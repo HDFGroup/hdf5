@@ -460,7 +460,7 @@ H5Zfilter_avail(H5Z_filter_t id)
     htri_t ret_value=FALSE;     /* Return value */
 
     FUNC_ENTER_API(H5Zfilter_avail, FAIL)
-    H5TRACE1("b","Zf",id);
+    H5TRACE1("t","Zf",id);
 
     /* Check args */
     if(id<0 || id>H5Z_FILTER_MAX)

@@ -2834,6 +2834,21 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 	    }
 	    break;
 
+	case 't':
+	    if (ptr) {
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
+	    } else {
+		htri_t tri_var = va_arg (ap, htri_t);
+		if (tri_var>0) fprintf (out, "TRUE");
+		else if (!tri_var) fprintf (out, "FALSE");
+		else fprintf (out, "FAIL(%d)", (int)tri_var);
+	    }
+	    break;
+
 	case 'x':
 	    if (ptr) {
 		if (vp) {

@@ -180,6 +180,7 @@ cmpd_dset.lo: \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5Ipublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5Gprivate.h \
@@ -211,7 +212,6 @@ cmpd_dset.lo: \
    $(top_srcdir)/src/H5Apublic.h \
    $(top_srcdir)/src/H5Epublic.h \
    $(top_srcdir)/src/H5HLpublic.h \
-   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \

@@ -28,6 +28,7 @@ h5debug.lo: \
    $(top_srcdir)/src/H5HGpublic.h \
    $(top_srcdir)/src/H5Tprivate.h \
    $(top_srcdir)/src/H5Tpublic.h \
+   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5Gprivate.h \
    $(top_srcdir)/src/H5Gpublic.h \
    $(top_srcdir)/src/H5RSprivate.h \
@@ -44,7 +45,6 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Opkg.h \
    $(top_srcdir)/src/H5Pprivate.h \
    $(top_srcdir)/src/H5Ppublic.h \
-   $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5FDfamily.h
 h5repart.lo: \
    $(srcdir)/h5repart.c \

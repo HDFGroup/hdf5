@@ -2877,7 +2877,7 @@ H5Pexist(hid_t id, const char *name)
     htri_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pexist, FAIL);
-    H5TRACE2("b","is",id,name);
+    H5TRACE2("t","is",id,name);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
@@ -3605,7 +3605,7 @@ H5Pequal(hid_t id1, hid_t id2)
     htri_t ret_value=FALSE;     /* return value */
 
     FUNC_ENTER_API(H5Pequal, FAIL);
-    H5TRACE2("b","ii",id1,id2);
+    H5TRACE2("t","ii",id1,id2);
 
     /* Check arguments. */
     if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
@@ -3759,7 +3759,7 @@ H5Pisa_class(hid_t plist_id, hid_t pclass_id)
     htri_t ret_value;                   /* return value */
 
     FUNC_ENTER_API(H5Pisa_class, FAIL);
-    H5TRACE2("b","ii",plist_id,pclass_id);
+    H5TRACE2("t","ii",plist_id,pclass_id);
 
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id))

@@ -42,6 +42,7 @@ h5dump.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h \
+   $(top_srcdir)/tools/lib/h5tools_ref.h \
    $(top_srcdir)/tools/lib/h5trav.h
 h5dumpgentest.lo: \
    $(srcdir)/h5dumpgentest.c \

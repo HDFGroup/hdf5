@@ -28,6 +28,7 @@ H5.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5RSprivate.h \
@@ -42,7 +43,6 @@ H5.lo: \
    $(srcdir)/H5Ipkg.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
    $(srcdir)/H5Sprivate.h
@@ -68,8 +68,6 @@ H5A.lo: \
    $(srcdir)/H5Fpublic.h \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5RSprivate.h \
-   $(srcdir)/H5HGprivate.h \
-   $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Spublic.h \
    $(srcdir)/H5Dprivate.h \
@@ -78,15 +76,17 @@ H5A.lo: \
    $(srcdir)/H5FDmpio.h \
    $(srcdir)/H5FDmpiposix.h \
    $(srcdir)/H5Oprivate.h \
+   $(srcdir)/H5HGprivate.h \
+   $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Rprivate.h \
    $(srcdir)/H5Rpublic.h \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5Iprivate.h \
@@ -117,6 +117,7 @@ H5AC.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -134,7 +135,6 @@ H5AC.lo: \
    $(srcdir)/H5FLprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
 H5B.lo: \
@@ -165,6 +165,7 @@ H5B.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5RSprivate.h \
@@ -182,7 +183,6 @@ H5B.lo: \
    $(srcdir)/H5MFprivate.h \
    $(srcdir)/H5FDprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
 H5D.lo: \
@@ -209,6 +209,7 @@ H5D.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -223,7 +224,6 @@ H5D.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FDprivate.h \
@@ -259,6 +259,7 @@ H5Dcontig.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -273,7 +274,6 @@ H5Dcontig.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FDprivate.h \
@@ -304,6 +304,7 @@ H5Dcompact.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -318,7 +319,6 @@ H5Dcompact.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FDprivate.h \
@@ -348,6 +348,7 @@ H5Dio.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -362,7 +363,6 @@ H5Dio.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FDprivate.h \
@@ -400,6 +400,7 @@ H5Distore.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5RSprivate.h \
@@ -410,7 +411,6 @@ H5Distore.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FLprivate.h \
@@ -443,6 +443,7 @@ H5Dseq.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -457,7 +458,6 @@ H5Dseq.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FDprivate.h \
@@ -489,6 +489,7 @@ H5Dtest.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -503,7 +504,6 @@ H5Dtest.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5Iprivate.h
@@ -601,6 +601,7 @@ H5FD.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -621,7 +622,6 @@ H5FD.lo: \
    $(srcdir)/H5FLprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
 H5FDcore.lo: \
@@ -733,6 +733,7 @@ H5FDfphdf5.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -747,7 +748,6 @@ H5FDfphdf5.lo: \
    $(srcdir)/H5FDprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
 H5FDgass.lo: \
@@ -860,6 +860,7 @@ H5FDmpio.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -874,7 +875,6 @@ H5FDmpio.lo: \
    $(srcdir)/H5FDprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
 H5FDmpiposix.lo: \
@@ -1158,6 +1158,7 @@ H5FO.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Rprivate.h \
    $(srcdir)/H5Rpublic.h \
    $(srcdir)/H5Zprivate.h \
@@ -1183,6 +1184,7 @@ H5FP.lo: \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -1220,6 +1222,7 @@ H5FPclient.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -1235,7 +1238,6 @@ H5FPclient.lo: \
    $(srcdir)/H5Gpkg.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Spkg.h \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
@@ -1268,6 +1270,7 @@ H5FPserver.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -1318,6 +1321,7 @@ H5G.lo: \
    $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Rprivate.h \
    $(srcdir)/H5Rpublic.h \
    $(srcdir)/H5Zprivate.h \
@@ -1332,8 +1336,7 @@ H5G.lo: \
    $(srcdir)/H5HLprivate.h \
    $(srcdir)/H5HLpublic.h \
    $(srcdir)/H5Iprivate.h \
-   $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h
+   $(srcdir)/H5MMprivate.h
 H5Gent.lo: \
    $(srcdir)/H5Gent.c \
    $(srcdir)/H5private.h \
@@ -1669,8 +1672,6 @@ H5Oattr.lo: \
    $(srcdir)/H5Fpublic.h \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5RSprivate.h \
-   $(srcdir)/H5HGprivate.h \
-   $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Spublic.h \
    $(srcdir)/H5Dprivate.h \
@@ -1679,15 +1680,17 @@ H5Oattr.lo: \
    $(srcdir)/H5FDmpio.h \
    $(srcdir)/H5FDmpiposix.h \
    $(srcdir)/H5Oprivate.h \
+   $(srcdir)/H5HGprivate.h \
+   $(srcdir)/H5HGpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Rprivate.h \
    $(srcdir)/H5Rpublic.h \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Eprivate.h \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5FLprivate.h \
@@ -1907,6 +1910,7 @@ H5Olayout.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -1924,7 +1928,6 @@ H5Olayout.lo: \
    $(srcdir)/H5MFprivate.h \
    $(srcdir)/H5FDprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Opkg.h
 H5Omtime.lo: \
    $(srcdir)/H5Omtime.c \
@@ -2017,6 +2020,7 @@ H5Onull.lo: \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2206,6 +2210,7 @@ H5P.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2222,7 +2227,6 @@ H5P.lo: \
    $(srcdir)/H5FLprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Ppkg.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
@@ -2250,6 +2254,7 @@ H5Pdcpl.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2265,7 +2270,6 @@ H5Pdcpl.lo: \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Ppkg.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
@@ -2293,6 +2297,7 @@ H5Pdxpl.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2309,7 +2314,6 @@ H5Pdxpl.lo: \
    $(srcdir)/H5Ppkg.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5TBprivate.h
 H5Pfapl.lo: \
    $(srcdir)/H5Pfapl.c \
@@ -2334,6 +2338,7 @@ H5Pfapl.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2352,7 +2357,6 @@ H5Pfapl.lo: \
    $(srcdir)/H5Ppkg.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5TBprivate.h \
    $(srcdir)/H5FDsec2.h
 H5Pfcpl.lo: \
@@ -2454,6 +2458,7 @@ H5R.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2471,7 +2476,6 @@ H5R.lo: \
    $(srcdir)/H5FOprivate.h \
    $(srcdir)/H5TBprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h
@@ -2559,6 +2563,7 @@ H5Sall.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2572,7 +2577,6 @@ H5Sall.lo: \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Vprivate.h
 H5Shyper.lo: \
    $(srcdir)/H5Shyper.c \
@@ -2603,6 +2607,7 @@ H5Shyper.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2616,7 +2621,6 @@ H5Shyper.lo: \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Vprivate.h
 H5Smpio.lo: \
    $(srcdir)/H5Smpio.c \
@@ -2692,6 +2696,7 @@ H5Snone.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2705,7 +2710,6 @@ H5Snone.lo: \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Vprivate.h
 H5Spoint.lo: \
    $(srcdir)/H5Spoint.c \
@@ -2775,6 +2779,7 @@ H5Sselect.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2794,7 +2799,6 @@ H5Sselect.lo: \
    $(srcdir)/H5Sprivate.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Vprivate.h
 H5Stest.lo: \
    $(srcdir)/H5Stest.c \
@@ -2824,6 +2828,7 @@ H5Stest.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2836,8 +2841,7 @@ H5Stest.lo: \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Zpublic.h \
    $(srcdir)/H5Pprivate.h \
-   $(srcdir)/H5Ppublic.h \
-   $(srcdir)/H5MMpublic.h
+   $(srcdir)/H5Ppublic.h
 H5ST.lo: \
    $(srcdir)/H5ST.c \
    $(srcdir)/H5Eprivate.h \
@@ -2873,6 +2877,7 @@ H5T.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -2889,7 +2894,6 @@ H5T.lo: \
    $(srcdir)/H5FLprivate.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
    $(srcdir)/H5Tpkg.h
@@ -2908,6 +2912,7 @@ H5Tarray.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -2946,6 +2951,7 @@ H5Tbit.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -2984,6 +2990,7 @@ H5Tcommit.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3105,6 +3112,7 @@ H5Tcset.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3224,6 +3232,7 @@ H5Tfixed.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3262,6 +3271,7 @@ H5Tfloat.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3383,6 +3393,7 @@ H5Toffset.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3461,6 +3472,7 @@ H5Torder.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3499,6 +3511,7 @@ H5Tpad.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3537,6 +3550,7 @@ H5Tprecis.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3575,6 +3589,7 @@ H5Tstrpad.lo: \
    $(srcdir)/H5Tpkg.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Opublic.h \
@@ -3692,6 +3707,7 @@ H5V.lo: \
    $(srcdir)/H5FDpublic.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -3727,6 +3743,7 @@ H5Z.lo: \
    $(srcdir)/H5Fprivate.h \
    $(srcdir)/H5Tprivate.h \
    $(srcdir)/H5Tpublic.h \
+   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Gprivate.h \
    $(srcdir)/H5Gpublic.h \
    $(srcdir)/H5Bprivate.h \
@@ -3742,7 +3759,6 @@ H5Z.lo: \
    $(srcdir)/H5Epublic.h \
    $(srcdir)/H5Iprivate.h \
    $(srcdir)/H5MMprivate.h \
-   $(srcdir)/H5MMpublic.h \
    $(srcdir)/H5Pprivate.h \
    $(srcdir)/H5Ppublic.h \
    $(srcdir)/H5Sprivate.h \

@@ -393,7 +393,7 @@ H5Sselect_valid(hid_t spaceid)
     htri_t ret_value;     /* return value */
 
     FUNC_ENTER_API(H5Sselect_valid, 0);
-    H5TRACE1("b","i",spaceid);
+    H5TRACE1("t","i",spaceid);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))

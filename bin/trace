@@ -16,7 +16,6 @@ $Source = "";
 #
 %TypeString = ("haddr_t"		   => "a",
 	       "hbool_t"                   => "b",
-               "htri_t"                    => "b",
                "double"                    => "d",
                "H5D_alloc_time_t"          => "Da",
                "H5D_fill_time_t"           => "Df",
@@ -53,6 +52,7 @@ $Source = "";
 	       "H5S_class_t"               => "Sc",
 	       "H5S_seloper_t"             => "Ss",
 	       "H5S_sel_type"              => "St",
+               "htri_t"                    => "t",
                "H5T_cset_t",               => "Tc",
                "H5T_direction_t",          => "Td",
                "H5T_norm_t"                => "Tn",

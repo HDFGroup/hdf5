@@ -912,7 +912,7 @@ H5Pall_filters_avail(hid_t plist_id)
     hbool_t ret_value=TRUE;     /* return value */
     
     FUNC_ENTER_API(H5Pall_filters_avail, UFAIL);
-    H5TRACE1("b","i",plist_id);
+    H5TRACE1("t","i",plist_id);
     
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))

@@ -1423,7 +1423,7 @@ H5Fis_hdf5(const char *name)
     htri_t	ret_value;
 
     FUNC_ENTER_API(H5Fis_hdf5, FAIL)
-    H5TRACE1("b","s",name);
+    H5TRACE1("t","s",name);
 
     /* Check args and all the boring stuff. */
     if (!name || !*name)
