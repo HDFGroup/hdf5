@@ -119,7 +119,7 @@ int h5repack_end  (pack_opt_t *options)
  * Function: h5repack_addfilter
  *
  * Purpose: add a compression -f option to table 
- *   Example: -f "dset:GZIP=6"
+ *   Example: -f dset:GZIP=6
  *
  * Return: 0, ok, -1, fail
  *

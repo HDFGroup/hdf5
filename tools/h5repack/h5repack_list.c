@@ -76,7 +76,10 @@ int check_objects(const char* fname,
  */
  
  if (options->verbose)
+ {
+  printf("\n");
   printf("Opening file <%s>. Searching for objects to modify...\n",fname);
+ }
  
  for ( i = 0; i < options->op_tbl->nelems; i++) 
  {

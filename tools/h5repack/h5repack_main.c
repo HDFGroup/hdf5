@@ -19,10 +19,6 @@ static void usage(void);
 
 /*
 h5repack main program
-
-Examples of use:
--v -i file1.h5 -o file2.h5 -f "dataset:GZIP 6" -l "dataset:CHUNK 2x2"
--v -i file1.h5 -o file2.h5 -f "GZIP 6" 
 */
 
 int main(int argc, char **argv)
