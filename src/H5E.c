@@ -175,7 +175,8 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     /* FPHDF5 errors */
     {H5E_CANTMAKETREE,  "Can't create a binary tree node"},
     {H5E_CANTRECV,      "Can't receive messages from processes"},
-    {H5E_CANTSENDMDATA, "Can't send metadata message"}
+    {H5E_CANTSENDMDATA, "Can't send metadata message"},
+    {H5E_CANTCHANGE,    "Can't register change with server"}
 };
 
 /* Interface initialization? */

@@ -26,6 +26,7 @@
  */
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5ACprivate.h"        /* Metadata Cache                       */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
@@ -43,120 +44,77 @@ static int interface_initialize_g = 0;
 
 /* Internal SAP structures */
 
-struct sap_obj_lock {
-    uint8_t oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object referenced */
-    unsigned int owned_rank;    /* rank which has the lock                  */
-    enum sap_obj_type obj_type; /* type of object being locked              */
-    unsigned int ref_count;     /* number of times lock was aquired by proc */
-    enum sap_lock_type rw_lock; /* indicates if it's a read or write lock   */
-};
+typedef struct {
+    uint8_t         oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
+    unsigned        owned_rank; /* rank which has the lock                  */
+    H5FP_obj_t      obj_type;   /* type of object being locked              */
+    unsigned        ref_count;  /* number of times lock was aquired by proc */
+    H5FP_lock_t     rw_lock;    /* indicates if it's a read or write lock   */
+} H5FP_object_lock;
 
-struct sap_file_mod {
-    unsigned long key;          /* key field for insertion into the TBBT    */
-    unsigned char *procs_notified; /* bitfield of size MPI_Comm_size()      */
-                                /* indicates process was notified of this
-                                 * modification - 0 means no, 1 means yes   */
-    unsigned num_notified;      /* counts number of processes notified      */
-    enum sap_obj_type obj_type; /* type of object                           */
-    enum sap_action action;     /* action done to object (H5FP_REQ_CHANGE only) */
-    int md_len;                 /* the length of the metadata array         */
-    char *metadata;             /* encoded metadata about the object        */
-};
+typedef struct {
+    H5AC_subid_t    type_id;    /* id of the type of this metadata          */
+    H5FP_obj_t      obj_type;   /* type of object modified                  */
+    haddr_t         addr;       /* address of the metadata                  */
+    unsigned        md_size;    /* size of the metadata                     */
+    char           *metadata;   /* encoded metadata about the object        */
+} H5FP_mdata_mod;
 
-struct sap_file_struct {
-    unsigned int sap_file_id;   /* the file id the SAP keeps per file       */
-    char *filename;             /* the filename - of dubious use            */
-    int closing;                /* we're closing the file - no more changes */
-    H5TB_TREE *mod_tree;        /* a tree of the modifications done         */
-    H5TB_TREE *locks;           /* a tree of locks on objects in the file   */
-};
+typedef struct {
+    unsigned        file_id;    /* the file id the SAP keeps per file       */
+    char           *filename;   /* the filename - of dubious use            */
+    int             closing;    /* we're closing the file - no more changes */
+    H5TB_TREE      *mod_tree;   /* a tree of metadata updates done          */
+    H5TB_TREE      *locks;      /* a tree of locks on objects in the file   */
+} H5FP_file_info;
 
 static H5TB_TREE *fs_tree;
 
-/*
- *  Note on procs_notified:
- *
- *  We needed a way of indicating that a process has been notified of a
- *  change. However, we didn't want to waste space, so I implemented an array
- *  of unsigned characters which would emulate such a thing. The code:
- *
- *          rank >> 3
- *
- *  is an integer divide by 8. While the code:
- *
- *          rank & 7
- *
- *  is a mod by 8. (Note that rank should be unsigned at this point). So, the
- *  code
- *
- *          fm->procs_notified[rank >> 3] |= 1 << (rank & 7);
- *
- *  is equivalent to
- *
- *          fm->procs_notified[rank / 8] |= 1 << (rank % 8);
- *
- *  Testing whether a given bit is set or not involves a test like this:
- *
- *          if (mod->procs_notified[rank >> 3] & (1 << (rank & 7)))
- *
- *  Of course, all bytes are 8 bits wide, right? :-)
- *
- *  The following two macros help this be more readable.
- */
-
-#define SET_PROC_NOTIFIED(arr, rank)    \
-    (arr->procs_notified[(rank) >> 3] |= (1 << ((rank) & 7)), ++arr->num_notified)
-#define IS_PROC_NOTIFIED(arr, rank)     \
-    (arr->procs_notified[(rank) >> 3] & (1 << ((rank) & 7)))
-
 /* local functions */
-static herr_t H5FP_sap_receive(struct SAP_request *req, int source,
-                               int tag, char **buf);
+static herr_t H5FP_sap_receive(H5FP_request *req, int source, int tag, char **buf);
 
     /* local functions to generate unique ids for messages */
-static unsigned int H5FP_gen_sap_file_id(void);
+static unsigned H5FP_gen_sap_file_id(void);
 
     /* local functions for handling object locks */
-static int H5FP_object_lock_cmp(struct sap_obj_lock *o1,
-                                struct sap_obj_lock *o2,
-                                int cmparg);
-static struct sap_obj_lock *H5FP_new_object_lock(const unsigned char *oid,
-                                                 unsigned int rank,
-                                                 enum sap_obj_type obj_type,
-                                                 enum sap_lock_type rw_lock);
-static herr_t H5FP_free_object_lock(struct sap_obj_lock *ol);
-static struct sap_obj_lock *H5FP_find_object_lock(struct sap_file_struct *fs,
-                                                  unsigned char *oid);
-static herr_t H5FP_remove_object_lock_from_list(struct sap_file_struct *fs,
-                                                struct sap_obj_lock *ol);
+static int H5FP_object_lock_cmp(H5FP_object_lock *o1, H5FP_object_lock *o2, int cmparg);
+static H5FP_object_lock *H5FP_new_object_lock(const unsigned char *oid,
+                                              unsigned rank,
+                                              H5FP_obj_t obj_type,
+                                              H5FP_lock_t rw_lock);
+static herr_t H5FP_free_object_lock(H5FP_object_lock *ol);
+static H5FP_object_lock *H5FP_find_object_lock(H5FP_file_info *fs, unsigned char *oid);
+static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *fs, H5FP_object_lock *ol);
 
-    /* local file structure handling functions */
-static herr_t H5FP_add_new_file_struct_to_list(unsigned int sap_file_id, char *filename);
-static int H5FP_file_struct_cmp(struct sap_file_struct *k1,
-                                struct sap_file_struct *k2, int cmparg);
-static struct sap_file_struct *H5FP_new_file_struct_node(unsigned int sap_file_id,
-                                                         char *filename);
-static struct sap_file_struct *H5FP_find_file_struct(unsigned int sap_file_id);
-static herr_t H5FP_remove_file_id_from_list(unsigned int sap_file_id);
-static herr_t H5FP_free_file_struct_node(struct sap_file_struct *fs);
+    /* local file information handling functions */
+static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename);
+static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
+static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id, char *filename);
+static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
+static herr_t H5FP_remove_file_id_from_list(unsigned file_id);
+static herr_t H5FP_free_file_info_node(H5FP_file_info *fs);
 
     /* local file modification structure handling functions */
-static struct sap_file_mod *H5FP_new_file_mod_node(unsigned rank,
-                                                   enum sap_obj_type obj_type,
-                                                   enum sap_action action,
-                                                   int md_len,
-                                                   char *metadata);
-static herr_t H5FP_free_mod_node(struct sap_file_mod *fs);
+static H5FP_mdata_mod *H5FP_new_file_mod_node(unsigned rank,
+                                              H5AC_subid_t type_id,
+                                              haddr_t addr,
+                                              int md_size,
+                                              char *metadata);
+static herr_t H5FP_free_mod_node(H5FP_mdata_mod *fs);
 
     /* local request handling functions */
-static herr_t H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int md_len);
-static herr_t H5FP_sap_handle_lock_request(struct SAP_request req);
-static herr_t H5FP_sap_handle_release_lock_request(struct SAP_request req);
-static herr_t H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len);
-static herr_t H5FP_sap_handle_sync_request(struct SAP_request req);
-static herr_t H5FP_sap_handle_close_request(struct SAP_request req);
+static herr_t H5FP_sap_handle_open_request(H5FP_request req, char *mdata, int md_size);
+static herr_t H5FP_sap_handle_lock_request(H5FP_request req);
+static herr_t H5FP_sap_handle_release_lock_request(H5FP_request req);
+static herr_t H5FP_sap_handle_write_request(H5FP_request req, char *mdata, int md_size);
+static herr_t H5FP_sap_handle_read_request(H5FP_request req);
+static herr_t H5FP_sap_handle_close_request(H5FP_request req);
 
-/** Public Library (non-API) Functions **/
+/*
+ *===----------------------------------------------------------------------===
+ *                    Public Library (non-API) Functions
+ *===----------------------------------------------------------------------===
+ */
 
 /*
  * Function:    H5FP_sap_receive_loop
@@ -177,12 +135,13 @@ H5FP_sap_receive_loop(void)
 
     FUNC_ENTER_NOAPI(H5FP_sap_receive_loop, FAIL);
 
-    if ((fs_tree = H5TB_dmake((H5TB_cmp_t)H5FP_file_struct_cmp,
-                              sizeof(struct sap_file_struct), FALSE)) == NULL)
+    /* Create the file structure tree. */
+    if ((fs_tree = H5TB_dmake((H5TB_cmp_t)H5FP_file_info_cmp,
+                              sizeof(H5FP_file_info), FALSE)) == NULL)
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, FAIL, "cannot make TBBT tree");
 
     for (;;) {
-        struct SAP_request req; 
+        H5FP_request req; 
         char *buf = NULL;
         herr_t hrc;
 
@@ -191,9 +150,8 @@ H5FP_sap_receive_loop(void)
 
         switch (req.req_type) {
         case H5FP_REQ_OPEN:
-            if ((hrc = H5FP_sap_handle_open_request(req, buf, req.md_len)) != SUCCEED)
+            if ((hrc = H5FP_sap_handle_open_request(req, buf, req.md_size)) != SUCCEED)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENOBJ, FAIL, "cannot open file");
-
             break;
         case H5FP_REQ_LOCK:
         case H5FP_REQ_LOCK_END:
@@ -203,11 +161,11 @@ H5FP_sap_receive_loop(void)
         case H5FP_REQ_RELEASE_END:
             hrc = H5FP_sap_handle_release_lock_request(req);
             break;
-        case H5FP_REQ_CHANGE:
-            hrc = H5FP_sap_handle_change_request(req, buf, req.md_len);
+        case H5FP_REQ_WRITE:
+            hrc = H5FP_sap_handle_write_request(req, buf, req.md_size);
             break;
-        case H5FP_REQ_SYNC:
-            hrc = H5FP_sap_handle_sync_request(req);
+        case H5FP_REQ_READ:
+            hrc = H5FP_sap_handle_read_request(req);
             break;
         case H5FP_REQ_CLOSE:
             hrc = H5FP_sap_handle_close_request(req);
@@ -215,7 +173,6 @@ H5FP_sap_receive_loop(void)
         case H5FP_REQ_STOP:
             if (++stop == H5FP_comm_size - 1)
                 goto done;
-
             break;
         default:
             HGOTO_ERROR(H5E_FPHDF5, H5E_ARGS, FAIL, "invalid request type");
@@ -240,7 +197,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_receive(struct SAP_request *req, int source, int tag, char **buf)
+H5FP_sap_receive(H5FP_request *req, int source, int tag, char **buf)
 {
     MPI_Status status;
     herr_t ret_value = SUCCEED;
@@ -250,17 +207,21 @@ H5FP_sap_receive(struct SAP_request *req, int source, int tag, char **buf)
 
     HDmemset(&status, 0, sizeof(status));
 
-    if ((mrc = MPI_Recv(req, 1, SAP_request_t, source, tag,
+    if ((mrc = MPI_Recv(req, 1, H5FP_request_t, source, tag,
                         H5FP_SAP_COMM, &status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    if (buf && req->md_len) {
-        if ((*buf = (char *)HDmalloc((size_t)req->md_len + 1)) == NULL)
+    if (buf && req->md_size) {
+        /*
+         * There is metadata associated with this request. Get it as a
+         * string (requires another read).
+         */
+        if ((*buf = (char *)HDmalloc((size_t)req->md_size + 1)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
 
-        HDmemset(*buf, 0, (size_t)req->md_len + 1);
+        HDmemset(*buf, 0, (size_t)req->md_size + 1);
 
-        if ((mrc = MPI_Recv(*buf, req->md_len, MPI_BYTE, (int)req->proc_rank,
+        if ((mrc = MPI_Recv(*buf, req->md_size, MPI_BYTE, (int)req->proc_rank,
                             H5FP_TAG_METADATA, H5FP_SAP_COMM, &status)) != MPI_SUCCESS) {
             HDfree(*buf);
             *buf = NULL;
@@ -279,8 +240,8 @@ done:
  * Programmer:  Bill Wendling, 09. September 2002
  * Modifications:
  */
-static int H5FP_object_lock_cmp(struct sap_obj_lock *o1,
-                                struct sap_obj_lock *o2,
+static int H5FP_object_lock_cmp(H5FP_object_lock *o1,
+                                H5FP_object_lock *o2,
                                 int UNUSED cmparg)
 {
     FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
@@ -303,16 +264,16 @@ static int H5FP_object_lock_cmp(struct sap_obj_lock *o1,
  * Programmer:  Bill Wendling, 09. September 2002
  * Modifications:
  */
-static struct sap_obj_lock *
-H5FP_new_object_lock(const unsigned char *oid, unsigned int rank,
-                     enum sap_obj_type obj_type, enum sap_lock_type rw_lock)
+static H5FP_object_lock *
+H5FP_new_object_lock(const unsigned char *oid, unsigned rank,
+                     H5FP_obj_t obj_type, H5FP_lock_t rw_lock)
 {
-    struct sap_obj_lock *ret_value = NULL;
+    H5FP_object_lock *ret_value = NULL;
     
     FUNC_ENTER_NOINIT(H5FP_new_object_lock);
     assert(oid);
 
-    if ((ret_value = (struct sap_obj_lock *)HDmalloc(sizeof(struct sap_obj_lock))) == NULL)
+    if ((ret_value = (H5FP_object_lock *)HDmalloc(sizeof(H5FP_object_lock))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
     H5FP_COPY_OID(ret_value->oid, oid);
@@ -333,7 +294,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_free_object_lock(struct sap_obj_lock *ol)
+H5FP_free_object_lock(H5FP_object_lock *ol)
 {
     FUNC_ENTER_NOINIT(H5FP_free_object_lock);
     HDfree(ol);
@@ -347,10 +308,10 @@ H5FP_free_object_lock(struct sap_obj_lock *ol)
  * Programmer:  Bill Wendling, 09. September 2002
  * Modifications:
  */
-static struct sap_obj_lock *
-H5FP_find_object_lock(struct sap_file_struct *fs, unsigned char *oid)
+static H5FP_object_lock *
+H5FP_find_object_lock(H5FP_file_info *fs, unsigned char *oid)
 {
-    struct sap_obj_lock *ret_value = NULL;
+    H5FP_object_lock *ret_value = NULL;
 
     FUNC_ENTER_NOINIT(H5FP_find_object_lock);
 
@@ -359,14 +320,14 @@ H5FP_find_object_lock(struct sap_file_struct *fs, unsigned char *oid)
 
     if (fs->locks && fs->locks->root) {
         H5TB_NODE *node;
-        struct sap_obj_lock ol;
+        H5FP_object_lock ol;
 
-        H5FP_COPY_OID(ol.oid, oid);
+        H5FP_COPY_OID(ol.oid, oid); /* This is the key field for the TBBT */
 
         if ((node = H5TB_dfind(fs->locks, (void *)&ol, NULL)) == NULL)
             HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, NULL, "lock not found");
 
-        ret_value = (struct sap_obj_lock *)node->data;
+        ret_value = (H5FP_object_lock *)node->data;
     }
 
 done:
@@ -383,8 +344,8 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_remove_object_lock_from_list(struct sap_file_struct *fs,
-                                  struct sap_obj_lock *ol)
+H5FP_remove_object_lock_from_list(H5FP_file_info *fs,
+                                  H5FP_object_lock *ol)
 {
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
@@ -407,29 +368,14 @@ H5FP_remove_object_lock_from_list(struct sap_file_struct *fs,
  * Modifications:
  */
 static int
-H5FP_file_mod_cmp(struct sap_file_mod *k1, struct sap_file_mod *k2, int UNUSED cmparg)
+H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
+                  H5FP_mdata_mod *k2,
+                  int UNUSED cmparg)
 {
     FUNC_ENTER_NOINIT(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE_NOAPI(k1->key - k2->key);
-}
-
-/*
- * Function:    H5FP_new_file_mod_key
- * Purpose:     Generate a new key for the sap_file_mode structure.
- * Return:      Success:    New key value.
- *              Failure:    Doesn't.
- * Programmer:  Bill Wendling, 27. August, 2002
- * Modifications:
- */
-static unsigned long
-H5FP_new_file_mod_key(void)
-{
-    static unsigned long key = 0;
-
-    FUNC_ENTER_NOINIT(H5FP_new_file_mod_key);
-    FUNC_LEAVE_NOAPI(key++);
+    FUNC_LEAVE_NOAPI(k1->addr - k2->addr);
 }
 
 /*
@@ -442,12 +388,11 @@ H5FP_new_file_mod_key(void)
  * Modifications:
  */
 static herr_t
-H5FP_free_mod_node(struct sap_file_mod *fs)
+H5FP_free_mod_node(H5FP_mdata_mod *fs)
 {
     FUNC_ENTER_NOINIT(H5FP_free_mod_node);
 
     if (fs) {
-        HDfree(fs->procs_notified);
         HDfree(fs->metadata);
         HDfree(fs);
     }
@@ -457,41 +402,31 @@ H5FP_free_mod_node(struct sap_file_mod *fs)
 
 /*
  * Function:    H5FP_new_file_mod_node
- * Purpose:     Create a new sap_file_mod node and initialize it.
+ * Purpose:     Create a new sap_file_mod node and initialize it. This
+ *              object now has responsibility for freeing the metadata
+ *              information.
  * Return:      Success: Pointer to new sap_file_mod structure.
  *              Failure: NULL
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
  */
-static struct sap_file_mod *
-H5FP_new_file_mod_node(unsigned rank, enum sap_obj_type obj_type,
-                       enum sap_action action, int md_len, char *metadata)
+static H5FP_mdata_mod *
+H5FP_new_file_mod_node(unsigned UNUSED rank, H5AC_subid_t type_id,
+                       haddr_t addr, int md_size, char *metadata)
 {
-    struct sap_file_mod *ret_value = NULL;
+    H5FP_mdata_mod *ret_value = NULL;
 
     FUNC_ENTER_NOINIT(H5FP_new_file_mod_node);
 
-    ret_value = (struct sap_file_mod *)HDmalloc(sizeof(struct sap_file_mod));
+    ret_value = (H5FP_mdata_mod *)HDmalloc(sizeof(H5FP_mdata_mod));
 
     if (!ret_value)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
-    ret_value->procs_notified = (unsigned char *)HDcalloc((size_t)1 +
-                                                   (H5FP_comm_size - 1) / H5FP_BYTE_BITS, 1);
-
-    if (!ret_value->procs_notified) {
-        HDfree(ret_value);
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
-    }
-
-    /* we'll just assume the SAP has been notified of this change :) */
-    SET_PROC_NOTIFIED(ret_value, H5FP_sap_rank);
-    SET_PROC_NOTIFIED(ret_value, rank);
-    ret_value->obj_type = obj_type;
-    ret_value->action = action;
-    ret_value->md_len = md_len;
+    ret_value->addr = addr;
+    ret_value->type_id = type_id;
+    ret_value->md_size = md_size;
     ret_value->metadata = metadata;
-    ret_value->key = H5FP_new_file_mod_key();
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -499,27 +434,46 @@ done:
 
 /*
  * Function:    H5FP_add_file_mod_to_list
- * Purpose:     Add a modification to a file ID.
+ * Purpose:     Add a metadata write to a file ID. If the metadata is
+ *              already in the cache, then we just replace it with the
+ *              updated bits. (Only the metadata info and size should
+ *              change in this case.)
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
  */
 static herr_t
-H5FP_add_file_mod_to_list(struct sap_file_struct *fs, enum sap_obj_type obj_type,
-                          enum sap_action action, unsigned rank, int md_len,
+H5FP_add_file_mod_to_list(H5FP_file_info *fs, H5AC_subid_t type_id,
+                          haddr_t addr, unsigned rank, int md_size,
                           char *metadata)
 {
-    struct sap_file_mod *fm;
+    H5FP_mdata_mod *fm, mod;
+    H5TB_NODE *node;
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOINIT(H5FP_add_file_mod_to_list);
 
     assert(fs);
 
-    if ((fm = H5FP_new_file_mod_node(rank, obj_type, action, md_len, metadata)) != NULL) {
+    mod.addr = addr;    /* This is the key field for the TBBT */
+
+    if ((node = H5TB_dfind(fs->mod_tree, (void *)&mod, NULL)) != NULL) {
+        /*
+         * The metadata is in the cache already. All we have to do is
+         * replace what's there. The addr and type should be the same.
+         * The only things to change is the metadata and its size.
+         */
+        fm = (H5FP_mdata_mod *)node->data;
+        HDfree(fm->metadata);
+        fm->metadata = metadata;
+        fm->md_size = md_size;
+        ret_value = SUCCEED;
+    } else if ((fm = H5FP_new_file_mod_node(rank, type_id, addr,
+                                            md_size, metadata)) != NULL) {
         if (!H5TB_dins(fs->mod_tree, (void *)fm, NULL))
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL, "can't insert modification into tree");
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
+                        "can't insert modification into tree");
 
         ret_value = SUCCEED;
     }
@@ -532,18 +486,13 @@ done:
  * Function:    H5FP_remove_mod_from_list
  * Purpose:     Remove a modification from the list of modifications on
  *              this file.
- *
- *              NOTE: Don't call this function directly. This should only be
- *              called after all processes for a particular modification have
- *              been synced.
- *
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 31. July, 2002
  * Modifications:
  */
 static herr_t
-H5FP_remove_mod_from_list(struct sap_file_struct *fs, struct sap_file_mod *mod)
+H5FP_remove_mod_from_list(H5FP_file_info *fs, H5FP_mdata_mod *mod)
 {
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
@@ -559,7 +508,7 @@ H5FP_remove_mod_from_list(struct sap_file_struct *fs, struct sap_file_mod *mod)
 }
 
 /*
- * Function:    H5FP_free_file_struct_node
+ * Function:    H5FP_free_file_info_node
  * Purpose:     Helper function to free up an SAP_FILE_STRUCT node and all
  *              of the malloced space it has.
  *
@@ -571,9 +520,9 @@ H5FP_remove_mod_from_list(struct sap_file_struct *fs, struct sap_file_mod *mod)
  * Modifications:
  */
 static herr_t
-H5FP_free_file_struct_node(struct sap_file_struct *fs)
+H5FP_free_file_info_node(H5FP_file_info *fs)
 {
-    FUNC_ENTER_NOINIT(H5FP_free_file_struct_node);
+    FUNC_ENTER_NOINIT(H5FP_free_file_info_node);
 
     if (fs) {
         H5TB_dfree(fs->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
@@ -586,54 +535,53 @@ H5FP_free_file_struct_node(struct sap_file_struct *fs)
 }
 
 /*
- * Function:    H5FP_file_struct_cmp
- * Purpose:     Compare two sap_file_struct structs for the TBBT.
+ * Function:    H5FP_file_info_cmp
+ * Purpose:     Compare two sap_file_info structs for the TBBT.
  * Return:      <0, 0, >0
  * Programmer:  Bill Wendling, 27. August, 2002
  * Modifications:
  */
 static int
-H5FP_file_struct_cmp(struct sap_file_struct *k1, struct sap_file_struct *k2, int UNUSED cmparg)
+H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5FP_file_struct_cmp);
+    FUNC_ENTER_NOINIT(H5FP_file_info_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE_NOAPI(k1->sap_file_id - k2->sap_file_id);
+    FUNC_LEAVE_NOAPI(k1->file_id - k2->file_id);
 }
 
 /*
- * Function:    H5FP_new_file_struct_node
- * Purpose:     Create and initialize an sap_file_struct node.
+ * Function:    H5FP_new_file_info_node
+ * Purpose:     Create and initialize an sap_file_info node.
  * Return:      Success: Pointer to new node
  *              Failure: NULL
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
  */
-static struct sap_file_struct *
-H5FP_new_file_struct_node(unsigned int sap_file_id, char *filename)
+static H5FP_file_info *
+H5FP_new_file_info_node(unsigned file_id, char *filename)
 {
-    struct sap_file_struct *ret_value;
+    H5FP_file_info *ret_value;
 
-    FUNC_ENTER_NOINIT(H5FP_new_file_struct_node);
+    FUNC_ENTER_NOINIT(H5FP_new_file_info_node);
 
-    if ((ret_value = (struct sap_file_struct *)HDmalloc(sizeof(struct sap_file_struct))) == NULL)
+    if ((ret_value = (H5FP_file_info *)HDmalloc(sizeof(H5FP_file_info))) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
-    ret_value->sap_file_id = sap_file_id;
+    ret_value->file_id = file_id;
     ret_value->filename = filename;
     ret_value->closing = FALSE;
-    ret_value->mod_tree = NULL;
-    ret_value->locks = NULL;
 
     if ((ret_value->mod_tree = H5TB_dmake((H5TB_cmp_t)H5FP_file_mod_cmp,
-                                          sizeof(struct sap_file_mod), FALSE)) == NULL) {
-        H5FP_free_file_struct_node(ret_value);
+                                          sizeof(H5FP_mdata_mod), FALSE)) == NULL) {
+        HDfree(ret_value);
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, NULL, "cannot make TBBT tree");
     }
 
     if ((ret_value->locks = H5TB_dmake((H5TB_cmp_t)H5FP_object_lock_cmp,
-                                       sizeof(struct sap_obj_lock), FALSE)) == NULL) {
-        H5FP_free_file_struct_node(ret_value);
+                                       sizeof(H5FP_object_lock), FALSE)) == NULL) {
+        H5TB_dfree(ret_value->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
+        HDfree(ret_value);
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, NULL, "cannot make TBBT tree");
     }
 
@@ -642,50 +590,50 @@ done:
 }
 
 /*
- * Function:    H5FP_find_file_struct
- * Purpose:     Find the file structure for the requested sap_file_id.
+ * Function:    H5FP_find_file_info
+ * Purpose:     Find the file structure for the requested file_id.
  * Return:      Success:    Pointer to the file structure
  *              Failure:    NULL
  * Programmer:  Bill Wendling, 31. July, 2002
  * Modifications:
  */
-static struct sap_file_struct *
-H5FP_find_file_struct(unsigned int sap_file_id)
+static H5FP_file_info *
+H5FP_find_file_info(unsigned file_id)
 {
     H5TB_NODE *node = NULL;
-    struct sap_file_struct *ret_value = NULL;
+    H5FP_file_info *ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5FP_find_file_struct);
+    FUNC_ENTER_NOINIT(H5FP_find_file_info);
 
     if (fs_tree && fs_tree->root) {
-        struct sap_file_struct s;
+        H5FP_file_info s;
 
-        s.sap_file_id = sap_file_id;
+        s.file_id = file_id;    /* This is the key field for the TBBT */
 
         if ((node = H5TB_dfind(fs_tree, (void *)&s, NULL)) != NULL)
-            ret_value = (struct sap_file_struct *)node->data;
+            ret_value = (H5FP_file_info *)node->data;
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
- * Function:    H5FP_add_new_file_struct_to_list
- * Purpose:     Add an SAP_FILE_ID to the list of file IDS.
+ * Function:    H5FP_add_new_file_info_to_list
+ * Purpose:     Add a FILE_ID to the list of file IDS.
  * Return:      SUCCEED if the node was added
  *              FAIL otherwise
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_struct_to_list(unsigned int sap_file_id, char *filename)
+H5FP_add_new_file_info_to_list(unsigned file_id, char *filename)
 {
-    struct sap_file_struct *fs;
+    H5FP_file_info *fs;
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FP_add_new_file_struct_to_list);
+    FUNC_ENTER_NOINIT(H5FP_add_new_file_info_to_list);
 
-    if ((fs = H5FP_new_file_struct_node(sap_file_id, filename)) != NULL) {
+    if ((fs = H5FP_new_file_info_node(file_id, filename)) != NULL) {
         if (!H5TB_dins(fs_tree, (void *)fs, NULL))
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert file structure into tree");
@@ -699,7 +647,7 @@ done:
 
 /*
  * Function:    H5FP_remove_file_id_from_list
- * Purpose:     Remove an SAP_FILE_ID from the list of file IDS.
+ * Purpose:     Remove an FILE_ID from the list of file IDS.
  *
  *              NOTE: This should only be called after all modifications to
  *              the file descriptor have been synced to all processes and the
@@ -711,41 +659,44 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_remove_file_id_from_list(unsigned int sap_file_id)
+H5FP_remove_file_id_from_list(unsigned file_id)
 {
-    struct sap_file_struct s;
+    H5FP_file_info s;
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOINIT(H5FP_remove_file_id_from_list);
 
-    s.sap_file_id = sap_file_id;
+    s.file_id = file_id;    /* This is the key field for the TBBT */
 
     if ((node = H5TB_dfind(fs_tree, (void *)&s, NULL)) != NULL) {
-        H5FP_free_file_struct_node(H5TB_rem(&fs_tree->root, node, NULL));
+        H5FP_free_file_info_node(H5TB_rem(&fs_tree->root, node, NULL));
         ret_value = SUCCEED;
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-/** Functions to reply to requests **/
+/*
+ *===----------------------------------------------------------------------===
+ *                     Functions to reply to requests
+ *===----------------------------------------------------------------------===
+ */
 
 static herr_t
-H5FP_send_reply(unsigned int to, unsigned int req_id, unsigned int file_id,
-                enum sap_status status)
+H5FP_send_reply(unsigned to, unsigned req_id, unsigned file_id, H5FP_status_t status)
 {
-    struct SAP_reply reply;
+    H5FP_reply reply;
     herr_t ret_value = SUCCEED;
     int mrc;
 
     FUNC_ENTER_NOINIT(H5FP_send_reply);
 
     reply.req_id = req_id;
-    reply.sap_file_id = file_id;
+    reply.file_id = file_id;
     reply.status = status;
 
-    if ((mrc = MPI_Send(&reply, 1, SAP_reply_t, (int)to, H5FP_TAG_REPLY,
+    if ((mrc = MPI_Send(&reply, 1, H5FP_reply_t, (int)to, H5FP_TAG_REPLY,
                         H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
@@ -753,7 +704,11 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-/** Functions to handle SAP requests **/
+/*
+ *===----------------------------------------------------------------------===
+ *                    Functions to handle SAP requests
+ *===----------------------------------------------------------------------===
+ */
 
 /*
  * Function:    H5FP_gen_request_id
@@ -763,10 +718,10 @@ done:
  * Programmer:  Bill Wendling, 30. July, 2002
  * Modifications:
  */
-static unsigned int
+static unsigned
 H5FP_gen_sap_file_id()
 {
-    static unsigned int i = 0;
+    static unsigned i = 0;
     FUNC_ENTER_NOINIT(H5FP_gen_sap_file_id);
     FUNC_LEAVE_NOAPI(i++);
 }
@@ -780,7 +735,7 @@ H5FP_gen_sap_file_id()
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int UNUSED md_len)
+H5FP_sap_handle_open_request(H5FP_request req, char *mdata, int UNUSED md_size)
 {
     herr_t ret_value = SUCCEED;
     int mrc;
@@ -791,12 +746,17 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int UNUSED md_
         unsigned new_file_id = H5FP_gen_sap_file_id();
         int i;
 
-        if (H5FP_add_new_file_struct_to_list(new_file_id, mdata) != SUCCEED)
+        if (H5FP_add_new_file_info_to_list(new_file_id, mdata) != SUCCEED) {
+            HDfree(mdata);
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert new file structure to list");
+        }
 
         /* broadcast the file id to all processes */
-        /* FIXME: Isn't there some way to broadcast this result to the barrier group? -QAK */
+        /*
+         * FIXME: Isn't there some way to broadcast this result to the
+         * barrier group? -QAK
+         */
         /*
          * XXX:
          *      MPI_Bcast doesn't work in this way and I don't know how
@@ -838,24 +798,25 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_lock_request(struct SAP_request req)
+H5FP_sap_handle_lock_request(H5FP_request req)
 {
     struct lock_group {
         unsigned char oid[sizeof(req.oid)];
-        unsigned int file_id;
-        unsigned int locked;
-        enum sap_lock_type rw_lock;
-        struct sap_file_struct *fs;
-        struct sap_obj_lock *lock;
+        unsigned file_id;
+        unsigned locked;
+        H5FP_lock_t rw_lock;
+        H5FP_file_info *fs;
+        H5FP_object_lock *lock;
     } *oids;
-    int list_size = 2;  /* the size of the "oids" list */
-    enum sap_status exit_state = H5FP_STATUS_LOCK_ACQUIRED;
+    unsigned list_size = 2; /* the size of the "oids" list */
+    H5FP_status_t exit_state = H5FP_STATUS_LOCK_ACQUIRED;
     herr_t ret_value = SUCCEED;
-    int i, j;
+    unsigned i, j;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_lock_request);
 
-    if ((oids = (struct lock_group *)HDmalloc(list_size * sizeof(struct lock_group))) == NULL) {
+    if ((oids = (struct lock_group *)HDmalloc(list_size *
+                                              sizeof(struct lock_group))) == NULL) {
         exit_state = H5FP_STATUS_OOM;
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "out of memory");
     }
@@ -867,7 +828,7 @@ H5FP_sap_handle_lock_request(struct SAP_request req)
     for (i = 0;; ++i) {
         if (req.oid[0]) {
             if (i == list_size) {
-                list_size *= 2;
+                list_size <<= 1;    /* equiv to list_size *= 2; */
                 oids = HDrealloc(oids, list_size * sizeof(struct lock_group));
 
                 if (!oids) {
@@ -877,7 +838,7 @@ H5FP_sap_handle_lock_request(struct SAP_request req)
             }
 
             H5FP_COPY_OID(oids[i].oid, req.oid);
-            oids[i].file_id = req.sap_file_id;
+            oids[i].file_id = req.file_id;
             oids[i].rw_lock = req.rw_lock;
             oids[i].locked = FALSE;
         }
@@ -898,7 +859,7 @@ H5FP_sap_handle_lock_request(struct SAP_request req)
      * not, the it's an error and we need to return.
      */
     for (j = 0; j <= i; ++j) {
-        if ((oids[j].fs = H5FP_find_file_struct(oids[j].file_id)) == NULL) {
+        if ((oids[j].fs = H5FP_find_file_info(oids[j].file_id)) == NULL) {
             /* FIXME: the file ID is invalid */
             exit_state = H5FP_STATUS_BAD_FILE_ID;
             HGOTO_DONE(FAIL);
@@ -969,8 +930,8 @@ H5FP_sap_handle_lock_request(struct SAP_request req)
                 goto rollback;
             }
         } else {
-            struct sap_obj_lock *lock = H5FP_new_object_lock(oids[j].oid, req.proc_rank,
-                                                             req.obj_type, req.rw_lock);
+            H5FP_object_lock *lock = H5FP_new_object_lock(oids[j].oid, req.proc_rank,
+                                                          req.obj_type, req.rw_lock);
 
             if (lock) {
                 if (!H5TB_dins(oids[j].fs->locks, (void *)lock, NULL)) {
@@ -1031,7 +992,7 @@ HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
     }
 
     HDfree(oids);
-    H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
+    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 } 
 
@@ -1043,18 +1004,18 @@ HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_release_lock_request(struct SAP_request req)
+H5FP_sap_handle_release_lock_request(H5FP_request req)
 {
     struct release_group {
         unsigned char oid[sizeof(req.oid)];
-        unsigned int file_id;
-        struct sap_file_struct *fs;
-        struct sap_obj_lock *lock;
+        unsigned file_id;
+        H5FP_file_info *fs;
+        H5FP_object_lock *lock;
     } *oids;
-    int list_size = 2;  /* the size of the "oids" list */
-    enum sap_status exit_state = H5FP_STATUS_LOCK_RELEASED;
+    unsigned list_size = 2; /* the size of the "oids" list */
+    H5FP_status_t exit_state = H5FP_STATUS_LOCK_RELEASED;
     herr_t ret_value;
-    int i, j;
+    unsigned i, j;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_release_lock_request);
 
@@ -1071,7 +1032,7 @@ H5FP_sap_handle_release_lock_request(struct SAP_request req)
     for (i = 0;; ++i) {
         if (req.oid[0]) {
             if (i == list_size) {
-                list_size *= 2;
+                list_size <<= 1;    /* equiv to list_size *= 2; */
                 oids = HDrealloc(oids, list_size * sizeof(struct release_group));
 
                 if (!oids) {
@@ -1081,7 +1042,7 @@ H5FP_sap_handle_release_lock_request(struct SAP_request req)
             }
 
             H5FP_COPY_OID(oids[i].oid, req.oid);
-            oids[i].file_id = req.sap_file_id;
+            oids[i].file_id = req.file_id;
         }
 
         if (req.req_type == H5FP_REQ_RELEASE_END)
@@ -1099,7 +1060,7 @@ H5FP_sap_handle_release_lock_request(struct SAP_request req)
      * will help keep us from being in a catastrophic state.
      */
     for (j = 0; j <= i; ++j) {
-        if ((oids[j].fs = H5FP_find_file_struct(oids[j].file_id)) == NULL) {
+        if ((oids[j].fs = H5FP_find_file_info(oids[j].file_id)) == NULL) {
             /* FIXME: the file ID is invalid */
             exit_state = H5FP_STATUS_BAD_FILE_ID;
             HGOTO_DONE(FAIL);
@@ -1136,37 +1097,37 @@ H5FP_sap_handle_release_lock_request(struct SAP_request req)
     }
 
 done:
-HDfprintf(stderr, "exit_state == %d\n", exit_state);
     HDfree(oids);
-    H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
+    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
- * Function:    H5FP_sap_handle_change_request
- * Purpose:     Handle a request to change the structure of an object.
+ * Function:    H5FP_sap_handle_write_request
+ * Purpose:     Handle a request to write a piece of metadata in the
+ *              file.
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 06. August, 2002
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len)
+H5FP_sap_handle_write_request(H5FP_request req, char *mdata, int md_size)
 {
-    struct sap_file_struct *fs;
-    enum sap_status exit_state = H5FP_STATUS_OK;
+    H5FP_file_info *fs;
+    H5FP_status_t exit_state = H5FP_STATUS_OK;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_change_request);
+    FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
 
-    if ((fs = H5FP_find_file_struct(req.sap_file_id)) != NULL) {
+    if ((fs = H5FP_find_file_info(req.file_id)) != NULL) {
         if (fs->closing) {
             /* we're closing the file - don't accept anymore changes */
             exit_state = H5FP_STATUS_FILE_CLOSING;
             ret_value = FAIL;
         } else {
             /* handle the change request */
-            struct sap_obj_lock *lock = H5FP_find_object_lock(fs, req.oid);
+            H5FP_object_lock *lock = H5FP_find_object_lock(fs, req.oid);
 
             if (!lock || lock->owned_rank != req.proc_rank
                     || lock->rw_lock != H5FP_LOCK_WRITE) {
@@ -1176,8 +1137,9 @@ H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len)
                  */
                 exit_state = H5FP_STATUS_NO_LOCK;
                 ret_value = FAIL;
-            } else if (H5FP_add_file_mod_to_list(fs, req.obj_type, req.action,
-                                                 req.proc_rank, md_len, mdata) != SUCCEED) {
+            } else if (H5FP_add_file_mod_to_list(fs, req.type_id, req.addr,
+                                                 req.proc_rank, md_size,
+                                                 mdata) != SUCCEED) {
                 exit_state = H5FP_STATUS_OOM;
                 ret_value = FAIL;
             }
@@ -1188,86 +1150,67 @@ H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len)
         ret_value = FAIL;
     }
 
-    H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
+    if (ret_value == FAIL)
+        HDfree(mdata);
+
+    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
- * Function:    H5FP_sap_handle_sync_request
- * Purpose:     Handle a request to sync changes to a file with the requesting
- *              process.
+ * Function:    H5FP_sap_handle_read_request
+ * Purpose:     Handle a read request from a client. The bit of metadata
+ *              that the client wants may or may not be in here. It's not
+ *              an error if it isn't here. When that's the case, the
+ *              client just goes and reads it from the file.
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 06. August, 2002
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_sync_request(struct SAP_request req)
+H5FP_sap_handle_read_request(H5FP_request req)
 {
-    struct sap_file_struct *fs;
-    struct SAP_sync s;
+    H5FP_file_info *fs;
+    H5FP_read r;
     herr_t ret_value = SUCCEED;
-    int mrc, sync_id = 0;
+    char *metadata = NULL;
+    int mrc;
 
-    FUNC_ENTER_NOINIT(H5FP_sap_handle_sync_request);
+    FUNC_ENTER_NOINIT(H5FP_sap_handle_read_request);
 
-HDfprintf(stderr, "%s: Trying to Synchronize!\n", FUNC);
+    r.req_id = req.req_id;
+    r.file_id = req.file_id;
+    r.md_size = 0;
+    r.type_id = 0;
+    r.addr = 0;
+    r.status = H5FP_STATUS_MDATA_NOT_CACHED;
 
-    s.req_id = req.req_id;
-    s.sap_file_id = req.sap_file_id;
-    s.last_msg = FALSE;
-    s.md_len = 0;
-    s.obj_type = 0;
-    s.action = 0;
-    s.status = H5FP_STATUS_OK;
+    if ((fs = H5FP_find_file_info(req.file_id)) != NULL) {
+        H5FP_mdata_mod mod;     /* Used to find the correct modification */
+        H5TB_NODE *node;
 
-    if ((fs = H5FP_find_file_struct(req.sap_file_id)) != NULL) {
-        if (fs->mod_tree->root) {
-            H5TB_NODE *mod_node = H5TB_first(fs->mod_tree->root);
+        mod.addr = req.addr;    /* This is the key field for the TBBT */
 
-            while (mod_node) {
-                struct sap_file_mod *mod = (struct sap_file_mod *)mod_node->data;
+        if ((node = H5TB_dfind(fs->mod_tree, (void *)&mod, NULL)) != NULL) {
+            H5FP_mdata_mod *fm = (H5FP_mdata_mod *)node->data;
 
-                if (mod && !IS_PROC_NOTIFIED(mod, req.proc_rank)) {
-                    s.sync_id = sync_id++;
-                    s.md_len = mod->md_len;
-                    s.obj_type = mod->obj_type;
-                    s.action = mod->action;
-
-                    if ((mrc = MPI_Send(&s, 1, SAP_sync_t, (int)req.proc_rank,
-                                        H5FP_TAG_SYNC, H5FP_SAP_COMM)) != MPI_SUCCESS)
-                        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
-
-
-                    if (H5FP_send_metadata(mod->metadata, mod->md_len, (int)req.proc_rank)
-                            != SUCCEED)
-                        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
-                                    "can't send metadata to client");
-
-                    SET_PROC_NOTIFIED(mod, req.proc_rank);
-                }
-
-                /*
-                 * check to see if this modification has been sent to all
-                 * clients
-                 */
-                if (mod->num_notified == (unsigned)H5FP_comm_size)
-                    if (H5FP_remove_mod_from_list(fs, mod) == FAIL)
-                        HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL, "cannot remove modification");
-
-                mod_node = H5TB_next(mod_node);
-            }
+            r.md_size = fm->md_size;
+            r.type_id = fm->type_id;
+            r.addr = fm->addr;
+            r.status = H5FP_STATUS_OK;
+            metadata = fm->metadata;    /* Sent out in a separate message */
         }
-    } else {
-        s.status = H5FP_STATUS_BAD_FILE_ID;
     }
 
-    s.sync_id = sync_id;
-    s.last_msg = TRUE;
-
-    if ((mrc = MPI_Send(&s, 1, SAP_sync_t, (int)req.proc_rank,
-                        H5FP_TAG_SYNC, H5FP_SAP_COMM)) != MPI_SUCCESS)
+    if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)req.proc_rank,
+                        H5FP_TAG_READ, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+
+    if (r.md_size)
+        if (H5FP_send_metadata(metadata, (int)r.md_size, (int)req.proc_rank) != SUCCEED)
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
+                        "can't send metadata to client");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1282,23 +1225,19 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_close_request(struct SAP_request req)
+H5FP_sap_handle_close_request(H5FP_request req)
 {
-    struct sap_file_struct *fs;
+    H5FP_file_info *fs;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_close_request);
 
-    if ((fs = H5FP_find_file_struct(req.sap_file_id)) != NULL) {
-        /* do a sync with the closing process */
-        if (H5FP_sap_handle_sync_request(req) != SUCCEED)
-            HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL, "couldn't sync with process");
-
+    if ((fs = H5FP_find_file_info(req.file_id)) != NULL)
         if (++fs->closing == H5FP_comm_size - 1)
             /* all processes have closed the file - remove it from list */
-            if (H5FP_remove_file_id_from_list(req.sap_file_id) != SUCCEED)
-                HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL, "cannot remove file ID from list");
-    }
+            if (H5FP_remove_file_id_from_list(req.file_id) != SUCCEED)
+                HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL,
+                            "cannot remove file ID from list");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
