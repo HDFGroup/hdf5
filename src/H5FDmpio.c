@@ -698,7 +698,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t']) {
     	fprintf(stdout, "Entering H5FD_mpio_open(name=\"%s\", flags=0x%x, "
-		"fapl_id=%lu, maxaddr=%lu)\n", name, flags, fapl_id, maxaddr);
+		"fapl_id=%d, maxaddr=%lu)\n", name, flags, (int)fapl_id, (unsigned long)maxaddr);
     }
 #endif
 

@@ -4631,7 +4631,6 @@ H5T_create(H5T_class_t type, size_t size)
     case H5T_VLEN:  /* Variable length datatype */
         HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL,
 		      "base type required - use H5Tvlen_create()");
-        break;
 
     default:
 	HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL,

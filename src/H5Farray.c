@@ -149,7 +149,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
 #ifdef COALESCE_READS
-    H5F_xfer_t *xfer_parms;                     /*transfer property list*/
+    H5D_xfer_t *xfer_parms;                     /*transfer property list*/
 #endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
@@ -169,7 +169,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
-	H5F_xfer_t *dxpl;
+	H5D_xfer_t *dxpl;
 	H5FD_mpio_dxpl_t *dx;
 	if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
 	    H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
@@ -281,7 +281,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef COALESCE_READS
         /* Get the dataset transfer property list */
         if (H5P_DEFAULT == dxpl_id) {
-            xfer_parms = &H5F_xfer_dflt;
+            xfer_parms = &H5D_xfer_dflt;
         } else if (H5P_DATA_XFER != H5P_get_class (dxpl_id) ||
                NULL == (xfer_parms = H5I_object (dxpl_id))) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
@@ -385,7 +385,7 @@ printf("%s: feature_flags=%lx\n",FUNC,(unsigned long)f->shared->lf->feature_flag
  *
  * 		Robb Matzke, 1998-09-28
  *		Added `xfer' argument, removed `xfer_mode' argument since it
- *		is a member of H5F_xfer_t.
+ *		is a member of H5D_xfer_t.
  *
  * 		Robb Matzke, 1999-08-02
  *		Data transfer properties are passed by ID since that's how
@@ -434,7 +434,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
-	H5F_xfer_t *dxpl;
+	H5D_xfer_t *dxpl;
 	H5FD_mpio_dxpl_t *dx;
 	if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
 	    H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&

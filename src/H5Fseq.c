@@ -83,7 +83,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
         /* Get the transfer mode */
-        H5F_xfer_t *dxpl;
+        H5D_xfer_t *dxpl;
         H5FD_mpio_dxpl_t *dx;
 
         if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
@@ -312,7 +312,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
         /* Get the transfer mode */
-        H5F_xfer_t *dxpl;
+        H5D_xfer_t *dxpl;
         H5FD_mpio_dxpl_t *dx;
 
         if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&

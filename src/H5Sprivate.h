@@ -236,4 +236,31 @@ __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
 				    H5S_sel_iter_t *sel_iter);
 
+#ifdef H5_HAVE_PARALLEL
+/* MPI-IO function to read directly from app buffer to file rky980813 */
+__DLL__ herr_t H5S_mpio_spaces_read(H5F_t *f,
+				    const struct H5O_layout_t *layout,
+				    const struct H5O_pline_t *pline,
+				    const struct H5O_efl_t *efl,
+				    size_t elmt_size, const H5S_t *file_space,
+				    const H5S_t *mem_space, hid_t dxpl_id,
+				    void *buf/*out*/,
+				    hbool_t *must_convert /*out*/ );
+
+/* MPI-IO function to write directly from app buffer to file rky980813 */
+__DLL__ herr_t H5S_mpio_spaces_write(H5F_t *f,
+				     const struct H5O_layout_t *layout,
+				     const struct H5O_pline_t *pline,
+				     const struct H5O_efl_t *efl,
+				     size_t elmt_size, const H5S_t *file_space,
+				     const H5S_t *mem_space, hid_t dxpl_id,
+				     const void *buf,
+				     hbool_t *must_convert /*out*/ );
+#ifndef _H5S_IN_H5S_C
+/* Global var whose value comes from environment variable */
+__DLLVAR__ hbool_t		H5_mpi_opt_types_g;
+#endif /* _H5S_IN_H5S_C */
+
+#endif /* H5_HAVE_PARALLEL */
+
 #endif /* _H5Sprivate_H */

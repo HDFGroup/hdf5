@@ -763,7 +763,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset of element in dataspace */
-    size_t temp_off;            /* Offset in a given dimension */
+    hssize_t temp_off;            /* Offset in a given dimension */
     H5S_hyper_node_t *node;     /* Hyperslab node */
     intn rank;                  /* Dataspace rank */
     intn i;                     /* Counter */

@@ -975,7 +975,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_cmemb_t	*src_memb = NULL;	/*source struct member descript.*/
     H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
-    size_t	src_delta, dst_delta;	/*source & destination stride	*/
+    size_t	src_delta;	    /*source stride	*/
     uintn	elmtno;
     intn	i;			/*counters			*/
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
@@ -1047,16 +1047,14 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	 */
 	if (buf_stride) {
 	    src_delta = buf_stride;
-            dst_delta = buf_stride;
-            if (!bkg_stride) bkg_stride = dst->size;
+        if (!bkg_stride)
+            bkg_stride = dst->size;
 	} else if (dst->size <= src->size) {
 	    src_delta = src->size;
-	    dst_delta = dst->size;
-            bkg_stride = dst->size;
+        bkg_stride = dst->size;
 	} else {
 	    src_delta = -(src->size);
-	    dst_delta = -(dst->size);
-            bkg_stride = -(dst->size);
+        bkg_stride = -(dst->size);
 	    xbuf += (nelmts-1) * src->size;
 	    xbkg += (nelmts-1) * dst->size;
 	}

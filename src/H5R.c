@@ -454,7 +454,6 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
         default:
             HGOTO_ERROR(H5E_REFERENCE, H5E_BADTYPE, FAIL,
                   "can't identify type of object referenced");
-            break;
      } /* end switch */
 
 done:
