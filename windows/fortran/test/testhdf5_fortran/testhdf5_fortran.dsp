@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
-# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /include:"Release/" /include:"..\..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt /module:"..\..\..\proj\hdf5_fortran\Release/"
+# ADD F90 /compile_only /define:"HDF5F90_WINDOWS" /include:"Release/" /include:"..\..\..\..\proj\hdf5_fortran\Release/" /nologo /warn:nofileopt /module:"..\..\..\proj\hdf5_fortran\Release/"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD CPP /nologo /W3 /GX /O2 /I "..\..\..\..\src" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -93,99 +93,99 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\fortranlib_test.f90
-DEP_F90_FORTR=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_FORTR=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5A.f90
-DEP_F90_TH5A_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5A_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5D.f90
-DEP_F90_TH5D_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5D_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5E.f90
-DEP_F90_TH5E_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5E_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5F.f90
-DEP_F90_TH5F_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5F_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5G.f90
-DEP_F90_TH5G_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5G_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5I.f90
-DEP_F90_TH5I_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5I_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5P.f90
-DEP_F90_TH5P_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5P_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5R.f90
-DEP_F90_TH5R_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5R_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5S.f90
-DEP_F90_TH5S_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5S_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5Sselect.f90
-DEP_F90_TH5SS=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5SS=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5T.f90
-DEP_F90_TH5T_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5T_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5VL.f90
-DEP_F90_TH5VL=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5VL=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\..\..\fortran\test\tH5Z.f90
-DEP_F90_TH5Z_=\
-	"..\..\..\..\proj\hdf5_fortran\Debug\HDF5.mod"\
+NODEP_F90_TH5Z_=\
+	"..\..\..\..\fortran\test\testhdf5_fortran\Release\HDF5.mod"\
 	
 # End Source File
 # End Group
