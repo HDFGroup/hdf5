@@ -189,56 +189,6 @@ H5Z_term_interface (void)
     return 0;
 }
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-
-/*-------------------------------------------------------------------------
- * Function:	H5Zregister
- *
- * Purpose:	This function registers new filter. The COMMENT argument is
- *		used for debugging and may be the null pointer.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
- *
- * Modifications:
- *              Changed to pass H5Z_class_t struct to H5Z_register
- *              Quincey Koziol, April  5, 2003
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
-{
-    H5Z_class_t cls;                    /* Filter class used to bundle parameters */
-    herr_t     ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Zregister, FAIL);
-    H5TRACE3("e","Zfsx",id,comment,func);
-
-    /* Check args */
-    if (id<0 || id>H5Z_FILTER_MAX)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
-    if (id<H5Z_FILTER_RESERVED)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
-    if (!func)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no function specified");
-
-    /* Build class structure */
-    cls.id=id;
-    cls.name=comment;
-    cls.can_apply=cls.set_local=NULL;
-    cls.filter=func;
-
-    /* Do it */
-    if (H5Z_register (&cls)<0)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Zregister
@@ -280,7 +230,6 @@ H5Zregister(const H5Z_class_t *cls)
 done:
     FUNC_LEAVE_API(ret_value);
 }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

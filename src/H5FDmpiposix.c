@@ -273,124 +273,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_init() */
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_mpiposix
- *
- * Purpose:	Store the user supplied MPI communicator COMM in
- *		the file access property list FAPL_ID which can then be used
- *		to create and/or open the file.  This function is available
- *		only in the parallel HDF5 library and is not collective.
- *
- *		comm is the MPI communicator to be used for file open as
- *		defined in MPI_FILE_OPEN of MPI-2. This function makes a
- *		duplicate of comm. Any modification to comm after this function
- *		call returns has no effect on the access property list.
- *
- *              If fapl_id has previously set comm value, it will be replaced
- *              and the old communicator is freed.
- *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, July 11, 2002
- *
- * Modifications:
- *		Albert Cheng, 2003-04-24
- *		Modified the description of the function that it now stores
- *		a duplicate of the communicator.  Free the old duplicate if
- *		previously set.  (Work is actually done by H5P_set_driver.)
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
-{
-    H5FD_mpiposix_fapl_t	fa;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
-    
-    FUNC_ENTER_API(H5Pset_fapl_mpiposix, FAIL);
-    H5TRACE2("e","iMc",fapl_id,comm);
-
-    /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
-    if (MPI_COMM_NULL == comm)
-	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator");
-
-    /* Initialize driver specific properties */
-    fa.comm = comm;
-    fa.use_gpfs = FALSE;
-
-    /* duplication is done during driver setting. */
-    ret_value= H5P_set_driver(plist, H5FD_MPIPOSIX, &fa);
-
-done:
-    FUNC_LEAVE_API(ret_value);
-} /* end H5Pset_fapl_mpiposix() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_fapl_mpiposix
- *
- * Purpose:	If the file access property list is set to the H5FD_MPIPOSIX
- *		driver then this function returns a duplicate of the MPI
- *		communicator through the comm pointer. It is the responsibility
- *		of the application to free the returned communicator.
- *
- * Return:	Success:	Non-negative with the communicator and
- *				information returned through the COMM 
- *				argument if non-null.  Since it is a duplicate
- *				of the stored object, future modifications to
- *				the access property list do not affect it and
- *				it is the responsibility of the application to
- *				free it.
- *
- * 		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *		Thursday, July 11, 2002
- *
- * Modifications:
- *		Albert Cheng, 2003-04-24
- *		Return duplicate of the stored communicator.
- *
- *              Bill Wendling, 2003-05-01
- *              Return the USE_GPFS flag.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
-{
-    H5FD_mpiposix_fapl_t	*fa;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    int		mpi_code;		/* mpi return code */
-    herr_t      ret_value=SUCCEED;      /* Return value */
-    
-    FUNC_ENTER_API(H5Pget_fapl_mpiposix, FAIL);
-    H5TRACE2("e","ix",fapl_id,comm);
-
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
-    if (H5FD_MPIPOSIX!=H5P_get_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
-    if (NULL==(fa=H5P_get_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
-
-    /* Get MPI Communicator */
-    if (comm){
-	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, comm)))
-	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
-    }
-
-done:
-    FUNC_LEAVE_API(ret_value);
-} /* end H5Pget_fapl_mpiposix() */
-#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_mpiposix
@@ -514,7 +396,6 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/, hbool_t *use_gpfs/*ou
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_fapl_mpiposix() */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

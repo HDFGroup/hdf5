@@ -660,11 +660,7 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
      hid_t c_prp_id;
      herr_t ret;
      int c_ik;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-     int c_lk;
-#else /* H5_WANT_H5_V1_4_COMPAT */
      unsigned c_lk;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
      /*
       * Call H5Pget_sym_k function.
@@ -1662,78 +1658,6 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
 
 DONE:    
      HDfree(c_name);
-     return ret_value;
-} 
-
-/*----------------------------------------------------------------------------
- * Name:        h5pset_hyper_cache_c
- * Purpose:     Call H5Pset__hyper_cache to indicate whether to 
- *              cache hyperslab blocks during I/O. 
- * Inputs:      prp_id - property list identifier
- *              cache - 
- *              limit - Maximum size of the hyperslab block to cache.
- *                      0 (zero) indicates no limit.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
-int_f
-nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
-{
-     int ret_value = -1;
-     hid_t c_prp_id;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-     herr_t ret;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
-     unsigned c_cache, c_limit;
-
-     c_cache = (unsigned) *cache;
-     c_limit = (unsigned) *limit;
-
-     /*
-      * Call H5Pset_hyper_cache function.
-      */
-     c_prp_id = (hid_t)*prp_id;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-     ret = H5Pset_hyper_cache(c_prp_id, c_cache, c_limit);
-     if (ret < 0) return ret_value;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
-     ret_value = 0;
-     return ret_value;
-} 
-
-/*----------------------------------------------------------------------------
- * Name:        h5pget_hyper_cache_c
- * Purpose:     Call H5Pget_hyper_cache to get information regarding 
- *              the caching of hyperslab blocks 
- * Inputs:      prp_id - property list identifier
- *              cache - 
- *              limit - Maximum size of the hyperslab block to cache.
- *                      0 (zero) indicates no limit.
- * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Friday, February 25, 2000
- * Modifications:
- *---------------------------------------------------------------------------*/
-int_f
-nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
-{
-     int ret_value = -1;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-     hid_t c_prp_id;
-     herr_t ret;
-     unsigned c_cache, c_limit;
-     /*
-      * Call H5Pget__hyper_cache function.
-      */
-     c_prp_id = (hid_t)*prp_id;
-     ret = H5Pget_hyper_cache(c_prp_id, &c_cache, &c_limit);
-     if (ret < 0) return ret_value;
-     *cache = (int_f)c_cache;
-     *limit = (int_f)c_limit;   
-     ret_value = 0;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
      return ret_value;
 } 
 

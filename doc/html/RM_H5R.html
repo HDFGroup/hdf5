@@ -83,7 +83,6 @@ to specific objects and data regions in an HDF5 file.
 <ul>
     <li><a href="#Reference-GetRegion">H5Rget_region</a>
     <li><a href="#Reference-GetObjType">H5Rget_obj_type</a>
-    <li><span class="1_4_compat"><a href="#Reference-GetObjectType">H5Rget_object_type</a></span> *
 </ul>
 </td><td valign=top width=20%>
 <ul>
@@ -110,7 +109,6 @@ See further notes in the description of each function.
     
     <td valign="top">
       <li><a href="#Reference-GetObjType">H5Rget_obj_type</a>
-      <li><a href="#Reference-GetObjectType">H5Rget_object_type</a> *
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -145,7 +143,6 @@ facilitate moving easily between them.</i>
 </td><td valign=top width=40%>
 <ul>
     <li><a href="#Reference-GetRegion">h5rget_region_f</a>
-    <li><a href="#Reference-GetObjectType">h5rget_object_type_f</a>
 </ul>
 </td><td valign=top width=20%>
 <ul>
@@ -375,53 +372,7 @@ facilitate moving easily between them.</i>
     <dd>Returns an object type as defined in <code>H5Gpublic.h</code> if successful;
         otherwise returns <code>H5G_UNKNOWN</code>.
 <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5r_FORTRAN.html#h5rget_object_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Reference-GetObjectType">H5Rget_object_type</a>
-<dt><strong>Signature:</strong>
-    <dd><em>int</em> <code>H5Rget_object_type</code>(<em>hid_t</em> <code>id</code>,
-    <em>void *</em><code>ref</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Retrieves the type of object that an object reference points to.
-<dt><strong>Description:</strong>
-    <dd>[<strong>NOTE:</strong>
-        <span class="1_4_compat">
-        This function is provided only to enable backward compatibility
-        with HDF5 Releases 1.4.<i>x</i>. 
-	This function is enabled only if the HDF5 library is configured 
-	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code> and is not
-	enabled in the binaries distributed by NCSA.
-	This function has been replaced in Release 1.6 by the function 
-	<a href="#Reference-GetObjType"><code>H5Rget_obj_type</code></a>
-	and will eventually be deleted from the HDF5 distribution.</span>]
-        <p>
-	</p>Given a reference to an object <code>ref</code>, 
-        <code>H5Rget_object_type</code> returns the 
-        type of the object pointed to.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>id</code>,
-            <dd>IN: The dataset containing the reference object or 
-                the location identifier of the object that the dataset 
-                is located within.
-        <dt><em>void *</em><code>ref</code>
-            <dd>IN: Reference to query.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns an object type as defined in <code>H5Gpublic.h</code>;
-        otherwise returns <code>H5G_UNKNOWN</code>.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5r_FORTRAN.html#h5rget_object_type_f" 
+    <dd><a href="fortran/h5r_FORTRAN.html#h5rget_obj_type_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 

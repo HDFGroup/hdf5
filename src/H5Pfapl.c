@@ -811,133 +811,6 @@ done:
 }               
 
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_cache
- *
- * Purpose:	Set the number of objects in the meta data cache and the
- *		maximum number of chunks and bytes in the raw data chunk
- *		cache.
- *
- * 		The RDCC_W0 value should be between 0 and 1 inclusive and
- *		indicates how much chunks that have been fully read or fully
- *		written are favored for preemption.  A value of zero means
- *		fully read or written chunks are treated no differently than
- *		other chunks (the preemption is strictly LRU) while a value
- *		of one means fully read chunks are always preempted before
- *		other chunks.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, May 19, 1998
- *
- * Modifications:
- *
- *		Raymond Lu 
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property list.
- *	
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_cache(hid_t plist_id, int mdc_nelmts,
-	     int _rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    size_t rdcc_nelmts=(size_t)_rdcc_nelmts;    /* Work around variable changing size */
-    herr_t ret_value=SUCCEED;   /* return value */
-    
-    FUNC_ENTER_API(H5Pset_cache, FAIL);
-    H5TRACE5("e","iIsIszd",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
-             rdcc_w0);
-
-    /* Check arguments */
-    if (mdc_nelmts<0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "meta data cache size must be non-negative");
-    if (rdcc_w0<0.0 || rdcc_w0>1.0)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive");
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Set sizes */
-    if(H5P_set(plist, H5F_ACS_META_CACHE_SIZE_NAME, &mdc_nelmts) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set meta data cache size");
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache element size");
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size");
-    if(H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_cache
- *
- * Purpose:	Retrieves the maximum possible number of elements in the meta
- *		data cache and the maximum possible number of elements and
- *		bytes and the RDCC_W0 value in the raw data chunk cache.  Any
- *		(or all) arguments may be null pointers in which case the
- *		corresponding datum is not returned.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, May 19, 1998
- *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list.
- *	
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
-	     int *_rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    size_t rdcc_nelmts;         /* Work around variable changing size */
-    herr_t ret_value=SUCCEED;   /* return value */
-    
-    FUNC_ENTER_API(H5Pget_cache, FAIL);
-    H5TRACE5("e","i*Is*Is*z*d",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
-             rdcc_w0);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Get sizes */
-    if (mdc_nelmts)
-        if(H5P_get(plist, H5F_ACS_META_CACHE_SIZE_NAME, mdc_nelmts) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get meta data cache size");
-    if (_rdcc_nelmts) {
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache element size");
-        *_rdcc_nelmts=rdcc_nelmts;
-    } /* end if */
-    if (rdcc_nbytes)
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
-    if (rdcc_w0)
-        if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-#else /* H5_WANT_H5_V1_4_COMPAT */
-
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_cache
  *
@@ -1056,7 +929,6 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 done:
     FUNC_LEAVE_API(ret_value);
 }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -1318,105 +1190,6 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_sieve_buf_size
- *
- * Purpose:	Sets the maximum size of the data seive buffer used for file
- *      drivers which are capable of using data sieving.  The data sieve
- *      buffer is used when performing I/O on datasets in the file.  Using a
- *      buffer which is large anough to hold several pieces of the dataset
- *      being read in for hyperslab selections boosts performance by quite a
- *      bit.
- *      
- *		The default value is set to 64KB, indicating that file I/O for raw data
- *      reads and writes will occur in at least 64KB blocks.
- *      Setting the value to 0 with this API function will turn off the
- *      data sieving, even if the VFL driver attempts to use that strategy.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *		Raymond Lu 
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    size_t size=(size_t)_size;  /* Work around size difference */
-    herr_t ret_value=SUCCEED;   /* return value */
-    
-    FUNC_ENTER_API(H5Pset_sieve_buf_size, FAIL);
-    H5TRACE2("e","ih",plist_id,_size);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Set values */
-    if(H5P_set(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
-
-done:
-    FUNC_LEAVE_API(ret_value);
-} /* end H5Pset_sieve_buf_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_sieve_buf_size
- *
- * Purpose:	Returns the current settings for the data sieve buffer size
- *      property from a file access property list.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *		Raymond Lu 
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list to the new generic property 
- *		list.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_sieve_buf_size(hid_t plist_id, hsize_t *_size/*out*/)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    size_t size;                /* Work around size difference */
-    herr_t ret_value=SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(H5Pget_sieve_buf_size, FAIL);
-    H5TRACE2("e","ix",plist_id,_size);
-
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-
-    /* Get values */
-    if (_size) {
-        if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size");
-        *_size=size;
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value);
-} /* end H5Pget_sieve_buf_size() */
-#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_sieve_buf_size
@@ -1510,7 +1283,6 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_sieve_buf_size() */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

@@ -772,8 +772,6 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_external_c         FNAME(H5PSET_EXTERNAL_C)
 #   define nh5pget_external_count_c         FNAME(H5PGET_EXTERNAL_COUNT_C)
 #   define nh5pget_external_c         FNAME(H5PGET_EXTERNAL_C)
-#   define nh5pset_hyper_cache_c         FNAME(H5PSET_HYPER_CACHE_C)
-#   define nh5pget_hyper_cache_c         FNAME(H5PGET_HYPER_CACHE_C)
 #   define nh5pget_btree_ratios_c         FNAME(H5PGET_BTREE_RATIOS_C)
 #   define nh5pset_btree_ratios_c         FNAME(H5PSET_BTREE_RATIOS_C)
 #   define nh5pset_fapl_mpio_c         FNAME(H5PSET_FAPL_MPIO_C)
@@ -881,8 +879,6 @@ H5_DLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 #   define nh5pset_external_c         FNAME(h5pset_external_c)
 #   define nh5pget_external_count_c         FNAME(h5pget_external_count_c)
 #   define nh5pget_external_c         FNAME(h5pget_external_c)
-#   define nh5pset_hyper_cache_c         FNAME(h5pset_hyper_cache_c)
-#   define nh5pget_hyper_cache_c         FNAME(h5pget_hyper_cache_c)
 #   define nh5pget_btree_ratios_c         FNAME(h5pget_btree_ratios_c)
 #   define nh5pset_btree_ratios_c         FNAME(h5pset_btree_ratios_c)
 #   define nh5pset_fapl_mpio_c         FNAME(h5pset_fapl_mpio_c)
@@ -1048,10 +1044,6 @@ H5_DLL int_f
 nh5pget_external_count_c (hid_t_f *prp_id, int_f* count);
 H5_DLL int_f
 nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes);
-H5_DLL int_f
-nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit);
-H5_DLL int_f
-nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f* cache, int_f* limit);
 H5_DLL int_f 
 nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_DLL int_f 

@@ -1730,13 +1730,8 @@ test_refer_dtype(hid_t file)
     /* Create reference to named datatype */
     if(H5Rcreate(wbuf,file,"/Group1/Datatype1",H5R_OBJECT,-1)<0) 
         TEST_ERROR;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    if(H5Rget_object_type(dataset,wbuf)!=H5G_TYPE)
-        TEST_ERROR;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     if(H5Rget_obj_type(dataset,H5R_OBJECT,wbuf)!=H5G_TYPE)
         TEST_ERROR;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     /* Write selection to disk */
     if(H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf)<0)

@@ -273,54 +273,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_log
- *
- * Purpose:	Modify the file access property list to use the H5FD_LOG
- *		driver defined in this source file.  There are no driver
- *		specific properties.
- *		
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Thursday, February 19, 1998
- *
- * Modifications:
- *              We copy the LOGFILE value into our own access properties.
- *
- * 		Raymond Lu, 2001-10-25
- *		Changed the file access list to the new generic property list.
- *	
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
-{
-    H5FD_log_fapl_t	fa;     /* File access property list information */
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
-
-    FUNC_ENTER_API(H5Pset_fapl_log, FAIL);
-    H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
-    
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-
-    fa.logfile=logfile;
-    if(verbosity>0) {
-        fa.flags=H5FD_LOG_LOC_IO|H5FD_LOG_FLAVOR;
-        if(verbosity>1)
-            fa.flags|=H5FD_LOG_FILE_IO;
-    } /* end if */
-    fa.buf_size=32*(1024*1024);
-    ret_value= H5P_set_driver(plist, H5FD_LOG, &fa);
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-#else /* H5_WANT_H5_V1_4_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_log
@@ -363,7 +315,6 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned flags, size_t buf_s
 done:
     FUNC_LEAVE_API(ret_value);
 }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*-------------------------------------------------------------------------

@@ -547,35 +547,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-int
-H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
-{
-    H5G_t		*group = NULL;
-    hsize_t             num_objs;
-    int 		ret_value = H5G_UNKNOWN;
-    
-    FUNC_ENTER_API(H5Gget_objtype_by_idx, FAIL);
-    H5TRACE2("Is","ih",group_id,idx);
-
-    /* Check args */
-    if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
-        
-    if (H5G_get_num_objs(group, &num_objs, H5AC_ind_dxpl_id)<0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
-    if(idx >= num_objs)    
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
-        
-    /*call private function*/
-    ret_value = H5G_get_objtype_by_idx(group, idx, H5AC_ind_dxpl_id);
-
-done:
-    FUNC_LEAVE_API(ret_value);
-
-}
-
-#else /*H5_WANT_H5_V1_4_COMPAT*/
 H5G_obj_t
 H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
 {
@@ -602,7 +573,6 @@ done:
     FUNC_LEAVE_API(ret_value);
 
 }
-#endif /*H5_WANT_H5_V1_4_COMPAT*/
 
 
 /*-------------------------------------------------------------------------

@@ -495,39 +495,6 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-#ifdef H5_WANT_H5_V1_4_COMPAT
-herr_t
-H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
-{
-    hssize_t tstart[H5O_LAYOUT_NDIMS];  /* Temporary starting coordinates */
-    hssize_t tend[H5O_LAYOUT_NDIMS];    /* Temporary ending coordinates */
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    unsigned u;                 /* Local index variable */
-    herr_t ret_value;        /* return value */
-
-    FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
-    H5TRACE3("e","i*h*h",spaceid,start,end);
-
-    /* Check args */
-    if(start==NULL || end==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
-
-    ret_value = H5S_get_select_bounds(space,tstart,tend);
-
-    if(ret_value>=0) {
-        /* Copy over the start & end values */
-        for(u=0; u<space->extent.u.simple.rank; u++) {
-            H5_ASSIGN_OVERFLOW(start[u],tstart[u],hssize_t,hsize_t);
-            H5_ASSIGN_OVERFLOW(end[u],tend[u],hssize_t,hsize_t);
-        } /* end for */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}   /* H5Sget_select_bounds() */
-#else /* H5_WANT_H5_V1_4_COMPAT */
 herr_t
 H5Sget_select_bounds(hid_t spaceid, hssize_t *start, hssize_t *end)
 {
@@ -548,7 +515,6 @@ H5Sget_select_bounds(hid_t spaceid, hssize_t *start, hssize_t *end)
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_bounds() */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 
 /*--------------------------------------------------------------------------

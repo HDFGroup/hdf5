@@ -80,11 +80,7 @@ test_file_create(void)
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
     int			iparm;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int		iparm2;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     unsigned		iparm2;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     herr_t		ret;		/*generic return value		*/
 
     /* Output message about test being performed */
@@ -319,11 +315,7 @@ test_file_open(void)
     size_t		parm;		/*file-creation parameters	*/
     size_t		parm2;		/*file-creation parameters	*/
     int			iparm;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int		iparm2;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     unsigned		iparm2;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     herr_t		ret;		/*generic return value		*/
 
     /*

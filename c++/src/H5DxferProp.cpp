@@ -33,30 +33,6 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList( H5P_DATASET_XFER) {}
 // Copy constructor: makes a copy of the original DSetMemXferPropList object;
 DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-// Sets type conversion and background buffers
-void DSetMemXferPropList::setBuffer( hsize_t size, void* tconv, void* bkg ) const
-{
-   herr_t ret_value = H5Pset_buffer( id, size, tconv, bkg );
-   if( ret_value < 0 )
-   {
-      throw PropListIException("DSetMemXferPropList::setBuffer",
-		"H5Pset_buffer failed");
-   }
-}
-
-// Reads buffer settings
-hsize_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
-{
-   hsize_t buffer_size = H5Pget_buffer( id, tconv, bkg );
-   if( buffer_size == 0 )
-   {
-      throw PropListIException("DSetMemXferPropList::getBuffer",
-		"H5Pget_buffer returned 0 for buffer size - failure");
-   }
-   return( buffer_size );
-}
-#else /* H5_WANT_H5_V1_4_COMPAT */
 // Sets type conversion and background buffers
 void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
 {
@@ -79,7 +55,6 @@ size_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
    }
    return( buffer_size );
 }
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 // Sets the dataset transfer property list status to TRUE or FALSE
 void DSetMemXferPropList::setPreserve( bool status ) const
@@ -106,35 +81,6 @@ bool DSetMemXferPropList::getPreserve() const
 		"H5Pget_preserve returned negative value for status");
    }
 }
-
-#ifdef H5_WANT_H5_V1_4_COMPAT
-// Indicates whether to cache hyperslab blocks during I/O
-void DSetMemXferPropList::setHyperCache( bool cache, unsigned limit ) const
-{
-   herr_t ret_value = H5Pset_hyper_cache( id, cache, limit );
-   if( ret_value < 0 )
-   {
-      throw PropListIException("DSetMemXferPropList::setHyperCache",
-		"H5Pset_hyper_cache failed");
-   }
-}
-
-// Returns information regarding the caching of hyperslab blocks during I/O
-void DSetMemXferPropList::getHyperCache( bool& cache, unsigned& limit ) const
-{
-   unsigned temp_cache;  // C routine takes hid_t, unsigned*, unsigned*
-   herr_t ret_value = H5Pget_hyper_cache( id, &temp_cache, &limit );
-   if( ret_value < 0 )
-   {
-      throw PropListIException("DSetMemXferPropList::getHyperCache",
-		"H5Pget_hyper_cache failed");
-   }
-   if( temp_cache > 0 )
-      cache = true;
-   else
-      cache = false;
-}
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 // Sets B-tree split ratios for a dataset transfer property list 
 void DSetMemXferPropList::setBtreeRatios( double left, double middle, double right ) const

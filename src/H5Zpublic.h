@@ -163,12 +163,7 @@ typedef struct H5Z_class_t {
     H5Z_func_t filter;		/* The actual filter function		     */
 } H5Z_class_t;
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-H5_DLL herr_t H5Zregister(H5Z_filter_t id, const char *comment,
-			   H5Z_func_t filter);
-#else /* H5_WANT_H5_V1_4_COMPAT */
 H5_DLL herr_t H5Zregister(const H5Z_class_t *cls);
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
 H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
 

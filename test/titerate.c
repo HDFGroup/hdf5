@@ -197,11 +197,13 @@ static void test_iter_group(void)
         VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
         for(i=0; i< (int)num_membs; i++) {
+            H5G_obj_t obj_type;         /* Type of object in file */
+
             ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
             CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
             
-            ret = (herr_t)H5Gget_objtype_by_idx(root_group, (hsize_t)i);
-            CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
+            obj_type = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
+            CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
         }
     
         H5E_BEGIN_TRY {
@@ -780,22 +782,24 @@ static void test_grp_memb_funcs(void)
     VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
   
     for(i=0; i< (int)num_membs; i++) {
-        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
+        H5G_obj_t obj_type;         /* Type of object in file */
+
+        ret = H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, 32);
         CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
         
         /* Keep a copy of the dataset names around for later */
         obj_names[i]=HDstrdup(dataset_name);
         CHECK(dnames[i], NULL, "strdup");           
         
-        ret = (herr_t)H5Gget_objtype_by_idx(root_group, (hsize_t)i);
-        CHECK(ret, FAIL, "H5Gget_objsname_by_idx");
+        obj_type = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
+        CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objsname_by_idx");
 
         if(!HDstrcmp(dataset_name, "grp"))
-            VERIFY(ret, H5G_GROUP, "H5Gget_objsname_by_idx");
+            VERIFY(obj_type, H5G_GROUP, "H5Gget_objsname_by_idx");
         if(!HDstrcmp(dataset_name, "dtype"))
-            VERIFY(ret, H5G_TYPE, "H5Gget_objsname_by_idx");
+            VERIFY(obj_type, H5G_TYPE, "H5Gget_objsname_by_idx");
         if(!HDstrncmp(dataset_name, "Dataset", 7))
-            VERIFY(ret, H5G_DATASET, "H5Gget_objsname_by_idx");
+            VERIFY(obj_type, H5G_DATASET, "H5Gget_objsname_by_idx");
     }
     
     H5E_BEGIN_TRY {

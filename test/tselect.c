@@ -2522,11 +2522,6 @@ test_select_hyper_union(void)
     xfer = H5Pcreate (H5P_DATASET_XFER);
     CHECK(xfer, FAIL, "H5Pcreate");
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    ret = H5Pset_hyper_cache(xfer,0,1);
-    CHECK(ret, FAIL, "H5Pset_hyper_cache");
-#endif /* H5_WANT_H5_V1_4_COMPAT */
-
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -6155,11 +6150,7 @@ test_select(void)
     hid_t plist_id;     /* Property list for reading random hyperslabs */
     hid_t fapl;         /* Property list accessing the file */
     int mdc_nelmts;     /* Metadata number of elements */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int rdcc_nelmts;   /* Raw data number of elements */
-#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nelmts;   /* Raw data number of elements */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes; /* Raw data number of bytes */
     double rdcc_w0;     /* Raw data write percentage */
     hssize_t offset[SPACE7_RANK]={1,1}; /* Offset for testing selection offsets */
@@ -6173,11 +6164,7 @@ test_select(void)
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     /* test I/O with a very small buffer for reads */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    ret=H5Pset_buffer(plist_id,(hsize_t)59,NULL,NULL);
-#else /* H5_WANT_H5_V1_4_COMPAT */
     ret=H5Pset_buffer(plist_id,(size_t)59,NULL,NULL);
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     CHECK(ret, FAIL, "H5Pset_buffer");
 
     /* These next tests use the same file */

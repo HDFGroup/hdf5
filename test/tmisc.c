@@ -1062,11 +1062,7 @@ test_misc8(void)
 #endif /* VERIFY_DATA */
     unsigned u,v;               /* Local index variables */
     int mdc_nelmts;             /* Metadata number of elements */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int rdcc_nelmts;            /* Raw data number of elements */
-#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nelmts;         /* Raw data number of elements */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes;         /* Raw data number of bytes */
     double rdcc_w0;             /* Raw data write percentage */
     hssize_t start[MISC8_RANK]; /* Hyperslab start */

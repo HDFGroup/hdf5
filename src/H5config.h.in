@@ -128,6 +128,9 @@
 /* Define to 1 if you have the `globus_io' library (-lglobus_io). */
 #undef HAVE_LIBGLOBUS_IO
 
+/* Define to 1 if you have the `lmpe' library (-llmpe). */
+#undef HAVE_LIBLMPE
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
@@ -178,6 +181,9 @@
 
 /* Define if we have MPE support */
 #undef HAVE_MPE
+
+/* Define to 1 if you have the <mpe.h> header file. */
+#undef HAVE_MPE_H
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
@@ -479,8 +485,8 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #undef TM_IN_SYS_TIME
 
-/* Define if the HDF5 v1.4 compatibility functions are to be compiled in */
-#undef WANT_H5_V1_4_COMPAT
+/* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
+#undef WANT_H5_V1_6_COMPAT
 
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */

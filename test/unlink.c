@@ -527,11 +527,7 @@ test_filespace(void)
 
     /* Metadata cache parameters */
     int mdc_nelmts;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int rdcc_nelmts;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nelmts;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes;
     double rdcc_w0;
 
@@ -1326,11 +1322,7 @@ main(void)
 
     /* Metadata cache parameters */
     int mdc_nelmts;
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int rdcc_nelmts;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nelmts;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     size_t rdcc_nbytes;
     double rdcc_w0;
 

@@ -624,111 +624,6 @@ done:
     FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_region() */
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_get_object_type
- PURPOSE
-    Retrieves the type of object that an object reference points to
- USAGE
-    int H5R_get_object_type(file, ref)
-        H5F_t *file;        IN: File the object being dereferenced is within
-        void *ref;          IN: Reference to query.
-        
- RETURNS
-    Success:	An object type defined in H5Gpublic.h
-    Failure:	H5G_UNKNOWN
- DESCRIPTION
-    Given a reference to some object, this function returns the type of object
-    pointed to.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static int
-H5R_get_object_type(H5F_t *file, hid_t dxpl_id, void *_ref)
-{
-    H5G_entry_t ent;            /* Symbol table entry */
-    hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
-    uint8_t *p;                 /* Pointer to OID to store */
-    int ret_value;
-
-    FUNC_ENTER_NOINIT(H5R_get_object_type);
-
-    assert(ref);
-    assert(file);
-
-    /* Initialize the symbol table entry */
-    HDmemset(&ent,0,sizeof(H5G_entry_t));
-    ent.type=H5G_NOTHING_CACHED;
-    ent.file=file;
-
-    /* Get the object oid */
-    p=(uint8_t *)ref->oid;
-    H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
-
-    /* Get the OID type */
-    ret_value=H5G_get_type(&ent, dxpl_id);
-
-#ifdef LATER
-done:
-#endif /* LATER */
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5R_get_object_type() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_object_type
- PURPOSE
-    Retrieves the type of object that an object reference points to
- USAGE
-    int H5Rget_object_type(id, ref)
-        hid_t id;       IN: Dataset reference object is in or location ID of
-                            object that the dataset is located within.
-        void *ref;          IN: Reference to query.
-        
- RETURNS
-    Success:	An object type defined in H5Gpublic.h
-    Failure:	H5G_UNKNOWN
- DESCRIPTION
-    Given a reference to some object, this function returns the type of object
-    pointed to.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5Rget_object_type(hid_t id, void *_ref)
-{
-    H5G_entry_t *loc = NULL;    /* Symbol table entry */
-    H5F_t *file=NULL;       /* File object */
-    hid_t ret_value;
-
-    FUNC_ENTER_API(H5Rget_object_type, H5G_UNKNOWN);
-    H5TRACE2("Is","ix",id,_ref);
-
-    /* Check args */
-    if (NULL == (loc = H5G_loc(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-    if(_ref==NULL)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer");
-
-    /* Get the file pointer from the entry */
-    file=loc->file;
-
-    /* Get the object information */
-    if ((ret_value=H5R_get_object_type(file,H5AC_ind_dxpl_id,_ref))<0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
-    
-done:
-    FUNC_LEAVE_API(ret_value);
-}   /* end H5Rget_object_type() */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
-
 
 /*--------------------------------------------------------------------------
  NAME
@@ -849,21 +744,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-#ifdef H5_WANT_H5_V1_4_COMPAT
-int
-H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
-#else /* H5_WANT_H5_V1_4_COMPAT */
 H5G_obj_t
 H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 {
     H5G_entry_t *loc = NULL;    /* Symbol table entry */
     H5F_t *file=NULL;       /* File object */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    int ret_value;
-#else /* H5_WANT_H5_V1_4_COMPAT */
     H5G_obj_t ret_value;
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     FUNC_ENTER_API(H5Rget_obj_type, H5G_UNKNOWN);
     H5TRACE3("Is","iRtx",id,ref_type,_ref);

@@ -153,11 +153,7 @@ test_file_create(void)
     	VERIFY(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes");
 
     	int  iparm1;		/*file-creation parameters	*/
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    	int  iparm2;	/*file-creation parameters	*/
-#else /* H5_WANT_H5_V1_4_COMPAT */
     	unsigned  iparm2;	/*file-creation parameters	*/
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1.getSymk( iparm1, iparm2);
     	VERIFY(iparm1, F1_SYM_INTERN_K, "FileCreatPropList::getSymk");
     	VERIFY(iparm2, F1_SYM_LEAF_K, "FileCreatPropList::getSymk");
@@ -207,11 +203,7 @@ test_file_create(void)
     	VERIFY(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes");
 
     	int  iparm1;		/*file-creation parameters	*/
-#ifdef H5_WANT_H5_V1_4_COMPAT
-    	int  iparm2;	/*file-creation parameters	*/
-#else /* H5_WANT_H5_V1_4_COMPAT */
     	unsigned  iparm2;	/*file-creation parameters	*/
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     	tmpl1->getSymk( iparm1, iparm2);
     	VERIFY(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk");
     	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
@@ -294,11 +286,7 @@ test_file_open(void)
 	VERIFY(parm2, F2_LENGTH_SIZE, "FileCreatPropList::getSizes");
 
 	int  iparm1;            /*file-creation parameters      */
-#ifdef H5_WANT_H5_V1_4_COMPAT
-	int  iparm2;       /*file-creation parameters      */
-#else /* H5_WANT_H5_V1_4_COMPAT */
 	unsigned  iparm2;       /*file-creation parameters      */
-#endif /* H5_WANT_H5_V1_4_COMPAT */
 	tmpl1.getSymk( iparm1, iparm2);
 	VERIFY(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk");
 	VERIFY(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk");
