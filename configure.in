@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 1997, 1998, 1999, 2000, 2001
+dnl Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002
 dnl     National Center for Supercomputing Applications
 dnl     All rights reserved.
 
@@ -390,24 +390,28 @@ AC_ARG_ENABLE(production,
 
 case "X-$enable_production" in
   X-yes)
+    enable_production="yes"
     AC_MSG_RESULT("production")
     CONFIG_MODE=production
     CFLAGS="$CFLAGS $PROD_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
   X-|X-no)
+    enable_production="no"
     AC_MSG_RESULT("development")
     CONFIG_MODE=development
     CFLAGS="$CFLAGS $DEBUG_CFLAGS"
     CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
     ;;
   X-pg|X-profile)
+    enable_production="profile"
     AC_MSG_RESULT("profile")
     CONFIG_MODE=profile
     CFLAGS="$CFLAGS $PROFILE_CFLAGS"
     CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
     ;;
   *)
+    enable_production="user-defined"
     AC_MSG_RESULT("user-defined")
     CONFIG_MODE="$X-enableval"
     ;;
@@ -589,6 +593,22 @@ AC_TRY_COMPILE([
 )
 
 dnl ----------------------------------------------------------------------
+dnl Fake --with-xxx option to allow us to create a help message for the
+dnl following --with-xxx options which can take either a =DIR or =INC,LIB
+dnl specifier.
+dnl
+AC_ARG_WITH(fnord,
+  [
+ For the following --with-xxx options, you can specify where the header
+ files and libraries are in two different ways:
+
+    --with-xxx=INC,LIB - Specify individually the include directory and
+                         library directory separated by a comma
+    --with-xxx=DIR     - Specify only the directory which contains the
+                         include/ and lib/ subdirectories
+  ],,)
+
+dnl ----------------------------------------------------------------------
 dnl Is HDF4 present?  If so then we can compile the hdf4 related tools.
 dnl The HDF4 software has 4 component libraries (df, mfhdf, z, jpeg)
 dnl and many header files.  Will just verify the presence of mfhdf.h
@@ -619,17 +639,6 @@ AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4.sh'
 AC_SUBST(H4TOH5) H4TOH5=h4toh5
 AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
-
-AC_ARG_WITH(fnord,
-  [
- For the following --with-xxx options, you can specify where the header
- files and libraries are in two different ways:
-
-    --with-xxx=INC,LIB - Specify individually the include directory and
-                         library directory separated by a comma
-    --with-xxx=DIR     - Specify only the directory which contains the
-                         include/ and lib/ subdirectories
-  ],,)
 
 AC_ARG_WITH(hdf4,
   [  --with-hdf4[=DIR]       Use the HDF4 library [default=no]],,
@@ -1864,19 +1873,21 @@ PRINT "Compiling Options:"
 
 PRINT_N "               Compilation Mode"
 case "X-$enable_production" in
-  X-yes)           PRINT "Production" ;;
-  X-|X-no)         PRINT "Development" ;;
-  X-pg|X-profile)  PRINT "Profile" ;;
-  *)               PRINT "$enable_production" ;;
+  X-yes)        PRINT "Production" ;;
+  X-no)         PRINT "Development" ;;
+  X-profile)    PRINT "Profile" ;;
+  *)            PRINT "$enable_production" ;;
 esac
 
 PRINT_N "                     Debug Mode"
-case "X-$DEBUG_PKG" in
-  X-|X-yes)     PRINT "Default" ;;
-  X-all)        PRINT "All" ;;
-  X-no|X-none)  PRINT "None" ;;
-  *)            PRINT "$DEBUG_PKG" ;;
-esac
+
+if test "X$DEBUG_PKG" = "X$all_packages"; then
+  PRINT "All"
+elif test -z $DEBUG_PKG; then
+  PRINT "None"
+else
+  PRINT $DEBUG_PKG
+fi
 
 PRINT_N "               Shared Libraries"
 IF_YES_NO "$enable_shared"
