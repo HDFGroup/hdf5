@@ -6,7 +6,32 @@
  
         CONTAINS
           
-           
+!----------------------------------------------------------------------
+! Name:		h5screate_simple_f 
+!
+! Purpose: 	Creates a new simple data space and opens it for access	.
+!
+! Inputs:  
+!		rank		- number of dimensions
+!		dims		- an array of the size of each dimension
+! Outputs:  
+!		space_id	- dataspace identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		maxdims		- an array of the maximum size of each 
+!				  dimension
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims) 
 
             IMPLICIT NONE
@@ -20,7 +45,20 @@
                                                     ! Array with the maximum 
                                                     ! dimension sizes 
             INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: f_maxdims
-            INTEGER, EXTERNAL :: h5screate_simple_c
+
+!            INTEGER, EXTERNAL :: h5screate_simple_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5screate_simple_c(rank, dims, maxdims, space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SCREATE_SIMPLE_C'::h5screate_simple_c
+              INTEGER, INTENT(IN) :: rank
+              INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
+              INTEGER(HSIZE_T), DIMENSION(:),INTENT(IN) :: maxdims(rank)
+              INTEGER(HID_T), INTENT(OUT) :: space_id
+              END FUNCTION h5screate_simple_c
+            END INTERFACE
             
             allocate (f_maxdims(rank), stat=hdferr)
             if (hdferr .NE. 0) then 
@@ -37,16 +75,75 @@
 
           END SUBROUTINE h5screate_simple_f
           
+!----------------------------------------------------------------------
+! Name:		h5sclose_f 
+!
+! Purpose: 	Releases and terminates access to a dataspace.	
+!
+! Inputs:  
+!		space_id	- identifier of dataspace to release
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
           SUBROUTINE h5sclose_f(space_id, hdferr)
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
-            INTEGER, EXTERNAL :: h5sclose_c
+
+!            INTEGER, EXTERNAL :: h5sclose_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sclose_c(space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SCLOSE_C'::h5sclose_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              END FUNCTION h5sclose_c
+            END INTERFACE
 
             hdferr = h5sclose_c(space_id)
 
           END SUBROUTINE h5sclose_f
+
+!----------------------------------------------------------------------
+! Name:		h5screate_f 
+!
+! Purpose: 	Creates a new dataspace of a specified type. 	
+!
+! Inputs:  
+!		classtype	- the type of the dataspace to be created
+! Outputs:  
+!		space_id	- dataspace identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5screate_f(classtype, space_id, hdferr) 
 
@@ -58,11 +155,47 @@
                                                  !  H5S_SIMPLE_F(1)
             INTEGER(HID_T), INTENT(OUT) :: space_id ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
-            INTEGER, EXTERNAL :: h5screate_c
+
+!            INTEGER, EXTERNAL :: h5screate_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5screate_c(classtype, space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SCREATE_C'::h5screate_c
+              INTEGER, INTENT(IN) :: classtype
+              INTEGER(HID_T), INTENT(OUT) :: space_id
+              END FUNCTION h5screate_c
+            END INTERFACE
+
             hdferr = h5screate_c(classtype, space_id)
 
           END SUBROUTINE h5screate_f
 
+!----------------------------------------------------------------------
+! Name:		h5scopy_f 
+!
+! Purpose: 	Creates an exact copy of a dataspace.	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		new_space_id	- identifier of dataspace's copy
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr) 
 
@@ -71,11 +204,48 @@
             INTEGER(HID_T), INTENT(OUT) :: new_space_id 
                                              ! Identifier of dataspace's copy 
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
-            INTEGER, EXTERNAL :: h5scopy_c
+
+!            INTEGER, EXTERNAL :: h5scopy_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5scopy_c(space_id, new_space_id)  
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SCOPY_C'::h5scopy_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HID_T), INTENT(OUT):: new_space_id
+              END FUNCTION h5scopy_c
+            END INTERFACE
+
             hdferr = h5scopy_c(space_id, new_space_id)
  
           END SUBROUTINE h5scopy_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_select_hyper_nblocks_f 
+!
+! Purpose: 	Get number of hyperslab blocks.	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		num_blocks	- number of hyperslab blocks in the current
+!				  hyperslab selection
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr) 
 
             IMPLICIT NONE
@@ -85,10 +255,49 @@
                                              !in the current dataspace 
                                              !selection 
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
-            INTEGER, EXTERNAL :: h5sget_select_hyper_nblocks_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_hyper_nblocks_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_hyper_nblocks_c (space_id, num_blocks)
+              USE H5GLOBAL
+!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_NBLOCKS_C'::h5sget_select_hyper_nblocks_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSSIZE_T), INTENT(OUT) :: num_blocks 
+              END FUNCTION h5sget_select_hyper_nblocks_c
+            END INTERFACE
+
             hdferr =  h5sget_select_hyper_nblocks_c (space_id, num_blocks)
  
           END SUBROUTINE h5sget_select_hyper_nblocks_f
+
+!----------------------------------------------------------------------
+! Name:		h5sget_select_hyper_blocklist_f 
+!
+! Purpose: 	Gets the list of hyperslab blocks currently selected. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		startblock	- hyperslab block to start with
+!		num_blocks	- number of blocks to get
+! Outputs:  
+!		buf		- buffer to hold block list
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr) 
@@ -105,12 +314,54 @@
                                              !List of hyperslab blocks selected
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
 
-            INTEGER, EXTERNAL :: h5sget_select_hyper_blocklist_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_hyper_blocklist_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_hyper_blocklist_c(space_id, startblock, &
+                                                              num_blocks, buf )
+              USE H5GLOBAL
+            !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_HYPER_BLOCKLIST_C'::h5sget_select_hyper_blocklist_c
+              INTEGER(HID_T), INTENT(IN) :: space_id 
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: startblock 
+              INTEGER(HSSIZE_T), INTENT(OUT) :: num_blocks 
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf 
+              END FUNCTION h5sget_select_hyper_blocklist_c
+            END INTERFACE
+
  
             hdferr =  h5sget_select_hyper_blocklist_c(space_id, startblock, &
                                                        num_blocks, buf )
  
           END SUBROUTINE h5sget_select_hyper_blocklist_f
+
+!----------------------------------------------------------------------
+! Name:		h5sget_select_bounds_f 
+!
+! Purpose: 	Gets the bounding box containing the current selection. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		
+! Outputs:  
+!		start		- starting coordinates of bounding box
+!		end		- ending coordinates of bounding box
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
 
@@ -123,11 +374,49 @@
                                              !i.e., the coordinates of the diagonally 
                                              !opposite corner 
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
-            INTEGER, EXTERNAL :: h5sget_select_bounds_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_bounds_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_bounds_c(space_id, start, end)
+              USE H5GLOBAL
+!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+              END FUNCTION h5sget_select_bounds_c
+            END INTERFACE
+
             hdferr =   h5sget_select_bounds_c(space_id, start, end)
  
           END SUBROUTINE h5sget_select_bounds_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_select_elem_npoints_f 
+!
+! Purpose: 	Gets the number of element points in the current selection	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		num_points	- number of element points in the current 
+!				  dataspace selection
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr) 
 
             IMPLICIT NONE
@@ -137,10 +426,49 @@
                                              !in the current dataspace 
                                              !selection 
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
-            INTEGER, EXTERNAL :: h5sget_select_elem_npoints_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_elem_npoints_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_elem_npoints_c (space_id, num_points)
+              USE H5GLOBAL
+!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_NPOINTS_C'::h5sget_select_elem_npoints_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSSIZE_T), INTENT(OUT) :: num_points 
+              END FUNCTION h5sget_select_elem_npoints_c
+            END INTERFACE
+
             hdferr =  h5sget_select_elem_npoints_c (space_id, num_points)
  
           END SUBROUTINE h5sget_select_elem_npoints_f
+
+!----------------------------------------------------------------------
+! Name:		h5sget_select_elem_pointlist_f 
+!
+! Purpose:	Gets the list of element points currently selected.  	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		startpoint	- element point to start with 
+!		num_points	- number of elemnt points to get
+! Outputs:  
+!		buf		- buffer with element points selected
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, &
                                                     num_points, buf, hdferr) 
@@ -153,11 +481,57 @@
             INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf 
                                              !List of element points selected
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
-            INTEGER, EXTERNAL :: h5sget_select_elem_pointlist_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_elem_pointlist_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_elem_pointlist_c(space_id, startpoint, &
+                                                              num_points, buf )
+              USE H5GLOBAL
+!MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_ELEM_POINTLIST_C'::h5sget_select_elem_pointlist_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSIZE_T),DIMENSION(*), INTENT(IN) :: startpoint 
+              INTEGER(HSIZE_T), INTENT(IN) :: num_points 
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf 
+              END FUNCTION h5sget_select_elem_pointlist_c
+            END INTERFACE
+
             hdferr =  h5sget_select_elem_pointlist_c(space_id, startpoint, &
                                                        num_points, buf )
           END SUBROUTINE h5sget_select_elem_pointlist_f
 
+!----------------------------------------------------------------------
+! Name:		h5sselect_elements_f 
+!
+! Purpose:	Selects elements to be included in the selection for 
+!		a dataspace 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		operator	- flag, valid values are:
+!				  H5S_SELECT_SET_F (0)
+!				  H5S_SELECT_OR_F (1)
+!		rank		- number of dataspace dimensions
+!		num_elements	- number of elements to be selected
+!		coord		- 2D (rank x num_elements) array with the 
+!				  elements coordinates
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5sselect_elements_f(space_id, operator, rank, & 
                                           num_elements, coord, hdferr) 
             IMPLICIT NONE
@@ -174,9 +548,24 @@
                                           ! of the selected elements
                                           ! coord(rank, num_elements)
             INTEGER, INTENT(OUT) :: hdferr     ! Error code
-            INTEGER, EXTERNAL :: h5sselect_elements_c
             INTEGER(HSSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
             INTEGER :: error, i,j
+
+!            INTEGER, EXTERNAL :: h5sselect_elements_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sselect_elements_c(space_id, operator,&
+                               num_elements,c_c_coord)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_ELEMENTS_C'::h5sselect_elements_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER, INTENT(IN) :: operator
+              INTEGER, INTENT(IN) :: num_elements
+              INTEGER(HSSIZE_T),DIMENSION(*) :: c_c_coord
+              END FUNCTION h5sselect_elements_c
+            END INTERFACE
+
             allocate(c_coord(rank, num_elements), stat = error)
             if (error.NE. 0) then
                 hdferr = -1
@@ -191,29 +580,122 @@
  
           END SUBROUTINE h5sselect_elements_f
 
+!----------------------------------------------------------------------
+! Name:		h5sselect_all_f 
+!
+! Purpose: 	Selects the entire dataspace. 	
+!
+! Inputs:  
+!		space_id	- identifier for the dataspace in which
+!				  selection being made
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sselect_all_f(space_id, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
-            INTEGER, EXTERNAL :: h5sselect_all_c
+
+!            INTEGER, EXTERNAL :: h5sselect_all_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sselect_all_c(space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_ALL_C'::h5sselect_all_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              END FUNCTION h5sselect_all_c
+            END INTERFACE
+
             hdferr = h5sselect_all_c(space_id)
 
           END SUBROUTINE h5sselect_all_f
 
+!----------------------------------------------------------------------
+! Name:		h5sselect_none_f 
+!
+! Purpose: 	Resets the selection region to include no elements. 	
+!
+! Inputs:  
+!		space_id	- the identifier for the dataspace in which 
+!                                 the selection is being reset. 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sselect_none_f(space_id, hdferr) 
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
-            INTEGER, EXTERNAL :: h5sselect_none_c
+
+!            INTEGER, EXTERNAL :: h5sselect_none_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sselect_none_c(space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_NONE_C'::h5sselect_none_c
+              INTEGER(HID_T), INTENT(IN) :: space_id 
+              END FUNCTION h5sselect_none_c
+            END INTERFACE
+
             hdferr = h5sselect_none_c(space_id)
 
           END SUBROUTINE h5sselect_none_f
 
-
-
+!----------------------------------------------------------------------
+! Name:		h5sselect_valid_f 
+!
+! Purpose:	Verifies that the selection is within the extent of 
+!		the dataspace.  	
+!
+! Inputs:  
+!		space_id	- identifier for the dataspace for which 
+!				  selection is verified
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5sselect_valid_f(space_id, status, hdferr) 
 
             IMPLICIT NONE
@@ -223,13 +705,49 @@
                                                     ! FALSE otherwise. 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
             INTEGER :: flag ! "TRUE/FALSE/ERROR" flag from C routine
-            INTEGER, EXTERNAL :: h5sselect_valid_c
+
+!            INTEGER, EXTERNAL :: h5sselect_valid_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sselect_valid_c(space_id, flag) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_VALID_C'::h5sselect_valid_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER :: flag
+              END FUNCTION h5sselect_valid_c 
+            END INTERFACE
+
             hdferr = h5sselect_valid_c(space_id, flag)
             status = .TRUE.
             if (flag .EQ. 0) status = .FALSE.
 
           END SUBROUTINE h5sselect_valid_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_simple_extent_npoints_f 
+!
+! Purpose: 	Determines the number of elements in a dataspace. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		npoints		- number of elements in the dataspace
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr) 
 
@@ -238,11 +756,47 @@
             INTEGER(HSIZE_T), INTENT(OUT) :: npoints  ! Number of elements in 
                                                        ! dataspace
             INTEGER, INTENT(OUT) :: hdferr             ! Error code
-            INTEGER, EXTERNAL :: h5sget_simple_extent_npoints_c
+
+!            INTEGER, EXTERNAL :: h5sget_simple_extent_npoints_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_simple_extent_npoints_c( space_id, npoints) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NPOINTS_C'::h5sget_simple_extent_npoints_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSIZE_T), INTENT(OUT) :: npoints
+              END FUNCTION h5sget_simple_extent_npoints_c
+            END INTERFACE
+
             hdferr = h5sget_simple_extent_npoints_c( space_id, npoints)
  
           END SUBROUTINE h5sget_simple_extent_npoints_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_select_npoints_f 
+!
+! Purpose: 	Determines the number of elements in a dataspace selection. 	
+!
+! Inputs: 
+!		space_id	- dataspace identifier 
+! Outputs:  
+!		npoints		- number of points in the dataspace selection
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr) 
 
@@ -251,11 +805,47 @@
             INTEGER(HSSIZE_T), INTENT(OUT) :: npoints  ! Number of elements in the
                                                        ! selection 
             INTEGER, INTENT(OUT) :: hdferr             ! Error code
-            INTEGER, EXTERNAL :: h5sget_select_npoints_c
+
+!            INTEGER, EXTERNAL :: h5sget_select_npoints_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_select_npoints_c(space_id, npoints) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SELECT_NPOINTS_C'::h5sget_select_npoints_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSSIZE_T), INTENT(OUT) :: npoints
+              END FUNCTION h5sget_select_npoints_c
+            END INTERFACE
+
             hdferr = h5sget_select_npoints_c(space_id, npoints)
  
           END SUBROUTINE h5sget_select_npoints_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_simple_extent_ndims_f 
+!
+! Purpose: 	Determines the dimensionality of a dataspace	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		rank		- number of dataspace dimensions
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr) 
 
@@ -263,11 +853,49 @@
             INTEGER(HID_T), INTENT(IN) :: space_id     ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: rank               ! Number of dimensions 
             INTEGER, INTENT(OUT) :: hdferr             ! Error code
-            INTEGER, EXTERNAL :: h5sget_simple_extent_ndims_c
+
+!            INTEGER, EXTERNAL :: h5sget_simple_extent_ndims_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_simple_extent_ndims_c(space_id, rank) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_NDIMS_C'::h5sget_simple_extent_ndims_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER, INTENT(OUT) :: rank
+              END FUNCTION h5sget_simple_extent_ndims_c
+            END INTERFACE
+
             hdferr = h5sget_simple_extent_ndims_c(space_id, rank)
  
           END SUBROUTINE h5sget_simple_extent_ndims_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_simple_extent_dims_f 
+!
+! Purpose: 	Retrieves dataspace dimension size and maximum size. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		dims		- array to store size of each dimension
+!		maxdims		- array to store maximum size of each 
+!				  dimension
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr) 
 
@@ -281,11 +909,51 @@
             INTEGER, INTENT(OUT) :: hdferr         ! Error code: -1 on failure,
                                                    ! number of dimensions on
                                                    ! on success
-            INTEGER, EXTERNAL :: h5sget_simple_extent_dims_c
+
+!            INTEGER, EXTERNAL :: h5sget_simple_extent_dims_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_simple_extent_dims_c(space_id, dims, maxdims)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_DIMS_C'::h5sget_simple_extent_dims_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: maxdims
+              END FUNCTION h5sget_simple_extent_dims_c
+            END INTERFACE
+
             hdferr = h5sget_simple_extent_dims_c(space_id, dims, maxdims)
  
           END SUBROUTINE h5sget_simple_extent_dims_f
 
+!----------------------------------------------------------------------
+! Name:		h5sget_simple_extent_type_f 
+!
+! Purpose: 	Determine the current class of a dataspace	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		classtype	- class type, possible values are:
+!				  H5S_NO_CLASS_F (-1)
+!				  H5S_SCALAR_F (0)
+!				  H5S_SIMPLE_F (1)
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr) 
 
@@ -297,11 +965,50 @@
                                                    !  H5S_SCALAR_F (0)
                                                    !  H5S_SIMPLE_F (1)
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
-            INTEGER, EXTERNAL :: h5sget_simple_extent_type_c
+
+!            INTEGER, EXTERNAL :: h5sget_simple_extent_type_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sget_simple_extent_type_c(space_id, classtype)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SGET_SIMPLE_EXTENT_TYPE_C'::h5sget_simple_extent_type_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER, INTENT(OUT) :: classtype
+              END FUNCTION h5sget_simple_extent_type_c
+            END INTERFACE
+
             hdferr = h5sget_simple_extent_type_c(space_id, classtype)
  
           END SUBROUTINE h5sget_simple_extent_type_f
 
+!----------------------------------------------------------------------
+! Name:		h5sset_extent_simple_f 
+!
+! Purpose: 	Sets or resets the size of an existing dataspace. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		rank		- dataspace number of dimensions
+!		current_size	- array with the new sizes of dimensions
+!		maximum_size	- array with the new maximum sizes of 
+!				  dimensions
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
                                             maximum_size, hdferr) 
@@ -317,12 +1024,52 @@
                                                    ! sizes of dimensions 
                                                    ! sizes  
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
-            INTEGER, EXTERNAL :: h5sset_extent_simple_c
+
+!            INTEGER, EXTERNAL :: h5sset_extent_simple_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sset_extent_simple_c(space_id, rank, &
+                               current_size,  maximum_size) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_SIMPLE_C'::h5sset_extent_simple_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER, INTENT(IN) :: rank
+              INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) :: current_size
+              INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) :: maximum_size
+              END FUNCTION h5sset_extent_simple_c
+            END INTERFACE
+
             hdferr = h5sset_extent_simple_c(space_id, rank, current_size, &
                                             maximum_size)
  
           END SUBROUTINE h5sset_extent_simple_f
 
+!----------------------------------------------------------------------
+! Name:		h5sis_simple_f 
+!
+! Purpose: 	Determines whether a dataspace is a simple dataspace. 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		status		- flag to indicate if dataspace
+!				  is simple or not 
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sis_simple_f(space_id, status, hdferr) 
 
@@ -333,13 +1080,50 @@
                                                 ! FALSE)  
             INTEGER, INTENT(OUT) :: hdferr      ! Error code
             INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C" 
-            INTEGER, EXTERNAL :: h5sis_simple_c
+
+!            INTEGER, EXTERNAL :: h5sis_simple_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sis_simple_c(space_id, flag) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SIS_SIMPLE_C'::h5sis_simple_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER :: flag
+              END FUNCTION h5sis_simple_c
+            END INTERFACE
+
             hdferr = h5sis_simple_c(space_id, flag)
             status = .TRUE.
             if (flag .EQ. 0) status = .FALSE.
  
           END SUBROUTINE h5sis_simple_f
 
+!----------------------------------------------------------------------
+! Name:		h5soffset_simple_f 
+!
+! Purpose:	Sets the offset of a simple dataspace.  	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		offset		- the offset at which to position the 
+!				  selection 
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr) 
 
             IMPLICIT NONE
@@ -348,11 +1132,49 @@
                                                    ! The offset at which to position
                                                    ! the selection  
             INTEGER, INTENT(OUT) :: hdferr         ! Error code
-            INTEGER, EXTERNAL :: h5soffset_simple_c
+
+!            INTEGER, EXTERNAL :: h5soffset_simple_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5soffset_simple_c(space_id, offset) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SOFFSET_SIMPLE_C'::h5soffset_simple_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) ::  offset
+              END FUNCTION h5soffset_simple_c
+            END INTERFACE
+
             hdferr = h5soffset_simple_c(space_id, offset)
  
           END SUBROUTINE h5soffset_simple_f
 
+!----------------------------------------------------------------------
+! Name:		h5sextent_copy_f 
+!
+! Purpose: 	Copies the extent of a dataspace. 	
+!
+! Inputs:  
+!		dest_space_id	- the identifier for the dataspace to which 
+!				  the extent is copied 
+!		source_space_id	- the identifier for the dataspace from 
+!				  which the extent is copied
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr) 
 
@@ -362,22 +1184,98 @@
             INTEGER(HID_T), INTENT(IN) :: source_space_id ! Identifier of source 
                                                           ! dataspace
             INTEGER, INTENT(OUT) :: hdferr                ! Error code
-            INTEGER, EXTERNAL :: h5sextent_copy_c
+
+!            INTEGER, EXTERNAL :: h5sextent_copy_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sextent_copy_c(dest_space_id, source_space_id)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SEXTENT_COPY_C'::h5sextent_copy_c
+              INTEGER(HID_T), INTENT(IN) :: dest_space_id
+              INTEGER(HID_T), INTENT(IN) :: source_space_id
+              END FUNCTION h5sextent_copy_c
+            END INTERFACE
+
             hdferr = h5sextent_copy_c(dest_space_id, source_space_id)
  
           END SUBROUTINE h5sextent_copy_f
 
-
+!----------------------------------------------------------------------
+! Name:		h5sset_extent_none_f 
+!
+! Purpose:	Removes the extent from a dataspace.  	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
           SUBROUTINE h5sset_extent_none_f(space_id, hdferr) 
 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
-            INTEGER, EXTERNAL :: h5sset_extent_none_c
+
+!            INTEGER, EXTERNAL :: h5sset_extent_none_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sset_extent_none_c(space_id) 
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSET_EXTENT_NONE_C'::h5sset_extent_none_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              END FUNCTION h5sset_extent_none_c
+            END INTERFACE
+
             hdferr = h5sset_extent_none_c(space_id)
  
           END SUBROUTINE h5sset_extent_none_f
 
+!----------------------------------------------------------------------
+! Name:		h5sselect_hyperslab_f 
+!
+! Purpose:	Selects a hyperslab region to add to the current selected 
+!		region 	
+!
+! Inputs:  
+!		space_id	- dataspace identifier
+!		operator	- flag, valid values are:
+!				  H5S_SELECT_SET_F (0)
+!				  H5S_SELECT_OR_F (1)
+!		start		- array with hyperslab offsets
+!		count		- number of blocks included in the 
+!				  hyperslab
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!		stride		- array with hyperslab strides
+!		block		- array with hyperslab block sizes 
+!
+! Programmer:	Elena Pourmal
+!		August 12, 1999	
+!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 6, 2001 
+!
+! Comment:		
+!----------------------------------------------------------------------
 
           SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count, &
                                            hdferr, stride, block) 
@@ -400,9 +1298,26 @@
                                           ! Sizes of element block
             INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_block 
             INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_stride
-            INTEGER, EXTERNAL :: h5sselect_hyperslab_c
             INTEGER :: rank
             INTEGER :: error1, error2 
+
+!            INTEGER, EXTERNAL :: h5sselect_hyperslab_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5sselect_hyperslab_c(space_id, operator, &
+                               start, count, stride, block)
+              USE H5GLOBAL
+              !MS$ATTRIBUTES C,reference,alias:'_H5SSELECT_HYPERSLAB_C'::h5sselect_hyperslab_c
+              INTEGER(HID_T), INTENT(IN) :: space_id
+              INTEGER, INTENT(IN) :: operator
+              INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) :: start
+              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
+              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
+              INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block 
+              END FUNCTION h5sselect_hyperslab_c
+            END INTERFACE
+
             if (present(stride).and. present(block)) then
             hdferr = h5sselect_hyperslab_c(space_id, operator, start, count, &
                                            stride, block)
