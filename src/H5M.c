@@ -279,11 +279,14 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Maccess(hatom_t oid)
 {
-    group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
+    group_t 	   group;
     intn i;         /* local counting variable */
     hatom_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Maccess, H5M_init_interface, FAIL);
+
+    /* Atom group for incoming object */
+    group = H5Aatom_group (oid);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
