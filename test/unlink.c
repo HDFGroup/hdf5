@@ -299,7 +299,7 @@ static int
 test_new_move(void)
 {
     hid_t 	fapl, file_a, file_b;
-    hid_t	grp1, grp2, grp_move, moved_grp;
+    hid_t	grp_1, grp_2, grp_move, moved_grp;
     char 	filename[1024];
 
     TESTING("new move");
@@ -314,14 +314,14 @@ test_new_move(void)
         goto error;
 
     /* Create groups in first file */
-    if((grp1=H5Gcreate(file_a, "group1", 0))<0) goto error;
-    if((grp2=H5Gcreate(file_a, "group2", 0))<0) goto error;
-    if((grp_move=H5Gcreate(grp1, "group_move", 0))<0) goto error;
+    if((grp_1=H5Gcreate(file_a, "group1", 0))<0) goto error;
+    if((grp_2=H5Gcreate(file_a, "group2", 0))<0) goto error;
+    if((grp_move=H5Gcreate(grp_1, "group_move", 0))<0) goto error;
 
     /* Create hard and soft links. */
-    if(H5Glink2(grp1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0) 
+    if(H5Glink2(grp_1, "group_move", H5G_LINK_HARD, H5G_SAME_LOC, "hard")<0) 
 	goto error;
-    if(H5Glink2(grp1, "/group1/group_move", H5G_LINK_SOFT, grp2, "soft")<0)
+    if(H5Glink2(grp_1, "/group1/group_move", H5G_LINK_SOFT, grp_2, "soft")<0)
 	goto error;
 
     /* Move a group within the file.  Both of source and destination use
@@ -333,20 +333,20 @@ test_new_move(void)
 
     /* Move a group across files.  Should fail. */
     H5E_BEGIN_TRY {
-        if(H5Gmove2(grp1, "group_move", file_b, "group_new_name")!=FAIL)
+        if(H5Gmove2(grp_1, "group_move", file_b, "group_new_name")!=FAIL)
 	    goto error;
     } H5E_END_TRY;
     
     /* Move a group across groups in the same file. */
-    if(H5Gmove2(grp1, "group_move", grp2, "group_new_name")<0)
+    if(H5Gmove2(grp_1, "group_move", grp_2, "group_new_name")<0)
 	goto error;
 
     /* Open the group just moved to the new location. */
-    if((moved_grp = H5Gopen(grp2, "group_new_name"))<0) 
+    if((moved_grp = H5Gopen(grp_2, "group_new_name"))<0) 
 	goto error;
 
-    H5Gclose(grp1);
-    H5Gclose(grp2);
+    H5Gclose(grp_1);
+    H5Gclose(grp_2);
     H5Gclose(grp_move);
     H5Gclose(moved_grp);
     H5Fclose(file_a);
@@ -357,8 +357,8 @@ test_new_move(void)
 
   error:
     H5E_BEGIN_TRY {
- 	H5Gclose(grp1);
-	H5Gclose(grp2);
+ 	H5Gclose(grp_1);
+	H5Gclose(grp_2);
 	H5Gclose(grp_move);
         H5Gclose(moved_grp);
 	H5Fclose(file_a);
@@ -388,7 +388,7 @@ static int
 check_new_move(void)
 {
     hid_t 	fapl, file;
-    H5G_stat_t	sb_hard1, sb_hard2, sb_soft;
+    H5G_stat_t	sb_hard1, sb_hard2;
     char 	filename[1024];
     char 	linkval[1024];
 

@@ -361,7 +361,7 @@ cklinks(hid_t fapl)
 static int
 ck_new_links(hid_t fapl)
 {
-    hid_t 		file, dset, grp2;
+    hid_t 		file;
     H5G_stat_t		sb_dset, sb_hard1, sb_hard2, sb_soft1, sb_soft2;
     char 		filename[1024];
     char 		linkval[1024];
