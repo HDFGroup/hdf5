@@ -56,8 +56,9 @@
 #  undef H5F_DEBUG
 #endif
 
-/* Maximum size of boot-block buffer */
-#define H5F_BOOTBLOCK_SIZE  1024
+/* Maximum size of super-block buffer */
+#define H5F_SUPERBLOCK_SIZE  256
+#define H5F_DRVINFOBLOCK_SIZE  1024
 
 /* Define the HDF5 file signature */
 #define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
@@ -118,11 +119,11 @@ typedef struct H5F_file_t {
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
     unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
 
-    haddr_t	boot_addr;	/* Absolute address of boot block	*/
+    haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	driver_addr;	/* File driver information block address*/
-    unsigned	boot_chksum;	/* Boot block checksum                  */
+    unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
     struct H5AC_t *cache;	/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
@@ -217,7 +218,7 @@ H5_DLL herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
 H5_DLL herr_t H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, int ndims);
 
-/* Functions that operate on contiguous storage wrt boot block */
+/* Functions that operate on contiguous storage wrt superblock */
 H5_DLL ssize_t H5F_contig_readvv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],

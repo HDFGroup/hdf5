@@ -81,7 +81,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
 
     if(H5P_get(plist, H5F_CRT_USER_BLOCK_NAME, &userblock_size)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get user block size");
-    if(H5P_get(plist, H5F_CRT_BOOT_VERS_NAME, &super_vers)<0)
+    if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
     if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, &freespace_vers)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get super block version");
@@ -103,7 +103,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
 	      "File open reference count:",
 	      (unsigned) (f->shared->nrefs));
     HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Address of super block:", f->shared->boot_addr);
+	      "Address of super block:", f->shared->super_addr);
     HDfprintf(stream, "%*s%-*s %lu bytes\n", indent, "", fwidth,
 	      "Size of user block:", (unsigned long) userblock_size);
 

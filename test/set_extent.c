@@ -33,6 +33,7 @@
  */
 
 #define RANK 2
+#define ISTORE_IK       64
 
 
 int main( void )
@@ -42,6 +43,7 @@ int main( void )
     hid_t   dataset_id=(-1);
     hid_t   space_id=(-1);  
     hid_t   plist_id=(-1);
+    hid_t   fcpl;               /* File creation property list */
     hsize_t dims[RANK] = { 90, 90 };
     hsize_t dims_new[RANK] = { 70, 70 };
     hsize_t dims_chunk[RANK] = { 20, 20 };
@@ -280,10 +282,17 @@ int main( void )
     *-------------------------------------------------------------------------
     */
 
+    /* Create a file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE))<0) goto out;
 
-    /* Create a new file using default properties. */
-    if ((file_id = H5Fcreate( "set_extent_read.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT ))<0) goto out;
+    /* Set non-default indexed storage B-tree internal 'K' value */
+    if(H5Pset_istore_k(fcpl,ISTORE_IK)<0) goto out;
 
+    /* Create a new file using properties. */
+    if ((file_id = H5Fcreate( "set_extent_read.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT ))<0) goto out;
+
+    /* Close property list */
+    if(H5Pclose(fcpl)<0) goto out;
 
     TESTING("extend dataset read with fill value");
 
