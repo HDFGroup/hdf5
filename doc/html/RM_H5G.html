@@ -469,7 +469,7 @@ END SUBROUTINE h5gget_linkval_f
 <dt><strong>Description:</strong>
   <dd><code>H5Gget_num_objs</code> returns number of objects in a group.
       Group is specified by its identifier <code>loc_id</code>. 
-      If file identifier is passed in, then  number of objects in the 
+      If a file identifier is passed in, then the number of objects in the 
       root group is returned.
 <dt><strong>Parameters:</strong>
   <dl>
@@ -551,7 +551,7 @@ SUBROUTINE
                   } H5O_stat_t
         </pre>
         The <code>fileno</code> and <code>objno</code> fields contain 
-        four values which uniquely itentify an object among those 
+        four values which uniquely identify an object among those 
         HDF5 files which are open: if all four values are the same 
         between two objects, then the two objects are the same 
         (provided both files are still open).  
@@ -659,7 +659,7 @@ SUBROUTINE
       the objects in the group.
       The value of <code>idx</code> is any nonnegative number less than 
       the total number of objects in the group, which is returned by the
-      functioin <code>H5Gget_num_objects</code>. 
+      function <code>H5Gget_num_objs</code>. 
       Note that this is a transient index; an object may have a 
       different index each time a group is opened.
       <p>
@@ -1428,7 +1428,7 @@ And in this document, the
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 29 October 2003");
+document.writeln("Last modified: 30 October 2003");
 -->
 </SCRIPT>
  
