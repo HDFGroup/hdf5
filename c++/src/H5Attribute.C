@@ -1,0 +1,122 @@
+#include <string>
+
+#include "H5Include.h"
+#include "H5Exception.h"
+#include "H5RefCounter.h"
+#include "H5IdComponent.h"
+#include "H5Idtemplates.h"
+#include "H5PropList.h"
+#include "H5Object.h"
+#include "H5AbstractDs.h"
+#include "H5Attribute.h"
+#include "H5DataType.h"
+#include "H5DataSpace.h"
+
+#ifndef H5_NO_NAMESPACE
+namespace H5 {
+#endif
+
+// Copy constructor: makes a copy of the original object; simply invokes
+// the base class copy constructor.
+Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {};
+
+// Creates a copy of an existing attribute using an id
+Attribute::Attribute( const hid_t attr_id ) : AbstractDs( attr_id ) {}
+
+// Writes data to this attribute.
+void Attribute::write( const DataType& mem_type, void *buf ) const
+{
+   herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException();
+   }
+}
+
+// Reads data from this attribute.
+void Attribute::read( const DataType& mem_type, void *buf ) const
+{
+   herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException();
+   }
+}
+
+// Gets a copy of the dataspace for this attribute.
+DataSpace Attribute::getSpace() const
+{
+   // Calls C function H5Aget_space to get the id of the dataspace
+   hid_t dataspace_id = H5Aget_space( id );
+
+   // If the dataspace id is valid, create and return the DataSpace object
+   if( dataspace_id > 0 )
+   {
+      DataSpace dataspace( dataspace_id );
+      return( dataspace );
+   }
+   else
+   {
+      throw AttributeIException();
+   }
+}
+
+// This private member function calls the C API to get the generic datatype
+// of the datatype that is used by this attribute.  This function is used
+// by the overloaded functions getDataType defined in AbstractDs for the 
+// generic datatype and specific sub-types.
+hid_t Attribute::p_getType() const
+{
+   hid_t type_id = H5Aget_type( id );
+   if( type_id > 0 )
+      return( type_id );
+   else
+   {
+      throw AttributeIException();
+   }
+}
+
+// Gets the name of this attribute.
+string Attribute::getName( size_t buf_size ) const
+{
+   char* name_C = new char[buf_size+1];  // temporary C-string for C API
+
+   // Calls C routine H5Aget_name to get the name of the attribute
+   herr_t name_size = H5Aget_name( id, buf_size, name_C );
+
+   // If H5Aget_name returns a negative value, raise an exception,
+   if( name_size < 0 )
+   {
+      throw AttributeIException();
+   }
+   // otherwise, create the string to hold the attribute name and return it
+   string name = string( name_C );
+   delete name_C;
+   return( name );
+}
+
+// This private function calls the C API H5Aclose to close this attribute.
+// Used by the IdComponent::reset.
+void Attribute::p_close() const
+{
+   herr_t ret_value = H5Aclose( id );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException();
+   }
+}
+
+// The destructor of this instance calls IdComponent::reset to
+// reset its identifier - no longer true
+// Older compilers (baldric) don't support template member functions
+// and IdComponent::reset is one; so at this time, the resetId is not
+// a member function so it can be template to work around that problem.
+Attribute::~Attribute()
+{
+   // The attribute id will be closed properly
+   resetIdComponent( this );
+}
+
+#ifndef H5_NO_NAMESPACE
+} // end namespace
+#endif
