@@ -19,6 +19,7 @@
 ./bin/buildhdf5
 ./bin/checkapi				_DO_NOT_DISTRIBUTE_
 ./bin/checkposix			_DO_NOT_DISTRIBUTE_
+./bin/chkconfigure                      _DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright			_DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
 ./bin/config.guess
