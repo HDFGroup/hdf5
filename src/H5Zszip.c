@@ -168,6 +168,13 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
             dtype_precision=dtype_size;
         }
     }
+    if (dtype_precision>24) {
+	if (dtype_precision <= 32) {
+		dtype_precision=32;
+	} else if ( dtype_precision <= 64) {
+		dtype_precision=64;
+	}
+    }
 
     /* Set "local" parameter for this dataset's "bits-per-pixel" */
     cd_values[H5Z_SZIP_PARM_BPP]=dtype_precision;
