@@ -465,7 +465,7 @@ H5S_point_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 #endif
     } /* end while */
 
-    FUNC_LEAVE (num_written);
+    FUNC_LEAVE (num_written>0 ? SUCCEED : FAIL);
 }   /* H5S_point_fscat() */
 
 /*-------------------------------------------------------------------------

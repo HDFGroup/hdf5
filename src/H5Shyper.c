@@ -1136,7 +1136,7 @@ H5S_hyper_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 #ifdef QAK
     printf("%s: check 2.0\n", FUNC);
 #endif /* QAK */
-    FUNC_LEAVE (num_written);
+    FUNC_LEAVE (num_written >0 ? SUCCEED : FAIL);
 } /* H5S_hyper_fscat() */
 
 /*-------------------------------------------------------------------------
@@ -1654,7 +1654,7 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
     H5MM_xfree(lo_bounds);
     H5MM_xfree(hi_bounds);
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (num_read>0 ? SUCCEED : FAIL);
 }   /* H5S_hyper_mscat() */
 
 /*--------------------------------------------------------------------------
@@ -1681,7 +1681,7 @@ H5S_hyper_mscat (const void *_tconv_buf, size_t elmt_size,
 static intn
 H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
 {
-    intn lo, mid, hi;       /* Indices for the search */
+    size_t lo, mid, hi;       /* Indices for the search */
     intn ret_value=-1;      /* Return value index */
 
     FUNC_ENTER (H5S_hyper_bsearch, FAIL);
@@ -1693,7 +1693,7 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
     if(size<barr[0].bound)
         ret_value=0;
     else if(size>barr[count-1].bound)
-        ret_value=count;
+        ret_value=(intn)count;
     else {      /* must be in the middle somewhere, go get it */
         lo=0;
         hi=count-1;
@@ -1703,7 +1703,7 @@ H5S_hyper_bsearch(hssize_t size, H5S_hyper_bound_t *barr, size_t count)
 
             /* check for bounds only seperated by one element */
             if((hi-lo)<=1) {
-                ret_value=hi;
+                ret_value=(intn)hi;
                 break;
             } else {    /* Divide and conquer! */
                 if(size>barr[mid].bound)

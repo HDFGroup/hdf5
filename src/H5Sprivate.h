@@ -78,7 +78,7 @@ typedef struct H5S_hyper_node_tag {
     hssize_t *end;      /* Pointer to a corner of a hyperslab furthest from the origin */
     struct {
         uintn cached;   /* Flag to indicate that the block is cached (during I/O only) */
-        uintn size;     /* Size of cached block (in elements) */
+        size_t size;     /* Size of cached block (in elements) */
         uintn left;     /* Elements left to access in block */
         hid_t block_id; /* Temporary buffer ID */
         uint8_t *block; /* Pointer into temporary buffer for cache */
