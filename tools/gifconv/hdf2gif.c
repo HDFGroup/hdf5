@@ -52,9 +52,11 @@ usage(void)
     printf("(maximum of 50 images).\n");
 }
 
+FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
-    FILE *fpGif;
+    
+
     hsize_t dim_sizes[2];
     BYTE *Image;
 
@@ -299,9 +301,9 @@ int main(int argc , char **argv)
         if (idx == 0) {
             /* Write out the GIF header and logical screen descriptor */
             if (n_images > 1) {
-                fwrite("GIF89a", 1, 6, fpGif);  /* the GIF magic number */
+                fwrite("GIF89a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
             } else {
-                fwrite("GIF87a", 1, 6, fpGif);  /* the GIF magic number */
+                fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
             }
 
             putword(RWidth, fpGif);             /* screen descriptor */
