@@ -344,7 +344,6 @@ RUNSNAPTEST()
 		done
 		eval $envname="'$envalue'"
 		export $envname
-		export
 		;;
 	    skip)
 		# skip this test
