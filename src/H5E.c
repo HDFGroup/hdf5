@@ -279,7 +279,7 @@ H5E_get_stack(void)
         /* no associated value with current thread - create one */
         estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
         estack->nused = 0;
-        estack->func = H5Eprint;
+        estack->func = (H5E_auto_t)H5Eprint;
         estack->auto_data = NULL;
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
@@ -2190,7 +2190,6 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
 #ifdef H5_WANT_H5_V1_6_COMPAT
 
 /*-------------------------------------------------------------------------
- * Function:	H5Eget_auto
  *
  * Purpose:	This function is for backward compatbility.
  *              Returns the current settings for the automatic error stack
@@ -2227,8 +2226,8 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
 done:
     FUNC_LEAVE_API(ret_value)
 }
-
 #else
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Eget_auto
@@ -2490,7 +2489,11 @@ H5E_dump_api_stack(int is_api)
 
         assert(estack);
         if (estack->func)
+#ifdef H5_WANT_H5_V1_6_COMPAT
+            (void)((estack->func)(estack->auto_data));
+#else /*H5_WANT_H5_V1_6_COMPAT*/
             (void)((estack->func)(H5E_DEFAULT, estack->auto_data));
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     } /* end if */
 
 done:

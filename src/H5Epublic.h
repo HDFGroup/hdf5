@@ -158,7 +158,11 @@ extern "C" {
 
 /* Error stack traversal callback function pointers */
 typedef herr_t (*H5E_walk_t)(unsigned n, const H5E_error_t *err_desc, void *client_data);
+#ifdef H5_WANT_H5_V1_6_COMPAT
+typedef herr_t (*H5E_auto_t)(void *client_data);
+#else
 typedef herr_t (*H5E_auto_t)(hid_t estack, void *client_data);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /* Public API functions */
 H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
