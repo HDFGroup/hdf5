@@ -639,6 +639,7 @@
 ./c++/config/linux-gnulibc2
 ./c++/config/rs6000-ibm-aix4.x
 ./c++/config/solaris2.x
+./c++/config/irix6.x
 
 ./c++/examples/Dependencies
 ./c++/examples/Attributes.h5
