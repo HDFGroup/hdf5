@@ -82,6 +82,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite
+          when not writing data ("none" selection or hyperslab or point
+          selection with no elements defined).  QAK - 2004/07/20
         - Calling H5Gcreate() on "/" or "." throws an error instead of
           failing quietly. JML - 2004/07/19
         - Fixed bug where setting file address size to be very small could
