@@ -249,7 +249,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	    H5_timer_end(&timer_total, &timer);
 	    /*
 	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 0.0 compiler.
+	     * for the Win32 version 5.0 compiler.
 	     * 1998-11-06 ptl
 	     */
 	    H5_bandwidth(s,
@@ -269,7 +269,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	H5_timer_end(&timer_total, &timer);
 	/*
 	 * The extra cast in the following statement is a bug workaround for
-	 * the Win32 version 0.0 compiler.
+	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
 	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
@@ -383,7 +383,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	    H5_timer_end(&timer_total, &timer);
 	    /*
 	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 0.0 compiler.
+	     * for the Win32 version 5.0 compiler.
 	     * 1998-11-06 ptl
 	     */
 	    H5_bandwidth(s,
@@ -411,7 +411,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	H5_timer_end(&timer_total, &timer);
 	/*
 	 * The extra cast in the following statement is a bug workaround for
-	 * the Win32 version 0.0 compiler.
+	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
 	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
@@ -547,7 +547,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	    H5_timer_end(&timer_total, &timer);
 	    /*
 	     * The extra cast in the following statement is a bug workaround
-	     * for the Win32 version 0.0 compiler.
+	     * for the Win32 version 5.0 compiler.
 	     * 1998-11-06 ptl
 	     */
 	    H5_bandwidth(s,
@@ -575,7 +575,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	H5_timer_end(&timer_total, &timer);
 	/*
 	 * The extra cast in the following statement is a bug workaround for
-	 * the Win32 version 0.0 compiler.
+	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
 	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
@@ -587,7 +587,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
     printf("   -------- -------- -------- ----------\n");
     /*
      * The extra cast in the following statement is a bug workaround for the
-     * Win32 version 0.0 compiler.
+     * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
     H5_bandwidth(s, (double)((hssize_t)read_nelmts)*sizeof(C_MTYPE),

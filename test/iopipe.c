@@ -186,7 +186,7 @@ main (void)
 
     /*
      * The extra cast in the following statement is a bug workaround for the
-     * Win32 version 0.0 compiler.
+     * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
     printf ("I/O request size is %1.1fMB\n",
