@@ -153,6 +153,8 @@ struct H5FD_t {
     const H5FD_class_t	*cls;		/*constant class info		*/
 
     unsigned long feature_flags;  /* VFL Driver feature Flags */
+    hsize_t     threshold;      /* Threshold for alignment              */
+    hsize_t     alignment;      /* Allocation alignment                 */
 
     /* Metadata aggregation fields */
     hsize_t def_meta_block_size;  /* Metadata allocation block size (if aggregating metadata) */
