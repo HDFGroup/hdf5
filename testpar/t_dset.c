@@ -155,7 +155,6 @@ void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t 
  */
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], DATATYPE *dataset, DATATYPE *original)
 {
-#define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
     DATATYPE *dataptr = dataset;
     DATATYPE *originptr = original;
 
@@ -246,12 +245,9 @@ dataset_writeInd(char *filename)
     /* ----------------------------------------
      * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
      * ---------------------------------------*/
-    /* setup file access template with parallel IO access. */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-    VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);
-    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -391,14 +387,9 @@ dataset_readInd(char *filename)
     data_origin1 = (DATATYPE *)malloc(dim0*dim1*sizeof(DATATYPE));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
-
     /* setup file access template */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
     VRFY((acc_tpl >= 0), "");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "");
-
 
     /* open the file collectively */
     fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
@@ -520,12 +511,9 @@ dataset_writeAll(char *filename)
     /* -------------------
      * START AN HDF5 FILE 
      * -------------------*/
-    /* setup file access template with parallel IO access. */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-    VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -747,12 +735,9 @@ dataset_readAll(char *filename)
     /* -------------------
      * OPEN AN HDF5 FILE 
      * -------------------*/
-    /* setup file access template with parallel IO access. */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-    VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
     fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
@@ -979,12 +964,9 @@ extend_writeInd(char *filename)
     /* -------------------
      * START AN HDF5 FILE 
      * -------------------*/
-    /* setup file access template with parallel IO access. */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
-    VRFY((acc_tpl >= 0), "H5Pcreate access succeeded");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "H5Pset_fapl_mpio succeeded");
+    /* setup file access template */
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
+    VRFY((acc_tpl >= 0), "");
 
     /* create the file collectively */
     fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -1023,6 +1005,7 @@ extend_writeInd(char *filename)
 
     /* release resource */
     H5Sclose(sid);
+    H5Pclose(dataset_pl);
 
 
 
@@ -1186,11 +1169,8 @@ extend_readInd(char *filename)
      * OPEN AN HDF5 FILE 
      * -------------------*/
     /* setup file access template */
-    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    acc_tpl = create_faccess_plist(comm, info, facc_type);
     VRFY((acc_tpl >= 0), "");
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(acc_tpl, comm, info);     
-    VRFY((ret >= 0), "");
 
     /* open the file collectively */
     fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);

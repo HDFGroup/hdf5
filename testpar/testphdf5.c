@@ -20,6 +20,7 @@ int verbose = 0;			/* verbose, default as no. */
 int ndatasets = 300;			/* number of datasets to create*/
 int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
+int facc_type = FACC_MPIO;		/*Test file access type */
 
 herr_t (*old_func)(void*);		/* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
@@ -88,66 +89,6 @@ int MPI_Init(int *argc, char ***argv)
 }
 #endif	/* USE_PAUSE */
 
-#if 0		/* temp. disabled */
-int MPI_Type_commit(MPI_Datatype *mpi_type)
-{
-    int ret_code;
-    ret_code=PMPI_Type_commit(mpi_type);
-    printf("PMPI_Type_commit ret_code=%d, mpi_type=%d\n", ret_code, *mpi_type);
-    return (ret_code);
-}
-
-int MPI_Type_free(MPI_Datatype *mpi_type)
-{
-    int ret_code;
-    printf("PMPI_Type_free mpi_type=%d, ", *mpi_type);
-    ret_code=PMPI_Type_free(mpi_type);
-    printf("ret_code=%d\n", ret_code);
-    return (ret_code);
-}
-
-int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype *newtype)
-{
-    int ret_code;
-    ret_code=PMPI_Type_contiguous(count, oldtype, newtype);
-    printf("PMPI_Type_contiguous ret_code=%d, count=%d, old_type=%d, new_type=%d\n",
-	    ret_code, count, oldtype, *newtype);
-    return (ret_code);
-}
-
-int MPI_Type_vector(int count, int blocklength, int stride, MPI_Datatype oldtype, MPI_Datatype *newtype) 
-{
-    int ret_code;
-    ret_code=PMPI_Type_vector(count, blocklength, stride, oldtype, newtype);
-    printf("PMPI_Type_vector ret_code=%d, count=%d, blocklength=%d, stride=%d, "
-	"old_type=%d, new_type=%d\n",
-	    ret_code, count, blocklength, stride, oldtype, *newtype);
-    return (ret_code);
-}
-
-int MPI_Type_struct(int count, int *array_of_blocklengths, MPI_Aint *array_of_displacements, MPI_Datatype *array_of_types, MPI_Datatype *newtype)
-{
-    int ret_code;
-    ret_code=PMPI_Type_struct(count, array_of_blocklengths, array_of_displacements, array_of_types, newtype);
-    printf("PMPI_Type_struct ret_code=%d, new_type=%d\n",
-	    ret_code, *newtype);
-    return (ret_code);
-}
-
-#ifdef HAVE_MPI2
-int MPI_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, MPI_Datatype *newtype)
-{
-    int ret_code;
-    ret_code=PMPI_Type_create_resized(oldtype, lb, extent, newtype);
-    printf("PMPI_Type_create_resized ret_code=%d, lb=%d, extent=%d, old_type=%d, new_type=%d\n",
-	    ret_code, lb, extent, oldtype, *newtype);
-    return (ret_code);
-}
-#endif
-
-#endif
-
-
 
 /*
  * Show command usage
@@ -165,6 +106,7 @@ usage(void)
         "\tset number of groups for the multiple group test\n");  
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
+    printf("\t-s\t\tuse Split-file together with MPIO\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions\n");
     printf("\tDefault: do write then read with dimensions %dx%d\n",
@@ -220,6 +162,11 @@ parse_options(int argc, char **argv)
 				return(1);
 			    }
 			    paraprefix = *argv;
+			    break;
+		case 's':   /* Use the split-file driver with MPIO access */
+			    /* Can use $HDF5_METAPREFIX to define the */
+			    /* meta-file-prefix. */
+			    facc_type = FACC_MPIO | FACC_SPLIT;
 			    break;
 		case 'd':   /* dimensizes */
 			    if (--argc < 2){
@@ -290,6 +237,56 @@ parse_options(int argc, char **argv)
     }
 
     return(0);
+}
+
+
+/*
+ * Create the appropriate File access property list
+ */
+hid_t
+create_faccess_plist(MPI_Comm comm, MPI_Info info, int facc_type )
+{
+    hid_t ret_pl = -1;
+    herr_t ret;                 /* generic return value */
+    int mpi_rank;		/* mpi variables */
+
+    /* need the rank for error checking macros */
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    ret_pl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((ret_pl >= 0), "H5P_FILE_ACCESS");
+
+    if (facc_type == FACC_DEFAULT)
+	return (ret_pl);
+
+    if (facc_type == FACC_MPIO){
+	/* set Parallel access with communicator */
+	ret = H5Pset_fapl_mpio(ret_pl, comm, info);     
+	VRFY((ret >= 0), "");
+	return(ret_pl);
+    }
+
+    if (facc_type == (FACC_MPIO | FACC_SPLIT)){
+	hid_t mpio_pl;
+
+	mpio_pl = H5Pcreate (H5P_FILE_ACCESS);
+	VRFY((mpio_pl >= 0), "");
+	/* set Parallel access with communicator */
+	ret = H5Pset_fapl_mpio(mpio_pl, comm, info);     
+	VRFY((ret >= 0), "");
+
+	/* setup file access template */
+	ret_pl = H5Pcreate (H5P_FILE_ACCESS);
+	VRFY((ret_pl >= 0), "");
+	/* set Parallel access with communicator */
+	ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
+	VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
+	H5Pclose(mpio_pl);
+	return(ret_pl);
+    }
+
+    /* unknown file access types */
+    return (ret_pl);
 }
 
 
