@@ -203,6 +203,12 @@ precision (detected_t *d)
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
 									      \
+   /* Completely initialize temporary variables, in case the bits used in */  \
+   /* the type take less space than the number of bits used to store the type */  \
+   memset(&_v3,0,sizeof(TYPE));                                               \
+   memset(&_v2,0,sizeof(TYPE));                                               \
+   memset(&_v1,0,sizeof(TYPE));                                               \
+									      \
    /* Byte Order */							      \
    for (_i=0,_v1=0.0,_v2=1.0; _i<(signed)sizeof(TYPE); _i++) {		      \
       _v3 = _v1; _v1 += _v2; _v2 /= 256.0;				      \
