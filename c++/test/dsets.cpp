@@ -21,7 +21,6 @@
      These routines are in the test directory of the C library:
         h5_reset() -- in h5test.c, resets the library by closing it
         h5_fileaccess() -- in h5test.c, returns a file access template
-        h5_fixname() -- in h5test.c, create a file name from a file base name
         h5_cleanup() -- in h5test.c, cleanup temporary test files
 
  ***************************************************************************/
@@ -78,72 +77,64 @@ test_create( H5File& file)
 {
    TESTING("create, open, close");
 
+    // Setting this to NULL for cleaning up in failure situations
+    DataSet *dataset = NULL;
     try {
-	/* Create the data space */
+	// Create the data space
 	hsize_t     dims[2];
 	dims[0] = 256;
 	dims[1] = 512;
 	DataSpace space (2, dims, NULL);
 
-	/*
-	* Create a dataset using the default dataset creation properties.	
-	* We're not sure what they are, so we won't check.
-	*/
+	// Create a dataset using the default dataset creation properties.	
+	// We're not sure what they are, so we won't check.
 	DataSet *dataset = new DataSet (file.createDataSet 
 		(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 
-	/* Close the dataset */
+	// Close the dataset
 	delete dataset;
+	dataset = NULL;
 
-	/* Add a comment to the dataset */
+	// Add a comment to the dataset
 	file.setComment (DSET_DEFAULT_NAME, "This is a dataset");
 
-	/*
-	* Try creating a dataset that already exists.  This should fail since a
-	* dataset can only be created once.  If an exception is not thrown
-	* for this action by createDataSet, then display failure information
-	* and jump to label error: to return.
-	*/
+        // Try creating a dataset that already exists.  This should fail since a
+        // dataset can only be created once.  If an exception is not thrown
+        // for this action by createDataSet, then display failure information
+        // and throw an exception.
 	try {
 	    dataset = new DataSet (file.createDataSet 
 			(DSET_DEFAULT_NAME, PredType::NATIVE_DOUBLE, space));
 	    // continuation here, that means no exception has been thrown
-	    H5_FAILED();
-	    cerr << "    Library allowed overwrite of existing dataset." << endl;
-	    goto error;
+            throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
         }
         catch (FileIException E ) // catching invalid creating dataset
-        {
-	    // Exception is expected.  Do nothing here.
-        }
-	/*
-	* Open the dataset we created above and then close it.  This is how
-	* existing datasets are accessed.
-	*/
+        {} // do nothing, exception expected
+
+	// Open the dataset we created above and then close it.  This is how
+	// existing datasets are accessed.
 	dataset = new DataSet (file.openDataSet (DSET_DEFAULT_NAME));
+
+	// Close the dataset when accessing is completed
 	delete dataset;
-    
-	/*
-	* Try opening a non-existent dataset.  This should fail so if an
-	* exception is not thrown for this action by openDataSet, then 
-	* display failure information and jump to label error: to return.
-	*/
+
+        // This is another way to open an existing dataset for accessing.
+        DataSet another_dataset(file.openDataSet (DSET_DEFAULT_NAME));
+
+	// Try opening a non-existent dataset.  This should fail so if an
+	// exception is not thrown for this action by openDataSet, then
+	// display failure information and throw an exception.
 	try {
 	    dataset = new DataSet (file.openDataSet( "does_not_exist" ));
+
 	    // continuation here, that means no exception has been thrown
-	    H5_FAILED();
-	    cerr << "    Opened a non-existent dataset." << endl;
-	    goto error;
+	    throw InvalidActionException("H5File::openDataSet", "Attempted to open a non-existent dataset");
 	}
 	catch (FileIException E ) // catching creating non-existent dataset
-	{
-	    // Exception is expected.  Do nothing here.
-	}
+	{} // do nothing, exception expected
 
-	/*
-	* Create a new dataset that uses chunked storage instead of the default
-	* layout.
-	*/
+	// Create a new dataset that uses chunked storage instead of the default
+	// layout.
 	DSetCreatPropList create_parms;
 	hsize_t     csize[2];
 	csize[0] = 5;
@@ -154,20 +145,33 @@ test_create( H5File& file)
 		(DSET_CHUNKED_NAME, PredType::NATIVE_DOUBLE, space, create_parms));
 	// Note: this one has no error message in C when failure occurs?
 
-	/*
-	* Close the chunked dataset.
-	*/
+	// clean up and return with success
 	delete dataset;
 
 	PASSED();
 	return 0;
    }	// outer most try block
 
-   // catch all dataset, file, space, plist exceptions
-   catch (Exception E) { goto error; }
-   
- error:
-    return -1;
+    catch (InvalidActionException E)
+    {
+	cerr << " FAILED" << endl;
+	cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+
+	// clean up and return with failure
+	if (dataset != NULL)
+	    delete dataset;
+	return -1;
+    }
+    // catch all other exceptions
+    catch (Exception E)
+    {
+	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+
+	// clean up and return with failure
+	if (dataset != NULL)
+	    delete dataset;
+	return -1;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -235,7 +239,7 @@ test_simple_io( H5File& file)
     int	check[100][200];
     int		i, j, n;
 
-    /* Initialize the dataset */
+    // Initialize the dataset
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
@@ -246,27 +250,27 @@ test_simple_io( H5File& file)
     char* tconv_buf = new char [1000];
     try 
     {
-	/* Create the data space */
+	// Create the data space
 	hsize_t	dims[2];
 	dims[0] = 100;
 	dims[1] = 200;
 	DataSpace space (2, dims, NULL);
 
-	/* Create a small conversion buffer to test strip mining */
+	// Create a small conversion buffer to test strip mining
 	DSetMemXferPropList xfer;
 
 	xfer.setBuffer (1000, tconv_buf, NULL);
 
-	/* Create the dataset */
+	// Create the dataset
 	DataSet dataset (file.createDataSet (DSET_SIMPLE_IO_NAME, PredType::NATIVE_INT, space));
 
-	/* Write the data to the dataset */
+	// Write the data to the dataset
 	dataset.write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Read the dataset back */
+	// Read the dataset back
 	dataset.read ((void*) check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i = 0; i < 100; i++)
 	    for (j = 0; j < 200; j++)
 	    {
@@ -317,7 +321,7 @@ test_tconv( H5File& file)
 
     TESTING("data type conversion");
     
-    /* Initialize the dataset */
+    // Initialize the dataset
     for (int i = 0; i < 1000000; i++) {
 	out[i*4+0] = 0x11;
 	out[i*4+1] = 0x22;
@@ -327,21 +331,21 @@ test_tconv( H5File& file)
 
     try
     {
-	/* Create the data space */
+	// Create the data space
 	hsize_t	dims[1];
 	dims[0] = 1000000;
 	DataSpace space (1, dims, NULL);
 
-	/* Create the data set */
+	// Create the data set
 	DataSet dataset (file.createDataSet (DSET_TCONV_NAME, PredType::STD_I32LE, space));
 
-	/* Write the data to the dataset */
+	// Write the data to the dataset
 	dataset.write ((void*) out, PredType::STD_I32LE);
 
-	/* Read data with byte order conversion */
+	// Read data with byte order conversion
 	dataset.read ((void*) in, PredType::STD_I32BE);
 
-	/* Check */
+	// Check
 	for (int i = 0; i < 1000000; i++) {
 	    if (in[4*i+0]!=out[4*i+3] ||
 		in[4*i+1]!=out[4*i+2] ||
@@ -436,7 +440,7 @@ test_compression(H5File& file)
     int		check[100][200];
     hsize_t	i, j, n;
 
-    /* Initialize the dataset */
+    // Initialize the dataset
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
@@ -448,18 +452,16 @@ test_compression(H5File& file)
     try 
     {
 	const hsize_t	size[2] = {100, 200};
-	/* Create the data space */
+	// Create the data space
 	DataSpace space1(2, size, NULL);
 
-	/*
-	* Create a small conversion buffer to test strip mining. We
-	* might as well test all we can!
-	*/
+	// Create a small conversion buffer to test strip mining. We
+	// might as well test all we can!
 	DSetMemXferPropList xfer;
 
 	xfer.setBuffer (1000, tconv_buf, NULL);
   
-	/* Use chunked storage with compression */
+	// Use chunked storage with compression
 	DSetCreatPropList dscreatplist;
 
 	const hsize_t	chunk_size[2] = {2, 25};
@@ -471,7 +473,7 @@ test_compression(H5File& file)
 #ifdef H5_HAVE_FILTER_DEFLATE
     TESTING("compression (setup)");
     
-	/* Create the dataset */
+	// Create the dataset
 	dataset = new DataSet (file.createDataSet 
 	    (DSET_COMPRESS_NAME, PredType::NATIVE_INT, space1, dscreatplist));
   
@@ -523,10 +525,10 @@ test_compression(H5File& file)
 	*/
 	TESTING("compression (read)");
 
-	/* Read the dataset back */
+	// Read the dataset back
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
 	    for (j = 0; j < size[1]; j++)
 	    {
@@ -554,10 +556,10 @@ test_compression(H5File& file)
 	}
 	dataset->write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Read the dataset back and check it */
+	// Read the dataset back and check it
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
 	    for (j = 0; j < size[1]; j++)
 	    {
@@ -580,7 +582,7 @@ test_compression(H5File& file)
 	dataset = new DataSet (file.openDataSet (DSET_COMPRESS_NAME));
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
 	    for (j = 0; j < size[1]; j++)
 	    {
@@ -610,7 +612,7 @@ test_compression(H5File& file)
 	dataset->write ((void*)points, PredType::NATIVE_INT, space1, space1, xfer);
 	dataset->read ((void*)check, PredType::NATIVE_INT, space1, space1, xfer);
     
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
 	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
@@ -658,7 +660,7 @@ test_compression(H5File& file)
 	dataset->write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
     
-	/* Check that the values read are the same as the values written */
+	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
 	    for (j = 0; j < size[1]; j++)
 	    {
@@ -738,7 +740,7 @@ test_multiopen (H5File& file)
 	cur_size[0] = 20;
 	dset1.extend (cur_size);
 
-	/* Get the size from the second handle */
+	// Get the size from the second handle
 	space = new DataSpace (dset2.getSpace());
 
 	hsize_t		tmp_size[1];
@@ -804,6 +806,7 @@ test_types(H5File& file)
 	    // Test copying a user-defined type using DataType::copy
 	    DataType copied_type;
 	    copied_type.copy(type);
+
 	    // Test copying a user-defined type using DataType::operator=
 	    DataType another_copied_type;
 	    another_copied_type = type;
@@ -1051,5 +1054,5 @@ void
 cleanup_dsets(void)
 {
     remove(FILE1.c_str());
-} /* cleanup_dsets */
+} // cleanup_dsets
 

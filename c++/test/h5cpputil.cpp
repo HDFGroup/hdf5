@@ -27,12 +27,22 @@
 #endif
 #include <string>
 
+#include "h5test.h"
+#include "H5Exception.h"
+#include "h5cpputil.h"
+
+#ifndef H5_NO_NAMESPACE
+namespace H5 {
+#ifndef H5_NO_STD
+	    using namespace std;
+#endif  // H5_NO_STD
+#endif
+/*
 #ifndef H5_NO_STD
 using namespace std;
 #endif
+*/
 
-#include "h5test.h"
-#include "h5cpputil.h"
 
 /*-------------------------------------------------------------------------
  * Function:	test_report
@@ -84,12 +94,39 @@ int test_report( int nerrors, const string& testname )
  *
  *-------------------------------------------------------------------------
  */
-void issue_fail_msg(const char* where, int line, const char* file_name)
+void issue_fail_msg(const char* where, int line, const char* file_name, 
+		    const char* message)
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
-        cerr << "   Call to routine: " << where << " at line " << line
-             << " in " << file_name << "has failed" << endl;
+        cerr << "--> From " << where << " at line " << line
+             << " in " << file_name << " - " << message << endl << endl;
     }
 }
+
+//--------------------------------------------------------------------------
+// Function:    InvalidActionException default constructor
+//--------------------------------------------------------------------------
+InvalidActionException::InvalidActionException():Exception(){}
+
+//--------------------------------------------------------------------------
+// Function:    InvalidActionException overloaded constructor
+//
+// Purpose:	Creates an InvalidActionException with the name of the function,
+//              which the failure should have occurred but didn't, and a 
+//		message explaining why it should fail.
+// Parameters
+//		func_name - IN: Name of the function where failure should occur
+//		message   - IN: Message 
+//--------------------------------------------------------------------------
+InvalidActionException::InvalidActionException(const string func_name, const string message) : Exception(func_name, message) {}
+
+//--------------------------------------------------------------------------
+// Function:    InvalidActionException destructor
+//--------------------------------------------------------------------------
+InvalidActionException::~InvalidActionException() {}
+
+#ifndef H5_NO_NAMESPACE
+} // end namespace
+#endif
 
