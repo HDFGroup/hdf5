@@ -1,5 +1,3 @@
-
-
 /******************************************************************************
 
   Description: This file contains routines to translate H5 files to H4 files.
@@ -45,9 +43,11 @@ extern int get_tableflag(int, int);
 extern int set_tableflag(int, int);
 extern char* get_objectname(int, int);
 
+#if 0 /*these are defined elsewhere, possibly incompatible --rpm 19990614 */
 extern int optind;
 extern void perror(const char *);
 extern int errno;
+#endif
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
 

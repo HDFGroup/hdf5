@@ -168,7 +168,7 @@ test_getset(void)
  *-------------------------------------------------------------------------
  */
 static int
-test_create(hid_t fapl, const char *basename, H5D_layout_t layout)
+test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     hid_t	file=-1, space=-1, dcpl=-1, dset1=-1, dset2=-1, dset3=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
@@ -188,7 +188,7 @@ test_create(hid_t fapl, const char *basename, H5D_layout_t layout)
      * conversion paths: small to large, large to small, and no conversion.
      * They depend on `short' being smaller than `long'.
      */
-    h5_fixname(basename, fapl, filename, sizeof filename);
+    h5_fixname(base_name, fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if ((space=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
@@ -311,7 +311,7 @@ test_create(hid_t fapl, const char *basename, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 static int
-test_rdwr(hid_t fapl, const char *basename, H5D_layout_t layout)
+test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     hid_t	file=-1, fspace=-1, mspace=-1, dcpl=-1, dset=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
@@ -335,7 +335,7 @@ test_rdwr(hid_t fapl, const char *basename, H5D_layout_t layout)
     }
 
     /* Create a file and dataset */
-    h5_fixname(basename, fapl, filename, sizeof filename);
+    h5_fixname(base_name, fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if ((fspace=H5Screate_simple(5, cur_size, cur_size))<0) goto error;
@@ -454,7 +454,7 @@ test_rdwr(hid_t fapl, const char *basename, H5D_layout_t layout)
  *-------------------------------------------------------------------------
  */
 static int
-test_extend(hid_t fapl, const char *basename, H5D_layout_t layout)
+test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
     hid_t	file=-1, fspace=-1, mspace=-1, dcpl=-1, dset=-1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
@@ -539,7 +539,7 @@ test_extend(hid_t fapl, const char *basename, H5D_layout_t layout)
 #endif
     
     /* Create a file and dataset */
-    h5_fixname(basename, fapl, filename, sizeof filename);
+    h5_fixname(base_name, fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if ((fspace=H5Screate_simple(5, cur_size, max_size))<0) goto error;

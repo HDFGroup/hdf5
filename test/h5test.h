@@ -56,7 +56,7 @@ extern "C" {
 
 int h5_cleanup(hid_t fapl);
 herr_t h5_errors(void *client_data);
-char *h5_fixname(const char *basename, hid_t fapl, char *fullname,
+char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 		 size_t size);
 hid_t h5_fileaccess(void);
 void h5_no_hwconv(void);

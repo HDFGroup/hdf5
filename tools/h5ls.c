@@ -66,7 +66,7 @@ static struct dispatch_t {
 }
 
 static herr_t list (hid_t group, const char *name, void *cd);
-static void display_type(hid_t type, int indent);
+static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
 
@@ -284,7 +284,7 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_native_type(hid_t type, int UNUSED indent)
+display_native_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
 	printf("native signed char");
@@ -400,7 +400,7 @@ display_native_type(hid_t type, int UNUSED indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_ieee_type(hid_t type, int UNUSED indent)
+display_ieee_type(hid_t type, int UNUSED ind)
 {
     if (H5Tequal(type, H5T_IEEE_F32BE)) {
 	printf("IEEE 32-bit big-endian float");
@@ -434,7 +434,7 @@ display_ieee_type(hid_t type, int UNUSED indent)
  *-------------------------------------------------------------------------
  */
 static void
-display_precision(hid_t type, int indent)
+display_precision(hid_t type, int ind)
 {
     size_t		prec;		/*precision			*/
     H5T_pad_t		plsb, pmsb;	/*lsb and msb padding		*/
@@ -449,7 +449,7 @@ display_precision(hid_t type, int indent)
      */
     if (8*H5Tget_size(type)!=(prec=H5Tget_precision(type))) {
 	printf("\n%*s(%lu bit%s of precision beginning at bit %lu)",
-	       indent, "", (unsigned long)prec, 1==prec?"":"s",
+	       ind, "", (unsigned long)prec, 1==prec?"":"s",
 	       (unsigned long)H5Tget_offset(type));
 
 	H5Tget_pad(type, &plsb, &pmsb);
@@ -488,7 +488,7 @@ display_precision(hid_t type, int indent)
 	    }
 	}
 	if (plsb_s || pmsb_s) {
-	    printf("\n%*s(", indent, "");
+	    printf("\n%*s(", ind, "");
 	    if (plsb_s) {
 		nbits = H5Tget_offset(type);
 		printf("%lu %s bit%s at bit 0",
@@ -527,7 +527,7 @@ display_precision(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_int_type(hid_t type, int indent)
+display_int_type(hid_t type, int ind)
 {
     H5T_order_t		order;		/*byte order value		*/
     const char 		*order_s=NULL;	/*byte order string		*/
@@ -571,7 +571,7 @@ display_int_type(hid_t type, int indent)
      */
     printf("%lu-bit%s%s integer",
 	   (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
-    display_precision(type, indent);
+    display_precision(type, ind);
     return TRUE;
 }
 
@@ -593,7 +593,7 @@ display_int_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_float_type(hid_t type, int indent)
+display_float_type(hid_t type, int ind)
 {
     H5T_order_t		order;		/*byte order value		*/
     const char 		*order_s=NULL;	/*byte order string		*/
@@ -630,7 +630,7 @@ display_float_type(hid_t type, int indent)
      */
     printf("%lu-bit%s floating-point",
 	   (unsigned long)(8*H5Tget_size(type)), order_s);
-    display_precision(type, indent);
+    display_precision(type, ind);
 
     /* Print sizes, locations, and other information about each field */
     H5Tget_fields (type, &spos, &epos, &esize, &mpos, &msize);
@@ -650,13 +650,13 @@ display_float_type(hid_t type, int indent)
 	norm_s = ", unknown normalization";
 	break;
     }
-    printf("\n%*s(significant for %lu bit%s at bit %lu%s)", indent, "", 
+    printf("\n%*s(significant for %lu bit%s at bit %lu%s)", ind, "", 
 	   (unsigned long)msize, 1==msize?"":"s", (unsigned long)mpos,
 	   norm_s);
     printf("\n%*s(exponent for %lu bit%s at bit %lu, bias is 0x%lx)",
-	   indent, "", (unsigned long)esize, 1==esize?"":"s",
+	   ind, "", (unsigned long)esize, 1==esize?"":"s",
 	   (unsigned long)epos, (unsigned long)ebias);
-    printf("\n%*s(sign bit at %lu)", indent, "", (unsigned long)spos);
+    printf("\n%*s(sign bit at %lu)", ind, "", (unsigned long)spos);
 
     /* Display internal padding */
     if (1+esize+msize<H5Tget_precision(type)) {
@@ -676,7 +676,7 @@ display_float_type(hid_t type, int indent)
 	    pad_s = "unknown";
 	    break;
 	}
-	printf("\n%*s(internal padding bits are %s)", indent, "", pad_s);
+	printf("\n%*s(internal padding bits are %s)", ind, "", pad_s);
     }
     return TRUE;
 }
@@ -699,7 +699,7 @@ display_float_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_cmpd_type(hid_t type, int indent)
+display_cmpd_type(hid_t type, int ind)
 {
     char	*name=NULL;	/*member name				*/
     int		ndims;		/*dimensionality			*/
@@ -716,7 +716,7 @@ display_cmpd_type(hid_t type, int indent)
 
 	/* Name and offset */
 	name = H5Tget_member_name(type, i);
-	printf("\n%*s\"", indent+4, "");
+	printf("\n%*s\"", ind+4, "");
 	n = display_string(stdout, name, FALSE);
 	printf("\"%*s +%-4lu ", MAX(0, 16-n), "",
 	       (unsigned long)H5Tget_member_offset(type, i));
@@ -745,12 +745,12 @@ display_cmpd_type(hid_t type, int indent)
 	
 	/* Data type */
 	subtype = H5Tget_member_type(type, i);
-	display_type(subtype, indent+4);
+	display_type(subtype, ind+4);
 	H5Tclose(subtype);
     }
     size = H5Tget_size(type);
     printf("\n%*s} %lu byte%s",
-	   indent, "", (unsigned long)size, 1==size?"":"s");
+	   ind, "", (unsigned long)size, 1==size?"":"s");
     return TRUE;
 }
 
@@ -772,7 +772,7 @@ display_cmpd_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_enum_type(hid_t type, int indent)
+display_enum_type(hid_t type, int ind)
 {
     char	**name=NULL;	/*member names				*/
     unsigned char *value=NULL;	/*value array				*/
@@ -788,7 +788,7 @@ display_enum_type(hid_t type, int indent)
     nmembs = H5Tget_nmembers(type);
     super = H5Tget_super(type);
     printf("enum ");
-    display_type(super, indent+4);
+    display_type(super, ind+4);
     printf(" {");
     
     /*
@@ -825,7 +825,7 @@ display_enum_type(hid_t type, int indent)
 
     /* Print members */
     for (i=0; i<nmembs; i++) {
-	printf("\n%*s", indent+4, "");
+	printf("\n%*s", ind+4, "");
 	nchars = display_string(stdout, name[i], TRUE);
 	printf("%*s = ", MAX(0, 16-nchars), "");
 
@@ -849,8 +849,8 @@ display_enum_type(hid_t type, int indent)
     free(value);
     H5Tclose(super);
 
-    if (0==nmembs) printf("\n%*s <empty>", indent+4, "");
-    printf("\n%*s}", indent, "");
+    if (0==nmembs) printf("\n%*s <empty>", ind+4, "");
+    printf("\n%*s}", ind, "");
     return TRUE;
 }
 
@@ -872,7 +872,7 @@ display_enum_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_string_type(hid_t type, int UNUSED indent)
+display_string_type(hid_t type, int UNUSED ind)
 {
     H5T_str_t		pad;
     const char		*pad_s=NULL;
@@ -962,7 +962,7 @@ display_string_type(hid_t type, int UNUSED indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_reference_type(hid_t type, int UNUSED indent)
+display_reference_type(hid_t type, int UNUSED ind)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
@@ -996,7 +996,7 @@ display_reference_type(hid_t type, int UNUSED indent)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-display_opaque_type(hid_t type, int indent)
+display_opaque_type(hid_t type, int ind)
 {
     char	*tag;
     size_t	size;
@@ -1006,7 +1006,7 @@ display_opaque_type(hid_t type, int indent)
     size = H5Tget_size(type);
     printf("%lu-byte opaque type", (unsigned long)size);
     if ((tag=H5Tget_tag(type))) {
-	printf("\n%*s(tag = \"", indent, "");
+	printf("\n%*s(tag = \"", ind, "");
 	display_string(stdout, tag, FALSE);
 	printf("\")");
 	free(tag);
@@ -1021,7 +1021,7 @@ display_opaque_type(hid_t type, int indent)
  * Purpose:	Prints a data type definition.  The definition is printed
  *		without any leading space or trailing line-feed (although
  *		there might be line-feeds inside the type definition).  The
- *		first line is assumed to have INDENT characters before it on
+ *		first line is assumed to have IND characters before it on
  *		the same line (printed by the caller).
  *
  * Return:	void
@@ -1036,7 +1036,7 @@ display_opaque_type(hid_t type, int indent)
  *-------------------------------------------------------------------------
  */
 static void
-display_type(hid_t type, int indent)
+display_type(hid_t type, int ind)
 {
     H5T_class_t		data_class = H5Tget_class(type);
     H5G_stat_t		sb;
@@ -1059,15 +1059,15 @@ display_type(hid_t type, int indent)
     }
     
     /* Print the type */
-    if (display_native_type(type, indent) ||
-	display_ieee_type(type, indent) ||
-	display_int_type(type, indent) ||
-	display_float_type(type, indent) ||
-	display_cmpd_type(type, indent) ||
-	display_enum_type(type, indent) ||
-	display_string_type(type, indent) ||
-	display_reference_type(type, indent) ||
-	display_opaque_type(type, indent)) {
+    if (display_native_type(type, ind) ||
+	display_ieee_type(type, ind) ||
+	display_int_type(type, ind) ||
+	display_float_type(type, ind) ||
+	display_cmpd_type(type, ind) ||
+	display_enum_type(type, ind) ||
+	display_string_type(type, ind) ||
+	display_reference_type(type, ind) ||
+	display_opaque_type(type, ind)) {
 	return;
     }
 

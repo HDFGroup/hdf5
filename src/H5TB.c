@@ -366,7 +366,6 @@ done:
 herr_t
 H5TB_resize_buf(hid_t tbuf_id, hsize_t size, void **ptr)
 {
-    herr_t ret_value = FAIL;
     H5TB_t *tbuf,               /* Pointer to temporary buffer */
         *curr;                  /* Pointer to temp. buffer node */
     void * old_ptr;             /* Pointer to the previous buffer */

@@ -185,12 +185,12 @@ h5_reset(void)
  *-------------------------------------------------------------------------
  */
 char *
-h5_fixname(const char *basename, hid_t fapl, char *fullname, size_t size)
+h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
     const char		*prefix=NULL, *suffix=NULL;
     H5F_driver_t	driver;
     
-    if (!basename || !fullname || size<1) return NULL;
+    if (!base_name || !fullname || size<1) return NULL;
 
     /* First use the environment variable, then try the constant */
     prefix = getenv("HDF5_PREFIX");
@@ -200,13 +200,13 @@ h5_fixname(const char *basename, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (HDsnprintf(fullname, size, "%s/%s", prefix, basename)==(int)size) {
+	if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name)==(int)size) {
 	    return NULL; /*buffer is too small*/
 	}
-    } else if (strlen(basename)>=size) {
+    } else if (strlen(base_name)>=size) {
 	return NULL; /*buffer is too small*/
     } else {
-	strcpy(fullname, basename);
+	strcpy(fullname, base_name);
     }
 
     /* Append a suffix */
