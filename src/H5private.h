@@ -133,6 +133,17 @@
 #   include "ProcIDs.h"
 #endif
 
+
+/*
+ * NT doesn't define SIGBUS, but since NT only runs on processors             
+ * that do not have alignment constraints a SIGBUS would never be              
+ * raised, so we just replace it with SIGILL (which also should               
+ * never be raised by the hdf5 library).                                       
+ */  
+#ifndef SIGBUS
+#	define SIGBUS SIGILL
+#endif
+
 /*
  * Does the compiler support the __attribute__(()) syntax?  This is how gcc
  * suppresses warnings about unused function arguments.	 It's no big deal if
