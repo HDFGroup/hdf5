@@ -1116,6 +1116,7 @@ dump_dataset_values(hid_t dset)
     size_t		size = H5Tget_size(f_type);
     h5dump_t		info;
     char		string_prefix[64];
+    static char         fmt_double[16], fmt_float[16];
 	
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
@@ -1150,6 +1151,12 @@ dump_dataset_values(hid_t dset)
 	info.line_cont = "        %s  ";
 	info.str_repeat = 8;
     }
+
+    /* Floating point types should display full precision */
+    sprintf(fmt_float, "%%1.%dg", FLT_DIG);
+    info.fmt_float = fmt_float;
+    sprintf(fmt_double, "%%1.%dg", DBL_DIG);
+    info.fmt_double = fmt_double;
 
     info.dset_format =  "DSET-%lu:%lu:%lu:%lu-";
     info.dset_hidefileno = 0;
