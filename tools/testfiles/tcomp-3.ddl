@@ -7,7 +7,7 @@ DATATYPE "/#5992:0"
  
 GROUP "/group2" {
    DATASET "dset5" {
-      DATATYPE           "/#6632:0"
+      DATATYPE  "/#6632:0"
         
       DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
       DATA {

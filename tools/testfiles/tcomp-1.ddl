@@ -3,10 +3,10 @@ Expected output for 'h5dump tcompound.h5'
 #############################
 HDF5 "tcompound.h5" {
 GROUP "/" {
-   DATATYPE "#6632:0" 
+   DATATYPE "#6632:0" H5T_COMPOUND {
       H5T_STD_I32BE "int";
       H5T_IEEE_F32BE "float";
-    
+   }    
    DATASET "dset1" {
       DATATYPE  H5T_COMPOUND {
          H5T_STD_I32BE "a_name";
@@ -44,8 +44,7 @@ GROUP "/" {
    } 
    GROUP "group1" {
       DATASET "dset2" {
-         DATATYPE              "/type1"
-           
+         DATATYPE  "/type1"           
          DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
          DATA {
             {
@@ -71,8 +70,7 @@ GROUP "/" {
          } 
       } 
       DATASET "dset3" {
-         DATATYPE              "/type2"
-           
+         DATATYPE  "/type2"           
          DATASPACE  SIMPLE { ( 3, 6 ) / ( 3, 6 ) } 
          DATA {
             {
@@ -222,8 +220,7 @@ GROUP "/" {
          } 
       } 
       DATASET "dset4" {
-         DATATYPE              "/group1/type3"
-           
+         DATATYPE  "/group1/type3"           
          DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
          DATA {
             {
@@ -248,14 +245,14 @@ GROUP "/" {
             }
          } 
       } 
-      DATATYPE "type3" 
+      DATATYPE "type3" H5T_COMPOUND {
          H5T_STD_I32BE "int";
          H5T_IEEE_F32BE "float";
-       
+      }       
    } 
    GROUP "group2" {
       DATASET "dset5" {
-         DATATYPE              "/#6632:0"
+         DATATYPE  "/#6632:0"
            
          DATASPACE  SIMPLE { ( 5 ) / ( 5 ) } 
          DATA {
@@ -282,13 +279,13 @@ GROUP "/" {
          } 
       } 
    } 
-   DATATYPE "type1" 
+   DATATYPE "type1" H5T_COMPOUND {
       H5T_STD_I32BE "int_name";
       H5T_IEEE_F32BE "float_name";
-    
-   DATATYPE "type2" 
+   }    
+   DATATYPE "type2" H5T_COMPOUND {
       H5T_ARRAY { [4] H5T_STD_I32BE } "int_array";
       H5T_ARRAY { [5][6] H5T_IEEE_F32BE } "float_array";
-    
+   }    
 } 
 } 
