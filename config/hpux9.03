@@ -11,8 +11,8 @@
 # `--enable-debug' switch of configure.
 
 # What must *always* be present for things to compile correctly?
-CFLAGS="$CFLAGS -Ae"
-#CPPFLAGS="$CPPFLAGS -I."
+#CFLAGS="$CFLAGS -Ae"
+CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?
 DEBUG_CFLAGS=-g
