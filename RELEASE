@@ -81,6 +81,7 @@ Configuration
      link MPIO routines during the configuration stage, rather than failing
      later as before.  One can just do "./configure --enable-parallel"
      if the MPI library is in the system library.
+   * Added support for pthread library and thread-safe option.
    * The libhdf5.settings file shows the correct machine byte-sex.
 
 Tools
