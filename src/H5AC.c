@@ -258,6 +258,8 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      * Free the previous cache entry if there is one.
      */
     if (*info) {
+        H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
+
         flush = (*info)->type->flush;
         status = (flush)(f, TRUE, (*info)->addr, (*info));
         if (status < 0) {
@@ -272,7 +274,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL,
                           "unable to flush existing cached object");
         }
-        cache->diagnostics[(*info)->type->id].nflushes++;
+        cache->diagnostics[type_id].nflushes++;
     }
     /*
      * Make the cache point to the new thing.
@@ -453,6 +455,9 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
         i = H5AC_HASH(f, addr);
         if (cache->slot[i] && (!type || cache->slot[i]->type == type) &&
             H5F_addr_eq(cache->slot[i]->addr, addr)) {
+
+            H5AC_subid_t type_id=cache->slot[i]->type->id;  /* Remember this for later */
+
             /*
              * Flush just this entry.
              */
@@ -463,7 +468,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                 HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                               "unable to flush object");
             }
-            cache->diagnostics[cache->slot[i]->type->id].nflushes++;
+            cache->diagnostics[type_id].nflushes++;
             if (destroy)
                 cache->slot[i]= NULL;
         }
@@ -528,13 +533,15 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 
 
     if ((*info)) {
+        H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
+
         flush = (*info)->type->flush;
         status = (flush)(f, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[(*info)->type->id].nflushes++;
+        cache->diagnostics[type_id].nflushes++;
     }
     (*info)=thing;
     (*info)->type = type;
@@ -615,6 +622,8 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
      * Free the item from the destination cache line.
      */
     if (cache->slot[new_idx]) {
+        H5AC_subid_t type_id=cache->slot[new_idx]->type->id;  /* Remember this for later */
+
         flush = cache->slot[new_idx]->type->flush;
         status = (flush)(f, TRUE, cache->slot[new_idx]->addr,
 			 cache->slot[new_idx]);
@@ -622,7 +631,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[cache->slot[new_idx]->type->id].nflushes++;
+        cache->diagnostics[type_id].nflushes++;
     }
     /*
      * Move the source to the destination (it might not be cached)
@@ -817,7 +826,9 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
      * Flush any object already in the cache at that location.  It had
      * better not be another copy of the protected object.
      */
-    if ((*info)) {
+    if (*info) {
+        H5AC_subid_t type_id=(*info)->type->id;  /* Remember this for later */
+
         assert(H5F_addr_ne((*info)->addr, addr));
         flush = (*info)->type->flush;
         status = (flush)(f, TRUE, (*info)->addr, (*info));
@@ -825,7 +836,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[(*info)->type->id].nflushes++;
+        cache->diagnostics[type_id].nflushes++;
     }
 #ifdef H5AC_DEBUG
     /*
