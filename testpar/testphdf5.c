@@ -14,11 +14,15 @@ int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
+/* FilePrefix defines where the temporary parallel test files should be. */
+/* In a parallel system, filesystem suitable for compiling are unlikly */
+/* the right place for parallel I/O.  There is no common used pathname */
+/* for the parallel file system.  So, /tmp is used as the default. */
 #ifdef __PUMAGON__
 /* For the PFS of TFLOPS */
 char *fileprefix = "pfs:/pfs_grande/multi/tmp_1/";
 #else
-char *fileprefix = NULL;		/* file prefix, default as NULL */
+char *fileprefix = "/tmp/";
 #endif
 size_t fileprefixlen;			/* file prefix length */
 
