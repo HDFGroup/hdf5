@@ -81,6 +81,17 @@ check test _test: tests
 	    fi;                                                         \
 	done
 
+## Run test with different Virtual File Driver
+check-vfd:
+	@for vfd in $(VFD_LIST) dummy; do				      \
+	    if test $$vfd != dummy; then                                      \
+		echo "============================";                          \
+		echo "Testing Virtual File Driver $$vfd";		      \
+		echo "============================";                          \
+		HDF5_DRIVER=$$vfd $(MAKE) check;			      \
+	    fi;								      \
+	done
+
 ## Make installation directories directories if they don't exist.
 ##
 $(libdir):
