@@ -37,9 +37,6 @@ static hid_t H5FD_MPIO_g = 0;
 
 #ifdef H5_HAVE_PARALLEL
 
-#define FALSE	0
-#define TRUE	1
-
 /*
  * The description of a file belonging to this driver.  If the ALLSAME
  * argument is set during a write operation then only p0 will do the actual
@@ -735,7 +732,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 	char debug_str[128];
         int infoerr, flag, i;
         if (fa->info) {
-            infoerr = MPI_Info_get(fa->info, H5FD_MPIO_DEBUG_KEY, 127,
+            infoerr = MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, 127,
 				   debug_str, &flag);
             if (flag) {
                 fprintf(stdout, "H5FD_mpio debug flags=%s\n", debug_str );
@@ -1236,10 +1233,10 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
     MPI_Status			mpi_stat;
     MPI_Datatype		buf_type, file_type;
     int         		mpierr, size_i, bytes_written;
-    int				mpi_rank;
+    int				mpi_rank=-1;
     int				use_types_this_time, used_types_last_time;
     hbool_t     		allsame;
-    herr_t              ret_value=FAIL;
+    herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_mpio_write, FAIL);
 
@@ -1271,7 +1268,9 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
         if (mpi_rank != 0) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_Debug[(int)'w']) {
-                fprintf(stdout, "  in H5FD_mpio_write (write omitted)\n" );
+                fprintf(stdout,
+		    "  proc %d: in H5FD_mpio_write (write omitted)\n",
+		    mpi_rank );
             }
 #endif
             HGOTO_DONE(SUCCEED) /* skip the actual write */
@@ -1299,7 +1298,7 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
         buf_type = file->btype;
         file_type = file->ftype;
         if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
-            HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     } else {
         /*
          * Prepare for a simple xfer of a contiguous block of bytes.
@@ -1319,7 +1318,7 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
             use_types_this_time) {	/* almost certainly a different ftype */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_set_view(file->f, mpi_disp, MPI_BYTE, file_type, (char*)"native", file->info))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_view failed");
     }
     
     /*
@@ -1335,7 +1334,7 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
     if (H5FD_MPIO_INDEPENDENT==dx->xfer_mode) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at failed");
     } else {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'t'])
@@ -1343,12 +1342,12 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
 #endif
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if (MPI_SUCCESS != MPI_File_write_at_all(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at_all failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_write_at_all failed");
     }
 
     /* How many bytes were actually written? */
     if (MPI_SUCCESS!= MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_written))
-        HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Get_count failed");
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'c'])
     	fprintf(stdout,
@@ -1364,17 +1363,24 @@ H5FD_mpio_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
     bytes_written = size_i;
 #endif
     if (bytes_written<0 || bytes_written>size_i)
-        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file write failed");
 
     /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
     file->eof = HADDR_UNDEF;
     
 done:
+    /* if only p0 writes, need to boardcast the ret_value to other processes */
+    if (allsame && H5_mpi_1_metawrite_g) {
+	if (MPI_SUCCESS !=
+	    MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, 0, file->comm))
+          HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, NULL, "MPI_Bcast failed");
+    }
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
-    	fprintf(stdout, "Leaving H5FD_mpio_write\n" );
+    	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
+	    mpi_rank, ret_value );
 #endif
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE(ret_value);
 }
 
 
