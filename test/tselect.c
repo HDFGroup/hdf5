@@ -422,7 +422,19 @@ test_select_all(void)
     ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-    /* Read selection from disk */
+    /* Select no extent for disk dataset */
+    ret = H5Sselect_none(sid1);
+    CHECK(ret, FAIL, "H5Sselect_all");
+
+    /* Read selection from disk (should fail with no selection defined) */
+    ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
+    VERIFY(ret, FAIL, "H5Dread");
+
+    /* Select entire 15x26 extent for disk dataset */
+    ret = H5Sselect_all(sid1);
+    CHECK(ret, FAIL, "H5Sselect_all");
+
+    /* Read selection from disk (should work now) */
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
@@ -1090,7 +1102,7 @@ test_select(void)
     /* These next tests use the same file */
     test_select_hyper();        /* Test basic H5S hyperslab selection code */
     test_select_point();        /* Test basic H5S element selection code */
-    test_select_all();          /* Test basic all selection code */
+    test_select_all();          /* Test basic all & none selection code */
     test_select_combo();        /* Test combined hyperslab & element selection code */
     test_select_hyper_stride(); /* Test strided hyperslab selection code */
     test_select_hyper_copy();   /* Test hyperslab selection copying code */
