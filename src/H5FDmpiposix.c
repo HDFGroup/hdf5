@@ -1264,7 +1264,6 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     int			mpi_code;	/* MPI return code */
     ssize_t	        nbytes;         /* Number of bytes written each I/O call */
     H5P_genplist_t      *plist;         /* Property list pointer */
-    unsigned		block_before_meta_write=0;      /* Whether to block before a metadata write */
     herr_t             	ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpiposix_write, FAIL)
@@ -1289,11 +1288,17 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* Metadata specific actions */
     if(type!=H5FD_MEM_DRAW) {
+        unsigned		block_before_meta_write=0;      /* Whether to block before a metadata write */
+
         /* Check if we need to syncronize all processes before attempting metadata write
          * (Prevents race condition where the process writing the metadata goes ahead
          * and writes the metadata to the file before all the processes have
          * read the data, "transmitting" data from the "future" to the reading
          * process. -QAK )
+         *
+         * The only time we don't want to block before a metadata write is when
+         * we are flushing out a bunch of metadata.  Then, we block before the
+         * first write and don't block for further writes in the sequence.
          */
         if(H5P_exist_plist(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME)>0)
             if(H5P_get(plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,&block_before_meta_write)<0)

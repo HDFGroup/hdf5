@@ -1164,13 +1164,14 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     MPI_Status          status;
     int                 mrc;
     MPI_Datatype        buf_type;
-    MPI_Datatype        file_type;
     int                 size_i;
     int                 bytes_read;
     int                 n;
     unsigned            use_view_this_time = 0;
     H5P_genplist_t     *plist;
-    H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_INDEPENDENT;
+#ifndef NDEBUG
+    H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+#endif /* NDEBUG */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_read, FAIL)
@@ -1199,57 +1200,84 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     /* Obtain the data transfer properties */
     if ((plist = H5I_object(dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+#ifndef NDEBUG
+    xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+#endif /* NDEBUG */
 
-    if (H5P_get_driver(plist) == H5FD_FPHDF5)
-        /* Get the transfer mode */
-        xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+    /* Only look for MPI views for raw data transfers */
+    if(mem_type==H5FD_MEM_DRAW) {
+        /*
+         * Set up for a fancy xfer using complex types, or single byte block.
+         * We wouldn't need to rely on the use_view field if MPI semantics
+         * allowed us to test that btype == ftype == MPI_BYTE (or even
+         * MPI_TYPE_NULL, which could mean "use MPI_BYTE" by convention).
+         */
+        if (H5P_exist_plist(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME) > 0)
+            if (H5P_get(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME, &use_view_this_time) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-    /*
-     * Set up for a fancy xfer using complex types, or single byte block.
-     * We wouldn't need to rely on the use_view field if MPI semantics
-     * allowed us to test that btype == ftype == MPI_BYTE (or even
-     * MPI_TYPE_NULL, which could mean "use MPI_BYTE" by convention).
-     */
-    if (H5P_exist_plist(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME) > 0)
-        if (H5P_get(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME, &use_view_this_time) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
+        if (use_view_this_time) {
+            MPI_Datatype        file_type;
 
-    if (use_view_this_time) {
-        /* Sanity check that views will only be used by collective I/O */
-        assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+            /* Sanity check that views will only be used by collective I/O */
+            assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
 
-        /* Prepare for a full-blown xfer using btype, ftype, and disp */
-        if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
+            /* Prepare for a full-blown xfer using btype, ftype, and disp */
+            if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-        if (H5P_get(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
+            if (H5P_get(plist, H5FD_FPHDF5_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-        /* Set the file view when we are using MPI derived types */
-        if ((mrc = MPI_File_set_view(file->f, mpi_off, MPI_BYTE,
-                                     file_type, H5FD_mpio_native,
-                                     file->info)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
+            /* Set the file view when we are using MPI derived types */
+            if ((mrc = MPI_File_set_view(file->f, mpi_off, MPI_BYTE,
+                                         file_type, H5FD_mpio_native,
+                                         file->info)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
+
+            /*
+             * When using types, use the address as the displacement for
+             * MPI_File_set_view and reset the address for the read to zero
+             */
+            mpi_off = 0;
+        } else {
+            /* Sanity check that independent I/O must be occuring */
+            assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
+
+            /*
+             * Prepare for a simple xfer of a contiguous block of bytes. The
+             * btype, ftype, and disp fields are not used.
+             */
+            buf_type = MPI_BYTE;
+        }
+
+        /* Read the data. */
+        if (!use_view_this_time) {
+            if ((mrc = MPI_File_read_at(file->f, mpi_off, buf, size_i,
+                                        buf_type, &status)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc)
+        } else {
+            if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
+                                            buf_type, &status)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc)
+        }
 
         /*
-         * When using types, use the address as the displacement for
-         * MPI_File_set_view and reset the address for the read to zero
+         * MPI_Get_count incorrectly returns negative count; fake a complete
+         * read.
          */
-        mpi_off = 0;
-    } else {
-        /* Sanity check that independent I/O must be occuring */
-        assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
+        bytes_read = size_i;
 
         /*
-         * Prepare for a simple xfer of a contiguous block of bytes. The
-         * btype, ftype, and disp fields are not used.
+         * Reset the file view when we used MPI derived types
          */
-        buf_type = MPI_BYTE;
-        file_type = MPI_BYTE;
-    }
+        if (use_view_this_time)
+            if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
+                                         H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
 
-    /* If metadata, check the metadata cache first */
-    if (mem_type != H5FD_MEM_DRAW) {
+        } /* end if */
+    else {
         /*
          * This is metadata - we want to try to read it from the SAP
          * first.
@@ -1266,39 +1294,12 @@ HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
 
         if (sap_status == H5FP_STATUS_OK) {
             /* WAH-HOO! We've found it! We can leave now */
-            goto finished_read;
         } else if (sap_status != H5FP_STATUS_MDATA_NOT_CACHED) {
             /* FIXME: something bad happened */
 HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
         }
-    }
+    } /* end else */
 
-    /* Read the data. */
-    if (!use_view_this_time) {
-        if ((mrc = MPI_File_read_at(file->f, mpi_off, buf, size_i,
-                                    buf_type, &status)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc)
-    } else {
-        if ((mrc = MPI_File_read_at_all(file->f, mpi_off, buf, size_i,
-                                        buf_type, &status)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mrc)
-    }
-
-    /*
-     * MPI_Get_count incorrectly returns negative count; fake a complete
-     * read.
-     */
-    bytes_read = size_i;
-
-    /*
-     * Reset the file view when we used MPI derived types
-     */
-    if (use_view_this_time)
-        if ((mrc = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
-                                     H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
-
-finished_read:
     /* Check for read failure */
     if (bytes_read < 0 || bytes_read > size_i)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
@@ -1351,7 +1352,7 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
     int             size_i;
     unsigned        dumping = 0;
     H5P_genplist_t *plist;
-    herr_t          ret_value = SUCCEED;
+    herr_t          ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write, FAIL)
 
@@ -1398,9 +1399,9 @@ HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
             /* WAH-HOO! We've written it! We can leave now */
             /* Forget the EOF value (see H5FD_fphdf5_get_eof()) */
             file->eof = HADDR_UNDEF;
-            HGOTO_DONE(ret_value)
+            HGOTO_DONE(SUCCEED)
         case H5FP_STATUS_FILE_CLOSING:
-            HGOTO_DONE(ret_value)
+            HGOTO_DONE(SUCCEED)
         case H5FP_STATUS_DUMPING_FAILED:
         case H5FP_STATUS_OOM:
         case H5FP_STATUS_BAD_FILE_ID:
@@ -1439,13 +1440,14 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, int size,
     H5FD_fphdf5_t      *file = (H5FD_fphdf5_t*)_file;
     MPI_Status          status;
     MPI_Datatype        buf_type;
-    MPI_Datatype        file_type;
     MPI_Offset          mpi_off;
     int                 mrc;
     int                 bytes_written;
     unsigned            use_view_this_time = 0;
     H5P_genplist_t     *plist;
-    H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_INDEPENDENT;
+#ifndef NDEBUG
+    H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+#endif /* NDEBUG */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_write_real, FAIL)
@@ -1480,10 +1482,8 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, int size,
         if (H5P_get(plist, H5FD_FPHDF5_XFER_USE_VIEW_NAME, &use_view_this_time) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
-
     if (use_view_this_time) {
-        /* Sanity check that views will only be used by collective I/O */
-        assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+        MPI_Datatype        file_type;
 
         /* Prepare for a full-blown xfer using btype, ftype, and disp */
         if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
@@ -1504,22 +1504,13 @@ H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, int size,
          */
         mpi_off = 0;
     } else {
-        /* Sanity check that independent I/O must be occuring */
-        assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-
         /*
          * Prepare for a simple xfer of a contiguous block of bytes. The
          * btype and ftype.
          */
         buf_type = MPI_BYTE;
-        file_type = MPI_BYTE;
     }
 
-
-    if (H5P_get_driver(plist) == H5FD_FPHDF5)
-        /* Get the transfer mode */
-        xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
- 
     /* Write the data. */
     if (!use_view_this_time) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
