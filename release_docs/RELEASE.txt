@@ -167,7 +167,7 @@ Platforms Tested
                                   HP F90 v2.4
                                   HP ANSI C++ B3910B A.03.13
                                   MPIch 1.2.4
-    IRIX 6.5                      MIPSpro cc 7.30
+    IRIX 6.5                      MIPSpro cc 7.3.1.2m
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
                                   F90 MIPSpro 7.3.1.3m (64 only)
                                   MPIch 1.2.4
