@@ -62,6 +62,28 @@ static char		RcsId[] = "$Revision$";
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
 
+herr_t test_select_hyper_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+herr_t test_select_point_iter1(void *elem,hid_t type_id, hsize_t ndim, hssize_t *point, void *operator_data);
+
+/****************************************************************
+**
+**  test_select_hyper_iter1(): Iterator for checking hyperslab iteration
+** 
+****************************************************************/
+herr_t 
+test_select_hyper_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+{
+    uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
+            **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
+
+    if(*tbuf!=**tbuf2)
+        return(-1);
+    else {
+        (*tbuf2)++;
+        return(0);
+    }
+}   /* end test_select_hyper_iter1() */
+
 /****************************************************************
 **
 **  test_select_hyper(): Test basic H5S (dataspace) selection code.
@@ -83,8 +105,7 @@ test_select_hyper(void)
     hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
-               *tbuf,       /* temporary buffer pointer */
-               *tbuf2;      /* temporary buffer pointer */
+               *tbuf;       /* temporary buffer pointer */
     intn        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     H5S_class_t ext_type;   /* Extent type */
@@ -160,16 +181,10 @@ test_select_hyper(void)
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Compare data read with data written out */
-    for(i=0; i<SPACE3_DIM1; i++) {
-        tbuf=wbuf+((i+15)*SPACE2_DIM2);
-        tbuf2=rbuf+(i*SPACE3_DIM2);
-        for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
-            if(*tbuf!=*tbuf2) {
-                printf("%d: hyperslab values don't match!, i=%d, j=%d\n",__LINE__,i,j);
-            } /* end if */
-        } /* end for */
-    } /* end for */
+    /* Check that the values match with a dataset iterator */
+    tbuf=wbuf+(15*SPACE2_DIM2);
+    ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid2,test_select_hyper_iter1,&tbuf);
+    CHECK(ret, FAIL, "H5Diterate");
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
@@ -192,6 +207,34 @@ test_select_hyper(void)
     free(rbuf);
 }   /* test_select_hyper() */
 
+struct pnt_iter {
+    hssize_t	coord[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    uint8_t *buf;           /* Buffer the points are in */
+    intn offset;            /* Which point we are looking at */
+};
+
+/****************************************************************
+**
+**  test_select_point_iter1(): Iterator for checking point iteration
+**  (This is really ugly code, not a very good example of correct usage - QAK)
+** 
+****************************************************************/
+herr_t 
+test_select_point_iter1(void *_elem,hid_t UNUSED type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *_operator_data)
+{
+    uint8_t *elem=(uint8_t *)_elem;  /* Pointer to the element to examine */
+    uint8_t *tmp;                       /* temporary ptr to element in operator data */
+    struct pnt_iter *pnt_info=(struct pnt_iter *)_operator_data;
+    
+    tmp=pnt_info->buf+(pnt_info->coord[pnt_info->offset][0]*SPACE2_DIM2)+pnt_info->coord[pnt_info->offset][1];
+    if(*elem!=*tmp)
+        return(-1);
+    else {
+        pnt_info->offset++;
+        return(0);
+    }
+}   /* end test_select_hyper_iter1() */
+
 /****************************************************************
 **
 **  test_select_point(): Test basic H5S (dataspace) selection code.
@@ -213,9 +256,9 @@ test_select_point(void)
     hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
-               *tbuf,       /* temporary buffer pointer */
-               *tbuf2;      /* temporary buffer pointer */
+               *tbuf;       /* temporary buffer pointer */
     intn        i,j;        /* Counters */
+    struct pnt_iter pi;     /* Custom Pointer iterator struct */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -303,14 +346,12 @@ test_select_point(void)
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    /* Compare data read with data written out */
-    for(i=0; i<POINT1_NPOINTS; i++) {
-        tbuf=wbuf+(coord2[i][0]*SPACE2_DIM2)+coord2[i][1];
-        tbuf2=rbuf+(coord3[i][0]*SPACE3_DIM2)+coord3[i][1];
-        if(*tbuf!=*tbuf2) {
-            printf("element values don't match!, i=%d\n",i);
-        } /* end if */
-    } /* end for */
+    /* Check that the values match with a dataset iterator */
+    HDmemcpy(pi.coord,coord2,sizeof(coord2));
+    pi.buf=wbuf;
+    pi.offset=0;
+    ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid2,test_select_point_iter1,&pi);
+    CHECK(ret, FAIL, "H5Diterate");
 
     /* Close memory dataspace */
     ret = H5Sclose(sid2);
