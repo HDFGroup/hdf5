@@ -367,8 +367,13 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 		    goto error;
 		}
 	    }
+#ifndef _HDF5USEDLL_
+/*	
+	For NT dll version we free memory down at the bottom.  crashed otherwise.	
+*/
 	    free(buf[i]);
 	    buf[i] = NULL;
+#endif
 	}
 
 	/* Print statistics? */
@@ -418,6 +423,16 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
     printf("   %27s%10s\n", "", s);
 
     /* Cleanup */
+#ifdef _HDF5USEDLL_
+/*
+	Need to clean up the memory we allocated.  Had to move this down here
+	for NT.  Crashing when it was up in the original location
+*/
+	for (i = 0; i < rows_at_once && size[i]; i++){
+		free(buf[i]);
+	//	buf[i] = NULL;
+	}
+#endif
     free(size);
     free(buf);
     printf("%-70s PASSED\n\n", testname);
