@@ -17,7 +17,7 @@ case $CXX_BASENAME in
 	;;
 
     *)
-	CXXFLAGS="$CXXFLAGS"
+	CXXFLAGS="$CXXFLAGS -std=c99 -w2 -Wall -D__GNUC__"
 	DEBUG_CXXFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS=""     #Default optimization O2 is used
