@@ -4224,7 +4224,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size)
+H5F_sieve_overlap_clear(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -4235,10 +4235,55 @@ H5F_sieve_overlap_clear(H5F_t *f, haddr_t addr, hsize_t size)
 
     /* Check for the address range overlapping with the sieve buffer */
     if(H5F_addr_overlap(f->shared->sieve_loc,f->shared->sieve_size,addr,size)) {
-        /* Reset sieve information */
-        f->shared->sieve_loc=HADDR_UNDEF;
-        f->shared->sieve_size=0;
-        f->shared->sieve_dirty=0;
+        /* Check if only part of the sieve buffer is being invalidated */
+        if(size<f->shared->sieve_size) {
+            /* Check if the portion to invalidate is at the end */
+            if((f->shared->sieve_loc+f->shared->sieve_size)==(addr+size)) {
+                /* Just shorten the buffer */
+                f->shared->sieve_size-=size;
+            } /* end if */
+            /* Check if the portion to invalidate is at the beginning */
+            else if(f->shared->sieve_loc==addr) {
+                /* Advance the start of the sieve buffer (on disk) and shorten the buffer */
+                f->shared->sieve_loc+=size;
+                f->shared->sieve_size-=size;
+
+                /* Move the retained information in the buffer down */
+                HDmemcpy(f->shared->sieve_buf,f->shared->sieve_buf+size,f->shared->sieve_size);
+            } /* end elif */
+            /* Portion to invalidate is in middle */
+            else {
+                size_t invalid_size;  /* Portion of sieve buffer to invalidate */
+
+                /* Write out portion at the beginning of the buffer, if buffer is dirty */
+                if(f->shared->sieve_dirty) {
+                    size_t start_size;  /* Portion of sieve buffer to write */
+
+                    /* Compute size of block at beginning of buffer */
+                    start_size=(addr-f->shared->sieve_loc);
+
+                    /* Write to file */
+                    if (H5F_block_write(f, H5FD_MEM_DRAW, f->shared->sieve_loc, start_size, dxpl_id, f->shared->sieve_buf)<0)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
+                } /* end if */
+
+                /* Compute size of block to invalidate */
+                invalid_size=((addr+size)-f->shared->sieve_loc);
+
+                /* Advance the start of the sieve buffer (on disk) and shorten the buffer */
+                f->shared->sieve_loc+=invalid_size;
+                f->shared->sieve_size-=invalid_size;
+
+                /* Move the retained information in the buffer down */
+                HDmemcpy(f->shared->sieve_buf,f->shared->sieve_buf+invalid_size,f->shared->sieve_size);
+            } /* end else */
+        } /* end if */
+        else {
+            /* Reset sieve information */
+            f->shared->sieve_loc=HADDR_UNDEF;
+            f->shared->sieve_size=0;
+            f->shared->sieve_dirty=0;
+        } /* end else */
     } /* end if */
     
 done:

@@ -346,7 +346,7 @@ H5F_contig_delete(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout)
         size *= layout->dim[u];
 
     /* Check for overlap with the sieve buffer and reset it */
-    if (H5F_sieve_overlap_clear(f, layout->addr, size)<0)
+    if (H5F_sieve_overlap_clear(f, dxpl_id, layout->addr, size)<0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to clear sieve buffer");
 
     /* Free the file space for the chunk */
