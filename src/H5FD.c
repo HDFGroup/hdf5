@@ -2023,9 +2023,9 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
 
     /* Check if this information is in the metadata accumulator */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
-        ((addr>=file->accum_loc && addr <=(file->accum_loc+file->accum_size))
-        || ((addr+size)>=file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
-        || (addr<file->accum_loc && (addr+size)>(file->accum_loc+file->accum_size)))) {
+        ((addr>=file->accum_loc && addr <(file->accum_loc+file->accum_size))
+        || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
+        || (addr<file->accum_loc && (addr+size)>file->accum_loc))) {
 
         unsigned char *read_buf=(unsigned char *)buf; /* Pointer to the buffer being read in */
         hsize_t amount_read;        /* Amount to read at a time */
@@ -2049,7 +2049,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
             size-=amount_read;
         } /* end if */
 
-        /* Read the part overlapping the metadata accumulator */
+        /* Copy the part overlapping the metadata accumulator */
         if(size>0 && (addr>=file->accum_loc && addr<(file->accum_loc+file->accum_size))) {
             /* Set the offset to "read" from */
             read_off=addr-file->accum_loc;
@@ -2187,9 +2187,9 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
         /* Check if there is already metadata in the accumulator */
         if(file->accum_size>0) {
             /* Check if the piece of metadata being written adjoins or is inside the metadata accumulator */
-            if((addr>=file->accum_loc && addr <=(file->accum_loc+file->accum_size))
-                || ((addr+size)>=file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
-                || (addr<file->accum_loc && (addr+size)>(file->accum_loc+file->accum_size))) {
+            if((addr>=file->accum_loc && addr <(file->accum_loc+file->accum_size))
+                || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
+                || (addr<file->accum_loc && (addr+size)>file->accum_loc)) {
 
                 /* Check if the new metadata adjoins the beginning of the current accumulator */
                 if((addr+size)==file->accum_loc) {
@@ -2285,7 +2285,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
                 /* Check if the new metadata overlaps the end of the current accumulator */
                 else if(addr>=file->accum_loc && (addr+size)>(file->accum_loc+file->accum_size)) {
                     /* Calculate the new accumulator size, based on the amount of overlap */
-                    new_size=file->accum_size+((addr+size)-(file->accum_loc+file->accum_size));
+                    new_size=(addr-file->accum_loc)+size;
 
                     /* Check if we need more buffer space */
                     if(new_size>file->accum_buf_size) {
