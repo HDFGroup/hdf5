@@ -549,7 +549,7 @@ H5I_destroy_group(H5I_type_t grp)
      */
     if (1==grp_ptr->count) {
         H5I_clear_group(grp, TRUE);
-        H5E_clear(H5E_get_my_stack()); /*don't care about errors*/
+        H5E_clear(NULL); /*don't care about errors*/
         H5MM_xfree(grp_ptr->id_list);
         HDmemset (grp_ptr, 0, sizeof(*grp_ptr));
     } else {
@@ -1068,6 +1068,7 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
+    H5I_id_info_t	*next_id = NULL;	/*ptr to the next ID	*/
     unsigned		i;			/*counter		*/
     void		*ret_value = NULL;	/*return value		*/
 
@@ -1084,9 +1085,10 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, void *key)
     for (i=0; i<grp_ptr->hash_size; i++) {
 	id_ptr = grp_ptr->id_list[i];
 	while (id_ptr) {
+            next_id= id_ptr->next;      /* Protect against ID being deleted in callback */
 	    if ((*func)(id_ptr->obj_ptr, id_ptr->id, key))
 		HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
-	    id_ptr = id_ptr->next;
+	    id_ptr = next_id;
 	}
     }
 
