@@ -406,10 +406,11 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
     /* Get the rank of the dataspace */
     ndims=space->extent.u.simple.rank;
 
-    /* Copy the size of the space */
-    assert(space->extent.u.simple.size);
-    assert(ndims>0);
-    HDmemcpy(space_size, space->extent.u.simple.size, ndims*sizeof(hsize_t));
+    if (ndims > 0){
+	/* Copy the size of the space */
+	assert(space->extent.u.simple.size);
+	HDmemcpy(space_size, space->extent.u.simple.size, ndims*sizeof(hsize_t));
+    }
     space_size[ndims]=elmt_size;
 
     /* Compute the maximum number of bytes required */
