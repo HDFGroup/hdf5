@@ -114,7 +114,7 @@
 #include "Trace.h"
 #include "TraceParam.h"
 #include "ProcIDs.h"
-#include "HDFTrace.h"
+#include "HDF5Trace.h"
 #include "SDDFparam.h"
 #include <string.h>
 #include <stdio.h>
@@ -137,7 +137,7 @@
 #endif
 #define NEG_THREAD_ID -999
 
-#include "HDFrecord_RT.h"
+#include "HDF5record_RT.h"
 
 #ifdef HAVE_PARALLEL
 #include "MPIO_Init.h"
@@ -207,6 +207,7 @@ void writeHDFRecDescrptrsRT( void );
 void printFileMappingsRT( char *, char **, int );
 void _hdfNameDescriptor( void );
 void _hdfDescriptorRT( char *, char *, int );
+void HDFfinalTimeStamp( void );
 /*======================================================================*
 // Global variables           						*
 //======================================================================*/
@@ -272,6 +273,7 @@ void HDFendTrace_RT( )
 	char **Names;
 	char* mapFile;
 
+	HDFfinalTimeStamp();
 	/*==============================================================*
 	//  Assing pablo ids to named identifiers and tag records	*
 	//==============================================================*/
@@ -398,9 +400,9 @@ void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen )
 	currentTime = getClock();
 	seconds = clockToSeconds( currentTime );
 
-	if ( isBeginIOEvent ( eventType ) ) {
+	if ( isBeginIOEvent ( eventType ) || eventType == ID_malloc ) {
 	   BeginIOEventRecord ( eventType, seconds, dataPtr ) ;
-	} else if ( isEndIOEvent( eventType ) ) {
+	} else if ( isEndIOEvent( eventType )  || eventType == -ID_malloc) {
 	   EndIOEventRecord ( eventType, seconds, dataPtr );
 	} else if ( isBeginHDFEvent( eventType ) ) { 
 	   BeginHDFEventRecord ( eventType , seconds ) ;
@@ -988,8 +990,8 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	HDFnode_t *Q;
 	struct {
 		int packetLen,
-		    packetTag,
 		    packetType,
+		    packetTag,
 	            eventID,
 		    threadID,
 	            nCalls;
@@ -1011,17 +1013,19 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	                 + nByteFields*sizeof(int)	 /* array lens  */
 	                 + nByteFields*nBkts*sizeof(int) /* byte hist   */
 	                 + sizeof(int) ;                 /* Name len    */
-	Header.packetTag = ( procIndex + 1 )*HDF_FAMILY | RECORD_TRACE ;
+	Header.packetTag = HDF_SUMMARY_FAMILY +
+			   ( procIndex + 1 )*8 + RECORD_TRACE ;
 	Header.packetType = PKT_DATA;
 	Header.threadID = TRgetNode();
         while ( P != NULL ) {
 	   Q = P->ptr;
-	   Header.eventID = Q->eventID;
-           Header.Seconds = Q->record.lastCall;
-	   Header.IncDur  = Q->record.incDur;
-	   Header.ExcDur  = Q->record.excDur;
-	   Header.HDFid   = Q->record.hdfID;
-	   Header.XREFid  = Q->record.xRef;
+	   Header.eventID = P->eventID;
+	   Header.nCalls  = P->record.nCalls;
+           Header.Seconds = P->record.lastCall;
+	   Header.IncDur  = P->record.incDur;
+	   Header.ExcDur  = P->record.excDur;
+	   Header.HDFid   = P->record.hdfID;
+	   Header.XREFid  = P->record.xRef;
 	   memcpy( Packet, &Header, sizeof(Header) );
 	   Packet += sizeof(Header);
 	   /*===========================================================*
@@ -1030,15 +1034,15 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   arrayLen = nTallyFields;
 	   memcpy( Packet, &arrayLen, sizeof(int) );
 	   Packet += sizeof(int);
-	   memcpy( Packet, Q->record.times, nTallyFields*sizeof(int) );
-	   Packet += nTallyFields*sizeof(int);
+	   memcpy( Packet, P->record.times, nTallyFields*sizeof(double) );
+	   Packet += nTallyFields*sizeof(double);
 	   /*===========================================================*
 	   // copy length of counts array and counts array to Packet.	*
 	   //===========================================================*/
 	   arrayLen = nTallyFields;
 	   memcpy( Packet, &arrayLen, sizeof(int) );
 	   Packet += sizeof(int);
-	   memcpy( Packet, Q->record.counts, nTallyFields*sizeof(int) );
+	   memcpy( Packet, P->record.counts, nTallyFields*sizeof(int) );
 	   Packet += nTallyFields*sizeof(int);
 	   /*===========================================================*
 	   // copy length of bytes array and bytes array to Packet.	*
@@ -1046,7 +1050,7 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   arrayLen = nByteFields;
 	   memcpy( Packet, &arrayLen, sizeof(int) );
 	   Packet += sizeof(int);
-	   memcpy( Packet, Q->record.counts, nByteFields*sizeof(int) );
+	   memcpy( Packet, P->record.bytes, nByteFields*sizeof(int) );
 	   Packet += nByteFields*sizeof(int);
 	   /*===========================================================*
 	   // copy length of historgram arrays and arrays to Packet.	*
@@ -1055,7 +1059,7 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	   for ( i = 0; i < nByteFields; ++i ) {
 	      memcpy( Packet, &arrayLen, sizeof(int) );
 	      Packet += sizeof(int);
-	      memcpy( Packet, Q->record.Hists[i], nBkts*sizeof(int) );
+	      memcpy( Packet, P->record.Hists[i], nBkts*sizeof(int) );
 	      Packet += nBkts*sizeof(int);
 	   }
 	   arrayLen = 0;	/* name length */
@@ -1375,7 +1379,7 @@ void writeHDFRecDescrptrsRT()
 #	include "HDFentryNames.h"
 	"HDF_Last_Entry"
 	};
-	int j;
+	int j, FAMILY;
         char BUF1[256], BUF2[256] ;
 	_hdfNameDescriptor();	/* Descriptor for named identifiers	*/
         for ( j = 0; j < NumHDFProcs; ++j ) {
@@ -1385,7 +1389,8 @@ void writeHDFRecDescrptrsRT()
               strcat( BUF2, " Procedure Summary");
               strcpy( BUF1, BUF2 );
               strcat( BUF1, " Trace");
-              _hdfDescriptorRT( BUF1, BUF2, (j+1)*HDF_FAMILY );
+	      FAMILY = HDF_SUMMARY_FAMILY + (j + 1)*8;
+              _hdfDescriptorRT( BUF1, BUF2, FAMILY );
            }
         }
         return;

@@ -71,7 +71,7 @@
 #include "SDDFparam.h"
 #include "TraceParam.h"
 #include "Trace.h"
-#include "HDFTrace.h"
+#include "HDF5Trace.h"
 void HDFendTrace_SDDF(void);
 void startHDFtraceEvent(int eventID);
 void endHDFtraceEvent(int , int , char *, int );
@@ -81,8 +81,6 @@ int  writeHDFProcRecordDescriptors( void );
 int findHDFProcEvent( int ) ;
 TR_RECORD *HDFprocEventRecord( int, TR_EVENT *, CLOCK, HDFsetInfo *, unsigned );
 TR_RECORD *miscEventRecord( int , TR_EVENT *, CLOCK, void *, unsigned );
-void _hdfTraceEntryDescriptor( void );
-void _hdfTraceExitDescriptor( void );
 void _hdfMiscDescriptor( void );
 void _hdfProcNameDescriptor( void );
 int setEventRecordFunction( int, void * );
@@ -92,6 +90,9 @@ void enableIOdetail( void );
 void disableLifetimeSummaries( void );
 void disableTimeWindowSummaries( void );
 void disableFileRegionSummaries( void );
+void _hdfTraceDescriptor( char *, char *, int );
+void createHDFTraceDescriptor( int );
+void HDFfinalTimeStamp( void );
 
 void initIOTrace( void );
 void endIOTrace( void );
@@ -156,24 +157,10 @@ static PROC_ENTRY	**procEntryStack =*/	/* array of pointers to	*/
 // records, similarly to record data structures in Trace.h	 	* 
 //======================================================================*/
 
-/*======================================================================*
-// FAMILY_PROCENTRY family Record Data packets:				* 
-//======================================================================*/
-struct procEntryTraceRecordData {
-	int	packetLength;	/* bytes in packet		    	*/
-	int	packetType;	/* == PKT_DATA			    	*/
-	int	packetTag;	/* FAMILY_PROCENTRY | RECORD_TRACE  	*/
-	int	eventID;	/* ID of corresponding event	    	*/
-	double	seconds;	/* floating-point timestamp	    	*/
-	long	sourceByte;	/* source code byte offset in file  	*/
-	int	sourceLine;	/* source code line number in file  	*/
-	int	nodeNumber;	/* occurred on which node	    	*/
-};
-#define procEntryTraceLen 6*sizeof(int) + sizeof(long) + sizeof(double)
 /*======================================================================* 
-// FAMILY_PROCEXIT family Record Data packets:				* 
+// TraceRecord Data packets:						* 
 //======================================================================*/
-struct procExitTraceRecordData {
+struct procTraceRecordData {
 	int	packetLength;	   /* bytes in packet		    	*/
 	int	packetType;	   /* == PKT_DATA		    	*/
 	int	packetTag;	   /* FAMILY_PROCEXIT | RECORD_TRACE   	*/
@@ -184,7 +171,7 @@ struct procExitTraceRecordData {
 	int	nameLen;	   /* Length of file or data set name	*/
 	/* name comes next, but no space is allocated	*/
 };
-#define procExitTraceLen 6*sizeof(int) + 3*sizeof(double) +sizeof(long)
+#define procTraceRecLen 6*sizeof(int) + sizeof(double) +sizeof(long)
 /*======================================================================*
 // misc Record Data packets:						* 
 //======================================================================*/
@@ -199,31 +186,6 @@ struct miscTraceRecordData {
 	int	nodeNumber;	/* occurred on which node	    	*/
 };
 #define miscTraceLen 5*sizeof(int) + 2*sizeof(double) +sizeof(long)
-/*======================================================================*
-// HDFprocName Record Data packets:					* 
-// These are used to pass information about the names of the traced	*
-// routine in the trace file to the post processing utilities.		*
-//======================================================================*/
-struct HDFprocNameRecordData {
-	int	packetLength;	/* bytes in packet		    	*/
-	int	packetType;	/* == PKT_DATA			    	*/
-	int	packetTag;	/* FAMILY_HDFPROCNAME | RECORD_TRACE	*/
-	int	eventID;	/* ID of corresponding event	    	*/
-	int	HDFeventID;	/* ID of HDF proc               	*/
-	int	procIndex;	/* Index of HDF proc            	*/
-	int	numProcs;	/* Number of HDF procs          	*/
-	int	NameLen;	/* length of HDF proc Name	    	*/
-	char   *Name;
-};
-#define HDFprocNameRecLen 8*sizeof(int)
-/*======================================================================*
-// Define data structures used to contain source code location data for *
-// Pablo instrumenting parser-generated code.				*
-//======================================================================*/
-static long	procByteOffset = -1;	/* source code byte offset    	*/
-
-static int	procLineNumber = -1;	/* source code line number 	*/
-
 /*======================================================================*
 // The procEntries array specifies the event IDs of procedure entry 	*
 // events. 								*
@@ -307,7 +269,6 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 //======================================================================*/
 void HDFendTrace_SDDF(void)
 {
-	HDFtraceIOEvent( -ID_timeStamp, 0, 0 ); 
 #ifdef HAVE_MPIOTRACE
 	/*===============================================================
 	// termintate MPI-IO tracing in the parallel case.  This will	*
@@ -318,6 +279,7 @@ void HDFendTrace_SDDF(void)
 	/*===============================================================
 	// terminate tracing 						*
 	//==============================================================*/
+	HDFfinalTimeStamp();
        	endIOTrace();
        	endTracing();
 #endif
@@ -391,10 +353,6 @@ int initHDFProcTrace( int numProcs, int *procEntryID )
 	procEvents[ numProcs+1 ].exitID = -ID_free;
 	setEventRecordFunction( ID_free, miscEventRecord );
 	setEventRecordFunction( -ID_free, miscEventRecord );
-	procEvents[ numProcs+2 ].entryID = ID_timeStamp;
-	procEvents[ numProcs+2 ].exitID = -ID_timeStamp;
-	setEventRecordFunction( ID_timeStamp, miscEventRecord );
-	setEventRecordFunction( -ID_timeStamp, miscEventRecord );
 
 	return SUCCESS;
 }
@@ -448,9 +406,6 @@ int  writeHDFProcRecordDescriptors( void )
 #endif /* DEBUG */
 
 	_hdfMiscDescriptor();
-	_hdfTraceEntryDescriptor() ;
-	_hdfTraceExitDescriptor()  ;
-	_hdfProcNameDescriptor();
 
 #ifdef DEBUG
 	fprintf( debugFile, "writeHDFProcRecordDescriptors done\n" );
@@ -484,19 +439,15 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	static TR_RECORD		traceRecord;
 	static void			*recordBuffer = NULL;
 	static int			bufferLength = 0;
-	struct procEntryTraceRecordData	*entryTraceRecordHeader;
-	struct procExitTraceRecordData	*exitTraceRecordHeader;
-	struct HDFprocNameRecordData 	*nameRecord;
+	struct procTraceRecordData	*TraceRecordHeader;
 	int				procIndex;
 	int				recordFamily;
 	char				*namePtr;
-	int				NameLen;
-	int				NameRecLen;
-	
-#ifdef DEBUG
-	fprintf( debugFile, "HDFprocEventRecord\n" );
-	fflush( debugFile );
-#endif /* DEBUG */
+		
+	#ifdef DEBUG
+		fprintf( debugFile, "HDFprocEventRecord\n" );
+		fflush( debugFile );
+	#endif /* DEBUG */
 
 	/*==============================================================* 
 	// Find the index in the tables for the procedure corresponding *
@@ -512,25 +463,7 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	// not already been produced.					*
 	//==============================================================*/
 	if ( procEntryCalled[procIndex] == 0 ) {
-	   NameLen = strlen( HDFProcNames[procIndex] );
-	   NameRecLen = HDFprocNameRecLen + NameLen;
-	   nameRecord = ( struct HDFprocNameRecordData *)malloc( NameRecLen );
-	   nameRecord->packetLength = NameRecLen;
-	   nameRecord->packetType  = PKT_DATA;
-	   nameRecord->packetTag   = FAMILY_HDFPROCNAME | RECORD_TRACE;
-	   nameRecord->eventID     = ID_HDFprocName;
-	   nameRecord->HDFeventID  = abs(eventPointer->eventID);
-	   nameRecord->procIndex   = procIndex;
-	   nameRecord->numProcs    = NumHDFProcs;
-	   nameRecord->NameLen     = NameLen;
-	   /*===========================================================*
-	   // copy procedure name into the packet, write out the packet	*
-	   // and set ProcEntryCalled[procIndex] to indicate the name	*
-	   // packet was produced.					*
-	   //===========================================================*/
-	   memcpy( &(nameRecord->Name), HDFProcNames[procIndex], NameLen );
-	   putBytes( (char *)nameRecord , NameRecLen );
-	   free( nameRecord );
+	   createHDFTraceDescriptor( procIndex );
 	   procEntryCalled[procIndex] = 1;
 	}
 	/*==============================================================* 
@@ -538,11 +471,7 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	// exit family event by lookup in the procedure event ID 	* 
 	// matching.  							* 
 	//==============================================================*/
-	if ( procEvents[ procIndex ].entryID == eventPointer->eventID ) {
-	   recordFamily = FAMILY_PROCENTRY;
-	} else {
-	   recordFamily = FAMILY_PROCEXIT;
-	}
+	recordFamily = HDF_FAMILY + ( procIndex + 1)*8;
 	/*==============================================================* 
 	// The time stamp stored in the event descriptor will be used	*  
 	// unless one is specified in the timeStamp parameter.	    	*  
@@ -554,16 +483,7 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	// Determine how many bytes of storage will be needed for the 	*  
 	// contents of the trace record.			    	* 
 	//==============================================================*/
-	switch (( recordFamily | recordType )) {
-
-	   case FAMILY_PROCENTRY | RECORD_TRACE:
-		traceRecord.recordLength = sizeof *entryTraceRecordHeader;
-		break;
-
-	   case FAMILY_PROCEXIT | RECORD_TRACE:
-		traceRecord.recordLength = sizeof *exitTraceRecordHeader;
-		break;
-	}
+	traceRecord.recordLength = sizeof *TraceRecordHeader;
         if ( dataPointer != NULL && dataPointer->setName != NULL ) {
 	   traceRecord.recordLength += strlen( dataPointer->setName );
         }
@@ -590,54 +510,30 @@ HDFprocEventRecord( int recordType, TR_EVENT *eventPointer, CLOCK timeStamp,
 	/*==============================================================* 
 	// Load the trace record fields into the allocated buffer 	* 
 	//==============================================================*/
-	switch (( recordFamily | recordType )) {
+	TraceRecordHeader = (struct procTraceRecordData *)recordBuffer;
+	TraceRecordHeader->packetLength = traceRecord.recordLength;
+	TraceRecordHeader->packetType = PKT_DATA;
+	TraceRecordHeader->packetTag = recordFamily | recordType;
+	TraceRecordHeader->seconds = clockToSeconds( timeStamp );
+	TraceRecordHeader->eventID = eventPointer->eventID;
+	TraceRecordHeader->nodeNumber = TRgetNode();
 
-	   case FAMILY_PROCENTRY | RECORD_TRACE:
-		entryTraceRecordHeader = (struct procEntryTraceRecordData *)
-							recordBuffer;
-		entryTraceRecordHeader->packetLength =
-				traceRecord.recordLength;
-		entryTraceRecordHeader->packetType = PKT_DATA;
-		entryTraceRecordHeader->packetTag = recordFamily | recordType;
-		entryTraceRecordHeader->seconds = clockToSeconds( timeStamp );
-		entryTraceRecordHeader->eventID = eventPointer->eventID;
-		entryTraceRecordHeader->nodeNumber = TRgetNode();
-		entryTraceRecordHeader->sourceByte = procByteOffset;
-		entryTraceRecordHeader->sourceLine = procLineNumber;
-		break;
-
-	   case FAMILY_PROCEXIT | RECORD_TRACE:
-		exitTraceRecordHeader = (struct procExitTraceRecordData *)
-							recordBuffer;
-		exitTraceRecordHeader->packetLength =
-				                  traceRecord.recordLength;
-		exitTraceRecordHeader->packetType = PKT_DATA;
-		exitTraceRecordHeader->packetTag = recordFamily | recordType;
-		exitTraceRecordHeader->seconds = clockToSeconds( timeStamp );
-		exitTraceRecordHeader->eventID = eventPointer->eventID;
-		exitTraceRecordHeader->nodeNumber = TRgetNode();
-
-		if ( dataPointer != 0 ) {
-	           exitTraceRecordHeader->setID = dataPointer->setID;
-		   if (dataPointer->setName != NULL ) {
-		      exitTraceRecordHeader->nameLen 
-					= (int)strlen( dataPointer->setName );
-		      /*================================================* 
-		      // copy name directly into the end of the buffer.	*
-		      //================================================*/
-		      namePtr = (char *)exitTraceRecordHeader 
-                                                  + procExitTraceLen;
-	              memcpy( namePtr, dataPointer->setName,
-		              exitTraceRecordHeader->nameLen );
-	           } else {
-		      exitTraceRecordHeader->nameLen = 0;
-	           }   
-		} else {
-	           exitTraceRecordHeader->setID = NoDSid;
-		   exitTraceRecordHeader->nameLen = 0;
-		} 
-		break;
-	}
+	if ( dataPointer != 0 ) {
+	  TraceRecordHeader->setID = dataPointer->setID;
+	  if (dataPointer->setName != NULL ) {
+	     TraceRecordHeader->nameLen = (int)strlen( dataPointer->setName );
+ 	     /*================================================* 
+	     // copy name directly into the end of the buffer.	*
+	     //================================================*/
+	     namePtr = (char *)TraceRecordHeader + procTraceRecLen;
+	     memcpy(namePtr, dataPointer->setName, TraceRecordHeader->nameLen);
+	  } else {
+	     TraceRecordHeader->nameLen = 0;
+	  }   
+	} else {
+	  TraceRecordHeader->setID = NoDSid;
+	  TraceRecordHeader->nameLen = 0;
+        } 
 
 #ifdef DEBUG
 	fprintf( debugFile, "HDFprocEventRecord done\n" );
@@ -680,22 +576,14 @@ TR_RECORD *miscEventRecord( int recordType,
        case ID_malloc:
        case ID_free:
 	  miscRecord.seconds = clockToSeconds( timeStamp ) ;
-	  miscRecord.bytes = *(size_t *)dataPointer;
           miscRecord.eventID = eventID ;
 	  break;
        case -ID_malloc:
        case -ID_free:
+	  miscRecord.bytes = *(size_t *)dataPointer;
           miscRecord.duration = clockToSeconds( timeStamp) 
                                       - miscRecord.seconds;
           return &traceRecord;		/* generate trace record */
-	  break;
-       case ID_timeStamp:
-       case -ID_timeStamp:
-	  miscRecord.seconds = clockToSeconds( timeStamp ) ;
-	  miscRecord.bytes = 0;
-          miscRecord.eventID = eventID ;
-          miscRecord.duration = 0;
-          return &traceRecord;	
 	  break;
        default:
           fprintf( stderr, "miscEventRecord: unknown eventID %d\n", eventID );
@@ -738,121 +626,60 @@ int findHDFProcEvent( int eventID )
 	}
 	return procIndex;
 }
+void createHDFTraceDescriptor( int Inx )
+{
+        char BUF1[256], BUF2[256] ;
+	int FAMILY;
+        strcpy( BUF2, "HDF ");
+        strcat( BUF2, HDFProcNames[Inx] );
+        strcat( BUF2, " Procedure");
+        strcpy( BUF1, BUF2 );
+        strcat( BUF1, " Trace");
+
+	FAMILY = HDF_FAMILY + (Inx + 1)*8;
+        _hdfTraceDescriptor( BUF1, BUF2, FAMILY );
+}
 /*======================================================================*
 // NAME									*
-//	_hdfTraceEntryDescriptor					* 
+//	_hdfTraceDescriptor						* 
 //	   Generate a SDDF binary format record descriptor for the	* 
 //	   full trace class of events in the HDF procedure entry 	* 
 // USAGE								*
-//      _hdfTraceEntryDescriptro()					*
+//   _hdfTraceDescriptro( recordName, recordDescription, recordFamily )	*
 // RETURNS								*
 //      void								*
 //======================================================================*/
-void _hdfTraceEntryDescriptor( void )
+void _hdfTraceDescriptor( char *recordName,
+                    	  char *recordDescription,
+                          int recordFamily )
 {
     static char recordBuffer[ 4096 ];
     int         recordLength;
 
-#ifdef DEBUG
-	fprintf( debugFile, "_hdfTraceEntryDescriptor entered\n" );
-	fflush( debugFile );
-#endif /* DEBUG */
     hdfRecordPointer = recordBuffer;
-    /*==================================================================* 
+    /*===================================================================
     // Allow space at the beginning of the record for the packet        *
     //length which will be computed after the packet is complete.       *
     //==================================================================*/
     sddfWriteInteger( &hdfRecordPointer, 0 );
-    /*==================================================================* 
-    // The record type, tag, and name                                   * 
+    /*===================================================================
+    // The record type, tag, and name                                   *
     //==================================================================*/
     sddfWriteInteger( &hdfRecordPointer, PKT_DESCRIPTOR );
-    sddfWriteInteger( &hdfRecordPointer, ( FAMILY_PROCENTRY | RECORD_TRACE ) );
-    sddfWriteString( &hdfRecordPointer, "HDF Procedure Entry Trace" );
-    /*==================================================================*
+    sddfWriteInteger( &hdfRecordPointer, ( recordFamily | RECORD_TRACE ) );
+    sddfWriteString( &hdfRecordPointer, recordName );
+    /*===================================================================
     // The record attribute count and string pair                       *
     //==================================================================*/
     sddfWriteInteger( &hdfRecordPointer, 1 );
     sddfWriteString( &hdfRecordPointer, "description" );
-    sddfWriteString( &hdfRecordPointer, "HDF Procedure Entry Trace Record" );
+    sddfWriteString( &hdfRecordPointer, recordDescription );
     /*==================================================================*
     // The record field count                                           * 
     //==================================================================*/
     sddfWriteInteger( &hdfRecordPointer, 5);
     /*==================================================================* 
     // Create fields                                               	*
-    //==================================================================*/
-    WRITE_HDF_FIELD( "Event Identifier", 
-		     "Event ID", 
-		     "Event Identifier Number", 
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "Seconds", 
-		     "Seconds", 
-		     "Floating Point Timestamp", 
-		     DOUBLE, 0 );
-    WRITE_HDF_FIELD( "Source Byte", 
-		     "Byte", 
-		     "Source Byte Offset", 
-		     LONG, 0 );
-    WRITE_HDF_FIELD( "Source Line", 
-		     "Line", 
-		     "Source Line Number",
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "Processor Number", 
-		     "Node", 
-		     "Processor number", 
-		     INTEGER, 0 );
-
-    recordLength = (int)(hdfRecordPointer - recordBuffer);
-
-    hdfRecordPointer = recordBuffer;
-    sddfWriteInteger( &hdfRecordPointer, recordLength );
-
-    putBytes( recordBuffer, (unsigned) recordLength );
-}
-/*======================================================================*
-// NAME									*
-//	_hdfTraceExitDescriptor	     					* 
-//	   Generate a SDDF binary format record descriptor for the	* 
-//	   full trace class of events in the HDF procedure exit  	* 
-// USAGE								*
-//	_hdfTraceExitDescriptor()					*	
-// RETURNS								*
-//  	void								*
-//======================================================================*/
-void _hdfTraceExitDescriptor( void )
-{
-    static char recordBuffer[ 4096 ];
-    int         recordLength;
-
-#ifdef DEBUG
-	fprintf( debugFile, "_hdfExitTraceDescriptor entered\n" );
-	fflush( debugFile );
-#endif /* DEBUG */
-    hdfRecordPointer = recordBuffer;
-    /*==================================================================* 
-    // Allow space at the beginning of the record for the packet        * 
-    // length which will be computed after the packet is complete.      * 
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 0 );
-    /*==================================================================* 
-    // The record type, tag, and name                                   * 
-    /===================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, PKT_DESCRIPTOR );
-    sddfWriteInteger( &hdfRecordPointer, ( FAMILY_PROCEXIT | RECORD_TRACE ) );
-    sddfWriteString( &hdfRecordPointer, "HDF Procedure Exit Trace" );
-    /*==================================================================*
-    // The record attribute count and string pair                       *
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 1 );
-    sddfWriteString( &hdfRecordPointer, "description" );
-    sddfWriteString( &hdfRecordPointer, "HDF Procedure Exit Trace Record" );
-    /*==================================================================* 
-    // The record field count                                           *
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 5);
-    /*==================================================================* 
-    // Create fields                                               	* 
     //==================================================================*/
     WRITE_HDF_FIELD(  "Event Identifier", 
 		      "Event ID", 
@@ -870,9 +697,10 @@ void _hdfTraceExitDescriptor( void )
 		      "Node", 
 		      "Processor number", 
 		      INTEGER, 0 );
-    WRITE_HDF_FIELD( "HDF Name",
-                     "HDF Name", "Name of File, Data Set or Dim",
+    WRITE_HDF_FIELD(  "HDF Name",
+                      "HDF Name", "Name of File, Data Set or Dim",
                       CHARACTER, 1 );
+
 
     recordLength = (int)(hdfRecordPointer - recordBuffer);
 
@@ -881,7 +709,6 @@ void _hdfTraceExitDescriptor( void )
 
     putBytes( recordBuffer, (unsigned) recordLength );
 }
-
 /*======================================================================*
 // NAME									*
 //	_hdfMiscDescriptor						* 
@@ -954,75 +781,5 @@ void _hdfMiscDescriptor( void )
 
     putBytes( recordBuffer, (unsigned) recordLength );
 }
-/*======================================================================*
-// NAME									*
-//	_hdfProcNameDescriptor						* 
-//	   Generate a SDDF binary format record descriptor for the	* 
-//	   HDFProcName Records                                   	* 
-// USAGE								*
-//      _hdfProcNameDescriptor()					*
-// RETURNS								*
-//      void								*
-//======================================================================*/
-void _hdfProcNameDescriptor( void )
-{
-    static char recordBuffer[ 4096 ];
-    int         recordLength;
 
-#ifdef DEBUG
-	fprintf( debugFile, "_hdfProcNameDescriptor entered\n" );
-	fflush( debugFile );
-#endif /* DEBUG */
-    hdfRecordPointer = recordBuffer;
-    /*==================================================================* 
-    // Allow space at the beginning of the record for the packet        *
-    //length which will be computed after the packet is complete.       *
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 0 );
-    /*==================================================================* 
-    // The record type, tag, and name                                   * 
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, PKT_DESCRIPTOR );
-    sddfWriteInteger( &hdfRecordPointer, ( FAMILY_HDFPROCNAME| RECORD_TRACE ) );
-    sddfWriteString( &hdfRecordPointer, "HDF Procedure Information" );
-    /*==================================================================*
-    // The record attribute count and string pair                       *
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 1 );
-    sddfWriteString( &hdfRecordPointer, "description" );
-    sddfWriteString( &hdfRecordPointer, "HDF Proc Info Record" );
-    /*==================================================================*
-    // The record field count                                           * 
-    //==================================================================*/
-    sddfWriteInteger( &hdfRecordPointer, 5);
-    /*==================================================================* 
-    // Create fields                                               	*
-    //==================================================================*/
-    WRITE_HDF_FIELD( "Event Identifier", 
-		     "Event ID", 
-		     "Event Identifier Number", 
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "HDF Proc Event Id", 
-		     "HDF Proc Event Identifier", 
-		     "HDF Proc Event Identifier Number", 
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "HDF Proc Index", 
-		     "HDF Proc Index", 
-		     "Index of HDF Proc in Tables", 
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "Num HDF Procs", 
-		     "Num HDF Procs", 
-		     "Number of HDF Procedures", 
-		     INTEGER, 0 );
-    WRITE_HDF_FIELD( "HDF Proc Name",
-                     "HDF Proc Name", 
-		     "Name of HDF Procedure",
-                     CHARACTER, 1 );
-    recordLength = (int)(hdfRecordPointer - recordBuffer);
-
-    hdfRecordPointer = recordBuffer;
-    sddfWriteInteger( &hdfRecordPointer, recordLength );
-
-    putBytes( recordBuffer, (unsigned) recordLength );
-}
 /*#endif */ /* HAVE_PABLO */ 
