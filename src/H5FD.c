@@ -1521,7 +1521,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF,
                   "memory allocation failed");
         }
-        if (H5FDread(file, H5P_DEFAULT, old_addr, old_size, buf)<0 ||
+        if (H5FDread(file, type, H5P_DEFAULT, old_addr, old_size, buf)<0 ||
                 H5FDwrite(file, type, H5P_DEFAULT, new_addr, old_size, buf)) {
             H5FDfree(file, type, new_addr, new_size);
             H5MM_xfree(buf);
@@ -1808,7 +1808,7 @@ H5FD_get_eof(H5FD_t *file)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 	 void *buf/*out*/)
 {
     FUNC_ENTER(H5FDread, FAIL);
@@ -1829,7 +1829,7 @@ H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     }
 
     /* Do the real work */
-    if (H5FD_read(file, dxpl_id, addr, size, buf)<0) {
+    if (H5FD_read(file, type, dxpl_id, addr, size, buf)<0) {
 	HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file read request failed");
     }
 
@@ -1854,7 +1854,7 @@ H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 	  void *buf/*out*/)
 {
     FUNC_ENTER(H5FD_read, FAIL);
@@ -1876,13 +1876,16 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         hsize_t amount_read;        /* Amount to read at a time */
         hsize_t read_off;           /* Offset to read from */
 
+        /* Double check that we aren't reading raw data */
+        assert(type!=H5FD_MEM_DRAW);
+
         /* Read the part before the metadata accumulator */
         if(addr<file->accum_loc) {
             /* Set the amount to read */
             amount_read=file->accum_loc-addr;
 
             /* Dispatch to driver */
-            if ((file->cls->read)(file, dxpl_id, addr, amount_read, read_buf)<0)
+            if ((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf)<0)
                 HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
 
             /* Adjust the buffer, address & size */
@@ -1911,7 +1914,7 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         /* Read the part after the metadata accumulator */
         if(size>0 && addr>=(file->accum_loc+file->accum_size)) {
             /* Dispatch to driver */
-            if ((file->cls->read)(file, dxpl_id, addr, size, read_buf)<0)
+            if ((file->cls->read)(file, type, dxpl_id, addr, size, read_buf)<0)
                 HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
 
             /* Adjust the buffer, address & size */
@@ -1925,7 +1928,7 @@ H5FD_read(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     } /* end if */
     else {
         /* Dispatch to driver */
-        if ((file->cls->read)(file, dxpl_id, addr, size, buf)<0)
+        if ((file->cls->read)(file, type, dxpl_id, addr, size, buf)<0)
             HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver read request failed");
     } /* end else */
 

@@ -162,7 +162,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                           "external data read failed");
                 }
             } else {
-                if (H5F_contig_read(f, addr, seq_len, dxpl_id, buf)<0) {
+                if (H5F_contig_read(f, H5FD_MEM_DRAW, addr, seq_len, dxpl_id, buf)<0) {
                     HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                               "block read failed");
                 }

@@ -336,7 +336,7 @@ H5B_load(H5F_t *f, haddr_t addr, const void *_type, void *udata)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)size, H5P_DEFAULT, bt->page)<0) {
+    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, (hsize_t)size, H5P_DEFAULT, bt->page)<0) {
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL,
 		      "can't read B-tree node");
     }

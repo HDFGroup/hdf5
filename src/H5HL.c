@@ -219,7 +219,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     assert(!udata1);
     assert(!udata2);
 
-    if (H5F_block_read(f, addr, (hsize_t)H5HL_SIZEOF_HDR(f), H5P_DEFAULT,
+    if (H5F_block_read(f, H5FD_MEM_LHEAP, addr, (hsize_t)H5HL_SIZEOF_HDR(f), H5P_DEFAULT,
 		       hdr) < 0) {
 	HRETURN_ERROR(H5E_HEAP, H5E_READERROR, NULL,
 		      "unable to read heap header");
@@ -259,7 +259,7 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 		     "memory allocation failed");
     }
     if (heap->disk_alloc &&
-	H5F_block_read(f, heap->addr, (hsize_t)(heap->disk_alloc),
+	H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, (hsize_t)(heap->disk_alloc),
 		       H5P_DEFAULT, heap->chunk + H5HL_SIZEOF_HDR(f)) < 0) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 		    "unable to read heap data");

@@ -332,7 +332,7 @@ __DLL__ herr_t H5F_arr_write (H5F_t *f, hid_t dxpl_id,
 			      const hssize_t file_offset[], const void *_buf);
 
 /* Functions that operate on blocks of bytes wrt boot block */
-__DLL__ herr_t H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
 			      hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                   hsize_t size, hid_t dxpl_id, const void *buf);

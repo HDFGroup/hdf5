@@ -376,7 +376,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
-    if (H5F_block_read(f, addr, hdr_size, H5P_DEFAULT, buf) < 0) {
+    if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, H5P_DEFAULT, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");
     }
@@ -433,7 +433,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
-	if (H5F_block_read(f, chunk_addr, chunk_size, H5P_DEFAULT,
+	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, H5P_DEFAULT,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 			"unable to read object header data");

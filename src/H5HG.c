@@ -256,7 +256,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if (H5F_block_read(f, addr, (hsize_t)H5HG_MINSIZE, H5P_DEFAULT,
+    if (H5F_block_read(f, H5FD_MEM_GHEAP, addr, (hsize_t)H5HG_MINSIZE, H5P_DEFAULT,
 		       heap->chunk)<0) {
 	HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 		     "unable to read global heap collection");
@@ -292,7 +292,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
-	if (H5F_block_read (f, next_addr, (hsize_t)(heap->size-H5HG_MINSIZE),
+	if (H5F_block_read (f, H5FD_MEM_GHEAP, next_addr, (hsize_t)(heap->size-H5HG_MINSIZE),
 			    H5P_DEFAULT, heap->chunk+H5HG_MINSIZE)<0) {
 	    HGOTO_ERROR (H5E_HEAP, H5E_READERROR, NULL,
 			 "unable to read global heap collection");

@@ -311,7 +311,7 @@ printf("%s: feature_flags=%lx\n",FUNC,(unsigned long)f->shared->lf->feature_flag
                       "external data read failed");
             }
         } else {
-            if (H5F_contig_read(f, addr, elmt_size, dxpl_id, buf)<0) {
+            if (H5F_contig_read(f, H5FD_MEM_DRAW, addr, elmt_size, dxpl_id, buf)<0) {
                 HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                           "block read failed");
             }

@@ -105,7 +105,7 @@ static herr_t H5FD_gass_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_gass_get_eoa(H5FD_t *_file);
 static herr_t H5FD_gass_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_gass_get_eof(H5FD_t *_file);
-static herr_t H5FD_gass_read(H5FD_t *_file, hid_t fapl_id, haddr_t addr,
+static herr_t H5FD_gass_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			     hsize_t size, void *buf);
 static herr_t H5FD_gass_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      hsize_t size, const void *buf);
@@ -575,7 +575,7 @@ H5FD_gass_get_eof(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_gass_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
+H5FD_gass_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, haddr_t addr,
                hsize_t size, void *buf/*out*/)
 {
     H5FD_gass_t         *file = (H5FD_gass_t*)_file;

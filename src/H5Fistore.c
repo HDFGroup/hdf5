@@ -1418,7 +1418,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	    /*
 	     * The chunk exists on disk.
 	     */
-	    if (H5F_block_read(f, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+	    if (H5F_block_read(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DEFAULT,
 			       chunk)<0) {
 		HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
 			     "unable to read raw data chunk");

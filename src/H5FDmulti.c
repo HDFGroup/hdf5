@@ -122,7 +122,7 @@ static haddr_t H5FD_multi_get_eof(H5FD_t *_file);
 static haddr_t H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size);
 static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr,
 			      hsize_t size);
-static herr_t H5FD_multi_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			      hsize_t size, void *_buf/*out*/);
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       hsize_t size, const void *_buf);
@@ -1320,6 +1320,9 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 static herr_t
 H5FD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
 {
+    /* Shut compiler up */
+    _f=_f;
+
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
@@ -1563,7 +1566,7 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, haddr_t addr, hsize_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		 void *_buf/*out*/)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
@@ -1594,7 +1597,7 @@ H5FD_multi_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     assert(hi>0);
 
     /* Read from that member */
-    return H5FDread(file->memb[hi], dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
+    return H5FDread(file->memb[hi], type, dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
 		    addr-start_addr, size, _buf);
 }
 

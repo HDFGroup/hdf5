@@ -127,7 +127,7 @@ typedef struct H5FD_class_t {
     haddr_t (*get_eoa)(H5FD_t *file);
     herr_t (*set_eoa)(H5FD_t *file, haddr_t addr);
     haddr_t (*get_eof)(H5FD_t *file);
-    herr_t (*read)(H5FD_t *file, hid_t dxpl, haddr_t addr, hsize_t size,
+    herr_t (*read)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size,
 		   void *buffer);
     herr_t (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl, haddr_t addr, hsize_t size,
 		    const void *buffer);
@@ -188,7 +188,7 @@ __DLL__ haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
 __DLL__ haddr_t H5FDget_eoa(H5FD_t *file);
 __DLL__ herr_t H5FDset_eoa(H5FD_t *file, haddr_t eof);
 __DLL__ haddr_t H5FDget_eof(H5FD_t *file);
-__DLL__ herr_t H5FDread(H5FD_t *file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+__DLL__ herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		void *buf/*out*/);
 __DLL__ herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		 const void *buf);

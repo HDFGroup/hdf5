@@ -76,7 +76,7 @@ static herr_t H5FD_family_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_family_get_eoa(H5FD_t *_file);
 static herr_t H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa);
 static haddr_t H5FD_family_get_eof(H5FD_t *_file);
-static herr_t H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr,
+static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       hsize_t size, void *_buf/*out*/);
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				hsize_t size, const void *_buf);
@@ -812,7 +812,7 @@ H5FD_family_get_eof(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
+H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size,
 		 void *_buf/*out*/)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
@@ -843,7 +843,7 @@ H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
         req = MIN(size, file->memb_size-sub);
         assert(i<file->nmembs);
 
-        if (H5FDread(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
+        if (H5FDread(file->memb[i], type, memb_dxpl_id, sub, req, buf)<0)
             HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 			  "member file read failed");
 

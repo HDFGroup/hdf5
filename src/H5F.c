@@ -600,7 +600,7 @@ H5F_locate_signature(H5FD_t *file)
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to set EOA value for file signature");
 	}
-	if (H5FD_read(file, H5P_DEFAULT, addr, H5F_SIGNATURE_LEN, buf)<0) {
+	if (H5FD_read(file, H5FD_MEM_SUPER, H5P_DEFAULT, addr, H5F_SIGNATURE_LEN, buf)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF,
 			  "unable to read file signature");
 	}
@@ -1108,7 +1108,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 			"unable to find file signature");
 	}
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size)<0 ||
-	    H5FD_read(lf, H5P_DEFAULT, shared->boot_addr, fixed_size, buf)<0) {
+	    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, shared->boot_addr, fixed_size, buf)<0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL,
 			"unable to read superblock");
 	}
@@ -1196,7 +1196,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 			H5G_SIZEOF_ENTRY(file);		/*root group ptr*/
 	assert(variable_size<=sizeof buf);
 	if (H5FD_set_eoa(lf, shared->boot_addr+fixed_size+variable_size)<0 ||
-	    H5FD_read(lf, H5P_DEFAULT, shared->boot_addr+fixed_size,
+	    H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, shared->boot_addr+fixed_size,
 		      variable_size, buf)<0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"unable to read superblock");
@@ -1215,7 +1215,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	if (H5F_addr_defined(shared->driver_addr)) {
 	    haddr_t drv_addr = shared->base_addr + shared->driver_addr;
 	    if (H5FD_set_eoa(lf, drv_addr+16)<0 ||
-		H5FD_read(lf, H5P_DEFAULT, drv_addr, 16, buf)<0) {
+		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr, 16, buf)<0) {
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			    "unable to read driver information block");
 	    }
@@ -1239,7 +1239,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 
 	    /* Read driver information and decode */
 	    if (H5FD_set_eoa(lf, drv_addr+16+driver_size)<0 ||
-		H5FD_read(lf, H5P_DEFAULT, drv_addr+16, driver_size, buf)<0) {
+		H5FD_read(lf, H5FD_MEM_SUPER, H5P_DEFAULT, drv_addr+16, driver_size, buf)<0) {
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			    "unable to read file driver information");
 	    }
@@ -2563,7 +2563,7 @@ H5F_get_driver_id(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size, hid_t dxpl_id,
+H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
 	       void *buf/*out*/)
 {
     haddr_t		    abs_addr;
@@ -2576,7 +2576,7 @@ H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size, hid_t dxpl_id,
     abs_addr = f->shared->base_addr + addr;
 
     /* Read the data */
-    if (H5FD_read(f->shared->lf, dxpl_id, abs_addr, size, buf)<0) {
+    if (H5FD_read(f->shared->lf, type, dxpl_id, abs_addr, size, buf)<0) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
     }
     
