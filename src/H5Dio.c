@@ -25,7 +25,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
-#include "H5TBprivate.h"	/* Threaded, balanced, binary trees (TBBTs) */
+#include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /*#define H5D_DEBUG*/
@@ -35,13 +35,16 @@
 #   include "H5Rpublic.h"
 #endif /*H5_HAVE_PARALLEL*/
 
+/* Local macros */
+#define H5D_DEFAULT_SKIPLIST_HEIGHT     8
+
 /* Local typedefs */
 
 /* Information for mapping between file space and memory space */
 
 /* Structure holding information about a chunk's selection for mapping */
 typedef struct H5D_chunk_info_t {
-    hsize_t index;              /* "Index" of chunk in dataset (must be first for TBBT routines) */
+    hsize_t index;              /* "Index" of chunk in dataset */
     size_t chunk_points;        /* Number of elements selected in chunk */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
@@ -51,7 +54,7 @@ typedef struct H5D_chunk_info_t {
 
 /* Main structure holding the mapping between file chunks and memory */
 typedef struct fm_map {
-    H5TB_TREE *fsel;            /* TBBT containing file dataspaces for all chunks */
+    H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
     const H5S_t *file_space;    /* Pointer to the file dataspace */
@@ -120,7 +123,7 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
         const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
 static herr_t H5D_destroy_chunk_map(const fm_map *fm);
-static void H5D_free_chunk_info(void *chunk_info);
+static herr_t H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata);
 static herr_t H5D_create_chunk_file_map_hyper(const fm_map *fm);
 static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
@@ -1610,7 +1613,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     fm_map      fm;                     /* File<->memory mapping */
-    H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
+    H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1657,15 +1660,15 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 || dataset->shared->efl.nused>0 || 0 == nelmts
                 || dataset->shared->layout.type==H5D_COMPACT);
 
-        /* Get first node in chunk tree */
-        chunk_node=H5TB_first(fm.fsel->root);
+        /* Get first node in chunk skip list */
+        chunk_node=H5SL_first(fm.fsel);
 
         /* Iterate through chunks to be operated on */
         while(chunk_node) {
             H5D_chunk_info_t *chunk_info;   /* chunk information */
 
-            /* Get the actual chunk information from the tree node */
-            chunk_info=chunk_node->data;
+            /* Get the actual chunk information from the skip list node */
+            chunk_info=H5SL_item(chunk_node);
 
             /* Pass in chunk's coordinates in a union. */
             store.chunk.offset = chunk_info->coords;
@@ -1681,8 +1684,8 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             if (status<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
 
-            /* Get the next chunk node in the tree */
-            chunk_node=H5TB_next(chunk_node);
+            /* Get the next chunk node in the skip list */
+            chunk_node=H5SL_next(chunk_node);
         } /* end while */
         
 #ifdef H5S_DEBUG
@@ -1755,15 +1758,15 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     
     /* Loop over all the chunks, performing I/O on each */
 
-    /* Get first node in chunk tree */
-    chunk_node=H5TB_first(fm.fsel->root);
+    /* Get first node in chunk skip list */
+    chunk_node=H5SL_first(fm.fsel);
 
     /* Iterate through chunks to be operated on */
     while(chunk_node) {
         H5D_chunk_info_t *chunk_info;   /* chunk information */
 
-        /* Get the actual chunk information from the tree nodes */
-        chunk_info=chunk_node->data;
+        /* Get the actual chunk information from the skip list nodes */
+        chunk_info=H5SL_item(chunk_node);
 
         /* initialize selection iterator */
         if (H5S_select_iter_init(&file_iter, chunk_info->fspace, src_type_size)<0)
@@ -1865,8 +1868,8 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             bkg_iter_init=0;
         } /* end if */
 
-        /* Get the next chunk node in the tree */
-        chunk_node=H5TB_next(chunk_node);
+        /* Get the next chunk node in the skip list */
+        chunk_node=H5SL_next(chunk_node);
     } /* end while */
      
 done:
@@ -1922,7 +1925,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
     fm_map      fm;                     /* File<->memory mapping */
-    H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
+    H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
     herr_t      status;                 /*function return status*/     
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
@@ -1963,15 +1966,15 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        /* Get first node in chunk tree */
-        chunk_node=H5TB_first(fm.fsel->root);
+        /* Get first node in chunk skip list */
+        chunk_node=H5SL_first(fm.fsel);
 
         /* Iterate through chunks to be operated on */
         while(chunk_node) {
             H5D_chunk_info_t *chunk_info;   /* chunk information */
 
-            /* Get the actual chunk information from the tree node */
-            chunk_info=chunk_node->data;
+            /* Get the actual chunk information from the skip list node */
+            chunk_info=H5SL_item(chunk_node);
 
             /* Pass in chunk's coordinates in a union. */
             store.chunk.offset = chunk_info->coords;
@@ -1987,8 +1990,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             if (status<0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
 
-            /* Get the next chunk node in the tree */
-            chunk_node=H5TB_next(chunk_node);
+            /* Get the next chunk node in the skip list */
+            chunk_node=H5SL_next(chunk_node);
         } /* end while */
         
 #ifdef H5S_DEBUG
@@ -2065,15 +2068,15 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
     /* Loop over all the chunks, performing I/O on each */
 
-    /* Get first node in chunk tree */
-    chunk_node=H5TB_first(fm.fsel->root);
+    /* Get first node in chunk skip list */
+    chunk_node=H5SL_first(fm.fsel);
 
     /* Iterate through chunks to be operated on */
     while(chunk_node) {
         H5D_chunk_info_t *chunk_info;   /* chunk information */
 
-        /* Get the actual chunk information from the tree node */
-        chunk_info=chunk_node->data;
+        /* Get the actual chunk information from the skip list node */
+        chunk_info=H5SL_item(chunk_node);
 
         /* initialize selection iterator */
         if (H5S_select_iter_init(&file_iter, chunk_info->fspace, dst_type_size)<0)
@@ -2174,8 +2177,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             bkg_iter_init=0;
         } /* end if */
 
-        /* Get the next chunk node in the tree */
-        chunk_node=H5TB_next(chunk_node);
+        /* Get the next chunk node in the skip list */
+        chunk_node=H5SL_next(chunk_node);
     } /* end while */
 
 done:
@@ -2330,7 +2333,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    H5TB_NODE *curr_node;       /* Current node in TBBT */
+    H5SL_node_t *curr_node;     /* Current node in skip list */
     H5S_sel_type fsel_type;     /* Selection type on disk */
     char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
@@ -2385,9 +2388,9 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     if(H5V_array_down(f_ndims,fm->chunks,fm->down_chunks)<0)
         HGOTO_ERROR (H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
-    /* Initialize TBBT for chunk selections */
-    if((fm->fsel=H5TB_fast_dmake(H5TB_FAST_HSIZE_COMPARE))==NULL)
-        HGOTO_ERROR(H5E_DATASET,H5E_CANTMAKETREE,FAIL,"can't create TBBT for chunk selections")
+    /* Initialize skip list for chunk selections */
+    if((fm->fsel=H5SL_create(H5SL_TYPE_HSIZE,0.5,H5D_DEFAULT_SKIPLIST_HEIGHT))==NULL)
+        HGOTO_ERROR(H5E_DATASET,H5E_CANTMAKETREE,FAIL,"can't create skip list for chunk selections")
 
     /* Initialize "last chunk" information */
     fm->last_index=(hsize_t)-1;
@@ -2424,20 +2427,20 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
 
         /* Clean file chunks' hyperslab span "scratch" information */
-        curr_node=H5TB_first(fm->fsel->root);
+        curr_node=H5SL_first(fm->fsel);
         while(curr_node) {
             H5D_chunk_info_t *chunk_info;   /* Pointer chunk information */
 
             /* Get pointer to chunk's information */
-            chunk_info=curr_node->data;
+            chunk_info=H5SL_item(curr_node);
             assert(chunk_info);
 
             /* Clean hyperslab span's "scratch" information */
             if(H5S_hyper_reset_scratch(chunk_info->fspace)<0)
                 HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
-            /* Get the next chunk node in the TBBT */
-            curr_node=H5TB_next(curr_node);
+            /* Get the next chunk node in the skip list */
+            curr_node=H5SL_next(curr_node);
         } /* end while */
     } /* end else */
 
@@ -2486,20 +2489,20 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         /* Clean up hyperslab stuff, if necessary */
         if(fm->msel_type!=H5S_SEL_POINTS) {
             /* Clean memory chunks' hyperslab span "scratch" information */
-            curr_node=H5TB_first(fm->fsel->root);
+            curr_node=H5SL_first(fm->fsel);
             while(curr_node) {
                 H5D_chunk_info_t *chunk_info;   /* Pointer chunk information */
 
                 /* Get pointer to chunk's information */
-                chunk_info=curr_node->data;
+                chunk_info=H5SL_item(curr_node);
                 assert(chunk_info);
 
                 /* Clean hyperslab span's "scratch" information */
                 if(H5S_hyper_reset_scratch(chunk_info->mspace)<0)
                     HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
-                /* Get the next chunk node in the TBBT */
-                curr_node=H5TB_next(curr_node);
+                /* Get the next chunk node in the skip list */
+                curr_node=H5SL_next(curr_node);
             } /* end while */
         } /* end if */
     } /* end else */
@@ -2541,24 +2544,23 @@ done:
  NAME
     H5D_free_chunk_info
  PURPOSE
-    Internal routine to destroy a chunk info node  (Wrapper for compatibility
-    with H5TB_dfree)
+    Internal routine to destroy a chunk info node
  USAGE
     void H5D_free_chunk_info(chunk_info)
         void *chunk_info;    IN: Pointer to chunk info to destroy
  RETURNS
     No return value
  DESCRIPTION
-    Releases all the memory for a chunk info node.
+    Releases all the memory for a chunk info node.  Called by H5SL_iterate
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5D_free_chunk_info(void *_chunk_info)
+static herr_t
+H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
 {
-    H5D_chunk_info_t *chunk_info=(H5D_chunk_info_t *)_chunk_info;
+    H5D_chunk_info_t *chunk_info=(H5D_chunk_info_t *)item;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_free_chunk_info)
 
@@ -2574,7 +2576,7 @@ H5D_free_chunk_info(void *_chunk_info)
     /* Free the actual chunk info */
     H5FL_FREE(H5D_chunk_info_t,chunk_info);
 
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(0);
 }   /* H5D_free_chunk_info() */
 
 
@@ -2599,9 +2601,14 @@ H5D_destroy_chunk_map(const fm_map *fm)
      
     FUNC_ENTER_NOAPI_NOINIT(H5D_destroy_chunk_map)
 
-    /* Free the chunk info tree */
-    if(fm->fsel)
-        H5TB_dfree(fm->fsel,H5D_free_chunk_info,NULL);
+    /* Free the chunk info skip list */
+    if(fm->fsel) {
+        if(H5SL_count(fm->fsel)>0)
+            if(H5SL_iterate(fm->fsel,H5D_free_chunk_info,NULL)<0)
+                HGOTO_ERROR(H5E_PLIST,H5E_CANTNEXT,FAIL,"can't iterate over chunks")
+
+        H5SL_close(fm->fsel);
+    } /* end if */
 
     /* Free the memory chunk dataspace template */
     if(fm->mchunk_tmpl)
@@ -2673,7 +2680,7 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
         /* (Casting away const OK - QAK) */
         if(H5S_hyper_intersect_block((H5S_t *)fm->file_space,coords,end)==TRUE) {
             H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
-            H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into tree */
+            H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
             /* Create "temporary" chunk for selection operations (copy file space) */
@@ -2735,10 +2742,10 @@ H5D_create_chunk_file_map_hyper(const fm_map *fm)
                 new_chunk_info->coords[u]=coords[u];
             new_chunk_info->coords[fm->f_ndims]=0;
 
-            /* Insert the new chunk into the TBBT tree */
-            if(H5TB_dins(fm->fsel,new_chunk_info,new_chunk_info)==NULL) {
-                H5D_free_chunk_info(new_chunk_info);
-                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into TBBT")
+            /* Insert the new chunk into the skip list */
+            if(H5SL_insert(fm->fsel,new_chunk_info,&new_chunk_info->index)<0) {
+                H5D_free_chunk_info(new_chunk_info,NULL,NULL);
+                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into skip list")
             } /* end if */
 
             /* Get number of elements selected in chunk */
@@ -2813,10 +2820,10 @@ done:
 static herr_t 
 H5D_create_chunk_mem_map_hyper(const fm_map *fm)
 {
-    H5TB_NODE *curr_node;                   /* Current node in TBBT */
-    hsize_t    file_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hsize_t    file_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
-    hsize_t    mem_sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    H5SL_node_t *curr_node;                 /* Current node in skip list */
+    hsize_t    file_sel_start[H5O_LAYOUT_NDIMS];    /* Offset of low bound of file selection */
+    hsize_t    file_sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
+    hsize_t    mem_sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t    mem_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hssize_t adjust[H5O_LAYOUT_NDIMS];      /* Adjustment to make to all file chunks */
     hssize_t chunk_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
@@ -2829,14 +2836,14 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     assert(fm->f_ndims>0);
 
     /* Check for all I/O going to a single chunk */
-    if(H5TB_count(fm->fsel)==1) {
+    if(H5SL_count(fm->fsel)==1) {
         H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
 
         /* Get the node */
-        curr_node=H5TB_first(fm->fsel->root);
+        curr_node=H5SL_first(fm->fsel);
 
         /* Get pointer to chunk's information */
-        chunk_info=curr_node->data;
+        chunk_info=H5SL_item(curr_node);
         assert(chunk_info);
 
         /* Check if it's OK to share dataspace */
@@ -2872,12 +2879,12 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         } /* end for */
 
         /* Iterate over each chunk in the chunk list */
-        curr_node=H5TB_first(fm->fsel->root);
+        curr_node=H5SL_first(fm->fsel);
         while(curr_node) {
             H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
 
             /* Get pointer to chunk's information */
-            chunk_info=curr_node->data;
+            chunk_info=H5SL_item(curr_node);
             assert(chunk_info);
 
             /* Copy the information */
@@ -2904,8 +2911,8 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
             if(H5S_hyper_adjust_s(chunk_info->mspace,chunk_adjust)<0) /*lint !e772 The chunk_adjust array will always be initialized */
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
 
-            /* Get the next chunk node in the TBBT */
-            curr_node=H5TB_next(curr_node);
+            /* Get the next chunk node in the skip list */
+            curr_node=H5SL_next(curr_node);
         } /* end while */
     } /* end else */
 
@@ -2945,7 +2952,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
     if(H5V_chunk_index(ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
-    /* Find correct chunk in file & memory TBBTs */
+    /* Find correct chunk in file & memory skip list */
     if(chunk_index==fm->last_index) {
         /* If the chunk index is the same as the last chunk index we used,
          * get the cached info to operate on.
@@ -2953,67 +2960,58 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
         chunk_info=fm->last_chunk_info;
     } /* end if */
     else {
-        H5TB_NODE *chunk_node;       /* TBBT node holding chunk information */
-
         /* If the chunk index is not the same as the last chunk index we used,
-         * find the chunk in the tree.
+         * find the chunk in the skip list.
          */
-        /* Get the chunk node from the TBBT */
-        if((chunk_node=H5TB_dfind(fm->fsel,&chunk_index,NULL))==NULL) {
-            H5D_chunk_info_t *new_chunk_info;   /* Chunk information to insert into tree */
+        /* Get the chunk node from the skip list */
+        if((chunk_info=H5SL_search(fm->fsel,&chunk_index))==NULL) {
             H5S_t *fspace;                      /* Memory chunk's dataspace */
 
             /* Allocate the file & memory chunk information */
-            if (NULL==(new_chunk_info = H5FL_MALLOC (H5D_chunk_info_t)))
+            if (NULL==(chunk_info = H5FL_MALLOC (H5D_chunk_info_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
 
             /* Initialize the chunk information */
 
             /* Set the chunk index */
-            new_chunk_info->index=chunk_index;
+            chunk_info->index=chunk_index;
 
             /* Create a dataspace for the chunk */
             if((fspace = H5S_create_simple(fm->f_ndims,fm->chunk_dim,NULL))==NULL) {
-                H5FL_FREE(H5D_chunk_info_t,new_chunk_info);
+                H5FL_FREE(H5D_chunk_info_t,chunk_info);
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace for chunk")
             } /* end if */
 
             /* De-select the chunk space */
             if(H5S_select_none(fspace)<0) {
                 (void)H5S_close(fspace);
-                H5FL_FREE(H5D_chunk_info_t,new_chunk_info);
+                H5FL_FREE(H5D_chunk_info_t,chunk_info);
                 HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select dataspace")
             } /* end if */
 
             /* Set the file chunk dataspace */
-            new_chunk_info->fspace=fspace;
+            chunk_info->fspace=fspace;
 
             /* Set the memory chunk dataspace */
-            new_chunk_info->mspace=NULL;
-            new_chunk_info->mspace_shared=0;
+            chunk_info->mspace=NULL;
+            chunk_info->mspace_shared=0;
 
             /* Set the number of selected elements in chunk to zero */
-            new_chunk_info->chunk_points=0;
+            chunk_info->chunk_points=0;
 
             /* Compute the chunk's coordinates */
             for(u=0; u<fm->f_ndims; u++) {
                 H5_CHECK_OVERFLOW(fm->layout->u.chunk.dim[u],hsize_t,hssize_t);
-                new_chunk_info->coords[u]=(coords[u]/(hssize_t)fm->layout->u.chunk.dim[u])*(hssize_t)fm->layout->u.chunk.dim[u];
+                chunk_info->coords[u]=(coords[u]/(hssize_t)fm->layout->u.chunk.dim[u])*(hssize_t)fm->layout->u.chunk.dim[u];
             } /* end for */
-            new_chunk_info->coords[fm->f_ndims]=0;
+            chunk_info->coords[fm->f_ndims]=0;
 
-            /* Insert the new chunk into the TBBT tree */
-            if(H5TB_dins(fm->fsel,new_chunk_info,new_chunk_info)==NULL) {
-                H5D_free_chunk_info(new_chunk_info);
-                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into TBBT")
+            /* Insert the new chunk into the skip list */
+            if(H5SL_insert(fm->fsel,chunk_info,&chunk_info->index)<0) {
+                H5D_free_chunk_info(chunk_info,NULL,NULL);
+                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into skip list")
             } /* end if */
-
-            /* Save the chunk info pointer */
-            chunk_info=new_chunk_info;
         } /* end if */
-        else
-            /* Get the information from the node */
-            chunk_info=(H5D_chunk_info_t *)(chunk_node->data);
 
         /* Update the "last chunk seen" information */
         fm->last_index=chunk_index;
@@ -3069,7 +3067,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
     if(H5V_chunk_index(ndims,coords,fm->layout->u.chunk.dim,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
-    /* Find correct chunk in file & memory TBBTs */
+    /* Find correct chunk in file & memory skip list */
     if(chunk_index==fm->last_index) {
         /* If the chunk index is the same as the last chunk index we used,
          * get the cached spaces to operate on.
@@ -3077,17 +3075,12 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
         chunk_info=fm->last_chunk_info;
     } /* end if */
     else {
-        H5TB_NODE *chunk_node;       /* TBBT node holding chunk information */
-
         /* If the chunk index is not the same as the last chunk index we used,
-         * find the chunk in the tree.
+         * find the chunk in the skip list.
          */
-        /* Get the chunk node from the TBBT */
-        if((chunk_node=H5TB_dfind(fm->fsel,&chunk_index,NULL))==NULL)
-            HGOTO_ERROR(H5E_DATASPACE,H5E_NOTFOUND,FAIL,"can't locate chunk in TBBT")
-
-        /* Get the chunk info pointer */
-        chunk_info=(H5D_chunk_info_t *)(chunk_node->data);
+        /* Get the chunk node from the skip list */
+        if((chunk_info=H5SL_search(fm->fsel,&chunk_index))==NULL)
+            HGOTO_ERROR(H5E_DATASPACE,H5E_NOTFOUND,FAIL,"can't locate chunk in skip list")
 
         /* Check if the chunk already has a memory space */
         if(chunk_info->mspace==NULL) {

@@ -131,7 +131,7 @@
 
 /* Skip list node data structure */
 struct H5SL_node_t {
-    void *key;                          /* Pointer to node's key */
+    const void *key;                    /* Pointer to node's key */
     void *item;                         /* Pointer to node's item */
     size_t level;                       /* The level of this node */
     struct H5SL_node_t **forward;       /* Array of forward pointers from this node */
@@ -153,7 +153,7 @@ struct H5SL_t {
 
 /* Static functions */
 static size_t H5SL_random_level(int p1, size_t max_level);
-static H5SL_node_t * H5SL_new_node(size_t lvl, void *item, void *key);
+static H5SL_node_t * H5SL_new_node(size_t lvl, void *item, const void *key);
 
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
@@ -258,7 +258,7 @@ H5SL_random_level(int p1, size_t max_level)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static H5SL_node_t *
-H5SL_new_node(size_t lvl, void *item, void *key)
+H5SL_new_node(size_t lvl, void *item, const void *key)
 {
     H5SL_node_t *ret_value;      /* New skip list node */
 
@@ -309,7 +309,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Check args */
     HDassert(p>0.0 && p<1.0);
     HDassert(max_level>0 && max_level<=H5SL_LEVEL_MAX);
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_STR);
+    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_HSIZE);
 
     /* Allocate skip list structure */
     if((new_slist=H5FL_MALLOC(H5SL_t))==NULL)
@@ -406,7 +406,7 @@ H5SL_count(H5SL_t *slist)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5SL_insert(H5SL_t *slist, void *item, void *key)
+H5SL_insert(H5SL_t *slist, void *item, const void *key)
 {
     H5SL_node_t **update[H5SL_LEVEL_MAX];       /* 'update' vector */
     H5SL_node_t *checked;                       /* Pointer to last node checked */
@@ -432,15 +432,19 @@ H5SL_insert(H5SL_t *slist, void *item, void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_INSERT(SCALAR,slist,x,update,i,int,item,key,checked)
+            H5SL_INSERT(SCALAR,slist,x,update,i,const int,item,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_INSERT(SCALAR,slist,x,update,i,haddr_t,item,key,checked)
+            H5SL_INSERT(SCALAR,slist,x,update,i,const haddr_t,item,key,checked)
             break;
 
         case H5SL_TYPE_STR:
             H5SL_INSERT(STRING,slist,x,update,i,char *,item,key,checked)
+            break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_INSERT(SCALAR,slist,x,update,i,const hsize_t,item,key,checked)
             break;
     } /* end switch */
 
@@ -531,6 +535,10 @@ H5SL_search(H5SL_t *slist, const void *key)
         case H5SL_TYPE_STR:
             H5SL_SEARCH(STRING,slist,x,-,i,char *,-,key,checked)
             break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_SEARCH(SCALAR,slist,x,-,i,const hsize_t,-,key,checked)
+            break;
     } /* end switch */
 
     /* 'key' must not have been found in existing list, if we get here */
@@ -586,15 +594,19 @@ H5SL_remove(H5SL_t *slist, const void *key)
     x=slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,int,-,key,checked)
+            H5SL_REMOVE(SCALAR,slist,x,update,i,const int,-,key,checked)
             break;
 
         case H5SL_TYPE_HADDR:
-            H5SL_REMOVE(SCALAR,slist,x,update,i,haddr_t,-,key,checked)
+            H5SL_REMOVE(SCALAR,slist,x,update,i,const haddr_t,-,key,checked)
             break;
 
         case H5SL_TYPE_STR:
             H5SL_REMOVE(STRING,slist,x,update,i,char *,-,key,checked)
+            break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_REMOVE(SCALAR,slist,x,update,i,const hsize_t,-,key,checked)
             break;
     } /* end switch */
 
@@ -755,7 +767,8 @@ H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
     node=slist->header->forward[0];
     while(node!=NULL) {
         /* Call the iterator callback */
-        if((ret_value=(op)(node->item,node->key,op_data))!=0)
+        /* Casting away const OK -QAK */
+        if((ret_value=(op)(node->item,(void *)node->key,op_data))!=0)
             break;
 
         node=node->forward[0];

@@ -26,7 +26,7 @@ const char *FILENAME[] = {
     NULL
 };
 
-#include "H5TBprivate.h"
+#include "H5SLprivate.h"
 #include "H5Cprivate.h"
 
 /* with apologies for the abuse of terminology... */
@@ -242,9 +242,9 @@ typedef struct local_H5C_t
     H5C_cache_entry_t *         (index[H5C__HASH_TABLE_LEN]);
 
 
-    int32_t                     tree_len;
-    size_t                      tree_size;
-    H5TB_TREE *                 tree_ptr;
+    int32_t                     slist_len;
+    size_t                      slist_size;
+    H5SL_t *                    slist_ptr;
 
     int32_t                     pl_len;
     size_t                      pl_size;

@@ -1105,10 +1105,10 @@ H5P_free_prop(H5P_genprop_t *prop)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop_cb(void *item, void UNUSED *key, void *_make_cb)
+H5P_free_all_prop_cb(void *item, void UNUSED *key, void *op_data)
 {
     H5P_genprop_t *tprop=(H5P_genprop_t *)item;       /* Temporary pointer to property */
-    unsigned make_cb=*(unsigned *)_make_cb;     /* Whether to make property 'close' callback */
+    unsigned make_cb=*(unsigned *)op_data;     /* Whether to make property 'close' callback */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_free_all_prop_cb);
 
