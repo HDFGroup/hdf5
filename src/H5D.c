@@ -130,7 +130,7 @@ H5D_term_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5Dcreate
  *
- * Purpose:	Creates a new dataset named NAME in file FILE_ID, opens the
+ * Purpose:	Creates a new dataset named NAME at LOC_ID, opens the
  *		dataset for access, and associates with that dataset constant
  *		and initial persistent properties including the type of each
  *		datapoint as stored in the file (TYPE_ID), the size of the
@@ -168,10 +168,10 @@ H5D_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
+H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t create_parms_id)
 {
-    H5F_t		   *f = NULL;
+    H5G_t		   *loc = NULL;
     H5T_t		   *type = NULL;
     H5S_t		   *space = NULL;
     H5D_t		   *new_dset = NULL;
@@ -181,9 +181,8 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
     FUNC_ENTER(H5Dcreate, FAIL);
 
     /* Check arguments */
-    if (H5_FILE != H5I_group(file_id) ||
-	NULL == (f = H5I_object(file_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    if (NULL == (loc = H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
@@ -207,7 +206,8 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
     }
 
     /* build and open the new dataset */
-    if (NULL == (new_dset = H5D_create(f, name, type, space, create_parms))) {
+    if (NULL == (new_dset = H5D_create(loc, name, type, space,
+				       create_parms))) {
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		      "unable to create dataset");
     }
@@ -219,23 +219,20 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dopen
  *
- * Purpose:	Finds a dataset named NAME in file FILE_ID, opens it, and
- *		returns its ID.	 The dataset should be close when the caller
- *		is no longer interested in it.
+ * Purpose:	Finds a dataset named NAME at LOC_ID, opens it, and returns
+ *		its ID.	 The dataset should be close when the caller is no
+ *		longer interested in it.
  *
  * Return:	Success:	A new dataset ID
  *
  *		Failure:	FAIL
  *
  * Errors:
- *		ARGS	  BADTYPE	Not a file. 
- *		ARGS	  BADVALUE	No name. 
- *		DATASET	  CANTREGISTER	Can't register dataset. 
- *		DATASET	  NOTFOUND	Dataset not found. 
  *
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
@@ -245,25 +242,24 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dopen(hid_t file_id, const char *name)
+H5Dopen(hid_t loc_id, const char *name)
 {
-    H5F_t	*file = NULL;		/*file holding the dataset	*/
+    H5G_t	*loc = NULL;		/*location holding the dataset	*/
     H5D_t	*dataset = NULL;	/*the dataset			*/
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Dopen, FAIL);
 
     /* Check args */
-    if (H5_FILE != H5I_group(file_id) ||
-	NULL == (file = H5I_object(file_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    if (NULL == (loc = H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
     }
     
     /* Find the dataset */
-    if (NULL == (dataset = H5D_open(file, name))) {
+    if (NULL == (dataset = H5D_open(loc, name))) {
 	HRETURN_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "dataset not found");
     }
     
@@ -722,7 +718,7 @@ H5Dextend (hid_t dataset_id, const size_t *size)
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
+H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	   const H5D_create_t *create_parms)
 {
     H5D_t		*new_dset = NULL;
@@ -730,15 +726,17 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     intn		i, ndims;
     size_t		max_dim[H5O_LAYOUT_NDIMS];
     H5O_efl_t		*efl = NULL;
+    H5F_t		*f = H5G_fileof (loc);
 
     FUNC_ENTER(H5D_create, NULL);
 
     /* check args */
-    assert(f);
-    assert(name && *name);
-    assert(type);
-    assert(space);
-    assert(create_parms);
+    assert (f);
+    assert (loc);
+    assert (name && *name);
+    assert (type);
+    assert (space);
+    assert (create_parms);
 
     /* Initialize the dataset object */
     new_dset = H5MM_xcalloc(1, sizeof(H5D_t));
@@ -869,7 +867,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     }
 
     /* Give the dataset a name */
-    if (H5G_insert(name, &(new_dset->ent)) < 0) {
+    if (H5G_insert(loc, name, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
     }
 
@@ -913,27 +911,29 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_open(H5F_t *f, const char *name)
+H5D_open(H5G_t *loc, const char *name)
 {
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
     intn	i;
-
+    H5F_t	*f = NULL;
+    
     FUNC_ENTER(H5D_open, NULL);
 
     /* check args */
-    assert(f);
-    assert(name && *name);
-
+    assert (loc);
+    assert (name && *name);
+    
+    f = H5G_fileof (loc);
     dataset = H5MM_xcalloc(1, sizeof(H5D_t));
     dataset->create_parms = H5P_copy (H5P_DATASET_CREATE, &H5D_create_dflt);
     H5F_addr_undef(&(dataset->ent.header));
 
     /* Open the dataset object */
-    if (H5G_find(f, name, NULL, &(dataset->ent)) < 0) {
+    if (H5G_find(loc, name, NULL, &(dataset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
     }
-    if (H5O_open(f, &(dataset->ent)) < 0) {
+    if (H5O_open(&(dataset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
     }
     
@@ -1127,6 +1127,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
+    if (nelmts!=H5S_get_npoints (file_space)) {
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "src and dest data spaces have different sizes");
+    }
+    if (0==nelmts) HRETURN (SUCCEED);
     if (NULL == (tconv_func = H5T_find(dataset->type, mem_type,
 				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1142,10 +1147,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from file to memory data space");
     }
-    if (nelmts!=H5S_get_npoints (file_space)) {
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "src and dest data spaces have different sizes");
-    }
+	
     
     /*
      * If there is no type conversion then try reading directly into the
@@ -1352,6 +1354,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
+    if (nelmts!=H5S_get_npoints (file_space)) {
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "src and dest data spaces have different sizes");
+    }
+    if (0==nelmts) HRETURN (SUCCEED);
     if (NULL == (tconv_func = H5T_find(mem_type, dataset->type,
 				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1366,10 +1373,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (NULL==(sconv_func=H5S_find (mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "unable to convert from memory to file data space");
-    }
-    if (nelmts!=H5S_get_npoints (file_space)) {
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-		     "src and dest data spaces have different sizes");
     }
     
     /*

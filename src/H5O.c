@@ -147,6 +147,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 
     /* allocate disk space for header and first chunk */
     size = H5O_SIZEOF_HDR(f) + size_hint;
+    ent->file = f;
     if (H5MF_alloc(f, H5MF_META, size, &(ent->header)/*out*/) < 0) {
 	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		      "unable to allocate file space for object header hdr");
@@ -190,12 +191,13 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     }
 
     /* open it */
-    if (H5O_open(f, ent) < 0) {
+    if (H5O_open(ent) < 0) {
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL,
 		      "unable to open object header");
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_open
@@ -215,13 +217,13 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_open(H5F_t *f, H5G_entry_t *obj_ent)
+H5O_open(H5G_entry_t *obj_ent)
 {
     FUNC_ENTER(H5O_open, FAIL);
 
     /* Check args */
-    assert(f);
     assert(obj_ent);
+    assert(obj_ent->file);
 
 #ifdef H5O_DEBUG
     fprintf(stderr, ">");
@@ -230,10 +232,10 @@ H5O_open(H5F_t *f, H5G_entry_t *obj_ent)
 #endif
 
     /* Increment open-lock counters */
-    obj_ent->file = f;
     obj_ent->file->nopen++;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_close

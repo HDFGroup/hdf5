@@ -404,7 +404,7 @@ typedef struct H5F_file_t {
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t create_parms;	/* File-creation property list		*/
     H5F_access_t access_parms;  /* File-access property list		*/
-    struct H5G_entry_t *root_ent; /* Root symbol table entry		*/
+    struct H5G_t *root_grp;	/* Open root group			*/
 } H5F_file_t;
 
 /*

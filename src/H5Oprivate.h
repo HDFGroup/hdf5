@@ -202,7 +202,7 @@ typedef struct H5O_stab_t {
 
 /* General message operators */
 herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
-herr_t H5O_open (H5F_t *f, H5G_entry_t *ent);
+herr_t H5O_open (H5G_entry_t *ent);
 herr_t H5O_close (H5G_entry_t *ent);
 intn H5O_link (H5G_entry_t *ent, intn adjust);
 void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,

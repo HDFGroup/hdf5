@@ -538,8 +538,8 @@ H5F_dest(H5F_t *f)
 
     if (f) {
 	if (0 == --(f->shared->nrefs)) {
+	    /* Do not close the root group since we didn't count it */
 	    H5AC_dest(f);
-	    f->shared->root_ent = H5MM_xfree(f->shared->root_ent);
 	    f->shared = H5MM_xfree(f->shared);
 	}
 	f->name = H5MM_xfree(f->name);
@@ -834,7 +834,7 @@ H5F_open(const char *name, uintn flags,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
 			"can't write file boot block");
 	}
-	
+
     } else if (1 == f->shared->nrefs) {
 	/* For existing files we must read the boot block. */
 	if (H5F_locate_signature(f->shared->lf,
@@ -940,11 +940,11 @@ H5F_open(const char *name, uintn flags,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"can't read root symbol entry");
 	}
-	if (H5F_addr_defined(&(root_ent.header))) {
-	    f->shared->root_ent = H5MM_xmalloc(sizeof(H5G_entry_t));
-	    *(f->shared->root_ent) = root_ent;
+	if (H5G_mkroot (f, &root_ent)<0) {
+	    HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
+			 "unable to read root group");
 	}
-	
+
 	/*
 	 * The userdefined data is the area of the file before the base
 	 * address.
@@ -983,6 +983,12 @@ H5F_open(const char *name, uintn flags,
 	fprintf(stderr, " (abs)\n");
 #endif
 	H5F_low_seteof(f->shared->lf, &addr2);
+    }
+
+    /* Create and/or open the root group if we haven't already done so */
+    if (H5G_mkroot (f, NULL)<0) {
+	HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL,
+		     "unable to create/open root group");
     }
     
     /* Success! */
@@ -1268,7 +1274,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     H5F_addr_encode(f, &p, &(f->shared->smallobj_addr));
     H5F_addr_encode(f, &p, &(f->shared->freespace_addr));
     H5F_addr_encode(f, &p, &(f->shared->hdf5_eof));
-    H5G_ent_encode(f, &p, f->shared->root_ent);
+    H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
 
     /* update file length if necessary */
     if (!H5F_addr_defined(&(f->shared->hdf5_eof))) {
@@ -1312,8 +1318,8 @@ H5F_close(H5F_t *f)
     FUNC_ENTER(H5F_close, FAIL);
 
     /* Close all current working groups */
-    while (H5G_pop(f) >= 0) /*void*/;
-
+    while (H5G_pop(f)>=0) /*void*/;
+    
     /* Flush the boot block and caches */
     if (H5F_flush(f, TRUE) < 0) {
 	HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
@@ -1324,7 +1330,7 @@ H5F_close(H5F_t *f)
      * they have all been closed.  The file is in a consistent state now, so
      * forgetting to close everything is not a major problem.
      */
-    if (f->nopen > 0) {
+    if (f->nopen>0) {
 #ifndef NDEBUG
 	fprintf(stderr, "HDF5-DIAG: H5F_close: %u object header%s still "
 		"open (file close will complete when %s closed)\n",
@@ -1610,10 +1616,10 @@ H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	    (unsigned) (f->shared->create_parms.sharedheader_ver));
 
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-	    "Root symbol table entry:",
-	    f->shared->root_ent ? "" : "(none)");
-    if (f->shared->root_ent) {
-	H5G_ent_debug(f, f->shared->root_ent, stream,
+	    "Root group symbol table entry:",
+	    f->shared->root_grp ? "" : "(none)");
+    if (f->shared->root_grp) {
+	H5G_ent_debug(f, H5G_entof (f->shared->root_grp), stream,
 		      indent + 3, MAX(0, fwidth - 3));
     }
     FUNC_LEAVE(SUCCEED);

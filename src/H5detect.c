@@ -1,4 +1,4 @@
-/**/
+/*keep this here -RPM*/
 static const char *FileHeader = "\n\
 /*-------------------------------------------------------------------------\n\
  * Copyright (C) 1997   National Center for Supercomputing Applications.   \n\

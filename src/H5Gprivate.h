@@ -91,15 +91,20 @@ typedef struct H5G_t H5G_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5G_t *H5G_create (H5F_t *f, const char *name, size_t size_hint);
-H5G_t *H5G_open (H5F_t *f, const char *name);
+H5G_t *H5G_loc (hid_t loc_id);
+herr_t H5G_mkroot (H5F_t *f, H5G_entry_t *root_entry);
+H5G_entry_t *H5G_entof (H5G_t *grp);
+H5F_t *H5G_fileof (H5G_t *grp);
+H5G_t *H5G_create (H5G_t *loc, const char *name, size_t size_hint);
+H5G_t *H5G_open (H5G_t *loc, const char *name);
 H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
-herr_t H5G_set (H5F_t *f, H5G_t *grp);
-herr_t H5G_push (H5F_t *f, H5G_t *grp);
+herr_t H5G_set (H5G_t *grp);
+herr_t H5G_push (H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
-herr_t H5G_insert (const char *name, H5G_entry_t *ent);
-herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent/*out*/,
+H5G_t *H5G_getcwg(H5F_t *f);
+herr_t H5G_insert (H5G_t *cwg, const char *name, H5G_entry_t *ent);
+herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
                  H5G_entry_t *ent/*out*/);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent/*out*/);

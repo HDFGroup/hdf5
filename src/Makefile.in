@@ -11,7 +11,7 @@ CPPFLAGS=-I. @CPPFLAGS@
 
 # These are our main targets:
 LIB=libhdf5.a
-PROGS=debug
+PROGS=debug h5ls
 
 # Source and object files for the library (lexicographically)...
 PARALLEL_SRC=H5Fmpio.c
@@ -29,7 +29,7 @@ LIB_OBJ=$(LIB_SRC:.c=.o)
 MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
 
 # Source and object files for programs...
-PROG_SRC=debug.c
+PROG_SRC=debug.c h5ls.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 # Public header files (to be installed)...
@@ -55,5 +55,8 @@ H5detect: H5detect.o
 # How to build the programs...
 debug: debug.o $(LIB)
 	$(CC) $(CFLAGS) -o $@ debug.o $(LIB) $(LIBS)
+
+h5ls: h5ls.o $(LIB)
+	$(CC) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LIBS)
 
 @CONCLUDE@
