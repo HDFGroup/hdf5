@@ -270,7 +270,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                  * Set the "force conversion" flag if VL datatype fields exist in this
                  * type or any component types
                  */
-                if(temp_type->type==H5T_VLEN || temp_type->force_conv==TRUE)
+                if(temp_type->force_conv==TRUE)
                     dt->force_conv=TRUE;
 
                 /* Set the "has array" flag if array datatype fields exist in this type */
@@ -319,7 +319,18 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             dt->u.atomic.offset = 0;
             dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
             dt->u.atomic.msb_pad = H5T_PAD_ZERO;
+
+            /* Set reference type */
             dt->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
+
+            /* Set extra information for object references, so the hobj_ref_t gets swizzled correctly */
+            if(dt->u.atomic.u.r.rtype==H5R_OBJECT) {
+                /* This type is on disk */
+                dt->u.atomic.u.r.loc = H5T_LOC_DISK;
+
+                /* This type needs conversion */
+                dt->force_conv=TRUE;
+            } /* end if */
             break;
 
         case H5T_STRING:
@@ -353,8 +364,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
             dt->force_conv=TRUE;
             /* Mark this type as on disk */
-            if (H5T_vlen_mark(dt, f, H5T_VLEN_DISK)<0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+            if (H5T_set_loc(dt, f, H5T_LOC_DISK)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location");
             break;
 
         case H5T_TIME:  /* Time datatypes */
@@ -393,7 +404,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              * Set the "force conversion" flag if a VL base datatype is used or
              * or if any components of the base datatype are VL types.
              */
-            if(dt->parent->type==H5T_VLEN || dt->parent->force_conv==TRUE)
+            if(dt->parent->force_conv==TRUE)
                 dt->force_conv=TRUE;
             break;
 
@@ -1285,14 +1296,14 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 "Vlen type:", s);
 
         switch (dt->u.vlen.loc) {
-            case H5T_VLEN_MEMORY:
+            case H5T_LOC_MEMORY:
                 s = "memory";
                 break;
-            case H5T_VLEN_DISK:
+            case H5T_LOC_DISK:
                 s = "disk";
                 break;
             default:
-                sprintf(buf, "H5T_VLEN_%d", dt->u.vlen.loc);
+                sprintf(buf, "H5T_LOC_%d", dt->u.vlen.loc);
                 s = buf;
                 break;
         }

@@ -5075,8 +5075,6 @@ char * name;
 	space = H5Tget_size(type);
 	buf = malloc((size_t)space);
 
-	H5Pget_fill_value(dcpl, type, buf);
-
 	if (H5Tget_class(type) == H5T_REFERENCE) {
 	    path = lookup_ref_path(*(hobj_ref_t *)buf);
 
@@ -5349,7 +5347,8 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     printf("<%sFillValue>\n",xmlnsprefix);
     indent += COL;
     err = H5Pfill_value_defined(dcpl, &fvstatus);
-    if (fvstatus == H5D_FILL_VALUE_UNDEFINED) {
+    if (fvstatus == H5D_FILL_VALUE_UNDEFINED ||
+            (fvstatus==H5D_FILL_VALUE_DEFAULT && ft==H5D_FILL_TIME_IFSET)) {
         indentation(indent + COL);
         printf("<%sNoFill/>\n",xmlnsprefix);
     } else {

@@ -37,13 +37,13 @@ typedef enum H5T_copy_t {
     H5T_COPY_REOPEN
 } H5T_copy_t;
 
-/* Location of VL information */
+/* Location of datatype information */
 typedef enum {
-    H5T_VLEN_BADLOC =   0,  /* invalid VL Type */
-    H5T_VLEN_MEMORY,        /* VL data stored in memory */
-    H5T_VLEN_DISK,          /* VL data stored on disk */
-    H5T_VLEN_MAXLOC         /* highest type (Invalid as true type) */
-} H5T_vlen_loc_t;
+    H5T_LOC_BADLOC =   0,  /* invalid datatype location */
+    H5T_LOC_MEMORY,        /* data stored in memory */
+    H5T_LOC_DISK,          /* data stored on disk */
+    H5T_LOC_MAXLOC         /* highest value (Invalid as true value) */
+} H5T_loc_t;
 
 /* Private functions */
 H5_DLL herr_t H5TN_init_interface(void);
@@ -69,8 +69,8 @@ H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
 			   hsize_t nelmts, size_t buf_stride, size_t bkg_stride,
                            void *buf, void *bkg, hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t ndim, hssize_t *point, void *_op_data);
-H5_DLL htri_t H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
+H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

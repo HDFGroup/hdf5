@@ -157,11 +157,8 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
         case H5R_OBJECT:
         {
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Get pointer to correct type of reference struct */
-            uint8_t *p;       /* Pointer to OID to store */
 
-            /* Set information for reference */
-            p=(uint8_t *)ref;
-            H5F_addr_encode(loc->file,&p,sb.objno);
+            *ref=sb.objno;
             break;
         }
 
@@ -351,13 +348,8 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
         case H5R_OBJECT:
         {
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
-            /*
-             * Switch on object type, when we implement that feature, always try to
-             *  open a dataset for now
-             */
-            /* Get the object oid */
-            p=(uint8_t *)ref;
-            H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
+
+            ent.header=*ref;
         } /* end case */
         break;
 
@@ -666,8 +658,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
             hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
 
             /* Get the object oid */
-            p=(uint8_t *)ref;
-            H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
+            ent.header=*ref;
         } /* end case */
         break;
 

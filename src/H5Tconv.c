@@ -508,11 +508,14 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	if (src->size != dst->size ||
                 0 != src->u.atomic.offset ||
-                0 != dst->u.atomic.offset ||
-                !((H5T_ORDER_BE == src->u.atomic.order &&
-                   H5T_ORDER_LE == dst->u.atomic.order) ||
-                  (H5T_ORDER_LE == src->u.atomic.order &&
-                   H5T_ORDER_BE == dst->u.atomic.order)))
+                0 != dst->u.atomic.offset)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
+        if((src->type==H5T_REFERENCE && dst->type!=H5T_REFERENCE) ||
+                (dst->type==H5T_REFERENCE && src->type!=H5T_REFERENCE))
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
+        if(src->type!=H5T_REFERENCE &&
+                !((H5T_ORDER_BE == src->u.atomic.order && H5T_ORDER_LE == dst->u.atomic.order) ||
+                  (H5T_ORDER_LE == src->u.atomic.order && H5T_ORDER_BE == dst->u.atomic.order)))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "conversion not supported");
         if (src->size!=1 && src->size!=2 && src->size!=4 &&
                 src->size!=8 && src->size!=16)
@@ -520,6 +523,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	switch (src->type) {
             case H5T_INTEGER:
             case H5T_BITFIELD:
+            case H5T_REFERENCE:
                 /* nothing to check */
                 break;
 
@@ -546,6 +550,30 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	if (NULL == (src = H5I_object(src_id)) ||
                 NULL == (dst = H5I_object(dst_id)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+        /* Check for "no op" reference conversion */
+        if(src->type==H5T_REFERENCE) {
+            H5T_t *native_int;          /* Native integer datatype */
+
+            /* Sanity check */
+            assert(dst->type==H5T_REFERENCE);
+
+            /* Get pointer to native integer type */
+            if (NULL==(native_int=H5I_object(H5T_NATIVE_INT_g)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
+
+            /* Check if we are on a little-endian machine (the order that
+             * the addresses in the file must be) and just get out now, there
+             * is no need to convert the object reference.  Yes, this is
+             * icky and non-portable, but I can't think of a better way to
+             * support allowing the objno in the H5G_stat_t struct and the
+             * hobj_ref_t type to be compared directly without introducing a
+             * "native" hobj_ref_t datatype and I think that would break a
+             * lot of existing programs.  -QAK
+             */
+            if(native_int->u.atomic.order == H5T_ORDER_LE)
+                break;
+        } /* end if */
 
         buf_stride = buf_stride ? buf_stride : src->size;
         switch (src->size) {

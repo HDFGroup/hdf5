@@ -1080,9 +1080,9 @@ H5Dget_type(hid_t dset_id)
     if (NULL==(copied_type=H5T_copy (dset->type, H5T_COPY_REOPEN)))
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy the data type")
 
-    /* Mark any VL datatypes as being in memory now */
-    if (H5T_vlen_mark(copied_type, NULL, H5T_VLEN_MEMORY)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
+    /* Mark any datatypes as being in memory now */
+    if (H5T_set_loc(copied_type, NULL, H5T_LOC_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
 
     /* Unlock copied type */
     if (H5T_lock (copied_type, FALSE)<0)
@@ -1645,9 +1645,9 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if((new_dset->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype")
 
-    /* Mark any VL datatypes as being on disk now */
-    if (H5T_vlen_mark(new_dset->type, file, H5T_VLEN_DISK)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location")
+    /* Mark any datatypes as being on disk now */
+    if (H5T_set_loc(new_dset->type, file, H5T_LOC_DISK)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Copy dataspace for dataset */
     if((new_dset->space = H5S_copy(space))==NULL)

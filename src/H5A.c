@@ -235,9 +235,9 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     /* Copy the attribute's datatype */
     attr->dt=H5T_copy(type, H5T_COPY_ALL);
 
-    /* Mark any VL datatypes as being on disk now */
-    if (H5T_vlen_mark(attr->dt, ent->file, H5T_VLEN_DISK)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
+    /* Mark any datatypes as being on disk now */
+    if (H5T_set_loc(attr->dt, ent->file, H5T_LOC_DISK)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
 
     /* Copy the dataspace for the attribute */
     attr->ds=H5S_copy(space);
@@ -910,9 +910,9 @@ H5Aget_type(hid_t attr_id)
     if (NULL==(dst=H5T_copy(attr->dt, H5T_COPY_REOPEN)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy datatype")
 
-    /* Mark any VL datatypes as being in memory now */
-    if (H5T_vlen_mark(dst, NULL, H5T_VLEN_MEMORY)<0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location")
+    /* Mark any datatypes as being in memory now */
+    if (H5T_set_loc(dst, NULL, H5T_LOC_MEMORY)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
     if (H5T_lock(dst, FALSE)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type")
     

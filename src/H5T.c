@@ -315,6 +315,7 @@ H5T_init_interface(void)
     H5T_t	*enum_type=NULL;        /* Datatype structure for enum objects */
     H5T_t	*vlen=NULL;             /* Datatype structure for vlen objects */
     H5T_t	*array=NULL;            /* Datatype structure for array objects */
+    H5T_t	*objref=NULL;           /* Datatype structure for object reference objects */
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
@@ -1613,12 +1614,14 @@ H5T_init_interface(void)
         dt->ent.header = HADDR_UNDEF;
         dt->type = H5T_REFERENCE;
         dt->size = H5R_OBJ_REF_BUF_SIZE;
+        dt->force_conv = TRUE;
         dt->u.atomic.order = H5T_ORDER_NONE;
         dt->u.atomic.offset = 0;
         dt->u.atomic.prec = 8 * dt->size;
         dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
         dt->u.atomic.msb_pad = H5T_PAD_ZERO;
         dt->u.atomic.u.r.rtype = H5R_OBJECT;
+        dt->u.atomic.u.r.loc = H5T_LOC_MEMORY;
 
         if ((H5T_STD_REF_OBJ_g = H5I_register(H5I_DATATYPE, dt)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize H5T layer");
@@ -1664,6 +1667,8 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (array = H5T_array_create(native_int,1,dim,NULL)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if (NULL == (objref = H5I_object(H5T_STD_REF_OBJ_g)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(std_u32le=H5I_object(H5T_STD_U32LE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL==(std_i32le=H5I_object(H5T_STD_I32LE_g)))
@@ -1685,6 +1690,7 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_SOFT, "enum", enum_type, enum_type, H5T_conv_enum, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "vlen", vlen, vlen, H5T_conv_vlen, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "array", array, array, H5T_conv_array, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_SOFT, "objref", objref, objref, H5T_conv_order_opt, H5AC_dxpl_id);
 
     /* Custom conversion for 32-bit ints to 64-bit floats (undocumented) */
     status |= H5T_register(H5T_PERS_HARD, "u32le_f64le", std_u32le, ieee_f64le, H5T_conv_i32le_f64le, H5AC_dxpl_id);
@@ -3690,10 +3696,11 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
 
         case H5T_VLEN:
+        case H5T_REFERENCE:
             if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
-                /* H5T_copy converts any VL type into a memory VL type */
-                if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+                /* H5T_copy converts any type into a memory type */
+                if (H5T_set_loc(new_dt, NULL, H5T_LOC_MEMORY)<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location");
             }
             break;
 
@@ -4047,8 +4054,8 @@ H5T_set_size(H5T_t *dt, size_t size)
                     dt->u.vlen.pad  = tmp_strpad;
 
                     /* Set up VL information */
-                    if (H5T_vlen_mark(dt, NULL, H5T_VLEN_MEMORY)<0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid VL location");
+                    if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location");
 
                 } else {
                     prec = 8 * size;
@@ -4313,8 +4320,8 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
         case H5T_VLEN:
             assert(dt1->u.vlen.type>H5T_VLEN_BADTYPE && dt1->u.vlen.type<H5T_VLEN_MAXTYPE);
             assert(dt2->u.vlen.type>H5T_VLEN_BADTYPE && dt2->u.vlen.type<H5T_VLEN_MAXTYPE);
-            assert(dt1->u.vlen.loc>H5T_VLEN_BADLOC && dt1->u.vlen.loc<H5T_VLEN_MAXLOC);
-            assert(dt2->u.vlen.loc>H5T_VLEN_BADLOC && dt2->u.vlen.loc<H5T_VLEN_MAXLOC);
+            assert(dt1->u.vlen.loc>H5T_LOC_BADLOC && dt1->u.vlen.loc<H5T_LOC_MAXLOC);
+            assert(dt2->u.vlen.loc>H5T_LOC_BADLOC && dt2->u.vlen.loc<H5T_LOC_MAXLOC);
 
             /* Arbitrarily sort sequence VL datatypes before string VL datatypes */
             if (dt1->u.vlen.type==H5T_VLEN_SEQUENCE &&
@@ -4325,11 +4332,11 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
                 HGOTO_DONE(1);
             }
             /* Arbitrarily sort VL datatypes in memory before disk */
-            if (dt1->u.vlen.loc==H5T_VLEN_MEMORY &&
-                    dt2->u.vlen.loc==H5T_VLEN_DISK) {
+            if (dt1->u.vlen.loc==H5T_LOC_MEMORY &&
+                    dt2->u.vlen.loc==H5T_LOC_DISK) {
                 HGOTO_DONE(-1);
-            } else if (dt1->u.vlen.loc==H5T_VLEN_DISK &&
-                    dt2->u.vlen.loc==H5T_VLEN_MEMORY) {
+            } else if (dt1->u.vlen.loc==H5T_LOC_DISK &&
+                    dt2->u.vlen.loc==H5T_LOC_MEMORY) {
                 HGOTO_DONE(1);
             }
             /* Don't allow VL types in different files to compare as equal */
@@ -4462,6 +4469,12 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
                     switch(dt1->u.atomic.u.r.rtype) {
                         case H5R_OBJECT:
+                            if (dt1->u.atomic.u.r.loc < dt2->u.atomic.u.r.loc)
+                                HGOTO_DONE(-1);
+                            if (dt1->u.atomic.u.r.loc > dt2->u.atomic.u.r.loc)
+                                HGOTO_DONE(1);
+                            break;
+
                         case H5R_DATASET_REGION:
                     /* Does this need more to distinguish it? -QAK 11/30/98 */
                             /*void */
@@ -5080,6 +5093,150 @@ H5T_is_sensible(const H5T_t *dt)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_set_loc
+ PURPOSE
+    Recursively mark any datatypes as on disk/in memory
+ USAGE
+    htri_t H5T_set_loc(dt,f,loc)
+        H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
+        H5F_t *dt;              IN: Pointer to the file the datatype is in
+        H5T_vlen_type_t loc     IN: location of type
+        
+ RETURNS
+    One of two values on success:
+        TRUE - If the location of any vlen types changed
+        FALSE - If the location of any vlen types is the same
+    <0 is returned on failure
+ DESCRIPTION
+    Recursively descends any VL or compound datatypes to mark all VL datatypes
+    as either on disk or in memory.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
+{
+    htri_t changed;    /* Whether H5T_set_loc changed the type (even if the size didn't change) */
+    htri_t ret_value = 0;   /* Indicate that success, but no location change */
+    int i;                  /* Local index variable */
+    int accum_change;       /* Amount of change in the offset of the fields */
+    size_t old_size;        /* Previous size of a field */
+
+    FUNC_ENTER_NOAPI(H5T_set_loc, FAIL);
+
+    assert(dt);
+    assert(loc>H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
+
+    /* Datatypes can't change in size if the force_conv flag is not set */
+    if(dt->force_conv) {
+        /* Check the datatype of this element */
+        switch(dt->type) {
+            case H5T_ARRAY:  /* Recurse on VL, compound and array base element type */
+                /* Recurse if it's VL, compound or array */
+                /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+                if(dt->parent->force_conv && (dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY)) {
+                    /* Keep the old base element size for later */
+                    old_size=dt->parent->size;
+
+                    /* Mark the VL, compound or array type */
+                    if((changed=H5T_set_loc(dt->parent,f,loc))<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                    if(changed>0)
+                        ret_value=changed;
+                    
+                    /* Check if the field changed size */
+                    if(old_size != dt->parent->size) {
+                        /* Adjust the size of the array */
+                        dt->size = dt->u.array.nelem*dt->parent->size;
+                    } /* end if */
+                } /* end if */
+                break;
+
+            case H5T_COMPOUND:  /* Check each field and recurse on VL, compound and array type */
+                /* Sort the fields based on offsets */
+                H5T_sort_value(dt,NULL);
+        
+                for (i=0,accum_change=0; i<dt->u.compnd.nmembs; i++) {
+                    H5T_t *memb_type;   /* Member's datatype pointer */
+
+                    /* Apply the accumulated size change to the offset of the field */
+                    dt->u.compnd.memb[i].offset += accum_change;
+
+                    /* Set the member type pointer (for convenience) */
+                    memb_type=dt->u.compnd.memb[i].type;
+
+                    /* Recurse if it's VL, compound or array */
+                    /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+                    if(memb_type->force_conv && (memb_type->type==H5T_COMPOUND || memb_type->type==H5T_VLEN || memb_type->type==H5T_ARRAY)) {
+                        /* Keep the old field size for later */
+                        old_size=memb_type->size;
+
+                        /* Mark the VL, compound or array type */
+                        if((changed=H5T_set_loc(memb_type,f,loc))<0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                        if(changed>0)
+                            ret_value=changed;
+                        
+                        /* Check if the field changed size */
+                        if(old_size != memb_type->size) {
+                            /* Adjust the size of the member */
+                            dt->u.compnd.memb[i].size = (dt->u.compnd.memb[i].size*memb_type->size)/old_size;
+
+                            /* Add that change to the accumulated size change */
+                            accum_change += (memb_type->size - (int)old_size);
+                        } /* end if */
+                    } /* end if */
+                } /* end for */
+
+                /* Apply the accumulated size change to the datatype */
+                dt->size += accum_change;
+                break;
+
+            case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
+                /* Recurse if it's VL, compound or array */
+                /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
+                if(dt->parent->force_conv && (dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY)) {
+                    if((changed=H5T_set_loc(dt->parent,f,loc))<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                    if(changed>0)
+                        ret_value=changed;
+                } /* end if */
+
+                /* Mark this VL sequence */
+                if((changed=H5T_vlen_set_loc(dt,f,loc))<0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                if(changed>0)
+                    ret_value=changed;
+                break;
+
+            case H5T_REFERENCE:
+                /* Only need to change location of object references */
+                if(dt->u.atomic.u.r.rtype==H5R_OBJECT) {
+                    /* Mark this reference */
+                    if(loc!=dt->u.atomic.u.r.loc) {
+                        /* Set the location */
+                        dt->u.atomic.u.r.loc = loc;
+
+                        /* Indicate that the location changed */
+                        ret_value=TRUE;
+                    } /* end if */
+                } /* end if */
+                break;
+
+            default:
+                break;
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* end H5T_set_loc() */
 
 
 /*-------------------------------------------------------------------------
