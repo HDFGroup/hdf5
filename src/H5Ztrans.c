@@ -23,6 +23,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Zpkg.h"		/* Data filters				*/
+#include "H5Vprivate.h"		/* H5V_array_fill			*/
 
 
 /* Token types */
@@ -756,61 +757,93 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
     /* If it's a trivial data transform, perform it */
     if( tree->type == H5Z_XFORM_INTEGER || tree->type == H5Z_XFORM_FLOAT)
     {
-	if( array_type == H5T_NATIVE_INT)
+	if(array_type == H5T_NATIVE_CHAR)
 	{
-	    for(i=0; i<array_size; i++)
-		*((int*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
-	else if(array_type == H5T_NATIVE_FLOAT)
-	{
-	    for(i=0; i<array_size; i++)
-		*((float*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
-	else if(array_type == H5T_NATIVE_CHAR)
-	{
-	    for(i=0; i<array_size; i++)
-		*((char*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
-	else if(array_type == H5T_NATIVE_DOUBLE)
-	{
-	    for(i=0; i<array_size; i++)
-		*((double*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
-	else if(array_type == H5T_NATIVE_SHORT)
-	{
-	    for(i=0; i<array_size; i++)
-		*((short*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
-	else if(array_type == H5T_NATIVE_LONG)
-	{
-	    for(i=0; i<array_size; i++)
-		*((long*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
-	}
+	    char tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(char), array_size);
+	}	
 	else if(array_type ==  H5T_NATIVE_UCHAR)
 	{
-	    for(i=0; i<array_size; i++)
-		*((unsigned char*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+	    unsigned char tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(unsigned char), array_size);
 	}
 	else if(array_type == H5T_NATIVE_SCHAR)
 	{
-	    for(i=0; i<array_size; i++)
-		*((signed char*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+	    signed char tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(signed char), array_size);
+	}
+
+	else if(array_type == H5T_NATIVE_SHORT)
+	{
+	    short tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(short), array_size);
 	}
 	else if(array_type == H5T_NATIVE_USHORT)
 	{
-	    for(i=0; i<array_size; i++)
-		*((unsigned short*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+	    unsigned short tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(unsigned short), array_size);
+	}
+	
+	else if( array_type == H5T_NATIVE_INT)
+	{
+	    int tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(int), array_size);
 	}
 	else if(array_type ==  H5T_NATIVE_UINT)
 	{
-	    for(i=0; i<array_size; i++)
-		*((unsigned int*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+	    unsigned int tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(unsigned int), array_size);
+	}
+	else if(array_type == H5T_NATIVE_LONG)
+	{
+	    long tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(long), array_size);
 	}
 	else if(array_type == H5T_NATIVE_ULONG)
 	{
-	    for(i=0; i<array_size; i++)
-		*((unsigned long*)array + i) = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+	    unsigned long tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(unsigned long), array_size);
+	}	
+	else if(array_type == H5T_NATIVE_LLONG)
+	{
+	    long_long tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(long_long), array_size);
 	}
+	else if(array_type == H5T_NATIVE_ULLONG)
+	{
+	    unsigned long_long tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(unsigned long_long), array_size);
+	}
+	else if(array_type == H5T_NATIVE_FLOAT)
+	{
+	    float tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(float), array_size);
+	}	
+	else if(array_type == H5T_NATIVE_DOUBLE)
+	{
+	    double tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(double), array_size);
+	}
+	else if(array_type == H5T_NATIVE_LDOUBLE)
+	{
+	    long double tree_val = (tree->type == H5Z_XFORM_INTEGER) ? tree->value.int_val : tree->value.float_val;
+
+	    H5V_array_fill(array, &tree_val, sizeof(long double), array_size);
+	}
+
     }
     /* Otherwise, do the full data transform */
     else
@@ -923,180 +956,392 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 
 	switch (tree->type) {
 	    case H5Z_XFORM_PLUS:  
-		if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL))
+		if( ((resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL)) || ((resr.type == H5Z_XFORM_SYMBOL) && (resl.type != H5Z_XFORM_SYMBOL)))
 		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
+		    if(array_type == H5T_NATIVE_CHAR)
+		    { 
+			char* charp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    charp = (char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    charp = (char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *charp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
+		    { 
+			unsigned char* ucharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ucharp = (unsigned char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ucharp = (unsigned char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ucharp++ += tree_val;
+
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
+		    { 
+			signed char* scharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    scharp = (signed char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    scharp = (signed char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *scharp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
+		    { 
+			short* shortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    shortp = (short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    shortp = (short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *shortp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
+		    { 
+			unsigned short* ushortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ushortp = (unsigned short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ushortp = (unsigned short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ushortp++ += tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_INT)
+		    {
+			int* intp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    intp = (int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    intp = (int*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *intp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
-		    {
+		    { 
+			unsigned int* uintp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    uintp = (unsigned int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    uintp = (unsigned int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *uintp++ += tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_LONG)
+		    { 
+			long* longp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    longp = (long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    longp = (long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *longp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
+		    { 
+			unsigned long* ulongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ulongp = (unsigned long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ulongp = (unsigned long*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ulongp++ += tree_val;
 		    }
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    { 
+			long_long* llongp;
+			double tree_val;
 
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    llongp = (long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    llongp = (long_long*)resr.value.dat_val;
+			}
 
-		}
-		else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type!=H5Z_XFORM_SYMBOL))
-		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
 			for(i=0; i<array_size; i++)
-			    *((int*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
+			    *llongp++ += tree_val;
+		    }	   
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    { 
+			unsigned long_long* ullongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ullongp = (unsigned long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ullongp = (unsigned long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ullongp++ += tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
+		    {  
+			float* floatp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    floatp = (float*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    floatp = (float*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((float*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((signed char*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    *floatp++ += tree_val;
+
 		    }
 		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
+		    { 
+			double* doublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    doublep = (double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    doublep = (double*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((double*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
+			    *doublep++ += tree_val;
+		    }	
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    { 
+			long double* ldoublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ldoublep = (long double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ldoublep = (long double*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resr.value.dat_val + i) += resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UINT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resr.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resr.value.dat_val + i) += resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ldoublep++ += tree_val;
 		    }
 		}
 		else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_SYMBOL))
 		{
-		    if(array_type == H5T_NATIVE_INT)
+		    if(array_type == H5T_NATIVE_CHAR)
 		    {
+			char* charpl = (char*)resl.value.dat_val;
+			char* charpr = (char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) += *((int*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) +=  *((float*)resr.value.dat_val + i);
-		    } 
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) +=  *((char*)resr.value.dat_val + i);
+			    *charpl++ +=  *charpr++;
 		    } 
 		    else if(array_type == H5T_NATIVE_UCHAR)
 		    {
+			unsigned char* ucharpl = (unsigned char*)resl.value.dat_val;
+			unsigned char* ucharpr = (unsigned char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) += *((unsigned char*)resr.value.dat_val + i);
+			    *ucharpl++ +=  *ucharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
 		    {
+			signed char* scharpl = (signed char*)resl.value.dat_val;
+			signed char* scharpr = (signed char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) += *((signed char*)resr.value.dat_val + i);
+			    *scharpl++ +=  *scharpr++;
 		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    else if(array_type == H5T_NATIVE_INT)
 		    {
+			int* intpl = (int*)resl.value.dat_val;
+			int* intpr = (int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) += *((double*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) += *((short*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) += *((long*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) += *((unsigned short*)resr.value.dat_val + i);
+			    *intpl++ +=  *intpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
 		    {
+			unsigned int* uintpl = (unsigned int*)resl.value.dat_val;
+			unsigned int* uintpr = (unsigned int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) += *((unsigned int*)resr.value.dat_val + i);
+			    *uintpl++ +=  *uintpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_SHORT)
+		    {
+			short* shortpl = (short*)resl.value.dat_val;
+			short* shortpr = (short*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *shortpl++ +=  *shortpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_USHORT)
+		    {
+			unsigned short* ushortpl = (unsigned short*)resl.value.dat_val;
+			unsigned short* ushortpr = (unsigned short*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ushortpl++ +=  *ushortpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LONG)
+		    {
+			long* longpl = (long*)resl.value.dat_val;
+			long* longpr = (long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *longpl++ +=  *longpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_ULONG)
 		    {
+			unsigned long* ulongpl = (unsigned long*)resl.value.dat_val;
+			unsigned long* ulongpr = (unsigned long*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) += *((unsigned long*)resr.value.dat_val + i);
+			    *ulongpl++ +=  *ulongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    {
+			long_long* llongpl = (long_long*)resl.value.dat_val;
+			long_long* llongpr = (long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *llongpl++ +=  *llongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    {
+			unsigned long_long* ullongpl = (unsigned long_long*)resl.value.dat_val;
+			unsigned long_long* ullongpr = (unsigned long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ullongpl++ +=  *ullongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			float* floatpl = (float*)resl.value.dat_val;
+			float* floatpr = (float*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *floatpl++ +=  *floatpr++;
+		    } 
+
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    {
+			double* doublepl = (double*)resl.value.dat_val;
+			double* doublepr = (double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *doublepl++ +=  *doublepr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    {
+			long double* ldoublepl = (long double*)resl.value.dat_val;
+			long double* ldoublepr = (long double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ldoublepl++ +=  *ldoublepr++;
 		    }
 		}               
 		else
@@ -1104,179 +1349,401 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 			break;
 
 	    case H5Z_XFORM_MINUS:
-		if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL))
+		if( ((resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL)) || ((resr.type == H5Z_XFORM_SYMBOL) && (resl.type != H5Z_XFORM_SYMBOL)))
 		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
+		    if(array_type == H5T_NATIVE_CHAR)
+		    { 
+			char* charp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    charp = (char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    charp = (char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *charp++ -= tree_val;
+
+
 		    }
 		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
+		    { 
+			unsigned char* ucharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ucharp = (unsigned char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ucharp = (unsigned char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ucharp++ -= tree_val;
+
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
+		    { 
+			signed char* scharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    scharp = (signed char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    scharp = (signed char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *scharp++ -= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
+		    { 
+			short* shortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    shortp = (short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    shortp = (short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *shortp++ -= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
+		    { 
+			unsigned short* ushortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ushortp = (unsigned short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ushortp = (unsigned short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UINT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) -= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ushortp++ -= tree_val;
 		    }
 
-		}
-		else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type!=H5Z_XFORM_SYMBOL))
-		{
-		    if(array_type == H5T_NATIVE_INT)
+		    else if(array_type == H5T_NATIVE_INT)
 		    {
+			int* intp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    intp = (int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    intp = (int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((signed char*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    *intp++ -= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
-		    {
+		    { 
+			unsigned int* uintp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    uintp = (unsigned int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    uintp = (unsigned int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    *uintp++ -= tree_val;
 		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
+		    else if(array_type == H5T_NATIVE_LONG)
+		    { 
+			long* longp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    longp = (long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    longp = (long*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resr.value.dat_val + i) -= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    *longp++ -= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_ULONG)
+		    { 
+			unsigned long* ulongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ulongp = (unsigned long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ulongp = (unsigned long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ulongp++ -= tree_val;
+
+
+		    }
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    { 
+			long_long* llongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    llongp = (long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    llongp = (long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *llongp++ -= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    { 
+			unsigned long_long* ullongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ullongp = (unsigned long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ullongp = (unsigned long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ullongp++ -= tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {  
+			float* floatp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    floatp = (float*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    floatp = (float*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *floatp++ -= tree_val;
+
+		    }
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    { 
+			double* doublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    doublep = (double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    doublep = (double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *doublep++ -= tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    { 
+			long double* ldoublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ldoublep = (long double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ldoublep = (long double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ldoublep++ -= tree_val;
 		    }
 		}
 		else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_SYMBOL))
 		{
-		    if(array_type == H5T_NATIVE_INT)
+		    if(array_type == H5T_NATIVE_CHAR)
 		    {
+			char* charpl = (char*)resl.value.dat_val;
+			char* charpr = (char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) -= *((int*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) -=  *((float*)resr.value.dat_val + i);
-		    } 
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) -=  *((char*)resr.value.dat_val + i);
+			    *charpl++ -=  *charpr++;
 		    } 
 		    else if(array_type == H5T_NATIVE_UCHAR)
 		    {
+			unsigned char* ucharpl = (unsigned char*)resl.value.dat_val;
+			unsigned char* ucharpr = (unsigned char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) -= *((unsigned char*)resr.value.dat_val + i);
+			    *ucharpl++ -=  *ucharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
 		    {
+			signed char* scharpl = (signed char*)resl.value.dat_val;
+			signed char* scharpr = (signed char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) -= *((signed char*)resr.value.dat_val + i);
+			    *scharpl++ -=  *scharpr++;
 		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    else if(array_type == H5T_NATIVE_INT)
 		    {
+			int* intpl = (int*)resl.value.dat_val;
+			int* intpr = (int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) -= *((double*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) -= *((short*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) -= *((long*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) -= *((unsigned short*)resr.value.dat_val + i);
+			    *intpl++ -=  *intpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
 		    {
+			unsigned int* uintpl = (unsigned int*)resl.value.dat_val;
+			unsigned int* uintpr = (unsigned int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) -= *((unsigned int*)resr.value.dat_val + i);
+			    *uintpl++ -=  *uintpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_SHORT)
+		    {
+			short* shortpl = (short*)resl.value.dat_val;
+			short* shortpr = (short*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *shortpl++ -=  *shortpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_USHORT)
+		    {
+			unsigned short* ushortpl = (unsigned short*)resl.value.dat_val;
+			unsigned short* ushortpr = (unsigned short*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ushortpl++ -=  *ushortpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_LONG)
+		    {
+			long* longpl = (long*)resl.value.dat_val;
+			long* longpr = (long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *longpl++ -=  *longpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_ULONG)
 		    {
+			unsigned long* ulongpl = (unsigned long*)resl.value.dat_val;
+			unsigned long* ulongpr = (unsigned long*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) -= *((unsigned long*)resr.value.dat_val + i);
+			    *ulongpl++ -=  *ulongpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    {
+			long_long* llongpl = (long_long*)resl.value.dat_val;
+			long_long* llongpr = (long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *llongpl++ -=  *llongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    {
+			unsigned long_long* ullongpl = (unsigned long_long*)resl.value.dat_val;
+			unsigned long_long* ullongpr = (unsigned long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ullongpl++ -=  *ullongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			float* floatpl = (float*)resl.value.dat_val;
+			float* floatpr = (float*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *floatpl++ -=  *floatpr++;
+		    } 
+
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    {
+			double* doublepl = (double*)resl.value.dat_val;
+			double* doublepr = (double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *doublepl++ -=  *doublepr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    {
+			long double* ldoublepl = (long double*)resl.value.dat_val;
+			long double* ldoublepr = (long double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ldoublepl++ -=  *ldoublepr++;
 		    }
 		}               
 		else
@@ -1287,361 +1754,816 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 
 
 	    case H5Z_XFORM_MULT:
-		if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL))
+		if( ((resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL)) || ((resr.type == H5Z_XFORM_SYMBOL) && (resl.type != H5Z_XFORM_SYMBOL)))
 		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
+		    if(array_type == H5T_NATIVE_CHAR)
+		    { 
+			char* charp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    charp = (char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    charp = (char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *charp++ *= tree_val;
+
+
 		    }
 		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
+		    { 
+			unsigned char* ucharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ucharp = (unsigned char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ucharp = (unsigned char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ucharp++ *= tree_val;
+
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
+		    { 
+			signed char* scharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    scharp = (signed char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    scharp = (signed char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *scharp++ *= tree_val;
 		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
+
+		    else if(array_type == H5T_NATIVE_INT)
 		    {
+			int* intp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    intp = (int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    intp = (int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *intp++ *= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
-		    {
+		    { 
+			unsigned int* uintp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    uintp = (unsigned int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    uintp = (unsigned int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *uintp++ *= tree_val;
+		    }
+		   
+		    else if(array_type == H5T_NATIVE_SHORT)
+		    { 
+			short* shortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    shortp = (short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    shortp = (short*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *shortp++ *= tree_val;
+		    }
+		   
+		    else if(array_type == H5T_NATIVE_USHORT)
+		    { 
+			unsigned short* ushortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ushortp = (unsigned short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ushortp = (unsigned short*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ushortp++ *= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_LONG)
+		    { 
+			long* longp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    longp = (long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    longp = (long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *longp++ *= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
+		    { 
+			unsigned long* ulongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ulongp = (unsigned long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ulongp = (unsigned long*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) *= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ulongp++ *= tree_val;
+
+
+		    }
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    { 
+			long_long* llongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    llongp = (long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    llongp = (long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *llongp++ *= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    { 
+			unsigned long_long* ullongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ullongp = (unsigned long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ullongp = (unsigned long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ullongp++ *= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {  
+			float* floatp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    floatp = (float*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    floatp = (float*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *floatp++ *= tree_val;
+
+		    }
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    { 
+			double* doublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    doublep = (double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    doublep = (double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *doublep++ *= tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    { 
+			long double* ldoublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ldoublep = (long double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ldoublep = (long double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ldoublep++ *= tree_val;
 		    }
 
 		}
-		else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type!=H5Z_XFORM_SYMBOL))
-		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((int*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((signed char*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UINT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resr.value.dat_val + i) *= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		}
 		else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_SYMBOL))
 		{
-		    if(array_type == H5T_NATIVE_INT)
+		    if(array_type == H5T_NATIVE_CHAR)
 		    {
+			char* charpl = (char*)resl.value.dat_val;
+			char* charpr = (char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) *= *((int*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) *=  *((float*)resr.value.dat_val + i);
-		    } 
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) *=  *((char*)resr.value.dat_val + i);
+			    *charpl++ *=  *charpr++;
 		    } 
 		    else if(array_type == H5T_NATIVE_UCHAR)
 		    {
+			unsigned char* ucharpl = (unsigned char*)resl.value.dat_val;
+			unsigned char* ucharpr = (unsigned char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) *= *((unsigned char*)resr.value.dat_val + i);
+			    *ucharpl++ *=  *ucharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
 		    {
+			signed char* scharpl = (signed char*)resl.value.dat_val;
+			signed char* scharpr = (signed char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) *= *((signed char*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) *= *((double*)resr.value.dat_val + i);
+			    *scharpl++ *=  *scharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SHORT)
 		    {
+			short* shortpl = (short*)resl.value.dat_val;
+			short* shortpr = (short*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) *= *((short*)resr.value.dat_val + i);
+			    *shortpl++ *=  *shortpr++;
 		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) *= *((long*)resr.value.dat_val + i);
-		    }
+
 		    else if(array_type == H5T_NATIVE_USHORT)
 		    {
+			unsigned short* ushortpl = (unsigned short*)resl.value.dat_val;
+			unsigned short* ushortpr = (unsigned short*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) *= *((unsigned short*)resr.value.dat_val + i);
+			    *ushortpl++ *=  *ushortpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_INT)
+		    {
+			int* intpl = (int*)resl.value.dat_val;
+			int* intpr = (int*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *intpl++ *=  *intpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
 		    {
+			unsigned int* uintpl = (unsigned int*)resl.value.dat_val;
+			unsigned int* uintpr = (unsigned int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) *= *((unsigned int*)resr.value.dat_val + i);
+			    *uintpl++ *=  *uintpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_LONG)
+		    {
+			long* longpl = (long*)resl.value.dat_val;
+			long* longpr = (long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *longpl++ *=  *longpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_ULONG)
 		    {
+			unsigned long* ulongpl = (unsigned long*)resl.value.dat_val;
+			unsigned long* ulongpr = (unsigned long*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) *= *((unsigned long*)resr.value.dat_val + i);
+			    *ulongpl++ *=  *ulongpr++;
 		    }
-		}               
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    {
+			long_long* llongpl = (long_long*)resl.value.dat_val;
+			long_long* llongpr = (long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *llongpl++ *=  *llongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    {
+			unsigned long_long* ullongpl = (unsigned long_long*)resl.value.dat_val;
+			unsigned long_long* ullongpr = (unsigned long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ullongpl++ *=  *ullongpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			float* floatpl = (float*)resl.value.dat_val;
+			float* floatpr = (float*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *floatpl++ *=  *floatpr++;
+		    } 
+
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    {
+			double* doublepl = (double*)resl.value.dat_val;
+			double* doublepr = (double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *doublepl++ *=  *doublepr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    {
+			long double* ldoublepl = (long double*)resl.value.dat_val;
+			long double* ldoublepr = (long double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ldoublepl++ *=  *ldoublepr++;
+		    }
+
+		} 
 		else
 		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")
 			break;
 
 	    case H5Z_XFORM_DIVIDE: 
-		if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL))
+		if( ((resl.type == H5Z_XFORM_SYMBOL) && (resr.type != H5Z_XFORM_SYMBOL)) || ((resr.type == H5Z_XFORM_SYMBOL) && (resl.type != H5Z_XFORM_SYMBOL)))
 		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
+		    if(array_type == H5T_NATIVE_CHAR)
+		    { 
+			char* charp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    charp = (char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    charp = (char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *charp++ /= tree_val;
+
+
 		    }
 		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
+		    { 
+			unsigned char* ucharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ucharp = (unsigned char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ucharp = (unsigned char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ucharp++ /= tree_val;
+
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
+		    { 
+			signed char* scharp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    scharp = (signed char*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    scharp = (signed char*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *scharp++ /= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
+		    { 
+			short* shortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    shortp = (short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    shortp = (short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *shortp++ /= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
+		    { 
+			unsigned short* ushortp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ushortp = (unsigned short*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ushortp = (unsigned short*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *ushortp++ /= tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_INT)
+		    {
+			int* intp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    intp = (int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    intp = (int*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *intp++ /= tree_val;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
-		    {
+		    { 
+			unsigned int* uintp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    uintp = (unsigned int*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    uintp = (unsigned int*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *uintp++ /= tree_val;
 		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
+		    
+		    else if(array_type == H5T_NATIVE_LONG)
+		    { 
+			long* longp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    longp = (long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    longp = (long*)resr.value.dat_val;
+			}
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) /= resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    *longp++ /= tree_val;
+		    }
+		    
+		  
+		    else if(array_type == H5T_NATIVE_ULONG)
+		    { 
+			unsigned long* ulongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ulongp = (unsigned long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ulongp = (unsigned long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ulongp++ /= tree_val;
+
+
+		    }
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    { 
+			long_long* llongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    llongp = (long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    llongp = (long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *llongp++ /= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    { 
+			unsigned long_long* ullongp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ullongp = (unsigned long_long*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ullongp = (unsigned long_long*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ullongp++ /= tree_val;
+		    }
+
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {  
+			float* floatp;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    floatp = (float*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    floatp = (float*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *floatp++ /= tree_val;
+
+		    }
+		   
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    { 
+			double* doublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    doublep = (double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    doublep = (double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *doublep++ /= tree_val;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    { 
+			long double* ldoublep;
+			double tree_val;
+
+			if(resl.type == H5Z_XFORM_SYMBOL)
+			{
+			    tree_val = resr.type==H5Z_XFORM_INTEGER ?  resr.value.int_val : resr.value.float_val;
+			    ldoublep = (long double*)resl.value.dat_val;
+			}
+			else
+			{
+			    tree_val = resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
+			    ldoublep = (long double*)resr.value.dat_val;
+			}
+
+			for(i=0; i<array_size; i++)
+			    *ldoublep++ /= tree_val;
 		    }
 
 		}
-		else if( (resr.type == H5Z_XFORM_SYMBOL) && (resl.type!=H5Z_XFORM_SYMBOL))
-		{
-		    if(array_type == H5T_NATIVE_INT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((int*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ? resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SCHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((signed char*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_SHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((short*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_USHORT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_UINT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		    else if(array_type == H5T_NATIVE_ULONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resr.value.dat_val + i) /= resl.type==H5Z_XFORM_INTEGER ?  resl.value.int_val : resl.value.float_val;
-		    }
-		}
 		else if( (resl.type == H5Z_XFORM_SYMBOL) && (resr.type==H5Z_XFORM_SYMBOL))
 		{
-		    if(array_type == H5T_NATIVE_INT)
+		    if(array_type == H5T_NATIVE_CHAR)
 		    {
+			char* charpl = (char*)resl.value.dat_val;
+			char* charpr = (char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((int*)resl.value.dat_val + i) /= *((int*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_FLOAT)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((float*)resl.value.dat_val + i) /=  *((float*)resr.value.dat_val + i);
-		    } 
-		    else if(array_type == H5T_NATIVE_CHAR)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((char*)resl.value.dat_val + i) /=  *((char*)resr.value.dat_val + i);
+			    *charpl++ /=  *charpr++;
 		    } 
 		    else if(array_type == H5T_NATIVE_UCHAR)
 		    {
+			unsigned char* ucharpl = (unsigned char*)resl.value.dat_val;
+			unsigned char* ucharpr = (unsigned char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned char*)resl.value.dat_val + i) /= *((unsigned char*)resr.value.dat_val + i);
+			    *ucharpl++ /=  *ucharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SCHAR)
 		    {
+			signed char* scharpl = (signed char*)resl.value.dat_val;
+			signed char* scharpr = (signed char*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((signed char*)resl.value.dat_val + i) /= *((signed char*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_DOUBLE)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((double*)resl.value.dat_val + i) /= *((double*)resr.value.dat_val + i);
+			    *scharpl++ /=  *scharpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_SHORT)
 		    {
+			short* shortpl = (short*)resl.value.dat_val;
+			short* shortpr = (short*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((short*)resl.value.dat_val + i) /= *((short*)resr.value.dat_val + i);
-		    }
-		    else if(array_type == H5T_NATIVE_LONG)
-		    {
-			for(i=0; i<array_size; i++)
-			    *((long*)resl.value.dat_val + i) /= *((long*)resr.value.dat_val + i);
+			    *shortpl++ /=  *shortpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_USHORT)
 		    {
+			unsigned short* ushortpl = (unsigned short*)resl.value.dat_val;
+			unsigned short* ushortpr = (unsigned short*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned short*)resl.value.dat_val + i) /= *((unsigned short*)resr.value.dat_val + i);
+			    *ushortpl++ /=  *ushortpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_INT)
+		    {
+			int* intpl = (int*)resl.value.dat_val;
+			int* intpr = (int*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *intpl++ /=  *intpr++;
 		    }
 		    else if(array_type == H5T_NATIVE_UINT)
 		    {
+			unsigned int* uintpl = (unsigned int*)resl.value.dat_val;
+			unsigned int* uintpr = (unsigned int*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned int*)resl.value.dat_val + i) /= *((unsigned int*)resr.value.dat_val + i);
+			    *uintpl++ /=  *uintpr++;
 		    }
+
+		    else if(array_type == H5T_NATIVE_LONG)
+		    {
+			long* longpl = (long*)resl.value.dat_val;
+			long* longpr = (long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *longpl++ /=  *longpr++;
+		    }
+
+
 		    else if(array_type == H5T_NATIVE_ULONG)
 		    {
+			unsigned long* ulongpl = (unsigned long*)resl.value.dat_val;
+			unsigned long* ulongpr = (unsigned long*)resr.value.dat_val;
+
 			for(i=0; i<array_size; i++)
-			    *((unsigned long*)resl.value.dat_val + i) /= *((unsigned long*)resr.value.dat_val + i);
+			    *ulongpl++ /=  *ulongpr++;
 		    }
-		}               
+		    else if(array_type == H5T_NATIVE_LLONG)
+		    {
+			long_long* llongpl = (long_long*)resl.value.dat_val;
+			long_long* llongpr = (long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *llongpl++ /=  *llongpr++;
+		    }
+		    else if(array_type == H5T_NATIVE_ULLONG)
+		    {
+			unsigned long_long* ullongpl = (unsigned long_long*)resl.value.dat_val;
+			unsigned long_long* ullongpr = (unsigned long_long*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ullongpl++ /=  *ullongpr++;
+		    }
+
+		    else if(array_type == H5T_NATIVE_FLOAT)
+		    {
+			float* floatpl = (float*)resl.value.dat_val;
+			float* floatpr = (float*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *floatpl++ /=  *floatpr++;
+		    } 
+		   
+		    else if(array_type == H5T_NATIVE_DOUBLE)
+		    {
+			double* doublepl = (double*)resl.value.dat_val;
+			double* doublepr = (double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *doublepl++ /=  *doublepr++;
+		    }
+		    else if(array_type == H5T_NATIVE_LDOUBLE)
+		    {
+			long double* ldoublepl = (long double*)resl.value.dat_val;
+			long double* ldoublepr = (long double*)resr.value.dat_val;
+
+			for(i=0; i<array_size; i++)
+			    *ldoublepl++ /=  *ldoublepr++;
+		    }
+
+		} 
 		else
 		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")
 			break;
@@ -1941,34 +2863,16 @@ static void H5Z_do_op(H5Z_node* tree)
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val / tree->rchild->value.float_val;
+	else if( ( (tree->lchild->type == H5Z_XFORM_FLOAT) || (tree->lchild->type == H5Z_XFORM_INTEGER)) && ( (tree->rchild->type == H5Z_XFORM_FLOAT) || (tree->rchild->type == H5Z_XFORM_INTEGER)))
+	{
+	    tree->type = H5Z_XFORM_FLOAT;
+            tree->value.float_val = ((tree->lchild->type == H5Z_XFORM_FLOAT) ? tree->lchild->value.float_val : tree->lchild->value.int_val) / 
+				    ((tree->rchild->type == H5Z_XFORM_FLOAT) ? tree->rchild->value.float_val : tree->rchild->value.int_val);
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val / tree->rchild->value.int_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.int_val / tree->rchild->value.float_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-
     }
     else if(tree->type == H5Z_XFORM_MULT)
     {
@@ -1983,34 +2887,16 @@ static void H5Z_do_op(H5Z_node* tree)
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val * tree->rchild->value.float_val;
+	else if( ( (tree->lchild->type == H5Z_XFORM_FLOAT) || (tree->lchild->type == H5Z_XFORM_INTEGER)) && ( (tree->rchild->type == H5Z_XFORM_FLOAT) || (tree->rchild->type == H5Z_XFORM_INTEGER)))
+	{
+	    tree->type = H5Z_XFORM_FLOAT;
+            tree->value.float_val = ((tree->lchild->type == H5Z_XFORM_FLOAT) ? tree->lchild->value.float_val : tree->lchild->value.int_val) * 
+				    ((tree->rchild->type == H5Z_XFORM_FLOAT) ? tree->rchild->value.float_val : tree->rchild->value.int_val);
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val * tree->rchild->value.int_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.int_val * tree->rchild->value.float_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-
     }
     else if(tree->type == H5Z_XFORM_PLUS)
     {
@@ -2025,34 +2911,16 @@ static void H5Z_do_op(H5Z_node* tree)
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val + tree->rchild->value.float_val;
+	else if( ( (tree->lchild->type == H5Z_XFORM_FLOAT) || (tree->lchild->type == H5Z_XFORM_INTEGER)) && ( (tree->rchild->type == H5Z_XFORM_FLOAT) || (tree->rchild->type == H5Z_XFORM_INTEGER)))
+	{
+	    tree->type = H5Z_XFORM_FLOAT;
+            tree->value.float_val = ((tree->lchild->type == H5Z_XFORM_FLOAT) ? tree->lchild->value.float_val : tree->lchild->value.int_val) + 
+				    ((tree->rchild->type == H5Z_XFORM_FLOAT) ? tree->rchild->value.float_val : tree->rchild->value.int_val);
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val + tree->rchild->value.int_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.int_val + tree->rchild->value.float_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-
     }
     else if(tree->type == H5Z_XFORM_MINUS)
     {
@@ -2067,28 +2935,11 @@ static void H5Z_do_op(H5Z_node* tree)
             tree->lchild = NULL;
             tree->rchild = NULL;
         }
-        else if((tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val - tree->rchild->value.float_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-        else if( (tree->lchild->type == H5Z_XFORM_FLOAT) && (tree->rchild->type==H5Z_XFORM_INTEGER))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.float_val - tree->rchild->value.int_val;
-            H5MM_xfree(tree->lchild);
-            H5MM_xfree(tree->rchild);
-            tree->lchild = NULL;
-            tree->rchild = NULL;
-        }
-        else if( (tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type == H5Z_XFORM_FLOAT))
-        {
-            tree->type = H5Z_XFORM_FLOAT;
-            tree->value.float_val = tree->lchild->value.int_val - tree->rchild->value.float_val;
+	else if( ( (tree->lchild->type == H5Z_XFORM_FLOAT) || (tree->lchild->type == H5Z_XFORM_INTEGER)) && ( (tree->rchild->type == H5Z_XFORM_FLOAT) || (tree->rchild->type == H5Z_XFORM_INTEGER)))
+	{
+	    tree->type = H5Z_XFORM_FLOAT;
+            tree->value.float_val = ((tree->lchild->type == H5Z_XFORM_FLOAT) ? tree->lchild->value.float_val : tree->lchild->value.int_val) - 
+				    ((tree->rchild->type == H5Z_XFORM_FLOAT) ? tree->rchild->value.float_val : tree->rchild->value.int_val);
             H5MM_xfree(tree->lchild);
             H5MM_xfree(tree->rchild);
             tree->lchild = NULL;
