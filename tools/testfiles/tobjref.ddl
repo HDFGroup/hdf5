@@ -1,3 +1,6 @@
+#############################
+Expected output for 'h5dump tobjref.h5'
+#############################
 HDF5 "tobjref.h5" {
 GROUP "/" {
    DATASET "Dataset3" {

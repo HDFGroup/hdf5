@@ -1,3 +1,6 @@
+#############################
+Expected output for 'h5dump tenum.h5'
+#############################
 HDF5 "tenum.h5" {
 GROUP "/" {
    DATATYPE "enum normal" {
