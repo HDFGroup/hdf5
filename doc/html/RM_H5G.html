@@ -175,11 +175,11 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>The file or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>const char *</em><code>name</code>
-        <dd>The absolute or relative name of the new group.
+        <dd>IN: Absolute or relative name of the new group.
       <dt><em>size_t</em> <code>size_hint</code>
-        <dd>An optional parameter indicating the number of bytes 
+        <dd>IN: Optional parameter indicating the number of bytes 
             to reserve for the names that will appear in the group. 
             A conservative estimate could result in multiple 
             system-level I/O requests to read the group name heap; 
@@ -226,9 +226,9 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier within which group is to be open.
+        <dd>IN: File or group identifier within which group is to be open.
       <dt><em>const char *</em> <code>name</code>
-        <dd>Name of group to open.
+        <dd>IN: Name of group to open.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a valid group identifier if successful; 
@@ -262,7 +262,7 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>group_id</code>
-        <dd>Group identifier to release.
+        <dd>IN: Group identifier to release.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -313,15 +313,16 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>H5G_link_t</em> <code>link_type</code>
-        <dd>Link type.
-            Possible values are <code>H5G_LINK_HARD</code> and <code>H5G_LINK_SOFT</code>.
+        <dd>IN: Link type.
+            Possible values are <code>H5G_LINK_HARD</code> and 
+            <code>H5G_LINK_SOFT</code>.
       <dt><em>const char *</em> <code>current_name</code>
-        <dd>Name of the existing object if link is a hard link.
+        <dd>IN: Name of the existing object if link is a hard link.
             Can be anything for the soft link.
       <dt><em>const char *</em> <code>new_name</code>
-        <dd>New name for the object.
+        <dd>IN: New name for the object.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -378,9 +379,9 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>Identifier of the file or group containing the object.
+        <dd>IN: Identifier of the file or group containing the object.
       <dt><em>const char *</em> <code>name</code>
-        <dd>Name of the object to unlink.
+        <dd>IN: Name of the object to unlink.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -525,11 +526,11 @@ create or access function.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>hid_t</em> <code>loc_id</code>
-        <dd>File or group identifier.
+        <dd>IN: File or group identifier.
       <dt><em>const char</em> <code>*src</code>
-        <dd>Object's original name.
+        <dd>IN: Object's original name.
       <dt><em>const char</em> <code>*dst</code>
-        <dd>Object's new name.
+        <dd>IN: Object's new name.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -827,7 +828,7 @@ H5G&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  16 August 2001
+Last modified:  1 February 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 

@@ -164,9 +164,9 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_auto_t</em> <code>func</code>
-            <dd>Function to be called upon an error condition.
+            <dd>IN: Function to be called upon an error condition.
         <dt><em>void *</em><code>client_data</code>
-            <dd>Data passed to the error function.
+            <dd>IN: Data passed to the error function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -199,10 +199,10 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_auto_t *</em> <code>func</code>
-            <dd>Current setting for the function to be called upon an 
+            <dd>OUT: Current setting for the function to be called upon an 
                 error condition.
         <dt><em>void **</em><code>client_data</code>
-            <dd>Current setting for the data passed to the error function.
+            <dd>OUT: Current setting for the data passed to the error function.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -328,7 +328,7 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>FILE *</em> <code>stream</code>
-            <dd>File pointer, or stderr if NULL.
+            <dd>IN: File pointer, or stderr if NULL.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -401,11 +401,11 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_direction_t</em> <code>direction</code>
-            <dd>Direction in which the error stack is to be walked.
+            <dd>IN: Direction in which the error stack is to be walked.
         <dt><em>H5E_walk_t</em> <code>func</code>
-            <dd>Function to be called for each error encountered.
+            <dd>IN: Function to be called for each error encountered.
         <dt><em>void *</em> <code>client_data</code>
-            <dd>Data to be passed with <code>func</code>.
+            <dd>IN: Data to be passed with <code>func</code>.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -453,16 +453,16 @@ errors within the H5E package.
         <p>
         <code>client_data</code> is the same pointer that was passed as the
         <code>client_data</code> argument of <code>H5Ewalk()</code>.  
-        It is expected to be a file pointer (or stderr if null). 
+        It is expected to be a file pointer (or stderr if NULL). 
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>int</em> <code>n</code>
-            <dd>Number of times this function has been called 
+            <dd>IN/OUT: Number of times this function has been called 
                 for this traversal of the stack.
         <dt><em>H5E_error_t *</em><code>err_desc</code>
-            <dd>Error description.
+            <dd>OUT: Error description.
         <dt><em>void</em> <code>*client_data</code>
-            <dd>A file pointer, or stderr if null.
+            <dd>IN: A file pointer, or stderr if NULL.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -493,7 +493,7 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_major_t</em> <code>n</code>
-            <dd>Major error number.
+            <dd>IN: Major error number.
     </dl>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
@@ -522,7 +522,7 @@ errors within the H5E package.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5E_minor_t</em> <code>n</code>
-            <dd>Minor error number.
+            <dd>IN: Minor error number.
     </dl>
 <dt><strong>Returns:</strong>
     <dd> Returns a character string describing the error if successful.
@@ -577,7 +577,7 @@ H5E&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  13 November 2000
+Last modified:  1 February 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 

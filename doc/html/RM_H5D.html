@@ -165,15 +165,18 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>Identifier of the file or group to create the dataset within.
+            <dd>IN: Identifier of the file or group to create the 
+                    dataset within.
         <dt><em>const char *</em> <code>name</code>
-            <dd>The name of the dataset to create.
+            <dd>IN: The name of the dataset to create.
         <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of the datatype to use when creating the dataset.
+            <dd>IN: Identifier of the datatype to use when creating 
+                    the dataset.
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace to use when creating the dataset.
+            <dd>IN: Identifier of the dataspace to use when creating 
+                    the dataset.
         <dt><em>hid_t</em> <code>create_plist_id</code>
-            <dd>Identifier of the set creation property list.
+            <dd>IN: Identifier of the set creation property list.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
@@ -204,9 +207,10 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
-            <dd>Identifier of the file or group to access the dataset within.
+            <dd>IN: Identifier of the file or group to access 
+                the dataset within.
         <dt><em>const char *</em> <code>name</code>
-            <dd>The name of the dataset to access.
+            <dd>IN: The name of the dataset to access.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
@@ -237,7 +241,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to query.
+            <dd>IN: Identifier of the dataset to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful;
@@ -272,7 +276,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to query.
+            <dd>IN: Identifier of the dataset to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
@@ -304,7 +308,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to query.
+            <dd>IN: Identifier of the dataset to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset creation property list identifier if successful;
@@ -336,7 +340,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to query.
+            <dd>IN: Identifier of the dataset to query.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns the amount of storage space allocated for the dataset, 
@@ -376,13 +380,14 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to query.
+            <dd>IN: Identifier of the dataset to query.
         <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Datatype identifier.
+            <dd>IN: Datatype identifier.
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Dataspace identifier.
+            <dd>IN: Dataspace identifier.
         <dt><em>hsize_t</em> *<code>size</code>
-            <dd>The size in bytes of the memory buffer required to store the VL data.
+            <dd>OUT: The size in bytes of the memory buffer required 
+                to store the VL data.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
@@ -429,13 +434,14 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
-            <dd>Identifier of the datatype.
+            <dd>IN: Identifier of the datatype.
         <dt><em>hid_t</em> <code>space_id</code>
-            <dd>Identifier of the dataspace.
+            <dd>IN: Identifier of the dataspace.
         <dt><em>hid_t</em> <code>plist_id</code>
-            <dd>Identifier of the property list used to create the buffer.
+            <dd>IN: Identifier of the property list used to create 
+                    the buffer.
         <dt><em>void</em> *<code>buf</code>
-            <dd>Pointer to the buffer to be reclaimed.
+            <dd>IN: Pointer to the buffer to be reclaimed.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
@@ -590,17 +596,18 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset read from.
+            <dd>IN: Identifier of the dataset read from.
         <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>Identifier of the memory datatype.
+            <dd>IN: Identifier of the memory datatype.
         <dt><em>hid_t</em> <code>mem_space_id</code>
-            <dd>Identifier of the memory dataspace.
+            <dd>IN: Identifier of the memory dataspace.
         <dt><em>hid_t</em> <code>file_space_id</code>
-            <dd>Identifier of the dataset's dataspace in the file.
+            <dd>IN: Identifier of the dataset's dataspace in the file.
         <dt><em>hid_t</em> <code>xfer_plist_id</code>
-            <dd>Identifier of a transfer property list for this I/O operation.
+            <dd>IN: Identifier of a transfer property list for 
+                    this I/O operation.
         <dt><em>void *</em> <code>buf</code>
-            <dd>Buffer to receive data read from file.
+            <dd>OUT: Buffer to receive data read from file.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -757,17 +764,18 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to write to.
+            <dd>IN: Identifier of the dataset to write to.
         <dt><em>hid_t</em> <code>mem_type_id</code>
-            <dd>Identifier of the memory datatype.
+            <dd>IN: Identifier of the memory datatype.
         <dt><em>hid_t</em> <code>mem_space_id</code>
-            <dd>Identifier of the memory dataspace.
+            <dd>IN: Identifier of the memory dataspace.
         <dt><em>hid_t</em> <code>file_space_id</code>
-            <dd>Identifier of the dataset's dataspace in the file.
+            <dd>IN: Identifier of the dataset's dataspace in the file.
         <dt><em>hid_t</em> <code>xfer_plist_id</code>
-            <dd>Identifier of a transfer property list for this I/O operation.
+            <dd>IN: Identifier of a transfer property list for 
+                this I/O operation.
         <dt><em>const void *</em> <code>buf</code>
-            <dd>Buffer with data to be written to the file.
+            <dd>OUT: Buffer with data to be written to the file.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -800,9 +808,9 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset.
+            <dd>IN: Identifier of the dataset.
         <dt><em>const hsize_t *</em> <code>size</code>
-            <dd>Array containing the new magnitude of each dimension.
+            <dd>IN: Array containing the new magnitude of each dimension.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -833,7 +841,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
-            <dd>Identifier of the dataset to finish access to.
+            <dd>IN: Identifier of the dataset to finish access to.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -946,7 +954,7 @@ H5D&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  13 November 2000
+Last modified:  1 February 2002
 <br>
 Describes HDF5 Release 1.4.3, February 2002
 
