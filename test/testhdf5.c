@@ -37,10 +37,6 @@
 
  */
 
-#if defined __MWERKS__
-#include <console.h>
-#endif
-
 #include <stdarg.h>
 
 #define MAXNUMOFTESTS 30
