@@ -150,8 +150,8 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     /* Whether fill value is defined */
     mesg->fill_defined = *p++;
 
-    /* Check for version of fill value message */
-    if(version==H5O_FILL_VERSION) {
+    /* Only decode fill value information if one is defined */
+    if(mesg->fill_defined) {
         UINT32DECODE(p, mesg->size);
         if (mesg->size>0) {
             H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
@@ -160,22 +160,9 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
             HDmemcpy(mesg->buf, p, (size_t)mesg->size);
         }
     } /* end if */
-    else {
-        /* Only decode fill value information if one is defined */
-        if(mesg->fill_defined) {
-            UINT32DECODE(p, mesg->size);
-            if (mesg->size>0) {
-                H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
-                if (NULL==(mesg->buf=H5MM_malloc((size_t)mesg->size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value");
-                HDmemcpy(mesg->buf, p, (size_t)mesg->size);
-            }
-        } /* end if */
-        else
-            mesg->size=(-1);
-    } /* end else */
-    
-    
+    else
+        mesg->size=(-1);
+
     /* Set return value */
     ret_value = (void*)mesg;
     
