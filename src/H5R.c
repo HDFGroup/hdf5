@@ -40,7 +40,7 @@ static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
 static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
-static H5G_obj_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
+static int H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -337,7 +337,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
     H5T_t *datatype;            /* Pointer to datatype to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    H5G_obj_t oid_type;         /* type of object being dereferenced */
+    int oid_type;               /* type of object being dereferenced */
     hid_t ret_value;
 
     FUNC_ENTER_NOINIT(H5R_dereference);
@@ -647,13 +647,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5G_obj_t
-H5R_get_object_type(H5F_t *file, void *_ref)
+static int
+H5R_get_object_type(H5F_t *file, hid_t dxpl_id, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
     uint8_t *p;                 /* Pointer to OID to store */
-    H5G_obj_t ret_value;
+    int ret_value;
 
     FUNC_ENTER_NOINIT(H5R_get_object_type);
 
@@ -670,7 +670,7 @@ H5R_get_object_type(H5F_t *file, void *_ref)
     H5F_addr_decode(ent.file,(const uint8_t **)&p,&(ent.header));
 
     /* Get the OID type */
-    ret_value=H5G_get_type(&ent, H5P_DEFAULT);
+    ret_value=H5G_get_type(&ent, dxpl_id);
 
 #ifdef LATER
 done:
@@ -721,7 +721,7 @@ H5Rget_object_type(hid_t id, void *_ref)
     file=loc->file;
 
     /* Get the object information */
-    if ((ret_value=H5R_get_object_type(file,_ref))<0)
+    if ((ret_value=H5R_get_object_type(file,H5AC_ind_dxpl_id,_ref))<0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
     
 done:
@@ -752,12 +752,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5G_obj_t
+static int
 H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    H5G_obj_t ret_value;
+    int ret_value;
 
     FUNC_ENTER_NOINIT(H5R_get_obj_type);
 
@@ -849,12 +849,21 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
+#ifdef H5_WANT_H5_V1_4_COMPAT
 int
 H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
+#else /* H5_WANT_H5_V1_4_COMPAT */
+H5G_obj_t
+H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 {
     H5G_entry_t *loc = NULL;    /* Symbol table entry */
     H5F_t *file=NULL;       /* File object */
-    hid_t ret_value;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int ret_value;
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    H5G_obj_t ret_value;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
     FUNC_ENTER_API(H5Rget_obj_type, H5G_UNKNOWN);
     H5TRACE3("Is","iRtx",id,ref_type,_ref);

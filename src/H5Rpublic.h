@@ -20,6 +20,7 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+#include "H5Gpublic.h"
 #include "H5Ipublic.h"
 
 /*
@@ -74,8 +75,10 @@ H5_DLL hid_t H5Rdereference(hid_t dataset, H5R_type_t ref_type, void *ref);
 H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, void *ref);
 #ifdef H5_WANT_H5_V1_4_COMPAT
 H5_DLL int H5Rget_object_type(hid_t dataset, void *_ref);
+H5_DLL int H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref);
+#else /* H5_WANT_H5_V1_4_COMPAT */
+H5_DLL H5G_obj_t H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref);
 #endif /* H5_WANT_H5_V1_4_COMPAT */
-H5_DLL int H5Rget_obj_type(hid_t dataset, H5R_type_t ref_type, void *_ref);
 
 #ifdef __cplusplus
 }
