@@ -22,7 +22,7 @@
 #endif
 
 
-#ifndef HAVE_ATTRIBUTE
+#ifndef H5_HAVE_ATTRIBUTE
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define UNUSED /*void*/

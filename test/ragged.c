@@ -33,30 +33,30 @@ typedef struct {
 #if 1
 /* Typical VBT sizes */
 static quant_t quant_g[] = {
-    {10.00, 	   1, 	    5},
-    {89.00, 	   6, 	   20},
-    { 0.90, 	  21, 	  100},
-    { 0.09, 	 101, 	 1000},
-    { 0.01,	1001, 	10000},
+    {10.00, 	   1, 	    5, 0},
+    {89.00, 	   6, 	   20, 0},
+    { 0.90, 	  21, 	  100, 0},
+    { 0.09, 	 101, 	 1000, 0},
+    { 0.01,	1001, 	10000, 0},
 };
 #elif 0
 /* Sizes for testing */
 static quant_t	quant_g[] = {
-    {10.0, 	   1,	    5},
-    {80.0, 	   6,	   15},
-    {10.0,	  16,	   20},
+    {10.0, 	   1,	    5, 0},
+    {80.0, 	   6,	   15, 0},
+    {10.0,	  16,	   20, 0},
 };
 #elif 0
 /* Larger I/O */
 static quant_t	quant_g[] = {
-    {10.0,         1, 	 1000},
-    {80.0, 	1001,	 5000},
-    {10.0, 	5001,	10000},
+    {10.0,         1, 	 1000, 0},
+    {80.0, 	1001,	 5000, 0},
+    {10.0, 	5001,	10000, 0},
 };
 #else
 /* All same size */
 static quant_t	quant_g[] = {
-    {100.0, 	1000, 1000}
+    {100.0, 	1000, 1000, 0}
 };
 #endif
 
@@ -648,7 +648,7 @@ main(int argc, char *argv[])
     H5Eset_auto(display_error_cb, NULL);
 
     /* Get a SIGALRM every few seconds */
-#ifdef HAVE_SIGACTION
+#ifdef H5_HAVE_SIGACTION
     {
 	struct sigaction act;
 	act.sa_handler = catch_alarm;
