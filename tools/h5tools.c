@@ -2166,85 +2166,103 @@ static void display_string
  *
  *-------------------------------------------------------------------------
  */
-static void display_compound_data
-(hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
- hsize_t p_nelmts, hsize_t elmtno) {
-size_t  offset, size, dims[4]; 
-hsize_t nelmts, dim_n_size=0;
-hid_t   memb;
-int     nmembs, i, j, k, ndims, perm[4];
+ static void display_compound_data
+    (hsize_t hs_nelmts, hid_t p_type, unsigned char *sm_buf, size_t p_type_nbytes, 
+	 hsize_t p_nelmts, hsize_t elmtno) {
 
-    if ((indent+COL) > nCols) indent = 0;
 
-    for (i=0; i<(int)hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+	 size_t  offset, size, dims[4]; 
+	 hsize_t nelmts, dim_n_size=0;
+	 hid_t   memb;
+	 int     nmembs, i, j, k, ndims, perm[4];
+	 
+	 if ((indent+COL) > nCols) indent = 0;
+	 
+	 for (i=0; i<(int)hs_nelmts && (elmtno+i) < p_nelmts; i++) {
+		 
+		 nmembs = H5Tget_nmembers(p_type);
+		 
+		 indentation(indent+COL); 
+		 printf("{\n");
+		 
+		 indent+= COL;
+		 for (j=0; j<nmembs; j++) {
+			 
+			 offset = H5Tget_member_offset(p_type, j);
+			 memb = H5Tget_member_type(p_type, j);
+			 size = H5Tget_size(memb);
+			 ndims = H5Tget_member_dims(p_type, j, dims, perm);
+			 if (ndims > 0) dim_n_size = dims[ndims-1];
+			 else dim_n_size = 1;
+			 for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
+			 
 
-       nmembs = H5Tget_nmembers(p_type);
+			 
 
-       indentation(indent+COL); 
-       printf("{\n");
-
-       indent+= COL;
-       for (j=0; j<nmembs; j++) {
-
-	    offset = H5Tget_member_offset(p_type, j);
-	    memb = H5Tget_member_type(p_type, j);
-	    size = H5Tget_size(memb);
-	    ndims = H5Tget_member_dims(p_type, j, dims, perm);
-            if (ndims > 0) dim_n_size = dims[ndims-1];
-            else dim_n_size = 1;
-	    for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
-
-            indentation(indent+COL);
-	    printf("[ ");
-
-            indent+=2;
-            switch (H5Tget_class(memb)) {
-            case H5T_INTEGER:
+			 switch (H5Tget_class(memb)) {
+			 case H5T_INTEGER:
+				 indentation(indent+COL);
+				 if (nelmts > 1) {
+					 printf("[ ");
+				 }
                  display_numeric_data
-                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
+					 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
+				 if (nelmts > 1) {
+					 printf(" ]");
+				 }
                  break;
-
-            case H5T_FLOAT:
-                 display_numeric_data
-                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
+				 
+			 case H5T_FLOAT:
+				 indentation(indent+COL);
+				 if (nelmts > 1) {
+					 printf("[ ");
+				 }                
+				 display_numeric_data
+					 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0, -1) ;
+				 if (nelmts > 1) {
+					 printf(" ]");
+				 }
                  break;
+				 
+			 case H5T_TIME:
 
-            case H5T_TIME:
                  break;
-
-            case H5T_STRING:
+				 
+			 case H5T_STRING:
+				 indentation(indent+COL);
                  display_string
-                 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0 ) ;
+					 (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, dim_n_size, 0 ) ;
+	
                  break;
+				 
+			 case H5T_BITFIELD:
 
-            case H5T_BITFIELD:
                  break;
+				 
+			 case H5T_OPAQUE:
+                 
+				 break;
+			 case H5T_COMPOUND:
+				 display_compound_data (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, 0);
+				 indentation(indent);
+				 break;
+			 default: break;
+				 
+			 }
 
-            case H5T_OPAQUE:
-                 break;
-			case H5T_COMPOUND:
-				printf("\n");
-				display_compound_data (nelmts, memb, sm_buf+offset+i*p_type_nbytes, size, nelmts, 0);
-				indentation(indent);
-				break;
-            default: break;
+			 if ( j == nmembs-1) printf(" \n");
+			 else printf(" ,\n");
 
-            }
-            indent-=2;
-
-            if ( j == nmembs-1) printf(" ]\n");
-            else printf(" ],\n");
-
-	    H5Tclose(memb);
-       }
-       indent-= COL;
-
-       indentation(indent+COL);
-       if ((elmtno+i+1) == p_nelmts) printf("}\n");
-       else printf("},\n");
-    }
-
-}
+			 H5Tclose(memb);
+		 }
+		 indent-= COL;
+		 
+		 indentation(indent+COL);
+		 if ((elmtno+i+1) == p_nelmts) printf("}\n");
+		 else printf("},\n");
+	 }
+	 
+ }
 /*-------------------------------------------------------------------------
  * Function:	print_data	
  *

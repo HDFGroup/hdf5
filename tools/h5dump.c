@@ -285,18 +285,24 @@ H5G_stat_t statbuf;
             nmembers = H5Tget_nmembers(type);
  
             for (i = 0; i < nmembers; i++) {
-
                  fname = H5Tget_member_name(type, i);
 
                  mtype = H5Tget_member_type(type, i);
 
                  ndims = H5Tget_member_dims(type, i, dims, perm);
 
-                 if (H5Tget_class(mtype) != H5T_STRING)
+                 if (H5Tget_class(mtype) != H5T_STRING)/* && (H5Tget_class(mtype) != H5T_COMPOUND))*/
                      indentation (indent+COL);
-
+				 if (H5Tget_class(mtype) == H5T_COMPOUND) {
+					 indent += COL; 
+					 printf("{\n");
+				 }
                  print_datatype(mtype);
-
+				 if (H5Tget_class(mtype) == H5T_COMPOUND) {
+					 indent -= COL;
+                     indentation (indent+COL);
+					 printf("}");
+				 }
                  printf (" \"%s\"", fname);
 
                  if (ndims != 1 || dims[0] != 1) {
@@ -316,14 +322,14 @@ H5G_stat_t statbuf;
 		break;
 	case H5T_ENUM:
 		printf("H5T_ENUM\n");
-		indentation(indent + 3);
+		indentation(indent + COL);
 		printf("{ ");	
 		super = H5Tget_super(type);
 		print_datatype(super);
 		printf(";");
 		print_enum(type);
 		printf("\n");
-		indentation (indent + 3);
+		indentation (indent + COL);
 		printf("}\n");
 		break;
     default:
