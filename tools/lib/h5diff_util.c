@@ -13,7 +13,34 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5diff.h"
+#include "ph5diff.h"
 #include "H5private.h"
+
+
+/*-------------------------------------------------------------------------
+ * Function: parallel_print
+ *
+ * Purpose: wrapper for printf for use in parallel mode.
+ *
+ * Programmer: Leon Arber
+ *
+ * Date: December 1, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+void parallel_print(const char* format, ...)
+{
+    va_list	ap;
+
+    va_start(ap, format);
+
+    if(!PARALLEL)
+	vprintf(format, ap);
+    else
+	outBuffOffset += vsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+
+    va_end(ap);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -46,22 +73,22 @@ void print_pos( int        *ph,
   *ph=0;
   if (per)
   {
-   printf("%-15s %-15s %-15s %-15s %-15s\n", 
+   parallel_print("%-15s %-15s %-15s %-15s %-15s\n", 
     "position", 
     (obj1!=NULL) ? obj1 : " ", 
     (obj2!=NULL) ? obj2 : " ",
     "difference", 
     "relative");
-   printf("------------------------------------------------------------------------\n");
+   parallel_print("------------------------------------------------------------------------\n");
   }
   else
   {
-   printf("%-15s %-15s %-15s %-20s\n", 
+   parallel_print("%-15s %-15s %-15s %-20s\n", 
     "position", 
     (obj1!=NULL) ? obj1 : " ", 
     (obj2!=NULL) ? obj2 : " ",
     "difference");
-   printf("------------------------------------------------------------\n");
+   parallel_print("------------------------------------------------------------\n");
   }
  }
 
@@ -72,12 +99,13 @@ void print_pos( int        *ph,
  }
  assert( curr_pos == 0 );
 
- printf("[ " );  
+ parallel_print("[ " );  
  for ( i = 0; i < rank; i++)
  {
-  HDfprintf(stdout,"%Hu ", pos[i]  );
+ /* HDfprintf(stdout,"%Hu ", pos[i]  ); */
+     parallel_print("%d ",(int) pos[i]);
  }
- printf("]" );
+ parallel_print("]" );
 }
 
 /*-------------------------------------------------------------------------
@@ -94,12 +122,11 @@ void print_pos( int        *ph,
 void print_dims( int r, hsize_t *d )
 {
  int i;
- printf("[ " );  
+ parallel_print("[ " );  
  for ( i=0; i<r; i++ ) 
-  printf("%d ",(int)d[i]  );
- printf("] " );
+  parallel_print("%d ",(int)d[i]  );
+ parallel_print("] " );
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: print_type

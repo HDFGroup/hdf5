@@ -103,7 +103,7 @@ int diff_attr(hid_t      loc1_id,
   {
    if (options->m_verbose) 
    {
-    printf("Different name for attributes: <%s> and <%s>\n", name1, name2);
+    parallel_print("Different name for attributes: <%s> and <%s>\n", name1, name2);
    }
    H5Aclose(attr1_id);
    H5Aclose(attr2_id);
@@ -178,7 +178,7 @@ int diff_attr(hid_t      loc1_id,
  buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
  buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
  if ( buf1==NULL || buf2==NULL){
-  printf( "cannot read into memory\n" );
+  parallel_print( "cannot read into memory\n" );
   goto error;
  }
  if (H5Aread(attr1_id,mtype1_id,buf1)<0)
@@ -197,7 +197,7 @@ int diff_attr(hid_t      loc1_id,
  /* always print name */
  if (options->m_verbose)
  {
-  printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
+  parallel_print( "Attribute:   <%s> and <%s>\n",name1,name2); 
   nfound = diff_array(buf1, 
                      buf2,
                      nelmts1,
@@ -234,7 +234,7 @@ int diff_attr(hid_t      loc1_id,
    options->m_quiet=0;
    if (nfound) 
    {
-    printf( "Attribute:   <%s> and <%s>\n",name1,name2); 
+    parallel_print( "Attribute:   <%s> and <%s>\n",name1,name2); 
     nfound = diff_array(buf1, 
                      buf2,
                      nelmts1,

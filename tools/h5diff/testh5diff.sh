@@ -47,6 +47,9 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
+   if test -n "$RUNPARALLEL"; then
+	echo $* SKIPPED
+   else
    expect="$srcdir/../testfiles/$1"
    actual="../testfiles/`basename $1 .txt`.out"
    actual_err="../testfiles/`basename $1 .txt`.err"
@@ -86,6 +89,7 @@ TOOLTEST() {
      if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actual_err
      fi
+   fi
 }
 
 ##############################################################################

@@ -13,6 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "h5diff.h"
+#include "ph5diff.h"
 #include "H5private.h" 
 #include "h5tools.h"
 
@@ -205,9 +206,9 @@ hsize_t diff_datasetid( hid_t dset1_id,
  storage_size2=H5Dget_storage_size(dset2_id);
  if (storage_size1<=0 && storage_size2<=0)
  {
-  if (options->m_verbose && obj1_name && obj2_name) 
-   printf("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
-  cmp=0;
+     if (options->m_verbose && obj1_name && obj2_name) 
+	 parallel_print("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
+     cmp=0;
  }
 
 
@@ -289,11 +290,12 @@ hsize_t diff_datasetid( hid_t dset1_id,
  sign2=H5Tget_sign(m_type2);
  if ( sign1 != sign2 )
  {
-  if (options->m_verbose && obj1_name) {
-   printf("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
-   printf("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
-  }
-  cmp=0;
+     if (options->m_verbose && obj1_name) {
+	 parallel_print("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
+	 parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
+     }
+
+     cmp=0;
  }
 
 /*-------------------------------------------------------------------------
