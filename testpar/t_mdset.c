@@ -306,6 +306,138 @@ void big_dataset(const char *filename)
     VRFY((ret >= 0), "H5Pclose succeeded");        
 }
 
+/* Example of using PHDF5 to read "short" datasets.  These datasets don't have
+ * actual data written to the entire raw data area and rely on the "fill with
+ * zeros" code in the VFL driver read routine to work correctly.
+ */
+void short_dataset(const char *filename)
+{
+    int mpi_size, mpi_rank;     /* MPI info */
+    hbool_t use_gpfs = FALSE;   /* Don't use GPFS stuff for this test */
+    int err_num;                /* Number of errors */
+    hid_t iof,                  /* File ID */
+        fapl,                   /* File access property list ID */
+        dxpl,                   /* Data transfer property list ID */
+        dataset,                /* Dataset ID */
+        memspace,               /* Memory dataspace ID */
+        filespace;              /* Dataset's dataspace ID */
+    char dname[]="dataset";     /* Name of dataset */
+    hsize_t     dset_size[4] = {0, 6, 7, 8};
+    hssize_t    req_start[4] = {0, 0, 0, 0};
+    hsize_t     req_count[4] = {1, 6, 7, 8};
+    int *rdata, *wdata;         /* Buffers for data to read and write */
+    int *tdata, *tdata2;        /* Temporary pointer into buffer */
+    int acc, i, j, k, l;        /* Local index variables */
+    herr_t ret;                 /* Generic return value */
+                                
+    MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
+
+    VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
+
+    /* Allocate space for the buffers */
+    dset_size[0]=mpi_size+1;
+    rdata=HDmalloc((size_t)(dset_size[0]*dset_size[1]*dset_size[2]*dset_size[3]*sizeof(int)));
+    VRFY((rdata != NULL), "HDcalloc succeeded for read buffer");
+    wdata=HDmalloc((size_t)(dset_size[0]*dset_size[1]*dset_size[2]*dset_size[3]*sizeof(int)));
+    VRFY((wdata != NULL), "HDmalloc succeeded for write buffer");
+
+    /* Initialize write buffer */
+    HDmemset(rdata,2,(size_t)(dset_size[0]*dset_size[1]*dset_size[2]*dset_size[3]*sizeof(int)));
+    tdata=wdata;
+    for (i=0, acc=0; i<(int)dset_size[0]; i++)
+        for (j=0; j<(int)dset_size[1]; j++)
+            for (k=0; k<(int)dset_size[2]; k++)
+                for (l=0; l<(int)dset_size[3]; l++)
+                    *tdata++ = acc++;
+
+    fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
+    VRFY((fapl >= 0), "create_faccess_plist succeeded");
+
+    /*
+     * Create HDF5 file
+     */
+    iof = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    VRFY((iof >= 0), "H5Fcreate succeeded");
+
+    filespace = H5Screate_simple(4, dset_size, NULL);
+    VRFY((filespace >= 0), "File H5Screate_simple succeeded");
+
+    dataset = H5Dcreate(iof, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dcreate succeeded");
+
+    memspace = H5Screate_simple(4, dset_size, NULL);
+    VRFY((memspace >= 0), "Memory H5Screate_simple succeeded");
+
+    /* Create hyperslabs in memory and file dataspaces */
+    req_start[0]=mpi_rank;
+    ret=H5Sselect_hyperslab(filespace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
+    VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
+    ret=H5Sselect_hyperslab(memspace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
+    VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
+
+    /* Create DXPL for collective I/O */
+    dxpl = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "H5Pcreate succeeded");
+
+    ret=H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    /* Collectively write a hyperslab of data to the dataset */
+    ret=H5Dwrite(dataset, H5T_NATIVE_INT, memspace, filespace, dxpl, wdata);
+    VRFY((ret >= 0), "H5Dwrite succeeded");
+
+    /* Barrier here, to allow MPI-posix I/O to sync */
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    /* Independently read the entire dataset back */
+    ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    VRFY((ret >= 0), "H5Dread succeeded");
+
+    /* Verify correct data read */
+    tdata=wdata;
+    tdata2=rdata;
+    err_num=0;
+    for (i=0; i<(int)dset_size[0]; i++)
+        for (j=0; j<(int)dset_size[1]; j++)
+            for (k=0; k<(int)dset_size[2]; k++)
+                for (l=0; l<(int)dset_size[3]; l++, tdata++, tdata2++)
+                    if(i<mpi_size) {
+                        if( *tdata != *tdata2 )
+                            if(err_num++ < MAX_ERR_REPORT || verbose)
+                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect %d, got %d\n", i,j,k,l, *tdata, *tdata2); 
+                    } /* end if */
+                    else {
+                        if( *tdata2 != 0)
+                            if(err_num++ < MAX_ERR_REPORT || verbose)
+                                printf("Dataset Verify failed at [%d][%d][%d][%d]: expect 0, got %d\n", i,j,k,l, *tdata2);
+                    } /* end else */
+    if(err_num > MAX_ERR_REPORT && !verbose)
+        printf("[more errors ...]\n");
+    if(err_num)
+        printf("%d errors found in check_value\n", err_num);
+
+    /* Close all file objects */
+    ret=H5Dclose (dataset);
+    VRFY((ret >= 0), "H5Dclose succeeded");        
+    ret=H5Sclose (filespace);
+    VRFY((ret >= 0), "H5Sclose succeeded");        
+    ret=H5Fclose (iof);
+    VRFY((ret >= 0), "H5Fclose succeeded");        
+
+    /* Close memory dataspace */
+    ret=H5Sclose (memspace);
+    VRFY((ret >= 0), "H5Sclose succeeded");
+
+    /* Close dxpl */
+    ret=H5Pclose (dxpl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+
+    /* Close fapl */
+    ret=H5Pclose (fapl);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+}
+
 /* Write multiple groups with a chunked dataset in each group collectively. 
  * These groups and datasets are for testing independent read later.
  */
