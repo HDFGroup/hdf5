@@ -16,6 +16,8 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
+   $(top_srcdir)/src/H5Cprivate.h \
+   $(top_srcdir)/src/H5Cpublic.h \
    $(top_srcdir)/src/H5RCprivate.h \
    $(top_srcdir)/src/H5Dprivate.h \
    $(top_srcdir)/src/H5Dpublic.h \
