@@ -12,7 +12,7 @@ Preconditions
        C++ libraries.  If you are interested only in the C library, 
        refer to INSTAll_Windows.txt or INSTAll_codewarrior.txt.
 
-    2. MicroSoft Developer Studio,Visual C++ 6.0 and WinZip must be 
+    2. MicroSoft Developer Studio, Visual C++ 6.0 and WinZip must be 
        installed prior to building the HDF5 library.
 
     3. Set up a directory structure to unpack the library.
@@ -26,8 +26,13 @@ Preconditions
        directory called 'hdf5xxx' under MyHDFstuff which contains 
        several files and directories. Rename "hdf5xxx" to "hdf5". 
 
-    5. HDF5 uses the zlib library, which is distributed with the HDF5 
-       Windows source code.  
+    5. HDF5 uses zlib library, but it is not distributed with the HDF5
+       library.  You will need to install your own.  Please refer to
+       INSTAll_Windows.txt for instructions regarding zlib library.
+
+    6. HDF5 also uses the szlib (szip) library, which is distributed 
+       with the HDF5 library.  Please refer to INSTAll_Windows.txt for 
+       instructions regarding szlib library.
 
 
 Building the HDF5 C and C++ libraries (both static and shared)
@@ -96,7 +101,7 @@ Building the HDF5 C and C++ libraries (both static and shared)
 Testing libraries and tools
 ---------------------------
 
-    1. See the file INSTALL_Windows.txt (STEP 2) for instruction on 
+    1. See the file INSTALL_Windows.txt (Section II) for instruction on 
        testing the C HDF5 library and non-hdf4-related tools.
 
     2. To test C++ HDF5 Library, you first need to copy the appropriate
