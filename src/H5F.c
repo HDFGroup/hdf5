@@ -1675,9 +1675,18 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 
     /* update file length if necessary */
     if (!H5F_addr_defined(&(f->shared->hdf5_eof))) {
-	H5F_addr_reset(&(f->shared->hdf5_eof));
-	H5F_addr_inc(&(f->shared->hdf5_eof), (hsize_t)(p-buf));
-	H5F_low_seteof(f->shared->lf, &(f->shared->hdf5_eof));
+        haddr_t		t_addr;	/*temporary address		*/
+
+        /* Set the HDF5 file size */
+        H5F_addr_reset(&(f->shared->hdf5_eof));
+        H5F_addr_inc(&(f->shared->hdf5_eof), (hsize_t)(p-buf));
+
+        /* Set the logical file size, including the userblock data */
+        t_addr = f->shared->hdf5_eof;
+        H5F_addr_add(&t_addr, &(f->shared->base_addr));
+        H5F_low_seteof(f->shared->lf, &t_addr);
+
+        /* Indicate that the boot block needs to be flushed out */
         firsttime_bootblock=1;
     }
     
