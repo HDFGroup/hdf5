@@ -61,8 +61,8 @@ static herr_t H5HP_sink_min(H5HP_t *heap, size_t loc);
 /* Declare a free list to manage the H5HP_t struct */
 H5FL_DEFINE_STATIC(H5HP_t);
 
-/* Declare a free list to manage arrays of H5HP_ent_t */
-H5FL_ARR_DEFINE_STATIC(H5HP_ent_t,-1);
+/* Declare a free list to manage sequences of H5HP_ent_t */
+H5FL_SEQ_DEFINE_STATIC(H5HP_ent_t);
 
 
 /*--------------------------------------------------------------------------
@@ -354,7 +354,7 @@ H5HP_create(H5HP_type_t heap_type)
         HGOTO_ERROR(H5E_HEAP,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Allocate the array to store the heap entries */
-    if((new_heap->heap=H5FL_ARR_MALLOC(H5HP_ent_t, H5HP_START_SIZE+1))==NULL)
+    if((new_heap->heap=H5FL_SEQ_MALLOC(H5HP_ent_t, H5HP_START_SIZE+1))==NULL)
         HGOTO_ERROR(H5E_HEAP,H5E_NOSPACE,NULL,"memory allocation failed");
 
     /* Set the internal fields */
@@ -386,7 +386,7 @@ done:
     if(ret_value==NULL) {
         if(new_heap!=NULL) {
             if(new_heap->heap!=NULL)
-                H5FL_ARR_FREE(H5HP_ent_t,new_heap->heap);
+                H5FL_SEQ_FREE(H5HP_ent_t,new_heap->heap);
             H5FL_FREE(H5HP_t,new_heap);
         } /* end if */
     } /* end if */
@@ -487,7 +487,7 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
     /* Check if we need to allocate more room for heap array */
     if(heap->nobjs>=heap->nalloc) {
         size_t n = MAX(H5HP_START_SIZE, 2*(heap->nalloc-1)) + 1;
-        H5HP_ent_t *new_heap = H5FL_ARR_REALLOC(H5HP_ent_t,heap->heap, n);
+        H5HP_ent_t *new_heap = H5FL_SEQ_REALLOC(H5HP_ent_t,heap->heap, n);
 
         if (!new_heap)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend heap array");
@@ -924,7 +924,7 @@ H5HP_close(H5HP_t *heap)
     assert(heap->heap[0].obj==NULL);
 
     /* Free internal structures for heap */
-    H5FL_ARR_FREE(H5HP_ent_t,heap->heap);
+    H5FL_SEQ_FREE(H5HP_ent_t,heap->heap);
 
     /* Free actual heap object */
     H5FL_FREE(H5HP_t,heap);

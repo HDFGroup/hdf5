@@ -177,11 +177,11 @@ H5FL_BLK_DEFINE_STATIC(page);
 /* Declare a PQ free list to manage the native block information */
 H5FL_BLK_DEFINE_STATIC(native_block);
 
-/* Declare a free list to manage the H5B_key_t array information */
-H5FL_ARR_DEFINE_STATIC(H5B_key_t,-1);
+/* Declare a free list to manage the H5B_key_t sequence information */
+H5FL_SEQ_DEFINE_STATIC(H5B_key_t);
 
-/* Declare a free list to manage the haddr_t array information */
-H5FL_ARR_DEFINE_STATIC(haddr_t,-1);
+/* Declare a free list to manage the haddr_t sequence information */
+H5FL_SEQ_DEFINE_STATIC(haddr_t);
 
 /* Declare a free list to manage the H5B_t struct */
 H5FL_DEFINE_STATIC(H5B_t);
@@ -251,8 +251,8 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     bt->nchildren = 0;
     if (NULL==(bt->page=H5FL_BLK_CALLOC(page,size)) ||
             NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
-            NULL==(bt->child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
-            NULL==(bt->key=H5FL_ARR_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))))
+            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
+            NULL==(bt->key=H5FL_SEQ_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node")
 
     /*
@@ -350,8 +350,8 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     bt->ndirty = 0;
     if (NULL==(bt->page=H5FL_BLK_MALLOC(page,size)) ||
             NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_nkey_size)) ||
-            NULL==(bt->key=H5FL_ARR_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))) ||
-            NULL==(bt->child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))))
+            NULL==(bt->key=H5FL_SEQ_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))) ||
+            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     if (H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, bt->page)<0)
 	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree node")
@@ -578,8 +578,8 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
     /* Verify that node is clean */
     assert(bt->cache_info.dirty==0);
 
-    H5FL_ARR_FREE(haddr_t,bt->child);
-    H5FL_ARR_FREE(H5B_key_t,bt->key);
+    H5FL_SEQ_FREE(haddr_t,bt->child);
+    H5FL_SEQ_FREE(H5B_key_t,bt->key);
     H5FL_BLK_FREE(page,bt->page);
     H5FL_BLK_FREE(native_block,bt->native);
     H5FL_FREE(H5B_t,bt);
@@ -1706,7 +1706,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child=H5FL_ARR_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
+	if (NULL==(child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
                 NULL==(key=H5MM_malloc((2*H5F_KVALUE(f, type)+1)*type->sizeof_nkey)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -1759,7 +1759,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 
 done:
     if(child!=NULL)
-        H5FL_ARR_FREE(haddr_t,child);
+        H5FL_SEQ_FREE(haddr_t,child);
     if(key!=NULL)
         H5MM_xfree(key);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2357,8 +2357,8 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
 
     if (NULL==(new_node->page=H5FL_BLK_MALLOC(page,size)) ||
             NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
-            NULL==(new_node->child=H5FL_ARR_MALLOC(haddr_t,nkeys)) ||
-            NULL==(new_node->key=H5FL_ARR_MALLOC(H5B_key_t,(nkeys+1))))
+            NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,nkeys)) ||
+            NULL==(new_node->key=H5FL_SEQ_MALLOC(H5B_key_t,(nkeys+1))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the other structures */
@@ -2382,8 +2382,8 @@ done:
         if(new_node) {
 	    H5FL_BLK_FREE (page,new_node->page);
 	    H5FL_BLK_FREE (native_block,new_node->native);
-	    H5FL_ARR_FREE (haddr_t,new_node->child);
-	    H5FL_ARR_FREE (H5B_key_t,new_node->key);
+	    H5FL_SEQ_FREE (haddr_t,new_node->child);
+	    H5FL_SEQ_FREE (H5B_key_t,new_node->key);
 	    H5FL_FREE (H5B_t,new_node);
         } /* end if */
     } /* end if */

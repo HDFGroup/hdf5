@@ -44,11 +44,14 @@ static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 /* Declare external the free list for hssize_t arrays */
 H5FL_ARR_EXTERN(hssize_t);
 
-/* Declare a free list to manage arrays of size_t */
-H5FL_ARR_DEFINE_STATIC(size_t,-1);
-
-/* Declare a free list to manage arrays of hsize_t */
+/* Declare external the free list for hsize_t arrays */
 H5FL_ARR_EXTERN(hsize_t);
+
+/* Declare a free list to manage sequences of size_t */
+H5FL_SEQ_DEFINE_STATIC(size_t);
+
+/* Declare a free list to manage sequences of hsize_t */
+H5FL_SEQ_DEFINE_STATIC(hsize_t);
 
 /* Declare a free list to manage blocks of single datatype element data */
 H5FL_BLK_EXTERN(type_elem);
@@ -912,9 +915,9 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Get the datatype size */
@@ -998,9 +1001,9 @@ done:
 
     /* Release length & offset vectors */
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_iterate() */
@@ -1353,9 +1356,9 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
     vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Initialize iterator */
@@ -1400,9 +1403,9 @@ done:
 
     /* Release length & offset vectors */
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
 
     /* Release fill value, if allocated */
     if(_fill==NULL && fill)
@@ -1467,9 +1470,9 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Compute the number of bytes available in buffer */
@@ -1500,9 +1503,9 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
 
 done:
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fscat() */
 
@@ -1566,9 +1569,9 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
 
     /* Compute the number of bytes available in buffer */
@@ -1599,9 +1602,9 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 
 done:
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fgath() */
 
@@ -1654,9 +1657,9 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Compute the number of bytes available in buffer */
@@ -1686,9 +1689,9 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
 
 done:
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mscat() */
 
@@ -1743,9 +1746,9 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O length vector array");
-    if((off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate I/O offset vector array");
 
     /* Compute the number of bytes available in buffer */
@@ -1775,9 +1778,9 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
 
 done:
     if(len!=NULL)
-        H5FL_ARR_FREE(size_t,len);
+        H5FL_SEQ_FREE(size_t,len);
     if(off!=NULL)
-        H5FL_ARR_FREE(hsize_t,off);
+        H5FL_SEQ_FREE(hsize_t,off);
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mgath() */
 
@@ -1843,13 +1846,13 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dc
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((mem_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((mem_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((mem_off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((mem_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-    if((file_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((file_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((file_off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((file_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Get number of bytes in selection */
@@ -1920,13 +1923,13 @@ done:
 
     /* Free vector arrays */
     if(file_len!=NULL)
-        H5FL_ARR_FREE(size_t,file_len);
+        H5FL_SEQ_FREE(size_t,file_len);
     if(file_off!=NULL)
-        H5FL_ARR_FREE(hsize_t,file_off);
+        H5FL_SEQ_FREE(hsize_t,file_off);
     if(mem_len!=NULL)
-        H5FL_ARR_FREE(size_t,mem_len);
+        H5FL_SEQ_FREE(size_t,mem_len);
     if(mem_off!=NULL)
-        H5FL_ARR_FREE(hsize_t,mem_off);
+        H5FL_SEQ_FREE(hsize_t,mem_off);
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_read() */
 
@@ -1991,13 +1994,13 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_ca
     vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
-    if((mem_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((mem_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((mem_off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((mem_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
-    if((file_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
+    if((file_len = H5FL_SEQ_MALLOC(size_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
-    if((file_off = H5FL_ARR_MALLOC(hsize_t,(size_t)vector_size))==NULL)
+    if((file_off = H5FL_SEQ_MALLOC(hsize_t,(size_t)vector_size))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
 
     /* Initialize file iterator */
@@ -2111,13 +2114,13 @@ done:
 
     /* Free vector arrays */
     if(file_len!=NULL)
-        H5FL_ARR_FREE(size_t,file_len);
+        H5FL_SEQ_FREE(size_t,file_len);
     if(file_off!=NULL)
-        H5FL_ARR_FREE(hsize_t,file_off);
+        H5FL_SEQ_FREE(hsize_t,file_off);
     if(mem_len!=NULL)
-        H5FL_ARR_FREE(size_t,mem_len);
+        H5FL_SEQ_FREE(size_t,mem_len);
     if(mem_off!=NULL)
-        H5FL_ARR_FREE(hsize_t,mem_off);
+        H5FL_SEQ_FREE(hsize_t,mem_off);
 #ifdef QAK
 {
     int mpi_rank;

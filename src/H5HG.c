@@ -139,8 +139,8 @@ static int interface_initialize_g = 0;
 /* Declare a free list to manage the H5HG_t struct */
 H5FL_DEFINE_STATIC(H5HG_heap_t);
 
-/* Declare a free list to manage arrays of H5HG_obj_t's */
-H5FL_ARR_DEFINE_STATIC(H5HG_obj_t,-1);
+/* Declare a free list to manage sequences of H5HG_obj_t's */
+H5FL_SEQ_DEFINE_STATIC(H5HG_obj_t);
 
 /* Declare a PQ free list to manage heap chunks */
 H5FL_BLK_DEFINE_STATIC(heap_chunk);
@@ -196,7 +196,7 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->nalloc = H5HG_NOBJS (f, size);
-    if (NULL==(heap->obj = H5FL_ARR_CALLOC (H5HG_obj_t,heap->nalloc)))
+    if (NULL==(heap->obj = H5FL_SEQ_CALLOC (H5HG_obj_t,heap->nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Initialize the header */
@@ -334,7 +334,7 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     /* Decode each object */
     p = heap->chunk + H5HG_SIZEOF_HDR (f);
     nalloc = H5HG_NOBJS (f, heap->size);
-    if (NULL==(heap->obj = H5FL_ARR_CALLOC (H5HG_obj_t,nalloc)))
+    if (NULL==(heap->obj = H5FL_SEQ_CALLOC (H5HG_obj_t,nalloc)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     heap->nalloc = nalloc;
     while (p<heap->chunk+heap->size) {
@@ -497,7 +497,7 @@ H5HG_dest (H5F_t *f, H5HG_heap_t *heap)
         }
     }
     heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
-    heap->obj = H5FL_ARR_FREE(H5HG_obj_t,heap->obj);
+    heap->obj = H5FL_SEQ_FREE(H5HG_obj_t,heap->obj);
     H5FL_FREE (H5HG_heap_t,heap);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
