@@ -33,31 +33,51 @@
 namespace H5 {
 #endif
 
-// Default constructor
+
+//--------------------------------------------------------------------------
+// Function:	IntType default constructor
+///\brief	Default constructor: Creates a stub integer datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::IntType() {}
 
-// Copy constructor: makes copy of the original IntType object
+//--------------------------------------------------------------------------
+// Function:	IntType copy constructor
+///\brief	Copy constructor: makes a copy of the original IntType object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::IntType( const IntType& original ) : AtomType( original ) {}
 
-// Creates a integer type using a predefined type
+//--------------------------------------------------------------------------
+// Function:	IntType overloaded constructor
+///\brief	Creates a integer type using a predefined type
+///\param	pred_type - IN: Predefined datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::IntType( const PredType& pred_type ) : AtomType()
 {
    // use DataType::copy to make a copy of this predefined type
    copy( pred_type );
 }
 
-/* BMR - may not keep
-IntType& IntType::operator=( const PredType& rhs )
-{
-   copy(rhs);
-   return(*this);
-}
-*/
-
-// Creates a integer datatype using an existing id
+//--------------------------------------------------------------------------
+// Function:	IntType overloaded constructor
+///\brief	Creates an integer datatype using the id of an existing 
+///		datatype.
+///\param	existing_id - IN: Id of an existing datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::IntType( const hid_t existing_id ) : AtomType( existing_id ) {}
 
-// Gets the integer datatype of the specified dataset - may reimplement -BMR
+//--------------------------------------------------------------------------
+// Function:	IntType overloaded constructor
+///\brief	Gets the integer datatype of the specified dataset.
+///\param	dataset - IN: Dataset that this integer datatype associates with
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::IntType( const DataSet& dataset ) : AtomType()
 {  
    // Calls C function H5Dget_type to get the id of the datatype
@@ -69,11 +89,18 @@ IntType::IntType( const DataSet& dataset ) : AtomType()
    }
 }  
 
-// Retrieves the sign type for an integer type
+//--------------------------------------------------------------------------
+// Function:	IntType::getSign
+///\brief	Retrieves the sign type for an integer type.
+///\return	Valid sign type
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_sign_t IntType::getSign() const
 {
    H5T_sign_t type_sign = H5Tget_sign( id );  // C routine
-   // Returns a valid sign type if successful
+
+   // Returns a valid sign type if no errors
    if( type_sign == H5T_SGN_ERROR )
    {
       throw DataTypeIException("IntType::getSign", 
@@ -82,7 +109,13 @@ H5T_sign_t IntType::getSign() const
    return( type_sign );
 }
 
-// Sets the sign proprety for an integer type. 
+//--------------------------------------------------------------------------
+// Function:	IntType::getSign
+///\brief	Sets the sign property for an integer type. 
+///\param	sign - IN: Sign type
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IntType::setSign( H5T_sign_t sign ) const
 {
    // Call C routine to set the sign property
@@ -93,7 +126,11 @@ void IntType::setSign( H5T_sign_t sign ) const
    }
 }
 
-// This destructor terminates access to the datatype
+//--------------------------------------------------------------------------
+// Function:	IntType destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IntType::~IntType() {}
 
 #ifndef H5_NO_NAMESPACE

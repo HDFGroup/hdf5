@@ -33,20 +33,48 @@
 namespace H5 {
 #endif
 
-// Creates an empty enumeration datatype based on a native signed
-// integer type.
-EnumType::EnumType( size_t size ) : DataType( H5T_ENUM, size ) {}
-
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	EnumType default constructor
+///\brief	Default constructor: Creates a stub datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::EnumType() : DataType() {}
 
-// Creates a enumeration datatype using an existing id
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Creates an EnumType object using the id of an existing datatype.
+///\param	existing_id - IN: Id of an existing datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::EnumType( const hid_t existing_id ) : DataType( existing_id ) {}
 
-// Copy constructor: makes a copy of the original EnumType object. 
+//--------------------------------------------------------------------------
+// Function:	EnumType copy constructor
+///\brief	Copy constructor: makes a copy of the original EnumType object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::EnumType( const EnumType& original ) : DataType( original ) {}
 
-// Gets the enum datatype of the specified dataset 
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Creates an empty enumeration datatype given a size, in bytes.
+///\param	size - IN: Number of bytes in the datatype to create
+///\exception	H5::DataTypeIException
+// Description
+// 		The DataType constructor calls the C API H5Tcreate to create
+// 		the enum datatype.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+EnumType::EnumType( size_t size ) : DataType( H5T_ENUM, size ) {}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Gets the enum datatype of the specified dataset.
+///\param	dataset - IN: Dataset that this enum datatype associates with
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::EnumType( const DataSet& dataset ) : DataType()
 {
    // Calls C function H5Dget_type to get the id of the datatype
@@ -59,7 +87,13 @@ EnumType::EnumType( const DataSet& dataset ) : DataType()
    }
 }
 
-// Creates a new enum datatype based on an integer datatype
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Creates a new enum datatype based on an integer datatype.
+///\param	data_type - IN: Base datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::EnumType( const IntType& data_type ) : DataType()
 {
    // Calls C function H5Tenum_create to get the id of the datatype
@@ -72,11 +106,14 @@ EnumType::EnumType( const IntType& data_type ) : DataType()
    }
 }
 
-// Inserts a new member to this enumeration datatype.
-void EnumType::insert( const string& name, void *value ) const
-{
-    insert( name.c_str(), value );
-}
+//--------------------------------------------------------------------------
+// Function:	EnumType::insert
+///\brief	Inserts a new member to this enumeration datatype.
+///\param	name  - IN: Name of the new member
+///\param	value - IN: Pointer to the value of the new member
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void EnumType::insert( const char* name, void *value ) const
 {
    // Calls C routine H5Tenum_insert to insert the new enum datatype member. 
@@ -87,7 +124,27 @@ void EnumType::insert( const char* name, void *value ) const
    }
 }
 
-// Returns the symbol name corresponding to a specified member of an enumeration datatype. 
+//--------------------------------------------------------------------------
+// Function:	EnumType::insert
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in the type of 
+///		argument \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void EnumType::insert( const string& name, void *value ) const
+{
+    insert( name.c_str(), value );
+}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType::nameOf
+///\brief	Returns the symbol name corresponding to a specified member 
+///		of this enumeration datatype. 
+///\param	value - IN: Pointer to the value of the enum datatype
+///\param	size  - IN: Size for the name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 string EnumType::nameOf( void *value, size_t size ) const
 {
    char* name_C = new char[size+1];  // temporary C-string for C API
@@ -102,16 +159,19 @@ string EnumType::nameOf( void *value, size_t size ) const
    }
    // otherwise, create the string to hold the datatype name and return it
    string name = string( name_C );
-   delete name_C;
+   delete [] name_C;
    return( name );
 }
 
-// Retrieves the value corresponding to a member of an enumeration 
-// datatype, given the member's name. 
-void EnumType::valueOf( const string& name, void *value ) const
-{
-    valueOf( name.c_str(), value );
-}
+//--------------------------------------------------------------------------
+// Function:	EnumType::valueOf
+///\brief	Retrieves the value corresponding to a member of this 
+///		enumeration datatype, given the member's name. 
+///\param	name  -  IN: Name of the queried member
+///\param	value - OUT: Pointer to the retrieved value
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void EnumType::valueOf( const char* name, void *value ) const
 {
    // Calls C routine H5Tenum_valueof to get the enum datatype value
@@ -122,20 +182,28 @@ void EnumType::valueOf( const char* name, void *value ) const
    }
 }
 
-/*-------------------------------------------------------------------------
- * Function:    getMemberIndex
- *
- * Purpose:     Returns the index of a member in an enumeration data type.
- *              Members are stored in no particular order with numbers 0
- *              through N-1, where N is the value returned by the member
- *              function getNmembers.
- *
- * Return:      Success:	index of the member if exists.
- *              Failure:	DataTypeIException
- *
- * BMR - May 16, 2002
- *-------------------------------------------------------------------------
- */
+//--------------------------------------------------------------------------
+// Function:	EnumType::valueOf
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in the type of 
+///		argument \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void EnumType::valueOf( const string& name, void *value ) const
+{
+    valueOf( name.c_str(), value );
+}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType::getMemberIndex
+///\brief	Returns the index of a member in this enumeration datatype.
+///\param	name - IN: Name of the queried member
+///\return	Index of the member if it exists.  Index will have the value
+///		between 0 and \c N-1, where \c N is the value returned by the 
+///		member function \c EnumType::getNmembers.
+///\exception	H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - May 16, 2002
+//--------------------------------------------------------------------------
 int EnumType::getMemberIndex(const char *name) const
 {
    int member_index = H5Tget_member_index(id, name);
@@ -146,13 +214,46 @@ int EnumType::getMemberIndex(const char *name) const
    }
    return( member_index );
 }
+
+//--------------------------------------------------------------------------
+// Function:	EnumType::getMemberIndex
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function only in the type of 
+///		argument \a name.
+// Programmer   Binh-Minh Ribler - May 16, 2002
+//--------------------------------------------------------------------------
 int EnumType::getMemberIndex(const string& name) const
 {
     return(EnumType::getMemberIndex(name.c_str()));
 }
 
-// Retrieves the value of a member in this enumeration datatype, given the 
-// member's index.
+//--------------------------------------------------------------------------
+// Function:	EnumType::getNmembers
+///\brief	Returns the number of members in this enumeration datatype.
+///\return	Number of members
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+int EnumType::getNmembers() const
+{
+   int num_members = H5Tget_nmembers( id );
+   if( num_members < 0 )
+   {
+      throw DataTypeIException("CompType::getNmembers",
+                "H5Tget_nmembers returns negative number of members");
+   }
+   return( num_members );
+}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType::getMemberValue
+///\brief	Retrieves the value of a member in this enumeration datatype, 
+///		given the member's index.
+///\param	memb_no - IN: Index of the queried member
+///\param	value   - OUT: Pointer to the retrieved value
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void EnumType::getMemberValue( int memb_no, void *value ) const
 {
    // Call C routine H5Tget_member_value to get the datatype member's value
@@ -163,7 +264,11 @@ void EnumType::getMemberValue( int memb_no, void *value ) const
    }
 }
 
-// Default destructor
+//--------------------------------------------------------------------------
+// Function:	EnumType destructor
+///\brief	Properly terminates access to this enum datatype.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 EnumType::~EnumType() {}
 
 #ifndef H5_NO_NAMESPACE

@@ -29,20 +29,47 @@
 namespace H5 {
 #endif
 
-// Default constructor 
+//--------------------------------------------------------------------------
+// Function:	PredType default constructor
+///\brief	Default constructor: Creates a stub predefined datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PredType::PredType() : AtomType() {}
 
-// creates predefined datatype, so set DataType::is_predtype to true by default
+//--------------------------------------------------------------------------
+// Function:	PredType overloaded constructor
+///\brief	Creates a PredType object using the id of an existing 
+///		predefined datatype.
+///\param	predtype_id - IN: Id of a predefined datatype
+// Description
+// 		This constructor creates a predefined datatype, so it sets 
+// 		DataType::is_predtype to true.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PredType::PredType( const hid_t predtype_id ) : AtomType( predtype_id )
 { 
    is_predtype = true; 
 }
 
-// Copy constructor: makes a copy of this PredType object.
+//--------------------------------------------------------------------------
+// Function:	PredType copy constructor
+///\brief	Copy constructor: makes a copy of the original PredType object.
+///\param	original - IN: PredType instance to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PredType::PredType( const PredType& original ) : AtomType( original ) {}
 
-// Makes a copy of the predefined type and stores the new
-// id in the left hand side object.  
+//--------------------------------------------------------------------------
+// Function:	PredType::operator=
+///\brief	Assignment operator.
+///\param	rhs - IN: Reference to the predefined datatype
+///\return	Reference to PredType instance
+///\exception	H5::DataTypeIException
+// Description
+//		Makes a copy of the type on the right hand side and stores
+//		the new id in the left hand side object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PredType& PredType::operator=( const PredType& rhs )
 {
    copy(rhs);
@@ -197,6 +224,12 @@ const PredType PredType::NATIVE_UINT_LEAST64( E_NATIVE_UINT_LEAST64 );
 const PredType PredType::NATIVE_INT_FAST64( E_NATIVE_INT_FAST64 );
 const PredType PredType::NATIVE_UINT_FAST64( E_NATIVE_UINT_FAST64 );
 
+//--------------------------------------------------------------------------
+// Function:	PredType::getId
+///\brief	Returns the HDF5 predefined type id.
+///\return	HDF5 predefined type id or INVALID
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t PredType::getId() const
 {
     switch( id ) {

@@ -36,11 +36,12 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Gets the name of this attribute.
 	ssize_t getName( size_t buf_size, string& attr_name ) const;
 	string getName( size_t buf_size ) const; // returns name, not its length
+	string getName() const; // returns name, no argument
 
 	// do not inherit iterateAttrs from H5Object
 	int iterateAttrs() { return 0; }
 
-	// Used by the API to appropriately close a attribute
+	// Used by the API to appropriately close an attribute
 	virtual void p_close() const;
 
         // Creates a copy of an existing attribute using the attribute id
@@ -57,6 +58,9 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// defined in AbstractDs for generic datatype and specific 
 	// sub-types
 	virtual hid_t p_getType() const;
+
+	// Default constructor
+	Attribute();
 };
 #ifndef H5_NO_NAMESPACE
 }

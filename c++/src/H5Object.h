@@ -46,22 +46,11 @@ class UserData4Aiterate { // user data for attribute iteration
 
 class H5_DLLCPP H5Object : public IdComponent {
    public:
-	// Pure virtual function so appropriate close function can 
-	// be called by subclasses' for the corresponding HDF5 object
-	//virtual void p_close() const = 0;
-
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object( const H5Object& original );
 
 	// Flushes all buffers associated with this object to disk
 	void flush( H5F_scope_t scope ) const;
-
-	// Assignment operator
-	//H5Object& operator=( const H5Object& rhs );
-
-	// Sets and gets H5Object's data member
-	//void setId( hid_t new_id );
-	//hid_t getId () const;
 
 	// Creates an attribute for a group, dataset, or named datatype.
 	// PropList is currently not used, so always be default.
@@ -69,8 +58,8 @@ class H5_DLLCPP H5Object : public IdComponent {
 	Attribute createAttribute( const string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
 
 	// Opens an attribute given its name.
-	Attribute openAttribute( const string& name ) const;
 	Attribute openAttribute( const char* name ) const;
+	Attribute openAttribute( const string& name ) const;
 
 	// Opens an attribute given its index.
 	Attribute openAttribute( const unsigned int idx ) const;
@@ -82,9 +71,14 @@ class H5_DLLCPP H5Object : public IdComponent {
 	int getNumAttrs() const;
 
 	// Removes the named attribute from this object.
-	void removeAttr( const string& name ) const;
 	void removeAttr( const char* name ) const;
+	void removeAttr( const string& name ) const;
 
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
+
+	// Creates a reference to a dataset region in this object.
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 	virtual ~H5Object();
 
    protected:

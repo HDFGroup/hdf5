@@ -35,14 +35,39 @@
 namespace H5 {
 #endif
 
-// Copy constructor: makes a copy of the original object; simply invokes
-// the base class copy constructor.
+//--------------------------------------------------------------------------
+// Function:	Attribute default constructor
+///\brief	Default constructor: Creates a stub attribute
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+Attribute::Attribute() : AbstractDs() {}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute copy constructor
+///\brief	Copy constructor: makes a copy of the original Attribute object.
+///\param	original  - IN: Original Attribute object to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 
-// Creates a copy of an existing attribute using an id
-Attribute::Attribute( const hid_t attr_id ) : AbstractDs( attr_id ) {}
+//--------------------------------------------------------------------------
+// Function:	Attribute overloaded constructor
+///\brief	Creates an Attribute object using the id of an existing 
+///		attribute.
+///\param	existing_id - IN: Id of an existing attribute
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
 
-// Writes data to this attribute.
+//--------------------------------------------------------------------------
+// Function:	Attribute::write
+///\brief	Writes data to this attribute.
+///\param	mem_type  - IN: Attribute datatype (in memory)
+///\param	buf       - IN: Data to be written
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
    herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
@@ -52,6 +77,15 @@ void Attribute::write( const DataType& mem_type, const void *buf ) const
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	Attribute::write
+///\brief	This is an overloaded member function, provided for convenience.
+///		It writes a \a std::string to this attribute.
+///\param	mem_type  - IN: Attribute datatype (in memory)
+///\param	strg      - IN: Data to be written
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Apr, 2003
+//--------------------------------------------------------------------------
 void Attribute::write( const DataType& mem_type, const string& strg ) const
 {
    // Convert string to C-string
@@ -65,7 +99,32 @@ void Attribute::write( const DataType& mem_type, const string& strg ) const
    }
 }
 
-// Reads data from this attribute.
+//--------------------------------------------------------------------------
+// Function:	Attribute::read
+///\brief	Reads data from this attribute.
+///\param	mem_type -  IN: Attribute datatype (in memory)
+///\param	buf      - OUT: Buffer for read data
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void Attribute::read( const DataType& mem_type, void *buf ) const
+{
+   herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
+   if( ret_value < 0 )
+   {
+      throw AttributeIException("Attribute::read", "H5Aread  failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::read
+///\brief	This is an overloaded member function, provided for convenience.
+///		It reads a \a std::string from this attribute.
+///\param	mem_type  - IN: Attribute datatype (in memory)
+///\param	strg      - IN: Buffer for read string
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Apr, 2003
+//--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, string& strg ) const
 {
    size_t size = mem_type.getSize();
@@ -79,17 +138,13 @@ void Attribute::read( const DataType& mem_type, string& strg ) const
    delete strg_C;
 }
 
-// Reads data from this attribute.
-void Attribute::read( const DataType& mem_type, void *buf ) const
-{
-   herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::read", "H5Aread  failed");
-   }
-}
-
-// Gets a copy of the dataspace for this attribute.
+//--------------------------------------------------------------------------
+// Function:	Attribute::getSpace
+///\brief	Gets a copy of the dataspace for this attribute.
+///\return	Dataspace instance
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 DataSpace Attribute::getSpace() const
 {
    // Calls C function H5Aget_space to get the id of the dataspace
@@ -107,10 +162,15 @@ DataSpace Attribute::getSpace() const
    }
 }
 
-// This private member function calls the C API to get the generic datatype
-// of the datatype that is used by this attribute.  This function is used
-// by the overloaded functions getDataType defined in AbstractDs for the 
-// generic datatype and specific sub-types.
+//--------------------------------------------------------------------------
+// Function:	Attribute::p_getType (private)
+// Purpose	Gets the datatype of this attribute.
+// Return	Id of the datatype
+// Exception	H5::AttributeIException
+// Description
+// 		This private function is used in AbstractDs.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t Attribute::p_getType() const
 {
    hid_t type_id = H5Aget_type( id );
@@ -122,7 +182,15 @@ hid_t Attribute::p_getType() const
    }
 }
 
-// Gets the name of this attribute, returning its length.
+//--------------------------------------------------------------------------
+// Function:	Attribute::getName
+///\brief	Gets the name of this attribute, returning its length.
+///\param	buf_size  -  IN: Desired length of the name
+///\param	attr_name - OUT: Buffer for the name string
+///\return	Length of the attribute name
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Nov, 2001
+//--------------------------------------------------------------------------
 ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
 {
    char* name_C = new char[buf_size+1];  // temporary C-string for C API
@@ -141,7 +209,16 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    return( name_size );
 }
 
-// Gets the name of this attribute, returning the name, not the length.
+//--------------------------------------------------------------------------
+// Function:	Attribute::getName
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it returns the 
+///		attribute's name, not the length.
+///\return	Name of the attribute
+///\param	buf_size  -  IN: Desired length of the name
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 string Attribute::getName( size_t buf_size ) const
 {
    string attr_name;
@@ -150,8 +227,37 @@ string Attribute::getName( size_t buf_size ) const
    // let caller catch exception if any
 }
 
-// This private function calls the C API H5Aclose to close this attribute.
-// Used by the IdComponent::reset.
+//--------------------------------------------------------------------------
+// Function:	Attribute::getName
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above functions in that it doesn't take
+///		any arguments and returns the attribute's name.
+///\return	Name of the attribute
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+string Attribute::getName() const
+{
+   // Try with 256 characters for the name first, if the name's length 
+   // returned is more than that then, read the name again with the 
+   // appropriate space allocation
+   string attr_name;
+   ssize_t name_size = getName(255, attr_name);
+   if (name_size >= 256)
+      name_size = getName(name_size, attr_name);
+   return( attr_name ); 
+   // let caller catch exception if any
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::p_close (private)
+///\brief	Closes this attribute.
+///\exception	H5::AttributeIException
+///\note
+///		This function will be obsolete because its functionality
+///		is recently handled by the C library layer. - May, 2004
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Attribute::p_close() const
 {
    herr_t ret_value = H5Aclose( id );
@@ -161,16 +267,16 @@ void Attribute::p_close() const
    }
 }
 
-// The destructor of this instance calls IdComponent::reset to
-// reset its identifier - no longer true
-// Older compilers (baldric) don't support template member functions
-// and IdComponent::reset is one; so at this time, the resetId is not
-// a member function so it can be template to work around that problem.
+//--------------------------------------------------------------------------
+// Function:	Attribute destructor
+///\brief	Properly terminates access to this attribute.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute::~Attribute()
 {
    // The attribute id will be closed properly
     try {
-        resetIdComponent( this ); }
+      resetIdComponent(this); }
     catch (Exception close_error) { // thrown by p_close
         cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
     }

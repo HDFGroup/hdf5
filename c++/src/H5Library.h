@@ -46,6 +46,14 @@ class H5_DLLCPP H5Library {
 	// into the library
 	static void checkVersion( unsigned majnum, unsigned minnum, unsigned relnum ); 
 
+	// Walks through all the garbage collection routines for the library, 
+	// which are supposed to free any unused memory they have allocated.
+	static void garbageCollect();
+
+	// Sets limits on the different kinds of free lists.
+	static void setFreeListLimits(int reg_global_lim, int reg_list_lim, int
+	arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);
+		
    private:
 	// Default constructor - no instance ever created
 	H5Library() {};
