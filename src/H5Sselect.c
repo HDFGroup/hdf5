@@ -1676,10 +1676,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
-    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
-    const H5S_t *space, H5S_sel_iter_t *iter, 
-    hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5S_select_fscat (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store, 
+    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
     const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
@@ -1700,7 +1699,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
 
     /* Check args */
     assert (f);
-    assert (layout);
+    assert (dset);
     assert (store);
     assert (space);
     assert (iter);
@@ -1735,7 +1734,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
         mem_off=0;
 
         /* Write sequence list out */
-        if (H5F_seq_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if (H5D_seq_writevv(f, dxpl_cache, dxpl_id, dset, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -1780,11 +1779,10 @@ done:
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
-    const H5S_t *space, H5S_sel_iter_t *iter, 
-    hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, void *_buf/*out*/)
+H5S_select_fgath (H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store, 
+    const H5S_t *space, H5S_sel_iter_t *iter, hsize_t nelmts,
+    void *_buf/*out*/)
 {
     uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
     hsize_t _off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
@@ -1804,7 +1802,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 
     /* Check args */
     assert (f);
-    assert (layout);
+    assert (dset);
     assert (store);
     assert (space);
     assert (iter);
@@ -1838,7 +1836,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         mem_off=0;
 
         /* Read sequence list in */
-        if (H5F_seq_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if (H5D_seq_readvv(f, dxpl_cache, dxpl_id, dset, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
@@ -2058,10 +2056,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
-    const H5D_storage_t *store, size_t nelmts, size_t elmt_size,
+H5S_select_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -2154,7 +2152,7 @@ HDfprintf(stderr,"%s: file_off[%Zu]=%Hu, file_len[%Zu]=%Zu\n",FUNC,curr_file_seq
 HDfprintf(stderr,"%s: mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,curr_mem_seq,mem_off[curr_mem_seq],curr_mem_seq,mem_len[curr_mem_seq]);
 #endif /* QAK */
         /* Read file sequences into current memory sequence */
-        if ((tmp_file_len=H5F_seq_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
+        if ((tmp_file_len=H5D_seq_readvv(f, dxpl_cache, dxpl_id, dset, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)
@@ -2208,10 +2206,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
-    const H5D_storage_t *store, size_t nelmts, size_t elmt_size,
+H5S_select_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -2346,7 +2344,7 @@ for(u=curr_mem_seq; u<mem_nseq; u++)
 }
 #endif /* QAK */
         /* Write memory sequences into file sequences */
-        if ((tmp_file_len=H5F_seq_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
+        if ((tmp_file_len=H5D_seq_writevv(f, dxpl_cache, dxpl_id, dset, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)

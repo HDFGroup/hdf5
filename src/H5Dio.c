@@ -1082,9 +1082,11 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
             || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->read)(dataset->ent.file, &(dataset->layout), 
-             &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), (size_t)nelmts, H5T_get_size(dataset->type), 
-             file_space, mem_space, dxpl_cache, dxpl_id, buf/*out*/);
+        status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
+            dataset, (H5D_storage_t *)&(dataset->efl),
+            (size_t)nelmts, H5T_get_size(dataset->type), 
+            file_space, mem_space,
+            buf/*out*/);
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[1].read_timer), &timer);
         sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
@@ -1179,9 +1181,10 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
                 || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
             || dataset->efl.nused>0 || 
              dataset->layout.type==H5D_COMPACT);
-        n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
-                &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
+        n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
+            dataset, (H5D_storage_t *)&(dataset->efl),
+            file_space, &file_iter, smine_nelmts,
+            tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
@@ -1309,9 +1312,11 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 	H5_timer_begin(&timer);
 #endif
         H5_CHECK_OVERFLOW(nelmts,hsize_t,size_t);
-        status = (sconv->write)(dataset->ent.file, &(dataset->layout),
-                &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), (size_t)nelmts, H5T_get_size(dataset->type),
-                file_space, mem_space, dxpl_cache, dxpl_id, buf);
+        status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
+            dataset, (H5D_storage_t *)&(dataset->efl),
+            (size_t)nelmts, H5T_get_size(dataset->type),
+            file_space, mem_space,
+            buf);
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[0].write_timer), &timer);
         sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
@@ -1419,9 +1424,10 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                 &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, 
-                 &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
+            n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
+                dataset, (H5D_storage_t *)&(dataset->efl),
+                file_space, &bkg_iter, smine_nelmts,
+                bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
@@ -1444,9 +1450,10 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-	status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-              &dataset->dcpl_cache, (H5D_storage_t *)&(dataset->efl), file_space, &file_iter,
-              smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
+	status = H5S_select_fscat(dataset->ent.file, dxpl_cache, dxpl_id,
+            dataset, (H5D_storage_t *)&(dataset->efl),
+            file_space, &file_iter, smine_nelmts,
+            tconv_buf);
 #ifdef H5S_DEBUG
         H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
         sconv->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
@@ -1565,9 +1572,11 @@ UNUSED
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual read operation */
-            status = (sconv->read)(dataset->ent.file, &(dataset->layout),
-                    &dataset->dcpl_cache, &store, chunk_info->chunk_points, H5T_get_size(dataset->type),
-                    chunk_info->fspace, chunk_info->mspace, dxpl_cache, dxpl_id, buf);
+            status = (sconv->read)(dataset->ent.file, dxpl_cache, dxpl_id,
+                dataset, &store,
+                chunk_info->chunk_points, H5T_get_size(dataset->type),
+                chunk_info->fspace, chunk_info->mspace,
+                buf);
         
             /* Check return value from optimized read */
             if (status<0)
@@ -1681,9 +1690,10 @@ UNUSED
             assert(((dataset->layout.type==H5D_CONTIGUOUS && H5F_addr_defined(dataset->layout.u.contig.addr))
                     || (dataset->layout.type==H5D_CHUNKED && H5F_addr_defined(dataset->layout.u.chunk.addr)))
                 || dataset->efl.nused>0 || dataset->layout.type==H5D_COMPACT);
-            n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                    &dataset->dcpl_cache, &store, chunk_info->fspace, 
-                    &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf/*out*/);
+            n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
+                dataset, &store,
+                chunk_info->fspace, &file_iter, smine_nelmts,
+                tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
@@ -1888,9 +1898,11 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             store.chunk.index = chunk_info->index;
 
             /* Perform the actual write operation */
-            status = (sconv->write)(dataset->ent.file, &(dataset->layout),
-                    &dataset->dcpl_cache, &store, chunk_info->chunk_points, H5T_get_size(dataset->type),
-                    chunk_info->fspace, chunk_info->mspace, dxpl_cache, dxpl_id, buf);
+            status = (sconv->write)(dataset->ent.file, dxpl_cache, dxpl_id,
+                dataset, &store,
+                chunk_info->chunk_points, H5T_get_size(dataset->type),
+                chunk_info->fspace, chunk_info->mspace,
+                buf);
         
             /* Check return value from optimized write */
             if (status<0)
@@ -2035,9 +2047,10 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
-                        &bkg_iter, smine_nelmts, dxpl_cache, dxpl_id, bkg_buf/*out*/); 
+                n = H5S_select_fgath(dataset->ent.file, dxpl_cache, dxpl_id,
+                    dataset, &store,
+                    chunk_info->fspace, &bkg_iter, smine_nelmts,
+                    bkg_buf/*out*/); 
 
 #ifdef H5S_DEBUG
                 H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
@@ -2061,9 +2074,10 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
-            status = H5S_select_fscat(dataset->ent.file, &(dataset->layout), 
-                        &dataset->dcpl_cache, &store, chunk_info->fspace, 
-                        &file_iter, smine_nelmts, dxpl_cache, dxpl_id, tconv_buf);
+            status = H5S_select_fscat(dataset->ent.file, dxpl_cache, dxpl_id,
+                dataset, &store,
+                chunk_info->fspace, &file_iter, smine_nelmts,
+                tconv_buf);
 
 #ifdef H5S_DEBUG
             H5_timer_end(&(sconv->stats[0].scat_timer), &timer);

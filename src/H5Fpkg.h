@@ -86,20 +86,6 @@
 #   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif
     
-/* The raw data chunk cache */
-typedef struct H5F_rdcc_t {
-    unsigned		ninits;	/* Number of chunk creations		*/
-    unsigned		nhits;	/* Number of cache hits			*/
-    unsigned		nmisses;/* Number of cache misses		*/
-    unsigned		nflushes;/* Number of cache flushes		*/
-    size_t		nbytes;	/* Current cached raw data in bytes	*/
-    size_t		nslots;	/* Number of chunk slots allocated	*/
-    struct H5F_rdcc_ent_t *head; /* Head of doubly linked list		*/
-    struct H5F_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
-    int		nused;	/* Number of chunk slots in use		*/
-    struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
-} H5F_rdcc_t;
-
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
@@ -118,19 +104,20 @@ typedef struct H5F_file_t {
     size_t	sizeof_size;	/* Size of offsets in file              */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
     unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
-
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	freespace_addr;	/* Relative address of free-space info	*/
     haddr_t	driver_addr;	/* File driver information block address*/
+
     unsigned	super_chksum;	/* Superblock checksum                  */
     unsigned	drvr_chksum;	/* Driver info block checksum           */
     struct H5AC_t *cache;	/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    int	mdc_nelmts;		/* Size of meta data cache (elements)	*/
+    int         mdc_nelmts;	/* Size of meta data cache (elements)	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    size_t      sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
@@ -138,15 +125,6 @@ typedef struct H5F_file_t {
     int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
-
-    /* Data Sieve Buffering fields */
-    unsigned char *sieve_buf;   /* Buffer to hold data sieve buffer */
-    haddr_t sieve_loc;          /* File location (offset) of the data sieve buffer */
-    size_t sieve_size;          /* Size of the data sieve buffer used (in bytes) */
-    size_t sieve_buf_size;      /* Size of the data sieve buffer allocated (in bytes) */
-    unsigned sieve_dirty;       /* Flag to indicate that the data sieve buffer is dirty */
-
-    H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
 } H5F_file_t;
 
@@ -198,50 +176,6 @@ H5_DLL void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
 H5_DLL herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 			 int indent, int fwidth);
-H5_DLL herr_t H5F_sieve_overlap_clear(const H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size);
 
-/* Functions that operate on indexed storage */
-H5_DLL herr_t H5F_istore_init (H5F_t *f);
-H5_DLL herr_t H5F_istore_flush (H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5F_istore_dest (H5F_t *f, hid_t dxpl_id);
-H5_DLL ssize_t H5F_istore_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id,
-    const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    const union H5D_storage_t *store,
-    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    void *buf);
-H5_DLL ssize_t H5F_istore_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id,
-    const struct H5O_layout_t *layout, const struct H5D_dcpl_cache_t *dcpl_cache,
-    const union H5D_storage_t *store,
-    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    const void *buf);
-#ifdef H5F_ISTORE_DEBUG
-H5_DLL herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
-#endif /* H5F_ISTORE_DEBUG */
-H5_DLL herr_t H5F_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
-				int indent, int fwidth, int ndims);
-
-/* Functions that operate on contiguous storage wrt superblock */
-H5_DLL ssize_t H5F_contig_readvv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
-    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    hid_t dxpl_id, void *buf);
-H5_DLL ssize_t H5F_contig_writevv(H5F_t *f, hsize_t _max_data, haddr_t _addr,
-    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    hid_t dxpl_id, const void *buf);
-
-/* Functions that operate on compact dataset storage */
-H5_DLL ssize_t H5F_compact_readvv(H5F_t *f, const struct H5O_layout_t *layout,
-    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t dxpl_id, void *buf);
-H5_DLL ssize_t H5F_compact_writevv(H5F_t *f, struct H5O_layout_t *layout,
-    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t dxpl_id, const void *buf);
 #endif
 

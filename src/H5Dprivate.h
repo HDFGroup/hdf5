@@ -208,8 +208,61 @@ H5_DLL herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
-H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
+
+/* Functions that operate on byte sequences in memory and on disk */
+H5_DLL ssize_t H5D_seq_readvv(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, H5D_t *dset, const H5D_storage_t *store, 
+    size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *buf);
+H5_DLL ssize_t H5D_seq_writevv(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, H5D_t *dset, const H5D_storage_t *store, 
+    size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *buf);
+
+/* Functions that operate on contiguous storage */
+H5_DLL herr_t H5D_contig_delete(H5F_t *f, hid_t dxpl_id,
+    const H5O_layout_t *layout);
+H5_DLL haddr_t H5D_contig_get_addr(const H5D_t *dset);
+H5_DLL ssize_t H5D_contig_readvv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
+    haddr_t dset_addr, hsize_t dset_size,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *buf);
+H5_DLL ssize_t H5D_contig_writevv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
+    haddr_t dset_addr, hsize_t dset_size,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *buf);
+
+/* Functions that operate on compact dataset storage */
+H5_DLL ssize_t H5D_compact_readvv(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
+    void *buf);
+H5_DLL ssize_t H5D_compact_writevv(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
+    const void *buf);
+
+/* Functions that operate on indexed storage */
+H5_DLL herr_t H5D_istore_delete(H5F_t *f, hid_t dxpl_id,
+    const H5O_layout_t *layout);
+H5_DLL ssize_t H5D_istore_readvv(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, H5D_t *dset, const H5D_storage_t *store,
+    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    void *buf);
+H5_DLL ssize_t H5D_istore_writevv(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, H5D_t *dset, const H5D_storage_t *store,
+    size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
+    const void *buf);
+H5_DLL herr_t H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
+				int indent, int fwidth, int ndims);
 
 #endif

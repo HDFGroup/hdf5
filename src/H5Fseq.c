@@ -23,27 +23,23 @@
  *
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Fseq_mask
+#define PABLO_MASK	H5Dseq_mask
 
-#include "H5private.h"
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5FDprivate.h"	/*file driver				  */
-#include "H5Iprivate.h"
-#include "H5MFprivate.h"
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Oprivate.h"
-#include "H5Pprivate.h"
-#include "H5Vprivate.h"
-
-/* MPIO & MPIPOSIX driver functions are needed for some special checks */
-#include "H5FDmpio.h"
-#include "H5FDmpiposix.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dpkg.h"		/* Datasets				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File space management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* Interface initialization */
 #define INTERFACE_INIT	NULL
@@ -51,105 +47,7 @@ static int interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_seq_read
- *
- * Purpose:	Reads a sequence of bytes from a file dataset into a buffer in
- *      in memory.  The data is read from file F and the array's size and
- *      storage information is in LAYOUT.  External files are described
- *      according to the external file list, EFL.  The sequence offset is 
- *      DSET_OFFSET in the dataset (offsets are in terms of bytes) and the 
- *      size of the hyperslab is SEQ_LEN. The total size of the file array 
- *      is implied in the LAYOUT argument.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, September 28, 2000
- *
- * Modifications:
- *              Re-written to use new vector I/O call - QAK, 7/7/01
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_seq_read(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, const H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
-    size_t seq_len, hsize_t dset_offset, void *buf/*out*/)
-{
-    hsize_t mem_off=0;                  /* Offset in memory */
-    size_t mem_len=seq_len;             /* Length in memory */
-    size_t mem_curr_seq=0;              /* "Current sequence" in memory */
-    size_t dset_curr_seq=0;             /* "Current sequence" in dataset */
-    herr_t     ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_seq_read, FAIL);
-
-    /* Check args */
-    assert(f);
-    assert(layout);
-    assert(buf);
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-
-    if (H5F_seq_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, 1, &dset_curr_seq, &seq_len, &dset_offset, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5F_seq_read() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_seq_write
- *
- * Purpose:	Writes a sequence of bytes to a file dataset from a buffer in
- *      in memory.  The data is written to file F and the array's size and
- *      storage information is in LAYOUT.  External files are described
- *      according to the external file list, EFL.  The sequence offset is 
- *      DSET_OFFSET in the dataset (offsets are in terms of bytes) and the 
- *      size of the hyperslab is SEQ_LEN. The total size of the file array 
- *      is implied in the LAYOUT argument.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, October 9, 2000
- *
- * Modifications:
- *              Re-written to use new vector I/O routine - QAK, 7/7/01
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_seq_write(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
-    size_t seq_len, hsize_t dset_offset, const void *buf)
-{
-    hsize_t mem_off=0;                  /* Offset in memory */
-    size_t mem_len=seq_len;             /* Length in memory */
-    size_t mem_curr_seq=0;              /* "Current sequence" in memory */
-    size_t dset_curr_seq=0;             /* "Current sequence" in dataset */
-    herr_t      ret_value=SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_seq_write, FAIL);
-
-    /* Check args */
-    assert(f);
-    assert(layout);
-    assert(buf);
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-
-    if (H5F_seq_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, 1, &dset_curr_seq, &seq_len, &dset_offset, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5F_seq_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_seq_readvv
+ * Function:	H5D_seq_readvv
  *
  * Purpose:	Reads in a vector of byte sequences from a file dataset into a
  *      buffer in in memory.  The data is read from file F and the array's size
@@ -189,22 +87,20 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
-    const struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
+H5D_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store, 
     size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     void *buf/*out*/)
 {
     ssize_t ret_value;            /* Return value */
    
-    FUNC_ENTER_NOAPI(H5F_seq_readvv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_seq_readvv, FAIL);
 
     /* Check args */
     assert(f);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER)); /* Make certain we have the correct type of property list */
-    assert(layout);
-    assert(dcpl_cache);
+    assert(dset);
     assert(dset_curr_seq);
     assert(*dset_curr_seq<dset_max_nseq);
     assert(dset_len_arr);
@@ -215,7 +111,7 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
     assert(mem_offset_arr);
     assert(buf);
 
-    switch (layout->type) {
+    switch (dset->layout.type) {
         case H5D_CONTIGUOUS:
             /* Read directly from file if the dataset is in an external file */
             if (store && store->efl.nused>0) {
@@ -231,17 +127,18 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
             } else {
                 /* Pass along the vector of sequences to read */
-                if((ret_value=H5F_contig_readvv(f, layout->u.contig.size, layout->u.contig.addr,
+                if((ret_value=H5D_contig_readvv(f, dxpl_id, dset,
+                        dset->layout.u.contig.addr, dset->layout.u.contig.size,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
-                        dxpl_id, buf))<0)
+                        buf))<0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "block read failed");
             } /* end else */
             break;
 
         case H5D_CHUNKED:
             assert(store);
-            if((ret_value=H5F_istore_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
+            if((ret_value=H5D_istore_readvv(f, dxpl_cache, dxpl_id, dset, store,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                     buf))<0)
@@ -250,10 +147,10 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
 
         case H5D_COMPACT:
             /* Pass along the vector of sequences to read */
-            if((ret_value=H5F_compact_readvv(f, layout,
+            if((ret_value=H5D_compact_readvv(f, dxpl_id, dset,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
-                    dxpl_id, buf))<0)
+                    buf))<0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "compact read failed");
             break;
                                                         
@@ -264,11 +161,11 @@ H5F_seq_readvv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_i
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5F_seq_readvv() */
+}   /* H5D_seq_readvv() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_seq_writevv
+ * Function:	H5D_seq_writevv
  *
  * Purpose:	Writes a vector of byte sequences from a buffer in memory into
  *      a vector of byte sequences in a file dataset.  The data is written to
@@ -298,22 +195,20 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
-    hid_t dxpl_id, struct H5O_layout_t *layout,
-    const struct H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
+H5D_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, struct H5D_t *dset, const H5D_storage_t *store, 
     size_t dset_max_nseq, size_t *dset_curr_seq,  size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf)
 {
     ssize_t     ret_value;              /* Return value */
    
-    FUNC_ENTER_NOAPI(H5F_seq_writevv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_seq_writevv, FAIL);
 
     /* Check args */
     assert(f);
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER)); /* Make certain we have the correct type of property list */
-    assert(layout);
-    assert(dcpl_cache);
+    assert(dset);
     assert(dset_curr_seq);
     assert(*dset_curr_seq<dset_max_nseq);
     assert(dset_len_arr);
@@ -324,7 +219,7 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
     assert(mem_offset_arr);
     assert(buf);
 
-    switch (layout->type) {
+    switch (dset->layout.type) {
         case H5D_CONTIGUOUS:
             /* Write directly to file if the dataset is in an external file */
             if (store && store->efl.nused>0) {
@@ -340,17 +235,18 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
             } else {
                 /* Pass along the vector of sequences to write */
-                if ((ret_value=H5F_contig_writevv(f, layout->u.contig.size, layout->u.contig.addr,
+                if ((ret_value=H5D_contig_writevv(f, dxpl_id, dset,
+                        dset->layout.u.contig.addr, dset->layout.u.contig.size,
                         dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                         mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
-                        dxpl_id, buf))<0)
+                        buf))<0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed");
             } /* end else */
             break;
 
         case H5D_CHUNKED:
             assert(store);
-            if((ret_value=H5F_istore_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
+            if((ret_value=H5D_istore_writevv(f, dxpl_cache, dxpl_id, dset, store,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
                     buf))<0)
@@ -359,10 +255,10 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 
         case H5D_COMPACT:       
             /* Pass along the vector of sequences to write */
-            if((ret_value=H5F_compact_writevv(f, layout,
+            if((ret_value=H5D_compact_writevv(f, dxpl_id, dset,
                     dset_max_nseq, dset_curr_seq, dset_len_arr, dset_offset_arr,
                     mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr,
-                    dxpl_id, buf))<0)
+                    buf))<0)
                  HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "compact write failed");
             break;
 
@@ -373,4 +269,4 @@ H5F_seq_writevv(H5F_t *f, const struct H5D_dxpl_cache_t *dxpl_cache,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5F_seq_writevv() */
+}   /* H5D_seq_writevv() */

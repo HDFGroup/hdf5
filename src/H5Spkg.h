@@ -245,17 +245,17 @@ H5_DLL herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
 
 #ifdef H5_HAVE_PARALLEL
 /* MPI-IO function to read directly from app buffer to file rky980813 */
-H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f, const struct H5O_layout_t *layout,
-    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store,
-    size_t nelmts, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    size_t nelmts, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space,
     void *buf/*out*/);
 
 /* MPI-IO function to write directly from app buffer to file rky980813 */
-H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f, struct H5O_layout_t *layout,
-    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store,
-    size_t nelmts, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    H5D_t *dset, const H5D_storage_t *store,
+    size_t nelmts, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space,
     const void *buf);
 
 /* MPI-IO function to check if a direct I/O transfer is possible between

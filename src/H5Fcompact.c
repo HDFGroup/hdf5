@@ -17,21 +17,22 @@
  *              August 5, 2002 
  *
  * Purpose:     Compact dataset I/O functions.  These routines are similar
- *              H5F_contig_* and H5F_istore_*.
+ *              H5D_contig_* and H5D_istore_*.
  */
 
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#define H5D_PACKAGE             /*suppress error about including H5Dpkg   */
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Fcompact_mask
+#define PABLO_MASK	H5Dcompact_mask
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"
-#include "H5Oprivate.h"
-#include "H5FDprivate.h"        /*file driver                             */
-#include "H5FLprivate.h"        /*Free Lists                              */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dpkg.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* Files				*/
+#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /* Interface initialization */
@@ -40,7 +41,7 @@ static int              interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_compact_readvv
+ * Function:    H5D_compact_readvv
  * 
  * Purpose:     Reads some data vectors from a dataset into a buffer.
  *              The data is in compact dataset.  The address is relative 
@@ -60,26 +61,28 @@ static int              interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_compact_readvv(H5F_t UNUSED *f, const H5O_layout_t *layout,
+H5D_compact_readvv(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5D_t *dset,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t UNUSED dxpl_id, void *buf)
+    void *buf)
 {
     ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5F_compact_readvv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_compact_readvv, FAIL);
+
+    assert(dset);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,layout->u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
+    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,dset->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
 done:   
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5F_compact_readvv() */
+}   /* end H5D_compact_readvv() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_compact_writevv
+ * Function:    H5D_compact_writevv
  * 
  * Purpose:     Writes some data vectors from a dataset into a buffer.
  *              The data is in compact dataset.  The address is relative 
@@ -102,22 +105,23 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_compact_writevv(H5F_t UNUSED *f, H5O_layout_t *layout,
+H5D_compact_writevv(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5D_t *dset,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[], 
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[], 
-    hid_t UNUSED dxpl_id, const void *buf)
+    const void *buf)
 {
     ssize_t ret_value;          /* Return value */
     
-    FUNC_ENTER_NOAPI(H5F_compact_writevv, FAIL);
+    FUNC_ENTER_NOAPI(H5D_compact_writevv, FAIL);
+
+    assert(dset);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(layout->u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
+    if((ret_value=H5V_memcpyvv(dset->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed");
 
-    layout->u.compact.dirty = TRUE;
+    dset->layout.u.compact.dirty = TRUE;
 
 done:   
     FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5F_compact_writevv() */
-
+}   /* end H5D_compact_writevv() */
