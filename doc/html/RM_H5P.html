@@ -217,8 +217,8 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
     <li><a href="#Property-GetEdcCheck">H5Pget_edc_check</a>
     <li><a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>
-    <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>
-    <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
+    <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a> *
+    <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a> *
     <li><a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>
     <li><a href="#Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
     <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
@@ -247,6 +247,11 @@ which require many different parameters to be easily manipulated.
 
 </table>
 <br>
+
+* Functions labelled with an asterisk (*) are provided only for 
+backwards compatibility with HDF5 Releases 1.4.<i>x</i>.  
+See further notes in the description of each function.
+<p>
 
 <i>Alphabetical Listing</i>
 <table border="0">
@@ -301,7 +306,7 @@ which require many different parameters to be easily manipulated.
       <li><a href="#Property-GetFilter">H5Pget_filter</a>
       <li><a href="#Property-GetFilterById">H5Pget_filter_by_id</a>
       <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
-      <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
+      <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a> *
       <li><a href="#Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
       <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
       <li><a href="#Property-GetLayout">H5Pget_layout</a>
@@ -362,7 +367,7 @@ which require many different parameters to be easily manipulated.
       <li><a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>
       <li><a href="#Property-SetFletcher32">H5Pset_fletcher32</a>
       <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
-      <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>
+      <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a> *
       <li><a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>
       <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
       <li><a href="#Property-SetLayout">H5Pset_layout</a>
@@ -4705,7 +4710,18 @@ END LIBRARY-SET OPTION TAGS -->
   <dt><strong>Purpose:</strong>
     <dd>Indicates whether to cache hyperslab blocks during I/O.
   <dt><strong>Description:</strong>
-    <dd>Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
+    <dd>[<strong>NOTE:</strong>
+        <span class="1_4_compat">
+	This function is deprecated in HDF5 Release 1.6 
+	and will eventually be removed from the HDF5 distribution.
+        It is provided in this release only to enable backward compatibility
+        with HDF5 Releases 1.4.<i>x</i> 
+	and is enabled only if the HDF5 library is configured 
+	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>;
+        the function is not enabled in the binaries distributed by NCSA.
+        </span>]
+        <p>
+        Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
         indicates whether to cache hyperslab blocks during I/O, 
         a process which can significantly increase I/O speeds.  
         <p>
@@ -4760,7 +4776,18 @@ END LIBRARY-SET OPTION TAGS -->
         <em>unsigned</em> *<code>limit</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Returns information regarding the caching of hyperslab blocks during I/O.
+    <dd>[<strong>NOTE:</strong>
+        <span class="1_4_compat">
+	This function is deprecated in HDF5 Release 1.6 
+	and will eventually be removed from the HDF5 distribution.
+        It is provided in this release only to enable backward compatibility
+        with HDF5 Releases 1.4.<i>x</i> 
+	and is enabled only if the HDF5 library is configured 
+	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>;
+        the function is not enabled in the binaries distributed by NCSA.
+	</span>]
+        <p>
+        Returns information regarding the caching of hyperslab blocks during I/O.
   <dt><strong>Description:</strong>
     <dd>Given a dataset transfer property list, <code>H5Pget_hyper_cache</code> 
         returns instructions regarding the caching of hyperslab blocks during I/O.
@@ -7637,7 +7664,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 30 June 2003
+Last modified: 1 July 2003
  
 </body>
 </html>
