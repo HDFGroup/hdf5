@@ -42,33 +42,33 @@ extern                  "C" {
 
 /* Public functions */
     hid_t                   H5Ccreate(H5C_class_t type);
-    herr_t                  H5Cclose(hid_t template);
-    hid_t                   H5Ccopy(hid_t template);
+    herr_t                  H5Cclose(hid_t tid);
+    hid_t                   H5Ccopy(hid_t tid);
 
-    H5C_class_t             H5Cget_class(hid_t template);
+    H5C_class_t             H5Cget_class(hid_t tid);
 
-    herr_t                  H5Cget_version(hid_t template, int *boot /*out */ , int *heap /*out */ ,
+    herr_t                  H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
                                int *freelist /*out */ , int *stab /*out */ ,
                                            int *shhdr /*out */ );
 
-    herr_t                  H5Cset_userblock(hid_t template, size_t size);
-    herr_t                  H5Cget_userblock(hid_t template, size_t *size);
+    herr_t                  H5Cset_userblock(hid_t tid, size_t size);
+    herr_t                  H5Cget_userblock(hid_t tid, size_t *size);
 
-    herr_t                  H5Cset_sizes(hid_t template, size_t sizeof_addr, size_t sizeof_size);
-    herr_t                  H5Cget_sizes(hid_t template, size_t *sizeof_addr /*out */ ,
+    herr_t                  H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size);
+    herr_t                  H5Cget_sizes(hid_t tid, size_t *sizeof_addr /*out */ ,
                                          size_t *sizeof_size /*out */ );
 
-    herr_t                  H5Cset_sym_k(hid_t template, int ik, int lk);
-    herr_t                  H5Cget_sym_k(hid_t template, int *ik /*out */ , int *lk /*out */ );
+    herr_t                  H5Cset_sym_k(hid_t tid, int ik, int lk);
+    herr_t                  H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ );
 
-    herr_t                  H5Cset_istore_k(hid_t template, int ik);
-    herr_t                  H5Cget_istore_k(hid_t template, int *ik /*out */ );
+    herr_t                  H5Cset_istore_k(hid_t tid, int ik);
+    herr_t                  H5Cget_istore_k(hid_t tid, int *ik /*out */ );
 
-    herr_t                  H5Cset_layout(hid_t template, H5D_layout_t layout);
-    H5D_layout_t            H5Cget_layout(hid_t template);
+    herr_t                  H5Cset_layout(hid_t tid, H5D_layout_t layout);
+    H5D_layout_t            H5Cget_layout(hid_t tid);
 
-    herr_t                  H5Cset_chunk(hid_t template, int ndims, size_t dim[]);
-    int                     H5Cget_chunk(hid_t template, int max_ndims, size_t dim[] /*out */ );
+    herr_t                  H5Cset_chunk(hid_t tid, int ndims, size_t dim[]);
+    int                     H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ );
 
 #ifdef __cplusplus
 }
