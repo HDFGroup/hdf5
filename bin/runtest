@@ -317,6 +317,15 @@ RUNSNAPTEST()
 		export $1
 		shift
 		;;
+	    setenv2)
+		# set environment variable with 2 values
+		# a kludge now--the extra single quotes are needed
+		# else eval complains.
+		shift
+		eval $1="'$2 $3'"
+		export $1
+		shift; shift
+		;;
 	    *) # unknown test
 		PRINT "$0: unknown type of test ($1)"
 		retcode=1
