@@ -239,8 +239,10 @@ test_2(void)
     /*
      * File access property list.
      */
+#if 0
     access_plist = H5Ccreate (H5C_FILE_ACCESS);
     H5Cset_core (access_plist, 3000000);
+#endif
 
     /* create the file */
     fid = H5Fcreate("tstab2.h5", H5F_ACC_TRUNC, create_plist, access_plist);
