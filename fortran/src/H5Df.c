@@ -205,50 +205,48 @@ nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_
  *                dims argumnet being of INTEGER(HSIZE_T) type.
  *---------------------------------------------------------------------------*/
 int_f
-nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims)
+nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f *buf, hsize_t_f *dims)
 {
-     int ret_value = -1;
-     herr_t ret;
-     hid_t c_dset_id;
-     hid_t c_mem_type_id;
-     hid_t c_mem_space_id;
-     hid_t c_file_space_id;
-     hid_t c_xfer_prp;
-     hobj_ref_t *buf_c;
-     int i, n;
-     n = (int)*dims;
+    int ret_value = -1;
+    herr_t ret;
+    hid_t c_dset_id;
+    hid_t c_mem_type_id;
+    hid_t c_mem_space_id;
+    hid_t c_file_space_id;
+    hid_t c_xfer_prp;
+    hobj_ref_t *buf_c;
+    int i, n;
 
-     /*
-      * Define transfer property
-      */
-     c_xfer_prp = (hid_t)*xfer_prp;
+    /*
+     * Define transfer property
+     */
+    c_xfer_prp = (hid_t)*xfer_prp;
 
-     /*
-      * Allocate temporary buffer and copy references from Fortran.
-      */
-      buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
-      if ( buf_c != NULL ) {
-      for (i = 0; i < n; i++) {
-           HDmemcpy(&buf_c[i], buf, H5R_OBJ_REF_BUF_SIZE);
-           buf = buf + REF_OBJ_BUF_LEN_F;
-      }
-      }  
-      else return ret_value;
-     
-     /*
-      * Call H5Dwrite function.
-      */
-     c_dset_id = (hid_t)*dset_id;
-     c_mem_type_id = (hid_t)*mem_type_id;
-     c_mem_space_id = (hid_t)*mem_space_id;
-     c_file_space_id = (hid_t)*file_space_id;
-     ret = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
-     HDfree(buf_c);
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
-
+    /*
+     * Allocate temporary buffer and copy references from Fortran.
+     */
+    n = (int)*dims;
+    buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
+    if ( buf_c != NULL ) {
+        for (i = 0; i < n; i++)
+             HDmemcpy(&buf_c[i], &buf[i], sizeof(haddr_t));
+    }  
+    else return ret_value;
+    
+    /*
+     * Call H5Dwrite function.
+     */
+    c_dset_id = (hid_t)*dset_id;
+    c_mem_type_id = (hid_t)*mem_type_id;
+    c_mem_space_id = (hid_t)*mem_space_id;
+    c_file_space_id = (hid_t)*file_space_id;
+    ret = H5Dwrite(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
+    HDfree(buf_c);
+    if (ret < 0) return ret_value;
+    ret_value = 0;
+    return ret_value;
 }
+
 /*----------------------------------------------------------------------------
  * Name:        h5dwrite_ref_reg_c
  * Purpose:     Call H5Dwrite to write a dataset of dataset region references
@@ -403,47 +401,46 @@ nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t
  *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
  *---------------------------------------------------------------------------*/
 int_f
-nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims)
+nh5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f * buf, hsize_t_f *dims)
 {
-     int ret_value = -1;
-     herr_t ret;
-     hid_t c_dset_id;
-     hid_t c_mem_type_id;
-     hid_t c_mem_space_id;
-     hid_t c_file_space_id;
-     hid_t c_xfer_prp;
-     hobj_ref_t *buf_c = NULL;
-     hsize_t i,n;
-     n = (hsize_t)*dims;
-     /*
-      * Define transfer property
-      */
-     c_xfer_prp = (hid_t)*xfer_prp;
-     
-     /*
-      * Allocate temporary buffer.
-      */
-     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(size_t)n);
-     if ( buf_c != NULL ) {
-         /*
-          * Call H5Dread function.
-          */
-         c_dset_id = (hid_t)*dset_id;
-         c_mem_type_id = (hid_t)*mem_type_id;
-         c_mem_space_id = (hid_t)*mem_space_id;
-         c_file_space_id = (hid_t)*file_space_id;
-         ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
-         if (ret >=0) {
-            for (i = 0; i < n; i++) {
-               HDmemcpy(buf, &buf_c[i], H5R_OBJ_REF_BUF_SIZE);
-               buf = buf + REF_OBJ_BUF_LEN_F;
-            }  
-         }
-         if ( buf_c != NULL ) HDfree(buf_c);
-     } 
-     if (ret < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
+    int ret_value = -1;
+    herr_t ret;
+    hid_t c_dset_id;
+    hid_t c_mem_type_id;
+    hid_t c_mem_space_id;
+    hid_t c_file_space_id;
+    hid_t c_xfer_prp;
+    hobj_ref_t *buf_c = NULL;
+    hsize_t i,n;
+
+    /*
+     * Define transfer property
+     */
+    c_xfer_prp = (hid_t)*xfer_prp;
+    
+    /*
+     * Allocate temporary buffer.
+     */
+    n = (hsize_t)*dims;
+    buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(size_t)n);
+    if ( buf_c != NULL ) {
+        /*
+         * Call H5Dread function.
+         */
+        c_dset_id = (hid_t)*dset_id;
+        c_mem_type_id = (hid_t)*mem_type_id;
+        c_mem_space_id = (hid_t)*mem_space_id;
+        c_file_space_id = (hid_t)*file_space_id;
+        ret = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf_c);
+        if (ret >=0) {
+           for (i = 0; i < n; i++)
+              HDmemcpy(&buf[i], &buf_c[i], sizeof(haddr_t));
+        }
+        if ( buf_c != NULL ) HDfree(buf_c);
+    } 
+    if (ret < 0) return ret_value;
+    ret_value = 0;
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

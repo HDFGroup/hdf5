@@ -21,7 +21,6 @@
 #include "H5f90proto.h"
 
 /* Constants used in H5Rff.f90 and H5Rf.c files */
-#define REF_OBJ_BUF_LEN_F    2
 #define REF_REG_BUF_LEN_F    3
 
 /* Constants used in H5Gf.c files */
