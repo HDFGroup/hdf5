@@ -2,6 +2,12 @@
 Expected output for 'h5diff file4.h5 file4.h5 -v dset6a dset6b'
 #############################
 $h5diff file4.h5 file4.h5 -v dset6a dset6b
-Object <dset6a> could not be found in <file4.h5>
-Object <dset6b> could not be found in <file4.h5>
+Dataset:     </dset6a> and </dset6b>
+position        dset6a          dset6b          difference          
+------------------------------------------------------------
+[ 1 0 ]          1.000000        3.000000        2.000000       
+[ 1 1 ]          1.000000        4.000000        3.000000       
+[ 2 0 ]          1.000000        5.000000        4.000000       
+[ 2 1 ]          1.000000        6.000000        5.000000       
+4 differences found
 

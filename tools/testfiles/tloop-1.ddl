@@ -6,12 +6,12 @@ GROUP "/" {
    GROUP "g1" {
       GROUP "g1.1" {
          GROUP "g2.1" {
-            HARDLINK "/g1"
+            HARDLINK "/g2/g1"
          }
       }
    }
    GROUP "g2" {
-      HARDLINK "/g1/g1.1"
+      HARDLINK "/g2/g1/g1.1"
    }
 }
 }

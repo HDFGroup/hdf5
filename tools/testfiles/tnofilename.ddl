@@ -10,6 +10,7 @@ usage: h5dump [OPTIONS] file
      -A                   Print the header and value of attributes; data of datasets is not displayed
      -i, --object-ids     Print the object ids
      -r, --string         Print 1-byte integer datasets as ASCII
+     -e,                  Interpret carriage return (\n) as new line
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
