@@ -468,7 +468,8 @@ create or access function.
         The existence of an object can be tested by calling this function 
         with a null <code>statbuf</code>.
         <p>
-        <code>H5Gget_objinfo</code> fills in the following data structure:
+        <code>H5Gget_objinfo</code> fills in the following data structure
+        (defined in H5Gpublic.h):
         <pre>
                   typedef struct H5G_stat_t {
                       unsigned long fileno[2];
@@ -477,7 +478,19 @@ create or access function.
                       int type;
                       time_t mtime; 
                       size_t linklen;
+                      H5O_stat_t ohdr;
                   } H5G_stat_t
+        </pre>
+
+        where H5O_stat_t (defined in H5Opublic.h) is:
+
+        <pre>
+                  typedef struct H5O_stat_t {
+                      hsize_t size;
+                      hsize_t free;
+                      unsigned nmesgs;
+                      unsigned nchunks;
+                  } H5O_stat_t
         </pre>
         The <code>fileno</code> and <code>objno</code> fields contain 
         four values which uniquely itentify an object among those 
@@ -497,17 +510,36 @@ create or access function.
         the object or zero when information is being returned about a 
         symbolic link (symbolic links do not have hard links but 
         all other objects always have at least one).  
+        <p>
         The <code>type</code> field contains the type of the object, 
         one of 
 		<code>H5G_GROUP</code>, 
 		<code>H5G_DATASET</code>,
         	<code>H5G_LINK</code>, or
         	<code>H5G_TYPE</code>.  
+        <p>
         The <code>mtime</code> field contains the modification time.
+        <p>
         If information is being returned about a symbolic link then 
         <code>linklen</code> will be the length of the link value 
         (the name of the pointed-to object with the null terminator);
         otherwise <code>linklen</code> will be zero.  
+        <p>
+        The fields in the <code>H5O_stat_t</code> struct contain information
+        about the object header for the object queried:
+            <ul><dl>
+                <dt><code>size</code>
+                <dd>The total size of all the object header information in
+                    the file (for all chunks).
+                <dt><code>free</code>
+                <dd>The size of unused space in the object header.
+                <dt><code>nmesgs</code>
+                <dd>The number of object header messages.
+                <dt><code>nchunks</code>
+                <dd>The number of chunks the object header is broken up into.
+            </dl> </ul>
+
+        <p>
         Other fields may be added to this structure in the future.
   <dt><strong>Note:</strong>
     <dd>Some systems will be able to record the time accurately but
