@@ -43,8 +43,12 @@ extern "C" {
 
 /* Functions in H5P.c */
 uintn H5Pnelem(hid_t dim_id);
+hbool_t H5Pis_simple(hid_t dim_id);
 herr_t H5Pset_space(hid_t sid, uint32 rank, uint32 *dims);
+
+/* Private functions which need to be globally visible */
 void H5P_term_interface (void);
+void H5P_destroy(void *dataspace);
 
 #ifdef __cplusplus
 }

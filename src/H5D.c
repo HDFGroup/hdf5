@@ -49,12 +49,12 @@ static char RcsId[] = "@(#)$Revision$";
  * A dataset is the following struct.
  */
 typedef struct H5D_t {
-   H5F_t	*file; 		/* File store for this object		   */
-   H5G_entry_t	*ent; 		/* Cached object header stuff		   */
-   h5_datatype_t *type; 	/* Datatype of this dataset		   */
-   H5P_dim_t	*dim; 		/* Dimensionality of this dataset	   */
-   haddr_t	data_addr; 	/* Data storage address			   */
-   hbool_t	dirty;		/* Header messages not updated yet	   */
+   H5F_t	*file; 		/* File store for this object       */
+   H5G_entry_t	*ent;   /* Cached object header stuff       */
+   hid_t tid;           /* Datatype ID of this dataset      */
+   hid_t sid;           /* Dataspace ID of this dataset     */
+   haddr_t	data_addr; 	/* Data storage address			    */
+   hbool_t	dirty;		/* Header messages not updated yet  */
 } H5D_t;
 
 /*--------------------- Locally scoped variables -----------------------------*/
@@ -81,7 +81,7 @@ static herr_t H5D_init_interface(void)
     FUNC_ENTER (H5D_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS))!=FAIL)
+    if((ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS,NULL))!=FAIL)
         ret_value=H5_add_exit(&H5D_term_interface);
 
     FUNC_LEAVE(ret_value);
@@ -147,8 +147,8 @@ hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name)
     
     /* Initialize the dataset object */
     new_dset->file = file;
-    new_dset->type=NULL;		/* No type yet */
-    new_dset->dim=NULL;			/* No dimensions yet */
+    new_dset->tid=(-1);		/* No type yet */
+    new_dset->sid=(-1);			/* No dimensions yet */
     new_dset->data_addr = -1;		/* No data yet */
     new_dset->dirty = FALSE;		/* There are no messages yet */
 
@@ -188,10 +188,12 @@ done:
  DESCRIPTION
         This function finds for a dataset by name in a directory.
 --------------------------------------------------------------------------*/
-hid_t H5D_find_name(hid_t grp_id, hobjtype_t type, const char *name)
+hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
 {
     H5F_t *file;          /* Pointer to the file-store of this object */
-    H5D_t	*dset = NULL;	/* The dataset				    */
+    H5D_t	*dset = NULL;	/* The dataset */
+    h5_datatype_t *type;    /* The dataset's type */
+    H5P_dim_t *dim;         /* The dataset's dataspace */
     hid_t ret_value = SUCCEED;
     H5O_std_store_t store;
 
@@ -219,19 +221,23 @@ hid_t H5D_find_name(hid_t grp_id, hobjtype_t type, const char *name)
     }
 
     /* Get the dataset's type (currently only atomic types) */
-    if((dset->type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
+    if((type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_SIM_DTYPE, 0,
-			dset->type))
+			type))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
+    if((dset->tid=H5Aregister_atom(H5_DATATYPE, (const VOIDP)type))==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
     
     /* Get the dataset's dimensionality (currently only simple dataspaces) */
-    if((dset->dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
+    if((dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-    dset->dim->type=H5P_TYPE_SIMPLE;    /* for now... */
-    if (NULL==(dset->dim->s=H5O_read (dset->file, NO_ADDR, dset->ent,
+    dim->type=H5P_TYPE_SIMPLE;    /* for now... */
+    if (NULL==(dim->s=H5O_read (dset->file, NO_ADDR, dset->ent,
 				      H5O_SIM_DIM, 0, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
+    if((dset->sid=H5Aregister_atom(H5_DATASPACE, (const VOIDP)dim))==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
 
     /* Get the dataset's data offset (currently only standard storage) */
     if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_STD_STORE, 0,
@@ -268,13 +274,13 @@ done:
     herr_t H5Dset_info(oid)
         hid_t oid;       IN: Dataset object to modify
         hid_t tid;       IN: Datatype object to use as node element
-        hid_t did;       IN: Dimensionality object to use as dataspace
+        hid_t sid;       IN: Dimensionality object to use as dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function sets the datatype and dataspace of a dataset.
 --------------------------------------------------------------------------*/
-herr_t H5Dset_info(hid_t oid, hid_t tid, hid_t did)
+herr_t H5Dset_info(hid_t oid, hid_t tid, hid_t sid)
 {
     H5D_t	*dataset = NULL;         /* dataset object to modify */
     herr_t      ret_value = SUCCEED;
@@ -285,19 +291,27 @@ herr_t H5Dset_info(hid_t oid, hid_t tid, hid_t did)
     H5ECLEAR;
 
     /* Check that we've received correctly typed parameters */
-    if(H5Aatom_group(tid)!=H5_DATATYPE || H5Aatom_group(did)!=H5_DATASPACE)
+    if(H5Aatom_group(tid)!=H5_DATATYPE || H5Aatom_group(sid)!=H5_DATASPACE)
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
 
     /* Get the object */
     if((dataset=H5Aatom_object(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
     /* Check that the datatype & dataspace haven't already been initialized */
-    if(dataset->type || dataset->dim)
+    if(dataset->tid!=(-1) || dataset->sid!=(-1))
         HGOTO_ERROR(H5E_FUNC, H5E_ALREADYINIT, FAIL);
 
-    /* Update the dataset in memory */
-    dataset->type=H5Aatom_object(tid);
-    dataset->dim=H5Aatom_object(did);
+    /* Increment the reference count for the datatype */
+    if(H5Ainc_ref(tid)==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    dataset->tid=tid;
+
+    /* Increment the reference count for the datatype */
+    if(H5Ainc_ref(sid)==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    dataset->sid=sid;
+
+    /* Mark the dataset as modified (Huh? - QAK) */
     dataset->dirty = TRUE;
 
 done:
@@ -346,13 +360,16 @@ herr_t H5Dget_info(hid_t oid, hid_t *tid, hid_t *sid)
     if((dataset=H5Aatom_object(oid))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
     /* Check that the datatype & dataspace have already been initialized */
-    if(dataset->type==NULL || dataset->dim==NULL)
+    if(dataset->tid==(-1) || dataset->sid==(-1))
         HGOTO_ERROR(H5E_DATASET, H5E_UNINITIALIZED, FAIL);
 
-    if((*tid=H5Aregister_atom(H5_DATATYPE, (const VOIDP)(dataset->type)))<0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
-    if((*sid=H5Aregister_atom(H5_DATASPACE, (const VOIDP)(dataset->dim)))<0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
+    /* Get the Dataset's IDs */
+    if(H5Ainc_ref(dataset->tid)==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    *tid=dataset->tid;
+    if(H5Ainc_ref(dataset->sid)==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    *sid=dataset->sid;
 
 done:
   if(ret_value == FAIL)   
@@ -408,18 +425,18 @@ herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
     /* Check that the datatype & dataspace have already been initialized */
-    if(dataset->type==NULL || dataset->dim==NULL || dataset->data_addr<0)
+    if(dataset->tid==(-1) || dataset->sid==(-1) || dataset->data_addr<0)
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
     /* Compute the number of bytes to read */
     if(did==H5P_SCALAR) /* Check if we are reading the entire dataset */
-        toread=H5T_size(dataset->type,BTRUE)*H5P_nelem(dataset->dim);
+        toread=H5Tsize(dataset->tid,BTRUE)*H5Pnelem(dataset->sid);
     else
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
     /* Check memory to disk datatype conversions, etc. */
 /* This is totally hacked up code, but I'm in a hurry. ;-/ -QAK */
-    if(dataset->type->dt.arch!=H5T_ARCH_TYPE)
+    if(H5Tarch(dataset->tid)!=H5T_ARCH_TYPE)
       {
         if((readbuf=HDmalloc(toread))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
@@ -434,7 +451,7 @@ herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
     
     if(free_buf!=0)
-        H5D_convert_buf(buf,readbuf,toread,dataset->type->dt.len);
+        H5D_convert_buf(buf,readbuf,toread,H5Tsize(dataset->tid,BTRUE));
 
 done:
   if(ret_value == FAIL)   
@@ -492,12 +509,12 @@ herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
         
     /* Check that the datatype & dataspace have already been initialized */
-    if(dataset->type==NULL || dataset->dim==NULL)
+    if(dataset->tid==(-1) || dataset->sid==(-1))
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
     /* Compute the number of bytes to write out */
     if(did==H5P_SCALAR) /* Check if we are writing out the entire dataset */
-        towrite=H5T_size(dataset->type,BTRUE)*H5P_nelem(dataset->dim);
+        towrite=H5Tsize(dataset->tid,BTRUE)*H5Pnelem(dataset->sid);
     else
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
@@ -510,11 +527,11 @@ herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
 
     /* Check memory to disk datatype conversions, etc. */
 /* This is totally hacked up code, but I'm in a hurry. ;-/ -QAK */
-    if(dataset->type->dt.arch!=H5T_ARCH_TYPE)
+    if(H5Tarch(dataset->tid)!=H5T_ARCH_TYPE)
       {
         if((writebuf=HDmalloc(towrite))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
-        H5D_convert_buf(writebuf,buf,towrite,dataset->type->dt.len);
+        H5D_convert_buf(writebuf,buf,towrite,H5Tsize(dataset->tid,BTRUE));
         free_buf=1;
       } /* end if */
     else
@@ -573,9 +590,11 @@ herr_t H5D_flush(hid_t oid)
 	 * Modify/create messages for this dataset.  Begin with the
 	 * type information.
 	 */
-	if (H5T_is_atomic (dataset->type)) {
+	if (H5Tis_atomic (dataset->tid)) {
+        h5_datatype_t *type=H5Aatom_object(dataset->tid);
+
 	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
-			   H5O_SIM_DTYPE, 0, dataset->type)<0) {
+			   H5O_SIM_DTYPE, 0, type)<0) {
 	      /* Can't create/update type message */
 	      HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
 	   }
@@ -587,9 +606,11 @@ herr_t H5D_flush(hid_t oid)
 	/*
 	 * Modify/create the dimensionality information.
 	 */
-	if (H5P_is_simple (dataset->dim)) {
+	if (H5Pis_simple (dataset->sid)) {
+        H5P_dim_t *dim=H5Aatom_object(dataset->sid);
+
 	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
-			   H5O_SIM_DIM, 0, dataset->dim->s)<0) {
+			   H5O_SIM_DIM, 0, dim->s)<0) {
 	      /* Can't create/update dimensionality message */
 	      HGOTO_ERROR (H5E_INTERNAL, H5E_CANTCREATE, FAIL);
 	   }
@@ -604,8 +625,7 @@ herr_t H5D_flush(hid_t oid)
 	if (dataset->data_addr>=0) {
 	   H5O_std_store_t store;  /* standard storage info */
 
-	   store.len = H5T_size (dataset->type, BTRUE) *
-	               H5P_nelem (dataset->dim);
+	   store.len = H5Tsize (dataset->tid, BTRUE) * H5Pnelem (dataset->sid);
 	   store.off = dataset->data_addr;
 	   if (H5O_modify (dataset->file, NO_ADDR, dataset->ent,
 			   H5O_STD_STORE, 0, &store)<0) {
@@ -664,6 +684,10 @@ herr_t H5D_release(hid_t oid)
     /* Close the dataset object */
     H5G_close (dataset->file, dataset->ent);
     dataset->ent = NULL;
+
+    /* Release the atoms for the datatype and dataspace */
+    H5Adec_ref(dataset->tid);
+    H5Adec_ref(dataset->sid);
     
     /* release the memory used for the dataset */
     H5MM_xfree (dataset);

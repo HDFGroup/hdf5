@@ -89,7 +89,7 @@ static herr_t H5F_init_interface(void)
     FUNC_ENTER (H5F_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_FILE,H5A_FILEID_HASHSIZE,0))!=FAIL)
+    if((ret_value=H5Ainit_group(H5_FILE,H5A_FILEID_HASHSIZE,0,NULL))!=FAIL)
         ret_value=H5_add_exit(&H5F_term_interface);
 
     FUNC_LEAVE(ret_value);

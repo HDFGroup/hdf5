@@ -135,7 +135,7 @@ static herr_t H5E_init_interface(void)
     FUNC_ENTER (H5E_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the error stacks */
-    if((ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0))!=FAIL)
+    if((ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0,NULL))!=FAIL)
         ret_value=H5_add_exit(&H5E_term_interface);
 
     FUNC_LEAVE(ret_value);

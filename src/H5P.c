@@ -63,7 +63,7 @@ static herr_t H5P_init_interface(void)
     FUNC_ENTER (H5P_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_DATASPACE,H5A_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS))!=FAIL)
+    if((ret_value=H5Ainit_group(H5_DATASPACE,H5A_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS,H5P_destroy))!=FAIL)
         ret_value=H5_add_exit(&H5P_term_interface);
 
     FUNC_LEAVE(ret_value);
@@ -198,7 +198,7 @@ hbool_t H5P_is_simple(H5P_dim_t *sdim)
 {
     hbool_t ret_value = BFAIL;
 
-    FUNC_ENTER(H5P_get_lrank, H5P_init_interface, UFAIL);
+    FUNC_ENTER(H5P_is_simple, H5P_init_interface, UFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -221,6 +221,46 @@ done:
 
     FUNC_LEAVE(ret_value);
 } /* end H5P_is_simple() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pis_simple
+ PURPOSE
+    Check if a dataspace is simple
+ USAGE
+    hbool_t H5Pis_simple(sid)
+        hid_t sid;            IN: ID of dataspace object to query
+ RETURNS
+    BTRUE/BFALSE/BFAIL
+ DESCRIPTION
+        This function determines the if a dataspace is "simple". ie. if it
+    has orthogonal, evenly spaced dimensions.
+--------------------------------------------------------------------------*/
+hbool_t H5Pis_simple(hid_t sid)
+{
+    H5P_dim_t *space=NULL;      /* dataspace to modify */
+    hbool_t        ret_value = BFAIL;
+
+    FUNC_ENTER(H5Pis_simple, H5P_init_interface, BFAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    if((space=H5Aatom_object(sid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+    ret_value=H5P_is_simple(space);
+
+done:
+  if(ret_value == BFAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Pis_simple() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -437,30 +477,26 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_release
+    H5P_destroy
  PURPOSE
-    Release access to an HDF5 dimensionality object.
+    Private function to destroy dataspace objects.
  USAGE
-    herr_t H5P_release(oid)
-        hid_t oid;       IN: Object to release access to
+    void H5P_destroy(dataspace)
+        void *dataspace;       IN: Pointer to dataspace object to destroy
  RETURNS
-    SUCCEED/FAIL
+    none
  DESCRIPTION
-        This function releases a dimensionality from active use by a user.
+    This function releases whatever memory is used by a dataspace object.
+    It should only be called from the atom manager when the reference count
+    for a dataspace drops to zero.
 --------------------------------------------------------------------------*/
-herr_t H5P_release(hid_t oid)
+void H5P_destroy(void *dataspace)
 {
-    H5P_dim_t *dim;         /* dimensionality object to release */
-    herr_t        ret_value = SUCCEED;
+    H5P_dim_t *dim=(H5P_dim_t *)dataspace;  /* dimensionality object to release */
 
-    FUNC_ENTER(H5P_release, H5P_init_interface, FAIL);
+    /* Don't call standard init/leave code, this is a private void function */
+    /* FUNC_ENTER(H5T_destroy, H5T_init_interface, FAIL); */
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
-    /* Chuck the object! :-) */
-    if((dim=H5Aremove_atom(oid))==NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
     if(dim->type==H5P_TYPE_SIMPLE)
       {
         if(dim->s!=NULL)
@@ -475,6 +511,45 @@ herr_t H5P_release(hid_t oid)
           } /* end if */
       } /* end if */
     HDfree(dim);
+
+#ifdef LATER
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+    FUNC_LEAVE(ret_value);
+#endif /* LATER */
+
+} /* H5P_destroy */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_release
+ PURPOSE
+    Release access to an HDF5 dimensionality object.
+ USAGE
+    herr_t H5P_release(oid)
+        hid_t oid;       IN: Object to release access to
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function releases a dimensionality from active use by a user.
+--------------------------------------------------------------------------*/
+herr_t H5P_release(hid_t oid)
+{
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5P_release, H5P_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Chuck the object! :-) */
+    if(H5Adec_ref(oid)==FAIL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
 done:
   if(ret_value == FAIL)   

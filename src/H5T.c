@@ -74,7 +74,7 @@ static herr_t H5T_init_interface(void)
     FUNC_ENTER (H5T_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if((ret_value=H5Ainit_group(H5_DATATYPE,H5A_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS))!=FAIL)
+    if((ret_value=H5Ainit_group(H5_DATATYPE,H5A_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS,H5T_destroy))!=FAIL)
         ret_value=H5_add_exit(&H5T_term_interface);
 
     FUNC_LEAVE(ret_value);
@@ -528,7 +528,7 @@ herr_t H5Tadd_field(hid_t tid, const char *name, hid_t base, uint8 len, uint8 ar
     else
       {
         new_field->dt.base=H5Mcopy(base);    /* Make a copy of the datatype for the field */
-        new_field->dt.len=H5Tsize(base,len,arch,BTRUE);
+        new_field->dt.len=H5Tsize(base,BTRUE);
         new_field->dt.arch=arch;
       } /* end else */
 
@@ -549,7 +549,7 @@ done:
  PURPOSE
     Determine the size of a datatype (internal)
  USAGE
-    uintn H5Tsize(dt, mem_flag)
+    uintn H5T_size(dt, mem_flag)
         h5_datatype_t *dt;      IN: Pointer to Datatype object to query
         hbool_t mem_flag;       IN: Whether the memory or disk size is desired
  RETURNS
@@ -584,8 +584,7 @@ uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag)
 
         /* Grab the number of fields */
         for(i=0; i<=dt->ci->n; i++)
-            ret_value+=H5Tsize(dt->ci->flist[i].dt.base, dt->ci->flist[i].dt.len,
-                    dt->ci->flist[i].dt.arch,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
+            ret_value+=H5Tsize(dt->ci->flist[i].dt.base,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
       } /* end if */
     else
       { /* Simple, user-defined datatypes */
@@ -636,16 +635,20 @@ done:
     Determine the size of a datatype
  USAGE
     uintn H5Tsize(tid, mem_flag)
-        hid_t tid;            IN: Datatype object to query
+        hid_t tid;              IN: Datatype object to query
         hbool_t mem_flag;       IN: Whether the memory or disk size is desired
  RETURNS
     The size of the datatype on success or UFAIL on failure.
  DESCRIPTION
-        Ths function returns the size of the datatype in bytes as it is stored
+        This function returns the size of the datatype in bytes as it is stored
     on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
     BTRUE returns the size in memory, BFALSE returns the size on disk.
+ NOTE:
+        This function does not compute the number of bytes for a predefined
+    library type (ie. H5T_CHAR, H5T_INT) which has not been "named" by the
+    user as field or new type.
 --------------------------------------------------------------------------*/
-uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
+uintn H5Tsize(hid_t tid, hbool_t mem_flag)
 {
     uintn ret_value = UFAIL;
 
@@ -656,6 +659,7 @@ uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
 
     if((H5Ais_reserved(tid)==BTRUE) && tid!=H5T_COMPOUND) /* Check if this is a "simple" datatype */
       {
+#ifdef LATER
         switch(tid)
           {
             case H5T_CHAR:
@@ -683,6 +687,8 @@ uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
           } /* end switch */
+#endif /* LATER */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
       } /* end if */
     else
       {
@@ -705,6 +711,83 @@ done:
 
     FUNC_LEAVE(ret_value);
 } /* end H5Tsize() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_arch
+ PURPOSE
+    Determine the architecture of a datatype (internal)
+ USAGE
+    uintn H5T_arch(dt)
+        h5_datatype_t *dt;      IN: Pointer to Datatype object to query
+ RETURNS
+    The architure type of the datatype on success or FAIL on failure.
+ DESCRIPTION
+        Ths function returns the architure type of the datatype.
+--------------------------------------------------------------------------*/
+intn H5T_arch(h5_datatype_t *dt)
+{
+    intn ret_value = FAIL;
+
+    FUNC_ENTER(H5T_arch, H5T_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    assert(dt);
+
+    ret_value=dt->dt.arch;
+
+done:
+  if(ret_value == FAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5T_arch() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Tarch
+ PURPOSE
+    Determine the architecture of a datatype
+ USAGE
+    intn H5Tarch(tid)
+        hid_t tid;            IN: Datatype object to query
+ RETURNS
+    The architecture of the datatype on success or FAIL on failure.
+ DESCRIPTION
+        Ths function returns the architecture of the datatype.
+--------------------------------------------------------------------------*/
+intn H5Tarch(hid_t tid)
+{
+    h5_datatype_t *dt;  /* datatype pointer */
+    intn ret_value = FAIL;
+
+    FUNC_ENTER(H5Tarch, H5T_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+
+    /* Go get the object */
+    if((dt=H5Aatom_object(tid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+    ret_value=H5T_arch(dt);
+
+done:
+  if(ret_value == FAIL)
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Tarch() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -748,6 +831,48 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5T_destroy
+ PURPOSE
+    Private function to destroy datatype objects.
+ USAGE
+    void H5T_destroy(datatype)
+        void *datatype;       IN: Pointer to datatype object to destroy
+ RETURNS
+    none
+ DESCRIPTION
+    This function releases whatever memory is used by a datatype object.
+    It should only be called from the atom manager when the reference count
+    for a datatype drops to zero.
+--------------------------------------------------------------------------*/
+void H5T_destroy(void *datatype)
+{
+    h5_datatype_t *dt=(h5_datatype_t *)datatype;  /* data-type object to destroy */
+
+    /* Don't call standard init/leave code, this is a private void function */
+    /* FUNC_ENTER(H5T_destroy, H5T_init_interface, FAIL); */
+
+    if(dt->name!=NULL)
+        HDfree(dt->name);
+    if(dt->ci!=NULL)
+      {
+      } /* end if */
+    HDfree(dt);
+
+#ifdef LATER
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+    FUNC_LEAVE(ret_value);
+#endif /* LATER */
+
+} /* H5T_destroy */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5T_release
  PURPOSE
     Release access to an HDF5 datatype object.
@@ -761,7 +886,6 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5T_release(hid_t oid)
 {
-    h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5T_release, H5T_init_interface, FAIL);
@@ -770,14 +894,8 @@ herr_t H5T_release(hid_t oid)
     H5ECLEAR;
 
     /* Chuck the object! :-) */
-    if((dt=H5Aremove_atom(oid))==NULL)
+    if(H5Adec_ref(oid)==FAIL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
-    if(dt->name!=NULL)
-        HDfree(dt->name);
-    if(dt->ci!=NULL)
-      {
-      } /* end if */
-    HDfree(dt);
 
 done:
   if(ret_value == FAIL)   

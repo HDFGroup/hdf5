@@ -70,11 +70,15 @@ hbool_t H5Tis_field_atomic(hid_t tid,uintn fidx);
 hbool_t H5Tis_atomic(hid_t tid);
 herr_t H5Tset_type(hid_t tid,hid_t base,uint8 len,uint8 arch);
 herr_t H5Tget_type(hid_t tid,hid_t *base,uint8 *len,uint8 *arch);
-uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
+uintn H5Tsize(hid_t tid, hbool_t mem_flag);
+intn H5Tarch(hid_t tid);
 herr_t H5Tadd_field (hid_t tid, const char *name, hid_t base, uint8 len,
 		     uint8 arch, hid_t space);
 herr_t H5Tget_fields(hid_t tid, hid_t *field_list);
+
+/* Private functions which need to be globally visible */
 void H5T_term_interface (void);
+void H5T_destroy(void *datatype);
 
 #ifdef __cplusplus
 }

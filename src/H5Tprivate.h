@@ -54,6 +54,7 @@ typedef struct {
 hid_t H5T_create(hid_t owner_id, hobjtype_t type, const char *name);
 hbool_t H5T_is_atomic(h5_datatype_t *type);
 uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag);
+intn H5T_arch(h5_datatype_t *dt);
 herr_t H5T_release(hid_t oid);
 
 #endif
