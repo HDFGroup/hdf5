@@ -786,10 +786,10 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 		fi
 		;;
 	    NoRemoteCommand)
-		PRINT $h does not accept Remote Command
+		PRINT $h does not accept Remote Command "(`date`)"
 		;;
 	    NotReachable)
-		PRINT $h is not reachable 
+		PRINT $h is not reachable  "(`date`)"
 		;;
 	    *)
 		PRINT "CHECK_RSH for $h returned unknow result ($RSH)"
@@ -798,6 +798,8 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     done
     # wait for all launched tests to finish, then cat them back out.
     wait
+    # Pause a moment in case the timekeeper is terminating processes.
+    wait 30
     for h in $TESTHOST; do
 	h=`echo $h | cut -f1 -d/`
 	TMP_OUTPUT="#$h.out"
