@@ -115,9 +115,9 @@
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(OUT) :: order 
                               ! Datatype byte order, bossible values are:
-                                          ! H5T_ORDER_LE (0)
-                                          ! H5T_ORDER_BE (1)
-                                          ! H5T_ORDER_VAX (2) 
+                                          ! H5T_ORDER_LE_F
+                                          ! H5T_ORDER_BE_F
+                                          ! H5T_ORDER_VAX_F
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
             INTEGER, EXTERNAL :: h5tget_order_c
             hdferr = h5tget_order_c(type_id, order)
@@ -129,9 +129,9 @@
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
             INTEGER, INTENT(IN) :: order ! Datatype byte order, bossible values
                                           ! are:
-                                          ! H5T_ORDER_LE (0)
-                                          ! H5T_ORDER_BE (1)
-                                          ! H5T_ORDER_VAX (2) 
+                                          ! H5T_ORDER_LE_F 
+                                          ! H5T_ORDER_BE_F
+                                          ! H5T_ORDER_VAX_F 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
             INTEGER, EXTERNAL :: h5tset_order_c
             hdferr = h5tset_order_c(type_id, order)
