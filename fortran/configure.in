@@ -455,7 +455,7 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Print some other parallel information and do some sanity checks.
 dnl
-ADD_PARALLEL_FILES=""
+ADD_PARALLEL_FILES="no"
 if test -n "$PARALLEL"; then
    dnl We are building a parallel library
    AC_DEFINE(HAVE_PARALLEL)

@@ -2565,7 +2565,7 @@ if test -n "$PARALLEL"; then
    TESTPARALLEL=testpar
 fi
 
-ADD_PARALLEL_FILES=""
+ADD_PARALLEL_FILES="no"
 if test -n "$PARALLEL"; then
       cat >> confdefs.h <<\EOF
 #define HAVE_PARALLEL 1
