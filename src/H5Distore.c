@@ -492,7 +492,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
 #ifdef AKC
     printf("calling H5MF_alloc for new chunk\n");
 #endif
-    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE,
+    if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_DRAW,
 					 udata->key.nbytes))) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
 		      "couldn't allocate new file storage");
@@ -675,7 +675,7 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 #ifdef AKC
 	    printf("calling H5MF_realloc for new chunk\n");
 #endif
-	    if (HADDR_UNDEF==(*new_node_p=H5MF_realloc(f, H5FD_MEM_BTREE, addr,
+	    if (HADDR_UNDEF==(*new_node_p=H5MF_realloc(f, H5FD_MEM_DRAW, addr,
 						      lt_key->nbytes,
 						      udata->key.nbytes))) {
 		HRETURN_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR,
@@ -714,7 +714,7 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
 #ifdef AKC
 	printf("calling H5MF_alloc for new chunk\n");
 #endif
-	if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_BTREE,
+	if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_DRAW,
 						 udata->key.nbytes))) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
 			  "file allocation failed");

@@ -8,16 +8,20 @@
 #ifndef _H5FDpublic_H
 #define _H5FDpublic_H
 
-/* Types of allocation requests */
+/*
+ * Types of allocation requests. The values larger than H5FD_MEM_DEFAULT
+ * should not change other than adding new types to the end. These numbers
+ * might appear in files.
+ */
 typedef enum H5FD_mem_t {
     H5FD_MEM_NOLIST	= -1,			/*must be negative*/
     H5FD_MEM_DEFAULT	= 0,			/*must be zero*/
-    H5FD_MEM_SUPER,
-    H5FD_MEM_BTREE,
-    H5FD_MEM_DRAW,
-    H5FD_MEM_GHEAP,
-    H5FD_MEM_LHEAP,
-    H5FD_MEM_OHDR,
+    H5FD_MEM_SUPER      = 1,
+    H5FD_MEM_BTREE      = 2,
+    H5FD_MEM_DRAW       = 3,
+    H5FD_MEM_GHEAP      = 4,
+    H5FD_MEM_LHEAP      = 5,
+    H5FD_MEM_OHDR       = 6,
 
     H5FD_MEM_NTYPES				/*must be last*/
 } H5FD_mem_t;

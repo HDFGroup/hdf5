@@ -2853,11 +2853,12 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
-    H5T_vlen_bufsize_t vlen_bufsize={0};
+    H5T_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0};
     char bogus;         /* bogus value to pass to H5Diterate() */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Dvlen_get_buf_size, FAIL);
+    H5TRACE4("e","iii*h",dataset_id,type_id,space_id,size);
 
     /* Check args */
     if (H5I_DATASET!=H5I_get_type(dataset_id) ||
@@ -2866,7 +2867,6 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
     }
 
-    /* Initialize the callback data block */
     /* Save the dataset ID */
     vlen_bufsize.dataset_id=dataset_id;
 

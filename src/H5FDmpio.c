@@ -164,7 +164,7 @@ hbool_t	H5_mpi_1_metawrite_g = FALSE;
 hid_t
 H5FD_mpio_init(void)
 {
-    if (!H5FD_MPIO_g) {
+    if (H5I_VFL!=H5Iget_type(H5FD_MPIO_g)) {
 	H5FD_MPIO_g = H5FDregister(&H5FD_mpio_g);
 
 #if 1

@@ -128,7 +128,7 @@ static const H5FD_class_t H5FD_core_g = {
 hid_t
 H5FD_core_init(void)
 {
-    if (!H5FD_CORE_g) {
+    if (H5I_VFL!=H5Iget_type(H5FD_CORE_g)) {
 	H5FD_CORE_g = H5FDregister(&H5FD_core_g);
     }
     return H5FD_CORE_g;

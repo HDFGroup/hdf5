@@ -10,7 +10,10 @@
 
 #include <H5FDpublic.h>
 
+#define H5FD_has_cmp(id) (NULL!=H5FD_get_class(id)->cmp)
+
 intn H5FD_term_interface(void);
+H5FD_class_t *H5FD_get_class(hid_t id);
 hsize_t H5FD_sb_size(H5FD_t *file);
 herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
 herr_t H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf);

@@ -247,6 +247,69 @@ H5FDunregister(hid_t driver_id)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_get_class
+ *
+ * Purpose:	Optains a pointer to the driver struct containing all the
+ *		callback pointers, etc. The PLIST_ID argument can be a file
+ *		access property list, a data transfer property list, or a
+ *		file driver identifier.
+ *
+ * Return:	Success:	Ptr to the driver information. The pointer is
+ *				only valid as long as the driver remains
+ *				registered or some file or property list
+ *				exists which references the driver.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 20, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_class_t *
+H5FD_get_class(hid_t id)
+{
+    H5FD_class_t	*ret_value=NULL;
+    H5F_access_t	*fapl=NULL;
+    H5F_xfer_t		*dxpl=NULL;
+    
+    FUNC_ENTER(H5FD_get_class, NULL);
+
+    if (H5P_DEFAULT==id) {
+	ret_value = H5FD_get_class(H5F_access_dflt.driver_id);
+    } else if (H5I_VFL==H5I_get_type(id)) {
+	ret_value = H5I_object(id);
+    } else {
+	switch (H5P_get_class(id)) {
+	case H5P_FILE_ACCESS:
+	    if (NULL==(fapl=H5I_object(id))) {
+		HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+			      "not a file access property list");
+	    }
+	    ret_value = H5FD_get_class(fapl->driver_id);
+	    break;
+
+	case H5P_DATA_XFER:
+	    if (NULL==(dxpl=H5I_object(id))) {
+		HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+			      "not a data transfer property list");
+	    }
+	    ret_value = H5FD_get_class(dxpl->driver_id);
+	    break;
+
+	default:
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+			  "not a driver id, file access property list or "
+			  "data transfer property list");
+	}
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_sb_size
  *
  * Purpose:	Obtains the number of bytes required to store the driver file

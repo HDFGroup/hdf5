@@ -315,7 +315,7 @@ h5_fileaccess(void)
 	}
 
 	if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
-			      memb_addr)<0) {
+			      memb_addr, FALSE)<0) {
 	    return -1;
 	}
     } else if (!strcmp(name, "family")) {

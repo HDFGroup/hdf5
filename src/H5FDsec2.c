@@ -178,7 +178,7 @@ static const H5FD_class_t H5FD_sec2_g = {
 hid_t
 H5FD_sec2_init(void)
 {
-    if (!H5FD_SEC2_g) {
+    if (H5I_VFL!=H5Iget_type(H5FD_SEC2_g)) {
 	H5FD_SEC2_g = H5FDregister(&H5FD_sec2_g);
     }
     return H5FD_SEC2_g;

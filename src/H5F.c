@@ -566,6 +566,7 @@ H5F_locate_signature(H5FD_t *file)
 		      "unable to obtain EOF/EOA value");
     }
     for (maxpow=0; addr; maxpow++) addr>>=1;
+    maxpow = MAX(maxpow, 9);
 
     /*
      * Search for the file signature at format address zero followed by
@@ -906,6 +907,13 @@ H5F_dest(H5F_t *f)
  *		Added decoding of file driver information block, which uses a
  *		formerly reserved address slot in the boot block in order to
  *		be compatible with previous versions of the file format.
+ *
+ * 		Robb Matzke, 1999-08-20
+ *		Optimizations for opening a file. If the driver can't
+ *		determine when two file handles refer to the same file then
+ *		we open the file in one step.  Otherwise if the first attempt
+ *		to open the file fails then we skip the second attempt if the
+ *		arguments would be the same.
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -925,17 +933,41 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
     uintn		tent_flags;	/*tentative flags		*/
     char		driver_name[9];	/*file driver name/version	*/
+    hbool_t		driver_has_cmp;	/*`cmp' callback defined?	*/
     
     FUNC_ENTER(H5F_open, NULL);
 
     /*
-     * Open the file very carefully because we don't want to wipe out a file
-     * which is currently open (which is possible if this call specifies
-     * truncation of an existing file).  So turn off truncation and file
-     * creation and try opening it. If that fails then open as normal.
+     * If the driver has a `cmp' method then the driver is capable of
+     * determining when two file handles refer to the same file and the
+     * library can insure that when the application opens a file twice that
+     * the two handles coordinate their operations appropriately. Otherwise
+     * it is the application's responsibility to never open the same file
+     * more than once at a time.
      */
-    tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
+    driver_has_cmp = H5FD_has_cmp(fapl_id);
+
+    /*
+     * Opening a file is a two step process. First we try to open the file in
+     * a way which doesn't affect its state (like not truncating or creating
+     * it) so we can compare it with files that are already open. If that
+     * fails then we try again with the full set of flags (only if they're
+     * different than the original failed attempt). However, if the file
+     * driver can't distinquish between files then there's no reason to open
+     * the file tentatively because it's the application's responsibility to
+     * prevent this situation (there's no way for us to detect it here
+     * anyway).
+     */
+    if (driver_has_cmp) {
+	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
+    } else {
+	tent_flags = flags;
+    }
     if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+	if (tent_flags == flags) {
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+			"unable to open file");
+	}
 	H5E_clear();
 	tent_flags = flags;
 	if (NULL==(lf=H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
@@ -1223,10 +1255,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     ret_value = file;
 
  done:
-    if (!ret_value) {
-	if (file) H5F_dest(file);
-	if (lf) H5FD_close(lf);
-    }
+    if (!ret_value && file) H5F_dest(file);
     FUNC_LEAVE(ret_value);
 }
 

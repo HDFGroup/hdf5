@@ -710,7 +710,9 @@ H5I_get_type(hid_t id)
  * Programmer:	
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-23
+ *		Also fails if the ID has a valid group but no longer exists
+ *		in the ID tables.
  *-------------------------------------------------------------------------
  */
 H5I_type_t
@@ -723,7 +725,8 @@ H5Iget_type(hid_t id)
 
     ret_value = H5I_get_type(id);
 
-    if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS) {
+    if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS ||
+	NULL==H5I_object(id)) {
 	HGOTO_DONE(H5I_BADID);
     }
 

@@ -18,7 +18,10 @@
 /*
  * File drivers
  */
+#include <H5FDsec2.h>
+#include <H5FDmulti.h>
 #include <H5FDfamily.h>
+#define NDRIVERS	10
 
 /*
  * If defined then include the file name as part of the object name when
@@ -37,6 +40,7 @@ static hbool_t fullname_g = FALSE;	/*print full path names		     */
 static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
 static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
 static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
+static hbool_t show_errors_g = FALSE;	/*print HDF5 error messages	     */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -98,6 +102,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       -h, -?, --help   Print a usage message and exit\n\
       -a, --address    Print addresses for raw data\n\
       -d, --data       Print the values of datasets\n\
+      -e, --errors     Show all HDF5 error reporting\n\
       -f, --full       Print full path names instead of base names\n\
       -g, --group      Show information about a group, not its contents\n\
       -l, --label      Label members of compound datasets\n\
@@ -1855,18 +1860,22 @@ get_width(void)
 int
 main (int argc, char *argv[])
 {
-    hid_t	file=-1, plist=-1, root=-1;
+    hid_t	file=-1, root=-1, fapl=-1;
     char	*fname=NULL, *oname=NULL, *x;
     const char	*progname;
     const char	*s = NULL;
     char	*rest, *container=NULL;
-    int		argno;
+    int		argno, dno;
     H5G_stat_t	sb;
     iter_t	iter;
     static char	root_name[] = "/";
 
-    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
-    H5Eset_auto(NULL, NULL);
+    int		ndrivers=0;
+    struct {
+	const char	*name;
+	hid_t		fapl;
+    } driver[NDRIVERS];
+	
 
     /* Build display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose,
@@ -1901,12 +1910,14 @@ main (int argc, char *argv[])
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--address")) {
 	    address_g = TRUE;
-	} else if (!strcmp(argv[argno], "--group")) {
-	    grp_literal_g = TRUE;
 	} else if (!strcmp(argv[argno], "--data")) {
 	    data_g = TRUE;
+	} else if (!strcmp(argv[argno], "--errors")) {
+	    show_errors_g = TRUE;
 	} else if (!strcmp(argv[argno], "--full")) {
 	    fullname_g = TRUE;
+	} else if (!strcmp(argv[argno], "--group")) {
+	    grp_literal_g = TRUE;
 	} else if (!strcmp(argv[argno], "--label")) {
 	    label_g = TRUE;
 	} else if (!strcmp(argv[argno], "--recursive")) {
@@ -1968,6 +1979,9 @@ main (int argc, char *argv[])
 		case 'd':	/* --data */
 		    data_g = TRUE;
 		    break;
+		case 'e':	/* --errors */
+		    show_errors_g = TRUE;
+		    break;
 		case 'f':	/* --full */
 		    fullname_g = TRUE;
 		    break;
@@ -2014,6 +2028,34 @@ main (int argc, char *argv[])
 	usage(progname);
 	exit(1);
     }
+
+    /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
+    if (!show_errors_g) H5Eset_auto(NULL, NULL);
+
+    /*
+     * Build a list of file access property lists which we should try when
+     * opening the file.  Eventually we'd like some way for the user to
+     * augment/replace this list interactively.
+     */
+
+    driver[ndrivers].name = "sec2";
+    driver[ndrivers].fapl = H5P_DEFAULT;
+    ndrivers++;
+    
+    driver[ndrivers].name = "family";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_family(fapl, 0, H5P_DEFAULT);
+    ndrivers++;
+
+    driver[ndrivers].name = "split";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+    ndrivers++;
+
+    driver[ndrivers].name = "multi";
+    driver[ndrivers].fapl = fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE);
+    ndrivers++;
     
     /*
      * Each remaining argument is an hdf5 file followed by an optional slash
@@ -2035,19 +2077,20 @@ main (int argc, char *argv[])
 	file = -1;
 
 	while (fname && *fname) {
-	    /* Choose a file driver*/
-	    plist = H5Pcreate(H5P_FILE_ACCESS);
-	    if (strchr(fname, '%')) {
-		H5Pset_fapl_family(plist, 0, H5P_DEFAULT);
+	    for (dno=0; dno<ndrivers; dno++) {
+		H5E_BEGIN_TRY {
+		    file = H5Fopen(fname, H5F_ACC_RDONLY, driver[dno].fapl);
+		} H5E_END_TRY;
+		if (file>=0) break;
 	    }
-
-	    /* Try to open the file */
-	    H5E_BEGIN_TRY {
-		file = H5Fopen(fname, H5F_ACC_RDONLY, plist);
-	    } H5E_END_TRY;
-	    H5Pclose(plist);
-	    if (file>=0) break; /*success*/
-
+	    if (file>=0) {
+		if (verbose_g) {
+		    printf("Opened \"%s\" with %s driver.\n",
+			   fname, driver[dno].name);
+		}
+		break; /*success*/
+	    }
+	    
 	    /* Shorten the file name; lengthen the object name */
 	    x = oname;
 	    oname = strrchr(fname, '/');
