@@ -1,8 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997-2001 National Center for Supercomputing Applications
- *                         All rights reserved.
- *
- *-------------------------------------------------------------------------
  *
  * Created:             H5Gprivate.h
  *                      Jul 11 1997
@@ -17,6 +27,7 @@
  *
  *-------------------------------------------------------------------------
  */
+
 #ifndef _H5Gprivate_H
 #define _H5Gprivate_H
 
@@ -96,13 +107,8 @@ typedef struct H5G_entry_t {
     H5G_type_t  type;                   /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
-#ifdef OLD_WAY
-    char        *user_path;             /* Path to object, as opened by user */
-    char        *canon_path;            /* Path to object, as found in file  */
-#else /* OLD_WAY */
     H5RS_str_t  *user_path_r;           /* Path to object, as opened by user */
     H5RS_str_t  *canon_path_r;          /* Path to object, as found in file  */
-#endif /* OLD_WAY */
     unsigned    user_path_hidden;       /* Whether the user's path is valid  */
 } H5G_entry_t;
 
