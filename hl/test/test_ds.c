@@ -24,12 +24,16 @@
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
+static herr_t op_bogus(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
+
 
 
 /* prototypes */
 static int test_simple(void);
 static int test_errors(void);
 static int test_rank(void);
+static int test_iterators(void);
+
 
 
 
@@ -73,6 +77,7 @@ int main(void)
  nerrors += test_simple()<0 	?1:0;
  nerrors += test_errors()<0 	?1:0;
  nerrors += test_rank()<0 	?1:0;
+ nerrors += test_iterators()<0 	?1:0;
 
  if (nerrors) goto error;
  printf("All dimension scales tests passed.\n");
@@ -96,6 +101,8 @@ error:
  * H5DSset_scale
  * H5DSget_scale_name
  * H5DSis_scale
+ * H5DSiterate_scales
+ * H5DSget_num_scales
  *
  *-------------------------------------------------------------------------
  */
@@ -1613,248 +1620,34 @@ out:
 } 
 
 
-
 /*-------------------------------------------------------------------------
- * test error conditions
+ * Function: op_bogus
+ *
+ * Purpose: example operator function used by H5DSiterate_scales, that does nothing
+ *
+ * Return: 
+ * The return values from an operator are: 
+ * Zero causes the iterator to continue, returning zero when all group members have been processed. 
+ * Positive causes the iterator to immediately return that positive value, indicating 
+ *  short-circuit success. The iterator can be restarted at the next group member. 
+ * Negative causes the iterator to immediately return that value, indicating failure. 
+ *  The iterator can be restarted at the next group member. 
+ *
  *-------------------------------------------------------------------------
  */
 
-static int test_errors(void)
+static herr_t op_bogus(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
- hid_t   fid;                                              /* file ID */
- int     rank     = RANK;                                  /* rank of data dataset */
- int     rankds   = 1;                                     /* rank of DS dataset */
- hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
- hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
- hsize_t s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
- hid_t   did;                                              /* dataset ID */
- hid_t   dsid;                                             /* scale ID */
- hid_t   gid;                                              /* group ID */
- hid_t   sid;                                              /* space ID */
- hid_t   sidds;                                            /* space ID */
- hsize_t pal_dims[] = {9,3};
- 
- printf("Testing error conditions\n");
-
-/*-------------------------------------------------------------------------
- * create a file, spaces, dataset and group ids
- *-------------------------------------------------------------------------
- */  
-
- /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
-  goto out;
- /* create a group */
- if ((gid=H5Gcreate(fid,"grp",0))<0) 
-  goto out;
- /* create the data space for the dataset */
- if ((sid=H5Screate_simple(rank,dims,NULL))<0)
-  goto out;
- /* create the data space for the scale */
- if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
-  goto out;
-  /* create a dataset */
- if ((did=H5Dcreate(fid,"dset_a",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
-  goto out;
- /* create a dataset for the scale */
- if ((dsid=H5Dcreate(fid,"ds_a",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
-  goto out;
-
-/*-------------------------------------------------------------------------
- * attempt to attach a dataset to itself, it should fail
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach a dataset to itself");
-
- if (H5DSattach_scale(did,did,0)==SUCCESS)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * attempt to attach a group with a dataset, it should fail
- *-------------------------------------------------------------------------
- */ 
- TESTING2("attach a group with a dataset");
-
- if (H5DSattach_scale(gid,dsid,0)==SUCCESS)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * attempt to attach a dataset with a group, it should fail
- *-------------------------------------------------------------------------
- */ 
- TESTING2("attach a dataset with a group");
-
- if (H5DSattach_scale(did,gid,0)==SUCCESS)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * attempt to set scale for a group, it should fail
- *-------------------------------------------------------------------------
- */ 
- TESTING2("set scale for a group");
-
- if (H5DSset_scale(gid,"scale 1")==SUCCESS)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * close IDs for this set
- *-------------------------------------------------------------------------
- */ 
-
- /* close */
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
- if (H5Sclose(sid)<0)
-  goto out;
- if (H5Sclose(sidds)<0)
-  goto out;
- if (H5Gclose(gid)<0)
-  goto out;
-
-
-/*-------------------------------------------------------------------------
- * try to attach a scale that has scales
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach a scale that has scales");
-
- /* create the data space for the scale */
- if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
-  goto out;
- 
- /* create a dataset "ds_b" for the scale */
- if ((dsid=H5Dcreate(fid,"ds_b",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
-  goto out;
-
- /* open the previous written "ds_a" */
- if ((did = H5Dopen(fid,"ds_a"))<0)
-  goto out;
-
- /* attach "ds_b" to "ds_a", valid */
- if(H5DSattach_scale(did,dsid,0)<0)
-  goto out;
-
- /* close */
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
- if (H5Sclose(sidds)<0)
-  goto out;
-
- /* open the previous written "dset_a" */
- if ((did = H5Dopen(fid,"dset_a"))<0)
-  goto out;
-
-  /* open the previous written "ds_a" */
- if ((dsid = H5Dopen(fid,"ds_a"))<0)
-  goto out;
-
- /* try to attach "ds_a" to "dset_a", not valid */
- if(H5DSattach_scale(did,dsid,0)==SUCCESS)
-  goto out;
-
- /* close */
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * try to attach a dataset that is a scale 
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach to a dataset that is a scale");
-
- /* open the previous written "ds_b", that is a scale */
- if ((dsid = H5Dopen(fid,"ds_b"))<0)
-  goto out;
-
- /* open the previous written "ds_a" */
- if ((did = H5Dopen(fid,"ds_a"))<0)
-  goto out;
-
- /* try to attach "ds_a" to "ds_b", not valid */
- if(H5DSattach_scale(dsid,did,0)==SUCCESS)
-  goto out;
-
- /* close */
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
-
- PASSED();
-
-/*-------------------------------------------------------------------------
- * try to attach a scale to an image, pallete or table
- *-------------------------------------------------------------------------
- */ 
-
- TESTING2("attach to a dataset that is a reserved class dataset");
-
- /* make an image */
- if (H5IMmake_image_8bit(fid,"image",100,50,NULL)<0)
-  goto out;
-
- /* make a palette */
- if (H5IMmake_palette(fid,"pallete",pal_dims,NULL)<0)
-  goto out;
-
- /* open the previous written "ds_b" */
- if ((dsid = H5Dopen(fid,"ds_b"))<0)
-  goto out;
-
- /* open the image dataset */
- if ((did = H5Dopen(fid,"image"))<0)
-  goto out;
-
- /* try to attach "ds_a" to the image, not valid */
- if(H5DSattach_scale(did,dsid,0)==SUCCESS)
-  goto out;
-
- /* close */
- if (H5Dclose(dsid)<0)
-  goto out;
- if (H5Dclose(did)<0)
-  goto out;
-
- PASSED();
-
- /* close */
- if (H5Fclose(fid)<0)
-  goto out;
-
- return 0;
+ /* define a default zero value for return. This will cause the iterator to continue */
+ int ret = 0;  
   
- /* error zone, gracefully close */
-out:
- H5E_BEGIN_TRY {
-  H5Sclose(sid);
-  H5Sclose(sidds);
-  H5Dclose(did);
-  H5Dclose(dsid);
-  H5Gclose(gid);
-  H5Fclose(fid);
- } H5E_END_TRY;
- H5_FAILED();
- return FAIL;
-}
+ /* unused */
+ dset=dset;
+ dim=dim;
+ visitor_data=visitor_data;
+ 
+ return ret;
+} 
 
 
 
@@ -2066,3 +1859,548 @@ out:
  H5_FAILED();
  return FAIL;
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * test error conditions
+ *-------------------------------------------------------------------------
+ */
+
+static int test_errors(void)
+{
+ hid_t   fid;                                              /* file ID */
+ int     rank     = RANK;                                  /* rank of data dataset */
+ int     rankds   = 1;                                     /* rank of DS dataset */
+ hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
+ hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
+ hsize_t s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
+ hid_t   did;                                              /* dataset ID */
+ hid_t   dsid;                                             /* scale ID */
+ hid_t   gid;                                              /* group ID */
+ hid_t   sid;                                              /* space ID */
+ hid_t   sidds;                                            /* space ID */
+ hsize_t pal_dims[] = {9,3};
+ 
+ printf("Testing error conditions\n");
+
+/*-------------------------------------------------------------------------
+ * create a file, spaces, dataset and group ids
+ *-------------------------------------------------------------------------
+ */  
+
+ /* create a file using default properties */
+ if ((fid=H5Fcreate("test_ds2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+ /* create a group */
+ if ((gid=H5Gcreate(fid,"grp",0))<0) 
+  goto out;
+ /* create the data space for the dataset */
+ if ((sid=H5Screate_simple(rank,dims,NULL))<0)
+  goto out;
+ /* create the data space for the scale */
+ if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
+  goto out;
+  /* create a dataset */
+ if ((did=H5Dcreate(fid,"dset_a",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
+  goto out;
+ /* create a dataset for the scale */
+ if ((dsid=H5Dcreate(fid,"ds_a",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attempt to attach a dataset to itself, it should fail
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach a dataset to itself");
+
+ if (H5DSattach_scale(did,did,0)==SUCCESS)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * attempt to attach a group with a dataset, it should fail
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("attach a group with a dataset");
+
+ if (H5DSattach_scale(gid,dsid,0)==SUCCESS)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * attempt to attach a dataset with a group, it should fail
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("attach a dataset with a group");
+
+ if (H5DSattach_scale(did,gid,0)==SUCCESS)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * attempt to set scale for a group, it should fail
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("set scale for a group");
+
+ if (H5DSset_scale(gid,"scale 1")==SUCCESS)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * close IDs for this set
+ *-------------------------------------------------------------------------
+ */ 
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
+  goto out;
+ if (H5Sclose(sidds)<0)
+  goto out;
+ if (H5Gclose(gid)<0)
+  goto out;
+
+
+/*-------------------------------------------------------------------------
+ * try to attach a scale that has scales
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach a scale that has scales");
+
+ /* create the data space for the scale */
+ if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
+  goto out;
+ 
+ /* create a dataset "ds_b" for the scale */
+ if ((dsid=H5Dcreate(fid,"ds_b",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
+  goto out;
+
+ /* open the previous written "ds_a" */
+ if ((did = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* attach "ds_b" to "ds_a", valid */
+ if(H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Sclose(sidds)<0)
+  goto out;
+
+ /* open the previous written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+  /* open the previous written "ds_a" */
+ if ((dsid = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to "dset_a", not valid */
+ if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ /* open the previous written "ds_a" */
+ if ((did = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* open the previous written "ds_b" */
+ if ((dsid = H5Dopen(fid,"ds_b"))<0)
+  goto out;
+
+ /* detach "ds_b" to "ds_a" */
+ if(H5DSdetach_scale(did,dsid,0)<0)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * try to attach a dataset that is a scale 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach to a dataset that is a scale");
+
+ /* open the previous written "ds_b", that is a scale */
+ if ((dsid = H5Dopen(fid,"ds_b"))<0)
+  goto out;
+
+ /* open the previous written "ds_a" */
+ if ((did = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to "ds_b", not valid */
+ if(H5DSattach_scale(dsid,did,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * try to attach a scale to an image, pallete or table
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("attach to a dataset that is a reserved class dataset");
+
+ /* make an image */
+ if (H5IMmake_image_8bit(fid,"image",100,50,NULL)<0)
+  goto out;
+
+ /* make a palette */
+ if (H5IMmake_palette(fid,"pallete",pal_dims,NULL)<0)
+  goto out;
+
+ /* open the previous written "ds_b" */
+ if ((dsid = H5Dopen(fid,"ds_b"))<0)
+  goto out;
+
+ /* open the image dataset */
+ if ((did = H5Dopen(fid,"image"))<0)
+  goto out;
+
+ /* try to attach "ds_a" to the image, not valid */
+ if(H5DSattach_scale(did,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * is scale
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("is scale");
+
+ /* open a non scale dataset */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* verify that it is not a dimension scale dataset  */
+ if ((H5DSis_scale(did))==1)
+  goto out;
+
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ /* open the group. */
+ if ((gid = H5Gopen(fid,"grp"))<0)
+  goto out;
+
+ /* verify that it is not a dimension scale dataset  */
+ if ((H5DSis_scale(gid))==1)
+  goto out;
+
+ /* close */
+ if (H5Gclose(gid)<0)
+  goto out;
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * detach 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("detach scale from dataset it is not attached to");
+
+ /* open the previous written "ds_a" */
+ if ((dsid = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* open the previous written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* try to detach "ds_a" from "dset_a" */
+ if(H5DSdetach_scale(did,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * detach 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("detach scale from group");
+
+ /* open the previous written "ds_a" */
+ if ((dsid = H5Dopen(fid,"ds_a"))<0)
+  goto out;
+
+ /* open the group. */
+ if ((gid = H5Gopen(fid,"grp"))<0)
+  goto out;
+
+ /* try to detach "ds_a" from "grp" */
+ if(H5DSdetach_scale(gid,dsid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if (H5Gclose(gid)<0)
+  goto out;
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * detach 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("detach scale when scale is group");
+
+ /* open the previous written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* open the group. */
+ if ((gid = H5Gopen(fid,"grp"))<0)
+  goto out;
+
+ /* try to detach "grp" from "dset_a" */
+ if(H5DSdetach_scale(did,gid,0)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Gclose(gid)<0)
+  goto out;
+
+ PASSED();
+
+
+ /* close */
+ if (H5Fclose(fid)<0)
+  goto out;
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Sclose(sid);
+  H5Sclose(sidds);
+  H5Dclose(did);
+  H5Dclose(dsid);
+  H5Gclose(gid);
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * test iterators
+ *-------------------------------------------------------------------------
+ */
+
+static int test_iterators(void)
+{
+ hid_t   fid;                                              /* file ID */
+ int     rank     = RANK;                                  /* rank of data dataset */
+ int     rankds   = 1;                                     /* rank of DS dataset */
+ hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
+ hsize_t s1_dim[1]   = {DIM1_SIZE};                        /* size of DS 1 dataset */
+ hid_t   gid;                                              /* group ID */
+ hid_t   did;                                              /* dataset ID */
+ hid_t   dsid;                                             /* scale ID */
+ char    dname[30];                                        /* dataset name */
+ int     i;
+ 
+ printf("Testing iterators\n");
+
+/*-------------------------------------------------------------------------
+ * create a file, spaces, dataset and group ids
+ *-------------------------------------------------------------------------
+ */  
+
+ /* create a file using default properties */
+ if ((fid=H5Fcreate("test_ds4.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+ /* create a group */
+ if ((gid=H5Gcreate(fid,"grp",0))<0) 
+  goto out;
+  /* close */
+ if (H5Gclose(gid)<0)
+  goto out;
+ /* make a dataset */
+ if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,NULL)<0)
+  goto out;
+ /* make a DS dataset */
+ if (H5LTmake_dataset_int(fid,"ds_a",rankds,s1_dim,NULL)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * iterate when the dataset has no scales 
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("iterate when the dataset has no scales ");
+
+ /* get the dataset id for "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* try to iterate trough the 1st dimension of "dset_a", return error */
+ if (H5DSiterate_scales(did,0,NULL,verifiy_scale,NULL)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+
+/*-------------------------------------------------------------------------
+ * iterate on dimension that is outside the rank
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("iterate on dimension that is outside the rank ");
+
+ /* get the dataset id for "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* try to iterate trough the 3rd dimension of "dset_a", return error */
+ if (H5DSiterate_scales(did,3,NULL,verifiy_scale,NULL)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * iterate for dimension with many scales
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("iterate for dimension with many scales ");
+
+ /* open the previously written "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ for (i=0; i<100; i++) 
+ {
+  /* make a DS */
+  sprintf(dname,"ds_%d",i);
+  if (H5LTmake_dataset_int(fid,dname,rankds,s1_dim,NULL)<0)
+   goto out;
+  /* open */
+  if ((dsid = H5Dopen(fid,dname))<0)
+   goto out;
+  /* attach */
+  if(H5DSattach_scale(did,dsid,0)<0)
+   goto out;
+  /* close */
+  if (H5Dclose(dsid)<0)
+   goto out;
+ }
+ 
+ /* iterate trough the 1st dimension of "dset_a" */
+ if (H5DSiterate_scales(did,0,NULL,op_bogus,NULL)<0)
+  goto out;
+ 
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * iterate on group
+ *-------------------------------------------------------------------------
+ */ 
+
+ TESTING2("iterate on group ");
+
+ /* open */
+ if ((gid = H5Gopen(fid,"grp"))<0)
+  goto out;
+
+ /* try to iterate, return error */
+ if (H5DSiterate_scales(gid,0,NULL,verifiy_scale,NULL)==SUCCESS)
+  goto out;
+
+ /* close */
+ if (H5Gclose(gid)<0)
+  goto out;
+
+
+
+ PASSED();
+
+ /* close */
+ if (H5Fclose(fid)<0)
+  goto out;
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Gclose(gid);
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}
+
+

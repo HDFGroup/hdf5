@@ -1013,7 +1013,6 @@ int H5DSget_num_scales(hid_t did,
 /* error zone, gracefully close */
 out:
  H5E_BEGIN_TRY {
-  H5Dclose(did);
   H5Sclose(sid);
   H5Aclose(aid);
   H5Tclose(tid);
@@ -1964,8 +1963,6 @@ out:
   H5Sclose(sid);
   H5Aclose(aid);
   H5Tclose(tid);
-  H5Dclose(did);
-  H5Dclose(dsid);
  } H5E_END_TRY;
  return FAIL;
 }
