@@ -1285,11 +1285,11 @@ H5TB_end(H5TB_NODE * root, int side)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5TB_end);
 
-    assert(root);
     assert(side==LEFT || side==RIGHT);
 
-    while (HasChild(root, side))
-      root = root->link[side];
+    if(root)
+        while (HasChild(root, side))
+            root = root->link[side];
 
     FUNC_LEAVE_NOAPI(root);
 }   /* end H5TB_end() */
