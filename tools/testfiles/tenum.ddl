@@ -11,7 +11,7 @@ GROUP "/" {
        "BLUE"             2;
        "WHITE"            3;
        "BLACK"            4;
-      }
+      };
    }
    DATASET "table" {
       DATATYPE { H5T_ENUM
