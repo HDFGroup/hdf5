@@ -145,6 +145,77 @@ typedef struct test_entry_t
                                          */
 } test_entry_t;
 
+/* The following is a cut down copy of the hash table manipulation 
+ * macros from H5C.c, which have been further modified to avoid references
+ * to the error reporting macros.  Needless to say, these macros must be
+ * updated as necessary.
+ */
+
+#define H5C__HASH_TABLE_LEN     (32 * 1024) /* must be a power of 2 */
+#define H5C__HASH_MASK          ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
+#define H5C__HASH_FCN(x)        (int)(((x) & H5C__HASH_MASK) >> 3)
+
+#define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr)          \
+if ( ( (cache_ptr) == NULL ) ||                         \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||      \
+     ( ! H5F_addr_defined(Addr) ) ||                    \
+     ( H5C__HASH_FCN(Addr) < 0 ) ||                     \
+     ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) { \
+    HDfprintf(stdout, "Pre HT search SC failed.\n");    \
+}
+
+#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+if ( ( (cache_ptr) == NULL ) ||                                   \
+     ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                \
+     ( (cache_ptr)->index_len < 1 ) ||                            \
+     ( (entry_ptr) == NULL ) ||                                   \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||           \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                \
+     ( (entry_ptr)->size <= 0 ) ||                                \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                       \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&              \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                      \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&              \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                      \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                        \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||      \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                        \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {     \
+    HDfprintf(stdout, "Post successful HT search SC failed.\n");  \
+}
+
+
+#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                   \
+{                                                                       \
+    int k;                                                              \
+    int depth = 0;                                                      \
+    H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr)                              \
+    k = H5C__HASH_FCN(Addr);                                            \
+    entry_ptr = ((cache_ptr)->index)[k];                                \
+    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
+    {                                                                   \
+        (entry_ptr) = (entry_ptr)->ht_next;                             \
+        (depth)++;                                                      \
+    }                                                                   \
+    if ( entry_ptr )                                                    \
+    {                                                                   \
+        H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)       \
+        if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
+        {                                                               \
+            if ( (entry_ptr)->ht_next )                                 \
+            {                                                           \
+                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
+            }                                                           \
+            HDassert( (entry_ptr)->ht_prev != NULL );                   \
+            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
+            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);             \
+            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];             \
+            (entry_ptr)->ht_prev = NULL;                                \
+            ((cache_ptr)->index)[k] = (entry_ptr);                      \
+        }                                                               \
+    }                                                                   \
+}
+
 
 /* The following is a local copy of the H5C_t structure -- any changes in 
  * that structure must be reproduced here.  The typedef is used to allow
@@ -168,7 +239,12 @@ typedef struct local_H5C_t
 
     int32_t                     index_len;
     size_t                      index_size;
-    H5TB_TREE *                 index_tree_ptr;
+    H5C_cache_entry_t *         (index[H5C__HASH_TABLE_LEN]);
+
+
+    int32_t                     tree_len;
+    size_t                      tree_size;
+    H5TB_TREE *                 tree_ptr;
 
     int32_t                     pl_len;
     size_t                      pl_size;
@@ -201,8 +277,18 @@ typedef struct local_H5C_t
     int64_t                     evictions[H5C__MAX_NUM_TYPE_IDS];
     int64_t                     renames[H5C__MAX_NUM_TYPE_IDS];
 
+    int64_t                     total_ht_insertions;
+    int64_t                     total_ht_deletions;
+    int64_t                     successful_ht_searches;
+    int64_t                     total_successful_ht_search_depth;
+    int64_t                     failed_ht_searches;
+    int64_t                     total_failed_ht_search_depth;
+
     int32_t                     max_index_len;
     size_t                      max_index_size;
+
+    int32_t                     max_tree_len;
+    size_t                      max_tree_size;
 
     int32_t                     max_pl_len;
     size_t                      max_pl_size;
@@ -213,6 +299,7 @@ typedef struct local_H5C_t
     int32_t                     min_accesses[H5C__MAX_NUM_TYPE_IDS];
     int32_t                     max_clears[H5C__MAX_NUM_TYPE_IDS];
     int32_t                     max_flushes[H5C__MAX_NUM_TYPE_IDS];
+    size_t                      max_size[H5C__MAX_NUM_TYPE_IDS];
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
@@ -1373,9 +1460,7 @@ entry_in_cache(H5C_t * cache_ptr,
     hbool_t in_cache = FALSE; /* will set to TRUE if necessary */
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
-    test_entry_t search_target;
-    H5TB_TREE * index_tree_ptr;
-    H5TB_NODE * node_ptr = NULL;
+    H5C_cache_entry_t * test_ptr = NULL;
 
     HDassert( cache_ptr );
     HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
@@ -1388,17 +1473,13 @@ entry_in_cache(H5C_t * cache_ptr,
     HDassert( entry_ptr->type == type );
     HDassert( entry_ptr == entry_ptr->self );
 
-    search_target.header.addr = entry_ptr->addr;
+    H5C__SEARCH_INDEX(((local_H5C_t *)cache_ptr), entry_ptr->addr, test_ptr)
 
-    index_tree_ptr = ((local_H5C_t *)cache_ptr)->index_tree_ptr;
-
-    node_ptr = H5TB_dfind(index_tree_ptr, &search_target, NULL);
-
-    if ( node_ptr != NULL ) {
+    if ( test_ptr != NULL ) {
 
         in_cache = TRUE;
+        HDassert( test_ptr == (H5C_cache_entry_t *)entry_ptr );
         HDassert( entry_ptr->addr == entry_ptr->header.addr );
-        HDassert( node_ptr->key == ((void *)(entry_ptr)) );
     }
 
     return(in_cache);
@@ -3428,6 +3509,9 @@ smoke_check_4(void)
 static void
 write_permitted_check(void)
 {
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
     const char * fcn_name = "write_permitted_check";
     hbool_t show_progress = FALSE;
     hbool_t display_stats = FALSE;
@@ -3435,7 +3519,11 @@ write_permitted_check(void)
     int mile_stone = 1;
     H5C_t * cache_ptr = NULL;
 
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
     TESTING("write permitted check -- 1/0 MB cache");
+
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
     pass = TRUE;
 
@@ -3571,6 +3659,14 @@ write_permitted_check(void)
     if ( ! pass )
         HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", 
                   fcn_name, failure_mssg);
+
+#else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+    SKIPPED();
+
+    HDfprintf(stdout, "	Clean and dirty LRU lists disabled.\n");
+
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 } /* write_permitted_check() */
 
@@ -4046,15 +4142,12 @@ int
 main(void)
 {
     H5open();
-#if 0
+
     smoke_check_1();
     smoke_check_2();
-#endif
     smoke_check_3();
     smoke_check_4();
-#if 0
     write_permitted_check();
-#endif
     check_flush_protected_err();
     check_destroy_protected_err();
     check_duplicate_insert_err();
