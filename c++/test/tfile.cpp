@@ -1,16 +1,29 @@
-/*
- * Copyright (C) 2001 National Center for Supercomputing Applications
- *                    All rights reserved.
- *
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/***********************************************************
-*
-* Test program:  tfile
-*
-* Test the low-level file I/O features
-*
-*************************************************************/
+/*****************************************************************************
+   FILE
+   tfile.cpp - HDF5 C++ testing the file I/O features
+
+   EXTERNAL ROUTINES/VARIABLES:
+     These routines are in the test directory of the C library:
+        h5_reset() -- in h5test.c, resets the library by closing it
+        h5_fileaccess() -- in h5test.c, returns a file access template
+        h5_fixname() -- in h5test.c, create a file name from a file base name
+        h5_cleanup() -- in h5test.c, cleanup temporary test files
+
+ ***************************************************************************/
 
 #include <iostream>
 #include "H5Cpp.h"
