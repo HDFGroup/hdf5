@@ -3211,7 +3211,29 @@ EOF
 	libdir="$hardcode_libdirs"
 	eval rpath=\" $hardcode_libdir_flag_spec\"
       fi
-      finalize_rpath="$rpath"
+      ###################################################################
+      # HACK: Fixes the problem with compilers on Irix[56] machines which
+      # can't handle long -Wl flags being sent to the linker during a
+      # "recompile" just before execution. -BW 08. April 2002
+      case "$host" in
+      *irix[56]*)
+        # Add in paths just for the HDF5 library stuff...
+        pwd=`pwd`;
+        rpath="${wl}-rpath ${wl}$pwd/.libs:$pwd/../src/.libs:$pwd/../../src/.libs:$pwd/../test/.libs$rpath";
+
+        # Modify the rpaths so that the compiler can handle the number
+        # of library paths
+        finalize_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
+        compile_rpath=`echo $rpath | sed -e "s#:# ${wl}-rpath ${wl}#g"`;
+        ;;
+      *)
+        finalize_rpath="$rpath";
+        ;;
+      esac
+      #
+      # End HACK
+      #
+      ###################################################################
 
       if test -n "$libobjs" && test "$build_old_libs" = yes; then
 	# Transform all the library objects into standard objects.
@@ -3680,7 +3702,17 @@ else
 	if test "$shlibpath_overrides_runpath" = yes && test -n "$shlibpath_var" && test -n "$temp_rpath"; then
 	  $echo >> $output "\
     # Add our own library path to $shlibpath_var
-    $shlibpath_var=\"$temp_rpath\$$shlibpath_var\"
+    ###################################################################
+    # HACK: This hack has been in HDF5's ltmain.sh file from since I
+	# started messing with the Makefile/configure system. I'm loathe to
+	# remove it because it seems to work for us.
+	#
+    ##$shlibpath_var=\"$temp_rpath\$$shlibpath_var\"
+    $shlibpath_var=\"$finalize_shlibpath$temp_rpath\$$shlibpath_var\"
+    #
+    # End HACK
+    #
+    ###################################################################
 
     # Some systems cannot cope with colon-terminated $shlibpath_var
     # The second colon is a workaround for a bug in BeOS R4 sed
