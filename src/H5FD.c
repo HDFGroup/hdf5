@@ -1879,6 +1879,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
                     curr->size+=size;
 
                     /* Adjust the information about to memory block to include the merged block */
+                    addr=curr->addr;
                     size=curr->size;
 
                     /* Update the information about the merged node */
