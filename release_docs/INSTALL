@@ -236,14 +236,7 @@
 	On Irix64 the default compiler is `cc'. To use an alternate
 	compiler specify it with the CC variable:
 
-	    $ CC='cc -o32' ./configure
-
-	One may also use various environment variables to change the
-	behavior of the compiler.  E.g., to ask for -n32 ABI:
-
-	    $ SGI_ABI=-n32
-	    $ export SGI_ABI
-	    $ ./configure
+	    $ CC='cc -n32' ./configure
 
         Similarly, users compiling on a Solaris machine and desiring to
         build the distribution with 64-bit support should specify the
