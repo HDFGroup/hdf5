@@ -96,7 +96,7 @@ Due to the nature of this release only C library and tools were tested.
                                   Cray Fortran Version 3.4.0.2
     Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
                                   Cray Fortran Version 3.4.0.2
-    FreeBSD 4.2                   gcc 2.95.2
+    FreeBSD 4.3                   gcc 2.95.2
                                   g++ 2.95.2
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
