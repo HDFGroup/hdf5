@@ -64,7 +64,10 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
                  hsize_t *dims, options_t options );
 void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank );
 
-
+const char *file1_name = NULL;
+const char *file2_name = NULL;
+char       *obj1_name  = NULL;
+char       *obj2_name  = NULL;
 
 
 /*-------------------------------------------------------------------------
@@ -87,22 +90,26 @@ void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank );
 
 void usage( const char *progname )
 {
-#define USAGE   "\
-  [-h ]             Print a basic help message\n\
-  [-v ]             Print a verbose output message\n\
-  [-r ]             Print only what objects differ \n\
+#define USAGE   "\n\
+  [OBJ1_NAME]       Name of an HDF5 object\n\
+  [OBJ2_NAME]       Name of an HDF5 object\n\
+  [-h ]             Print a basic help message (this message)\n\
+  [-v ]             Print more verbose output\n\
+  [-r ]             Print only what objects differ\n\
   [-d ]             Compare only datasets\n\
   [-g ]             Compare only groups\n\
   [-n count]        Print difference up to count number for each variable\n\
   [-m delta]        Print difference when it is greater than limit delta\n\
   [-p percent]      Print differences which are within a certain percent value\n\
-  file1             File name of the first HDF5 file\n\
-  file2             File name of the second HDF5 file\n"
+  FILE1_NAME        File name of the first HDF5 file\n\
+  FILE2_NAME        File name of the second HDF5 file\n"
 
  fprintf(stderr,
-  "%s [-h] [-v] [-r] [-d] [-g] [-n count] [-m delta] [-p percent] file1 file2\n%s",
+  "%s [OBJ1_NAME] [OBJ2_NAME] [-h] [-v] [-r] [-d] [-g] [-n count] [-m delta] [-p percent] FILE1_NAME FILE2_NAME\n%s",
   progname,
   USAGE);
+ fprintf(stderr,"\n");
+ fprintf(stderr,"Items in [ ] are optional \n");
  exit(EXIT_FAILURE);
 }
 
@@ -133,10 +140,7 @@ int main(int argc, const char *argv[])
  int        have_group = FALSE;
  int        argno, i, j;
  const char *s = NULL;
- const char *file1_name = NULL;
- const char *file2_name = NULL;
- char       *obj1_name = NULL;
- char       *obj2_name = NULL;
+ 
  hid_t      file1_id, file2_id; 
  herr_t     status;
  int        nobjects1, nobjects2;
@@ -148,9 +152,12 @@ int main(int argc, const char *argv[])
 
 
  /* string compare */
- char *pdest;
- int  result;
- int  len;
+ char       *pdest;
+ int        result;
+ int        len;
+
+	void      *edata;
+ hid_t     (*func)(void*);
 
 
 
@@ -168,7 +175,7 @@ int main(int argc, const char *argv[])
  }
  
  /* last 2 items are the file names */
- for (argno=1; argno<argc-2 ; argno++) 
+ for (argno=1; argno<argc ; argno++) 
  {
   
   /* get the single-letter switches */
@@ -260,11 +267,28 @@ int main(int argc, const char *argv[])
  
  file1_name = argv[argc-2];
  file2_name = argv[argc-1];
- 
- /* Open the files */
- if ((file1_id=H5Fopen(file1_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ||
-     (file2_id=H5Fopen(file2_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0)
+
+
+	/* disable error reporting */
+ H5Eget_auto(&func, &edata);
+ H5Eset_auto(NULL, NULL);
+
+	
+	/* Open the files */
+ if ((file1_id=H5Fopen(file1_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+	{
+  printf("cannot open %s\n", file1_name );
   exit(EXIT_FAILURE);
+	}
+
+	if ((file2_id=H5Fopen(file2_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+	{
+  printf("cannot open %s\n", file2_name );
+  exit(EXIT_FAILURE);
+	}
+
+	/* enable error reporting */
+ H5Eset_auto(func, edata);
 
 
 /*-------------------------------------------------------------------------
@@ -447,6 +471,8 @@ int main(int argc, const char *argv[])
   
     pdest = strstr( info2[j].name, obj1_name );
     result = pdest - info2[j].name;
+
+				obj2_name = info2[j].name;
     
     /* found at position result */
     if( pdest != NULL && 
@@ -616,7 +642,11 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   goto out;
  }
 
+#if 0
  printf("Dataset Names: %s and %s .... Comparing\n", obj1_name, obj2_name);
+ printf("position \t%s \t%s \tdifference\n", obj1_name, obj2_name);
+	printf("------------------------------------------------------------\n");
+#endif
 
  tot_cnt1 = 1;
  for (i = 0; i < rank1; i++) 
@@ -753,6 +783,63 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 1:
     i1ptr1 = (char *) buf1;
     i1ptr2 = (char *) buf2;
+
+				printf("position \t%s  \t%s \tdifference\n", obj1_name, obj2_name);
+	   printf("------------------------------------------------------------\n");
+  
+    for ( i = 0; i < tot_cnt; i++)
+    {
+     if ( options.n_ && i>options.n_number_count-1)
+      return found;
+
+      /* delta but not percentage */
+     if ( options.m_ && !options.p_ )
+     {
+      if ( fabs(*i1ptr1 - *i1ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
+					  found=1;
+      }
+     }
+      
+     /* percentage but not delta */
+     else if ( !options.m_ && options.p_ )
+     {
+      if ( 1 - *i1ptr1 / *i1ptr2  > options.p_percent  )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
+					  found=1;
+      }
+     }
+   
+     /* percentage and delta */
+     else if ( options.m_ && options.p_ )
+     {
+      if ( 1 - *i1ptr1 / *i1ptr2  > options.p_percent &&
+           fabs(*i1ptr1 - *i1ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
+					  found=1;
+      }
+     }
+     
+     else
+          
+     if (*i1ptr1 != *i1ptr2)
+     {
+      print_pos( i, acc, pos, rank );
+						printf("\t");
+      printf("\t%d \t%d \t%d\n", *i1ptr1, *i1ptr2, *i1ptr1 - *i1ptr2);
+					 found=1;
+     }                                               
+     i1ptr1++;  i1ptr2++;
+    }
   
     break;
 
@@ -764,6 +851,63 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 2:
     i2ptr1 = (short *) buf1;
     i2ptr2 = (short *) buf2;
+
+				printf("position \t%s  \t%s \tdifference\n", obj1_name, obj2_name);
+	   printf("------------------------------------------------------------\n");
+  
+    for ( i = 0; i < tot_cnt; i++)
+    {
+     if ( options.n_ && i>options.n_number_count-1)
+      return found;
+
+      /* delta but not percentage */
+     if ( options.m_ && !options.p_ )
+     {
+      if ( fabs(*i2ptr1 - *i2ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
+					  found=1;
+      }
+     }
+      
+     /* percentage but not delta */
+     else if ( !options.m_ && options.p_ )
+     {
+      if ( 1 - *i2ptr1 / *i2ptr2  > options.p_percent  )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
+					  found=1;
+      }
+     }
+   
+     /* percentage and delta */
+     else if ( options.m_ && options.p_ )
+     {
+      if ( 1 - *i2ptr1 / *i2ptr2  > options.p_percent &&
+           fabs(*i2ptr1 - *i2ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
+					  found=1;
+      }
+     }
+     
+     else
+          
+     if (*i2ptr1 != *i2ptr2)
+     {
+      print_pos( i, acc, pos, rank );
+						printf("\t");
+      printf("\t%d \t%d \t%d\n", *i2ptr1, *i2ptr2, *i2ptr1 - *i2ptr2);
+					 found=1;
+     }                                               
+     i2ptr1++;  i2ptr2++;
+    }
    
     break;
 
@@ -775,20 +919,67 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 4:
     i4ptr1 = (int *) buf1;
     i4ptr2 = (int *) buf2;
+    
+
+				printf("position \t%s  \t%s \tdifference\n", obj1_name, obj2_name);
+	   printf("------------------------------------------------------------\n");
+  
     for ( i = 0; i < tot_cnt; i++)
     {
+     if ( options.n_ && i>options.n_number_count-1)
+      return found;
 
+      /* delta but not percentage */
+     if ( options.m_ && !options.p_ )
+     {
+      if ( fabs(*i4ptr1 - *i4ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
+					  found=1;
+      }
+     }
+      
+     /* percentage but not delta */
+     else if ( !options.m_ && options.p_ )
+     {
+      if ( 1 - *i4ptr1 / *i4ptr2  > options.p_percent  )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
+					  found=1;
+      }
+     }
+   
+     /* percentage and delta */
+     else if ( options.m_ && options.p_ )
+     {
+      if ( 1 - *i4ptr1 / *i4ptr2  > options.p_percent &&
+           fabs(*i4ptr1 - *i4ptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
+					  found=1;
+      }
+     }
+     
+     else
+          
      if (*i4ptr1 != *i4ptr2)
      {
       print_pos( i, acc, pos, rank );
-      printf(" %d, %d\n", *i4ptr1, *i4ptr2);
-      found++;
-    
-      if ( options.n_ && found>options.n_number_count-1)
-       return found;
+						printf("\t");
+      printf("\t%d \t%d \t%d\n", *i4ptr1, *i4ptr2, *i4ptr1 - *i4ptr2);
+					 found=1;
      }                                               
      i4ptr1++;  i4ptr2++;
     }
+
+
+
     break;
     
        
@@ -801,6 +992,16 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case H5T_FLOAT:
 
 
+/*
+position   dset5      dset6     difference
+--------  --------   --------   ----------
+[ 1 2 ]   1.000000   1.100000   -0.100000
+[ 2 1 ]   3.000000   3.020000   -0.020000
+[ 2 2 ]   4.000000   4.002000   -0.002000
+
+*/
+
+
    switch(type_size)
    {
 
@@ -811,6 +1012,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 4:
     fptr1 = (float *) buf1;
     fptr2 = (float *) buf2;
+
+				printf("position \t%s  \t \t%s  \t \tdifference\n", obj1_name, obj2_name);
+	   printf("------------------------------------------------------------\n");
   
     for ( i = 0; i < tot_cnt; i++)
     {
@@ -823,8 +1027,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       if ( fabs(*fptr1 - *fptr2) > options.m_limit )
       {
        print_pos( i, acc, pos, rank );
-       printf(" %f, %f\n", *fptr1, *fptr2);
-       found=1;
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
+					  found=1;
       }
      }
       
@@ -834,8 +1039,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
       if ( 1 - *fptr1 / *fptr2  > options.p_percent  )
       {
        print_pos( i, acc, pos, rank );
-       printf(" %f, %f\n", *fptr1, *fptr2);
-       found=1;
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
+					  found=1;
       }
      }
    
@@ -846,8 +1052,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
            fabs(*fptr1 - *fptr2) > options.m_limit )
       {
        print_pos( i, acc, pos, rank );
-       printf(" %f, %f\n", *fptr1, *fptr2);
-       found=1;
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
+					  found=1;
       }
      }
      
@@ -856,8 +1063,9 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
      if (*fptr1 != *fptr2)
      {
       print_pos( i, acc, pos, rank );
-      printf(" %f, %f\n", *fptr1, *fptr2);
-      found=1;
+						printf("\t");
+      printf("\t%f \t%f \t%f\n", *fptr1, *fptr2, *fptr1 - *fptr2);
+					 found=1;
      }                                               
      fptr1++;  fptr2++;
     }
@@ -871,6 +1079,63 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
    case 8:
     dptr1 = (double *) buf1;
     dptr2 = (double *) buf2;
+
+					printf("position \t%s  \t \t%s  \t \tdifference\n", obj1_name, obj2_name);
+	   printf("------------------------------------------------------------\n");
+  
+    for ( i = 0; i < tot_cnt; i++)
+    {
+     if ( options.n_ && i>options.n_number_count-1)
+      return found;
+
+      /* delta but not percentage */
+     if ( options.m_ && !options.p_ )
+     {
+      if ( fabs(*dptr1 - *dptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
+					  found=1;
+      }
+     }
+      
+     /* percentage but not delta */
+     else if ( !options.m_ && options.p_ )
+     {
+      if ( 1 - *dptr1 / *dptr2  > options.p_percent  )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
+					  found=1;
+      }
+     }
+   
+     /* percentage and delta */
+     else if ( options.m_ && options.p_ )
+     {
+      if ( 1 - *dptr1 / *dptr2  > options.p_percent &&
+           fabs(*dptr1 - *dptr2) > options.m_limit )
+      {
+       print_pos( i, acc, pos, rank );
+							printf("\t");
+       printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
+					  found=1;
+      }
+     }
+     
+     else
+          
+     if (*dptr1 != *dptr2)
+     {
+      print_pos( i, acc, pos, rank );
+						printf("\t");
+      printf("\t%f \t%f \t%f\n", *dptr1, *dptr2, *dptr1 - *dptr2);
+					 found=1;
+     }                                               
+     dptr1++;  dptr2++;
+    }
    
 
 
@@ -880,7 +1145,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
 
    
-   break; /* H5T_FLOAT */
+   break; /* H5T_FLOAT 8 */
    
  } /*switch*/
    
@@ -928,7 +1193,7 @@ void print_pos( hsize_t curr_pos, hsize_t *acc, hsize_t *pos, int rank )
  {
   printf("%d ", pos[i]+1  );
  }
- printf("] :" );
+ printf("]" );
 
 
 }

@@ -26,6 +26,7 @@ fi
 TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+   echo '\n'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
@@ -38,16 +39,17 @@ TESTING() {
 #
 TOOLTEST() {
    # Run test.
-   TESTING $RUNSERIAL $DUMPER_BIN "$@"
+   TESTING $DUMPER $@
+   $RUNSERIAL $DUMPER_BIN "$@"
 }
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###           T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
 # test 
-TOOLTEST -d dset h5diff_test1.h5 h5diff_test2.h5
+TOOLTEST -v h5diff_test1.h5 h5diff_test2.h5
 
 exit $nerrors
