@@ -467,9 +467,11 @@
 ./c++/examples/chunks.cpp
 ./c++/examples/compound.cpp
 ./c++/examples/create.cpp
+./c++/examples/expected.out
 ./c++/examples/extend_ds.cpp
 ./c++/examples/h5group.cpp
 ./c++/examples/readdata.cpp
+./c++/examples/testexamples.sh
 ./c++/examples/writedata.cpp
 ./c++/examples/Makefile.in
 
