@@ -4,7 +4,7 @@ Expected output for 'h5dump -e -d string tfilters.h5'
 HDF5 "tfilters.h5" {
 DATASET "string" {
    DATATYPE  H5T_STRING {
-         STRSIZE 57;
+         STRSIZE 59;
          STRPAD H5T_STR_NULLTERM;
          CSET H5T_CSET_ASCII;
          CTYPE H5T_C_S1;
@@ -12,9 +12,9 @@ DATASET "string" {
    DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
    DATA {
         (0) "this is
-            a string with three
+            a string 	with three
             newline
-            escape characters"
+            escape 	characters"
    }
 }
 }
