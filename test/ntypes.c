@@ -41,6 +41,7 @@ int	ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 #define DSET_COMPOUND_NAME      "compound_type"
 #define DSET_COMPOUND_NAME_2    "compound_type_2"
 #define DSET_COMPOUND_NAME_3    "compound_type_3"
+#define DSET_COMPOUND_NAME_4    "compound_type_4"
 #define DSET_ENUM_NAME	        "enum_type"
 #define DSET_ARRAY_NAME	        "array_type"
 #define DSET_ARRAY2_NAME	"array_type_2"
@@ -867,6 +868,195 @@ test_compound_dtype3(hid_t file)
     /* Free memory for test data */
     free(points);
     free(check);
+
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compound_opaque
+ *
+ * Purpose:	Test H5Tget_native_type for compound datatype with opaque field
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *		January 31, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compound_opaque(hid_t file)
+{
+    typedef struct {
+        char            c;
+        unsigned char   o[5];
+        long_long       l;
+    } s1;
+    hid_t		dataset, space;
+    hid_t               dtype, native_type, tid, tid2, tid_m,
+                        mem_id;
+    int			i, j, k, n;
+    hsize_t		dims[2];
+    s1                  *temp_point, *temp_check;
+    s1 	                *points=NULL, *check=NULL;
+    void                *tmp, *bkg;
+    
+    TESTING("compound datatype with opaque field");
+
+    /* Allocate space for the points & check arrays */
+    if((points=HDmalloc(sizeof(s1)*DIM0*DIM1))==NULL)
+        TEST_ERROR;
+    if((check=HDcalloc(sizeof(s1),DIM0*DIM1))==NULL)
+        TEST_ERROR;
+
+    /* Initialize the dataset */
+    for (i = n = 0, temp_point=points; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++,temp_point++) {
+	    temp_point->c = 't';
+	    temp_point->l = (i*10+j*100)*n;
+	    for (k = 0; k < 5; k++)
+	        (temp_point->o)[k] = n++;
+	}
+    }
+
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if ((space = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR;
+        
+    /* Create opaque datatype */
+    if((tid2=H5Tcreate(H5T_OPAQUE, sizeof(temp_point->o)))<0) TEST_ERROR;
+    if(H5Tset_tag(tid2, "testing opaque field")<0) TEST_ERROR;
+        
+    /* Create compound datatype for disk storage */
+    if((tid=H5Tcreate(H5T_COMPOUND, 14))<0) TEST_ERROR;
+
+    /* Insert members */
+    if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "o", 1, tid2)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "l", 6, H5T_STD_I64BE)<0) TEST_ERROR;
+    
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_4, tid, space,
+			     H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Create compound datatype for datatype in memory */
+    if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
+    if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid_m, "o", HOFFSET(s1, o), tid2)<0) TEST_ERROR;
+    if(H5Tinsert(tid_m, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG)<0) TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, points)<0)
+	TEST_ERROR;
+
+    /* Close dataset */
+    if(H5Dclose(dataset)<0) TEST_ERROR;
+
+    /* Close datatype */
+    if(H5Tclose(tid)<0) TEST_ERROR;
+    if(H5Tclose(tid2)<0) TEST_ERROR;
+
+    /* Close dataspace */
+    if(H5Sclose(space)<0) TEST_ERROR; 
+
+    
+    /* Open dataset again to check H5Tget_native_type */
+    if((dataset=H5Dopen(file, DSET_COMPOUND_NAME_4))<0) TEST_ERROR;
+
+    if((dtype=H5Dget_type(dataset))<0) TEST_ERROR;
+
+    if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
+        TEST_ERROR;
+        
+    /* Verify the datatype of each field retrieved and converted */
+    /* check the char member */
+    if((mem_id = H5Tget_member_type(native_type, 0))<0)
+        TEST_ERROR;
+    if(H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_UCHAR)) 
+        TEST_ERROR;
+    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_U8LE))
+        TEST_ERROR;
+    if(H5T_INTEGER!=H5Tget_class(mem_id))
+        TEST_ERROR;
+    H5Tclose(mem_id);
+    
+    /* check the array member */
+    if((mem_id = H5Tget_member_type(native_type, 1))<0)
+        TEST_ERROR;
+    if(H5T_OPAQUE!=H5Tget_class(mem_id))
+        TEST_ERROR;
+    if(H5Tget_size(mem_id) != sizeof(temp_point->o))
+        TEST_ERROR;
+    H5Tclose(mem_id);
+  
+    /* check the long long member */
+    if((mem_id = H5Tget_member_type(native_type, 2))<0)
+        TEST_ERROR;
+    if(H5Tget_order(mem_id) != H5Tget_order(H5T_NATIVE_LLONG)) 
+        TEST_ERROR;
+    if(H5Tget_size(mem_id) < H5Tget_size(H5T_STD_I64BE))
+        TEST_ERROR;
+    if(H5T_INTEGER!=H5Tget_class(mem_id))
+        TEST_ERROR;
+    H5Tclose(mem_id);
+  
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = HDmalloc(DIM0*DIM1*H5Tget_size(native_type));
+    if((bkg=HDcalloc(sizeof(s1),DIM0*DIM1))==NULL)
+        TEST_ERROR;
+   
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
+	TEST_ERROR;
+
+    HDmemcpy(check, tmp, DIM0*DIM1*H5Tget_size(native_type));
+    HDfree(tmp);
+
+    if (H5Tconvert(native_type, tid_m, (hsize_t)(DIM0*DIM1), check, bkg, H5P_DEFAULT))
+        TEST_ERROR;
+
+    HDfree(bkg);
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0, temp_point=points, temp_check=check; i < DIM0; i++) {
+	for (j = 0; j < DIM1; j++, temp_point++,temp_check++) {
+	    if (temp_point->c != temp_check->c ||
+	        temp_point->l != temp_check->l ) {
+		H5_FAILED();
+		printf("    Read different values than written.\n");
+		printf("    At index %d,%d\n", i, j);
+		goto error;
+	    }
+
+	    for (k = 0; k < 5; k++) {
+                if(temp_point->o[k] != temp_check->o[k]) {
+		      H5_FAILED();
+		      printf("    Read different values than written.\n");
+		      printf("    At index %d,%d,%d\n", i, j, k);
+		      goto error;
+                }
+            }
+	}
+    }
+
+    H5Dclose(dataset);
+    H5Tclose(dtype);
+    H5Tclose(native_type);
+    H5Tclose(tid_m);
+
+    /* Free memory for test data */
+    HDfree(points);
+    HDfree(check);
 
     PASSED();
     return 0;
@@ -2175,6 +2365,7 @@ main(void)
     nerrors += test_compound_dtype(file)<0 	?1:0;
     nerrors += test_compound_dtype2(file)<0 	?1:0;
     nerrors += test_compound_dtype3(file)<0 	?1:0;
+    nerrors += test_compound_opaque(file)<0 	?1:0;
     nerrors += test_enum_dtype(file)<0 	        ?1:0;
     nerrors += test_array_dtype(file)<0 	?1:0;
     nerrors += test_array_dtype2(file)<0 	?1:0;
