@@ -342,6 +342,8 @@ H5T_term_interface(void)
 		       path->cdata.stats->timer.etime,
 		       nbytes / path->cdata.stats->timer.etime);
 #endif
+	    H5T_close (path->src);
+	    H5T_close (path->dst);
 	    H5MM_xfree (path->cdata.stats);
 	}
     }
@@ -2765,7 +2767,10 @@ H5T_close(H5T_t *dt)
 
     assert(dt);
 
-    /* Don't free locked datatypes unless we are shutting the interface down */
+    /*
+     * Don't free locked datatypes unless we are shutting the interface
+     * down.
+     */
     if (!dt->locked) {
 	if (dt && H5T_COMPOUND == dt->type) {
 	    for (i = 0; i < dt->u.compnd.nmembs; i++) {

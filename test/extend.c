@@ -64,6 +64,7 @@ main (void)
     assert (status>=0);
     dataset = H5Dcreate (file, "dataset", H5T_NATIVE_INT, mem_space, cparms);
     assert (dataset>=0);
+    H5Pclose (cparms);
 
     /* Write the data */
     for (i=0; i<5; i++) {

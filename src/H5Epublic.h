@@ -23,6 +23,31 @@
 #include <H5Ipublic.h>
 
 /*
+ * One often needs to temporarily disable automatic error reporting when
+ * trying something that's likely or expected to fail.  For instance, to
+ * determine if an object exists one can call H5Gstat() which will fail if
+ * the object doesn't exist.  The code to try can be nested between calls to
+ * H5Eget_auto() and H5Eset_auto(), but it's easier just to use this macro
+ * like:
+ * 	H5E_BEGIN_TRY {
+ *	    ...stuff here that's likely to fail...
+ *      } H5E_END_TRY
+ *
+ * Warning: don't break, return, or longjmp() from the body of the loop or
+ *	    the error reporting won't be properly restored!
+ */
+#define H5T_BEGIN_TRY do {						      \
+    herr_t (*H5E_saved_efunc)(void*);					      \
+    void *H5E_saved_edata;						      \
+    H5Eget_auto (&H5E_saved_efunc, &H5E_saved_edata);			      \
+    H5Eset_auto (NULL, NULL);
+
+#define H5T_END_TRY							      \
+    H5Eset_auto (H5E_saved_efunc, H5E_saved_edata);			      \
+}
+
+
+/*
  * Declare an enumerated type which holds all the valid major HDF error codes.
  */
 typedef enum H5E_major_t {

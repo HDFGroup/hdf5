@@ -165,6 +165,7 @@ test_create(hid_t file)
     dataset = H5Dcreate(file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space,
 			create_parms);
     if (dataset < 0) goto error;
+    H5Pclose (create_parms);
 
     /*
      * Close the chunked dataset.
@@ -257,8 +258,9 @@ test_simple_io(hid_t file)
 	}
     }
 
+    H5Pclose (xfer);
     H5Dclose(dataset);
-
+    free (tconv_buf);
     puts(" PASSED");
     return 0;
 
@@ -350,6 +352,8 @@ test_tconv(hid_t file)
 
     H5Dclose(dataset);
     H5Tclose(type);
+    free (out);
+    free (in);
 
     puts(" PASSED");
     return 0;
@@ -656,7 +660,10 @@ test_compression(hid_t file)
      * Cleanup
      *---------------------------------------------------------------------- 
      */
+    H5Pclose (xfer);
+    H5Pclose (dc);
     H5Dclose(dataset);
+    free (tconv_buf);
     return 0;
 
   error:

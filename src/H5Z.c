@@ -160,7 +160,9 @@ H5Z_term_interface (void)
 		HDfprintf (stderr, "%9s\n", "NaN");
 	    }
 	}
+	H5MM_xfree (H5Z_g[i].name);
     }
+    HDmemset (H5Z_g, 0, sizeof H5Z_g);
 #endif
 }
 

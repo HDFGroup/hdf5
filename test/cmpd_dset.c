@@ -546,6 +546,8 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     /* Write to disk */
     status = H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11);
     assert (status>=0);
+    free (s11);
+    s11=NULL;
 
     /* Read the whole thing */
     status = H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
@@ -585,6 +587,7 @@ STEP 11: Write an array back to the middle third of the dataset to\n\
     /*
      * Release resources.
      */
+    H5Pclose (PRESERVE);
     H5Dclose (dataset);
     H5Fclose (file);
 

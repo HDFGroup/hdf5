@@ -537,11 +537,17 @@ H5F_dest(H5F_t *f)
 
     if (f) {
 	if (0 == --(f->shared->nrefs)) {
-	    /* Do not close the root group since we didn't count it */
+	    /*
+	     * Do not close the root group since we didn't count it, but free
+	     * the memory associated with it.
+	     */
+	    H5MM_xfree (f->shared->root_grp);
+	    f->shared->root_grp=NULL;
 	    if (H5AC_dest(f)) {
 		HERROR (H5E_FILE, H5E_CANTINIT, "problems closing file");
 		ret_value = FAIL; /*but keep going*/
 	    }
+	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
 	    f->shared = H5MM_xfree(f->shared);
 	}
 	f->name = H5MM_xfree(f->name);

@@ -673,6 +673,7 @@ main(int argc, char *argv[])
 	}
 	exit(1);
     }
+    H5Pclose (template_id);
     printf("All i-store tests passed.\n");
     return 0;
 }

@@ -68,6 +68,7 @@ writer (int wrt_n)
     plist = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_family (plist, 30, H5P_DEFAULT);
     file = H5Fcreate (FNAME, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+    H5Pclose (plist);
 
     /* Create simple data spaces according to the size specified above. */
     space1 = H5Screate_simple (4, size1, size1);
@@ -132,6 +133,7 @@ reader (const char *script_name)
     plist = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_family (plist, 30, H5P_DEFAULT);
     file = H5Fopen (FNAME, H5F_ACC_RDONLY, plist);
+    H5Pclose (plist);
 
     /* Open the dataset */
     d2 = H5Dopen (file, "d2");
@@ -169,6 +171,7 @@ reader (const char *script_name)
     H5Sclose (mspace);
     H5Sclose (fspace);
     H5Fclose (file);
+    free (buf);
     fclose (script);
 }
 

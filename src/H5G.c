@@ -1288,10 +1288,9 @@ H5G_close(H5G_t *grp)
 	if (H5O_close(&(grp->ent)) < 0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
 	}
+	H5MM_xfree (grp);
     }
     --grp->nref;
-    if(grp->nref==0)
-        H5MM_xfree(grp);
 
     FUNC_LEAVE(SUCCEED);
 }

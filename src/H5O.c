@@ -857,8 +857,8 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 			 "unable to read shared message from global heap");
 	}
 	tmp_mesg = (type->decode)(ent->file, tmp_buf, shared);
+	tmp_buf = H5MM_xfree (tmp_buf);
 	if (!tmp_mesg) {
-	    H5MM_xfree (tmp_buf);
 	    HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
 			 "unable to decode object header shared message");
 	}
@@ -1061,11 +1061,12 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 	    sh_mesg = H5MM_xcalloc (1, sizeof *sh_mesg);
 	    if ((type->share)(ent->file, mesg, sh_mesg/*out*/)<0) {
 		/*
-		 * If the message isn't shared then turn of the shared bit
+		 * If the message isn't shared then turn off the shared bit
 		 * and treat it as an unshared message.
 		 */
 		H5E_clear ();
 		flags &= ~H5O_FLAG_SHARED;
+		H5MM_xfree (sh_mesg);
 	    } else {
 		if (H5HG_link (ent->file, sh_mesg, 1)<0) {
 		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
@@ -1098,6 +1099,9 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     if (flags & H5O_FLAG_SHARED) {
 	oh->mesg[idx].native = sh_mesg;
     } else {
+	if (oh->mesg[idx].native) {
+	    H5O_reset (oh->mesg[idx].type, oh->mesg[idx].native);
+	}
 	oh->mesg[idx].native = (type->copy) (mesg, oh->mesg[idx].native);
 	if (NULL == oh->mesg[idx].native) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
@@ -1601,8 +1605,9 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 	    oh->alloc_nmesgs += H5O_NMESGS;
 	    oh->mesg = H5MM_xrealloc(oh->mesg,
 				     oh->alloc_nmesgs * sizeof(H5O_mesg_t));
-        /* Set new object header info to zeros */
-        HDmemset(&oh->mesg[old_alloc],0,(oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
+	    /* Set new object header info to zeros */
+	    HDmemset(&oh->mesg[old_alloc],0,
+		     (oh->alloc_nmesgs-old_alloc)*sizeof(H5O_mesg_t));
 	}
 	null_idx = oh->nmesgs++;
 	oh->mesg[null_idx].type = H5O_NULL;

@@ -62,6 +62,7 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
     case H5T_CONV_FREE:
 	/* Nothing to free */
+	cdata->stats = H5MM_xfree (cdata->stats);
 	break;
 	
     default:
@@ -387,6 +388,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	H5MM_xfree (priv->src_memb_id);
 	H5MM_xfree (priv->dst_memb_id);
 	H5MM_xfree (priv->memb_conv);
+	H5MM_xfree (priv->memb_cdata);
 	cdata->priv = priv = H5MM_xfree (priv);
 	break;
 

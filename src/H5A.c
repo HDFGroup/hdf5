@@ -152,8 +152,6 @@ H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     H5T_t		   *type = NULL;
     H5S_t		   *space = NULL;
     const H5D_create_t	   *create_parms = NULL;
-    H5A_t       found_attr;
-    intn        seq=0;
     hid_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Acreate, FAIL);
@@ -191,20 +189,6 @@ H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     else
 	ent = H5G_entof ((H5G_t*)obj);
 
-    /* Read in the existing attributes to check for duplicates */
-    seq=0;
-    while(H5O_read(ent, H5O_ATTR, seq, &found_attr)!=NULL)
-      {
-        /* Compare found attribute name to new attribute name reject creation if names are the same */
-        if(HDstrcmp(found_attr.name,name)==0) {
-            H5O_reset (H5O_ATTR, &found_attr);
-            HRETURN_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL,
-                "attribute already exists");
-          }
-        seq++;
-        H5O_reset (H5O_ATTR, &found_attr);
-      } /* end while */
-
     /* Go do the real work for attaching the attribute to the dataset */
     ret_value=H5A_create(ent,name,type,space);
 
@@ -236,6 +220,8 @@ static hid_t
 H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5S_t *space)
 {
     H5A_t       *attr = NULL;
+    H5A_t       found_attr;
+    intn        seq=0;
     hid_t	    ret_value = FAIL;
 
     FUNC_ENTER(H5A_create, FAIL);
@@ -253,6 +239,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
     attr->name=HDstrdup(name);
     attr->dt=H5T_copy(type);
     attr->ds=H5S_copy(space);
+    attr->initialized = TRUE; /*for now, set to false later*/
 
     /* Copy the symbol table entry */
     attr->ent=*ent;
@@ -268,6 +255,22 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
     }
     attr->ent_opened=1;
 
+    /* Read in the existing attributes to check for duplicates */
+    seq=0;
+    while(H5O_read(&(attr->ent), H5O_ATTR, seq, &found_attr)!=NULL) {
+        /*
+	 * Compare found attribute name to new attribute name reject creation
+	 * if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,attr->name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL,
+			"attribute already exists");
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	seq++;
+    } /* end while */
+
     /* Create the attribute message and save the attribute index */
     if (H5O_modify(&(attr->ent), H5O_ATTR, H5O_NEW_MESG, 0, attr) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
@@ -278,6 +281,9 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		    "unable to register attribute for ID");
     }
+
+    /* Now it's safe to say it's uninitialized */
+    attr->initialized = FALSE;
 
 done:
     if (ret_value < 0) {
@@ -322,21 +328,24 @@ H5A_get_index(H5G_entry_t *ent, const char *name)
 
     /* Look up the attribute for the object */
     i=0;
-    while(H5O_read(ent, H5O_ATTR, i, &found_attr)!=NULL)
-      {
-          /* Compare found attribute name to new attribute name reject creation if names are the same */
-          if(HDstrcmp(found_attr.name,name)==0) {
-            H5O_reset (H5O_ATTR, &found_attr);
-            ret_value=i;
-              break;
-          }
-          H5O_reset (H5O_ATTR, &found_attr);
-          i++;
-      } /* end while */
+    while(H5O_read(ent, H5O_ATTR, i, &found_attr)!=NULL) {
+	/*
+	 * Compare found attribute name to new attribute name reject creation
+	 * if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    ret_value = i;
+	    break;
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	i++;
+    } /* end while */
+    
     if(ret_value<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL,
 		      "attribute not found");
-      }
+    }
 
     FUNC_LEAVE(ret_value);
 } /* H5A_get_index() */
@@ -1111,9 +1120,9 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
               /* Compare found attribute name to new attribute name reject creation if names are the same */
               (*attr_num)++;
               if((ret_value=op(loc_id,found_attr.name,op_data))!=0) {
-                  H5O_reset (H5O_ATTR, &found_attr);
+		  H5O_reset (H5O_ATTR, &found_attr);
                   break;
-              }
+	      }
 	      H5O_reset (H5O_ATTR, &found_attr);
           } /* end while */
 
@@ -1172,18 +1181,20 @@ H5Adelete(hid_t loc_id, const char *name)
 
     /* Look up the attribute for the object */
     idx=0;
-    while(H5O_read(ent, H5O_ATTR, idx, &found_attr)!=NULL)
-      {
-          /* Compare found attribute name to new attribute name reject creation if names are the same */
-          if(HDstrcmp(found_attr.name,name)==0) {
-              H5O_reset (H5O_ATTR, &found_attr);
-              found=idx;
-              break;
-            }
-          H5O_reset (H5O_ATTR, &found_attr);
-          idx++;
-      } /* end while */
-    if(found<0) {
+    while(H5O_read(ent, H5O_ATTR, idx, &found_attr)!=NULL) {
+	/*
+	 * Compare found attribute name to new attribute name reject
+	 * creation if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    found = idx;
+	    break;
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	idx++;
+    } /* end while */
+    if (found<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL,
 		      "attribute not found");
     }
