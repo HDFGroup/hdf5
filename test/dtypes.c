@@ -6396,7 +6396,7 @@ run_int_float_conv(const char *name)
 #endif
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
         nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
+#if H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
         nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
 #else /* H5_ULLONG_TO_FP_CAST_WORKS */
         {
