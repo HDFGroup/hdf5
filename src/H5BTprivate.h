@@ -52,8 +52,9 @@ H5_DLL herr_t H5BT_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, haddr_t offset,
     hsize_t length);
 H5_DLL herr_t H5BT_get_total_size(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     hsize_t *tot_size);
+H5_DLL herr_t H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size,
+    haddr_t *locate_addr, hsize_t *locate_size);
 H5_DLL herr_t H5BT_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 #endif /* _H5BTprivate_H */
-
 

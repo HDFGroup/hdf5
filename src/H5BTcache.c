@@ -23,7 +23,7 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5BT_PACKAGE		/*suppress error about including H5B2pkg  */
+#define H5BT_PACKAGE		/*suppress error about including H5SHpkg  */
 
 /* Private headers */
 #include "H5private.h"		/* Generic Functions			*/
@@ -99,7 +99,7 @@ H5BT_cache_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&bt->cache_info,0,sizeof(H5AC_info_t));
 
-    /* Compute the size of the B-tree header on disk */
+    /* Compute the size of the block tracker on disk */
     size = H5BT_SIZE(f);
 
     /* Allocate temporary buffer */
@@ -180,7 +180,7 @@ H5BT_cache_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5BT_t 
         uint8_t *p;                 /* Pointer into raw data buffer */
         size_t	size;
 
-        /* Compute the size of the B-tree header on disk */
+        /* Compute the size of the block tracker info on disk */
         size = H5BT_SIZE(f);
 
         /* Allocate temporary buffer */
@@ -232,7 +232,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_cache_dest
+ * Function:	H5BT_cache_dest
  *
  * Purpose:	Destroys a block tracker in memory.
  *

@@ -1430,6 +1430,122 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_locate
+ *
+ * Purpose:	Basic tests for the block tracker code
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, March 24, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_locate(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    haddr_t     bt_addr;                /* Address of block tracker created */
+    haddr_t     block_addr;             /* Address of block to insert */
+    hsize_t     block_size;             /* Size of block to insert */
+    hsize_t     search_size;            /* Size of block to search for */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	TEST_ERROR;
+    } /* end if */
+
+    if (H5BT_create(f, H5P_DATASET_XFER_DEFAULT, &bt_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    } /* end if */
+
+    /* Insert blocks */
+    block_addr = 2048;
+    block_size = 8;
+    for(u = 0; u < 10; u++) {
+        if (H5BT_insert(f, H5P_DATASET_XFER_DEFAULT, bt_addr, block_addr, block_size)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        } /* end if */
+
+        /* Increment block address & size for next insertion */
+        block_addr *= 2;
+        block_size *= 2;
+    } /* end for */
+
+    TESTING("attempt to locate too large of a block");
+
+    search_size = block_size * 2;
+    block_addr = HADDR_UNDEF;
+    if (H5BT_locate(f, H5P_DATASET_XFER_DEFAULT, bt_addr, search_size, &block_addr, &block_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(H5F_addr_defined(block_addr)) TEST_ERROR;
+
+    PASSED();
+
+    TESTING("locate blocks");
+
+    search_size = 8;
+    if (H5BT_locate(f, H5P_DATASET_XFER_DEFAULT, bt_addr, search_size, &block_addr, &block_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(block_addr != 2048) TEST_ERROR;
+    if(block_size != 8) TEST_ERROR;
+
+    search_size = 10;
+    if (H5BT_locate(f, H5P_DATASET_XFER_DEFAULT, bt_addr, search_size, &block_addr, &block_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(block_addr != 4096) TEST_ERROR;
+    if(block_size != 16) TEST_ERROR;
+
+    search_size = 100;
+    if (H5BT_locate(f, H5P_DATASET_XFER_DEFAULT, bt_addr, search_size, &block_addr, &block_size)<0) {
+        H5_FAILED();
+        H5Eprint_stack(H5E_DEFAULT, stdout);
+        goto error;
+    } /* end if */
+    if(block_addr != 32768) TEST_ERROR;
+    if(block_size != 128) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_locate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_delete
  *
  * Purpose:	Basic tests for the block tracker code
@@ -1469,7 +1585,7 @@ test_delete(hid_t fapl)
     /* Get the size of an empty file */
     if((empty_size=h5_get_file_size(filename))==0) TEST_ERROR;
 
-    TESTING("delete: delete empty block tracker");
+    TESTING("delete empty block tracker");
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
@@ -1505,7 +1621,7 @@ test_delete(hid_t fapl)
 
     PASSED();
 
-    TESTING("delete: delete block tracker with many blocks");
+    TESTING("delete block tracker with many blocks");
 
     /* Create the file to work on */
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
@@ -1599,6 +1715,9 @@ main(void)
     /* Test block tracker removal */
     nerrors += test_remove_whole(fapl);
     nerrors += test_remove_partial_begin(fapl);
+
+    /* Test block tracker locate */
+    nerrors += test_locate(fapl);
 
     /* Test block tracker deletion */
     nerrors += test_delete(fapl);

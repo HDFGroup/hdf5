@@ -41,6 +41,12 @@
 
 /* Local typedefs */
 
+/* Struct for locating blocks */
+typedef struct {
+    hsize_t search_size;        /* Size of block to search for */
+    H5BT_blk_info_t found;      /* Information for block found */
+} H5BT_locate_t;
+
 /* Local prototypes */
 
 /* Package variables */
@@ -97,7 +103,7 @@ H5BT_create(H5F_t *f, hid_t dxpl_id, haddr_t *addr_p)
     if (H5B2_create(f, dxpl_id, H5B2_BLKTRK, H5BT_BT2_NODE_SIZE, H5BT_BT2_RREC_SIZE(f), H5BT_BT2_SPLIT_PERC, H5BT_BT2_MERGE_PERC, &bt->bt2_addr/*out*/)<0)
 	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTINIT, FAIL, "can't create B-tree for storing block info")
 
-    /* Cache the new B-tree node */
+    /* Cache the new block tracker node */
     if (H5AC_set(f, dxpl_id, H5AC_BLTR, *addr_p, bt, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTINIT, FAIL, "can't add block tracker info to cache")
 
@@ -644,6 +650,100 @@ done:
     
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5BT_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_locate_cb
+ *
+ * Purpose:	v2 B-tree find callback
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 11, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5BT_locate_cb(const void *_record, void *_op_data)
+{
+    const H5BT_blk_info_t *record = (const H5BT_blk_info_t *)_record;
+    H5BT_locate_t *search = (H5BT_locate_t *)_op_data;
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5BT_locate_cb)
+
+    /* Check if we've found a block that's big enough */
+    if (record->len >= search->search_size) {
+        search->found = *record;
+        ret_value = H5B2_ITER_STOP;
+    } /* end if */
+    else
+        ret_value = H5B2_ITER_CONT;
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5BT_locate_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5BT_locate
+ *
+ * Purpose:	Locate first block that is at least a certain size
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar 24 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5BT_locate(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t size, haddr_t *locate_addr, hsize_t *locate_size)
+{
+    H5BT_t *bt = NULL;                  /* The new B-tree header information */
+    H5BT_locate_t found;                /* Block info found */
+    htri_t ret_value=TRUE;
+
+    FUNC_ENTER_NOAPI(H5BT_locate, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Look up the block tracker header */
+    if (NULL == (bt = H5AC_protect(f, dxpl_id, H5AC_BLTR, addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_BLKTRK, H5E_CANTPROTECT, FAIL, "unable to load block tracker info")
+
+    /* Iterate through blocks, looking for first one that is large enough */
+    found.search_size = size;
+    found.found.addr = HADDR_UNDEF;
+    if (H5B2_iterate(f, dxpl_id, H5B2_BLKTRK, bt->bt2_addr, H5BT_locate_cb, &found) < 0)
+	HGOTO_ERROR(H5E_BLKTRK, H5E_NOTFOUND, FAIL, "unable to locate block")
+
+    /* Update user's information, if block was found */
+    if(H5F_addr_defined(found.found.addr)) {
+        if(locate_addr)
+            *locate_addr = found.found.addr;
+        if(locate_size)
+            *locate_size = found.found.len;
+    } /* end if */
+    else
+        ret_value = FALSE;
+
+done:
+    /* Release the block tracker info */
+    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BLTR, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BLKTRK, H5E_CANTUNPROTECT, FAIL, "unable to release block tracker info")
+    
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5BT_locate() */
 
 
 /*-------------------------------------------------------------------------

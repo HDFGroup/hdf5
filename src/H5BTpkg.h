@@ -28,7 +28,7 @@
 #define _H5BTpkg_H
 
 /* Get package's private header */
-#include "H5BTprivate.h"
+#include "H5BTprivate.h"	/* Block tracker 			*/
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/

@@ -27,7 +27,7 @@
 
 /* Private headers */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5BTpkg.h"		/* B-trees				*/
+#include "H5BTpkg.h"		/* Block tracker			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 
 
@@ -100,5 +100,5 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release block tracker info")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5BT_debug() */
+} /* end H5BT_hdr_debug() */
 
