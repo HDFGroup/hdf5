@@ -851,8 +851,8 @@ dnl
 AC_ARG_WITH([szlib],
             [AC_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
-                             filter [default=yes]])],,
-            withval=yes)
+                             filter [default=no]])],,
+            withval=no)
 
 case $withval in
   yes)
