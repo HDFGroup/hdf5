@@ -360,11 +360,6 @@ H5MF_alloc_overflow(H5F_t *f, hsize_t size)
  *
  * Purpose:	Check if a block in the file can be extended.
  *
- *		This is a simple check currently, which only checks for the
- *              block being at the end of the file.  A more sophisticated check
- *              would also use the free space list to see if there is a block
- *              appropriately placed to accomodate the space requested.
- *
  * Return:	Success:	TRUE(1)/FALSE(0)
  *
  * 		Failure:	FAIL

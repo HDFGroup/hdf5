@@ -2614,11 +2614,6 @@ done:
  *
  * Purpose:	Check if a block in the file can be extended.
  *
- *		This is a simple check currently, which only checks for the
- *              block being at the end of the file.  A more sophisticated check
- *              would also use the free space list to see if there is a block
- *              appropriately placed to accomodate the space requested.
- *
  * Return:	Success:	TRUE(1)/FALSE(0)
  *
  * 		Failure:	FAIL
@@ -2631,7 +2626,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5FD_can_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t UNUSED extra_requested)
+H5FD_can_extend(const H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
     haddr_t     eoa;                    /* End of address space in the file */
     htri_t      ret_value=FALSE;        /* Return value */
@@ -2645,9 +2640,19 @@ H5FD_can_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize
     /* Check if the block is exactly at the end of the file */
     if((addr+size)==eoa)
         HGOTO_DONE(TRUE)
-    /* Check if block is inside the metadata or small data accumulator */
     else {
-        if(type!=H5FD_MEM_DRAW) {
+        H5FD_free_t *curr;          /* Current free block being inspected */
+        H5FD_mem_t mapped_type;     /* Memory type, after mapping */
+        haddr_t end;                /* End of block in file */
+
+        /* Map request type to free list */
+        if (H5FD_MEM_DEFAULT==file->cls->fl_map[type])
+            mapped_type = type;
+        else
+            mapped_type = file->cls->fl_map[type];
+
+        /* Check if block is inside the metadata or small data accumulator */
+        if(mapped_type!=H5FD_MEM_DRAW) {
             if (file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
                 /* If the metadata block is at the end of the file, and
                  * the block to test adjoins the beginning of the metadata
@@ -2669,6 +2674,21 @@ H5FD_can_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize
                     HGOTO_DONE(TRUE)
             } /* end if */
         } /* end else */
+
+        /* Scan through the existing blocks for the mapped type to see if we can extend one */
+        curr = file->fl[mapped_type];
+        end = addr + size;
+        while(curr != NULL) {
+            if(end == curr->addr) {
+                if(extra_requested <= curr->size)
+                    HGOTO_DONE(TRUE)
+                else
+                    HGOTO_DONE(FALSE)
+            } /* end if */
+
+            /* Advance to next node in list */
+            curr=curr->next;
+        } /* end while */
     } /* end else */
 
 done:
@@ -2681,14 +2701,9 @@ done:
  *
  * Purpose:	Extend a block in the file.
  *
- *		This is simple code currently, which only checks for the
- *              block being at the end of the file.  A more sophisticated check
- *              would also use the free space list to see if there is a block
- *              appropriately placed to accomodate the space requested.
+ * Return:	Success:	Non-negative
  *
- * Return:	Success:	TRUE(1)/FALSE(0)
- *
- * 		Failure:	FAIL
+ * 		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Saturday, June 12, 2004
@@ -2701,8 +2716,11 @@ herr_t
 H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
 {
     haddr_t     eoa;                    /* End of address space in the file */
+    haddr_t     end;                    /* End of block in file */
     hbool_t     update_eoma=FALSE;      /* Whether we need to update the eoma */
     hbool_t     update_eosda=FALSE;     /* Whether we need to update the eosda */
+    hbool_t     at_end=FALSE;           /* Block is at end of file */
+    H5FD_mem_t  mapped_type;            /* Memory type, after mapping */
     herr_t      ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI(H5FD_extend, FAIL)
@@ -2711,56 +2729,103 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t e
     if (HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
 
+    /* Map request type to free list */
+    if (H5FD_MEM_DEFAULT==file->cls->fl_map[type])
+        mapped_type = type;
+    else
+        mapped_type = file->cls->fl_map[type];
+
+    /* Compute end of block */
+    end = addr + size;
+
     /* Check if the block is exactly at the end of the file */
-    /* (Check if block is inside the metadata or small data accumulator) */
-    if((addr+size)!=eoa) {
-        if(type!=H5FD_MEM_DRAW) {
-            if (file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+    if(end == eoa)
+        at_end = TRUE;
+    else {
+        /* (Check if block is inside the metadata or small data accumulator) */
+        if(mapped_type!=H5FD_MEM_DRAW) {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA)
                 /* If the metadata block is at the end of the file, and
                  * the block to test adjoins the beginning of the metadata
                  * block, then it's extendable
                  */
-                if (file->eoma + file->cur_meta_block_size == eoa &&
-                        (addr+size)==file->eoma)
+                if ((file->eoma + file->cur_meta_block_size) == eoa &&
+                        end == file->eoma)
                     update_eoma=TRUE;
-                else
-                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
-            } /* end if */
-            else
-                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
         } /* end if */
         else {
-            if (file->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA)
                 /* If the small data block is at the end of the file, and
                  * the block to test adjoins the beginning of the small data
                  * block, then it's extendable
                  */
-                if (file->eosda + file->cur_sdata_block_size == eoa &&
-                        (addr+size)==file->eosda)
+                if ((file->eosda + file->cur_sdata_block_size) == eoa &&
+                        end == file->eosda)
                     update_eosda=TRUE;
-                else
-                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
-            } /* end if */
-            else
-                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
         } /* end else */
     } /* end else */
 
-    /* Check for overflowing the file */
-    if (H5F_addr_overflow(eoa, extra_requested) || eoa + extra_requested > file->maxaddr)
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+    /* Block is at end of file, we are extending the eoma or eosda */
+    if(update_eoma || update_eosda || at_end) {
+        /* Check for overflowing the file */
+        if (H5F_addr_overflow(eoa, extra_requested) || eoa + extra_requested > file->maxaddr)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
 
-    /* Extend the file */
-    eoa += extra_requested;
-    if (file->cls->set_eoa(file, eoa) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+        /* Extend the file */
+        eoa += extra_requested;
+        if (file->cls->set_eoa(file, eoa) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
 
-    /* Update the metadata and/or small data block */
-    assert(!(update_eoma && update_eosda));
-    if(update_eoma)
-        file->eoma+=extra_requested;
-    if(update_eosda)
-        file->eosda+=extra_requested;
+        /* Update the metadata and/or small data block */
+        assert(!(update_eoma && update_eosda));
+        if(update_eoma)
+            file->eoma+=extra_requested;
+        if(update_eosda)
+            file->eosda+=extra_requested;
+    } /* end if */
+    /* If the block we are extending isn't at the end of the file, find a free block to extend into */
+    else {
+        H5FD_free_t *curr;          /* Current free block being inspected */
+        H5FD_free_t *prev;          /* Current free block being inspected */
+
+        /* Walk through free list, looking for block to merge with */
+        curr = file->fl[mapped_type];
+        prev = NULL;
+        while(curr!=NULL) {
+            /* Found block that ajoins end of block to extend */
+            if(end == curr->addr) {
+                /* Check if free space is large enough */
+                if(extra_requested <= curr->size) {
+                    /* Check for exact match */
+                    if(extra_requested == curr->size) {
+                        /* Unlink node from free list */
+                        if(prev == NULL)
+                            file->fl[mapped_type] = curr->next;
+                        else
+                            prev->next = curr->next;
+
+                        /* Free the memory for the used block */
+                        H5FL_FREE(H5FD_free_t, curr);
+                    } /* end if */
+                    else
+                        curr->size -= extra_requested;
+
+                    /* Leave now */
+                    break;
+                } /* end if */
+                else
+                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+            } /* end if */
+
+            /* Advance to next node in list */
+            prev = curr;
+            curr = curr->next;
+        } /* end while */
+
+        /* Couldn't find block to extend */
+        if(curr == NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
