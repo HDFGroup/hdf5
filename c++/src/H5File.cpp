@@ -41,10 +41,8 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-// Function	Default constructor
-///\brief	Default constructor - Creates a stub hdf5 file object.
-///\par Description
-///		The id of this hdf5 file is set to 0.
+// Function	H5File default constructor
+///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File() : IdComponent() {}
@@ -52,8 +50,8 @@ H5File::H5File() : IdComponent() {}
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
 ///\brief	Creates or opens an HDF5 file depending on the parameter flags.
-///\param	name - IN: Name of the file
-///\param	flags - IN: File access flags
+///\param	name         - IN: Name of the file
+///\param	flags        - IN: File access flags
 ///\param	create_plist - IN: File creation property list, used when 
 ///		modifying default file meta-data.  Default to 
 ///		FileCreatPropList::DEFAULT
@@ -76,28 +74,27 @@ H5File::H5File() : IdComponent() {}
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5F.html#File-Create
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
+H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {
-   p_get_file( name.c_str(), flags, create_plist, access_plist );
+   p_get_file(name, flags, create_plist, access_plist);
 }
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
 ///\brief	This is another overloaded constructor.  It differs from the 
 ///		above constructor only in the type of the \a name argument.
-///\param	name - IN: Name of the file
+///\param	name - IN: Name of the file - \c std::string
 ///\param	flags - IN: File access flags
 ///\param	create_plist - IN: File creation property list, used when 
 ///		modifying default file meta-data.  Default to 
 ///		FileCreatPropList::DEFAULT
 ///\param	access_plist - IN: File access property list.  Default to 
 ///		FileCreatPropList::DEFAULT
-///\param	name - IN: Name of the file - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
+H5File::H5File( const string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent()
 {
-   p_get_file( name, flags, create_plist, access_plist );
+   p_get_file(name.c_str(), flags, create_plist, access_plist);
 }
 
 //--------------------------------------------------------------------------
@@ -105,7 +102,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 // constructors taking a string or a char*
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist )
+void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist)
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
@@ -133,9 +130,9 @@ void H5File::p_get_file( const char* name, unsigned int flags, const FileCreatPr
 }
 
 //--------------------------------------------------------------------------
-// Function:	Copy Constructor
-///\brief	Copy Constructor: Makes a copy of the original
-///		H5File object
+// Function:	H5File copy constructor
+///\brief	Copy constructor: makes a copy of the original
+///		H5File object.
 ///\param	original - IN: H5File instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -143,7 +140,7 @@ H5File::H5File( const H5File& original ) : IdComponent( original ) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
-///\brief	Determines whether a file in HDF5 format
+///\brief	Determines whether a file in HDF5 format.
 ///\param	name - IN: Name of the file
 ///\return	true if the file is in HDF5 format, and false, otherwise
 ///\exception	H5::FileIException
@@ -163,11 +160,12 @@ bool H5File::isHdf5(const char* name )
       throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
    }
 }
+
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It takes an \c std::string for \a name.
-///\param	name - IN: Name of the file
+///\param	name - IN: Name of the file - \c std::string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const string& name ) 
@@ -176,15 +174,15 @@ bool H5File::isHdf5(const string& name )
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::reopen
-///\brief	Reopens this file
+// Function:	H5File::reOpen
+///\brief	Reopens this file.
 ///\exception	H5::FileIException
 // Description
 //		If this object has represented another HDF5 file, the previous
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::reopen()
+void H5File::reOpen()
 {
    // reset the identifier of this H5File - send 'this' in so that
    // H5Fclose can be called appropriately
@@ -192,14 +190,28 @@ void H5File::reopen()
         decRefCount();
     }
     catch (Exception close_error) {
-        throw FileIException("H5File::reopen", close_error.getDetailMsg());
+        throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
    // call C routine to reopen the file - Note: not sure about this
    // does id need to be closed later?  which id to be the parameter?
    id = H5Freopen( id );
    if( id <= 0 ) // Raise exception when H5Freopen returns a neg value
-      throw FileIException("H5File::reopen", "H5Freopen failed");
+      throw FileIException("H5File::reOpen", "H5Freopen failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::reopen
+///\brief	Reopens this file.
+///\exception	H5::FileIException
+///\par Description
+///		This function will be replaced by the above function \c reOpen
+///		in future releases.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void H5File::reopen()
+{
+   H5File::reOpen();
 }
 
 //--------------------------------------------------------------------------
@@ -397,6 +409,18 @@ void H5File::getVFDHandle(void **file_handle) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5File::getFileName
+///\brief	Gets the name of this file.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+string H5File::getFileName() const
+{
+   return(p_get_file_name());
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File::Reference
 ///\brief	Creates a reference to an Hdf5 object or a dataset region.
 ///\param	name - IN: Name of the object to be referenced
@@ -405,8 +429,7 @@ void H5File::getVFDHandle(void **file_handle) const
 ///\return	A reference
 ///\exception	H5::ReferenceIException
 ///\par Description
-///		Note that, for H5File, name must be an absolute path to the 
-///		object in the file.
+///		Note that name must be an absolute path to the object in the file.
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
@@ -439,13 +462,13 @@ void* H5File::Reference(const char* name) const
 //--------------------------------------------------------------------------
 // Function:	H5File::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
+///\param	ref      - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query
 ///\return	Object type, which can be one of the following:
-///			\li \c H5G_LINK Object is a symbolic link.  
-///			\li \c H5G_GROUP Object is a group.  
-///			\li \c H5G_DATASET   Object is a dataset.  
-///			\li \c H5G_TYPE Object is a named datatype 
+///		\li \c H5G_LINK    - Object is a symbolic link.  
+///		\li \c H5G_GROUP   - Object is a group.  
+///		\li \c H5G_DATASET - Object is a dataset.  
+///		\li \c H5G_TYPE    - Object is a named datatype 
 ///\exception	H5::ReferenceIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -470,23 +493,10 @@ DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
-//--------------------------------------------------------------------------
 // Function:	H5File::getFileSize
-///\brief	Retrieves the file size of the HDF5 file.
-///\exception	H5::FileIException
+///\brief	Returns the file size of the HDF5 file.
 ///\return	File size
+///\exception	H5::FileIException
 ///\par Description
 ///		This function is called after an existing file is opened in 
 ///		order to learn the true size of the underlying file.
@@ -500,7 +510,20 @@ hsize_t H5File::getFileSize() const
    {
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
-   return(file_size);
+   return (file_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
 }
 
 //--------------------------------------------------------------------------

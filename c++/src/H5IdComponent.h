@@ -16,8 +16,7 @@
 #ifndef _IdComponent_H
 #define _IdComponent_H
 
-// IdComponent provides a mechanism to handle
-// reference counting for an identifier of any HDF5 object.
+// IdComponent represents an HDF5 object that has an identifier.
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -25,54 +24,61 @@ namespace H5 {
 
 class H5_DLLCPP IdComponent {
    public:
-	// Parent classes must reset the current IdComponent copy
-	// before setting new id to control reference count
+	// Increment reference counter.
+	void incRefCount();
+
+	// Decrement reference counter.
+	void decRefCount();
+
+	// Get the reference counter to this identifier.
+	int getCounter();
+
+	// Assignment operator.
+	IdComponent& operator=( const IdComponent& rhs );
+
+	void reset();
+
+	// Sets the identifier of this object to a new value.
 	void setId( hid_t new_id );
 
-	// Creates an object to hold an HDF5 identifier
+	// Creates an object to hold an HDF5 identifier.
 	IdComponent( const hid_t h5_id );
 
 	// Copy constructor: makes copy of the original IdComponent object.
 	IdComponent( const IdComponent& original );
 
-	// Gets the value of IdComponent's data member
+	// Gets the value of IdComponent's data member.
 	virtual hid_t getId () const;
-
-	// Increment reference counter
-	void incRefCount();
-
-	// Decrement reference counter
-	void decRefCount();
-
-	// Get the reference counter to this identifier
-	int getCounter();
-
-	// Assignment operator
-	IdComponent& operator=( const IdComponent& rhs );
-
-	void reset();
-	void resetId();
 
 	// Destructor
 	virtual ~IdComponent();
 
    protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	hid_t id;	// HDF5 object id
 
-	// Default constructor
+	// Default constructor.
 	IdComponent();
 
-	// Gets the id of the H5 file in which the given object is located.
-	hid_t p_get_file_id();
+	// Gets the name of the file, in which an HDF5 object belongs.
+#ifdef H5_NO_STD
+	string p_get_file_name() const;
+#else
+	std::string p_get_file_name() const;
+#endif  // H5_NO_STD
 
-	// Creates a reference to an HDF5 object or a dataset region.
-	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
-	
-	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+        // Gets the id of the H5 file in which the given object is located.
+        hid_t p_get_file_id();
 
-	// Retrieves a dataspace with the region pointed to selected.
-	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+        // Creates a reference to an HDF5 object or a dataset region.
+        void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
+
+        // Retrieves the type of object that an object reference points to.
+        H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+
+        // Retrieves a dataspace with the region pointed to selected.
+        hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end class IdComponent
 

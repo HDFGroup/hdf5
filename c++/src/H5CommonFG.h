@@ -28,11 +28,13 @@ class Group;
 class H5File;
 class H5_DLLCPP CommonFG {
    public:
-	// Creates a new group at this location which can be a file or another group.
+	// Creates a new group at this location which can be a file 
+	// or another group.
 	Group createGroup(const char* name, size_t size_hint = 0) const;
 	Group createGroup(const string& name, size_t size_hint = 0) const;
 
-	// Opens an existing group in a location which can be a file or another group.
+	// Opens an existing group in a location which can be a file 
+	// or another group.
 	Group openGroup(const char* name) const;
 	Group openGroup(const string& name) const;
 
@@ -43,10 +45,6 @@ class H5_DLLCPP CommonFG {
 	// Opens an existing dataset at this location.
 	DataSet openDataSet(const char* name) const;
 	DataSet openDataSet(const string& name) const;
-
-	// Removes the specified name at this location.
-	void unlink(const char* name) const;
-	void unlink(const string& name) const;
 
 	// Retrieves comment for the HDF5 object specified by its name.
 	string getComment(const char* name, size_t bufsize) const;
@@ -87,6 +85,10 @@ class H5_DLLCPP CommonFG {
 	void link(H5G_link_t link_type, const char* curr_name, const char* new_name) const;
 	void link(H5G_link_t link_type, const string& curr_name, const string& new_name) const;
 
+	// Removes the specified name at this location.
+	void unlink(const char* name) const;
+	void unlink(const string& name) const;
+
 	// Mounts the file 'child' onto this location.
 	void mount(const char* name, H5File& child, PropList& plist) const;
 	void mount(const string& name, H5File& child, PropList& plist) const;
@@ -123,11 +125,11 @@ class H5_DLLCPP CommonFG {
 	StrType openStrType(const char* name) const;
 	StrType openStrType(const string& name) const;
 
-	/// For subclasses, H5File and Group, to return the correct
-        /// object id, i.e. file or group id.
+	/// For subclasses, H5File and Group, to return the correct 
+	/// object id, i.e. file or group id.
 	virtual hid_t getLocId() const = 0; 
 
-	/// For H5File and Group to throw appropriate exception.
+	/// For subclasses, H5File and Group, to throw appropriate exception.
 	virtual void throwException(const string func_name, const string msg) const = 0;
 
 	// Default constructor.

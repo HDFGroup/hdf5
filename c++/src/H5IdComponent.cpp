@@ -24,25 +24,13 @@ namespace H5 {
 #endif
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent default constructor - private
-///\brief	Default constructor.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-IdComponent::IdComponent() : id( -1 )
-{
-}
-
-//--------------------------------------------------------------------------
 // Function:	IdComponent overloaded constructor
 ///\brief	Creates an IdComponent object using the id of an existing object.
 ///\param	h5_id - IN: Id of an existing object
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-
-IdComponent::IdComponent( const hid_t h5_id ) : id( h5_id )
-{
-}
+IdComponent::IdComponent(const hid_t h5_id) : id(h5_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent copy constructor
@@ -91,15 +79,16 @@ int IdComponent::getCounter() { return( H5Iget_ref(id)); }
 ///\exception	H5::IdComponentException when attempt to close the HDF5
 ///		object fails
 // Description
-//		Reset the identifier of this object so that the HDF5 id can 
-//		be properly closed.  Copy the id from rhs to this object, 
-//		then increment the reference counter of the id to indicate 
-//		that another object is referencing it.
+// 		The underlaying reference counting in the C library ensures
+// 		that the current valid id of this object is properly closed.
+//		Copy the id from rhs to this object, then increment the 
+//		reference counter of the id to indicate that another object 
+//		is referencing it.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
 {
-   // reset the identifier of this object, call appropriate H5Xclose
+   // handling references to this id
    decRefCount();
 
    // copy the data members from the rhs object
@@ -117,17 +106,17 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///		object fails
 // Description:
-//		Reset the current id of this object so that the HDF5
-//		id can be appropriately closed.  If only this object references
-//		its id, its reference counter will be deleted.  A new 
-//		reference counter is created for the new HDF5 object id.
+// 		The underlaying reference counting in the C library ensures
+// 		that the current valid id of this object is properly closed.
+// 		Then the object's id is reset to the new id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void IdComponent::setId( hid_t new_id )
 {
-   // reset the identifier of this object, call appropriate H5Xclose
+   // handling references to this id
    decRefCount();
 
+   // reset object's id to the given id
    id = new_id;
 }
 
@@ -176,6 +165,53 @@ IdComponent::~IdComponent() {
 //
 // Implementation of protected functions for HDF5 Reference Interface.
 // 
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	IdComponent default constructor - private
+///\brief	Default constructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+IdComponent::IdComponent() : id(-1) {}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::p_get_file_name
+// Purpose:	Gets the name of the file, in which this object belongs.
+// Exception:	H5::IdComponentException
+// Description:
+// 		This function is protected so that the user applications can
+// 		only have access to its code via allowable classes, namely, 
+// 		H5File and H5Object subclasses.
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+string IdComponent::p_get_file_name() const
+{
+   // Preliminary call to H5Fget_name to get the length of the file name
+   ssize_t name_size = H5Fget_name(id, NULL, 0);
+
+   // If H5Aget_name returns a negative value, raise an exception,
+   if( name_size < 0 )
+   {
+      throw IdComponentException("IdComponent::p_get_file_name", 
+				"H5Fget_name failed");
+   }
+
+   // Call H5Fget_name again to get the actual file name
+   char* name_C = new char[name_size+1];  // temporary C-string for C API
+   name_size = H5Fget_name(id, name_C, name_size+1);
+
+   // Check for failure again
+   if( name_size < 0 )
+   {
+      throw IdComponentException("IdComponent::p_get_file_name", 
+				"H5Fget_name failed");
+   }
+
+   // Convert the C file name and return
+   string file_name(name_C);
+   delete name_C;
+   return(file_name);
+}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_reference (protected)
@@ -246,6 +282,8 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
    }
    return(space_id);
 }
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE
 }

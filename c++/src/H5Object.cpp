@@ -30,6 +30,7 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr simply interfaces between the user's function and the
 // C library function H5Aiterate; used to resolve the different prototype 
 // problem.  May be moved to Iterator later.
@@ -48,20 +49,22 @@ extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_
 //--------------------------------------------------------------------------
 // Function:	H5Object default constructor (protected)
 // Description
-//		The id is set to 0 here but subclass constructor will set
-//		it to a valid HDF5 id.
+//		The id is set by IdComponent() but subclass constructor will 
+//		set it to a valid HDF5 id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::H5Object() : IdComponent() {}
 
 //--------------------------------------------------------------------------
 // Function:	H5Object overloaded constructor (protected)
-// Purpose	Creates an H5Object object using the id of an existing H5 
+// Purpose	Creates an H5Object object using the id of an existing HDF5 
 // 		object.
-// Parameters	object_id - IN: Id of an existing H5 object
+// Parameters	object_id - IN: Id of an existing HDF5 object
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::H5Object( const hid_t object_id ) : IdComponent( object_id ) {}
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5Object copy constructor
@@ -220,7 +223,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
 
 //--------------------------------------------------------------------------
 // Function:	H5Object::getNumAttrs
-///\brief	Returns the number of attributes attached to this H5 object.
+///\brief	Returns the number of attributes attached to this HDF5 object.
 ///\return	Number of attributes
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -284,6 +287,18 @@ void H5Object::flush(H5F_scope_t scope ) const
    {
       throw FileIException("H5Object::flush", "H5Fflush failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::getFileName
+///\brief	Gets the name of the file, in which this HDF5 object belongs.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+string H5Object::getFileName() const
+{
+   return(p_get_file_name());
 }
 
 //--------------------------------------------------------------------------
