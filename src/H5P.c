@@ -2050,8 +2050,7 @@ H5Pget_deflate (hid_t plist_id)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_mpi
  *
- * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info,
- *		    unsigned access_mode) 
+ * Signature:	herr_t H5Pset_mpi(hid_t tid, MPI_Comm comm, MPI_Info info)
  *
  * Purpose:	Store the access mode for MPIO call and the user supplied
  *		communicator and info in the access template which can then
@@ -2075,12 +2074,6 @@ H5Pget_deflate (hid_t plist_id)
  *		    this function call returns may have undetermined effect
  *		    to the access template.  Users should call this function
  *		    again to setup the template.
- *		unsigned access_mode 
- *		    File data access modes: 
- *			H5ACC_INDEPENDENT 
- *			    Allow independent datasets access. 
- *			H5ACC_COLLECTIVE 
- *			    Allow only collective datasets access. 
  *	     
  * Return:	Success:	SUCCEED
  *
