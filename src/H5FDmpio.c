@@ -341,7 +341,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     H5TRACE2("e","iDt",dxpl_id,xfer_mode);
     
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5Pget_class(dxpl_id))
+    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO_INDEPENDENT!=xfer_mode &&
             H5FD_MPIO_COLLECTIVE!=xfer_mode)
@@ -384,7 +384,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     FUNC_ENTER(H5Pget_dxpl_mpio, FAIL);
     H5TRACE2("e","ix",dxpl_id,xfer_mode);
 
-    if (H5P_DATA_XFER!=H5Pget_class(dxpl_id)) 
+    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id)) 
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl");
     if (H5FD_MPIO!=H5Pget_driver(dxpl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");

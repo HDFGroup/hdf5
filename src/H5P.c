@@ -31,6 +31,21 @@ static char		RcsId[] = "@(#)$Revision$";
 /* Default file driver - see H5Pget_driver() */
 #include <H5FDsec2.h>		/* Posix unbuffered I/O	file driver	*/
 
+#ifdef WANT_H5_V1_2_COMPAT
+/* Other predefined file drivers */
+#include <H5FDcore.h>		/* Files stored entirely in memory	*/
+#include <H5FDfamily.h>		/* File families 			*/
+#include <H5FDmpio.h>		/* Parallel files using MPI-2 I/O	*/
+#include <H5FDstdio.h>		/* Standard C buffered I/O		*/
+#include <H5FDsrb.h>        /* Remote access using SRB              */
+#include <H5FDgass.h>		/* Remote files using GASS I/O		*/
+#include <H5FDdpss.h>       /* Remote access using Storage Client API */
+#include <H5FDstream.h>     /* in-memory files streamed via sockets */
+#include <H5FDmulti.h>		/* Usage-partitioned file family	*/
+#include <H5FDlog.h>        /* sec2 driver with I/O logging (for debugging) */
+#endif /* WANT_H5_V1_2_COMPAT */
+
+
 #define PABLO_MASK	H5P_mask
 
 /* Is the interface initialized? */
@@ -46,7 +61,7 @@ hid_t H5P_NO_CLASS_g            = FAIL;
 hid_t H5P_FILE_CREATE_g         = FAIL;
 hid_t H5P_FILE_ACCESS_g         = FAIL;
 hid_t H5P_DATASET_CREATE_g      = FAIL;
-hid_t H5P_DATA_XFER_g           = FAIL;
+hid_t H5P_DATASET_XFER_g        = FAIL;
 hid_t H5P_MOUNT_g               = FAIL;
 
 /* Local static functions */
@@ -208,7 +223,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file access class */
-    if ((H5P_DATA_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+    if ((H5P_DATASET_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Register the dataset creation and data xfer property classes */
@@ -222,11 +237,11 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the data xfer class */
-    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATA_XFER_HASH_SIZE,1,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"data xfer",H5P_DATASET_XFER_HASH_SIZE,1,NULL,NULL,NULL,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the data xfer class */
-    if ((H5P_DATA_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
+    if ((H5P_DATASET_XFER_g = H5I_register (H5I_GENPROP_CLS, pclass))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
 /* When do the "basic" properties for each of the library classes get added? */
@@ -324,7 +339,7 @@ H5Pcreate(H5P_class_t type)
         case H5P_DATASET_CREATE:
             src = &H5D_create_dflt;
             break;
-        case H5P_DATA_XFER:
+        case H5P_DATASET_XFER:
             src = &H5D_xfer_dflt;
             break;
         case H5P_MOUNT:
@@ -479,7 +494,7 @@ H5P_close(void *_plist)
             H5O_reset(H5O_PLINE, &(dc_list->pline));
             break;
 
-        case H5P_DATA_XFER:
+        case H5P_DATASET_XFER:
             if (dx_list->driver_id>=0) {
                 H5FD_dxpl_free(dx_list->driver_id, dx_list->driver_info);
                 H5I_dec_ref(dx_list->driver_id);
@@ -683,7 +698,7 @@ H5P_copy (H5P_class_t type, const void *src)
             size = sizeof(H5D_create_t);
             break;
 
-        case H5P_DATA_XFER:
+        case H5P_DATASET_XFER:
             size = sizeof(H5D_xfer_t);
             break;
 
@@ -747,7 +762,7 @@ H5P_copy (H5P_class_t type, const void *src)
             }
             break;
         
-        case H5P_DATA_XFER:
+        case H5P_DATASET_XFER:
             dx_dst = (H5D_xfer_t*)dst;
 
             if (dx_dst->driver_id>=0) {
@@ -1696,7 +1711,7 @@ H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
         fapl->driver_id = driver_id;
         fapl->driver_info = H5FD_fapl_copy(driver_id, driver_info);
         
-    } else if (H5P_DATA_XFER==H5P_get_class(plist_id)) {
+    } else if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
         if (NULL==(dxpl=H5I_object(plist_id))) {
             HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                   "not a file access property list");
@@ -1719,6 +1734,97 @@ H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
     FUNC_LEAVE(SUCCEED);
 }
 
+#ifdef WANT_H5_V1_2_COMPAT
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_driver
+ *
+ * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
+ *		be a file access property list.
+ *
+ * Return:	Success:	A low-level driver ID
+ *
+ *		Failure:	H5F_LOW_ERROR (a negative value)
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_driver_t
+H5Pget_driver(hid_t plist_id)
+{
+    H5F_access_t	*plist = NULL;
+    H5F_driver_t    ret_value=H5F_LOW_ERROR;
+
+    FUNC_ENTER (H5Pget_driver, H5F_LOW_ERROR);
+    H5TRACE1("Fd","i",plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+            NULL == (plist=H5I_object (plist_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5F_LOW_ERROR,
+		       "not a file access property list");
+    }
+    
+    if(plist->driver_id==H5FD_SEC2 || plist->driver_id==H5P_DEFAULT)
+        ret_value=H5F_LOW_SEC2;
+    else if(plist->driver_id==H5FD_STDIO)
+        ret_value=H5F_LOW_STDIO;
+    else if(plist->driver_id==H5FD_MPIO)
+        ret_value=H5F_LOW_MPIO;
+    else if(plist->driver_id==H5FD_CORE)
+        ret_value=H5F_LOW_CORE;
+    else if(plist->driver_id==H5FD_FAMILY)
+        ret_value=H5F_LOW_FAMILY;
+    else if(plist->driver_id==H5FD_MULTI) { /* Need to check if it's a split or multi file */
+        H5FD_mem_t		mt;
+        H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
+        haddr_t         memb_addr[H5FD_MEM_NTYPES];
+        uintn           multi=0;
+
+        /* Get the information from the multi file driver */
+        if (H5Pget_fapl_multi(plist_id,memb_map,NULL,NULL,memb_addr,NULL)<0) {
+            HRETURN_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,
+                   "can't get multi file information");
+        }
+
+        /* Check whether all of the meta data is in one file & the raw data in another */
+        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
+            if(mt==H5FD_MEM_DRAW) {
+                if(memb_map[mt]!=H5FD_MEM_DRAW) {
+                    multi=1;
+                    break;
+                } /* end if */
+            } /* end if */
+            else {
+                if(memb_map[mt]!=H5FD_MEM_SUPER) {
+                    multi=1;
+                    break;
+                } /* end if */
+            } /* end else */
+        } /* end for */
+
+        /* Check further if things look like a split file currently */
+        if(!multi) {
+            if(memb_addr[H5FD_MEM_SUPER]!=0 || memb_addr[H5FD_MEM_DRAW] != HADDR_MAX/2)
+                multi=1;
+        } /* end if */
+
+        if(multi)
+            ret_value=H5F_LOW_ERROR;    /* v1.2 didn't have multi-file driver */
+        else
+            ret_value=H5F_LOW_SPLIT;
+    } /* end if */
+    else
+        ret_value=H5F_LOW_ERROR;    /* error, or driver unknown to v1.2 */
+
+    FUNC_LEAVE (ret_value);
+}
+
+#else /* WANT_H5_V1_2_COMPAT */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_driver
@@ -1759,7 +1865,7 @@ H5Pget_driver(hid_t plist_id)
             (fapl=H5I_object(plist_id))) {
         ret_value = fapl->driver_id;
 	
-    } else if (H5P_DATA_XFER==H5P_get_class(plist_id) &&
+    } else if (H5P_DATASET_XFER==H5P_get_class(plist_id) &&
 	       (dxpl=H5I_object(plist_id))) {
         ret_value = dxpl->driver_id;
 	
@@ -1768,11 +1874,12 @@ H5Pget_driver(hid_t plist_id)
 		      "not a file access or data transfer property list");
     }
 
-    if (-2==ret_value)
+    if (H5P_DEFAULT==ret_value)
         ret_value = H5FD_SEC2;
 
     FUNC_LEAVE(ret_value);
 }
+#endif /* WANT_H5_V1_2_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -1809,7 +1916,7 @@ H5Pget_driver_info(hid_t plist_id)
             (fapl=H5I_object(plist_id))) {
         ret_value = fapl->driver_info;
 	
-    } else if (H5P_DATA_XFER==H5P_get_class(plist_id) &&
+    } else if (H5P_DATASET_XFER==H5P_get_class(plist_id) &&
 	       (dxpl=H5I_object(plist_id))) {
         ret_value = dxpl->driver_info;
 	
@@ -1820,6 +1927,702 @@ H5Pget_driver_info(hid_t plist_id)
     
     FUNC_LEAVE(ret_value);
 }
+
+#ifdef WANT_H5_V1_2_COMPAT
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_stdio
+ *
+ * Purpose:	Set the low level file driver to use the functions declared
+ *		in the stdio.h file: fopen(), fseek() or fseek64(), fread(),
+ *		fwrite(), and fclose().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_stdio(hid_t plist_id)
+{
+    FUNC_ENTER (H5Pset_stdio, FAIL);
+    H5TRACE1("e","i",plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    FUNC_LEAVE(H5Pset_fapl_stdio(plist_id));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_stdio
+ *
+ * Purpose:	If the file access property list is set to the stdio driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_stdio().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_stdio(hid_t plist_id)
+{
+    herr_t	ret_value=FAIL;
+
+    FUNC_ENTER (H5Pget_stdio, FAIL);
+    H5TRACE1("e","i",plist_id);
+
+    /* Check arguments and test driver */
+    if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
+            (H5FD_STDIO == H5Pget_driver(plist_id))) {
+        ret_value=SUCCEED;
+    }
+    else {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_sec2
+ *
+ * Purpose:	Set the low-level file driver to use the functions declared
+ *		in the unistd.h file: open(), lseek() or lseek64(), read(),
+ *		write(), and close().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_sec2(hid_t plist_id)
+{
+    FUNC_ENTER (H5Pset_sec2, FAIL);
+    H5TRACE1("e","i",plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    FUNC_LEAVE(H5Pset_fapl_sec2(plist_id));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_sec2
+ *
+ * Purpose:	If the file access property list is set to the sec2 driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_sec2().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_sec2(hid_t plist_id)
+{
+    herr_t	ret_value=FAIL;
+
+    FUNC_ENTER (H5Pget_sec2, FAIL);
+    H5TRACE1("e","i",plist_id);
+
+    /* Check arguments and test driver */
+    if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
+            (H5FD_SEC2 == H5Pget_driver(plist_id))) {
+        ret_value=SUCCEED;
+    }
+    else {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_core
+ *
+ * Purpose:	Set the low-level file driver to use malloc() and free().
+ *		This driver is restricted to temporary files which are not
+ *		larger than the amount of virtual memory available. The
+ *		INCREMENT argument determines the file block size and memory
+ *		will be allocated in multiples of INCREMENT bytes. A liberal
+ *		INCREMENT results in fewer calls to realloc() and probably
+ *		less memory fragmentation.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_core(hid_t plist_id, size_t increment)
+{
+    FUNC_ENTER (H5Pset_core, FAIL);
+    H5TRACE2("e","iz",plist_id,increment);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+    if (increment<1) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "increment must be positive");
+    }
+
+    FUNC_LEAVE(H5Pset_fapl_core(plist_id,increment,0));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_core
+ *
+ * Purpose:	If the file access property list is set to the core driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 On success, the block size is returned
+ *		through the INCREMENT argument if it isn't the null pointer.
+ *		In the future, additional arguments may be added to this
+ *		function to match those added to H5Pset_core().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_core(hid_t plist_id, size_t *increment/*out*/)
+{
+    herr_t	ret_value=FAIL;
+
+    FUNC_ENTER (H5Pget_core, FAIL);
+    H5TRACE2("e","ix",plist_id,increment);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS==H5P_get_class(plist_id) &&
+            (H5FD_CORE == H5Pget_driver(plist_id)) &&
+            H5Pget_fapl_core(plist_id,increment,NULL)>=0) {
+        ret_value=SUCCEED;
+    }
+    else {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_split
+ *
+ * Purpose:	Set the low-level driver to split meta data from raw data,
+ *		storing meta data in one file and raw data in another file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_split(hid_t plist_id, const char *meta_ext, hid_t meta_plist_id,
+	      const char *raw_ext, hid_t raw_plist_id)
+{
+    FUNC_ENTER (H5Pset_split, FAIL);
+    H5TRACE5("e","isisi",plist_id,meta_ext,meta_plist_id,raw_ext,raw_plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+    if (H5P_DEFAULT!=meta_plist_id &&
+            (H5P_FILE_ACCESS != H5P_get_class(meta_plist_id) ||
+             NULL == H5I_object(meta_plist_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+    if (H5P_DEFAULT!=raw_plist_id &&
+            (H5P_FILE_ACCESS != H5P_get_class(raw_plist_id) ||
+             NULL == H5I_object(raw_plist_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    /* Set driver */
+    FUNC_LEAVE (H5Pset_fapl_split(plist_id,meta_ext,meta_plist_id,raw_ext,raw_plist_id));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_split
+ *
+ * Purpose:	If the file access property list is set to the sec2 driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 On success, at most META_EXT_SIZE characters
+ *		are copied to the META_EXT buffer if non-null and at most
+ *		RAW_EXT_SIZE characters are copied to the RAW_EXT buffer if
+ *		non-null.  If the actual extension is larger than the number
+ *		of characters requested then the buffer will not be null
+ *		terminated (that is, behavior like strncpy()).	In addition,
+ *		if META_PROPERTIES and/or RAW_PROPERTIES are non-null then
+ *		the file access property list of the meta file and/or raw
+ *		file is copied and its OID returned through these arguments.
+ *		In the future, additional arguments may be added to this
+ *		function to match those added to H5Pset_sec2().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
+	      hid_t *meta_properties/*out*/, size_t raw_ext_size,
+	      char *raw_ext/*out*/, hid_t *raw_properties/*out*/)
+{
+    H5FD_mem_t		mt;
+    H5FD_mem_t		_memb_map[H5FD_MEM_NTYPES];
+    hid_t		_memb_fapl[H5FD_MEM_NTYPES];
+    char		_memb_name[H5FD_MEM_NTYPES][16];
+    char		*_memb_name_ptrs[H5FD_MEM_NTYPES];
+    haddr_t		_memb_addr[H5FD_MEM_NTYPES];
+
+    FUNC_ENTER (H5Pget_split, FAIL);
+    H5TRACE7("e","izxxzxx",plist_id,meta_ext_size,meta_ext,meta_properties,
+             raw_ext_size,raw_ext,raw_properties);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+            NULL == H5I_object (plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5FD_MULTI != H5Pget_driver(plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the split driver is not set");
+    }
+
+    /* Reset output args for error handling */
+    if (meta_ext && meta_ext_size>0)
+        *meta_ext = '\0';
+    if (raw_ext && raw_ext_size>0)
+        *raw_ext = '\0';
+    if (meta_properties)
+        *meta_properties = FAIL;
+    if (raw_properties)
+        *raw_properties = FAIL;
+
+    /* Set up the member extention pointers */
+	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++)
+	    _memb_name_ptrs[mt] = &_memb_name[mt][0];
+
+    /* Get the information from the multi file driver */
+    if (H5Pget_fapl_multi(plist_id,_memb_map,_memb_fapl,_memb_name_ptrs,_memb_addr,NULL)<0) {
+        HRETURN_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL,
+		       "can't get split file information");
+    }
+
+    /* Output arguments */
+    if (meta_ext && meta_ext_size>0) {
+        if (_memb_name[H5FD_MEM_SUPER]) {
+            HDstrncpy (meta_ext, _memb_name[H5FD_MEM_SUPER], meta_ext_size);
+        } else {
+            HDstrncpy (meta_ext, ".meta", meta_ext_size);
+        }
+    }
+    if (raw_ext && raw_ext_size>0) {
+        if (_memb_name[H5FD_MEM_DRAW]) {
+            HDstrncpy (raw_ext, _memb_name[H5FD_MEM_DRAW], raw_ext_size);
+        } else {
+            HDstrncpy (raw_ext, ".raw", raw_ext_size);
+        }
+    }
+    if (meta_properties) {
+        *meta_properties = _memb_fapl[H5FD_MEM_SUPER];
+    }
+    if (raw_properties) {
+        *raw_properties = _memb_fapl[H5FD_MEM_DRAW];
+    }
+    
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_family
+ *
+ * Purpose:	Sets the low-level driver to stripe the hdf5 address space
+ *		across a family of files.  The MEMB_SIZE argument indicates
+ *		the size in bytes of each family member and is only
+ *		meaningful when creating new files or opening families that
+ *		have only one member.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 19, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_family(hid_t plist_id, hsize_t memb_size, hid_t memb_plist_id)
+{
+    FUNC_ENTER (H5Pset_family, FAIL);
+    H5TRACE3("e","ihi",plist_id,memb_size,memb_plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+    if (memb_size && memb_size<1024) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		       "family member size is too small");
+    }
+    if (H5P_DEFAULT!=memb_plist_id &&
+            (H5P_FILE_ACCESS != H5P_get_class(memb_plist_id) ||
+             NULL == H5I_object(memb_plist_id))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+
+    /* Set driver */
+    FUNC_LEAVE(H5Pset_fapl_family(plist_id,memb_size,memb_plist_id));
+}
+    
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_family
+ *
+ * Purpose:	If the file access property list is set to the family driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 On success, if MEMB_PLIST_ID is a non-null
+ *		pointer it will be initialized with the id of an open
+ *		property list: the file access property list for the family
+ *		members.  In the future, additional arguments may be added to
+ *		this function to match those added to H5Pset_family().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
+	       hid_t *memb_plist_id/*out*/)
+{
+    FUNC_ENTER (H5Pget_family, FAIL);
+    H5TRACE3("e","ixx",plist_id,memb_size,memb_plist_id);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+            NULL == H5I_object (plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5FD_FAMILY == H5Pget_driver(plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the family driver is not set");
+    }
+
+    /* Retrieve args */
+    FUNC_LEAVE (H5Pget_fapl_family(plist_id,memb_size,memb_plist_id));
+}
+
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_mpi
+ *
+ * Signature:	herr_t H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info)
+ *
+ * Purpose:	Store the access mode for MPIO call and the user supplied
+ *		communicator and info in the access property list which can
+ *		then be used to open file.  This function is available only
+ *		in the parallel HDF5 library and is not a collective
+ *		function.
+ *
+ * Parameters:
+ *		hid_t plist_id 
+ *		    ID of property list to modify 
+ *		MPI_Comm comm 
+ *		    MPI communicator to be used for file open as defined in
+ *		    MPI_FILE_OPEN of MPI-2.  This function  does not make a
+ *		    duplicated communicator. Any modification to comm after
+ *		    this function call returns may have undetermined effect
+ *		    to the access property list.  Users should call this
+ *		    function again to setup the property list.
+ *		MPI_Info info 
+ *		    MPI info object to be used for file open as defined in
+ *		    MPI_FILE_OPEN of MPI-2.  This function  does not make a
+ *		    duplicated info. Any modification to info after
+ *		    this function call returns may have undetermined effect
+ *		    to the access property list.  Users should call this
+ *		    function again to setup the property list.
+ *	     
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Albert Cheng
+ *		Feb 3, 1998
+ *
+ * Modifications:
+ *
+ *	Robb Matzke, 18 Feb 1998
+ *	Check all arguments before the property list is updated so we don't
+ *	leave the property list in a bad state if something goes wrong.  Also,
+ *	the property list data type changed to allow more generality so all
+ *	the mpi-related stuff is in the `u.mpi' member.  The `access_mode'
+ *	will contain only mpi-related flags defined in H5Fpublic.h.
+ *
+ *	Albert Cheng, Apr 16, 1998
+ *	Removed the access_mode argument.  The access_mode is changed
+ *	to be controlled by data transfer property list during data
+ *	read/write calls.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info)
+{
+    FUNC_ENTER(H5Pset_mpi, FAIL);
+    H5TRACE3("e","iMcMi",plist_id,comm,info);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file access property list");
+    }
+    
+    /* Set driver */
+    FUNC_LEAVE(H5Pset_fapl_mpio(plist_id,comm,info));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpi
+ *
+ * Purpose:	If the file access property list is set to the mpi driver
+ *		then this function returns zero; otherwise it returns a
+ *		negative value.	 In the future, additional arguments may be
+ *		added to this function to match those added to H5Pset_mpi().
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Thursday, February 26, 1998
+ *
+ * Modifications:
+ *
+ *	Albert Cheng, Apr 16, 1998
+ *	Removed the access_mode argument.  The access_mode is changed
+ *	to be controlled by data transfer property list during data
+ *	read/write calls.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
+{
+    FUNC_ENTER (H5Pget_mpi, FAIL);
+    H5TRACE3("e","i*Mc*Mi",plist_id,comm,info);
+
+    /* Check arguments */
+    if (H5P_FILE_ACCESS != H5P_get_class (plist_id) ||
+            NULL == H5I_object (plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a file access property list");
+    }
+    if (H5FD_MPIO == H5Pget_driver(plist_id)) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "the mpi driver is not set");
+    }
+
+    /* Retrieve args */
+    FUNC_LEAVE (H5Pget_fapl_mpio(plist_id,comm,info));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_xfer
+ *
+ * Signature:	herr_t H5Pset_xfer(hid_t plist_id,
+ *		                   H5D_transfer_t data_xfer_mode)
+ *
+ * Purpose:	Set the transfer mode of the dataset transfer property list.
+ *		The list can then be used to control the I/O transfer mode
+ *		during dataset accesses.  This function is available only
+ *		in the parallel HDF5 library and is not a collective function.
+ *
+ * Parameters:
+ *		hid_t plist_id 
+ *		    ID of a dataset transfer property list
+ *		H5D_transfer_t data_xfer_mode
+ *		    Data transfer modes: 
+ *			H5D_XFER_INDEPENDENT 
+ *			    Use independent I/O access. 
+ *			H5D_XFER_COLLECTIVE 
+ *			    Use MPI collective I/O access. 
+ *			H5D_XFER_DFLT 
+ *			    Use default I/O access.  Currently,
+ *			    independent is the default mode.
+ *			
+ *	     
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Albert Cheng
+ *		April 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode)
+{
+    H5FD_mpio_xfer_t	dx_xfer_mode;
+
+    FUNC_ENTER(H5Pset_xfer, FAIL);
+    H5TRACE2("e","iDt",plist_id,data_xfer_mode);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+    
+    switch (data_xfer_mode) {
+        case H5D_XFER_COLLECTIVE:
+            dx_xfer_mode = H5FD_MPIO_COLLECTIVE;
+            break;
+
+        case H5D_XFER_INDEPENDENT:
+        case H5D_XFER_DFLT:
+            dx_xfer_mode = H5FD_MPIO_INDEPENDENT;
+            break;
+
+        default:
+            HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid dataset transfer mode");
+    }
+
+    FUNC_LEAVE(H5Pset_dxpl_mpio(plist_id,dx_xfer_mode));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_xfer
+ *
+ * Purpose:	Reads the transfer mode current set in the property list.
+ *		This function is available only in the parallel HDF5 library
+ *		and is not a collective function.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Albert Cheng
+ *		April 2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode)
+{
+    H5FD_mpio_xfer_t	dx_xfer_mode;
+
+    FUNC_ENTER (H5Pget_xfer, FAIL);
+    H5TRACE2("e","i*Dt",plist_id,data_xfer_mode);
+
+    /* Check arguments */
+    if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
+            NULL == H5I_object(plist_id)) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset transfer property list");
+    }
+
+    if(data_xfer_mode) {
+        if(H5Pget_fapl_mpio(plist_id,&dx_xfer_mode)<0) {
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                  "not a dataset transfer property list");
+        }
+        switch(dx_xfer_mode) {
+            H5FD_MPIO_INDEPENDENT:
+                *data_xfer_mode = H5D_XFER_INDEPENDENT;
+                break;
+
+            H5FD_MPIO_COLLECTIVE:
+                *data_xfer_mode = H5D_XFER_COLLECTIVE;
+                break;
+        } /* end switch */
+    } /* end if */
+
+    FUNC_LEAVE (SUCCEED);
+}
+#endif /*HAVE_PARALLEL*/
+#endif /* WANT_H5_V1_2_COMPAT */
 
 
 /*-------------------------------------------------------------------------
@@ -1967,7 +2770,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
     H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
@@ -2011,7 +2814,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, 0,
 		       "not a dataset transfer property list");
@@ -2059,7 +2862,7 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
     H5TRACE3("e","iIuIu",plist_id,cache,limit);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
@@ -2097,7 +2900,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
     H5TRACE3("e","ixx",plist_id,cache,limit);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
@@ -2140,7 +2943,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
     H5TRACE2("e","ib",plist_id,status);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
@@ -2178,7 +2981,7 @@ H5Pget_preserve(hid_t plist_id)
     H5TRACE1("Is","i",plist_id);
 
     /* Check arguments */
-    if (H5P_DATA_XFER != H5P_get_class (plist_id) ||
+    if (H5P_DATASET_XFER != H5P_get_class (plist_id) ||
             NULL == (plist = H5I_object (plist_id))) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
 		       "not a dataset transfer property list");
@@ -2234,7 +3037,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
     H5TRACE5("e","iZfIuz*[a3]Iu",plist_id,filter,flags,cd_nelmts,cd_values);
 
     /* Check arguments */
-    if (H5P_DATA_XFER==H5P_get_class(plist_id)) {
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
         HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
 		      "transient pipelines are not supported yet");
     }
@@ -2298,7 +3101,7 @@ H5Pget_nfilters(hid_t plist_id)
     FUNC_ENTER(H5Pget_nfilters, FAIL);
     H5TRACE1("Is","i",plist_id);
 
-    if (H5P_DATA_XFER==H5P_get_class(plist_id)) {
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
         HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
 		      "transient pipelines are not supported yet");
     }
@@ -2350,7 +3153,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
              name);
     
     /* Check arguments */
-    if (H5P_DATA_XFER==H5P_get_class(plist_id)) {
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
         HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, H5Z_FILTER_ERROR,
 		      "transient filters are not supported yet");
     }
@@ -2445,7 +3248,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     H5TRACE2("e","iIu",plist_id,level);
 
     /* Check arguments */
-    if (H5P_DATA_XFER==H5P_get_class(plist_id)) {
+    if (H5P_DATASET_XFER==H5P_get_class(plist_id)) {
         HRETURN_ERROR(H5E_PLINE, H5E_UNSUPPORTED, FAIL,
 		      "transient filter pipelines are not supported yet");
     }
@@ -2497,7 +3300,7 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
     H5TRACE4("e","ixxx",plist_id,left,middle,right);
 
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5P_get_class(plist_id) ||
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
             NULL==(plist=H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");
@@ -2547,7 +3350,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
     H5TRACE4("e","iddd",plist_id,left,middle,right);
 
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5P_get_class(plist_id) ||
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
             NULL==(plist=H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");
@@ -2854,7 +3657,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5P_get_class(plist_id) ||
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
             NULL==(plist=H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");
@@ -2896,7 +3699,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
 
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5P_get_class(plist_id) ||
+    if (H5P_DATASET_XFER!=H5P_get_class(plist_id) ||
             NULL==(plist=H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a dataset transfer property list");

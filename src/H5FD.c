@@ -302,7 +302,7 @@ H5FD_get_class(hid_t id)
 	    ret_value = H5FD_get_class(fapl->driver_id);
 	    break;
 
-	case H5P_DATA_XFER:
+	case H5P_DATASET_XFER:
 	    if (NULL==(dxpl=H5I_object(id))) {
 		HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
 			      "not a data transfer property list");
@@ -1821,7 +1821,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
     }
     if (H5P_DEFAULT!=dxpl_id &&
-	(H5P_DATA_XFER!=H5P_get_class(dxpl_id) ||
+	(H5P_DATASET_XFER!=H5P_get_class(dxpl_id) ||
 	 NULL==H5I_object(dxpl_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a data transfer property list");
@@ -1866,7 +1866,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
     FUNC_ENTER(H5FD_read, FAIL);
     assert(file && file->cls);
     assert(H5P_DEFAULT==dxpl_id ||
-	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) || H5I_object(dxpl_id)));
+	   (H5P_DATASET_XFER==H5P_get_class(dxpl_id) || H5I_object(dxpl_id)));
     assert(buf);
 
 #ifndef H5_HAVE_PARALLEL
@@ -1977,7 +1977,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer");
     }
     if (H5P_DEFAULT!=dxpl_id &&
-	(H5P_DATA_XFER!=H5P_get_class(dxpl_id) ||
+	(H5P_DATASET_XFER!=H5P_get_class(dxpl_id) ||
 	 NULL==H5I_object(dxpl_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a data transfer property list");
@@ -2026,7 +2026,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
     FUNC_ENTER(H5FD_write, FAIL);
     assert(file && file->cls);
     assert(H5P_DEFAULT==dxpl_id ||
-	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) && H5I_object(dxpl_id)));
+	   (H5P_DATASET_XFER==H5P_get_class(dxpl_id) && H5I_object(dxpl_id)));
     assert(buf);
     
 #ifndef H5_HAVE_PARALLEL

@@ -282,7 +282,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
         /* Get the dataset transfer property list */
         if (H5P_DEFAULT == dxpl_id) {
             xfer_parms = &H5D_xfer_dflt;
-        } else if (H5P_DATA_XFER != H5P_get_class (dxpl_id) ||
+        } else if (H5P_DATASET_XFER != H5P_get_class (dxpl_id) ||
                NULL == (xfer_parms = H5I_object (dxpl_id))) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
         }

@@ -565,7 +565,7 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
         xfer_parms = &H5F_xfer_dflt;
-    } else if (H5P_DATA_XFER != H5P_get_class (dxpl_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class (dxpl_id) ||
                NULL == (xfer_parms = H5I_object (dxpl_id))) {
         HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a xfer");
     }

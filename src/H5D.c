@@ -704,7 +704,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			  "selection+offset not within extent");
 	}
     }
-    if (H5P_DEFAULT != plist_id && H5P_DATA_XFER != H5P_get_class(plist_id)) {
+    if (H5P_DEFAULT != plist_id && H5P_DATASET_XFER != H5P_get_class(plist_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -799,7 +799,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			  "selection+offset not within extent");
 	}
     }
-    if (H5P_DEFAULT != plist_id && H5P_DATA_XFER != H5P_get_class(plist_id)) {
+    if (H5P_DEFAULT != plist_id && H5P_DATASET_XFER != H5P_get_class(plist_id)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
     if (!buf) {
@@ -1608,7 +1608,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
         xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATA_XFER != H5P_get_class(dxpl_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
 	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
@@ -2068,7 +2068,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
         xfer_parms = &H5D_xfer_dflt;
-    } else if (H5P_DATA_XFER != H5P_get_class(dxpl_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class(dxpl_id) ||
 	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
@@ -2931,7 +2931,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     if (H5P_DEFAULT == plist_id) {
         HDmemcpy(&tmp_xfer_parms,&H5D_xfer_dflt,sizeof(H5D_xfer_t));
         xfer_parms = &tmp_xfer_parms;
-    } else if (H5P_DATA_XFER != H5P_get_class(plist_id) ||
+    } else if (H5P_DATASET_XFER != H5P_get_class(plist_id) ||
 	       NULL == (xfer_parms = H5I_object(plist_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
@@ -3099,7 +3099,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    if((vlen_bufsize.xfer_pid=H5Pcreate(H5P_DATA_XFER))<0)
+    if((vlen_bufsize.xfer_pid=H5Pcreate(H5P_DATASET_XFER))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "no dataset xfer plists available");
 
     if(H5Pset_vlen_mem_manager(vlen_bufsize.xfer_pid,H5D_vlen_get_buf_size_alloc,&vlen_bufsize,NULL,NULL)<0)

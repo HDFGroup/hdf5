@@ -539,13 +539,13 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
     H5Eclear();
 
     /* Check arguments */
-    if (H5P_DATA_XFER!=H5Pget_class(dxpl_id))
+    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
     if (!memb_dxpl)
         H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1);
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt++) {
 	if (H5P_DEFAULT!=memb_dxpl[mt] &&
-	    H5P_DATA_XFER!=H5Pget_class(memb_dxpl[mt]))
+	    H5P_DATASET_XFER!=H5Pget_class(memb_dxpl[mt]))
             H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
     }
 

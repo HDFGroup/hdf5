@@ -34,15 +34,16 @@ typedef enum H5P_class_t {
     H5P_FILE_CREATE      = 0,   /*file creation properties           */
     H5P_FILE_ACCESS      = 1,   /*file access properties             */
     H5P_DATASET_CREATE   = 2,   /*dataset creation properties        */
-    H5P_DATA_XFER        = 3,   /*data transfer properties	         */
+    H5P_DATASET_XFER     = 3,   /*data transfer properties	         */
     H5P_MOUNT		     = 4,	/*file mounting properties		     */
 
     H5P_NCLASSES         = 5    /*this must be last!                 */
 } H5P_class_t;
 
-/* Alias for the previous H5P_DATASER_XFER property list */
-/* This should eventually be publicly decommisioned - 10/6/99 - QAK */
-#define H5P_DATASET_XFER H5P_DATA_XFER
+#if defined(WANT_H5_V1_2_COMPAT) || defined(H5_WANT_H5_V1_2_COMPAT)
+/* Alias for the previous H5P_DATA_XFER property list */
+#define H5P_DATA_XFER H5P_DATASET_XFER
+#endif /* WANT_H5_V1_2_COMPAT */
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
@@ -72,15 +73,15 @@ extern "C" {
 #define H5P_FILE_ACCESS_HASH_SIZE   17
 #define H5P_DATASET_CREATE_NEW  (H5open(), H5P_DATASET_CREATE_g)
 #define H5P_DATASET_CREATE_HASH_SIZE   17
-#define H5P_DATA_XFER_NEW   (H5open(), H5P_DATA_XFER_g)
-#define H5P_DATA_XFER_HASH_SIZE   17
+#define H5P_DATASET_XFER_NEW   (H5open(), H5P_DATASET_XFER_g)
+#define H5P_DATASET_XFER_HASH_SIZE   17
 #define H5P_MOUNT_NEW       (H5open(), H5P_MOUNT_g)
 #define H5P_MOUNT_HASH_SIZE   17
 __DLLVAR__ hid_t H5P_NO_CLASS_g;
 __DLLVAR__ hid_t H5P_FILE_CREATE_g;
 __DLLVAR__ hid_t H5P_FILE_ACCESS_g;
 __DLLVAR__ hid_t H5P_DATASET_CREATE_g;
-__DLLVAR__ hid_t H5P_DATA_XFER_g;
+__DLLVAR__ hid_t H5P_DATASET_XFER_g;
 __DLLVAR__ hid_t H5P_MOUNT_g;
 
 /* Public functions */
@@ -143,7 +144,31 @@ __DLL__ herr_t H5Pget_external(hid_t plist_id, int idx, size_t name_size,
 			       hsize_t *size/*out*/);
 __DLL__ herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
 			     const void *driver_info);
+#if defined(WANT_H5_V1_2_COMPAT) || defined(H5_WANT_H5_V1_2_COMPAT)
+__DLL__ H5F_driver_t H5Pget_driver(hid_t plist_id);
+__DLL__ herr_t H5Pset_stdio(hid_t plist_id);
+__DLL__ herr_t H5Pget_stdio(hid_t plist_id);
+__DLL__ herr_t H5Pset_sec2(hid_t plist_id);
+__DLL__ herr_t H5Pget_sec2(hid_t plist_id);
+__DLL__ herr_t H5Pset_core(hid_t plist_id, size_t increment);
+__DLL__ herr_t H5Pget_core(hid_t plist_id, size_t *increment/*out*/);
+__DLL__ herr_t H5Pset_split(hid_t plist_id, const char *meta_ext, hid_t meta_plist_id,
+	      const char *raw_ext, hid_t raw_plist_id);
+__DLL__ herr_t H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
+	      hid_t *meta_properties/*out*/, size_t raw_ext_size,
+	      char *raw_ext/*out*/, hid_t *raw_properties/*out*/);
+__DLL__ herr_t H5Pset_family(hid_t plist_id, hsize_t memb_size, hid_t memb_plist_id);
+__DLL__ herr_t H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
+	       hid_t *memb_plist_id/*out*/);
+#ifdef HAVE_PARALLEL
+__DLL__ herr_t H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info);
+__DLL__ herr_t H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info);
+__DLL__ herr_t H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode);
+__DLL__ herr_t H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode);
+#endif /*HAVE_PARALLEL*/
+#else /* WANT_H5_V1_2_COMPAT */
 __DLL__ hid_t H5Pget_driver(hid_t plist_id);
+#endif /* WANT_H5_V1_2_COMPAT */
 __DLL__ void *H5Pget_driver_info(hid_t plist_id);
 __DLL__ herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
 			     void *bkg);

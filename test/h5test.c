@@ -119,7 +119,9 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     char	temp[2048];
     int		i, j;
     int		retval=0;
+#ifndef H5_WANT_H5_V1_2_COMPAT
     hid_t	driver;
+#endif /* H5_WANT_H5_V1_2_COMPAT */
 
     if (!getenv("HDF5_NOCLEANUP")) {
 	for (i=0; base_name[i]; i++) {
@@ -128,6 +130,31 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 		continue;
 	    }
 
+#ifdef H5_WANT_H5_V1_2_COMPAT
+	    switch (H5Pget_driver(fapl)) {
+            case H5F_LOW_CORE:
+                break; /*nothing to remove*/
+		
+            case H5F_LOW_SPLIT:
+                HDsnprintf(temp, sizeof temp, "%s.raw", filename);
+                remove(temp);
+                HDsnprintf(temp, sizeof temp, "%s.meta", filename);
+                remove(temp);
+                break;
+
+            case H5F_LOW_FAMILY:
+                for (j=0; /*void*/; j++) {
+                    HDsnprintf(temp, sizeof temp, filename, j);
+                    if (access(temp, F_OK)<0) break;
+                    remove(temp);
+                }
+                break;
+
+            default:
+                remove(filename);
+                break;
+	    }
+#else /* H5_WANT_H5_V1_2_COMPAT */
 	    driver = H5Pget_driver(fapl);
 	    if (H5FD_FAMILY==driver) {
 		for (j=0; /*void*/; j++) {
@@ -148,6 +175,7 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 	    } else {
 		remove(filename);
 	    }
+#endif /* H5_WANT_H5_V1_2_COMPAT */
 	}
 	retval=1;
     }
@@ -229,10 +257,15 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
     const char	*prefix=NULL;
     const char	*suffix=".h5";		/* suffix has default */
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    H5F_driver_t	driver;
+#else /* H5_WANT_H5_V1_2_COMPAT */
     hid_t	driver;
+#endif /* H5_WANT_H5_V1_2_COMPAT */
     
     if (!base_name || !fullname || size<1) return NULL;
 
+#ifndef H5_WANT_H5_V1_2_COMPAT
     /* figure out the suffix */
     if (H5P_DEFAULT!=fapl){
 	if ((driver=H5Pget_driver(fapl))<0) return NULL;
@@ -262,6 +295,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	if (!prefix) prefix = HDF5_PREFIX;
 #endif
     }
+#endif /* H5_WANT_H5_V1_2_COMPAT */
 
 
     /* Prepend the prefix value to the base name */
@@ -275,6 +309,22 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 	strcpy(fullname, base_name);
     }
 
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    /* Append a suffix */
+    if ((driver=H5Pget_driver(fapl))<0) return NULL;
+    switch (driver) {
+    case H5F_LOW_SPLIT:
+    case H5F_LOW_CORE:
+	suffix = NULL;
+	break;
+    case H5F_LOW_FAMILY:
+	suffix = "%05d.h5";
+	break;
+    default:
+	suffix = ".h5";
+	break;
+    }
+#endif /* H5_WANT_H5_V1_2_COMPAT */
     /* Append a suffix */
     if (suffix) {
 	if (strlen(fullname)+strlen(suffix)>=size) return NULL;

@@ -831,7 +831,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hs
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
-        assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
+        assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }
@@ -894,7 +894,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, h
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
-        assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
+        assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }

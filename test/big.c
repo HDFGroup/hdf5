@@ -120,7 +120,11 @@ enough_room(hid_t fapl)
     for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
 
     /* Get file name template */
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    assert(H5F_LOW_FAMILY==H5Pget_driver(fapl));
+#else /* H5_WANT_H5_V1_2_COMPAT */
     assert(H5FD_FAMILY==H5Pget_driver(fapl));
+#endif /* H5_WANT_H5_V1_2_COMPAT */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     /* Create files */
@@ -366,7 +370,11 @@ main (void)
     fapl = h5_fileaccess();
 
     /* The file driver must be the family driver */
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    if (H5F_LOW_FAMILY!=H5Pget_driver(fapl)) {
+#else /* H5_WANT_H5_V1_2_COMPAT */
     if (H5FD_FAMILY!=H5Pget_driver(fapl)) {
+#endif /* H5_WANT_H5_V1_2_COMPAT */
 	printf("Changing file drivers to the family driver, %lu bytes each\n",
 	       (unsigned long)FAMILY_SIZE);
 	if (H5Pset_fapl_family(fapl, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;

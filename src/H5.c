@@ -1949,8 +1949,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			case H5P_DATASET_CREATE:
 			    fprintf(out, "H5P_DATASET_CREATE");
 			    break;
-			case H5P_DATA_XFER:
-			    fprintf(out, "H5P_DATA_XFER");
+			case H5P_DATASET_XFER:
+			    fprintf(out, "H5P_DATASET_XFER");
 			    break;
 			case H5P_MOUNT:
 			    fprintf(out, "H5P_MOUNT");
@@ -2112,8 +2112,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		case H5P_DATASET_CREATE:
 		    fprintf (out, "H5P_DATASET_CREATE");
 		    break;
-		case H5P_DATA_XFER:
-		    fprintf (out, "H5P_DATA_XFER");
+		case H5P_DATASET_XFER:
+		    fprintf (out, "H5P_DATASET_XFER");
 		    break;
 		default:
 		    fprintf (out, "%ld", (long)plist_class);

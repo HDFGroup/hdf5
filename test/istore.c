@@ -562,7 +562,11 @@ main(int argc, char *argv[])
      * For testing file families, fool the library into thinking it already
      * allocated a whole bunch of data.
      */
+#ifdef H5_WANT_H5_V1_2_COMPAT
+    if (H5F_LOW_FAMILY!=H5Pget_driver(fapl)) {
+#else /* H5_WANT_H5_V1_2_COMPAT */
     if (H5FD_FAMILY==H5Pget_driver(fapl)) {
+#endif /* H5_WANT_H5_V1_2_COMPAT */
 	haddr_t addr;
 	addr = 8 * ((uint64_t)1<<30);	/*8 GB */
 	if (H5FDset_eoa(f->shared->lf, addr)<0) {

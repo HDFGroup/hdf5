@@ -566,7 +566,7 @@ dataset_writeAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATA_XFER);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -629,7 +629,7 @@ printf("writeAll by some with zero row\n");
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATA_XFER);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -779,7 +779,7 @@ dataset_readAll(char *filename)
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATA_XFER);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
@@ -841,7 +841,7 @@ printf("readAll by some with zero col\n");
     }
 
     /* set up the collective transfer properties list */
-    xfer_plist = H5Pcreate (H5P_DATA_XFER);
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
     VRFY((xfer_plist >= 0), "");
     ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
     VRFY((ret >= 0), "H5Pcreate xfer succeeded");
