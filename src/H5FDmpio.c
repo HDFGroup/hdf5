@@ -1088,7 +1088,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     if (haddr_to_MPIOff(addr, &mpi_off/*out*/)<0)
         HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
-    if ((size_t)size_i != size)
+    if ((hsize_t)size_i != size)
         HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
 
 #ifdef H5FDmpio_DEBUG
@@ -1330,7 +1330,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
     if (haddr_to_MPIOff(file->disp, &mpi_disp)<0)
         HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off");
     size_i = (int)size;
-    if ((size_t)size_i != size)
+    if ((hsize_t)size_i != size)
         HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i");
 
 #ifdef H5FDmpio_DEBUG

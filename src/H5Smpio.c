@@ -549,7 +549,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     herr_t	 ret_value = SUCCEED;
     int		 err;
     haddr_t	 disp, addr;
-    size_t	 mpi_count;
+    hsize_t	 mpi_count;
     hsize_t	 mpi_buf_count, mpi_unused_count;
     MPI_Datatype mpi_buf_type, mpi_file_type;
     hbool_t	 mbt_is_derived, mft_is_derived;
