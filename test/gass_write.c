@@ -27,7 +27,8 @@ int main(void)
 
 #ifdef hide
 
-#define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"   
+/*#define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"*/   
+#define URL    "http://paz.ncsa.uiuc.edu:8080/test/put/test/b.h5"
 
 #define DATASETNAME "IntArray"
 #define NX     5                      /* dataset dimensions */
@@ -83,12 +84,13 @@ int main (void)
    * default file creation properties, and gass file
    * access properties.
    */
+  /*
   // file = H5Fcreate(URL, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
   // Works. Truncates existing files.
   // file = H5Fcreate(URL, H5F_ACC_EXCL, H5P_DEFAULT, fapl);
   // Works. Croaks if existing file, else creates.
   // Any other flag has no effect as long as one and exactly one of TRUNC/
-  // EXCL is there
+  // EXCL is there */
   /* printf ("I'm here just before H5Fcreate. \n");*/
   file = H5Fcreate(URL, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
   if (file < 0) {
@@ -156,12 +158,11 @@ int main (void)
     
     return 0;
 }
-
-#else
+#else 
 int main(void)
 {
-    printf("Test skipped because GASS driver does not support writing yet\n");
+    printf("Test skipped because writing depends on web server!\n");
     return 0;
 }
-#endif     
+#endif  
 #endif

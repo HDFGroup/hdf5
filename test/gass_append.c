@@ -151,7 +151,7 @@ int main (void)
 #else
 int main(void)
 {
-    printf("Test skipped because GASS driver does not support append yet\n");
+    printf("Test skipped because append depends on web server!\n");
     return 0;
 }
 #endif   
