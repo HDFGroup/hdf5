@@ -110,8 +110,11 @@
               END FUNCTION h5eprint_c2
             END INTERFACE
             namelen = LEN(NAME)
-            if (present(name)) hdferr = h5eprint_c1(name, namelen) 
+            if (present(name)) then
+               hdferr = h5eprint_c1(name, namelen) 
+            else
             hdferr = h5eprint_c2() 
+            endif
           END SUBROUTINE h5eprint_f
 
 !----------------------------------------------------------------------
