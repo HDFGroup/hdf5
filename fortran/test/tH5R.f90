@@ -38,6 +38,7 @@
           INTEGER :: rankr = 1 
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
           TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
+          INTEGER :: ref_dim
           INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
 
           !
@@ -123,8 +124,8 @@
               CALL check("h5rcreate_f",error,total_error)
           CALL h5rcreate_f(file_id, "MyType", ref(4), error)
               CALL check("h5rcreate_f",error,total_error)
-
-          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, error)
+          ref_dim = size(ref)
+          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, ref_dim, error)
               CALL check("h5dwrite_f",error,total_error)
 
           !
@@ -132,13 +133,13 @@
           ! 
           CALL h5dclose_f(dsetr_id, error)
               CALL check("h5dclose_f",error,total_error)
-
           ! 
           ! Reopen the dataset with object references
           !
           CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
               CALL check("h5dopen_f",error,total_error)
-          CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, error)
+          ref_dim = size(ref_out)
+          CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, ref_dim, error)
               CALL check("h5dread_f",error,total_error)
    
           !
@@ -205,6 +206,7 @@
           INTEGER     ::   error
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref     ! Buffers to store references
           TYPE(hdset_reg_ref_t_f) , DIMENSION(2) :: ref_out !
+          INTEGER :: ref_dim
           INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/2,9/)  ! Datasets dimensions
           INTEGER(HSIZE_T), DIMENSION(1) :: dimsr = (/2/)   ! 
           INTEGER(HSSIZE_T), DIMENSION(2) :: start
@@ -287,7 +289,8 @@
           !
           ! Write dataset with the references. 
           !
-          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_DSETREG, ref, error) 
+          ref_dim = size(ref)
+          CALL h5dwrite_f(dsetr_id, H5T_STD_REF_DSETREG, ref, ref_dim, error) 
               CALL check("h5dwrite_f", error, total_error)
           !
           ! Close all objects.
@@ -310,7 +313,8 @@
           !
           ! Read references to the dataset regions.
           !
-          CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, error) 
+          ref_dim = size(ref_out)
+          CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, ref_dim, error) 
               CALL check("h5dread_f", error, total_error)
           ! 
           ! Dereference the first reference.
@@ -335,6 +339,7 @@
           ! 
           CALL H5rdereference_f(dsetr_id, ref_out(2), dsetv_id, error)
               CALL check("h5rdereference_f", error, total_error)
+           
           CALL H5rget_region_f(dsetr_id, ref_out(2), space_id, error) 
               CALL check("h5rget_region_f", error, total_error)
           !
