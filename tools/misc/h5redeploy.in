@@ -50,9 +50,8 @@ show_action()
     echo "Update the following tools because they are now installed at a new directory"
     for t in $foundtools; do
 	echo "${t}:"
-	echo -n "   current setting="
-	sed -e "/^prefix=/s/prefix=//p" -e d $t
-	echo    "   new     setting="\""$prefix"\"
+	echo "   current setting=`sed -e '/^prefix=/s/prefix=//p' -e d $t`"
+	echo "   new     setting="\""$prefix"\"
     done
 }
 
@@ -126,7 +125,7 @@ fi
 show_action
 # Ask confirmation unless fmode is on
 if [ x-$fmode = x- ]; then
-    echo -n "Continue? (yes/no)"
+    echo "Continue? (yes/no)"
     read ansx
     ans=`echo $ansx | tr "[A-Z]" "[a-z]"`
     if [ x-$ans != x-yes ]; then
