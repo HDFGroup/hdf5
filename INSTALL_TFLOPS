@@ -48,6 +48,13 @@ FROM JANUS,
      the file test/Makefile before the next step.
      RUNTEST=$(LT_RUN)
 7.2) make check 
+7.3) Sometimes the "make check" fails in the sub-directories of test
+     or tools with a message as "print not found".  This is due to the
+     "make" of Janus thinking some binary code needs to be recompiled.
+     The easiest way to fix it is
+     FROM SASN100
+     cd <hdf5>/test	# or cd <hdf5>/tools
+     make clean; make   # re-make all binary
 
 
 Once satisfied with the test results, you can install
@@ -96,6 +103,13 @@ FROM JANUS,
      the file test/Makefile before the next step.
      RUNTEST=$(LT_RUN)
 7.2) make check 
+7.3) Sometimes the "make check" fails in the sub-directories of test
+     or tools with a message as "print not found".  This is due to the
+     "make" of Janus thinking some binary code needs to be recompiled.
+     The easiest way to fix it is
+     FROM SASN100
+     cd <hdf5>/test	# or cd <hdf5>/tools
+     make clean; make   # re-make all binary
 
 
 Once satisfied with the parallel test results, as long as you 
