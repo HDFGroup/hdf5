@@ -129,16 +129,16 @@ TOOLTEST tvldtypes1.ddl tvldtypes1.h5
 TOOLTEST tvldtypes2.ddl tvldtypes2.h5
 TOOLTEST tvldtypes3.ddl tvldtypes3.h5
 #dumping tvldtypes4.h5 is causing core-dumps on modi4 currently - QAK
-#TOOLTEST tvldtypes4.ddl tvldtypes4.h5
+TOOLTEST tvldtypes4.ddl tvldtypes4.h5
 
 # test for files with array data
 TOOLTEST tarray1.ddl tarray1.h5
 TOOLTEST tarray2.ddl tarray2.h5
 TOOLTEST tarray3.ddl tarray3.h5
 #dumping tarray4.h5 is causing core-dumps on modi4 currently - QAK
-#TOOLTEST tarray4.ddl tarray4.h5
+TOOLTEST tarray4.ddl tarray4.h5
 #dumping tarray5.h5 is causing core-dumps on hawkwind currently - QAK
-#TOOLTEST tarray5.ddl tarray5.h5
+TOOLTEST tarray5.ddl tarray5.h5
 TOOLTEST tarray6.ddl tarray6.h5
 TOOLTEST tarray7.ddl tarray7.h5
 
