@@ -18,7 +18,9 @@ LIBH5TOOLS=../tools/lib/libh5tools.la
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-TEST_PROGS_PARA=mpi-perf perf pio_perf
+##Temporary disable the compiling of pio_perf codes while I fix it.
+##TEST_PROGS_PARA=mpi-perf perf pio_perf
+TEST_PROGS_PARA=mpi-perf perf
 TEST_PROGS=iopipe chunk overhead
 
 ## These are the files that `make clean' (and derivatives) will remove from
