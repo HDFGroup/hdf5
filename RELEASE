@@ -90,6 +90,8 @@ Library
      put an upper limit on the amount of memory used for free lists.
    * Checked for non-existent or deleted objects when dereferencing one with
      object or region references and disallow dereference.
+   * "Time" datatypes (H5T_UNIX_D*) were not being stored and retrieved from
+     object headers correctly, fixed now.
 
 
 Configuration

@@ -322,6 +322,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 			      "invalid VL location");
             break;
 
+        case H5T_TIME:  /* Time datatypes */
+            dt->u.atomic.order = (flags & 0x1) ? H5T_ORDER_BE : H5T_ORDER_LE;
+            UINT16DECODE(*pp, dt->u.atomic.prec);
+            break;
+
         default:
             if (flags) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
@@ -656,6 +661,20 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             }
             break;
 
+        case H5T_TIME:  /* Time datatypes...  */
+            switch (dt->u.atomic.order) {
+                case H5T_ORDER_LE:
+                    break;		/*nothing */
+                case H5T_ORDER_BE:
+                    flags |= 0x01;
+                    break;
+                default:
+                    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+                          "byte order is not supported in file format yet");
+            }
+            UINT16ENCODE(*pp, dt->u.atomic.prec);
+            break;
+
         default:
             /*nothing */
             break;
@@ -858,6 +877,10 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     case H5T_VLEN:
         ret_value += H5O_dtype_size(f, dt->parent);
         break;
+
+    case H5T_TIME:
+	ret_value += 2;
+	break;
 
     default:
 	/*no properties */

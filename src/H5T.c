@@ -6426,7 +6426,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 
 	    break;
 
-	case H5T_TIME:
+	case H5T_TIME:  /* order and precision are checked above */
 	    /*void */
 	    break;
 

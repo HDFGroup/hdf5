@@ -168,6 +168,7 @@ main(int argc, char *argv[])
     InitTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
     InitTest("attr", test_attr, cleanup_attr,  "Attributes");
     InitTest("select", test_select, cleanup_select,  "Selections");
+    InitTest("time", test_time, cleanup_time,  "Time Datatypes");
     InitTest("reference", test_reference, cleanup_reference,  "References");
     InitTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
     InitTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings");
