@@ -44,6 +44,8 @@ typedef struct H5E_minor_mesg_t {
 typedef struct H5E_t {
     int	nused;			/*num slots currently used in stack  */
     H5E_error_t slot[H5E_NSLOTS];	/*array of error records	     */
+    H5E_auto_t auto_func;       /* Function for 'automatic' error reporting */
+    void *auto_data;            /* Callback data for 'automatic' error reporting */
 } H5E_t;
 
 /*
@@ -59,8 +61,7 @@ typedef struct H5E_t {
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR (maj, min, str);						      \
-   if (H5_IS_API(FUNC) && H5E_auto_g)  					      \
-       (H5E_auto_g)(H5E_auto_data_g)
+   (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -96,15 +97,12 @@ typedef struct H5E_t {
  */
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
 
-H5_DLLVAR const hbool_t H5E_clearable_g;/*safe to call H5E_clear() on enter?*/
-H5_DLLVAR herr_t (*H5E_auto_g)(void *client_data);
-H5_DLLVAR void *H5E_auto_data_g;
-
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 			 const char *func_name, const char *file_name,
 			 unsigned line, const char *desc);
 H5_DLL herr_t H5E_clear (void);
+H5_DLL herr_t H5E_dump_api_stack (int is_api);
 
 #ifdef H5_HAVE_PARALLEL
 /*

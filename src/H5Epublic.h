@@ -103,6 +103,7 @@ typedef enum H5E_major_t {
     H5E_TBBT, 		        /*Threaded, Balanced, Binary Trees           */
     H5E_TST, 		        /*Ternary Search Trees                       */
     H5E_RS,  		        /*Reference Counted Strings                  */
+    H5E_ERROR,  		/*Error API                                  */
     H5E_SLIST  		        /*Skip Lists                                 */
 } H5E_major_t;
 

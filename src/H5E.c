@@ -79,6 +79,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_TBBT,		"Threaded, Balanced, Binary Trees"},
     {H5E_TST,		"Ternary Search Trees"},
     {H5E_RS,		"Reference Counted Strings"},
+    {H5E_ERROR,		"Error API"},
     {H5E_SLIST,		"Skip Lists"},
 };
 
@@ -239,15 +240,6 @@ char	H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 int	H5E_mpi_error_str_len;
 #endif
 
-/*
- * Automatic error stack traversal occurs if the traversal callback function
- * is non null and an API function is about to return an error.  These should
- * probably be part of the error stack so they're local to a thread.
- */
-herr_t (*H5E_auto_g)(void*) = (herr_t(*)(void*))H5Eprint;
-void *H5E_auto_data_g = NULL;
-
-
 /* Static function declarations */
 static herr_t H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data);
 static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
@@ -276,7 +268,11 @@ H5E_init_interface (void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_init_interface)
 
-    H5E_auto_data_g = stderr;
+#ifndef H5_HAVE_THREADSAFE
+    H5E_stack_g[0].nused = 0;
+    H5E_stack_g[0].auto_func = (H5E_auto_t)H5Eprint;
+    H5E_stack_g[0].auto_data = stderr;
+#endif /* H5_HAVE_THREADSAFE */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -303,24 +299,26 @@ H5E_init_interface (void)
 static H5E_t *
 H5E_get_stack(void)
 {
-    H5E_t *estack;
-    H5E_t *ret_value;   /* Return value */
+    H5E_t *estack;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5E_get_stack,NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_stack)
 
     estack = pthread_getspecific(H5TS_errstk_key_g);
 
     if (!estack) {
         /* no associated value with current thread - create one */
         estack = (H5E_t *)H5MM_malloc(sizeof(H5E_t));
+        assert(estack);
+
+        /* Set thread specific information */
+        estack->nused = 0;
+        estack->auto_func = (H5E_auto_t)H5Eprint;
+        estack->auto_data = stderr;
+
         pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
     }
 
-    /* Set return value */
-    ret_value=estack;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(estack)
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
@@ -354,13 +352,19 @@ done:
 herr_t
 H5Eset_auto(H5E_auto_t func, void *client_data)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eset_auto, FAIL)
     H5TRACE2("e","xx",func,client_data);
+
+    /* Get the thread-specific error stack */
+    if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     
-    H5E_auto_g = func;
-    H5E_auto_data_g = client_data;
+    /* Set the automatic error reporting info */
+    estack->auto_func = func;
+    estack->auto_data = client_data;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -386,13 +390,19 @@ done:
 herr_t
 H5Eget_auto(H5E_auto_t *func, void **client_data)
 {
+    H5E_t   *estack;            /* Error stack to operate on */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto, FAIL)
     H5TRACE2("e","*xx",func,client_data);
 
-    if (func) *func = H5E_auto_g;
-    if (client_data) *client_data = H5E_auto_data_g;
+    /* Get the thread-specific error stack */
+    if((estack = H5E_get_my_stack())==NULL) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
+    
+    /* Set the automatic error reporting info */
+    if (func) *func = estack->auto_func;
+    if (client_data) *client_data = estack->auto_data;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -850,4 +860,42 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_dump_api_stack
+ *      
+ * Purpose:     Private function to dump the error stack during an error in
+ *              an API function if a callback function is defined for the
+ *              current error stack.    
+ *      
+ * Return:      Non-negative on success/Negative on failure
+ * 
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 20, 2005
+ *
+ * Modifications:
+ *  
+ *-------------------------------------------------------------------------
+ */ 
+herr_t  
+H5E_dump_api_stack(int is_api)
+{       
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL)
+
+    /* Only dump the error stack during an API call */
+    if(is_api) {
+        H5E_t *estack = H5E_get_my_stack();
+
+        assert(estack);
+        if (estack->auto_func)
+            (void)((estack->auto_func)(estack->auto_data));
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
