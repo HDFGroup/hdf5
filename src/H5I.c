@@ -349,33 +349,40 @@ H5I_destroy_group(H5I_type_t grp)
     FUNC_LEAVE(ret_value);
 }
 
-/******************************************************************************
- NAME
-     H5I_register - Register an object in a group and get an ID for it.
-
- DESCRIPTION
-    Registers an object in a group and returns an ID for it.	This routine
-    does _not_ check for unique-ness of the objects, if you register an object
-    twice, you will get two different IDs for it.  This routine does make
-    certain that each ID in a group is unique.  IDs are created by getting
-    a unique number for the group the ID is in and incorporating the group
-    into the ID which is returned to the user.
-
- RETURNS
-    Returns ID if successful and FAIL otherwise
-
-*******************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_register
+ *
+ * Purpose:	Registers an OBJECT in a GROUP and returns an ID for it.
+ *		This routine does _not_ check for unique-ness of the objects,
+ *		if you register an object twice, you will get two different
+ *		IDs for it.  This routine does make certain that each ID in a
+ *		group is unique.  IDs are created by getting a unique number
+ *		for the group the ID is in and incorporating the group into
+ *		the ID which is returned to the user.
+ *
+ * Return:	Success:	New object id.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Unknown
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t 
-H5I_register(H5I_type_t grp,   /* IN: Group to register the object in */
-	     void *object     /* IN: Object to attach to atom */
-)
+H5I_register(H5I_type_t grp, void *object)
 {
-    H5I_id_group_t	   *grp_ptr = NULL;	/* ptr to the group */
-    H5I_id_info_t	*id_ptr = NULL;	/* ptr to the new ID information */
-    hid_t		    new_id;	/* new ID */
-    uintn		    hash_loc;	/* new item's hash table location */
-    hid_t		    ret_value = SUCCEED;
-
+    H5I_id_group_t	*grp_ptr=NULL;	/*ptr to the group 		*/
+    H5I_id_info_t	*id_ptr=NULL;	/*ptr to the new ID information */
+    hid_t		new_id;		/*new ID 			*/
+    uintn		hash_loc;	/*new item's hash table location*/
+    hid_t		next_id;	/*next ID to check		*/
+    hid_t		ret_value=SUCCEED; /*return value		*/
+    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
+    uintn		i;		/*counter			*/
+    
     FUNC_ENTER(H5I_register, FAIL);
 
     if (grp <= H5I_BADID || grp >= H5I_MAXID)
@@ -410,32 +417,45 @@ H5I_register(H5I_type_t grp,   /* IN: Group to register the object in */
      * wrapping around, thus necessitating checking for duplicate IDs being
      * handed out.
      */
-    if (grp_ptr->nextid > (uintn) ID_MASK || grp_ptr->wrapped != 0) {
-	if (grp_ptr->wrapped == 0) {
-	    /* set the "wrapped around" flag if it isn't already */
-	    grp_ptr->wrapped = 1;
-	    /* re-start the ID counter */
-	    grp_ptr->nextid = grp_ptr->reserved;
-	}
-	
-	do {
-	    /* new ID to check for */
-	    hid_t next_id = H5I_MAKE(grp, grp_ptr->nextid);
-	    H5I_id_info_t *curr_id;   /* ptr to the current atom */
-	    hash_loc = H5I_LOC (grp_ptr->nextid, grp_ptr->hash_size);
+    if (grp_ptr->nextid > (uintn)ID_MASK) {
+	grp_ptr->wrapped = 1;
+	grp_ptr->nextid = grp_ptr->reserved;
+    }
 
+    /*
+     * If we've wrapped around then we need to check for duplicate id's being
+     * handed out.
+     */
+    if (grp_ptr->wrapped) {
+
+	/*
+	 * Make sure we check all available ID's.  If we're about at the end
+	 * of the range then wrap around and check the beginning values.  If
+	 * we check all possible values and didn't find any free ones *then*
+	 * we can fail.
+	 */
+	for (i=grp_ptr->reserved; i<ID_MASK; i++) {
+
+	    /* Handle end of range by wrapping to beginning */
+	    if (grp_ptr->nextid>(uintn)ID_MASK) {
+		grp_ptr->nextid = grp_ptr->reserved;
+	    }
+
+	    /* new ID to check for */
+	    next_id = H5I_MAKE(grp, grp_ptr->nextid);
+	    hash_loc = H5I_LOC (grp_ptr->nextid, grp_ptr->hash_size);
 	    curr_id = grp_ptr->id_list[hash_loc];
 	    if (curr_id == NULL) break; /* Ha! this is not likely... */
 
-	    while (curr_id != NULL) {
+	    while (curr_id) {
 		if (curr_id->id == next_id) break;
 		curr_id = curr_id->next;
 	    }
-	    if (curr_id == NULL) break; /* must not have found a match */
+	    if (!curr_id) break; /* must not have found a match */
 	    grp_ptr->nextid++;
-	} while (grp_ptr->nextid <= (uintn) ID_MASK);
-	
-	if (grp_ptr->nextid > (uintn) ID_MASK) {
+	}
+
+	if (i>=(uintn)ID_MASK) {
 	    /* All the IDs are gone! */
 	    HGOTO_DONE(FAIL);
 	}
