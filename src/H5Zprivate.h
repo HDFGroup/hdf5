@@ -58,5 +58,6 @@ H5_DLL herr_t H5Z_set_local(hid_t dcpl_id, hid_t type_id);
 H5_DLL H5Z_filter_info_t *H5Z_filter_info(struct H5O_pline_t *pline,
         H5Z_filter_t filter);
 H5_DLL htri_t H5Z_all_filters_avail(struct H5O_pline_t *pline);
+H5_DLL herr_t H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
 
 #endif

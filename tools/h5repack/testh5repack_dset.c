@@ -17,9 +17,7 @@
 #include "h5repack.h"
 
 static void make_dset_reg_ref(hid_t loc_id);
-#ifdef LATER
 static void read_dset_reg_ref(hid_t loc_id);
-#endif /* LATER */
 
 
 
@@ -82,6 +80,7 @@ void write_dset_in(hid_t loc_id,
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
+ e_t        buf452[3][2];                                         /* enum */
  hvl_t      buf52[3][2];                                          /* vlen */
  int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
  int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -95,6 +94,7 @@ void write_dset_in(hid_t loc_id,
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
+ e_t        buf453[4][3][2];   /* enum */
  hvl_t      buf53[4][3][2];    /* vlen */
  int        buf63[24][3];      /* array */
  int        buf73[4][3][2];    /* integer */
@@ -360,6 +360,13 @@ void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
+ for (i=0; i<3; i++)
+  for (j=0; j<2; j++)
+  {
+   if (make_diffs) buf452[i][j]=GREEN; else buf452[i][j]=RED; 
+  }
+
+
  type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
  H5Tenum_insert(type_id, "RED",   (val = 0, &val));
  H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
@@ -538,6 +545,15 @@ void write_dset_in(hid_t loc_id,
  * H5T_ENUM
  *-------------------------------------------------------------------------
  */
+
+ 
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    if (make_diffs) buf453[i][j][k]=RED; else buf453[i][j][k]=GREEN;
+   }
+  }
+ }
 
  type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
  H5Tenum_insert(type_id, "RED",   (val = 0, &val));
@@ -725,7 +741,6 @@ static void make_dset_reg_ref(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 
-#ifdef LATER
 static void read_dset_reg_ref(hid_t loc_id)
 {
  hid_t           dset1;    /* Dataset ID   */
@@ -823,4 +838,3 @@ static void read_dset_reg_ref(hid_t loc_id)
  free(rbuf);
  free(drbuf);
 }   
-#endif /* LATER */

@@ -143,7 +143,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
   {
    if (options->verbose)
     printf("Warning: Filter not applied to <%s>. Dataset smaller than <%d> bytes\n",
-    name,(int)options->threshold);
+    name,options->threshold);
    return 0;
   }
 
@@ -346,7 +346,7 @@ int check_szip(hid_t type_id,   /* dataset datatype */
                unsigned *szip_pixels_per_block /*IN,OUT*/,
                pack_opt_t *options)
 {
- size_t      size=0;     /* size of datatype in bytes */
+ size_t      size;     /* size of datatype in bytes */
  szip_comp_t szip;
  int         i;
  unsigned    ppb=*szip_pixels_per_block;
@@ -360,6 +360,7 @@ int check_szip(hid_t type_id,   /* dataset datatype */
   {
   default:
    return 0;
+   break;
   case H5T_INTEGER:
   case H5T_FLOAT:
    break;
@@ -436,7 +437,7 @@ int check_szip(hid_t type_id,   /* dataset datatype */
   szip.bits_per_pixel = 64;
   break;
  default:
-  printf("Warning: Invalid numeric type of size <%u> for SZIP\n",(unsigned)size);
+  printf("Warning: Invalid numeric type of size <%d> for SZIP\n",size);
   return 0;
  }}
 

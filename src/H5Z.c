@@ -1134,3 +1134,75 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5Z_all_filters_avail() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Z_delete
+ *
+ * Purpose: Delete filter FILTER from pipeline PLINE; 
+ *  deletes all filters if FILTER is H5Z_FILTER_NONE 
+ *
+ * Return: Non-negative on success/Negative on failure
+ *
+ * Programmer: Pedro Vicente
+ *              Monday, January 26, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
+{
+    herr_t ret_value=SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_delete, FAIL)
+
+    /* Check args */
+    assert(pline);
+    assert(filter>=0 && filter<=H5Z_FILTER_MAX);
+
+    /* if the pipeline has no filters, just return */
+    if(pline->nfilters==0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Delete all filters */
+    if (H5Z_FILTER_ALL==filter) {
+        if(H5O_reset(H5O_PLINE_ID, pline)<0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
+    } /* end if */
+    /* Delete filter */
+    else {
+        size_t idx;             /* Index of filter in pipeline */
+        unsigned found=0;       /* Indicate filter was found in pipeline */
+
+        /* Locate the filter in the pipeline */
+        for(idx=0; idx<pline->nfilters; idx++)
+            if(pline->filter[idx].id==filter) {
+                found=1;
+                break;
+            }
+
+        /* filter was not found in the pipeline */
+        if (!found)
+            HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter not in pipeline")
+
+        /* Free information for deleted filter */
+        H5MM_xfree(pline->filter[idx].name);
+        H5MM_xfree(pline->filter[idx].cd_values);
+
+        /* Remove filter from pipeline array */
+        if((idx+1)<pline->nfilters)
+            HDmemcpy(&pline->filter[idx], &pline->filter[idx+1],
+                sizeof (H5Z_filter_info_t)*(pline->nfilters-(idx+1)));
+
+        /* Decrement number of used filters */
+        pline->nfilters--;
+
+        /* Reset information for previous last filter in pipeline */
+        HDmemset(&pline->filter[pline->nfilters], 0, sizeof (H5Z_filter_info_t));
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} 

@@ -20,7 +20,8 @@
 #include "h5repack.h"
 
 static const char* MapIdToName(hid_t refobj_id, 
-                               trav_table_t *travt);
+                               trav_table_t *travt,
+                               const char* fname);
 
 static void close_obj(H5G_obj_t obj_type, hid_t obj_id);
 
@@ -29,7 +30,9 @@ static int copy_refs_attr(hid_t loc_in,
                           hid_t loc_out, 
                           pack_opt_t *options,
                           trav_table_t *travt,
-                          hid_t fidout         /* for saving references */
+                          hid_t fidout,         /* for saving references */
+                          hid_t fidin,
+                          const char *fname
                           );
 
 /*-------------------------------------------------------------------------
@@ -50,17 +53,18 @@ static int copy_refs_attr(hid_t loc_in,
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
                     trav_table_t *travt,
-                    pack_opt_t *options) /* repack options */
+                    pack_opt_t *options, /* repack options */
+                    const char *fnamein)
 {
- hid_t     grp_in=-1;       /* group ID */ 
- hid_t     grp_out=-1;      /* group ID */ 
- hid_t     dset_in=-1;      /* read dataset ID */ 
- hid_t     dset_out=-1;     /* write dataset ID */ 
- hid_t     type_in=-1;      /* named type ID */ 
- hid_t     dcpl_id=-1;      /* dataset creation property list ID */ 
- hid_t     space_id=-1;     /* space ID */ 
- hid_t     ftype_id=-1;     /* file data type ID */ 
- hid_t     mtype_id=-1;     /* memory data type ID */
+ hid_t     grp_in;       /* group ID */ 
+ hid_t     grp_out;      /* group ID */ 
+ hid_t     dset_in;      /* read dataset ID */ 
+ hid_t     dset_out;     /* write dataset ID */ 
+ hid_t     type_in;      /* named type ID */ 
+ hid_t     dcpl_id;      /* dataset creation property list ID */ 
+ hid_t     space_id;     /* space ID */ 
+ hid_t     ftype_id;     /* file data type ID */ 
+ hid_t     mtype_id;     /* memory data type ID */
  size_t    msize;        /* memory size of memory type */
  hsize_t   nelmts;       /* number of elements in dataset */
  int       rank;         /* rank of dataset */
@@ -186,7 +190,7 @@ int do_copy_refobjs(hid_t fidin,
       } H5E_END_TRY;
       /* get the name. a valid name could only occur in the 
       second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      if ((refname=MapIdToName(refobj_id,travt,fnamein))!=NULL)
       {
        /* create the reference, -1 parameter for objects */
        if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
@@ -266,7 +270,7 @@ int do_copy_refobjs(hid_t fidin,
       
       /* get the name. a valid name could only occur in the 
       second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      if ((refname=MapIdToName(refobj_id,travt,fnamein))!=NULL)
       {
        hid_t region_id;    /* region id of the referenced dataset */
        if ((region_id = H5Rget_region(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
@@ -319,7 +323,7 @@ int do_copy_refobjs(hid_t fidin,
  * copy referenced objects in attributes
  *-------------------------------------------------------------------------
  */
-   if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0) 
+   if (copy_refs_attr(dset_in,dset_out,options,travt,fidout,fidin,fnamein)<0) 
     goto error;
    
 
@@ -406,7 +410,7 @@ int do_copy_refobjs(hid_t fidin,
  if ((grp_in  = H5Gopen(fidin,"/"))<0) 
   goto error;
  
- if (copy_refs_attr(grp_in,grp_out,options,travt,fidout)<0) 
+ if (copy_refs_attr(grp_in,grp_out,options,travt,fidout,fidin,fnamein)<0) 
   goto error;
  
  if (H5Gclose(grp_out)<0) 
@@ -455,14 +459,16 @@ static int copy_refs_attr(hid_t loc_in,
                           hid_t loc_out, 
                           pack_opt_t *options,
                           trav_table_t *travt,
-                          hid_t fidout         /* for saving references */
+                          hid_t fidout,        /* for saving references */
+                          hid_t fidin,
+                          const char *fnamein
                           )
 {
- hid_t      attr_id=-1;      /* attr ID */ 
- hid_t      attr_out=-1;     /* attr ID */ 
- hid_t      space_id=-1;     /* space ID */ 
- hid_t      ftype_id=-1;     /* file data type ID */ 
- hid_t      mtype_id=-1;     /* memory data type ID */
+ hid_t      attr_id;      /* attr ID */ 
+ hid_t      attr_out;     /* attr ID */ 
+ hid_t      space_id;     /* space ID */ 
+ hid_t      ftype_id;     /* file data type ID */ 
+ hid_t      mtype_id;     /* memory data type ID */
  size_t     msize;        /* memory size of type */
  hsize_t    nelmts;       /* number of elements in dataset */
  int        rank;         /* rank of dataset */
@@ -558,7 +564,7 @@ static int copy_refs_attr(hid_t loc_in,
       } H5E_END_TRY;
       /* get the name. a valid name could only occur in the 
       second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      if ((refname=MapIdToName(refobj_id,travt,fnamein))!=NULL)
       {
        /* create the reference */
        if (H5Rcreate(&refbuf[k],fidout,refname,H5R_OBJECT,-1)<0)
@@ -640,7 +646,7 @@ static int copy_refs_attr(hid_t loc_in,
       } H5E_END_TRY;
       /* get the name. a valid name could only occur in the 
       second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+      if ((refname=MapIdToName(refobj_id,travt,fnamein))!=NULL)
       {
        hid_t region_id;    /* region id of the referenced dataset */
        if ((region_id = H5Rget_region(attr_id,H5R_DATASET_REGION,&buf[k]))<0)
@@ -738,16 +744,17 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
  */
 
 static const char* MapIdToName(hid_t refobj_id, 
-                               trav_table_t *travt)
+                               trav_table_t *travt,
+                               const char* fname)
 {
  hid_t id;
  hid_t fid;
  int   i;
 
- /* obtains the file ID given an object ID.  This ID must be closed */
- if ((fid = H5Iget_file_id(refobj_id))<0)
- {
-  return NULL;
+ /* open */
+ if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
+  printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
+  exit(1);
  }
 
  /* linear search */
@@ -778,8 +785,7 @@ static const char* MapIdToName(hid_t refobj_id,
   }  /* switch */
  } /* i */
 
- if (H5Fclose(fid)<0)
-  return NULL;
+ H5Fclose(fid);
 
  return NULL;
 }

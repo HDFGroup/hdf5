@@ -482,4 +482,6 @@ extern int      h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset
 extern int      h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
 
+extern int      h5tools_canreadf(const char* name,
+                                 hid_t dcpl_id);
 #endif	/* H5TOOLS_H__ */

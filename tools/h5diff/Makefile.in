@@ -1,4 +1,3 @@
-## HDF5 Library Makefile(.in)
 ##
 ## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
@@ -11,6 +10,8 @@
 ## is linked from the top-level documents page.  It can also be found at
 ## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
 ## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
+## HDF5 Library Makefile(.in)
 ##
 top_srcdir=@top_srcdir@
 top_builddir=../..
@@ -31,6 +32,7 @@ TEST_SCRIPTS=$(srcdir)/testh5diff.sh
 ## These are our main targets: library and tools.
 ##
 LIBHDF5=$(top_builddir)/src/libhdf5.la
+LIBTOOLS=../lib/libh5tools.la
 
 PUB_PROGS=h5diff
 PROGS=$(PUB_PROGS) $(TEST_PROGS) 
@@ -47,10 +49,12 @@ MOSTLYCLEAN=*.h5
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5diff.c h5trav.c h5difftst.c
+PROG_SRC= h5diff_main.c  testh5diff_attr.c testh5diff_basic.c testh5diff_dset.c testh5diff_util.c testh5diff_main.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
+OBJS= h5diff_main.lo
+TEST_OBJS=testh5diff_attr.lo testh5diff_basic.lo testh5diff_dset.lo testh5diff_util.lo testh5diff_main.lo
 
-PRIVATE_HDR=h5trav.h
+PRIVATE_HDR=testh5diff.h
 
 ## Source and object files for the tests
 ##
@@ -64,13 +68,13 @@ check test _test: $(PROGS)
 ## How to build the programs...They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
 ##
-$(PROGS): $(LIBHDF5)
+$(PROGS): $(LIBTOOLS) $(LIBHDF5)
 
-h5diff: h5diff.lo h5trav.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5diff.lo h5trav.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5diff: $(OBJS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(OBJS) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5difftst: h5difftst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5difftst.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5difftst: $(TEST_OBJS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 
 @CONCLUDE@

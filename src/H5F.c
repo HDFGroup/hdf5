@@ -2322,7 +2322,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
      * reading and writing.
      */
     if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
-	flags |= H5F_ACC_EXCL;	 /*default*/
+	   flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /*
@@ -2334,6 +2334,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file");
+
+    /* Keep this ID in file object structure */
+    new_file->file_id = ret_value;
 
 done:
     if (ret_value<0 && new_file)
@@ -2410,6 +2413,9 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle");
+
+    /* Keep this ID in file object structure */
+    new_file->file_id = ret_value;
 
 done:
     if (ret_value<0 && new_file)
@@ -2979,6 +2985,10 @@ H5F_close(H5F_t *f)
                 /* Register an ID for closing the file later */
                 if (!f->closing)
                     f->closing  = H5I_register(H5I_FILE_CLOSING, f);
+
+                 /* Invalidate file ID */
+                f->file_id = -1;
+
                 HGOTO_DONE(SUCCEED);
             } else {
                 if (f->closing) {
@@ -3009,6 +3019,10 @@ H5F_close(H5F_t *f)
                 /* Register an ID for closing the file later */
                 if (!f->closing)
                     f->closing  = H5I_register(H5I_FILE_CLOSING, f);
+
+                /* Invalidate file ID */
+                f->file_id = -1;
+
                 HGOTO_DONE(SUCCEED);
             } else {
                 if (!f->closing && f->shared->nrefs>1)
@@ -3070,6 +3084,9 @@ H5F_close(H5F_t *f)
         default:
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, unknown file close degree"); 	
     } /* end switch */
+
+    /* Invalidate file ID */
+    f->file_id = -1;
 
     /* Only flush at this point if the file will be closed */
     if (closing) {
@@ -3690,6 +3707,9 @@ H5Freopen(hid_t file_id)
 
     if ((ret_value=H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle");
+
+   /* Keep this ID in file object structure */
+   new_file->file_id = ret_value;
 
 done:
     if (ret_value<0 && new_file)
@@ -4432,3 +4452,49 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE * stream, int inden
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file)
+{
+    hid_t       ret_value;
+    
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_id)
+
+    assert(file);
+
+    if(file->file_id == -1) {
+        if(H5I_remove(file->closing)==NULL)
+	    HGOTO_ERROR(H5E_ATOM, H5E_READERROR, FAIL, "unable to remove from closing list")
+                
+        /* Get an atom for the file */
+        if ((file->file_id = H5I_register(H5I_FILE, file))<0)
+	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+           
+        /* Indicate file is not closing */     
+        file->closing = 0;
+    } else {
+        /* Increment reference count on atom. */
+        if (H5I_inc_ref(file->file_id)<0)
+            HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed");
+    }
+    
+    ret_value = file->file_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */

@@ -20,7 +20,7 @@
 int make_all_objects(hid_t loc_id);
 int make_attributes(hid_t loc_id);
 int make_special_objects(hid_t loc_id);
-int make_early(void);
+int make_early();
 
 
 
@@ -245,6 +245,7 @@ int make_special_objects(hid_t loc_id)
  hid_t   dset_id;
  hid_t   space_id;  
 	hid_t   plist_id;
+ herr_t  status;
 	int     fillvalue=2;
 
 /*-------------------------------------------------------------------------
@@ -289,13 +290,13 @@ int make_special_objects(hid_t loc_id)
  */
 
  plist_id = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
+	status = H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
 	space_id = H5Screate_simple(2,dims,NULL);
 	dset_id = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,space_id,plist_id);
-	H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-	H5Pclose(plist_id);
-	H5Dclose(dset_id);
- H5Sclose(space_id);
+	status = H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+	status = H5Pclose(plist_id);
+	status = H5Dclose(dset_id);
+ status = H5Sclose(space_id);
 
  return 0;                                                 
  
@@ -309,15 +310,15 @@ int make_special_objects(hid_t loc_id)
  *
  *-------------------------------------------------------------------------
  */
-int make_early(void)
+int make_early()
 {
  hsize_t dims[1] ={3000};
  hsize_t cdims[1]={30};
- hid_t   fid=-1;  
- hid_t   dset_id=-1;
- hid_t   sid=-1;  
- hid_t   tid=-1;  
- hid_t   dcpl=-1;
+ hid_t   fid;  
+ hid_t   dset_id;
+ hid_t   sid;  
+ hid_t   tid;  
+	hid_t   dcpl;
  int     i;
  char    name[10];
  int     iter=100;

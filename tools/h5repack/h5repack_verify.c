@@ -157,9 +157,9 @@ int h5repack_verify(const char *fname,
                     pack_opt_t *options)
 {
  hid_t  fid;      /* file ID */
- hid_t  dset_id=-1;  /* dataset ID */ 
- hid_t  dcpl_id=-1;  /* dataset creation property list ID */ 
- hid_t  space_id=-1; /* space ID */ 
+ hid_t  dset_id;  /* dataset ID */ 
+ hid_t  dcpl_id;  /* dataset creation property list ID */ 
+ hid_t  space_id; /* space ID */ 
  int    ret=1, i, j;
  trav_table_t  *travt=NULL;
 
@@ -343,12 +343,12 @@ error:
 int h5repack_cmpdcpl(const char *fname1,
                      const char *fname2)
 {
- hid_t         fid1=-1;       /* file ID */ 
- hid_t         fid2=-1;       /* file ID */ 
- hid_t         dset1=-1;      /* dataset ID */ 
- hid_t         dset2=-1;      /* dataset ID */ 
- hid_t         dcpl1=-1;      /* dataset creation property list ID */ 
- hid_t         dcpl2=-1;      /* dataset creation property list ID */ 
+ hid_t         fid1;       /* file ID */ 
+ hid_t         fid2;       /* file ID */ 
+ hid_t         dset1;      /* dataset ID */ 
+ hid_t         dset2;      /* dataset ID */ 
+ hid_t         dcpl1;      /* dataset creation property list ID */ 
+ hid_t         dcpl2;      /* dataset creation property list ID */ 
  trav_table_t  *travt1=NULL;
  trav_table_t  *travt2=NULL;
  int           ret=1, i;

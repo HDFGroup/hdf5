@@ -1434,3 +1434,95 @@ done:
 }
 #endif /* H5I_DEBUG_OUTPUT */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Iget_file_id
+ *
+ * Purpose:	The public version of H5I_get_file_id(), obtains the file
+ *              ID given an object ID.  User has to close this ID. 
+ *
+ * Return:	Success:	file ID
+ *
+ *		Failure:	a negative value
+ *
+ * Programmer:  Raymond Lu
+ *              Oct 27, 2003	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Iget_file_id(hid_t obj_id)
+{
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(H5Iget_file_id, FAIL);
+    H5TRACE1("i","i",obj_id);
+
+    if((ret_value = H5I_get_file_id(obj_id))<0)
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_file_id
+ *
+ * Purpose:	The private version of H5Iget_file_id(), obtains the file
+ *              ID given an object ID. 
+ *
+ * Return:	Success:	file ID
+ *
+ *		Failure:	a negative value
+ *
+ * Programmer:  Raymond Lu
+ *              Oct 27, 2003	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5I_get_file_id(hid_t obj_id)
+{
+    H5G_entry_t         *ent;
+    hid_t		ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5I_get_file_id);
+
+    /* Get object type */
+    switch(H5I_GROUP(obj_id)) {
+        case H5I_FILE:
+            ret_value = obj_id;
+            
+            /* Increment reference count on atom. */
+            if (H5I_inc_ref(ret_value)<0)
+                HGOTO_ERROR (H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed");
+
+            break;
+
+        case H5I_DATATYPE:
+            if((ent = H5G_loc(obj_id))==NULL)
+                HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "not a named datatype");
+            ret_value = H5F_get_id(ent->file);
+            break;
+
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_ATTR:
+            if((ent = H5G_loc(obj_id))==NULL)
+                HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get symbol table info");
+            ret_value = H5F_get_id(ent->file);
+            break;
+
+        default:
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID");
+    } 
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}

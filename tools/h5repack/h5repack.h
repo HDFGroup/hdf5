@@ -99,7 +99,7 @@ typedef struct {
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
  int verbose;                 /*verbose mode */
- hsize_t threshold;               /*minimum size to compress, in bytes */
+	int threshold;               /*minimum size to compress, in bytes */
 } pack_opt_t;
 
 
@@ -159,7 +159,8 @@ int copy_attr(hid_t loc_in,
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
                     trav_table_t *travt,
-                    pack_opt_t *options); /* repack options */
+                    pack_opt_t *options,
+                    const char *fnamein); /* repack options */
 
 
 

@@ -30,12 +30,12 @@
  *-------------------------------------------------------------------------
  */
 
-int trav_table_search(haddr_t objno, trav_table_t *table )
+int trav_table_search(unsigned long *objno, trav_table_t *table )
 {
  int i;
  
  for (i = 0; i < table->nobjs; i++)
-  if (table->objs[i].objno == objno)
+   if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
    return i;
   
   return -1;
@@ -56,7 +56,7 @@ int trav_table_search(haddr_t objno, trav_table_t *table )
  *-------------------------------------------------------------------------
  */
 
-void trav_table_add(haddr_t objno, 
+void trav_table_add(unsigned long *objno, 
                     char *name, 
                     H5G_obj_t type, 
                     trav_table_t *table)
@@ -69,7 +69,7 @@ void trav_table_add(haddr_t objno,
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
   
   for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno = 0;
+   table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
@@ -81,7 +81,8 @@ void trav_table_add(haddr_t objno,
  }
  
  i = table->nobjs++;
- table->objs[i].objno = objno;
+ table->objs[i].objno[0] = objno[0];
+ table->objs[i].objno[1] = objno[1];
  table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
  HDfree(table->objs[i].name);
  table->objs[i].name = (char *)HDstrdup(name);
@@ -118,7 +119,7 @@ void trav_table_addflags(unsigned *flags,
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
   
   for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno = 0;
+   table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
@@ -130,7 +131,8 @@ void trav_table_addflags(unsigned *flags,
  }
  
  i = table->nobjs++;
- table->objs[i].objno = 0;
+ table->objs[i].objno[0] = 0;
+ table->objs[i].objno[1] = 0;
  table->objs[i].flags[0] = flags[0];
  table->objs[i].flags[1] = flags[1];
  HDfree(table->objs[i].name);
@@ -166,7 +168,7 @@ void trav_table_init( trav_table_t **tbl )
   (trav_obj_t*)HDmalloc(table->size * sizeof(trav_obj_t));
  
  for (i = 0; i < table->size; i++) {
-  table->objs[i].objno = 0;
+  table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
   table->objs[i].displayed = 0;
   table->objs[i].type = H5G_UNKNOWN;

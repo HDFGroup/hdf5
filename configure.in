@@ -2335,6 +2335,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5dump/Makefile
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
+                 tools/h5repack/Makefile
                  tools/h5ls/Makefile
                  tools/lib/Makefile
                  tools/misc/Makefile

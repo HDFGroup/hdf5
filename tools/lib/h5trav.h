@@ -54,7 +54,7 @@ typedef struct trav_link_t {
  */
 
 typedef struct trav_obj_t {
-    haddr_t     objno;     /* object number from H5Gget_objinfo */
+    unsigned long objno[2];/* object number from H5Gget_objinfo */
     unsigned    flags[2];  /* h5diff.object is present or not in both files*/
     char        *name;     /* name */
     int         displayed; /* hard link already traversed once */
@@ -117,10 +117,10 @@ void trav_table_init(trav_table_t **table);
 
 void trav_table_free(trav_table_t *table);
 
-int  trav_table_search(haddr_t objno, 
+int  trav_table_search(unsigned long *objno, 
                        trav_table_t *table );
 
-void trav_table_add(haddr_t objno, 
+void trav_table_add(unsigned long *objno, 
                     char *objname, 
                     H5G_obj_t type, 
                     trav_table_t *table);

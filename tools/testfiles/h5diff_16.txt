@@ -1,96 +1,10 @@
 #############################
-Expected output for 'h5diff file6.h5 file6.h5'
+Expected output for 'h5diff file1.h5 file2.h5'
 #############################
-$h5diff file6.h5 file6.h5
-file1     file2
----------------------------------------
-    x      x    /dset0a        
-    x      x    /dset0b        
-    x      x    /dset10a       
-    x      x    /dset10b       
-    x      x    /dset1a        
-    x      x    /dset1b        
-    x      x    /dset2a        
-    x      x    /dset2b        
-    x      x    /dset3a        
-    x      x    /dset3b        
-    x      x    /dset4a        
-    x      x    /dset4b        
-    x      x    /dset5a        
-    x      x    /dset5b        
-    x      x    /dset6a        
-    x      x    /dset6b        
-    x      x    /dset7a        
-    x      x    /dset7b        
-    x      x    /dset8a        
-    x      x    /dset8b        
-    x      x    /dset9a        
-    x      x    /dset9b        
-
-Comparing </dset0a> with </dset0a>
-0 differences found
-
-Comparing </dset0b> with </dset0b>
-0 differences found
-
-Comparing </dset10a> with </dset10a>
-0 differences found
-
-Comparing </dset10b> with </dset10b>
-0 differences found
-
-Comparing </dset1a> with </dset1a>
-0 differences found
-
-Comparing </dset1b> with </dset1b>
-0 differences found
-
-Comparing </dset2a> with </dset2a>
-0 differences found
-
-Comparing </dset2b> with </dset2b>
-0 differences found
-
-Comparing </dset3a> with </dset3a>
-0 differences found
-
-Comparing </dset3b> with </dset3b>
-0 differences found
-
-Comparing </dset4a> with </dset4a>
-0 differences found
-
-Comparing </dset4b> with </dset4b>
-0 differences found
-
-Comparing </dset5a> with </dset5a>
-0 differences found
-
-Comparing </dset5b> with </dset5b>
-0 differences found
-
-Comparing </dset6a> with </dset6a>
-0 differences found
-
-Comparing </dset6b> with </dset6b>
-0 differences found
-
-Comparing </dset7a> with </dset7a>
-0 differences found
-
-Comparing </dset7b> with </dset7b>
-0 differences found
-
-Comparing </dset8a> with </dset8a>
-0 differences found
-
-Comparing </dset8b> with </dset8b>
-0 differences found
-
-Comparing </dset9a> with </dset9a>
-0 differences found
-
-Comparing </dset9b> with </dset9b>
-0 differences found
-
-
+position        dset1           dset1           difference          
+------------------------------------------------------------
+[ 0 1 ]          1.000000        1.100000        0.100000       
+[ 1 0 ]          1.000000        1.010000        0.010000       
+[ 1 1 ]          1.000000        1.001000        0.001000       
+[ 2 0 ]          1.000000        1.000100        0.000100       
+[ 2 1 ]          1.000000        1.000000        0.000000       

@@ -38,6 +38,7 @@
 
 int main (void)
 {
+ int verbose=0;
  pack_opt_t  pack_options;
  diff_opt_t  diff_options;
  memset(&diff_options, 0, sizeof (diff_opt_t));
@@ -58,14 +59,14 @@ int main (void)
  *     it returns RET==0 if the objects have the same data
  *-------------------------------------------------------------------------
  */
- 
+
  TESTING("    copy of datasets");
 
 /*-------------------------------------------------------------------------
  * file with all kinds of dataset datatypes
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, verbose)<0)
   TEST_ERROR;
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
   TEST_ERROR;
@@ -124,6 +125,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  PASSED();
+
  TESTING("    copy of datasets with all filters");
  
  if (h5repack_init (&pack_options, 0)<0)
