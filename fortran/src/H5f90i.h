@@ -20,8 +20,6 @@
 #undef GOT_MACHINE
 #endif
 
-#define  DFMT_IRIX         0x1111
-
 /* 
  * Standard header files needed all the time 
  */
@@ -46,11 +44,6 @@
 #include <sys/stat.h>
 #endif /*O_RDONLY*/
 
-#ifdef _CRAYIEEE
-#define DF_MT   DFMT_UNICOSIEEE
-#else
-#define DF_MT   DFMT_UNICOS
-#endif
 /*typedef char*              _fcd;*/
 typedef long               hsize_t_f;
 typedef long               hssize_t_f;
@@ -82,7 +75,6 @@ Please check your Makefile.
 #endif /* __GNUC__ */
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT             DFMT_IBM6000
 typedef char              *_fcd;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
@@ -111,15 +103,20 @@ typedef float             real_f;
 #endif /*APPLE*/
 
 /* LINUX definitions */
-#if defined(i386) && defined(linux)
-#define DF_MT             DFMT_LINIX
+#if (defined(linux) || defined(__gnu_linux__) || defined(__linux__))
+
+/* Common definitions */
 typedef char              *_fcd;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+
+/* IA32 specific definitions */
+#if (defined(i386) || defined(__i386) || defined(__i386__))
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #define FNAME(x) x
@@ -127,37 +124,22 @@ typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
 #endif /*H5_ABSOFT*/
 
-#define _fcdtocp(desc) (desc)
-
-#endif /*LINUX*/
-
-/* LINUX 64 definitions */
-#if defined __x86_64__
-#define DF_MT             DFMT_LINIX
-typedef char              *_fcd;
+/* AMD64 specific definitions */
+#elif defined __x86_64__
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
-#endif /*LINUX64*/
 
-/* IA64 LINUX definitions */
-#if defined __ia64
-typedef char              *_fcd;
+/* IA64 specific definitions */
+#elif defined __ia64
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
 typedef long              size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
 
-#endif /* IA64 LINUX*/
+#endif /* IA64 */
+#endif /* LINUX*/
 
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
 
@@ -185,7 +167,6 @@ Please check your Makefile.
 #endif /* __GNUC__ */
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT         DFMT_IRIX
 typedef char          *_fcd;
 
 typedef long          hsize_t_f;
@@ -225,7 +206,6 @@ Please check your Makefile.
 #include <sys/time.h>
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT             DFMT_SUN
 typedef char              *_fcd;
 typedef long long         hssize_t_f;
 typedef long long         hsize_t_f;
@@ -251,7 +231,6 @@ Please check your Makefile.
 #define GOT_MACHINE
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT            DFMT_ALPHA
 typedef char             *_fcd;
 typedef long             hsize_t_f;
 typedef long             hssize_t_f;
@@ -278,7 +257,6 @@ Please check your Makefile.
 
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT            DFMT_ALPHA
 typedef char             *_fcd;
 typedef long long            hsize_t_f;
 typedef long long            hssize_t_f;
@@ -309,7 +287,6 @@ Please check your Makefile.
 #endif /* __GNUC__ */
 #include <sys/file.h>               /* for unbuffered i/o stuff */
 #include <sys/stat.h>
-#define DF_MT          DFMT_HP9000
 typedef char           *_fcd;
 typedef long long           hsize_t_f;
 typedef long long          hssize_t_f;
@@ -337,7 +314,6 @@ typedef float          real_f;
 #include <stddef.h>         /* for the 'fortran' pragma */
 #endif
 
-#define DF_MT             DFMT_PC
 
 typedef char              *_fcd;
 typedef int               hsize_t_f;
