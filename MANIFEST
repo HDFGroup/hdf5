@@ -90,6 +90,7 @@
 ./src/H5P.c
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
+./src/H5Psimp.c
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5T.c

@@ -824,14 +824,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	 void *buf/*out*/)
 {
     size_t		nelmts, src_size, dst_size;
-    size_t		offset[H5O_LAYOUT_NDIMS];
-    size_t		size[H5O_LAYOUT_NDIMS];
-    size_t		zero[H5O_LAYOUT_NDIMS];
-    intn		i;
     herr_t		ret_value = FAIL;
-    uint8		*conv_buf = NULL;	/*data type conv buffer	*/
-    H5T_conv_t		conv_func = NULL;	/*conversion function	*/
+    uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
+    H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
+    const H5P_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
+    H5P_number_t	numbering;		/*element numbering info*/
 
     FUNC_ENTER(H5D_read, FAIL);
 
@@ -840,13 +838,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
-
-    if ((mem_space && H5P_cmp(mem_space, dataset->space)) ||
-	(file_space && H5P_cmp(file_space, dataset->space))) {
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "space conversion not supported yet");
-    }
-    assert (!mem_space || H5P_SIMPLE==mem_space->type);
+    if (!file_space) file_space = dataset->space;
+    if (!mem_space) mem_space = file_space;
     
     /*
      * Convert data types to atoms because the conversion functions are
@@ -859,6 +852,27 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     }
 
     /*
+     * Locate the type conversion function, data space conversion, and set up
+     * the element numbering information.
+     */
+    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type))) {
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		    "unable to convert between src and dest data types");
+    }
+    if (NULL==(sconv_func=H5P_find (file_space, mem_space))) {
+	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		     "unable to convert between src and dest data spaces");
+    }
+    if (sconv_func->init &&
+	(sconv_func->init)(&(dataset->layout), mem_space, file_space,
+			   &numbering/*out*/)<=0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		     "unable to initialize element numbering information");
+    } else {
+	HDmemset (&numbering, 0, sizeof numbering);
+    }
+    
+    /*
      * Compute the size of the request and allocate scratch buffers.
      */
 #ifndef LATER
@@ -869,62 +883,43 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     nelmts = H5P_get_npoints(dataset->space);
     src_size = nelmts * H5T_get_size(dataset->type);
     dst_size = nelmts * H5T_get_size(mem_type);
-    conv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+    tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
 #endif
-
-    /*
-     * Locate the type conversion function.
-     */
-    if (NULL == (conv_func = H5T_find(dataset->type, mem_type))) {
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		    "unable to convert between src and dest data types");
-    }
 
     /*
      * Gather the data from disk into the data type conversion buffer.
      */
-#ifndef LATER
-    /*
-     * Note: We only support complete reads currently.  That is, the
-     *	     hyperslab must begin at zero in memory and on disk and the
-     *	     size of the hyperslab must be the same as the array on disk.
-     */
-    for (i = 0; i < dataset->layout.ndims; i++) {
-	zero[i] = 0;
-	offset[i] = 0;
-    }
-    i = H5P_get_dims (dataset->space, size);
-    assert (i+1==dataset->layout.ndims);
-    size[i] = H5T_get_size (dataset->type);
-#endif
-    if (H5F_arr_read(dataset->ent.file, &(dataset->layout), size, offset,
-		     zero, size, conv_buf) < 0) {
-	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read failed");
+    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+			    H5T_get_size (dataset->type), file_space,
+			    &numbering, 0, nelmts,
+			    tconv_buf/*out*/)<0) {
+	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "gather failed");
     }
 
     /*
      * Perform data type conversion.
      */
-    if ((conv_func) (src_id, dst_id, nelmts, conv_buf, NULL) < 0) {
+    if ((tconv_func) (src_id, dst_id, nelmts, tconv_buf, NULL) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
 
     /*
-     * Copy conversion buffer into destination.
+     * Scatter the data into memory.
      */
-    HDmemcpy(buf, conv_buf, dst_size);
-
+    if ((sconv_func->mscat)(tconv_buf, H5T_get_size (mem_type), mem_space,
+			    &numbering, 0, nelmts, buf/*out*/)<0) {
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "scatter failed");
+    }
     ret_value = SUCCEED;
+    
   done:
-    if (src_id >= 0)
-	H5A_dec_ref(src_id);
-    if (dst_id >= 0)
-	H5A_dec_ref(dst_id);
-    conv_buf = H5MM_xfree(conv_buf);
+    if (src_id >= 0) H5A_dec_ref(src_id);
+    if (dst_id >= 0) H5A_dec_ref(dst_id);
+    tconv_buf = H5MM_xfree(tconv_buf);
     FUNC_LEAVE(ret_value);
 }
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5D_write
  *
@@ -953,8 +948,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     size_t	zero[H5O_LAYOUT_NDIMS];
     intn	i;
     herr_t	ret_value = FAIL;
-    uint8	*conv_buf = NULL;	/*data type conversion buffer	*/
-    H5T_conv_t	conv_func = NULL;	/*data type conversion function */
+    uint8	*tconv_buf = NULL;	/*data type conversion buffer	*/
+    H5T_conv_t	tconv_func = NULL;	/*data type conversion function */
     hid_t	src_id = -1, dst_id = -1; /*temporary type atoms	*/
 
     FUNC_ENTER(H5D_write, FAIL);
@@ -997,13 +992,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     nelmts = H5P_get_npoints(dataset->space);
     src_size = nelmts * H5T_get_size(mem_type);
     dst_size = nelmts * H5T_get_size(dataset->type);
-    conv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+    tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
 #endif
 
     /*
      * Locate the type conversion function.
      */
-    if (NULL == (conv_func = H5T_find(mem_type, dataset->type))) {
+    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
@@ -1011,12 +1006,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     /*
      * Gather data into the data type conversion buffer.
      */
-    HDmemcpy(conv_buf, buf, src_size);
+    HDmemcpy(tconv_buf, buf, src_size);
 
     /*
      * Perform data type conversion.
      */
-    if ((conv_func) (src_id, dst_id, nelmts, conv_buf, NULL) < 0) {
+    if ((tconv_func) (src_id, dst_id, nelmts, tconv_buf, NULL) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
@@ -1039,7 +1034,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     size[i] = H5T_get_size (dataset->type);
 #endif
     if (H5F_arr_write(dataset->ent.file, &(dataset->layout), size, offset,
-		      zero, size, conv_buf) < 0) {
+		      zero, size, tconv_buf) < 0) {
 	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
     }
     ret_value = SUCCEED;
@@ -1047,6 +1042,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
   done:
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
-    conv_buf = H5MM_xfree(conv_buf);
+    tconv_buf = H5MM_xfree(tconv_buf);
     FUNC_LEAVE(ret_value);
 }

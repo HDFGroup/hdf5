@@ -23,11 +23,11 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5Oprivate.h>         /*object headers                  */
 #include <H5Pprivate.h>         /* Data-space functions                   */
 
-#define PABLO_MASK      H5P_mask
 
 /* Interface initialization */
-static intn             interface_initialize_g = FALSE;
+#define PABLO_MASK      H5P_mask
 #define INTERFACE_INIT  H5P_init_interface
+static intn             interface_initialize_g = FALSE;
 static herr_t           H5P_init_interface(void);
 static void             H5P_term_interface(void);
 
@@ -891,4 +891,61 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_find
+ *
+ * Purpose:	Given source and destination data spaces (SRC and DST) this
+ *		function locates the data space conversion functions and
+ *		initializes CONV to point to them.
+ *
+ * Return:	Success:	Pointer to a data space conversion callback
+ *				list.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5P_conv_t *
+H5P_find (const H5P_t *src, const H5P_t *dst)
+{
+    static H5P_conv_t		_conv;
+    static const H5P_conv_t 	*conv = NULL;
+    
+    FUNC_ENTER (H5P_find, NULL);
+
+    /* Check args */
+    assert (src && H5P_SIMPLE==src->type);
+    assert (dst && H5P_SIMPLE==dst->type);
+
+    /*
+     * We can't do conversion if the source and destination select a
+     * different number of data points.
+     */
+    if (H5P_get_npoints (src) != H5P_get_npoints (dst)) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL,
+		       "src and dest data spaces are different sizes");
+    }
+
+    /*
+     * Initialize pointers.  This will eventually be a table lookup based
+     * on the source and destination data spaces, similar to H5T_find(), but
+     * for now we only support simple data spaces.
+     */
+    if (!conv) {
+	_conv.init = H5P_simp_init;
+	_conv.fgath = H5P_simp_fgath;
+	_conv.mscat = H5P_simp_mscat;
+	_conv.mgath = H5P_simp_mgath;
+	_conv.fscat = H5P_simp_fscat;
+	conv = &_conv;
+    }
+    
+    FUNC_LEAVE (conv);
 }
