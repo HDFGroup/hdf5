@@ -37,6 +37,9 @@ New Features
 
     Configuration:
     --------------
+        - Default of $prefix is changed to $PWD/hdf5 so that multiple
+	  builds using --srcdir is possible in the same machine.
+	  AKC - 2003/12/1
 
     Library:
     --------

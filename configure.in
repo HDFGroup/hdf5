@@ -48,6 +48,11 @@ AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
 dnl ----------------------------------------------------------------------
+dnl Set prefix default (install directory) to a directory in the build area.
+dnl This allows multiple src-dir builds within one host.
+AC_PREFIX_DEFAULT([`pwd`/hdf5])
+
+dnl ----------------------------------------------------------------------
 dnl Dump all shell variables values.
 dnl
 AC_MSG_CHECKING([shell variables initial values])
