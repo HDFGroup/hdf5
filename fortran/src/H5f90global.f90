@@ -186,7 +186,7 @@
 !
 ! H5E flags declaration
 !
-      INTEGER, PARAMETER :: H5E_FLAGS_LEN = 23
+      INTEGER, PARAMETER :: H5E_FLAGS_LEN = 24
       INTEGER H5E_flags(H5E_FLAGS_LEN)
       COMMON /H5E_FLAGS/ H5E_flags
 
