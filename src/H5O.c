@@ -1580,14 +1580,18 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
  *		Aug  7 1997
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-08-26
+ *		If new memory is allocated as a multiple of some alignment
+ *		then we're careful to initialize the part of the new memory
+ *		from the end of the expected message to the end of the new
+ *		memory.
  *-------------------------------------------------------------------------
  */
 static intn
 H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 {
     intn	idx, i;
-    size_t	delta;
+    size_t	delta, padding;
     uint8_t	*old_addr;
 
     FUNC_ENTER(H5O_alloc_extend_chunk, FAIL);
@@ -1652,6 +1656,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 	oh->mesg = x;
     }
     delta = MAX(H5O_MIN_SIZE, size+H5O_SIZEOF_MSGHDR(f));
+    padding = H5O_ALIGN(delta) - delta;
     delta = H5O_ALIGN(delta);
     idx = oh->nmesgs++;
     oh->mesg[idx].type = H5O_NULL;
@@ -1671,6 +1676,8 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		       "memory allocation failed");
     }
+    HDmemset(oh->chunk[chunkno].image+oh->chunk[chunkno].size-padding,
+	     0, padding);
     
     /* adjust raw addresses for messages of this chunk */
     if (old_addr != oh->chunk[chunkno].image) {
