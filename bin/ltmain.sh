@@ -2462,13 +2462,14 @@ EOF
         for foo in X $libs; do
           if test "$foo" != "X"; then
             if test -n "$bar"; then
-              bar='$bar ${wl}-rpath ${wl}$foo';
+              bar="$bar ${wl}-rpath ${wl}$foo";
             else
-              bar='${wl}-rpath ${wl}$foo';
+              bar="${wl}-rpath ${wl}$foo";
             fi;
           fi;
         done
         finalize_rpath="$bar";
+        compile_rpath="$bar"
         ;;
       *)
         finalize_rpath="$rpath";
