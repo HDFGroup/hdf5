@@ -23,7 +23,8 @@ TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
-PROGS=h5debug h5import h5ls h5repart h5dump h5dumptst @H5TOH4@ @PDB2HDF@
+PUB_PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@ @PDB2HDF@
+PROGS=$(PUB_PROGS) h5dumptst
 
 ## Source and object files for the library; do not install
 LIB_SRC=h5tools.c
