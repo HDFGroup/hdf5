@@ -377,7 +377,7 @@ test_attr_complex_read(void)
     char *fieldname;    /* Name of a field */
     size_t      offset; /* Attribute datatype field offset */
     hid_t   field;      /* Attribute field datatype */
-    struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]={}; /* Buffer for reading 4th attribute */
+    struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; /* Buffer for reading 4th attribute */
     int     i,j;
     size_t  name_len;   /* Length of attribute name */
     herr_t  ret;		/* Generic return value		*/

@@ -100,16 +100,8 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 
     assert (access_parms);
     assert (H5F_LOW_FAMILY==access_parms->driver);
-
-    /*
-     * Use the default file driver or the specified driver for each of the
-     * family members.
-     */
-    if (access_parms->u.fam.memb_access) {
-	memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
-    } else {
-	memb_type = H5F_low_class (H5F_LOW_DFLT);
-    }
+    assert (access_parms->u.fam.memb_access);
+    memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
 
     /*
      * If we're truncating the file then delete all but the first family
@@ -386,14 +378,10 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(buf);
     assert (access_parms);
     assert (H5F_LOW_FAMILY==access_parms->driver);
+    assert (access_parms->u.fam.memb_access);
 
     /* Get the member driver */
-    if (access_parms->u.fam.memb_access) {
-	memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
-    } else {
-	memb_type = H5F_low_class (H5F_LOW_DFLT);
-    }
-    
+    memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
     member_size = (hsize_t) 1 << lf->u.fam.offset_bits;
     membno = H5F_FAM_MEMBNO(addr, lf->u.fam.offset_bits);
     offset = H5F_FAM_OFFSET(addr, lf->u.fam.offset_bits);
@@ -564,13 +552,10 @@ H5F_fam_access(const char *name, const H5F_access_t *access_parms,
     assert (name && *name);
     assert (access_parms);
     assert (H5F_LOW_FAMILY==access_parms->driver);
+    assert (access_parms->u.fam.memb_access);
 
     /* Get the driver for the family members */
-    if (access_parms->u.fam.memb_access) {
-	memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
-    } else {
-	memb_type = H5F_low_class (H5F_LOW_DFLT);
-    }
+    memb_type = H5F_low_class (access_parms->u.fam.memb_access->driver);
 
     /* Access the members */
     for (membno=0; /*void*/; membno++) {

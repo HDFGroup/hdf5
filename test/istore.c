@@ -272,7 +272,9 @@ test_extend(H5F_t *f, const char *prefix,
     max_corner[1] = 0;
     max_corner[2] = 0;
 
-    for (ctr = 0; H5V_vector_lt_s(ndims, max_corner, whole_size); ctr++) {
+    for (ctr = 0;
+	 H5V_vector_lt_s(ndims, max_corner, (hssize_t*)whole_size);
+	 ctr++) {
 
 	/* Size and location */
 	if (0 == ctr) {

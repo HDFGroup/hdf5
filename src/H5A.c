@@ -105,6 +105,7 @@ H5A_init_interface(void)
 static void
 H5A_term_interface(void)
 {
+    H5I_destroy_group (H5_ATTR);
 }
 
 
@@ -213,14 +214,13 @@ H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
  *		April 2, 1998
  *
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static hid_t
 H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5S_t *space)
 {
     H5A_t       *attr = NULL;
-    H5A_t       *found_attr = NULL;
+    H5A_t       found_attr;
     intn        seq=0;
     hid_t	    ret_value = FAIL;
 
@@ -256,14 +256,19 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type, const H5
 
     /* Read in the existing attributes to check for duplicates */
     seq=0;
-    while((found_attr=H5O_read(&(attr->ent), H5O_ATTR, seq, NULL))!=NULL)
-      {
-        /* Compare found attribute name to new attribute name reject creation if names are the same */
-        if(HDstrcmp(found_attr->name,attr->name)==0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL,
-                "attribute already exists");
-        seq++;
-      } /* end while */
+    while(H5O_read(&(attr->ent), H5O_ATTR, seq, &found_attr)!=NULL) {
+        /*
+	 * Compare found attribute name to new attribute name reject creation
+	 * if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,attr->name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL,
+			"attribute already exists");
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	seq++;
+    } /* end while */
 
     /* Create the attribute message and save the attribute index */
     if (H5O_modify(&(attr->ent), H5O_ATTR, H5O_NEW_MESG, 0, attr) < 0) 
@@ -309,8 +314,8 @@ done:
 static int
 H5A_get_index(H5G_entry_t *ent, const char *name)
 {
-    H5A_t      *found_attr = NULL;
-    int		    ret_value = FAIL;
+    H5A_t      	found_attr;
+    int		ret_value=FAIL, i;
 
     FUNC_ENTER(H5A_get_index, FAIL);
 
@@ -318,18 +323,25 @@ H5A_get_index(H5G_entry_t *ent, const char *name)
     assert(name);
 
     /* Look up the attribute for the object */
-    ret_value=0;
-    while((found_attr=H5O_read(ent, H5O_ATTR, ret_value, NULL))!=NULL)
-      {
-          /* Compare found attribute name to new attribute name reject creation if names are the same */
-          if(HDstrcmp(found_attr->name,name)==0)
-              break;
-          ret_value++;
-      } /* end while */
-    if(found_attr==NULL) {
+    i=0;
+    while(H5O_read(ent, H5O_ATTR, i, &found_attr)!=NULL) {
+	/*
+	 * Compare found attribute name to new attribute name reject creation
+	 * if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    ret_value = i;
+	    break;
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	i++;
+    } /* end while */
+    
+    if(ret_value<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL,
 		      "attribute not found");
-      }
+    }
 
     FUNC_LEAVE(ret_value);
 } /* H5A_get_index() */
@@ -479,13 +491,8 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
     /* check args */
     assert(ent);
 
-    /* Build the attribute information */
-    if((attr = H5MM_xcalloc(1, sizeof(H5A_t)))==NULL)
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		      "unable to allocate space for attribute info");
-
     /* Read in attribute with H5O_read() */
-    if (NULL==(H5O_read(ent, H5O_ATTR, idx, attr))) {
+    if (NULL==(attr=H5O_read(ent, H5O_ATTR, idx, attr))) {
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to load attribute info from dataset header");
     }
@@ -1077,7 +1084,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_entry_t    *ent = NULL;     /* Symbol table entry of object to attribute */
     void           *obj = NULL;
-    H5A_t          *found_attr = NULL;
+    H5A_t          found_attr;
     int		        ret_value = 0;
 
     FUNC_ENTER(H5Anum_attrs, FAIL);
@@ -1105,12 +1112,15 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 
     /* Look up the attribute for the object */
     if((int)*attr_num<H5O_count(ent, H5O_ATTR))   /* Make certain the start point is reasonable */
-        while((found_attr=H5O_read(ent, H5O_ATTR, *attr_num, NULL))!=NULL)
+        while(H5O_read(ent, H5O_ATTR, *attr_num, &found_attr)!=NULL)
           {
               /* Compare found attribute name to new attribute name reject creation if names are the same */
               (*attr_num)++;
-              if((ret_value=op(loc_id,found_attr->name,op_data))!=0)
+              if((ret_value=op(loc_id,found_attr.name,op_data))!=0) {
+		  H5O_reset (H5O_ATTR, &found_attr);
                   break;
+	      }
+	      H5O_reset (H5O_ATTR, &found_attr);
           } /* end while */
 
     FUNC_LEAVE(ret_value);
@@ -1140,11 +1150,11 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
-    H5A_t          *found_attr = NULL;
+    H5A_t          found_attr;
     H5G_entry_t    *ent = NULL;     /* Symbol table entry of object to attribute */
     void           *obj = NULL;
-    intn            idx=0;
-    hid_t		    ret_value = FAIL;
+    intn            idx=0, found=-1;
+    herr_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Aopen_name, FAIL);
 
@@ -1168,20 +1178,26 @@ H5Adelete(hid_t loc_id, const char *name)
 
     /* Look up the attribute for the object */
     idx=0;
-    while((found_attr=H5O_read(ent, H5O_ATTR, idx, NULL))!=NULL)
-      {
-          /* Compare found attribute name to new attribute name reject creation if names are the same */
-          if(HDstrcmp(found_attr->name,name)==0)
-              break;
-          idx++;
-      } /* end while */
-    if(found_attr==NULL) {
+    while(H5O_read(ent, H5O_ATTR, idx, &found_attr)!=NULL) {
+	/*
+	 * Compare found attribute name to new attribute name reject
+	 * creation if names are the same.
+	 */
+	if(HDstrcmp(found_attr.name,name)==0) {
+	    H5O_reset (H5O_ATTR, &found_attr);
+	    found = idx;
+	    break;
+	}
+	H5O_reset (H5O_ATTR, &found_attr);
+	idx++;
+    } /* end while */
+    if (found<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL,
 		      "attribute not found");
-      }
+    }
 
     /* Delete the attribute from the location */
-    if ((ret_value=H5O_remove(ent, H5O_ATTR, idx)) < 0) 
+    if ((ret_value=H5O_remove(ent, H5O_ATTR, found)) < 0) 
         HRETURN_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL,
             "can't delete attribute header message");
 
@@ -1209,41 +1225,17 @@ H5Adelete(hid_t loc_id, const char *name)
 herr_t
 H5Aclose(hid_t attr_id)
 {
-    H5A_t		   *attr = NULL;
-    herr_t		    ret_value = FAIL;
-
     FUNC_ENTER(H5Aclose, FAIL);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
-            (NULL == (attr = H5I_object(attr_id)))) {
+	NULL == H5I_object(attr_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute");
     }
 
-    /* Check if the attribute has any data yet, if not, fill with zeroes */
-    if(!attr->initialized) {
-        uint8 *tmp_buf=H5MM_xcalloc(1,attr->data_size);
-
-        if (NULL == tmp_buf) {
-            HRETURN_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL,
-                "can't allocate attribute fill-value");
-        }
-
-        /* Go write the fill data to the attribute */
-        if ((ret_value=H5A_write(attr,attr->dt,tmp_buf))<0) {
-            HRETURN_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL,
-                "can't write attribute");
-        }
-
-        /* Free temporary buffer */
-        H5MM_xfree(tmp_buf);
-    } /* end if */
-
-    /* Free the memory used for the attribute */
-    H5A_close(attr);
-    ret_value=SUCCEED;
-
-    FUNC_LEAVE(ret_value);
+    /* Decrement references to that atom (and close it) */
+    H5I_dec_ref (attr_id);
+    FUNC_LEAVE(SUCCEED);
 } /* H5Aclose() */
 
 
@@ -1319,6 +1311,25 @@ H5A_close(H5A_t *attr)
     FUNC_ENTER(H5A_close, FAIL);
 
     assert(attr);
+
+    /* Check if the attribute has any data yet, if not, fill with zeroes */
+    if(attr->ent_opened && !attr->initialized) {
+        uint8 *tmp_buf=H5MM_xcalloc(1,attr->data_size);
+
+        if (NULL == tmp_buf) {
+            HRETURN_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL,
+                "can't allocate attribute fill-value");
+        }
+
+        /* Go write the fill data to the attribute */
+        if (H5A_write(attr,attr->dt,tmp_buf)<0) {
+            HRETURN_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL,
+                "can't write attribute");
+        }
+
+        /* Free temporary buffer */
+        H5MM_xfree(tmp_buf);
+    } /* end if */
 
     /* Free dynamicly allocated items */
     if(attr->name)

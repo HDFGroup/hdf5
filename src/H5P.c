@@ -1449,8 +1449,8 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
 	      const char *raw_ext, hid_t raw_tid)
 {
     H5F_access_t	*tmpl = NULL;
-    H5F_access_t	*meta_tmpl = NULL;
-    H5F_access_t	*raw_tmpl = NULL;
+    H5F_access_t	*meta_tmpl = &H5F_access_dflt;
+    H5F_access_t	*raw_tmpl = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_split, FAIL);
 
@@ -1462,13 +1462,13 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
     }
     if (H5P_DEFAULT!=meta_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(meta_tid) ||
-	 NULL == (tmpl = H5I_object(meta_tid)))) {
+	 NULL == (meta_tmpl = H5I_object(meta_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
     if (H5P_DEFAULT!=raw_tid &&
 	(H5P_FILE_ACCESS != H5Pget_class(raw_tid) ||
-	 NULL == (tmpl = H5I_object(raw_tid)))) {
+	 NULL == (raw_tmpl = H5I_object(raw_tid)))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a file access template");
     }
@@ -1498,11 +1498,8 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
  *		if META_PROPERTIES and/or RAW_PROPERTIES are non-null then
  *		the file access property list of the meta file and/or raw
  *		file is copied and its OID returned through these arguments.
- *		If the meta file or raw file has no property list then an OID
- *		of FAIL (-1) is returned but the H5Pget_split() function
- *		still returns SUCCEED. In the future, additional arguments
- *		may be added to this function to match those added to
- *		H5Pset_sec2().
+ *		In the future, additional arguments may be added to this
+ *		function to match those added to H5Pset_sec2().
  *
  * Return:	Success:	SUCCEED
  *
@@ -1556,18 +1553,19 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
 	    strncpy (raw_ext, ".raw", raw_ext_size);
 	}
     }
-    if (meta_properties && tmpl->u.split.meta_access) {
+    if (meta_properties) {
+	assert (tmpl->u.split.meta_access);
 	*meta_properties = H5P_create (H5P_FILE_ACCESS,
 				       H5P_copy (H5P_FILE_ACCESS,
 						 tmpl->u.split.meta_access));
     }
-    if (raw_properties && tmpl->u.split.raw_access) {
+    if (raw_properties) {
+	assert (tmpl->u.split.raw_access);
 	*raw_properties = H5P_create (H5P_FILE_ACCESS,
 				      H5P_copy (H5P_FILE_ACCESS,
 						tmpl->u.split.raw_access));
     }
     
-
     FUNC_LEAVE (SUCCEED);
 }
 
@@ -1629,12 +1627,9 @@ H5Pset_family (hid_t tid, size_t offset_bits, hid_t memb_tid)
  * Purpose:	If the file access property list is set to the family driver
  *		then this function returns zero; otherwise it returns a
  *		negative value.	 On success, if MEMB_TID is a non-null
- *		pointer it will be initialized with the OID of a copy of the
- *		file access template used for the family members.  If the
- *		family members have no file access template (that is, they
- *		are using the default values) then FAIL (-1) is returned for
- *		the member property list OID but the function still returns
- *		SUCCEED.  In the future, additional arguments may be added to
+ *		pointer it will be initialized with the id of an open
+ *		property list: the file access property list for the family
+ *		members.  In the future, additional arguments may be added to
  *		this function to match those added to H5Pset_family().
  *
  * Return:	Success:	SUCCEED
@@ -1667,12 +1662,11 @@ H5Pget_family (hid_t tid, size_t *offset_bits/*out*/, hid_t *memb_tid/*out*/)
     }
 
     /* Output args */
-    if (memb_tid && tmpl->u.fam.memb_access) {
+    if (memb_tid) {
+	assert (tmpl->u.fam.memb_access);
 	*memb_tid = H5P_create (H5P_FILE_ACCESS,
 				H5P_copy (H5P_FILE_ACCESS,
 					  tmpl->u.fam.memb_access));
-    } else if (memb_tid) {
-	*memb_tid = FAIL;
     }
     if (offset_bits) *offset_bits = tmpl->u.fam.offset_bits;
 	

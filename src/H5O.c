@@ -786,7 +786,11 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
  *		the null pointer, then this function will malloc() memory
  *		to hold the result and return its pointer instead.
  *
- * Return:	Success:	Ptr to message in native format.
+ * Return:	Success:	Ptr to message in native format.  The message
+ *				should be freed by calling H5O_reset().  If
+ *				MESG is a null pointer then the caller should
+ *				also call H5MM_xfree() on the return value
+ *				after calling H5O_reset().
  *
  *		Failure:	NULL
  *

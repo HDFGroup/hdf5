@@ -250,6 +250,34 @@ H5T_init_interface(void)
     FUNC_LEAVE(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_unlock_cb
+ *
+ * Purpose:	Clear the locked flag for a data type.  This function is
+ *		called when the library is closing in order to unlock all
+ *		registered data types and thus make them free-able.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 27, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static intn
+H5T_unlock_cb (void *dt, const void __unused__ *key)
+{
+    FUNC_ENTER (H5T_unlock_cb, FAIL);
+    assert (dt);
+    ((H5T_t*)dt)->locked = FALSE;
+    FUNC_LEAVE (0);
+}
+
 /*--------------------------------------------------------------------------
  NAME
     H5T_term_interface
@@ -333,33 +361,9 @@ H5T_term_interface(void)
 	(cfunc)(FAIL, FAIL, pcdata, 0, NULL, NULL);
     }
 
+    /* Unlock all datatypes, then free them */
+    H5I_search (H5_DATATYPE, H5T_unlock_cb, NULL);
     H5I_destroy_group(H5_DATATYPE);
-    H5T_NATIVE_CHAR_g = FAIL;
-    H5T_NATIVE_UCHAR_g = FAIL;
-    H5T_NATIVE_SHORT_g = FAIL;
-    H5T_NATIVE_USHORT_g = FAIL;
-    H5T_NATIVE_INT_g = FAIL;
-    H5T_NATIVE_UINT_g = FAIL;
-    H5T_NATIVE_LONG_g = FAIL;
-    H5T_NATIVE_LLONG_g = FAIL;
-    H5T_NATIVE_ULLONG_g = FAIL;
-    H5T_NATIVE_HYPER_g = FAIL;
-    H5T_NATIVE_UHYPER_g = FAIL;
-    H5T_NATIVE_INT8_g = FAIL;
-    H5T_NATIVE_UINT8_g = FAIL;
-    H5T_NATIVE_INT16_g = FAIL;
-    H5T_NATIVE_UINT16_g = FAIL;
-    H5T_NATIVE_INT32_g = FAIL;
-    H5T_NATIVE_UINT32_g = FAIL;
-    H5T_NATIVE_INT64_g = FAIL;
-    H5T_NATIVE_UINT64_g = FAIL;
-    H5T_NATIVE_ULONG_g = FAIL;
-    H5T_NATIVE_FLOAT_g = FAIL;
-    H5T_NATIVE_DOUBLE_g = FAIL;
-    H5T_NATIVE_TIME_g = FAIL;
-    H5T_NATIVE_STRING_g = FAIL;
-    H5T_NATIVE_BITFIELD_g = FAIL;
-    H5T_NATIVE_OPAQUE_g = FAIL;
 }
 
 
@@ -2765,6 +2769,7 @@ H5T_close(H5T_t *dt)
 	if (dt && H5T_COMPOUND == dt->type) {
 	    for (i = 0; i < dt->u.compnd.nmembs; i++) {
 		H5MM_xfree(dt->u.compnd.memb[i].name);
+		H5T_close (dt->u.compnd.memb[i].type);
 	    }
 	    H5MM_xfree(dt->u.compnd.memb);
 	    H5MM_xfree(dt);

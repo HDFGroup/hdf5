@@ -153,9 +153,9 @@ H5F_init_interface(void)
     H5F_access_dflt.u.mpio.comm = MPI_COMM_SELF;
     H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
 #elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
-    /* Nothing to initialize */
+#   error "H5F_LOW_SPLIT cannot be a default file driver"
 #elif (H5F_LOW_DFLT == H5F_LOW_FAMILY)
-    H5F_access_dflt.u.fam.offset_bits = 26u; /*64MB members*/
+#   error "H5F_LOW_FAMILY cannot be a default file driver"
 #else
 #   error "Unknown default file driver"
 #endif

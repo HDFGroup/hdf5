@@ -58,7 +58,6 @@ static char		RcsId[] = "@(#)$Revision$";
    1/7/96  - Finished coding prototype
    6/10/97 - Moved into HDF5 library
  */
-
 #include <H5private.h>
 #include <H5Iprivate.h>
 #include <H5Eprivate.h>
