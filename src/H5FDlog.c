@@ -1216,7 +1216,7 @@ H5FD_log_flush(H5FD_t *_file)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
 
-    FUNC_ENTER(H5FD_log_seek, FAIL);
+    FUNC_ENTER(H5FD_log_flush, FAIL);
 
     if (file->eoa>file->eof) {
         if (-1==file_seek(file->fd, (file_offset_t)(file->eoa-1), SEEK_SET))
