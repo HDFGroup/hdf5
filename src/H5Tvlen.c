@@ -37,9 +37,6 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5T_init_vlen_interface
 static herr_t H5T_init_vlen_interface(void);
 
-/* Declare extern the free list for H5T_t's */
-H5FL_EXTERN(H5T_t);
-
 /* Local functions */
 static htri_t H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc);
 static herr_t H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
@@ -61,6 +58,19 @@ static htri_t H5T_vlen_disk_isnull(H5F_t *f, void *_vl);
 static herr_t H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf, void *_bg, hsize_t seq_len, hsize_t base_size);
 static herr_t H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
+
+/* Local variables */
+
+/* Default settings for variable-length allocation routines */
+static const H5T_vlen_alloc_info_t H5T_vlen_def_vl_alloc_info ={
+    H5D_XFER_VLEN_ALLOC_DEF,
+    H5D_XFER_VLEN_ALLOC_INFO_DEF,
+    H5D_XFER_VLEN_FREE_DEF,
+    H5D_XFER_VLEN_FREE_INFO_DEF
+};
+
+/* Declare extern the free list for H5T_t's */
+H5FL_EXTERN(H5T_t);
 
 
 /*--------------------------------------------------------------------------
@@ -1164,19 +1174,24 @@ H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t *vl_alloc_info)
     assert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
     assert(vl_alloc_info);
 
-    /* Check args */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+    /* Check for the default DXPL */
+    if(dxpl_id==H5P_DATASET_XFER_DEFAULT)
+        HDmemcpy(vl_alloc_info,&H5T_vlen_def_vl_alloc_info,sizeof(H5T_vlen_alloc_info_t));
+    else {
+        /* Check args */
+        if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
-    /* Get the allocation functions & information */
-    if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&vl_alloc_info->alloc_func)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
-    if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&vl_alloc_info->alloc_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
-    if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,&vl_alloc_info->free_func)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
-    if (H5P_get(plist,H5D_XFER_VLEN_FREE_INFO_NAME,&vl_alloc_info->free_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        /* Get the allocation functions & information */
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_NAME,&vl_alloc_info->alloc_func)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        if (H5P_get(plist,H5D_XFER_VLEN_ALLOC_INFO_NAME,&vl_alloc_info->alloc_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        if (H5P_get(plist,H5D_XFER_VLEN_FREE_NAME,&vl_alloc_info->free_func)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+        if (H5P_get(plist,H5D_XFER_VLEN_FREE_INFO_NAME,&vl_alloc_info->free_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
