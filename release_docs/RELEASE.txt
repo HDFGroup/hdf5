@@ -90,29 +90,54 @@ Platforms Tested
 ================
 
 
-    AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
-                                  mpcc_r 3.6.6
-    Cray T3E sn6711 2.0.5.47      Cray Standard C Version 6.5.0.0
-    Cray SV1 10.0.0.8             Cray Standard C Version 6.5.0.0
-    FreeBSD 4.3                   gcc 2.95.2
-    HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
-    IRIX 6.5                      MIPSpro cc 7.30
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
-    Linux 2.4.4                   gcc-2.95.3
+    AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6.0
+                                  mpcc_r 3.6.6.0
+                                  xlf 07.01.0000.0002
+                                  mpxlf 07.01.0000.0002
+    AIX 4.3 (IBM SP RS6000)       C for AIX Compiler, Version 5.0.2.0
+                                  xlf 7.1.0.2
+                                  poe 2.4.0.14 (includes mpi)
+    Cray T3E sn6711 2.0.5.49a     Cray Standard C Version 6.5.0.1
+    Cray SV1 10.0.0.2             Cray Standard C Version 6.5.0.0  
+    FreeBSD 4.3                   gcc 2.95.3
                                   g++ 2.95.3
-    Linux 2.2.18smp               gcc-2.95.2
+    HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
+                                  HP F90 v2.3
+    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
+                                  HP F90 v2.4
+    HP-UX B.11.00 SysV            HP C  HP92453-01 A.11.01.20 
+                                  HP F90 v2.4
+    IRIX 6.5                      MIPSpro cc 7.30
+    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.2m
+    Linux 2.4.4                   gcc 2.95.3
+                                  g++ 2.95.3
+    Linux 2.2.18smp               gcc 2.95.2
+                                  gcc 2.95.2 with mpich 1.2.1
                                   g++ 2.95.2
-    OSF1 V4.0                     DEC-V5.2-040
+                                  pgf90 3.2-4
+    OSF1 V4.0                     DEC-V5.2-040 on Digital UNIX V4.0 (Rev 564)
                                   Digital Fortran 90 V4.1-270
     SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
-     (Solaris 2.6)                
-
+     (Solaris 2.6)                WorkShop Compilers 5.0 98/10/25 FORTRAN 90 
+                                          2.0 Patch 107356-04
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
-     (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0
-    TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
+     (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0 
+                                  Workshop Compilers 5.0 98/10/25 FORTRAN 90
+                                          2.0 Patch 107356-04 
+    SunOS 5.8/32                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
+     (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
+                                          2000/09/11
+                                  Sun WorkShop 6 update 1 C++ 5.2 2000/09/11
+    SunOS 5.8/64                  Sun WorkShop 6 update 1 C 5.2 2000/09/11
+     (Solaris 2.8)                Sun WorkShop 6 update 1 Fortran 95 6.1 
+                                          2000/09/11
+                                  Sun WorkShop 6 update 1 C++ 5.2 2000/09/11
+    TFLOPS r1.0.4 v4.0.7 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
+                                          local modifications
     Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
+    Windows NT4.0                 Code Warrior 6.0
     Windows 98                    MSVC++ 6.0
+                                  DEC Visual Fortran 6.0
 
 
 Supported Configuration Features Summary
