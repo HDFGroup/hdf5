@@ -31,14 +31,18 @@ LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
     H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c H5Oshared.c \
     H5Ostab.c H5P.c H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c \
     H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c H5Tinit.c \
-    H5TB.c H5V.c H5Z.c PabloHDF5.c PabloHDF_RT.c PabloHDF_SDDF.c
+    H5TB.c H5V.c H5Z.c PabloHDF.c PabloHDF_RT.c PabloHDF_SDDF.c
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
 # Temporary files
 MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
 
-# Public header files (to be installed)...
+# Pablo header files (to be installed)...
+PABLO_HDR = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
+            ProcTrace.inc
+
+# Public header files ...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h \
     H5Epublic.h H5Fpublic.h H5Gpublic.h H5HGpublic.h H5HLpublic.h \
     H5Ipublic.h H5MFpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
@@ -93,6 +97,12 @@ install: $(LIB)
 	      (set -x; $(INSTALL_DATA) $$f $(libdir)/. || exit 1);	      \
 	   fi;								      \
 	done
+	@test -d $(includedir) || mkdir $(includedir)
+	@for f in X $(PABLO_HDR); do                                          \
+	    if test $$f != X; then                                            \
+	      (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);        \
+	    fi                                                                \
+	done
 
 # Removes those things that `make install' (would have) installed.
 uninstall:
@@ -110,7 +120,7 @@ mostlyclean:
 # is part of the HDF5 distribution.
 #
 clean: mostlyclean
-	$(RM) $(LIB) $(TESTS) $(PROGS) $(CLEAN)
+	$(RM) $(LIB) $(TESTS) $(PROGS) $(CLEAN) $(PABLO_CLEAN)
 
 # Like `clean' except it also removes files that were created by running
 # configure.  If you've unpacked the source and built HDF5 without creating
@@ -138,10 +148,44 @@ maintainer-clean: distclean
 .c.o: 
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c
 
-PABLO_INCLUDES = HDFentryNames.h HDFidList.h HDF5record_RT.h ProcIDs.h \
-	         ProcTrace.h
+PABLO_INCLUDES = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
+                 ProcTrace.inc
 
-PabloHDF5.o: PabloHDF5.c $(PABLO_INCLUDES)
+PABLO_CLEAN = HDFentryNames.h HDFidList.h ProcMasks.h HDFentries.txt
+
+HDFentries.txt: ../src/*.c
+	grep "FUNC_ENTER.*(H5" ../src/*.c | \
+	sed "s/.*(H5/H5/;s/[,)].*//" | sort -u > $@
+
+HDFentryNames.h: HDFentries.txt
+	sed "s/.*/\"&\",/" $? > $@
+
+HDFidList.h: HDFentries.txt
+	sed "s/.*/ID_&,/" $? > $@
+	echo ID_ALLHDF, >> $@
+	grep "#define[ 	]*PABLO_MASK" ../src/*.c | \
+	sed "s/.*H5/ID_H5/;s/mask.*/c,/" | sort -u >> $@
+
+ProcMasks.h: ../src/*.c
+	grep "#define[ 	]*PABLO_MASK" ../src/*.c | \
+	sed "s/.*[ 	]H5/H5/;s/_mask.*//;s/.*/#define &_mask ID_&_c/" >$@
+
+ProcIDs.h: HDFidList.h ProcMasks.h
+
+ProcTrace.inc: HDFidList.h
+	sed "=" $? | sed -f PabloSedscr > $@
+	echo "      integer RuntimeTrace"  >> $@
+	echo "      integer SummaryTrace"  >> $@
+	echo "      integer MPIRuntimeTrace"  >> $@
+	echo "      integer MPISummaryTrace"  >> $@
+	echo "      integer NoTrace"  >> $@
+	echo "      parameter (RuntimeTrace = 0)"  >> $@
+	echo "      parameter (SummaryTrace = 1)"  >> $@
+	echo "      parameter (MPIRuntimeTrace = 2)"  >> $@
+	echo "      parameter (MPISummaryTrace = 3)"  >> $@
+	echo "      parameter (NoTrace = 4)"  >> $@
+
+PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES)
@@ -149,13 +193,6 @@ PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES)
 
 PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
-
-HDFentryNames.h: HDFentries.txt
-	sort $? | sed "s/.*/\"&\",/" > $@
-
-HDFidList.h: HDFentries.txt
-	sort $? | sed "s/.*/ID_&,/" > $@
-
 #------------------------------------------------------------------------------
 # The following section of this makefile contains dependencies between the
 # source files and the header files.  If GNU make and GCC are being used then
