@@ -14,7 +14,7 @@ verbose=yes
 if test "X$srcdir" = X; then
     srcdir=.
 fi
-mkdir testfiles >/dev/null 2>&1
+test -d testfiles || mkdir testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -39,6 +39,8 @@ TOOLTEST()
     shift
 
     # Run test.
+    # Stderr is included in stdout so that the diff can detect
+    # any unexpected output from that stream too.
     TESTING $h5tool $@
     (
 	echo "#############################"

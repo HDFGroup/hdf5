@@ -13,7 +13,7 @@ verbose=yes
 if test "X$srcdir" = X; then
     srcdir=.
 fi
-mkdir testfiles >/dev/null 2>&1
+test -d testfiles || mkdir testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -38,14 +38,16 @@ TOOLTEST()
     full=`pwd`/$h5tool
 
     # Run test.
+    # Stderr is included in stdout so that the diff can detect
+    # any unexpected output from that stream too.
     TESTING $h5tool $@
     (
 	echo "#############################"
 	echo "Expected output for '$h5tool $@'" 
 	echo "#############################"
 	cd $srcdir/testfiles
-        $RUNSERIAL $h5tool_bin "$@" 2>/dev/null
-    ) >$actual
+        $RUNSERIAL $h5tool_bin "$@"
+    ) >$actual 2>& 1
     
     if $CMP $expect $actual; then
 	echo " PASSED"
