@@ -15,6 +15,30 @@ fi
 #       from /usr/include/sys/cdefs.h
 CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE=1" 
 
+# Figure out C compiler flags
+. $srcdir/config/gnu-flags
+
+# Figure out Intel C compiler flags
+. $srcdir/config/intel-flags
+
+# The default Fortran 90 compiler
+if test "X-" = "X-$F9X"; then
+    case $CC_BASENAME in
+        gcc*|pgcc*)
+            F9X=gfortran40
+            F9X_BASENAME=gfortran40
+            ;;
+        icc*)
+            F9X=ifort
+            F9X_BASENAME=ifort
+            ;;
+        mpicc*)
+            F9X=mpif90
+            F9X_BASENAME=mpif90
+            ;;
+    esac
+fi
+
 #
 # HDF5 FORTRAN integers
 #
@@ -30,11 +54,11 @@ HID_T='SELECTED_INT_KIND(R_INTEGER)'
 SIZE_T='SELECTED_INT_KIND(R_INTEGER)'
 OBJECT_NAMELEN_DEFAULT_F=-1
 
-# Figure out C compiler flags
-. $srcdir/config/gnu-flags
-
 # Figure out FORTRAN compiler flags
 . $srcdir/config/gnu-fflags
+
+# Figure out Intel F90 compiler flags
+. $srcdir/config/intel-fflags
 
 # Special setup to use pthread support if enable-threadsafe is on.
 # Works with static executable only.

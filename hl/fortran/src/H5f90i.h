@@ -25,6 +25,7 @@
 #include <fortran.h>
 
 /*typedef char*              _fcd;*/
+typedef long               haddr_t_f;
 typedef long               hsize_t_f;
 typedef long               hssize_t_f;
 typedef long               size_t_f;
@@ -39,6 +40,7 @@ typedef double             real_f;
 #if defined(IBM6000) || defined(_AIX)
 
 typedef char              *_fcd;
+typedef long long         haddr_t_f;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
@@ -51,6 +53,7 @@ typedef float             real_f;
 /* MAC APPLE definitions with IBM XL compiler*/
 #if defined(__APPLE__)
 typedef char              *_fcd;
+typedef long long         haddr_t_f;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
@@ -65,61 +68,54 @@ typedef float             real_f;
 
 #endif /*APPLE*/
 
-
 /* LINUX definitions */
-#if (defined(i386) || defined(__i386__)) && (defined(linux) || defined(__linux__)) 
+#if (defined(linux) || defined(__gnu_linux__) || defined(__linux__))
 
-
-/*#error "LINUX definitions"*/
-
+/* Common definitions */
 typedef char              *_fcd;
-typedef long long         hsize_t_f;
-typedef long long         hssize_t_f;
-typedef int               size_t_f;
 typedef int               int_f;
 typedef int               hid_t_f;
 typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+
+/* IA32 specific definitions */
+#if (defined(i386) || defined(__i386) || defined(__i386__))
+
+typedef long long         haddr_t_f;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
 #if defined H5_ABSOFT
 #define DF_CAPFNAMES
 #else
 #define FNAME_POST_UNDERSCORE
 #endif /*H5_ABSOFT*/
-#define _fcdtocp(desc) (desc)
 
-#endif /*LINUX*/
+/* AMD64 specific definitions */
+#elif defined __x86_64__
 
-/* LINUX64 definitions */
-#if defined  __x86_64__
-
-typedef char              *_fcd;
+typedef long long         haddr_t_f;
 typedef long long         hsize_t_f;
 typedef long long         hssize_t_f;
 typedef int               size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
-#endif /*LINUX64*/
 
-/* IA64 LINUX definitions */
-#if defined __ia64
+/* IA64 specific definitions */
+#elif defined __ia64
 
-typedef char              *_fcd;
+typedef long              haddr_t_f;
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
 typedef long              size_t_f;
-typedef int               int_f;
-typedef int               hid_t_f;
-typedef float             real_f;
 #define FNAME_POST_UNDERSCORE
-#define _fcdtocp(desc) (desc)
 
-#endif /* IA64 LINUX*/
+#endif /* IA64 */
+#endif /* LINUX*/
 
 #if defined(IRIX) || defined(IRIS4) || defined(sgi) || defined(__sgi__) || defined(__sgi)
 
 typedef char          *_fcd;
+typedef long          haddr_t_f;
 typedef long          hsize_t_f;
 typedef long          hssize_t_f;
 typedef long          size_t_f;
@@ -133,6 +129,7 @@ typedef float         real_f;
 #if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
 
 typedef char              *_fcd;
+typedef long long         haddr_t_f;
 typedef long long         hssize_t_f;
 typedef long long         hsize_t_f;
 typedef int               size_t_f;
@@ -147,6 +144,7 @@ typedef float             real_f;
 #if defined DEC_ALPHA || (defined __alpha && defined __unix__ && !defined __linux__)
 
 typedef char             *_fcd;
+typedef long             haddr_t_f;
 typedef long             hsize_t_f;
 typedef long             hssize_t_f;
 typedef long             size_t_f;
@@ -161,9 +159,10 @@ typedef float            real_f;
 #if defined __alpha__ && defined __linux__
 
 typedef char             *_fcd;
-typedef long long            hsize_t_f;
-typedef long long            hssize_t_f;
-typedef long long            size_t_f;
+typedef long long        haddr_t_f;
+typedef long long        hsize_t_f;
+typedef long long        hssize_t_f;
+typedef long long        size_t_f;
 typedef int              int_f;
 typedef int              hid_t_f;
 typedef float            real_f;
@@ -175,8 +174,9 @@ typedef float            real_f;
 #if defined(HP9000) || (!defined(__convexc__) && (defined(hpux) || defined(__hpux)))
 
 typedef char           *_fcd;
-typedef long long           hsize_t_f;
-typedef long long          hssize_t_f;
+typedef long long      haddr_t_f;
+typedef long long      hsize_t_f;
+typedef long long      hssize_t_f;
 typedef long           size_t_f;
 typedef int            int_f;
 typedef int            hid_t_f;
@@ -189,6 +189,7 @@ typedef float          real_f;
 #if defined _WINDOWS || defined WIN32
 
 typedef char              *_fcd;
+typedef int               haddr_t_f;
 typedef int               hsize_t_f;
 typedef int               hssize_t_f;
 typedef int               size_t_f;
@@ -200,6 +201,40 @@ typedef float             real_f;
 #define _fcdtocp(desc) (desc)
 
 #endif /*WINDOWS */
+
+/* FreeBSD definitions */
+#if (defined(__FreeBSD) || defined(__FreeBSD__))
+
+/* Common definitions */
+typedef char              *_fcd;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+
+/* IA32 specific definitions */
+#if (defined(i386) || defined(__i386) || defined(__i386__))
+typedef long long         haddr_t_f;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+/* AMD64 specific definitions */
+#elif defined __x86_64__
+typedef long long         haddr_t_f;
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+/* IA64 specific definitions */
+#elif defined __ia64
+typedef long              haddr_t_f;
+typedef long              hsize_t_f;
+typedef long              hssize_t_f;
+typedef long              size_t_f;
+#endif /* IA64 */
+
+#define FNAME_POST_UNDERSCORE
+
+#endif /* FreeBSD */
 
 /*----------------------------------------------------------------
 ** MACRO FNAME for any fortran callable routine name.
