@@ -68,6 +68,7 @@ void print_pos( int *ph, unsigned int curr_pos, int *acc,
  */
 
 hid_t fixtype( hid_t f_type );
+void print_datatype(hid_t type);
 int check_n_input( const char* );
 int check_f_input( const char* );
 int get_index( const char *obj, int nobjects, info_t *info );
@@ -793,7 +794,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  hid_t   rank1, rank2; 
  void    *buf1, *buf2;
  hsize_t tot_cnt, tot_cnt1, tot_cnt2;
- hsize_t dims1[32], dims2[32];
+ hsize_t dims1[32], dims2[32], maxdim1[32], maxdim2[32];
  int     i, j;
  herr_t  status;
  H5T_class_t tclass1;
@@ -804,6 +805,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  hid_t   type_mem =-1; /* read to memory type */
  void    *edata;
  hid_t   (*func)(void*);
+ htri_t  is1, is2;
 
  /* disable error reporting */
  H5Eget_auto(&func, &edata);
@@ -857,16 +859,16 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   return -1;
 
  /* Get dimensions */
- if ( H5Sget_simple_extent_dims(space1_id,dims1,NULL) < 0 )
+ if ( H5Sget_simple_extent_dims(space1_id,dims1,maxdim1) < 0 )
   goto out;
 
  /* Get dimensions */
- if ( H5Sget_simple_extent_dims(space2_id,dims2,NULL) < 0 )
+ if ( H5Sget_simple_extent_dims(space2_id,dims2,maxdim2) < 0 )
   goto out;
 
 
 /*-------------------------------------------------------------------------
- * check for the same class datatype
+ * check for the same class 
  *-------------------------------------------------------------------------
  */
 
@@ -924,6 +926,21 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  }
 
 /*-------------------------------------------------------------------------
+ * check for equal datatype
+ *-------------------------------------------------------------------------
+ */
+
+ if ( (H5Tequal(type1_id, type2_id)==0) ) 
+ {
+  printf("Warning: <%s> has different storage datatype than <%s>\n", obj1_name, obj2_name );
+  printf("<%s> has datatype ", obj1_name);
+  print_datatype(type1_id);
+  printf(" and <%s> has datatype ", obj2_name);
+  print_datatype(type2_id);
+  printf("\n");
+ }
+
+/*-------------------------------------------------------------------------
  * check for the same rank
  *-------------------------------------------------------------------------
  */
@@ -944,6 +961,30 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   printf("]\n" );
   goto out;
  }
+
+/*-------------------------------------------------------------------------
+ * check for different maximum dimensions; just give a warning
+ *-------------------------------------------------------------------------
+ */
+
+ for (i = 0; i < rank1; i++) 
+ {
+  if ( maxdim1[i] != maxdim2[i] )
+  {
+   printf( "Warning: <%s> has different maximum dimensions than <%s>\n", obj1_name, obj2_name );
+   printf( "<%s>: ", obj1_name );
+   printf("[ " );  
+   for (j = 0; j < rank1; j++) 
+    printf("%d ", (int)maxdim1[j]  );
+   printf("]\n" );
+   printf( "<%s>: ", obj2_name );
+   printf("[ " );  
+   for (j = 0; j < rank1; j++) 
+    printf("%d ", (int)maxdim2[j]  );
+   printf("]\n" );
+  }
+ }
+
 
 /*-------------------------------------------------------------------------
  * check for the same dimensionality
@@ -969,6 +1010,15 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
   }
  }
 
+
+/*-------------------------------------------------------------------------
+ * check for simple dataspace
+ *-------------------------------------------------------------------------
+ */
+
+ is1 = H5Sis_simple(space1_id);
+ is2 = H5Sis_simple(space2_id);
+ 
 
  tot_cnt1 = 1;
  for (i = 0; i < rank1; i++) 
@@ -1749,7 +1799,7 @@ void print_class( H5T_class_t tclass, char *sclass )
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: march 5, 2003
+ * Date: March 5, 2003
  *
  * Comments: Adapted from h5tools_fixtype
  *
@@ -1820,4 +1870,106 @@ hid_t fixtype(hid_t f_type)
 
 
 
+/*-------------------------------------------------------------------------
+ * Function: print_datatype
+ *
+ * Purpose: Print name of datatype 
+ *
+ * Return: 
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: April 17, 2003
+ *
+ * Comments: Adapted from h5dump for H5T_INTEGER and H5T_FLOAT classes only
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void print_datatype(hid_t type)
+{
+ switch (H5Tget_class(type)) 
+ {
+ default:
+  return;
+ case H5T_INTEGER:
+  if (H5Tequal(type, H5T_STD_I8BE)) {
+   printf("H5T_STD_I8BE");
+  } else if (H5Tequal(type, H5T_STD_I8LE)) {
+   printf("H5T_STD_I8LE");
+  } else if (H5Tequal(type, H5T_STD_I16BE)) {
+   printf("H5T_STD_I16BE");
+  } else if (H5Tequal(type, H5T_STD_I16LE)) {
+   printf("H5T_STD_I16LE");
+  } else if (H5Tequal(type, H5T_STD_I32BE)) {
+   printf("H5T_STD_I32BE");
+  } else if (H5Tequal(type, H5T_STD_I32LE)) {
+   printf("H5T_STD_I32LE");
+  } else if (H5Tequal(type, H5T_STD_I64BE)) {
+   printf("H5T_STD_I64BE");
+  } else if (H5Tequal(type, H5T_STD_I64LE)) {
+   printf("H5T_STD_I64LE");
+  } else if (H5Tequal(type, H5T_STD_U8BE)) {
+   printf("H5T_STD_U8BE");
+  } else if (H5Tequal(type, H5T_STD_U8LE)) {
+   printf("H5T_STD_U8LE");
+  } else if (H5Tequal(type, H5T_STD_U16BE)) {
+   printf("H5T_STD_U16BE");
+  } else if (H5Tequal(type, H5T_STD_U16LE)) {
+   printf("H5T_STD_U16LE");
+  } else if (H5Tequal(type, H5T_STD_U32BE)) {
+   printf("H5T_STD_U32BE");
+  } else if (H5Tequal(type, H5T_STD_U32LE)) {
+   printf("H5T_STD_U32LE");
+  } else if (H5Tequal(type, H5T_STD_U64BE)) {
+   printf("H5T_STD_U64BE");
+  } else if (H5Tequal(type, H5T_STD_U64LE)) {
+   printf("H5T_STD_U64LE");
+  } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+   printf("H5T_NATIVE_SCHAR");
+  } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+   printf("H5T_NATIVE_UCHAR");
+  } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+   printf("H5T_NATIVE_SHORT");
+  } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+   printf("H5T_NATIVE_USHORT");
+  } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+   printf("H5T_NATIVE_INT");
+  } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+   printf("H5T_NATIVE_UINT");
+  } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+   printf("H5T_NATIVE_LONG");
+  } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+   printf("H5T_NATIVE_ULONG");
+  } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+   printf("H5T_NATIVE_LLONG");
+  } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+   printf("H5T_NATIVE_ULLONG");
+  } else {
+   printf("undefined integer");
+  }
+  break;
+  
+ case H5T_FLOAT:
+  if (H5Tequal(type, H5T_IEEE_F32BE)) {
+   printf("H5T_IEEE_F32BE");
+  } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+   printf("H5T_IEEE_F32LE");
+  } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+   printf("H5T_IEEE_F64BE");
+  } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+   printf("H5T_IEEE_F64LE");
+  } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+   printf("H5T_NATIVE_FLOAT");
+  } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+   printf("H5T_NATIVE_DOUBLE");
+  } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+   printf("H5T_NATIVE_LDOUBLE");
+  } else {
+   printf("undefined float");
+  }
+  break;
+   
+ }/*switch*/
+}
 

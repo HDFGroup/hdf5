@@ -35,6 +35,8 @@ int main(int argc, const char *argv[])
 
 
 
+
+
 /*-------------------------------------------------------------------------
  * these command line options are tested in ./testh5diff.sh
  *-------------------------------------------------------------------------
@@ -55,6 +57,13 @@ dset1.1 dset1.4 h5diff_test1.h5 h5diff_test2.h5
 dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
 # test 1.6
 dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.7
+dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
+# test 1.8
+dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
+# test 1.9
+dset1.9 dset1.9 h5diff_test1.h5 h5diff_test2.h5
 
 #######################################################
 # Different datatype sizes and different mix of options 
@@ -142,6 +151,7 @@ int do_test_files(void)
  hid_t   dataset_id;
  hid_t   space_id;  
  hid_t   group_id;
+ hid_t   plist_id;
  hid_t   type_id, type2_id;  
  herr_t  status;
  int     val;
@@ -149,6 +159,8 @@ int do_test_files(void)
  /* Test 1. */
  hsize_t dims1  [1] = { 7 };
  hsize_t dims1_1[1] = { 8 };
+ hsize_t maxdim [1] = { 8 }; 
+ hsize_t dims0  [1] = { 1 };
  hsize_t dims2  [2] = { 3,2 };
  char    data1_3[]  = {"A string"};
  float   data1_4[7] = {1,1,3,4,5,6,7};
@@ -322,6 +334,47 @@ int do_test_files(void)
  write_dataset(file2_id,1,dims1_1,"dset1.6",H5T_NATIVE_INT,NULL);
 
 /*-------------------------------------------------------------------------
+ * Test 1.7
+ * Check for the same maximum dimensions. Give a warning if they are different
+ *-------------------------------------------------------------------------
+ */
+
+ space_id = H5Screate_simple(1,dims1,dims1);
+ dataset_id = H5Dcreate(file1_id,"dset1.7",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ status = H5Dclose(dataset_id);
+ status = H5Sclose(space_id);
+ space_id = H5Screate_simple(1,dims1,maxdim);
+ plist_id = H5Pcreate(H5P_DATASET_CREATE);
+ status = H5Pset_chunk(plist_id,1,dims1);
+ dataset_id = H5Dcreate(file2_id,"dset1.7",H5T_NATIVE_INT,space_id,plist_id);
+ status = H5Dclose(dataset_id);
+ status = H5Sclose(space_id);
+
+/*-------------------------------------------------------------------------
+ * Test 1.8
+ * Check for different storage order. Give a warning if they are different
+ *-------------------------------------------------------------------------
+ */
+
+ write_dataset(file1_id,1,dims1,"dset1.8",H5T_STD_I32BE,0);
+ write_dataset(file2_id,1,dims1,"dset1.8",H5T_STD_I32LE,0);
+
+/*-------------------------------------------------------------------------
+ * Test 1.9
+ * Check for H5S_SCALAR dataspace vs simple dataspace with 1 element     
+ *-------------------------------------------------------------------------
+ */
+
+ space_id = H5Screate(H5S_SCALAR);
+ dataset_id = H5Dcreate(file1_id,"dset1.9",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ status = H5Dclose(dataset_id);
+ status = H5Sclose(space_id);
+ space_id = H5Screate_simple(0,dims0,NULL);
+ dataset_id = H5Dcreate(file2_id,"dset1.9",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ status = H5Dclose(dataset_id);
+ status = H5Sclose(space_id);
+
+/*-------------------------------------------------------------------------
  * Test 2.1
  * Check H5T_NATIVE_CHAR data
  *-------------------------------------------------------------------------
@@ -456,5 +509,7 @@ int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name
  return 0;
 
 }
+
+
 
 

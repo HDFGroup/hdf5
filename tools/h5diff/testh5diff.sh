@@ -152,6 +152,15 @@ TOOLTEST h5diff_15.txt dset1.1 dset1.5 h5diff_test1.h5 h5diff_test2.h5
 # test 1.6: Check for the same current dimensions
 TOOLTEST h5diff_16.txt dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
 
+# test 1.7 Check for the same maximum dimensions
+TOOLTEST h5diff_17.txt dset1.7 dset1.7 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.8 Check for different storage order
+TOOLTEST h5diff_18.txt dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
+
+# test 1.9 Check for H5S_SCALAR dataspace vs simple dataspace with 1 element
+TOOLTEST h5diff_19.txt dset1.9 dset1.9 h5diff_test1.h5 h5diff_test2.h5
+
 ##############################################################################
 # tests 2., Different datatype sizes and different mix of options 
 ##############################################################################
