@@ -34,6 +34,7 @@ int make_deflate(hid_t loc_id);
 int make_shuffle(hid_t loc_id);
 int make_fletcher32(hid_t loc_id);
 int make_nbit(hid_t loc_id);
+int make_scaleoffset(hid_t loc_id);
 int make_all(hid_t loc_id);
 int make_fill(hid_t loc_id);
 
@@ -165,6 +166,15 @@ int make_testfiles(void)
  if((loc_id = H5Fcreate(FNAME12,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
  if (make_nbit(loc_id)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * create a file with the scaleoffset filter
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME13,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_scaleoffset(loc_id)<0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -711,6 +721,98 @@ int make_nbit(hid_t loc_id)
   H5Tclose(dtid);
   goto out;
  }
+ H5Dclose(dsid);
+#endif
+
+/*-------------------------------------------------------------------------
+ * close space and dcpl
+ *-------------------------------------------------------------------------
+ */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ 
+ return 0;                                                 
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_scaleoffset
+ *
+ * Purpose: make a dataset with the scaleoffset filter
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_scaleoffset(hid_t loc_id)
+{
+ hid_t    dcpl; /* dataset creation property list */
+ hid_t    sid;  /* dataspace ID */
+ hid_t    dtid;  
+ hid_t    dsid; 
+ hsize_t  dims[RANK]={DIM1,DIM2};
+ hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
+ int      buf[DIM1][DIM2];
+ int      i, j, n;
+
+ for (i=n=0; i<DIM1; i++){
+  for (j=0; j<DIM2; j++){
+   buf[i][j]=n++;
+  }
+ }
+ /* create a space */
+ if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+  return -1;
+ /* create a dataset creation property list; the same DCPL is used for all dsets */
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ /* set up chunk */
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+  goto out;
+
+ dtid = H5Tcopy(H5T_NATIVE_INT);
+
+#if defined (H5_HAVE_FILTER_NBIT)
+ /* remove the filters from the dcpl */
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0) 
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ if (H5Pset_scaleoffset(dcpl,31)<0) 
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ if((dsid = H5Dcreate (loc_id,"dset_scaleoffset",dtid,sid,dcpl))<0)
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ H5Dclose(dsid);
+ if((dsid = H5Dcreate (loc_id,"dset_none",dtid,sid,H5P_DEFAULT))<0)
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ {
+  H5Tclose(dtid);
+  goto out;
+ }
+ H5Tclose(dtid);
  H5Dclose(dsid);
 #endif
 

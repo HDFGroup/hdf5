@@ -118,6 +118,9 @@ static void print_obj(hid_t dcpl_id, char *name)
   case H5Z_FILTER_NBIT:
    strcat(str,"NBIT ");
    break;
+  case H5Z_FILTER_SCALEOFFSET:
+   strcat(str,"SCALEOFFSET ");
+   break;
   } /* switch */
  }/*i*/
 

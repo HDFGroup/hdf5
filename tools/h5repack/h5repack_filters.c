@@ -288,6 +288,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
  * H5Z_FILTER_SZIP       4 , szip compression 
  * H5Z_FILTER_NBIT       5 , nbit compression 
+ * H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression 
  *-------------------------------------------------------------------------
  */
 	
@@ -370,7 +371,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				if (H5Pset_fletcher32(dcpl_id)<0) 
 					return -1;
 				break;
-				/*-------------------------------------------------------------------------
+				/*----------- -------------------------------------------------------------
 				* H5Z_FILTER_NBIT , NBIT compression
 				*-------------------------------------------------------------------------
 				*/
@@ -378,6 +379,17 @@ int apply_filters(const char* name,    /* object name from traverse list */
 				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
 					return -1;
 				if (H5Pset_nbit(dcpl_id)<0) 
+					return -1;
+				break;
+				/*----------- -------------------------------------------------------------
+				* H5Z_FILTER_SCALEOFFSET , scale+offset compression
+				*-------------------------------------------------------------------------
+				*/
+			case H5Z_FILTER_SCALEOFFSET:
+				aggression=obj.filter[i].cd_values[0];
+				if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+					return -1;
+				if (H5Pset_scaleoffset(dcpl_id,aggression)<0) 
 					return -1;
 				break;
 			} /* switch */

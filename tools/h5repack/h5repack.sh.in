@@ -19,6 +19,11 @@ USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
 USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 USE_FILTER_NBIT="@USE_FILTER_NBIT@"
+#
+#  Leave these tests off for now. Enable when filter is ready
+:
+#USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
+USE_FILTER_SCALEOFFSET="no"
 
 
 H5REPACK=h5repack               # The tool name
@@ -307,9 +312,33 @@ else
  TOOLTEST $arg
 fi
 
+# scaleoffset add
+arg="test_scaleoffset.h5 -f dset_none:S+O=31"
+if test $USE_FILTER_SCALEOFFSET != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
+# scaleoffset copy
+arg="test_scaleoffset.h5"
+if test $USE_FILTER_SCALEOFFSET != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
+# scaleoffset remove
+arg="test_scaleoffset.h5 -f dset_scaleoffset:NONE"
+if test $USE_FILTER_SCALEOFFSET != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi        
+
 # remove all  filters
 arg="test_all.h5 -f NONE"
-if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  -o $USE_FILTER_NBIT != "yes"  ; then
+if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  -o $USE_FILTER_NBIT != "yes"  -o $USE_FILTER_SCALEOFFSET != "yes"  ; then
  SKIP $arg
 else
  TOOLTEST $arg

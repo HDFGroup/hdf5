@@ -1545,6 +1545,7 @@
 ./tools/testfiles/test_shuffle.h5
 ./tools/testfiles/test_szip.h5
 ./tools/testfiles/test_nbit.h5
+./tools/testfiles/test_scaleoffset.h5
 ./tools/testfiles/h5repack_info.txt
 
 # jam utility and tests

@@ -35,6 +35,7 @@
  *  SHUF, to apply the HDF5 shuffle filter
  *  FLET, to apply the HDF5 checksum filter
  *  NBIT, to apply the HDF5 NBIT filter (NBIT compression)
+ *  S+O, to apply the HDF5 scale+offset filter (compression)
  *  NONE, to remove the filter 
  *
  * Examples: 
@@ -284,6 +285,19 @@ obj_list_t* parse_filter(const char *str,
      exit(1);
     }
    }
+/*-------------------------------------------------------------------------
+ * H5Z_FILTER_SCALEOFFSET
+ *-------------------------------------------------------------------------
+ */
+   else if (strcmp(scomp,"S+O")==0)
+   {
+    filt->filtn=H5Z_FILTER_SCALEOFFSET;
+    if (no_param) { /*no more parameters, S+O must have parameter */
+     if (obj_list) free(obj_list);
+     printf("Input Error: Missing compression parameter in <%s>\n",str);
+     exit(1);
+    }
+   }
    else {
     if (obj_list) free(obj_list);
     printf("Input Error: Invalid filter type in <%s>\n",str);
@@ -327,6 +341,13 @@ obj_list_t* parse_filter(const char *str,
    exit(1);
   }
   break;
+ case H5Z_FILTER_SCALEOFFSET:
+  if (filt->cd_values[0]<0 ){
+   if (obj_list) free(obj_list);
+   printf("Input Error: Invalid compression parameter in <%s>\n",str);
+   exit(1);
+  }
+  break;
  };
 
  return obj_list;
@@ -357,6 +378,8 @@ const char* get_sfilter(H5Z_filter_t filtn)
   return "FLETCHER32";
  else if (filtn==H5Z_FILTER_NBIT)
   return "NBIT";
+ else if (filtn==H5Z_FILTER_SCALEOFFSET)
+  return "S+O";
  else {
   printf("Input error in filter type\n");
   exit(1);

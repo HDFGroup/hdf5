@@ -1012,6 +1012,66 @@ if (szip_can_encode) {
 #else
  SKIPPED();
 #endif
+ TESTING("    copy of scaleoffset filter");
+ 
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    removing scaleoffset filter");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_scaleoffset:NONE",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
+
+  TESTING("    adding scaleoffset filter");
+
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_none:S+O=31",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME13,FNAME13OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME13,FNAME13OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();  
+#else
+ SKIPPED();
+#endif
 
 /*-------------------------------------------------------------------------
  * file with all filters 
