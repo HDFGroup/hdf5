@@ -7,35 +7,45 @@ Preconditions
 -------------
 
     1. These instructions are for users who wish to build the C and 
-       C++ libraries.  If you are interested only in the C library, 
-       refer to INSTAll_Windows.txt or INSTAll_codewarrior.txt.
+       C++ libraries.  If you are not interested in the C++ library, 
+       please refer to INSTAll_Windows.txt or INSTAll_codewarrior.txt.
 
-    2. MicroSoft Developer Studio,Visual C++ 6.0 and WinZip must be 
-       installed prior to building the HDF5 library.
+    2. MicroSoft Developer Studio, Visual C++ 6.0 and WinZip must be 
+       installed prior to building the HDF5 libraries.
 
     3. Set up a directory structure to unpack the library.
       For example:
 
-            c:\                         (any drive of your choice)
+            C:\                         (any drive of your choice)
            MyHDFstuff\                  (any folder name)
 
     4. Download the hdf5-1.4.3 distribution archive and use WinZip to 
-       extract the hdf5 package into c:\MyHDFstuff.  This creates a 
-       directory called 'hdf5xxx'under MyHDFstuff which contains 
-       several files and directories. Rename "hdf5xxx" to "hdf5". 
+       extract the hdf5 package into C:\MyHDFstuff.  This creates a 
+       directory called 'hdf5xxx' under MyHDFstuff which contains 
+       several files and directories.  Rename "hdf5xxx" to "hdf5". 
 
-    5. HDF5 uses the zlib library, which is distributed with the HDF5 Windows 
-       source code.  
+    5. HDF5 uses the zlib library, which is distributed with the HDF5 
+       Windows source code.  
 
 
 Building the HDF5 C and C++ libraries (both static and shared)
 -------------------------------------
 
-    1. Unpack all.zip, found in the c:\MyHDFstuff\hdf5\windows directory, 
-       into c:\MyHDFstuff.
+    1. Unpack all.zip in 'hdf5' and 
 
-    2. Go to the hdf5\proj\ directory and double-click on the file all.dsw. 
-       This will invoke MS VC++.
+    1. Unpack all.zip, found in the directory C:\MyHDFstuff\hdf5\windows, 
+       into C:\MyHDFstuff.  Move the zlib.dll, found in the directory
+       C:\MyHDFstuff\hdf5\src\zlib\dll into the Windows system directory.
+
+         The system directory can usually be found under the path
+                C:\WINNT\system or C:\WINDOWS\system
+
+    2. Invoke Microsoft Visual C++, go to "File" and select
+       the "Open Workspace" option.  Then open the workspace
+       C:\MyHDFstuff\hdf5\proj\all\all.dsw.
+
+       You may also go to the C:\MyHDFstuff\hdf5\proj\all directory 
+       and double-click on the file all.dsw to invoke MS VC++.
      
     3. Make sure that "all" is "Set as Active Project" by selecting
        "Project"/"Set Active Project", or right-clicking on "all" then
@@ -64,8 +74,8 @@ Building the HDF5 C and C++ libraries (both static and shared)
 
     NOTE: "all" is a dummy target, "all.exe" is never created.
 
-    When the debug or release build is completed, the directories 
-    listed below will contain the following files:
+    When the debug or release build is completed, the subdirectories 
+    of C:\MyHDFstuff listed below will contain the following files:
 
            hdf5\proj\hdf5\debug - 
            hdf5\proj\hdf5\release - 
@@ -103,7 +113,7 @@ Testing libraries and tools
          The system directory can usually be found under the path
                 C:\WINNT\system or C:\WINDOWS\system
 
-       You can now run hdf5cpptest.bat in the hdf5\c++\test directory 
+       You can now run hdf5cpptest.bat in C:\MyHDFstuff\hdf5\c++\test 
        at the command prompt as below:
 
 	hdf5cpptest release
