@@ -23,6 +23,13 @@
 #ifndef _h5cpputil_h
 #define _h5cpputil_h
 
+#ifndef H5_NO_NAMESPACE
+namespace H5 {
+#ifndef H5_NO_STD
+	    using namespace std;
+#endif  // H5_NO_STD
+#endif
+
 #ifndef H5_NO_STD
 int test_report (int, const std::string&);
 using std::cerr;
@@ -49,5 +56,16 @@ template <class Type1, class Type2>
         H5Eprint (stderr);
     }
 }
+
+class InvalidActionException : public Exception {
+   public:
+	InvalidActionException(const string func_name, const string message = DEFAULT_MSG);
+	InvalidActionException();
+	virtual ~InvalidActionException();
+};
+
+#ifndef H5_NO_NAMESPACE
+}
+#endif
 
 #endif
