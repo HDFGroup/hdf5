@@ -62,6 +62,7 @@ $(EXAMPLEDIR):
 	$(top_srcdir)/bin/mkdirs $@
 
 ## Install the library, the public header files, and public programs.
+## Install h5fc as h5pfc for parallel mode.
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
@@ -87,7 +88,6 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	      fi;							      \
 	   fi;								      \
 	done
-	# install h5fc as h5pfc for parallel mode.
 	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
 	     if test "X$(PARALLEL)" != "Xno" -a $$f = "h5fc"; then            \
