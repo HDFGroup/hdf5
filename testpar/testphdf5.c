@@ -36,7 +36,7 @@ int ngroups = 512;                      /* number of groups to create in root
                                          * group. */
 int facc_type = FACC_MPIO;		/*Test file access type */
 
-herr_t (*old_func)(void*);		/* previous error handler */
+H5E_auto_t old_func;		        /* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
 
 /* other option flags */
