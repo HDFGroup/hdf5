@@ -24,6 +24,14 @@
 
 /* Private headers needed by this file */
 
+/* Macros for turning off free lists in the library */
+#define H5_NO_FREE_LISTS
+#ifdef H5_NO_FREE_LISTS
+#define H5_NO_REG_FREE_LISTS
+#define H5_NO_ARR_FREE_LISTS
+#define H5_NO_BLK_FREE_LISTS
+#endif /* H5_NO_FREE_LISTS */
+
 /*
  * Private datatypes.
  */
@@ -47,6 +55,7 @@ typedef struct H5FL_reg_head_t {
 /*
  * Macros for defining & using free lists for a type
  */
+#ifndef H5_NO_REG_FREE_LISTS
 /* Declare a free list to manage objects of type 't' */
 #define H5FL_DEFINE(t)  H5FL_reg_head_t t##_free_list={0,0,0,0,#t,sizeof(t),NULL}
 
@@ -65,6 +74,14 @@ typedef struct H5FL_reg_head_t {
 /* Re-allocating an object of type 't' is not defined, because these free-lists
  * only support fixed sized types, like structs, etc..
  */
+
+#else /* H5_NO_REG_FREE_LISTS */
+#define H5FL_DEFINE(t)  int t##_reg_free_list_placeholder
+#define H5FL_EXTERN(t)  extern int t##_reg_free_list_placeholder
+#define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE(t)
+#define H5FL_ALLOC(t,clr) (clr ? H5MM_calloc(sizeof(t)) : H5MM_malloc(sizeof(t)))
+#define H5FL_FREE(t,obj) H5MM_xfree(obj)
+#endif /* H5_NO_REG_FREE_LISTS */
 
 /* Data structure to store information about each block allocated */
 typedef union H5FL_blk_list_t {
@@ -95,6 +112,7 @@ typedef struct H5FL_blk_head_t {
 /*
  * Macros for defining & using priority queues 
  */
+#ifndef H5_NO_BLK_FREE_LISTS
 /* Declare a free list to manage objects of type 't' */
 #define H5FL_BLK_DEFINE(t)  H5FL_blk_head_t t##_pq={0,0,0,0,#t,NULL}
 
@@ -112,6 +130,15 @@ typedef struct H5FL_blk_head_t {
 
 /* Re-allocate a block of type 't' */
 #define H5FL_BLK_REALLOC(t,blk,new_size) H5FL_blk_realloc(&(t##_pq),blk,new_size)
+
+#else /* H5_NO_BLK_FREE_LISTS */
+#define H5FL_BLK_DEFINE(t)      int t##_blk_free_list_placeholder
+#define H5FL_BLK_EXTERN(t)      extern int t##_blk_free_list_placeholder
+#define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE(t)
+#define H5FL_BLK_ALLOC(t,size,clr) (clr ? H5MM_calloc(size) : H5MM_malloc(size))
+#define H5FL_BLK_FREE(t,blk) H5MM_xfree(blk)
+#define H5FL_BLK_REALLOC(t,blk,new_size) H5MM_realloc(blk,new_size)
+#endif /* H5_NO_BLK_FREE_LISTS */
 
 /* Data structure to store each array in free list */
 typedef union H5FL_arr_node_t {
@@ -139,6 +166,7 @@ typedef struct H5FL_arr_head_t {
 /*
  * Macros for defining & using free lists for an array of a type
  */
+#ifndef H5_NO_ARR_FREE_LISTS
 /* Declare a free list to manage arrays of type 't' */
 #define H5FL_ARR_DEFINE(t,m)  H5FL_arr_head_t t##_arr_free_list={0,0,NULL,0,#t"_arr",m+1,sizeof(t),{NULL}}
 
@@ -156,6 +184,15 @@ typedef struct H5FL_arr_head_t {
 
 /* Re-allocate an array of type 't' */
 #define H5FL_ARR_REALLOC(t,obj,new_elem) H5FL_arr_realloc(&(t##_arr_free_list),obj,new_elem)
+
+#else /* H5_NO_ARR_FREE_LISTS */
+#define H5FL_ARR_DEFINE(t,m)    int t##_arr_free_list_placeholder
+#define H5FL_ARR_EXTERN(t)      extern int t##_arr_free_list_placeholder
+#define H5FL_ARR_DEFINE_STATIC(t,m)  static H5FL_ARR_DEFINE(t,m)
+#define H5FL_ARR_ALLOC(t,elem,clr) (clr ? H5MM_calloc(elem*sizeof(t)) : H5MM_malloc(elem*sizeof(t)))
+#define H5FL_ARR_FREE(t,obj) H5MM_xfree(obj)
+#define H5FL_ARR_REALLOC(t,obj,new_elem) H5MM_realloc(obj,new_elem*sizeof(t))
+#endif /* H5_NO_ARR_FREE_LISTS */
 
 /*
  * Library prototypes.
