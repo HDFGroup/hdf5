@@ -336,6 +336,21 @@ SOURCE=..\..\..\src\H5BTdbg.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5BTtest.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5C.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -1407,6 +1422,51 @@ SOURCE=..\..\..\src\H5Sall.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5SH.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHcache.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHdbg.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Shyper.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -2066,6 +2126,10 @@ SOURCE=..\..\..\src\H5Bpublic.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5BTpkg.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Cprivate.h
 # End Source File
 # Begin Source File
@@ -2225,5 +2289,17 @@ SOURCE=..\..\..\src\H5Zpublic.h
 SOURCE=..\..\..\src\hdf5.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHpkg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHprivate.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5SHpublic.h
+# End Source File
 # End Target
 # End Project
