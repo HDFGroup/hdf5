@@ -193,13 +193,6 @@ H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
  */
 H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 
-#ifdef H5_HAVE_FPHDF5
-/*
- * Flexible parallel message
- */
-H5_DLLVAR const H5O_class_t H5O_FPHDF5[1];
-#endif  /* H5_HAVE_FPHDF5 */
-
 /* Package-local function prototypes */
 
 /* Symbol table operators */
@@ -207,4 +200,3 @@ H5_DLL void *H5O_stab_fast(const H5G_cache_t *cache, const struct H5O_class_t *t
 			    void *_mesg);
 
 #endif /* _H5Opkg_H */
-
