@@ -2,6 +2,7 @@
 ./configure
 ./INSTALL
 ./INSTALL_MAINT
+./Makefile.dist
 ./Makefile.in
 ./MANIFEST
 ./bin/checkposix
@@ -9,6 +10,7 @@
 ./bin/config.sub
 ./bin/errors
 ./bin/install-sh
+./bin/release
 ./config/commence.in
 ./config/conclude.in
 ./config/depend.in

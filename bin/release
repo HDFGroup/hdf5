@@ -1,0 +1,142 @@
+#! /usr/local/bin/perl -w
+require 5.003;
+
+# Builds a release.  Arguments are zero or more of the words.
+#
+#	tar		-- build a tar file			*.tar
+#	compress	-- build a compressed tar file		*.tar.Z
+#	gzip		-- build a compressed tar file		*.tar.gz
+#	bzip2		-- build a compressed tar file		*.tar.bz2
+#
+# If no arguments are given then `gzip' is assumed.  If the only argument
+# is the word `all' then all forms are used.
+
+$releases = "./releases";	# Directory for release tarballs
+
+##############################################################################
+# Read version info, return an array (MAJOR,MINOR,RELEASE,PATCHLEVEL) or
+# a string "MAJOR.MINOR.RELEASE PATCHLEVEL"
+#
+sub getver () {
+   my @ver;
+
+   open SRC, "./src/H5private.h" or die "cannot read HDF5 version";
+   while (<SRC>) {
+      $ver[0] = $1 if /define\s+HDF5_MAJOR_VERSION\s+(\d+)/;
+      $ver[1] = $1 if /define\s+HDF5_MINOR_VERSION\s+(\d+)/;
+      $ver[2] = $1 if /define\s+HDF5_RELEASE_VERSION\s+(\d+)/;
+      $ver[3] = $1 if /define\s+HDF5_PATCH_VERSION\s+(\d+)/;
+   }
+   close SRC;
+   wantarray ? @ver : "$ver[0].$ver[1].$ver[2]".chr(ord('a')+$ver[3]);
+}
+
+##############################################################################
+# Set version information.  Input is a string or an array.
+#
+sub setver ($;$$$) {
+   my @ver = @_;
+   local $_;
+
+   if ($ver[0]=~/\D/) {
+      @ver = $ver[0] =~ /^(\d+)\.(\d+)\.(\d+)([a-z])$/ or return "";
+      $ver[3] = ord($ver[3])-ord('a');
+   }
+
+   $_ = `cat ./src/H5private.h`;
+   s/(define\s+HDF5_MAJOR_VERSION\s+)(\d+)/$1$ver[0]/;
+   s/(define\s+HDF5_MINOR_VERSION\s+)(\d+)/$1$ver[1]/;
+   s/(define\s+HDF5_RELEASE_VERSION\s+)(\d+)/$1$ver[2]/;
+   s/(define\s+HDF5_PATCH_VERSION\s+)(\d+)/$1$ver[3]/;
+   open SRC, "> ./src/H5private.h" or return "";
+   print SRC $_;
+   close SRC;
+
+   return 1;
+}
+
+##############################################################################
+# Build a release
+#
+sub release (@) {
+   my @types = @_;
+   my ($ver, $status);
+   local $_;
+
+   # Make sure the version number is correct.
+   print "Building an HDF release...\n";
+   print "HDF version to release [", ($ver=getver), "] ";
+   return "" unless defined ($_=<STDIN>);
+   chomp;
+   (setver ($ver=$_) or die "cannot set version") if /\S/;
+
+   # Clean the source tree, showing only errors.
+   print "Cleaning source tree...\n";
+   $status = system "make distclean >/dev/null";
+   die "cannot make distclean" if $status >> 8;
+
+   # Move default top-level makefile into place.
+   $status = system "cp Makefile.dist Makefile";
+   die "cannot install default Makefile" if $status >> 8;
+
+   # Make sure release directory exists and create a name.
+   (mkdir $releases, 0777 or die "cannot create $releases")
+       unless -d $releases;
+   die "no manifest" unless -r "MANIFEST";
+   my $name = "$releases/hdf-$ver";
+
+   # Build the releases
+   @types = ("gzip") unless @types;
+   @types = qw/tar gzip compress bzip2/ if 1==@types && "all" eq $types[0];
+   my $filelist = 'Makefile `cat MANIFEST`';
+   for (@types) {
+      print "Compressing with $_...\n";
+
+      /^tar$/ && do {
+	 $status = system "tar cf $name.tar $filelist";
+	 next;
+      };
+
+      /^gzip$/ && do {
+	 $status = system "tar cf - $filelist |gzip -9 >$name.tar.gz";
+	 next;
+      };
+
+      /^compress$/ && do {
+	 $status = system "tar cf - $filelist |compress -c >$name.tar.Z";
+	 next;
+      };
+
+      /^bzip2$/ && do {
+	 $status = system "tar cf - $filelist |bzip2 -9 >$name.tar.bz2";
+	 next;
+      };
+   } continue {
+      print STDERR "$_ failed\n" if $status >> 8;
+   }
+
+   # Update version info
+   print <<EOF;
+
+If this is a real release then the version number for continued development
+should be incremented.  Otherwise just press return.
+
+EOF
+   print "Set development version to [", ($ver=getver), "] ";
+   return "" unless defined ($_ = <STDIN>);
+   chomp;
+   (setver ($ver=$_) or die "cannot set version") if /\S/;
+
+   if (-d "CVS") {
+      print <<EOF;
+      # If we're running under CVS then check in changes and tag all files
+      # with the release number.  Quincey, do you want to add this to the
+      # bottom of the perl script?  Otherwise just give me the commands
+      # and I'll add them.
+EOF
+   }
+
+   return 1;
+}
+
+release @ARGV;

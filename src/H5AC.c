@@ -873,12 +873,13 @@ H5AC_debug(H5F_t *f)
         } else {
             sprintf(ascii, "%7.2f%%", miss_rate);
         }
-        fprintf(stderr, "   %18s: %8d %8d %7s %8d%+-9d\n", s,
+        fprintf(stderr, "   %18s: %8u %8u %7s %8u%+-9ld\n", s,
                 cache->diagnostics[i].nhits,
                 cache->diagnostics[i].nmisses,
                 ascii,
                 cache->diagnostics[i].ninits,
-             cache->diagnostics[i].nflushes - cache->diagnostics[i].ninits);
+		((long)(cache->diagnostics[i].nflushes) -
+		 (long)(cache->diagnostics[i].ninits)));
     }
 
     FUNC_LEAVE(SUCCEED);

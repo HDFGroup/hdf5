@@ -1,0 +1,24 @@
+# Top-level distributed Makefile 			       -*- makefile -*-
+
+# This Makefile is a stub (copied from Makefile.dist) which will run
+# configure and then invoke the same target in the new Makefile created
+# by configure.
+
+# Uncomment this variable if your make(1) doesn't set it automatically.
+#
+#MAKE=make
+
+
+SHELL=/bin/sh
+
+all lib progs test install uninstall dep depend clean mostlyclean: config
+	$(MAKE) $@
+
+distclean maintainer-clean TAGS: config
+	$(MAKE) $@
+
+config:
+	sh configure
+
+.PHONY: all lib progs test install uninstall dep depend clean mostlyclean     \
+	distclean maintainer-clean config
