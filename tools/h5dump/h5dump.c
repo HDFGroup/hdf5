@@ -5422,6 +5422,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 
     H5Tclose(type);
     H5Sclose(space);
+    H5Pclose(dcpl);
     indentation(indent);
     printf("</%sDataset>\n", xmlnsprefix);
 }
