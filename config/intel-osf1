@@ -150,5 +150,10 @@ hdf5_cv_system_scope_threads=${hdf5_cv_system_scope_threads="no"}
 # Hard set MPI_File_set_size() working for files over 2GB to no
 hdf5_cv_mpi_file_set_size_big=${hdf5_cv_mpi_file_set_size_big='no'}
 
+# Hard set variables for v1.7 and higher.
 # Set gettimeofday_tz to yes.
 hdf5_cv_gettimeofday_tz=${hdf5_cv_gettimeofday_tz='yes'}
+hdf5_cv_fp_to_ullong_bottom_bit_works=${hdf5_cv_fp_to_ullong_bottom_bit_works='no'}
+hdf5_cv_fp_to_ullong_right_maximum=${hdf5_cv_fp_to_ullong_right_maximum='yes'}
+hdf5_cv_convert_denormal_float=${hdf5_cv_convert_denormal_float='no'}
+hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
