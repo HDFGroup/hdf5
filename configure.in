@@ -1563,6 +1563,12 @@ AC_OUTPUT(src/libhdf5.settings
           test/Makefile
           testpar/Makefile
           tools/Makefile
+          tools/h4toh5/Makefile
+          tools/h5dump/Makefile
+          tools/h5ls/Makefile
+          tools/h5toh4/Makefile
+          tools/lib/Makefile
+          tools/misc/Makefile
           examples/Makefile
           doc/Makefile
           doc/html/Makefile
