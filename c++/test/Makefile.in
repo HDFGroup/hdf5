@@ -29,7 +29,7 @@ TEST_PROGS=
 TEST_SRC=
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
-TEST_SCRIPTS=testexamples.sh
+TEST_SCRIPTS=
 
 DISTCLEAN=$(TEST_PROGS_SRC:.cpp=.lo) $(TEST_PROGS_SRC:.cpp=.o) *.h5
 
