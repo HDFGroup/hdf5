@@ -251,8 +251,9 @@ H5F_contig_fill(H5F_t *f, hid_t dxpl_id, struct H5O_layout_t *layout,
             /* Check if this file is accessed with an MPI-capable file driver */
             if(using_mpi) {
                 /* Write the chunks out from only one process */
+                /* !! Use the internal "independent" DXPL!! -QAK */
                 if(H5_PAR_META_WRITE==mpi_rank) {
-                    if (H5F_contig_write(f, (hsize_t)size, addr, size, dxpl_id, buf)<0)
+                    if (H5F_contig_write(f, (hsize_t)size, addr, size, H5AC_ind_dxpl_id, buf)<0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                 } /* end if */
 

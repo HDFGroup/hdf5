@@ -2341,8 +2341,9 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 /* Check if this file is accessed with an MPI-capable file driver */
                 if(using_mpi) {
                     /* Write the chunks out from only one process */
+                    /* !! Use the internal "independent" DXPL!! -QAK */
                     if(H5_PAR_META_WRITE==mpi_rank) {
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5AC_ind_dxpl_id, chunk)<0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
                     } /* end if */
 
