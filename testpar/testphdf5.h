@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 #ifndef PHDF5TEST_H
 #define PHDF5TEST_H
 
@@ -153,6 +151,7 @@ void test_split_comm_access(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);
 void extend_writeInd(void);
+void extend_writeInd2(void);
 void extend_writeAll(void);
 void dataset_readInd(void);
 void dataset_readAll(void);

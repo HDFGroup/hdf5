@@ -1860,10 +1860,20 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * If the chunk is too large to load into the cache and it has no
      * filters in the pipeline (i.e. not compressed) and if the address
      * for the chunk has been defined, then don't load the chunk into the
-     * cache, just write the data to it directly.
+     * cache, just read the data from it directly.
+     *
+     * If MPI based VFD is used, must bypass the
+     * chunk-cache scheme because other MPI processes could be
+     * writing to other elements in the same chunk.  Do a direct
+     * read-through of only the elements requested.
      */
-    if (dset->layout.u.chunk.size>dset->cache.chunk.nbytes && dset->dcpl_cache.pline.nused==0 &&
-            chunk_addr!=HADDR_UNDEF) {
+    if ((dset->layout.u.chunk.size>dset->cache.chunk.nbytes && dset->dcpl_cache.pline.nused==0 && chunk_addr!=HADDR_UNDEF)
+            || (IS_H5FD_MPI(f) && (H5F_ACC_RDWR & H5F_get_intent(f)))) {
+#ifdef H5_HAVE_PARALLEL
+        /* Additional sanity check when operating in parallel */
+        if (chunk_addr==HADDR_UNDEF || dset->dcpl_cache.pline.nused>0)
+            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
+#endif /* H5_HAVE_PARALLEL */
         if ((ret_value=H5D_contig_readvv(f, dxpl_id, dset, chunk_addr, (hsize_t)dset->layout.u.chunk.size, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
             HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read raw data to file");
     } /* end if */
