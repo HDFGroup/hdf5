@@ -356,10 +356,8 @@ H5Tpack(hid_t type_id)
     H5TRACE1("e","i",type_id);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
+    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_detect_class(dt,H5T_COMPOUND)<=0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
-    if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
 
     /* Pack */
     if (H5T_pack(dt) < 0)
@@ -446,6 +444,29 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     parent->u.compnd.sorted = H5T_SORT_NONE;
     parent->u.compnd.nmembs++;
 
+    /* Determine if the compound datatype stayed packed */
+    if(parent->u.compnd.packed) {
+        /* Check if the member type is packed */
+        if(H5T_is_packed(parent->u.compnd.memb[idx].type)>0) {
+            if(idx==0) {
+                /* If the is the first member, the datatype is not packed
+                 * if the first member isn't at offset 0
+                 */
+                if(parent->u.compnd.memb[idx].offset>0)
+                    parent->u.compnd.packed=FALSE;
+            } /* end if */
+            else {
+                /* If the is not the first member, the datatype is not
+                 * packed if the new member isn't adjoining the previous member
+                 */
+                if(parent->u.compnd.memb[idx].offset!=(parent->u.compnd.memb[idx-1].offset+parent->u.compnd.memb[idx-1].size))
+                    parent->u.compnd.packed=FALSE;
+            } /* end else */
+        } /* end if */
+        else
+            parent->u.compnd.packed=FALSE;
+    } /* end if */
+
     /*
      * Set the "force conversion" flag if the field's datatype indicates
      */
@@ -479,31 +500,88 @@ H5T_pack(H5T_t *dt)
     size_t	offset;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_pack, FAIL);
+    FUNC_ENTER_NOINIT(H5T_pack);
 
     assert(dt);
 
-    if (H5T_COMPOUND == dt->type) {
-	assert(H5T_STATE_TRANSIENT==dt->state);
+    if(H5T_detect_class(dt,H5T_COMPOUND)>0) {
+        /* If datatype has been packed, skip packing it and indicate success */
+        if(H5T_is_packed(dt)== TRUE)
+            HGOTO_DONE(SUCCEED);
+
+        /* Check for packing unmodifiable datatype */
+        if (H5T_STATE_TRANSIENT!=dt->state)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is read-only");
 	
-	/* Recursively pack the members */
-	for (i=0; i<dt->u.compnd.nmembs; i++) {
-	    if (H5T_pack(dt->u.compnd.memb[i].type) < 0)
-		HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound data type");
-	}
+        if(dt->parent) {
+            if (H5T_pack(dt->parent) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack parent of datatype");
 
-	/* Remove padding between members */
-	H5T_sort_value(dt, NULL);
-	for (i=0, offset=0; i<dt->u.compnd.nmembs; i++) {
-	    dt->u.compnd.memb[i].offset = offset;
-	    offset += dt->u.compnd.memb[i].size;
-	}
+            /* Adjust size of datatype appropriately */
+            if(dt->type==H5T_ARRAY)
+                dt->size = dt->parent->size * dt->u.array.nelem;
+            else if(dt->type!=H5T_VLEN)
+                dt->size = dt->parent->size;
+        } /* end if */
+        else if(dt->type==H5T_COMPOUND) {
+            /* Recursively pack the members */
+            for (i=0; i<dt->u.compnd.nmembs; i++)
+                if (H5T_pack(dt->u.compnd.memb[i].type) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound data type");
 
-	/* Change total size */
-	dt->size = MAX(1, offset);
-    }
+            /* Remove padding between members */
+            H5T_sort_value(dt, NULL);
+            for (i=0, offset=0; i<dt->u.compnd.nmembs; i++) {
+                dt->u.compnd.memb[i].offset = offset;
+                offset += dt->u.compnd.memb[i].size;
+            }
+
+            /* Change total size */
+            dt->size = MAX(1, offset);
+
+            /* Mark the type as packed now */
+            dt->u.compnd.packed=TRUE;
+        } /* end if */
+    } /* end if */
     
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_is_packed
+ *
+ * Purpose:	Checks whether a datatype which is compound (or has compound
+ *              components) is packed.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, September 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_packed(H5T_t *dt)
+{
+    htri_t      ret_value=TRUE;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_is_packed,FAIL);
+
+    assert(dt);
+
+    /* Go up the chain as far as possible */
+    while(dt->parent)
+        dt=dt->parent;
+
+    /* If this is a compound datatype, check if it is packed */
+    if(dt->type==H5T_COMPOUND)
+        ret_value=dt->u.compnd.packed;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5T_is_packed() */
 

@@ -1071,15 +1071,15 @@ H5Tget_overflow ()
     <dd>Sets the total size for an atomic datatype.
 <dt><strong>Description:</strong>
     <dd><code>H5Tset_size</code> sets the total size in bytes, 
-        <code>size</code>, for an atomic datatype (this operation
-        is not permitted on compound datatypes).  If the size is
-         decreased so that the significant bits of the datatype extend beyond
+        <code>size</code>, for a datatype.  If the datatype is atomic and size
+         is decreased so that the significant bits of the datatype extend beyond
          the edge of the new size, then the `offset' property is decreased
          toward zero.  If the `offset' becomes zero and the significant
          bits of the datatype still hang over the edge of the new size, then
          the number of significant bits is decreased.
          Adjusting the size of an H5T_STRING automatically sets the precision
-         to 8*size.  All datatypes have a positive size.
+         to 8*size.  A compound datatype may increase in size, but may not
+         shrink.  All datatypes must have a positive size.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>

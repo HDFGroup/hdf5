@@ -187,6 +187,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              */
             dt->u.compnd.nmembs = flags & 0xffff;
             assert(dt->u.compnd.nmembs > 0);
+            dt->u.compnd.packed = TRUE; /* Start off packed */
             dt->u.compnd.nalloc = dt->u.compnd.nmembs;
             dt->u.compnd.memb = H5MM_calloc(dt->u.compnd.nalloc*
                             sizeof(H5T_cmemb_t));
@@ -278,6 +279,29 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
                 /* Set the field datatype (finally :-) */
                 dt->u.compnd.memb[i].type=temp_type;
+
+                /* Check if the datatype stayed packed */
+                if(dt->u.compnd.packed) {
+                    /* Check if the member type is packed */
+                    if(H5T_is_packed(temp_type)>0) {
+                        if(i==0) {
+                            /* If the is the first member, the datatype is not packed
+                             * if the first member isn't at offset 0
+                             */
+                            if(dt->u.compnd.memb[i].offset>0)
+                                dt->u.compnd.packed=FALSE;
+                        } /* end if */
+                        else {
+                            /* If the is not the first member, the datatype is not
+                             * packed if the new member isn't adjoining the previous member
+                             */
+                            if(dt->u.compnd.memb[i].offset!=(dt->u.compnd.memb[i-1].offset+dt->u.compnd.memb[i-1].size))
+                                dt->u.compnd.packed=FALSE;
+                        } /* end else */
+                    } /* end if */
+                    else
+                        dt->u.compnd.packed=FALSE;
+                } /* end if */
             }
             break;
 

@@ -2660,7 +2660,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive");
     if (size == H5T_VARIABLE && dt->type!=H5T_STRING)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length");
-    if ((H5T_ENUM==dt->type && dt->u.enumer.nmembs>0) || (H5T_COMPOUND==dt->type && dt->u.compnd.nmembs>0))
+    if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     if (H5T_REFERENCE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
@@ -3334,6 +3334,8 @@ H5T_create(H5T_class_t type, size_t size)
             if (NULL==(dt = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->type = type;
+            if(type==H5T_COMPOUND)
+                dt->u.compnd.packed=TRUE;       /* Start out packed */
             break;
 
         case H5T_ENUM:
@@ -4014,8 +4016,12 @@ H5T_set_size(H5T_t *dt, size_t size)
             case H5T_TIME:
             case H5T_BITFIELD:
             case H5T_OPAQUE:
-            case H5T_COMPOUND:
                 /* nothing to check */
+                break;
+
+            case H5T_COMPOUND:
+                if(size<dt->size)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't shrink compound datatype");
                 break;
 
             case H5T_STRING:

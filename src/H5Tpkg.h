@@ -123,8 +123,9 @@ typedef enum H5T_sort_t {
 typedef struct H5T_compnd_t {
     int		nalloc;		/*num entries allocated in MEMB array*/
     int		nmembs;		/*number of members defined in struct*/
-    H5T_sort_t		sorted;		/*how are members sorted?	     */
-    struct H5T_cmemb_t	*memb;		/*array of struct members	     */
+    H5T_sort_t	sorted;		/*how are members sorted?	     */
+    hbool_t     packed;		/*are members packed together?       */
+    struct H5T_cmemb_t	*memb;	/*array of struct members	     */
 } H5T_compnd_t;
 
 /* An enumeration data type */
@@ -861,4 +862,8 @@ H5_DLL herr_t H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, void *vl_addr, void *
 /* Array functions */
 H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
         const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
+
+/* Compound functions */
+H5_DLL htri_t H5T_is_packed(H5T_t *dt);
+
 #endif
