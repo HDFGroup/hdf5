@@ -21,7 +21,7 @@ srcdir=@srcdir@
 ## Replace building CC with the just installed h5cc
 H5CC=$(bindir)/h5cc
 H5CC_PP=$(bindir)/h5pcc
-CPPFLAGS=-I. -I$(srcdir)
+CPPFLAGS=-I. -I$(srcdir) -I$(top_srcdir)/src @CPPFLAGS@
 CFLAGS=
 
 ## These are the programs that `make all' or `make tests' will build and which
