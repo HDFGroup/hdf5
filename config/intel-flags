@@ -54,7 +54,7 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    CFLAGS="${CFLAGS:--std=c99}"
+    CFLAGS="${CFLAGS:--std=c99} $arch"
 
     # Production
     PROD_CFLAGS="-O3"
@@ -82,12 +82,6 @@ case "$cc_vendor-$cc_version" in
     icc-8.0*)
 	# v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
 	PROD_CFLAGS="-O2"
-	;;
-    icc-8.1*)
-	# Add C99 standard flag to enable definition of ULLONG_MAX because in Intel
-	# compiler header file limits.h, C99 has to be enable to define this macro.
-	# Compilers of Version 8 and before don't have this problem.
-	CFLAGS="$CFLAGS -std=c99"
 	;;
 esac
 
