@@ -173,10 +173,25 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zfilter_avail_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5zfilter_avail_f
+    <dd>
+	<pre>
+SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
+  
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: filter               ! Filter; one of the possible values:
+                                                 ! H5Z_FILTER_DEFLATE_F
+                                                 ! H5Z_FILTER_SHUFFLE_F
+                                                 ! H5Z_FILTER_FLETCHER32_F
+  LOGICAL, INTENT(OUT) :: status               ! Flag, idicates if filter
+                                               ! is availble ( .TRUE. or .FALSE.)
+												 
+END SUBROUTINE h5zfilter_avail_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -379,11 +394,17 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
 <!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
+	<pre>
+
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -413,10 +434,23 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5z_FORTRAN.html#h5zunregister_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+  <dt><strong>Fortran90 Interface:</strong> h5zunregister_f
+    <dd>
+	<pre>
+SUBROUTINE h5zunregister_f(filter, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: filter  ! Filter; one of the possible values:
+                                    ! H5Z_FILTER_DEFLATE_F
+                                    ! H5Z_FILTER_SHUFFLE_F
+                                    ! H5Z_FILTER_FLETCHER32_F
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                  ! 0 on success, and -1 on failure
+END SUBROUTINE h5zunregister_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
