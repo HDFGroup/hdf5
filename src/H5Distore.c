@@ -955,9 +955,10 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
 
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_ISTORE;
+    shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
     shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
     assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, H5B_ISTORE, &shared->sizeof_keys, shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
@@ -3287,9 +3288,10 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_ISTORE;
+    shared->two_k=2*H5F_KVALUE(f,H5B_ISTORE);
     shared->sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
     assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, H5B_ISTORE, &shared->sizeof_keys, shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")

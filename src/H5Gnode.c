@@ -1750,9 +1750,10 @@ H5G_node_init(H5F_t *f)
 
     /* Set up the "global" information for this file's groups */
     shared->type= H5B_SNODE;
+    shared->two_k=2*H5F_KVALUE(f,H5B_SNODE);
     shared->sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
     assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, H5B_SNODE, &shared->sizeof_keys, shared->sizeof_rkey);
+    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")

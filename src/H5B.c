@@ -135,13 +135,12 @@ static H5B_ins_t H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 				   uint8_t *rt_key,
 				   hbool_t *rt_key_changed,
 				   haddr_t *retval);
-static herr_t H5B_insert_child(const H5F_t *f,
-			       H5B_t *bt, unsigned idx, haddr_t child,
+static herr_t H5B_insert_child(H5B_t *bt, unsigned idx, haddr_t child,
 			       H5B_ins_t anchor, const void *md_key);
 static herr_t H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt,
 			haddr_t old_addr, unsigned idx,
                         void *udata, haddr_t *new_addr/*out*/);
-static H5B_t * H5B_copy(const H5F_t *f, const H5B_t *old_bt);
+static H5B_t * H5B_copy(const H5B_t *old_bt);
 static herr_t H5B_serialize(H5F_t *f, H5B_t *bt);
 #ifdef H5B_DEBUG
 static herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
@@ -234,7 +233,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
-            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,shared->type)))))
+            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,shared->two_k)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node")
     if (HADDR_UNDEF==(*addr_p=H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)shared->sizeof_rnode)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree root node")
@@ -311,7 +310,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
     if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
-            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))))
+            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,shared->two_k)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if (H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->sizeof_rnode, dxpl_id, shared->page)<0)
@@ -622,7 +621,7 @@ H5B_compute_size(H5F_t *f, H5B_t *bt, size_t *size_ptr)
     HDassert(shared->type);
     HDassert(size_ptr);
 
-    size = H5B_nodesize(f, shared->type, NULL, shared->sizeof_rkey);
+    size = H5B_nodesize(f, shared, NULL);
 
     if ( size == 0 ) {
 
@@ -790,7 +789,6 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, haddr_t old_addr,
     H5P_genplist_t *dx_plist;           /* Data transfer property list */
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     H5B_t	*new_bt = NULL, *tmp_bt = NULL;
-    unsigned	k;                      /* B-tree 'K' value for the maximum number of entries in node */
     unsigned	nleft, nright;          /* Number of keys in left & right halves */
     double      split_ratios[3];        /* B-tree split ratios */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -809,9 +807,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, haddr_t old_addr,
      */
     shared=H5RC_GET_OBJ(old_bt->rc_shared);
     HDassert(shared);
-    assert(old_bt->nchildren == 2 * H5F_KVALUE(f, shared->type));
-    k = H5F_KVALUE(f, shared->type);
-
+    assert(old_bt->nchildren == shared->two_k);
 
     /* Get the dataset transfer property list */
     if (NULL == (dx_plist = H5I_object(dxpl_id)))
@@ -835,7 +831,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, haddr_t old_addr,
 	    side = "MIDDLE";
 	}
 	fprintf(H5DEBUG(B), "H5B_split: %3u {%5.3f,%5.3f,%5.3f} %6s",
-		2*k, split_ratios[0], split_ratios[1], split_ratios[2], side);
+		shared->two_k, split_ratios[0], split_ratios[1], split_ratios[2], side);
     }
 #endif
 
@@ -844,11 +840,11 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, haddr_t old_addr,
      * and the new node.
      */
     if (!H5F_addr_defined(old_bt->right)) {
-	nleft = (unsigned)(2 * (double)k * split_ratios[2]);	/*right*/
+	nleft = (unsigned)((double)shared->two_k * split_ratios[2]);	/*right*/
     } else if (!H5F_addr_defined(old_bt->left)) {
-	nleft = (unsigned)(2 * (double)k * split_ratios[0]);	/*left*/
+	nleft = (unsigned)((double)shared->two_k * split_ratios[0]);	/*left*/
     } else {
-	nleft = (unsigned)(2 * (double)k * split_ratios[1]);	/*middle*/
+	nleft = (unsigned)((double)shared->two_k * split_ratios[1]);	/*middle*/
     }
 
     /*
@@ -856,12 +852,12 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_t *old_bt, haddr_t old_addr,
      * result in nodes that have an unused child when data is written
      * sequentially, but it simplifies stuff below.
      */
-    if (idx<nleft && nleft==2*k) {
+    if (idx<nleft && nleft==shared->two_k) {
 	--nleft;
     } else if (idx>=nleft && 0==nleft) {
 	nleft++;
     }
-    nright = 2*k - nleft;
+    nright = shared->two_k - nleft;
 #ifdef H5B_DEBUG
     if (H5DEBUG(B))
 	fprintf(H5DEBUG(B), " split %3d/%-3d\n", nleft, nright);
@@ -1048,7 +1044,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     bt->cache_info.is_dirty = TRUE;
 
     /* Make a copy of the old root information */
-    if (NULL == (new_bt = H5B_copy(f, bt))) {
+    if (NULL == (new_bt = H5B_copy(bt))) {
         HCOMMON_ERROR(H5E_BTREE, H5E_CANTLOAD, "unable to copy old root");
 
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, FALSE) != SUCCEED)
@@ -1115,7 +1111,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_insert_child(const H5F_t *f, H5B_t *bt, unsigned idx, haddr_t child,
+H5B_insert_child(H5B_t *bt, unsigned idx, haddr_t child,
     H5B_ins_t anchor, const void *md_key)
 {
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
@@ -1126,25 +1122,43 @@ H5B_insert_child(const H5F_t *f, H5B_t *bt, unsigned idx, haddr_t child,
     assert(bt);
     shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    assert(bt->nchildren<2*H5F_KVALUE(f, shared->type));
+    assert(bt->nchildren<shared->two_k);
 
     bt->cache_info.is_dirty = TRUE;
 
-    /* Make room for the new key */
-    base=bt->native + (idx+1) * shared->type->sizeof_nkey,
-    HDmemmove(base + shared->type->sizeof_nkey, base,
-              (bt->nchildren - idx) * shared->type->sizeof_nkey);
-    HDmemcpy(base, md_key, shared->type->sizeof_nkey);
+    /* Check for inserting right-most key into node (common when just appending
+     * records to an unlimited dimension chunked dataset)
+     */
+    base=H5B_NKEY(bt,shared,(idx+1));
+    if((idx+1)==bt->nchildren) {
+        /* Make room for the new key */
+        HDmemcpy(base + shared->type->sizeof_nkey, base,
+                  shared->type->sizeof_nkey);   /* No overlap possible - memcpy() OK */
+        HDmemcpy(base, md_key, shared->type->sizeof_nkey);
 
-    /* The MD_KEY is the left key of the new node */
-    if (H5B_INS_RIGHT == anchor)
-	idx++;
+        /* The MD_KEY is the left key of the new node */
+        if (H5B_INS_RIGHT == anchor)
+            idx++;  /* Don't have to memmove() child addresses down, just add new child */
+        else
+            /* Make room for the new child address */
+            bt->child[idx+1] = bt->child[idx];
+    } /* end if */
+    else {
+        /* Make room for the new key */
+        HDmemmove(base + shared->type->sizeof_nkey, base,
+                  (bt->nchildren - idx) * shared->type->sizeof_nkey);
+        HDmemcpy(base, md_key, shared->type->sizeof_nkey);
 
-    /* Make room for the new child address */
-    HDmemmove(bt->child + idx + 1, bt->child + idx,
-	      (bt->nchildren - idx) * sizeof(haddr_t));
+        /* The MD_KEY is the left key of the new node */
+        if (H5B_INS_RIGHT == anchor)
+            idx++;
+
+        /* Make room for the new child address */
+        HDmemmove(bt->child + idx + 1, bt->child + idx,
+                  (bt->nchildren - idx) * sizeof(haddr_t));
+    } /* end if */
+
     bt->child[idx] = child;
-
     bt->nchildren += 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1404,7 +1418,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	/*
 	 * If this node is full then split it before inserting the new child.
 	 */
-	if (bt->nchildren == 2 * H5F_KVALUE(f, type)) {
+	if (bt->nchildren == shared->two_k) {
 	    if (H5B_split(f, dxpl_id, bt, addr, idx, udata, new_node_p/*out*/)<0)
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, H5B_INS_ERROR, "unable to split node")
 	    if (NULL == (twin = H5AC_protect(f, dxpl_id, H5AC_BT, *new_node_p, type, udata, H5AC_WRITE)))
@@ -1420,7 +1434,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	}
 
 	/* Insert the child */
-	if (H5B_insert_child(f, tmp_bt, idx, child_addr, my_ins, md_key) < 0)
+	if (H5B_insert_child(tmp_bt, idx, child_addr, my_ins, md_key) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "can't insert child")
     }
     
@@ -1527,7 +1541,7 @@ H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op
 	 * We've reached the left-most leaf.  Now follow the right-sibling
 	 * pointer from leaf to leaf until we've processed all leaves.
 	 */
-	if (NULL==(child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
+	if (NULL==(child=H5FL_SEQ_MALLOC(haddr_t,shared->two_k)) ||
                 NULL==(key=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -2028,8 +2042,8 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
-	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
+H5B_nodesize(const H5F_t *f, const H5B_shared_t *shared,
+	     size_t *total_nkey_size/*out*/)
 {
     size_t	size;
 
@@ -2039,22 +2053,22 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
      * Check arguments.
      */
     assert(f);
-    assert(type);
-    assert(sizeof_rkey > 0);
-    assert(H5F_KVALUE(f, type) > 0);
+    assert(shared);
+    assert(shared->two_k > 0);
+    assert(shared->sizeof_rkey > 0);
 
     /*
      * Total native key size.
      */
     if (total_nkey_size)
-	*total_nkey_size = (2 * H5F_KVALUE(f, type) + 1) * type->sizeof_nkey;
+	*total_nkey_size = (shared->two_k + 1) * shared->type->sizeof_nkey;
 
     /*
      * Total node size.
      */
     size = (H5B_SIZEOF_HDR(f) + /*node header	*/
-	    2 * H5F_KVALUE(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
-	    (2 * H5F_KVALUE(f, type) + 1) * sizeof_rkey);	/*keys		*/
+	    shared->two_k * H5F_SIZEOF_ADDR(f) +	/*child pointers */
+	    (shared->two_k + 1) * shared->sizeof_rkey);	/*keys		*/
 
     FUNC_LEAVE_NOAPI(size)
 }
@@ -2078,11 +2092,10 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
  *-------------------------------------------------------------------------
  */
 static H5B_t *
-H5B_copy(const H5F_t *f, const H5B_t *old_bt)
+H5B_copy(const H5B_t *old_bt)
 {
     H5B_t		*new_node = NULL;
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    size_t              nkeys;
     H5B_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5B_copy, NULL)
@@ -2090,7 +2103,6 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
     /*
      * Check arguments.
      */
-    assert(f);
     assert(old_bt);
     shared=H5RC_GET_OBJ(old_bt->rc_shared);
     HDassert(shared);
@@ -2102,16 +2114,13 @@ H5B_copy(const H5F_t *f, const H5B_t *old_bt)
     /* Copy the main structure */
     HDmemcpy(new_node,old_bt,sizeof(H5B_t));
 
-    /* Compute the number of keys in this node */
-    nkeys=2*H5F_KVALUE(f,shared->type);
-
     if ( NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
-            NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,nkeys)))
+            NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,shared->two_k)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the other structures */
     HDmemcpy(new_node->native,old_bt->native,shared->sizeof_keys);
-    HDmemcpy(new_node->child,old_bt->child,(size_t)(sizeof(haddr_t)*nkeys));
+    HDmemcpy(new_node->child,old_bt->child,(sizeof(haddr_t)*shared->two_k));
 
     /* Increment the ref-count on the raw page */
     H5RC_INC(new_node->rc_shared);
@@ -2207,7 +2216,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
 
     HDfprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth,
 	      "Number of children (max):",
-	      bt->nchildren, (2 * H5F_KVALUE(f, type)));
+	      bt->nchildren, shared->two_k);
 
     /*
      * Print the child addresses
