@@ -1546,9 +1546,9 @@ AC_OUTPUT(src/libhdf5.settings config/depend1 config/depend2 config/depend3
           Makefile src/Makefile pablo/Makefile test/Makefile
           testpar/Makefile tools/Makefile examples/Makefile
           doc/Makefile doc/html/Makefile doc/html/ADGuide/Makefile
-          doc/html/Graphics/Makefile doc/html/PSandPDF/Makefile
-          doc/html/TechNotes/Makefile doc/html/Tutor/Makefile
-          doc/html/Tutor/Graphics/Makefile
+          doc/html/Graphics/Makefile doc/html/Intro/Makefile
+          doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile
+          doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile
           doc/html/Tutor/examples/Makefile
           doc/html/Tutor/examples/java/Makefile
           doc/html/cpplus/Makefile doc/html/fortran/Makefile)
