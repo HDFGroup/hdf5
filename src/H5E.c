@@ -64,36 +64,52 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_NONE_MINOR, 	"No error"},
+
+    /* Argument errors */
     {H5E_UNINITIALIZED, "Information is uninitialized"},
     {H5E_UNSUPPORTED, 	"Feature is unsupported"},
     {H5E_BADTYPE, 	"Inappropriate type"},
     {H5E_BADRANGE, 	"Out of range"},
     {H5E_BADVALUE, 	"Bad value"},
+
+    /* Resource errors */
     {H5E_NOSPACE, 	"No space available for allocation"},
     {H5E_CANTCOPY, 	"Unable to copy object"},
     {H5E_CANTFREE, 	"Unable to free object"},
+
+    /* File accessability errors */
     {H5E_FILEEXISTS, 	"File already exists"},
     {H5E_FILEOPEN, 	"File already open"},
     {H5E_CANTCREATE, 	"Unable to create file"},
     {H5E_CANTOPENFILE, 	"Unable to open file"},
-    {H5E_CANTOPENOBJ, 	"Unable to open object"},
+    {H5E_CANTCLOSEFILE, 	"Unable to close file"},
     {H5E_NOTHDF5, 	"Not an HDF5 file"},
     {H5E_BADFILE, 	"Bad file ID accessed"},
     {H5E_TRUNCATED, 	"File has been truncated"},
     {H5E_MOUNT,		"File mount error"},
+
+    /* Generic low-level file I/O errors */
     {H5E_SEEKERROR,	"Seek failed"},
     {H5E_READERROR, 	"Read failed"},
     {H5E_WRITEERROR, 	"Write failed"},
     {H5E_CLOSEERROR, 	"Close failed"},
     {H5E_OVERFLOW, 	"Address overflowed"},
+
+    /* Function entry/exit interface errors */
     {H5E_CANTINIT, 	"Unable to initialize"},
     {H5E_ALREADYINIT, 	"Object already initialized"},
+
+    /* Object atom related errors */
     {H5E_BADATOM, 	"Unable to find atom information (already closed?)"},
     {H5E_CANTREGISTER, 	"Unable to  register new atom"},
+
+    /* Cache related errors */
     {H5E_CANTFLUSH, 	"Unable to flush data from cache"},
     {H5E_CANTLOAD, 	"Unable to load meta data into cache"},
     {H5E_PROTECT, 	"Protected meta data error"},
     {H5E_NOTCACHED, 	"Meta data not currently cached"},
+
+    /* B-tree related errors */
     {H5E_NOTFOUND, 	"Object not found"},
     {H5E_EXISTS, 	"Object already exists"},
     {H5E_CANTENCODE, 	"Unable to encode value"},
@@ -101,14 +117,26 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_CANTSPLIT, 	"Unable to split node"},
     {H5E_CANTINSERT, 	"Unable to insert object"},
     {H5E_CANTLIST, 	"Unable to list node"},
+
+    /* Object header related errors */
     {H5E_LINKCOUNT, 	"Bad object header link count"},
     {H5E_VERSION, 	"Wrong version number"},
     {H5E_ALIGNMENT, 	"Alignment error"},
     {H5E_BADMESG, 	"Unrecognized message"},
+    {H5E_CANTDELETE, 	"Can't delete message"},
+
+    /* Group related errors */
+    {H5E_CANTOPENOBJ, 	"Can't open object"},
     {H5E_COMPLEN, 	"Name component is too long"},
     {H5E_CWG, 		"Problem with current working group"},
     {H5E_LINK, 		"Link count failure"},
     {H5E_SLINK,		"Symbolic link error"},
+
+    /* Datatype conversion errors */
+    {H5E_CANTCONVERT,		"Can't convert datatypes"},
+
+    /* Datatype conversion errors */
+    {H5E_MPI,		"Some MPI function failed"}
 };
 
 /* Interface initialization? */
