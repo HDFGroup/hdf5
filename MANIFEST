@@ -408,9 +408,6 @@
 ./doc/html/Tutor/examples/java/runHyperSlab.sh
 ./doc/html/Tutor/examples/java/runHyperSlab.sh.in
 
-./doc/html/cpplus/CppInterfaces.html
-./doc/html/cpplus/CppUserNotes.doc
-./doc/html/cpplus/CppUserNotes.pdf
 ./doc/html/cpplus/Dependencies
 ./doc/html/cpplus/Makefile.in
 
@@ -640,7 +637,6 @@
 
 ./doc/html/cpplus_RM/header_files/Dependencies
 ./doc/html/cpplus_RM/header_files/Makefile.in
-./doc/html/cpplus_RM/header_files/filelist.xml
 ./doc/html/cpplus_RM/header_files/filelist.xml
 ./doc/html/cpplus_RM/header_files/image001.jpg
 ./doc/html/cpplus_RM/header_files/image002.jpg
