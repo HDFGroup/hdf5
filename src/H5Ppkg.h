@@ -115,6 +115,7 @@ H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
 H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
 H5_DLL int H5P_tbbt_strcmp(const void *k1, const void *k2, int UNUSED cmparg);
+H5_DLL herr_t H5P_close_class(void *_pclass);
 
 /* Testing functions */
 #ifdef H5P_TESTING

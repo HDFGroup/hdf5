@@ -12,10 +12,12 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
+/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *
+ * Purpose:	Generic Property Functions
+ */
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-#define H5P_TESTING		/*suppress warning about H5P testing funcs*/
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
@@ -30,7 +32,7 @@
 /* Pablo mask */
 #define PABLO_MASK	H5P_mask
 
-/* Is the interface initialized? */
+/* Interface initialization */
 static int		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
@@ -86,7 +88,6 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_create_func_t cls_create, void *create_data,
      H5P_cls_copy_func_t cls_copy, void *copy_data,
      H5P_cls_close_func_t cls_close, void *close_data);
-static herr_t H5P_close_class(void *_pclass);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
@@ -5340,49 +5341,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pget_class_path
- PURPOSE
-    Routine to query the full path of a generic property list class
- USAGE
-    char *H5Pget_class_name(pclass_id)
-        hid_t pclass_id;         IN: Property class to query
- RETURNS
-    Success: Pointer to a malloc'ed string containing the full path of class
-    Failure: NULL
- DESCRIPTION
-        This routine retrieves the full path name of a generic property list
-    class, starting with the root of the class hierarchy.
-    The pointer to the name must be free'd by the user for successful calls.
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING H5P_get_class_path()
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-char *
-H5P_get_class_path_test(hid_t pclass_id)
-{
-    H5P_genclass_t	*pclass;    /* Property class to query */
-    char *ret_value;       /* return value */
-
-    FUNC_ENTER_NOAPI(H5P_get_class_path_test, NULL);
-
-    /* Check arguments. */
-    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
-
-    /* Get the property list class path */
-    if ((ret_value=H5P_get_class_path(pclass))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5P_get_class_path_test() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5P_open_class_path
  PURPOSE
     Internal routine to open [a copy of] a class with its full path name
@@ -5457,54 +5415,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_open_class_path() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Popen_class_path
- PURPOSE
-    Routine to open a [copy of] a class with its full path name
- USAGE
-    hid_t H5Popen_class_name(path)
-        const char *path;       IN: Full path name of class to open [copy of]
- RETURNS
-    Success: ID of generic property class
-    Failure: NULL
- DESCRIPTION
-    This routine opens [a copy] of the class indicated by the full path.
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING H5P_open_class_path()
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-hid_t
-H5P_open_class_path_test(const char *path)
-{
-    H5P_genclass_t *pclass=NULL;/* Property class to query */
-    hid_t ret_value;            /* Return value */
-
-    FUNC_ENTER_NOAPI(H5P_open_class_path_test, FAIL);
-
-    /* Check arguments. */
-    if (NULL == path || *path=='\0')
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid class path");
-
-    /* Open the property list class */
-    if ((pclass=H5P_open_class_path(path))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to find class with full path");
-
-    /* Get an atom for the class */
-    if ((ret_value=H5I_register(H5I_GENPROP_CLS, pclass))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
-
-done:
-    if(ret_value<0 && pclass)
-        H5P_close_class(pclass);
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5P_open_class_path_test() */
 
 
 /*--------------------------------------------------------------------------
@@ -5612,7 +5522,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_close_class(void *_pclass)
 {
     H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
