@@ -52,17 +52,6 @@ typedef enum H5G_link_t {
  * application is running.  An object may satisfy the `isa' function for more
  * than one type.
  */
-#ifdef TRY
-#define H5G_UNKNOWN	(-1)		/* Unknown object type		*/
-#define H5G_LINK	0		/* Object is a symbolic link	*/
-#define H5G_GROUP	1		/* Object is a group		*/
-#define H5G_DATASET	2		/* Object is a dataset		*/
-#define H5G_TYPE	3		/* Object is a named data type	*/
-#define H5G_RESERVED_4	4		/* Reserved for future use	*/
-#define H5G_RESERVED_5	5		/* Reserved for future use	*/
-#define H5G_RESERVED_6	6		/* Reserved for future use	*/
-#define H5G_RESERVED_7	7		/* Reserved for future use	*/
-#else
 typedef enum H5G_obj_t {
     H5G_UNKNOWN = -1,		/* Unknown object type		*/
     H5G_LINK,		        /* Object is a symbolic link	*/
@@ -74,7 +63,6 @@ typedef enum H5G_obj_t {
     H5G_RESERVED_6,		/* Reserved for future use	*/
     H5G_RESERVED_7		/* Reserved for future use	*/
 } H5G_obj_t;    
-#endif /*TRY*/
 
 #define H5G_NTYPES	256		/* Max possible number of types	*/
 #define H5G_NLIBTYPES	8		/* Number of internal types	*/

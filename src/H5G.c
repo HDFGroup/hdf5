@@ -2525,7 +2525,6 @@ static H5G_obj_t
 H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id)
 {
     H5G_obj_t		ret_value = H5G_UNKNOWN;
-    herr_t              ret;
     H5G_bt_ud3_t	udata;
     
     FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
@@ -2535,8 +2534,8 @@ H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id)
     udata.group = grp;
     
     /* Iterate over the group members */
-    if ((ret = H5B_iterate (H5G_fileof(grp), dxpl_id, H5B_SNODE,
-              H5G_node_type, grp->ent.cache.stab.btree_addr, &udata))<0)
+    if (H5B_iterate (H5G_fileof(grp), dxpl_id, H5B_SNODE,
+              H5G_node_type, grp->ent.cache.stab.btree_addr, &udata)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
     ret_value = udata.type;
