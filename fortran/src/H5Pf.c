@@ -1183,6 +1183,8 @@ nh5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* m
      c_meta_plist = *meta_plist;
      c_raw_plist = *raw_plist; 
      ret = H5Pset_fapl_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );
+     HDfree(c_meta_ext);
+     HDfree(c_raw_ext);
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -1540,6 +1542,7 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, h
       */
      c_prp_id = *prp_id;
      ret = H5Pset_external(c_prp_id, c_name, c_offset, c_bytes);
+     HDfree(c_name);
 
      if (ret < 0) return ret_value;
      ret_value = 0;
