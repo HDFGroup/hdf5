@@ -86,11 +86,10 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
+    if (!H5T_IS_ATOMIC(dt))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
     
     /* Get values */
-    assert(H5T_is_atomic(dt));
     if (lsb)
         *lsb = dt->u.atomic.lsb_pad;
     if (msb)
@@ -137,11 +136,10 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
+    if (!H5T_IS_ATOMIC(dt))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
 
     /* Commit */
-    assert(H5T_is_atomic(dt));
     dt->u.atomic.lsb_pad = lsb;
     dt->u.atomic.msb_pad = msb;
 

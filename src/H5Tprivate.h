@@ -18,6 +18,7 @@
 #ifndef _H5Tprivate_H
 #define _H5Tprivate_H
 
+/* Get package's public header */
 #include "H5Tpublic.h"
 
 /* Private headers needed by this file */
@@ -30,7 +31,7 @@ typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
 typedef struct H5T_path_t H5T_path_t;
 
-/* How to copy a data type */
+/* How to copy a datatype */
 typedef enum H5T_copy_t {
     H5T_COPY_TRANSIENT,
     H5T_COPY_ALL,

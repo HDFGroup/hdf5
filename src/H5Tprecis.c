@@ -19,12 +19,14 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5Tpkg.h"		/*data-type functions			  */
-
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Tprecis_mask
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -51,16 +53,16 @@ DESCRIPTION
 static herr_t
 H5T_init_precis_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_precis_interface);
+    FUNC_ENTER_NOINIT(H5T_init_precis_interface)
 
-    FUNC_LEAVE_NOAPI(H5T_init());
+    FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_precis_interface() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_precision
  *
- * Purpose:	Gets the precision of a data type.  The precision is
+ * Purpose:	Gets the precision of a datatype.  The precision is
  *		the number of significant bits which, unless padding is
  *		present, is 8 times larger than the value returned by
  *		H5Tget_size().
@@ -75,7 +77,7 @@ H5T_init_precis_interface(void)
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -85,37 +87,36 @@ H5Tget_precision(hid_t type_id)
     H5T_t	*dt = NULL;
     size_t	ret_value;
 
-    FUNC_ENTER_API(H5Tget_precision, 0);
+    FUNC_ENTER_API(H5Tget_precision, 0)
     H5TRACE1("z","i",type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
     while (dt->parent)
         dt = dt->parent;	/*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified data type");
+    if (!H5T_IS_ATOMIC(dt))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
     
     /* Precision */
-    assert(H5T_is_atomic(dt));
     ret_value = dt->u.atomic.prec;
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_precision
  *
- * Purpose:	Sets the precision of a data type.  The precision is
+ * Purpose:	Sets the precision of a datatype.  The precision is
  *		the number of significant bits which, unless padding is
  *		present, is 8 times larger than the value returned by
  *		H5Tget_size().
  *
  *		If the precision is increased then the offset is decreased
  *		and then the size is increased to insure that significant
- *		bits do not "hang over" the edge of the data type.
+ *		bits do not "hang over" the edge of the datatype.
  *
  *		The precision property of strings is read-only.
  *
@@ -140,43 +141,43 @@ H5Tset_precision(hid_t type_id, size_t prec)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tset_precision, FAIL);
+    FUNC_ENTER_API(H5Tset_precision, FAIL)
     H5TRACE2("e","iz",type_id,prec);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (H5T_STATE_TRANSIENT!=dt->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
-    if (prec <= 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive");
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+    if (prec == 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive")
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined")
     if (H5T_STRING==dt->type)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only")
     if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
 
     /* Do the work */
     if (H5T_set_precision(dt, prec)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_set_precision
  *
- * Purpose:	Sets the precision of a data type.  The precision is
+ * Purpose:	Sets the precision of a datatype.  The precision is
  *		the number of significant bits which, unless padding is
  *		present, is 8 times larger than the value returned by
  *		H5Tget_size().
  *
  *		If the precision is increased then the offset is decreased
  *		and then the size is increased to insure that significant
- *		bits do not "hang over" the edge of the data type.
+ *		bits do not "hang over" the edge of the datatype.
  *
  *		The precision property of strings is read-only.
  *
@@ -191,7 +192,7 @@ done:
  *
  * Modifications:
  * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
@@ -201,7 +202,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
     size_t	offset, size;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_set_precision, FAIL);
+    FUNC_ENTER_NOAPI(H5T_set_precision, FAIL)
 
     /* Check args */
     assert(dt);
@@ -213,7 +214,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 
     if (dt->parent) {
 	if (H5T_set_precision(dt->parent, prec)<0)
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision for base type");
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
 
         /* Adjust size of datatype appropriately */
         if(dt->type==H5T_ARRAY)
@@ -221,7 +222,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
         else if(dt->type!=H5T_VLEN)
             dt->size = dt->parent->size;
     } else {
-        if (H5T_is_atomic(dt)) {
+        if (H5T_IS_ATOMIC(dt)) {
 	    /* Adjust the offset and size */
 	    offset = dt->u.atomic.offset;
 	    size = dt->size;
@@ -248,27 +249,25 @@ H5T_set_precision(H5T_t *dt, size_t prec)
                      */
                     if (dt->u.atomic.u.f.sign >= prec ||
                             dt->u.atomic.u.f.epos + dt->u.atomic.u.f.esize > prec ||
-                            dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec) {
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
-                    }
+                            dt->u.atomic.u.f.mpos + dt->u.atomic.u.f.msize > prec)
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first")
                     break;
 
                 default:
                     assert("not implemented yet" && 0);
-	    }
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
+	    } /* end switch */
 
 	    /* Commit */
 	    dt->size = size;
-	    if (H5T_is_atomic(dt)) {
-		dt->u.atomic.offset = offset;
-		dt->u.atomic.prec = prec;
-	    }
-	}
+            dt->u.atomic.offset = offset;
+            dt->u.atomic.prec = prec;
+	} /* end if */
         else
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype");
-    }
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")
+    } /* end else */
     
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 

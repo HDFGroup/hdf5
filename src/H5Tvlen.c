@@ -70,10 +70,10 @@ H5T_init_vlen_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5Tvlen_create
  *
- * Purpose:	Create a new variable-length data type based on the specified
+ * Purpose:	Create a new variable-length datatype based on the specified
  *		BASE_TYPE.
  *
- * Return:	Success:	ID of new VL data type
+ * Return:	Success:	ID of new VL datatype
  *
  *		Failure:	Negative
  *
@@ -87,8 +87,8 @@ H5T_init_vlen_interface(void)
 hid_t
 H5Tvlen_create(hid_t base_id)
 {
-    H5T_t	*base = NULL;		/*base data type	*/
-    H5T_t	*dt = NULL;		/*new data type	*/
+    H5T_t	*base = NULL;		/*base datatype	*/
+    H5T_t	*dt = NULL;		/*new datatype	*/
     hid_t	ret_value;	        /*return value			*/
     
     FUNC_ENTER_API(H5Tvlen_create, FAIL)
@@ -114,10 +114,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_vlen_create
  *
- * Purpose:	Create a new variable-length data type based on the specified
+ * Purpose:	Create a new variable-length datatype based on the specified
  *		BASE_TYPE.
  *
- * Return:	Success:	new VL data type
+ * Return:	Success:	new VL datatype
  *
  *		Failure:	NULL
  *
@@ -131,7 +131,7 @@ done:
 H5T_t *
 H5T_vlen_create(const H5T_t *base)
 {
-    H5T_t	*dt = NULL;		/*new VL data type	*/
+    H5T_t	*dt = NULL;		/*new VL datatype	*/
     H5T_t	*ret_value;	/*return value			*/
     
     FUNC_ENTER_NOINIT(H5T_vlen_create)
@@ -843,7 +843,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get the free func & information */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))

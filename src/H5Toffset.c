@@ -105,11 +105,10 @@ H5Tget_offset(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     while (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
+    if (!H5T_IS_ATOMIC(dt))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type");
     
     /* Offset */
-    assert(H5T_is_atomic(dt));
     ret_value = (int)dt->u.atomic.offset;
 
 done:
@@ -175,7 +174,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
     if (H5T_COMPOUND==dt->type || H5T_REFERENCE==dt->type || H5T_OPAQUE==dt->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for this datatype");
 
     /* Do the real work */
     if (H5T_set_offset(dt, offset)<0)

@@ -50,10 +50,19 @@
 #define H5T_NAMELEN		32
 
 /* Macro to ease detecting "complex" datatypes (i.e. those with base types or fields) */
-#define H5T_IS_COMPLEX(t)      ((t)==H5T_COMPOUND || (t)==H5T_ENUM || (t)==H5T_VLEN || (t)==H5T_ARRAY)
+#define H5T_IS_COMPLEX(t)       ((t)==H5T_COMPOUND || (t)==H5T_ENUM || (t)==H5T_VLEN || (t)==H5T_ARRAY)
+
+/* Macro to ease detecting fixed "string" datatypes */
+#define H5T_IS_FIXED_STRING(dt)   (H5T_STRING == (dt)->type)
+
+/* Macro to ease detecting variable-length "string" datatypes */
+#define H5T_IS_VL_STRING(dt)    (H5T_VLEN == (dt)->type && H5T_VLEN_STRING == (dt)->u.vlen.type)
 
 /* Macro to ease detecting fixed or variable-length "string" datatypes */
-#define H5T_IS_STRING(dt)      (H5T_STRING == (dt)->type || (H5T_VLEN == (dt)->type && H5T_VLEN_STRING == (dt)->u.vlen.type))
+#define H5T_IS_STRING(dt)       (H5T_IS_FIXED_STRING(dt) || H5T_IS_VL_STRING(dt))
+
+/* Macro to ease detecting atomic datatypes */
+#define H5T_IS_ATOMIC(dt)       (!(H5T_IS_COMPLEX((dt)->type) || (dt)->type==H5T_OPAQUE))
 
 /* Statistics about a conversion function */
 struct H5T_stats_t {
@@ -62,11 +71,11 @@ struct H5T_stats_t {
     H5_timer_t	timer;			/*total time for conversion	     */
 };
 
-/* The data type conversion database */
+/* The datatype conversion database */
 struct H5T_path_t {
     char	name[H5T_NAMELEN];	/*name for debugging only	     */
-    H5T_t	*src;			/*source data type ID		     */
-    H5T_t	*dst;			/*destination data type ID	     */
+    H5T_t	*src;			/*source datatype ID		     */
+    H5T_t	*dst;			/*destination datatype ID	     */
     H5T_conv_t	func;			/*data conversion function	     */
     hbool_t	is_hard;		/*is it a hard function?	     */
     H5T_stats_t	stats;			/*statistics for the conversion	     */
@@ -107,14 +116,14 @@ typedef struct H5T_atomic_t {
     } u;
 } H5T_atomic_t;
 
-/* How members are sorted for compound or enum data types */
+/* How members are sorted for compound or enum datatypes */
 typedef enum H5T_sort_t {
     H5T_SORT_NONE	= 0,		/*not sorted			     */
     H5T_SORT_NAME	= 1,		/*sorted by member name		     */
     H5T_SORT_VALUE	= 2 		/*sorted by memb offset or enum value*/
 } H5T_sort_t;
 
-/* A compound data type */
+/* A compound datatype */
 typedef struct H5T_compnd_t {
     int		nalloc;		/*num entries allocated in MEMB array*/
     int		nmembs;		/*number of members defined in struct*/
@@ -122,7 +131,7 @@ typedef struct H5T_compnd_t {
     struct H5T_cmemb_t	*memb;	/*array of struct members	     */
 } H5T_compnd_t;
 
-/* An enumeration data type */
+/* An enumeration datatype */
 typedef struct H5T_enum_t {
     int		nalloc;		/*num entries allocated		     */
     int		nmembs;		/*number of members defined in enum  */
@@ -157,7 +166,7 @@ typedef struct H5T_vlen_t {
     H5T_vlen_writefunc_t write; /* Function to write VL sequence from buffer */
 } H5T_vlen_t;
 
-/* An opaque data type */
+/* An opaque datatype */
 typedef struct H5T_opaque_t {
     char		*tag;		/*short type description string	     */
 } H5T_opaque_t;
@@ -185,18 +194,18 @@ struct H5T_t {
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
-    struct H5T_t	*parent;/*parent type for derived data types	     */
+    struct H5T_t	*parent;/*parent type for derived datatypes	     */
     union {
-        H5T_atomic_t	atomic; /* an atomic data type              */
-        H5T_compnd_t	compnd; /* a compound data type (struct)    */
+        H5T_atomic_t	atomic; /* an atomic datatype              */
+        H5T_compnd_t	compnd; /* a compound datatype (struct)    */
         H5T_enum_t	enumer; /* an enumeration type (enum)       */
         H5T_vlen_t	vlen;   /* a variable-length datatype       */
-        H5T_opaque_t	opaque; /* an opaque data type              */
+        H5T_opaque_t	opaque; /* an opaque datatype              */
         H5T_array_t	array;  /* an array datatype                */
     } u;
 };
 
-/* A compound data type member */
+/* A compound datatype member */
 typedef struct H5T_cmemb_t {
     char		*name;		/*name of this member		     */
     size_t		offset;		/*offset from beginning of struct    */
@@ -207,8 +216,8 @@ typedef struct H5T_cmemb_t {
 /* The master list of soft conversion functions */
 typedef struct H5T_soft_t {
     char	name[H5T_NAMELEN];	/*name for debugging only	     */
-    H5T_class_t src;			/*source data type class	     */
-    H5T_class_t dst;			/*destination data type class	     */
+    H5T_class_t src;			/*source datatype class	     */
+    H5T_class_t dst;			/*destination datatype class	     */
     H5T_conv_t	func;			/*the conversion function	     */
 } H5T_soft_t;
 
@@ -301,8 +310,6 @@ H5_DLL char  *H5T_get_member_name(H5T_t *dt, int membno);
 H5_DLL herr_t H5T_get_member_value(H5T_t *dt, int membno, void *value);
 H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, int membno);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
-H5_DLL htri_t H5T_is_variable_str(H5T_t *dt);
-H5_DLL htri_t H5T_is_atomic(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
 H5_DLL H5T_t *H5T_enum_create(H5T_t *parent);

@@ -2541,7 +2541,7 @@ H5Tis_variable_str(hid_t dtype_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Set return value */
-    ret_value=H5T_is_variable_str(dt);
+    ret_value=H5T_IS_VL_STRING(dt);
 
 done:
     FUNC_LEAVE_API(ret_value);   
@@ -2549,48 +2549,15 @@ done:
  
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_variable_str
- *
- * Purpose:	Private function of H5Tis_variable_str.
- *              Check whether a datatype is a variable-length string
- *		
- *
- * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		November 4, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_is_variable_str(H5T_t *dt)
-{
-    htri_t      ret_value=FALSE;        /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_is_variable_str, FAIL);
-    
-    assert(dt);
-
-    if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
-        ret_value = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);   
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Tget_size
  *
- * Purpose:	Determines the total size of a data type in bytes.
+ * Purpose:	Determines the total size of a datatype in bytes.
  *
- * Return:	Success:	Size of the data type in bytes.	 The size of
- *				data type is the size of an instance of that
- *				data type.
+ * Return:	Success:	Size of the datatype in bytes.	 The size of
+ *				datatype is the size of an instance of that
+ *				datatype.
  *
- *		Failure:	0 (valid data types are never zero size)
+ *		Failure:	0 (valid datatypes are never zero size)
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
@@ -2610,7 +2577,7 @@ H5Tget_size(hid_t type_id)
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
     
     /* size */
     ret_value = H5T_get_size(dt);
@@ -2623,12 +2590,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_size
  *
- * Purpose:	Sets the total size in bytes for a data type (this operation
- *		is not permitted on reference data types).  If the size is
- *		decreased so that the significant bits of the data type
+ * Purpose:	Sets the total size in bytes for a datatype (this operation
+ *		is not permitted on reference datatypes).  If the size is
+ *		decreased so that the significant bits of the datatype
  *		extend beyond the edge of the new size, then the `offset'
  *		property is decreased toward zero.  If the `offset' becomes
- *		zero and the significant bits of the data type still hang
+ *		zero and the significant bits of the datatype still hang
  *		over the edge of the new size, then the number of significant
  *		bits is decreased.
  *
@@ -3911,41 +3878,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_atomic
- *
- * Purpose:	Determines if a data type is an atomic type.
- *
- * Return:	Success:	TRUE, FALSE
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_is_atomic(const H5T_t *dt)
-{
-    htri_t	ret_value;
-    
-    FUNC_ENTER_NOAPI(H5T_is_atomic, FAIL);
-
-    assert(dt);
-
-    if (!H5T_IS_COMPLEX(dt->type) && H5T_OPAQUE!=dt->type)
-	ret_value = TRUE;
-    else
-	ret_value = FALSE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_set_size
  *
  * Purpose:	Sets the total size in bytes for a data type (this operation
@@ -4000,7 +3932,7 @@ H5T_set_size(H5T_t *dt, size_t size)
         else if(dt->type!=H5T_VLEN)
             dt->size = dt->parent->size;
     } else {
-        if (H5T_is_atomic(dt)) {
+        if (H5T_IS_ATOMIC(dt)) {
             offset = dt->u.atomic.offset;
             prec = dt->u.atomic.prec;
 
@@ -4093,7 +4025,7 @@ H5T_set_size(H5T_t *dt, size_t size)
         /* Commit (if we didn't convert this type to a VL string) */
         if(dt->type!=H5T_VLEN) {
             dt->size = size;
-            if (H5T_is_atomic(dt)) {
+            if (H5T_IS_ATOMIC(dt)) {
                 dt->u.atomic.offset = offset;
                 dt->u.atomic.prec = prec;
             }
@@ -5394,7 +5326,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
     fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->size));
 
-    if (H5T_is_atomic(dt)) {
+    if (H5T_IS_ATOMIC(dt)) {
 	switch (dt->u.atomic.order) {
             case H5T_ORDER_BE:
                 s1 = "BE";

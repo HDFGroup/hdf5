@@ -89,15 +89,13 @@ H5Tget_cset(hid_t type_id)
     while (dt->parent && !H5T_IS_STRING(dt))
         dt = dt->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, H5T_CSET_ERROR, "operation not defined for data type class");
     
     /* result */
-    if(H5T_STRING == dt->type)
+    if(H5T_IS_FIXED_STRING(dt))
         ret_value = dt->u.atomic.u.s.cset;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+    else 
         ret_value = dt->u.vlen.cset;
-    else
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR, "can't get cset info");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -141,15 +139,13 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     while (dt->parent && !H5T_IS_STRING(dt))
         dt = dt->parent;  /*defer to parent*/
     if (!H5T_IS_STRING(dt))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for data type class");
     
     /* Commit */
-    if(H5T_STRING == dt->type)
+    if(H5T_IS_FIXED_STRING(dt))
         dt->u.atomic.u.s.cset = cset;
-    else if(H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)
+    else 
         dt->u.vlen.cset = cset;
-    else
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't set cset info");
 
 done:
     FUNC_LEAVE_API(ret_value);
