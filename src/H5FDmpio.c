@@ -1429,7 +1429,7 @@ H5FD_mpio_flush(H5FD_t *_file)
 static haddr_t
 MPIOff_to_haddr(MPI_Offset mpi_off)
 {
-    hadd_t ret_value=HADDR_UNDEF;
+    haddr_t ret_value=HADDR_UNDEF;
 
     FUNC_ENTER(MPIOff_to_haddr, HADDR_UNDEF);
 
