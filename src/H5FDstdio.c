@@ -711,15 +711,23 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /*
      * Seek to the correct file position.
      */
-    if (!(file->op == H5FD_STDIO_OP_WRITE || file->op==H5FD_STDIO_OP_SEEK) ||
+    if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
-#ifdef WIN32                                                                                   fpos_t tempos =(fpos_t)(addr+SEEK_SET);                                                if (fsetpos(file->fp,&tempos)!=0) {                                                        file->op = H5FD_STDIO_OP_UNKNOWN;                                                      file->pos = HADDR_UNDEF;                                                               H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);                    }                                                                              #else          
+#ifdef WIN32
+	    fpos_t tempos =(fpos_t)(addr+SEEK_SET);
+
+	    if (fsetpos(file->fp,&tempos) != 0) {
+		file->op = H5FD_STDIO_OP_UNKNOWN;
+		file->pos = HADDR_UNDEF;
+		H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fsetpos failed", -1);
+	    }
+#else
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1);
         }
-#endif
+#endif	/* WIN32 */
         file->pos = addr;
     }
     
