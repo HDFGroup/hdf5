@@ -430,6 +430,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
     hsize_t		i, j;
     hssize_t		row;			/*current row number	*/
     hsize_t		interval_nelmts;	/*elmts/interval timer	*/
+    hsize_t		read_nelmts=0;		/*total elements read	*/
     hsize_t		*size=NULL;		/*size of each row	*/
     C_MTYPE		**buf=NULL;		/*buffer for each row	*/
     H5_timer_t		timer, timer_total;	/*performance timers	*/
@@ -484,8 +485,13 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	    interval_nelmts += MIN(width, size[i]);
 
 	    /*
-	     * Total number of elements for all the rows read so far.  This
-	     * is used to calculate the percent done.
+	     * Total number of elements actually read for rows so far.
+	     */
+	    read_nelmts += MIN(width, size[i]);
+
+	    /*
+	     * Total number of elements attributed to the rows read so far.
+	     * This is used to calculate the percent done.
 	     */
 	    total_nelmts += size[i];
 
@@ -510,7 +516,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	    H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
-		   (unsigned long)(row+i), (unsigned long)total_nelmts,
+		   (unsigned long)(row+i), (unsigned long)read_nelmts,
 		   100.0*total_nelmts/MAX_NELMTS, s,
 		   0==timeout_g?" (aborting)":"");
 	    interval_nelmts = 0;
@@ -531,11 +537,11 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	H5_timer_end(&timer_total, &timer);
 	H5_bandwidth(s, (double)interval_nelmts*sizeof(C_MTYPE), timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
-	       (unsigned long)row, (unsigned long)total_nelmts,
+	       (unsigned long)row, (unsigned long)read_nelmts,
 	       100.0*total_nelmts/MAX_NELMTS, s);
     }
     printf("   -------- -------- -------- ----------\n");
-    H5_bandwidth(s, (double)total_nelmts*sizeof(C_MTYPE), timer_total.etime);
+    H5_bandwidth(s, (double)read_nelmts*sizeof(C_MTYPE), timer_total.etime);
     printf("   %27s%10s\n", "", s);
 
     /* Cleanup */
