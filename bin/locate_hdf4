@@ -1,0 +1,68 @@
+#!/bin/sh
+# Try to locate the HDF (nicknamed hdf4) software
+# This is a hack because there is no consistent place to find
+# the valid HDF library.
+# Usage: locate_hdf5
+# It prints two strings in which the first one represents a valid
+# value for the --with-hdf=... switch and the second one is where
+# one can find the hdp command.  It can be added to the $PATH.
+
+H4_SW=
+H4_BIN=
+OS=`uname -s`
+# this default is the best guess of locating hdf4 software
+h4paths_defaults="/usr/ncsa /usr/sdt /usr/local"
+
+case "$OS" in
+    HP-UX)
+	h4paths="/afs/ncsa/packages/hdf/HPUX_10.20"
+	;;
+    IRIX)
+	h4paths="/afs/ncsa/packages/hdf/4.1r3_irix"
+	;;
+    IRIX64)
+	case "$CC" in
+	cc|"")	#default cc
+	    abi=`cc -show_defaults 2>&1 | grep 'default abi'`
+	    case $abi in
+	    *-n32)
+		h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
+		;;
+	    *-64)
+		h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		;;
+	    *)
+		h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+		;;
+	    esac	# $abi
+	    ;;
+	*-n32)
+	    h4paths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
+	    ;;
+	*)
+	    h4paths="/afs/ncsa/packages/hdf/IRIX64_6.5"
+	    ;;
+	esac
+	;;
+    Linux)
+	h4paths="/afs/ncsa/packages/hdf/linux"
+	;;
+    OSF1)
+	h4paths="/afs/ncsa/packages/hdf/OSF1_V4.0"
+	;;
+    *)
+	h4paths="$h4paths_defaults"
+	;;
+esac
+
+# check if the hdf4 software is actually available
+for h4 in $h4paths; do
+    if [ -f $h4/lib/libdf.a -a -f $h4/include/hdf.h ]; then
+	H4_SW="$h4/include,$h4/lib"
+	if [ -f $h4/bin/hdp ]; then
+	    H4_BIN=$h4/bin
+	fi
+	break
+    fi
+done
+echo $H4_SW $H4_BIN
