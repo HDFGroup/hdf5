@@ -92,6 +92,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - ASdded PGI Fortran support for Linux64 (x86_64) systems
+                            EIP - 2004/08/19
         - Absoft compiler f95 v9.0 is supported on Linux 2.4 32bit
                             EIP - 2004/07/29 
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
