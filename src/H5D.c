@@ -3191,7 +3191,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     size_t              ptsperbuf;      /* Maximum # of points which fit in the buffer */
     size_t		bufsize=64*1024;    /* Size of buffer to write */
     size_t		size;           /* Current # of points to write */
-    haddr_t		addr;           /* Offset in dataset */
+    hsize_t		addr;           /* Offset in dataset */
     void		*buf = NULL;    /* Buffer for fill value writing */
     H5O_fill_t          fill;           /* Fill value information */
     H5P_genplist_t     *plist;          /* Property list */

@@ -258,7 +258,8 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    if (H5O_efl_read(f, &efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    H5_CHECK_OVERFLOW(file_offset_arr[v],hsize_t,haddr_t);
+                    if (H5O_efl_read(f, &efl, (haddr_t)file_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "external data read failed");
 
                     /* Increment offset in buffer */
@@ -641,7 +642,8 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                      *  all datasets in external files would alias to the same set of
                      *  file offsets, totally mixing up the data sieve buffer information. -QAK
                      */
-                    if (H5O_efl_write(f, &efl, file_offset_arr[v], seq_len_arr[v], real_buf)<0)
+                    H5_CHECK_OVERFLOW(file_offset_arr[v],hsize_t,haddr_t);
+                    if (H5O_efl_write(f, &efl, (haddr_t)file_offset_arr[v], seq_len_arr[v], real_buf)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "external data write failed");
 
                     /* Increment offset in buffer */

@@ -2460,6 +2460,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     } /* end if */
 
     if (alloc_only) {
+	haddr_t addr;
 	/*
 	 * Allocate space for the userblock, superblock, and driver info
 	 * block. We do it with one allocation request because the userblock
@@ -2467,10 +2468,9 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	 * the first allocation request is required to return memory at
 	 * format address zero.
 	 */
-	haddr_t addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER,
-				  (f->shared->base_addr +
-				   superblock_size +
-				   driver_size));
+        H5_CHECK_OVERFLOW(f->shared->base_addr,haddr_t,hsize_t);
+	addr = H5FD_alloc(f->shared->lf, H5FD_MEM_SUPER,
+              ((hsize_t)f->shared->base_addr + superblock_size + driver_size));
 	if (HADDR_UNDEF==addr)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to allocate file space for userblock and/or superblock");
 	if (0!=addr)

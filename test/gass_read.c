@@ -16,7 +16,7 @@
    4. Get some information about the dataset from the file.
 */
 #include "h5test.h"
-#include <strings.h>
+#include <string.h>
 
 #ifndef H5_HAVE_GASS
 int main(void)

@@ -794,16 +794,18 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
             file->nmembs = MAX(file->nmembs, i+1);
             sprintf(memb_name, file->name, i);
             H5E_BEGIN_TRY {
+            H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
             file->memb[i] = H5FDopen(memb_name, file->flags|H5F_ACC_CREAT,
-                         file->memb_fapl_id, file->memb_size);
+                         file->memb_fapl_id, (haddr_t)file->memb_size);
             } H5E_END_TRY;
             if (NULL==file->memb[i])
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open member file");
         }
         
         /* Set the EOA marker for the member */
-        if (addr>file->memb_size) {
-            H5FDset_eoa(file->memb[i], file->memb_size);
+        H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
+        if (addr>(haddr_t)file->memb_size) {
+            H5FDset_eoa(file->memb[i], (haddr_t)file->memb_size);
             addr -= file->memb_size;
         } else {
             H5FDset_eoa(file->memb[i], addr);
