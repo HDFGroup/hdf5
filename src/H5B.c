@@ -624,10 +624,10 @@ H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
  
     if (destroy)
         if (H5B_dest(f, bt) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node");
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_clear() */
 
 
@@ -659,7 +659,7 @@ H5B_size(H5F_t *f, H5B_t *bt)
     assert(bt->type);
 
     ret_value = H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey);
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -733,7 +733,15 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
 	}
     }
     if (cmp)
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
 	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree key not found")
+#else /* OLD_WAY */
+	HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     
     /*
      * Follow the link to the subtree or to the data node.
@@ -753,10 +761,26 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
 
     if (level > 0) {
 	if (H5B_find(f, dxpl_id, type, child, udata) < 0)
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in subtree")
+#else /* OLD_WAY */
+            HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     } else {
 	if ((type->found) (f, dxpl_id, child, nkey1, udata, nkey2) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
+        /* Note: don't push error on stack, leave that to next higher level,
+         *      since many times the B-tree is searched in order to determine
+         *      if an object exists in the B-tree or not. -QAK
+         */
+#ifdef OLD_WAY
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
+#else /* OLD_WAY */
+            HGOTO_DONE(FAIL)
+#endif /* OLD_WAY */
     }
 
 done:
