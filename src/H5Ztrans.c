@@ -964,8 +964,11 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
     } 
     else 
     {
-	H5Z_xform_eval_full(tree->lchild, array_size, array_type, &resl);
-	H5Z_xform_eval_full(tree->rchild, array_size, array_type, &resr);
+	if(H5Z_xform_eval_full(tree->lchild, array_size, array_type, &resl) < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+	if(H5Z_xform_eval_full(tree->rchild, array_size, array_type, &resr) < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
+
 	res->type = H5Z_XFORM_SYMBOL; 
 
 	/* For each type of operation:
@@ -999,8 +1002,8 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 			H5Z_XFORM_DO_OP1(resl, resr, long_long, +=, array_size)
 		    else if(array_type == H5T_NATIVE_ULLONG)
                     {
-#ifdef WIN32
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned int64 to double on win32")
+#ifndef H5_ULLONG_TO_FP_CAST_WORKS
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double, this is required for data transform to function")
 #else
 			H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, +=, array_size)
 #endif
@@ -1074,8 +1077,8 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 			H5Z_XFORM_DO_OP1(resl, resr, long_long, -=, array_size)
 		    else if(array_type == H5T_NATIVE_ULLONG)
                     {
-#ifdef WIN32
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned int64 to double on win32")
+#ifndef H5_ULLONG_TO_FP_CAST_WORKS
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double, this is required for data transform to function")
 #else
 			H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, -=, array_size)
 #endif
@@ -1152,8 +1155,8 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 			H5Z_XFORM_DO_OP1(resl, resr, long_long, *=, array_size)
 		    else if(array_type == H5T_NATIVE_ULLONG)
                     {
-#ifdef WIN32
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned int64 to double on win32")
+#ifndef H5_ULLONG_TO_FP_CAST_WORKS
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double, this is required for data transform to function")
 #else
 			H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, *=, array_size)
 #endif
@@ -1222,17 +1225,15 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 		    else if(array_type == H5T_NATIVE_LONG)
 			H5Z_XFORM_DO_OP1(resl, resr, long, /=, array_size)
 		    else if(array_type == H5T_NATIVE_ULONG)
-                    {
-#ifdef WIN32
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned int64 to double on win32")
-#else
-			H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, /=, array_size)
-#endif
-                    }
+			H5Z_XFORM_DO_OP1(resl, resr, unsigned long, /=, array_size)
 		    else if(array_type == H5T_NATIVE_LLONG)
 			H5Z_XFORM_DO_OP1(resl, resr, long_long, /=, array_size)
 		    else if(array_type == H5T_NATIVE_ULLONG)
-			H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, /=, array_size)
+#ifndef H5_ULLONG_TO_FP_CAST_WORKS
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double, this is required for data transform to function")
+#else
+		H5Z_XFORM_DO_OP1(resl, resr, unsigned long_long, /=, array_size)
+#endif
 		    else if(array_type == H5T_NATIVE_FLOAT)
 			H5Z_XFORM_DO_OP1(resl, resr, float, /=, array_size)
 		    else if(array_type == H5T_NATIVE_DOUBLE)
@@ -1593,7 +1594,7 @@ H5Z_xform_create(const char *expr)
      * we don't need to allocate any space since no array will have to be 
      * stored */
     if(count > 0)
-	if((data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
+	if((data_xform_prop->dat_val_pointers->ptr_dat_val = (void**) HDcalloc(count, sizeof(void**))) == NULL)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for pointers in transform array")
 
     /* Initialize the num_ptrs field, which will be used to keep track of the number of copies
@@ -1721,7 +1722,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 	}
 	
 	if(count > 0)
-	    if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
+	    if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void**) HDcalloc(count, sizeof(void**))) == NULL)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
 	   
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */
