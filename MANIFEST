@@ -1361,11 +1361,11 @@
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
 ./tools/testfiles/tperror.ddl
-./tools/testfiles/tindiceslarge.ddl
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstr3.h5
+./tools/testfiles/taindices.h5
 
 
 # Expected output from h5ls tests

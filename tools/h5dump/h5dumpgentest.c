@@ -75,6 +75,8 @@
 #define FILE47  "tfcontents2.h5"
 #define FILE48  "tfvalues.h5"
 #define FILE49  "tstr3.h5"
+#define FILE50  "taindices.h5"
+
 
 
 /*-------------------------------------------------------------------------
@@ -4459,22 +4461,13 @@ static void gent_filters(void)
  unsigned szip_pixels_per_block=4;
 #endif
  hsize_t  dims1[RANK]      = {DIM1,DIM2};
- hsize_t  dims3[3]         = {2,2,100};
  hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
  int      buf1[DIM1][DIM2];
- int      buf3[2][2][100];
- int      i, j, k, n, ret;
+ int      i, j, n, ret;
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
    buf1[i][j]=n++;
-  }
- }
- for (i=n=0; i<2; i++){
-  for (j=0; j<2; j++){
-   for (k=0; k<100; k++){
-    buf3[i][j][k]=n++;
-   }
   }
  }
  
@@ -4710,12 +4703,6 @@ static void gent_filters(void)
 
  ret=H5Tclose(tid);
  assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * a large 3D dataset
- *-------------------------------------------------------------------------
- */
- write_dset(fid,3,dims3,"3d",H5T_NATIVE_INT,buf3);
  
 /*-------------------------------------------------------------------------
  * close
@@ -4730,6 +4717,7 @@ static void gent_filters(void)
  ret=H5Fclose(fid);
  assert(ret>=0);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function: myfilter
@@ -5153,6 +5141,80 @@ static void gent_string(void)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: gent_aindices
+ *
+ * Purpose: make several datasets for the array indices tests
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_aindices(void)
+{
+ hid_t    fid;     /* file id */
+ hid_t    gid[6];  /* group ids */
+ hsize_t  dims1[1]  = {100};
+ hsize_t  dims2[2]  = {2,100};
+ hsize_t  dims3[3]  = {2,2,100};
+ int      buf1[100];
+ int      buf2[2][100];
+ int      buf3[2][2][100];
+ int      i, j, k, n, ret;
+
+ for (i=n=0; i<100; i++){
+  buf1[i]=n++;
+ }
+
+ for (i=n=0; i<2; i++){
+  for (j=0; j<100; j++){
+   buf2[i][j]=n++;
+  }
+ }
+ for (i=n=0; i<2; i++){
+  for (j=0; j<2; j++){
+   for (k=0; k<100; k++){
+    buf3[i][j][k]=n++;
+   }
+  }
+ }
+ 
+ /* create a file */
+ fid  = H5Fcreate(FILE50, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ assert(fid>=0);
+
+/*-------------------------------------------------------------------------
+ * root datasets
+ *-------------------------------------------------------------------------
+ */
+ write_dset(fid,1,dims1,"1d",H5T_NATIVE_INT,buf1);
+ write_dset(fid,2,dims2,"2d",H5T_NATIVE_INT,buf2);
+ write_dset(fid,3,dims3,"3d",H5T_NATIVE_INT,buf3);
+
+/*-------------------------------------------------------------------------
+ * test with group indentation
+ *-------------------------------------------------------------------------
+ */
+ gid[0] = H5Gcreate (fid, "/g1", 0);
+ gid[1] = H5Gcreate (fid, "g1/g2", 0);
+ gid[2] = H5Gcreate (fid, "g1/g2/g3", 0);
+ gid[3] = H5Gcreate (fid, "g1/g2/g3/g4", 0);
+ gid[4] = H5Gcreate (fid, "g1/g2/g3/g4/g5", 0);
+ gid[5] = H5Gcreate (fid, "g1/g2/g3/g4/g5/g6", 0);
+ write_dset(gid[5],1,dims1,"1d",H5T_NATIVE_INT,buf1);
+ write_dset(gid[5],2,dims2,"2d",H5T_NATIVE_INT,buf2);
+ write_dset(gid[5],3,dims3,"3d",H5T_NATIVE_INT,buf3);
+ for (i=0; i<6; i++)
+  H5Gclose(gid[i]);
+ 
+
+ 
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Fclose(fid);
+ assert(ret>=0);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -5224,6 +5286,7 @@ int main(void)
     gent_fvalues();
     gent_fcontents();
     gent_string();
+    gent_aindices();
 
     return 0;
 }

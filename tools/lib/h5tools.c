@@ -358,7 +358,7 @@ h5tools_ncols(const char *s)
  *      Robb Matzke, 1999-09-29
  *	If a new prefix is printed then the current element number is set back
  *	to zero.
- *      pvn, 2004-06-30
+ *      pvn, 2004-07-08
  * Added support for printing array indices: 
  *  the indentation is printed before the prefix (printed one indentation
  *  level before) 
@@ -418,7 +418,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
     else
         fputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
 
-    templength = h5tools_str_len(&prefix);
+     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++){
         /*we already made the indent for the array indices case */
@@ -427,6 +427,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
         templength += h5tools_str_len(&prefix);
      }
      else {
+      /*we cannot count the prefix for the array indices case */
       templength += h5tools_str_len(&str);
      }
     }

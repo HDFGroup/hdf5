@@ -245,10 +245,10 @@ TOOLTEST tstring.ddl tstr3.h5
 # char data as ASCII with non escape
 TOOLTEST tstring2.ddl -r -d str4 tstr3.h5
 
-# array indices print/not print, large dataset
-TOOLTEST tindicesyes.ddl -d compact  tfilters.h5
-TOOLTEST tindicesno.ddl -y -d compact  tfilters.h5
-TOOLTEST tindiceslarge.ddl -p -d 3d tfilters.h5
+# array indices print/not print
+TOOLTEST tindicesyes.ddl taindices.h5
+TOOLTEST tindicesno.ddl -y taindices.h5
+
 
 
 # tests for filters
