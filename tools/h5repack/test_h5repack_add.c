@@ -177,7 +177,7 @@ int make_dsets()
   TEST_ERROR;
  
  nerrors += make_deflate(fid);
-#if 0
+#if 1
  nerrors += make_szip(fid);
 #endif
  

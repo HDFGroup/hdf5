@@ -18,14 +18,14 @@
 
 
 /*-------------------------------------------------------------------------
- * Function: h5diff_can_diff
+ * Function: diff_can
  *
  * Purpose: Check if TYPE_ID is supported; only the listed types are 
  *  supported in the current version
  *
  *-------------------------------------------------------------------------
  */
-int h5diff_can_diff(hid_t type_id)
+int diff_can(hid_t type_id)
 {
  int ret=0;
  if ( (H5Tequal(type_id, H5T_NATIVE_FLOAT)==1)||
@@ -58,10 +58,6 @@ int h5diff_can_diff(hid_t type_id)
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: May 9, 2003
- *
- * Comments:
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -114,8 +110,6 @@ void print_pos( int *ph, int p, unsigned int curr_pos, int *acc,
  *
  * Date: May 9, 2003
  *
- * Comments: 
- *
  *-------------------------------------------------------------------------
  */
 void print_dims( int r, hsize_t *d )
@@ -129,11 +123,11 @@ void print_dims( int r, hsize_t *d )
 
 
 /*-------------------------------------------------------------------------
- * Function: print_datatype
+ * Function: print_type
  *
  * Purpose: Print name of datatype 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -143,7 +137,7 @@ void print_dims( int r, hsize_t *d )
  *
  *-------------------------------------------------------------------------
  */
-void print_datatype(hid_t type)
+void print_type(hid_t type)
 {
  switch (H5Tget_class(type)) 
  {
@@ -233,7 +227,7 @@ void print_datatype(hid_t type)
 
 
 /*-------------------------------------------------------------------------
- * Function: h5diff_basename
+ * Function: diff_basename
  *
  * Purpose: Returns a pointer to the last component absolute name 
  *
@@ -241,12 +235,10 @@ void print_datatype(hid_t type)
  *
  * Date: May 9, 2003
  *
- * Comments: 
- *
  *-------------------------------------------------------------------------
  */
 const char*
-h5diff_basename(const char *name)
+diff_basename(const char *name)
 {
  size_t i;
  
@@ -270,8 +262,6 @@ h5diff_basename(const char *name)
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: May 9, 2003
- *
- * Comments: 
  *
  *-------------------------------------------------------------------------
  */
@@ -329,8 +319,6 @@ get_sign(H5T_sign_t sign)
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: May 9, 2003
- *
- * Comments: 
  *
  *-------------------------------------------------------------------------
  */
@@ -395,23 +383,23 @@ void print_sizes( const char *obj1, const char *obj2,
  printf("sizeof(long)   %u\n", sizeof(long) );
  printf("<%s> ------------------\n", obj1);
  printf("type on file   ");
- print_datatype(f_type1);
+ print_type(f_type1);
  printf("\n");
  printf("size on file   %u\n", f_size1 );
 
  printf("type on memory ");
- print_datatype(m_type1);
+ print_type(m_type1);
  printf("\n");
  printf("size on memory %u\n", m_size1 );
 
  printf("<%s> ------------------\n", obj2);
  printf("type on file   ");
- print_datatype(f_type2);
+ print_type(f_type2);
  printf("\n");
  printf("size on file   %u\n", f_size2 );
 
  printf("type on memory ");
- print_datatype(m_type2);
+ print_type(m_type2);
  printf("\n");
  printf("size on memory %u\n", m_size2 );
  printf("\n");

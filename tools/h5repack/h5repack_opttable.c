@@ -28,10 +28,10 @@
  *-------------------------------------------------------------------------
  */
 
-int options_table_init( options_table_t **tbl )
+int options_table_init( pack_opttbl_t **tbl )
 {
  int i;
- options_table_t* table = (options_table_t*) malloc(sizeof(options_table_t));
+ pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
   printf("Error: not enough memory for options table\n");
   return -1;
@@ -66,7 +66,7 @@ int options_table_init( options_table_t **tbl )
  *-------------------------------------------------------------------------
  */
 
-int options_table_free( options_table_t *table )
+int options_table_free( pack_opttbl_t *table )
 {
  free(table->objs);
  free(table);
@@ -88,7 +88,7 @@ int options_add_chunk( obj_list_t *obj_list,
                        int n_objs,
                        hsize_t *chunk_lengths,
                        int chunk_rank,
-                       options_table_t *table )
+                       pack_opttbl_t *table )
 {
  int i, j, k, I, added=0, found=0;
  
@@ -185,7 +185,7 @@ int options_add_chunk( obj_list_t *obj_list,
 int options_add_comp( obj_list_t *obj_list,
                       int n_objs,
                       comp_info_t comp,
-                      options_table_t *table )
+                      pack_opttbl_t *table )
 {
  
  int i, j, I, added=0, found=0;
@@ -273,7 +273,7 @@ int options_add_comp( obj_list_t *obj_list,
  */
 
 pack_info_t* options_get_object( char *path,
-                                 options_table_t *table )
+                                 pack_opttbl_t *table )
 {
  int i;
  

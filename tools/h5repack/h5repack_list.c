@@ -37,11 +37,11 @@
  */
 
 
-int get_objlist(char* fname, packoptions_t *options)
+int get_objlist(char* fname, pack_opt_t *options)
 {
- hid_t    fid; 
- int      nobjects, i;
- info_t   *info=NULL;
+ hid_t        fid; 
+ int          nobjects, i;
+ trav_info_t  *info=NULL;
 
 /*-------------------------------------------------------------------------
  * open the file 
@@ -65,7 +65,7 @@ int get_objlist(char* fname, packoptions_t *options)
  *-------------------------------------------------------------------------
  */
 
- if ((nobjects = H5get_object_info(fid, NULL ))<0) {
+ if ((nobjects = h5trav_getinfo(fid, NULL ))<0) {
   printf("h5repack: <%s>: Could not obtain object list\n", fname );
   return -1;
  }
@@ -75,11 +75,11 @@ int get_objlist(char* fname, packoptions_t *options)
  *-------------------------------------------------------------------------
  */
 
- if ((info = (info_t*) malloc( nobjects * sizeof(info_t)))==NULL){
+ if ((info = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t)))==NULL){
   printf("h5repack: <%s>: Could not allocate object list\n", fname );
   return -1;
  }
- if (H5get_object_info(fid, info )<0) {
+ if (h5trav_getinfo(fid, info )<0) {
   printf("h5repack: <%s>: Could not obtain object list\n", fname );
   return -1;
  }
@@ -99,12 +99,12 @@ int get_objlist(char* fname, packoptions_t *options)
    printf(PFORMAT1,"","",obj_name);
   
   /* the input object names are present in the file and are valid */
-  if (info_getindex(obj_name,nobjects,info)<0)
+  if (h5trav_getindex(obj_name,nobjects,info)<0)
   {
    printf("\nError: Could not find <%s> in file <%s>. Exiting...\n",
     obj_name,fname);
    H5Fclose(fid);
-   info_free(info,nobjects);
+   h5trav_freeinfo(info,nobjects);
    exit(1);
   }
   if (options->verbose)
@@ -118,7 +118,7 @@ int get_objlist(char* fname, packoptions_t *options)
  *-------------------------------------------------------------------------
  */
  H5Fclose(fid);
- info_free(info,nobjects);
+ h5trav_freeinfo(info,nobjects);
  return 0;
 
 }
@@ -141,12 +141,12 @@ int get_objlist(char* fname, packoptions_t *options)
 
 int copy_file(char* fnamein, 
               char* fnameout,
-              packoptions_t *options)
+              pack_opt_t *options)
 {
- hid_t    fidin; 
- hid_t    fidout; 
- int      nobjects;
- info_t   *info=NULL;
+ hid_t       fidin; 
+ hid_t       fidout; 
+ int         nobjects;
+ trav_info_t *info=NULL;
 
 /*-------------------------------------------------------------------------
  * open the files 
@@ -174,7 +174,7 @@ int copy_file(char* fnamein,
  *-------------------------------------------------------------------------
  */
 
- if ((nobjects = H5get_object_info(fidin, NULL ))<0) {
+ if ((nobjects = h5trav_getinfo(fidin, NULL ))<0) {
   printf("h5repack: <%s>: Could not obtain object list\n", fnamein );
   return -1;
  }
@@ -184,11 +184,11 @@ int copy_file(char* fnamein,
  *-------------------------------------------------------------------------
  */
 
- if ((info = (info_t*) malloc( nobjects * sizeof(info_t)))==NULL){
+ if ((info = (trav_info_t*) malloc( nobjects * sizeof(trav_info_t)))==NULL){
   printf("h5repack: <%s>: Could not allocate object list\n", fnamein );
   return -1;
  }
- if (H5get_object_info(fidin, info )<0) {
+ if (h5trav_getinfo(fidin, info )<0) {
   printf("h5repack: <%s>: Could not obtain object list\n", fnamein );
   return -1;
  }
@@ -209,7 +209,7 @@ int copy_file(char* fnamein,
  */
  H5Fclose(fidin);
  H5Fclose(fidout);
- info_free(info,nobjects);
+ h5trav_freeinfo(info,nobjects);
  return 0;
 
 }
@@ -231,7 +231,7 @@ int copy_file(char* fnamein,
  */
 void print_objlist(char *filename, 
                    int nobjects, 
-                   info_t *info )
+                   trav_info_t *info )
 {
  int i;
 
@@ -278,8 +278,8 @@ void print_objlist(char *filename,
 int do_copy_file(hid_t fidin, 
                  hid_t fidout, 
                  int nobjects, 
-                 info_t *info,
-                 packoptions_t *options)
+                 trav_info_t *info,
+                 pack_opt_t *options)
 {
  hid_t     grp_id;       /* group ID */ 
  hid_t     dset_in;      /* read dataset ID */ 

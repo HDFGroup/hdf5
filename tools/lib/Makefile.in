@@ -41,7 +41,7 @@ PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the library; do not install
 ##
-LIB_SRC=h5tools.c h5tools_str.c h5tools_utils.c
+LIB_SRC=h5tools.c h5tools_str.c h5tools_utils.c h5diff.c h5diff_array.c h5diff_dset.c h5diff_util.c h5trav.c h5trav_table.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 AUX_LIB=$(LIB)
@@ -49,7 +49,7 @@ AUX_LIB=$(LIB)
 TEST_SRC=talign.c
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
-PRIVATE_HDR=h5tools.h h5tools_str.h
+PRIVATE_HDR=h5tools.h h5tools_str.h h5diff.h h5trav.h
 
 ## Programs have to be built before they can be tested!
 ##

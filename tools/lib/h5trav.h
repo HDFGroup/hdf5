@@ -19,45 +19,50 @@
 
 
 /*-------------------------------------------------------------------------
- * struct to store name and type of an object
+ * public struct to store name and type of an object
+ * the TYPE can be: 
+ *    H5G_UNKNOWN = -1,		
+ *    H5G_LINK,		        Object is a symbolic link	
+ *    H5G_GROUP,		       Object is a group		
+ *    H5G_DATASET,		     Object is a dataset		
+ *    H5G_TYPE,			       Object is a named data type	
  *-------------------------------------------------------------------------
  */
 
-typedef struct info_t {
-	char *name;
-	int type;
-} info_t;
-
+typedef struct trav_info_t {
+	char      *name;
+	H5G_obj_t type;
+} trav_info_t;
 
 
 /*-------------------------------------------------------------------------
- * struct to store basic info about an object
+ * struct to store basic info needed for the h5trav table traversal algorythm
  *-------------------------------------------------------------------------
  */
 
-typedef struct obj_t {
-    haddr_t objno;
-    unsigned flags[2];
-    char *objname;
-    int displayed;
-    int type;
-} obj_t;
+typedef struct trav_obj_t {
+    haddr_t   objno;
+    unsigned  flags[2];
+    char      *objname;
+    int       displayed;
+    H5G_obj_t type;
+} trav_obj_t;
 
 
 /*-------------------------------------------------------------------------
- * struct that stores all objects, excluding shared objects
+ * private struct that stores all objects
  *-------------------------------------------------------------------------
  */
 
-typedef struct table_t {
-	int size;
-	int nobjs;
-	obj_t *objs;
-} table_t;
+typedef struct trav_table_t {
+	int        size;
+	int        nobjs;
+	trav_obj_t *objs;
+} trav_table_t;
 
 
 /*-------------------------------------------------------------------------
- * "info" public functions
+ * "h5trav info" public functions
  *-------------------------------------------------------------------------
  */
 
@@ -65,9 +70,9 @@ typedef struct table_t {
 extern "C" {
 #endif
 
-int H5get_object_info( hid_t file_id, info_t *info );
-int info_getindex( const char *obj, int nobjs, info_t *info );
-void info_free(info_t *info, int nobjs);
+int  h5trav_getinfo( hid_t file_id, trav_info_t *info );
+int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
+void h5trav_freeinfo( trav_info_t *info, int nobjs );
 
 #ifdef __cplusplus
 }
@@ -78,11 +83,11 @@ void info_free(info_t *info, int nobjs);
  *-------------------------------------------------------------------------
  */
 
-void table_init(table_t **table);
-void table_free(table_t *table);
-int  table_search_obj(haddr_t objno, table_t *table );
-void table_add_obj(haddr_t objno, char *objname, int type, table_t *table);
-void table_add_flags(unsigned *flags, char *objname, int type, table_t *table);
+void trav_table_init(trav_table_t **table);
+void trav_table_free(trav_table_t *table);
+int  trav_table_search(haddr_t objno, trav_table_t *table );
+void trav_table_add(haddr_t objno, char *objname, int type, trav_table_t *table);
+void trav_table_addflags(unsigned *flags, char *objname, int type, trav_table_t *table);
 
 
 

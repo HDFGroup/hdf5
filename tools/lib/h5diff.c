@@ -39,13 +39,13 @@ int  h5diff(const char *fname1,
             const char *fname2, 
             const char *objname1, 
             const char *objname2, 
-            options_t options)
+            diff_opt_t options)
 {
- int     nobjects1, nobjects2;
- info_t  *info1=NULL;
- info_t  *info2=NULL;
- hid_t   file1_id, file2_id; 
- int     nfound;
+ int          nobjects1, nobjects2;
+ trav_info_t  *info1=NULL;
+ trav_info_t  *info2=NULL;
+ hid_t        file1_id, file2_id; 
+ int          nfound;
 
 
 /*-------------------------------------------------------------------------
@@ -76,21 +76,21 @@ int  h5diff(const char *fname1,
  *-------------------------------------------------------------------------
  */
 
- nobjects1 = H5get_object_info( file1_id, NULL );
- nobjects2 = H5get_object_info( file2_id, NULL );
+ nobjects1 = h5trav_getinfo( file1_id, NULL );
+ nobjects2 = h5trav_getinfo( file2_id, NULL );
 
 /*-------------------------------------------------------------------------
  * get the list of objects in the files
  *-------------------------------------------------------------------------
  */
 
- info1 = (info_t*) malloc( nobjects1 * sizeof(info_t));
- info2 = (info_t*) malloc( nobjects2 * sizeof(info_t));
+ info1 = (trav_info_t*) malloc( nobjects1 * sizeof(trav_info_t));
+ info2 = (trav_info_t*) malloc( nobjects2 * sizeof(trav_info_t));
  if (info1==NULL || info2==NULL)
   return 0;
 
- H5get_object_info( file1_id, info1 );
- H5get_object_info( file2_id, info2 );
+ h5trav_getinfo( file1_id, info1 );
+ h5trav_getinfo( file2_id, info2 );
 
 /*-------------------------------------------------------------------------
  * object name was supplied
@@ -100,8 +100,8 @@ int  h5diff(const char *fname1,
  if ( objname1 )
  {
   assert(objname2);
-  nfound=compare(file1_id,fname1,objname1,nobjects1,info1,
-                 file2_id,fname2,objname2,nobjects2,info2,options);
+  nfound=diff_compare(file1_id,fname1,objname1,nobjects1,info1,
+                      file2_id,fname2,objname2,nobjects2,info2,options);
  }
 
 /*-------------------------------------------------------------------------
@@ -111,13 +111,13 @@ int  h5diff(const char *fname1,
 
  else 
  {
-  nfound=match(file1_id,nobjects1,info1,
-               file2_id,nobjects2,info2,options);
+  nfound=diff_match(file1_id,nobjects1,info1,
+                    file2_id,nobjects2,info2,options);
  }
  
  
- info_free(info1,nobjects1);
- info_free(info2,nobjects2);
+ h5trav_freeinfo(info1,nobjects1);
+ h5trav_freeinfo(info2,nobjects2);
  /* close */
  assert( (H5Fclose(file1_id)) >=0);
  assert( (H5Fclose(file2_id)) >=0);
@@ -128,7 +128,7 @@ int  h5diff(const char *fname1,
 
 
 /*-------------------------------------------------------------------------
- * Function: match
+ * Function: diff_match
  *
  * Purpose: Find common objects; the algorithm used for this search is the 
  *  cosequential match algorithm and is described in 
@@ -140,32 +140,30 @@ int  h5diff(const char *fname1,
  *
  * Date: May 9, 2003
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-int match( hid_t file1_id, int nobjects1, info_t *info1,
-            hid_t file2_id, int nobjects2, info_t *info2, 
-            options_t options )
+int diff_match( hid_t file1_id, 
+                int nobjects1, 
+                trav_info_t *info1,
+                hid_t file2_id, 
+                int nobjects2, 
+                trav_info_t *info2, 
+                diff_opt_t options )
 {
- int  cmp;
- int  more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
- int  curr1=0;
- int  curr2=0;
- int  i;
- /*build a common list */
- table_t  *table=NULL;
- unsigned infile[2]; 
- char c1, c2;
- int  nfound=0;
+ int           more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
+ trav_table_t  *table=NULL;
+ int           cmp;
+ int           curr1=0;
+ int           curr2=0;
+ unsigned      infile[2]; 
+ char          c1, c2;
+ int           nfound=0, i;
 
 /*-------------------------------------------------------------------------
  * build the list
  *-------------------------------------------------------------------------
  */
- table_init( &table );
+ trav_table_init( &table );
 
  
  while ( more_names_exist )
@@ -175,7 +173,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   if ( cmp == 0 )
   {
    infile[0]=1; infile[1]=1;
-   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
+   trav_table_addflags(infile, info1[curr1].name, info1[curr1].type, table );
 
    curr1++;
    curr2++;
@@ -183,13 +181,13 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   else if ( cmp < 0 )
   {
    infile[0]=1; infile[1]=0;
-   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
+   trav_table_addflags(infile, info1[curr1].name, info1[curr1].type, table );
    curr1++;
   }
   else 
   {
    infile[0]=0; infile[1]=1;
-   table_add_flags(infile, info2[curr2].name, info2[curr2].type, table );
+   trav_table_addflags(infile, info2[curr2].name, info2[curr2].type, table );
    curr2++;
   }
 
@@ -204,7 +202,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   while ( curr1<nobjects1 )
   {
    infile[0]=1; infile[1]=0;
-   table_add_flags(infile, info1[curr1].name, info1[curr1].type, table );
+   trav_table_addflags(infile, info1[curr1].name, info1[curr1].type, table );
    curr1++;
   }
  }
@@ -215,7 +213,7 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
   while ( curr2<nobjects2 )
   {
    infile[0]=0; infile[1]=1;
-   table_add_flags(infile, info2[curr2].name, info2[curr2].type, table );
+   trav_table_addflags(infile, info2[curr2].name, info2[curr2].type, table );
    curr2++;
   }
  }
@@ -254,15 +252,15 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
  }
 
  /* free table */
- table_free(table);
+ trav_table_free(table);
  return nfound;
 }
 
 
 /*-------------------------------------------------------------------------
- * Function: compare
+ * Function: diff_compare
  *
- * Purpose: get objects form list, and check for the same type
+ * Purpose: get objects from list, and check for the same type
  *
  * Return: Number of differences found
  *
@@ -270,25 +268,27 @@ int match( hid_t file1_id, int nobjects1, info_t *info1,
  *
  * Date: May 9, 2003
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
-              int nobjects1, info_t *info1,
-              hid_t file2_id, const char *file2_name, const char *obj2_name, 
-              int nobjects2, info_t *info2,
-              options_t options )
+int diff_compare( hid_t file1_id, 
+                  const char *file1_name, 
+                  const char *obj1_name, 
+                  int nobjects1, 
+                  trav_info_t *info1,
+                  hid_t file2_id, 
+                  const char *file2_name, 
+                  const char *obj2_name, 
+                  int nobjects2, 
+                  trav_info_t *info2,
+                  diff_opt_t options )
 {
 
  int f1=0, f2=0;
  int nfound=0;
 
- int i = info_getindex( obj1_name, nobjects1, info1 );
- int j = info_getindex( obj2_name, nobjects2, info2 );
+ int i = h5trav_getindex( obj1_name, nobjects1, info1 );
+ int j = h5trav_getindex( obj2_name, nobjects2, info2 );
 
  if ( i == -1 )
  {
@@ -341,8 +341,12 @@ int compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
  *-------------------------------------------------------------------------
  */
 
-int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
-           options_t options, int type )
+int diff( hid_t file1_id, 
+          const char *obj1_name, 
+          hid_t file2_id, 
+          const char *obj2_name, 
+          diff_opt_t options, 
+          int type )
 {
  int nfound=0;
 
@@ -367,7 +371,7 @@ int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj
 
 
 /*-------------------------------------------------------------------------
- * Function: list
+ * Function: diff_list
  *
  * Purpose: print list of objects in file
  *
@@ -384,7 +388,7 @@ int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj
  *-------------------------------------------------------------------------
  */
 #ifdef NOT_YET
-void list( const char *filename, int nobjects, info_t *info )
+void diff_list( const char *filename, int nobjects, trav_info_t *info )
 {
  int i;
 

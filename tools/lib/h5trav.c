@@ -19,43 +19,51 @@
 
 
 /* functions for traversal */
-int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info, int *idx );
-herr_t get_nobjects( hid_t loc_id, const char *group_name );
-herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name, int *type );
+int traverse( hid_t loc_id, 
+              const char *group_name, 
+              trav_table_t *table, 
+              trav_info_t *info, 
+              int *idx );
+
+herr_t get_nobjects( hid_t loc_id, 
+                     const char *group_name );
+
+herr_t get_name_type( hid_t loc_id, 
+                      const char *group_name, 
+                      int idx, 
+                      char **name, 
+                      int *type );
 
 /*-------------------------------------------------------------------------
- * Function: H5get_object_info
+ * Function: h5trav_getinfo
  *
- * Purpose: 
+ * Purpose: get an array of "trav_info_t" , containing the name and type of 
+ *  objects in the file
  *
- * Return:
+ * Return: number of objects in file
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 6, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int H5get_object_info( hid_t file_id, info_t *info )
+int h5trav_getinfo( hid_t file_id, trav_info_t *info )
 {
 
- table_t  *table=NULL;
- int      nobjects=0;
+ trav_table_t  *table=NULL;
+ int           nobjects=0;
 
  /* init table */
- table_init( &table );
+ trav_table_init( &table );
 
  /* iterate starting on the root group */
  if (( nobjects = traverse( file_id, "/", table, info, &nobjects )) < 0 )
   return -1;
 
  /* free table */
- table_free( table );
+ trav_table_free( table );
 
  return nobjects;
 
@@ -63,7 +71,7 @@ int H5get_object_info( hid_t file_id, info_t *info )
 
 
 /*-------------------------------------------------------------------------
- * Function: info_getindex
+ * Function: h5trav_getindex
  *
  * Purpose: get index of OBJ in list
  *
@@ -73,14 +81,10 @@ int H5get_object_info( hid_t file_id, info_t *info )
  *
  * Date: May 9, 2003
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int info_getindex( const char *obj, int nobjs, info_t *info )
+int h5trav_getindex( const char *obj, int nobjs, trav_info_t *info )
 {
  char *pdest;
  int  result;
@@ -104,14 +108,14 @@ int info_getindex( const char *obj, int nobjs, info_t *info )
 
 
 /*-------------------------------------------------------------------------
- * Function: info_free
+ * Function: h5trav_freeinfo
  *
  * Purpose: free info memory
  *
  *-------------------------------------------------------------------------
  */
 
-void info_free( info_t *info, int nobjs )
+void h5trav_freeinfo( trav_info_t *info, int nobjs )
 {
  int i;
 	if ( info )
@@ -213,8 +217,8 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
  if (H5Gget_objinfo( loc_id, name, 0, &statbuf) < 0 )
   return -1;
 
- ((info_t *)op_data)->type = statbuf.type;
- ((info_t *)op_data)->name = (char *)HDstrdup(name);
+ ((trav_info_t *)op_data)->type = statbuf.type;
+ ((trav_info_t *)op_data)->name = (char *)HDstrdup(name);
 
  /* Define 1 for return. This will cause the iterator to stop */
  return 1;
@@ -245,7 +249,7 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
 herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name, int *type ) 
 {
 
- info_t info;
+ trav_info_t info;
 
  if (H5Giterate( loc_id, group_name, &idx, opget_info, (void *)&info) < 0 )
   return -1;
@@ -259,22 +263,22 @@ herr_t get_name_type( hid_t loc_id, const char *group_name, int idx, char **name
 /*-------------------------------------------------------------------------
  * Function: traverse
  *
- * Purpose: 
+ * Purpose: recursive function that searches HDF5 objects in LOC_ID
  *
- * Return: 
+ * Return: number of objects found in LOC_ID
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info, int *idx ) 
+int traverse( hid_t loc_id, 
+              const char *group_name, 
+              trav_table_t *table, 
+              trav_info_t *info, 
+              int *idx ) 
 {
  
  char          *name=NULL;
@@ -334,10 +338,10 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
    {
     /* add object to table */
-    table_add_obj(statbuf.objno, path, H5G_GROUP, table );
+    trav_table_add(statbuf.objno, path, H5G_GROUP, table );
     
     /* recurse with the absolute name */
     inserted_objs += traverse( loc_id, path, table, info, idx );
@@ -347,7 +351,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
        group with more than one link to it */
    if (statbuf.nlink > 1) 
    {
-    if ((j = table_search_obj(statbuf.objno, table )) < 0 )
+    if ((j = trav_table_search(statbuf.objno, table )) < 0 )
      return -1;
 
     if ( table->objs[j].displayed == 0 )
@@ -374,17 +378,17 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
    {
     /* add object to table */
-    table_add_obj(statbuf.objno, path, H5G_DATASET, table );
+    trav_table_add(statbuf.objno, path, H5G_DATASET, table );
    }
 
     /* search table
        dataset with more than one link to it */
    if (statbuf.nlink > 1) 
    {
-    if ((j = table_search_obj(statbuf.objno, table )) < 0 )
+    if ((j = trav_table_search(statbuf.objno, table )) < 0 )
      return -1;
 
     if ( table->objs[j].displayed == 0 )
@@ -412,10 +416,10 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
    {
     /* add object to table */
-    table_add_obj(statbuf.objno, path, H5G_TYPE, table );
+    trav_table_add(statbuf.objno, path, H5G_TYPE, table );
    }
    
    break;
@@ -451,8 +455,6 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    HDfree( path );
   
  } /* i */
- 
- 
  
  return inserted_objs;
 }

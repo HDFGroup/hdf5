@@ -21,7 +21,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function: array_diff
+ * Function: diff_array
  *
  * Purpose: compare array; 
  *   currenttly only the NATIVE types below are supported
@@ -34,8 +34,14 @@
  *
  *-------------------------------------------------------------------------
  */
-int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
-                options_t options, const char *obj1, const char *obj2,
+int diff_array( void *buf1, 
+                void *buf2, 
+                hsize_t tot_cnt, 
+                int rank, 
+                hsize_t *dims, 
+                diff_opt_t options, 
+                const char *obj1, 
+                const char *obj2,
                 hid_t m_type )
 {
  char        fmt_llong[255],  fmt_ullong[255];

@@ -21,7 +21,7 @@
 
 
 
-static void print_options(packoptions_t *options);
+static void print_options(pack_opt_t *options);
 
 /*-------------------------------------------------------------------------
  * Function: h5repack
@@ -44,7 +44,7 @@ static void print_options(packoptions_t *options);
  */
 int h5repack(char* infile, 
              char* outfile, 
-             packoptions_t *options)
+             pack_opt_t *options)
 {
  options->trip=0;
 
@@ -80,10 +80,10 @@ int h5repack(char* infile,
  *-------------------------------------------------------------------------
  */
 
-int h5repack_init (packoptions_t *options, 
+int h5repack_init (pack_opt_t *options, 
                    int verbose)
 {
- memset(options,0,sizeof(packoptions_t));
+ memset(options,0,sizeof(pack_opt_t));
  options->threshold = 1024;
  options->verbose   = verbose;
  return (options_table_init(&(options->op_tbl)));
@@ -97,7 +97,7 @@ int h5repack_init (packoptions_t *options,
  *-------------------------------------------------------------------------
  */
 
-int h5repack_end  (packoptions_t *options)
+int h5repack_end  (pack_opt_t *options)
 {
  return options_table_free(options->op_tbl);
 }
@@ -114,7 +114,7 @@ int h5repack_end  (packoptions_t *options)
  */
 
 int h5repack_addcomp(char* str, 
-                     packoptions_t *options)
+                     pack_opt_t *options)
 {
  obj_list_t      *obj_list=NULL; /*one object list for the -t and -c option entry */
  comp_info_t     comp;           /*compression info for the current -t option entry */
@@ -167,7 +167,7 @@ int h5repack_addcomp(char* str,
 
 
 int h5repack_addchunk(char* str, 
-                      packoptions_t *options)
+                      pack_opt_t *options)
 {
   
  obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
@@ -227,7 +227,7 @@ int h5repack_addchunk(char* str,
  *-------------------------------------------------------------------------
  */
 static
-void print_options(packoptions_t *options)
+void print_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
 
@@ -339,7 +339,8 @@ void print_options(packoptions_t *options)
  *-------------------------------------------------------------------------
  */
 
-void read_info(char *filename,packoptions_t *options) 
+void read_info(char *filename,
+               pack_opt_t *options) 
 {
  char stype[10];
  char comp_info[1024];

@@ -44,29 +44,27 @@
 static int
 test()
 {
- packoptions_t options;
- options_t     diff_options;
- memset(&diff_options, 0, sizeof (options_t));
-
+ pack_opt_t  pack_options;
+ diff_opt_t  diff_options;
+ memset(&diff_options, 0, sizeof (diff_opt_t));
 
  TESTING("    deflate filter");
 
- if (h5repack_init (&options, 0)<0)
+ if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addcomp("dset1:GZIP 9",&options)<0)
+ if (h5repack_addcomp("dset1:GZIP 9",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addchunk("dset1:5x4",&options)<0)
+ if (h5repack_addchunk("dset1:5x4",&pack_options)<0)
   TEST_ERROR;
- if (h5repack(FILENAME,FILENAME_OUT,&options)<0)
+ if (h5repack(FILENAME,FILENAME_OUT,&pack_options)<0)
   TEST_ERROR;
- if (h5repack_end (&options)<0)
+ if (h5repack_end (&pack_options)<0)
   TEST_ERROR;
  if (h5diff(FILENAME,FILENAME,NULL,NULL,diff_options) == 1)
   TEST_ERROR;
  
  PASSED();                                                 
  return 0; 
-
  
 error:                                                       
  return 1;

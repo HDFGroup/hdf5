@@ -36,8 +36,11 @@
  *
  *-------------------------------------------------------------------------
  */
-int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
-                  const char *obj2_name, options_t options )
+int diff_dataset( hid_t file1_id, 
+                  hid_t file2_id, 
+                  const char *obj1_name, 
+                  const char *obj2_name, 
+                  diff_opt_t options )
 {
  hid_t        dset1_id  =-1;
  hid_t        dset2_id  =-1;
@@ -266,10 +269,10 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  {
   printf("Warning: Different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
-  print_datatype(f_type1);
+  print_type(f_type1);
   printf("\n");
   printf("<%s> has file datatype ", obj2_name);
-  print_datatype(f_type2);
+  print_type(f_type2);
   printf("\n");
  }
 
@@ -289,12 +292,12 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
 #endif 
 
 /*-------------------------------------------------------------------------
- * check for the comparable types in array_diff
+ * check for the comparable types in diff_array
  *-------------------------------------------------------------------------
  */
 
- can1=h5diff_can_diff(m_type1);
- can2=h5diff_can_diff(m_type2);
+ can1=diff_can(m_type1);
+ can2=diff_can(m_type2);
  if ( can1==0 || can2==0 )
  {
   printf("Comparison not supported\n");
@@ -373,9 +376,9 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  */
  if (options.verbose)
   printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
- name1=h5diff_basename(obj1_name);
- name2=h5diff_basename(obj2_name);
- nfound = array_diff(buf1,buf2,tot_cnt1,rank1,dims1,options,name1,name2,m_type1);
+ name1=diff_basename(obj1_name);
+ name2=diff_basename(obj2_name);
+ nfound = diff_array(buf1,buf2,tot_cnt1,rank1,dims1,options,name1,name2,m_type1);
  if (options.verbose)
   printf("%d differences found\n", nfound );
 

@@ -62,12 +62,12 @@ typedef struct {
  chunk_info_t chunk;                        /* chunk information */
 } pack_info_t;
 
-/* store a list of all objects */
+/* store a table of all objects */
 typedef struct {
  int        size;
  int        nelems;
  pack_info_t *objs;
-} options_table_t;
+} pack_opttbl_t;
 
 
 /*-------------------------------------------------------------------------
@@ -77,7 +77,7 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
- options_table_t *op_tbl;     /*table with all -c and -t options */
+ pack_opttbl_t   *op_tbl;     /*table with all -c and -t options */
  int             all_chunk;   /*chunk all objects, input of "*" */
  int             all_comp;    /*comp all objects, input of "*" */
  comp_info_t     comp_g;      /*global compress INFO for the ALL case */
@@ -86,7 +86,7 @@ typedef struct {
  int trip;                    /*which cycle are we in */
 	int threshold;               /*minimum size to compress, in bytes */
  
-} packoptions_t;
+} pack_opt_t;
 
 
 
@@ -99,11 +99,11 @@ typedef struct {
 extern "C" {
 #endif
 
-int h5repack         (char* infile, char* outfile, packoptions_t *options);
-int h5repack_addcomp (char* str, packoptions_t *options);
-int h5repack_addchunk(char* str, packoptions_t *options);
-int h5repack_init    (packoptions_t *options, int verbose);
-int h5repack_end     (packoptions_t *options);
+int h5repack         (char* infile, char* outfile, pack_opt_t *options);
+int h5repack_addcomp (char* str, pack_opt_t *options);
+int h5repack_addchunk(char* str, pack_opt_t *options);
+int h5repack_init    (pack_opt_t *options, int verbose);
+int h5repack_end     (pack_opt_t *options);
 
 #ifdef __cplusplus
 }
@@ -115,7 +115,7 @@ int h5repack_end     (packoptions_t *options);
  */
 
 
-void read_info(char *filename,packoptions_t *options);
+void read_info(char *filename,pack_opt_t *options);
 
 
 

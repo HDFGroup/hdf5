@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 {
  char          *infile  = NULL;
  char          *outfile = NULL;
- packoptions_t options;            /*the global options */
+ pack_opt_t    options;            /*the global options */
  int           i;
 
  /* initialize options  */

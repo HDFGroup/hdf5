@@ -28,21 +28,21 @@
 
 
 int get_objlist(char* infname, 
-                packoptions_t *options);
+                pack_opt_t *options);
 
 int copy_file(char* fnamein, 
               char* fnameout,
-              packoptions_t *options);
+              pack_opt_t *options);
 
 void print_objlist(char *filename, 
                    int nobjects, 
-                   info_t *info );
+                   trav_info_t *info );
 
 int do_copy_file(hid_t fidin, 
                  hid_t fidout, 
                  int nobjects, 
-                 info_t *info,
-                 packoptions_t *options);
+                 trav_info_t *info,
+                 pack_opt_t *options);
 
 
 

@@ -13,28 +13,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include "h5diff.h"
+#include "h5trav.h"
 #include "H5private.h" 
 
 /*-------------------------------------------------------------------------
- * Function: table_search_obj
+ * Function: trav_table_search
  *
- * Purpose: 
+ * Purpose: Search in the table for OBJNO
  *
- * Return: 
+ * Return: index of object in table
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int table_search_obj(haddr_t objno, table_t *table )
+int trav_table_search(haddr_t objno, trav_table_t *table )
 {
  int i;
  
@@ -47,31 +43,28 @@ int table_search_obj(haddr_t objno, table_t *table )
 
 
 /*-------------------------------------------------------------------------
- * Function: table_add_obj
+ * Function: trav_table_add
  *
- * Purpose: 
+ * Purpose: Add OBJNO, NAME and TYPE of object to table
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
-table_add_obj(haddr_t objno, char *objname, int type, table_t *table)
+trav_table_add(haddr_t objno, char *objname, int type, trav_table_t *table)
 {
  int i;
  
  if (table->nobjs == table->size) {
   table->size *= 2;
-  table->objs = (obj_t*)HDrealloc(table->objs, table->size * sizeof(obj_t));
+  table->objs = 
+   (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
   
   for (i = table->nobjs; i < table->size; i++) {
    table->objs[i].objno = 0;
@@ -92,31 +85,28 @@ table_add_obj(haddr_t objno, char *objname, int type, table_t *table)
 
 
 /*-------------------------------------------------------------------------
- * Function: table_add_flags
+ * Function: trav_table_addflags
  *
- * Purpose: 
+ * Purpose: Add FLAGS, NAME and TYPE of object to table
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 void
-table_add_flags(unsigned *flags, char *objname, int type, table_t *table)
+trav_table_addflags(unsigned *flags, char *objname, int type, trav_table_t *table)
 {
  int i;
  
  if (table->nobjs == table->size) {
   table->size *= 2;
-  table->objs = (obj_t*)HDrealloc(table->objs, table->size * sizeof(obj_t));
+  table->objs = 
+   (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
   
   for (i = table->nobjs; i < table->size; i++) {
    table->objs[i].objno = 0;
@@ -138,31 +128,28 @@ table_add_flags(unsigned *flags, char *objname, int type, table_t *table)
 
 
 /*-------------------------------------------------------------------------
- * Function: table_init
+ * Function: trav_table_init
  *
- * Purpose: 
+ * Purpose: Initialize the table 
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-void table_init( table_t **tbl )
+void trav_table_init( trav_table_t **tbl )
 {
  int i;
- table_t* table = (table_t*) HDmalloc(sizeof(table_t));
+ trav_table_t* table = (trav_table_t*) HDmalloc(sizeof(trav_table_t));
  
  table->size = 20;
  table->nobjs = 0;
- table->objs = (obj_t*) HDmalloc(table->size * sizeof(obj_t));
+ table->objs = 
+  (trav_obj_t*)HDmalloc(table->size * sizeof(trav_obj_t));
  
  for (i = 0; i < table->size; i++) {
   table->objs[i].objno = 0;
@@ -178,24 +165,20 @@ void table_init( table_t **tbl )
 
 
 /*-------------------------------------------------------------------------
- * Function: table_free
+ * Function: trav_table_free
  *
  * Purpose: free table memory
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 4, 2002
  *
- * Comments: 
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-void table_free( table_t *table )
+void trav_table_free( trav_table_t *table )
 {
  int i;
 

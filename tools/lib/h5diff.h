@@ -57,7 +57,7 @@ typedef struct {
  int    n;       /* count */
  int    count;   /* count value */
  int    verbose; /* print information */
-} options_t;
+} diff_opt_t;
 
 
 
@@ -74,7 +74,7 @@ int  h5diff(const char *fname1,
             const char *fname2, 
             const char *objname1, 
             const char *objname2, 
-            options_t options);
+            diff_opt_t options);
 
 
 #ifdef __cplusplus
@@ -89,35 +89,63 @@ int  h5diff(const char *fname1,
  */
 
 
-int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
- const char *obj2_name, options_t options );
-int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
- options_t options, int type );
-int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
- int nobjects1, info_t *info1,
- hid_t file2_id, const char *file2_name, const char *obj2_name, 
- int nobjects2, info_t *info2,
- options_t options );
-int match( hid_t file1_id, int nobjects1, info_t *info1,
- hid_t file2_id, int nobjects2, info_t *info2, options_t options );
-int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
- options_t options, const char *obj1, const char *obj2,
- hid_t m_type );
+int diff_dataset( hid_t file1_id, 
+                  hid_t file2_id, 
+                  const char *obj1_name, 
+                  const char *obj2_name,
+                  diff_opt_t options );
+
+int diff( hid_t file1_id, 
+          const char *obj1_name, 
+          hid_t file2_id, 
+          const char *obj2_name, 
+          diff_opt_t options, 
+          int type );
+
+int diff_compare( hid_t file1_id, 
+                  const char *file1_name, 
+                  const char *obj1_name, 
+                  int nobjects1, 
+                  trav_info_t *info1,
+                  hid_t file2_id, 
+                  const char *file2_name, 
+                  const char *obj2_name, 
+                  int nobjects2, 
+                  trav_info_t *info2,
+                  diff_opt_t options );
+
+int diff_match( hid_t file1_id, 
+                int nobjects1, 
+                trav_info_t *info1,
+                hid_t file2_id, 
+                int nobjects2, 
+                trav_info_t *info2, 
+                diff_opt_t options );
+
+int diff_array( void *buf1, 
+                void *buf2, 
+                hsize_t tot_cnt, 
+                int rank, 
+                hsize_t *dims, 
+                diff_opt_t options, 
+                const char *obj1, 
+                const char *obj2,
+                hid_t m_type );
 
 /*-------------------------------------------------------------------------
  * utility functions
  *-------------------------------------------------------------------------
  */
 
-int h5diff_can_diff( hid_t type_id );
-void print_datatype(hid_t type);
-const char* h5diff_basename(const char *name);
+int         diff_can( hid_t type_id );
+void        print_type(hid_t type);
+const char* diff_basename(const char *name);
 const char* get_type(int type);
 const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
-void print_dims( int r, hsize_t *d );
-void print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
- int *pos, int rank, const char *obj1, const char *obj2 );
+void        print_dims( int r, hsize_t *d );
+void        print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
+             int *pos, int rank, const char *obj1, const char *obj2 );
 
 #if defined (H5DIFF_DEBUG)
 void print_sizes( const char *obj1, const char *obj2,
@@ -126,7 +154,7 @@ void print_sizes( const char *obj1, const char *obj2,
 #endif
 
 #ifdef NOT_YET
-void list( const char *filename, int nobjects, info_t *info );
+void diff_list( const char *filename, int nobjects, trav_info_t *info );
 #endif /* NOT_YET */
 
 
