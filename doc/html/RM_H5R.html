@@ -52,35 +52,30 @@ The Reference interface allows the user to create references
 to specific objects and data regions in an HDF5 file.
 <p>
 
-<table border=0>
-<tr><td valign=top>
+
+<table border=0 width=98%>
+<tr><td valign=top width=33%>
 <ul>
     <li><a href="#Reference-Create">H5Rcreate</a>
 </ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+</td><td valign=top width=33%>
 <ul>
     <li><a href="#Reference-Dereference">H5Rdereference</a>
 </ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+</td><td valign=top width=34%>
 <ul>
-    <li><a href="#Reference-GetRegion">H5Rget_region</a> (NYI)
+    <li><a href="#Reference-GetRegion">H5Rget_region</a>
 </ul>
-</td></tr>
-<tr><td colspan=5 align=right><font size=-1>
-NYI = Not yet implemented.</font>
 </td></tr>
 </table>
 
-<p>
-<i>Note: The only type of reference implemented in this release 
-is an object reference pointing to a dataset.</i>
 <p>
 
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Reference-Create">H5Rcreate</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Rcreate</code>(<em>href_t *</em><code>ref</code>,
+    <dd><em>herr_t</em> <code>H5Rcreate</code>(<em>void *</em><code>ref</code>,
         <em>hid_t</em> <code>loc_id</code>,
         <em>const char *</em><code>name</code>,
         <em>H5R_type_t</em> <code>ref_type</code>,
@@ -98,12 +93,9 @@ is an object reference pointing to a dataset.</i>
         <p>
         The parameter <code>space_id</code> identifies the region 
         to be pointed to (for dataset region references).  
-        <p>
-        <i>Note: Only object references of type <code>H5T_STD_REF_OBJ</code>
-        pointing to entire datasets are implemented at this time.</i>
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>href_t *</em><code>ref</code>
+        <dt><em>void *</em><code>ref</code>
             <dd>OUT: Reference created by the function call.
         <dt><em>hid_t</em> <code>loc_id</code>
             <dd>IN: Location identifier used to locate the object being 
@@ -128,7 +120,7 @@ is an object reference pointing to a dataset.</i>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Rdereference</code>(<em>hid_t</em> <code>dataset</code>,
         <em>H5R_type_t</em> <code>ref_type</code>,
-        <em>href_t *</em><code>ref</code>
+        <em>void *</em><code>ref</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Opens the HDF5 object referenced.
@@ -161,9 +153,9 @@ is an object reference pointing to a dataset.</i>
 <dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a>
 &nbsp;&nbsp;<i>(Not yet implemented.)</i>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Rget_region</code>(<em>hid_t</em> <code>dataset</code>,
+    <dd><em>H5S_t</em> <code>H5Rget_region</code>(<em>H5D_t</em> <code>dataset</code>,
     <em>H5R_type_t</em> <code>ref_type</code>,
-    <em>href_t *</em><code>ref</code>
+    <em>void *</em><code>ref</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves a dataspace with the specified region selected.
@@ -184,7 +176,7 @@ is an object reference pointing to a dataset.</i>
             <dd>IN: Dataset containing reference object.
         <dt><em>H5R_type_t</em> <code>ref_type</code>,
             <dd>IN: The reference type of <code>ref</code>.
-        <dt><em>href_t *</em><code>ref</code>
+        <dt><em>void *</em><code>ref</code>
             <dd>IN: Reference to open.
     </dl>
 <dt><strong>Returns:</strong>

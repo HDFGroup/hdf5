@@ -158,7 +158,7 @@ H5I interface,  have been implemented to support references.
 The H5I function is also useful outside the context of references.
 <p>
 <dl>
-    <dt><em>herr_t</em> <code>H5Rcreate(</code><em>href_t *</em><code>reference,</code>
+    <dt><em>herr_t</em> <code>H5Rcreate(</code><em>void *</em><code>reference,</code>
         <em>hid_t</em> <code>loc_id,</code>
         <em>const char *</em><code>name,</code>
         <em>H5R_type_t</em> <code>type,</code>
@@ -171,31 +171,26 @@ The H5I function is also useful outside the context of references.
         in the dataspace is the portion of the dataset which 
         will be referred to.
         <p>
-        <em>Currently only object references which point to 
-        entire datasets can be created.</em>
-        <p>
 
     <dt><em>hid_t</em> <code>H5Rdereference(</code><em>hid_t</em> <code>dset,</code>
         <em>H5R_type_t</em> <code>rtype,</code>
-        <em>href_t *</em><code>ref)</code>
+        <em>void *</em><code>reference)</code>
     <dd><code>H5Rdereference</code> opens the object referenced 
         and returns an identifier for that object.
-        The parameter <code>ref</code> specifies a reference of 
+        The parameter <code>reference</code> specifies a reference of 
         type <code>rtype</code> that is stored in the dataset 
         <code>dset</code>.
         <p>
 
-    <dt><em>hid_t</em> <code>H5Rget_region(</code><em>hid_t</em> <code>dataset,</code>
+    <dt><em>H5S_t</em> <code>H5Rget_region(</code><em>H5D_t</em> <code>dataset,</code>
         <em>H5R_type_t</em> <code>type,</code>
-        <em>href_t *</em><code>reference)</code>
+        <em>void *</em><code>reference)</code>
     <dd><code>H5Rget_region</code> creates a copy of dataspace of
         the dataset that is pointed to and defines a selection in 
         the copy which is the location (or region) pointed to.
         The parameter <code>ref</code> specifies a reference of 
         type <code>rtype</code> that is stored in the dataset 
         <code>dset</code>.
-        <p>
-        <em>This function is not yet implemented.</em>
         <p>
 
     <dt><em>H5I_type_t</em> <code>H5Iget_type(</code><em>hid_t</em> <code>id)</code>
@@ -245,8 +240,8 @@ of its raw data and write the dataset to the file.
     hid_t dataset1;
     hid_t datatype, dataspace;
     char buf[128];
-    href_t link;
-    href_t data[10][10];
+    hobj_ref_t link;
+    hobj_ref_t data[10][10];
     int rank;
     size_t dimsf[2];
     int i, j;
@@ -272,7 +267,7 @@ of its raw data and write the dataset to the file.
         for(j=0; j<10; i++)
           {
             sprintf(buf,"/Group/Linked Set %d-%d",i,j);
-            if(H5Rcreate(&link,file1,buf,H5R_REF_OBJ,-1)>0)
+            if(H5Rcreate(&link,file1,buf,H5R_OBJECT,-1)>0)
                 data[i][j]=link;
           } /* end for */
 
