@@ -631,7 +631,11 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmemcpy(X,Y,Z)		memcpy((char*)(X),(const char*)(Y),Z)
 #define HDmemmove(X,Y,Z)	memmove((char*)(X),(const char*)(Y),Z)
 #define HDmemset(X,C,Z)		memset(X,C,Z)
+#ifdef WIN32
+#define HDmkdir(S,M)		_mkdir(S)
+#else /* WIN32 */
 #define HDmkdir(S,M)		mkdir(S,M)
+#endif /* WIN32 */
 #define HDmkfifo(S,M)		mkfifo(S,M)
 #define HDmktime(T)		mktime(T)
 #define HDmodf(X,Y)		modf(X,Y)
