@@ -1,12 +1,12 @@
-HDF5 version 1.6.1 released on Thu Oct 16 21:42:02 CDT 2003
+HDF5 version 1.6.1-post0 released on Mon Nov  3 00:35:58 CST 2003
 ================================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.6.0 and
-HDF5-1.6.1, and contains information on the platforms tested and
-known problems in HDF5-1.6.1. For more details check the HISTORY.txt
+This document describes the differences between HDF5-1.6.1 and
+HDF5-1.6.1-post*, and contains information on the platforms tested and
+known problems in HDF5-1.6.1-post*. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -26,7 +26,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.6.0
+- Bug Fixes since HDF5-1.6.1
 - Documentation
 - Platforms Tested
 - Known Problems
@@ -40,10 +40,6 @@ New Features
 
     Library:
     --------
-        - Added new fields to the H5G_stat_t for more information about an
-            object's object header.  QAK 2003/10/06
-        - Added new H5Fget_freespace() routine to query the free space in a
-            given file.  QAK 2003/10/06
 
     Parallel Library:
     -----------------
@@ -53,148 +49,48 @@ New Features
 
     C++ API:
     --------
-        - Added overloaded functions read and write to H5::Attribute.
-          BMR - 2003/04/21
-        - Added an overloaded constructor H5::StrType so the need to separately
-          set the length of the string type can be eliminated. BMR - 2003/04/21
-        - Added overloaded functions read and write to H5::DataSet.
-          BMR - 2003/04/27
-
-        The following items were added but not documented in previous releases:
-
-        - On windows, any application, that uses the C++ API dll, must
-          include the name HDF5CPP_USEDLL in its project setting. (Feb 17, 2002)
-          BMR - 2003/10/10
-        - Added missing default constructor H5::H5File. (Apr 26, 2002)
-          BMR - 2003/10/10
-        - Added new member function H5::DataSet::fillMemBuf per the new C
-          API H5Dfill, which fills the elements in a selection for a memory
-          buffer with a fill value. (May 16, 2002) BMR - 2003/10/10
-        - Added the new member function getMemberIndex to H5::EnumType
-          and H5::CompType to match the new C API H5Tget_member_index.  Given
-          the name of a member of an enumeration or compound datatype, this
-          new function queries the index of the member. (May 16, 2002)
-          BMR - 2003/10/10
-        - Added these member functions to H5::Group per the new C functions
-          H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx:
-          + getNumObjs: Returns the number of objects in the group.
-          + getObjnameByIdx: Retrieves the name of an object in a group,
-                             given an index
-          + getObjTypeByIdx: Returns the type of an object in a group,
-                             given an index
-          (Jan 20, 2003) BMR - 2003/10/10
 
 
 Support for new platforms, languages and compilers.
 =======================================
-         - gcc 3.3.1 is supported on Linux.
   
 
-Bug Fixes since HDF5-1.6.0 release
+Bug Fixes since HDF5-1.6.1 release
 ==================================
 
     Library
     -------
-        - Fixed incorrect datatype of the third parameter to the Fortran90
-          h5pset(get)_cache_f functions (INTEGER to INTEGER(SIZE_T)) EIP - 2003/10/13
-        - Fixed problems with accessing variable-length data datatypes on
-            Crays.  QAK - 2003/10/10
-        - Fixed potential file corruption bug when too many object header
-            messages (probably attributes, from a user perspective) were
-            inserted into an object header and certain other conditions were
-            met.  QAK - 2003/10/08
-        - Changed implementation of internal ID searching algorithm to avoid
-            O(n) behavior for many common cases.  QAK - 2003/10/06
-        - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
-        - Correctly create reference to shared datatype in attribute, instead
-            of making a copy of the shared datatype in the attribute.
-            QAK - 2003/10/01
-        - Revert changes which caused files >2GB to fail when created with
-            MPI-I/O file driver on certain platforms.  QAK - 2003/09/16
-        - Allow compound datatypes to grow in size.  SLU - 2003/09/10
-        - Detect if a type is already packed before attempting to pack it
-            again or check if it is locked.  SLU - 2003/09/10
-        - Corrected bug when opening a file twice with read-only permission
-            for one open and then closing the read-only access file ID would
-            generate an error.  QAK - 2003/09/10
-        - Corrected bug in repeated calls to H5Pget_access_plist() which would
-            incorrectly manage reference counts of internal information and
-            eventually blow up.  QAK - 2003/09/02
-        - Return rank of the array datatype on successful call to
-            H5Tget_array_dims().  QAK - 2003/08/30
-        - Corrected bug in H5Tdetect_class which was not correctly detecting
-            datatype classes of fields in nested compound datatypes in some
-            circumstances.  QAK - 2003/08/30
-        - Corrected bug in sieve buffer code which could cause loss of data
-            when a small dataset was created and deleted in quick succession.
-            QAK - 2003/08/27
-        - Corrected bug in H5Gget_objname_by_idx which was not allowing NULL
-            for the name when just querying for the object name's length.
-            QAK - 2003/08/25
-        - Corrected bug in variable-length string handling which could
-            generate a core dump on writing variable-length strings as part
-            of a compound datatype on certain architectures.  QAK - 2003/08/25
-        - Corrected bug in H5Tget_native_type which would incorrectly compute
-            the size of certain compound datatypes and also incorrectly
-            compute the offset of the last field for those compound datatypes.
-            QAK - 2003/08/25
-        - Corrected bug in H5Tget_native_type which would drop string datatype
-            metadata (padding, etc.)  QAK - 2003/08/25
-        - Corrected bugs in H5Gget_num_objs, H5Gget_objname_by_idx and
-            H5Gget_objtype_by_idx to allow them to accept location IDs, not just
-            group IDs.  QAK - 2003/08/21
-        - Corrected bug when using scalar dataspace for memory selection and
-            operating on chunked dataset.  QAK - 2003/08/18
-        - Corrected bugs with multiple '/' characters in names for H5Glink
-            and H5Gunlink.  QAK - 2003/08/16
-        - Corrected bug with user blocks that didn't allow a user block to
-            be inserted in front of a file after the file was created.
-            QAK - 2003/08/13
-        - Corrected errors with using point selections to access data in
-            chunked datasets.  QAK - 2003/07/23
-        - Corrected error with variable-length datatypes and chunked datasets
-            which caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
-        - Modified library and file format to support storing indexed storage
-            (chunked dataset) B-tree's with non-default internal 'K' values.
-            QAK - 2003/07/15
-        - Returned H5T_BKG_TEMP support to library after it was accidentally
-            removed.  QAK - 2003/07/14
+        - Fixed problems with MPI datatypes that caused ASCI Q machine to
+            hang.  QAK - 2003/10/28
+        - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,
+            since it had no benefit.  QAK - 2003/10/28
+        - Single hyperslab selections (which were set with only one call to
+            H5Sselect_hyperslab) that had dimensions that could be "flattened"
+            but were interspersed with dimensions that could not be flattened
+            were not correctly handled, causing core dumps.  QAK - 2003/10/25
+        - Avoid metadata cache from preempting current dataset object header
+            when looking up information about the named datatype that the
+            dataset uses.  QAK - 2003/10/20
 
     Configuration
     -------------
-        - Fixed the error that caused "make install" to fail because of the
-            macro definition syntax of "prefix?=..."  AKC - 2003/07/22
 
     Performance
     -------------
+        - Hoisted invariant 'if/else's out of inner datatype conversion loop for
+            integer and floating-point values, giving about a 20% speedup.
+            QAK - 2003/10/20
 
     Tools
     -----
-	- Fixed a segmentation fault of h5diff when percentage option is used.
-            AKC - 2003/08/27
-        - Switched away from tools using internal "fixtype" function(s) to use
-            H5Tget_native_type() internally.  QAK - 2003/08/25
 
     Documentation 
     ------------- 
-        - Added two missing Fortran APIs (h5pget_fapl_mpiposix_f and 
-            h5pset_fapl_mpiposix_f) to the reference manual.
-            FMB - 2003/10/15
-        - Corrected the reference manual descriptions of H5open/h5open_f and 
-            H5close/h5close_f to indicate that these calls are required in 
-            Fortran90 applications.   FMB - 2003/10/15
 
 
 Documentation
 =============
 
-    Fortran90 APIs are being integrated into the main body of the 
-    HDF5 Reference Manual (RM).  This process is complete in all RM sections
-    except H5P.
-
-    A PDF version of the RM will be posted on the HDF5 website
-    (at http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/) approximately one week
-    after the release.
 
 
 Platforms Tested
