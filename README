@@ -5,6 +5,11 @@ documentation, see the RELEASE file for information specific to this release of
 the library.  The INSTALL file contains instructions on compiling and
 installing the library.
 
+Documentation for this release is in the html directory:
+    H5.apiv2.html - API interface description for HDF5 interface
+    H5.format.html - Format description for HDF5 files
+    H5.intro.html - Introduction to programming with the HDF5 interface
+
 Three mailing lists are currently set up for use with the HDF5 library:
     hdf5 - For general discussion of the HDF5 library with other users.
     hdf5dev - For discussion of the HDF5 library development with developers

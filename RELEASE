@@ -15,6 +15,11 @@ limitations of the prototype is as follows:
         its full "pathname" in the file, ie. "/foo/bar/dataset1",
         "/foo/bar/dataset2", "/foo/data"
 
+    This release has been tested on UNIX platforms only; specifically: Linux,
+FreedBSD, IRIX, Solaris & Dec UNIX.  Machines which do not have IEEE floating-
+point representation or non big- or little-endian memory representations aren't
+supported in this release, most other machines should work correctly.
+
     A list of the API functions currently supported follows.  [This list is
 short, mainly as a method of providing feedback before significant direction
 changes must be made]
