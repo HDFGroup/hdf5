@@ -1773,7 +1773,7 @@ done
 rm maketest
 
 if test "X$GCC" = "Xyes"; then
-   CFLAGS="$CFLAGS -Wall -W -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
+   CFLAGS="$CFLAGS -ansi -pedantic -Wchar-subscripts -Wconversion -Wredundant-decls -Wall -W -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -Winline"
 fi
 
 echo $ac_n "checking for production mode""... $ac_c" 1>&6
