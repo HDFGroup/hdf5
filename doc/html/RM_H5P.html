@@ -122,7 +122,6 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
     <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
     <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
-    <li><a href="#Property-SetFaplDpss">H5Pset_fapl_dpss</a>
     <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
     <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
     <!--
@@ -278,8 +277,8 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetAlignment">h5pget_alignment_f</a>
 <!--<li><a href="#Property-SetCore">h5pset_core_f</a>                     -->
 <!--<li><a href="#Property-GetCore">h5pget_core_f</a>                     -->
-    <li><a href="#Property-SetFaplMpio">h5pset_fapl_mpi_f</a>&nbsp;&nbsp;&nbsp;||
-    <li><a href="#Property-GetFaplMpio">h5pget_fapl_mpi_f</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-SetFaplMpio">h5pset_fapl_mpio_f</a>&nbsp;&nbsp;&nbsp;||
+    <li><a href="#Property-GetFaplMpio">h5pget_fapl_mpio_f</a>&nbsp;&nbsp;&nbsp;||
 <!--<li><a href="#Property-SetFamily">h5pset_family_f</a>                 -->
 <!--<li><a href="#Property-GetFamily">h5pget_family_f</a>                 -->
     <li><a href="#Property-SetCache">h5pset_cache_f</a>
@@ -301,8 +300,8 @@ facilitate moving easily between them.</i>
     <li><a href="#Property-GetHyperCache">h5pget_hyper_cache_f</a>
     <li><a href="#Property-SetBTreeRatios">h5pset_btree_ratios_f</a>
     <li><a href="#Property-GetBTreeRatios">h5pget_btree_ratios_f</a>
-    <li><a href="#Property-SetDxplMpio">h5pset_dxpl_mpi_f</a>&nbsp;&nbsp;&nbsp;|| 
-    <li><a href="#Property-GetDxplMpio">h5pget_dxpl_mpi_f</a>&nbsp;&nbsp;&nbsp;|| 
+    <li><a href="#Property-SetDxplMpio">h5pset_dxpl_mpio_f</a>&nbsp;&nbsp;&nbsp;|| 
+    <li><a href="#Property-GetDxplMpio">h5pget_dxpl_mpio_f</a>&nbsp;&nbsp;&nbsp;|| 
     </ul>
 
 </td></tr>
@@ -347,6 +346,10 @@ facilitate moving easily between them.</i>
               creates and returns a new mount property list
               initialized with default values.
       </dl>
+      <p>
+      This property list must eventually be closed with 
+      <code>H5Pclose</code>;  
+      otherwise, errors are likely to occur.
   <dt><strong>Parameters:</strong>
     <dl>
       <dt><em>H5P_class_t</em> <code>type</code>
@@ -2754,7 +2757,7 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_mpi_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fapl_mpio_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -2796,7 +2799,7 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_mpi_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fapl_mpio_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -2841,7 +2844,7 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_dxpl_mpi_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_dxpl_mpio_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -2879,7 +2882,7 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
   <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_dxpl_mpi_f" 
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_dxpl_mpio_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
         <img src="Graphics/Java.gif"> 
@@ -3483,7 +3486,7 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetDriver">H5Pget_driver</a>
   <dt><strong>Signature:</strong>
-    <dd><em>H5F_driver_t</em> <code>H5Pget_driver</code>(
+    <dd><em>hid_t</em> <code>H5Pget_driver</code>(
                      <em>hid_t</em> <code>plist_id</code>
     )
   <dt><strong>Purpose:</strong>
@@ -3492,6 +3495,23 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
     <dd><code>H5Pget_driver</code> returns the identifier of the 
         low-level file driver associated with the file access property list 
         or data transfer propert list <code>plist_id</code>.
+        <p>
+        Valid driver identifiers with the standard HDF5 library distribution
+        include the following:
+        <pre>
+           H5FD_CORE
+           H5FD_DPSS
+           H5FD_FAMILY
+           H5FD_GASS
+           H5FD_LOG
+           H5FD_MPIO
+           H5FD_MULTI
+           H5FD_SEC2
+           H5FD_STDIO
+           H5FD_STREAM </pre>
+        If a user defines and registers custom drivers or 
+        if additional drivers are defined in an HDF5 distribution, 
+        this list will be longer.
         <p>
         The returned driver identifier is only valid as long as the 
         file driver remains registered.
@@ -3644,52 +3664,6 @@ fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
             <dd>IN: File access property list identifier.
         <dt><em>GASS_Info *</em><code>info</code>
             <dd>OUT: Pointer to the GASS information structure.
-    </dl>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFaplDpss">H5Pset_fapl_dpss</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_fapl_dpss</code>(
-                     <em>hid_t</em> <code>fapl_id</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Sets use of the DPSS I/O driver.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_fapl_dpss</code> modifies the file access property list
-        <code>fapl_id</code> to use the DPSS I/O driver in a
-        Globus evnvironment.
-  <dt><strong>Note:</strong>
-    <dd><code>H5Pget_fapl_dpss</code> is an experimental function.
-        It is designed for use only when accessing files via the 
-        DPSS facility of the Globus environment. 
-        For further information, see 
-        <a href="http://www.globus.org/">http//www.globus.org/</a>.
-        <p>
-        As of HDF5 Release 1.4 Beta, the Globus project has deprecated 
-        the DPSS facility in favor of an FTP-based facility that is still 
-        under development.
-        While the DPSS functionality is still available, 
-        users must be aware that it was implemented purely for research purposes
-        and may be unavailable in future Globus releases.
-  <dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>fapl_id</code>
-            <dd>IN: File access property list identifier.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -4015,7 +3989,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  2 April 2001
+Last modified:  18 Dec 2001
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
