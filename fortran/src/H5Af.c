@@ -412,7 +412,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
       * Allocate buffer to hold name of an attribute
       */
      c_bufsize = *bufsize;
-     c_buf = (char *)HDmalloc(c_bufsize +1);
+     c_buf = (char *)HDmalloc((int)c_bufsize +1);
      if (c_buf == NULL) return ret_value; 
  
      /*
@@ -425,9 +425,8 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-      
-      HDpackFstring(c_buf, _fcdtocp(buf), c_bufsize);
-      HDfree( c_buf);
-      ret_value = c_size;
+      HDpackFstring(c_buf, _fcdtocp(buf), (int)c_bufsize);
+      HDfree(c_buf);
+      ret_value = (int_f)c_size;
       return ret_value;
 }

@@ -979,8 +979,8 @@
           SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
-            INTEGER, INTENT(IN) :: size            ! Buffer size 
-            CHARACTER(LEN=*), INTENT(OUT) :: buf   
+            INTEGER(SIZE_T), INTENT(IN) :: size            ! Buffer size 
+            CHARACTER(LEN=*), INTENT(INOUT) :: buf   
                                                ! Buffer to hold attribute name
             INTEGER, INTENT(OUT) :: hdferr         ! Error code:
                                                    ! name length is successful,
