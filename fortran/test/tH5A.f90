@@ -33,6 +33,7 @@
      CHARACTER(LEN=11), PARAMETER :: aname3 = "attr_double"   !DOuble Attribute name
      CHARACTER(LEN=9), PARAMETER :: aname4 = "attr_real"      !Real Attribute name
      CHARACTER(LEN=12), PARAMETER :: aname5 = "attr_integer"  !Integer Attribute name
+     CHARACTER(LEN=9), PARAMETER :: aname6 = "attr_null"     !Null Attribute name
     
      !
      !data space rank and dimensions
@@ -52,11 +53,13 @@
      INTEGER(HID_T) :: attr3_id       !Double Attribute identifier 
      INTEGER(HID_T) :: attr4_id       !Real Attribute identifier 
      INTEGER(HID_T) :: attr5_id       !Integer Attribute identifier 
+     INTEGER(HID_T) :: attr6_id       !Null Attribute identifier 
      INTEGER(HID_T) :: aspace_id      !String Attribute Dataspace identifier 
      INTEGER(HID_T) :: aspace2_id     !Character Attribute Dataspace identifier 
      INTEGER(HID_T) :: aspace3_id     !Double Attribute Dataspace identifier 
      INTEGER(HID_T) :: aspace4_id     !Real Attribute Dataspace identifier 
      INTEGER(HID_T) :: aspace5_id     !Integer Attribute Dataspace identifier 
+     INTEGER(HID_T) :: aspace6_id     !Null Attribute Dataspace identifier 
      INTEGER(HID_T) :: atype_id       !String Attribute Datatype identifier 
      INTEGER(HID_T) :: atype2_id      !Character Attribute Datatype identifier 
      INTEGER(HID_T) :: atype3_id      !Double Attribute Datatype identifier 
@@ -74,6 +77,7 @@
      INTEGER(HID_T) :: attr3_type      !Returned DOUBLE Attribute Datatype identifier
      INTEGER(HID_T) :: attr4_type      !Returned REAL Attribute Datatype identifier
      INTEGER(HID_T) :: attr5_type      !Returned INTEGER Attribute Datatype identifier
+     INTEGER(HID_T) :: attr6_type      !Returned NULL Attribute Datatype identifier
      INTEGER        :: num_attrs      !number of attributes 
      CHARACTER(LEN=256) :: attr_name    !buffer to put attr_name
      INTEGER(SIZE_T)    ::  name_size = 80 !attribute name length
@@ -90,6 +94,7 @@
      
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
      INTEGER, DIMENSION(1)  :: aread_integer_data ! variable to put read back integer attr data
+     INTEGER, DIMENSION(1)  :: aread_null_data = 7 ! variable to put read back null attr data
      DOUBLE PRECISION, DIMENSION(1)   :: aread_double_data ! variable to put read back double attr data
      REAL, DIMENSION(1)  :: aread_real_data ! variable to put read back real attr data
 
@@ -167,6 +172,11 @@
      !
      CALL h5screate_simple_f(arank, adims2, aspace2_id, error)
      CALL check("h5screate_simple_f",error,total_error)
+     !
+     ! Create null data space for null attributes. 
+     !
+     CALL h5screate_f(H5S_NULL_F, aspace6_id, error)
+     CALL check("h5screate_f",error,total_error)
 
      !
      ! Create datatype for the String attribute.
@@ -183,7 +193,7 @@
      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, atype2_id, error)
      CALL check("h5tcopy_f",error,total_error)
      !
-     ! Create datatype for the DOulble attribute.
+     ! Create datatype for the Double attribute.
      !
      CALL h5tcopy_f(H5T_NATIVE_DOUBLE, atype3_id, error)
      CALL check("h5tcopy_f",error,total_error)
@@ -233,7 +243,13 @@
      CALL h5acreate_f(dset_id, aname5, atype5_id, aspace2_id, &
                       attr5_id, error)
      CALL check("h5acreate_f",error,total_error)
-     
+     !
+     ! Create dataset NULL attribute of INTEGER.
+     !
+     CALL h5acreate_f(dset_id, aname6, atype5_id, aspace6_id, &
+                      attr6_id, error)
+     CALL check("h5acreate_f",error,total_error)
+    
      !
      ! Write the String attribute data.
      !
@@ -264,7 +280,13 @@
      data_dims(1) = 1 
      CALL h5awrite_f(attr5_id, atype5_id, attr_integer_data, data_dims, error)
      CALL check("h5awrite_f",error,total_error)
-    
+
+     !
+     ! Write the NULL attribute data(nothing can be written).
+     !
+     CALL h5awrite_f(attr6_id, atype5_id, attr_integer_data, data_dims, error)
+     CALL check("h5awrite_f",error,total_error)
+   
      !
      ! Close the attribute. 
      !
@@ -277,6 +299,8 @@
      CALL h5aclose_f(attr4_id, error)
      CALL check("h5aclose_f",error,total_error)
      CALL h5aclose_f(attr5_id, error)
+     CALL check("h5aclose_f",error,total_error)
+     CALL h5aclose_f(attr6_id, error)
      CALL check("h5aclose_f",error,total_error)
 
      CALL h5tclose_f(atype_id, error)
@@ -296,6 +320,8 @@
      CALL h5sclose_f(aspace_id, error)
      CALL check("h5sclose_f",error,total_error)
      CALL h5sclose_f(aspace2_id, error)
+     CALL check("h5sclose_f",error,total_error)
+     CALL h5sclose_f(aspace6_id, error)
      CALL check("h5sclose_f",error,total_error)
      !
      ! Terminate access to the dataset.
@@ -343,6 +369,12 @@
      !open the INTEGER attrbute by name
      !
      CALL h5aopen_name_f(dset_id, aname5, attr5_id, error)
+     CALL check("h5aopen_idx_f",error,total_error)
+     
+     !
+     !open the NULL attrbute by name
+     !
+     CALL h5aopen_name_f(dset_id, aname6, attr6_id, error)
      CALL check("h5aopen_idx_f",error,total_error)
 
      !
@@ -393,13 +425,19 @@
      !
      CALL h5aget_type_f(attr5_id, attr5_type, error)
      CALL check("h5aget_type_f",error,total_error)
+     
+     !
+     !get the null attrbute datatype
+     !
+     CALL h5aget_type_f(attr6_id, attr6_type, error)
+     CALL check("h5aget_type_f",error,total_error)
 
      !
      !get number of attributes
      !
      CALL h5aget_num_attrs_f(dset_id, num_attrs, error)
      CALL check("h5aget_num_attrs_f",error,total_error)
-     if (num_attrs .ne. 5) then
+     if (num_attrs .ne. 6) then
        write(*,*) "got number of attributes wrong", num_attrs
        total_error = total_error +1
      end if
@@ -463,7 +501,17 @@
          write(*,*) "Read back integer attrbute is wrong ", aread_integer_data
          total_error = total_error + 1 
      end if 
-     
+     !
+     !read the null attribute data. nothing can be read.
+     !
+     data_dims(1) = 1 
+     CALL h5aread_f(attr6_id, H5T_NATIVE_INTEGER, aread_null_data, data_dims, error)
+     CALL check("h5aread_f",error,total_error)
+     if (aread_null_data(1) .ne. 7 ) then
+         write(*,*) "Read back null attrbute is wrong ", aread_null_data
+         total_error = total_error + 1 
+     end if 
+    
      !
      ! Close the attribute. 
      !
@@ -477,6 +525,8 @@
      CALL check("h5aclose_f",error,total_error)
      CALL h5aclose_f(attr5_id, error)
      CALL check("h5aclose_f",error,total_error)
+     CALL h5aclose_f(attr6_id, error)
+     CALL check("h5aclose_f",error,total_error)
 
      !
      ! Delete the attribute from the Dataset. 
@@ -489,7 +539,7 @@
      !
      CALL h5aget_num_attrs_f(dset_id, num_attrs, error)
      CALL check("h5aget_num_attrs_f",error,total_error)
-     if (num_attrs .ne. 4) then
+     if (num_attrs .ne. 5) then
        write(*,*) "got number of attributes wrong", num_attrs
        total_error = total_error +1
      end if
@@ -513,6 +563,8 @@
      CALL h5tclose_f(attr4_type, error)
      CALL check("h5tclose_f",error,total_error)
      CALL h5tclose_f(attr5_type, error)
+     CALL check("h5tclose_f",error,total_error)
+     CALL h5tclose_f(attr6_type, error)
      CALL check("h5tclose_f",error,total_error)
 
      !   
