@@ -36,11 +36,15 @@ install: $(LIB) $(PUB_HDR) $(PROGS)
 	fi
 	@if test -n "$(PUB_HDR)"; then					      \
 	   test -d $(includedir) || mkdir $(includedir) || exit 1;	      \
-	   (set -x; $(INSTALL_DATA) $(PUB_HDR) $(includedir)/. || exit 1);    \
+	   for f in $(PUB_HDR); do 					      \
+	      (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);        \
+	   done;							      \
         fi
 	@if test -n "$(PROGS)"; then					      \
 	   test -d $(bindir) || mkdir $(bindir) || exit 1;		      \
-	   (set -x; $(INSTALL_PROGRAM) $(PROGS) $(bindir)/. || exit 1);	      \
+	   for f in $(PROGS); do					      \
+	     (set -x; $(INSTALL_PROGRAM) $$f $(bindir)/. || exit 1);	      \
+	   done;							
 	fi
 
 # Removes those things that `make install' (would have) installed.
