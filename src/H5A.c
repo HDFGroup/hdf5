@@ -683,7 +683,6 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     if (H5O_modify(&(attr->ent), H5O_ATTR, idx, 0, attr) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to update attribute header messages");
-    attr->data=NULL;    /* un-do the data pointer */
 
     /* Indicate the the attribute doesn't need fill-values */
     attr->initialized=TRUE;
@@ -696,8 +695,6 @@ done:
         H5I_dec_ref(src_id);
     if (dst_id >= 0) 
         H5I_dec_ref(dst_id);
-    if (tconv_buf)
-        H5MM_xfree(tconv_buf);
     if (bkg_buf)
 	H5MM_xfree(bkg_buf);
 
