@@ -21,6 +21,9 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 LIB=libhdf5_fortran.la
 DISTCLEAN=H5fortran_types.f90
 
+## Public header files (to be installed)...
+PUB_HDR=H5pubconf_fortran.h
+
 ## Source and object files for the library
 ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
 
