@@ -34,10 +34,11 @@ typedef struct info_t {
 
 /*struct to store basic info about an object */
 typedef struct obj_t {
-    unsigned long objno[2];
+    haddr_t objno;
+    unsigned flags[2];
     char *objname;
     int displayed;
-				int type;
+    int type;
 } obj_t;
 
 /*struct that stores all objects, excluding shared objects */
@@ -54,8 +55,9 @@ int H5get_object_info( hid_t file_id, info_t *info );
 /* table methods */
 void table_init(table_t **table);
 void table_free(table_t *table);
-int  table_search(unsigned long *objno, table_t *table );
-void table_add(unsigned long *objno, char *objname, int type, table_t *table);
+int  table_search_obj(haddr_t objno, table_t *table );
+void table_add_obj(haddr_t objno, char *objname, int type, table_t *table);
+void table_add_flags(unsigned *flags, char *objname, int type, table_t *table);
 void info_free(info_t *info, int nobjs);
 
 
