@@ -669,7 +669,6 @@ hyperslab.lo: \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5Eprivate.h \
-   $(top_srcdir)/src/H5MMprivate.h \
    $(top_srcdir)/src/H5Vprivate.h
 istore.lo: \
    $(srcdir)/istore.c \
@@ -728,7 +727,6 @@ istore.lo: \
    $(top_srcdir)/src/H5Fpkg.h \
    $(top_srcdir)/src/H5FOprivate.h \
    $(top_srcdir)/src/H5TBprivate.h \
-   $(top_srcdir)/src/H5MMprivate.h \
    $(top_srcdir)/src/H5Vprivate.h
 lheap.lo: \
    $(srcdir)/lheap.c \
