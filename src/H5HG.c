@@ -102,6 +102,7 @@ H5HG_create (H5F_t *f, size_t size)
     /* Check args */
     assert (f);
     if (size<H5HG_MINSIZE) size = H5HG_MINSIZE;
+    size = H5HG_ALIGN(size);
 
     /* Create it */
     if (H5MF_alloc (f, H5MF_META, (hsize_t)size, &addr/*out*/)<0) {
@@ -137,8 +138,9 @@ H5HG_create (H5F_t *f, size_t size)
     /* The freespace object */
     heap->obj[0].size = size - H5HG_SIZEOF_HDR (f);
     heap->obj[0].begin = p;
-    UINT16ENCODE (p, 0);	/*object ID*/
-    UINT16ENCODE (p, 0);	/*reference count*/
+    UINT16ENCODE(p, 0);	/*object ID*/
+    UINT16ENCODE(p, 0);	/*reference count*/
+    UINT32ENCODE(p, 0); /*reserved*/
     H5F_encode_length (f, p, heap->obj[0].size);
     HDmemset (p, 0, (size_t)((heap->chunk+heap->nalloc) - p));
 
@@ -289,6 +291,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	    assert (idx<heap->nalloc);
 	    assert (NULL==heap->obj[idx].begin);
 	    UINT16DECODE (p, heap->obj[idx].nrefs);
+	    p += 4; /*reserved*/
 	    H5F_decode_length (f, p, heap->obj[idx].size);
 	    heap->obj[idx].begin = begin;
 	    p = begin + heap->obj[idx].size;
@@ -440,8 +443,9 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     heap->obj[idx].size = size;
     heap->obj[idx].begin = heap->obj[0].begin;
     p = heap->obj[idx].begin;
-    UINT16ENCODE (p, idx);
-    UINT16ENCODE (p, 0); /*nrefs*/
+    UINT16ENCODE(p, idx);
+    UINT16ENCODE(p, 0); /*nrefs*/
+    UINT32ENCODE(p, 0); /*reserved*/
     H5F_encode_length (f, p, size);
 
     /* Fix the free space object */
@@ -466,8 +470,9 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	heap->obj[0].size -= size;
 	heap->obj[0].begin += size;
 	p = heap->obj[0].begin;
-	UINT16ENCODE (p, 0);	/*id*/
-	UINT16ENCODE (p, 0);	/*nrefs*/
+	UINT16ENCODE(p, 0);	/*id*/
+	UINT16ENCODE(p, 0);	/*nrefs*/
+	UINT32ENCODE(p, 0);	/*reserved*/
 	H5F_encode_length (f, p, heap->obj[0].size);
 		
     } else {
@@ -528,7 +533,7 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     }
 
     /* Find a large enough collection on the CWFS list */
-    need = size + H5HG_SIZEOF_OBJHDR (f);
+    need = H5HG_ALIGN(size + H5HG_SIZEOF_OBJHDR(f));
     for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
 	if (f->shared->cwfs[cwfsno]->obj[0].size>=need) {
 	    /*
@@ -565,7 +570,9 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     assert (idx>0);
     
     /* Copy data into the heap */
-    HDmemcpy (heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
+    HDmemcpy(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f), obj, size);
+    HDmemset(heap->obj[idx].begin+H5HG_SIZEOF_OBJHDR(f)+size, 0,
+	     need-(H5HG_SIZEOF_OBJHDR(f)+size));
     heap->dirty = TRUE;
 
     /* Return value */
@@ -820,8 +827,9 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 	       heap->size-((obj_start+size)-heap->chunk));
     if (heap->obj[0].size>=H5HG_SIZEOF_OBJHDR (f)) {
 	p = heap->obj[0].begin;
-	UINT32ENCODE (p, 0); /*id*/
-	UINT32ENCODE (p, 0); /*nrefs*/
+	UINT16ENCODE(p, 0); /*id*/
+	UINT16ENCODE(p, 0); /*nrefs*/
+	UINT32ENCODE(p, 0); /*reserved*/
 	H5F_encode_length (f, p, size);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));

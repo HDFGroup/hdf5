@@ -24,10 +24,18 @@
 
     <h2>2. File Size Limits</h2>
 
-    <p>Some 32-bit operating systems have special file systems that
-      can support large (&gt;2GB) files and HDF5 will detect these and
-      use them automatically.  If this is the case, the output from
-      configure will show:
+    <p>Systems that have 64-bit file addresses will be able to access
+      those files automatically.  One should see the following output
+      from configure:
+
+    <p><code><pre>
+checking size of off_t... 8
+    </pre></code>
+
+    <p>Also, some 32-bit operating systems have special file systems
+      that can support large (&gt;2GB) files and HDF5 will detect
+      these and use them automatically.  If this is the case, the
+      output from configure will show:
 
     <p><code><pre>
 checking for lseek64... yes
@@ -42,25 +50,28 @@ checking for fseek64... yes
     <p><code><pre>
 hid_t plist, file;
 plist = H5Pcreate (H5P_FILE_ACCESS);
-H5Pset_family (plist, 1<<30, H5P_DEFAULT);
+H5Pset_family (plist, 1&lt;&lt;30, H5P_DEFAULT);
 file = H5Fcreate ("big%03d.h5", H5F_ACC_TRUNC, H5P_DEFAULT, plist);
     </code></pre>
 
-    <p>The second argument (<code>30</code>) to
+    <p>The second argument (<code>1&lt;&lt;30</code>) to
       <code>H5Pset_family()</code> indicates that the family members
-      are to be 2^30 bytes (1GB) each.  In general, family members
-      cannot be 2GB because writes to byte number 2,147,483,647 will
-      fail, so the largest safe value for a family member is
-      2,147,483,647.  HDF5 will create family members on demand as the
-      HDF5 address space increases, but since most Unix systems limit
-      the number of concurrently open files the effective maximum size
-      of the HDF5 address space will be limited.
+      are to be 2^30 bytes (1GB) each although we could have used any
+      reasonably large value.  In general, family members cannot be
+      2GB because writes to byte number 2,147,483,647 will fail, so
+      the largest safe value for a family member is 2,147,483,647.
+      HDF5 will create family members on demand as the HDF5 address
+      space increases, but since most Unix systems limit the number of
+      concurrently open files the effective maximum size of the HDF5
+      address space will be limited (the system on which this was
+      developed allows 1024 open files, so if each family member is
+      approx 2GB then the largest HDF5 file is approx 2TB).
 
     <p>If the effective HDF5 address space is limited then one may be
       able to store datasets as external datasets each spanning
       multiple files of any length since HDF5 opens external dataset
-      files one at a time.  To arrange storage for a 5TB dataset one
-      could say:
+      files one at a time.  To arrange storage for a 5TB dataset split
+      among 1GB files one could say:
 
     <p><code><pre>
 hid_t plist = H5Pcreate (H5P_DATASET_CREATE);
@@ -73,9 +84,9 @@ for (i=0; i&lt;5*1024; i++) {
     <h2>3. Dataset Size Limits</h2>
 
     <p>The second limit which must be overcome is that of
-      <code>sizeof(size_t)</code>.  HDF5 defines a new data type
-      called <code>hsize_t</code> which is used for sizes of datasets
-      and is, by default, defined as <code>unsigned long long</code>.
+      <code>sizeof(size_t)</code>.  HDF5 defines a data type called
+      <code>hsize_t</code> which is used for sizes of datasets and is,
+      by default, defined as <code>unsigned long long</code>.
 
     <p>To create a dataset with 8*2^30 4-byte integers for a total of
       32GB one first creates the dataspace.  We give two examples
@@ -105,7 +116,7 @@ hid_t space2 = H5Screate_simple (1, size2, size2};
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Fri Apr 10 13:26:04 EDT 1998 -->
 <!-- hhmts start -->
-Last modified: Wed May 13 12:36:47 EDT 1998
+Last modified: Sun Jul 19 11:37:25 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

@@ -142,6 +142,8 @@ H5G_ent_decode_vec(H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
  *              Jul 18 1997
  *
  * Modifications:
+ *	Robb Matzke, 17 Jul 1998
+ * 	Added a 4-byte padding field for alignment and future expansion.
  *
  *-------------------------------------------------------------------------
  */
@@ -164,6 +166,7 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
     H5F_decode_length(f, *pp, ent->name_off);
     H5F_addr_decode(f, pp, &(ent->header));
     UINT32DECODE(*pp, tmp);
+    *pp += 4; /*reserved*/
     ent->type=(H5G_type_t)tmp;
 
     /* decode scratch-pad */
@@ -275,6 +278,7 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, const H5G_entry_t *ent)
         H5F_encode_length(f, *pp, ent->name_off);
         H5F_addr_encode(f, pp, &(ent->header));
         UINT32ENCODE(*pp, ent->type);
+	UINT32ENCODE(*pp, 0); /*reserved*/
 
         /* encode scratch-pad */
         switch (ent->type) {
@@ -300,6 +304,7 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, const H5G_entry_t *ent)
         H5F_addr_undef(&undef);
         H5F_addr_encode(f, pp, &undef);
         UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
+	UINT32ENCODE(*pp, 0); /*reserved*/
     }
 
     /* fill with zero */

@@ -184,7 +184,7 @@ typedef struct H5O_compress_t {
 /*
  * Attribute Message.
  */
-#define H5O_ATTR_ID	0x000C
+#define H5O_ATTR_ID	0x000c
 extern const H5O_class_t H5O_ATTR[1];
 
 /* operates on an H5A_t struct */

@@ -72,6 +72,10 @@ static hbool_t          interface_initialize_g = FALSE;
         This function decodes the "raw" disk form of a attribute message
     into a struct in memory native format.  The struct is allocated within this
     function using malloc() and is returned to the caller.
+ *
+ * Modifications:
+ * 	Robb Matzke, 17 Jul 1998
+ *	Added padding for alignment.
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
@@ -90,24 +94,30 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
+
+    /*
+     * Decode the sizes of the parts of the attribute.  The sizes stored in
+     * the file are exact but the parts are aligned on 8-byte boundaries.
+     */
+    UINT16DECODE(p, name_len); /*including null*/
+    UINT16DECODE(p, attr->dt_size);
+    UINT16DECODE(p, attr->ds_size);
+    p += 2; /*reserved*/
     
     /* Decode and store the name */
-    UINT16DECODE(p, name_len);
-    if (NULL==(attr->name=H5MM_malloc(name_len+1))) {
+    if (NULL==(attr->name=H5MM_malloc(name_len))) {
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
     HDmemcpy(attr->name,p,name_len);
-    attr->name[name_len]='\0';
-    p+=name_len;    /* advance the memory pointer */
+    p += H5O_ALIGN(name_len);    /* advance the memory pointer */
 
     /* decode the attribute datatype */
     if((attr->dt=(H5O_DTYPE->decode)(f,p,NULL))==NULL) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL,
                       "can't decode attribute datatype");
     }
-    attr->dt_size=(H5O_DTYPE->raw_size)(f,attr->dt);
-    p+=attr->dt_size;
+    p += H5O_ALIGN(attr->dt_size);
 
     /* decode the attribute dataspace */
     if (NULL==(attr->ds = H5MM_calloc(sizeof(H5S_t)))) {
@@ -120,9 +130,8 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
         H5MM_xfree(simple);
     } else {
         attr->ds->extent.type = H5S_SCALAR;
-    } /* end else */
-    attr->ds_size=(H5O_SDSPACE->raw_size)(f,&(attr->ds->extent.u.simple));
-    p+=attr->ds_size;
+    }
+    p += H5O_ALIGN(attr->ds_size);
 
     /* Compute the size of the data */
     attr->data_size=H5S_extent_npoints(attr->ds)*H5T_get_size(attr->dt);
@@ -162,6 +171,10 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
  DESCRIPTION
         This function encodes the native memory form of the attribute
     message in the "raw" disk form.
+ *
+ * Modifications:
+ * 	Robb Matzke, 17 Jul 1998
+ *	Added padding for alignment.
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
@@ -176,25 +189,40 @@ H5O_attr_encode(H5F_t *f, uint8 *p, const void *mesg)
     assert(p);
     assert(attr);
 
-    /* encode the attribute name */
-    name_len=HDstrlen(attr->name);
+    /*
+     * Encode the lengths of the various parts of the attribute message. The
+     * encoded lengths are exact but we pad each part except the data to be a
+     * multiple of eight bytes.
+     */
+    name_len = HDstrlen(attr->name)+1;
     UINT16ENCODE(p, name_len);
-    HDmemcpy(p,attr->name,name_len);
-    p+=name_len;
+    UINT16ENCODE(p, attr->dt_size);
+    UINT16ENCODE(p, attr->ds_size);
+    UINT16ENCODE(p, 0); /*reserved*/
+
+    /*
+     * Write the name including null terminator padded to the correct number
+     * of bytes.
+     */
+    HDmemcpy(p, attr->name, name_len);
+    HDmemset(p+name_len, 0, H5O_ALIGN(name_len)-name_len);
+    p += H5O_ALIGN(name_len);
 
     /* encode the attribute datatype */
     if((H5O_DTYPE->encode)(f,p,attr->dt)<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
                       "can't encode attribute datatype");
     }
-    p+=attr->dt_size;
+    HDmemset(p+attr->dt_size, 0, H5O_ALIGN(attr->dt_size)-attr->dt_size);
+    p += H5O_ALIGN(attr->dt_size);
 
     /* encode the attribute dataspace */
     if((H5O_SDSPACE->encode)(f,p,&(attr->ds->extent.u.simple))<0) {
         HRETURN_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
                       "can't encode attribute dataspace");
     }
-    p+=attr->ds_size;
+    HDmemset(p+attr->ds_size, 0, H5O_ALIGN(attr->ds_size)-attr->ds_size);
+    p += H5O_ALIGN(attr->ds_size);
     
     /* Store attribute data */
     HDmemcpy(p,attr->data,attr->data_size);
@@ -256,32 +284,36 @@ H5O_attr_copy(const void *_src, void *_dst)
         This function returns the size of the raw attribute message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
+ *
+ * Modified:
+ * 	Robb Matzke, 17 Jul 1998
+ *	Added padding between message parts for alignment.
 --------------------------------------------------------------------------*/
 static size_t
 H5O_attr_size(H5F_t __unused__ *f, const void *mesg)
 {
-    size_t                  ret_value = 0;
-    const H5A_t            *attr = (const H5A_t *) mesg;
+    size_t		ret_value = 0;
+    size_t		name_len;
+    const H5A_t         *attr = (const H5A_t *) mesg;
 
     FUNC_ENTER(H5O_attr_size, 0);
 
     assert(attr);
 
-    /* Get size of name */
-    ret_value=2;    /* Size to store length of name */
-    ret_value+=HDstrlen(attr->name); /* Add length of name (non-zero terminated) */
+    name_len = HDstrlen(attr->name)+1;
 
-    /* Get size of datatype information */
-    ret_value+=attr->dt_size;
-
-    /* Get size of [simple] dataspace information */
-    ret_value+=attr->ds_size;
-
-    /* Get size of attribute data */
-    ret_value+=attr->data_size;
+    ret_value = 2 +				/*name size inc. null	*/
+		2 +				/*type size		*/
+		2 +				/*space size		*/
+		2 +				/*reserved		*/
+		H5O_ALIGN(name_len)      +	/*attribute name	*/
+		H5O_ALIGN(attr->dt_size) +	/*data type		*/
+		H5O_ALIGN(attr->ds_size) +	/*data space		*/
+		attr->data_size;		/*the data itself	*/
 
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_attr_reset
@@ -339,15 +371,10 @@ H5O_attr_reset(void *_mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_debug(H5F_t __unused__ *f, const void __unused__ *mesg,
-	       FILE __unused__ * stream, intn __unused__ indent,
-	       intn __unused__ fwidth)
+H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, intn indent,
+	       intn fwidth)
 {
-#ifdef LATER
-    const char             *s;
-    char                    buf[256];
-    intn                    i, j;
-#endif /* LATER */
+    const H5A_t *mesg = (const H5A_t *)_mesg;
 
     FUNC_ENTER(H5O_attr_debug, FAIL);
 
@@ -357,218 +384,29 @@ H5O_attr_debug(H5F_t __unused__ *f, const void __unused__ *mesg,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-#ifdef LATER
-    switch (dt->type) {
-    case H5T_INTEGER:
-        s = "integer";
-        break;
-    case H5T_FLOAT:
-        s = "floating-point";
-        break;
-    case H5T_TIME:
-        s = "date and time";
-        break;
-    case H5T_STRING:
-        s = "text string";
-        break;
-    case H5T_BITFIELD:
-        s = "bit field";
-        break;
-    case H5T_OPAQUE:
-        s = "opaque";
-        break;
-    case H5T_COMPOUND:
-        s = "compound";
-        break;
-    default:
-        sprintf(buf, "H5T_CLASS_%d", (int) (dt->type));
-        s = buf;
-        break;
-    }
-    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-            "Type class:",
-            s);
+    fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
+	    "Name:",
+	    mesg->name);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Initialized:",
+	    (unsigned int)mesg->initialized);
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Opened:",
+	    (unsigned int)mesg->ent_opened);
+    fprintf(stream, "%*sSymbol table entry...\n", indent, "");
+    H5G_ent_debug(f, &(mesg->ent), stream, indent+3, MAX(0, fwidth-3), NULL);
+    
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Data type size:",
+	    (unsigned long)(mesg->dt_size));
+    fprintf(stream, "%*sData type...\n", indent, "");
+    (H5O_DTYPE->debug)(f, mesg->dt, stream, indent+3, MAX(0, fwidth-3));
 
-    fprintf(stream, "%*s%-*s %lu byte%s\n", indent, "", fwidth,
-            "Size:",
-            (unsigned long) (dt->size), 1 == dt->size ? "" : "s");
-
-    if (H5T_COMPOUND == dt->type) {
-        fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-                "Number of members:",
-                dt->u.compnd.nmembs);
-        for (i = 0; i < dt->u.compnd.nmembs; i++) {
-            sprintf(buf, "Member %d:", i);
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                    buf,
-                    dt->u.compnd.memb[i].name);
-            fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth-3),
-                    "Byte offset:",
-                    (unsigned long) (dt->u.compnd.memb[i].offset));
-            fprintf(stream, "%*s%-*s %d%s\n", indent + 3, "", MAX(0, fwidth-3),
-                    "Dimensionality:",
-                    dt->u.compnd.memb[i].ndims,
-                    0 == dt->u.compnd.memb[i].ndims ? " (scalar)" : "");
-            if (dt->u.compnd.memb[i].ndims > 0) {
-                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth-3),
-                        "Size:");
-                for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-                    fprintf(stream, "%s%lu", j ? ", " : "",
-                            (unsigned long) (dt->u.compnd.memb[i].dim[j]));
-                }
-                fprintf(stream, "}\n");
-                fprintf(stream, "%*s%-*s {", indent + 3, "", MAX(0, fwidth-3),
-                        "Permutation:");
-                for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-                    fprintf(stream, "%s%lu", j ? ", " : "",
-                            (unsigned long) (dt->u.compnd.memb[i].perm[j]));
-                }
-                fprintf(stream, "}\n");
-            }
-            H5O_dtype_debug(f, dt->u.compnd.memb[i].type, stream,
-                            indent + 3, MAX(0, fwidth - 3));
-        }
-    } else {
-        switch (dt->u.atomic.order) {
-        case H5T_ORDER_LE:
-            s = "little endian";
-            break;
-        case H5T_ORDER_BE:
-            s = "big endian";
-            break;
-        case H5T_ORDER_VAX:
-            s = "VAX";
-            break;
-        case H5T_ORDER_NONE:
-            s = "none";
-            break;
-        default:
-            sprintf(buf, "H5T_ORDER_%d", dt->u.atomic.order);
-            s = buf;
-            break;
-        }
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Byte order:",
-                s);
-
-        fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
-                "Precision:",
-                (unsigned long) (dt->u.atomic.prec),
-                1 == dt->u.atomic.prec ? "" : "s");
-
-        fprintf(stream, "%*s%-*s %lu bit%s\n", indent, "", fwidth,
-                "Offset:",
-                (unsigned long) (dt->u.atomic.offset),
-                1 == dt->u.atomic.offset ? "" : "s");
-
-        switch (dt->u.atomic.lsb_pad) {
-        case H5T_PAD_ZERO:
-            s = "zero";
-            break;
-        case H5T_PAD_ONE:
-            s = "one";
-            break;
-        default:
-            s = "pad?";
-            break;
-        }
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Low pad type:", s);
-
-        switch (dt->u.atomic.msb_pad) {
-        case H5T_PAD_ZERO:
-            s = "zero";
-            break;
-        case H5T_PAD_ONE:
-            s = "one";
-            break;
-        default:
-            s = "pad?";
-            break;
-        }
-        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "High pad type:", s);
-
-        if (H5T_FLOAT == dt->type) {
-            switch (dt->u.atomic.u.f.pad) {
-            case H5T_PAD_ZERO:
-                s = "zero";
-                break;
-            case H5T_PAD_ONE:
-                s = "one";
-                break;
-            default:
-                if (dt->u.atomic.u.f.pad < 0) {
-                    sprintf(buf, "H5T_PAD_%d", -(dt->u.atomic.u.f.pad));
-                } else {
-                    sprintf(buf, "bit-%d", dt->u.atomic.u.f.pad);
-                }
-                s = buf;
-                break;
-            }
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                    "Internal pad type:", s);
-
-            switch (dt->u.atomic.u.f.norm) {
-            case H5T_NORM_IMPLIED:
-                s = "implied";
-                break;
-            case H5T_NORM_MSBSET:
-                s = "msb set";
-                break;
-            case H5T_NORM_NONE:
-                s = "none";
-                break;
-            default:
-                sprintf(buf, "H5T_NORM_%d", (int) (dt->u.atomic.u.f.norm));
-                s = buf;
-            }
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                    "Normalization:", s);
-
-            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                    "Sign bit location:",
-                    (unsigned long) (dt->u.atomic.u.f.sign));
-
-            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                    "Exponent location:",
-                    (unsigned long) (dt->u.atomic.u.f.epos));
-
-            fprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
-                    "Exponent bias:",
-                    (unsigned long) (dt->u.atomic.u.f.ebias));
-
-            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                    "Exponent size:",
-                    (unsigned long) (dt->u.atomic.u.f.esize));
-
-            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                    "Mantissa location:",
-                    (unsigned long) (dt->u.atomic.u.f.mpos));
-
-            fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-                    "Mantissa size:",
-                    (unsigned long) (dt->u.atomic.u.f.msize));
-
-        } else if (H5T_INTEGER == dt->type) {
-            switch (dt->u.atomic.u.i.sign) {
-            case H5T_SGN_NONE:
-                s = "none";
-                break;
-            case H5T_SGN_2:
-                s = "2's comp";
-                break;
-            default:
-                sprintf(buf, "H5T_SGN_%d", (int) (dt->u.atomic.u.i.sign));
-                s = buf;
-                break;
-            }
-            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                    "Sign scheme:", s);
-
-        }
-    }
-#endif /* LATER */
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Data space size:",
+	    (unsigned long)(mesg->ds_size));
+    fprintf(stream, "%*sData space...\n", indent, "");
+    (H5O_SDSPACE->debug)(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
 
     FUNC_LEAVE(SUCCEED);
 }

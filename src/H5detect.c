@@ -953,7 +953,7 @@ main(void)
      * systems.
      */
     DETECT_I(long,                LLONG,   d[nd]); nd++;
-    DETECT_I(unsigned long,       ULLONG,  d[nd]); dn++;
+    DETECT_I(unsigned long,       ULLONG,  d[nd]); nd++;
 #else
     DETECT_I(long long,	  	  LLONG,   d[nd]); nd++;
     DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;

@@ -29,6 +29,10 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#if SIZEOF_DOUBLE != SIZEOF_LONG_DOUBLE
+#   define USE_LDOUBLE
+#endif
+
 #ifndef MAX
 #   define MAX(X,Y)	((X)>(Y)?(X):(Y))
 #   define MIN(X,Y)	((X)<(Y)?(X):(Y))
@@ -769,10 +773,12 @@ my_isnan(flt_t type, void *val)
 	retval = (*((double*)val)!=*((double*)val));
 	break;
 
+#ifdef USE_LDOUBLE
     case FLT_LDOUBLE:
 	retval = (*((long double*)val)!=*((long double*)val));
 	break;
-
+#endif
+	
     default:
 	return 0;
     }
@@ -791,9 +797,11 @@ my_isnan(flt_t type, void *val)
 	    sprintf(s, "%g", *((double*)val));
 	    break;
 
+#ifdef USE_LDOUBLE
 	case FLT_LDOUBLE:
 	    sprintf(s, "%Lg", *((long double*)val));
 	    break;
+#endif
 
 	default:
 	    return 0;
@@ -843,7 +851,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     char		str[256];		/*hello string		*/
     float		hw_f;			/*hardware-converted 	*/
     double		hw_d;			/*hardware-converted	*/
+#ifdef USE_LDOUBLE
     long double		hw_ld;			/*hardware-converted	*/
+#endif
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     size_t		i, j, k;		/*counters		*/
     int			endian;			/*machine endianess	*/
@@ -889,9 +899,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
 	src_type_name = "double";
 	src_type = FLT_DOUBLE;
+#ifdef USE_LDOUBLE
     } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
 	src_type_name = "long double";
 	src_type = FLT_LDOUBLE;
+#endif
     } else {
 	src_type_name = "UNKNOWN";
 	src_type = FLT_OTHER;
@@ -903,9 +915,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
 	dst_type_name = "double";
 	dst_type = FLT_DOUBLE;
+#ifdef USE_LDOUBLE
     } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
 	dst_type_name = "long double";
 	dst_type = FLT_LDOUBLE;
+#endif
     } else {
 	dst_type_name = "UNKNOWN";
 	dst_type = FLT_OTHER;
@@ -956,7 +970,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	for (j=0; j<nelmts; j++) {
 	    hw_f = 911.0;
 	    hw_d = 911.0;
+#ifdef USE_LDOUBLE
 	    hw_ld = 911.0;
+#endif
 
 	    /* The hardware conversion */
 	    if (FLT_FLOAT==src_type) {
@@ -966,9 +982,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = ((float*)saved)[j];
 		    hw = (unsigned char*)&hw_d;
+#ifdef USE_LDOUBLE
 		} else {
 		    hw_ld = ((float*)saved)[j];
 		    hw = (unsigned char*)&hw_ld;
+#endif
 		}
 	    } else if (FLT_DOUBLE==src_type) {
 		if (FLT_FLOAT==dst_type) {
@@ -977,10 +995,13 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		} else if (FLT_DOUBLE==dst_type) {
 		    hw_d = ((double*)saved)[j];
 		    hw = (unsigned char*)&hw_d;
+#ifdef USE_LDOUBLE
 		} else {
 		    hw_ld = ((double*)saved)[j];
 		    hw = (unsigned char*)&hw_ld;
+#endif
 		}
+#ifdef USE_LDOUBLE
 	    } else {
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = ((long double*)saved)[j];
@@ -992,6 +1013,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		    hw_ld = ((long double*)saved)[j];
 		    hw = (unsigned char*)&hw_ld;
 		}
+#endif
 	    }
 
 	    /* Are the two results the same? */
@@ -1015,10 +1037,12 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		       my_isnan(dst_type, (double*)buf+j) &&
 		       my_isnan(dst_type, hw)) {
 		continue;
+#ifdef USE_LDOUBLE
 	    } else if (FLT_LDOUBLE==dst_type &&
 		       my_isnan(dst_type, (long double*)buf+j) &&
 		       my_isnan(dst_type, hw)) {
 		continue;
+#endif
 	    }
 #endif
 
@@ -1048,9 +1072,11 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		} else if (FLT_DOUBLE==dst_type) {
 		    check_mant[0] = frexp(((double*)buf)[j], check_expo+0);
 		    check_mant[1] = frexp(((double*)hw)[0], check_expo+1);
+#ifdef USE_LDOUBLE
 		} else {
 		    check_mant[0] = frexp(((long double*)buf)[j],check_expo+0);
 		    check_mant[1] = frexp(((long double*)hw)[0],check_expo+1);
+#endif
 		}
 		if (check_expo[0]==check_expo[1] &&
 		    fabs(check_mant[0]-check_mant[1])<0.000001) {
@@ -1071,8 +1097,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		printf(" %29.20e\n", ((float*)saved)[j]);
 	    } else if (FLT_DOUBLE==src_type) {
 		printf(" %29.20e\n", ((double*)saved)[j]);
+#ifdef USE_LDOUBLE
 	    } else {
 		printf(" %29.20Le\n", ((long double*)saved)[j]);
+#endif
 	    }
 
 	    printf("      dst =");
@@ -1084,8 +1112,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		printf(" %29.20e\n", ((float*)buf)[j]);
 	    } else if (FLT_DOUBLE==dst_type) {
 		printf(" %29.20e\n", ((double*)buf)[j]);
+#ifdef USE_LDOUBLE
 	    } else {
 		printf(" %29.20Le\n", ((long double*)buf)[j]);
+#endif
 	    }
 
 	    printf("      ans =");
@@ -1097,8 +1127,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		printf(" %29.20e\n", hw_f);
 	    } else if (FLT_DOUBLE==dst_type) {
 		printf(" %29.20e\n", hw_d);
+#ifdef USE_LDOUBLE
 	    } else {
 		printf(" %29.20Le\n", hw_ld);
+#endif
 	    }
 
 	    if (++fails_all_tests>=max_fails) {

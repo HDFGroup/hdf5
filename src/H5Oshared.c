@@ -64,6 +64,7 @@ static void *
 H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
 {
     H5O_shared_t	*mesg;
+    uintn		flags;
     
     FUNC_ENTER (H5O_shared_decode, NULL);
 
@@ -77,7 +78,11 @@ H5O_shared_decode (H5F_t *f, const uint8 *buf, H5O_shared_t __unused__ *sh)
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
-    UINT32DECODE (buf, mesg->in_gh);
+
+    flags = *buf++;
+    mesg->in_gh = (flags & 0x01);
+    buf += 7; /*reserved*/
+
     if (mesg->in_gh) {
 	H5F_addr_decode (f, &buf, &(mesg->u.gh.addr));
 	INT32DECODE (buf, mesg->u.gh.idx);
@@ -109,6 +114,7 @@ static herr_t
 H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
 {
     const H5O_shared_t	*mesg = (const H5O_shared_t *)_mesg;
+    uintn		flags;
     
     FUNC_ENTER (H5O_shared_encode, FAIL);
 
@@ -118,7 +124,16 @@ H5O_shared_encode (H5F_t *f, uint8 *buf/*out*/, const void *_mesg)
     assert (mesg);
 
     /* Encode */
-    INT32ENCODE (buf, mesg->in_gh);
+    flags = mesg->in_gh ? 0x01 : 0x00;
+    *buf++ = flags;
+    *buf++ = 0; /*reserved 1*/
+    *buf++ = 0; /*reserved 2*/
+    *buf++ = 0; /*reserved 3*/
+    *buf++ = 0; /*reserved 4*/
+    *buf++ = 0; /*reserved 5*/
+    *buf++ = 0; /*reserved 6*/
+    *buf++ = 0; /*reserved 7*/
+
     if (mesg->in_gh) {
 	H5F_addr_encode (f, &buf, &(mesg->u.gh.addr));
 	INT32ENCODE (buf, mesg->u.gh.idx);
@@ -153,7 +168,8 @@ H5O_shared_size (H5F_t *f, const void __unused__ *_mesg)
     
     FUNC_ENTER (H5O_shared_size, 0);
 
-    size = 4 +				/*the flags field		*/
+    size = 1 +				/*the flags field		*/
+	   7 +				/*reserved			*/
 	   MAX (H5F_SIZEOF_ADDR(f)+4,	/*sharing via global heap	*/
 		H5G_SIZEOF_ENTRY(f));	/*sharing by another obj hdr	*/
 

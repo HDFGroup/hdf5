@@ -43,7 +43,8 @@
    (H5F_SIZEOF_SIZE(F) +        /*offset of name into heap              */    \
     H5F_SIZEOF_ADDR(F) +        /*address of object header              */    \
     4 +                         /*entry type                            */    \
-    H5G_SIZEOF_SCRATCH)         /*scratch pad space                       */
+    4 +				/*reserved				*/    \
+    H5G_SIZEOF_SCRATCH)         /*scratch pad space                     */
 
 /*
  * Various types of object header information can be cached in a symbol

@@ -56,8 +56,8 @@
 		  Name: Reserved - not assigned yet</a>
 	      <li><a href="#CompressionMessage">                <!-- 0x000b -->
 		  Name: Data Storage - Compressed</a>
-	      <li><a href="#AttributeListMessage">              <!-- 0x000c -->
-		  Name: Attribute List</a>
+	      <li><a href="#AttributeMessage">                  <!-- 0x000c -->
+		  Name: Attribute</a>
 	      <li><a href="#NameMessage">                       <!-- 0x000d -->
 		  Name: Object Name</a>
 	      <li><a href="#ModifiedMessage">                   <!-- 0x000e -->
@@ -179,9 +179,7 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>
-	    Symbol-Table Entry of the "Root Object"
-	    <br><br></td>
+	  <td colspan=4><br>Root Group Symbol Table Entry<br><br></td>
 	</tr>
       </table>
     </center>
@@ -392,7 +390,7 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Symbol-Table Entry of the Root Object</td>
+	  <td>Root Group Symbol Table Entry</td>
 	  <td>This symbol-table entry (described later in this
 	    document) refers to the entry point into the group
 	    graph.  If the file contains a single object, then that
@@ -688,18 +686,27 @@
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
+	</tr>
 
 	<tr align=center>
 	  <td colspan=4>Name Offset (&lt;size&gt; bytes)</td>
+	</tr>
 
 	<tr align=center>
 	  <td colspan=4>Object Header Address</td>
+	</tr>
 
 	<tr align=center>
 	  <td colspan=4>Symbol-Type</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Reserved</td>
+	</tr>
 
 	<tr align=center>
 	  <td colspan=4><br><br>Scratch-pad Space (24 bytes)<br><br><br></td>
+	</tr>
       </table>
     </center>
 
@@ -756,6 +763,13 @@
 	      still work properly.
 	    </dl>
 	  </td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>These for bytes are present so that the scratch pad
+	    space is aligned on an eight-byte boundary.  They are
+	    always set to zero.</td>
 	</tr>
 
 	<tr valign=top>
@@ -1101,7 +1115,11 @@
 	  <td colspan=2>Object ID</td>
 	  <td colspan=2>Reference Count</td>
 	</tr>
-	  
+
+	<tr align=center>
+	  <td colspan=4>Reserved</td>
+	</tr>
+
 	<tr align=center>
 	  <td colspan=4>Object Total Size</td>
 	</tr>
@@ -1136,6 +1154,12 @@
 	    object which is referenced from some other part of the
 	    file will have a positive reference count. The reference
 	    count for Object zero is always zero.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>Zero padding to align next field on an 8-byte
+	    boundary.</td>
 	</tr>
 
 	<tr valign=top>
@@ -1283,7 +1307,7 @@
 
 	<tr align=center>
 	  <td colspan=1 width="25%">Version # of Object Header</td>
-	  <td colspan=1 width="25%">Alignment of Object Header Messages</td>
+	  <td colspan=1 width="25%">Reserved</td>
 	  <td colspan=2 width="50%">Number of Header Messages</td>
 	</tr>
 	<tr align=center>
@@ -1301,7 +1325,7 @@
 	  <td colspan=3>Reserved</td>
 	</tr>
 	<tr align=center>
-	  <td colspan=4>Header Message Data #1 (variable size)</td>
+	  <td colspan=4><br>Header Message Data #1<br><br></td>
 	</tr>
 	<tr align=center>
 	  <td colspan=4>.<br>.<br>.<br></td>
@@ -1315,7 +1339,7 @@
 	  <td colspan=3>Reserved</td>
 	</tr>
 	<tr align=center>
-	  <td colspan=4>Header Message Data #n (variable)</td>
+	  <td colspan=4><br>Header Message Data #n<br><br></td>
 	</tr>
       </table>
     </center>
@@ -1338,11 +1362,8 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Alignment of object header messages</td>
-	  <td>This value is used to determine the byte-alignment of
-	    messagesin the object header.  Typically set to 4, which
-	    aligns new messages on a 4-byte boundary in the object
-	    header.</td>
+	  <td>Reserved</td>
+	  <td>Always set to zero.</td>
 	</tr>
 
 	<tr valign=top>
@@ -1384,7 +1405,9 @@
 	  <td>Size of Header Message Data</td>
 	  <td>This value specifies the number of bytes of header
 	    message data following the header message type and length
-	    information for the current message.</td>
+	    information for the current message. The size includes
+	    padding bytes to make the message a multiple of eight
+	    bytes.</td>
 	</tr>
 
 	<tr valign=top>
@@ -1410,7 +1433,8 @@
 	    header message type and size respectively.  Some header
 	    message types do not require any data and this information
 	    can be eliminated by setting the length of the message to
-	    zero.</td>
+	    zero. The data is padded with enough zeros to make the
+	    size a multiple of eight.</td>
 	</tr>
       </table>
     </center>
@@ -1439,7 +1463,7 @@
 
 
     <hr>
-    <h3><a name="SimpleDataSpace">Name: Simple Data Space/a></h3>
+    <h3><a name="SimpleDataSpace">Name: Simple Data Space</a></h3>
 
     <b>Type: </b>0x0001<br>
     <b>Length:</b> varies<br>
@@ -1517,7 +1541,7 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Dimension Size #n (&lt;size&rt; bytes)</td>
+	  <td>Dimension Size #n (&lt;size&gt; bytes)</td>
 	  <td>This value is the current size of the dimension of the
 	    data as stored in the file.  The first dimension stored in
 	    the list of dimensions is the slowest changing dimension
@@ -1526,14 +1550,14 @@
 	</tr>
 
 	<tr valign=top>
-	  <td>Dimension Maximum #n (&lt;size&rt; bytes)</td>
+	  <td>Dimension Maximum #n (&lt;size&gt; bytes)</td>
 	  <td>This value is the maximum size of the dimension of the
 	    data as stored in the file.  This value may be the special
-	    value &lt;UNLIMITED&gt; (0xffffffff) which indicates that
-	    the data may expand along this dimension indefinitely.  If
-	    these values are not stored, the maximum value of each
-	    dimension is assumed to be the same as the current size
-	    value.</td>
+	    value &lt;UNLIMITED&gt; (all bits set) which indicates
+	    that the data may expand along this dimension
+	    indefinitely.  If these values are not stored, the maximum
+	    value of each dimension is assumed to be the same as the
+	    current size value.</td>
 	</tr>
 
 	<tr valign=top>
@@ -2072,7 +2096,7 @@
     <p>
     <center>
       <table border cellpadding=4 width="80%">
-	<caption align=bottom>
+	<caption align=top>
 	  <b>Bit Field for Compound Types (Class 6)</b>
 	</caption>
 
@@ -2105,7 +2129,7 @@
     <p>
     <center>
       <table border cellpadding=4 width="80%">
-	<caption align=bottom>
+	<caption align=top>
 	  <b>Properties for Compound Types (Class 6)</b>
 	</caption>
 
@@ -2643,121 +2667,29 @@
       library's discretion, chunks which fail the compression can also
       be stored in their raw format.
 
-    <!--
-  <hr>
-  <h3><a name="BackPointerMessage">Name: Back-Pointer List</a></h3>
-  <b>Type:</b> 0x000C<BR>
-  <b>Length:</b> varies<BR>
-  <b>Status:</b> Optional, may be repeated.<BR>
-  <b>Purpose and Description:</b>  The back-pointer message contains a list of
-    other objects which reference the current object and a reference count of the
-    number the current object is referenced.  External references (i.e. references
-    to objects in the current HDF file from outside HDF files) are not
-    counted.<BR>
-  <b>Format of Data:</b>
-    
-  <P>
-  <center>
-  <table border cellpadding=4 width=60%>
-  <caption align=bottom>
-  <B>HDF5 Back-Pointer Message Layout</B>
-  </caption>
-    
-  <tr align=center>
-  <th width=25%>byte</th>
-  <th width=25%>byte</th>
-  <th width=25%>byte</th>
-  <th width=25%>byte</th>
-    
-  <tr align=center>
-  <td colspan=4>Total Reference Count</td>
-  <tr align=center>
-  <td colspan=4>Dataset offset of Object #1</td>
-  <tr align=center>
-  <td colspan=4>Reference Count of Object #1</td>
-  <tr align=center>
-  <td colspan=4>.<br>.<br>.<br></td>
-  <tr align=center>
-  <td colspan=4>Dataset offset of Object #n</td>
-  <tr align=center>
-  <td colspan=4>Reference Count of Object #n</td>
-  </table>
-  </center>
-    
-  <p>
-  <dl>
-  <dt>The elements of the back-pointer message are described below:
-  <dd>
-  <dl>
-  <dt>Total Reference Count: (32-bit unsigned integer)
-  <dd>This value stores the total number of times that the current dataset is
-    referenced by other objects within the file.
-  <dt>Dataset offset of Object: (&lt;offset&gt;-byte signed integer)
-  <dd>This is the dataset offset of an object in the current file which contains a pointer
-    to the current object.
-  <dt>Reference Count of Object: (32-bit unsigned integer)
-  <dd>This value stores the number of times that the dataset (above) references the
-    current object.
-  </dl>
-  </dl>
-    
-  <h4><a name="BackPointerExample">Examples:</a></h4>
-  <dl>
-  <dt>Example #1 
-  <dd>4 objects in an HDF file (Offsets: 1, 2, 3, 4) reference a fifth
-    object in the file (offset: 5) once each.  The fifth object has a header message
-    containing a back-pointer message with the following information:
-    
-  <pre>
-    Total Reference Count: 4
-    Offset of Object #1: 1
-    Reference Count of Object #1: 1
-    Offset of Object #2: 2
-    Reference Count of Object #2: 1
-    Offset of Object #3: 3
-    Reference Count of Object #3: 1
-    Offset of Object #4: 4
-    Reference Count of Object #4: 1
-  </pre>
-  <dt>Example #2 
-  <dd>An object in an HDF file (offset: 1) references another object in the same
-    HDF file (offset: 10) fourteen times.  A second object (offset: 4) references object
-    offset:10 seven times.  Object offset:10 has the following back-pointer message:
-    
-  <pre>
-    Total Reference Count: 21
-    Offset of Object #1: 1
-    Reference Count of Object #1: 14
-    Offset of Object #2: 4
-    Reference Count of Object #2: 7
-  </pre>
-  </dl>
-    -->
 
     <hr>
-    <h3><a name="AttributeListMessage">Name: Attribute List</a></h3>
+    <h3><a name="AttributeMessage">Name: Attribute</a></h3>
     <b>Type:</b> 0x000C<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may be repeated.<BR>
     
-    <p><b>Purpose and Description:</b>  The <em>Attribute List</em>
+    <p><b>Purpose and Description:</b>  The <em>Attribute</em>
       message is used to list objects in the HDF file which are used
-      as attributes, or "meta-data" about the current object.  Other
-      objects can be used as attributes for either the entire object
-      or portions of the current object.  The attribute list is
-      composed of two lists of objects, the first being simple
-      attributes about the entire dataset, and the second being
-      pointers attribute objects about the entire dataset.  Partial
-      dataset pointers are currently unspecified and
-      unimplemented.
+      as attributes, or "meta-data" about the current object.  An
+      attribute is a small dataset; it has a name, a data type, a data
+      space, and raw data.  Since attributes are stored in the object
+      header they must be relatively small (<64kb) and can be
+      associated with any type of object which has an object header
+      (groups, datasets, named types and spaces, etc.).
 
     <p><b>Format of Data:</b>
     
     <p>
     <center>
-      <table border cellpadding=4 width="80%">
-	<caption align=bottom>
-	  <b>HDF5 Attribute-List Message Layout</b>
+      <table border align=center cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Attribute Message</b>
 	</caption>
 
 	<tr align=center>
@@ -2765,130 +2697,104 @@
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
 	  <th width="25%">byte</th>
-	  
-	<tr align=center>
-	  <td colspan=4>Attribute List Flags</td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4># of Simple Attributes</td>
+	  <td colspan=2>Name Size</td>
+	  <td colspan=2>Type Size</td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Name Offset</td>
+	  <td colspan=2>Space Size</td>
+	  <td colspan=2>Reserved</td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Data-Type</td>
+	  <td colspan=4><br>Name<br><br></td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Rank</td>
+	  <td colspan=4><br>Type<br><br></td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Dim #1 Size</td>
+	  <td colspan=4><br>Space<br><br></td>
 	</tr>
+
 	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Dim #2 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Dim #3 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Dim #4 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #1 Data Offset</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>.<br>.<br>.<br></td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Name Offset</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Data-Type</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Rank</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Dim #1 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Dim #2 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Dim #3 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Dim #4 Size</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Simple Attribute #n Data Offset</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4># of Complex Attributes</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Pointer to Complex Attribute #1</td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>.<br>.<br>.<br></td>
-	</tr>
-	<tr align=center>
-	  <td colspan=4>Pointer to Complex Attribute #n</td>
+	  <td colspan=4><br>Data<br><br></td>
 	</tr>
       </table>
     </center>
-    
+
     <p>
-    <dl>
-      <dt>The elements of the attribute list message are described below:
-      <dd>
-	<dl>
-	  <dt>Attribute List Flags: (unsigned 32-bit integer)
-	  <dd>These flags indicate the presence of simple and complex
-	    lists of attributes for this dataset.  Bit 0 indicates the
-	    presence of a list of simple attributes and Bit 1
-	    indicates the presence of a list of complex attributes.
+    <center>
+      <table align=center width="80%">
+	<tr>
+	  <th width="30%">Field Name</th>
+	  <th width="70%">Description</th>
+	</tr>
 
-	  <dt># of Simple Attributes: (unsigned 32-bit integer)
-	  <dd>This indicates the number of simple attributes for this
-	    dataset.
+	<tr valign=top>
+	  <td>Name Size</td>
+	  <td>The length of the attribute name in bytes including the
+	    null terminator.  Note that the Name field below may
+	    contain additional padding not represented by this
+	    field.</td>
+	</tr>
 
-	  <dt>Simple Attribute #n Name Offset: (unsigned 32-bit integer)
-	  <dd>This is the offset of the simple attribute's name in the
-	    global small-data heap.
+	<tr valign=top>
+	  <td>Type Size</td>
+	  <td>The length of the data type description in the Type
+	    field below.  Note that the Type field may contain
+	    additional padding not represented by this field.</td>
+	</tr>
 
-	  <dt>Simple Attribute #n Data-type: (unsigned 32-bit integer)
-	  <dd>This is a simple data-type, which indicates the type of
-	    data used for the attribute.
+	<tr valign=top>
+	  <td>Space Size</td>
+	  <td>The length of the data space description in the Space
+	    field below.  Note that the Space field may contain
+	    additional padding not represented by this field.</td>
+	</tr>
 
-	  <dt>Simple Attribute #n Rank: (unsigned 32-bit integer)
-	  <dd>This is the number of dimensions of the attribute,
-	    limited to four or less.
+	<tr valign=top>
+	  <td>Reserved</td>
+	  <td>This field is reserved for later use and is set to
+	    zero.</td>
+	</tr>
 
-	  <dt>Simple Attribute #n Dim #n Size: (unsigned 32-bit integer)
-	  <dd>This is the size of the attribute's n'th dimension,
-	    which is stored in the canonical order for dimensions
-	    (i.e. no permutations of the indices are allowed).
+	<tr valign=top>
+	  <td>Name</td>
+	  <td>The null-terminated attribute name.  This field is
+	    padded with additional null characters to make it a
+	    multiple of eight bytes.</td>
+	</tr>
 
-	  <dt>Simple Attribute #n Data Offset: (unsigned 32-bit integer)
-	  <dd>This is the offset of the simple attribute's data in the
-	    global small-data.
+	<tr valign=top>
+	  <td>Type</td>
+	  <td>The data type description follows the same format as
+	    described for the data type object header message.  This
+	    field is padded with additional zero bytes to make it a
+	    multiple of eight bytes.</td>
+	</tr>
 
-	  <dt># of Complex Attributes: (unsigned 32-bit integer)
-	  <dd>This indicates the number of complex attributes for this
-	    dataset.
+	<tr valign=top>
+	  <td>Space</td>
+	  <td>The data space description follows the same format as
+	    described for the data space object header message.  This
+	    field is padded with additional zero bytes to make it a
+	    multiple of eight bytes.</td>
+	</tr>
 
-	  <dt>Pointer to Complex Attribute #n: (unsigned 32-bit integer)
-	  <dd>This is the small-data heap offset of the name of the
-	    attribute object in the file.
-	</dl>
-    </dl>
-
-    <p>[<b>Note:</b> It has been suggested that each attribute have an
-      additional "units" field, so this is being considered.]
-
-    <h4><a name="AttributeListExample">Examples:</a></h4>
-    [Comment: need examples.]
+	<tr valign=top>
+	  <td>Data</td>
+	  <td>The raw data for the attribute.  The size is determined
+	    from the data type and data space descriptions.  This
+	    field is <em>not</em> padded with additional zero
+	    bytes.</td>
+	</tr>
+      </table>
+    </center>
     
     <hr>
     <h3><a name="NameMessage">Name: Object Name</a></h3>
@@ -2933,10 +2839,9 @@
       by writing that message in the global heap and having the object
       headers all point to it.  The pointing is accomplished with a
       Shared Object message which is understood directly by the object
-      header layer of the library and never actually appears as a
-      message in the file. It is also possible to have a message of
-      one object header point to a message in some other object
-      header, but care must be exercised to prevent cycles.
+      header layer of the library. It is also possible to have a
+      message of one object header point to a message in some other
+      object header, but care must be exercised to prevent cycles.
 
     <p>If a message is shared, then the message appears in the global
       heap and its message ID appears in the Header Message Type
@@ -2961,7 +2866,12 @@
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Flags</td>
+	  <td>Flags</td>
+	  <td colspan=3>Reserved</td>
+	</tr>
+
+	<tr align=center>
+	  <td colspan=4>Reserved</td>
 	</tr>
 
 	<tr align=center>
@@ -2980,13 +2890,19 @@
 
 	<tr valign=top>
 	  <td>Flags</td>
-	  <td>The Shared Message Message is a pointer to a Shared
-	    Message.  The actual shared message can appear in either
-	    the global heap or in some other object header and this
-	    field specifies which form is used.  If the value is zero
-	    then the actual message is the first such message in some
-	    other object header; otherwise the actual message is
-	    stored in the global heap.</td>
+	  <td>The Shared Message message points to a message which is
+	    shared among multiple object headers.  The Flags field
+	    describes the type of sharing:
+
+	    <dl>
+	      <dt><code>Bit 0</code>
+	      <dd>If this bit is clear then the actual message is the
+		first message in some other object header; otherwise
+		the actual message is stored in the global heap.
+
+	      <dt><code>Bits 2-7</code>
+	      <dd>Reserved (always zero)
+	    </dl>
 	</tr>
 
 	<tr valign=top>
@@ -3177,7 +3093,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Mon Jun  1 21:44:38 EDT 1998
+Last modified: Mon Jul 20 09:16:11 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

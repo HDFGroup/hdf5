@@ -24,6 +24,16 @@
 #define H5HG_VERSION	1
 
 /*
+ * Pad all global heap messages to a multiple of eight bytes so we can load
+ * the entire collection into memory and operate on it there.  Eight should
+ * be sufficient for machines that have alignment constraints because our
+ * largest data type is eight bytes.
+ */
+#define H5HG_ALIGNMENT	8
+#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/	      \
+					 H5HG_ALIGNMENT))
+
+/*
  * All global heap collections are at least this big.  This allows us to read
  * most collections with a single read() since we don't have to read a few
  * bytes of header to figure out the size.  If the heap is larger than this
@@ -53,8 +63,9 @@
 /*
  * The overhead associated with each object in the heap.
  */
-#define H5HG_SIZEOF_OBJHDR(f) (2 +		/*reference count	*/    \
-			       2 +		/*reserved		*/    \
+#define H5HG_SIZEOF_OBJHDR(f) (2 +		/*object id number	*/    \
+			       2 +		/*reference count	*/    \
+			       4 +		/*reserved		*/    \
 			       H5F_SIZEOF_SIZE(f)) /*object data size	*/
 
 /*
