@@ -279,7 +279,7 @@ RedHat 7, 8 & 9 ia32        y   y (1)    y(PGI) n        y    y             y
     W gcc (3)
 RedHat 7.3 ia32 W Intel (3) y   n        y      n        y    n             y
 RedHat 7.3 ia32 W PGI (3)   y   n        y      n        y    n             y
-Linux 2.4 ia32 C Intel (3)  y   n        y      n        y    n             y
+RedHat 7 ia32 C Intel (3)   y   n        y      n        y    n             y
 RedHat 7.1 ia64 C Intel (3) y   n        y      n        y    n             y
 RedHat 8 & SuSe x86_64      y   n        n      n        y    n             y
     gcc (3)
@@ -315,7 +315,7 @@ RedHat 7, 8 & 9 ia32        y        y        y     n     y        y      y
     W gcc (3)
 RedHat 7.3 ia32 W Intel (3) y        n        y     n     y        n      n
 RedHat 7.3 ia32 W PGI (3)   y        n        y     n     y        n      n
-Linux 2.4 ia32 C Intel (3)  y        n        y     n     y        y      y
+RedHat 7 ia32 C Intel (3)   y        n        y     n     y        y      y
 RedHat 7.1 ia64 C Intel (3) y        n        y     n     y        y      y
 RedHat 8 & SuSe x86_64      y        n        y     n     y        y      y
     gcc (3)
