@@ -2876,7 +2876,7 @@ handle_datasets(hid_t fid, char *dset, void *data)
         dump_dataset(dsetid, dset, sset);
     }
 
-    if (H5Dclose(dsetid) < 1)
+    if (H5Dclose(dsetid) < 0)
         d_status = EXIT_FAILURE;
 }
 
