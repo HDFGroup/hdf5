@@ -66,7 +66,7 @@
 /*  And goto a label after pushing error onto stack */
 #define H5Epush_goto(func,maj,min,str,label) {      \
     H5Epush(__FILE__,func,__LINE__,maj,min,str);    \
-    goto (label);                                   \
+    goto label;                                   \
 }
 
 /*
@@ -171,6 +171,9 @@ typedef enum H5E_minor_t {
     H5E_CWG,                    /*problem with current working group         */
     H5E_LINK,                   /*link count failure                         */
     H5E_SLINK,			/*symbolic link error			     */
+
+    /* Datatype conversion errors */
+    H5E_CANTCONVERT,            /*Can't convert datatypes */
 
     /* Parallel errors */
     H5E_MPI			/*some MPI function failed		     */

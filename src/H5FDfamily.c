@@ -21,9 +21,13 @@
  *		implement holes, like nfs).
  *		
  */
-#include <assert.h>
-#include <hdf5.h>
-#include <stdlib.h>
+#include <H5private.h>		/*library functions			*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fprivate.h>		/*files					*/
+#include <H5FDfamily.h>     /* Family file driver */
+#include <H5MMprivate.h>    /* Memory allocation */
+#include <H5Pprivate.h>		/*property lists			*/
+
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -104,6 +108,11 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_FLMAP_SINGLE,				/*fl_map		*/
 };
 
+/* Interface initialization */
+#define PABLO_MASK	H5FD_family_mask
+#define INTERFACE_INIT	H5FD_family_init
+static intn interface_initialize_g = 0;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_family_init
@@ -125,10 +134,12 @@ static const H5FD_class_t H5FD_family_g = {
 hid_t
 H5FD_family_init(void)
 {
-    if (H5I_VFL!=H5Iget_type(H5FD_FAMILY_g)) {
-	H5FD_FAMILY_g = H5FDregister(&H5FD_family_g);
-    }
-    return H5FD_FAMILY_g;
+    FUNC_ENTER(H5FD_family_init, FAIL);
+
+    if (H5I_VFL!=H5Iget_type(H5FD_FAMILY_g))
+        H5FD_FAMILY_g = H5FDregister(&H5FD_family_g);
+
+    FUNC_LEAVE(H5FD_FAMILY_g);
 }
 
 
@@ -155,14 +166,18 @@ H5FD_family_init(void)
 herr_t
 H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
 {
+    herr_t ret_value=FAIL;
     H5FD_family_fapl_t	fa;
     
     /*NO TRACE*/
+    FUNC_ENTER(H5FD_set_fapl_family, FAIL);
     
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
     if (H5P_DEFAULT!=memb_fapl_id &&
-	H5P_FILE_ACCESS!=H5Pget_class(memb_fapl_id)) return -1;
+            H5P_FILE_ACCESS!=H5Pget_class(memb_fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
     /*
      * Initialize driver specific information. No need to copy it into the FA
@@ -170,7 +185,10 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
      */
     fa.memb_size = memb_size;
     fa.memb_fapl_id = memb_fapl_id;
-    return H5Pset_driver(fapl_id, H5FD_FAMILY, &fa);
+
+    ret_value= H5Pset_driver(fapl_id, H5FD_FAMILY, &fa);
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -198,13 +216,18 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     H5FD_family_fapl_t	*fa;
     
     /*NO TRACE*/
+    FUNC_ENTER(H5Pget_fapl_family, FAIL);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
-    if (H5FD_FAMILY!=H5Pget_driver(fapl_id)) return -1;
-    if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if (H5FD_FAMILY!=H5Pget_driver(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
     if (memb_size) *memb_size = fa->memb_size;
     if (memb_fapl_id) *memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
-    return 0;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -229,11 +252,17 @@ static void *
 H5FD_family_fapl_get(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    H5FD_family_fapl_t	*fa = calloc(1, sizeof(H5FD_family_fapl_t*));
+    H5FD_family_fapl_t	*fa = NULL;
+
+    FUNC_ENTER(H5FD_family_fapl_get, NULL);
+
+    if (NULL==(fa=H5MM_calloc(sizeof(H5FD_family_fapl_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     fa->memb_size = file->memb_size;
     fa->memb_fapl_id = H5Pcopy(file->memb_fapl_id);
-    return fa;
+
+    FUNC_LEAVE(fa);
 }
 
 
@@ -257,12 +286,17 @@ static void *
 H5FD_family_fapl_copy(const void *_old_fa)
 {
     const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t*)_old_fa;
-    H5FD_family_fapl_t *new_fa = malloc(sizeof(H5FD_family_fapl_t));
-    assert(new_fa);
+    H5FD_family_fapl_t *new_fa = NULL;
+
+    FUNC_ENTER(H5FD_family_fapl_copy, NULL);
+
+    if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_family_fapl_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     memcpy(new_fa, old_fa, sizeof(H5FD_family_fapl_t));
     new_fa->memb_fapl_id = H5Pcopy(old_fa->memb_fapl_id);
-    return new_fa;
+
+    FUNC_LEAVE(new_fa);
 }
 
 
@@ -286,9 +320,13 @@ static herr_t
 H5FD_family_fapl_free(void *_fa)
 {
     H5FD_family_fapl_t	*fa = (H5FD_family_fapl_t*)_fa;
+
+    FUNC_ENTER(H5FD_family_fapl_free, FAIL);
+
     H5Pclose(fa->memb_fapl_id);
-    free(fa);
-    return 0;
+    H5MM_xfree(fa);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -312,12 +350,17 @@ static void *
 H5FD_family_dxpl_copy(const void *_old_dx)
 {
     const H5FD_family_dxpl_t *old_dx = (const H5FD_family_dxpl_t*)_old_dx;
-    H5FD_family_dxpl_t *new_dx = malloc(sizeof(H5FD_family_dxpl_t));
-    assert(new_dx);
+    H5FD_family_dxpl_t *new_dx = NULL;
+
+    FUNC_ENTER(H5FD_family_dxpl_copy, NULL);
+
+    if (NULL==(new_dx=H5MM_malloc(sizeof(H5FD_family_dxpl_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     memcpy(new_dx, old_dx, sizeof(H5FD_family_dxpl_t));
     new_dx->memb_dxpl_id = H5Pcopy(old_dx->memb_dxpl_id);
-    return new_dx;
+
+    FUNC_LEAVE(new_dx);
 }
 
 
@@ -341,9 +384,13 @@ static herr_t
 H5FD_family_dxpl_free(void *_dx)
 {
     H5FD_family_dxpl_t	*dx = (H5FD_family_dxpl_t*)_dx;
+
+    FUNC_ENTER(H5FD_family_dxpl_free, FAIL);
+
     H5Pclose(dx->memb_dxpl_id);
-    free(dx);
-    return 0;
+    H5MM_xfree(dx);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -370,63 +417,72 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
 {
     H5FD_family_t	*file=NULL;
+    H5FD_t     *ret_value=NULL;
     char		memb_name[4096], temp[4096];
     hsize_t		eof;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     
+    FUNC_ENTER(H5FD_family_open, NULL);
+
     /* Check arguments */
-    if (!name || !*name) return NULL;
-    if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
+    if (!name || !*name)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
+    if (0==maxaddr || HADDR_UNDEF==maxaddr)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
 
     /* Initialize file from file access properties */
-    if (NULL==(file=calloc(1, sizeof(H5FD_family_t)))) return NULL;
+    if (NULL==(file=H5MM_calloc(sizeof(H5FD_family_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
     if (H5P_DEFAULT==fapl_id) {
-	file->memb_fapl_id = H5P_DEFAULT;
-	file->memb_size = 1024*1024*1024; /*1GB*/
+        file->memb_fapl_id = H5P_DEFAULT;
+        file->memb_size = 1024*1024*1024; /*1GB*/
     } else {
-	H5FD_family_fapl_t *fa = H5Pget_driver_info(fapl_id);
-	file->memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
-	file->memb_size = fa->memb_size;
+        H5FD_family_fapl_t *fa = H5Pget_driver_info(fapl_id);
+
+        file->memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
+        file->memb_size = fa->memb_size;
     }
-    file->name = malloc(strlen(name)+1);
-    strcpy(file->name, name);
+    file->name = H5MM_strdup(name);
     file->flags = flags;
     
     /* Check that names are unique */
     sprintf(memb_name, name, 0);
     sprintf(temp, name, 1);
-    if (!strcmp(memb_name, temp)) return NULL;
+    if (!strcmp(memb_name, temp))
+        HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique");
 
     /* Open all the family members */
     while (1) {
-	sprintf(memb_name, name, file->nmembs);
+        sprintf(memb_name, name, file->nmembs);
 
-	/* Enlarge member array */
-	if (file->nmembs>=file->amembs) {
-	    int n = MAX(64, 2*file->amembs);
-	    H5FD_t **x = realloc(file->memb, n*sizeof(H5FD_t*));
-	    if (!x) goto error;
-	    file->amembs = n;
-	    file->memb = x;
-	}
-	
-	/*
-	 * Attempt to open file. If the first file cannot be opened then fail;
-	 * otherwise an open failure means that we've reached the last member.
-	 * Allow H5F_ACC_CREAT only on the first family member.
-	 */
-	H5E_BEGIN_TRY {
-	    file->memb[file->nmembs] = H5FDopen(memb_name,
-						0==file->nmembs?flags:t_flags,
-						file->memb_fapl_id,
-						HADDR_UNDEF);
-	} H5E_END_TRY;
-	if (!file->memb[file->nmembs]) {
-	    if (0==file->nmembs) goto error;
-	    H5Eclear();
-	    break;
-	}
-	file->nmembs++;
+        /* Enlarge member array */
+        if (file->nmembs>=file->amembs) {
+            int n = MAX(64, 2*file->amembs);
+            H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
+            if (!x)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't reallocate members");
+            file->amembs = n;
+            file->memb = x;
+        }
+        
+        /*
+         * Attempt to open file. If the first file cannot be opened then fail;
+         * otherwise an open failure means that we've reached the last member.
+         * Allow H5F_ACC_CREAT only on the first family member.
+         */
+        H5E_BEGIN_TRY {
+            file->memb[file->nmembs] = H5FDopen(memb_name,
+                            0==file->nmembs?flags:t_flags,
+                            file->memb_fapl_id,
+                            HADDR_UNDEF);
+        } H5E_END_TRY;
+        if (!file->memb[file->nmembs]) {
+            if (0==file->nmembs)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open member file");
+            H5Eclear();
+            break;
+        }
+        file->nmembs++;
     }
     
     /*
@@ -436,21 +492,24 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
      */
     if ((eof=H5FDget_eof(file->memb[0]))) file->memb_size = eof;
 
-    return (H5FD_t*)file;
+    ret_value=(H5FD_t *)file;
 
- error:
+done:
     /* Cleanup and fail */
-    if (file) {
-	int i;
-	for (i=0; i<file->nmembs; i++) {
-	    if (file->memb[i]) H5FDclose(file->memb[i]);
-	}
-	if (file->memb) free(file->memb);
-	H5Pclose(file->memb_fapl_id);
-	if (file->name) free(file->name);
-	free(file);
+    if (ret_value==NULL && file!=NULL) {
+        int i;
+
+        for (i=0; i<file->nmembs; i++)
+            if (file->memb[i])
+                H5FDclose(file->memb[i]);
+        if (file->memb)
+            H5MM_xfree(file->memb);
+        H5Pclose(file->memb_fapl_id);
+        if (file->name)
+            H5MM_xfree(file->name);
+        H5MM_xfree(file);
     }
-    return NULL;
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -478,24 +537,30 @@ H5FD_family_close(H5FD_t *_file)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     int			i, nerrors=0;
 
+    FUNC_ENTER(H5FD_family_close, FAIL);
+
     /* Close as many members as possible */
     for (i=0; i<file->nmembs; i++) {
-	if (file->memb[i]) {
-	    if (H5FDclose(file->memb[i])<0) {
-		nerrors++;
-	    } else {
-		file->memb[i] = NULL;
-	    }
-	}
+        if (file->memb[i]) {
+                if (H5FDclose(file->memb[i])<0) {
+                nerrors++;
+            } else {
+                file->memb[i] = NULL;
+            }
+        }
     }
-    if (nerrors) return -1;
+    if (nerrors)
+        HRETURN_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close member files");
 
     /* Clean up other stuff */
     H5Pclose(file->memb_fapl_id);
-    free(file->memb);
-    free(file->name);
-    free(file);
-    return 0;
+    if (file->memb)
+        H5MM_xfree(file->memb);
+    if (file->name)
+        H5MM_xfree(file->name);
+    H5MM_xfree(file);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -522,12 +587,16 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_family_t	*f1 = (const H5FD_family_t*)_f1;
     const H5FD_family_t	*f2 = (const H5FD_family_t*)_f2;
+    int ret_value=(-2);
+
+    FUNC_ENTER(H5FD_family_cmp, -2);
 
     assert(f1->nmembs>=1 && f1->memb[0]);
     assert(f2->nmembs>=1 && f2->memb[0]);
     
+    ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
 
-    return H5FDcmp(f1->memb[0], f2->memb[0]);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -553,7 +622,10 @@ static haddr_t
 H5FD_family_get_eoa(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    return file->eoa;
+
+    FUNC_ENTER(H5FD_family_get_eoa, HADDR_UNDEF);
+
+    FUNC_LEAVE(file->eoa);
 }
 
 
@@ -581,41 +653,45 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
     int			i;
     char		memb_name[4096];
 
+    FUNC_ENTER(H5FD_family_set_eoa, FAIL);
+
     for (i=0; addr || i<file->nmembs; i++) {
 
-	/* Enlarge member array */
-	if (i>=file->amembs) {
-	    int n = MAX(64, 2*file->amembs);
-	    H5FD_t **x = realloc(file->memb, n*sizeof(H5FD_t*));
-	    if (!x) return -1;
-	    file->amembs = n;
-	    file->memb = x;
-	    file->nmembs = i;
-	}
+        /* Enlarge member array */
+        if (i>=file->amembs) {
+            int n = MAX(64, 2*file->amembs);
+            H5FD_t **x = H5MM_realloc(file->memb, n*sizeof(H5FD_t*));
+            if (!x)
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate memory block");
+            file->amembs = n;
+            file->memb = x;
+            file->nmembs = i;
+        }
 
-	/* Create another file if necessary */
-	if (i>=file->nmembs || !file->memb[i]) {
-	    file->nmembs = MAX(file->nmembs, i+1);
-	    sprintf(memb_name, file->name, i);
-	    H5E_BEGIN_TRY {
-		file->memb[i] = H5FDopen(memb_name, file->flags|H5F_ACC_CREAT,
-					 file->memb_fapl_id, file->memb_size);
-	    } H5E_END_TRY;
-	    if (NULL==file->memb[i]) return -1;
-	}
-	
-	/* Set the EOA marker for the member */
-	if (addr>file->memb_size) {
-	    H5FDset_eoa(file->memb[i], file->memb_size);
-	    addr -= file->memb_size;
-	} else {
-	    H5FDset_eoa(file->memb[i], addr);
-	    addr = 0;
-	}
+        /* Create another file if necessary */
+        if (i>=file->nmembs || !file->memb[i]) {
+            file->nmembs = MAX(file->nmembs, i+1);
+            sprintf(memb_name, file->name, i);
+            H5E_BEGIN_TRY {
+            file->memb[i] = H5FDopen(memb_name, file->flags|H5F_ACC_CREAT,
+                         file->memb_fapl_id, file->memb_size);
+            } H5E_END_TRY;
+            if (NULL==file->memb[i])
+                HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't open member file");
+        }
+        
+        /* Set the EOA marker for the member */
+        if (addr>file->memb_size) {
+            H5FDset_eoa(file->memb[i], file->memb_size);
+            addr -= file->memb_size;
+        } else {
+            H5FDset_eoa(file->memb[i], addr);
+            addr = 0;
+        }
     }
 
     file->eoa = eoa;
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -645,14 +721,18 @@ H5FD_family_get_eof(H5FD_t *_file)
     haddr_t		eof=0;
     int			i;
 
+    FUNC_ENTER(H5FD_family_get_eof, HADDR_UNDEF);
+
     /*
      * Find the last member that has a non-zero EOF and break out of the loop
      * with `i' equal to that member. If all members have zero EOF then exit
      * loop with i==0.
      */
     for (i=file->nmembs-1; i>=0; --i) {
-	if ((eof=H5FDget_eof(file->memb[i]))) break;
-	if (0==i) break;
+        if ((eof=H5FDget_eof(file->memb[i])))
+            break;
+        if (0==i)
+            break;
     }
 
     /*
@@ -660,7 +740,8 @@ H5FD_family_get_eof(H5FD_t *_file)
      * size of the i'th member.
      */
     eof += i*file->memb_size;
-    return MAX(eof, file->eoa);
+
+    FUNC_LEAVE(MAX(eof, file->eoa));
 }
 
 
@@ -694,34 +775,36 @@ H5FD_family_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     haddr_t		sub;
     hsize_t		req;
 
+    FUNC_ENTER(H5FD_family_read, FAIL);
+
     /*
      * Get the member data transfer property list. If the transfer property
      * list does not belong to this driver then assume defaults
      */
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
-	H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
-	assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
-	assert(dx);
-	memb_dxpl_id = dx->memb_dxpl_id;
+        H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
+
+        assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
+        assert(dx);
+        memb_dxpl_id = dx->memb_dxpl_id;
     }
 
     /* Read from each member */
     while (size>0) {
-	i = addr / file->memb_size;
-	sub = addr % file->memb_size;
-	req = MIN(size, file->memb_size-sub);
-	assert(i<file->nmembs);
+        i = addr / file->memb_size;
+        sub = addr % file->memb_size;
+        req = MIN(size, file->memb_size-sub);
+        assert(i<file->nmembs);
 
-	if (H5FDread(file->memb[i], memb_dxpl_id, sub, req, buf)<0) {
-	    return -1;
-	}
+        if (H5FDread(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
+            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "member file read failed");
 
-	addr += req;
-	buf += req;
-	size -= req;
+        addr += req;
+        buf += req;
+        size -= req;
     }
 
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -754,34 +837,36 @@ H5FD_family_write(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
     haddr_t		sub;
     hsize_t		req;
 
+    FUNC_ENTER(H5FD_family_write, FAIL);
+
     /*
      * Get the member data transfer property list. If the transfer property
      * list does not belong to this driver then assume defaults.
      */
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5Pget_driver(dxpl_id)) {
-	H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
-	assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
-	assert(dx);
-	memb_dxpl_id = dx->memb_dxpl_id;
+        H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
+
+        assert(H5P_DATA_XFER==H5Pget_class(dxpl_id));
+        assert(dx);
+        memb_dxpl_id = dx->memb_dxpl_id;
     }
 
     /* Write to each member */
     while (size>0) {
-	i = addr / file->memb_size;
-	sub = addr % file->memb_size;
-	req = MIN(size, file->memb_size-sub);
-	assert(i<file->nmembs);
+        i = addr / file->memb_size;
+        sub = addr % file->memb_size;
+        req = MIN(size, file->memb_size-sub);
+        assert(i<file->nmembs);
 
-	if (H5FDwrite(file->memb[i], memb_dxpl_id, sub, req, buf)<0) {
-	    return -1;
-	}
+        if (H5FDwrite(file->memb[i], memb_dxpl_id, sub, req, buf)<0)
+            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed");
 
-	addr += req;
-	buf += req;
-	size -= req;
+        addr += req;
+        buf += req;
+        size -= req;
     }
 
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -807,11 +892,14 @@ H5FD_family_flush(H5FD_t *_file)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     int			i, nerrors=0;
 
-    for (i=0; i<file->nmembs; i++) {
-	if (file->memb[i] && H5FDflush(file->memb[i])<0) {
-	    nerrors++;
-	}
-    }
+    FUNC_ENTER(H5FD_family_flush, FAIL);
 
-    return nerrors?-1:0;
+    for (i=0; i<file->nmembs; i++)
+        if (file->memb[i] && H5FDflush(file->memb[i])<0)
+            nerrors++;
+
+    if (nerrors)
+        HRETURN_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "can't flush member files");
+
+    FUNC_LEAVE(SUCCEED);
 }

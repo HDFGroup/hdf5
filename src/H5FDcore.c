@@ -9,10 +9,12 @@
  *		only the HDF5 public API. This driver is useful for fast
  *		access to small, temporary hdf5 files.
  */
-#include <H5private.h>
-#include <H5Fprivate.h>
-#include <H5FDcore.h>
-#include <H5Pprivate.h>
+#include <H5private.h>		/*library functions			*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fprivate.h>		/*files					*/
+#include <H5FDcore.h>       /* Core file driver */
+#include <H5MMprivate.h>    /* Memory allocation */
+#include <H5Pprivate.h>		/*property lists			*/
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -112,6 +114,11 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_FLMAP_SINGLE,				/*fl_map		*/
 };
 
+/* Interface initialization */
+#define PABLO_MASK	H5FD_core_mask
+#define INTERFACE_INIT	H5FD_core_init
+static intn interface_initialize_g = 0;
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_init
@@ -133,10 +140,12 @@ static const H5FD_class_t H5FD_core_g = {
 hid_t
 H5FD_core_init(void)
 {
-    if (H5I_VFL!=H5Iget_type(H5FD_CORE_g)) {
-	H5FD_CORE_g = H5FDregister(&H5FD_core_g);
-    }
-    return H5FD_CORE_g;
+    FUNC_ENTER(H5FD_core_init, FAIL);
+
+    if (H5I_VFL!=H5Iget_type(H5FD_CORE_g))
+        H5FD_CORE_g = H5FDregister(&H5FD_core_g);
+
+    FUNC_LEAVE(H5FD_CORE_g);
 }
 
 
@@ -162,13 +171,20 @@ H5FD_core_init(void)
 herr_t
 H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 {
+    herr_t ret_value=FAIL;
     H5FD_core_fapl_t	fa;
 
+    FUNC_ENTER(H5FD_set_fapl_core, FAIL);
+
     /* NO TRACE */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
     fa.increment = increment;
     fa.backing_store = backing_store;
-    return H5Pset_driver(fapl_id, H5FD_CORE, &fa);
+
+    ret_value= H5Pset_driver(fapl_id, H5FD_CORE, &fa);
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -195,15 +211,20 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
 {
     H5FD_core_fapl_t	*fa;
 
+    FUNC_ENTER(H5Pget_fapl_core, FAIL);
+
     /* NO TRACE */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
-    if (H5FD_CORE!=H5Pget_driver(fapl_id)) return -1;
-    if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if (H5FD_CORE!=H5Pget_driver(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
     
     if (increment) *increment = fa->increment;
     if (backing_store) *backing_store = fa->backing_store;
     
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -227,11 +248,17 @@ static void *
 H5FD_core_fapl_get(H5FD_t *_file)
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
-    H5FD_core_fapl_t	*fa = calloc(1, sizeof(H5FD_core_fapl_t));
+    H5FD_core_fapl_t	*fa = NULL;
+
+    FUNC_ENTER(H5FD_core_fapl_get, NULL);
+
+    if (NULL==(fa=H5MM_calloc(sizeof(H5FD_core_fapl_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     fa->increment = file->increment;
     fa->backing_store = (file->fd>=0);
-    return fa;
+
+    FUNC_LEAVE(fa);
 }
 
 
@@ -261,24 +288,28 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     H5FD_core_t		*file=NULL;
     H5FD_core_fapl_t	*fa=NULL;
     int			fd=-1;
+
+    FUNC_ENTER(H5FD_init_interface, NULL);
     
     /* Check arguments */
-    if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
-    if (ADDR_OVERFLOW(maxaddr)) return NULL;
+    if (0==maxaddr || HADDR_UNDEF==maxaddr)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+    if (ADDR_OVERFLOW(maxaddr))
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow");
     if (H5P_DEFAULT!=fapl_id) fa = H5Pget_driver_info(fapl_id);
 
     /* Open backing store */
     if (fa && fa->backing_store && name &&
-	(fd=open(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
-	return NULL;
+            (fd=open(name, O_CREAT|O_TRUNC|O_RDWR, 0666))<0) {
+        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open backing store");
     }
 
     /* Create the new file struct */
-    file = calloc(1, sizeof(H5FD_core_t));
+    if (NULL==(file=H5MM_calloc(sizeof(H5FD_core_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
     file->fd = fd;
     if (name && *name) {
-	file->name = malloc(strlen(name)+1);
-	strcpy(file->name, name);
+        file->name = HDstrdup(name);
     }
 
     /*
@@ -289,7 +320,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     file->increment = (fa && fa->increment>0) ?
 		      fa->increment : H5FD_CORE_INCREMENT;
 
-    return (H5FD_t*)file;
+    FUNC_LEAVE((H5FD_t*)file);
 }
 
 
@@ -315,22 +346,28 @@ H5FD_core_flush(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
     
+    FUNC_ENTER(H5FD_core_flush, FAIL);
+
     /* Write to backing store */
     if (file->dirty && file->fd>=0) {
-	haddr_t size = file->eof;
-	unsigned char *ptr = file->mem;
-	if (0!=lseek(file->fd, 0, SEEK_SET)) return -1;
+        haddr_t size = file->eof;
+        unsigned char *ptr = file->mem;
 
-	while (size) {
-	    ssize_t n = write(file->fd, ptr, size);
-	    if (n<0 && EINTR==errno) continue;
-	    if (n<0) return -1;
-	    ptr += (size_t)n;
-	    size -= (size_t)n;
-	}
-	file->dirty = FALSE;
+        if (0!=lseek(file->fd, 0, SEEK_SET))
+            HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "error seeking in backing store");
+
+        while (size) {
+            ssize_t n = write(file->fd, ptr, size);
+            if (n<0 && EINTR==errno) continue;
+            if (n<0)
+                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "error writing backing store");
+            ptr += (size_t)n;
+            size -= (size_t)n;
+        }
+        file->dirty = FALSE;
     }
-    return 0;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -357,15 +394,18 @@ H5FD_core_close(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
 
+    FUNC_ENTER(H5FD_core_close, FAIL);
+
     /* Flush */
-    if (H5FD_core_flush(_file)<0) return -1;
+    if (H5FD_core_flush(_file)<0)
+        HRETURN_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "can't flush file");
 
     /* Release resources */
     if (file->fd>=0) close(file->fd);
-    if (file->name) free(file->name);
-    if (file->mem) free(file->mem);
+    if (file->name) H5MM_xfree(file->name);
+    if (file->mem) H5MM_xfree(file->mem);
     memset(file, 0, sizeof(H5FD_core_t));
-    return 0;
+    FUNC_LEAVE(0);
 }
 
 
@@ -395,16 +435,22 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_core_t	*f1 = (const H5FD_core_t*)_f1;
     const H5FD_core_t	*f2 = (const H5FD_core_t*)_f2;
 
+    FUNC_ENTER(H5FD_core_cmp, FAIL);
+
     if (NULL==f1->name && NULL==f2->name) {
-	if (f1<f2) return -1;
-	if (f1>f2) return 1;
-	return 0;
+        if (f1<f2)
+            HRETURN(-1);
+        if (f1>f2)
+            HRETURN(1);
+        HRETURN(0);
     }
     
-    if (NULL==f1->name) return -1;
-    if (NULL==f2->name) return 1;
+    if (NULL==f1->name)
+        HRETURN(-1);
+    if (NULL==f2->name)
+        HRETURN(1);
 
-    return strcmp(f1->name, f2->name);
+    FUNC_LEAVE(HDstrcmp(f1->name, f2->name));
 }
 
 
@@ -430,7 +476,10 @@ static haddr_t
 H5FD_core_get_eoa(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    return file->eoa;
+    
+    FUNC_ENTER(H5FD_core_get_eoa, HADDR_UNDEF);
+
+    FUNC_LEAVE(file->eoa);
 }
 
 
@@ -456,9 +505,14 @@ static herr_t
 H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    if (ADDR_OVERFLOW(addr)) return -1;
+
+    FUNC_ENTER(H5FD_core_set_eoa, FAIL);
+
+    if (ADDR_OVERFLOW(addr))
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow");
+
     file->eoa = addr;
-    return 0;
+    FUNC_LEAVE(0);
 }
 
 
@@ -486,7 +540,10 @@ static haddr_t
 H5FD_core_get_eof(H5FD_t *_file)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    return MAX(file->eof, file->eoa);
+
+    FUNC_ENTER(H5FD_core_get_eof, HADDR_UNDEF);
+
+    FUNC_LEAVE(MAX(file->eof, file->eoa));
 }
 
 
@@ -516,28 +573,33 @@ H5FD_core_read(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     ssize_t		nbytes;
     
+    FUNC_ENTER(H5FD_core_read, FAIL);
+
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr) return -1;
-    if (REGION_OVERFLOW(addr, size)) return -1;
-    if (addr+size>file->eoa) return -1;
+    if (HADDR_UNDEF==addr)
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+    if (REGION_OVERFLOW(addr, size))
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+    if (addr+size>file->eoa)
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /* Read the part which is before the EOF marker */
     if (addr<file->eof) {
-	nbytes = MIN(size, file->eof-addr);
-	memcpy(buf, file->mem+addr, nbytes);
-	size -= nbytes;
-	addr += nbytes;
-	buf = (char*)buf + nbytes;
+        nbytes = MIN(size, file->eof-addr);
+        memcpy(buf, file->mem+addr, nbytes);
+        size -= nbytes;
+        addr += nbytes;
+        buf = (char*)buf + nbytes;
     }
 
     /* Read zeros for the part which is after the EOF markers */
-    if (size>0) {
-	memset(buf, 0, size);
-    }
-    return 0;
+    if (size>0)
+        memset(buf, 0, size);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -565,12 +627,16 @@ H5FD_core_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
     
+    FUNC_ENTER(H5FD_core_write, FAIL);
+
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
-    if (REGION_OVERFLOW(addr, size)) return -1;
-    if (addr+size>file->eoa) return -1;
+    if (REGION_OVERFLOW(addr, size))
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
+    if (addr+size>file->eoa)
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
 
     /*
      * Allocate more memory if necessary, careful of overflow. Also, if the
@@ -579,18 +645,21 @@ H5FD_core_write(H5FD_t *_file, hid_t UNUSED dxpl_id, haddr_t addr,
      * the first argument is null.
      */
     if (addr+size>file->eof) {
-	unsigned char *x;
-	size_t new_eof = file->increment * ((addr+size)/file->increment);
-	if ((addr+size) % file->increment) new_eof += file->increment;
-	if (NULL==file->mem) x = malloc(new_eof);
-	else x = realloc(file->mem, new_eof);
-	if (!x) return -1;
-	file->mem = x;
-	file->eof = new_eof;
+        unsigned char *x;
+        size_t new_eof = file->increment * ((addr+size)/file->increment);
+
+        if ((addr+size) % file->increment) new_eof += file->increment;
+        if (NULL==file->mem) x = H5MM_malloc(new_eof);
+        else x = H5MM_realloc(file->mem, new_eof);
+        if (!x)
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate memory block");
+        file->mem = x;
+        file->eof = new_eof;
     }
 
     /* Write from BUF to memory */
     memcpy(file->mem+addr, buf, size);
     file->dirty = TRUE;
-    return 0;
+
+    FUNC_LEAVE(SUCCEED);
 }

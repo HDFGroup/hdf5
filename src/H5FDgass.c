@@ -8,16 +8,13 @@
  * Purpose:	This is the GASS I/O driver.
  *
  */
-#include <assert.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <hdf5.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <H5private.h>		/*library functions			*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fprivate.h>		/*files					*/
+#include <H5FDgass.h>       /* Core file driver */
+#include <H5MMprivate.h>    /* Memory allocation */
+#include <H5Pprivate.h>		/*property lists			*/
 
-/* Packages needed by this file.*/
-#include <H5Eprivate.h>
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -144,7 +141,12 @@ static const H5FD_class_t H5FD_gass_g = {
     H5FD_FLMAP_SINGLE,				/*fl_map		*/
 };
 
+/* Interface initialization */
+#define PABLO_MASK	H5FD_gass_mask
+#define INTERFACE_INIT	H5FD_gass_init
+static intn interface_initialize_g = 0;
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_gass_init
  *
@@ -165,13 +167,15 @@ static const H5FD_class_t H5FD_gass_g = {
 hid_t
 H5FD_gass_init(void)
 {
-    if (!H5FD_GASS_g) {
-	H5FD_GASS_g = H5FDregister(&H5FD_gass_g);
-    }
+    FUNC_ENTER(H5FD_gass_init, FAIL);
+
+    if (!H5FD_GASS_g)
+        H5FD_GASS_g = H5FDregister(&H5FD_gass_g);
+
     globus_module_activate (GLOBUS_COMMON_MODULE);
     globus_module_activate (GLOBUS_GASS_FILE_MODULE);
 
-    return H5FD_GASS_g;
+    FUNC_LEAVE(H5FD_GASS_g);
 }
 
 
@@ -203,19 +207,25 @@ H5FD_gass_init(void)
 herr_t
 H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
 {
+    herr_t ret_value=FAIL;
     H5FD_gass_fapl_t	fa;
     
     /*NO TRACE*/
-
+    FUNC_ENTER(H5FD_set_fapl_gass, FAIL);
+    
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 #ifdef LATER
 #warning "We need to verify that INFO contain sensible information."
 #endif
 
     /* Initialize driver specific properties */
     fa.info = info;
-    return H5Pset_driver(fapl_id, H5FD_GASS, &fa);
+
+    ret_value= H5Pset_driver(fapl_id, H5FD_GASS, &fa);
+
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -247,13 +257,19 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
     H5FD_gass_fapl_t	*fa;
     
     /*NO TRACE*/
+    FUNC_ENTER(H5Pget_fapl_gass, FAIL);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id)) return -1;
-    if (H5FD_GASS!=H5Pget_driver(fapl_id)) return -1;
-    if (NULL==(fa=H5Pget_driver_info(fapl_id))) return -1;
+    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if (H5FD_GASS!=H5Pget_driver(fapl_id))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
+    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
 
-    if (info) *info = fa->info;
-    return 0;
+    if (info)
+        *info = fa->info;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -289,28 +305,33 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     H5FD_gass_t	*file=NULL;
     const H5FD_gass_fapl_t	*fa=NULL;
     H5FD_gass_fapl_t		_fa;
-    char *filename = (char *) malloc(80 * sizeof(char));
+    char *filename = (char *) H5MM_malloc(80 * sizeof(char));
     
+    FUNC_ENTER(H5FD_gass_open, NULL);
+
     /* fprintf(stdout, "Entering H5FD_gass_open name=%s flags=0x%x\n", name, flags); */
+
+    /* Check arguments */
+    if (!name || !*name)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name");
+    if (0==maxaddr || HADDR_UNDEF==maxaddr)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
+    if (ADDR_OVERFLOW(maxaddr))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr");
 
     strcpy (filename, name);
     
     /* Obtain a pointer to gass-specific file access properties */
     if (H5P_DEFAULT==fapl_id || H5FD_GASS!=H5Pget_driver(fapl_id)) {
-      GASS_INFO_NULL (_fa.info);
-      /* _fa.info = GASS_INFO_NULL; */
-      /* _fa.info = {0,0}; */ /*default*/
-	fa = &_fa;
+        GASS_INFO_NULL (_fa.info);
+        /* _fa.info = GASS_INFO_NULL; */
+        /* _fa.info = {0,0}; */ /*default*/
+        fa = &_fa;
     } else {
-	fa = H5Pget_driver_info(fapl_id);
-	assert(fa);
+        fa = H5Pget_driver_info(fapl_id);
+        assert(fa);
     }
     
-    /* Check arguments */
-    if (!name || !*name) return NULL;
-    if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
-    if (ADDR_OVERFLOW(maxaddr)) return NULL;
-
     /* When I come down here, the possible flag values and the correct
        responses are given here :-
 
@@ -333,62 +354,48 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     /* fprintf (stderr, "flags=0x%x\n", flags); */
     
     if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_EXCL)) {
-      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0) {
-	/* HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, FAIL, "open failed"); */
-	fprintf (stderr, "Can't open file. \n");
-	return NULL;
-      }
+      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
+        HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, FAIL, "open failed");
       
     }
     else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
-      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0) {
-	/* HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed"); */
-	fprintf (stderr, "Can't open file. \n");
-	return NULL;
-      }
+      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
+        HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
       
     }
     else if ((flags & H5F_ACC_RDWR) && (flags & H5F_ACC_TRUNC)) {
-      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0) {
-	/* HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed"); */
-	fprintf (stderr, "Can't open file. \n");
-	return NULL;
-      }
+      if ((fd = globus_gass_open (filename, O_RDWR|O_TRUNC)) < 0)
+        HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
     
     }
     else if (flags & H5F_ACC_RDWR) {
       printf ("I'm here in H5FDgass_open going to call globus_gass_open with O_RDWR. \n");
       printf ("Name of URL =%s \n", filename);
-      if ((fd = globus_gass_open (filename, O_RDWR)) < 0) {
-	/* HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed"); */
-	fprintf (stderr, "Can't open file. \n");
-	return NULL;
-      }
+      if ((fd = globus_gass_open (filename, O_RDWR)) < 0)
+        HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
       
     }
     else { /* This is case where H5F_ACC_RDWR is not set */
-      if ((fd = globus_gass_open (filename, O_RDONLY)) < 0) {
-	/* HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");*/
-	fprintf (stderr, "Can't open file. \n");
-	return NULL;
-      }
+      if ((fd = globus_gass_open (filename, O_RDONLY)) < 0)
+        HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
       
     }
    
      if (fstat(fd, &sb)<0) {
-	close(fd);
-	return NULL;
+        close(fd);
+        HRETURN_ERROR(H5E_IO, H5E_BADFILE, NULL, "fstat failed");
     }
 
     /* Create the new file struct */
-    file = calloc(1, sizeof(H5FD_gass_t));
+    if (NULL==(file=H5MM_calloc(sizeof(H5FD_gass_t))))
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate file struct");
     file->fd = fd;
     file->eof = sb.st_size;
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
     file->info = fa->info;
     
-    return (H5FD_t*)file;
+    FUNC_LEAVE((H5FD_t*)file);
 }
 
 /*-------------------------------------------------------------------------
@@ -410,20 +417,19 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
 static herr_t
 H5FD_gass_close (H5FD_t *_file)
 {
-	int gasserr;
-        H5FD_gass_t *file = (H5FD_gass_t *)_file;
+    H5FD_gass_t *file = (H5FD_gass_t *)_file;
 
-	if (file == NULL) {
-	  /* HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, NULL, "close failed"); */
-	  fprintf (stderr, "Can't close file. \n");
-	  return -1;
-	}
+    FUNC_ENTER(H5FD_gass_close, FAIL);
+
+	if (file == NULL)
+	  HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle");
 	
-	gasserr = globus_gass_close (file->fd);
-	if (gasserr == -1)
-		fprintf (stderr, "GASS close failed. \n");
+	if (globus_gass_close (file->fd) < 0)
+	  HRETURN_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "can't close GASS file");
 
-	return gasserr;
+    H5MM_xfree(file);
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 	
@@ -449,7 +455,10 @@ static haddr_t
 H5FD_gass_get_eoa(H5FD_t *_file)
 {
 	H5FD_gass_t *file = (H5FD_gass_t *)_file;
-	return file->eoa;
+
+    FUNC_ENTER(H5FD_gass_get_eoa, HADDR_UNDEF);
+
+    FUNC_LEAVE(file->eoa);
 }
 
 
@@ -473,8 +482,12 @@ static herr_t
 H5FD_gass_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_gass_t *file = (H5FD_gass_t *)_file;
+
+    FUNC_ENTER(H5FD_gass_set_eoa, FAIL);
+
     file->eoa = addr;
-    return 0;
+
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -502,7 +515,10 @@ static haddr_t
 H5FD_gass_get_eof(H5FD_t *_file)
 {
     H5FD_gass_t *file = (H5FD_gass_t*)_file;
-    return MAX(file->eof, file->eoa);
+
+    FUNC_ENTER(H5FD_gass_get_eof, HADDR_UNDEF);
+
+    FUNC_LEAVE(MAX(file->eof, file->eoa));
 }
 
 /*-------------------------------------------------------------------------
@@ -530,20 +546,25 @@ H5FD_gass_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
     H5FD_gass_t         *file = (H5FD_gass_t*)_file;
     ssize_t             nbytes;
 
+    FUNC_ENTER(H5FD_gass_read, FAIL);
+
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr) return -1;
-    if (REGION_OVERFLOW(addr, size)) return -1;
-    if (addr+size>file->eoa) return -1;
+    if (HADDR_UNDEF==addr)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined");
+    if (REGION_OVERFLOW(addr, size))
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+    if (addr+size>file->eoa)
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_READ!=file->op) &&
-        file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
+            file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-        return -1;
+        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "gass file seek failed");
     }
 
     /*
@@ -551,13 +572,15 @@ H5FD_gass_read(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
      * and the end of the file.
      */
     while (size>0) {
-do nbytes = read(file->fd, buf, size);
+        do 
+            nbytes = read(file->fd, buf, size);
         while (-1==nbytes && EINTR==errno);
+
         if (-1==nbytes) {
             /* error */
             file->pos = HADDR_UNDEF;
             file->op = OP_UNKNOWN;
-            return -1;
+            HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "gass file read failed");
         }
         if (0==nbytes) {
             /* end of file but not end of format address space */
@@ -574,7 +597,7 @@ do nbytes = read(file->fd, buf, size);
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
 /*-------------------------------------------------------------------------
@@ -601,20 +624,25 @@ H5FD_gass_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
     H5FD_gass_t         *file = (H5FD_gass_t*)_file;
     ssize_t             nbytes;
 
+    FUNC_ENTER(H5FD_gass_write, FAIL);
+
     assert(file && file->pub.cls);
     assert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr) return -1;
-    if (REGION_OVERFLOW(addr, size)) return -1;
-    if (addr+size>file->eoa) return -1;
+    if (HADDR_UNDEF==addr)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "addr undefined");
+    if (REGION_OVERFLOW(addr, size))
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
+    if (addr+size>file->eoa)
+        HRETURN_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr too large");
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op) &&
         file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0) {
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-        return -1;
+        HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "gass file seek failed");
     }
 
     /*
@@ -622,13 +650,15 @@ H5FD_gass_write(H5FD_t *_file, hid_t dxpl_id/*unused*/, haddr_t addr,
      * results
      */
     while (size>0) {
-        do nbytes = write(file->fd, buf, size);
+        do
+            nbytes = write(file->fd, buf, size);
         while (-1==nbytes && EINTR==errno);
-if (-1==nbytes) {
+
+        if (-1==nbytes) {
             /* error */
             file->pos = HADDR_UNDEF;
             file->op = OP_UNKNOWN;
-            return -1;
+            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "gass file write failed");
         }
         assert(nbytes>0);
         assert((hsize_t)nbytes<=size);
@@ -640,9 +670,10 @@ if (-1==nbytes) {
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
-    if (file->pos>file->eof) file->eof = file->pos;
+    if (file->pos>file->eof)
+        file->eof = file->pos;
 
-    return 0;
+    FUNC_LEAVE(SUCCEED);
 }
 
-#endif
+#endif  /* HAVE_GASS */
