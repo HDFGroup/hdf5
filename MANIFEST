@@ -24,7 +24,7 @@
 ./config/solaris2.5
 ./configure.in
 ./examples/h5_compound.c
-./examples/h5_extend_read.c
+./examples/h5_chunk_read.c
 ./examples/h5_extend_write.c
 ./examples/h5_group.c
 ./examples/h5_read.c
