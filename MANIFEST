@@ -1000,13 +1000,18 @@
 ./tools/gifconv/readhdf.c
 ./tools/gifconv/writehdf.c
 
-
 ./tools/h5dump/Dependencies
 ./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dumptst.c
 ./tools/h5dump/testh5dump.sh
+
+./tools/h5diff/Dependencies
+./tools/h5diff/Makefile.in
+./tools/h5diff/h5diff.c
+./tools/h5diff/h5difftst.c
+./tools/h5diff/testh5diff.sh
 
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in
