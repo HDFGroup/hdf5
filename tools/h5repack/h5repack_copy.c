@@ -26,7 +26,7 @@
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: October, 23, 2003
  *
@@ -45,26 +45,17 @@ int copy_objects(const char* fnamein,
  * open the files 
  *-------------------------------------------------------------------------
  */
-
- /* disable error reporting */
- H5E_BEGIN_TRY {
- 
- /* Open the files */
  if ((fidin=H5Fopen(fnamein,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
   printf("h5repack: <%s>: %s\n", fnamein, H5FOPENERROR );
-  exit(1);
+  goto out;
  }
  if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0 ){
   printf("h5repack: <%s>: Could not create file\n", fnameout );
-  exit(1);
+  goto out;
  }
- /* enable error reporting */
- } H5E_END_TRY;
 
- 
  if (options->verbose)
   printf("Making file <%s>...\n",fnameout);
-
 
  /* init table */
  trav_table_init(&travt);
@@ -111,15 +102,56 @@ int copy_objects(const char* fnamein,
 
 out:
  H5E_BEGIN_TRY {
- H5Fclose(fidin);
- H5Fclose(fidout);
- trav_table_free(travt);
+  H5Fclose(fidin);
+  H5Fclose(fidout);
  } H5E_END_TRY;
+ if (travt)
+  trav_table_free(travt);
 
  return -1;
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: print_obj
+ *
+ * Purpose: print name and filters of an object 
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+void print_obj(pack_info_t *obj, char *name)
+{
+ char str[26]; /*5x5+1*/
+ int i;
+
+ strcpy(str,"\0");
+
+ for ( i=0; i<obj->nfilters; i++)
+ {
+  switch (obj->filter[i].filtn)
+  {
+  default:
+   break;
+  case H5Z_FILTER_DEFLATE:
+   strcat(str,"GZIP ");
+   break;
+  case H5Z_FILTER_SZIP:
+   strcat(str,"SZIP ");
+   break;
+  case H5Z_FILTER_SHUFFLE:
+   strcat(str,"SHUF ");
+   break;
+  case H5Z_FILTER_FLETCHER32:
+   strcat(str,"FLET ");
+   break;
+  } /* switch */
+ }/*i*/
+
+ printf(" %-10s %s %s\n", "dataset",str,name );
+
+}
 
 
 /*-------------------------------------------------------------------------
@@ -129,7 +161,7 @@ out:
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: October, 23, 2003
  *
@@ -162,6 +194,7 @@ int do_copy_objects(hid_t fidin,
  hsize_t   dsize_out;    /* output dataset size after filter */
 #endif /* LATER */
  int       i, j;
+ int       wrote=0;
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -208,9 +241,6 @@ int do_copy_objects(hid_t fidin,
  *-------------------------------------------------------------------------
  */
   case H5G_DATASET:
-   if (options->verbose)
-    printf(" %-10s %s\n", "dataset",travt->objs[i].name );
-
    if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0) 
     goto error;
    if ((space_id=H5Dget_space(dset_in))<0) 
@@ -311,12 +341,11 @@ int do_copy_objects(hid_t fidin,
      */
     if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0) 
      goto error;
-
     if (dsize_in && nelmts) {
      if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
+     wrote=1;
     }
-
     /*-------------------------------------------------------------------------
      * copy attrs
      *-------------------------------------------------------------------------
@@ -339,6 +368,11 @@ int do_copy_objects(hid_t fidin,
     
     if (buf)
      free(buf);
+
+    if (options->verbose && wrote)
+     print_obj(&obj,travt->objs[i].name );
+
+
     
    }/*H5T_STD_REF_OBJ*/
    }/*can_read*/
@@ -488,7 +522,7 @@ error:
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: October, 28, 2003
  *
@@ -565,6 +599,8 @@ int copy_attr(hid_t loc_in,
  */
   if ( ! H5Tequal(mtype_id, H5T_STD_REF_OBJ)) 
   {
+   
+   
  /*-------------------------------------------------------------------------
   * read to memory
   *-------------------------------------------------------------------------
@@ -591,6 +627,7 @@ int copy_attr(hid_t loc_in,
    /*close*/
    if (H5Aclose(attr_out)<0) 
     goto error;
+   
    
    if (buf)
     free(buf);
@@ -628,4 +665,7 @@ error:
  } H5E_END_TRY;
  return -1;
 }
+
+
+
 

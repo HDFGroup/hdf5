@@ -55,7 +55,7 @@ static void aux_initglb_filter(pack_opt_t *options)
  *
  * Return: 0, ok, -1, fail
  *
- * Programmer:  pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *
@@ -68,7 +68,7 @@ int h5repack(const char* infile,
  /* check input */
  if (check_options(options)<0)
   return -1;
-
+ 
  /* check for objects in input that are in the file */
  if (check_objects(infile,options)<0)
   return -1;
@@ -76,6 +76,7 @@ int h5repack(const char* infile,
  /* copy the objects  */
  if (copy_objects(infile,outfile,options)<0)
   return -1;
+
  
  return 0;
 }
@@ -223,7 +224,7 @@ int h5repack_addlayout(const char* str,
  *
  * Return: void, return -1 on error
  *
- * Programmer:  pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *
@@ -242,7 +243,6 @@ static int check_options(pack_opt_t *options)
  */
  if (options->verbose) 
  {
-  printf("\n");
   printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
    printf(" Apply layout to all\n ");
@@ -290,20 +290,22 @@ static int check_options(pack_opt_t *options)
  
  if (options->verbose) 
  {
-  printf("Objects to filter are...\n");
+  printf("Objects to apply filter are...\n");
   if (options->all_filter==1) 
   {
    H5Z_filter_t filtn=options->filter_g.filtn;
    switch (filtn)
    {
    case H5Z_FILTER_NONE:
-     printf(" Uncompress all %s\n",get_sfilter(filtn));
+     printf(" Uncompress all\n");
+    break;
+   case H5Z_FILTER_SHUFFLE:
+   case H5Z_FILTER_FLETCHER32:
+     printf(" All with %s\n",get_sfilter(filtn));
     break;
    case H5Z_FILTER_SZIP:
-     printf(" Compress all with %s compression\n",get_sfilter(filtn));
-    break;
    case H5Z_FILTER_DEFLATE:
-     printf("\tCompress all with %s compression, parameter %d\n",
+     printf(" All with %s, parameter %d\n",
       get_sfilter(filtn),
       options->filter_g.cd_values[0]);
     break;
@@ -320,21 +322,22 @@ static int check_options(pack_opt_t *options)
   {
    if (options->verbose) 
    {
-    printf(" <%s> with %s filter%s",
+    printf(" <%s> with %s filter\n",
      name,
-     get_sfilter(pack.filter[j].filtn),
-     (i==options->op_tbl->nelems-1)? "" : "\n");
+     get_sfilter(pack.filter[j].filtn));
    }
 
    has_cp=1;
-   
+
+#if defined (CHECK_SZIP)
+  
    /*check for invalid combination of options */
    switch (pack.filter[j].filtn)
    {
    default:
     break;
    case H5Z_FILTER_SZIP:
-    
+
     szip_pixels_per_block=pack.filter[j].cd_values[0];
     
     /* check szip parameters */
@@ -363,6 +366,9 @@ static int check_options(pack_opt_t *options)
      
     break;
    } /* switch */
+
+#endif
+
   } /* j */
  } /* i */
  
@@ -381,7 +387,7 @@ static int check_options(pack_opt_t *options)
  *
  * Return: void, exit on error
  *
- * Programmer:  pvn@ncsa.uiuc.edu
+ * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
  *

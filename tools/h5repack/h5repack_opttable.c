@@ -72,6 +72,30 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
  }
 }
 
+/*-------------------------------------------------------------------------
+ * Function: aux_tblinsert_layout
+ *
+ * Purpose: auxiliary function, inserts the layout in object OBJS[ I ]
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void aux_tblinsert_layout(pack_opttbl_t *table, 
+                                 int I,
+                                 pack_info_t *pack)
+{
+ int k;
+ 
+ table->objs[I].layout = pack->layout;
+ if (H5D_CHUNKED==pack->layout) {
+  table->objs[I].chunk.rank = pack->chunk.rank;
+  for (k = 0; k < pack->chunk.rank; k++) 
+   table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+ }
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: aux_inctable
@@ -189,7 +213,7 @@ int options_add_layout( obj_list_t *obj_list,
                         pack_info_t *pack,
                         pack_opttbl_t *table )
 {
- int i, j, k, I, added=0, found=0;
+ int i, j, I, added=0, found=0;
  
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size) 
@@ -219,12 +243,7 @@ int options_add_layout( obj_list_t *obj_list,
      /* insert the layout info */
      else
      {
-      table->objs[i].layout = pack->layout;
-      if (H5D_CHUNKED==pack->layout) {
-       table->objs[i].chunk.rank = pack->chunk.rank;
-       for (k = 0; k < pack->chunk.rank; k++) 
-        table->objs[i].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
-      }
+      aux_tblinsert_layout(table,i,pack);
       found=1;
       break;
      }
@@ -237,12 +256,20 @@ int options_add_layout( obj_list_t *obj_list,
     I = table->nelems + added;  
     added++;
     strcpy(table->objs[I].path,obj_list[j].obj);
-    table->objs[I].layout = pack->layout;
-    if (H5D_CHUNKED==pack->layout) {
-     table->objs[I].chunk.rank = pack->chunk.rank;
-     for (k = 0; k < pack->chunk.rank; k++) 
-      table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
+    aux_tblinsert_layout(table,I,pack);
     }
+   /* cases where we have an already inserted name but there is a new name also
+      example:
+      -f dset1:GZIP=1 -l dset1,dset2:CHUNK=20x20 
+      dset1 is already inserted, but dset2 must also be 
+      */
+   else if (found==1 && strcmp(obj_list[j].obj,table->objs[i].path)!=0)
+   {
+    /* keep the grow in a temp var */
+    I = table->nelems + added;  
+    added++;
+    strcpy(table->objs[I].path,obj_list[j].obj);
+    aux_tblinsert_layout(table,I,pack);
    }
   } /* j */ 
  }
@@ -256,12 +283,8 @@ int options_add_layout( obj_list_t *obj_list,
    I = table->nelems + added;  
    added++;
    strcpy(table->objs[I].path,obj_list[j].obj);
-   table->objs[I].layout = pack->layout;
-   if (H5D_CHUNKED==pack->layout) {
-    table->objs[I].chunk.rank = pack->chunk.rank;
-    for (k = 0; k < pack->chunk.rank; k++) 
-     table->objs[I].chunk.chunk_lengths[k] = pack->chunk.chunk_lengths[k];
-   }
+   aux_tblinsert_layout(table,I,pack);
+
   }
  }
  
@@ -317,6 +340,19 @@ int options_add_filter(obj_list_t *obj_list,
    } /* i */
    
    if (found==0)
+   {
+    /* keep the grow in a temp var */
+    I = table->nelems + added;  
+    added++;
+    strcpy(table->objs[I].path,obj_list[j].obj);
+    aux_tblinsert_filter(table,I,filt);
+   }
+   /* cases where we have an already inserted name but there is a new name also
+      example:
+      -l dset1:CHUNK=20x20 -f dset1,dset2:GZIP=1
+      dset1 is already inserted, but dset2 must also be 
+      */
+   else if (found==1 && strcmp(obj_list[j].obj,table->objs[i].path)!=0)
    {
     /* keep the grow in a temp var */
     I = table->nelems + added;  
