@@ -266,15 +266,15 @@ int fnord;
 }
 
 int main(void) {
-	using namespace H5;
-	fnord = 37;
-	return 0;
+   using namespace H5;
+   fnord = 37;
+   return 0;
 } 
 ], [
-echo yes
+   echo yes
 ], [
-echo no
-CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
 ])
 
 AC_MSG_CHECKING(if $CXX needs old style header files in includes)
@@ -283,20 +283,39 @@ AC_TRY_RUN([
 
 int main(void) { return 0; }
 ], [
-echo no
+   echo no
 ], [
-echo yes
-CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+   echo yes
+   CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
 ])
 
 AC_MSG_CHECKING(if $CXX supports bool types)
 AC_TRY_RUN([
-int main(void) { bool flag; return 0; }
+int main(void) {
+   bool flag;
+   return 0;
+}
 ], [
-echo yes
+   echo yes
 ], [
-echo no
-CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+])
+
+AC_MSG_CHECKING(if $CXX can handle static cast)
+AC_TRY_RUN([
+int main(void) {
+   float test_float;
+   int test_int;
+   test_float = 37.0;
+   test_int = static_cast <int> (test_float);
+   return 0;
+}
+], [
+   echo yes
+], [
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
 ])
 
 dnl ----------------------------------------------------------------------
