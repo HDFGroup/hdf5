@@ -265,6 +265,10 @@ Platforms Tested
     IA-32 Linux 2.4.18            gcc 2.96
                                   Intel(R) C++ Version 7.0
                                   Intel(R) Fortran Compiler Version 7.0
+
+    Xeon Linux 2.4.20-31.9smp_perfctr_lustre
+	                          Intel(R) C++ Version 8.0
+                                  Intel(R) Fortran Compiler Version 8.0
                                   
     IA-64 Linux 2.4.16 ia64       gcc version 3.0.4
                                   Intel(R) C++ Version 7.1
@@ -330,6 +334,9 @@ RedHat 8 & SuSe x86_64      y   n        n      n        y    n             y
     gcc (3)
 Linux 2.4 SGI Altix ia64    y   n        y      n        y    y             y
     Intel (3) 
+Xeon Linux 2.4.20-31.9      y   n	 y	n	 y    y		    y
+    smp_perfctr_lustre 
+    C Intel (3)
 
 
 Platform                    static-  Thread-  SZIP  GASS  STREAM-  High-  H4/H5 
@@ -366,6 +373,10 @@ RedHat 8 & SuSe x86_64      y        n        y     n     y        y      y
     gcc (3)
 Linux 2.4 SGI Altix ia64    y        n        y     n     y        y      y
     Intel (3) 
+Xeon Linux 2.4.20-31.9      n        n	      y	    n     y	   n	  n
+    smp_perfctr_lustre 
+    C Intel (3)
+
 
 
 Compiler versions for each platform are listed in the "Platforms Tested" 
