@@ -11,7 +11,8 @@ srcdir=@srcdir@
 
 ## Add include directory to the C preprocessor flags and the hdf5 library
 ## to the library list.
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src -I$(top_srcdir)/test \
+    -I$(top_srcdir)/tools/lib @CPPFLAGS@
 LIBHDF5=../src/libhdf5.la
 LIBH5TEST=../test/libh5test.la
 LIBTOOLS=../tools/lib/libh5tools.la

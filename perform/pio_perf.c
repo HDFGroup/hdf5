@@ -83,7 +83,6 @@
 FILE       *output;             /* output file                          */
 int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
-MPI_Info    pio_info_g = MPI_INFO_NULL; /*MPI INFO object to run the PIO*/
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
