@@ -11,7 +11,7 @@
 #include "H5Zprivate.h"
 
 #ifdef H5_HAVE_ZLIB_H
-#   include <zlib.h>
+#   include "zlib.h"
 #else
 /* Make sure compression is disabled too. */
 #undef H5_HAVE_COMPRESS2
@@ -78,9 +78,9 @@ H5Z_filter_deflate (unsigned UNUSED flags, size_t cd_nelmts,
 	}
 	HDmemset(&z_strm, 0, sizeof(z_strm));
 	z_strm.next_in = *buf;
-	z_strm.avail_in = (uInt)nbytes;
+        H5_ASSIGN_OVERFLOW(z_strm.avail_in,nbytes,size_t,uInt);
 	z_strm.next_out = outbuf;
-	z_strm.avail_out = (uInt)nalloc;
+        H5_ASSIGN_OVERFLOW(z_strm.avail_out,nalloc,size_t,uInt);
 	if (Z_OK!=inflateInit(&z_strm)) {
 	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, 0, "inflateInit() failed");
 	}

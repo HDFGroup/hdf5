@@ -989,7 +989,9 @@ H5FD_mpio_close(H5FD_t *_file)
 static herr_t
 H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
+#ifndef NDEBUG
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
+#endif /* NDEBUG */
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_query, FAIL);

@@ -109,7 +109,7 @@ void multiple_dset_write(char *filename, int ndatasets)
 void multiple_group_write(char *filename, int ngroups)
 {
     int mpi_rank, mpi_size;
-    int i, j, l, m;
+    int m;
     char gname[64];
     hid_t fid, gid, plist, memspace, filespace;
     hssize_t chunk_origin[DIM];
@@ -248,7 +248,7 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
 void multiple_group_read(char *filename, int ngroups)
 {
     int      mpi_rank, mpi_size, error_num;
-    int      l, m;
+    int      m;
     char     gname[64];
     hid_t    plist, fid, gid, memspace, filespace;
     hssize_t chunk_origin[DIM];
@@ -316,7 +316,6 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
     char dname[32];
     DATATYPE *outdata, *indata;
     hid_t did;
-    hsize_t block[DIM]={SIZE,SIZE};
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -349,6 +348,9 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 	       
         H5Dclose(did);
     }
+
+    free(indata);
+    free(outdata);
 
     return vrfy_errors;
 }

@@ -147,7 +147,7 @@ do_pio(parameters param)
 
     char        fname[FILENAME_MAX];
     int         maxprocs;
-    int		nfiles, nf;
+    long	nfiles, nf;
     long        ndsets;
     off_t       nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
@@ -190,7 +190,7 @@ do_pio(parameters param)
 
     if (nfiles < 0 ) {
         fprintf(stderr,
-                "number of files must be >= 0 (%d)\n",
+                "number of files must be >= 0 (%ld)\n",
                 nfiles);
         GOTOERROR(FAIL);
     }
@@ -253,7 +253,7 @@ do_pio(parameters param)
 
         MPI_Barrier(pio_comm_g);
 
-        sprintf(base_name, "#pio_tmp_%u", nf);
+        sprintf(base_name, "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
@@ -488,7 +488,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 #endif
 
     /* calculate dataset parameters. data type is always native C int */
-    dset_size = nelmts * ELMT_SIZE;
+    dset_size = nelmts * (off_t)ELMT_SIZE;
     nelmts_in_buf = buf_size/ELMT_SIZE;
 
     /* hdf5 data space setup */
@@ -692,7 +692,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 		    /* Contiguous pattern */
 		    /* need to (off_t) the elmnts_begin expression because they */
 		    /* may be of smaller sized integer types */
-		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
 
 		    /* only care if seek returns error */
 		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
@@ -707,7 +707,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 		    size_t	xferred=0;
 		    size_t	toxfer=0;
 
-		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
 	if (pio_debug_level >= 4) {
 HDprint_rank(output);
 HDfprintf(output,
@@ -723,7 +723,7 @@ HDfprintf(output,
 			    toxfer = nelmts_toxfer - xferred;
 			/* Skip offset over blocks of other processes */
 			file_offset = dset_offset +
-			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*ELMT_SIZE;
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*(off_t)ELMT_SIZE;
 	if (pio_debug_level >= 4) {
 HDprint_rank(output);
 HDfprintf(output,
@@ -749,7 +749,7 @@ HDfprintf(output,
                 break;
 
             case MPIO:
-                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
+                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
                 mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
                                         (int)(nelmts_toxfer), ELMT_MPI_TYPE,
                                         &mpi_status);
@@ -872,7 +872,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 #endif
 
     /* calculate dataset parameters. data type is always native C int */
-    dset_size = nelmts * ELMT_SIZE;
+    dset_size = nelmts * (off_t)ELMT_SIZE;
     nelmts_in_buf = buf_size/ELMT_SIZE;
 
     /* hdf5 data space setup */
@@ -1029,7 +1029,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 		    /* Contiguous pattern */
 		    /* need to (off_t) the elmnts_begin expression because they */
 		    /* may be of smaller sized integer types */
-		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
 
 		    /* only care if seek returns error */
 		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
@@ -1044,7 +1044,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 		    size_t	xferred=0;
 		    size_t	toxfer=0;
 
-		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
 	if (pio_debug_level >= 4) {
 HDprint_rank(output);
 HDfprintf(output,
@@ -1060,7 +1060,7 @@ HDfprintf(output,
 			    toxfer = nelmts_toxfer - xferred;
 			/* Skip offset over blocks of other processes */
 			file_offset = dset_offset +
-			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*ELMT_SIZE;
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*(off_t)ELMT_SIZE;
 	if (pio_debug_level >= 4) {
 HDprint_rank(output);
 HDfprintf(output,
@@ -1086,7 +1086,7 @@ HDfprintf(output,
                 break;
 
             case MPIO:
-                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
+                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
                                        (int)(nelmts_toxfer), ELMT_MPI_TYPE,

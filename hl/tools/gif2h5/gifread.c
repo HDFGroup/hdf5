@@ -382,9 +382,6 @@ ReadDataSubBlocks(BYTE **MemGif2, /* GIF image file input FILE stream           
 	
     }
 
-#ifdef COMMENTED_OUT
-    *ptr1++ = (BYTE) NULL;			/* Add NULL to simulate Terminator value */
-#endif /* COMMENTED_OUT */
    	*ptr1++ = '\0';
 	
     return(ptr2);					/* Return a pointer to the sub-block data */

@@ -19,15 +19,16 @@ char *cmd;
 
 FILE *fp;
 
+static WORD
+    XC = 0, YC = 0,         /* Output X and Y coords of current pixel       */
+    InitCodeSize,           /* Starting code size, used during Clear        */
+    CodeSize,               /* Code size, read from GIF header              */
+    BytesPerScanline,       /* Bytes per scanline in output raster          */
+    IWidth, IHeight;        /* image dimensions                             */
 static int
     BitOffset = 0,          /* Bit Offset of next code                      */
-    XC = 0, YC = 0,         /* Output X and Y coords of current pixel       */
     Pass = 0,               /* Used by output routine if WORDerlaced pic    */
     OutCount = 0,           /* Decompressor output 'stack count'            */
-    IWidth, IHeight,        /* image dimensions                             */
-    BytesPerScanline,       /* Bytes per scanline in output raster          */
-    CodeSize,               /* Code size, read from GIF header              */
-    InitCodeSize,           /* Starting code size, used during Clear        */
     Code,                   /* Value returned by ReadCode                   */
     MaxCode,                /* limiting value for current code size         */
     ClearCode,              /* GIF clear code                               */
@@ -162,7 +163,7 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
     OutCount = 0;
     BitOffset = 0;
     
-    DataMask = (1L << ((GifHead->PackedField & 0x07) +1)) -1;
+    DataMask = (1 << ((GifHead->PackedField & 0x07) +1)) -1;
     Raster = GifImageDesc->GIFImage;
 
     /* Check for image seperator */

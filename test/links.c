@@ -111,7 +111,6 @@ new_links(hid_t fapl)
     hid_t		dset1, dset2;
     char		filename[1024]; 
     static hsize_t      size[1] = {1};
-    H5G_stat_t		sb_soft2;
 
     TESTING("H5Glink2 function");
 
