@@ -4521,10 +4521,10 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                 if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
                     continue; /*no error*/
             } /* end if */
-            else if (dst_size==sizeof(unsigned long long)) {
-                unsigned long long tmp_s, tmp_h;
-                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long long));
-                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long long));
+            else if (dst_size==sizeof(unsigned long_long)) {
+                unsigned long_long tmp_s, tmp_h;
+                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long_long));
+                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long_long));
                 if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
                     continue; /*no error*/
             } /* end if */

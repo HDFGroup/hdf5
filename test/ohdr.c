@@ -406,6 +406,7 @@ main(void)
     return 0;
 
  error:
+     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
