@@ -28,13 +28,13 @@ TEST_OBJ=$(TEST_SRC:.f90=.lo)
 
 $(TEST_PROGS): $(FLIB)
 
-fortranlib_test: $(TEST_OBJ)
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fortranlib_test.f90 $(TEST_OBJ) $(FLIB) $(LIBS) $(HDF5LIB)
+fortranlib_test: fortranlib_test.lo $(TEST_OBJ)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fortranlib_test.lo $(TEST_OBJ) $(FLIB) $(LIBS) $(HDF5LIB)
 
-fflush1: fflush1.f90 hdf5test.f90
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.f90 hdf5test.o $(FLIB) $(LIBS) $(HDF5LIB)
+fflush1: fflush1.lo hdf5test.lo
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo hdf5test.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-fflush2: fflush2.f90 hdf5test.f90
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.f90 hdf5test.o $(FLIB) $(LIBS) $(HDF5LIB)
+fflush2: fflush2.lo hdf5test.lo
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo hdf5test.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
 @CONCLUDE@
