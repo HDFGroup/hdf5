@@ -78,17 +78,20 @@ fi
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
-  icc-8.1*)
-    # Add C99 standard flag to enable definition of ULLONG_MAX because in Intel
-    # compiler header file limits.h, C99 has to be enable to define this macro.
-    # Compilers of Version 8 and before don't have this problem.
-    CFLAGS="$CFLAGS -std=c99"
-    ;;
+    icc-8.0*)
+	# v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
+	PROD_CFLAGS="-O2"
+	;;
+    icc-8.1*)
+	# Add C99 standard flag to enable definition of ULLONG_MAX because in Intel
+	# compiler header file limits.h, C99 has to be enable to define this macro.
+	# Compilers of Version 8 and before don't have this problem.
+	CFLAGS="$CFLAGS -std=c99"
+	;;
 esac
 
 # Clear cc info if no flags set
 if test "X-$cc_flags_set" = "X-"; then
-  cc_vendor=
-  cc_version=
+    cc_vendor=
+    cc_version=
 fi
-
