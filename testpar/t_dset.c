@@ -1,0 +1,1009 @@
+/* $Id$ */
+
+/*
+ * Parallel tests for file operations
+ */
+
+/*
+ * Example of using the parallel HDF5 library to access datasets.
+ *
+ * This program contains two parts.  In the first part, the mpi processes
+ * collectively create a new parallel HDF5 file and create two fixed
+ * dimension datasets in it.  Then each process writes a hyperslab into
+ * each dataset in an independent mode.  All processes collectively
+ * close the datasets and the file.
+ * In the second part, the processes collectively open the created file
+ * and the two datasets in it.  Then each process reads a hyperslab from
+ * each dataset in an independent mode and prints them out.
+ * All processes collectively close the datasets and the file.
+ */
+
+#include <testphdf5.h>
+
+/*
+ * Setup the dimensions of the hyperslab.
+ * Two modes--by rows or by columns.
+ * Assume dimension rank is 2.
+ */
+void
+slab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
+	 hsize_t stride[], int mode)
+{
+    switch (mode){
+    case BYROW:
+	/* Each process takes a slabs of rows. */
+	stride[0] = 1;
+	stride[1] = 1;
+	count[0] = DIM1/mpi_size;
+	count[1] = DIM2;
+	start[0] = mpi_rank*count[0];
+	start[1] = 0;
+if (verbose) printf("slab_set BYROW\n");
+	break;
+    case BYCOL:
+	/* Each process takes a block of columns. */
+	stride[0] = 1;
+	stride[1] = 1;
+	count[0] = DIM1;
+	count[1] = DIM2/mpi_size;
+	start[0] = 0;
+	start[1] = mpi_rank*count[1];
+#ifdef DISABLED
+	/* change the above macro to #ifndef if you want to test */
+	/* zero elements access. */
+	printf("set to size 0\n");
+	if (!(mpi_rank % 3))
+	    count[1]=0;
+#endif
+if (verbose) printf("slab_set BYCOL\n");
+	break;
+    default:
+	/* Unknown mode.  Set it to cover the whole dataset. */
+	printf("unknown slab_set mode (%d)\n", mode);
+	stride[0] = 1;
+	stride[1] = 1;
+	count[0] = DIM1;
+	count[1] = DIM2;
+	start[0] = 0;
+	start[1] = 0;
+if (verbose) printf("slab_set wholeset\n");
+	break;
+    }
+if (verbose){
+    printf("start[]=(%d,%d), count[]=(%d,%d), total datapoints=%d\n",
+	start[0], start[1], count[0], count[1], count[0]*count[1]);
+    }
+}
+
+
+/*
+ * Fill the dataset with trivial data for testing.
+ * Assume dimension rank is 2 and data is stored contiguous.
+ */
+void
+dataset_fill(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+{
+    DATATYPE *dataptr = dataset;
+    int i, j;
+
+    /* put some trivial data in the data_array */
+    for (i=0; i < count[0]; i++){
+	for (j=0; j < count[1]; j++){
+	    *dataptr = (i*stride[0]+start[0])*100 + (j*stride[1]+start[1]+1);
+	    dataptr++;
+	}
+    }
+}
+
+
+/*
+ * Print the content of the dataset.
+ */
+void dataset_print(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE * dataset)
+{
+    DATATYPE *dataptr = dataset;
+    int i, j;
+
+    /* print the column heading */
+    printf("%-8s", "Cols:");
+    for (j=0; j < count[1]; j++){
+	printf("%3d ", start[1]+j);
+    }
+    printf("\n");
+
+    /* print the slab data */
+    for (i=0; i < count[0]; i++){
+	printf("Row %2d: ", (int)(i*stride[0]+start[0]));
+	for (j=0; j < count[1]; j++){
+	    printf("%03d ", *dataptr++);
+	}
+	printf("\n");
+    }
+}
+
+
+/*
+ * Print the content of the dataset.
+ */
+int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *dataset, DATATYPE *original)
+{
+#define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
+    DATATYPE *dataptr = dataset;
+    DATATYPE *originptr = original;
+
+    int i, j, vrfyerrs;
+
+    /* print it if verbose */
+    if (verbose)
+	dataset_print(start, count, stride, dataset);
+
+    vrfyerrs = 0;
+    for (i=0; i < count[0]; i++){
+	for (j=0; j < count[1]; j++){
+	    if (*dataset != *original){
+		if (vrfyerrs++ < MAX_ERR_REPORT || verbose){
+		    printf("Dataset Verify failed at [%d][%d](row %d, col %d): expect %d, got %d\n",
+			i, j,
+			(int)(i*stride[0]+start[0]), (int)(j*stride[1]+start[1]),
+			*(original), *(dataset));
+		}
+		dataset++;
+		original++;
+	    }
+	}
+    }
+    if (vrfyerrs > MAX_ERR_REPORT && !verbose)
+	printf("[more errors ...]\n");
+    if (vrfyerrs)
+	printf("%d errors found in dataset_vrfy\n", vrfyerrs);
+    return(vrfyerrs);
+}
+
+
+/*
+ * Example of using the parallel HDF5 library to create two datasets
+ * in one HDF5 files with parallel MPIO access support.
+ * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
+ * Each process controls only a slab of size DIM1 x DIM2 within each
+ * dataset.
+ */
+
+void
+dataset_writeInd(char *filename)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hsize_t dims[RANK] = {DIM1,DIM2};		/* dataset dim sizes */
+    hsize_t dimslocal1[RANK] = {DIM1,DIM2}; 	/* local dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+
+    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int   i, j;
+    int mpi_size, mpi_rank;
+    char *fname;
+    
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Independent write test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* -------------------
+     * START AN HDF5 FILE 
+     * -------------------*/
+    /* setup file access template with parallel IO access. */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "H5Pcreate access succeed");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "H5Pset_mpi succeed");
+
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    VRFY((fid != FAIL), "H5Fcreate succeed");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+
+    /* --------------------------
+     * Define the dimensions of the overall datasets
+     * and the slabs local to the MPI process.
+     * ------------------------- */
+    /* setup dimensionality object */
+    sid = H5Screate_simple (RANK, dims, NULL);
+    VRFY((sid != FAIL), "H5Screate_simple succeed");
+
+    
+    /* create a dataset collectively */
+    dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid,
+			H5P_DEFAULT);
+    VRFY((dataset1 != FAIL), "H5Dcreate succeed");
+
+    /* create another dataset collectively */
+    dataset2 = H5Dcreate(fid, DATASETNAME2, H5T_NATIVE_INT, sid,
+			H5P_DEFAULT);
+    VRFY((dataset2 != FAIL), "H5Dcreate succeed");
+
+
+
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* put some trivial data in the data_array */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* write data independently */
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
+	    H5P_DEFAULT, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite succeed");
+
+    /* write data independently */
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
+	    H5P_DEFAULT, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite succeed");
+
+    /* release dataspace ID */
+    H5Sclose(file_dataspace);
+
+    /* close dataset collectively */					    
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "H5Dclose1 succeed");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "H5Dclose2 succeed");
+
+    /* release all IDs created */
+    H5Sclose(sid);
+
+    /* close the file collectively */					    
+    H5Fclose(fid);							    
+}
+
+/* Example of using the parallel HDF5 library to read a dataset */
+void
+dataset_readInd(char *filename)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+
+    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];	/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int   i, j;
+    int mpi_size, mpi_rank;
+
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Independent read test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+
+    /* setup file access template */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "");
+
+
+    /* open the file collectively */
+    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    VRFY((fid != FAIL), "");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+    /* open the dataset1 collectively */
+    dataset1 = H5Dopen(fid, DATASETNAME1);
+    VRFY((dataset1 != FAIL), "");
+
+    /* open another dataset collectively */
+    dataset2 = H5Dopen(fid, DATASETNAME1);
+    VRFY((dataset2 != FAIL), "");
+
+
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);
+    VRFY((file_dataspace != FAIL), "");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill dataset with test data */
+    dataset_fill(start, count, stride, &data_origin1[0][0]);
+
+    /* read data independently */
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
+    VRFY((ret != FAIL), "");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    if (ret) nerrors++;
+
+    /* read data independently */
+    ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
+    VRFY((ret != FAIL), "");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    if (ret) nerrors++;
+
+    /* close dataset collectively */
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "");
+
+    /* release all IDs created */
+    H5Sclose(file_dataspace);
+
+    /* close the file collectively */
+    H5Fclose(fid);
+}
+
+
+/*
+ * Example of using the parallel HDF5 library to create two datasets
+ * in one HDF5 file with collective parallel access support.
+ * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
+ * Each process controls only a slab of size DIM1 x DIM2 within each
+ * dataset. [Note: not so yet.  Datasets are of sizes DIM1xDIM2 and
+ * each process controls a hyperslab within.]
+ */
+
+void
+dataset_writeAll(char *filename)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t xfer_plist;		/* Dataset transfer properties list */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t datatype;		/* Datatype ID */
+    hsize_t dims[RANK] = {DIM1,DIM2};	/* dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+
+    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int mpi_size, mpi_rank;
+    
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Collective write test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* -------------------
+     * START AN HDF5 FILE 
+     * -------------------*/
+    /* setup file access template with parallel IO access. */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "H5Pcreate access succeed");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "H5Pset_mpi succeed");
+
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    VRFY((fid != FAIL), "H5Fcreate succeed");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+
+    /* --------------------------
+     * Define the dimensions of the overall datasets
+     * and create the dataset
+     * ------------------------- */
+    /* setup dimensionality object */
+    sid = H5Screate_simple (RANK, dims, NULL);
+    VRFY((sid != FAIL), "H5Screate_simple succeed");
+
+    
+    /* create a dataset collectively */
+    dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    VRFY((dataset1 != FAIL), "H5Dcreate succeed");
+
+    /* create another dataset collectively */
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+    ret = H5Tset_order(datatype, H5T_ORDER_LE);
+    VRFY((ret != FAIL), "H5Tset_order succeed");
+
+    dataset2 = H5Dcreate(fid, DATASETNAME2, datatype, sid, H5P_DEFAULT);
+    VRFY((dataset2 != FAIL), "H5Dcreate 2 succeed");
+
+    /*
+     * Set up dimensions of the slab this process accesses.
+     */
+
+    /* Dataset1: each process takes a block of rows. */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill the local slab with some trivial data */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist != FAIL), "");
+    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    VRFY((ret != FAIL), "H5Pcreate xfer succeed");
+
+    /* write data collectively */
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite dataset1 succeed");
+
+    /* release all temporary handles. */
+    /* Could have used them for dataset2 but it is cleaner */
+    /* to create them again.*/
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+    /* Dataset2: each process takes a block of columns. */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
+
+    /* put some trivial data in the data_array */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill the local slab with some trivial data */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist != FAIL), "");
+    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    VRFY((ret != FAIL), "H5Pcreate xfer succeed");
+
+    /* write data independently */
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite dataset2 succeed");
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+
+    /*
+     * All writes completed.  Close datasets collectively
+     */					    
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "H5Dclose1 succeed");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "H5Dclose2 succeed");
+
+    /* release all IDs created */
+    H5Sclose(sid);
+
+    /* close the file collectively */					    
+    H5Fclose(fid);							    
+}
+
+/*
+ * Example of using the parallel HDF5 library to read two datasets
+ * in one HDF5 file with collective parallel access support.
+ * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
+ * Each process controls only a slab of size DIM1 x DIM2 within each
+ * dataset. [Note: not so yet.  Datasets are of sizes DIM1xDIM2 and
+ * each process controls a hyperslab within.]
+ */
+
+void
+dataset_readAll(char *filename)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t xfer_plist;		/* Dataset transfer properties list */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+
+    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int mpi_size, mpi_rank;
+
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Collective read test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* -------------------
+     * OPEN AN HDF5 FILE 
+     * -------------------*/
+    /* setup file access template with parallel IO access. */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "H5Pcreate access succeed");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "H5Pset_mpi succeed");
+
+    /* open the file collectively */
+    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    VRFY((fid != FAIL), "H5Fopen succeed");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+
+    /* --------------------------
+     * Open the datasets in it
+     * ------------------------- */
+    /* open the dataset1 collectively */
+    dataset1 = H5Dopen(fid, DATASETNAME1);
+    VRFY((dataset1 != FAIL), "H5Dopen succeed");
+
+    /* open another dataset collectively */
+    dataset2 = H5Dopen(fid, DATASETNAME2);
+    VRFY((dataset2 != FAIL), "H5Dopen 2 succeed");
+
+    /*
+     * Set up dimensions of the slab this process accesses.
+     */
+
+    /* Dataset1: each process takes a block of columns. */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill dataset with test data */
+    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_origin1[0][0]);
+    }
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist != FAIL), "");
+    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    VRFY((ret != FAIL), "H5Pcreate xfer succeed");
+
+    /* read data collectively */
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret != FAIL), "H5Dread succeed");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    if (ret) nerrors++;
+
+    /* release all temporary handles. */
+    /* Could have used them for dataset2 but it is cleaner */
+    /* to create them again.*/
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+    /* Dataset2: each process takes a block of rows. */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill dataset with test data */
+    dataset_fill(start, count, stride, &data_origin1[0][0]);
+    MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_origin1[0][0]);
+    }
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist != FAIL), "");
+    ret=H5Pset_xfer(xfer_plist, H5D_XFER_COLLECTIVE);
+    VRFY((ret != FAIL), "H5Pcreate xfer succeed");
+
+    /* read data independently */
+    ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);					    
+    VRFY((ret != FAIL), "H5Dread succeed");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    if (ret) nerrors++;
+
+    /* release all temporary handles. */
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+
+    /*
+     * All reads completed.  Close datasets collectively
+     */					    
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "H5Dclose1 succeed");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "H5Dclose2 succeed");
+
+    /* close the file collectively */					    
+    H5Fclose(fid);							    
+}
+
+
+/*
+ * Example of using the parallel HDF5 library to create two extendable
+ * datasets in one HDF5 file with parallel MPIO access support.
+ * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
+ * Each process controls only a slab of size DIM1 x DIM2 within each
+ * dataset.
+ */
+
+void
+extend_writeInd(char *filename)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hsize_t dims[RANK] = {DIM1,DIM2};		/* dataset initial dim sizes */
+    hsize_t max_dims[RANK] =
+    		{DIM1, DIM2};	/* dataset maximum dim sizes */
+    hsize_t dimslocal1[RANK] = {DIM1,DIM2}; 	/* local dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];		/* data buffer */
+    hsize_t	chunk_dims[RANK];		/* chunk sizes */
+    hid_t	dataset_pl;			/* dataset create prop. list */
+
+    hssize_t	start[RANK];	/* for hyperslab setting */
+    hsize_t	count[RANK];	/* for hyperslab setting */
+    hsize_t	stride[RANK];	/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int   i, j;
+    int mpi_size, mpi_rank;
+    char *fname;
+    
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Extend independent write test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* -------------------
+     * START AN HDF5 FILE 
+     * -------------------*/
+    /* setup file access template with parallel IO access. */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "H5Pcreate access succeed");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "H5Pset_mpi succeed");
+
+    /* create the file collectively */
+    fid=H5Fcreate(filename,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    VRFY((fid != FAIL), "H5Fcreate succeed");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+
+    /* --------------------------
+     * Define the dimensions of the overall datasets
+     * and the slabs local to the MPI process.
+     * ------------------------- */
+
+    /* set up dataset storage chunk sizes and creation property list */
+    chunk_dims[0] = 7;
+    chunk_dims[1] = 13;
+    if (verbose)
+	printf("chunks[]=%d,%d\n", chunk_dims[0], chunk_dims[1]);
+    dataset_pl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dataset_pl != FAIL), "H5Pcreate succeed");
+    ret = H5Pset_chunk(dataset_pl, RANK, chunk_dims);
+    VRFY((ret != FAIL), "H5Pset_chunk succeed");
+
+
+    /* setup dimensionality object */
+    sid = H5Screate_simple (RANK, dims, max_dims);
+    VRFY((sid != FAIL), "H5Screate_simple succeed");
+
+    
+    /* create an extendable dataset collectively */
+    dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid,
+			dataset_pl);
+    VRFY((dataset1 != FAIL), "H5Dcreate succeed");
+
+    /* create another extendable dataset collectively */
+    dataset2 = H5Dcreate(fid, DATASETNAME2, H5T_NATIVE_INT, sid,
+			dataset_pl);
+    VRFY((dataset2 != FAIL), "H5Dcreate succeed");
+
+    /* extend both datasets */
+    ret = H5Dextend (dataset2, dims);
+    VRFY((ret != FAIL), "H5Dextend succeed");
+
+
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* put some trivial data in the data_array */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* write data independently */
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite succeed");
+
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYCOL);
+
+    /* put some trivial data in the data_array */
+    dataset_fill(start, count, stride, &data_array1[0][0]);
+    MESG("data_array initialized");
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);				    
+    VRFY((file_dataspace != FAIL), "H5Dget_space succeed");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "H5Sset_hyperslab succeed");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* write data independently */
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,    
+	    H5P_DEFAULT, data_array1);					    
+    VRFY((ret != FAIL), "H5Dwrite succeed");
+
+    /* release dataspace ID */
+    H5Sclose(file_dataspace);
+#ifdef NO
+#endif /* NO */
+
+    /* close dataset collectively */					    
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "H5Dclose1 succeed");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "H5Dclose2 succeed");
+
+    /* release all IDs created */
+    H5Sclose(sid);
+
+    /* close the file collectively */					    
+    H5Fclose(fid);							    
+}
+
+/* Example of using the parallel HDF5 library to read a dataset */
+void
+extend_readInd(char *filename)
+{
+    hid_t fid;			/* HDF5 file ID */
+    hid_t acc_tpl;		/* File access templates */
+    hid_t sid;   		/* Dataspace ID */
+    hid_t file_dataspace;	/* File dataspace ID */
+    hid_t mem_dataspace;	/* memory dataspace ID */
+    hid_t dataset1, dataset2;	/* Dataset ID */
+    hsize_t dims[] = {DIM1,DIM2};   	/* dataset dim sizes */
+    DATATYPE data_array1[DIM1][DIM2];	/* data buffer */
+    DATATYPE data_origin1[DIM1][DIM2];	/* expected data buffer */
+
+    hssize_t   start[RANK];			/* for hyperslab setting */
+    hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
+
+    herr_t ret;         	/* Generic return value */
+    int   i, j;
+    int mpi_size, mpi_rank;
+
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    if (verbose)
+	printf("Extend independent read test on file %s\n", filename);
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+
+    /* setup file access template */
+    acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((acc_tpl != FAIL), "");
+    /* set Parallel access with communicator */
+    ret = H5Pset_mpi(acc_tpl, comm, info);     
+    VRFY((ret != FAIL), "");
+
+
+    /* open the file collectively */
+    fid=H5Fopen(filename,H5F_ACC_RDWR,acc_tpl);
+    VRFY((fid != FAIL), "");
+
+    /* Release file-access template */
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret != FAIL), "");
+
+    /* open the dataset1 collectively */
+    dataset1 = H5Dopen(fid, DATASETNAME1);
+    VRFY((dataset1 != FAIL), "");
+
+    /* open another dataset collectively */
+    dataset2 = H5Dopen(fid, DATASETNAME1);
+    VRFY((dataset2 != FAIL), "");
+
+
+    /* set up dimensions of the slab this process accesses */
+    slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset1);
+    VRFY((file_dataspace != FAIL), "");
+    ret=H5Sset_hyperslab(file_dataspace, start, count, stride); 
+    VRFY((ret != FAIL), "");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, count, NULL);
+    VRFY((mem_dataspace != FAIL), "");
+
+    /* fill dataset with test data */
+    dataset_fill(start, count, stride, &data_origin1[0][0]);
+
+    /* read data independently */
+    ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
+    VRFY((ret != FAIL), "");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    VRFY((ret == 0), "dataset1 read verified correct");
+    if (ret) nerrors++;
+
+    /* read data independently */
+    ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
+    VRFY((ret != FAIL), "");
+
+    /* verify the read data with original expected data */
+    ret = dataset_vrfy(start, count, stride, &data_array1[0][0], &data_origin1[0][0]);
+    VRFY((ret == 0), "dataset2 read verified correct");
+    if (ret) nerrors++;
+
+    /* close dataset collectively */
+    ret=H5Dclose(dataset1);
+    VRFY((ret != FAIL), "");
+    ret=H5Dclose(dataset2);
+    VRFY((ret != FAIL), "");
+
+    /* release all IDs created */
+    H5Sclose(file_dataspace);
+
+    /* close the file collectively */
+    H5Fclose(fid);
+}

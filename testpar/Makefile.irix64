@@ -24,7 +24,7 @@ MOSTLYCLEAN=ParaEg1.h5f ParaEg2.h5f
 DISTCLEAN=go
 
 # The default is to build the library and programs.
-all: testphdf5
+all: progs
 
 
 # These are our main targets. They should be listed in the order to be
@@ -36,10 +36,10 @@ TESTS=$(PROGS)
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-PROG_SRC=testphdf5.c
+PROG_SRC=testphdf5.c t_dset.c t_file.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
-TESTPHDF5_SRC=testphdf5.c
+TESTPHDF5_SRC=testphdf5.c t_dset.c t_file.c
 TESTPHDF5_OBJ=$(TESTPHDF5_SRC:.c=.o)
 
 # Private header files (not to be installed)...
@@ -92,7 +92,7 @@ distclean: clean
 maintainer-clean: distclean
 
 # Implicit rules
-.c.o:
+.c.o:	testphdf5.h
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
 
