@@ -9,6 +9,7 @@
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 #include <hdf5.h>
+#include <H5private.h>
 
 #ifdef H5_STDC_HEADERS
 #   include <assert.h>
@@ -220,7 +221,7 @@ main (void)
     /* Open the files */
     file = H5Fcreate (HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
-    fd = open (RAW_FILE_NAME, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    fd = HDopen (RAW_FILE_NAME, O_RDWR|O_CREAT|O_TRUNC, 0666);
     assert (fd>=0);
     
     /* Create the dataset */
@@ -516,7 +517,7 @@ printf("Before getrusage() call\n");
 
     
     /* Close everything */
-    close (fd);
+    HDclose (fd);
     H5Dclose (dset);
     H5Sclose (file_space);
     H5Fclose (file);
