@@ -5553,18 +5553,17 @@ done:
 herr_t
 H5Pclose_class(hid_t cls_id)
 {
-    H5P_genclass_t	*pclass;        /* Property list class created */
     hid_t	ret_value = SUCCEED;    /* Return value			*/
 
     FUNC_ENTER_API(H5Pclose_class, FAIL);
     H5TRACE1("e","i",cls_id);
 
     /* Check arguments */
-    if (H5I_GENPROP_CLS != H5I_get_type(cls_id) || NULL == (pclass = H5I_remove(cls_id)))
+    if (H5I_GENPROP_CLS != H5I_get_type(cls_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
-    /* Delete the property list class */
-    if (H5P_close_class(pclass) < 0)
+    /* Close the property list class */
+    if (H5I_dec_ref(cls_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
