@@ -1594,7 +1594,6 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
     /* There should be no way that these can be NULL since the function
      * that calls this one checks to make sure they aren't before
      * pasing them */
-    assert(exp);
     assert(data_xform_prop);
   
     ret_value = data_xform_prop->xform_exp;

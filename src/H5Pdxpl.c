@@ -80,6 +80,7 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_data_transform
  *
@@ -136,11 +137,9 @@ ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t s
     len = HDstrlen(pexp);
     if(expression)
     {
-	/* sanity check */
-	if(size > len)
-	    size = len;
-	
-	HDstrncpy(expression, pexp, size);
+	HDstrncpy(expression, pexp, MIN(len+1,size));
+        if(len >= size)
+            expression[size-1]='\0';
     }
     
     ret_value = (ssize_t)len;
@@ -154,9 +153,6 @@ done:
 
     FUNC_LEAVE_API(ret_value);
 }
-
-
-
 
 
 /*-------------------------------------------------------------------------

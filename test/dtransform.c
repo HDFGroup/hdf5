@@ -654,13 +654,13 @@ int test_getset(const hid_t dxpl_id_c_to_f)
 
     const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */ 
     const char* c_to_f = "(9/5.0)*x + 32";
-    char* ptrgetTest = malloc(strlen(c_to_f)+1);
+    char* ptrgetTest = HDmalloc(HDstrlen(c_to_f)+1);
     
-    memset(ptrgetTest, 0, strlen(c_to_f)+1);
+    HDmemset(ptrgetTest, 0, HDstrlen(c_to_f)+1);
     
     TESTING("H5Pget_data_transform")
-    H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, strlen(c_to_f));
-    if(strcmp(c_to_f, ptrgetTest) != 0)
+    H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(c_to_f)+1);
+    if(HDstrcmp(c_to_f, ptrgetTest) != 0)
     {
 	H5_FAILED();
 	fprintf(stderr, "    ERROR: Data transform failed to match what was set\n");
@@ -690,12 +690,12 @@ int test_getset(const hid_t dxpl_id_c_to_f)
     }
     PASSED();
     
-    memset(ptrgetTest, 0, strlen(c_to_f)+1);
+    HDmemset(ptrgetTest, 0, strlen(c_to_f)+1);
     free(ptrgetTest);
 
     ptrgetTest = malloc(strlen(simple)+1);
     
-    memset(ptrgetTest, 0, strlen(simple)+1);
+    HDmemset(ptrgetTest, 0, strlen(simple)+1);
     TESTING("H5Pget_data_transform, after resetting transform property")
     H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, strlen(simple)+1);
     if(strcmp(simple, ptrgetTest) != 0)
