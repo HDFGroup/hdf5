@@ -375,7 +375,6 @@ done:
 herr_t
 H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache)
 {
-    H5P_genplist_t *dx_plist;   /* Data transfer property list */
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_get_dxpl_cache,FAIL)
@@ -2867,109 +2866,126 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
     /* Sanity check */
     assert(fm->f_ndims>0);
 
-    /* Get bounding box for selection */
-    if(H5S_get_select_bounds(fm->file_space, file_sel_start, file_sel_end)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
-
-    /* Get bounding box for selection */
-    if(H5S_get_select_bounds(fm->mem_space, mem_sel_start, mem_sel_end)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
-
-    /* Calculate the adjustment for memory selection from file selection */
-    assert(fm->m_ndims==fm->f_ndims);
-    for(u=0; u<fm->f_ndims; u++)
-        adjust[u]=file_sel_start[u]-mem_sel_start[u];
-#ifdef QAK
-{
-    int mpi_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    if(mpi_rank==1) {
-        HDfprintf(stderr,"%s: rank=%d - adjust={",FUNC,mpi_rank);
-        for(u=0; u<fm->f_ndims; u++)
-            HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-    } /* end if */
-}
-#endif /* QAK */
-#ifdef QAK
-HDfprintf(stderr,"%s: adjust={",FUNC);
-for(u=0; u<fm->f_ndims; u++)
-    HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
-#endif /* QAK */
-
-    /* Iterate over each chunk in the chunk list */
-    curr_node=H5TB_first(fm->fsel->root);
-    while(curr_node) {
+    /* Check for all I/O going to a single chunk */
+    if(H5TB_count(fm->fsel)==1) {
         H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
+
+        /* Get the node */
+        curr_node=H5TB_first(fm->fsel->root);
 
         /* Get pointer to chunk's information */
         chunk_info=curr_node->data;
         assert(chunk_info);
 
-        /* Copy the information */
-
-        /* Copy the memory dataspace */
+        /* Copy the memory dataspace & selection to be the chunk's dataspace & selection */
         if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
-
-        /* Release the current selection */
-        if(H5S_select_release(chunk_info->mspace)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
-
-        /* Copy the file chunk's selection */
-        if(H5S_select_copy(chunk_info->mspace,chunk_info->fspace)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection");
-
-        /* Compensate for the chunk offset */
-        for(u=0; u<fm->f_ndims; u++) {
-            H5_CHECK_OVERFLOW(fm->layout->dim[u],hsize_t,hssize_t);
-            chunk_adjust[u]=adjust[u]-(chunk_info->coords[u]*(hssize_t)fm->layout->dim[u]); /*lint !e771 The adjust array will always be initialized */
-        } /* end for */
-#ifdef QAK
-{
-    int mpi_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    if(mpi_rank==1) {
-        HDfprintf(stderr,"%s: rank=%d - Before adjusting memory selection\n",FUNC,mpi_rank);
-        HDfprintf(stderr,"%s: rank=%d - chunk_adjust={",FUNC,mpi_rank);
-        for(u=0; u<fm->f_ndims; u++)
-            HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
     } /* end if */
-}
+    else {
+        /* Get bounding box for selection */
+        if(H5S_get_select_bounds(fm->file_space, file_sel_start, file_sel_end)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+        /* Get bounding box for selection */
+        if(H5S_get_select_bounds(fm->mem_space, mem_sel_start, mem_sel_end)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+        /* Calculate the adjustment for memory selection from file selection */
+        assert(fm->m_ndims==fm->f_ndims);
+        for(u=0; u<fm->f_ndims; u++)
+            adjust[u]=file_sel_start[u]-mem_sel_start[u];
+#ifdef QAK
+    {
+        int mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+        if(mpi_rank==1) {
+            HDfprintf(stderr,"%s: rank=%d - adjust={",FUNC,mpi_rank);
+            for(u=0; u<fm->f_ndims; u++)
+                HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+        } /* end if */
+    }
 #endif /* QAK */
 #ifdef QAK
-HDfprintf(stderr,"%s: Before adjusting memory selection\n",FUNC);
-HDfprintf(stderr,"%s: chunk_adjust={",FUNC);
-for(u=0; u<fm->f_ndims; u++)
-    HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+    HDfprintf(stderr,"%s: adjust={",FUNC);
+    for(u=0; u<fm->f_ndims; u++)
+        HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-        /* Adjust the selection */
-        if(H5S_hyper_adjust(chunk_info->mspace,chunk_adjust)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection");
+
+        /* Iterate over each chunk in the chunk list */
+        curr_node=H5TB_first(fm->fsel->root);
+        while(curr_node) {
+            H5D_chunk_info_t *chunk_info;   /* Pointer to chunk information */
+
+            /* Get pointer to chunk's information */
+            chunk_info=curr_node->data;
+            assert(chunk_info);
+
+            /* Copy the information */
+
+            /* Copy the memory dataspace */
+            if((chunk_info->mspace = H5S_copy(fm->mem_space))==NULL)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+
+            /* Release the current selection */
+            if(H5S_select_release(chunk_info->mspace)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
+
+            /* Copy the file chunk's selection */
+            if(H5S_select_copy(chunk_info->mspace,chunk_info->fspace)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection");
+
+            /* Compensate for the chunk offset */
+            for(u=0; u<fm->f_ndims; u++) {
+                H5_CHECK_OVERFLOW(fm->layout->dim[u],hsize_t,hssize_t);
+                chunk_adjust[u]=adjust[u]-(chunk_info->coords[u]*(hssize_t)fm->layout->dim[u]); /*lint !e771 The adjust array will always be initialized */
+            } /* end for */
 #ifdef QAK
-{
-    int mpi_rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-    if(mpi_rank==1)
-        HDfprintf(stderr,"%s: rank=%d - After adjusting memory selection\n",FUNC,mpi_rank);
-}
+    {
+        int mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+        if(mpi_rank==1) {
+            HDfprintf(stderr,"%s: rank=%d - Before adjusting memory selection\n",FUNC,mpi_rank);
+            HDfprintf(stderr,"%s: rank=%d - chunk_adjust={",FUNC,mpi_rank);
+            for(u=0; u<fm->f_ndims; u++)
+                HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+        } /* end if */
+    }
 #endif /* QAK */
 #ifdef QAK
-HDfprintf(stderr,"%s: After adjusting memory selection\n",FUNC);
-
-{
-    hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
-
-    if(H5S_get_simple_extent_dims(chunk_info->mspace, mem_dims, NULL)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
-
-    HDfprintf(stderr,"%s: mem_dims={",FUNC);
-    for(u=0; u<fm->m_ndims; u++)
-        HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
-}
+    HDfprintf(stderr,"%s: Before adjusting memory selection\n",FUNC);
+    HDfprintf(stderr,"%s: chunk_adjust={",FUNC);
+    for(u=0; u<fm->f_ndims; u++)
+        HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
 #endif /* QAK */
-        /* Get the next chunk node in the TBBT */
-        curr_node=H5TB_next(curr_node);
-    } /* end while */
+            /* Adjust the selection */
+            if(H5S_hyper_adjust(chunk_info->mspace,chunk_adjust)<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection");
+#ifdef QAK
+    {
+        int mpi_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+        if(mpi_rank==1)
+            HDfprintf(stderr,"%s: rank=%d - After adjusting memory selection\n",FUNC,mpi_rank);
+    }
+#endif /* QAK */
+#ifdef QAK
+    HDfprintf(stderr,"%s: After adjusting memory selection\n",FUNC);
+
+    {
+        hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
+
+        if(H5S_get_simple_extent_dims(chunk_info->mspace, mem_dims, NULL)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
+
+        HDfprintf(stderr,"%s: mem_dims={",FUNC);
+        for(u=0; u<fm->m_ndims; u++)
+            HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
+    }
+#endif /* QAK */
+            /* Get the next chunk node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
