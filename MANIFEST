@@ -248,6 +248,9 @@
 ./src/H5P.c
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
+./src/H5R.c
+./src/H5Rprivate.h
+./src/H5Rpublic.h
 ./src/H5RA.c
 ./src/H5RAprivate.h
 ./src/H5RApublic.h
