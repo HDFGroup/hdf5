@@ -1040,8 +1040,10 @@ Optional Packages:
                          include/ and lib/ subdirectories
 
   --with-dmalloc=DIR      Use dmalloc memory debugging aid [default=no]
-  --with-zlib=DIR         Use GNU zlib compression [default=yes]
-  --with-szlib=DIR        Use szlib compression [default=yes]
+  --with-zlib=DIR         Use zlib library for external deflate I/O filter
+                          [default=yes]
+  --with-szlib=DIR        Use szlib library for external szlib I/O filter
+                          [default=yes]
   --with-pablo=DIR        Use the Pablo library [default=no]
   --with-ssl=LIB          Use the SSL library [default=no]
   --with-gass=DIR         Use the GASS library [default=no]
@@ -4109,7 +4111,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4112 "configure"' > conftest.$ac_ext
+  echo '#line 4114 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4650,7 +4652,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4653: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4655: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6461,7 +6463,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6464 "configure"
+#line 6466 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6559,7 +6561,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6562 "configure"
+#line 6564 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -23356,6 +23358,11 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_DEFLATE 1
 _ACEOF
 
+
+        if test "X$EXTERNAL_FILTERS" != "X"; then
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+    fi
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate"
 fi
 
 
@@ -23792,14 +23799,17 @@ echo "$as_me: error: couldn't find szlib library" >&2;}
     ;;
 esac
 
-
-  if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-
+if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_SZIP 1
 _ACEOF
 
+
+        if test "X$EXTERNAL_FILTERS" != "X"; then
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+    fi
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
 fi
 
  PABLO=""
@@ -32420,6 +32430,11 @@ if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   fi
 fi
 
+PRINT_PLAIN() {
+  echo $ECHO_N "$1$ECHO_C"
+  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5.settings
+}
+
 PRINT_N() {
   echo $ECHO_N "$1:  $ECHO_C"
   echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5.settings
@@ -32524,14 +32539,17 @@ IF_YES_NO "$GPFS"
 PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
 
-PRINT_N "           Internal I/O filters"
-PRINT "$FILTERS"
-
 PRINT_N "                        hsize_t"
 case "$HSIZET" in
   no|small)  PRINT "Small" ;;
   *)         PRINT "Large" ;;
 esac
+
+PRINT_N "         I/O filters (external)"
+PRINT "$EXTERNAL_FILTERS"
+
+PRINT_N "         I/O filters (internal)"
+PRINT "$FILTERS"
 
 PRINT_N " Linux Large File Support (LFS)"
 IF_ENABLED_DISABLED "$LINUX_LFS"
@@ -32557,9 +32575,3 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
-
-PRINT_N "               Zlib-compression"
-IF_YES_NO "$HAVE_ZLIB"
-
-PRINT_N "               SZlib-compression"
-IF_YES_NO "$HAVE_SZLIB"
