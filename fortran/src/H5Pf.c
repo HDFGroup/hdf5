@@ -1133,15 +1133,17 @@ nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts,  size_t_
  * Programmer:  Xiangyang Su
  *              Friday, February 25, 2000
  * Modifications: Changed type of the rdcc_w0 parameter to be real_f instead of double
+ *                Changed type of the rdcc_nelmts parameter to be int_f.
+ *                                                          EIP  October 10, 2003      
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
+nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
 {
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
      int c_mdc_nelmts;
-     size_t c_rdcc_nelmts; 
+     int c_rdcc_nelmts; 
      size_t c_rdcc_nbytes;
      double c_rdcc_w0; 
      /*

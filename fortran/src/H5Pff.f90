@@ -2165,6 +2165,9 @@
 !			called C functions (it is needed for Windows
 !			port).  March 14, 2001 
 !
+!                       Bug fix: type of the rdcc_nelmts parameter should be INTEGER
+!                                instead of INTEGER(SIZE_T) October 10, 2003 
+!
 ! Comment:		
 !----------------------------------------------------------------------
 
@@ -2179,7 +2182,7 @@
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: mdc_nelmts  !Number of elements (objects)
                                                         ! in the meta data cache
-            INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts  !Number of elements (objects)
+            INTEGER, INTENT(OUT) :: rdcc_nelmts  !Number of elements (objects)
                                                         ! in the meta data cache
             INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes !Total size of the raw data 
                                                       !chunk cache, in bytes 
@@ -2198,7 +2201,7 @@
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
               INTEGER, INTENT(OUT) :: mdc_nelmts 
-              INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts 
+              INTEGER, INTENT(OUT) :: rdcc_nelmts 
               INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
               REAL, INTENT(OUT) :: rdcc_w0
               END FUNCTION h5pget_cache_c
