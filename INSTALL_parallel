@@ -8,7 +8,7 @@ HDF5.  Platforms supported by this release are SGI Origin 2000,
 IBM SP2, and the Intel TFLOP.  The steps are kind of unnatural and
 will be more automized in the next release.   If you have difficulties
 installing the software in your system, please send mail to
-	hdfparallel@ncsa.uiuc.edu
+	hdfhelp@ncsa.uiuc.edu
 In your mail, please enclose the output of "uname -a".  Also attach the
 content of "config.log" if you have run the "configure" command.
 
@@ -26,30 +26,38 @@ configure for a few machines we tested.  If your particular platform
 is not shown or somehow the steps do not work for yours, please go
 to the next section for more detail explanations.
 
-IBM SP2: follow the instructions in bin/config_para_ibm_sp.sh.
+2.1. IBM SP2
+------------
+Follow the instructions in bin/config_para_ibm_sp.sh.
 
-TFLOPS: follow the instuctions in INSTALL_TFLOPS.
+2.2. TFLOPS
+-----------
+Follow the instuctions in INSTALL_TFLOPS.
 
-SGI Origin 2000:
-Cray T3E:
-(where MPI-IO is part of system MPI library such as mpt 1.3)
+2.3. SGI/CRAY (Origin 2000, T3E)
+--------------------------------
+For SGI/CRAY systems in which MPI-IO is part of system MPI library
+such as mpt 1.3, use the following steps.
 
-#!/bin/sh
-
-RUNPARALLEL="mpirun -np 2"
-export RUNPARALLEL
-LIBS="-lmpi"
-export LIBS
-./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+./configure --enable-parallel --prefix=$PWD/installdir
 make
 make check
 make install
 
 
-SGI Origin 2000:
-Cray T3E:
-(where MPI-IO is not part of system MPI library or I want to
-use my own version of MPIO)
+2.4. MPICH systems
+------------------
+For systems in which the latest MPICH library with ROMIO is installed,
+use the following steps.
+
+CC=mpicc ./configure --prefix=$PWD/installdir
+
+
+2.5. Other machines
+-------------------
+For systems in which MPI and/or MPI-IO are not part of system library
+or I want to use my own version of MPI or MPIO libraries, use the
+following steps.
 
 
 mpi1_inc=""                                     #mpi-1 include
@@ -60,17 +68,19 @@ mpio_lib="-L$HOME/ROMIO/lib/IRIX64"             #mpio library
 MPI_INC="$mpio_inc $mpi1_inc"
 MPI_LIB="$mpio_lib $mpi1_lib"
 
-#for version 1.1
+# Specify where to find the MPI and/or MPI-IO headers and libraries
 CPPFLAGS=$MPI_INC
 export CPPFLAGS
 LDFLAGS=$MPI_LIB
 export LDFLAGS
-RUNPARALLEL="mpirun -np 2"
-export RUNPARALLEL
 LIBS="-lmpio -lmpi"
 export LIBS
 
-./configure --enable-parallel --disable-shared --prefix=$PWD/installdir
+# Specify how to run MPI parallel jobs
+RUNPARALLEL="mpirun -np 2"
+export RUNPARALLEL
+
+./configure --enable-parallel --prefix=$PWD/installdir
 make
 make check
 make install
