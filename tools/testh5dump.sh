@@ -18,7 +18,7 @@ mkdir testfiles >/dev/null 2>&1
 TESTING()
 {
     SPACES="                                                               "
-    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\n'
+    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
