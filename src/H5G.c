@@ -1193,7 +1193,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
      */
     if (!ent) {
 	ent = &new_root;
-	if (H5G_stab_create (f, 16, ent/*out*/)<0) {
+	if (H5G_stab_create (f, 256, ent/*out*/)<0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			   "unable to create root group");
 	}
