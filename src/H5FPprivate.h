@@ -39,6 +39,7 @@
  * for that object.
  */
 typedef enum {
+    /* Metadata Requests */
     H5FP_REQ_OPEN,              /* Open a file (or eventually an object)    */
     H5FP_REQ_LOCK,              /* Lock an object (in a sequence)           */
     H5FP_REQ_LOCK_END,          /* Last lock request in lock sequence       */
@@ -48,7 +49,11 @@ typedef enum {
     H5FP_REQ_READ,              /* Reading a piece of metadata              */
     H5FP_REQ_FLUSH,             /* Flush the metadata out to disk           */
     H5FP_REQ_CLOSE,             /* Close a file (or eventually an object)   */
-    H5FP_REQ_STOP               /* Stop SAP                                 */
+    H5FP_REQ_STOP,              /* Stop SAP                                 */
+
+    /* Allocation Requests */
+    H5FP_REQ_ALLOC,             /* Allocate a region of metadata            */
+    H5FP_REQ_FREE               /* Free a region of metadata                */
 } H5FP_req_t;
 
 /*===----------------------------------------------------------------------===
@@ -105,6 +110,7 @@ enum {
     H5FP_TAG_REPLY,
     H5FP_TAG_READ,
     H5FP_TAG_METADATA,
+    H5FP_TAG_ALLOC,
     H5FP_TAG_FILE_ID
 };
 
@@ -168,6 +174,11 @@ typedef struct {
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     unsigned        md_size;    /* Size of the metadata sent in next msg    */
     MPI_Offset      addr;       /* Address of the metadata                  */
+    unsigned long   feature_flags; /* Feature flags for the file driver     */
+    hsize_t         meta_block_size; /* Metadata block size                 */
+    hsize_t         sdata_block_size; /* Small data block size              */
+    hsize_t         threshold;  /* Alignment threshold                      */
+    hsize_t         alignment;  /* Alignment (really!)                      */
     unsigned char   oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
 } H5FP_request;
 
@@ -205,6 +216,22 @@ typedef struct {
 
 extern MPI_Datatype H5FP_read_t; /* MPI datatype for the H5FP_read obj      */
 
+/*===----------------------------------------------------------------------===
+ *                              H5FP_alloc
+ *===----------------------------------------------------------------------===
+ *
+ * The reply message from the SAP on an H5FP_alloc H5FP_REQ_ALLOC send.
+ */
+typedef struct {
+    unsigned        req_id;     /* Request ID copied from the SAP_request   */
+    unsigned        file_id;    /* SAP's file ID for the specific file      */
+    H5FP_status_t   status;     /* Status of the request                    */
+    H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
+    haddr_t         addr;       /* Address of the metadata                  */
+} H5FP_alloc;
+
+extern MPI_Datatype H5FP_alloc_t; /* MPI datatype for the H5FP_alloc obj    */
+
 /* Handy #define for copying OIDs */
 #define H5FP_COPY_OID(dst, src)     HDmemcpy((dst), (src), H5R_OBJ_REF_BUF_SIZE)
 
@@ -224,6 +251,9 @@ extern herr_t H5FP_sap_receive_loop(void);
 
 /* Use these functions to communicate with the SAP */
 extern herr_t H5FP_request_open(H5FP_obj_t obj_type, MPI_Offset maxaddr,
+                                unsigned long feature_flags, hsize_t
+                                meta_block_size, hsize_t sdata_block_size,
+                                hsize_t threshold, hsize_t alignment,
                                 unsigned *file_id, unsigned *req_id);
 extern herr_t H5FP_request_lock(unsigned sap_file_id, unsigned char *mdata,
                                 H5FP_lock_t rw_lock, int last, unsigned *req_id,
@@ -244,6 +274,13 @@ extern herr_t H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id,
                                           H5FP_status_t *status);
 extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id,
                                  unsigned *req_id, H5FP_status_t *status);
+
+extern herr_t H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type,
+                                    hsize_t size, haddr_t *addr,
+                                    unsigned *req_id, H5FP_status_t *status);
+extern herr_t H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type,
+                                haddr_t addr, hsize_t size,
+                                unsigned *req_id, H5FP_status_t *status);
 
 /* NOTE: Don't use these functions outside of the H5FP* modules! */
 extern herr_t H5FP_send_metadata(const char *mdata, int len, int to);

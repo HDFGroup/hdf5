@@ -70,7 +70,9 @@ static herr_t H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id, H5FP_read *sap_read
  */
 herr_t
 H5FP_request_open(H5FP_obj_t obj_type, MPI_Offset maxaddr,
-                  unsigned *file_id, unsigned *req_id)
+                  unsigned long feature_flags, hsize_t meta_block_size,
+                  hsize_t sdata_block_size, hsize_t threshold,
+                  hsize_t alignment, unsigned *file_id, unsigned *req_id)
 {
     H5FP_request req;
     MPI_Status mpi_status;
@@ -100,6 +102,11 @@ H5FP_request_open(H5FP_obj_t obj_type, MPI_Offset maxaddr,
         req.md_size = 0;
         req.obj_type = obj_type;
         req.addr = maxaddr;
+        req.feature_flags = feature_flags;
+        req.meta_block_size = meta_block_size;
+        req.sdata_block_size = sdata_block_size;
+        req.threshold = threshold;
+        req.alignment = alignment;
 
         if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                             H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -573,11 +580,11 @@ herr_t
 H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
                    H5FP_status_t *status)
 {
-    H5FP_reply sap_reply;
-    H5FP_request req;
-    MPI_Status mpi_status;
-    int mrc, my_rank;
-    int ret_value = SUCCEED;
+    H5FP_reply      sap_reply;
+    H5FP_request    req;
+    MPI_Status      mpi_status;
+    int             mrc;
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FP_request_close, FAIL);
 
@@ -587,14 +594,10 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
     assert(status);
 
     HDmemset(&req, 0, sizeof(req));
-
-    if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &my_rank)) != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
-
     req.req_type = H5FP_REQ_CLOSE;
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
-    req.proc_rank = my_rank;
+    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -608,6 +611,116 @@ H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
 
     if (sap_reply.status != H5FP_STATUS_OK)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't close file on server");
+
+    *status = H5FP_STATUS_OK;
+
+done:
+    *req_id = req.req_id;
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_request_allocate
+ * Purpose:     Request an allocation of space from the SAP.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 19. February 2003
+ * Modifications:
+ */
+herr_t
+H5FP_request_allocate(H5FD_t *file, H5FD_mem_t mem_type, hsize_t size,
+                      haddr_t *addr, unsigned *req_id, H5FP_status_t *status)
+{
+    H5FP_alloc      sap_alloc;
+    H5FP_request    req;
+    MPI_Status      mpi_status;
+    int             mrc;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5FP_request_allocate, FAIL);
+
+    /* check args */
+    assert(file);
+    assert(req_id);
+    assert(status);
+
+    HDmemset(&req, 0, sizeof(req));
+
+    req.req_type = H5FP_REQ_ALLOC;
+    req.req_id = H5FP_gen_request_id();
+    req.file_id = H5FD_fphdf5_file_id(file);
+    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.mem_type = mem_type;
+    req.meta_block_size = size; /* use this field as the size to allocate */
+
+    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+
+    HDmemset(&mpi_status, 0, sizeof(mpi_status));
+
+    if ((mrc = MPI_Recv(&sap_alloc, 1, H5FP_alloc_t, (int)H5FP_sap_rank,
+                        H5FP_TAG_ALLOC, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+
+    if (sap_alloc.status != H5FP_STATUS_OK)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't allocate space on server");
+
+    *status = H5FP_STATUS_OK;
+    *addr = sap_alloc.addr;
+
+done:
+    *req_id = req.req_id;
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_request_free
+ * Purpose:     Request freeing of space from the SAP.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 20. February 2003
+ * Modifications:
+ */
+herr_t
+H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr,
+                  hsize_t size, unsigned *req_id, H5FP_status_t *status)
+{
+    H5FP_reply      sap_reply;
+    H5FP_request    req;
+    MPI_Status      mpi_status;
+    int             mrc;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5FP_request_free, FAIL);
+
+    /* check args */
+    assert(file);
+    assert(req_id);
+    assert(status);
+
+    HDmemset(&req, 0, sizeof(req));
+
+    req.req_type = H5FP_REQ_ALLOC;
+    req.req_id = H5FP_gen_request_id();
+    req.file_id = H5FD_fphdf5_file_id(file);
+    req.proc_rank = H5FD_fphdf5_mpi_rank(file);
+    req.mem_type = mem_type;
+    req.addr = addr;
+    req.meta_block_size = size; /* use this field as the size to free */
+
+    if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
+                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+
+    HDmemset(&mpi_status, 0, sizeof(mpi_status));
+
+    if ((mrc = MPI_Recv(&sap_reply, 1, H5FP_reply_t, (int)H5FP_sap_rank,
+                        H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
+
+    if (sap_reply.status != H5FP_STATUS_OK)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't free space on server");
 
     *status = H5FP_STATUS_OK;
 

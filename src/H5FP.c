@@ -32,6 +32,7 @@ static int interface_initialize_g = 0;
 MPI_Datatype H5FP_request_t;    /* MPI datatype for the H5FP_request obj*/
 MPI_Datatype H5FP_reply_t;      /* MPI datatype for the H5FP_reply obj  */
 MPI_Datatype H5FP_read_t;       /* MPI datatype for the H5FP_read obj   */
+MPI_Datatype H5FP_alloc_t;      /* MPI datatype for the H5FP_alloc obj  */
 
 /* SAP specific variables */
 MPI_Comm H5FP_SAP_COMM;         /* Comm we use: Supplied by user        */
@@ -73,6 +74,7 @@ H5FPinit(MPI_Comm comm, int sap_rank)
     H5FP_request_t = MPI_DATATYPE_NULL;
     H5FP_reply_t = MPI_DATATYPE_NULL;
     H5FP_read_t = MPI_DATATYPE_NULL;
+    H5FP_alloc_t = MPI_DATATYPE_NULL;
 
     H5FP_SAP_COMM = MPI_COMM_NULL;
     H5FP_SAP_BARRIER_COMM = MPI_COMM_NULL;
@@ -137,6 +139,10 @@ done:
             if (MPI_Type_free(&H5FP_read_t) != MPI_SUCCESS)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
+        if (H5FP_alloc_t != MPI_DATATYPE_NULL)
+            if (MPI_Type_free(&H5FP_alloc_t) != MPI_SUCCESS)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+
         if (H5FP_SAP_BARRIER_COMM != MPI_COMM_NULL)
             /* this comm will be NULL for the SAP */
             if (MPI_Comm_free(&H5FP_SAP_BARRIER_COMM) != MPI_SUCCESS)
@@ -192,6 +198,9 @@ H5FPfinalize(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
     if (MPI_Type_free(&H5FP_read_t) != MPI_SUCCESS)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
+
+    if (MPI_Type_free(&H5FP_alloc_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_free failed");
 
     /* Release the barrier communicator */
@@ -289,8 +298,8 @@ done:
 
 /*
  * Function:    H5FP_commit_sap_datatypes
- * Purpose:     Commit the H5FP_request_t, H5FP_reply_t, and H5FP_read_t
- *              structure datatypes to MPI.
+ * Purpose:     Commit the H5FP_request_t, H5FP_reply_t, H5FP_read_t, and
+ *              H5FP_alloc_t structure datatypes to MPI.
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 26. July, 2002
@@ -299,9 +308,9 @@ done:
 static herr_t
 H5FP_commit_sap_datatypes(void)
 {
-    int block_length[3];
-    MPI_Aint displs[3];
-    MPI_Datatype old_types[3];
+    int block_length[5];
+    MPI_Aint displs[5];
+    MPI_Datatype old_types[5];
     H5FP_request req;
     H5FP_read sap_read;
     herr_t ret_value = SUCCEED;
@@ -311,18 +320,26 @@ H5FP_commit_sap_datatypes(void)
     /* Commit the H5FP_request_t datatype */
     block_length[0] = 8;
     block_length[1] = 1;
-    block_length[2] = sizeof(req.oid);
-    old_types[0] = MPI_INT;
+    block_length[2] = 1;
+    block_length[3] = 4;
+    block_length[4] = sizeof(req.oid);
+    old_types[0] = MPI_UNSIGNED;
     old_types[1] = HADDR_AS_MPI_TYPE;
-    old_types[2] = MPI_UNSIGNED_CHAR;
+    old_types[2] = MPI_UNSIGNED_LONG;
+    old_types[3] = MPI_LONG_LONG_INT;
+    old_types[4] = MPI_UNSIGNED_CHAR;
     MPI_Address(&req.req_type, &displs[0]);
     MPI_Address(&req.addr, &displs[1]);
-    MPI_Address(&req.oid, &displs[2]);
+    MPI_Address(&req.feature_flags, &displs[2]);
+    MPI_Address(&req.meta_block_size, &displs[3]);
+    MPI_Address(&req.oid, &displs[4]);
+    displs[4] -= displs[3];
+    displs[3] -= displs[2];
     displs[2] -= displs[1];
     displs[1] -= displs[0];
     displs[0] -= displs[0];
 
-    if (MPI_Type_struct(3, block_length, displs, old_types,
+    if (MPI_Type_struct(5, block_length, displs, old_types,
                         &H5FP_request_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");
 
@@ -344,7 +361,7 @@ H5FP_commit_sap_datatypes(void)
     /* Commit the H5FP_read_t datatype */
     block_length[0] = 5;
     block_length[1] = 1;
-    old_types[0] = MPI_INT;
+    old_types[0] = MPI_UNSIGNED;
     old_types[1] = HADDR_AS_MPI_TYPE;
     MPI_Address(&sap_read.req_id, &displs[0]);
     MPI_Address(&sap_read.addr, &displs[1]);
@@ -356,6 +373,23 @@ H5FP_commit_sap_datatypes(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");
 
     if (MPI_Type_commit(&H5FP_read_t) != MPI_SUCCESS)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_commit failed");
+
+    /* Commit the H5FP_alloc_t datatype */
+    block_length[0] = 4;
+    block_length[1] = 1;
+    old_types[0] = MPI_UNSIGNED;
+    old_types[1] = HADDR_AS_MPI_TYPE;
+    MPI_Address(&sap_read.req_id, &displs[0]);
+    MPI_Address(&sap_read.addr, &displs[1]);
+    displs[1] -= displs[0];
+    displs[0] -= displs[0];
+
+    if (MPI_Type_struct(2, block_length, displs, old_types,
+                        &H5FP_alloc_t) != MPI_SUCCESS)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_struct failed");
+
+    if (MPI_Type_commit(&H5FP_alloc_t) != MPI_SUCCESS)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_commit failed");
 
 done:

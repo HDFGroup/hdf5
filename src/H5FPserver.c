@@ -28,11 +28,13 @@
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata Cache                       */
 #include "H5Eprivate.h"         /* Error Handling                       */
+#include "H5FDprivate.h"        /* File driver                          */
 #include "H5Oprivate.h"         /* Object Headers                       */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
 
+#include "H5FDfphdf5.h"         /* File Driver for FPHDF5               */
 #include "H5FPprivate.h"        /* Flexible Parallel Functions          */
 
 /* Pablo mask */
@@ -125,7 +127,12 @@ static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *info,
                                                 H5FP_object_lock *ol);
 
     /* local file information handling functions */
-static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr);
+static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
+                                             unsigned long feature_flags,
+                                             hsize_t meta_block_size,
+                                             hsize_t sdata_block_size,
+                                             hsize_t threshold,
+                                             hsize_t alignment);
 static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
 static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id);
 static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
@@ -150,6 +157,7 @@ static herr_t H5FP_sap_handle_write_request(H5FP_request req,
                                             unsigned md_size);
 static herr_t H5FP_sap_handle_flush_request(H5FP_request req);
 static herr_t H5FP_sap_handle_close_request(H5FP_request req);
+static herr_t H5FP_sap_handle_alloc_request(H5FP_request req);
 
 /*
  *===----------------------------------------------------------------------===
@@ -218,6 +226,9 @@ H5FP_sap_receive_loop(void)
             break;
         case H5FP_REQ_CLOSE:
             hrc = H5FP_sap_handle_close_request(req);
+            break;
+        case H5FP_REQ_ALLOC:
+            hrc = H5FP_sap_handle_alloc_request(req);
             break;
         case H5FP_REQ_STOP:
             if (++stop == comm_size - 1)
@@ -634,7 +645,12 @@ H5FP_find_file_info(unsigned file_id)
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr)
+H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
+                               unsigned long feature_flags,
+                               hsize_t meta_block_size,
+                               hsize_t sdata_block_size,
+                               hsize_t threshold,
+                               hsize_t alignment)
 {
     H5FP_file_info *info;
     herr_t ret_value = FAIL;
@@ -652,9 +668,15 @@ H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr)
          * Initialize some of the information needed for metadata
          * allocation requests
          */
+        HDmemset(info->file.fl, 0, sizeof(info->file.fl));
+        info->file.cls = &H5FD_fphdf5_g;
         info->file.maxaddr = maxaddr;
         info->file.accum_loc = HADDR_UNDEF;
-        HDmemset(info->file.fl, 0, sizeof(info->file.fl));
+        info->file.feature_flags = feature_flags;
+        info->file.def_meta_block_size = meta_block_size;
+        info->file.def_sdata_block_size = sdata_block_size;
+        info->file.threshold = threshold;
+        info->file.alignment = alignment;
         ret_value = SUCCEED;
     }
 
@@ -840,7 +862,9 @@ H5FP_sap_handle_open_request(H5FP_request req, unsigned UNUSED md_size)
         unsigned new_file_id = H5FP_gen_sap_file_id();
 
         /* N.B. At this point, req.addr is equiv. to maxaddr in H5FD_open() */
-        if (H5FP_add_new_file_info_to_list(new_file_id, req.addr) != SUCCEED)
+        if (H5FP_add_new_file_info_to_list(new_file_id, req.addr, req.feature_flags,
+                                           req.meta_block_size, req.sdata_block_size,
+                                           req.threshold, req.alignment) != SUCCEED)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert new file structure to list");
 
@@ -1265,7 +1289,9 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
     FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
 
     if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+#if 0
         H5FP_object_lock *lock;
+#endif  /* 0 */
 
         if (info->num_mods >= H5FP_MDATA_CACHE_HIGHWATER_MARK) {
             /*
@@ -1406,6 +1432,58 @@ H5FP_sap_handle_close_request(H5FP_request req)
 
 done:
     H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_sap_handle_alloc_request
+ * Purpose:     Handle a request to allocate data from the file.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling, 19. February 2003
+ * Modifications:
+ */
+static herr_t
+H5FP_sap_handle_alloc_request(H5FP_request req)
+{
+    H5FP_alloc      alloc;
+    H5FP_file_info *info;
+    int             mrc;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOINIT(H5FP_sap_handle_alloc_request);
+
+    if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+        alloc.req_id = req.req_id;
+        alloc.file_id = info->file_id;
+        alloc.status = H5FP_STATUS_OK;
+        alloc.mem_type = req.mem_type;
+
+        /*
+         * Try allocating from the free-list that is kept on the server
+         * first. If that fails, then call the specified allocation
+         * functions depending upon what type of data is being allocated.
+         *
+         * Note: H5P_DEFAULT is passed in as the data xfer property list.
+         * This is okay since the only situation where that will be used
+         * is if you have a "hole" in the middle of your metadata (in
+         * aggregate mode) that needs to be freed. We've turned off
+         * metadata aggregation for FPHDF5 because we don't have the
+         * proper information.
+         *
+         * Whatta pain.
+         */
+        if ((alloc.addr = H5FD_alloc(&info->file, req.mem_type,
+                                     H5P_DEFAULT, req.meta_block_size)) == HADDR_UNDEF)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                        "SAP unable to allocate file memory");
+
+        if ((mrc = MPI_Send(&alloc, 1, H5FP_alloc_t, (int)req.proc_rank,
+                            H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+    }
+
+done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

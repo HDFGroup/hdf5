@@ -207,7 +207,8 @@ typedef enum H5E_minor_t {
     H5E_CANTMAKETREE,           /*can't make a TBBT tree                     */
     H5E_CANTRECV,               /*can't receive messages from processes      */
     H5E_CANTSENDMDATA,          /*can't send metadata message                */
-    H5E_CANTCHANGE              /*can't register change on server            */
+    H5E_CANTCHANGE,             /*can't register change on server            */
+    H5E_CANTALLOC               /*can't allocate from file                   */
 } H5E_minor_t;
 
 /* Information about an error */
