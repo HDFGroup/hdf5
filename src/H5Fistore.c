@@ -1304,7 +1304,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
  *		directly into the chunk cache and should not be freed
  *		by the caller but will be valid until it is unlocked.  The
  *		input value IDX_HINT is used to speed up cache lookups and
- *		it's output value should be given to H5F_rdcc_unlock().
+ *		it's output value should be given to H5F_istore_unlock().
  *		IDX_HINT is ignored if it is out of range, and if it points
  *		to the wrong entry then we fall back to the normal search
  *		method.
