@@ -894,7 +894,6 @@
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
-./test/chunk.c
 ./test/cmpd_dset.c
 ./test/dpss_read.c
 ./test/dpss_write.c
@@ -913,14 +912,12 @@
 ./test/h5test.c
 ./test/h5test.h
 ./test/hyperslab.c
-./test/iopipe.c
 ./test/istore.c
 ./test/lheap.c
 ./test/links.c
 ./test/mount.c
 ./test/mtime.c
 ./test/ohdr.c
-./test/overhead.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_
@@ -957,8 +954,6 @@
 
 ./testpar/Dependencies
 ./testpar/Makefile.in
-./testpar/mpi-perf.c
-./testpar/perf.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_mdset.c
