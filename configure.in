@@ -920,6 +920,22 @@ if test "X$THREADSAFE" = "Xyes"; then
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like the HDF5 v1.2 compatibility functions
+dnl compiled in
+dnl
+AC_MSG_CHECKING(whether HDF5 v1.2 compatibility functions enabled)
+AC_ARG_ENABLE(hdf5v1_2,
+   [  --enable-hdf5v1_2       Compile the HDF5 v1.2 compatibility interface [default=no]],
+   HDF5_V1_2_COMPAT=$enableval)
+
+if test "X$HDF5_V1_2_COMPAT" = "Xyes"; then
+   AC_MSG_RESULT(yes)
+   AC_DEFINE(WANT_H5_V1_2_COMPAT)
+else
+   AC_MSG_RESULT(no)
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
 AC_MSG_CHECKING(for Stream Virtual File Driver support)
