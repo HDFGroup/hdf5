@@ -2523,24 +2523,41 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
 
     <p>
       <code><pre>
-typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
-                             hid_t <em>dest_type</em>,
-			     H5T_cdata_t *<em>cdata</em>,
-			     size_t <em>nelmts</em>,
-			     void *<em>buffer</em>,
-                             void *<em>background</em>);
+typedef herr_t (*H5T_conv_t) (hid_t <em>src_id</em>, 
+                              hid_t <em>dst_id</em>, 
+                              H5T_cdata_t *<em>cdata</em>,
+                              size_t <em>nelmts</em>, 
+                              size_t <em>buf_stride</em>, 
+                              size_t <em>bkg_stride</em>, 
+                              void *<em>buf</em>, 
+                              void *<em>bkg</em>,
+                              hid_t <em>dset_xfer_plist</em>);
     </pre></code>
 
     <p>The conversion function is called with the source and
-      destination datatypes (<em>src_type</em> and
-      <em>dst_type</em>), path-constant data (<em>cdata</em>), the
-      number of instances of the datatype to convert
-      (<em>nelmts</em>), a buffer which initially contains an array of
-      data having the source type and on return will contain an array
-      of data having the destination type (<em>buffer</em>), and a
-      temporary or background buffer (<em>background</em>).  Functions
-      return a negative value on failure and some other value on
-      success.
+      destination datatypes (<em>src_type</em> and <em>dst_type</em>), 
+      path-constant data (<em>cdata</em>), 
+      the number of instances of the datatype to convert (<em>nelmts</em>), 
+      stride parameters for the buffer and temporary buffer 
+          (<em>buf_stride</em> and <em>bkg_stride</em>),
+      a buffer (<em>buf</em>) which initially contains an array of
+          data having the source type and on return will contain an array
+          of data having the destination type, 
+      a temporary or background buffer (<em>bkg</em>) 
+          which always has the destination type, and 
+      a transfer property list identifier (<em>dset_xfer_plist</em>).
+
+    <p>Normally, the data in <em>buf</em> and <em>bkg</em> are packed
+      and <em>buf_stride</em> and <em>bkg_stride</em> are both 
+      <code>0</code> (zero). 
+      If <em>buf_stride</em> and/or <em>bkg_stride</em> are non-zero, 
+      they indicate the number of bytes from the beginning of one element 
+      to the beginning of the next elelment of the array.
+      If <em>buf_stride</em> is non-zero, the value applies to both the 
+      input and output contents of <em>buf</em>.
+
+    <p>Functions return a negative value on failure and 
+      some other value on success.
 
     <p>The <code>command</code> field of the <em>cdata</em> argument
       determines what happens within the conversion function.  It's
