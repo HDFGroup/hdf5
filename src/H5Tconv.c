@@ -2935,7 +2935,6 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                         }
                     } else if (src->u.atomic.prec<dst->u.atomic.prec) {
                         H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset, src->u.atomic.prec);
-                        /* Why is it set to TRUE? */
                         H5T_bit_set (d, dst->u.atomic.offset+src->u.atomic.prec, dst->u.atomic.prec-src->u.atomic.prec, TRUE);
                     } else {
                         H5T_bit_copy (d, dst->u.atomic.offset, s, src->u.atomic.offset, dst->u.atomic.prec);
@@ -8468,8 +8467,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             /* Allocate enough space for the buffer holding temporary 
              * converted value
              */ 
-            buf_size = (int)pow(2, src.u.f.esize) / 8 + 1;          
-            int_buf = (uint8_t*)HDcalloc(buf_size, 1);
+            buf_size = (int)HDpow((double)2.0, (double)src.u.f.esize) / 8 + 1;          
+            int_buf = (uint8_t*)H5MM_calloc(buf_size);
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
@@ -8734,7 +8733,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 HDmemset(int_buf, 0, buf_size);
             }
            
-            HDfree(int_buf);
+            H5MM_xfree(int_buf);
 
             break;
                 

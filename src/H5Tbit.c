@@ -27,6 +27,7 @@
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Tpkg.h"		/*data-type functions			  */
 
 /* Interface initialization */
@@ -177,36 +178,38 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_shift (uint8_t *buf, hssize_t shift_dist, size_t buf_size)
+H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t buf_size)
 {
     uint8_t *tmp_buf;
     size_t  buf_size_bit = 8*buf_size;
-    size_t  i;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5T_bit_shift);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_shift);
+
+    /* Sanity check */
+    assert(buf);
+    assert(buf_size);
 
     if(!shift_dist)
         goto done;    
-    if(abs(shift_dist) >= buf_size_bit) {
-        H5T_bit_set (buf, 0, buf_size_bit, FALSE);
+    if(ABS(shift_dist) >= buf_size_bit) {
+        HDmemset(buf,0,buf_size);
         goto done;
     }
     
-    tmp_buf = (uint8_t*)HDcalloc(buf_size, 1);
+    tmp_buf = (uint8_t*)H5MM_calloc(buf_size);
+    assert(tmp_buf);
 
     /* Shift vector by making copies */    
     if(shift_dist > 0)  /* left shift */ 
-        H5T_bit_copy (tmp_buf, shift_dist, buf, 0, buf_size_bit-shift_dist);
-    else { /* right shift */
-        shift_dist = -shift_dist;
-        H5T_bit_copy(tmp_buf, 0, buf, shift_dist, buf_size_bit-shift_dist);
-    }
+        H5T_bit_copy (tmp_buf, (size_t)shift_dist, buf, 0, (size_t)(buf_size_bit-shift_dist));
+    else  /* right shift */
+        H5T_bit_copy(tmp_buf, 0, buf, (size_t)-shift_dist, (size_t)(buf_size_bit+shift_dist));
 
     /* Copy back the vector */
-    for(i=0; i<buf_size; i++)
-        buf[i] = tmp_buf[i];
+    HDmemcpy(buf,tmp_buf,buf_size);
 
-    HDfree(tmp_buf);
+    /* Free temporary buffer */
+    H5MM_xfree(tmp_buf);
 
 done:
     FUNC_LEAVE_NOAPI_VOID
@@ -558,6 +561,8 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
     size_t	idx;
 
     assert(buf);
+    assert(size);
+    assert(start==0);
 
     for(idx=0; idx < size/8; idx++) {
         if(buf[idx] != 0x00) {
@@ -591,6 +596,8 @@ H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
     size_t i;
 
     assert(buf);
+    assert(size);
+    assert(start==0);
 
     for(i=0; i<size/8; i++)
         buf[i] = ~(buf[i]);
