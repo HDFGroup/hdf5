@@ -1591,7 +1591,6 @@ AC_OUTPUT(src/libhdf5.settings
           doc/html/Tutor/Makefile
           doc/html/Tutor/Graphics/Makefile
           doc/html/Tutor/examples/Makefile
-          doc/html/Tutor/examples/java/Makefile
           doc/html/cpplus/Makefile
           doc/html/fortran/Makefile)
 no_create=$saved_no_create
