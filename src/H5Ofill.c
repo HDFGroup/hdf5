@@ -152,7 +152,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
     /* Only decode fill value information if one is defined */
     if(mesg->fill_defined) {
-        UINT32DECODE(p, mesg->size);
+        INT32DECODE(p, mesg->size);
         if (mesg->size>0) {
             H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
             if (NULL==(mesg->buf=H5MM_malloc((size_t)mesg->size)))
@@ -267,7 +267,7 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     *p++ = mesg->fill_defined;
 
     /* Does it handle undefined fill value? */
-    UINT32ENCODE(p, mesg->size);
+    INT32ENCODE(p, mesg->size);
     if(mesg->size>0)
         if(mesg->buf) {
             H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
