@@ -131,6 +131,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Opaque datatype with no tag failed for some operations.  Fixed.
+            SLU - 2004/6/3 
 	- Fixed dtypes "sw long double -> double" failure in QSC class
 	  machines.  AKC - 2004/4/16
         - Fixed problem with fletcher32 filter when converting data of different
