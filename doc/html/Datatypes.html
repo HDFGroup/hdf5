@@ -1139,7 +1139,7 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
     <a name="Datatypes_Enum">&nbsp;</a>
     <h2>8. Enumeration Datatypes</h2>
 
-    <h3>8.1. Introduction</h2>
+    <h3>8.1. Introduction</h3>
 
     <p>An HDF enumeration datatype is a 1:1 mapping between a set of
       symbols and a set of integer values, and an order is imposed on
@@ -1148,7 +1148,7 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
       the values for a particular enumeration type are of the same
       integer type, which is not necessarily a native type.
 
-    <h3>8.2. Creation</h2>
+    <h3>8.2. Creation</h3>
     
     <p>Creation of an enumeration datatype resembles creation of a
       compound datatype: first an empty enumeration type is created,
@@ -1221,7 +1221,7 @@ H5Tlock(hdf_en_colors);</pre>
 
     </dl>
 
-    <h3>8.3. Integer Operations</h2>
+    <h3>8.3. Integer Operations</h3>
 
     <p>Because an enumeration datatype is derived from an integer
       datatype, any operation which can be performed on integer 
@@ -1289,7 +1289,7 @@ H5Tenum_insert(hdf_fr_colors, "noir",  (val=4,&amp;val));
 H5Tlock(hdf_fr_colors);</pre>
     </dl>
 
-    <h3>8.4. Type Functions</h2>
+    <h3>8.4. Type Functions</h3>
 
     <p>A small set of functions is available for querying properties
       of an enumeration type.  These functions are likely to be used
@@ -1350,7 +1350,7 @@ for (i=0; i&lt;n; i++) {
 #4                WHITE = 3</pre>
     </dl>
 
-    <h3>8.5. Data Functions</h2>
+    <h3>8.5. Data Functions</h3>
 
     <p>In addition to querying about the enumeration type properties,
       an application may want to make queries about enumerated
@@ -1413,7 +1413,7 @@ printf("}\n");</pre>
 ...</pre>
     </dl>
 
-    <h3>8.6. Conversion</h2>
+    <h3>8.6. Conversion</h3>
 
     <p>Enumerated data can be converted from one type to another
       provided the destination enumeration type contains all the
@@ -1479,7 +1479,7 @@ for (i=0; i&lt;6; i++) {
       integer types it is permissible to treat enumerated data as
       integers and perform integer conversions in that context.
 
-    <h3>8.7. Symbol Order</h2>
+    <h3>8.7. Symbol Order</h3>
 
     <p>Symbol order is determined by the integer values associated
       with each symbol.  When the integer datatype is a native type,
@@ -1577,7 +1577,7 @@ Converting...
 1 WHITE
 0 BLACK</pre>
 
-    <h3>8.8. Equality</h2>
+    <h3>8.8. Equality</h3>
 
     <p>The order that members are inserted into an enumeration type is 
       unimportant; the important part is the associations between the
@@ -1587,7 +1587,7 @@ Converting...
       datatypes. Type equality is tested with the
       <code>H5Tequal()</code> function.
 
-    <h3>8.9. Interacting with C's <code>enum</code> Type</h2>
+    <h3>8.9. Interacting with C's <code>enum</code> Type</h3>
 
     <p>Although HDF enumeration datatypes are similar to C
       <code>enum</code> datatypes, there are some important
@@ -1688,7 +1688,7 @@ typedef enum {
 	</tr>
       </table>
 
-    <h4>Creating HDF Types from C Types</h3>
+    <h4>Creating HDF Types from C Types</h4>
 
     <p>An HDF enumeration datatype can be created from a C
       <code>enum</code> type simply by passing pointers to the C
@@ -1713,7 +1713,7 @@ H5Tenum_insert(hdf_en_colors, "BLACK", (val=BLACK,&amp;val));</pre></code>
 	</tr>
       </table>
 
-    <h4>Name Changes between Applications</h3>
+    <h4>Name Changes between Applications</h4>
 
     <p>Occassionally two applicatons wish to exchange data but they
       use different names for the constants they exchange.  For
@@ -1746,7 +1746,7 @@ H5Dread(dataset, hdf_sp_colors, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);</pre></cod
       </table>
 
 
-    <h4>Symbol Ordering across Applications</h3>
+    <h4>Symbol Ordering across Applications</h4>
 
     <p>Since symbol ordering is completely determined by the integer values
       assigned to each symbol in the <code>enum</code> definition,
@@ -1780,7 +1780,7 @@ H5Dread(dataset, hdf_sp_colors, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);</pre></cod
       related symbols that don't have any well defined order
       relationship.
 
-    <h4>Internationalization</h3>
+    <h4>Internationalization</h4>
 
     <p>The HDF enumeration type conversion features can also be used
       to provide internationalization of debugging output.  A program
@@ -1830,7 +1830,7 @@ nameof(lang_t language, c_en_colors val, char *name, size_t size)
 	</tr>
       </table>
 
-    <h3>8.10. Goals That Have Been Met</h2>
+    <h3>8.10. Goals That Have Been Met</h3>
 
     <p>The main goal of enumeration types is to provide communication
       of enumerated data using symbolic equivalence.  That is, a
