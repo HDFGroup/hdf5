@@ -78,6 +78,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <limits.h>
 #ifndef fileno
 int fileno ( FILE * );
 #endif
@@ -90,6 +91,11 @@ int fileno ( FILE * );
 #define HDFtrace3OPEN__
 int HDFtrace3OPEN( const char *, int, mode_t );
 
+#ifdef TRACELIB_BUILD
+#undef PCF_BUILD
+#endif 
+
+#ifndef PCF_BUILD
 #include "SDDFparam.h" 
 #include "TraceParam.h"
 
@@ -97,6 +103,9 @@ int HDFtrace3OPEN( const char *, int, mode_t );
 #include "Trace.h"
 
 #include "IO_TraceParams.h"
+#include "IOTrace.h"
+#endif
+
 #include "HDFIOTrace.h"
 
 #ifndef TRUE
@@ -122,7 +131,6 @@ extern void preInitIOTrace( void );
 
 #include "ProcIDs.h"
 #include "HDFTrace.h"
-#include "IOTrace.h"
 
 #define	ID_HDFprocName		9996
 #define	ID_malloc		9997
@@ -130,7 +138,7 @@ extern void preInitIOTrace( void );
 #define	ID_timeStamp		9999
 #define	DUMMY_HDF		10000
 
-extern char HDFprocNames[][40] = {
+char HDFprocNames[][40] = {
 "noName",
 "noName",
 "noName",
@@ -142,18 +150,58 @@ extern char HDFprocNames[][40] = {
 
 void startHDFtraceEvent (int );
 void endHDFtraceEvent (int , int , char *, int );
+void getHDFprocName( int, char[41] );
 
-#ifdef TRACELIB_BUILD
-#undef PCF_BUILD
-#endif 
+void setHDFcallLevel( int );
+void resetHDFcallLevel( void );
+int HDFcallLevel;
+int MaxHDFcallLevel = INT_MAX;
 
 #ifdef PCF_BUILD
-void hdfCaptureInit( const char* name, int captureType );
+#include "PcUIOinterface.h"
+void hdfCaptureInit( const char* name, int procNum, int captureType );
 void hdfCaptureEnd( void );
+void traceHDFentryEvent( int eventID ) ;
+void traceHDFexitEvent( int eventID );
+void basePerformanceInit( const char* name, int procNum );
+void genericBaseInit( int captureType, int procNum );
+void unixIObaseInit( int captureType, int procNum );
+int hdfBaseInit( int captureType,
+                 int procNum,
+                 int numHDFentries,
+                 char HDFprocNames[][40] );
+void timeStamp( void );
+void hdfBaseEnd( void );
+void unixIObaseEnd( void );
+void genericBaseEnd( void );
+void basePerformanceEnd( void ); 
+/*void* traceMALLOC( size_t bytes );
+FILE* traceFOPEN( const char* fileName, const char* type );
+int traceOPEN( const char *path, int flags, ... ) ;
+int trace3OPEN( const char *path, int flags, mode_t mode ) ;
+int traceCREAT( const char *path, mode_t mode ) ;
+int traceFFLUSH( FILE *stream ) ;
+int traceFCLOSE( FILE *stream ) ;
+int traceCLOSE( int fd ) ;
+ssize_t traceREAD( int fd, void *buf, int nbyte ) ;
+size_t traceFREAD( void *ptr, int size, int nItems, FILE *stream ) ;
+int traceFGETC( FILE *stream ) ;
+char* traceFGETS( char *s, int n, FILE *stream ) ;
+int traceGETW( FILE *stream ) ;
+off_t traceLSEEK( int fd, off_t offset, int whence ) ;
+int traceFSEEK( FILE *stream, off_t offset, int whence ) ;
+int traceFSETPOS( FILE *stream, const fpos_t *position ) ;
+void traceREWIND( FILE *stream ) ;
+ssize_t traceWRITE( int fd, const void *buf, int nbyte ) ;
+size_t traceFWRITE(const void *ptr, int size, int nItems, FILE *stream ) ;
+int traceFPUTC( int c, FILE *stream ) ;
+int traceFPUTS( const char *s, FILE *stream ) ;
+int tracePUTS( const char *s ) ;
+int tracePUTW( int w, FILE *stream ) ;*/
 #else
-void HDFinitTrace_RT ( const char * );
-void HDFinitTrace_SDDF ( const char * );
-void hinittracex_ ( char [], int *, int[], int *,unsigned * );
+void HDFinitTrace_RT ( const char *, int procNum );
+void HDFinitTrace_SDDF ( const char *, int procNum );
+void hinittracex_ ( char [], int *, int*, int[], int *,unsigned * );
 void hdfendtrace_ ( void ) ;
 void HDFendTrace_RT (void );
 void HDFendTrace_SDDF( void );
@@ -187,6 +235,7 @@ char *hdfRecordPointer;
 void 
 hinittracex_( char *file, 
               int *len, 
+              int *procNum,
               int flags[], 
               int *nflags, 
               unsigned *out_sw )
@@ -194,6 +243,7 @@ hinittracex_( char *file,
    char *traceFileName;
    int i;
    traceFileName = (char *)malloc(*len+1);
+   HDFcallLevel = 0;
    for ( i = 0; i < *len; ++i ) 
    {
       traceFileName[i] = file[i];
@@ -240,19 +290,19 @@ hinittracex_( char *file,
       }
    }
 #ifdef PCF_BUILD
-   hdfCaptureInit( traceFileName, OUTPUT_SWITCH );
+   hdfCaptureInit( traceFileName, *procNum, OUTPUT_SWITCH );
 #else
    suppressMPIOtrace = TRUE;
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
                         || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
-      HDFinitTrace_SDDF( traceFileName );
+      HDFinitTrace_SDDF( traceFileName, *procNum );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
                         || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
    {
-      HDFinitTrace_RT( traceFileName );
+      HDFinitTrace_RT( traceFileName, *procNum );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == NO_TRACE ) 
@@ -271,12 +321,12 @@ hinittracex_( char *file,
 #endif /* PCF_BUILD */
 }
 void
-HDFinitTrace( const char *traceFileName, int id_flag, ... )
+HDFinitTrace( const char *traceFileName, int procNum, int id_flag, ... )
 {
    int i; 
    int nIDs;
    va_list ap;
-
+   HDFcallLevel = 0;
    /*===================================================================*
    // Allocate space for trace indicators.				*
    //===================================================================*/
@@ -322,19 +372,19 @@ HDFinitTrace( const char *traceFileName, int id_flag, ... )
       }
    }
 #ifdef PCF_BUILD
-   hdfCaptureInit( traceFileName, OUTPUT_SWITCH );
+   hdfCaptureInit( traceFileName, procNum, OUTPUT_SWITCH );
 #else
    suppressMPIOtrace = TRUE;
    if ( OUTPUT_SWITCH == RUNTIME_TRACE 
                         || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
    {
-      HDFinitTrace_SDDF( traceFileName );
+      HDFinitTrace_SDDF( traceFileName, procNum );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
                         || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
    {
-      HDFinitTrace_RT( traceFileName );
+      HDFinitTrace_RT( traceFileName, procNum );
       IOtracingEnabled = 1;
    } 
    else if ( OUTPUT_SWITCH == NO_TRACE ) 
@@ -364,6 +414,14 @@ void hdfendtrace_( void )
 {
    HDFendTrace ();
 }
+void setHDFcallLevel( int maxLevel )
+{
+   MaxHDFcallLevel = maxLevel;
+}
+void resetHDFcallLevel()
+{
+   MaxHDFcallLevel = INT_MAX;
+}
 void HDFendTrace(void)
 {
 #ifdef PCF_BUILD
@@ -380,55 +438,68 @@ void HDFendTrace(void)
       HDFendTrace_RT();
    }
 #endif /* PCF_BUILD */
+   OUTPUT_SWITCH = NO_TRACE;
+   MaxHDFcallLevel = INT_MAX;
 }
 void startHDFtraceEvent(int eventID)
 {
+   ++HDFcallLevel;
+   if ( HDFcallLevel <= MaxHDFcallLevel )
+   {
 #ifdef PCF_BUILD
-   traceHDFentryEvent( eventID ) ;
+      if (OUTPUT_SWITCH != NO_TRACE ) 
+      {
+         traceHDFentryEvent( eventID ) ;
+      }
 #else
-   if ( OUTPUT_SWITCH == RUNTIME_TRACE 
+      if ( OUTPUT_SWITCH == RUNTIME_TRACE 
 	                     || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
-   {
-      traceEvent( eventID, NULL, 0 ) ;
-   } 
-   else 
-   {
-      HDFtraceEvent_RT( eventID, NULL, 0 ) ;
-   } 
+      {
+         traceEvent( eventID, NULL, 0 ) ;
+      } 
+      else if (OUTPUT_SWITCH != NO_TRACE ) 
+      {
+         HDFtraceEvent_RT( eventID, NULL, 0 ) ;
+      } 
 #endif /* PCF_BUILD */
+   } 
 }
 void endHDFtraceEvent(int eventID, int setID, char *setName, int IDtype )
 {
+   if ( HDFcallLevel <= MaxHDFcallLevel )
+   {
 #ifdef PCF_BUILD
-   traceHDFexitEvent( eventID );
+      {
+         traceHDFexitEvent( eventID );
+      }
 #else
-   HDFsetInfo info;
-   info.setID = setID;
-   info.setName = setName;
-   if ( OUTPUT_SWITCH == RUNTIME_TRACE 
+      HDFsetInfo info;
+      info.setID = setID;
+      info.setName = setName;
+      if ( OUTPUT_SWITCH == RUNTIME_TRACE 
 	                     || OUTPUT_SWITCH == MPI_RUNTIME_TRACE ) 
-   {
-      traceEvent( eventID, (char *)&info, 0 ) ;
-   } 
-   else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
+      {
+         traceEvent( eventID, (char *)&info, 0 ) ;
+      } 
+      else if ( OUTPUT_SWITCH == SUMMARY_TRACE 
 	                     || OUTPUT_SWITCH == MPI_SUMMARY_TRACE ) 
-   {
-      HDFtraceEvent_RT( eventID, &info, 0 ) ;
-   } 
-   else if ( OUTPUT_SWITCH != NO_TRACE ) 
-   {
-      fprintf(stderr,"endHDFtraceEvent: ");
-      fprintf(stderr,"invalid OUTPUT_SWITCH %d, IDtype = %d\n",
+      {
+         HDFtraceEvent_RT( eventID, &info, 0 ) ;
+      } 
+      else if ( OUTPUT_SWITCH != NO_TRACE ) 
+      {
+         fprintf(stderr,"endHDFtraceEvent: ");
+         fprintf(stderr,"invalid OUTPUT_SWITCH %d, IDtype = %d\n",
                                                   OUTPUT_SWITCH, IDtype ) ;
-   }
+      }
 #endif /* PCF_BUILD */
+   }
+   --HDFcallLevel;
 }
 #ifdef PCF_BUILD
 void
-hdfCaptureInit( const char* name, int captureType )
+hdfCaptureInit( const char* name, int procNum, int captureType )
 {
-   int procNum;
-   HDF_get_NodeNum( &procNum );
    basePerformanceInit( name, procNum );
    genericBaseInit( captureType, procNum );
    unixIObaseInit( captureType, procNum );
@@ -439,6 +510,7 @@ hdfCaptureInit( const char* name, int captureType )
                 procNum,
                 ID_HDF_Last_Entry,
                 HDFprocNames );
+   HDFcallLevel = 0;
 }
 void
 hdfCaptureEnd( void )
@@ -456,6 +528,7 @@ hdfCaptureEnd( void )
    unixIObaseEnd();
    genericBaseEnd();
    basePerformanceEnd(); 
+   MaxHDFcallLevel = INT_MAX;
 }
 #endif /* PCF_BUILD */
 /*****************************************************************************/
@@ -1121,10 +1194,10 @@ int
 HDFtracePUTS( const char *s )
 {
    int ret;
-   int fd = fileno( stdout );
 #ifdef PCF_BUILD
-   tracePUTS( s );
+   ret = tracePUTS( s );
 #else
+   int fd = fileno( stdout );
    struct read_write_args writeArgs;
    if ( IOtracingEnabled )
    {
@@ -1145,6 +1218,11 @@ HDFtracePUTS( const char *s )
 
    return( ret );
 }
+
+void getHDFprocName ( int i, char buff[41] )
+{
+   strcpy( buff, HDFprocNames[i] );
+}   
 
 /*****************************************************************************/
 /*+	Routine:  int HDFtraceFPUTC( int c, FILE *stream )                  +*/
@@ -1200,11 +1278,11 @@ HDFtraceFPUTC( int c, FILE *stream )
 int HDFtraceFPUTS( const char *s, FILE *stream )
 {
    int ret;
-   int fd = fileno( stream );
 
 #ifdef PCF_BUILD
    ret = traceFPUTS( s, stream );
 #else
+   int fd = fileno( stream );
    struct read_write_args writeArgs;
    if ( IOtracingEnabled ) 
    {

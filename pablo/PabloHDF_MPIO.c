@@ -97,6 +97,7 @@
 // 
 //======================================================================*/
 #ifdef H5_HAVE_PARALLEL
+void HDFtraceEvent_RT( int , char *, unsigned ) ;
 #include "mpi.h"
 /************************************************************************/
 /* Return the node number.						*/
@@ -125,6 +126,7 @@ int HDF_get_comm( MPI_Comm );
 int HDF_get_Datatype( MPI_Datatype );
 int HDF_get_DataRep( char* );
 int HDF_get_Bytes( MPI_Datatype, int );
+void HDFtraceIOEvent( int , void *, unsigned );
 
 /* Get the mode at the file openning */
 int 

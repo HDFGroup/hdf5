@@ -123,6 +123,7 @@
 #include "SDDFparam.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 /*======================================================================* 
 // on ipsc/860 don't include this or you'll get multiply defined SEEK_  *
@@ -184,7 +185,7 @@ fileRec_t *HDFfileList;
 /*======================================================================*
 // Internal Function prototypes						*
 //======================================================================*/
-void HDFinitTrace_RT( char *, int );
+void HDFinitTrace_RT( char *, int, int );
 void HDFendTrace_RT();
 int initproctracert_( void );
 int initHDFProcTrace_RT( void );
@@ -210,6 +211,8 @@ void printFileMappingsRT( char *, char **, int );
 void _hdfNameDescriptor( void );
 void _hdfDescriptorRT( char *, char *, int );
 void HDFfinalTimeStamp( void );
+void getHDFprocName( int index, char buff[41] );
+void IOtraceInit( char*, int, int );
 /*======================================================================*
 // Global variables           						*
 //======================================================================*/
@@ -230,7 +233,7 @@ extern char HDFprocNames[][40];
 // RETURNS								*
 //     None.								*
 //======================================================================*/
-void HDFinitTrace_RT( char *fileName, int OUTSW )
+void HDFinitTrace_RT( char *fileName, int procNum, int OUTSW )
 {
    int error;
    TRgetClock( &epoch );
@@ -249,7 +252,7 @@ void HDFinitTrace_RT( char *fileName, int OUTSW )
    // of the node as a suffix; if not, only one file is opened  	*
    // and it is not given a suffix.					*
    //===================================================================*/
-   initIOTraceMP( fileName, OUTSW );
+   IOtraceInit( fileName, procNum, OUTSW );
 }
 /*======================================================================*
 // NAME									*
@@ -1583,11 +1586,13 @@ void writeHDFRecDescrptrsRT( void )
 {
 	int j, FAMILY;
         char BUF1[256], BUF2[256] ;
+        char buff[41];
 	_hdfNameDescriptor();	/* Descriptor for named identifiers	*/
         for ( j = 0; j < NumHDFProcs; ++j ) {
            if ( HDFQueues[j] != NULL ) {
+              getHDFprocName( j, buff );
               strcpy( BUF2, "HDF ");
-              strcat( BUF2, HDFprocNames[j] );
+              strcat( BUF2, buff );
               strcat( BUF2, " Procedure Summary");
               strcpy( BUF1, BUF2 );
               strcat( BUF1, " Trace");

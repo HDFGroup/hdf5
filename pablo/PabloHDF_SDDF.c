@@ -70,6 +70,7 @@
 #include "Trace.h"
 #include "IOTrace.h"
 #include "HDFTrace.h"
+void IOtraceInit( char*, int, int );
 void HDFendTrace_SDDF(void);
 void startHDFtraceEvent(int eventID);
 void endHDFtraceEvent(int , int , char *, int );
@@ -92,6 +93,8 @@ void disableFileRegionSummaries( void );
 void _hdfTraceDescriptor( char *, char *, int );
 void createHDFTraceDescriptor( int );
 void HDFfinalTimeStamp( void );
+void getHDFprocName( int index, char buff[41] );
+void endIOTrace();
 
 #define PABLO 1
 /* on the ipsc/860 we don't include unistd.h */
@@ -102,17 +105,16 @@ void HDFfinalTimeStamp( void );
 #define returnRecord(x)    return x;
 
 #ifdef H5_HAVE_MPIOTRACE
-	int initMPIOTrace( char *, int );
+	int initMPIOTrace( char *, int, int );
 	void endMPIOTrace( void ) ;
 #else
 	void endMPIOTrace( void ) {return;} 
 #endif
 extern char *hdfRecordPointer;
-extern char HDFprocNames[][40];
 /*======================================================================*
 // Prototypes of functions in this file.				*
 //======================================================================*/
-void HDFinitTrace_SDDF( char * );
+void HDFinitTrace_SDDF( char *, int );
 /*======================================================================* 
 // Each procedure being traced has associated with it a distinct pair 	* 
 // of entry and exit event IDs.  This code maintains a vector of such  	* 
@@ -206,21 +208,21 @@ int *procEntryCalled;
 // NAME									*
 //     	HDFinitTrace_SDDF -- initalize HDF tracing with SDDF records	*
 // USAGE								*
-//     	HDFinitTrace_SDDF( traceFileName )                	*
+//     	HDFinitTrace_SDDF( traceFileName, porcNum )                	*
 // PARAMETERS								*
 //	char *traceFileName  -- name of trace file to hold output	*
+//	int  procNum         -- processor Number                 	*
 // RETURNS								*
 //     	None 								*
 //======================================================================*/
-void HDFinitTrace_SDDF( char *traceFileName )
+void HDFinitTrace_SDDF( char *traceFileName, int procNum )
 {
    /*====================================================================
    // set traceFileName and set IO tracing switches.  If MPIO 		*
    // tracing is available, MPIO tracing will also be initialized. 	*
    //===================================================================*/
 #ifdef H5_HAVE_MPIOTRACE
-   int myNode;
-   char *buff;
+//   int myNode;
    /*====================================================================
    // in the parallel case, initialize MPI-IO tracing. This  		*
    // will initialize the traceFileName and set the I/O tracing		*
@@ -231,15 +233,19 @@ void HDFinitTrace_SDDF( char *traceFileName )
    // MPIO initialization be performed and handle the naming of 	*
    // trace files.							*
    //===================================================================*/
-   initMPIOTrace( traceFileName, SUPPRESS_MPIO_TRACE ); 
-   MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
-   setTraceProcessorNumber( myNode );
+   initMPIOTrace( traceFileName, procNum, RUNTIME_TRACE ); 
+//   MPI_Comm_rank( MPI_COMM_WORLD, &myNode );
+   setTraceProcessorNumber( procNum );
 #else 
-   initIOTraceMP( traceFileName, RUNTIME_TRACE );
-#endif
+   IOtraceInit( traceFileName, procNum, RUNTIME_TRACE );
    /*====================================================================
    // complete HDF initiailization.					*
    //===================================================================*/
+   enableIOdetail();
+   disableLifetimeSummaries();
+   disableTimeWindowSummaries();
+   disableFileRegionSummaries();
+#endif
    preInitHDFProcTrace();
    initHDFProcTrace( sizeof(procEntries)/sizeof(int), procEntries );
 }
@@ -644,9 +650,11 @@ void createHDFTraceDescriptor( int Inx )
 {
    char BUF1[256]; 
    char BUF2[256] ;
+   char buff[41];
    int FAMILY;
+   getHDFprocName( Inx, buff );
    strcpy( BUF2, "HDF ");
-   strcat( BUF2, HDFprocNames[Inx] );
+   strcat( BUF2, buff );
    strcat( BUF2, " Procedure");
    strcpy( BUF1, BUF2 );
    strcat( BUF1, " Trace");
