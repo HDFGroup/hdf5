@@ -730,7 +730,7 @@ H5FD_sec2_flush(H5FD_t *_file, unsigned UNUSED closing)
     if (file->eoa>file->eof) {
 #ifdef WIN32
         /* Map the posix file handle to a Windows file handle */
-        filehandle = _get_osfhandle(fd);
+        filehandle = _get_osfhandle(file->fd);
 
         /* Translate 64-bit integers into form Windows wants */
         /* [This algorithm is from the Windows documentation for SetFilePointer()] */
