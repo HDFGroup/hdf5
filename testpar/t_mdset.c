@@ -2,9 +2,8 @@
 
 #define DIM  2
 #define SIZE 32
-#define NUMITEMS 300
 
-void multiple_dset_write(char *filename)
+void multiple_dset_write(char *filename, int ndatasets)
 {
     int i, j, n, mpi_size, mpi_rank;
     hid_t iof, plist, dataset, memspace, filespace;
@@ -37,10 +36,10 @@ void multiple_dset_write(char *filename)
     filespace = H5Screate_simple (DIM, file_dims, NULL);
     H5Sselect_hyperslab (filespace, H5S_SELECT_SET, chunk_origin, chunk_dims, count, chunk_dims);
 
-    for (n = 0; n < NUMITEMS; n++) {
+    for (n = 0; n < ndatasets; n++) {
 	sprintf (dname, "dataset %d", n);
-	dataset = H5Dcreate (iof, dname, H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT);
-	VRFY((dataset > 0), "dataset create succeeded"); 
+	dataset = H5Dcreate (iof, dname, H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT);
+	VRFY((dataset > 0), dname); 
 
 	/* calculate data to write */
 	for (i = 0; i < SIZE; i++)
@@ -52,8 +51,8 @@ void multiple_dset_write(char *filename)
 	H5Dclose (dataset);
 	if (! ((n+1) % 10)) {
 	    printf("created %d datasets\n", n+1);
-	}
 	    MPI_Barrier(MPI_COMM_WORLD);
+	}
     }
 
     H5Sclose (filespace);

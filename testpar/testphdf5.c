@@ -6,6 +6,10 @@
 
 #include <testphdf5.h>
 
+#ifndef FILENAME_MAX
+#define FILENAME_MAX 512
+#endif
+
 /* global variables */
 int dim0 = DIM0;
 int dim1 = DIM1;
@@ -13,6 +17,7 @@ int chunkdim0;
 int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
+int ndatasets = 300;			/*number of datasets to create*/
 
 herr_t (*old_func)(void*);		/* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
@@ -20,7 +25,6 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
-int domdset=1;				/* multiple dataset test */
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[5]={
 	    "ParaEg1",
@@ -28,7 +32,7 @@ const char *FILENAME[5]={
 	    "ParaEg3",
 	    "ParaMdset",
 	    NULL};
-char	filenames[5][200];
+char	filenames[5][FILENAME_MAX];
 hid_t	fapl;				/* file access property list */
 
 
@@ -150,10 +154,12 @@ int MPI_Type_create_resized(MPI_Datatype oldtype, MPI_Aint lb, MPI_Aint extent, 
 void
 usage(void)
 {
-    printf("Usage: testphdf5 [-r] [-w] [-v] [-f <prefix>] [-d <dim0> <dim1>]\n");
+    printf("Usage: testphdf5 [-r] [-w] [-v] [-m<n_datasets>] "
+	"[-f <prefix>] [-d <dim0> <dim1>]\n");
     printf("\t-r\t\tno read test\n");
     printf("\t-w\t\tno write test\n");
-    printf("\t-m\t\tno multiple dataset test\n");
+    printf("\t-m<n_datasets>"
+	"\tset number of datasets for the multiple dataset test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-d <dim0> <dim1>\tdataset dimensions\n");
@@ -188,7 +194,11 @@ parse_options(int argc, char **argv)
 			    break;
 		case 'w':   dowrite = 0;
 			    break;
-		case 'm':   domdset = 0;
+		case 'm':   ndatasets = atoi((*argv+1)+1);
+			    if (ndatasets < 0){
+				nerrors++;
+				return(1);
+			    }
 			    break;
 		case 'v':   verbose = 1;
 			    break;
@@ -296,9 +306,9 @@ main(int argc, char **argv)
 	goto finish;
     }
 
-	if (domdset){
+	if (ndatasets){
 	    MPI_BANNER("multiple datasets write ...");
-	    multiple_dset_write(filenames[3]);
+	    multiple_dset_write(filenames[3], ndatasets);
 	}
 	else{
 	    MPI_BANNER("Multiple datasets test skipped");
@@ -335,7 +345,7 @@ main(int argc, char **argv)
 	MPI_BANNER("read tests skipped");
     }
 
-    if (!(dowrite || doread || domdset)){
+    if (!(dowrite || doread || ndatasets)){
 	usage();
 	nerrors++;
     }

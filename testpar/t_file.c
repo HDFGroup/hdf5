@@ -77,6 +77,8 @@ test_split_comm_access(char *filename)
 	    VRFY((mrc==MPI_SUCCESS), "");
 	}
     }
+    mrc = MPI_Barrier(MPI_COMM_WORLD);
+    VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 }
 
 
