@@ -3329,12 +3329,12 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
         io_info->ops.write = H5D_mpio_spaces_write;
       }
 
-    #ifdef KYANG
+    #ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
       else {
 	io_info->ops.read = H5D_mpio_spaces_span_read;
 	io_info->ops.write = H5D_mpio_spaces_span_write;
       }
-      #endif
+    #endif
         /* Indicate that the I/O will be parallel */
         *use_par_opt_io=TRUE;
     } /* end if */
