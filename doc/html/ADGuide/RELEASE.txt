@@ -1,4 +1,4 @@
-HDF5 version 1.4.1-post3 released on Mon Jul  2 17:36:32 CDT 2001
+HDF5 version 1.4.2-pre3 released on Mon Jul 16 19:07:49 CDT 2001
 ================================================================================
 
 
@@ -80,6 +80,10 @@ Bug Fixes since HDF5-1.4.1 Release
       set for datasets whose dimensions were too large for the 'all' selection
       code to handle.  Any size dimensioned datasets should be handled
       correctly now.
+    * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
+      when --enable-hdf5v1_2 configure flag is enabled.
+    * Added --enable-linux-lfs flag to allow more control over whether to enable
+      or disable large file support on Linux.
 
 Documentation
 =============
