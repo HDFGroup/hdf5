@@ -48,7 +48,7 @@ dump_vars(){
 show_action()
 {
     echo "Update the following tools because they are now installed at a new directory"
-    for t in $h5tools; do
+    for t in $foundtools; do
 	echo "${t}:"
 	echo -n "   current setting="
 	sed -e "/^prefix=/s/prefix=//p" -e d $t
@@ -67,8 +67,9 @@ ERROR()
 # Main
 #
 # Initialization
-h5tools=h5cc
-fmode=			# default off
+h5tools="h5cc h5fc"	# possible hdf5 tools
+foundtools=		# tools found and will be modified
+fmode=			# force mode, default is off
 prefix=`(cd ..;pwd)`
 
 # Parse options
@@ -107,12 +108,19 @@ if [ ! -d $prefix ]; then
 fi
 
 for x in $h5tools; do
-    if [ ! -w $x ]; then
-	ERROR "h5tool($h5tools) is not found in the current directory or is not writable"
-	exit 1
+    if [ -f $x ]; then
+	foundtools="$foundtools $x"
+	if [ ! -w $x ]; then
+	    ERROR "h5tool($x) is not writable"
+	    exit 1
+	fi
     fi
 done
-	
+
+if [ -z $foundtools ]; then
+    ERROR "found no tools to modify"
+    exit 1
+fi
 
 # Show actions to be taken and get consent
 show_action
@@ -145,7 +153,7 @@ if [ "$SHOW" = "echo" ]; then
     echo "===End Update commands====="
 fi
 
-for t in $h5tools; do
+for t in $foundtools; do
     echo Update $t ...
     COMMAND="ed - $t"
     if [ "$SHOW" = "echo" ]; then
