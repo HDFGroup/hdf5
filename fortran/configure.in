@@ -457,7 +457,7 @@ dnl executable. For `mpif90' the executable should be run with `mpirun'
 dnl from the same directory as mpif90 if it exists.
 dnl
 case "$F9X" in
-  mpif90)
+  *mpif90*)
     dnl The mpich compiler. Use mpirun from the same directory if it
     dnl exists.
     PARALLEL=mpif90
@@ -488,7 +488,7 @@ case "$F9X" in
     fi
     ;;
 
-  mpxlf | mpxlf_r | mpxlf90 | mpxlf90_r | mpxlf95 | mpxlf95_r)
+  *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
     dnl The IBM compiler
     PARALLEL="$F9X"
     ;;

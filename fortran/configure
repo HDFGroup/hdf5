@@ -8081,7 +8081,7 @@ cross_compiling=$ac_cv_prog_f9x_cross
 
 
 case "$F9X" in
-  mpif90)
+  *mpif90*)
             PARALLEL=mpif90
     echo "$as_me:$LINENO: checking for mpirun" >&5
 echo $ECHO_N "checking for mpirun... $ECHO_C" >&6
@@ -8111,7 +8111,7 @@ echo "${ECHO_T}none" >&6
     fi
     ;;
 
-  mpxlf | mpxlf_r | mpxlf90 | mpxlf90_r | mpxlf95 | mpxlf95_r)
+  *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
         PARALLEL="$F9X"
     ;;
 
