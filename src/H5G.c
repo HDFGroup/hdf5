@@ -8,7 +8,17 @@
  * 			Jul 18 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		
+ * Purpose:		Symbol table functions.  The functions that
+ *			begin with `H5G_stab_' don't understand the
+ *			directory hierarchy; they operate on a single
+ *			symbol table at a time.
+ *
+ * 			The functions that begin with `H5G_node_' operate
+ *			on the leaf nodes of a symbol table B-tree.  They
+ *			should be defined in the H5Gnode.c file.
+ *
+ * 			The remaining functions know about the directory
+ *			hierarchy.
  *
  * Modifications:
  *
@@ -37,10 +47,9 @@
 /* Is the interface initialized? */
 static intn interface_initialize_g = FALSE;
 
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_new
+ * Function:	H5G_stab_new
  *
  * Purpose:	Creates a new empty symbol table (object header, name heap,
  *		and B-tree).  The caller can specify an initial size for the
@@ -54,7 +63,10 @@ static intn interface_initialize_g = FALSE;
  *		item in the heap is the empty string, and must appear at
  *		heap offset zero.
  *
- * Return:	Success:	Address of new symbol table.
+ * Return:	Success:	Address of new symbol table header.  If
+ *				the caller supplies a symbol table entry
+ *				SELF then it will be initialized to point to
+ *				this symbol table.
  *
  *		Failure:	FAIL
  *
@@ -67,13 +79,13 @@ static intn interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5G_new (hdf5_file_t *f, size_t init)
+H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
 {
    off_t	name;				/*offset of "" name	*/
    haddr_t	addr;				/*object header address	*/
    H5O_stab_t	stab;				/*symbol table message	*/
 
-   FUNC_ENTER (H5G_new, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_new, NULL, FAIL);
 
    /*
     * Check arguments.
@@ -102,11 +114,18 @@ H5G_new (hdf5_file_t *f, size_t init)
    /* The B-tree is created on demand later */
    stab.btree = 0;
 
-   /* Create symbol table object header */
-   if ((addr = H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
+   /* Create symbol table object header with a single link */
+   if ((addr = H5O_new (f, 1, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
-   if (H5O_modify(f, addr, NULL, NULL, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
+   if (self) {
+      self->name_off = 0;
+      self->header = addr;
+      self->type = H5G_NOTHING_CACHED;
+   }
+
+   /* insert the symbol table message */
+   if (H5O_modify(f, addr, self, NULL, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
 
@@ -115,11 +134,11 @@ H5G_new (hdf5_file_t *f, size_t init)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_find
+ * Function:	H5G_stab_find
  *
- * Purpose:	Finds a symbol named NAME in the symbol table whose address
- *		is ADDR and returns a copy of the symbol table entry through
- *		the ENTRY argument.
+ * Purpose:	Finds a symbol named NAME in the symbol table whose
+ *		description is stored in SELF in file F and returns a
+ *		copy of the symbol table entry through the ENT argument.
  *
  * Return:	Success:	Address corresponding to the name.
  *
@@ -134,21 +153,22 @@ H5G_new (hdf5_file_t *f, size_t init)
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5G_find (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
+H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+	       H5G_entry_t *ent)
 {
    H5G_node_ud1_t       udata;		/*data to pass through B-tree	*/
    H5O_stab_t		stab;		/*symbol table message		*/
 
-   FUNC_ENTER (H5G_find, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_find, NULL, FAIL);
 
    /* Check arguments */
    assert (f);
-   assert (addr>=0);
+   assert (self && self->header>=0);
    assert (name && *name);
-   assert (entry);
+   assert (ent);
 
    /* set up the udata */
-   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
    if (stab.btree<=0 || stab.heap<=0) {
@@ -164,17 +184,17 @@ H5G_find (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
    }
 
    /* return the result */
-   if (entry) *entry = udata.entry;
+   if (ent) *ent = udata.entry;
    FUNC_LEAVE (udata.entry.header);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_modify
+ * Function:	H5G_stab_modify
  *
  * Purpose:	Modifies the entry for an existing symbol.  The name of the
- *		symbol is NAME in the symbol table whose address is ADDR in
- *		file F.  ENTRY is the new symbol table entry to use for the
+ *		symbol is NAME in the symbol table described by SELF in
+ *		file F.  ENT is the new symbol table entry to use for the
  *		symbol.
  *
  * Return:	Success:	SUCCEED
@@ -190,21 +210,22 @@ H5G_find (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
+H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+		 H5G_entry_t *ent)
 {
    H5G_node_ud1_t	udata;		/*data to pass through B-tree	*/
    H5O_stab_t		stab;		/*symbol table message		*/
 
-   FUNC_ENTER (H5G_modify, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_modify, NULL, FAIL);
 
    /* check arguments */
    assert (f);
-   assert (addr>=0);
+   assert (self && self->header>=0);
    assert (name && *name);
-   assert (entry);
+   assert (ent);
 
    /* set up the udata */
-   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
    if (stab.btree<=0 || stab.heap<=0) {
@@ -213,7 +234,7 @@ H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
    udata.operation = H5G_OPER_MODIFY;
    udata.name = name;
    udata.heap = stab.heap;
-   udata.entry = *entry;
+   udata.entry = *ent;
 
    /* search and modify the B-tree */
    if (H5B_find (f, H5B_SNODE, stab.btree, &udata)<0) {
@@ -225,11 +246,11 @@ H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_insert
+ * Function:	H5G_stab_insert
  *
- * Purpose:	Insert a new symbol into the table whose address is ADDR in
+ * Purpose:	Insert a new symbol into the table described by SELF in
  *		file F.  The name of the new symbol is NAME and its symbol
- *		table entry is ENTRY.
+ *		table entry is ENT.
  *
  * Return:	Success:	SUCCEED
  *
@@ -244,22 +265,23 @@ H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
+H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+		 H5G_entry_t *ent)
 {
    H5O_stab_t		stab;		/*symbol table message		*/
    H5G_node_ud1_t	udata;		/*data to pass through B-tree	*/
    off_t		offset;		/*offset of name within heap	*/
 
-   FUNC_ENTER (H5G_insert, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_insert, NULL, FAIL);
 
    /* check arguments */
    assert (f);
-   assert (addr>=0);
+   assert (self && self->header>=0);
    assert (name && *name);
-   assert (entry);
+   assert (ent);
    
    /* make sure we have a B-tree and a heap */
-   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
    if (stab.btree<=0 || stab.heap<=0) {
@@ -277,7 +299,7 @@ H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 	    HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL);
 	 }
       }
-      if (H5O_modify (f, addr, NULL, NULL, H5O_STAB, 0, &stab)<0) {
+      if (H5O_modify (f, self->header, self, NULL, H5O_STAB, 0, &stab)<0) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
    }
@@ -285,7 +307,7 @@ H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
    /* initialize data to pass through B-tree */
    udata.name = name;
    udata.heap = stab.heap;
-   udata.entry = *entry;
+   udata.entry = *ent;
    if (H5B_insert (f, H5B_SNODE, stab.btree, &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
    }
@@ -295,7 +317,7 @@ H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_list
+ * Function:	H5G_stab_list
  *
  * Purpose:	Returns a list of all the symbols in a symbol table.
  *		The caller allocates an array of pointers which this
@@ -322,16 +344,21 @@ H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name, H5G_entry_t *entry)
  *-------------------------------------------------------------------------
  */
 intn
-H5G_list (hdf5_file_t *f, haddr_t addr, int maxentries,
-	  char *names[], H5G_entry_t entries[])
+H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
+	       char *names[], H5G_entry_t entries[])
 {
    H5G_node_list_t	udata;
    H5O_stab_t		stab;
    intn			i;
 
-   FUNC_ENTER (H5G_list, NULL, FAIL);
+   FUNC_ENTER (H5G_stab_list, NULL, FAIL);
 
-   if (NULL==H5O_read (f, addr, NULL, H5O_STAB, 0, &stab)) {
+   /* check args */
+   assert (f);
+   assert (self && self->header>=0);
+   assert (maxentries>=0);
+
+   if (NULL==H5O_read (f, self->header, self, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL);
    }
    if (stab.btree<=0 || stab.heap<=0) HRETURN (0); /*empty directory*/
@@ -520,12 +547,16 @@ H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 8 Aug 1997
+ *	Writes zeros for the bytes that aren't used so the file doesn't
+ *	contain junk.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
 {
-   uint8	*p_ret = *pp;
+   uint8	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
    FUNC_ENTER (H5G_encode, NULL, FAIL);
 
@@ -562,7 +593,10 @@ H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent)
       abort();
    }
 
-   *pp = p_ret + H5G_SIZEOF_ENTRY(f);
+   /* fill with zero */
+   while (*pp<p_ret) *(*pp)++ = 0;
+   
+   *pp = p_ret;
    FUNC_LEAVE (SUCCEED);
 }
 

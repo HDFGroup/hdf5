@@ -21,9 +21,9 @@
 #include "H5Fprivate.h"
 #include "H5Gprivate.h"
 
-#define H5O_MIN_SIZE	64		/*min obj header data size	*/
-#define H5O_NMESGS	64		/*initial number of messages	*/
-#define H5O_NCHUNKS	64		/*initial number of chunks	*/
+#define H5O_MIN_SIZE	16		/*min obj header data size	*/
+#define H5O_NMESGS	32		/*initial number of messages	*/
+#define H5O_NCHUNKS	8		/*initial number of chunks	*/
 #define H5O_NEW_MESG	(-1)		/*new message			*/
 #define H5O_NO_ADDR	(-1)		/*no disk address yet		*/
 

@@ -369,6 +369,7 @@ H5F_dest (hdf5_file_t *f)
       H5AC_dest (f);
       f->dir = H5MM_xfree (f->dir);
       f->filename = H5MM_xfree (f->filename);
+      f->root_sym = H5MM_xfree (f->root_sym);
       H5MM_xfree (f);
    }
    return NULL;

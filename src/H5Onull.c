@@ -18,6 +18,8 @@
 #include "H5private.h"
 #include "H5Oprivate.h"
 
+#define PABLO_MASK	H5O_null_mask
+
 /* This message derives from H5O */
 const H5O_class_t H5O_NULL[1] = {{
    H5O_NULL_ID,				/*message id number		*/

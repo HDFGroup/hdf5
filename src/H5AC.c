@@ -28,7 +28,6 @@
 #include "H5MMprivate.h"
 
 #define PABLO_MASK	H5AC_mask
-#define HASH(addr)	((unsigned)(addr) % H5AC_NSLOTS)
 
 static int	interface_initialize_g = FALSE;		/*initialized?*/
 
@@ -99,7 +98,7 @@ H5AC_dest (hdf5_file_t *f)
    
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_find
+ * Function:	H5AC_find_f
  *
  * Purpose:	Given an object type and the address at which that object
  *		is located in the file, return a pointer to the object.
@@ -127,10 +126,10 @@ H5AC_dest (hdf5_file_t *f)
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-	   const void *udata)
+H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+	     const void *udata)
 {
-   unsigned	idx = HASH(addr);
+   unsigned	idx = H5AC_HASH(addr);
    herr_t	status;
    void		*thing = NULL;
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
@@ -158,6 +157,10 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
        f->cache[idx].type!=type) {
       HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
    }
+
+#ifdef DO_NOT_CACHE
+   H5AC_flush (f, NULL, 0, TRUE);
+#endif
 
    /*
     * Load a new thing.  If it can't be loaded, then return an error
@@ -220,7 +223,7 @@ herr_t
 H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	    hbool_t destroy)
 {
-   uintn	i = HASH(addr);
+   uintn	i = H5AC_HASH(addr);
    herr_t	status;
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
@@ -287,7 +290,7 @@ herr_t
 H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
    herr_t	status;
-   uintn	idx = HASH (addr);
+   uintn	idx = H5AC_HASH (addr);
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
    FUNC_ENTER (H5AC_set, NULL, FAIL);
@@ -337,8 +340,8 @@ herr_t
 H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
 	     haddr_t old_addr, haddr_t new_addr)
 {
-   uintn	old_idx = HASH (old_addr);
-   uintn	new_idx = HASH (new_addr);
+   uintn	old_idx = H5AC_HASH (old_addr);
+   uintn	new_idx = H5AC_HASH (new_addr);
    herr_t	(*flush)(hdf5_file_t*, hbool_t, haddr_t, void*);
    herr_t	status;
 

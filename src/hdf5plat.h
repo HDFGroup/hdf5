@@ -332,6 +332,10 @@ typedef float              float32;
 typedef double             float64;
 typedef int                intf;     /* size of INTEGERs in Fortran compiler */
 
+#define HDF5_HAVE_NATIVE_INT64
+typedef __int64_t	  int64;
+typedef __uint64_t	  uint64;
+
 /* Fortran compatibility macros */
 #define FNAME_POST_UNDERSCORE       /* Fortran function names require trailing underscore */
 #define _fcdtocp(desc) (desc)       /* Macro to convert from Fortran character descriptor to C 'char *' */

@@ -237,8 +237,6 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
     * Check arguments.
     */
    assert (f);
-   assert (lt_key);
-   assert (rt_key);
 
    sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
    size = H5G_node_size (f);
@@ -320,9 +318,9 @@ H5G_node_flush (hdf5_file_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
 
       /* entries */
       H5G_encode_vec (f, &p, sym->entry, sym->nsyms);
-
+      memset (p, 0, size - (p-buf));
       
-      status = H5F_block_write (f, addr, p-buf, buf);
+      status = H5F_block_write (f, addr, size, buf);
       buf = H5MM_xfree (buf);
       if (status<0) HRETURN_ERROR (H5E_SYM, H5E_WRITEERROR, FAIL);
    }
@@ -855,12 +853,13 @@ H5G_node_list (hdf5_file_t *f, haddr_t addr, void *_udata)
  */
 herr_t
 H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
-		intn fwidth)
+		intn fwidth, haddr_t heap)
 {
    int		i, j;
    char		buf[64];
    H5G_node_t	*sn = NULL;
    herr_t	status;
+   const char	*s;
 
    FUNC_ENTER (H5G_node_debug, NULL, FAIL);
 
@@ -897,6 +896,11 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    fwidth = MAX (0, fwidth-3);
    for (i=0; i<sn->nsyms; i++) {
       fprintf (stream, "%*sSymbol %d:\n", indent-3, "", i);
+      if (heap>0 && (s = H5H_peek (f, heap, sn->entry[i].name_off))) {
+	 fprintf (stream, "%*s%-*s `%s'\n", indent, "", fwidth,
+		  "Name:",
+		  s);
+      }
       fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	       "Name offset into private heap:",
 	       (unsigned long)(sn->entry[i].name_off));

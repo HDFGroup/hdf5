@@ -53,6 +53,7 @@ main (int argc, char *argv[])
    uint8	sig[16];
    intn		i;
    herr_t	status = SUCCEED;
+   haddr_t	extra = 0;
 
    /*
     * Parse command arguments.
@@ -60,6 +61,9 @@ main (int argc, char *argv[])
    if (argc>2) {
       printf ("New address: %s\n", argv[2]);
       addr = strtol (argv[2], NULL, 0);
+   }
+   if (argc>3) {
+      extra = strtol (argv[3], NULL, 0);
    }
    
    /*
@@ -99,7 +103,7 @@ main (int argc, char *argv[])
       /*
        * Debug a symbol table node.
        */
-      status = H5G_node_debug (f, addr, stdout, 0, VCOL);
+      status = H5G_node_debug (f, addr, stdout, 0, VCOL, extra);
 
    } else if (!memcmp (sig, H5B_MAGIC, H5B_SIZEOF_MAGIC)) {
       /*
@@ -110,7 +114,7 @@ main (int argc, char *argv[])
       H5B_subid_t subtype = sig[H5B_SIZEOF_MAGIC];
       switch (subtype) {
       case H5B_SUBTYPE_SNODE:
-	 status = H5G_node_debug (f, addr, stdout, 0, VCOL);
+	 status = H5G_node_debug (f, addr, stdout, 0, VCOL, extra);
 	 break;
 
       default:

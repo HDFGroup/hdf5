@@ -196,7 +196,7 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
     uintn   towrite;        /* number of bytes to write out */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Dset_info, H5D_init_interface, FAIL);
+    FUNC_ENTER(H5Dwrite, H5D_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;

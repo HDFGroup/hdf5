@@ -23,6 +23,8 @@
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
 
+#define PABLO_MASK	H5O_stab_mask
+
 /* PRIVATE PROTOTYPES */
 static void *H5O_stab_decode (hdf5_file_t *f, const uint8 *p);
 static herr_t H5O_stab_encode (hdf5_file_t *f, size_t size, uint8 *p,
@@ -200,20 +202,26 @@ H5O_stab_cache (H5G_entry_t *ent, const void *_mesg)
    assert (ent);
    assert (stab);
 
-   /* cache */
+   /*
+    * We do this in two steps so Purify doesn't complain about
+    * uninitialized memory reads even though they don't bother
+    * anything.
+    */
    if (H5G_CACHED_STAB != ent->type) {
       modified = TRUE;
       ent->type = H5G_CACHED_STAB;
-   }
-
-   if (ent->cache.stab.btree != stab->btree) {
-      modified = TRUE;
       ent->cache.stab.btree = stab->btree;
-   }
-
-   if (ent->cache.stab.heap != stab->heap) {
-      modified = TRUE;
       ent->cache.stab.heap = stab->heap;
+   } else {
+      if (ent->cache.stab.btree != stab->btree) {
+	 modified = TRUE;
+	 ent->cache.stab.btree = stab->btree;
+      }
+
+      if (ent->cache.stab.heap != stab->heap) {
+	 modified = TRUE;
+	 ent->cache.stab.heap = stab->heap;
+      }
    }
 
    FUNC_LEAVE (modified);

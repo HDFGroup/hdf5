@@ -47,7 +47,8 @@ typedef struct H5AC_class_t {
  * cache entry by hashing the object's file address.  Each file has its
  * own cache, an array of slots.
  */
-#define H5AC_NSLOTS	1033	/*prime number tend to work best	*/
+#define H5AC_NSLOTS	10330	/*prime number tend to work best	*/
+#define H5AC_HASH(ADDR)	((unsigned)(ADDR) % H5AC_NSLOTS)
 
 typedef struct H5AC_cache_t {
    const H5AC_class_t *type;	/*type of object stored here		*/
@@ -59,8 +60,8 @@ typedef struct H5AC_cache_t {
  * Library prototypes.
  */
 herr_t H5AC_dest (hdf5_file_t *f);
-void *H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
-		 const void *udata);
+void *H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
+		   const void *udata);
 herr_t H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		   hbool_t destroy);
 herr_t H5AC_new (hdf5_file_t *f);
@@ -68,5 +69,11 @@ herr_t H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
 		    haddr_t old, haddr_t new);
 herr_t H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 		 void *thing);
+
+#define H5AC_find(F,TYPE,ADDR,UDATA)					      \
+   (((F)->cache[H5AC_HASH(ADDR)].type==(TYPE) &&			      \
+     (F)->cache[H5AC_HASH(ADDR)].addr==(ADDR)) ?			      \
+    (F)->cache[H5AC_HASH(ADDR)].thing :					      \
+    H5AC_find_f (F, TYPE, ADDR, UDATA))
 
 #endif /* !_H5ACprivate_H */

@@ -134,16 +134,16 @@ extern const H5B_class_t H5B_SNODE[1];
  * Library prototypes...
  */
 herr_t H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
-		       intn fwidth);
-haddr_t H5G_new (hdf5_file_t *f, size_t init);
-haddr_t H5G_find (hdf5_file_t *f, haddr_t addr, const char *name,
-		  H5G_entry_t *entry);
-herr_t H5G_modify (hdf5_file_t *f, haddr_t addr, const char *name,
-		   H5G_entry_t *entry);
-herr_t H5G_insert (hdf5_file_t *f, haddr_t addr, const char *name,
-		   H5G_entry_t *entry);
-intn H5G_list (hdf5_file_t *f, haddr_t addr, int maxentries,
-	       char *names[], H5G_entry_t entries[]);
+		       intn fwidth, haddr_t heap);
+haddr_t H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init);
+haddr_t H5G_stab_find (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+		       H5G_entry_t *ent);
+herr_t H5G_stab_modify (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+			H5G_entry_t *ent);
+herr_t H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
+			H5G_entry_t *ent);
+intn H5G_stab_list (hdf5_file_t *f, H5G_entry_t *self, intn maxentries,
+		    char *names[], H5G_entry_t entries[]);
 herr_t H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 herr_t H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);

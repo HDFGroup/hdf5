@@ -22,6 +22,7 @@
 
 #define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_SIZEOF_MAGIC 4
+#define H5H_ALIGN(X)	((X)=((X)+1) & ~0x01)
 
 typedef enum H5H_type_t {
    H5H_LOCAL	=0,			/*local symtab name heap	*/

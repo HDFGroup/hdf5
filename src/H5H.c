@@ -132,7 +132,7 @@ H5H_new (hdf5_file_t *f, H5H_type_t heap_type, size_t size_hint)
    heap->addr = addr + H5H_SIZEOF_HDR(f);
    heap->disk_alloc = size_hint;
    heap->mem_alloc = size_hint;
-   heap->chunk = H5MM_xmalloc (H5H_SIZEOF_HDR(f) + size_hint);
+   heap->chunk = H5MM_xcalloc (1, H5H_SIZEOF_HDR(f)+size_hint);
 
    /* free list */
    if (size_hint) {
@@ -179,7 +179,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
    uint8	hdr[20], *p;
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *tail=NULL;
-   haddr_t	free_block;
+   haddr_t	free_block=H5H_FREE_NULL;
 
    FUNC_ENTER (H5H_load, NULL, NULL);
 
@@ -211,7 +211,7 @@ H5H_load (hdf5_file_t *f, haddr_t addr, const void *udata)
 
    /* data */
    H5F_decode_offset (f, p, heap->addr);
-   heap->chunk = H5MM_xmalloc (H5H_SIZEOF_HDR(f) + heap->mem_alloc);
+   heap->chunk = H5MM_xcalloc (1, H5H_SIZEOF_HDR(f) + heap->mem_alloc);
    if (heap->disk_alloc &&
        H5F_block_read (f, heap->addr, heap->disk_alloc,
 		       heap->chunk + H5H_SIZEOF_HDR(f))<0) {
@@ -517,12 +517,12 @@ H5H_remove_free (H5H_t *heap, H5H_free_t *fl)
  *-------------------------------------------------------------------------
  */
 off_t
-H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
+H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
 {
    H5H_t	*heap=NULL;
    H5H_free_t	*fl=NULL, *max_fl=NULL;
    off_t	offset = -1;
-   size_t	need_more;
+   size_t	need, old_size, need_more;
 #ifndef NDEBUG
    static	nmessages = 0;
 #endif
@@ -533,8 +533,12 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
    assert (f);
    if (H5H_GLOBAL==addr) addr = f->smallobj_off;
    assert (addr>0);
-   assert (size>0);
+   assert (buf_size>0);
    assert (buf);
+
+   /* allocate aligned file memory */
+   need = buf_size;
+   H5H_ALIGN (need);
 
    if (NULL==(heap=H5AC_find (f, H5AC_HEAP, addr, NULL))) {
       HRETURN_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL);
@@ -546,12 +550,12 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
     * leave zero or at least H5G_SIZEOF_FREE bytes left over.
     */
    for (fl=heap->freelist; fl; fl=fl->next) {
-      if (fl->size>size && fl->size-size>=H5H_SIZEOF_FREE(f)) {
+      if (fl->size>need && fl->size-need>=H5H_SIZEOF_FREE(f)) {
 	 offset = fl->offset;
-	 fl->offset += size;
-	 fl->size -= size;
+	 fl->offset += need;
+	 fl->size -= need;
 	 break;
-      } else if (fl->size==size) {
+      } else if (fl->size==need) {
 	 offset = fl->offset;
 	 H5H_remove_free (heap, fl);
 	 break;
@@ -570,15 +574,15 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
    if (offset<0) {
 
       need_more = MAX (2*heap->mem_alloc, H5H_SIZEOF_FREE(f));
-      need_more = MAX (need_more, size);
+      need_more = MAX (need_more, need);
 
       if (max_fl && max_fl->offset+max_fl->size==heap->mem_alloc) {
 	 /*
 	  * Increase the size of the maximum free block.
 	  */
 	 offset = max_fl->offset;
-	 max_fl->offset += size;
-	 max_fl->size += need_more - size;
+	 max_fl->offset += need;
+	 max_fl->size += need_more - need;
 
 	 if (max_fl->size < H5H_SIZEOF_FREE(f)) {
 #ifndef NDEBUG
@@ -600,18 +604,18 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 	  * take some space out of it right away.
 	  */
 	 offset = heap->mem_alloc;
-	 if (need_more-size >= H5H_SIZEOF_FREE(f)) {
+	 if (need_more-need >= H5H_SIZEOF_FREE(f)) {
 	    fl = H5MM_xmalloc (sizeof(H5H_free_t));
-	    fl->offset = heap->mem_alloc + size;
-	    fl->size = need_more - size;
+	    fl->offset = heap->mem_alloc + need;
+	    fl->size = need_more - need;
 	    fl->prev = NULL;
 	    fl->next = heap->freelist;
 	    if (heap->freelist) heap->freelist->prev = fl;
 	    heap->freelist = fl;
 #ifndef NDEBUG
-	 } else if (need_more>size) {
+	 } else if (need_more>need) {
 	    fprintf (stderr, "H5H_insert: lost %d bytes at line %d\n",
-		     need_more-size, __LINE__);
+		     need_more-need, __LINE__);
 	    if (0==nmessages++) {
 	       fprintf (stderr, "Messages from H5H_insert() will go away "
 			"when assertions are turned off.\n");
@@ -629,15 +633,19 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t size, const void *buf)
 		  "when assertions are turned off.\n");
       }
 #endif
+      old_size = heap->mem_alloc;
       heap->mem_alloc += need_more;
       heap->chunk = H5MM_xrealloc (heap->chunk,
 				   H5H_SIZEOF_HDR(f)+heap->mem_alloc);
+
+      /* clear new section so junk doesn't appear in the file */
+      memset (heap->chunk+H5H_SIZEOF_HDR(f)+old_size, 0, need_more);
    }
 
    /*
     * Copy the data into the heap
     */
-   HDmemcpy (heap->chunk + H5H_SIZEOF_HDR(f) + offset, buf, size);
+   HDmemcpy (heap->chunk + H5H_SIZEOF_HDR(f) + offset, buf, buf_size);
    FUNC_LEAVE (offset);
 }
    
@@ -796,7 +804,7 @@ H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size)
     * lost.
     */
    if (size < H5H_SIZEOF_FREE(f)) {
-#ifndef NDEUBG
+#ifndef NDEBUG
       fprintf (stderr, "H5H_remove: lost %d bytes\n", size);
       if (0==nmessages++) {
 	 fprintf (stderr, "Messages from H5H_remove() will go away "

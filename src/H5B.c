@@ -583,6 +583,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
    if (NULL==(old=H5AC_find (f, H5AC_BT, addr, type))) {
       HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
    }
+   assert (old->nchildren == 2*type->k);
    bt = H5MM_xmalloc (sizeof(H5B_t));
    recsize = old->sizeof_rkey + H5F_SIZEOF_OFFSET(f);
 
@@ -591,11 +592,12 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
     */
    size = H5B_nodesize (f, type, &total_nkey_size, old->sizeof_rkey);
    bt->dirty = 1;
+   bt->sizeof_rkey = old->sizeof_rkey;
    bt->ndirty = BOUND (0, old->ndirty-delta, type->k);
    bt->type = type;
    bt->level = old->level;
    bt->nchildren = type->k;
-   bt->page = H5MM_xmalloc (size);
+   bt->page = H5MM_xcalloc (size, 1); /*use calloc() to keep file clean*/
    bt->native = H5MM_xmalloc (total_nkey_size);
    bt->child = H5MM_xmalloc (2*type->k * sizeof(haddr_t));
    bt->key = H5MM_xmalloc ((2*type->k+1) * sizeof(H5B_key_t));
@@ -615,7 +617,7 @@ H5B_split (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, intn anchor)
       /* key */
       if (i<=type->k) {
 	 bt->key[i].dirty = old->key[delta+i].dirty;
-	 bt->key[i].rkey = bt->native + offset;
+	 bt->key[i].rkey = bt->page + offset;
 	 if (old->key[delta+i].nkey) {
 	    bt->key[i].nkey = bt->native + i*type->sizeof_nkey;
 	 } else {
@@ -957,6 +959,11 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 
       for (i=bt->nchildren; i>=idx; --i) {
 	 bt->key[i+1].dirty = bt->key[i].dirty;
+	 if (bt->key[i].nkey) {
+	    bt->key[i+1].nkey = bt->native + (i+1) * type->sizeof_nkey;
+	 } else {
+	    bt->key[i+1].nkey = NULL;
+	 }
       }
       bt->key[idx].dirty = 1;
       bt->key[idx].nkey = bt->native + idx * type->sizeof_nkey;
@@ -978,10 +985,14 @@ H5B_insert_child (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 
       for (i=bt->nchildren; i>idx; --i) {
 	 bt->key[i+1].dirty = bt->key[i].dirty;
+	 if (bt->key[i].nkey) {
+	    bt->key[i+1].nkey = bt->native + (i+1) * type->sizeof_nkey;
+	 } else {
+	    bt->key[i+1].nkey = NULL;
+	 }
       }
       bt->key[idx+1].dirty = 1;
-      bt->key[idx+1].nkey = bt->native +
-			    (idx+1) * type->sizeof_nkey;
+      bt->key[idx+1].nkey = bt->native + (idx+1) * type->sizeof_nkey;
       memcpy (bt->key[idx+1].nkey, md_key, type->sizeof_nkey);
    }
 
@@ -1411,6 +1422,7 @@ H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	   intn fwidth, const H5B_class_t *type)
 {
    H5B_t		*bt = NULL;
+   int			i;
 
    FUNC_ENTER (H5B_debug, NULL, FAIL);
 
@@ -1455,9 +1467,20 @@ H5B_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Address of right sibling:",
 	    (unsigned long)(bt->right));
-   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
-	    "Number of children:",
-	    (int)(bt->nchildren));
+   fprintf (stream, "%*s%-*s %d (%d)\n", indent, "", fwidth,
+	    "Number of children (max):",
+	    (int)(bt->nchildren),
+	    (int)(2*type->k));
+
+   /*
+    * Print the child addresses
+    */
+   for (i=0; i<bt->nchildren; i++) {
+      fprintf (stream, "%*sChild %d...\n", indent, "", i);
+      fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),
+	       "Address:",
+	       (unsigned long)(bt->child[i]));
+   }
 
    FUNC_LEAVE (SUCCEED);
 }

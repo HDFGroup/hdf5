@@ -23,6 +23,8 @@
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
 
+#define PABLO_MASK	H5O_cont_mask
+
 /* PRIVATE PROTOTYPES */
 static void *H5O_cont_decode (hdf5_file_t *f, const uint8 *p);
 static herr_t H5O_cont_encode (hdf5_file_t *f, size_t size, uint8 *p,
