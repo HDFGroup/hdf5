@@ -384,12 +384,14 @@ run_test(FILE *output, iotype iot, parameters parms)
     results         res;
     register int    i, ret_value = SUCCESS;
     int             comm_size;
+    long            raw_size;
     minmax          total_mm;
     minmax         *write_mm_table;
     minmax         *read_mm_table;
     minmax          write_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_mm = {0.0, 0.0, 0.0, 0};
 
+    raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
     parms.io_type = iot;
     print_indent(output, TAB_SPACE * 2);
     output_report(output, "Type of IO = ");
@@ -450,23 +452,37 @@ run_test(FILE *output, iotype iot, parameters parms)
 
     total_mm = accumulate_minmax_stuff(write_mm_table, parms.num_iters);
 
-printf("write metrics: min: %f, max: %f, avg: %f\n", total_mm.min,
-       total_mm.max, total_mm.sum / total_mm.num);
+    print_indent(output, TAB_SPACE * 3);
+    output_report(output, "Write (%d iterations):\n", parms.num_iters);
+
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.min,
+                  MB_PER_SEC(raw_size, total_mm.min));
+
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.sum / total_mm.num,
+                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
 
     total_mm = accumulate_minmax_stuff(read_mm_table, parms.num_iters);
 
-printf("read metrics: min: %f, max: %f, avg: %f\n", total_mm.min,
-       total_mm.max, total_mm.sum / total_mm.num);
-
     print_indent(output, TAB_SPACE * 3);
-    output_report(output, "Write Results = %.2f MB/s\n",
-                  MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
-                             get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS)));
+    output_report(output, "Read (%d iterations):\n", parms.num_iters);
 
-    print_indent(output, TAB_SPACE * 3);
-    output_report(output, "Read Results = %.2f MB/s\n",
-                  MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
-                             get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS)));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Minimum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.min, MB_PER_SEC(raw_size, total_mm.min));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Maximum Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.max, MB_PER_SEC(raw_size, total_mm.max));
+    print_indent(output, TAB_SPACE * 4);
+    output_report(output, "Average Time: %.2fs (%.2f MB/s)\n",
+                  total_mm.sum / total_mm.num,
+                  MB_PER_SEC(raw_size, (total_mm.sum / total_mm.num)));
 
     free(write_mm_table);
     free(read_mm_table);
@@ -474,6 +490,14 @@ printf("read metrics: min: %f, max: %f, avg: %f\n", total_mm.min,
     return ret_value;
 }
 
+/*
+ * Function:    get_minmax_stuff
+ * Purpose:     Each process sends its MINMAX information to the 0 process.
+ *              If we're the 0 process, we gather that information.
+ * Return:      Nothing
+ * Programmer:  Bill Wendling, 21. December 2001
+ * Modifications:
+ */
 static void
 get_minmax(minmax *mm)
 {
@@ -499,6 +523,14 @@ get_minmax(minmax *mm)
     }
 }
 
+/*
+ * Function:    accumulate_minmax_stuff
+ * Purpose:     Accumulate the minimum, maximum, and average of the times
+ *              across all processes.
+ * Return:      TOTAL_MM - the total of all of these.
+ * Programmer:  Bill Wendling, 21. December 2001
+ * Modifications:
+ */
 static minmax
 accumulate_minmax_stuff(minmax *mm, int count)
 {
