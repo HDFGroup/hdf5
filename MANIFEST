@@ -1045,6 +1045,7 @@
 ./test/mount.c
 ./test/mtime.c
 ./test/ntypes.c
+./test/noencoder.h5
 ./test/ohdr.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
