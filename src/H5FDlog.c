@@ -636,9 +636,8 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_query(const H5FD_t *_f, unsigned long *flags /* out */)
+H5FD_log_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
 {
-    const H5FD_log_t	*f = (const H5FD_log_t*)_f;
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER(H5FD_log_query, FAIL);

@@ -430,7 +430,8 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 static herr_t
 H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
 {
-    const H5FD_stdio_t	*f = (const H5FD_stdio_t*)_f;
+    /* Shut compiler up */
+    _f=_f;
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -670,6 +671,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     /* Shut compiler up */
     dxpl_id=dxpl_id;
+    type=type;
 
     /* Clear the error stack */
     H5Eclear();

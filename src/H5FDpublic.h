@@ -172,6 +172,7 @@ __DLL__ H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr);
 __DLL__ herr_t H5FDclose(H5FD_t *file);
 __DLL__ int H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
+__DLL__ int H5FDquery(const H5FD_t *f, unsigned long *flags);
 __DLL__ haddr_t H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size);
 __DLL__ herr_t H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size);
 __DLL__ haddr_t H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t addr,

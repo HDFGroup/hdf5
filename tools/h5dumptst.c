@@ -1598,18 +1598,6 @@ void test_nestcomp(void){
     s1_t       s1[10];
     hid_t      s1_tid;     /* File datatype identifier */
 
-    /* Second structure (subset of s1_t)  and dataset*/
-    typedef struct s2_t {
-	double c;
-	int    a;
-    } s2_t;
-    s2_t       s2[10];
-    hid_t      s2_tid;    /* Memory datatype handle */
-
-    /* Third "structure" ( will be used to read float field of s1) */
-    hid_t      s3_tid;   /* Memory datatype handle */
-    float      s3[10];
-
     int        i;
     hid_t      file, dataset, space; /* Handles */
     herr_t     status;

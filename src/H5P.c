@@ -3212,9 +3212,10 @@ done:
  PURPOSE
     Internal routine to remove all properties from a property hash table
  USAGE
-    herr_t H5P_free_all_prop(hash, hashsize)
+    herr_t H5P_free_all_prop(hash, hashsize, make_cb)
         H5P_gen_prop_t *hash[]; IN/OUT: Pointer to array of properties for hash table
         uintn hashsize;         IN: Size of hash table
+        uintn make_cb;          IN: Whether to make property callbacks or not
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
@@ -3226,7 +3227,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_all_prop(H5P_genprop_t *hash[], uintn hashsize)
+H5P_free_all_prop(H5P_genprop_t *hash[], uintn hashsize, uintn make_cb)
 {
     H5P_genprop_t *tprop, *next;/* Temporary pointer to properties */
     uintn u;                    /* Local index variable */
@@ -3245,7 +3246,7 @@ H5P_free_all_prop(H5P_genprop_t *hash[], uintn hashsize)
             next=tprop->next;
 
             /* Call the close callback and ignore the return value, there's nothing we can do about it */
-            if(tprop->close!=NULL)
+            if(make_cb && tprop->close!=NULL)
                 (tprop->close)(tprop->name,&(tprop->value));
 
             /* Free the property, ignoring return value, nothing we can do */
@@ -3324,10 +3325,10 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
         assert(pclass->name);
         H5MM_xfree(pclass->name);
 
-/*!! Need to not make callbacks for these... */
+        /* Free the class properties without making callbacks */
+        H5P_free_all_prop(pclass->props,pclass->hashsize,0);
 
-        /* Make calls to any property close callbacks which exist */
-/*      H5P_free_all_prop(plist->props,plist->pclass->hashsize); */
+        H5MM_xfree(pclass);
     } /* end if */
 
 #ifdef LATER
@@ -3616,7 +3617,7 @@ done:
     if(ret_value==NULL) {
         if(plist!=NULL) {
             /* Close & free all the properties */
-            H5P_free_all_prop(plist->props,class->hashsize);
+            H5P_free_all_prop(plist->props,class->hashsize,1);
 
             /* Decrement the number of property lists derived from the class */
             class->plists--;
@@ -4779,12 +4780,12 @@ herr_t H5P_close_list(H5P_genplist_t *plist)
 
     assert(plist);
 
-    /* Decrement parent class's dependant property list value! */
+    /* Make calls to any property close callbacks which exist */
+    H5P_free_all_prop(plist->props,plist->pclass->hashsize,1);
+
+    /* Decrement class's dependant property list value! */
     if(H5P_access_class(plist->pclass,H5P_MOD_DEC_LST)<0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "Can't decrement class ref count");
-
-    /* Make calls to any property close callbacks which exist */
-    H5P_free_all_prop(plist->props,plist->pclass->hashsize);
 
     /* Destroy property list object */
     H5MM_xfree(plist);

@@ -386,6 +386,7 @@ __DLL__ int H5S_hyper_compare_regions(const void *r1, const void *r2);
 __DLL__ int H5S_hyper_compare_bounds(const void *r1, const void *r2);
 __DLL__ herr_t H5S_hyper_copy(H5S_t *dst, const H5S_t *src);
 __DLL__ htri_t H5S_hyper_select_valid(const H5S_t *space);
+__DLL__ intn H5S_hyper_bound_comp(const void *_b1, const void *_b2);
 __DLL__ herr_t H5S_hyper_node_add(H5S_hyper_node_t **head, intn endflag,
 				  intn rank, const hssize_t *start,
 				  const hsize_t *size);

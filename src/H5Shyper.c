@@ -1762,7 +1762,6 @@ H5S_hyper_add (H5S_t *space, H5S_hyper_node_t *piece_lst)
     H5S_hyper_node_t *slab;     /* New hyperslab node to insert */
     H5S_hyper_node_t *tmp_slab; /* Temporary hyperslab node */
     H5S_hyper_bound_t *tmp;     /* Temporary pointer to an hyperslab bound array */
-    intn bound_loc;             /* Boundary location to insert hyperslab */
     size_t elem_count;          /* Number of elements in hyperslab selection */
     uintn piece_count;          /* Number of hyperslab pieces being added */
     intn i;     /* Counters */
@@ -3025,8 +3024,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     hssize_t slab[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
     size_t slice[H5O_LAYOUT_NDIMS];	 /* Size of preceding dimension's slice */
     H5S_hyper_node_t *add=NULL, /* List of hyperslab nodes to add */
-        *uniq=NULL,         /* List of unique hyperslab nodes */
-        *tmp;               /* Temporary hyperslab node */
+        *uniq=NULL;         /* List of unique hyperslab nodes */
     uintn acc;                /* Accumulator for building slices */
     uintn contig;             /* whether selection is contiguous or not */
     int i,j;                  /* Counters */
