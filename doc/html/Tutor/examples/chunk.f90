@@ -111,7 +111,7 @@
      !
      !Initialize FORTRAN predifined datatypes
      !
-     CALL h5close_f(error) 
+     CALL h5open_f(error) 
 
      !
      !Create a new file using default properties.
