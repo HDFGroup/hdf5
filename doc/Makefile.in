@@ -1,0 +1,70 @@
+# HDF5 Library Doc Makefile(.in)
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+# This is the top level makefile of the Doc directory.  It mostly just
+# reinvokes make in the various subdirectories.
+# You can alternatively invoke make from each subdirectory manually.
+#
+# This is just a preliminary version.  It turns the "install" and
+# "uninstall" targets to "install-doc" and "uninstall-doc" targets
+# for subdirectories.  This should be revised to more correct
+# separate targets as "install-all", "install" and "install-doc"
+# whereas "install-all" does both "install" and "install-doc".
+#
+top_srcdir=@top_srcdir@
+top_builddir=..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order
+SUBDIRS=html
+
+##===========================================================================
+lib progs check test _test:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
+tests TAGS dep depend:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@) || exit 1;				      \
+	done
+
+$(docdir):
+	mkdir $@ && chmod 755 $@
+
+install: $(docdir)
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@-doc) || exit 1;			      \
+	done
+
+uninstall:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@-doc) || exit 1;			      \
+	done
+
+.PHONY: all lib progs test _test install uninstall dep depend clean           \
+	mostlyclean distclean maintainer-clean
+
+clean mostlyclean:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@);					      \
+	done
+
+distclean:
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@);					      \
+	done
+	-$(RM) Makefile
+
+maintainer-clean: distclean
+	@echo "This target is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+	@@SETX@; for d in $(SUBDIRS); do				      \
+	   (cd $$d && $(MAKE) $@);					      \
+	done
+

@@ -34,6 +34,7 @@ exec_prefix=@exec_prefix@
 bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
+docdir=@exec_prefix@/doc
 PUB_LIB=$(LIB)
 
 # Shared libraries

@@ -55,6 +55,9 @@ $(includedir):
 $(bindir):
 	mkdir $@ && chmod 755 $@
 
+$(DOCDIR):
+	mkdir $@ && chmod 755 $@
+
 # Install the library, the public header files, and programs.
 install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
@@ -81,6 +84,24 @@ install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
 	   fi;							              \
 	done
 
+# Install the documents.
+install-doc: $(PUB_DOCS) $(DOCDIR)
+	@for d in X $(SUBDIRS); do					      \
+	    if test $$d != X; then					      \
+	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
+	    fi;								      \
+	done
+	@for f in X $(PUB_DOCS); do					      \
+	   if test $$f != X; then					      \
+	      if test -f $$f; then					      \
+		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
+	      else							      \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
+		    exit 1);						      \
+	      fi;							      \
+	   fi;								      \
+	done
+
 # Removes those things that `make install' (would have) installed.
 uninstall:
 	@if test "X$(LIB)" != X; then					      \
@@ -95,6 +116,17 @@ uninstall:
 	   for f in $(PROGS); do					      \
 	      $(LT_UNINSTALL) $(bindir)/$$f;				      \
 	   done;							      \
+	fi
+
+# Removes those things that `make install-doc' (would have) installed.
+uninstall-doc:
+	@for d in X $(SUBDIRS); do					      \
+	    if test $$d != X; then					      \
+	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
+	    fi;								      \
+	done
+	@if test "X$(PUB_DOCS)" != X; then				      \
+	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
 
 # Removes temporary files without removing the final target files.  That is,
