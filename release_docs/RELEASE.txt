@@ -1,12 +1,12 @@
-HDF5 version 1.6.3-pre4 currently under development
+HDF5 version 1.6.3 released on Wed Sep 22 11:30:11 CDT 2004
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.2 and
-HDF5-1.6.2-*, and contains information on the platforms tested and
-known problems in HDF5-1.6.2-*. For more details check the HISTORY.txt
+HDF5-1.6.3, and contains information on the platforms tested and
+known problems in HDF5-1.6.3. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -517,6 +517,11 @@ Footnotes:  (1) Using mpich 1.2.4
 
 Known Problems
 ==============
+* h5fc and h5c++ compilation scripts have a bug: object files (*.o) cannot be
+  created when source code is compiled using h5fc or h5c++. We will provide
+  a fix. Please check ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/ 
+  for the patches.
+
 * Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
 
 * There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
