@@ -348,6 +348,16 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             /* Correct the coords array */
                             coords[i]=0;
                             coords[i-1]++;
+
+                            /* Carry the coord array correction up the array, if the dimension is finished */
+                            while(i>0 && coords[i-1]==(hssize_t)dset_dims[i-1]) {
+                                i--;
+                                coords[i]=0;
+                                if(i>0) {
+                                    coords[i-1]++;
+                                    assert(coords[i-1]<=(hssize_t)dset_dims[i-1]);
+                                } /* end if */
+                            } /* end while */
                         } /* end if */
                     } /* end for */
 
@@ -721,6 +731,16 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                             /* Correct the coords array */
                             coords[i]=0;
                             coords[i-1]++;
+
+                            /* Carry the coord array correction up the array, if the dimension is finished */
+                            while(i>0 && coords[i-1]==(hssize_t)dset_dims[i-1]) {
+                                i--;
+                                coords[i]=0;
+                                if(i>0) {
+                                    coords[i-1]++;
+                                    assert(coords[i-1]<=(hssize_t)dset_dims[i-1]);
+                                } /* end if */
+                            } /* end while */
                         } /* end if */
                     } /* end for */
 
