@@ -164,12 +164,12 @@ h5tools_fopen(const char *fname, const char *driver, char *drivername,
         const char     *name;
         hid_t		fapl;
     } drivers_list[] = {
-        { "sec2", FAIL },
-        { "family", FAIL },
-        { "split", FAIL },
-        { "multi", FAIL },
+        { "sec2", FAIL }
+        ,{ "family", FAIL }
+        ,{ "split", FAIL }
+        ,{ "multi", FAIL }
 #ifdef H5_HAVE_STREAM
-        { "stream", FAIL },
+        ,{ "stream", FAIL }
 #endif	/* H5_HAVE_STREAM */
     };
     /* This enum should match the entries in the above drivers_list since they
