@@ -774,9 +774,9 @@ H5S_hyper_span_precompute_helper (H5S_hyper_span_info_t *spans, size_t elmt_size
     assert(spans);
 
     /* Check if we've already set this down span tree */
-    if(spans->scratch!=(void *)~((size_t)NULL)) {
+    if(spans->scratch!=(H5S_hyper_span_info_t *)~((size_t)NULL)) {
         /* Set the tree's scratch pointer */
-        spans->scratch=(void *)~((size_t)NULL);
+        spans->scratch=(H5S_hyper_span_info_t *)~((size_t)NULL);
 
         /* Set the scratch pointers in all the nodes */
         span=spans->head;
@@ -926,7 +926,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     assert(spans);
 
     /* Check if the span tree was already copied */
-    if(spans->scratch!=NULL && spans->scratch!=(void *)~((size_t)NULL)) {
+    if(spans->scratch!=NULL && spans->scratch!=(H5S_hyper_span_info_t *)~((size_t)NULL)) {
         /* Just return the value of the already copied span tree */
         ret_value=spans->scratch;
 
