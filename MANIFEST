@@ -1118,6 +1118,7 @@
 ./tools/testfiles/image_attr_test.hdf
 ./tools/testfiles/ras_24_test.hdf
 ./tools/testfiles/ras_8_test.hdf
+./tools/testfiles/ras24il.hdf
 ./tools/testfiles/sds_attr_test.hdf
 ./tools/testfiles/sds_dim_test.hdf
 ./tools/testfiles/sds_typ_test.hdf
@@ -1167,6 +1168,7 @@
 ./tools/testfiles/Expected/image_attr_test.h5
 ./tools/testfiles/Expected/ras_24_test.h5
 ./tools/testfiles/Expected/ras_8_test.h5
+./tools/testfiles/Expected/ras24il.h5
 ./tools/testfiles/Expected/sds_attr.h5
 ./tools/testfiles/Expected/sds_attr_test.h5
 ./tools/testfiles/Expected/sds_dim_test.h5
