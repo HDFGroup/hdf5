@@ -51,4 +51,4 @@ fi
 # Replace the previous version with the current version.
 rm -rf ${COMPARE}/previous
 mv ${COMPARE}/current ${COMPARE}/previous
-exit 1
+exit 0
