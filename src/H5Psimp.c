@@ -128,6 +128,7 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 					hsize, sample))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
 		       "unable to retrieve hyperslab parameters");
+    }
 #else
     if ((space_ndims=H5P_get_hyperslab (file_space, file_offset_signed,
 					hsize, sample))<0) {
