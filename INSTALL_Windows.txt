@@ -180,8 +180,11 @@ depending on which version you would like to test.
 
 To test the h5dump utility, cd into hdf5\tools. Then type: "dumptest
 [debug or release] [dll]" depending on which version you would like to
-test. Some differences are expected in the output of these 4 tests (the
-errors are in the dimensions of the dataspace).
+test. We are using "fc" command to compare whether dumper generates 
+correct results.We recommend you to redirection (using ">") to redirect
+the output into a file to check the test output manually.
+
+To test the h4toh5 utility,  cd into hdf5\tools. Then type: "h4toh5testrun                         [debug or release] [dll]" depending on which version you would like to                             test. We are using "fc" command to compare whether converter converts                              correctly. We recommend you to redirection (using ">") to redirect                                 the output into a file to check the test output manually.                                                                                                                                             To test the h5toh4 utility, you need to have "hdp" utilityin your system.                          cd into hdf5\tools. Four parameters should be input in this format:                                h5toh4testrun [para 1] [para 2] [para 3] [para 4]                                                                                                                                                                                                                                                            para1. [Debug] or [Release] version you are testing.                                               para2. The top directory path(including the drive name) where hdf5 tools                                        is located,for example: D:/h5_1.4                                                     para3. The full path where hdp is located, for example D:/H414/bin                                 para4. If no dll version,leave this parameter empty or type DLL.                                                                                                                                                                                                                                         We are using "fc" command to compare whether converter converts                                    correctly. We recommend you to redirection (using ">") to redirect                                 the output into a file to check the test output manually.     
 
 
 NOTE: The appropriate dll should be placed in the Windows\system
