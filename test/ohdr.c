@@ -93,7 +93,7 @@ main(void)
     /* create a new message */
     TESTING("message creation");
     time_new = 11111111;
-    if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -103,7 +103,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -121,7 +121,7 @@ main(void)
      */
     TESTING("message modification");
     time_new = 33333333;
-    if (H5O_modify(&oh_ent, H5O_MTIME_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 0, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -131,7 +131,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -150,7 +150,7 @@ main(void)
      */
     TESTING("duplicate message creation");
     time_new = 55555555;
-    if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -160,7 +160,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -178,7 +178,7 @@ main(void)
      */
     TESTING("duplicate message modification");
     time_new = 77777777;
-    if (H5O_modify(&oh_ent, H5O_MTIME_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+    if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, 1, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -188,7 +188,7 @@ main(void)
 	H5Eprint(stdout);
 	goto error;
     }
-    if (NULL==H5O_read(&oh_ent, H5O_MTIME_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
+    if (NULL==H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 1, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	H5Eprint(stdout);
 	goto error;
@@ -204,6 +204,10 @@ main(void)
     /*
      * Test creation of a bunch of messages one after another to see
      * what happens when the object header overflows in core.
+     * (Use 'old' MTIME message here, because it is large enough to be
+     *  replaced with a continuation message (the new one is too small)
+     *  and the library doesn't understand how to migrate more than one
+     *  message from an object header currently - QAK - 10/8/03)
      */
     TESTING("object header overflow in memory");
     for (i=0; i<40; i++) {
@@ -228,7 +232,7 @@ main(void)
     TESTING("object header overflow on disk");
     for (i=0; i<10; i++) {
         time_new = (i + 1) * 1000 + 10;
-        if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
+        if (H5O_modify(&oh_ent, H5O_MTIME_NEW_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
 	    goto error;
@@ -245,9 +249,20 @@ main(void)
      * Delete all time messages.
      */
     TESTING("message deletion");
+    if (H5O_remove(&oh_ent, H5O_MTIME_NEW_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
+	H5_FAILED();
+	H5Eprint(stdout);
+	goto error;
+    }
     if (H5O_remove(&oh_ent, H5O_MTIME_ID, H5O_ALL, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
 	H5Eprint(stdout);
+	goto error;
+    }
+    if (H5O_read(&oh_ent, H5O_MTIME_NEW_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
+	H5_FAILED();
+	puts("    H5O_read() should have failed but didn't");
+	H5Eclear();
 	goto error;
     }
     if (H5O_read(&oh_ent, H5O_MTIME_ID, 0, &ro, H5P_DATASET_XFER_DEFAULT)) {
