@@ -1081,6 +1081,7 @@ H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL htri_t H5T_bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void H5T_bit_neg(uint8_t *buf, size_t start, size_t size);
+H5_DLL void H5T_bit_neg2(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
 H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);

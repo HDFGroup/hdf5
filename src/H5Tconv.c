@@ -8607,7 +8607,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  */
                 if(sign) {
                     H5T_bit_dec(int_buf, 0, 8*buf_size);
-
                     H5T_bit_neg(int_buf, 0, 8*buf_size);
                 }
                 

@@ -579,7 +579,7 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
     assert(size);
 
     /* The first partial byte */
-    if ((size+start)/8 > idx) { /*bit sequence doesn't end in the same byte as starts*/
+    if ((size+start-1)/8 > idx) { /*bit sequence doesn't end in the same byte as starts*/
         /* Example:  a sequence like 11000100 and start = 3.  We substract 00001000 from 
          * it and get 10111100.  If a sequence is 00000111, we do right shift for START 
          * bits and get 00000000.  So we need to borrow from higher byte when we substract
@@ -589,6 +589,7 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
             borrow = 1;
         buf[idx] -= 1 << pos;
         idx++;
+        size -= (8 - pos);
     } else { /* bit sequence ends in the same byte as starts */
         /* Example: a sequence like 11000100 and start=3, size=3.  We substract 00001000 
          * and get 10111100.  A bit is borrowed from 6th bit(buf[idx]>>6=00000010, tmp>>6=00000011,
@@ -613,7 +614,7 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
 	size -= 8;
     }
 
-    /* The last byte */
+    /* The last partial byte */
     if (borrow && size>0) {
         /* Similar to the first byte case, where sequence ends in the same byte as starts */
         tmp = buf[idx];
@@ -628,7 +629,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_bit_neg
+ * Function:	H5T_bit_neg2
  *
  * Purpose:	Bit-negate buffer.
  *              At this moment, START is always 0 and SIZE is always a
@@ -647,7 +648,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
+H5T_bit_neg2(uint8_t *buf, size_t start, size_t size)
 {
     size_t i;
 
@@ -657,4 +658,66 @@ H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
 
     for(i=0; i<size/8; i++)
         buf[i] = ~(buf[i]);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_bit_neg
+ *
+ * Purpose:	negate part of a bit sequence.  The bit 
+ *              field starts with bit position START and is SIZE bits long.
+ *
+ * Return:	void
+ *
+ * Programmer:	Raymond Lu
+ *              March 19, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_bit_neg(uint8_t *buf, size_t start, size_t size)
+{
+    size_t	idx = start / 8;
+    size_t      pos = start % 8;
+    uint8_t     tmp;
+    
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_bit_neg);
+
+    assert(buf);
+    assert(size);
+
+    /* The first partial byte */
+    tmp = buf[idx];
+    tmp = ~tmp;
+
+    /* Simply copy the negated bit field back to the original byte */
+    if((size+start-1)/8 > idx) {   /*bit sequence doesn't end in the same byte as starts*/
+        H5T_bit_copy (&(buf[idx]), pos, &tmp, pos, (8-pos));
+        idx++;
+        size -= (8 - pos);
+    } else {  /* bit sequence ends in the same byte as starts */
+        H5T_bit_copy (&(buf[idx]), pos, &tmp, pos, size);
+        goto done;
+    }
+
+    /* The middle bytes */
+    while (size>=8) {
+        buf[idx] = ~(buf[idx]);
+	idx++;
+	size -= 8;
+    }
+
+    /* The last partial byte */
+    if (size>0) {
+        /* Similar to the first byte case, where sequence ends in the same byte as starts */
+        tmp = buf[idx];
+        tmp = ~tmp;
+        H5T_bit_copy (&(buf[idx]), 0, &tmp, 0, size);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI_VOID
 }
