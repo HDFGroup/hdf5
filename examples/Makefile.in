@@ -156,4 +156,13 @@ ph5example: $(srcdir)/ph5example.c
 	  $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;			\
 	fi
 
+h5_dtransform: $(srcdir)/h5_dtransform.c
+	@if test "X$(PARALLEL)" = "Xno"; then				\
+	  echo $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;		\
+	  $(H5CC) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;			\
+	else								\
+	  echo $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;		\
+	  $(H5CC_PP) $(CPPFLAGS) -o $@ $(srcdir)/$@.c;			\
+	fi
+
 @CONCLUDE@
