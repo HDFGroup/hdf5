@@ -62,7 +62,7 @@ converter.*/
 #define HDF4_PALETTE_TYPE   "PAL_TYPE"
 #define PAL_TYPE            "STANDARD8"
 #define PAL_COLORMODEL      "PAL_COLORMODEL"
-#define RGB                 "RGB"
+#define HDF5_RGB                 "RGB"
 /* 3. reserved name for HDF5 object name when meeting with name clashing. */
 
 #define HDF4_VGROUP         "HDF4_VGROUP"
