@@ -39,6 +39,7 @@ main (void)
     static int		buf1[NY][NX], buf2[NX/2][NY/2];
     static const size_t	dims[2] = {NX, NY};
     static const size_t half_dims[2] = {NX/2, NY/2};
+    static const size_t chunk_dims[2] = {NX/2, NY/2};
     static size_t	maxdims[2] = {H5P_UNLIMITED, H5P_UNLIMITED};
     static size_t	size[2];
     int			offset[2];
@@ -59,7 +60,7 @@ main (void)
     /* Create the dataset which is originally NX by NY */
     cparms = H5Ccreate (H5C_DATASET_CREATE);
     assert (cparms>=0);
-    status = H5Cset_chunk (cparms, 2, dims);
+    status = H5Cset_chunk (cparms, 2, chunk_dims);
     assert (status>=0);
     dataset = H5Dcreate (file, "dataset", H5T_NATIVE_INT, mem_space, cparms);
     assert (dataset>=0);
@@ -94,13 +95,13 @@ main (void)
 
     /* Read the data */
     mem_space = H5Pcreate_simple (2, half_dims, NULL);
+    file_space = H5Dget_space (dataset);
     for (i=0; i<10; i++) {
 	for (j=0; j<10; j++) {
 
 	    /* Select a hyperslab */
 	    offset[0] = i * NX/2;
 	    offset[1] = j * NY/2;
-	    file_space = H5Dget_space (dataset);
 	    assert (file_space>=0);
 	    status = H5Pset_hyperslab (file_space, offset, half_dims, NULL);
 	    assert (status>=0);
@@ -109,7 +110,6 @@ main (void)
 	    status = H5Dread (dataset, H5T_NATIVE_INT, mem_space, file_space,
 			      H5C_DEFAULT, buf2);
 	    assert (status>=0);
-	    H5Pclose (file_space);
 
 	    /* Compare */
 	    for (k=0; k<NX/2; k++) {

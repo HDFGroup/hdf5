@@ -47,6 +47,14 @@
 ./html/review1.html
 ./html/review1a.html
 ./html/storage.html
+./html/study.html
+./html/study_1000x1000.gif
+./html/study_250x250.gif
+./html/study_499x499.gif
+./html/study_5000x1000.gif
+./html/study_500x500.gif
+./html/study_p1.gif
+./html/study_p1.obj
 ./html/symtab
 ./src/debug.c
 ./src/H5.c
