@@ -84,11 +84,11 @@ fi
    
 # Prepare the source tree for a release.
 test -h ../hdf5-$VERS && rm ../hdf5-$VERS
-(cd ..; ln -s hdf5 hdf5-$VERS || exit 1)
+ln -s `pwd` ../hdf5-$VERS || exit 1
 mv Makefile ../Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
 test "$verbose" && echo "   Running tar..." 1>&2
-(cd ..; tar cf x.tar `sed s+^.+hdf5-$VERS+ hdf5/MANIFEST` || exit 1)
+(cd ..; tar cf x.tar `sed s+^.+hdf5-$VERS+ hdf5-$VERS/MANIFEST` || exit 1)
 
 # Compress
 for comp in $methods; do

@@ -66,8 +66,11 @@ while ($_ = shift) {
   };
 
   $_ eq "-i" && do {
-    die "-i switch needs a value\n" unless @ARGV;
-    $inc = shift;
+    if (@ARGV && $ARGV[1]=~/^(major|minor|release)$/) {
+      $inc = shift;
+    } else {
+      $inc = "release";
+    }
     next;
   };
 
