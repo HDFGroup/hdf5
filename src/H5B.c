@@ -2143,6 +2143,7 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     int	i, ncell, cmp;
     static int	ncalls = 0;
     herr_t	status;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     /* A queue of child data */
     struct child_t {
@@ -2234,6 +2235,7 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
 	head = tmp;
     }
 
-    FUNC_LEAVE(SUCCEED);
+done:
+    FUNC_LEAVE(ret_value);
 }
 #endif /* H5B_DEBUG */
