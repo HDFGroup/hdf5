@@ -95,8 +95,8 @@ H5Gcreate(hid_t file_id, const char *name, size_t size_hint)
     H5ECLEAR;
 
     /* Check arguments */
-    if (H5_FILE != H5Aatom_group(file_id) ||
-        NULL == (f = H5Aatom_object(file_id))) {
+    if (H5_FILE != H5A_group(file_id) ||
+        NULL == (f = H5A_object(file_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     if (!name || !*name) {
@@ -106,7 +106,7 @@ H5Gcreate(hid_t file_id, const char *name, size_t size_hint)
     if (NULL == (grp = H5G_create(f, name, size_hint))) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
     }
-    if ((ret_value = H5Aregister_atom(H5_GROUP, grp)) < 0) {
+    if ((ret_value = H5A_register(H5_GROUP, grp)) < 0) {
         H5G_close(grp);
         HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                       "unable to register group");
@@ -144,8 +144,8 @@ H5Gopen(hid_t file_id, const char *name)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_FILE != H5Aatom_group(file_id) ||
-        NULL == (f = H5Aatom_object(file_id))) {
+    if (H5_FILE != H5A_group(file_id) ||
+        NULL == (f = H5A_object(file_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     if (!name || !*name) {
@@ -156,7 +156,7 @@ H5Gopen(hid_t file_id, const char *name)
         HRETURN_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group");
     }
     /* Register an atom for the group */
-    if ((ret_value = H5Aregister_atom(H5_GROUP, grp)) < 0) {
+    if ((ret_value = H5A_register(H5_GROUP, grp)) < 0) {
         H5G_close(grp);
         HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                       "unable to register group");
@@ -190,8 +190,8 @@ H5Gclose(hid_t grp_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_GROUP != H5Aatom_group(grp_id) ||
-        NULL == (grp = H5Aatom_object(grp_id))) {
+    if (H5_GROUP != H5A_group(grp_id) ||
+        NULL == (grp = H5A_object(grp_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
     }
     /*
@@ -241,8 +241,8 @@ H5Gset(hid_t file_id, const char *name)
     H5ECLEAR;
 
     /* Check/fix arguments */
-    if (H5_FILE != H5Aatom_group(file_id) ||
-        NULL == (f = H5Aatom_object(file_id))) {
+    if (H5_FILE != H5A_group(file_id) ||
+        NULL == (f = H5A_object(file_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     if (!name || !*name) {
@@ -300,8 +300,8 @@ H5Gpush(hid_t file_id, const char *name)
     H5ECLEAR;
 
     /* Check arguments */
-    if (H5_FILE != H5Aatom_group(file_id) ||
-        NULL == (f = H5Aatom_object(file_id))) {
+    if (H5_FILE != H5A_group(file_id) ||
+        NULL == (f = H5A_object(file_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     if (!name || !*name) {
@@ -360,8 +360,8 @@ H5Gpop(hid_t file_id)
     H5ECLEAR;
 
     /* Check arguments */
-    if (H5_FILE != H5Aatom_group(file_id) ||
-        NULL == (f = H5Aatom_object(file_id))) {
+    if (H5_FILE != H5A_group(file_id) ||
+        NULL == (f = H5A_object(file_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     /* pop */
@@ -402,8 +402,8 @@ H5G_init_interface(void)
     FUNC_ENTER(H5G_init_interface, FAIL);
 
     /* Initialize the atom group for the group IDs */
-    if (H5Ainit_group(H5_GROUP, H5A_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
-                      (herr_t (*)(void *)) H5G_close) < 0 ||
+    if (H5A_init_group(H5_GROUP, H5A_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
+		       (herr_t (*)(void *)) H5G_close) < 0 ||
         H5_add_exit(H5G_term_interface) < 0) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
                       "unable to initialize interface");
@@ -428,7 +428,7 @@ H5G_init_interface(void)
 static void
 H5G_term_interface(void)
 {
-    H5Adestroy_group(H5_GROUP);
+    H5A_destroy_group(H5_GROUP);
 }
 
 /*-------------------------------------------------------------------------

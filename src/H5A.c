@@ -39,15 +39,14 @@ static char             RcsId[] = "@(#)$Revision$";
    H5A_release_atom_node - Releases an atom node (uses the atom free list)
    EXPORTED ROUTINES
    Atom Functions:
-   H5Aregister_atom   - Register an object in a group and get an atom for it
-   H5Aatom_object     - Get the object for an atom
-   H5Aatom_group      - Get the group for an atom
-   H5Aremove_atom     - Remove an atom from a group
-   H5Asearch_atom     - Search a group for a particular object
-   H5Ais_reserved     - Check whether an atom is a reserved atom in a group
+   H5A_register       - Register an object in a group and get an atom for it
+   H5A_object         - Get the object for an atom
+   H5A_group          - Get the group for an atom
+   H5A_remove         - Remove an atom from a group
+   H5A_search         - Search a group for a particular object
    Atom Group Functions:
-   H5Ainit_group      - Initialize a group to store atoms in
-   H5Adestroy_group   - Destroy an atomic group
+   H5A_init_group      - Initialize a group to store atoms in
+   H5A_destroy_group   - Destroy an atomic group
    Atom Group Cleanup:
    H5Ashutdown        - Terminate various static buffers.
 
@@ -117,7 +116,7 @@ H5A_init_interface(void)
 
 /******************************************************************************
  NAME
-     H5Ainit_group - Initialize an atomic group
+     H5A_init_group - Initialize an atomic group
 
  DESCRIPTION
     Creates a global atomic group to store atoms in.  If the group has already
@@ -133,7 +132,7 @@ H5A_init_interface(void)
 
 *******************************************************************************/
 intn 
-H5Ainit_group(group_t grp,      /* IN: Group to initialize */
+H5A_init_group(group_t grp,      /* IN: Group to initialize */
               intn hash_size,   /* IN: Minimum hash table size to use for group */
               uintn reserved,   /* IN: Number of hash table entries to reserve */
               herr_t                  (*free_func) (void *)     /* IN: Function to call when releasing ref counted objects */
@@ -142,7 +141,7 @@ H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
     intn                    ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Ainit_group, FAIL);
+    FUNC_ENTER(H5A_init_group, FAIL);
 
     if ((grp <= BADGROUP || grp >= MAXGROUP) && hash_size > 0)
         HGOTO_DONE(FAIL);
@@ -197,11 +196,11 @@ H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Ainit_group() */
+}                               /* end H5A_init_group() */
 
 /******************************************************************************
  NAME
-     H5Adestroy_group - Destroy an atomic group
+     H5A_destroy_group - Destroy an atomic group
 
  DESCRIPTION
     Destroys an atomic group which atoms are stored in.  If the group still
@@ -214,13 +213,13 @@ H5Ainit_group(group_t grp,      /* IN: Group to initialize */
 
 *******************************************************************************/
 intn 
-H5Adestroy_group(group_t grp    /* IN: Group to destroy */
+H5A_destroy_group(group_t grp    /* IN: Group to destroy */
 )
 {
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
     intn                    ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Adestroy_group, FAIL);
+    FUNC_ENTER(H5A_destroy_group, FAIL);
 
     if (grp <= BADGROUP || grp >= MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -253,11 +252,11 @@ H5Adestroy_group(group_t grp    /* IN: Group to destroy */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Adestroy_group() */
+}                               /* end H5A_destroy_group() */
 
 /******************************************************************************
  NAME
-     H5Aregister_atom - Register an object in a group and get an atom for it.
+     H5A_register - Register an object in a group and get an atom for it.
 
  DESCRIPTION
     Registers an object in a group and returns an atom for it.  This routine
@@ -272,8 +271,8 @@ H5Adestroy_group(group_t grp    /* IN: Group to destroy */
 
 *******************************************************************************/
 hid_t 
-H5Aregister_atom(group_t grp,   /* IN: Group to register the object in */
-                 const void *object     /* IN: Object to attach to atom */
+H5A_register(group_t grp,   /* IN: Group to register the object in */
+	     const void *object     /* IN: Object to attach to atom */
 )
 {
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
@@ -282,7 +281,7 @@ H5Aregister_atom(group_t grp,   /* IN: Group to register the object in */
     uintn                   hash_loc;   /* new item's hash table location */
     hid_t                   ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Aregister_atom, FAIL);
+    FUNC_ENTER(H5A_register, FAIL);
 
     if (grp <= BADGROUP || grp >= MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -349,7 +348,7 @@ H5Aregister_atom(group_t grp,   /* IN: Group to register the object in */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Aregister_atom() */
+}
 
 /******************************************************************************
  NAME
@@ -387,7 +386,7 @@ H5A_inc_ref(hid_t atm)
 
 /******************************************************************************
  NAME
-     H5Aatom_object - Returns to the object ptr for the atom 
+     H5A_object - Returns to the object ptr for the atom 
 
  DESCRIPTION
     Retrieves the object ptr which is associated with the atom.
@@ -397,7 +396,7 @@ H5A_inc_ref(hid_t atm)
 
 *******************************************************************************/
 VOIDP 
-H5Aatom_object(hid_t atm        /* IN: Atom to retrieve object for */
+H5A_object(hid_t atm        /* IN: Atom to retrieve object for */
 )
 {
 #ifdef ATOMS_ARE_CACHED
@@ -406,7 +405,7 @@ H5Aatom_object(hid_t atm        /* IN: Atom to retrieve object for */
     atom_info_t            *atm_ptr = NULL;     /* ptr to the new atom */
     VOIDP                   ret_value = NULL;
 
-    FUNC_ENTER(H5Aatom_object, NULL);
+    FUNC_ENTER(H5A_object, NULL);
 
 #ifdef ATOMS_ARE_CACHED
     /* Look for the atom in the cache first */
@@ -440,11 +439,11 @@ H5Aatom_object(hid_t atm        /* IN: Atom to retrieve object for */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Aatom_object() */
+}
 
 /******************************************************************************
  NAME
-     H5Aatom_group - Returns to the group for the atom 
+     H5A_group - Returns to the group for the atom 
 
  DESCRIPTION
     Retrieves the group which is associated with the atom.
@@ -454,12 +453,12 @@ H5Aatom_object(hid_t atm        /* IN: Atom to retrieve object for */
 
 *******************************************************************************/
 group_t 
-H5Aatom_group(hid_t atm         /* IN: Atom to retrieve group for */
+H5A_group(hid_t atm         /* IN: Atom to retrieve group for */
 )
 {
     group_t                 ret_value = BADGROUP;
 
-    FUNC_ENTER(H5Aatom_group, FAIL);
+    FUNC_ENTER(H5A_group, FAIL);
 
     ret_value = ATOM_TO_GROUP(atm);
     if (ret_value <= BADGROUP || ret_value >= MAXGROUP)
@@ -471,11 +470,11 @@ H5Aatom_group(hid_t atm         /* IN: Atom to retrieve group for */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Aatom_group() */
+}
 
 /******************************************************************************
  NAME
-     H5Aremove_atom - Removes an atom from a group
+     H5A_remove - Removes an atom from a group
 
  DESCRIPTION
     Removes an atom from a group.
@@ -485,7 +484,7 @@ H5Aatom_group(hid_t atm         /* IN: Atom to retrieve group for */
 
 *******************************************************************************/
 VOIDP 
-H5Aremove_atom(hid_t atm        /* IN: Atom to remove */
+H5A_remove(hid_t atm        /* IN: Atom to remove */
 )
 {
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
@@ -498,7 +497,7 @@ H5Aremove_atom(hid_t atm        /* IN: Atom to remove */
 #endif /* ATOMS_ARE_CACHED */
     VOIDP                   ret_value = NULL;
 
-    FUNC_ENTER(H5Aremove_atom, NULL);
+    FUNC_ENTER(H5A_remove, NULL);
 
     grp = ATOM_TO_GROUP(atm);
     if (grp <= BADGROUP || grp >= MAXGROUP)
@@ -553,7 +552,7 @@ H5Aremove_atom(hid_t atm        /* IN: Atom to remove */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Aremove_atom() */
+}
 
 /******************************************************************************
  NAME
@@ -590,7 +589,7 @@ H5A_dec_ref(hid_t atm)
         atm_ptr->count--;
 
         /* If the reference count is zero, remove the object from the group */
-        if (0 == atm_ptr->count && (obj = H5Aremove_atom(atm)) != NULL) {
+        if (0 == atm_ptr->count && (obj = H5A_remove(atm)) != NULL) {
             /* call the user's 'free' function for the atom's information */
             (*grp_ptr->free_func) (obj);
         }
@@ -601,7 +600,7 @@ H5A_dec_ref(hid_t atm)
 
 /******************************************************************************
  NAME
-     H5Asearch_atom - Search for an object in a group and get it's pointer.
+     H5A_search - Search for an object in a group and get it's pointer.
 
  DESCRIPTION
     Searchs for an object in a group and returns the pointer to it.
@@ -613,10 +612,10 @@ H5A_dec_ref(hid_t atm)
     Returns pointer an atom's object if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP 
-H5Asearch_atom(group_t grp,     /* IN: Group to search for the object in */
-               H5Asearch_func_t func,   /* IN: Ptr to the comparison function */
-               const VOIDP key  /* IN: pointer to key to compare against */
+void *
+H5A_search(group_t grp,     /* IN: Group to search for the object in */
+	   H5Asearch_func_t func,   /* IN: Ptr to the comparison function */
+	   const void *key  /* IN: pointer to key to compare against */
 )
 {
     atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
@@ -624,7 +623,7 @@ H5Asearch_atom(group_t grp,     /* IN: Group to search for the object in */
     intn                    i;  /* local counting variable */
     VOIDP                   ret_value = NULL;
 
-    FUNC_ENTER(H5Asearch_atom, NULL);
+    FUNC_ENTER(H5A_search, NULL);
 
     if (grp <= BADGROUP || grp >= MAXGROUP)
         HGOTO_DONE(NULL);
@@ -649,51 +648,7 @@ H5Asearch_atom(group_t grp,     /* IN: Group to search for the object in */
     }                           /* end if */
     /* Normal function cleanup */
     FUNC_LEAVE(ret_value);
-}                               /* end H5Asearch_atom() */
-
-/******************************************************************************
- NAME
-     H5Ais_reserved - Check whether an atom is a reserved atom in a group
-
- DESCRIPTION
-    Determines the group an atom belongs to and checks if the atom is a
-    reserved atom in the group.
-
- RETURNS
-    Returns BTRUE/BFALSE/BFAIL
-
-*******************************************************************************/
-intn 
-H5Ais_reserved(hid_t atm        /* IN: Group to search for the object in */
-)
-{
-    atom_group_t           *grp_ptr = NULL;     /* ptr to the atomic group */
-    group_t                 grp;        /* atom's atomic group */
-    hbool_t                 ret_value = BFAIL;
-
-    FUNC_ENTER(H5Ais_reserved, FAIL);
-
-    grp = ATOM_TO_GROUP(atm);
-    if (grp <= BADGROUP || grp >= MAXGROUP)
-        HGOTO_DONE(BFAIL);
-
-    grp_ptr = atom_group_list[grp];
-    if (grp_ptr == NULL)
-        HGOTO_DONE(BFAIL);
-
-    /* Get the location in which the atom is located */
-    if ((atm & ATOM_MASK) < grp_ptr->reserved)
-        ret_value = BTRUE;
-    else
-        ret_value = BFALSE;
-
-  done:
-    if (ret_value == BFAIL) {   /* Error condition cleanup */
-
-    }                           /* end if */
-    /* Normal function cleanup */
-    FUNC_LEAVE(ret_value);
-}                               /* end H5Ais_reserved() */
+}
 
 /******************************************************************************
  NAME

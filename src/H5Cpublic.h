@@ -27,51 +27,42 @@
 
 /* Template classes */
 typedef enum H5C_class_t {
-    H5C_NO_CLASS = -1,          /* Error return value                   */
-    H5C_FILE_CREATE = 0,        /* File creation template               */
-    H5C_FILE_ACCESS = 1,        /* File access template                 */
-    H5C_DATASET_CREATE = 2,     /* Dataset creation template            */
-    H5C_DATASET_XFER = 3,       /* Dataset transfer template            */
+    H5C_NO_CLASS         = -1,  /*error return value                         */
+    H5C_FILE_CREATE      = 0,   /*file creation template                     */
+    H5C_FILE_ACCESS      = 1,   /*file access template                       */
+    H5C_DATASET_CREATE   = 2,   /*dataset creation template                  */
+    H5C_DATASET_XFER     = 3,   /*dataset transfer template                  */
 
-    H5C_NCLASSES = 4            /* This must be last!                   */
+    H5C_NCLASSES         = 4    /*this must be last!                         */
 } H5C_class_t;
 
 #ifdef __cplusplus
-extern                  "C" {
+extern "C" {
 #endif
 
 /* Public functions */
-    hid_t                   H5Ccreate(H5C_class_t type);
-    herr_t                  H5Cclose(hid_t tid);
-    hid_t                   H5Ccopy(hid_t tid);
-
-    H5C_class_t             H5Cget_class(hid_t tid);
-
-    herr_t                  H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
-                               int *freelist /*out */ , int *stab /*out */ ,
-                                           int *shhdr /*out */ );
-
-    herr_t                  H5Cset_userblock(hid_t tid, size_t size);
-    herr_t                  H5Cget_userblock(hid_t tid, size_t *size);
-
-    herr_t                  H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size);
-    herr_t                  H5Cget_sizes(hid_t tid, size_t *sizeof_addr /*out */ ,
-                                         size_t *sizeof_size /*out */ );
-
-    herr_t                  H5Cset_sym_k(hid_t tid, int ik, int lk);
-    herr_t                  H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ );
-
-    herr_t                  H5Cset_istore_k(hid_t tid, int ik);
-    herr_t                  H5Cget_istore_k(hid_t tid, int *ik /*out */ );
-
-    herr_t                  H5Cset_layout(hid_t tid, H5D_layout_t layout);
-    H5D_layout_t            H5Cget_layout(hid_t tid);
-
-    herr_t                  H5Cset_chunk(hid_t tid, int ndims, size_t dim[]);
-    int                     H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ );
+hid_t H5Ccreate (H5C_class_t type);
+herr_t H5Cclose (hid_t tid);
+hid_t H5Ccopy (hid_t tid);
+H5C_class_t H5Cget_class (hid_t tid);
+herr_t H5Cget_version (hid_t tid, int *boot/*out*/, int *heap/*out*/,
+                       int *freelist/*out*/, int *stab/*out*/,
+                       int *shhdr/*out*/);
+herr_t H5Cset_userblock (hid_t tid, size_t size);
+herr_t H5Cget_userblock (hid_t tid, size_t *size);
+herr_t H5Cset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size);
+herr_t H5Cget_sizes (hid_t tid, size_t *sizeof_addr/*out*/,
+                     size_t *sizeof_size/*out*/);
+herr_t H5Cset_sym_k (hid_t tid, int ik, int lk);
+herr_t H5Cget_sym_k (hid_t tid, int *ik/*out*/, int *lk/*out*/);
+herr_t H5Cset_istore_k (hid_t tid, int ik);
+herr_t H5Cget_istore_k (hid_t tid, int *ik/*out*/);
+herr_t H5Cset_layout (hid_t tid, H5D_layout_t layout);
+H5D_layout_t H5Cget_layout (hid_t tid);
+herr_t H5Cset_chunk (hid_t tid, int ndims, size_t dim[]);
+int H5Cget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
 
 #ifdef __cplusplus
 }
-
 #endif
 #endif

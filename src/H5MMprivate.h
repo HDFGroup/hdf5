@@ -10,12 +10,13 @@
  *
  * Purpose:             Private header for memory management.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5MMprivate_H
 #define _H5MMprivate_h
+
 #include <H5MMpublic.h>
 
 /* Private headers needed by this file */
@@ -24,10 +25,9 @@
 /*
  * Library prototypes...
  */
-void                   *H5MM_xmalloc(size_t size);
-void                   *H5MM_xcalloc(size_t n, size_t size);
-void                   *H5MM_xrealloc(void *mem, size_t size);
-char                   *H5MM_xstrdup(const char *s);
-void                   *H5MM_xfree(const void *mem);
-
+void *H5MM_xmalloc (size_t size);
+void *H5MM_xcalloc (size_t n, size_t size);
+void *H5MM_xrealloc (void *mem, size_t size);
+char *H5MM_xstrdup (const char *s);
+void *H5MM_xfree (const void *mem);
 #endif

@@ -44,6 +44,7 @@ static char             RcsId[] = "@(#)$Revision$";
    + */
 
 #include <H5private.h>          /* Generic functions */
+#include <H5Aprivate.h>		/* Atom interface */
 #include <H5Cprivate.h>         /* Template interface */
 #include <H5Dprivate.h>         /* Dataset interface */
 #include <H5Eprivate.h>         /*error handling */
@@ -224,7 +225,7 @@ H5Maccess(hid_t oid)
     FUNC_ENTER(H5Maccess, FAIL);
 
     /* Atom group for incoming object */
-    group = H5Aatom_group(oid);
+    group = H5A_group(oid);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -262,7 +263,7 @@ H5Maccess(hid_t oid)
 hid_t 
 H5Mcopy(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -306,7 +307,7 @@ hid_t
 H5Mfind_name(hid_t owner_id, group_t type, const char *name)
 {
 #ifdef OLD_WAY
-    group_t                 group = H5Aatom_group(owner_id);    /* Atom group for incoming object */
+    group_t                 group = H5A_group(owner_id);    /* Atom group for incoming object */
 #endif /* OLD_WAY */
     intn                    i;  /* local counting variable */
     hid_t                   ret_value = SUCCEED;
@@ -355,7 +356,7 @@ H5Mfind_name(hid_t owner_id, group_t type, const char *name)
 uint32 
 H5Mname_len(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -397,7 +398,7 @@ H5Mname_len(hid_t oid)
 herr_t 
 H5Mget_name(hid_t oid, char *name)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     hid_t                   ret_value = SUCCEED;
 
@@ -440,7 +441,7 @@ H5Mget_name(hid_t oid, char *name)
 herr_t 
 H5Mset_name(hid_t oid, const char *name)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     hid_t                   ret_value = SUCCEED;
 
@@ -484,7 +485,7 @@ H5Mset_name(hid_t oid, const char *name)
 hid_t
 H5Msearch(hid_t oid, group_t type, const char *name)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     hid_t                   ret_value = SUCCEED;
 
@@ -527,7 +528,7 @@ H5Msearch(hid_t oid, group_t type, const char *name)
 hid_t
 H5Mindex(hid_t oid, group_t type, uint32 idx)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     hid_t                   ret_value = SUCCEED;
 
@@ -576,7 +577,7 @@ H5Mflush(hid_t oid)
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
-    group = H5Aatom_group(oid); /* look up group for incoming object */
+    group = H5A_group(oid); /* look up group for incoming object */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -612,7 +613,7 @@ H5Mflush(hid_t oid)
 herr_t 
 H5Mdelete(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -653,7 +654,7 @@ H5Mdelete(hid_t oid)
 hid_t 
 H5Mget_parent(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -695,7 +696,7 @@ H5Mget_parent(hid_t oid)
 hid_t 
 H5Mget_file(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
@@ -737,7 +738,7 @@ H5Mget_file(hid_t oid)
 herr_t 
 H5Mclose(hid_t oid)
 {
-    group_t                 group = H5Aatom_group(oid);         /* Atom group for incoming object */
+    group_t                 group = H5A_group(oid);         /* Atom group for incoming object */
     intn                    i;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 

@@ -133,8 +133,8 @@ H5E_init_interface(void)
     FUNC_ENTER(H5E_init_interface, FAIL);
 
     /* Initialize the atom group for the error stacks */
-    if ((ret_value = H5Ainit_group(H5_ERR, H5A_ERRSTACK_HASHSIZE, 0,
-                                 (herr_t (*)(void *)) H5E_close)) != FAIL) {
+    if ((ret_value = H5A_init_group(H5_ERR, H5A_ERRSTACK_HASHSIZE, 0,
+				    (herr_t (*)(void *)) H5E_close)) != FAIL) {
         ret_value = H5_add_exit(H5E_term_interface);
     }
     FUNC_LEAVE(ret_value);
@@ -160,7 +160,7 @@ H5E_init_interface(void)
 static void
 H5E_term_interface(void)
 {
-    H5Adestroy_group(H5_ERR);
+    H5A_destroy_group(H5_ERR);
 }
 
 /*--------------------------------------------------------------------------
@@ -199,7 +199,7 @@ H5Ecreate(uintn initial_stack_nelmts)
     new_stack->push = H5E_push; /* Set the default error handler */
 
     /* Get an atom for the error stack */
-    if ((ret_value = H5Aregister_atom(H5_ERR, new_stack)) < 0) {
+    if ((ret_value = H5A_register(H5_ERR, new_stack)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                       "unable to register error stack");
     }
@@ -227,7 +227,7 @@ H5Eclose(hid_t estack_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_ERR != H5Aatom_group(estack_id)) {
+    if (H5_ERR != H5A_group(estack_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack");
     }
     /*
@@ -295,8 +295,8 @@ H5Epush(hid_t estack_id, H5E_major_t maj_num, H5E_minor_t min_num,
      * check args, but don't call error functions if ESTACK_ID is the thread
      * global error handler.
      */
-    if (H5_ERR != H5Aatom_group(estack_id) ||
-        NULL == (estack = H5Aatom_object(estack_id))) {
+    if (H5_ERR != H5A_group(estack_id) ||
+        NULL == (estack = H5A_object(estack_id))) {
         HRETURN(FAIL);
     }
     if (!function_name || !file_name || !desc) {
@@ -342,8 +342,8 @@ H5Eclear(hid_t estack_id)
         H5ECLEAR;
 
     /* check args */
-    if (H5_ERR != H5Aatom_group(estack_id) ||
-        NULL == (estack = H5Aatom_object(estack_id))) {
+    if (H5_ERR != H5A_group(estack_id) ||
+        NULL == (estack = H5A_object(estack_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack");
     }
     if (H5E_clear(estack) < 0) {
@@ -384,8 +384,8 @@ H5Eprint(hid_t estack_id, FILE * file)
         H5ECLEAR;
 
     /* check args */
-    if (H5_ERR != H5Aatom_group(estack_id) ||
-        NULL == (estack = H5Aatom_object(estack_id))) {
+    if (H5_ERR != H5A_group(estack_id) ||
+        NULL == (estack = H5A_object(estack_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error stack");
     }
     if (!file)

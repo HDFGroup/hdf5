@@ -10,8 +10,6 @@
  *                                                                          *
  ****************************************************************************/
 
-/* $Id$ */
-
 /*
  * This is the main public HDF5 include file.  Put further information in
  * a particular header file and include that here, don't fill this file with
@@ -36,5 +34,4 @@
 #include <H5Opublic.h>
 #include <H5Ppublic.h>
 #include <H5Tpublic.h>
-
 #endif

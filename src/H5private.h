@@ -409,8 +409,8 @@ extern char            *strdup(const char *s);
  *
  *-------------------------------------------------------------------------
  */
-extern hbool_t          library_initialize_g;   /*good thing C's lazy about extern! */
-extern hbool_t          thread_initialize_g;    /*don't decl interface_initialize_g */
+extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
+extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 
 #define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
 
@@ -478,10 +478,10 @@ extern hbool_t          thread_initialize_g;    /*don't decl interface_initializ
 #endif
 
 /* Private functions, not part of the publicly documented API */
-herr_t                  H5_init_library(void);
-void                    H5_term_library(void);
-herr_t                  H5_add_exit(void (*func) (void));
-herr_t                  H5_init_thread(void);
-void                    H5_term_thread(void);
+herr_t H5_init_library(void);
+void H5_term_library(void);
+herr_t H5_add_exit(void (*func) (void));
+herr_t H5_init_thread(void);
+void H5_term_thread(void);
 
 #endif

@@ -49,7 +49,7 @@ typedef struct {
  * are numbered.
  */
 typedef struct H5P_number_t {
-    int		_place_holder;		/*remove this field!*/
+    int _place_holder;                  /*remove this field!                 */
 } H5P_number_t;
 
 /*
@@ -58,29 +58,29 @@ typedef struct H5P_number_t {
 typedef struct H5P_tconv_t {
     /* Initialize element numbering information */
     size_t (*init)(const struct H5O_layout_t *layout, const H5P_t *mem_space,
-		   const H5P_t *file_space, H5P_number_t *numbering/*out*/);
+                   const H5P_t *file_space, H5P_number_t *numbering/*out*/);
 
     /* Gather elements from disk to type conversion buffer */
     size_t (*fgath)(H5F_t *f, const struct H5O_layout_t *layout,
-		    size_t elmt_size, const H5P_t *file_space,
-		    const H5P_number_t *numbering, intn start, intn nelmts,
-		    void *tconv_buf/*out*/);
+                    size_t elmt_size, const H5P_t *file_space,
+                    const H5P_number_t *numbering, intn start, intn nelmts,
+                    void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to application buffer */
     herr_t (*mscat)(const void *tconv_buf, size_t elmt_size,
-		    const H5P_t *mem_space, const H5P_number_t *numbering,
-		    intn start, intn nelmts, void *buf/*out*/);
+                    const H5P_t *mem_space, const H5P_number_t *numbering,
+                    intn start, intn nelmts, void *buf/*out*/);
 
     /* Gather elements from app buffer to type conversion buffer */
     size_t (*mgath)(const void *buf, size_t elmt_size,
-		    const H5P_t *mem_space, const H5P_number_t *numbering,
-		    intn start, intn nelmts, void *tconv_buf/*out*/);
+                    const H5P_t *mem_space, const H5P_number_t *numbering,
+                    intn start, intn nelmts, void *tconv_buf/*out*/);
 
     /* Scatter elements from type conversion buffer to disk */
     herr_t (*fscat)(H5F_t *f, const struct H5O_layout_t *layout,
-		    size_t elmt_size, const H5P_t *file_space,
-		    const H5P_number_t *numbering, intn start, intn nelmts,
-		    const void *tconv_buf);
+                    size_t elmt_size, const H5P_t *file_space,
+                    const H5P_number_t *numbering, intn start, intn nelmts,
+                    const void *tconv_buf);
 } H5P_conv_t;
 
 H5P_t *H5P_copy (const H5P_t *src);
@@ -97,21 +97,20 @@ const H5P_conv_t *H5P_find (const H5P_t *mem_space, const H5P_t *file_space);
 
 /* Conversion functions for simple data spaces */
 size_t H5P_simp_init (const struct H5O_layout_t *layout,
-		      const H5P_t *mem_space, const H5P_t *file_space,
-		      H5P_number_t *numbering/*out*/);
+                      const H5P_t *mem_space, const H5P_t *file_space,
+                      H5P_number_t *numbering/*out*/);
 size_t H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		       size_t elmt_size, const H5P_t *file_space,
-		       const H5P_number_t *numbering, intn start, intn nelmts,
-		       void *tconv_buf/*out*/);
+                       size_t elmt_size, const H5P_t *file_space,
+                       const H5P_number_t *numbering, intn start,
+                       intn nelmts, void *tconv_buf/*out*/);
 herr_t H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
-		       const H5P_t *mem_space, const H5P_number_t *numbering,
-		       intn start, intn nelmts, void *buf/*out*/);
+                       const H5P_t *mem_space, const H5P_number_t *numbering,
+                       intn start, intn nelmts, void *buf/*out*/);
 size_t H5P_simp_mgath (const void *buf, size_t elmt_size,
-		       const H5P_t *mem_space, const H5P_number_t *numbering,
-		       intn start, intn nelmts, void *tconv_buf/*out*/);
+                       const H5P_t *mem_space, const H5P_number_t *numbering,
+                       intn start, intn nelmts, void *tconv_buf/*out*/);
 herr_t H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		       size_t elmt_size, const H5P_t *file_space,
-		       const H5P_number_t *numbering, intn start, intn nelmts,
-		       const void *tconv_buf);
-
+                       size_t elmt_size, const H5P_t *file_space,
+                       const H5P_number_t *numbering, intn start,
+                       intn nelmts, const void *tconv_buf);
 #endif

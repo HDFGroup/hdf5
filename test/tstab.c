@@ -17,6 +17,7 @@
 #include <testhdf5.h>
 
 #include <H5private.h>
+#include <H5Aprivate.h>
 #include <H5ACprivate.h>
 #include <H5Cprivate.h>
 #include <H5Fprivate.h>
@@ -68,7 +69,7 @@ test_1(void)
     /* create the file */
     fid = H5Fcreate("tstab1.h5", H5ACC_OVERWRITE, 0, 0);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5Aatom_object(fid);
+    f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
 
     /* create the object */
@@ -131,7 +132,7 @@ test_1(void)
     /* create the file */
     fid = H5Fcreate("tstab1.h5", H5ACC_OVERWRITE, 0, 0);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5Aatom_object(fid);
+    f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
 
     /* create the object */
@@ -240,7 +241,7 @@ test_2(void)
     /* create the file */
     fid = H5Fcreate("tstab2.h5", H5ACC_OVERWRITE, props, 0);
     CHECK(fid, FAIL, "H5Fcreate");
-    f = H5Aatom_object(fid);
+    f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
     f->intent |= H5F_ACC_DEBUG;
 

@@ -10,7 +10,7 @@
  *
  * Purpose:             Public include file for cache functions.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -21,11 +21,10 @@
 #include <H5public.h>
 
 #ifdef __cplusplus
-extern                  "C" {
+extern "C" {
 #endif
 
 #ifdef __cplusplus
 }
-
 #endif
 #endif

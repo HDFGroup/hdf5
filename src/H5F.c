@@ -125,7 +125,7 @@ H5F_init_interface(void)
     FUNC_ENTER(H5F_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5Ainit_group(H5_FILE, H5A_FILEID_HASHSIZE, 0, NULL)) != FAIL)
+    if ((ret_value = H5A_init_group(H5_FILE, H5A_FILEID_HASHSIZE, 0, NULL)) != FAIL)
         ret_value = H5_add_exit(&H5F_term_interface);
 
     FUNC_LEAVE(ret_value);
@@ -151,7 +151,7 @@ H5F_init_interface(void)
 static void
 H5F_term_interface(void)
 {
-    H5Adestroy_group(H5_FILE);
+    H5A_destroy_group(H5_FILE);
 }
 
 /*--------------------------------------------------------------------------
@@ -232,10 +232,10 @@ H5Fget_create_template(hid_t fid)
     H5ECLEAR;
 
     /* check args */
-    if (H5_FILE != H5Aatom_group(fid)) {
+    if (H5_FILE != H5A_group(fid)) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a file");
     }
-    if (NULL == (file = H5Aatom_object(fid))) {
+    if (NULL == (file = H5A_object(fid))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't get file struct");
     }
     /* Create the template object to return */
@@ -657,7 +657,7 @@ H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
             HRETURN_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                           "file is not writable");
         }
-        if ((old = H5Asearch_atom(H5_FILE, H5F_compare_files, &search))) {
+        if ((old = H5A_search(H5_FILE, H5F_compare_files, &search))) {
             if (flags & H5F_ACC_TRUNC) {
                 HRETURN_ERROR(H5E_FILE, H5E_FILEOPEN, NULL,
                               "file already open - TRUNC failed");
@@ -994,13 +994,13 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
 
     if (create_temp <= 0) {
         create_parms = &H5F_create_dflt;
-    } else if (NULL == (create_parms = H5Aatom_object(create_temp))) {
+    } else if (NULL == (create_parms = H5A_object(create_temp))) {
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize template");
     }
 #ifdef LATER
     if (access_temp <= 0) {
         access_parms = &H5F_access_dflt;
-    } else if (NULL == (access_parms = H5Aatom_object(access_temp))) {
+    } else if (NULL == (access_parms = H5A_object(access_temp))) {
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);       /*can't unatomize template */
     }
 #endif
@@ -1013,7 +1013,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't create file");
     }
     /* Get an atom for the file */
-    if ((ret_value = H5Aregister_atom(H5_FILE, new_file)) < 0)
+    if ((ret_value = H5A_register(H5_FILE, new_file)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
 
   done:
@@ -1084,7 +1084,7 @@ H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 #ifdef LATER
     if (access_temp <= 0)
         access_temp = H5CPget_default_atom(H5_TEMPLATE);
-    if (NULL == (f_access_parms = H5Aatom_object(access_temp)))
+    if (NULL == (f_access_parms = H5A_object(access_temp)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);       /*can't unatomize template */
 #endif
 
@@ -1093,7 +1093,7 @@ H5Fopen(const char *filename, uintn flags, hid_t access_temp)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cant open file");
     }
     /* Get an atom for the file */
-    if ((ret_value = H5Aregister_atom(H5_FILE, new_file)) < 0)
+    if ((ret_value = H5A_register(H5_FILE, new_file)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
 
   done:
@@ -1289,16 +1289,16 @@ H5Fclose(hid_t fid)
     H5ECLEAR;
 
     /* Check/fix arguments. */
-    if (H5_FILE != H5Aatom_group(fid))
+    if (H5_FILE != H5A_group(fid))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
-    if (NULL == (file = H5Aatom_object(fid)))
+    if (NULL == (file = H5A_object(fid)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
 
     /* Close the file */
     ret_value = H5F_close(file);
 
     /* Remove the file atom */
-    if (NULL == H5Aremove_atom(fid)) {
+    if (NULL == H5A_remove(fid)) {
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't remove atom");
     }
   done:

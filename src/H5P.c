@@ -50,9 +50,9 @@ H5P_init_interface(void)
     FUNC_ENTER(H5P_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5Ainit_group(H5_DATASPACE, H5A_DATASPACEID_HASHSIZE,
-                                   H5P_RESERVED_ATOMS,
-                                 (herr_t (*)(void *)) H5P_close)) != FAIL) {
+    if ((ret_value = H5A_init_group(H5_DATASPACE, H5A_DATASPACEID_HASHSIZE,
+				    H5P_RESERVED_ATOMS,
+				    (herr_t (*)(void *)) H5P_close)) != FAIL) {
         ret_value = H5_add_exit(&H5P_term_interface);
     }
     FUNC_LEAVE(ret_value);
@@ -78,7 +78,7 @@ H5P_init_interface(void)
 static void
 H5P_term_interface(void)
 {
-    H5Adestroy_group(H5_DATASPACE);
+    H5A_destroy_group(H5_DATASPACE);
 }
 
 /*-------------------------------------------------------------------------
@@ -130,7 +130,7 @@ H5Pcreate(H5P_class_t type)
     }
 
     /* Register the new data space and get an ID for it */
-    if ((ret_value = H5Aregister_atom(H5_DATASPACE, ds)) < 0) {
+    if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                     "unable to register data space for ID");
     }
@@ -166,8 +166,8 @@ H5Pclose(hid_t space_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATASPACE != H5Aatom_group(space_id) ||
-        NULL == H5Aatom_object(space_id)) {
+    if (H5_DATASPACE != H5A_group(space_id) ||
+        NULL == H5A_object(space_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     /* When the reference count reaches zero the resources are freed */
@@ -318,8 +318,8 @@ H5Pget_npoints(hid_t space_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATASPACE != H5Aatom_group(space_id) ||
-        NULL == (ds = H5Aatom_object(space_id))) {
+    if (H5_DATASPACE != H5A_group(space_id) ||
+        NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
     }
     ret_value = H5P_get_npoints(ds);
@@ -404,8 +404,8 @@ H5Pget_ndims(hid_t space_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATASPACE != H5Aatom_group(space_id) ||
-        NULL == (ds = H5Aatom_object(space_id))) {
+    if (H5_DATASPACE != H5A_group(space_id) ||
+        NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     ret_value = H5P_get_ndims(ds);
@@ -491,8 +491,8 @@ H5Pget_dims(hid_t space_id, size_t dims[] /*out */ )
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATASPACE != H5Aatom_group(space_id) ||
-        NULL == (ds = H5Aatom_object(space_id))) {
+    if (H5_DATASPACE != H5A_group(space_id) ||
+        NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if (!dims) {
@@ -772,7 +772,7 @@ H5Pis_simple(hid_t sid)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
-    if ((space = H5Aatom_object(sid)) == NULL)
+    if ((space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
     ret_value = H5P_is_simple(space);
@@ -819,7 +819,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     H5ECLEAR;
 
     /* Get the object */
-    if ((space = H5Aatom_object(sid)) == NULL)
+    if ((space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
     if (rank > 0 && dims == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");

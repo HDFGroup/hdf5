@@ -93,9 +93,9 @@ H5T_init_interface(void)
     FUNC_ENTER(H5T_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5Ainit_group(H5_DATATYPE, H5A_DATATYPEID_HASHSIZE,
-                                   H5T_RESERVED_ATOMS,
-                                 (herr_t (*)(void *)) H5T_close)) != FAIL) {
+    if ((ret_value = H5A_init_group(H5_DATATYPE, H5A_DATATYPEID_HASHSIZE,
+				    H5T_RESERVED_ATOMS,
+				    (herr_t (*)(void *)) H5T_close)) != FAIL) {
         ret_value = H5_add_exit(&H5T_term_interface);
     }
     /*
@@ -170,7 +170,7 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 8 * dt->size;
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_TIME_g = H5Aregister_atom(H5_DATATYPE, dt)) < 0) {
+    if ((H5T_NATIVE_TIME_g = H5A_register(H5_DATATYPE, dt)) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "can't initialize H5T layer");
     }
@@ -186,7 +186,7 @@ H5T_init_interface(void)
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
     dt->u.atomic.u.s.pad = H5T_STR_NULL;
-    if ((H5T_NATIVE_STRING_g = H5Aregister_atom(H5_DATATYPE, dt)) < 0) {
+    if ((H5T_NATIVE_STRING_g = H5A_register(H5_DATATYPE, dt)) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "can't initialize H5T layer");
     }
@@ -200,7 +200,7 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 8 * dt->size;
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_BITFIELD_g = H5Aregister_atom(H5_DATATYPE, dt)) < 0) {
+    if ((H5T_NATIVE_BITFIELD_g = H5A_register(H5_DATATYPE, dt)) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to initialize H5T layer");
     }
@@ -214,7 +214,7 @@ H5T_init_interface(void)
     dt->u.atomic.prec = 8 * dt->size;
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
-    if ((H5T_NATIVE_OPAQUE_g = H5Aregister_atom(H5_DATATYPE, dt)) < 0) {
+    if ((H5T_NATIVE_OPAQUE_g = H5A_register(H5_DATATYPE, dt)) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to initialize H5T layer");
     }
@@ -263,7 +263,7 @@ H5T_init_interface(void)
 static void
 H5T_term_interface(void)
 {
-    H5Adestroy_group(H5_DATATYPE);
+    H5A_destroy_group(H5_DATATYPE);
 }
 
 /*-------------------------------------------------------------------------
@@ -305,7 +305,7 @@ H5Tcreate(H5T_class_t type, size_t size)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create type");
     }
     /* Make it an atom */
-    if ((ret_value = H5Aregister_atom(H5_DATATYPE, dt)) < 0) {
+    if ((ret_value = H5A_register(H5_DATATYPE, dt)) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                       "can't register data type atom");
     }
@@ -341,8 +341,8 @@ H5Tcopy(hid_t type_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id))) {
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     /* copy */
@@ -350,7 +350,7 @@ H5Tcopy(hid_t type_id)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
     }
     /* atomize result */
-    if ((ret_value = H5Aregister_atom(H5_DATATYPE, new_dt)) < 0) {
+    if ((ret_value = H5A_register(H5_DATATYPE, new_dt)) < 0) {
         H5T_close(new_dt);
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                       "can't register data type atom");
@@ -383,8 +383,8 @@ H5Tclose(hid_t type_id)
     H5ECLEAR;
 
     /* check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id))) {
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (dt->locked) {
@@ -425,10 +425,10 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     FUNC_ENTER(H5Tequal, FAIL);
 
     /* check args */
-    if (H5_DATATYPE != H5Aatom_group(type1_id) ||
-        NULL == (dt1 = H5Aatom_object(type1_id)) ||
-        H5_DATATYPE != H5Aatom_group(type2_id) ||
-        NULL == (dt2 = H5Aatom_object(type2_id))) {
+    if (H5_DATATYPE != H5A_group(type1_id) ||
+        NULL == (dt1 = H5A_object(type1_id)) ||
+        H5_DATATYPE != H5A_group(type2_id) ||
+        NULL == (dt2 = H5A_object(type2_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     ret_value = (0 == H5T_cmp(dt1, dt2));
@@ -465,8 +465,8 @@ H5Tlock(hid_t type_id)
     FUNC_ENTER(H5Tlock, FAIL);
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id))) {
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     dt->locked = TRUE;
@@ -499,8 +499,8 @@ H5Tget_class(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id))) {
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
     }
     FUNC_LEAVE(dt->type);
@@ -534,8 +534,8 @@ H5Tget_size(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id))) {
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     }
     /* size */
@@ -582,8 +582,8 @@ H5Tset_size(hid_t type_id, size_t size)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -679,8 +679,8 @@ H5Tget_order(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR,
                       "not an atomic data type");
@@ -716,8 +716,8 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -762,8 +762,8 @@ H5Tget_precision(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
     }
@@ -813,8 +813,8 @@ H5Tset_precision(hid_t type_id, size_t prec)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -920,8 +920,8 @@ H5Tget_offset(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
     }
@@ -979,8 +979,8 @@ H5Tset_offset(hid_t type_id, size_t offset)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -1028,8 +1028,8 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -1067,8 +1067,8 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         !H5T_is_atomic(dt)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
@@ -1110,8 +1110,8 @@ H5Tget_sign(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_INTEGER != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR,
                       "not an integer data type");
@@ -1147,8 +1147,8 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_INTEGER != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type");
     }
@@ -1196,8 +1196,8 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out */ ,
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a floating-point data type");
@@ -1249,8 +1249,8 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a floating-point data type");
@@ -1320,8 +1320,8 @@ H5Tget_ebias(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0,
                       "not a floating-point data type");
@@ -1357,8 +1357,8 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a floating-point data type");
@@ -1398,8 +1398,8 @@ H5Tget_norm(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR,
                       "not a floating-point data type");
@@ -1436,8 +1436,8 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a floating-point data type");
@@ -1482,8 +1482,8 @@ H5Tget_inpad(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR,
                       "not a floating-point data type");
@@ -1522,8 +1522,8 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_FLOAT != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a floating-point data type");
@@ -1568,8 +1568,8 @@ H5Tget_cset(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_STRING != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR,
                       "not a string data type");
@@ -1607,8 +1607,8 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_STRING != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
     }
@@ -1653,8 +1653,8 @@ H5Tget_strpad(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_STRING != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR,
                       "not a string data type");
@@ -1693,8 +1693,8 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_STRING != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a string data type");
     }
@@ -1738,8 +1738,8 @@ H5Tget_nmembers(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
@@ -1776,8 +1776,8 @@ H5Tget_member_name(hid_t type_id, int membno)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a compound data type");
     }
@@ -1818,8 +1818,8 @@ H5Tget_member_offset(hid_t type_id, int membno)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound data type");
     }
@@ -1860,8 +1860,8 @@ H5Tget_member_dims(hid_t type_id, int membno,
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
@@ -1909,8 +1909,8 @@ H5Tget_member_type(hid_t type_id, int membno)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
@@ -1922,7 +1922,7 @@ H5Tget_member_type(hid_t type_id, int membno)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to copy member data type");
     }
-    if ((memb_type_id = H5Aregister_atom(H5_DATATYPE, memb_dt)) < 0) {
+    if ((memb_type_id = H5A_register(H5_DATATYPE, memb_dt)) < 0) {
         H5T_close(memb_dt);
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                       "can't register data type atom");
@@ -1968,8 +1968,8 @@ H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(parent_id) ||
-        NULL == (parent = H5Aatom_object(parent_id)) ||
+    if (H5_DATATYPE != H5A_group(parent_id) ||
+        NULL == (parent = H5A_object(parent_id)) ||
         H5T_COMPOUND != parent->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
@@ -1979,8 +1979,8 @@ H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
     if (!name || !*name) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no member name");
     }
-    if (H5_DATATYPE != H5Aatom_group(member_id) ||
-        NULL == (member = H5Aatom_object(member_id))) {
+    if (H5_DATATYPE != H5A_group(member_id) ||
+        NULL == (member = H5A_object(member_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (H5T_insert(parent, name, offset, member) < 0) {
@@ -2016,8 +2016,8 @@ H5Tpack(hid_t type_id)
     H5ECLEAR;
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(type_id) ||
-        NULL == (dt = H5Aatom_object(type_id)) ||
+    if (H5_DATATYPE != H5A_group(type_id) ||
+        NULL == (dt = H5A_object(type_id)) ||
         H5T_COMPOUND != dt->type) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
@@ -2066,10 +2066,10 @@ H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
     FUNC_ENTER(H5Tregister_hard, FAIL);
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(src_id) ||
-        NULL == (src = H5Aatom_object(src_id)) ||
-        H5_DATATYPE != H5Aatom_group(dst_id) ||
-        NULL == (dst = H5Aatom_object(dst_id))) {
+    if (H5_DATATYPE != H5A_group(src_id) ||
+        NULL == (src = H5A_object(src_id)) ||
+        H5_DATATYPE != H5A_group(dst_id) ||
+        NULL == (dst = H5A_object(dst_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     /* Locate or create a new conversion path */
@@ -2139,8 +2139,8 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
          */
         if (path->src->type != src_cls || path->dst->type != dst_cls)
             continue;
-        if ((src_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
-        (dst_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
+        if ((src_id = H5A_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
+        (dst_id = H5A_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                           "unable to register data types for conv query");
         }
@@ -2216,10 +2216,10 @@ H5Tunregister(H5T_conv_t func)
                  * Conversion functions are app-level, so temporarily create
                  * object id's for the data types.
                  */
-                if ((src_id = H5Aregister_atom(H5_DATATYPE,
-                                               H5T_copy(path->src))) < 0 ||
-                    (dst_id = H5Aregister_atom(H5_DATATYPE,
-                                               H5T_copy(path->dst))) < 0) {
+                if ((src_id = H5A_register(H5_DATATYPE,
+					   H5T_copy(path->src))) < 0 ||
+                    (dst_id = H5A_register(H5_DATATYPE,
+					   H5T_copy(path->dst))) < 0) {
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                   "unable to register conv types for query");
                 }
@@ -2262,10 +2262,10 @@ H5Tfind(hid_t src_id, hid_t dst_id)
     FUNC_ENTER(H5Tfind, NULL);
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(src_id) ||
-        NULL == (src = H5Aatom_object(src_id)) ||
-        H5_DATATYPE != H5Aatom_group(dst_id) ||
-        NULL == (dst = H5Aatom_object(dst_id))) {
+    if (H5_DATATYPE != H5A_group(src_id) ||
+        NULL == (src = H5A_object(src_id)) ||
+        H5_DATATYPE != H5A_group(dst_id) ||
+        NULL == (dst = H5A_object(dst_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type");
     }
     /* Find it */
@@ -3044,8 +3044,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create)
             if (src->type != H5T_soft_g[i].src || dst->type != H5T_soft_g[i].dst) {
                 continue;
             }
-            if ((src_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
-                (dst_id = H5Aregister_atom(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
+            if ((src_id=H5A_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
+                (dst_id=H5A_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                               "unable to register conv types for query");
             }

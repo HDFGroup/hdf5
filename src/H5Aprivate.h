@@ -10,8 +10,6 @@
  *                                                                          *
  ****************************************************************************/
 
-/* $Id$ */
-
 /*-----------------------------------------------------------------------------
  * File:    atom.h
  * Purpose: header file for atom API
@@ -20,7 +18,8 @@
 /* avoid re-inclusion */
 #ifndef _H5Aprivate_H
 #define _H5Aprivate_H
-#include <H5Apublic.h>          /* Include Public Definitions */
+
+#include <H5Apublic.h>          /*include Public Definitions                 */
 
 /* Private headers needed by this file */
 #include <H5private.h>
@@ -37,19 +36,23 @@
 #define ATOMS_ARE_CACHED
 
 #ifdef ATOMS_ARE_CACHED
-#  define ATOM_CACHE_SIZE 4     /* # of previous atoms cached */
+#  define ATOM_CACHE_SIZE 4             /*# of previous atoms cached         */
 #endif
 
 /* Map an atom to a Group number */
-#define ATOM_TO_GROUP(a)    ((group_t)((((hid_t)(a))>>((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
+#define ATOM_TO_GROUP(a)    ((group_t)((((hid_t)(a))>>			     \
+					((sizeof(hid_t)*8)-GROUP_BITS))	     \
+				       &GROUP_MASK))
 
 #ifdef HASH_SIZE_POWER_2
+
 /*
  * Map an atom to a hash location (assumes s is a power of 2 and smaller
  * than the ATOM_MASK constant).
  */
 #  define ATOM_TO_LOC(a,s)    ((hid_t)(a)&((s)-1))
 #else
+
 /*
  * Map an atom to a hash location.
  */
@@ -57,36 +60,46 @@
 #endif
 
 /* Default sizes of the hash-tables for various atom groups */
-#define H5A_ERRSTACK_HASHSIZE   64
-#define H5A_FILEID_HASHSIZE     64
-#define H5A_TEMPID_HASHSIZE     64
-#define H5A_DATATYPEID_HASHSIZE 64
-#define H5A_DATASPACEID_HASHSIZE 64
-#define H5A_DATASETID_HASHSIZE  64
-#define H5A_OID_HASHSIZE        64
-#define H5A_GROUPID_HASHSIZE    64
+#define H5A_ERRSTACK_HASHSIZE   	64
+#define H5A_FILEID_HASHSIZE     	64
+#define H5A_TEMPID_HASHSIZE     	64
+#define H5A_DATATYPEID_HASHSIZE 	64
+#define H5A_DATASPACEID_HASHSIZE 	64
+#define H5A_DATASETID_HASHSIZE  	64
+#define H5A_OID_HASHSIZE        	64
+#define H5A_GROUPID_HASHSIZE    	64
 
 /* Atom information structure used */
 typedef struct atom_info_struct_tag {
-    hid_t                   id; /* atom ID for this info */
-    uintn                   count;      /* ref. count for this atom */
-    VOIDP                  *obj_ptr;    /* pointer associated with the atom */
-    struct atom_info_struct_tag *next;  /* link to next atom (in case of hash-clash) */
+    hid_t                       id;       /*atom ID for this info            */
+    uintn                       count;    /*ref. count for this atom         */
+    VOIDP                       *obj_ptr; /*pointer associated with the atom */
+    struct atom_info_struct_tag *next;/*link to next atom (in case of hash-clash)*/
 } atom_info_t;
 
 /* Atom group structure used */
 typedef struct atom_group_struct_tag {
-    uintn                   count;      /* # of times this group has been initialized */
-    uintn                   reserved;   /* # of atoms to reserve for constant atoms */
-    uintn                   wrapped;    /* whether the id count has wrapped around */
-    intn                    hash_size;  /* size of the hash table to store the atoms in */
-    uintn                   atoms;      /* current number of atoms held */
-    uintn                   nextid;     /* atom ID to use for the next atom */
-    herr_t                  (*free_func) (void *);      /* Pointer to function to call when releasing ref counted object */
-    atom_info_t           **atom_list;  /* pointer to an array of ptrs to atoms */
+    uintn       count;           /*# of times this group has been initialized*/
+    uintn       reserved;          /*# of atoms to reserve for constant atoms*/
+    uintn       wrapped;            /*whether the id count has wrapped around*/
+    intn        hash_size;     /*size of the hash table to store the atoms in*/
+    uintn       atoms;                 /*current number of atoms held        */
+    uintn       nextid;                /*atom ID to use for the next atom    */
+    herr_t      (*free_func) (void *);/*pointer to function to call when releasing ref counted object*/
+    atom_info_t **atom_list;           /*pointer to an array of ptrs to atoms*/
 } atom_group_t;
 
-intn                    H5A_dec_ref(hid_t atm);
-hid_t                   H5A_inc_ref(hid_t atm);
+/* Private Functions in H5A.c */
+intn H5A_init_group (group_t grp, intn hash_size, uintn reserved,
+		     herr_t (*free_func)(void *));
+intn H5A_destroy_group (group_t grp);
+hid_t H5A_register (group_t grp, const void *object);
+void *H5A_object (hid_t atm);
+group_t H5A_group (hid_t atm);
+void *H5A_remove (hid_t atm);
+void *H5A_search (group_t grp, H5Asearch_func_t func, const void *key);
+void H5A_term_interface (void);
+intn H5A_dec_ref (hid_t atm);
+hid_t H5A_inc_ref (hid_t atm);
 
 #endif

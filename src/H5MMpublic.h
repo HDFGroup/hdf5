@@ -11,7 +11,7 @@
  * Purpose:             Public declarations for the H5MM (memory management)
  *                      package.
  *
- * Modifications:       
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -22,11 +22,10 @@
 #include <H5public.h>
 
 #ifdef __cplusplus
-extern                  "C" {
+extern "C" {
 #endif
 
 #ifdef __cplusplus
 }
-
 #endif
 #endif

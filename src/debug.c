@@ -15,6 +15,7 @@
  *-------------------------------------------------------------------------
  */
 #include <H5private.h>
+#include <H5Aprivate.h>
 #include <H5Bprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
@@ -59,7 +60,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
     }
-    if (NULL == (f = H5Aatom_object(fid))) {
+    if (NULL == (f = H5A_object(fid))) {
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     }

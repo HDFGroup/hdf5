@@ -9,6 +9,7 @@
  */
 #define H5T_PACKAGE             /*suppress error about including H5Tpkg   */
 
+#include <H5Aprivate.h>
 #include <H5Eprivate.h>
 #include <H5Tpkg.h>
 
@@ -73,10 +74,10 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, size_t nelmts,
     FUNC_ENTER(H5T_conv_order, FAIL);
 
     /* Check args */
-    if (H5_DATATYPE != H5Aatom_group(src_id) ||
-        NULL == (src = H5Aatom_object(src_id)) ||
-        H5_DATATYPE != H5Aatom_group(dst_id) ||
-        NULL == (dst = H5Aatom_object(dst_id))) {
+    if (H5_DATATYPE != H5A_group(src_id) ||
+        NULL == (src = H5A_object(src_id)) ||
+        H5_DATATYPE != H5A_group(dst_id) ||
+        NULL == (dst = H5A_object(dst_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     if (background) {
@@ -132,3 +133,32 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, size_t nelmts,
 
     FUNC_LEAVE(SUCCEED);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_struct
+ *
+ * Purpose:	Converts between compound data types.  This is a soft
+ *		conversion function.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, January 22, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_struct(hid_t src_id, hid_t dst_id, size_t nelmts,
+		void *_buf, const void *background)
+{
+    FUNC_ENTER (H5T_conv_struct, FAIL);
+
+    HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+
+    FUNC_LEAVE (SUCCEED);
+}
+

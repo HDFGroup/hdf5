@@ -10,15 +10,13 @@
  *                                                                          *
  ****************************************************************************/
 
-/* $Id$ */
-
 /*
  * This file contains public declarations for the H5 module.
  */
-
 #ifndef _H5public_H
 #define _H5public_H
-#include <H5config.h>           /* From configure         */
+
+#include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
 
 /*
@@ -93,6 +91,7 @@ typedef unsigned uintn;
  * values.
  */
 typedef intn herr_t;
+
 #define SUCCEED         0
 #define FAIL            (-1)
 #define UFAIL           (unsigned)(-1)
@@ -101,22 +100,21 @@ typedef intn herr_t;
  * Boolean type.
  */
 typedef enum {
-    BFAIL = (-1),               /*error value */
-    BFALSE = 0,
-    BTRUE = 1
+    BFAIL        = (-1),        /*error value                                */
+    BFALSE       = 0,
+    BTRUE        = 1
 } hbool_t;
 
 #ifdef __cplusplus
-extern                  "C" {
+extern "C" {
 #endif
 
 /* Functions in H5.c */
-    herr_t                  H5init(void);
-    herr_t                  H5dont_atexit(void);
-    herr_t                  H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum);
+herr_t H5init (void);
+herr_t H5dont_atexit (void);
+herr_t H5version (uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum);
 
 #ifdef __cplusplus
 }
-
 #endif
 #endif

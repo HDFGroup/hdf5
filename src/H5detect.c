@@ -271,6 +271,7 @@ print_results(int nd, detected_t *d)
 #define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
 \n\
 #include <H5private.h>\n\
+#include <H5Aprivate.h>\n\
 #include <H5Eprivate.h>\n\
 #include <H5MMprivate.h>\n\
 #include <H5Tpkg.h>\n\
@@ -342,7 +343,7 @@ H5T_init (void)\n\
 
         /* Atomize the type */
         printf("\
-   if ((H5T_NATIVE_%s_g = H5Aregister_atom (H5_DATATYPE, dt))<0) {\n\
+   if ((H5T_NATIVE_%s_g = H5A_register (H5_DATATYPE, dt))<0) {\n\
       HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\n\
                      \"can't initialize type system (atom registration \"\n\
                      \"failure\");\n\

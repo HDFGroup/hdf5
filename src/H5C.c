@@ -66,7 +66,7 @@ H5C_init_interface(void)
      * atom groups aren't.
      */
     for (i = 0; i < H5C_NCLASSES; i++) {
-        status = H5Ainit_group(H5_TEMPLATE_0 + i, H5A_TEMPID_HASHSIZE, 0, NULL);
+        status = H5A_init_group(H5_TEMPLATE_0 + i, H5A_TEMPID_HASHSIZE, 0, NULL);
         if (status < 0)
             ret_value = FAIL;
     }
@@ -107,7 +107,7 @@ H5C_term_interface(void)
     intn                    i;
 
     for (i = 0; i < H5C_NCLASSES; i++) {
-        H5Adestroy_group(H5_TEMPLATE_0 + i);
+        H5A_destroy_group(H5_TEMPLATE_0 + i);
     }
 }
 
@@ -202,7 +202,7 @@ H5C_create(H5C_class_t type, void *tmpl)
     assert(tmpl);
 
     /* Atomize the new template */
-    if ((ret_value = H5Aregister_atom(H5_TEMPLATE_0 + type, tmpl)) < 0) {
+    if ((ret_value = H5A_register(H5_TEMPLATE_0 + type, tmpl)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
                       "can't register template");
     }
@@ -230,7 +230,7 @@ H5Cclose(hid_t tid)
     FUNC_ENTER(H5Cclose, FAIL);
 
     /* Chuck the object! :-) */
-    if (NULL == (tmpl = H5Aremove_atom(tid))) {
+    if (NULL == (tmpl = H5A_remove(tid))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to remove atom");
     }
     H5MM_xfree(tmpl);
@@ -262,7 +262,7 @@ H5Cget_class(hid_t tid)
 
     FUNC_ENTER(H5Cget_class, H5C_NO_CLASS);
 
-    if ((group = H5Aatom_group(tid)) < 0 ||
+    if ((group = H5A_group(tid)) < 0 ||
 #ifndef NDEBUG
         group >= H5_TEMPLATE_MAX ||
 #endif
@@ -309,7 +309,7 @@ H5Cget_version(hid_t tid, int *boot /*out */ , int *heap /*out */ ,
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -354,7 +354,7 @@ H5Cset_userblock(hid_t tid, size_t size)
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -398,7 +398,7 @@ H5Cget_userblock(hid_t tid, size_t *size)
 
     /* Check args */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -436,7 +436,7 @@ H5Cset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -491,7 +491,7 @@ H5Cget_sizes(hid_t tid,
 
     /* Check args */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -542,7 +542,7 @@ H5Cset_sym_k(hid_t tid, int ik, int lk)
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -584,7 +584,7 @@ H5Cget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -624,7 +624,7 @@ H5Cset_istore_k(hid_t tid, int ik)
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -665,7 +665,7 @@ H5Cget_istore_k(hid_t tid, int *ik /*out */ )
 
     /* Check arguments */
     if (H5C_FILE_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a file creation template");
     }
@@ -701,7 +701,7 @@ H5Cset_layout(hid_t tid, H5D_layout_t layout)
 
     /* Check arguments */
     if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
     }
@@ -740,7 +740,7 @@ H5Cget_layout(hid_t tid)
 
     /* Check arguments */
     if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
                       "not a dataset creation template");
     }
@@ -778,7 +778,7 @@ H5Cset_chunk(hid_t tid, int ndims, size_t dim[])
 
     /* Check arguments */
     if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
     }
@@ -839,7 +839,7 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
     /* Check arguments */
     if (H5C_DATASET_CREATE != H5Cget_class(tid) ||
-        NULL == (tmpl = H5Aatom_object(tid))) {
+        NULL == (tmpl = H5A_object(tid))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                       "not a dataset creation template");
     }
@@ -891,9 +891,9 @@ H5Ccopy(hid_t tid)
     H5ECLEAR;
 
     /* check args */
-    if (NULL == (tmpl = H5Aatom_object(tid)) ||
+    if (NULL == (tmpl = H5A_object(tid)) ||
         (type = H5Cget_class(tid)) < 0 ||
-        (group = H5Aatom_group(tid)) < 0) {
+        (group = H5A_group(tid)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL,
                       "can't unatomize template");
     }
@@ -925,7 +925,7 @@ H5Ccopy(hid_t tid)
     HDmemcpy(new_tmpl, tmpl, size);
 
     /* Register the atom for the new template */
-    if ((ret_value = H5Aregister_atom(group, new_tmpl)) < 0) {
+    if ((ret_value = H5A_register(group, new_tmpl)) < 0) {
         HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
                       "unable to atomize template pointer");
     }
