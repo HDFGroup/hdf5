@@ -252,7 +252,7 @@ int check_n_input( const char *str )
 /*-------------------------------------------------------------------------
  * Function: check_f_input
  *
- * Purpose: check for valid input
+ * Purpose: check for a valid floating point input
  *
  * Return: 1 for ok, -1 for fail
  *
@@ -270,6 +270,13 @@ static
 int check_f_input( const char *str )
 {
  double x;
+
+ /* 
+ the atof return value on a hexadecimal input is different 
+ on some systems; we do a character check for this
+ */
+ if (strlen(str)>2 && str[0]=='0' && str[1]=='x')
+  return -1;
  
  x=atof(str);
  if (x==0)

@@ -202,7 +202,7 @@ TOOLTEST h5diff_604.txt file1.h5 file2.h5 -d 0 g1/dset3 g1/dset4
 TOOLTEST h5diff_605.txt file1.h5 file2.h5 -d u g1/dset3 g1/dset4
 
 # 6.6: hexadecimal
-#TOOLTEST h5diff_606.txt file1.h5 file2.h5 -d 0x1 g1/dset3 g1/dset4
+TOOLTEST h5diff_606.txt file1.h5 file2.h5 -d 0x1 g1/dset3 g1/dset4
 
 # 6.7: string
 TOOLTEST h5diff_607.txt file1.h5 file2.h5 -d "1" g1/dset3 g1/dset4
@@ -235,7 +235,7 @@ TOOLTEST h5diff_613.txt file1.h5 file2.h5 -p 0 g1/dset3 g1/dset4
 TOOLTEST h5diff_614.txt file1.h5 file2.h5 -p u g1/dset3 g1/dset4
 
 # 6.15: hexadecimal
-#TOOLTEST h5diff_615.txt file1.h5 file2.h5 -p 0x1 g1/dset3 g1/dset4
+TOOLTEST h5diff_615.txt file1.h5 file2.h5 -p 0x1 g1/dset3 g1/dset4
 
 # 6.16: string
 TOOLTEST h5diff_616.txt file1.h5 file2.h5 -p "0.21" g1/dset3 g1/dset4
