@@ -16,6 +16,10 @@
 #include "ph5diff.h"
 #include "H5private.h"
 
+/* global variables */
+int      g_nTasks;
+char    outBuff[OUTBUFF_SIZE];
+unsigned int     outBuffOffset;
 
 /*-------------------------------------------------------------------------
  * Function: parallel_print

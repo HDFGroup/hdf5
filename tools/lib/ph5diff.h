@@ -30,9 +30,9 @@
 #define MPI_TAG_END		6
 #define MPI_TAG_PARALLEL	7
 
-int	g_nTasks;
-char    outBuff[OUTBUFF_SIZE];
-unsigned int	outBuffOffset;
+extern int	g_nTasks;
+extern char    outBuff[OUTBUFF_SIZE];
+extern unsigned int	outBuffOffset;
 
 struct diff_args
 {
