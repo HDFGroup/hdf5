@@ -1,8 +1,7 @@
 #############################
-Expected output for 'h5diff dset3 dset3 h5diff_test3.h5 h5diff_test4.h5'
+Expected output for 'h5diff dset_A dset_A h5diff_test3.h5 h5diff_test4.h5'
 #############################
-$h5diff dset3 dset3 h5diff_test3.h5 h5diff_test4.h5
-Comparing <dset3> with <dset3>
-using memory type H5T_NATIVE_INT
+$h5diff dset_A dset_A h5diff_test3.h5 h5diff_test4.h5
+Comparing <dset_A> with <dset_A>
 0 differences found
 

@@ -6,6 +6,5 @@ Comparing <dset1.7> with <dset1.7>
 Warning: <dset1.7> has different maximum dimensions than <dset1.7>
 <dset1.7>: [ 7 ]
 <dset1.7>: [ 8 ]
-using memory type H5T_NATIVE_INT
 0 differences found
 

@@ -5,6 +5,5 @@ $h5diff dset1.8 dset1.8 h5diff_test1.h5 h5diff_test2.h5
 Comparing <dset1.8> with <dset1.8>
 Warning: <dset1.8> has different storage datatype than <dset1.8>
 <dset1.8> has datatype H5T_STD_I32BE and <dset1.8> has datatype H5T_STD_I32LE
-using memory type H5T_NATIVE_INT
 0 differences found
 

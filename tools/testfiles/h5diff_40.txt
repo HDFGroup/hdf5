@@ -1,0 +1,7 @@
+#############################
+Expected output for 'h5diff g1/dset1 g2/dset1 h5diff_test5.h5 h5diff_test6.h5'
+#############################
+$h5diff g1/dset1 g2/dset1 h5diff_test5.h5 h5diff_test6.h5
+Comparing <g1/dset1> with <g2/dset1>
+0 differences found
+

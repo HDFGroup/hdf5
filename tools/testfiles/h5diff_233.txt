@@ -3,7 +3,6 @@ Expected output for 'h5diff dset2.3a dset2.3b -p 3 h5diff_test1.h5 h5diff_test2.
 #############################
 $h5diff dset2.3a dset2.3b -p 3 h5diff_test1.h5 h5diff_test2.h5
 Comparing <dset2.3a> with <dset2.3b>
-using memory type H5T_NATIVE_INT
 position        dset2.3a        dset2.3b        difference          
 ------------------------------------------------------------
 [ 2 0 ]          1               5               4              

@@ -1,0 +1,7 @@
+#############################
+Expected output for 'h5diff dset1 dset1 h5diff_test5.h5 h5diff_test6.h5'
+#############################
+$h5diff dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
+Object <dset1> could not be found in <h5diff_test5.h5>
+Object <dset1> could not be found in <h5diff_test6.h5>
+

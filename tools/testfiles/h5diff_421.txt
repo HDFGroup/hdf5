@@ -1,0 +1,7 @@
+#############################
+Expected output for 'h5diff /a/b/c /a/b/c h5diff_test5.h5 h5diff_test6.h5'
+#############################
+$h5diff /a/b/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
+Comparing </a/b/c> with </a/b/c>
+0 differences found
+

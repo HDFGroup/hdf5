@@ -389,16 +389,50 @@ TOOLTEST h5diff_263.txt dset2.6a dset2.6b -p 3 h5diff_test1.h5 h5diff_test2.h5
 TOOLTEST h5diff_30.txt h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.1
-TOOLTEST h5diff_31.txt dset3 dset3 h5diff_test3.h5 h5diff_test4.h5
+TOOLTEST h5diff_31.txt dset_A dset_A h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.2
-TOOLTEST h5diff_32.txt dset3 dset4 h5diff_test3.h5 h5diff_test4.h5
+TOOLTEST h5diff_32.txt dset_A dset_B h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.3
-TOOLTEST h5diff_33.txt dset6 dset3 h5diff_test3.h5 h5diff_test4.h5
+TOOLTEST h5diff_33.txt dset_C dset_A h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.4
-TOOLTEST h5diff_34.txt dset6 dset6 h5diff_test3.h5 h5diff_test4.h5
+TOOLTEST h5diff_34.txt dset_C dset_C h5diff_test3.h5 h5diff_test4.h5
+
+#######################################################
+# reverse direction
+#######################################################
+
+# test 3.5
+TOOLTEST h5diff_35.txt h5diff_test4.h5 h5diff_test3.h5
+
+#######################################################
+# Different paths
+#######################################################
+
+# test 4.0: should find
+TOOLTEST h5diff_40.txt g1/dset1 g2/dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.1: should NOT find
+TOOLTEST h5diff_411.txt dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.2: should NOT find
+TOOLTEST h5diff_412.txt /g1/dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.3: should NOT find
+TOOLTEST h5diff_413.txt /g1/dset1 /g1/dset1 h5diff_test5.h5 h5diff_test6.h5
+
+#######################################################
+# paths with several components
+#######################################################
+
+# test 4.2.1: 
+TOOLTEST h5diff_421.txt /a/b/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.2.2: 
+TOOLTEST h5diff_422.txt /x/a/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
+
 
 
 

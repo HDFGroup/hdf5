@@ -20,7 +20,7 @@
 
 /* diff tst*/
 int do_test_files(void);
-int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name,
+int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t type_id, void *data );
 
 
@@ -53,9 +53,6 @@ h5diff_test1.h5
 
 # test 0.3.1: Check for -h option
 -h h5diff_test1.h5 h5diff_test2.h5
-
-# test 0.3.2: Check for -l option
--l h5diff_test1.h5 h5diff_test2.h5
 
 # test 0.3.3: Check for -r option
 -r h5diff_test1.h5 h5diff_test2.h5
@@ -340,16 +337,49 @@ dset2.6a dset2.6b -p 3 h5diff_test1.h5 h5diff_test2.h5
 h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.1
-dset3 dset3 h5diff_test3.h5 h5diff_test4.h5
+dset_A dset_A h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.2
-dset3 dset4 h5diff_test3.h5 h5diff_test4.h5
+dset_A dset_B h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.3
-dset6 dset3 h5diff_test3.h5 h5diff_test4.h5
+dset_C dset_A h5diff_test3.h5 h5diff_test4.h5
 
 # test 3.4
-dset6 dset6 h5diff_test3.h5 h5diff_test4.h5
+dset_C dset_C h5diff_test3.h5 h5diff_test4.h5
+
+#######################################################
+# reverse direction
+#######################################################
+
+# test 3.5
+h5diff_test4.h5 h5diff_test3.h5
+
+#######################################################
+# Different paths
+#######################################################
+
+# test 4.0: should find
+g1/dset1 g2/dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.1: should NOT find
+dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.2: should NOT find
+/g1/dset1 dset1 h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.1.3: should NOT find
+/g1/dset1 /g1/dset1 h5diff_test5.h5 h5diff_test6.h5
+
+#######################################################
+# paths with several components
+#######################################################
+
+# test 4.2.1: 
+/a/b/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
+
+# test 4.2.2: 
+/x/a/c /a/b/c h5diff_test5.h5 h5diff_test6.h5
 
 */
 
@@ -358,9 +388,10 @@ int do_test_files(void)
 {
 
  hid_t   file1_id, file2_id, file3_id, file4_id; 
+	hid_t   file5_id, file6_id; 
  hid_t   dataset_id;
  hid_t   space_id;  
- hid_t   group_id;
+ hid_t   group_id, group2_id;
  hid_t   plist_id;
  hid_t   type_id, type2_id;  
  herr_t  status;
@@ -744,6 +775,61 @@ int do_test_files(void)
  write_dataset(file4_id,1,dims1_1,"dset_C",H5T_NATIVE_INT,0);
 
 
+/*-------------------------------------------------------------------------
+ * Create two files for path tests
+ *-------------------------------------------------------------------------
+ */
+  
+ /* Create a file */
+ file5_id = H5Fcreate ("h5diff_test5.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
+
+ /* Create a file */
+ file6_id = H5Fcreate ("h5diff_test6.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
+
+/*-------------------------------------------------------------------------
+ * Test 4.1.x
+ * Check for different paths
+ *-------------------------------------------------------------------------
+ */
+
+	/* Create "g1/dset1" */
+ group_id = H5Gcreate(file5_id, "g1", 0);
+ write_dataset(group_id,1,dims1_1,"dset1",H5T_NATIVE_INT,0);
+	status = H5Gclose(group_id);
+
+	/* Create "g2/dset1" */
+ group_id = H5Gcreate(file6_id, "g2", 0);
+ write_dataset(group_id,1,dims1_1,"dset1",H5T_NATIVE_INT,0);
+	status = H5Gclose(group_id);
+
+/*-------------------------------------------------------------------------
+ * Test 4.2.x
+ * paths with several components
+ *-------------------------------------------------------------------------
+ */
+
+	/* Create "/a/b/c" */
+ group_id = H5Gcreate(file5_id, "a", 0);
+	group2_id = H5Gcreate(group_id, "b", 0);
+ write_dataset(group2_id,1,dims1_1,"c",H5T_NATIVE_INT,0);
+	status = H5Gclose(group_id);
+	status = H5Gclose(group2_id);
+
+	/* Create "/a/b/c" */
+ group_id = H5Gcreate(file6_id, "a", 0);
+	group2_id = H5Gcreate(group_id, "b", 0);
+ write_dataset(group2_id,1,dims1_1,"c",H5T_NATIVE_INT,0);
+	status = H5Gclose(group_id);
+	status = H5Gclose(group2_id);
+
+	/* Create "/x/a/c" */
+ group_id = H5Gcreate(file5_id, "x", 0);
+	group2_id = H5Gcreate(group_id, "a", 0);
+ write_dataset(group2_id,1,dims1_1,"c",H5T_NATIVE_INT,0);
+	status = H5Gclose(group_id);
+	status = H5Gclose(group2_id);
+
+
 
  
 /*-------------------------------------------------------------------------
@@ -754,6 +840,8 @@ int do_test_files(void)
  status = H5Fclose(file2_id);
  status = H5Fclose(file3_id);
  status = H5Fclose(file4_id);
+	status = H5Fclose(file5_id);
+ status = H5Fclose(file6_id);
 
 
  return 0;
@@ -775,7 +863,7 @@ int do_test_files(void)
  *-------------------------------------------------------------------------
  */
 
-int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name,
+int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t type_id, void *data )
 {
  hid_t   dataset_id;
@@ -786,7 +874,7 @@ int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name
  space_id = H5Screate_simple(rank,dims,NULL);
 
  /* Create a dataset */
- dataset_id = H5Dcreate(file_id,dset_name,type_id,space_id,H5P_DEFAULT);
+ dataset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT);
   
  /* Write the data */
  if ( data )
@@ -799,9 +887,6 @@ int write_dataset( hid_t file_id, int rank, hsize_t *dims, const char *dset_name
  return 0;
 
 }
-
-
-
 
 
 

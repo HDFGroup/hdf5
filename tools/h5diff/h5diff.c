@@ -46,7 +46,8 @@ typedef struct options_t
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options );
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, const char *obj1, const char *obj2 );
+                 hsize_t *dims, options_t options, const char *obj1, const char *obj2,
+																	size_t size_mem);
 void print_class( H5T_class_t tclass, char *sclass );
 void list( const char *filename, int nobjects, info_t *info );
 void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
@@ -104,7 +105,7 @@ void usage(void)
  printf("[-n count]        Print difference up to count number for each variable\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
  printf("[-p relative]     Print differences which are within a relative error value\n");
- printf("[-m ]             Print differences on a sequencial match iteration\n");
+ printf("[-m ]             Print differences on a sequential match iteration\n");
 }
 
 
@@ -158,7 +159,6 @@ int main(int argc, const char *argv[])
  const char *obj1_name  = NULL;
  const char *obj2_name  = NULL;
  
-
 /*-------------------------------------------------------------------------
  * print the command line options
  *-------------------------------------------------------------------------
@@ -797,6 +797,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  char    sclass2[20];
  int     nfound;
  hid_t   type_mem =-1; /* read to memory type */
+	size_t  size_mem;     /* size of type in memory */
  void    *edata;
  hid_t   (*func)(void*);
  htri_t  is1, is2;
@@ -1043,6 +1044,9 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  */
 
  type_mem = fixtype( type1_id );
+	/* Get the size. */
+ size_mem = H5Tget_size( type_mem );
+
 
 /*-------------------------------------------------------------------------
  * read
@@ -1060,7 +1064,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  else
   tot_cnt = tot_cnt1; 
 
- nfound = array_diff(buf1,buf2,tot_cnt,type1_id,rank1,dims1,options,obj1_name,obj2_name);
+ nfound = array_diff(buf1,buf2,tot_cnt,type1_id,rank1,dims1,options,
+		        obj1_name,obj2_name,size_mem);
  printf("%d differences found\n", nfound );
 
 
@@ -1105,7 +1110,8 @@ out:
  */
  
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank,
-                 hsize_t *dims, options_t options, const char *obj1, const char *obj2 )
+                 hsize_t *dims, options_t options, const char *obj1, const char *obj2,
+																	size_t size_mem )
 {
  char   *i1ptr1, *i1ptr2;
  short  *i2ptr1, *i2ptr2;
@@ -1116,6 +1122,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  int    nfound=0; /* number of differences found */
  int    ph=1;     /* print header  */
  int    i8diff; 
+	int    v=0;
 
  /* accumulator and matrix position */
  int          acc[32];
@@ -1137,6 +1144,12 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
  /* Get the size. */
  type_size = H5Tget_size( type_id );
 
+	if (v && size_mem!=type_size)
+	{
+  printf("memory type size is %d\n", size_mem);
+		printf("disk type size is %d\n", type_size);
+	}
+
  
  switch(type_class)
  {
@@ -1146,7 +1159,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
   case H5T_INTEGER:
 
 
-   switch(type_size)
+   switch(size_mem)
    {
 
   /*-------------------------------------------------------------------------
@@ -1515,7 +1528,7 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id, int rank
 
    case H5T_FLOAT:
 
-   switch(type_size)
+   switch(size_mem)
    {
 
   /*-------------------------------------------------------------------------
@@ -1841,6 +1854,7 @@ hid_t fixtype(hid_t f_type)
 {
  hid_t   m_type = -1;
  size_t  size;
+	int     v=0;
  
  size = H5Tget_size(f_type);
  
@@ -1857,19 +1871,19 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(char)) {
    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
-   printf("using memory type H5T_NATIVE_SCHAR\n");
+			if (v) printf("using memory type H5T_NATIVE_SCHAR\n");
   } else if (size <= sizeof(short)) {
    m_type = H5Tcopy(H5T_NATIVE_SHORT);
-   printf("using memory type H5T_NATIVE_SHORT\n");
+   if (v) printf("using memory type H5T_NATIVE_SHORT\n");
   } else if (size <= sizeof(int)) {
    m_type = H5Tcopy(H5T_NATIVE_INT);
-   printf("using memory type H5T_NATIVE_INT\n");
+   if (v) printf("using memory type H5T_NATIVE_INT\n");
   } else if (size <= sizeof(long)) {
    m_type = H5Tcopy(H5T_NATIVE_LONG);
-   printf("using memory type H5T_NATIVE_LONG\n");
+   if (v) printf("using memory type H5T_NATIVE_LONG\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LLONG);
-   printf("using memory type H5T_NATIVE_LLONG\n");
+   if (v) printf("using memory type H5T_NATIVE_LLONG\n");
   }
   
   H5Tset_sign(m_type, H5Tget_sign(f_type));
@@ -1883,13 +1897,13 @@ hid_t fixtype(hid_t f_type)
  */
   if (size <= sizeof(float)) {
    m_type = H5Tcopy(H5T_NATIVE_FLOAT);
-   printf("using memory type H5T_NATIVE_FLOAT\n");
+   if (v) printf("using memory type H5T_NATIVE_FLOAT\n");
   } else if (size <= sizeof(double)) {
    m_type = H5Tcopy(H5T_NATIVE_DOUBLE);
-   printf("using memory type H5T_NATIVE_DOUBLE\n");
+   if (v) printf("using memory type H5T_NATIVE_DOUBLE\n");
   } else {
    m_type = H5Tcopy(H5T_NATIVE_LDOUBLE);
-   printf("using memory type H5T_NATIVE_LDOUBLE\n");
+   if (v) printf("using memory type H5T_NATIVE_LDOUBLE\n");
   }
   break;
   
@@ -2002,6 +2016,8 @@ void print_datatype(hid_t type)
    
  }/*switch*/
 }
+
+
 
 
 

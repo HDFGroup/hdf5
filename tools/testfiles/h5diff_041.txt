@@ -15,4 +15,4 @@ file2_name        File name of the second HDF5 file
 [-n count]        Print difference up to count number for each variable
 [-d delta]        Print difference when it is greater than limit delta
 [-p relative]     Print differences which are within a relative error value
-[-m ]             Print differences on a sequencial match iteration
+[-m ]             Print differences on a sequential match iteration
