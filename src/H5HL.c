@@ -47,6 +47,11 @@
 #define H5HL_FREE_NULL	1		/*end of free list on disk	*/
 #define H5HL_MIN_HEAP   256             /* Minimum size to reduce heap buffer to */
 
+/*
+ * Local heap collection version.
+ */
+#define H5HL_VERSION	0
+
 /* Private typedefs */
 
 /* PRIVATE PROTOTYPES */
@@ -237,8 +242,12 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature");
     p += H5HL_SIZEOF_MAGIC;
 
+    /* Version */
+    if (H5HL_VERSION!=*p++)
+	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap");
+
     /* Reserved */
-    p += 4;
+    p += 3;
 
     /* Allocate space in memory for the heap */
     if (NULL==(heap = H5FL_CALLOC(H5HL_t)))
@@ -444,7 +453,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
         fl=heap->freelist;
 	HDmemcpy(p, H5HL_MAGIC, H5HL_SIZEOF_MAGIC);
 	p += H5HL_SIZEOF_MAGIC;
-	*p++ = 0;	/*reserved*/
+	*p++ = H5HL_VERSION;
 	*p++ = 0;	/*reserved*/
 	*p++ = 0;	/*reserved*/
 	*p++ = 0;	/*reserved*/
