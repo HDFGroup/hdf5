@@ -100,6 +100,27 @@ typedef int herr_t;
 typedef unsigned int hbool_t;
 typedef int htri_t;
 
+/* Define the ssize_t type if it not is defined */
+#if H5_SIZEOF_SSIZE_T==0
+/* Undefine this size, we will re-define it in one of the sections below */
+#undef H5_SIZEOF_SSIZE_T
+#if H5_SIZEOF_SIZE_T==H5_SIZEOF_INT
+typedef int ssize_t;
+#       define H5_SIZEOF_SSIZE_T H5_SIZEOF_INT
+#elif H5_SIZEOF_SIZE_T==H5_SIZEOF_LONG
+typedef long ssize_t;
+#       define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG
+#elif H5_SIZEOF_SIZE_T==H5_SIZEOF_LONG_LONG
+typedef long long ssize_t;
+#       define H5_SIZEOF_SSIZE_T H5_SIZEOF_LONG_LONG
+#elif H5_SIZEOF_SIZE_T==H5_SIZEOF___INT64
+typedef __int64 ssize_t;
+#       define H5_SIZEOF_SSIZE_T H5_SIZEOF___INT64
+#else /* Can't find matching type for ssize_t */
+#   error "nothing appropriate for ssize_t"
+#endif
+#endif
+
 /*
  * The sizes of file objects have their own types defined here.  If large
  * sizes are enabled then use a 64-bit data type, otherwise use the size of
