@@ -42,7 +42,7 @@ DUMP()
 	echo "Expected output for '$h5dump $@'" 
 	echo "#############################"
 	cd $srcdir/testfiles
-        $full "$@" 2>/dev/null
+        $RUNSERIAL $full "$@" 2>/dev/null
     ) >$actual
     
     # Results. We normalize the result to account for different output 
