@@ -37,7 +37,7 @@ STEP II: Building the Libraries and tests.
         1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.  
 
         2. Unpack all.zip in 'hdf5' and move the zlib.dll from 
-	     c:\myHDFstuff\hdf5\src\dll to the Windows system directory.
+	     c:\myHDFstuff\hdf5\src\zlib\dll\ to the Windows system directory.
 
            NOTE TO ALPHA USERS- the version of zlib that is packaged in all.zip 
            is for Intel platforms.  The Alpha versions of the libraries can be
