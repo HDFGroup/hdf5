@@ -823,6 +823,7 @@ done:
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
+        H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
         H5P_prp_close_func_t prp_close; IN: Function pointer to property close
                                     callback
  RETURNS
@@ -840,7 +841,8 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     void *value,
     H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
-    H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+    H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
+    H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value;        /* Return value */
@@ -876,6 +878,11 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     prop->get=prp_get;
     prop->del=prp_delete;
     prop->copy=prp_copy;
+    /* Use custom comparison routine if available, otherwise default to memcmp() */
+    if(prp_cmp!=NULL)
+        prop->cmp=prp_cmp;
+    else
+        prop->cmp=&memcmp;
     prop->close=prp_close;
 
     /* Set return value */
@@ -1756,6 +1763,7 @@ done:
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
+        H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
         H5P_prp_close_func_t prp_close; IN: Function pointer to property close
                                     callback
  RETURNS
@@ -1778,11 +1786,12 @@ done:
         The 'create' callback is called when a new property list with this
     property is being created.  H5P_prp_create_func_t is defined as:
         typedef herr_t (*H5P_prp_create_func_t)(hid_t prop_id, const char *name,
-                void **initial_value);
+                size_t size, void *initial_value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being created.
         const char *name;   IN: The name of the property being modified.
-        void **initial_value;   IN/OUT: The initial value for the property being created.
+        size_t size;        IN: The size of the property value
+        void *initial_value; IN/OUT: The initial value for the property being created.
                                 (The 'default' value passed to H5Pregister)
     The 'create' routine may modify the value to be set and those changes will
     be stored as the initial value of the property.  If the 'create' routine
@@ -1792,10 +1801,11 @@ done:
         The 'set' callback is called before a new value is copied into the
     property.  H5P_prp_set_func_t is defined as:
         typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name,
-            void **value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
         const char *name;   IN: The name of the property being modified.
+        size_t size;        IN: The size of the property value
         void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
     stored as the value of the property.  If the 'set' routine returns a
@@ -1805,10 +1815,11 @@ done:
         The 'get' callback is called before a value is retrieved from the
     property.  H5P_prp_get_func_t is defined as:
         typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being queried.
         const char *name;   IN: The name of the property being queried.
+        size_t size;        IN: The size of the property value
         void *value;        IN/OUT: The value being retrieved for the property.
     The 'get' routine may modify the value to be retrieved and those changes
     will be returned to the calling function.  If the 'get' routine returns a
@@ -1818,10 +1829,11 @@ done:
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
         typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
         const char *name;   IN: The name of the property being deleted.
+        size_t size;        IN: The size of the property value
         void *value;        IN/OUT: The value of the property being deleted.
     The 'delete' routine may modify the value passed in, but the value is not
     used by the library when the 'delete' routine returns.  If the
@@ -1830,20 +1842,38 @@ done:
 
         The 'copy' callback is called when a property list with this
     property is copied.  H5P_prp_copy_func_t is defined as:
-        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, void *value);
+        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, size_t size,
+            void *value);
     where the parameters to the callback function are:
-        const char *name;   IN: The name of the property being closed.
-        void *value;        IN: The value of the property being closed.
+        const char *name;   IN: The name of the property being copied.
+        size_t size;        IN: The size of the property value
+        void *value;        IN: The value of the property being copied.
     The 'copy' routine may modify the value to be copied and those changes will be
     stored as the value of the property.  If the 'copy' routine returns a
     negative value, the new property value is not copied into the property and
     the property list copy routine returns an error value.
 
+        The 'compare' callback is called when a property list with this
+    property is compared to another property list.  H5P_prp_compare_func_t is
+    defined as:
+        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+            size_t size);
+    where the parameters to the callback function are:
+        const void *value1; IN: The value of the first property being compared.
+        const void *value2; IN: The value of the second property being compared.
+        size_t size;        IN: The size of the property value
+    The 'compare' routine may not modify the values to be compared.  The
+    'compare' routine should return a positive value if VALUE1 is greater than
+    VALUE2, a negative value if VALUE2 is greater than VALUE1 and zero if VALUE1
+    and VALUE2 are equal.
+
         The 'close' callback is called when a property list with this
     property is being destroyed.  H5P_prp_close_func_t is defined as:
-        typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
+        typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size,
+            void *value);
     where the parameters to the callback function are:
         const char *name;   IN: The name of the property being closed.
+        size_t size;        IN: The size of the property value
         void *value;        IN: The value of the property being closed.
     The 'close' routine may modify the value passed in, but the value is not
     used by the library when the 'close' routine returns.  If the
@@ -1873,7 +1903,8 @@ herr_t
 H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
-    H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close)
+    H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
+    H5P_prp_close_func_t prp_close)
 {
     H5P_genclass_t *new_class; /* New class pointer */
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
@@ -1928,7 +1959,7 @@ H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     } /* end if */
 
     /* Create property object from parameters */
-    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_CLASS,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
+    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_CLASS,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_cmp,prp_close))==NULL)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
     /* Insert property into property list class */
@@ -1995,11 +2026,12 @@ done:
         The 'create' callback is called when a new property list with this
     property is being created.  H5P_prp_create_func_t is defined as:
         typedef herr_t (*H5P_prp_create_func_t)(hid_t prop_id, const char *name,
-                void **initial_value);
+                size_t size, void *initial_value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being created.
         const char *name;   IN: The name of the property being modified.
-        void **initial_value;   IN/OUT: The initial value for the property being created.
+        size_t size;        IN: The size of the property value
+        void *initial_value; IN/OUT: The initial value for the property being created.
                                 (The 'default' value passed to H5Pregister)
     The 'create' routine may modify the value to be set and those changes will
     be stored as the initial value of the property.  If the 'create' routine
@@ -2009,11 +2041,12 @@ done:
         The 'set' callback is called before a new value is copied into the
     property.  H5P_prp_set_func_t is defined as:
         typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name,
-            void **value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
         const char *name;   IN: The name of the property being modified.
-        void **new_value;   IN/OUT: The value being set for the property.
+        size_t size;        IN: The size of the property value
+        void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
     stored as the value of the property.  If the 'set' routine returns a
     negative value, the new property value is not copied into the property and
@@ -2022,11 +2055,12 @@ done:
         The 'get' callback is called before a value is retrieved from the
     property.  H5P_prp_get_func_t is defined as:
         typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being queried.
         const char *name;   IN: The name of the property being queried.
-        void **value;       IN/OUT: The value being retrieved for the property.
+        size_t size;        IN: The size of the property value
+        void *value;        IN/OUT: The value being retrieved for the property.
     The 'get' routine may modify the value to be retrieved and those changes
     will be returned to the calling function.  If the 'get' routine returns a
     negative value, the property value is returned and the property list get
@@ -2035,10 +2069,11 @@ done:
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
         typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
         const char *name;   IN: The name of the property being deleted.
+        size_t size;        IN: The size of the property value
         void *value;        IN/OUT: The value of the property being deleted.
     The 'delete' routine may modify the value passed in, but the value is not
     used by the library when the 'delete' routine returns.  If the
@@ -2047,10 +2082,12 @@ done:
 
         The 'copy' callback is called when a property list with this
     property is copied.  H5P_prp_copy_func_t is defined as:
-        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, void *value);
+        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, size_t size,
+            void *value);
     where the parameters to the callback function are:
-        const char *name;   IN: The name of the property being closed.
-        void *value;        IN: The value of the property being closed.
+        const char *name;   IN: The name of the property being copied.
+        size_t size;        IN: The size of the property value
+        void *value;        IN: The value of the property being copied.
     The 'copy' routine may modify the value to be copied and those changes will be
     stored as the value of the property.  If the 'copy' routine returns a
     negative value, the new property value is not copied into the property and
@@ -2058,9 +2095,11 @@ done:
 
         The 'close' callback is called when a property list with this
     property is being destroyed.  H5P_prp_close_func_t is defined as:
-        typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
+        typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size,
+            void *value);
     where the parameters to the callback function are:
         const char *name;   IN: The name of the property being closed.
+        size_t size;        IN: The size of the property value
         void *value;        IN: The value of the property being closed.
     The 'close' routine may modify the value passed in, but the value is not
     used by the library when the 'close' routine returns.  If the
@@ -2108,7 +2147,7 @@ H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
 
     /* Create the new property list class */
-    if ((ret_value=H5P_register(pclass,name,size,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,prp_close))<0)
+    if ((ret_value=H5P_register(pclass,name,size,def_value,prp_create,prp_set,prp_get,prp_delete,prp_copy,NULL,prp_close))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
 
 done:
@@ -2130,6 +2169,8 @@ done:
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
+        H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
+        H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
         H5P_prp_close_func_t prp_close; IN: Function pointer to property close
                                     callback
  RETURNS
@@ -2151,11 +2192,11 @@ done:
         The 'set' callback is called before a new value is copied into the
     property.  H5P_prp_set_func_t is defined as:
         typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name,
-            void **value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
-        const char *name;   IN: The name of the property being modified.
-        void **new_value;   IN/OUT: The value being set for the property.
+        size_t size;        IN: The size of the property value
+        void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
     stored as the value of the property.  If the 'set' routine returns a
     negative value, the new property value is not copied into the property and
@@ -2164,11 +2205,12 @@ done:
         The 'get' callback is called before a value is retrieved from the
     property.  H5P_prp_get_func_t is defined as:
         typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being queried.
         const char *name;   IN: The name of the property being queried.
-        void **value;       IN/OUT: The value being retrieved for the property.
+        size_t size;        IN: The size of the property value
+        void *value;        IN/OUT: The value being retrieved for the property.
     The 'get' routine may modify the value to be retrieved and those changes
     will be returned to the calling function.  If the 'get' routine returns a
     negative value, the property value is returned and the property list get
@@ -2177,22 +2219,51 @@ done:
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
         typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
         const char *name;   IN: The name of the property being deleted.
+        size_t size;        IN: The size of the property value
         void *value;        IN/OUT: The value of the property being deleted.
     The 'delete' routine may modify the value passed in, but the value is not
     used by the library when the 'delete' routine returns.  If the
     'delete' routine returns a negative value, the property list deletion
     routine returns an error value but the property is still deleted.
 
+        The 'copy' callback is called when a property list with this
+    property is copied.  H5P_prp_copy_func_t is defined as:
+        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, size_t size,
+            void *value);
+    where the parameters to the callback function are:
+        const char *name;   IN: The name of the property being copied.
+        size_t size;        IN: The size of the property value
+        void *value;        IN: The value of the property being copied.
+    The 'copy' routine may modify the value to be copied and those changes will be
+    stored as the value of the property.  If the 'copy' routine returns a
+    negative value, the new property value is not copied into the property and
+    the property list copy routine returns an error value.
+
+        The 'compare' callback is called when a property list with this
+    property is compared to another property list.  H5P_prp_compare_func_t is
+    defined as:
+        typedef int (*H5P_prp_compare_func_t)( void *value1, void *value2,
+            size_t size);
+    where the parameters to the callback function are:
+        const void *value1; IN: The value of the first property being compared.
+        const void *value2; IN: The value of the second property being compared.
+        size_t size;        IN: The size of the property value
+    The 'compare' routine may not modify the values to be compared.  The
+    'compare' routine should return a positive value if VALUE1 is greater than
+    VALUE2, a negative value if VALUE2 is greater than VALUE1 and zero if VALUE1
+    and VALUE2 are equal.
+
         The 'close' callback is called when a property list with this
     property is being destroyed.  H5P_prp_close_func_t is defined as:
-        typedef herr_t (*H5P_prp_close_func_t)(const char *name,
+        typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size,
             void *value);
     where the parameters to the callback function are:
         const char *name;   IN: The name of the property being closed.
+        size_t size;        IN: The size of the property value
         void *value;        IN: The value of the property being closed.
     The 'close' routine may modify the value passed in, but the value is not
     used by the library when the 'close' routine returns.  If the
@@ -2226,7 +2297,7 @@ herr_t
 H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
-    H5P_prp_close_func_t prp_close)
+    H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *new_prop=NULL;       /* Temporary property pointer */
     H5TB_NODE *prop_node;               /* TBBT node holding property */
@@ -2272,7 +2343,7 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     /* Ok to add to property list */
 
     /* Create property object from parameters */
-    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_LIST,value,NULL,prp_set,prp_get,prp_delete,prp_copy,prp_close))==NULL)
+    if((new_prop=H5P_create_prop(name,size,H5P_PROP_WITHIN_LIST,value,NULL,prp_set,prp_get,prp_delete,prp_copy,prp_cmp,prp_close))==NULL)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
     /* Insert property into property list class */
@@ -2311,6 +2382,7 @@ done:
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
+        H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
         H5P_prp_close_func_t prp_close; IN: Function pointer to property close
                                     callback
  RETURNS
@@ -2332,11 +2404,11 @@ done:
         The 'set' callback is called before a new value is copied into the
     property.  H5P_prp_set_func_t is defined as:
         typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name,
-            void **value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being modified.
-        const char *name;   IN: The name of the property being modified.
-        void **new_value;   IN/OUT: The value being set for the property.
+        size_t size;        IN: The size of the property value
+        void *new_value;    IN/OUT: The value being set for the property.
     The 'set' routine may modify the value to be set and those changes will be
     stored as the value of the property.  If the 'set' routine returns a
     negative value, the new property value is not copied into the property and
@@ -2345,11 +2417,12 @@ done:
         The 'get' callback is called before a value is retrieved from the
     property.  H5P_prp_get_func_t is defined as:
         typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list being queried.
         const char *name;   IN: The name of the property being queried.
-        void **value;       IN/OUT: The value being retrieved for the property.
+        size_t size;        IN: The size of the property value
+        void *value;        IN/OUT: The value being retrieved for the property.
     The 'get' routine may modify the value to be retrieved and those changes
     will be returned to the calling function.  If the 'get' routine returns a
     negative value, the property value is returned and the property list get
@@ -2358,21 +2431,37 @@ done:
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
         typedef herr_t (*H5P_prp_del_func_t)(hid_t prop_id, const char *name,
-            void *value);
+            size_t size, void *value);
     where the parameters to the callback function are:
         hid_t prop_id;      IN: The ID of the property list the property is deleted from.
         const char *name;   IN: The name of the property being deleted.
+        size_t size;        IN: The size of the property value
         void *value;        IN/OUT: The value of the property being deleted.
     The 'delete' routine may modify the value passed in, but the value is not
     used by the library when the 'delete' routine returns.  If the
     'delete' routine returns a negative value, the property list deletion
     routine returns an error value but the property is still deleted.
 
+        The 'copy' callback is called when a property list with this
+    property is copied.  H5P_prp_copy_func_t is defined as:
+        typedef herr_t (*H5P_prp_copy_func_t)(const char *name, size_t size,
+            void *value);
+    where the parameters to the callback function are:
+        const char *name;   IN: The name of the property being copied.
+        size_t size;        IN: The size of the property value
+        void *value;        IN: The value of the property being copied.
+    The 'copy' routine may modify the value to be copied and those changes will be
+    stored as the value of the property.  If the 'copy' routine returns a
+    negative value, the new property value is not copied into the property and
+    the property list copy routine returns an error value.
+
         The 'close' callback is called when a property list with this
     property is being destroyed.  H5P_prp_close_func_t is defined as:
-        typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
+        typedef herr_t (*H5P_prp_close_func_t)(const char *name, size_t size,
+            void *value);
     where the parameters to the callback function are:
         const char *name;   IN: The name of the property being closed.
+        size_t size;        IN: The size of the property value
         void *value;        IN: The value of the property being closed.
     The 'close' routine may modify the value passed in, but the value is not
     used by the library when the 'close' routine returns.  If the
@@ -2424,7 +2513,7 @@ H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
 
     /* Create the new property list class */
-    if ((ret_value=H5P_insert(plist,name,size,value,prp_set,prp_get,prp_delete,prp_copy,prp_close))<0)
+    if ((ret_value=H5P_insert(plist,name,size,value,prp_set,prp_get,prp_delete,prp_copy,NULL,prp_close))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
 
 done:
@@ -3239,13 +3328,6 @@ H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
     if(prop1->size < prop2->size) HGOTO_DONE(-1);
     if(prop1->size > prop2->size) HGOTO_DONE(1);
 
-    /* Check if they both have values allocated (or not allocated) */
-    if(prop1->value==NULL && prop2->value!=NULL) HGOTO_DONE(-1);
-    if(prop1->value!=NULL && prop2->value==NULL) HGOTO_DONE(1);
-    if(prop1->value!=NULL)
-        if((cmp_value=HDmemcmp(prop1->value,prop2->value,prop1->size))!=0)
-            HGOTO_DONE(cmp_value);
-
     /* Check if they both have the same 'create' callback */
     if(prop1->create==NULL && prop2->create!=NULL) HGOTO_DONE(-1);
     if(prop1->create!=NULL && prop2->create==NULL) HGOTO_DONE(1);
@@ -3271,10 +3353,24 @@ H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
     if(prop1->copy!=NULL && prop2->copy==NULL) HGOTO_DONE(1);
     if(prop1->copy!=prop2->copy) HGOTO_DONE(-1);
 
+    /* Check if they both have the same 'compare' callback */
+    if(prop1->cmp==NULL && prop2->cmp!=NULL) HGOTO_DONE(-1);
+    if(prop1->cmp!=NULL && prop2->cmp==NULL) HGOTO_DONE(1);
+    if(prop1->cmp!=prop2->cmp) HGOTO_DONE(-1);
+
     /* Check if they both have the same 'close' callback */
     if(prop1->close==NULL && prop2->close!=NULL) HGOTO_DONE(-1);
     if(prop1->close!=NULL && prop2->close==NULL) HGOTO_DONE(1);
     if(prop1->close!=prop2->close) HGOTO_DONE(-1);
+
+    /* Check if they both have values allocated (or not allocated) */
+    if(prop1->value==NULL && prop2->value!=NULL) HGOTO_DONE(-1);
+    if(prop1->value!=NULL && prop2->value==NULL) HGOTO_DONE(1);
+    if(prop1->value!=NULL) {
+        /* Call comparison routine */
+        if((cmp_value=prop1->cmp(prop1->value,prop2->value,prop1->size))!=0)
+            HGOTO_DONE(cmp_value);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4727,7 +4823,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         prop=H5P_find_prop_plist(src_plist,name);
 
         /* Create property object from parameters */
-        if((new_prop=H5P_create_prop(prop->name,prop->size,H5P_PROP_WITHIN_LIST,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->copy))==NULL)
+        if((new_prop=H5P_create_prop(prop->name,prop->size,H5P_PROP_WITHIN_LIST,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->cmp,prop->close))==NULL)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property");
 
         /* Call property creation callback, if it exists */
@@ -4809,7 +4905,7 @@ H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass, con
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to locate property");
 
     /* Register the property into the destination */
-    if(H5P_register(dst_pclass,name,prop->size,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->close)<0)
+    if(H5P_register(dst_pclass,name,prop->size,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->cmp,prop->close)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:

@@ -71,6 +71,8 @@ const char *FILENAME[] = {
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
+#define DSET_COMPARE_DCPL_NAME	"compare_dcpl"
+#define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
 
 #define USER_BLOCK              1024
 #define SIXTY_FOUR_KB           65536 
@@ -3019,6 +3021,91 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_compare_dcpl
+ *
+ * Purpose:	Verifies that if the same DCPL was used to create two
+ *              datasets, the DCPLs retrieved from each dataset should
+ *              compare equal.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, January  7, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compare_dcpl(hid_t file)
+{
+    hid_t       dsid=(-1);      /* Dataset ID */
+    hid_t       sid=(-1);       /* Dataspace ID */
+    hid_t       dcpl=(-1);      /* Dataspace creation property list ID */
+    hid_t       dcpl1=(-1),dcpl2=(-1);          /* Dataspace creation property list IDs from datasets */
+    const hsize_t dims[2] = {500, 4096};        /* Dataspace dimensions */
+    const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
+
+    TESTING("comparing dataset creation property lists");
+
+    /* Create the data space */
+    if ((sid = H5Screate_simple(2, dims, NULL))<0) TEST_ERROR
+
+    /* Create dcpl with special filter */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0) TEST_ERROR
+
+    /* Set gzip parameter (if available) */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    if(H5Pset_deflate (dcpl, 9)<0) TEST_ERROR
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    /* Create first dataset */
+    if ((dsid = H5Dcreate(file, DSET_COMPARE_DCPL_NAME, H5T_NATIVE_INT, sid, dcpl)) <0) TEST_ERROR
+
+    /* Get copy of dataset's dataset creation property list */
+    if ((dcpl1=H5Dget_create_plist(dsid))<0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid)<0) TEST_ERROR
+
+    /* Create second dataset */
+    if ((dsid = H5Dcreate(file, DSET_COMPARE_DCPL_NAME_2, H5T_NATIVE_INT, sid, dcpl)) <0) TEST_ERROR
+
+    /* Get copy of dataset's dataset creation property list */
+    if ((dcpl2=H5Dget_create_plist(dsid))<0) TEST_ERROR
+
+    /* Close dataset */
+    if(H5Dclose (dsid)<0) TEST_ERROR
+
+    /* Close dataspace */
+    if(H5Sclose(sid)<0) TEST_ERROR
+
+    /* Compare dataset creation property lists */
+    if(H5Pequal(dcpl1,dcpl2)<=0) TEST_ERROR
+
+    /* Close dataset creation property lists */
+    if(H5Pclose(dcpl)<0) TEST_ERROR
+    if(H5Pclose(dcpl1)<0) TEST_ERROR
+    if(H5Pclose(dcpl2)<0) TEST_ERROR
+
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcpl);
+        H5Pclose(dcpl1);
+        H5Pclose(dcpl2);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_compare_dcpl() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -3084,6 +3171,7 @@ main(void)
     nerrors += test_set_local(fapl)<0	?1:0;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
     nerrors += test_can_apply_szip(file)<0	?1:0; 
+    nerrors += test_compare_dcpl(file)<0	?1:0; 
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

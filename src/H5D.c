@@ -48,6 +48,9 @@ static int interface_initialize_g = 0;
 /* Local functions */
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
+static int H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
+static int H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size);
 static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
            const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
@@ -215,73 +218,73 @@ H5D_init_interface(void)
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
         /* Register the max. temp buffer size property */
-        if(H5P_register(xfer_pclass,H5D_XFER_MAX_TEMP_BUF_NAME,H5D_XFER_MAX_TEMP_BUF_SIZE,&def_max_temp_buf,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_MAX_TEMP_BUF_NAME,H5D_XFER_MAX_TEMP_BUF_SIZE,&def_max_temp_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the type conversion buffer property */
-        if(H5P_register(xfer_pclass,H5D_XFER_TCONV_BUF_NAME,H5D_XFER_TCONV_BUF_SIZE,&def_tconv_buf,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_TCONV_BUF_NAME,H5D_XFER_TCONV_BUF_SIZE,&def_tconv_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the background buffer property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_NAME,H5D_XFER_BKGR_BUF_SIZE,&def_bkgr_buf,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_NAME,H5D_XFER_BKGR_BUF_SIZE,&def_bkgr_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the background buffer type property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_TYPE_NAME,H5D_XFER_BKGR_BUF_TYPE_SIZE,&def_bkgr_buf_type,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_BKGR_BUF_TYPE_NAME,H5D_XFER_BKGR_BUF_TYPE_SIZE,&def_bkgr_buf_type,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the B-Tree node splitting ratios property */
-        if(H5P_register(xfer_pclass,H5D_XFER_BTREE_SPLIT_RATIO_NAME,H5D_XFER_BTREE_SPLIT_RATIO_SIZE,&def_btree_split_ratio,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_BTREE_SPLIT_RATIO_NAME,H5D_XFER_BTREE_SPLIT_RATIO_SIZE,&def_btree_split_ratio,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
         /* Register the hyperslab caching property */
-        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_NAME,H5D_XFER_HYPER_CACHE_SIZE,&def_hyper_cache,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_NAME,H5D_XFER_HYPER_CACHE_SIZE,&def_hyper_cache,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the hyperslab cache limit property */
-        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_LIM_NAME,H5D_XFER_HYPER_CACHE_LIM_SIZE,&def_hyper_cache_lim,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_CACHE_LIM_NAME,H5D_XFER_HYPER_CACHE_LIM_SIZE,&def_hyper_cache_lim,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
         /* Register the vlen allocation function property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_NAME,H5D_XFER_VLEN_ALLOC_SIZE,&def_vlen_alloc,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_NAME,H5D_XFER_VLEN_ALLOC_SIZE,&def_vlen_alloc,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the vlen allocation information property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_INFO_NAME,H5D_XFER_VLEN_ALLOC_INFO_SIZE,&def_vlen_alloc_info,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_ALLOC_INFO_NAME,H5D_XFER_VLEN_ALLOC_INFO_SIZE,&def_vlen_alloc_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the vlen free function property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_NAME,H5D_XFER_VLEN_FREE_SIZE,&def_vlen_free,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_NAME,H5D_XFER_VLEN_FREE_SIZE,&def_vlen_free,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the vlen free information property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_INFO_NAME,H5D_XFER_VLEN_FREE_INFO_SIZE,&def_vlen_free_info,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VLEN_FREE_INFO_NAME,H5D_XFER_VLEN_FREE_INFO_SIZE,&def_vlen_free_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the file driver ID property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VFL_ID_NAME,H5D_XFER_VFL_ID_SIZE,&def_vfl_id,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VFL_ID_NAME,H5D_XFER_VFL_ID_SIZE,&def_vfl_id,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the file driver info property */
-        if(H5P_register(xfer_pclass,H5D_XFER_VFL_INFO_NAME,H5D_XFER_VFL_INFO_SIZE,&def_vfl_info,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_VFL_INFO_NAME,H5D_XFER_VFL_INFO_SIZE,&def_vfl_info,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the vector size property */
-        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the I/O transfer mode property */
-        if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_MODE_NAME,H5D_XFER_IO_XFER_MODE_SIZE,&def_io_xfer_mode,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_IO_XFER_MODE_NAME,H5D_XFER_IO_XFER_MODE_SIZE,&def_io_xfer_mode,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the EDC property */
-        if(H5P_register(xfer_pclass,H5D_XFER_EDC_NAME,H5D_XFER_EDC_SIZE,&enable_edc,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_EDC_NAME,H5D_XFER_EDC_SIZE,&enable_edc,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
              
         /* Register the filter callback property */
-        if(H5P_register(xfer_pclass,H5D_XFER_FILTER_CB_NAME,H5D_XFER_FILTER_CB_SIZE,&filter_cb,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+        if(H5P_register(xfer_pclass,H5D_XFER_FILTER_CB_NAME,H5D_XFER_FILTER_CB_SIZE,&filter_cb,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     } /* end if */
 
@@ -307,35 +310,35 @@ H5D_init_interface(void)
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
         /* Register the storage layout property */ 
-        if(H5P_register(crt_pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &layout, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &layout, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
         
         /* Register the chunking dimensionality property */
-        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_DIM_NAME, H5D_CRT_CHUNK_DIM_SIZE, &chunk_ndims, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_DIM_NAME, H5D_CRT_CHUNK_DIM_SIZE, &chunk_ndims, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the chunking size property */ 
-        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_SIZE_NAME, H5D_CRT_CHUNK_SIZE_SIZE, chunk_size, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_CHUNK_SIZE_NAME, H5D_CRT_CHUNK_SIZE_SIZE, chunk_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
       
         /* Register the fill value property */
-        if(H5P_register(crt_pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, H5D_CRT_FILL_VALUE_CMP, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the space allocation time property */
-        if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_NAME, H5D_CRT_ALLOC_TIME_SIZE, &alloc_time, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_ALLOC_TIME_NAME, H5D_CRT_ALLOC_TIME_SIZE, &alloc_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the fill value writing time property */
-        if(H5P_register(crt_pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
         /* Register the external file list property */
-        if(H5P_register(crt_pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, H5D_CRT_EXT_FILE_LIST_CMP, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
        
         /* Register the data pipeline property */
-        if(H5P_register(crt_pclass, H5D_CRT_DATA_PIPELINE_NAME, H5D_CRT_DATA_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        if(H5P_register(crt_pclass, H5D_CRT_DATA_PIPELINE_NAME, H5D_CRT_DATA_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, H5D_CRT_DATA_PIPELINE_CMP, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     } /* end if */
 
@@ -565,6 +568,228 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_crt_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5D_crt_fill_value_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the fill value
+ *                 property in the dataset creation property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ * Modification: 
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t size)
+{
+    const H5O_fill_t     *fill1=(const H5O_fill_t *)value1,     /* Create local aliases for values */
+        *fill2=(const H5O_fill_t *)value2;
+    int cmp_value;              /* Value from comparison */
+    herr_t         ret_value=0; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_fill_value_cmp)
+
+    /* Sanity check */
+    assert(fill1);
+    assert(fill2);
+    assert(size==sizeof(H5O_fill_t));
+
+    /* Check the size of fill values */
+    if(fill1->size < fill2->size) HGOTO_DONE(-1);
+    if(fill1->size > fill2->size) HGOTO_DONE(1);
+
+    /* Check the types of the fill values */
+    if(fill1->type==NULL && fill2->type!=NULL) HGOTO_DONE(-1);
+    if(fill1->type!=NULL && fill2->type==NULL) HGOTO_DONE(1);
+    if(fill1->type!=NULL)
+        if((cmp_value=H5T_cmp(fill1->type,fill2->type))!=0)
+            HGOTO_DONE(cmp_value);
+
+    /* Check the fill values in the buffers */
+    if(fill1->buf==NULL && fill2->buf!=NULL) HGOTO_DONE(-1);
+    if(fill1->buf!=NULL && fill2->buf==NULL) HGOTO_DONE(1);
+    if(fill1->buf!=NULL)
+        if((cmp_value=HDmemcmp(fill1->buf,fill2->buf,fill1->size))!=0)
+            HGOTO_DONE(cmp_value);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_crt_fill_value_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5D_crt_ext_file_list_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the external file
+ *                 list property in the dataset creation property list is
+ *                 compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ * Modification: 
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D_crt_ext_file_list_cmp(const void *value1, const void *value2, size_t size)
+{
+    const H5O_efl_t     *efl1=(const H5O_efl_t *)value1,     /* Create local aliases for values */
+        *efl2=(const H5O_efl_t *)value2;
+    int cmp_value;              /* Value from comparison */
+    herr_t         ret_value=0; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_ext_file_list_cmp)
+
+    /* Sanity check */
+    assert(efl1);
+    assert(efl2);
+    assert(size==sizeof(H5O_efl_t));
+
+    /* Check the heap address of external file lists */
+    if((cmp_value=H5F_addr_cmp(efl1->heap_addr,efl2->heap_addr))!=0)
+        HGOTO_DONE(cmp_value);
+
+    /* Check the number of allocated efl entries */
+    if(efl1->nalloc < efl2->nalloc) HGOTO_DONE(-1);
+    if(efl1->nalloc > efl2->nalloc) HGOTO_DONE(1);
+
+    /* Check the number of used efl entries */
+    if(efl1->nused < efl2->nused) HGOTO_DONE(-1);
+    if(efl1->nused > efl2->nused) HGOTO_DONE(1);
+
+    /* Check the efl entry information */
+    if(efl1->slot==NULL && efl2->slot!=NULL) HGOTO_DONE(-1);
+    if(efl1->slot!=NULL && efl2->slot==NULL) HGOTO_DONE(1);
+    if(efl1->slot!=NULL && efl1->nused>0) {
+        int i;       /* Local index variable */
+
+        /* Loop through all entries, comparing them */
+        for(i=0; i<efl1->nused; i++) {
+            /* Check the name offset of the efl entry */
+            if(efl1->slot[i].name_offset < efl2->slot[i].name_offset) HGOTO_DONE(-1);
+            if(efl1->slot[i].name_offset > efl2->slot[i].name_offset) HGOTO_DONE(1);
+
+            /* Check the name of the efl entry */
+            if(efl1->slot[i].name==NULL && efl2->slot[i].name!=NULL) HGOTO_DONE(-1);
+            if(efl1->slot[i].name!=NULL && efl2->slot[i].name==NULL) HGOTO_DONE(1);
+            if(efl1->slot[i].name!=NULL)
+                if((cmp_value=HDstrcmp(efl1->slot[i].name,efl2->slot[i].name))!=0)
+                    HGOTO_DONE(cmp_value);
+
+            /* Check the file offset of the efl entry */
+            if(efl1->slot[i].offset < efl2->slot[i].offset) HGOTO_DONE(-1);
+            if(efl1->slot[i].offset > efl2->slot[i].offset) HGOTO_DONE(1);
+
+            /* Check the file size of the efl entry */
+            if(efl1->slot[i].size < efl2->slot[i].size) HGOTO_DONE(-1);
+            if(efl1->slot[i].size > efl2->slot[i].size) HGOTO_DONE(1);
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_crt_ext_file_list_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5D_crt_data_pipeline_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the filter pipeline
+ *                 property in the dataset creation property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, January 7, 2004
+ *
+ * Modification: 
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D_crt_data_pipeline_cmp(const void *value1, const void *value2, size_t size)
+{
+    const H5O_pline_t     *pline1=(const H5O_pline_t *)value1,     /* Create local aliases for values */
+        *pline2=(const H5O_pline_t *)value2;
+    int cmp_value;              /* Value from comparison */
+    herr_t         ret_value=0; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_crt_data_pipeline_cmp)
+
+    /* Sanity check */
+    assert(pline1);
+    assert(pline2);
+    assert(size==sizeof(H5O_pline_t));
+
+    /* Check the number of allocated pipeline entries */
+    if(pline1->nalloc < pline2->nalloc) HGOTO_DONE(-1);
+    if(pline1->nalloc > pline2->nalloc) HGOTO_DONE(1);
+
+    /* Check the number of used pipeline entries */
+    if(pline1->nfilters < pline2->nfilters) HGOTO_DONE(-1);
+    if(pline1->nfilters > pline2->nfilters) HGOTO_DONE(1);
+
+    /* Check the filter entry information */
+    if(pline1->filter==NULL && pline2->filter!=NULL) HGOTO_DONE(-1);
+    if(pline1->filter!=NULL && pline2->filter==NULL) HGOTO_DONE(1);
+    if(pline1->filter!=NULL && pline1->nfilters>0) {
+        int i;       /* Local index variable */
+
+        /* Loop through all filters, comparing them */
+        for(i=0; i<pline1->nfilters; i++) {
+            /* Check the ID of the filter */
+            if(pline1->filter[i].id < pline2->filter[i].id) HGOTO_DONE(-1);
+            if(pline1->filter[i].id > pline2->filter[i].id) HGOTO_DONE(1);
+
+            /* Check the flags for the filter */
+            if(pline1->filter[i].flags < pline2->filter[i].flags) HGOTO_DONE(-1);
+            if(pline1->filter[i].flags > pline2->filter[i].flags) HGOTO_DONE(1);
+
+            /* Check the name of the filter */
+            if(pline1->filter[i].name==NULL && pline2->filter[i].name!=NULL) HGOTO_DONE(-1);
+            if(pline1->filter[i].name!=NULL && pline2->filter[i].name==NULL) HGOTO_DONE(1);
+            if(pline1->filter[i].name!=NULL)
+                if((cmp_value=HDstrcmp(pline1->filter[i].name,pline2->filter[i].name))!=0)
+                    HGOTO_DONE(cmp_value);
+
+            /* Check the number of parameters for the filter */
+            if(pline1->filter[i].cd_nelmts < pline2->filter[i].cd_nelmts) HGOTO_DONE(-1);
+            if(pline1->filter[i].cd_nelmts > pline2->filter[i].cd_nelmts) HGOTO_DONE(1);
+
+            /* Check the filter parameter information */
+            if(pline1->filter[i].cd_values==NULL && pline2->filter[i].cd_values!=NULL) HGOTO_DONE(-1);
+            if(pline1->filter[i].cd_values!=NULL && pline2->filter[i].cd_values==NULL) HGOTO_DONE(1);
+            if(pline1->filter[i].cd_values!=NULL && pline1->filter[i].cd_nelmts>0) {
+                size_t v;       /* Local index variable */
+
+                /* Loop through all parameters, comparing them */
+                for(v=0; v<pline1->filter[i].cd_nelmts; v++) {
+                    /* Check each parameter for the filter */
+                    if(pline1->filter[i].cd_values[v] < pline2->filter[i].cd_values[v]) HGOTO_DONE(-1);
+                    if(pline1->filter[i].cd_values[v] > pline2->filter[i].cd_values[v]) HGOTO_DONE(1);
+                } /* end for */
+            } /* end if */
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_crt_data_pipeline_cmp() */
 
 
 /*-------------------------------------------------------------------------
