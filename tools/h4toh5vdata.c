@@ -655,23 +655,27 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
   size_t  fieldsizef;
   size_t  fielddim[1];
   hid_t   h5str_type;
+  int     check_ifstr;/* flag to check if the h5 type is string.*/
   int     i;
 
+
+  check_ifstr    = 0;
   fil_offset     = 0;
   mem_offset     = 0;
   fieldsizef     = 0;
   
 
-
  for (i =0;i< nfields;i++) {
    
    fieldname = NULL;
    fieldorder = VFfieldorder(vdata_id,i);
-   /*   printf(" %d fieldorder%d\n",i,fieldorder);*/
+   /*  printf(" %d fieldorder%d\n",i,fieldorder);*/
+   
    if(fieldorder == FAIL){
      printf("error in obtaining fieldorder.\n");
      return FAIL;
    }
+
    /* temp_fieldname = VFfieldname(vdata_id,i);
    if(temp_fieldname== NULL) {
      printf("fail to obtain Vdata field name. \n");
@@ -696,19 +700,25 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
      return FAIL;
    }
 
+   /* when vdata is a character array, we will write the whole
+      array as one hdf5 type string. */
+
    if(sh5type[i] == H5T_STRING) {
-     /*     printf("sh4size in the string %d\n",sh4size[i]);
-	    printf("fieldsize in the string %d\n",fieldsize);*/
-     if ((h5str_type = mkstr(sh4size[i],H5T_STR_NULLTERM))<0) {
+     /*            printf("sh4size in the string %d\n",sh4size[i]);
+		   printf("fieldsize in the string %d\n",fieldsize);*/
+	    /*     if ((h5str_type = mkstr(sh4size[i],H5T_STR_NULLTERM))<0) {*/
+    if ((h5str_type = mkstr(sh4size[i]*fieldorder,H5T_STR_NULLTERM))<0) {
        printf("error in making string of hdf5 string. \n");
        return FAIL;
      }
      sh5type[i] = h5str_type;
+     check_ifstr  = 1;
    }
 
    if (sh5memtype[i] == H5T_STRING) {
 
-     if((h5str_type = mkstr(sh4memsize[i],H5T_STR_NULLTERM))<0){ 
+     /*if((h5str_type = mkstr(sh4memsize[i],H5T_STR_NULLTERM))<0){ */
+     if((h5str_type = mkstr(sh4memsize[i]*fieldorder,H5T_STR_NULLTERM))<0){ 
        printf("error in making string for VDATA in memory. \n");
        return FAIL;
      }
@@ -720,9 +730,9 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
         
      /* if field type is an array, use H5Tinsert_array.*/
 
-   if (fielddim[0] == 1) {
+   if (fielddim[0] == 1 || check_ifstr == 1) {
 
-     /*     printf("i%d,sh5type[i] %d\n",i,sh5type[i]);
+     /*         printf("i%d,sh5type[i] %d\n",i,sh5type[i]);
      printf("i%d,fieldname%s\n",i,fieldname);
      printf("i%d,fil_offset%d\n",i,fil_offset);*/
      if(H5Tinsert(h5_ctype,fieldname,fil_offset,sh5type[i])<0) {
@@ -765,8 +775,16 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
    fil_offset = fil_offset + fieldsizef;
    mem_offset = mem_offset + sh4memsize[i];*/
 
-   fil_offset = fil_offset + sh4size[i]*fieldorder;
-   mem_offset = mem_offset + sh4memsize[i]*fieldorder;
+   if( check_ifstr == 1) {
+     fil_offset = fil_offset + sh4size[i];
+     mem_offset = mem_offset + sh4memsize[i];
+     check_ifstr = 0;
+   }
+   else { 
+   
+     fil_offset = fil_offset + sh4size[i]*fieldorder;
+     mem_offset = mem_offset + sh4memsize[i]*fieldorder;
+   }
    /*   free(fieldname);*/
  }
 
