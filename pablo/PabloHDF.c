@@ -141,7 +141,6 @@ void startHDFtraceEvent (int );
 int computeProcMask (int eventID);
 int computePacketTag(int eventID);
 void endHDFtraceEvent (int , int , char *, int );
-void traceEvent ( int , char *, unsigned );
 void HDFtraceEvent_RT ( int , HDFsetInfo *, unsigned );
 void HDFtraceIOEvent( int , void *, unsigned );
 extern int IOtracingEnabled;
@@ -638,7 +637,7 @@ size_t HDFtraceFREAD( void *ptr, size_t size, size_t nitems, FILE *stream )
 
     if ( IOtracingEnabled ) {
         readArgs.fileID = c_mappedID( fd );
-        readArgs.numVariables = nitems;
+        readArgs.numVariables = (int)nitems;
         readArgs.cause = -1;
         HDFtraceIOEvent( freadBeginID, (void *) &readArgs, sizeof(readArgs) );
     }
@@ -850,7 +849,7 @@ size_t HDFtraceFWRITE(const void *ptr,size_t size,size_t nitems,FILE *stream )
 
     if ( IOtracingEnabled ) {
         writeArgs.fileID = c_mappedID( fd );
-        writeArgs.numVariables = nitems;
+        writeArgs.numVariables = (int)nitems;
         writeArgs.cause = -1;
 
       HDFtraceIOEvent( fwriteBeginID, (void *) &writeArgs, sizeof(writeArgs) );
