@@ -681,13 +681,14 @@
 ./c++/config/depend4.in
 ./c++/config/dependN.in
 ./c++/config/hpux11.00
+./c++/config/ia64-linux-gnu
+./c++/config/irix6.x
 ./c++/config/linux-gnu
 ./c++/config/linux-gnulibc1
 ./c++/config/linux-gnulibc2
 ./c++/config/powerpc-ibm-aix
 ./c++/config/rs6000-ibm-aix4.x
 ./c++/config/solaris2.x
-./c++/config/irix6.x
 ./c++/config/sv1-cray
 ./c++/config/unicos10.0.X
 ./c++/config/unicosmk2.0.6.X
