@@ -39,9 +39,9 @@ extern const char *FILENAME[];
  * the FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)	{printf("%-70s", "Testing " WHAT); fflush(stdout);}
-#define PASSED()	puts(" PASSED")
-#define FAILED()	puts("*FAILED*")
-#define SKIPPED()	puts(" -SKIP-")
+#define PASSED()	{puts(" PASSED");fflush(stdout);}
+#define FAILED()	{puts("*FAILED*");fflush(stdout);}
+#define SKIPPED()	{puts(" -SKIP-");fflush(stdout);}
 
 /*
  * Print the current location on the standard output stream.

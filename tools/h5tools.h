@@ -13,6 +13,8 @@
 #include <hdf5.h>
 #include <stdio.h>
 
+#define ESCAPE_HTML	1
+
 /*
  * Information about how to format output.
  */
@@ -77,6 +79,15 @@ typedef struct h5dump_t {
      *		     escape.  If `ascii' is zero then then 1-byte integers are
      *		     printed as numeric values.  The default is zero.
      *
+     *	 str_locale: Determines how strings are printed. If zero then strings
+     *		     are printed like in C except. If set to ESCAPE_HTML then
+     *		     strings are printed using HTML encoding where each
+     *		     character not in the class [a-zA-Z0-9] is substituted
+     *		     with `%XX' where `X' is a hexadecimal digit.
+     *
+     *	 str_repeat: If set to non-zero then any character value repeated N
+     *		     or more times is printed as 'C'*N
+     *
      * Numeric data is also subject to the formats for individual elements.
      */
     hbool_t	raw;
@@ -94,6 +105,8 @@ typedef struct h5dump_t {
     const char	*fmt_double;
     const char	*fmt_float;
     int		ascii;
+    int		str_locale;
+    int		str_repeat;
 
     /*
      * Fields associated with compound array members.
@@ -178,7 +191,10 @@ typedef struct h5dump_t {
     /*
      * Fields associated with entire lines.
      *
-     *   ncols:	    Number of columns per line defaults to 80.
+     *	 ncols:	    Number of columns per line defaults to 80.
+     *
+     *	 per_line:  If this field has a positive value then every Nth element
+     *	 	    will be printed at the beginning of a line.
      *
      *	 pre:       Each line of output contains an optional prefix area
      *		    before the data. This area can contain the index for the
@@ -224,6 +240,7 @@ typedef struct h5dump_t {
      *		    unless it wouldn't fit.
      */
     int		line_ncols;		/*columns of output		*/
+    size_t	line_per_line;		/*max elements per line		*/
     const char	*line_pre;		/*prefix at front of each line	*/
     const char	*line_1st;		/*alternate pre. on first line	*/
     const char	*line_cont;		/*alternate pre. on continuation*/

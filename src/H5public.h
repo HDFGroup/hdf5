@@ -23,12 +23,50 @@ static char             RcsId[] = "@(#)$Revision$";
 #ifndef _H5public_H
 #define _H5public_H
 
+/*
+ * Undefine things that might get redefined in the H5config.h file if hdf5 is
+ * being included by other packages that use autoconf. The problem is that
+ * if the C preprocessor emits warning messages about redefinitions then
+ * autoconf will become confused and think that the hdf5 header file doesn't
+ * exist.
+ */
+#undef SIZEOF_INT8_T
+#undef SIZEOF_INT_FAST8_T
+#undef SIZEOF_INT_LEAST8_T
+#undef SIZEOF_UINT8_T
+#undef SIZEOF_UINT_FAST8_T
+#undef SIZEOF_UINT_LEAST8_T
+
+#undef SIZEOF_INT16_T
+#undef SIZEOF_INT_FAST16_T
+#undef SIZEOF_INT_LEAST16_T
+#undef SIZEOF_UINT16_T
+#undef SIZEOF_UINT_FAST16_T
+#undef SIZEOF_UINT_LEAST16_T
+
+#undef SIZEOF_INT32_T
+#undef SIZEOF_INT_FAST32_T
+#undef SIZEOF_INT_LEAST32_T
+#undef SIZEOF_UINT32_T
+#undef SIZEOF_UINT_FAST32_T
+#undef SIZEOF_UINT_LEAST32_T
+
+#undef SIZEOF_INT64_T
+#undef SIZEOF_INT_FAST64_T
+#undef SIZEOF_INT_LEAST64_T
+#undef SIZEOF_UINT64_T
+#undef SIZEOF_UINT_FAST64_T
+#undef SIZEOF_UINT_LEAST64_T
+
+/* Include files for public use... */
 #include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
 #ifdef STDC_HEADERS
 #   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
 #endif
-
+#ifdef HAVE_STDINT_H
+#   include <stdint.h>		/*for C9x types				     */
+#endif
 #ifdef HAVE_STDDEF_H
 #   include <stddef.h>
 #endif
@@ -119,7 +157,7 @@ typedef ssize_t			hssize_t;
 #elif SIZEOF_LONG_LONG>=8
     typedef unsigned long long	haddr_t;
 #   define HADDR_UNDEF		((haddr_t)(long long)(-1))
-#   elif SIZEOF___INT64>=8
+#elif SIZEOF___INT64>=8
     typedef unsigned __int64	haddr_t;
 #   define HADDR_UNDEF		((haddr_t)(__int64)(-1))
 #else

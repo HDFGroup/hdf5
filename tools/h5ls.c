@@ -41,6 +41,7 @@ static hbool_t recursive_g = FALSE;	/*recursive descent listing	     */
 static hbool_t grp_literal_g = FALSE;	/*list group, not contents	     */
 static hbool_t hexdump_g = FALSE;	/*show data as raw hexadecimal	     */
 static hbool_t show_errors_g = FALSE;	/*print HDF5 error messages	     */
+static hbool_t simple_output_g = FALSE;	/*make output more machine-readable  */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -108,6 +109,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       -l, --label      Label members of compound datasets\n\
       -r, --recursive  List all groups recursively, avoiding cycles\n\
       -s, --string     Print 1-byte integer datasets as ASCII\n\
+      -S, --simple     Use a machine-readable output format\n\
       -wN, --width=N   Set the number of columns of output\n\
       -v, --verbose    Generate more verbose output\n\
       -V, --version    Print version number and exit\n\
@@ -1098,7 +1100,9 @@ display_type(hid_t type, int ind)
  *              Tuesday, July 21, 1998
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-09-27
+ *		Understands the simple_output_g switch which causes data to
+ *		be displayed in a more machine-readable format.
  *-------------------------------------------------------------------------
  */
 static void
@@ -1107,21 +1111,41 @@ dump_dataset_values(hid_t dset)
     hid_t		f_type = H5Dget_type(dset);
     size_t		size = H5Tget_size(f_type);
     h5dump_t		info;
-
+    char		string_prefix[64];
+	
     /* Set to all default values and then override */
     memset(&info, 0, sizeof info);
-    info.idx_fmt = "(%s)";
-    info.line_ncols = width_g;
-    info.line_multi_new = 1;
-    if (label_g) info.cmpd_name = "%s=";
-    
-    /*
-     * If a compound datatype is split across multiple lines then indent
-     * the continuation line.
-     */
-    info.line_pre  = "        %s ";
-    info.line_cont = "        %s  ";
 
+    if (simple_output_g) {
+	info.idx_fmt = "";
+	info.line_ncols = 65535; /*something big*/
+	info.line_per_line = 1;
+	info.line_multi_new = 0;
+	info.line_pre  = "        ";
+	info.line_cont = "         ";
+	
+	info.arr_pre = "";
+	info.arr_suf = "";
+	info.arr_sep = " ";
+
+	info.cmpd_pre = "";
+	info.cmpd_suf = "";
+	info.cmpd_sep = " ";
+	if (label_g) info.cmpd_name = "%s=";
+	
+	info.elmt_suf1 = " ";
+	info.str_locale = ESCAPE_HTML;
+	
+    } else {
+	info.idx_fmt = "(%s)";
+	info.line_ncols = width_g;
+	info.line_multi_new = 1;
+	if (label_g) info.cmpd_name = "%s=";
+	info.line_pre  = "        %s ";
+	info.line_cont = "        %s  ";
+	info.str_repeat = 8;
+    }
+    
     if (hexdump_g) {
 	/*
 	 * Print all data in hexadecimal format if the `-x' or `--hexdump'
@@ -1136,7 +1160,9 @@ dump_dataset_values(hid_t dset)
 	info.ascii = TRUE;
 	info.elmt_suf1 = "";
 	info.elmt_suf2 = "";
-	info.line_pre ="        %s \"";
+	strcpy(string_prefix, info.line_pre);
+	strcat(string_prefix, "\"");
+	info.line_pre = string_prefix;
 	info.line_suf = "\"";
     }
     
@@ -1211,12 +1237,14 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_1st  = "        Data:  ";
 	    info.line_pre  = "               ";
 	    info.line_cont = "                ";
+	    info.str_repeat = 8;
 	    
 	} else {
 	    printf("        Data:\n");
 	    info.idx_fmt = "(%s)";
 	    info.line_pre  = "            %s ";
 	    info.line_cont = "            %s  ";
+	    info.str_repeat = 8;
 	}
 	info.line_ncols = width_g;
 	if (label_g) info.cmpd_name = "%s=";
@@ -1924,6 +1952,8 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--recursive")) {
 	    recursive_g = TRUE;
 	    fullname_g = TRUE;
+	} else if (!strcmp(argv[argno], "--simple")) {
+	    simple_output_g = TRUE;
 	} else if (!strcmp(argv[argno], "--string")) {
 	    string_g = TRUE;
 	} else if (!strncmp(argv[argno], "--width=", 8)) {
@@ -1995,6 +2025,9 @@ main (int argc, char *argv[])
 		case 'r':	/* --recursive */
 		    recursive_g = TRUE;
 		    fullname_g = TRUE;
+		    break;
+		case 'S':	/* --simple */
+		    simple_output_g = TRUE;
 		    break;
 		case 's':	/* --string */
 		    string_g = TRUE;

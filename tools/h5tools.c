@@ -61,12 +61,6 @@ int print_data(hid_t oid, hid_t _p_type, int obj_data);
 #define REPEAT_VERBOSE
 
 /*
- * This is the original value of the repeat_threshold in the h5dump_sprint
- * function.
- */
-#define H5DEFAULT_REPEAT_THRESHOLD 8
-
-/*
  * The output functions need a temporary buffer to hold a piece of the
  * dataset while it's being printed.  This constant sets the limit on the
  * size of that temporary buffer in bytes.  For efficiency's sake, choose the
@@ -97,6 +91,7 @@ typedef struct h5dump_str_t {
 /* Output variables */
 typedef struct h5dump_context_t {
     size_t		cur_column;	/*current column for output	*/
+    size_t		cur_elmt;	/*current element/output line	*/
     int			need_prefix;	/*is line prefix needed?	*/
     int			ndims;		/*dimensionality		*/
     hsize_t		p_min_idx[H5S_MAX_RANK]; /*min selected index	*/
@@ -613,11 +608,6 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     static char	fmt_llong[8], fmt_ullong[8];
     H5T_str_t 	pad;
     H5G_stat_t	sb;
-    int		repeat_threshold = H5DEFAULT_REPEAT_THRESHOLD;
-
-	if (programtype == H5DUMP){
-		repeat_threshold = -1; /*-1 means any amount of repeat allowed*/
-    }
     
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
@@ -645,75 +635,14 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
     } else if (info->ascii &&
 	       (H5Tequal(type, H5T_NATIVE_SCHAR) ||
 		H5Tequal(type, H5T_NATIVE_UCHAR))) {
-	switch (*((char*)vp)) {
-	case '"':
-	    h5dump_str_append(str, "\\\"");
-	    break;
-	case '\\':
-	    h5dump_str_append(str, "\\\\");
-	    break;
-	case '\b':
-	    h5dump_str_append(str, "\\b");
-	    break;
-	case '\f':
-	    h5dump_str_append(str, "\\f");
-	    break;
-	case '\n':
-	    h5dump_str_append(str, "\\n");
-	    break;
-	case '\r':
-	    h5dump_str_append(str, "\\r");
-	    break;
-	case '\t':
-	    h5dump_str_append(str, "\\t");
-	    break;
-	default:
-	    if (isprint((int)(*((char*)vp)))) {
+	if (ESCAPE_HTML==info->str_locale) {
+	    if (*((char*)vp)<=' ' || *((char*)vp)>'~') {
+		h5dump_str_append(str, "%%%02X", *((unsigned char*)vp));
+	    } else {
 		h5dump_str_append(str, "%c", *((char*)vp));
-	    } else {
-		h5dump_str_append(str, "\\%03o", *((unsigned char*)vp));
 	    }
-	    break;
-	}
-	
-    } else if (H5T_STRING==H5Tget_class(type)) {
-	size = H5Tget_size(type);
-	quote = '\0';
-	pad = H5Tget_strpad(type);
-	
-	for (i=0;
-	     i<size && ((pad == H5T_STR_NULLPAD)?1:(((char*)vp)[i] != '\0'));
-	     i++) {
-			
-	    /*
-	     * Count how many times the next character repeats. If the
-	     * threshold is negative then that means it can repeat any number
-	     * of times.
-	     */
-	    if (repeat_threshold >= 0) {
-		j=1;
-		while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
-	    } else {
-		j = repeat_threshold - 1;
-	    }
-	    
-	    /*
-	     * Print the opening quote.  If the repeat count is high enough to
-	     * warrant printing the number of repeats instead of enumerating
-	     * the characters, then make sure the character to be repeated is
-	     * in it's own quote.
-	     */
-	    if (j>repeat_threshold) {
-		if (quote) h5dump_str_append(str, "%c", quote);
-		quote = '\'';
-		h5dump_str_append(str, "%s%c", i?" ":"", quote);
-	    } else if (!quote) {
-		quote = '"';
-		h5dump_str_append(str, "%s%c", i?" ":"", quote);
-	    }
-			
-	    /* Print the character */
-	    switch (((char*)vp)[i]) {
+	} else {
+	    switch (*((char*)vp)) {
 	    case '"':
 		h5dump_str_append(str, "\\\"");
 		break;
@@ -736,16 +665,92 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		h5dump_str_append(str, "\\t");
 		break;
 	    default:
-		if (isprint((int)((char*)vp)[i])) {
-		    h5dump_str_append(str, "%c", ((char*)vp)[i]);
+		if (isprint(*((char*)vp))) {
+		    h5dump_str_append(str, "%c", *((char*)vp));
 		} else {
-		    h5dump_str_append(str, "\\%03o", ((unsigned char*)vp)[i]);
+		    h5dump_str_append(str, "\\%03o", *((unsigned char*)vp));
 		}
 		break;
 	    }
+	}
+
+    } else if (H5T_STRING==H5Tget_class(type)) {
+	size = H5Tget_size(type);
+	quote = '\0';
+	pad = H5Tget_strpad(type);
+	
+	for (i=0;
+	     i<size && ((pad == H5T_STR_NULLPAD)?1:(((char*)vp)[i] != '\0'));
+	     i++) {
 			
+	    /*
+	     * Count how many times the next character repeats. If the
+	     * threshold is zero then that means it can repeat any number
+	     * of times.
+	     */
+	    j=1;
+	    if (info->str_repeat>0) {
+		while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
+	    }
+	    
+	    /*
+	     * Print the opening quote.  If the repeat count is high enough to
+	     * warrant printing the number of repeats instead of enumerating
+	     * the characters, then make sure the character to be repeated is
+	     * in it's own quote.
+	     */
+	    if (info->str_repeat>0 && j>info->str_repeat) {
+		if (quote) h5dump_str_append(str, "%c", quote);
+		quote = '\'';
+		h5dump_str_append(str, "%s%c", i?" ":"", quote);
+	    } else if (!quote) {
+		quote = '"';
+		h5dump_str_append(str, "%s%c", i?" ":"", quote);
+	    }
+			
+	    /* Print the character */
+	    if (ESCAPE_HTML==info->str_locale) {
+		if (((char*)vp)[i]<=' ' || ((char*)vp)[i]>'~') {
+		    h5dump_str_append(str, "%%%02X", ((unsigned char*)vp)[i]);
+		} else {
+		    h5dump_str_append(str, "%c", ((char*)vp)[i]);
+		}
+	    } else {
+		switch (((char*)vp)[i]) {
+		case '"':
+		    h5dump_str_append(str, "\\\"");
+		    break;
+		case '\\':
+		    h5dump_str_append(str, "\\\\");
+		    break;
+		case '\b':
+		    h5dump_str_append(str, "\\b");
+		    break;
+		case '\f':
+		    h5dump_str_append(str, "\\f");
+		    break;
+		case '\n':
+		    h5dump_str_append(str, "\\n");
+		    break;
+		case '\r':
+		    h5dump_str_append(str, "\\r");
+		    break;
+		case '\t':
+		    h5dump_str_append(str, "\\t");
+		    break;
+		default:
+		    if (isprint(((char*)vp)[i])) {
+			h5dump_str_append(str, "%c", ((char*)vp)[i]);
+		    } else {
+			h5dump_str_append(str, "\\%03o",
+					  ((unsigned char*)vp)[i]);
+		    }
+		    break;
+		}
+	    }
+	    
 	    /* Print the repeat count */
-	    if (j>repeat_threshold) {
+	    if (info->str_repeat && j>info->str_repeat) {
 #ifdef REPEAT_VERBOSE
 		h5dump_str_append(str, "%c repeats %d times", quote, j-1);
 #else
@@ -756,6 +761,11 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    }
 	}
 	if (quote) h5dump_str_append(str, "%c", quote);
+
+	if (0==i) {
+	    h5dump_str_append(str, "\"\"");	/*empty string*/
+	}
+	
 		
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {
 	h5dump_str_append(str, OPT(info->fmt_int, "%d"),
@@ -1001,7 +1011,9 @@ h5dump_ncols(const char *s)
  *              Monday, April 26, 1999
  *
  * Modifications:
- *
+ *		Robb Matzke, 1999-09-29
+ *		If a new prefix is printed then the current element number is
+ *		set back to zero.
  *-------------------------------------------------------------------------
  */
 static void
@@ -1036,6 +1048,7 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
 	      stream);
     }
     ctx->cur_column = ctx->prev_prefix_len = h5dump_str_len(&prefix);
+    ctx->cur_elmt = 0;
     ctx->need_prefix = 0;
 
     /* Free string */
@@ -1065,6 +1078,10 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
  *		The `container' argument is the optional dataset for
  *		reference types.
  *
+ * 		Robb Matzke, 1999-09-29
+ *		Understands the `per_line' property which indicates that
+ *		every Nth element should begin a new line.
+ *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1087,7 +1104,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
     if (info->line_ncols>0) ncols = info->line_ncols;
     h5dump_simple_prefix(stream, info, ctx, 0, 0);
     
-    for (i=0; i<nelmts; i++) {
+    for (i=0; i<nelmts; i++, ctx->cur_elmt++) {
 	
 	/* Render the element */
 	h5dump_str_reset(&buffer);
@@ -1133,6 +1150,14 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 	    (ctx->cur_column + h5dump_ncols(s) +
 	     strlen(OPT(info->elmt_suf2, " ")) +
 	     strlen(OPT(info->line_suf, ""))) > ncols) {
+	    ctx->need_prefix = TRUE;
+	}
+
+	/*
+	 * If too many elements have already been printed then we need to
+	 * start a new line.
+	 */
+	if (info->line_per_line>0 && ctx->cur_elmt>=info->line_per_line) {
 	    ctx->need_prefix = TRUE;
 	}
 	
