@@ -41,6 +41,9 @@ New Features
 
     Library:
     --------
+        - A new API function H5Fget_name was added.  It returns the name
+          of the file by object(file, group, data set, named data type,
+          attribute) ID.  SLU - 2004/06/29
         - A new API function H5Fget_filesize was added.  It returns the
           actual file size of the opened file.  SLU - 2004/06/24
 	- Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,

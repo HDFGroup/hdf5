@@ -4706,3 +4706,55 @@ H5Fget_filesize(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_filesize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_name
+ *
+ * Purpose:     Gets the name of the file to which object OBJ_ID belongs.
+ *              If `name' is non-NULL then write up to `size' bytes into that
+ *              buffer and always return the length of the entry name.
+ *              Otherwise `size' is ignored and the function does not store the name,
+ *              just returning the number of characters required to store the name.
+ *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
+ *              is unchanged and the function returns a negative value.
+ *              
+ * Return:      Success:        The length of the file name 
+ *              Failure:        Negative
+ *
+ * Programmer:  Raymond Lu
+ *              June 29, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
+{
+    H5G_entry_t   *ent;       /*symbol table entry */
+    size_t        len=0;
+    ssize_t       ret_value;
+
+    FUNC_ENTER_API (H5Fget_name, FAIL);
+    H5TRACE3("Zs","ixz",obj_id,name,size);
+
+    /* get symbol table entry */
+    if((ent = H5G_loc(obj_id))==NULL)
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
+
+    len = HDstrlen(ent->file->name);
+
+    if(name) {
+        HDstrncpy(name, ent->file->name, MIN(len+1,size));
+        if(len >= size)
+            name[size-1]='\0';
+    } /* end if */
+
+    /* Set return value */
+    ret_value=(ssize_t)len;
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Fget_name() */
+

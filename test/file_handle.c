@@ -177,6 +177,11 @@ test_core(void)
      * Just try to check if it's reasonable.  Currently, this file size
      * is 976.
      */ 
+    
+    
+    
+    
+    
     if(file_size<KB/2 || file_size>1*KB)
         goto error;
 

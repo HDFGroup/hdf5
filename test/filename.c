@@ -19,7 +19,6 @@
  * Purpose:     Tests the "H5Fget_name" functionality
  */
 
-#include "hdf5.h"
 #include "h5test.h"
 #include "testhdf5.h"
 
@@ -49,7 +48,7 @@ typedef struct s1_t {
     if (strcmp(x, val)) {					              \
 	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d " \
 		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
-	H5Eprint (H5E_DEFAULT, stdout);					      \
+	H5Eprint (stdout);					              \
     }									      \
     strcmp(x, "");                                                            \
 } while(0)
