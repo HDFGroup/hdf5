@@ -107,7 +107,7 @@ H5V_vector_reduce_product(unsigned n, const hsize_t *v)
     while (n--) ret_value *= *v++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -142,7 +142,7 @@ H5V_vector_zerop_u(int n, const hsize_t *v)
             HGOTO_DONE(FALSE);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -177,7 +177,7 @@ H5V_vector_zerop_s(int n, const hssize_t *v)
             HGOTO_DONE(FALSE);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -216,7 +216,7 @@ H5V_vector_cmp_u (int n, const hsize_t *v1, const hsize_t *v2)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -256,7 +256,7 @@ H5V_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 

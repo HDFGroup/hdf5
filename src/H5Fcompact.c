@@ -66,7 +66,7 @@ H5F_compact_readv(H5F_t UNUSED *f, const H5O_layout_t *layout, size_t nseq,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5F_compact_readv() */
 
 /*-------------------------------------------------------------------------
@@ -117,5 +117,5 @@ H5F_compact_writev(H5F_t UNUSED *f, H5O_layout_t *layout, size_t nseq,
     layout->dirty = TRUE;
 
 done:   
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5F_compact_writev */

@@ -1084,27 +1084,34 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
    CONSTR (FUNC, #func_name);						      \
-   MPE_LOG_VARS(func_name)                                                    \
    PABLO_SAVE (ID_ ## func_name)  					      \
-   H5TRACE_DECL;							      \
 									      \
    /* Check API status */               				      \
    assert(asrt);				                              \
 									      \
    /* Start tracing */                  				      \
-   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
-									      \
+   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id)
+
+/* Threadsafety initialization code for API routines */
+#define FUNC_ENTER_API_THREADSAFE                                             \
    /* Initialize the thread-safe code */				      \
    H5_FIRST_THREAD_INIT;                                                      \
 									      \
    /* Grab the mutex for the library */ 				      \
    H5_API_UNSET_CANCEL                                                        \
-   H5_API_LOCK                                                                 
+   H5_API_LOCK
+
+/* Local variables for API routines */
+#define FUNC_ENTER_API_VARS                                                   \
+    MPE_LOG_VARS(func_name)                                                   \
+    H5TRACE_DECL
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(func_name,err) {                                       \
+    FUNC_ENTER_API_VARS;                                                      \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
-    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
     /* Clear thread error stack entering public functions */		      \
     H5E_clear();						              \
     {
@@ -1114,8 +1121,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      like H5Eprint and H5Ewalk.
  */
 #define FUNC_ENTER_API_NOCLEAR(func_name,err) {                               \
+    FUNC_ENTER_API_VARS;                                                      \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
-    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_COMMON(func_name,INTERFACE_INIT,err);                      \
     {
 
 /*
@@ -1124,7 +1133,9 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *      are: H5close, H5check_version, H5Eget_major, H5Eget_minor.
  */
 #define FUNC_ENTER_API_NOINIT(func_name) {                                    \
+    FUNC_ENTER_API_VARS;                                                      \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
+    FUNC_ENTER_API_THREADSAFE;                                                \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
@@ -1195,9 +1206,25 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  *
  *-------------------------------------------------------------------------
  */
-#define FUNC_LEAVE(return_value)                                              \
-	MPE_LOG_VARS_USE(func_name);					      \
-        HRETURN(return_value)                                                 \
+#define FUNC_LEAVE_API(ret_value)                                             \
+        FINISH_MPE_LOG;                                                       \
+        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        H5TRACE_RETURN(ret_value);					      \
+        H5_API_UNLOCK                                                         \
+        H5_API_SET_CANCEL                                                     \
+        return (ret_value);						      \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+} /*end scope from beginning of FUNC_ENTER*/
+
+#define FUNC_LEAVE_NOAPI(ret_value)                                           \
+        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        return (ret_value);						      \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+} /*end scope from beginning of FUNC_ENTER*/
+
+#define FUNC_LEAVE_NOAPI_VOID                                                 \
+        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        return;						                      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 

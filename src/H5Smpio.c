@@ -162,7 +162,7 @@ done:
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_all_type() */
 
 
@@ -225,7 +225,7 @@ H5S_mpio_none_type( const H5S_t *space, size_t UNUSED elmt_size, hbool_t prefer_
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_none_type() */
 
 
@@ -566,7 +566,7 @@ done:
     HDfprintf(stdout, "Leave %s, count=%Hu  is_derived_type=%d\n",
 		FUNC, *count, *is_derived_type );
 #endif
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -669,7 +669,7 @@ done:
 #ifdef H5Smpi_DEBUG
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_mpio_hyper_contig_type() */
 
 
@@ -770,7 +770,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -924,7 +924,7 @@ done:
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
     }
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -963,7 +963,7 @@ H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
 				     buf, 0/*read*/);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1003,7 +1003,7 @@ H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
 				     (void*)buf, 1/*write*/);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1061,7 +1061,7 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_mpio_opt_possible() */
 
 #endif  /* H5_HAVE_PARALLEL */

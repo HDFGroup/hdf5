@@ -78,7 +78,7 @@ H5FO_create(H5F_t *f)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object TBBT");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_create() */
 
 
@@ -128,7 +128,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
         ret_value=FAIL;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_opened() */
 
 
@@ -180,7 +180,7 @@ H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
         HGOTO_ERROR(H5E_CACHE,H5E_CANTINSERT,FAIL,"can't insert object into TBBT");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_insert() */
 
 
@@ -230,7 +230,7 @@ H5FO_delete(H5F_t *f, haddr_t addr)
     H5FL_FREE(H5FO_open_obj_t,open_obj);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_delete() */
 
 
@@ -272,6 +272,6 @@ H5FO_dest(H5F_t *f)
     f->shared->open_objs=H5TB_dfree(f->shared->open_objs,NULL,NULL);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_dest() */
 

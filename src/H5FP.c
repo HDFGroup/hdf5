@@ -147,7 +147,7 @@ done:
     if (sap_barrier_group != MPI_GROUP_NULL)
         MPI_Group_free(&sap_barrier_group);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 /*
@@ -194,7 +194,7 @@ H5FPfinalize(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_free failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 /** Public Libarary (non-API) Functions **/
@@ -228,7 +228,7 @@ H5FP_send_metadata(const char *mdata, int len, int rank)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /** Private Functions **/
@@ -298,7 +298,7 @@ H5FP_commit_sap_datatypes(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Type_commit failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -328,7 +328,7 @@ H5FP_request_sap_stop(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Send failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_FPHDF5 */

@@ -140,7 +140,7 @@ H5FP_request_open(const char *mdata, int md_len, enum sap_obj_type obj_type,
 
 done:
     *req_id = req.req_id;
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -204,7 +204,7 @@ H5FP_request_lock(unsigned int sap_file_id, unsigned char *obj_oid,
 
 done:
     *req_id = req.req_id;
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -272,7 +272,7 @@ H5FP_request_release_lock(unsigned int sap_file_id, unsigned char *obj_oid,
 
 done:
     *req_id = req.req_id;
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -338,7 +338,7 @@ H5FP_request_change(unsigned int sap_file_id, unsigned char *obj_oid,
 
 done:
     *req_id = req.req_id;
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #if 0
@@ -396,7 +396,7 @@ H5FP_generate_message(fid_t fid, const char *dataset, const char *group,
     fphdf5->efl = &efl;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif
 
@@ -486,7 +486,7 @@ H5FP_request_sync(unsigned int sap_file_id, hid_t hdf_file_id,
 
 done:
     *req_id = req.req_id;
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -521,7 +521,7 @@ H5FP_request_close(unsigned sap_file_id, unsigned *req_id)
     *req_id = req.req_id;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /** Private Functions **/
@@ -540,7 +540,7 @@ H5FP_gen_request_id()
     static unsigned int i = 0;
 
     FUNC_ENTER_NOINIT(H5FP_gen_request_id);
-    FUNC_LEAVE(i++);
+    FUNC_LEAVE_NOAPI(i++);
 }
 
 /*
@@ -649,7 +649,7 @@ done:
     if (ret_value == FAIL)
         H5MM_xfree(ent);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_FPHDF5 */

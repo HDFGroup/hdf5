@@ -94,7 +94,7 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -142,7 +142,7 @@ H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -244,7 +244,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_set_driver() */
 
 
@@ -295,7 +295,7 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_driver() */
 
 
@@ -354,7 +354,7 @@ H5P_get_driver(H5P_genplist_t *plist)
         ret_value = H5FD_SEC2;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -401,7 +401,7 @@ H5Pget_driver(hid_t plist_id)
     ret_value = H5P_get_driver(plist);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -450,7 +450,7 @@ H5P_get_driver_info(H5P_genplist_t *plist)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_get_driver_info() */
 
 
@@ -495,7 +495,7 @@ H5Pget_driver_info(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_driver_info() */
 
 
@@ -534,7 +534,7 @@ herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset");
                     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -569,7 +569,7 @@ herr_t H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
  
 
@@ -608,7 +608,7 @@ herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset");
                                                                                                           
 done:               
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   
 
 
@@ -643,7 +643,7 @@ herr_t H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
     }    
                                                                                                
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   
                 
 
@@ -682,7 +682,7 @@ herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver");
                                                   
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -717,7 +717,7 @@ herr_t H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }               
 
 
@@ -756,7 +756,7 @@ herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver");
                                                                                                                                      
 done:                                              
-    FUNC_LEAVE(ret_value);                         
+    FUNC_LEAVE_API(ret_value);                         
 }   
 
 
@@ -791,7 +791,7 @@ herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
     }    
                                                                                           
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }               
 
 
@@ -857,7 +857,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -917,7 +917,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -981,7 +981,7 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1038,7 +1038,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -1092,7 +1092,7 @@ H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1135,7 +1135,7 @@ H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get garbage collect reference");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1171,7 +1171,7 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1204,7 +1204,7 @@ herr_t H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } 
 
 
@@ -1255,7 +1255,7 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data block size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1299,7 +1299,7 @@ H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -1352,7 +1352,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_sieve_buf_size() */
 
 
@@ -1398,7 +1398,7 @@ H5Pget_sieve_buf_size(hid_t plist_id, hsize_t *_size/*out*/)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_sieve_buf_size() */
 #else /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -1449,7 +1449,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_sieve_buf_size() */
 
 
@@ -1492,7 +1492,7 @@ H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_sieve_buf_size() */
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -1539,7 +1539,7 @@ H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' block size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_small_data_block_size() */
 
 
@@ -1578,6 +1578,6 @@ H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_small_data_block_size() */
 

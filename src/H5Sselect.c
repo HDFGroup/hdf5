@@ -76,7 +76,7 @@ H5S_get_vector_size(hid_t dxpl_id)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_get_vector_size() */
 
 
@@ -159,7 +159,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
     } /* end switch */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_copy() */
 
 
@@ -196,7 +196,7 @@ H5Sget_select_npoints(hid_t spaceid)
     ret_value = (*space->select.get_npoints)(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_npoints() */
 
 
@@ -236,7 +236,7 @@ H5Sselect_valid(hid_t spaceid)
     ret_value = (*space->select.is_valid)(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sselect_valid() */
 
 
@@ -297,7 +297,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_deserialize() */
 
 
@@ -346,7 +346,7 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     ret_value = (*space->select.bounds)(space,start,end);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_bounds() */
 
 
@@ -509,7 +509,7 @@ done:
     if(off!=NULL)
         H5FL_ARR_FREE(hsize_t,off);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_iterate() */
 
 
@@ -545,7 +545,7 @@ H5Sget_select_type(hid_t space_id)
     ret_value=space->select.type;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Sget_select_type() */
 
 
@@ -665,7 +665,7 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     } /* end for */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_shape_same() */
 
 
@@ -784,7 +784,7 @@ done:
     if(_fill==NULL && fill)
         H5FL_BLK_FREE(type_elem,fill);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_fill() */
 
 
@@ -870,7 +870,7 @@ done:
         H5FL_ARR_FREE(size_t,len);
     if(off!=NULL)
         H5FL_ARR_FREE(hsize_t,off);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fscat() */
 
 
@@ -960,7 +960,7 @@ done:
         H5FL_ARR_FREE(size_t,len);
     if(off!=NULL)
         H5FL_ARR_FREE(hsize_t,off);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5S_select_fgath() */
 
 
@@ -1047,7 +1047,7 @@ done:
         H5FL_ARR_FREE(size_t,len);
     if(off!=NULL)
         H5FL_ARR_FREE(hsize_t,off);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mscat() */
 
 
@@ -1136,7 +1136,7 @@ done:
         H5FL_ARR_FREE(size_t,len);
     if(off!=NULL)
         H5FL_ARR_FREE(hsize_t,off);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_mgath() */
 
 
@@ -1363,7 +1363,7 @@ done:
         H5FL_ARR_FREE(size_t,mem_len);
     if(mem_off!=NULL)
         H5FL_ARR_FREE(hsize_t,mem_off);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_read() */
 
 
@@ -1590,6 +1590,6 @@ done:
         H5FL_ARR_FREE(size_t,mem_len);
     if(mem_off!=NULL)
         H5FL_ARR_FREE(hsize_t,mem_off);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_write() */
 

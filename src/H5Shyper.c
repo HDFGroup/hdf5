@@ -67,7 +67,7 @@ H5S_hyper_print_spans_helper(struct H5S_hyper_span_t *span,unsigned depth)
         tmp_span=tmp_span->next;
     } /* end while */
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 static herr_t
@@ -80,7 +80,7 @@ H5S_hyper_print_spans(const struct H5S_hyper_span_info_t *span_lst)
         H5S_hyper_print_spans_helper(span_lst->head,0);
     } /* end if */
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 #endif /* H5S_HYPER_DEBUG */
 
@@ -254,7 +254,7 @@ H5S_hyper_iter_init (const H5S_t *space, size_t elmt_size, H5S_sel_iter_t *sel_i
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_iter_init() */
 
 
@@ -286,7 +286,7 @@ H5S_hyper_iter_nelmts (const H5S_sel_iter_t *sel_iter)
     ret_value=sel_iter->hyp.elmt_left;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_iter_nelmts() */
 
 
@@ -344,7 +344,7 @@ H5S_hyper_iter_release (H5S_sel_iter_t *sel_iter)
         H5FL_ARR_FREE(H5S_hyper_span_t,sel_iter->hyp.span);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_iter_release() */
 
 
@@ -452,7 +452,7 @@ H5S_hyper_iter_next (const H5S_t *space, H5S_sel_iter_t *iter)
     for(i=0; i<ndims; i++)
         iter->hyp.off[i]=tdiminfo[i].start+(tdiminfo[i].stride*iter_count[i])+iter_offset[i];
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5S_hyper_iter_next() */
 
 
@@ -487,7 +487,7 @@ H5S_hyper_npoints (const H5S_t *space)
     ret_value=space->select.num_elem;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_npoints() */
 
 
@@ -536,7 +536,7 @@ H5S_hyper_new_span (hssize_t low, hssize_t high, H5S_hyper_span_info_t *down, H5
         ret_value->down->count++;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_new_span() */
 
 
@@ -595,7 +595,7 @@ H5S_hyper_span_precompute_helper (H5S_hyper_span_info_t *spans, size_t elmt_size
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_span_precompute_helper() */
 
 
@@ -636,7 +636,7 @@ H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "can't reset hyperslab scratch pointer");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_span_precompute() */
 
 
@@ -687,7 +687,7 @@ H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_span_scratch() */
 
 
@@ -775,7 +775,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_copy_span_helper() */
 
 
@@ -815,7 +815,7 @@ H5S_hyper_copy_span (H5S_hyper_span_info_t *spans)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, NULL, "can't reset span tree scratch pointers");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_copy_span() */
 
 
@@ -921,7 +921,7 @@ H5S_hyper_cmp_spans (H5S_hyper_span_info_t *span_info1, H5S_hyper_span_info_t *s
 #ifdef LATER
 done:
 #endif /* LATER */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_cmp_spans() */
 
 
@@ -974,7 +974,7 @@ H5S_hyper_free_span_info (H5S_hyper_span_info_t *span_info)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_free_span_info() */
 
 
@@ -1016,7 +1016,7 @@ H5S_hyper_free_span (H5S_hyper_span_t *span)
     H5FL_FREE(H5S_hyper_span_t,span);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_free_span() */
 
 
@@ -1091,7 +1091,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_copy() */
 
 
@@ -1157,7 +1157,7 @@ H5S_hyper_is_valid_helper (const H5S_hyper_span_info_t *spans, const hssize_t *o
         curr=curr->next;
     } /* end while */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_is_valid_helper() */
 
 
@@ -1225,7 +1225,7 @@ H5S_hyper_is_valid (const H5S_t *space)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_is_valid() */
 
 
@@ -1273,7 +1273,7 @@ H5S_hyper_span_nblocks (H5S_hyper_span_info_t *spans)
         } /* end while */
     } /* end else */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_span_nblocks() */
 
 
@@ -1313,7 +1313,7 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
     else
         ret_value = H5S_hyper_span_nblocks(space->select.sel_info.hslab.span_lst);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_get_select_hyper_nblocks() */
 
 
@@ -1352,7 +1352,7 @@ H5Sget_select_hyper_nblocks(hid_t spaceid)
     ret_value = H5S_get_select_hyper_nblocks(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_hyper_nblocks() */
 
 
@@ -1406,7 +1406,7 @@ H5S_hyper_serial_size (const H5S_t *space)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_serial_size() */
 
 
@@ -1484,7 +1484,7 @@ H5S_hyper_serialize_helper (const H5S_hyper_span_info_t *spans, hssize_t *start,
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_serialize_helper() */
 
 
@@ -1644,7 +1644,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t *buf)
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_serialize() */
 
 
@@ -1736,7 +1736,7 @@ H5S_hyper_deserialize (H5S_t *space, const uint8_t *buf)
     H5FL_ARR_FREE(hsize_t,block);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_deserialize() */
 
 
@@ -1840,7 +1840,7 @@ H5S_hyper_span_blocklist(H5S_hyper_span_info_t *spans, hssize_t start[], hssize_
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_span_blocklist() */
 
 
@@ -1982,7 +1982,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
     else 
         ret_value=H5S_hyper_span_blocklist(space->select.sel_info.hslab.span_lst,start,end,(hsize_t)0,&startblock,&numblocks,&buf);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_get_select_hyper_blocklist() */
 
 
@@ -2040,7 +2040,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numbloc
         ret_value=SUCCEED;      /* Successfully got 0 blocks... */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_hyper_blocklist() */
 
 
@@ -2107,7 +2107,7 @@ H5S_hyper_bounds_helper (const H5S_hyper_span_info_t *spans, const hssize_t *off
         curr=curr->next;
     } /* end while */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_bounds_helper() */
 
 
@@ -2176,8 +2176,8 @@ H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
-}   /* H5Sget_hyper_bounds() */
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_hyper_bounds() */
 
 
 /*--------------------------------------------------------------------------
@@ -2359,7 +2359,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_is_contiguous() */
 
 
@@ -2438,7 +2438,7 @@ H5S_hyper_is_single(const H5S_t *space)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_is_single() */
 
 
@@ -2479,7 +2479,7 @@ H5S_hyper_is_regular(const H5S_t *space)
         ret_value=FALSE;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_is_regular() */
 
 
@@ -2534,7 +2534,7 @@ H5S_hyper_release (H5S_t *space)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_release() */
 
 
@@ -2575,7 +2575,7 @@ H5S_hyper_recover_span (unsigned *recover, H5S_hyper_span_t **curr_span, H5S_hyp
     /* Set the current span to next span */
     *curr_span=next_span;
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_hyper_recover_span() */
 
 
@@ -2674,7 +2674,7 @@ H5S_hyper_append_span (H5S_hyper_span_t **prev_span, H5S_hyper_span_info_t ** sp
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_append_span() */
 
 
@@ -3178,7 +3178,7 @@ H5S_hyper_clip_spans (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_clip_spans() */
 
 
@@ -3489,7 +3489,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     ret_value=merged_spans;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_merge_spans_helper() */
 
 
@@ -3544,7 +3544,7 @@ H5S_hyper_merge_spans (H5S_t *space, H5S_hyper_span_info_t *new_spans)
         space->select.sel_info.hslab.span_lst=merged_spans;
     } /* end else */
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_hyper_merge_spans() */
 
 
@@ -3592,7 +3592,7 @@ H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
         } /* end while */
     } /* end else */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_spans_nelem() */
 
 
@@ -3702,7 +3702,7 @@ H5S_hyper_make_spans (unsigned rank, const hssize_t *start, const hsize_t *strid
     ret_value=down;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_hyper_make_spans() */
 
 #ifndef NEW_HYPERSLAB_API
@@ -3908,7 +3908,7 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release temporary hyperslab spans");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_generate_hyperslab() */
 
 
@@ -4150,7 +4150,7 @@ done:
         H5FL_ARR_FREE(hsize_t,_stride);
     if(_block!=NULL)
         H5FL_ARR_FREE(hsize_t,_block);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_hyperslab() */
 
 
@@ -4203,7 +4203,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Sselect_hyperslab() */
 #else /* NEW_HYPERSLAB_API */ /* Works */
 
@@ -4378,7 +4378,7 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
     space->select.is_single=H5S_hyper_is_single;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_operate_hyperslab() */
 
 
@@ -4456,7 +4456,7 @@ done:
     if(new_spans!=NULL)
         H5S_hyper_free_span_info(new_spans);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_generate_hyperslab() */
 
 
@@ -4681,7 +4681,7 @@ done:
         H5FL_ARR_FREE(hsize_t,_stride);
     if(_block!=NULL)
         H5FL_ARR_FREE(hsize_t,_block);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_hyperslab() */
 
 
@@ -4734,7 +4734,7 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Sselect_hyperslab() */
 
 
@@ -4803,7 +4803,7 @@ done:
     if (ret_value<0 && new_space)
         H5S_close(new_space);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Scombine_hyperslab() */
 
 
@@ -4849,7 +4849,7 @@ done:
     if(ret_value==NULL && new_space!=NULL)
         H5S_close(new_space);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_combine_select() */
 
 
@@ -4914,7 +4914,7 @@ done:
     if (ret_value<0 && new_space)
         H5S_close(new_space);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Scombine_select() */
 
 
@@ -4957,7 +4957,7 @@ done:
     if(tmp_spans!=NULL)
         H5S_hyper_free_span_info(tmp_spans);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_select() */
 
 
@@ -5014,7 +5014,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to modify hyperslab selection");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Sselect_select() */
 #endif /* NEW_HYPERSLAB_API */ /* Works */
 
@@ -5426,7 +5426,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
     /* Set the number of bytes used */
     *nbytes=(start_io_bytes_left-io_bytes_left);
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5S_hyper_get_seq_list_gen() */
 
 
@@ -5985,7 +5985,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     /* Set the number of bytes used */
     *nbytes=(start_io_left-io_left)*elmt_size;
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5S_hyper_get_seq_list_opt() */
 
 
@@ -6050,6 +6050,6 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
         ret_value=H5S_hyper_get_seq_list_gen(space,iter,elem_size,maxseq,maxbytes,nseq,nbytes,off,len);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_hyper_get_seq_list() */
 

@@ -152,7 +152,7 @@ H5_init_library(void)
     H5_debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -296,7 +296,8 @@ H5dont_atexit(void)
     dont_atexit_g = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);}
+    FUNC_LEAVE_API(ret_value);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -332,7 +333,7 @@ H5garbage_collect(void)
     H5FL_garbage_coll();
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5garbage_collect() */
 
 
@@ -379,7 +380,7 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
     H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5set_free_list_limits() */
 
 
@@ -512,7 +513,7 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
     if (relnum) *relnum = H5_VERS_RELEASE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -622,7 +623,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -652,7 +653,7 @@ H5open(void)
     H5TRACE0("e","");
     /* all work is done by FUNC_ENTER() */
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -683,7 +684,7 @@ H5close(void)
 
     H5_term_library();
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_API(SUCCEED);
 }
 
 

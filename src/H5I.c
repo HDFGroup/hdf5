@@ -100,7 +100,7 @@ H5I_init_interface(void)
      */
     assert(H5I_NGROUPS<=(1<<GROUP_BITS));
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -150,7 +150,7 @@ H5I_term_interface(void)
         /* Mark interface closed */
         interface_initialize_g = 0;
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -240,7 +240,7 @@ done:
 	}
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -285,7 +285,7 @@ H5I_nmembers(H5I_type_t grp)
     ret_value=n;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -442,7 +442,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
     } /* end for */
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -497,7 +497,7 @@ H5I_destroy_group(H5I_type_t grp)
     }
     
   done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -612,7 +612,7 @@ H5I_register(H5I_type_t grp, void *object)
     ret_value = new_id;
 
   done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -647,7 +647,7 @@ H5I_object(hid_t id)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -686,7 +686,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5I_object_verify() */
 
 
@@ -722,7 +722,7 @@ H5I_get_type(hid_t id)
     assert(ret_value>=H5I_BADID && ret_value<H5I_NGROUPS);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -760,7 +760,7 @@ H5Iget_type(hid_t id)
 	HGOTO_DONE(H5I_BADID);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -845,7 +845,7 @@ H5I_remove(hid_t id)
     (grp_ptr->ids)--;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -928,7 +928,7 @@ H5I_dec_ref(hid_t id)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -974,7 +974,7 @@ H5I_inc_ref(hid_t id)
     ret_value=id_ptr->count;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1031,7 +1031,7 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1117,7 +1117,7 @@ H5I_find_id(hid_t id)
 #endif /* IDS_ARE_CACHED */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1173,7 +1173,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     ret_value=(ssize_t)len;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1207,7 +1207,7 @@ H5I_debug(H5I_type_t grp)
     unsigned int iu;
     herr_t ret_value;  /* Return value */
 
-    FUNC_ENTER_API(H5I_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5I_debug, FAIL);
 
     fprintf(stderr, "Dumping group %d\n", (int)grp);
     grp_ptr = H5I_id_group_list_g[grp];
@@ -1263,7 +1263,7 @@ H5I_debug(H5I_type_t grp)
     } /* end for */
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 #endif /* H5I_DEBUG_OUTPUT */
 

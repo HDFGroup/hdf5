@@ -102,7 +102,7 @@ done:
             H5FL_FREE(H5O_stab_t,stab);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -139,7 +139,7 @@ H5O_stab_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     H5F_addr_encode(f, &p, stab->heap_addr);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -188,7 +188,7 @@ H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
     ret_value=stab;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -231,7 +231,7 @@ H5O_stab_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -265,7 +265,7 @@ H5O_stab_size(H5F_t *f, const void UNUSED *_mesg)
     ret_value=2 * H5F_SIZEOF_ADDR(f);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -295,7 +295,7 @@ H5O_stab_free (void *mesg)
     H5FL_FREE(H5O_stab_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -337,5 +337,5 @@ H5O_stab_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 	      "Name heap address:", stab->heap_addr);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

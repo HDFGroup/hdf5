@@ -129,7 +129,7 @@ H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5G_node_sizeof_rkey);
 
-    FUNC_LEAVE(H5F_SIZEOF_SIZE(f));	/*the name offset */
+    FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
 }
 
 
@@ -163,7 +163,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
     H5F_DECODE_LENGTH(f, raw, key->offset);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -197,7 +197,7 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
     H5F_ENCODE_LENGTH(f, raw, key->offset);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -223,7 +223,7 @@ H5G_node_size(H5F_t *f)
 {
     FUNC_ENTER_NOINIT(H5G_node_size);
 
-    FUNC_LEAVE(H5G_NODE_SIZEOF_HDR(f) +
+    FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
 	(2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
 }
 
@@ -298,7 +298,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -406,7 +406,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -496,7 +496,7 @@ done:
         }
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -551,7 +551,7 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     ret_value = HDstrcmp(s1, s2);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -609,7 +609,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 	HGOTO_DONE(1);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -703,7 +703,7 @@ done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -875,7 +875,7 @@ done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn) < 0 && ret_value!=H5B_INS_ERROR)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1032,7 +1032,7 @@ done:
     if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn)<0 && ret_value!=H5B_INS_ERROR)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1121,7 +1121,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 
 done:
     name_off = H5MM_xfree (name_off);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1163,7 +1163,7 @@ H5G_node_sumup(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     *num_objs += sn->nsyms;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1220,7 +1220,7 @@ H5G_node_name(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     bt_udata->num_objs += sn->nsyms;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1268,7 +1268,7 @@ H5G_node_type(H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
     bt_udata->num_objs += sn->nsyms;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1345,6 +1345,6 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
     H5AC_unprotect(f, H5AC_SNODE, addr, sn);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

@@ -112,7 +112,7 @@ done:
             H5MM_xfree(mesg);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -165,7 +165,7 @@ H5O_shared_encode (H5F_t *f, uint8_t *buf/*out*/, const void *_mesg)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -198,7 +198,7 @@ H5O_shared_size (H5F_t *f, const void UNUSED *_mesg)
 		H5G_SIZEOF_ENTRY(f));	/*sharing by another obj hdr	*/
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -251,5 +251,5 @@ H5O_shared_debug (H5F_t UNUSED *f, const void *_mesg,
     }
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

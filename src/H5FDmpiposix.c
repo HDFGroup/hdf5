@@ -263,7 +263,7 @@ H5FD_mpiposix_init(void)
     ret_value=H5FD_MPIPOSIX_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_init() */
 
 
@@ -315,7 +315,7 @@ H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm)
     ret_value= H5P_set_driver(plist, H5FD_MPIPOSIX, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_fapl_mpiposix() */
 
 
@@ -364,7 +364,7 @@ H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/)
         *comm = fa->comm;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_fapl_mpiposix() */
 
 
@@ -399,7 +399,7 @@ H5FD_mpiposix_communicator(H5FD_t *_file)
     ret_value=file->comm;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpi_posix_communicator() */
 
 
@@ -433,7 +433,7 @@ H5FD_mpiposix_mpi_rank(H5FD_t *_file)
     ret_value=file->mpi_rank;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_mpi_rank() */
 
 
@@ -467,7 +467,7 @@ H5FD_mpiposix_mpi_size(H5FD_t *_file)
     ret_value=file->mpi_size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_mpi_size() */
 
 
@@ -511,7 +511,7 @@ H5FD_mpiposix_fapl_get(H5FD_t *_file)
     ret_value=fa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_fapl_get() */
 
 
@@ -712,7 +712,7 @@ done:
             HDclose(fd);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_open() */
 
 
@@ -749,7 +749,7 @@ H5FD_mpiposix_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_close() */
 
 
@@ -804,7 +804,7 @@ H5FD_mpiposix_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_cmp() */
 
 
@@ -848,7 +848,7 @@ H5FD_mpiposix_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_query() */
 
 
@@ -884,7 +884,7 @@ H5FD_mpiposix_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_get_eoa() */
 
 
@@ -919,7 +919,7 @@ H5FD_mpiposix_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpi_posix_set_eoa() */
 
 
@@ -960,7 +960,7 @@ H5FD_mpiposix_get_eof(H5FD_t *_file)
     ret_value=MAX(file->eof,file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_get_eof() */
 
 
@@ -992,7 +992,7 @@ H5FD_mpiposix_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->fd);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1088,7 +1088,7 @@ done:
         file->op = OP_UNKNOWN;
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_read() */
 
 
@@ -1246,7 +1246,7 @@ done:
         } /* end if */
     } /* end else */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_write() */
 
 
@@ -1320,7 +1320,7 @@ H5FD_mpiposix_flush(H5FD_t *_file, unsigned UNUSED closing)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpiposix_flush() */
 
 #endif /*H5_HAVE_PARALLEL*/

@@ -133,7 +133,7 @@ H5O_mtime_new_decode(H5F_t UNUSED *f, const uint8_t *p,
     ret_value=mesg;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_mtime_new_decode() */
 
 
@@ -261,7 +261,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
     ret_value=mesg;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -305,7 +305,7 @@ H5O_mtime_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     UINT32ENCODE(p, *mesg);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_mtime_new_encode() */
 
 
@@ -345,7 +345,7 @@ H5O_mtime_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -388,7 +388,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -424,7 +424,7 @@ H5O_mtime_new_size(H5F_t * UNUSED f, const void * UNUSED mesg)
     assert(mesg);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_mtime_new_size() */
 
 
@@ -460,7 +460,7 @@ H5O_mtime_size(H5F_t * UNUSED f, const void * UNUSED mesg)
     assert(mesg);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -487,7 +487,7 @@ H5O_mtime_reset(void UNUSED *_mesg)
     FUNC_ENTER_NOAPI(H5O_mtime_reset, FAIL);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -517,7 +517,7 @@ H5O_mtime_free (void *mesg)
     H5FL_FREE(time_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -562,6 +562,6 @@ H5O_mtime_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
 	    "Time:", buf);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

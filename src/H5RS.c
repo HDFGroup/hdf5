@@ -68,7 +68,7 @@ H5RS_xstrdup(const char *s)
     else
         ret_value=NULL;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_xstrdup() */
 
 
@@ -108,7 +108,7 @@ H5RS_create(const char *s)
     ret_value->n=1;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_create() */
 
 
@@ -148,7 +148,7 @@ H5RS_wrap(char *s)
     ret_value->n=1;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_wrap() */
 
 
@@ -190,7 +190,7 @@ H5RS_own(char *s)
     ret_value->n=1;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_own() */
 
 
@@ -232,7 +232,7 @@ H5RS_decr(H5RS_str_t *rs)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_decr() */
 
 
@@ -278,7 +278,7 @@ H5RS_incr(H5RS_str_t *rs)
     rs->n++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_incr() */
 
 
@@ -312,7 +312,7 @@ H5RS_dup(H5RS_str_t *ret_value)
         ret_value->n++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_dup() */
 
 
@@ -349,7 +349,7 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
     assert(rs2);
     assert(rs2->s);
 
-    FUNC_LEAVE(HDstrcmp(rs1->s,rs2->s));
+    FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s,rs2->s));
 } /* end H5RS_cmp() */
 
 
@@ -385,6 +385,6 @@ H5RS_len(const H5RS_str_t *rs)
     ret_value=HDstrlen(rs->s);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_len() */
 

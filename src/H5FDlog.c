@@ -257,7 +257,7 @@ H5FD_log_init(void)
     ret_value=H5FD_LOG_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -305,7 +305,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
     ret_value= H5P_set_driver(plist, H5FD_LOG, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #else /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -348,7 +348,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned flags, size_t buf_s
     ret_value= H5P_set_driver(plist, H5FD_LOG, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -384,7 +384,7 @@ H5FD_log_fapl_get(H5FD_t *_file)
     ret_value= H5FD_log_fapl_copy(&(file->fa));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_log_fapl_get() */
 
 
@@ -427,7 +427,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
     ret_value=new_fa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_log_fapl_copy() */
 
 
@@ -461,7 +461,7 @@ H5FD_log_fapl_free(void *_fa)
     H5MM_xfree(fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_log_fapl_free() */
 
 
@@ -578,7 +578,7 @@ done:
             HDclose(fd);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_log_open() */
 
 
@@ -708,7 +708,7 @@ H5FD_log_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -764,7 +764,7 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -802,7 +802,7 @@ H5FD_log_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -859,7 +859,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hsize_t size)
     ret_value=addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5FD_log_alloc() */
 
 
@@ -893,7 +893,7 @@ H5FD_log_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -926,7 +926,7 @@ H5FD_log_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -962,7 +962,7 @@ H5FD_log_get_eof(H5FD_t *_file)
     ret_value=MAX(file->eof, file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -994,7 +994,7 @@ H5FD_log_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->fd);
                                                                                                                                      
 done:   
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   
             
 
@@ -1105,7 +1105,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
     file->op = OP_READ;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1277,7 +1277,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
         file->eof = file->pos;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1317,5 +1317,5 @@ H5FD_log_flush(H5FD_t *_file, unsigned UNUSED closing)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

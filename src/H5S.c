@@ -102,7 +102,7 @@ H5S_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -273,7 +273,7 @@ H5S_term_interface(void)
 	}
     }
     
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -323,7 +323,7 @@ H5S_create(H5S_class_t type)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_create() */
 
 
@@ -371,7 +371,7 @@ done:
             H5S_close(new_ds);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Screate() */
 
 
@@ -422,7 +422,7 @@ H5S_extent_release(H5S_t *ds)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_extent_release() */
 
 
@@ -463,7 +463,7 @@ H5S_close(H5S_t *ds)
     H5FL_FREE(H5S_t,ds);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -500,7 +500,7 @@ H5Sclose(hid_t space_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -538,7 +538,7 @@ H5S_release_simple(H5S_simple_t *simple)
 #endif /* LATER */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -585,7 +585,7 @@ done:
             H5S_close(dst);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -624,7 +624,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -681,7 +681,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -728,7 +728,7 @@ H5S_copy(const H5S_t *src)
     ret_value=dst;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -763,7 +763,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
     ret_value = ds->extent.nelem;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -800,7 +800,7 @@ H5Sget_simple_extent_npoints(hid_t space_id)
     ret_value = H5S_get_simple_extent_npoints(ds);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -867,7 +867,7 @@ H5S_get_npoints_max(const H5S_t *ds)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -903,7 +903,7 @@ H5Sget_simple_extent_ndims(hid_t space_id)
     ret_value = H5S_get_simple_extent_ndims(ds);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -952,7 +952,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -995,7 +995,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
     ret_value = H5S_get_simple_extent_dims(ds, dims, maxdims);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1055,7 +1055,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1100,7 +1100,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1146,7 +1146,7 @@ H5S_append(H5F_t *f, H5O_t *oh, const H5S_t *ds)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_append() */
 
 
@@ -1218,7 +1218,7 @@ done:
             H5FL_FREE(H5S_t,ds);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1293,7 +1293,7 @@ H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1324,7 +1324,7 @@ H5S_is_simple(const H5S_t *sdim)
 	  sdim->extent.type == H5S_SCALAR) ? TRUE : FALSE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1358,7 +1358,7 @@ H5Sis_simple(hid_t space_id)
     ret_value = H5S_is_simple(space);
 
   done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1425,7 +1425,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1513,7 +1513,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1660,7 +1660,7 @@ done:
             H5MM_xfree(path);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1718,7 +1718,7 @@ H5S_extend (H5S_t *space, const hsize_t *size)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1795,7 +1795,7 @@ done:
             H5S_close(space);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1829,7 +1829,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
     ret_value=space->extent.type;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1867,7 +1867,7 @@ H5Sget_simple_extent_type(hid_t sid)
     ret_value=H5S_get_simple_extent_type(space);
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1905,7 +1905,7 @@ H5Sset_extent_none(hid_t space_id)
     space->extent.type=H5S_NO_CLASS;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Sset_extent_none() */
 
 
@@ -1950,7 +1950,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Soffset_simple() */
 
 
@@ -2003,7 +2003,7 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     } /* end if */
 
 done:
-    FUNC_LEAVE( ret_value );
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2049,6 +2049,6 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

@@ -179,7 +179,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     ret_value=attr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -260,7 +260,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     HDmemcpy(p,attr->data,attr->data_size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -305,7 +305,7 @@ H5O_attr_copy(const void *_src, void *_dst)
     ret_value=dst;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -352,7 +352,7 @@ H5O_attr_size(H5F_t UNUSED *f, const void *mesg)
 		attr->data_size;		/*the data itself	*/
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -389,7 +389,7 @@ H5O_attr_reset(void *_mesg)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -452,5 +452,5 @@ H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
     H5S_debug(f, mesg->ds, stream, indent+3, MAX(0, fwidth-3));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

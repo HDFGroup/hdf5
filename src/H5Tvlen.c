@@ -127,7 +127,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_set_loc() */
 
 
@@ -160,7 +160,7 @@ H5T_vlen_seq_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
     ret_value=(hssize_t)vl->len;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_seq_mem_getlen() */
 
 
@@ -193,7 +193,7 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
     HDmemcpy(buf,vl->p,len);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_seq_mem_read() */
 
 
@@ -260,7 +260,7 @@ H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
     H5_ASSIGN_OVERFLOW(vl->len,seq_len,hsize_t,size_t);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_seq_mem_write() */
 
 
@@ -294,7 +294,7 @@ H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
     ret_value=(hssize_t)HDstrlen(s);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_str_mem_getlen() */
 
 
@@ -327,7 +327,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
     HDmemcpy(buf,s,len);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_str_mem_read() */
 
 
@@ -385,7 +385,7 @@ H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf
     (*s)[len]='\0';
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_str_mem_write() */
 
 
@@ -417,7 +417,7 @@ H5T_vlen_disk_getlen(H5F_t UNUSED *f, void *vl_addr)
     UINT32DECODE(vl, ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_disk_getlen() */
 
 
@@ -465,7 +465,7 @@ H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_disk_read() */
 
 
@@ -541,7 +541,7 @@ H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, v
     INT32ENCODE(vl,hobjid.idx);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_disk_write() */
 
 
@@ -651,7 +651,7 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
     } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_reclaim_recurse() */
 
 
@@ -710,7 +710,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED
     ret_value=H5T_vlen_reclaim_recurse(elem,dt,free_func,free_info);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_reclaim() */
 
 
@@ -835,6 +835,6 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
     } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_vlen_mark() */
 

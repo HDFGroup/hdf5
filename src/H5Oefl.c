@@ -134,7 +134,7 @@ done:
         if(mesg!=NULL)
             H5MM_xfree (mesg);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -204,7 +204,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -261,7 +261,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -305,7 +305,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
 			       H5F_SIZEOF_SIZE(f));	/*file size	*/
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -345,7 +345,7 @@ H5O_efl_reset(void *_mesg)
         mesg->slot = H5MM_xfree(mesg->slot);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -386,7 +386,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -474,7 +474,7 @@ done:
     if (fd>=0)
         HDclose (fd);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 	
 
@@ -563,7 +563,7 @@ done:
     if (fd>=0)
         HDclose (fd);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 	
 
@@ -628,5 +628,5 @@ H5O_efl_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

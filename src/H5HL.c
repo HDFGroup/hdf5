@@ -180,7 +180,7 @@ H5HL_create(H5F_t *f, size_t size_hint, haddr_t *addr_p/*out*/)
 	    H5FL_FREE (H5HL_t,heap);
 	}
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -297,7 +297,7 @@ done:
         H5FL_FREE(H5HL_t,heap);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -425,7 +425,7 @@ H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HL_t *heap)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -481,7 +481,7 @@ H5HL_read(H5F_t *f, haddr_t addr, size_t offset, size_t size, void *buf)
     ret_value=buf;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -536,7 +536,7 @@ H5HL_peek(H5F_t *f, haddr_t addr, size_t offset)
     ret_value = heap->chunk + H5HL_SIZEOF_HDR(f) + offset;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -566,7 +566,7 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 
     if (!fl->prev) heap->freelist = fl->next;
 
-    FUNC_LEAVE(H5FL_FREE(H5HL_free_t,fl));
+    FUNC_LEAVE_NOAPI(H5FL_FREE(H5HL_free_t,fl));
 }
 
 
@@ -731,7 +731,7 @@ H5HL_insert(H5F_t *f, haddr_t addr, size_t buf_size, const void *buf)
     ret_value=offset;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -782,7 +782,7 @@ H5HL_write(H5F_t *f, haddr_t addr, size_t offset, size_t size, const void *buf)
     HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -912,7 +912,7 @@ H5HL_remove(H5F_t *f, haddr_t addr, size_t offset, size_t size)
     heap->freelist = fl;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1048,5 +1048,5 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent, int fwidth)
     H5MM_xfree(marker);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

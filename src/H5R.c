@@ -66,7 +66,7 @@ H5R_init_interface(void)
 	HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -104,7 +104,7 @@ H5R_term_interface(void)
 	}
     }
     
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -242,7 +242,7 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
     } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5R_create() */
 
 
@@ -302,7 +302,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Rcreate() */
 
 
@@ -437,7 +437,7 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
      } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5R_dereference() */
 
 
@@ -489,7 +489,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, void *_ref)
         HGOTO_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Rdereference() */
 
 
@@ -561,7 +561,7 @@ H5R_get_region(H5F_t *file, H5R_type_t UNUSED ref_type, void *_ref)
     H5MM_xfree(buf);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5R_get_region() */
 
 
@@ -619,7 +619,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, void *_ref)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_region() */
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -673,7 +673,7 @@ H5R_get_object_type(H5F_t *file, void *_ref)
 #ifdef LATER
 done:
 #endif /* LATER */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5R_get_object_type() */
 
 
@@ -723,7 +723,7 @@ H5Rget_object_type(hid_t id, void *_ref)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_object_type() */
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -820,7 +820,7 @@ H5R_get_obj_type(H5F_t *file, H5R_type_t ref_type, void *_ref)
     ret_value=H5G_get_type(&ent);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5R_get_obj_type() */
 
 
@@ -873,6 +873,6 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Rget_obj_type() */
 

@@ -71,7 +71,7 @@ H5A_init_interface(void)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -107,7 +107,7 @@ H5A_term_interface(void)
 	    n = 1;
 	}
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -179,7 +179,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Acreate() */
 
 
@@ -291,7 +291,7 @@ done:
             H5A_close(attr);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5A_create() */
 
 
@@ -348,7 +348,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "attribute not found");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5A_get_index() */
 
 
@@ -405,7 +405,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aopen_name() */
 
 
@@ -456,7 +456,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 	HGOTO_ERROR (H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aopen_idx() */
 
 
@@ -520,7 +520,7 @@ done:
         if(attr) H5A_close(attr);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5A_open() */
 
 
@@ -565,7 +565,7 @@ H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Awrite() */
 
 
@@ -668,7 +668,7 @@ done:
     if (bkg_buf)
         H5MM_xfree(bkg_buf);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5A_write() */
 
 
@@ -713,7 +713,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aread() */
 
 
@@ -807,7 +807,7 @@ done:
     if (bkg_buf)
 	H5MM_xfree(bkg_buf);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5A_read() */
 
 
@@ -852,7 +852,7 @@ H5Aget_space(hid_t attr_id)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aget_space() */
 
 
@@ -919,7 +919,7 @@ done:
             H5T_close(dst);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aget_type() */
 
 
@@ -981,7 +981,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
     ret_value = (ssize_t)nbytes;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aget_type() */
 
 
@@ -1021,7 +1021,7 @@ H5Aget_storage_size(hid_t attr_id)
     ret_value = H5A_get_storage_size(attr);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1056,7 +1056,7 @@ H5A_get_storage_size(H5A_t *attr)
     ret_value = attr->data_size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
  
 
@@ -1115,7 +1115,7 @@ H5Aget_num_attrs(hid_t loc_id)
     ret_value=H5O_count(ent, H5O_ATTR);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aget_num_attrs() */
 
 
@@ -1156,7 +1156,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     ret_value = H5A_rename(ent, old_name, new_name);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1230,7 +1230,7 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name)
     H5A_close(found_attr);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1321,7 +1321,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
         *attr_num = (unsigned)idx;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aiterate() */
 
 
@@ -1393,7 +1393,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute header message");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Adelete() */
 
 
@@ -1430,7 +1430,7 @@ H5Aclose(hid_t attr_id)
     H5I_dec_ref (attr_id);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* H5Aclose() */
 
 
@@ -1494,7 +1494,7 @@ done:
             H5A_close(new_attr);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1556,7 +1556,7 @@ H5A_close(H5A_t *attr)
     H5MM_xfree(attr);
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1590,5 +1590,5 @@ H5A_entof(H5A_t *attr)
     ret_value=&(attr->ent);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -63,7 +63,7 @@ H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -205,7 +205,7 @@ H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
     } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -322,7 +322,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
     ret_value=skip;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -375,7 +375,7 @@ H5V_hyper_eq(int n,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -427,7 +427,7 @@ H5V_hyper_disjointp(unsigned n,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -493,7 +493,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
 			     fill_value);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -694,7 +694,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
              dst_stride, dst+dst_start, src_stride, src+src_start);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -746,7 +746,7 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -814,7 +814,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -886,7 +886,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -943,7 +943,7 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
         HDmemcpy(dst, _dst, items_left * size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5V_array_fill() */
 
 
@@ -991,6 +991,6 @@ H5V_array_offset(unsigned n, const hsize_t *total_size, const hssize_t *offset)
     ret_value=skip;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5V_array_offset() */
 

@@ -31,30 +31,13 @@
 #define HERROR(maj, min, str) H5E_push(maj, min, FUNC, __FILE__, __LINE__, str)
 
 /*
- * HCOMMON_ERROR macro, used by HRETURN_ERROR and HGOTO_ERROR
+ * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
  * (Shouldn't need to be used outside this header file)
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR (maj, min, str);						      \
    if (H5_IS_API(FUNC) && H5E_auto_g)  					      \
        (H5E_auto_g)(H5E_auto_data_g)
-
-/* Note: if this is still ifdef'ed out and its after the v1.6 release, then
- * we should be completely free of the necessity for this macro and it can
- * be removed.  -QAK, 9/25/2002
- */
-#ifdef OLD_WAY
-/*
- * HRETURN_ERROR macro, used to facilitate error reporting between a
- * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
- * the major error number, the minor error number, a return value, and a
- * description of the error.
- */
-#define HRETURN_ERROR(maj, min, ret_val, str) {				      \
-   HCOMMON_ERROR (maj, min, str);					      \
-   HRETURN(ret_val);						              \
-}
-#endif /* OLD_WAY */
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -66,20 +49,6 @@
 #define HDONE_ERROR(maj, min, ret_val, str) {				      \
    HCOMMON_ERROR (maj, min, str);					      \
    ret_value = ret_val;                                                       \
-}
-
-/*
- * HRETURN macro, used to facilitate returning from a function between a
- * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The argument is
- * the return value.
- */
-#define HRETURN(ret_val) {						      \
-   FINISH_MPE_LOG;                                                            \
-   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
-   H5TRACE_RETURN(ret_val);						      \
-   H5_API_UNLOCK                                                              \
-   H5_API_SET_CANCEL                                                          \
-   return (ret_val);							      \
 }
 
 /*
@@ -153,10 +122,6 @@ extern	int	H5E_mpi_error_str_len;
 #define	HMPI_GOTO_ERROR(retcode, str, mpierr){				      \
     HMPI_ERROR(mpierr);							      \
     HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);			      \
-}
-#define	HMPI_RETURN_ERROR(retcode, str, mpierr){			      \
-    HMPI_ERROR(mpierr);							      \
-    HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                       \
 }
 #endif
 

@@ -121,7 +121,7 @@ H5AC_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5AC_init_interface() */
 
 
@@ -170,7 +170,7 @@ H5AC_term_interface(void)
             interface_initialize_g = 0;
     } /* end if */
 
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 } /* end H5AC_term_interface() */
 
 
@@ -233,7 +233,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -286,7 +286,7 @@ H5AC_dest(H5F_t *f)
     f->shared->cache = cache = H5FL_FREE(H5AC_t,cache);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -436,7 +436,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     ret_value=thing;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -488,7 +488,7 @@ H5AC_compare(const void *_a, const void *_b)
         ret_value=1;
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif
 
@@ -640,7 +640,7 @@ done:
         map = H5FL_ARR_FREE(int,map);
 #endif /* H5AC_SORT_BY_ADDR */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -722,7 +722,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 #endif /* H5AC_DEBUG */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -819,7 +819,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
     cache->slot[old_idx]= NULL;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -953,7 +953,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     ret_value=thing;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1053,7 +1053,7 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     cache->nprots -= 1;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1141,5 +1141,5 @@ H5AC_debug(H5F_t UNUSED *f)
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

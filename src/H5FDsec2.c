@@ -215,7 +215,7 @@ H5FD_sec2_init(void)
     ret_value=H5FD_SEC2_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -250,7 +250,7 @@ H5Pset_fapl_sec2(hid_t fapl_id)
     ret_value= H5P_set_driver(plist, H5FD_SEC2, NULL);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -336,7 +336,7 @@ done:
             HDclose(fd);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -370,7 +370,7 @@ H5FD_sec2_close(H5FD_t *_file)
     H5FL_FREE(H5FD_sec2_t,file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -426,7 +426,7 @@ H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -464,7 +464,7 @@ H5FD_sec2_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -498,7 +498,7 @@ H5FD_sec2_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -531,7 +531,7 @@ H5FD_sec2_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -567,7 +567,7 @@ H5FD_sec2_get_eof(H5FD_t *_file)
     ret_value=MAX(file->eof, file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -598,7 +598,7 @@ H5FD_sec2_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->fd);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -680,7 +680,7 @@ done:
         file->op = OP_UNKNOWN;
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -758,7 +758,7 @@ done:
         file->op = OP_UNKNOWN;
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -819,5 +819,5 @@ H5FD_sec2_flush(H5FD_t *_file, unsigned UNUSED closing)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

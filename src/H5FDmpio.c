@@ -188,7 +188,7 @@ H5FD_mpio_init(void)
     ret_value=H5FD_MPIO_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -273,7 +273,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     ret_value= H5P_set_driver(plist, H5FD_MPIO, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -333,7 +333,7 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
         *info = fa->info;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -388,7 +388,7 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
     ret_value= H5P_set_driver(plist, H5FD_MPIO, &dx);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -433,7 +433,7 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
         *xfer_mode = dx->xfer_mode;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -468,7 +468,7 @@ H5FD_mpio_communicator(H5FD_t *_file)
     ret_value=file->comm;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -502,7 +502,7 @@ H5FD_mpio_mpi_rank(H5FD_t *_file)
     ret_value=file->mpi_rank;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpio_mpi_rank() */
 
 
@@ -536,7 +536,7 @@ H5FD_mpio_mpi_size(H5FD_t *_file)
     ret_value=file->mpi_size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_mpio_mpi_size() */
 
 
@@ -590,7 +590,7 @@ H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype, unsigned 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -634,7 +634,7 @@ H5FD_mpio_teardown(hid_t dxpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -687,7 +687,7 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -735,7 +735,7 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -780,7 +780,7 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
     ret_value=fa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -965,7 +965,7 @@ done:
     if (H5FD_mpio_Debug[(int)'t'])
         fprintf(stdout, "Leaving H5FD_mpio_open\n" );
 #endif
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1017,7 +1017,7 @@ done:
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Leaving H5FD_mpio_close\n");
 #endif
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1062,7 +1062,7 @@ H5FD_mpio_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1099,7 +1099,7 @@ H5FD_mpio_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1135,7 +1135,7 @@ H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1179,7 +1179,7 @@ H5FD_mpio_get_eof(H5FD_t *_file)
     ret_value=file->eof;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1211,7 +1211,7 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->f);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
              
 
@@ -1468,7 +1468,7 @@ done:
     	fprintf(stdout, "Leaving H5FD_mpio_read\n" );
 #endif
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1811,7 +1811,7 @@ done:
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
 	    file->mpi_rank, ret_value );
 #endif
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1918,7 +1918,7 @@ done:
     	fprintf(stdout, "Leaving H5FD_mpio_flush\n" );
 #endif
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1956,7 +1956,7 @@ H5FD_mpio_MPIOff_to_haddr(MPI_Offset mpi_off)
     else
         ret_value=(haddr_t)mpi_off;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1999,6 +1999,6 @@ H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
     else
         ret_value=SUCCEED;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* H5_HAVE_PARALLEL */

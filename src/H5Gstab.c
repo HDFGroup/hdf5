@@ -108,7 +108,7 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
     self->type = H5G_CACHED_STAB;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -175,7 +175,7 @@ H5G_stab_find(H5G_entry_t *grp_ent, const char *name,
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -238,7 +238,7 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     obj_ent->name_off = udata.ent.name_off;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -281,7 +281,7 @@ H5G_stab_remove(H5G_entry_t *grp_ent, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -395,6 +395,6 @@ H5G_insert_name(H5G_entry_t *loc, H5G_entry_t *obj, const char *name)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

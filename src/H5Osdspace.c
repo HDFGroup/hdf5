@@ -146,7 +146,7 @@ done:
         H5FL_FREE(H5S_simple_t,sdim);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -224,7 +224,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -282,7 +282,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     ret_value=dst;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -331,7 +331,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -361,7 +361,7 @@ H5O_sdspace_reset(void *_mesg)
     H5S_release_simple(mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -391,7 +391,7 @@ H5O_sdspace_free (void *mesg)
     H5FL_FREE(H5S_simple_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -465,5 +465,5 @@ H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

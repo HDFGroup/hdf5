@@ -62,7 +62,7 @@ H5S_point_iter_init(const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t 
     sel_iter->pnt.curr=space->select.sel_info.pnt_lst->head;
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_iter_init() */
 
 
@@ -94,7 +94,7 @@ H5S_point_iter_nelmts (const H5S_sel_iter_t *sel_iter)
     ret_value=sel_iter->pnt.elmt_left;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_iter_nelmts() */
 
 
@@ -126,7 +126,7 @@ H5S_point_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
     assert (sel_iter);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_iter_release() */
 
 
@@ -211,7 +211,7 @@ H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t *
     space->select.num_elem+=num_elem;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_add() */
 
 
@@ -260,7 +260,7 @@ H5S_point_release (H5S_t *space)
     space->select.num_elem=0;
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_release() */
 
 
@@ -294,7 +294,7 @@ H5S_point_npoints (const H5S_t *space)
     ret_value=space->select.num_elem;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_npoints() */
 
 
@@ -377,7 +377,7 @@ H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     space->select.is_regular=H5S_point_is_regular;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_elements() */
 
 
@@ -438,7 +438,7 @@ H5S_point_copy (H5S_t *dst, const H5S_t *src)
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_point_copy() */
 
 
@@ -491,7 +491,7 @@ H5S_point_is_valid (const H5S_t *space)
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_point_is_valid() */
 
 
@@ -523,7 +523,7 @@ H5S_get_select_elem_npoints(H5S_t *space)
 
     ret_value = space->select.num_elem;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5Sget_select_elem_npoints() */
 
 
@@ -562,7 +562,7 @@ H5Sget_select_elem_npoints(hid_t spaceid)
     ret_value = H5S_get_select_elem_npoints(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_elem_npoints() */
 
 
@@ -610,7 +610,7 @@ H5S_point_serial_size (const H5S_t *space)
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_point_serial_size() */
 
 
@@ -678,7 +678,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_serialize() */
 
 
@@ -742,7 +742,7 @@ done:
     if(coord!=NULL)
         H5MM_xfree(coord);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_deserialize() */
 
 
@@ -806,8 +806,8 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
         node=node->next;
       } /* end while */
 
-    FUNC_LEAVE (SUCCEED);
-}   /* H5Sget_select_elem_pointlist() */
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}   /* H5S_get_select_elem_pointlist() */
 
 
 /*--------------------------------------------------------------------------
@@ -859,7 +859,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoint
     ret_value = H5S_get_select_elem_pointlist(space,startpoint,numpoints,buf);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_elem_pointlist() */
 
 
@@ -925,8 +925,8 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
       } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
-}   /* H5Sget_point_bounds() */
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_point_bounds() */
 
 
 /*--------------------------------------------------------------------------
@@ -966,7 +966,7 @@ H5S_point_is_contiguous(const H5S_t *space)
     	ret_value=FALSE;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_is_contiguous() */
 
 
@@ -1004,7 +1004,7 @@ H5S_point_is_single(const H5S_t *space)
     	ret_value=FALSE;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_is_single() */
 
 
@@ -1046,7 +1046,7 @@ H5S_point_is_regular(const H5S_t *space)
     	ret_value=FALSE;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_is_regular() */
 
 
@@ -1103,7 +1103,7 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't select elements");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sselect_elements() */
 
 
@@ -1245,6 +1245,6 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     *nbytes=(start_bytes_left-bytes_left);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_point_get_seq_list() */
 

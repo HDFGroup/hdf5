@@ -271,7 +271,7 @@ done:
 	}
     }
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -380,7 +380,7 @@ done:
         H5FL_BLK_FREE(native_block,bt->native);
         H5FL_FREE(H5B_t,bt);
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -487,7 +487,7 @@ H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -575,7 +575,7 @@ done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -733,7 +733,7 @@ done:
     if (new_bt && H5AC_unprotect(f, H5AC_BT, *new_addr_p, new_bt) < 0 && ret_value>=0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -766,7 +766,7 @@ H5B_decode_key(H5F_t *f, H5B_t *bt, int idx)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode key");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -801,7 +801,7 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, int idx)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, FAIL, "unable to decode key");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -958,7 +958,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 #endif
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
     
 
@@ -1056,7 +1056,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
     bt->nchildren += 1;
     bt->ndirty = bt->nchildren;
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1390,7 +1390,7 @@ done:
 	    HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node(s)");
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1498,7 +1498,7 @@ done:
         H5FL_ARR_FREE(haddr_t,child);
     if(key!=NULL)
         H5MM_xfree(key);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1763,7 +1763,7 @@ done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt)<0 && ret_value>=0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to release node");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1825,7 +1825,7 @@ H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     H5B_assert(f, addr, type, udata);
 #endif
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1886,7 +1886,7 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
     ret_value=size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1973,7 +1973,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5B_copy */
 
 
@@ -2070,7 +2070,7 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2192,6 +2192,6 @@ H5B_assert(H5F_t *f, haddr_t addr, const H5B_class_t *type, void *udata)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /* H5B_DEBUG */

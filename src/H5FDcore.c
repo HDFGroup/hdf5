@@ -157,7 +157,7 @@ H5FD_core_init(void)
     ret_value=H5FD_CORE_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -204,7 +204,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     ret_value= H5P_set_driver(plist, H5FD_CORE, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -255,7 +255,7 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
         *backing_store = fa->backing_store;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -294,7 +294,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
     ret_value=fa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -363,7 +363,7 @@ H5FD_core_open(const char *name, unsigned UNUSED flags, hid_t fapl_id,
     ret_value=(H5FD_t *)file;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -416,7 +416,7 @@ H5FD_core_flush(H5FD_t *_file, unsigned UNUSED closing)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -461,7 +461,7 @@ H5FD_core_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -510,7 +510,7 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     ret_value = HDstrcmp(f1->name, f2->name);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -545,7 +545,7 @@ H5FD_core_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -581,7 +581,7 @@ H5FD_core_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -618,7 +618,7 @@ H5FD_core_get_eof(H5FD_t *_file)
     ret_value=MAX(file->eof, file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -650,7 +650,7 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->mem);
 
 done:   
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   
 
 
@@ -717,7 +717,7 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
         HDmemset(buf, 0, size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -786,5 +786,5 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
     file->dirty = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -72,7 +72,7 @@ H5MM_realloc(void *mem, size_t size)
     ret_value=mem;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -112,7 +112,7 @@ H5MM_xstrdup(const char *s)
 #ifdef LATER
 done:
 #endif /* LATER */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -149,7 +149,7 @@ H5MM_strdup(const char *s)
     HDstrcpy(ret_value, s);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -183,5 +183,5 @@ H5MM_xfree(void *mem)
     if (mem)
         HDfree(mem);
 
-    FUNC_LEAVE(NULL);
+    FUNC_LEAVE_NOAPI(NULL);
 }

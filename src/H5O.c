@@ -128,7 +128,7 @@ H5O_init_interface(void)
      */
     H5O_fast_g[H5G_CACHED_STAB] = H5O_stab_fast;
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -185,7 +185,7 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -274,7 +274,7 @@ H5O_init(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/, haddr_t header)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -313,7 +313,7 @@ H5O_open(H5G_entry_t *obj_ent)
     obj_ent->file->nopen_objs++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -374,7 +374,7 @@ H5O_close(H5G_entry_t *obj_ent)
     H5G_free_ent_name(obj_ent);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -561,7 +561,7 @@ done:
         H5FL_FREE(H5O_t,oh);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -757,7 +757,7 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -795,7 +795,7 @@ H5O_reset(const H5O_class_t *type, void *native)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -832,7 +832,7 @@ H5O_free (const H5O_class_t *type, void *mesg)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -869,7 +869,7 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -935,7 +935,7 @@ done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -985,7 +985,7 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
     ret_value=acc;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1039,7 +1039,7 @@ H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, int sequence)
     ret_value=(sequence<0);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1146,7 +1146,7 @@ done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=NULL)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1225,7 +1225,7 @@ H5O_find_in_ohdr(H5F_t *f, haddr_t addr, const H5O_class_t **type_p,
     ret_value=u;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1401,7 +1401,7 @@ done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value!=FAIL)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1444,7 +1444,7 @@ H5O_protect(H5G_entry_t *ent)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_protect() */
 
 
@@ -1484,7 +1484,7 @@ H5O_unprotect(H5G_entry_t *ent, H5O_t *oh)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_unprotect() */
 
 
@@ -1601,7 +1601,7 @@ H5O_append(H5F_t *f, H5O_t *oh, const H5O_class_t *type,
     ret_value = idx;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_append() */
 
 
@@ -1668,7 +1668,7 @@ H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
     oh->dirty = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1716,7 +1716,7 @@ done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh)<0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1816,7 +1816,7 @@ done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, ent->header, oh) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1947,7 +1947,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, unsigned chunkno, size_t size)
     ret_value=idx;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2145,7 +2145,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     ret_value=idx;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2266,7 +2266,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     ret_value=idx;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2317,7 +2317,7 @@ done:
     if(buf)
         H5MM_xfree (buf);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2499,5 +2499,5 @@ done:
     if (oh && H5AC_unprotect(f, H5AC_OHDR, addr, oh) < 0 && ret_value>=0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

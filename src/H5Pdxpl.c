@@ -85,7 +85,7 @@ H5Pset_buffer(hid_t plist_id, hsize_t _size, void *tconv, void *bkg)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -135,7 +135,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     ret_value=(hsize_t)size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 #else /* H5_WANT_H5_V1_4_COMPAT */
@@ -189,7 +189,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -239,7 +239,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     ret_value=size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 #endif /* H5_WANT_H5_V1_4_COMPAT */
@@ -290,7 +290,7 @@ H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -331,7 +331,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -374,7 +374,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -416,7 +416,7 @@ H5Pget_preserve(hid_t plist_id)
     ret_value= need_bkg ? TRUE : FALSE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -465,7 +465,7 @@ H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
         *right = btree_split_ratio[2];
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -521,7 +521,7 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -567,7 +567,7 @@ H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_set_vlen_mem_manager() */
 
 
@@ -611,7 +611,7 @@ H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set values");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_vlen_mem_manager() */
 
 
@@ -659,7 +659,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -708,7 +708,7 @@ H5Pset_hyper_vector_size(hid_t plist_id, size_t vector_size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_hyper_vector_size() */
 
 
@@ -745,6 +745,6 @@ H5Pget_hyper_vector_size(hid_t plist_id, size_t *vector_size/*out*/)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_hyper_vector_size() */
 

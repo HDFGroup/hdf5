@@ -193,7 +193,7 @@ done:
             H5G_close(grp);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -245,7 +245,7 @@ done:
             H5G_close(grp);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -284,7 +284,7 @@ H5Gclose(hid_t group_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -367,7 +367,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     H5I_dec_ref (udata.group_id); /*also closes udata.group*/
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -407,7 +407,7 @@ H5Gget_num_objs(hid_t group_id, hsize_t *num_objs)
     ret_value = H5G_get_num_objs(group, num_objs);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -460,7 +460,7 @@ H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char *name, size_t size)
     ret_value = H5G_get_objname_by_idx(group, idx, name, size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -504,7 +504,7 @@ H5Gget_objtype_by_idx(hid_t group_id, hsize_t idx)
     ret_value = H5G_get_objtype_by_idx(group, idx);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 
 }
 
@@ -565,7 +565,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to change object name");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -635,7 +635,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 	HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -678,7 +678,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to unlink object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -720,7 +720,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
 	HGOTO_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -762,7 +762,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link value");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -801,7 +801,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -848,7 +848,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 /*
@@ -895,7 +895,7 @@ H5G_init_interface(void)
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -948,7 +948,7 @@ H5G_term_interface(void)
 	}
     }
     
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -1022,7 +1022,7 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 done:
     if (ret_value<0)
         H5MM_xfree(desc);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1061,7 +1061,7 @@ H5G_component(const char *name, size_t *size_p)
     if (size_p)
         *size_p = HDstrcspn(name, "/");
 
-    FUNC_LEAVE(name);
+    FUNC_LEAVE_NOAPI(name);
 }
 
 
@@ -1107,7 +1107,7 @@ H5G_basename(const char *name, size_t *size_p)
     if ('/'==name[i] && size_p)
         *size_p = 1;
 
-    FUNC_LEAVE(name+i);
+    FUNC_LEAVE_NOAPI(name+i);
 }
 
 
@@ -1384,7 +1384,7 @@ done:
     if(null_grp && group_copy)
         H5G_free_ent_name(grp_ent);
 
-   FUNC_LEAVE(ret_value);
+   FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1472,7 +1472,7 @@ done:
     H5G_free_ent_name(&tmp_grp_ent);
 
     H5MM_xfree (linkval);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1557,7 +1557,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
     f->nopen_objs = 0;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1626,7 +1626,7 @@ done:
             H5FL_FREE(H5G_t,grp);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1662,7 +1662,7 @@ H5G_isa(H5G_entry_t *ent)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
     
 
@@ -1715,7 +1715,7 @@ done:
     if (!ret_value && grp)
         H5FL_FREE(H5G_t,grp);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1774,7 +1774,7 @@ done:
     if (!ret_value && grp)
         H5FL_FREE(H5G_t,grp);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1810,7 +1810,7 @@ H5G_reopen(H5G_t *grp)
     ret_value=grp;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1850,7 +1850,7 @@ H5G_close(H5G_t *grp)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1887,7 +1887,7 @@ H5G_rootof(H5F_t *f)
     ret_value=f->shared->root_grp;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1935,7 +1935,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
 	HGOTO_ERROR(H5E_SYM, H5E_LINK, FAIL, "unable to increment hard link count");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1982,7 +1982,7 @@ H5G_find(H5G_entry_t *loc, const char *name,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2008,7 +2008,7 @@ H5G_entof (H5G_t *grp)
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5G_entof);
 
-    FUNC_LEAVE(grp ? &(grp->ent) : NULL);
+    FUNC_LEAVE_NOAPI(grp ? &(grp->ent) : NULL);
 }
 
 
@@ -2036,7 +2036,7 @@ H5G_fileof (H5G_t *grp)
 
     assert (grp);
 
-    FUNC_LEAVE(grp->ent.file);
+    FUNC_LEAVE_NOAPI(grp->ent.file);
 }
 
 
@@ -2124,7 +2124,7 @@ H5G_loc (hid_t loc_id)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2246,7 +2246,7 @@ done:
     /* Free the ID to name buffer */
     H5G_free_ent_name(&cur_obj);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2287,7 +2287,7 @@ H5G_get_type(H5G_entry_t *ent)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2382,7 +2382,7 @@ done:
     H5G_free_ent_name(&grp_ent);
     H5G_free_ent_name(&obj_ent);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2418,7 +2418,7 @@ H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs)
         HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
         
 done:
-    FUNC_LEAVE(ret_value);   
+    FUNC_LEAVE_NOAPI(ret_value);   
 }
 
 
@@ -2468,7 +2468,7 @@ done:
     /* Free the duplicated name */
     if(udata.name!=NULL)
         H5MM_xfree(udata.name);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2509,7 +2509,7 @@ H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx)
     ret_value = udata.type;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2575,7 +2575,7 @@ done:
     H5G_free_ent_name(&grp_ent);
     H5G_free_ent_name(&obj_ent);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2625,7 +2625,7 @@ done:
     /* Free the ID to name buffer */
     H5G_free_ent_name(&obj_ent);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2681,7 +2681,7 @@ done:
     /* Free the ID to name buffer */
     H5G_free_ent_name(&obj_ent);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
     
 
@@ -2749,7 +2749,7 @@ done:
     H5G_free_ent_name(&grp_ent);
     H5G_free_ent_name(&obj_ent);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2840,7 +2840,7 @@ H5G_move(H5G_entry_t *src_loc, const char *src_name, H5G_entry_t *dst_loc,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to deregister old object name");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2915,7 +2915,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name)
         ret_value=loc->file;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2956,7 +2956,7 @@ H5G_free_grp_name(H5G_t *grp)
     H5G_free_ent_name(ent);
 
 done:
-     FUNC_LEAVE(ret_value);
+     FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2997,7 +2997,7 @@ H5G_free_ent_name(H5G_entry_t *ent)
     } /* end if */
  
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3096,7 +3096,7 @@ H5G_replace_name( int type, H5G_entry_t *loc,
         H5I_search(H5I_DATATYPE, H5G_replace_ent, &names);
 
 done: 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3166,7 +3166,7 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
         ret_value=TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3542,6 +3542,6 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, const void *key)
     } /* end switch */
  
 done:
-    FUNC_LEAVE(ret_value); 
+    FUNC_LEAVE_NOAPI(ret_value); 
 }
 

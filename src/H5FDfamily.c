@@ -152,7 +152,7 @@ H5FD_family_init(void)
     ret_value=H5FD_FAMILY_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -212,7 +212,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     ret_value= H5P_set_driver(plist, H5FD_FAMILY, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -264,7 +264,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -311,7 +311,7 @@ done:
         if(fa!=NULL)
             H5MM_xfree(fa);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -364,7 +364,7 @@ done:
         if(new_fa!=NULL)
             H5MM_xfree(new_fa);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -396,7 +396,7 @@ H5FD_family_fapl_free(void *_fa)
     H5MM_xfree(fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -447,7 +447,7 @@ done:
         if(new_dx!=NULL)
             H5MM_xfree(new_dx);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -479,7 +479,7 @@ H5FD_family_dxpl_free(void *_dx)
     H5MM_xfree(dx);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -611,7 +611,7 @@ done:
             H5MM_xfree(file->name);
         H5MM_xfree(file);
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -664,7 +664,7 @@ H5FD_family_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -701,7 +701,7 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     ret_value= H5FDcmp(f1->memb[0], f2->memb[0]);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -739,7 +739,7 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -773,7 +773,7 @@ H5FD_family_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -844,7 +844,7 @@ H5FD_family_set_eoa(H5FD_t *_file, haddr_t eoa)
     file->eoa = eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -899,7 +899,7 @@ H5FD_family_get_eof(H5FD_t *_file)
     ret_value=MAX(eof, file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -941,7 +941,7 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     ret_value = H5FD_get_vfd_handle(file->memb[memb], fapl, file_handle);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1019,7 +1019,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1096,7 +1096,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1133,5 +1133,5 @@ H5FD_family_flush(H5FD_t *_file, unsigned closing)
         HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to flush member files");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

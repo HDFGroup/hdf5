@@ -135,7 +135,7 @@ H5TB_strcmp(const void *k1, const void *k2, int UNUSED cmparg)
     assert(k1);
     assert(k2);
 
-    FUNC_LEAVE(HDstrcmp(k1,k2));
+    FUNC_LEAVE_NOAPI(HDstrcmp(k1,k2));
 } /* end H5TB_strcmp() */
 
 
@@ -161,7 +161,7 @@ H5TB_addr_cmp(const void *k1, const void *k2, int UNUSED cmparg)
     assert(k1);
     assert(k2);
 
-    FUNC_LEAVE(H5F_addr_cmp(*(const haddr_t *)k1,*(const haddr_t *)k2));
+    FUNC_LEAVE_NOAPI(H5F_addr_cmp(*(const haddr_t *)k1,*(const haddr_t *)k2));
 } /* end H5TB_addr_cmp() */
 
 
@@ -187,7 +187,7 @@ H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
     assert(k1);
     assert(k2);
 
-    FUNC_LEAVE(*(const int *)k1 - *(const int *)k2);
+    FUNC_LEAVE_NOAPI(*(const int *)k1 - *(const int *)k2);
 } /* end H5TB_int_cmp() */
 
 
@@ -242,7 +242,7 @@ H5TB_fast_dmake(unsigned fast_compare)
         HGOTO_ERROR (H5E_TBBT, H5E_CANTCREATE, NULL, "can't create TBBT");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_fast_dmake() */
 
 
@@ -341,7 +341,7 @@ H5TB_dmake(H5TB_cmp_t cmp, int arg, unsigned fast_compare)
     ret_value=tree;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dmake() */
 
 
@@ -390,7 +390,7 @@ H5TB_dfind(H5TB_TREE * tree, const void * key, H5TB_NODE ** pp)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dfind() */
 
 
@@ -451,7 +451,7 @@ H5TB_find(H5TB_NODE * root, const void * key,
     ret_value= (0 == cmp) ? ptr : NULL;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_find() */
 
 
@@ -494,7 +494,7 @@ H5TB_dless(H5TB_TREE * tree, void * key, H5TB_NODE ** pp)
     ret_value= H5TB_less(tree->root, key, tree->compar, tree->cmparg, pp);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dless() */
 
 
@@ -567,7 +567,7 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
     ret_value= (0 == cmp) ? ptr : NULL;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_less */
 
 
@@ -625,7 +625,7 @@ H5TB_index(H5TB_NODE * root, unsigned indx)
     ret_value=ptr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_index() */
 
 
@@ -667,7 +667,7 @@ H5TB_dins(H5TB_TREE * tree, void * item, void * key)
         tree->count++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dins() */
 
 
@@ -739,7 +739,7 @@ H5TB_ins(H5TB_NODE ** root, void * item, void * key, H5TB_cmp_t compar, int arg)
     ret_value=ptr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_ins() */
 
 
@@ -909,7 +909,7 @@ done:
     if(ret_value)
         ((H5TB_TREE *) root)->count--;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_rem() */
 
 
@@ -944,7 +944,7 @@ H5TB_first(H5TB_NODE * root)
     ret_value=H5TB_end(root, LEFT);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_first() */
 
 
@@ -979,7 +979,7 @@ H5TB_last(H5TB_NODE * root)
     ret_value=H5TB_end(root, RIGHT);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_last() */
 
 
@@ -1013,7 +1013,7 @@ H5TB_next(H5TB_NODE * node)
     ret_value=H5TB_nbr(node, RIGHT);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_next() */
 
 
@@ -1047,7 +1047,7 @@ H5TB_prev(H5TB_NODE * node)
     ret_value=H5TB_nbr(node, LEFT);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_prev() */
 
 
@@ -1092,7 +1092,7 @@ H5TB_dfree(H5TB_TREE * tree, void(*fd) (void * /* item */), void(*fk) (void * /*
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dfree() */
 
 
@@ -1164,7 +1164,7 @@ H5TB_free(H5TB_NODE ** root, void(*fd) (void * /* item */), void(*fk) (void * /*
       } /* end while */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_free() */
 
 
@@ -1196,7 +1196,7 @@ H5TB_count(H5TB_TREE * tree)
     ret_value= (tree==NULL) ? FAIL : (long)tree->count;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_count() */
 
 #ifdef H5TB_DEBUG
@@ -1227,11 +1227,11 @@ H5TB_dump(H5TB_TREE *tree, void (*key_dump)(void *,void *), int method)
 {
     FUNC_ENTER_NOAPI(H5TB_dump,FAIL);
 
-	printf("H5TB-tree dump  %p:\n",tree);
-	printf("capacity = %ld\n\n",(long)tree->count);
-	H5TB_dumpNode(tree->root,key_dump, method);
+    printf("H5TB-tree dump  %p:\n",tree);
+    printf("capacity = %ld\n\n",(long)tree->count);
+    H5TB_dumpNode(tree->root,key_dump, method);
 
-	FUNC_LEAVE(SUCCESS);
+    FUNC_LEAVE_NOAPI(SUCCESS);
 }   /* end H5TB_dump() */
 
 
@@ -1270,7 +1270,7 @@ H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
         (*key_dump)(node->key,node->data);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_printNode() */
 
 
@@ -1334,7 +1334,7 @@ H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
       } /* end switch() */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_dumpNode() */
 
 #endif /* H5TB_DEBUG */
@@ -1367,7 +1367,7 @@ H5TB_end(H5TB_NODE * root, int side)
     while (HasChild(root, side))
       root = root->link[side];
 
-    FUNC_LEAVE(root);
+    FUNC_LEAVE_NOAPI(root);
 }   /* end H5TB_end() */
 
 /* Returns pointer to neighboring node (to LEFT or RIGHT): */
@@ -1390,7 +1390,7 @@ H5TB_nbr(H5TB_NODE * ptr, int side)
     ret_value=ptr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5TB_nbr() */
 
 /* H5TB_ffind -- Look up a node in a tree based on a key value */
@@ -1463,7 +1463,7 @@ H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE 
             break;
     } /* end switch */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5TB_ffind() */
 
 /* swapkid -- Often refered to as "rotating" nodes.  ptr and ptr's `side'
@@ -1540,7 +1540,7 @@ H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side)
       }     /* end if */
     ptr->flags = ptrflg;
 
-    FUNC_LEAVE(kid);
+    FUNC_LEAVE_NOAPI(kid);
 }   /* end H5TB_swapkid() */
 
 /* balance -- Move up tree, incrimenting number of left children when needed
@@ -1688,6 +1688,6 @@ H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
           ptr = ptr->Parent;    /* Move up the tree */
       }
     /* total tree depth += deeper; */
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5TB_balance() */
 

@@ -40,28 +40,19 @@
 #define MPE_LOG_VARS(func_name)                                               \
     static int eventa(func_name) = -1;                                        \
     static int eventb(func_name) = -1;                                        \
-    static int eventc(func_name) = 0;                                         \
-    int * p_eventb = &eventb(func_name);                                      \
+/*    static int eventc(func_name) = 0; */                                    \
     char* p_end_funcname = #func_name;                                        \
-    char* p_event_start = "start" #func_name;			      \
-    int * p_eventc = & eventc(func_name);
-/* the following is for the elimination of "unused variable" warning */
-#define MPE_LOG_VARS_USE(func_name)                                           \
-    eventa(func_name) = eventa(func_name);				      \
-    eventb(func_name) = eventb(func_name);				      \
-    eventc(func_name) = eventc(func_name);				      \
-    p_eventc = p_eventc;						      \
-    p_event_start = p_event_start;
+    char* p_event_start = "start" #func_name;
 
-#define BEGIN_MPE_LOG(func_name)                                       \
+#define BEGIN_MPE_LOG(func_name)                                              \
   if (H5_MPEinit_g){							      \
-    if (H5_MPEinit_g && eventa(func_name) == -1 && eventb(func_name) == -1) {                 \
+    if (H5_MPEinit_g && eventa(func_name) == -1 && eventb(func_name) == -1) { \
 	char* p_color = COLOR(func_name);				      \
          eventa(func_name)=MPE_Log_get_event_number();                        \
          eventb(func_name)=MPE_Log_get_event_number();                        \
-         MPE_Describe_state(eventa(func_name), eventb(func_name), p_end_funcname,p_color);                  \
+         MPE_Describe_state(eventa(func_name), eventb(func_name), p_end_funcname,p_color); \
     }                                                                         \
-    MPE_Log_event(eventa(func_name), 0, p_event_start); 			      \
+    MPE_Log_event(eventa(func_name), 0, p_event_start); 	              \
   }
 
 
@@ -72,8 +63,8 @@
  * Programmer: Long Wang
  */
 #define FINISH_MPE_LOG                                                       \
-     if (H5_IS_API(FUNC) && H5_MPEinit_g) {                                                \
-     MPE_Log_event(*p_eventb, 0, p_end_funcname);                            \
+    if (H5_MPEinit_g) {                                                      \
+        MPE_Log_event(eventb(func_name), 0, p_end_funcname);                         \
 /*     eventc(func_name)++          */                                      \
     }
 
@@ -388,12 +379,7 @@
 #define color_H5Zunregister "red"
 
 #else
-#define eventa(func_name)   /* void */
-#define eventb(func_name)   /* void */
-#define eventc(func_name)   /* void */ 
 #define MPE_LOG_VARS(func_name) /* void */   
-#define MPE_LOG_VARS_USE(func_name) /* void */   
-#define COLOR(func_name) /* void */     
 #define BEGIN_MPE_LOG(func_name) /* void */  
 #define FINISH_MPE_LOG   /* void */ 
 

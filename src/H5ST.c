@@ -62,7 +62,7 @@ H5ST_create(void)
     ret_value->root=NULL;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_create() */
 
 
@@ -98,7 +98,7 @@ H5ST_close_internal(H5ST_ptr_t p)
         H5FL_FREE(H5ST_node_t,p);
     } /* end if */
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5ST_close_internal() */
 
 
@@ -139,7 +139,7 @@ H5ST_close(H5ST_tree_t *tree)
     H5FL_FREE(H5ST_tree_t,tree);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_close() */
 
 
@@ -217,7 +217,7 @@ H5ST_insert(H5ST_tree_t *tree, const char *s, void *obj)
     } /* end for */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_insert() */
 
 
@@ -262,7 +262,7 @@ H5ST_search(H5ST_tree_t *tree, const char *s)
     } /* end while */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_search() */
 
 
@@ -305,7 +305,7 @@ H5ST_find_internal(H5ST_ptr_t p, const char *s)
     } /* end while */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_find_internal() */
 
 
@@ -340,7 +340,7 @@ H5ST_find(H5ST_tree_t *tree, const char *s)
         HGOTO_ERROR(H5E_TST,H5E_NOTFOUND,NULL,"key not found in TST");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_find() */
 
 
@@ -379,7 +379,7 @@ H5ST_locate(H5ST_tree_t *tree, const char *s)
     ret_value=node->eqkid;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5ST_locate() */
 
 
@@ -425,7 +425,7 @@ H5ST_findfirst_internal(H5ST_ptr_t p)
     } /* end while */
             
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_findfirst_internal() */
 
 
@@ -458,7 +458,7 @@ H5ST_findfirst(H5ST_tree_t *tree)
         HGOTO_ERROR(H5E_TST,H5E_NOTFOUND,NULL,"no nodes in TST");
             
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_findfirst() */
 
 
@@ -516,7 +516,7 @@ H5ST_getnext(H5ST_ptr_t p)
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_getnext() */
 
 
@@ -557,7 +557,7 @@ H5ST_findnext(H5ST_ptr_t p)
     } while(p);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_findnext() */
 
 
@@ -633,7 +633,7 @@ H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
 
     H5FL_FREE(H5ST_node_t,p);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5ST_delete_internal() */
 
 
@@ -668,7 +668,7 @@ H5ST_delete(H5ST_tree_t *tree, H5ST_ptr_t p)
         HGOTO_ERROR(H5E_TST,H5E_CANTDELETE,FAIL,"can't delete node from TST");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_delete() */
 
 
@@ -711,7 +711,7 @@ H5ST_remove(H5ST_tree_t *tree, const char *s)
         HGOTO_ERROR(H5E_TST,H5E_CANTDELETE,NULL,"can't delete node from TST");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5ST_remove() */
 
 #ifdef H5ST_DEBUG
@@ -757,7 +757,7 @@ H5ST_dump_internal(H5ST_ptr_t p)
     } /* end if */
 
 done:
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5ST_dump_internal() */
 
 
@@ -790,6 +790,6 @@ H5ST_dump(H5ST_tree_t *tree)
     H5ST_dump_internal(tree->root);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5ST_dump() */
 #endif /* H5ST_DEBUG */

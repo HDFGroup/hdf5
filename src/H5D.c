@@ -129,7 +129,7 @@ H5D_init(void)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -381,7 +381,7 @@ H5D_init_interface(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -418,7 +418,7 @@ H5D_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -491,7 +491,7 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
-    FUNC_LEAVE(ret_value);    
+    FUNC_LEAVE_NOAPI(ret_value);    
 }
 
 
@@ -544,7 +544,7 @@ H5D_crt_close(hid_t dcpl_id, void UNUSED *close_data)
     H5O_reset(H5O_PLINE, &pline);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_crt_close() */
 
 
@@ -606,7 +606,7 @@ H5D_xfer_create(hid_t dxpl_id, void UNUSED *create_data)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_xfer_create() */
 
 
@@ -640,7 +640,7 @@ H5D_xfer_copy(hid_t new_plist_id, hid_t UNUSED old_plist_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy property list");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -690,7 +690,7 @@ H5D_xfer_close(hid_t dxpl_id, void UNUSED *close_data)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_xfer_close() */
 
 
@@ -780,7 +780,7 @@ done:
             H5D_close(new_dset);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -829,7 +829,7 @@ H5Dopen(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -876,7 +876,7 @@ H5Dclose(hid_t dset_id)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -928,7 +928,7 @@ done:
             H5S_close(space);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -964,7 +964,7 @@ herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1029,7 +1029,7 @@ static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation)
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1093,7 +1093,7 @@ done:
             H5T_close (copied_type);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1167,7 +1167,7 @@ done:
             H5Pclose(new_dcpl_id);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1263,7 +1263,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1354,7 +1354,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1394,7 +1394,7 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1469,7 +1469,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1681,7 +1681,7 @@ done:
         if(H5O_unprotect(ent,oh)<0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1979,7 +1979,7 @@ done:
         H5FL_FREE(H5D_t,new_dset);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2028,7 +2028,7 @@ H5D_isa(H5G_entry_t *ent)
     
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2091,7 +2091,7 @@ H5D_open(H5G_entry_t *ent)
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2305,7 +2305,7 @@ done:
         dataset->ent.file = NULL;
         H5FL_FREE(H5D_t,dataset);
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2379,7 +2379,7 @@ H5D_close(H5D_t *dataset)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free the type or creation property list, but the dataset was freed anyway.");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2796,7 +2796,7 @@ done:
         H5FL_BLK_FREE(type_conv,tconv_buf);
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))
         H5FL_BLK_FREE(type_conv,bkg_buf);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_read() */
 
 
@@ -3221,7 +3221,7 @@ done:
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))
         H5FL_BLK_FREE(type_conv,bkg_buf);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_write() */
 
 
@@ -3280,7 +3280,7 @@ H5D_extend (H5D_t *dataset, const hsize_t *size)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3306,7 +3306,7 @@ H5D_entof (H5D_t *dataset)
     /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
     FUNC_ENTER_NOINIT(H5D_entof);
 
-    FUNC_LEAVE( dataset ? &(dataset->ent) : NULL);
+    FUNC_LEAVE_NOAPI( dataset ? &(dataset->ent) : NULL);
 }
 
 
@@ -3336,7 +3336,7 @@ H5D_typeof (H5D_t *dset)
     assert (dset);
     assert (dset->type);
 
-    FUNC_LEAVE (dset->type);
+    FUNC_LEAVE_NOAPI(dset->type);
 }
 
 
@@ -3365,7 +3365,7 @@ H5D_get_file (const H5D_t *dset)
     assert (dset);
     assert (dset->ent.file);
 
-    FUNC_LEAVE (dset->ent.file);
+    FUNC_LEAVE_NOAPI(dset->ent.file);
 }
 
 
@@ -3480,7 +3480,7 @@ H5D_alloc_storage (H5F_t *f, H5D_t *dset/*in,out*/, H5D_time_alloc_t time_alloc,
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_alloc_storage() */
 
 
@@ -3580,7 +3580,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite)
     } /* end switch */
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3621,7 +3621,7 @@ H5Dget_storage_size(hid_t dset_id)
     ret_value = H5D_get_storage_size(dset);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3678,7 +3678,7 @@ H5D_get_storage_size(H5D_t *dset)
     }
      
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3715,7 +3715,7 @@ H5Dget_offset(hid_t dset_id)
     ret_value = H5D_get_offset(dset);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3772,7 +3772,7 @@ H5D_get_offset(H5D_t *dset)
     }
      
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3860,7 +3860,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     ret_value=H5S_select_iterate(buf,type_id,space,op,operator_data);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Diterate() */
 
 
@@ -3906,7 +3906,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&plist_id);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Dvlen_reclaim() */
 
 
@@ -3943,7 +3943,7 @@ H5D_vlen_get_buf_size_alloc(size_t size, void *info)
     ret_value=vlen_bufsize->vl_tbuf;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_vlen_get_buf_size_alloc() */
 
 
@@ -4003,7 +4003,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hss
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5D_vlen_get_buf_size() */
 
 
@@ -4107,7 +4107,7 @@ done:
     if(vlen_bufsize.xfer_pid>0)
         H5I_dec_ref(vlen_bufsize.xfer_pid);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Dvlen_get_buf_size() */
 
 
@@ -4196,7 +4196,7 @@ done:
         H5FL_BLK_FREE(type_elem,tconv_buf);
     if (bkg_buf)
         H5FL_BLK_FREE(type_elem,bkg_buf);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5D_fill() */
 
 
@@ -4249,7 +4249,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Dfill() */
 
 
@@ -4292,7 +4292,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4398,7 +4398,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -4456,7 +4456,7 @@ H5D_flush(H5F_t *f)
 done:
     if(id_list!=NULL)
         H5MM_xfree(id_list);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_flush() */
 
 
@@ -4498,5 +4498,5 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }

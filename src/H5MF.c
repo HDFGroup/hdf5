@@ -82,7 +82,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t type, hsize_t size)
     ret_value -= f->shared->base_addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -134,7 +134,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -197,5 +197,5 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     ret_value -= f->shared->base_addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

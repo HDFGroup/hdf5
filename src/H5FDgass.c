@@ -196,7 +196,7 @@ H5FD_gass_init(void)
     ret_value=H5FD_GASS_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -252,7 +252,7 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     ret_value= H5P_set_driver(plist, H5FD_GASS, &fa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -302,7 +302,7 @@ H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/)
         *info = fa->info;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -432,7 +432,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value=(H5FD_t*)file;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -469,7 +469,7 @@ H5FD_gass_close (H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -505,7 +505,7 @@ H5FD_gass_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -539,7 +539,7 @@ H5FD_gass_get_eoa(H5FD_t *_file)
     ret_value=file->eoa;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -570,7 +570,7 @@ H5FD_gass_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -606,7 +606,7 @@ H5FD_gass_get_eof(H5FD_t *_file)
     ret_value=MAX(file->eof, file->eoa);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -638,7 +638,7 @@ H5FD_gass_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->fd);
 
 done:   
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   
             
 
@@ -721,7 +721,7 @@ H5FD_gass_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, h
     file->op = OP_READ;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -800,7 +800,7 @@ H5FD_gass_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id/*unused*/, haddr_t
         file->eof = file->pos;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_GASS */

@@ -132,7 +132,7 @@ H5FL_malloc(size_t mem_size)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_malloc() */
 
 
@@ -179,7 +179,7 @@ H5FL_reg_init(H5FL_reg_head_t *head)
         head->size=sizeof(void *);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_reg_init() */
 
 
@@ -243,7 +243,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
         H5FL_reg_gc();
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_reg_free() */
 
 
@@ -302,7 +302,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_reg_malloc() */
 
 
@@ -339,7 +339,7 @@ H5FL_reg_calloc(H5FL_reg_head_t *head)
     HDmemset(ret_value,0,head->size);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_reg_calloc() */
 
 
@@ -396,7 +396,7 @@ H5FL_reg_gc_list(H5FL_reg_head_t *head)
     /* Decrement global count of free memory on "regular" lists */
     H5FL_reg_gc_head.mem_freed-=total_mem;
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_reg_gc_list() */
 
 
@@ -437,7 +437,7 @@ H5FL_reg_gc(void)
     /* Double check that all the memory on the free lists is recycled */
     assert(H5FL_reg_gc_head.mem_freed==0);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_reg_gc() */
 
 
@@ -509,7 +509,7 @@ H5FL_reg_term(void)
 
     /* Terminating this layer never affects other layers; rather, other layers affect
      * the termination of this layer. */
-    FUNC_LEAVE(0);
+    FUNC_LEAVE_NOAPI(0);
 }   /* end H5FL_reg_term() */
 
 
@@ -565,7 +565,7 @@ H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
     
     ret_value=temp;
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_find_list() */
 
 
@@ -617,7 +617,7 @@ H5FL_blk_create_list(H5FL_blk_node_t **head, size_t size)
     ret_value=temp;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_create_list() */
 
 
@@ -660,7 +660,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
     head->init=1;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_blk_init() */
 
 
@@ -698,7 +698,7 @@ H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size)
     else
         ret_value=FALSE;
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_free_block_avail() */
 
 
@@ -774,7 +774,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size)
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_malloc() */
 
 
@@ -815,7 +815,7 @@ H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size)
     HDmemset(ret_value,0,size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_calloc() */
 
 
@@ -886,7 +886,7 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
         H5FL_blk_gc();
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_free() */
 
 
@@ -940,7 +940,7 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size)
         ret_value=H5FL_blk_malloc(head,new_size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FL_blk_realloc() */
 
 
@@ -1004,7 +1004,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
     /* Double check that all the memory on this list is recycled */
     assert(head->list_mem==0);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_blk_gc_list() */
 
 
@@ -1043,7 +1043,7 @@ H5FL_blk_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_blk_gc_head.mem_freed==0);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_blk_gc() */
 
 
@@ -1104,7 +1104,7 @@ printf("H5FL_blk_term: head->name=%s, head->allocated=%d\n", H5FL_blk_gc_head.fi
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_blk_gc_head.first=left;
     
-    FUNC_LEAVE (H5FL_blk_gc_head.first!=NULL ? 1 : 0);
+    FUNC_LEAVE_NOAPI(H5FL_blk_gc_head.first!=NULL ? 1 : 0);
 }   /* end H5FL_blk_term() */
 
 
@@ -1163,7 +1163,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     head->init=1;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_arr_init() */
 
 
@@ -1244,7 +1244,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         H5FL_blk_free(&(head->u.queue),obj);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_arr_free() */
 
 
@@ -1329,7 +1329,7 @@ H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem)
         ret_value=H5FL_blk_malloc(&(head->u.queue),mem_size);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_arr_malloc() */
 
 
@@ -1366,7 +1366,7 @@ H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem)
     HDmemset(ret_value,0,head->size*elem);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_arr_calloc() */
 
 
@@ -1431,7 +1431,7 @@ H5FL_arr_realloc(H5FL_arr_head_t *head, void * obj, size_t new_elem)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_arr_realloc() */
 
 
@@ -1501,7 +1501,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
     else
         H5FL_blk_gc_list(&(head->u.queue));
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_arr_gc_list() */
 
 
@@ -1540,7 +1540,7 @@ H5FL_arr_gc(void)
     /* Double check that all the memory on the free lists are recycled */
     assert(H5FL_arr_gc_head.mem_freed==0);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_arr_gc() */
 
 
@@ -1629,7 +1629,7 @@ printf("H5FL_arr_term: head->name=%s, head->allocated=%d\n", H5FL_arr_gc_head.fi
     /* Point to the list of nodes left with allocations open, if any */
     H5FL_arr_gc_head.first=left;
     
-    FUNC_LEAVE (H5FL_arr_gc_head.first!=NULL ? 1 : 0);
+    FUNC_LEAVE_NOAPI(H5FL_arr_gc_head.first!=NULL ? 1 : 0);
 }   /* end H5FL_arr_term() */
 
 
@@ -1662,7 +1662,7 @@ H5FL_garbage_coll(void)
     /* Garbage collect the free lists for regular objects */
     H5FL_reg_gc();
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* end H5FL_garbage_coll() */
 
 
@@ -1718,7 +1718,7 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
     H5FL_blk_lst_mem_lim=(blk_list_lim==-1 ? UINT_MAX : (size_t)blk_list_lim);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5FL_set_free_list_limits() */
 
 
@@ -1753,6 +1753,6 @@ H5FL_term_interface(void)
 
     ret_value=H5FL_reg_term()+H5FL_arr_term()+H5FL_blk_term();
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

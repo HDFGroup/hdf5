@@ -88,7 +88,7 @@ static H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
      H5P_cls_close_func_t cls_close, void *close_data);
 static herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
-static herr_t H5P_free_prop(H5P_genprop_t *prop);
+static void H5P_free_prop(H5P_genprop_t *prop);
 
 
 /*--------------------------------------------------------------------------
@@ -156,7 +156,7 @@ done:
             H5P_free_prop(pcopy);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_do_prop_cb1() */
 
 
@@ -185,7 +185,7 @@ H5P_init(void)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -283,7 +283,7 @@ H5P_init_interface(void)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -361,7 +361,7 @@ H5P_term_interface(void)
             interface_initialize_g = 0;
         }
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -434,7 +434,7 @@ done:
     if (ret_value==NULL && new_pclass)
         H5P_close_class(new_pclass);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_copy_pclass() */
 
 
@@ -637,7 +637,7 @@ done:
     if (ret_value<0 && new_plist)
         H5P_close(new_plist);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_copy_plist() */
 
 
@@ -701,7 +701,7 @@ H5Pcopy(hid_t id)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pcopy() */
 
 
@@ -798,7 +798,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_dup_prop() */
 
 
@@ -890,7 +890,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_create_prop() */
 
 
@@ -928,7 +928,7 @@ H5P_add_prop(H5TB_TREE *tree, H5P_genprop_t *prop)
         HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into TBBT");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_add_prop() */
 
 
@@ -991,7 +991,7 @@ H5P_find_prop_plist(H5P_genplist_t *plist, const char *name)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_find_prop_plist() */
 
 
@@ -1032,7 +1032,7 @@ H5P_find_prop_pclass(H5P_genclass_t *pclass, const char *name)
     ret_value=prop_node->data;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_find_prop_pclass() */
 
 
@@ -1054,7 +1054,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+static void
 H5P_free_prop(H5P_genprop_t *prop)
 {
     FUNC_ENTER_NOINIT(H5P_free_prop);
@@ -1071,7 +1071,7 @@ H5P_free_prop(H5P_genprop_t *prop)
 
     H5FL_FREE(H5P_genprop_t,prop);
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI_VOID;
 }   /* H5P_free_prop() */
 
 
@@ -1127,7 +1127,7 @@ H5P_free_all_prop(H5TB_TREE *tree,unsigned make_cb)
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_free_all_prop() */
 
 
@@ -1219,7 +1219,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
             H5P_access_class(par_class, H5P_MOD_DEC_CLS);
     } /* end if */
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5P_access_class() */
 
 
@@ -1264,7 +1264,7 @@ H5P_check_class(void *_obj, hid_t id, const void *_key)
             ret_value=1;        /* Indicate a match */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_check_class() */
 
 
@@ -1363,7 +1363,7 @@ done:
             H5FL_FREE(H5P_genclass_t,pclass);
     }
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_create_class() */
 
 
@@ -1444,7 +1444,7 @@ done:
     if (ret_value<0 && pclass)
         H5P_close_class(pclass);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pcreate_class() */
 
 
@@ -1586,7 +1586,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_create() */
 
 
@@ -1653,7 +1653,7 @@ done:
     if (ret_value<0 && plist)
         H5P_close(plist);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_create_id() */
 
 
@@ -1697,7 +1697,7 @@ H5Pcreate(hid_t cls_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pcreate() */
 
 
@@ -1914,7 +1914,7 @@ done:
             H5FL_FREE(H5P_genprop_t,new_prop);
         } /* end if */
     }  /* end if */
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_register() */
 
 
@@ -2075,7 +2075,7 @@ H5Pregister(hid_t cls_id, const char *name, size_t size, void *def_value,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pregister() */
 
 
@@ -2256,7 +2256,7 @@ done:
         } /* end if */
     }  /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_insert() */
 
 
@@ -2391,7 +2391,7 @@ H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pinsert() */
 
 
@@ -2559,7 +2559,7 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_set() */
 
 
@@ -2616,7 +2616,7 @@ H5Pset(hid_t plist_id, const char *name, void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pset() */
 
 
@@ -2676,7 +2676,7 @@ H5P_exist_plist(H5P_genplist_t *plist, const char *name)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_exist_plist() */
 
 
@@ -2717,7 +2717,7 @@ H5P_exist_pclass(H5P_genclass_t *pclass, const char *name)
     else
         ret_value=1;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_exist_pclass() */
 
 
@@ -2777,7 +2777,7 @@ H5Pexist(hid_t id, const char *name)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pexist() */
 
 
@@ -2823,7 +2823,7 @@ H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
     *size=prop->size;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_size_plist() */
 
 
@@ -2869,7 +2869,7 @@ H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name, size_t *size)
     *size=prop->size;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_size_pclass() */
 
 
@@ -2935,7 +2935,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget_size() */
 
 
@@ -2970,7 +2970,7 @@ H5P_get_class(H5P_genplist_t *plist)
     /* Get property size */
     ret_value=plist->pclass;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_class() */
 
 
@@ -3024,7 +3024,7 @@ done:
     if (ret_value<0 && pclass)
         H5P_close_class(pclass);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget_class() */
 
 
@@ -3059,7 +3059,7 @@ H5P_get_nprops_plist(H5P_genplist_t *plist, size_t *nprops)
     /* Get property size */
     *nprops=plist->nprops;
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5P_get_nprops_plist() */
 
 
@@ -3097,7 +3097,7 @@ H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops)
     *nprops=pclass->nprops;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_nprops_pclass() */
 
 
@@ -3157,7 +3157,7 @@ H5Pget_nprops(hid_t id, size_t *nprops)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget_nprops() */
 
 
@@ -3240,7 +3240,7 @@ H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
     if(prop1->close!=prop2->close) HGOTO_DONE(-1);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_cmp_prop() */
 
 
@@ -3342,7 +3342,7 @@ H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
     } /* end while */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_cmp_class() */
 
 
@@ -3441,7 +3441,7 @@ H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
         HGOTO_DONE(cmp_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_cmp_plist() */
 
 
@@ -3495,7 +3495,7 @@ H5Pequal(hid_t id1, hid_t id2)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pequal() */
 
 
@@ -3544,7 +3544,7 @@ H5P_isa_class_real(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_isa_class_real() */
 
 
@@ -3593,7 +3593,7 @@ H5P_isa_class(hid_t plist_id, hid_t pclass_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to compare property list classes");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_isa_class() */
 
 
@@ -3639,7 +3639,7 @@ H5Pisa_class(hid_t plist_id, hid_t pclass_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to compare property list classes");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pisa_class() */
 
 
@@ -3687,7 +3687,7 @@ H5P_object_verify(hid_t plist_id, hid_t pclass_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_object_verify() */
 
 
@@ -3846,7 +3846,7 @@ done:
     if(seen!=NULL)
         H5TB_dfree(seen,NULL,NULL);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_iterate_plist() */
 
 
@@ -3946,7 +3946,7 @@ done:
     /* Set the index we stopped at */
     *idx=curr_idx;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_iterate_pclass() */
 
 
@@ -4032,7 +4032,7 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Piterate() */
 
 
@@ -4077,7 +4077,7 @@ H5P_peek_unsigned(H5P_genplist_t *plist, const char *name)
     H5P_get(plist,name,&ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_peek_unsigned() */
 
 
@@ -4122,7 +4122,7 @@ H5P_peek_hid_t(H5P_genplist_t *plist, const char *name)
     H5P_get(plist,name,&ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_peek_hid_t() */
 
 
@@ -4167,7 +4167,7 @@ H5P_peek_voidp(H5P_genplist_t *plist, const char *name)
     H5P_get(plist,name,&ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_peek_voidp() */
 
 
@@ -4212,7 +4212,7 @@ H5P_peek_hsize_t(H5P_genplist_t *plist, const char *name)
     H5P_get(plist,name,&ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_peek_hsize_t() */
 
 
@@ -4257,7 +4257,7 @@ H5P_peek_size_t(H5P_genplist_t *plist, const char *name)
     H5P_get(plist,name,&ret_value);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_peek_size_t() */
 
 
@@ -4412,7 +4412,7 @@ H5P_get(H5P_genplist_t *plist, const char *name, void *value)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get() */
 
 
@@ -4466,7 +4466,7 @@ H5Pget(hid_t plist_id, const char *name, void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget() */
 
 
@@ -4601,7 +4601,7 @@ H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_remove() */
 
 
@@ -4651,7 +4651,7 @@ H5Premove(hid_t plist_id, const char *name)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Premove() */
 
 
@@ -4760,7 +4760,7 @@ done:
             H5P_free_prop(new_prop);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_copy_prop_plist() */
 
 
@@ -4823,7 +4823,7 @@ H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass, con
 done:
     /* Cleanup, if necessary */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_copy_prop_pclass() */
 
 
@@ -4897,7 +4897,7 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     } /* end else */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pcopy_prop() */
 
 
@@ -4955,7 +4955,7 @@ H5P_unregister(H5P_genclass_t *pclass, const char *name)
     pclass->revision = H5P_GET_NEXT_REV;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_unregister() */
 
 
@@ -5000,7 +5000,7 @@ H5Punregister(hid_t pclass_id, const char *name)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to remove property from class");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Punregister() */
 
 
@@ -5148,7 +5148,7 @@ done:
     if(seen!=NULL)
         H5TB_dfree(seen,NULL,NULL);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_close() */
 
 
@@ -5198,7 +5198,7 @@ H5Pclose(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTDELETE, FAIL, "can't delete property list");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pclose() */
 
 
@@ -5235,7 +5235,7 @@ H5P_get_class_name(H5P_genclass_t *pclass)
     ret_value=H5MM_xstrdup(pclass->name);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_class_name() */
 
 
@@ -5276,7 +5276,7 @@ H5Pget_class_name(hid_t pclass_id)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query name of class");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget_class_name() */
 
 
@@ -5343,7 +5343,7 @@ H5P_get_class_path(H5P_genclass_t *pclass)
         ret_value=H5MM_xstrdup(pclass->name);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_class_path() */
 
 
@@ -5386,7 +5386,7 @@ H5P_get_class_path_test(hid_t pclass_id)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_class_path_test() */
 
 
@@ -5464,7 +5464,7 @@ done:
     /* Free the duplicated path */
     H5MM_xfree(tmp_path);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_open_class_path() */
 
 
@@ -5512,7 +5512,7 @@ done:
     if(ret_value<0 && pclass)
         H5P_close_class(pclass);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_open_class_path_test() */
 
 
@@ -5547,7 +5547,7 @@ H5P_get_class_parent(H5P_genclass_t *pclass)
     /* Get property size */
     ret_value=pclass->parent;
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_get_class_parent() */
 
 
@@ -5600,7 +5600,7 @@ done:
     if (ret_value<0 && parent)
         H5P_close_class(parent);
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pget_class_parent() */
 
 
@@ -5636,7 +5636,7 @@ H5P_close_class(void *_pclass)
         HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, FAIL, "Can't decrement ID ref count");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5P_close_class() */
 
 
@@ -5676,6 +5676,6 @@ H5Pclose_class(hid_t cls_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Pclose_class() */
 

@@ -262,7 +262,7 @@ H5T_init(void)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1824,7 +1824,7 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1855,7 +1855,7 @@ H5T_unlock_cb (void *_dt, hid_t UNUSED id,  const void UNUSED *key)
     if (H5T_STATE_IMMUTABLE==dt->state)
 	dt->state = H5T_STATE_RDONLY;
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -2023,7 +2023,7 @@ H5T_term_interface(void)
 	interface_initialize_g = 0;
 	n = 1; /*H5I*/
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -2071,7 +2071,7 @@ H5Tcreate(H5T_class_t type, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2121,7 +2121,7 @@ done:
             H5T_close (type);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2163,7 +2163,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit data type");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2200,7 +2200,7 @@ H5Tcommitted(hid_t type_id)
     ret_value= (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2272,7 +2272,7 @@ done:
             H5T_close(new_dt);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Tcopy() */
 
 
@@ -2310,7 +2310,7 @@ H5Tclose(hid_t type_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2350,7 +2350,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
     ret_value = (0 == H5T_cmp(dt1, dt2)) ? TRUE : FALSE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2397,7 +2397,7 @@ H5Tlock(hid_t type_id)
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient data type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2435,7 +2435,7 @@ H5Tget_class(hid_t type_id)
     ret_value= H5T_get_class(dt);
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2473,7 +2473,7 @@ H5T_get_class(const H5T_t *dt)
         ret_value=dt->type;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_get_class() */
 
 
@@ -2511,7 +2511,7 @@ H5Tdetect_class(hid_t type, H5T_class_t cls)
     ret_value=H5T_detect_class(dt,cls);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2569,7 +2569,7 @@ H5T_detect_class (const H5T_t *dt, H5T_class_t cls)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2604,7 +2604,7 @@ H5Tis_variable_str(hid_t dtype_id)
     ret_value=H5T_is_variable_str(dt);
 
 done:
-    FUNC_LEAVE(ret_value);   
+    FUNC_LEAVE_API(ret_value);   
 }
  
 
@@ -2637,7 +2637,7 @@ H5T_is_variable_str(H5T_t *dt)
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);   
+    FUNC_LEAVE_NOAPI(ret_value);   
 }
 
 
@@ -2704,7 +2704,7 @@ done:
             H5T_close(new_dt);
     } /* end if */
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3059,7 +3059,7 @@ done:
             H5T_close(new_type);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3191,7 +3191,7 @@ H5T_t* H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t dire
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
                         
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3282,7 +3282,7 @@ H5T_t* H5T_get_native_float(size_t size, H5T_direction_t direction, size_t *stru
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");
                         
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3327,7 +3327,7 @@ herr_t H5T_cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size,
         *struct_align = align;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3366,7 +3366,7 @@ H5Tget_size(hid_t type_id)
     ret_value = H5T_get_size(dt);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Tget_size() */
 
 
@@ -3426,7 +3426,7 @@ H5Tset_size(hid_t type_id, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for data type");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3471,7 +3471,7 @@ H5Tget_order(hid_t type_id)
     ret_value = dt->u.atomic.order;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3519,7 +3519,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     dt->u.atomic.order = order;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3567,7 +3567,7 @@ H5Tget_precision(hid_t type_id)
     ret_value = dt->u.atomic.prec;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3624,7 +3624,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set precision");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3684,7 +3684,7 @@ H5Tget_offset(hid_t type_id)
     ret_value = (int)dt->u.atomic.offset;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3751,7 +3751,7 @@ H5Tset_offset(hid_t type_id, size_t offset)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set offset");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3798,7 +3798,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
         *msb = dt->u.atomic.msb_pad;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3847,7 +3847,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     dt->u.atomic.msb_pad = msb;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3884,7 +3884,7 @@ H5Tget_sign(hid_t type_id)
     ret_value = H5T_get_sign(dt);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3926,7 +3926,7 @@ H5T_get_sign(H5T_t *dt)
     ret_value = dt->u.atomic.u.i.sign;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3974,7 +3974,7 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     dt->u.atomic.u.i.sign = sign;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4028,7 +4028,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     if (msize) *msize = dt->u.atomic.u.f.msize;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4097,7 +4097,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     dt->u.atomic.u.f.msize = msize;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4139,7 +4139,7 @@ H5Tget_ebias(hid_t type_id)
     H5_ASSIGN_OVERFLOW(ret_value,dt->u.atomic.u.f.ebias,uint64_t,size_t);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4182,7 +4182,7 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     dt->u.atomic.u.f.ebias = ebias;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4226,7 +4226,7 @@ H5Tget_norm(hid_t type_id)
     ret_value = dt->u.atomic.u.f.norm;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4272,7 +4272,7 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     dt->u.atomic.u.f.norm = norm;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4318,7 +4318,7 @@ H5Tget_inpad(hid_t type_id)
     ret_value = dt->u.atomic.u.f.pad;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4366,7 +4366,7 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     dt->u.atomic.u.f.pad = pad;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4417,7 +4417,7 @@ H5Tget_cset(hid_t type_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_CSET_ERROR, "can't get cset info");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4470,7 +4470,7 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't set cset info");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4522,7 +4522,7 @@ H5Tget_strpad(hid_t type_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't get strpad info");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4586,7 +4586,7 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, H5T_STR_ERROR, "can't set strpad info");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4627,7 +4627,7 @@ H5Tget_nmembers(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4668,7 +4668,7 @@ H5T_get_nmembers(const H5T_t *dt)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -4709,7 +4709,7 @@ H5Tget_member_name(hid_t type_id, int membno)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4759,7 +4759,7 @@ H5T_get_member_name(H5T_t *dt, int membno)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -4817,7 +4817,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
        
 
@@ -4860,7 +4860,7 @@ H5Tget_member_offset(hid_t type_id, int membno)
     ret_value = H5T_get_member_offset(dt, membno);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -4899,7 +4899,7 @@ H5T_get_member_offset(H5T_t *dt, int membno)
     ret_value = dt->u.compnd.memb[membno].offset;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -4938,7 +4938,7 @@ H5Tget_member_class(hid_t type_id, int membno)
     ret_value = dt->u.compnd.memb[membno].type->type;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Tget_member_class() */
 
 
@@ -4992,7 +4992,7 @@ done:
             H5T_close(memb_dt);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5030,7 +5030,7 @@ H5T_get_member_type(H5T_t *dt, int membno)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy member data type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -5086,7 +5086,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5125,7 +5125,7 @@ H5Tpack(hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound data type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5168,7 +5168,7 @@ H5Tenum_create(hid_t parent_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5209,7 +5209,7 @@ H5T_enum_create(H5T_t *parent)
     ret_value->ent.header = HADDR_UNDEF;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -5259,7 +5259,7 @@ H5Tenum_insert(hid_t type, const char *name, void *value)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert new enumeration member");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5302,7 +5302,7 @@ done:
             H5T_close(super);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5339,7 +5339,7 @@ H5T_get_super(H5T_t *dt)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy parent data type");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -5381,7 +5381,7 @@ H5Tget_member_value(hid_t type, int membno, void *value/*out*/)
     if (H5T_get_member_value(dt, membno, value)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get member value");
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5416,7 +5416,7 @@ H5T_get_member_value(H5T_t *dt, int membno, void *value/*out*/)
     HDmemcpy(value, dt->u.enumer.value + membno*dt->size, dt->size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -5466,7 +5466,7 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "nameof query failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5512,7 +5512,7 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "valueof query failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
     
 
@@ -5568,7 +5568,7 @@ H5T_vlen_create(H5T_t *base)
     ret_value=dt;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -5612,7 +5612,7 @@ H5Tvlen_create(hid_t base_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5654,7 +5654,7 @@ H5Tset_tag(hid_t type_id, const char *tag)
     dt->u.opaque.tag = H5MM_strdup(tag);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5695,7 +5695,7 @@ H5Tget_tag(hid_t type_id)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -5861,7 +5861,7 @@ done:
             H5I_dec_ref(tmp_did);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5T_register() */
 
 
@@ -5914,7 +5914,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't register conversion function");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Tregister() */
 
 
@@ -6001,7 +6001,7 @@ H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_unregister() */
 
 
@@ -6044,7 +6044,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "internal unregister function failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -6096,7 +6096,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     ret_value = path->func;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -6156,7 +6156,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -6194,7 +6194,7 @@ H5Tget_overflow(void)
     ret_value=H5T_overflow_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -6227,7 +6227,7 @@ H5Tset_overflow(H5T_overflow_t func)
     H5T_overflow_g = func;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -6323,7 +6323,7 @@ done:
             H5FL_FREE(H5T_t,dt);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6358,7 +6358,7 @@ H5T_isa(H5G_entry_t *ent)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to read object header");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6406,7 +6406,7 @@ H5T_open (H5G_entry_t *loc, const char *name)
     ret_value=dt;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6455,7 +6455,7 @@ done:
             H5O_close(ent);
     } /* end if */
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6673,7 +6673,7 @@ done:
             H5FL_FREE (H5T_t,new_dt);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6741,7 +6741,7 @@ done:
 	    type->ent.header = HADDR_UNDEF;
 	}
     }
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6787,7 +6787,7 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6865,7 +6865,7 @@ H5T_free(H5T_t *dt)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close parent data type");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5T_free() */
 
 
@@ -6911,7 +6911,7 @@ H5T_close(H5T_t *dt)
     H5FL_FREE(H5T_t,dt);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -6946,7 +6946,7 @@ H5T_is_atomic(const H5T_t *dt)
 	ret_value = FALSE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7097,7 +7097,7 @@ H5T_set_size(H5T_t *dt, size_t size)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7128,7 +7128,7 @@ H5T_get_size(const H5T_t *dt)
     /* check args */
     assert(dt);
 
-    FUNC_LEAVE(dt->size);
+    FUNC_LEAVE_NOAPI(dt->size);
 }
 
 
@@ -7231,7 +7231,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7304,7 +7304,7 @@ H5T_set_offset(H5T_t *dt, size_t offset)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7396,7 +7396,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
         parent->u.compnd.has_array=TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7447,7 +7447,7 @@ H5T_pack(H5T_t *dt)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7558,7 +7558,7 @@ H5T_sort_value(H5T_t *dt, int *map)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7665,7 +7665,7 @@ H5T_sort_name(H5T_t *dt, int *map)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7730,7 +7730,7 @@ H5T_enum_insert(H5T_t *dt, const char *name, void *value)
     HDmemcpy(dt->u.enumer.value+i*dt->size, value, dt->size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7810,7 +7810,7 @@ H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
     ret_value=name;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -7875,7 +7875,7 @@ H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
     HDmemcpy(value, dt->u.enumer.value+md*dt->size, dt->size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8245,7 +8245,7 @@ done:
     if(idx2!=NULL)
         H5MM_xfree(idx2);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8515,7 +8515,7 @@ done:
     if (src_id>=0) H5I_dec_ref(src_id);
     if (dst_id>=0) H5I_dec_ref(dst_id);
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8588,7 +8588,7 @@ H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, hsize_t nelmts,
 #endif
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8629,7 +8629,7 @@ H5T_entof (H5T_t *dt)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8662,7 +8662,7 @@ H5T_is_immutable(H5T_t *dt)
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8695,7 +8695,7 @@ H5T_is_named(H5T_t *dt)
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -8732,7 +8732,7 @@ H5T_get_ref_type(const H5T_t *dt)
         ret_value=dt->u.atomic.u.r.rtype;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_get_ref_type() */
 
 
@@ -8792,7 +8792,7 @@ H5Tarray_create(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Tarray_create */
 
 
@@ -8864,7 +8864,7 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
         ret_value->force_conv=TRUE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_array_create */
 
 
@@ -8902,7 +8902,7 @@ H5Tget_array_ndims(hid_t type_id)
     ret_value = H5T_get_array_ndims(dt);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Tget_array_ndims */
 
 
@@ -8936,7 +8936,7 @@ H5T_get_array_ndims(H5T_t *dt)
     ret_value=dt->u.array.ndims;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_get_array_ndims */
 
 
@@ -8974,7 +8974,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     if(H5T_get_array_dims(dt, dims, perm)<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes");
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* end H5Tget_array_dims */
 
 
@@ -9016,7 +9016,7 @@ H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
             perm[i]=dt->u.array.perm[i];
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5T_get_array_dims */
 
 
@@ -9071,7 +9071,7 @@ H5T_is_sensible(const H5T_t *dt)
     } /* end switch */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -9137,7 +9137,7 @@ H5T_print_stats(H5T_path_t * UNUSED path, int * UNUSED nprint/*in,out*/)
 		   bandwidth);
     }
 #endif
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 /*-------------------------------------------------------------------------
@@ -9348,6 +9348,6 @@ H5T_debug(const H5T_t *dt, FILE *stream)
     fprintf(stream, "}");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

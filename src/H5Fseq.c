@@ -78,7 +78,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vector read failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5F_seq_read() */
 
 
@@ -124,7 +124,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5F_seq_write() */
 
 
@@ -511,7 +511,7 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }   /* end switch() */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5F_seq_readv() */
 
 
@@ -897,6 +897,6 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     }   /* end switch() */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5F_seq_writev() */
 

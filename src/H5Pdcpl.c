@@ -77,7 +77,7 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -120,7 +120,7 @@ H5Pget_layout(hid_t plist_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_LAYOUT_ERROR, "can't get layout");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -189,7 +189,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set chunk size");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -252,7 +252,7 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
     ret_value=ndims;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -345,7 +345,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set external file list");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -392,7 +392,7 @@ H5Pget_external_count(hid_t plist_id)
     ret_value=efl.nused;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -458,7 +458,7 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
         *size = efl.slot[idx].size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -535,7 +535,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -585,7 +585,7 @@ H5Pget_nfilters(hid_t plist_id)
     ret_value=(int)(pline.nfilters);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -692,7 +692,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
     ret_value=pline.filter[idx].id;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -748,7 +748,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -797,7 +797,7 @@ H5Pset_shuffle(hid_t plist_id, unsigned bytes_of_type)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -869,7 +869,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
   	     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -975,7 +975,7 @@ done:
         H5MM_xfree(bkg);
     if (src_id>=0)
         H5I_dec_ref(src_id);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1022,7 +1022,7 @@ H5P_is_fill_value_defined(const struct H5O_fill_t *fill, H5D_fill_value_t *statu
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_is_fill_value_defined() */
 
 
@@ -1061,7 +1061,7 @@ H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5P_fill_value_defined() */
 
 
@@ -1100,7 +1100,7 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value info"); 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Pfill_value_defined() */
 
 
@@ -1139,7 +1139,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
-    FUNC_LEAVE(ret_value);  
+    FUNC_LEAVE_API(ret_value);  
 }
 
 
@@ -1178,7 +1178,7 @@ H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t *alloc_time/*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get space allocation time");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1216,7 +1216,7 @@ H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -1253,6 +1253,6 @@ H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time/*out*/)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 

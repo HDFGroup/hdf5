@@ -91,7 +91,7 @@ H5FD_init_interface(void)
     HDmemset(file_serial_no,0,sizeof(file_serial_no));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -131,7 +131,7 @@ H5FD_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -160,7 +160,7 @@ H5FD_free_cls(H5FD_class_t *cls)
 
     H5MM_xfree(cls);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -229,7 +229,7 @@ done:
         if(saved)
             H5MM_xfree(saved);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -269,7 +269,7 @@ H5FDunregister(hid_t driver_id)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -330,7 +330,7 @@ H5FD_get_class(hid_t id)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -365,7 +365,7 @@ H5FD_sb_size(H5FD_t *file)
 	ret_value = (file->cls->sb_size)(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -403,7 +403,7 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -436,7 +436,7 @@ H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -479,7 +479,7 @@ H5FD_fapl_get(H5FD_t *file)
 	ret_value = (file->cls->fapl_get)(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -531,7 +531,7 @@ H5FD_fapl_copy(hid_t driver_id, const void *old_fapl)
     ret_value=new_fapl;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -572,7 +572,7 @@ H5FD_fapl_free(hid_t driver_id, void *fapl)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -624,7 +624,7 @@ H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl)
     ret_value=new_dxpl;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -665,7 +665,7 @@ H5FD_dxpl_free(hid_t driver_id, void *dxpl)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -742,7 +742,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to open file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -840,7 +840,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
 done:
     /* Can't cleanup 'file' information, since we don't know what type it is */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -879,7 +879,7 @@ H5FDclose(H5FD_t *file)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to close file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -965,7 +965,7 @@ H5FD_close(H5FD_t *file)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "close failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1004,7 +1004,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
     ret_value = H5FD_cmp(f1, f2);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1054,7 +1054,7 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
     ret_value = (f1->cls->cmp)(f1, f2);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1088,7 +1088,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
     ret_value = H5FD_query(f, flags);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1125,7 +1125,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
         *flags=0;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1191,7 +1191,7 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file memory");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1576,7 +1576,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1665,7 +1665,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_real_alloc() */
 
 
@@ -1710,7 +1710,7 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file deallocation request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1944,7 +1944,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1979,7 +1979,7 @@ H5FDrealloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file reallocation request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2059,7 +2059,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
     ret_value=new_addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2097,7 +2097,7 @@ H5FDget_eoa(H5FD_t *file)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2130,7 +2130,7 @@ H5FD_get_eoa(H5FD_t *file)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2180,7 +2180,7 @@ H5FDset_eoa(H5FD_t *file, haddr_t addr)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2215,7 +2215,7 @@ H5FD_set_eoa(H5FD_t *file, haddr_t addr)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2262,7 +2262,7 @@ H5FDget_eof(H5FD_t *file)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2300,7 +2300,7 @@ H5FD_get_eof(H5FD_t *file)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2352,7 +2352,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2531,7 +2531,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2580,7 +2580,7 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2822,7 +2822,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     } /* end else */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2862,7 +2862,7 @@ H5FDflush(H5FD_t *file, unsigned closing)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file flush request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2908,7 +2908,7 @@ H5FD_flush(H5FD_t *file, unsigned closing)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2942,7 +2942,7 @@ H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
     HDmemcpy(filenum,file->fileno,sizeof(file->fileno));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_get_fileno() */
 
 
@@ -2973,7 +2973,7 @@ herr_t H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
     ret_value=H5FD_get_vfd_handle(file, fapl, file_handle);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3002,5 +3002,5 @@ herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");        
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }    

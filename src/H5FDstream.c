@@ -241,7 +241,7 @@ hid_t H5FD_stream_init (void)
     ret_value=H5FD_STREAM_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -291,7 +291,7 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
     ret_value = H5P_set_driver (plist, H5FD_STREAM, &default_fapl);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -330,7 +330,7 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
     *fapl = *this_fapl;
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -367,7 +367,7 @@ H5FD_stream_fapl_get (H5FD_t *_stream)
     ret_value=fapl;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -476,7 +476,7 @@ done:
           H5FD_STREAM_CLOSE_SOCKET(sock);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -533,7 +533,7 @@ H5FD_stream_read_from_socket (H5FD_stream_t *stream)
            (int) stream->eof);
 #endif
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -672,7 +672,7 @@ done:
         } /* end if */
     }
 
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -745,7 +745,7 @@ H5FD_stream_flush (H5FD_t *_stream, unsigned UNUSED closing)
   }
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -785,7 +785,7 @@ H5FD_stream_close (H5FD_t *_stream)
   H5MM_xfree (stream);
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -823,7 +823,7 @@ H5FD_stream_query(const H5FD_t UNUSED * _f,
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -856,7 +856,7 @@ H5FD_stream_get_eoa (H5FD_t *_stream)
     ret_value=stream->eoa;
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -891,7 +891,7 @@ H5FD_stream_set_eoa (H5FD_t *_stream, haddr_t addr)
   stream->eoa = addr;
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -926,7 +926,7 @@ H5FD_stream_get_eof (H5FD_t *_stream)
     ret_value= MAX (stream->eof, stream->eoa);
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -958,7 +958,7 @@ H5FD_stream_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->socket);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1020,7 +1020,7 @@ H5FD_stream_read (H5FD_t *_stream,
     HDmemset (buf, 0, size);
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1091,7 +1091,7 @@ H5FD_stream_write (H5FD_t *_stream,
   stream->dirty = TRUE;
 
 done:
-  FUNC_LEAVE (ret_value);
+  FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif /* H5_HAVE_STREAM */

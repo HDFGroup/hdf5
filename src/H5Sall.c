@@ -54,7 +54,7 @@ H5S_all_iter_init (const H5S_t *space, size_t UNUSED elmt_size, H5S_sel_iter_t *
     sel_iter->all.offset=0;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_iter_init() */
 
 
@@ -86,7 +86,7 @@ H5S_all_iter_nelmts (const H5S_sel_iter_t *sel_iter)
     ret_value=sel_iter->all.elmt_left;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_iter_nelmts() */
 
 
@@ -118,7 +118,7 @@ H5S_all_iter_release (H5S_sel_iter_t * UNUSED sel_iter)
     assert (sel_iter);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_iter_release() */
 
 
@@ -150,7 +150,7 @@ H5S_all_release (H5S_t * UNUSED space)
     assert (space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_release() */
 
 
@@ -185,7 +185,7 @@ H5S_all_npoints (const H5S_t *space)
     ret_value=(hsize_t)H5S_get_simple_extent_npoints(space);
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_npoints() */
 
 
@@ -219,7 +219,7 @@ H5S_all_is_valid (const H5S_t UNUSED *space)
     assert(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_all_is_valid() */
 
 
@@ -258,7 +258,7 @@ H5S_all_serial_size (const H5S_t UNUSED *space)
     ret_value=16;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_all_serial_size() */
 
 
@@ -300,7 +300,7 @@ H5S_all_serialize (const H5S_t *space, uint8_t *buf)
     ret_value=SUCCEED;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_serialize() */
 
 
@@ -337,7 +337,7 @@ H5S_all_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_deserialize() */
 
 
@@ -389,7 +389,7 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     } /* end for */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5Sget_all_bounds() */
 
 
@@ -421,7 +421,7 @@ H5S_all_is_contiguous(const H5S_t UNUSED *space)
     assert(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_is_contiguous() */
 
 
@@ -453,7 +453,7 @@ H5S_all_is_single(const H5S_t UNUSED *space)
     assert(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_is_single() */
 
 
@@ -487,7 +487,7 @@ H5S_all_is_regular(const H5S_t UNUSED *space)
     assert(space);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_all_is_regular() */
 
 
@@ -543,7 +543,7 @@ H5S_select_all (H5S_t *space, unsigned rel_prev)
     space->select.is_regular=H5S_all_is_regular;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_all() */
 
 
@@ -580,7 +580,7 @@ herr_t H5Sselect_all (hid_t spaceid)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }   /* H5Sselect_all() */
 
 
@@ -660,6 +660,6 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     iter->all.offset+=elem_used;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_all_get_seq_list() */
 

@@ -109,6 +109,6 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
     ret_value = nbytes;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif /*H5_HAVE_FILTER_SHUFFLE */

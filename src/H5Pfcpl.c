@@ -93,7 +93,7 @@ H5Pget_version(hid_t plist_id, int *boot/*out*/, int *freelist/*out*/,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header version");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -144,7 +144,7 @@ H5Pset_userblock(hid_t plist_id, hsize_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set user block");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -187,7 +187,7 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,"can't get user block");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -241,7 +241,7 @@ H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set byte number for object ");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -286,7 +286,7 @@ H5Pget_sizes(hid_t plist_id,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get byte number for object ");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 #ifdef H5_WANT_H5_V1_4_COMPAT
@@ -348,7 +348,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -397,7 +397,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , int *lk /*out */ )
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #else /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -458,7 +458,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -507,7 +507,7 @@ H5Pget_sym_k(hid_t plist_id, int *ik /*out */ , unsigned *lk /*out */ )
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for symbol table leaf nodes");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
@@ -557,7 +557,7 @@ H5Pset_istore_k(hid_t plist_id, int ik)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -604,6 +604,6 @@ H5Pget_istore_k(hid_t plist_id, int *ik /*out */ )
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 

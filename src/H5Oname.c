@@ -98,7 +98,7 @@ done:
             H5MM_xfree (mesg);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -134,7 +134,7 @@ H5O_name_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     HDstrcpy((char*)p, mesg->s);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -179,7 +179,7 @@ H5O_name_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -218,7 +218,7 @@ H5O_name_size(H5F_t UNUSED *f, const void *_mesg)
     ret_value = mesg->s ? HDstrlen(mesg->s) + 1 : 0;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -253,7 +253,7 @@ H5O_name_reset(void *_mesg)
     mesg->s = H5MM_xfree(mesg->s);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -293,5 +293,5 @@ H5O_name_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
             mesg->s);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

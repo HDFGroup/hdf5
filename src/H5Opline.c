@@ -141,7 +141,7 @@ done:
         H5FL_FREE(H5O_pline_t,pline);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -212,7 +212,7 @@ H5O_pline_encode (H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -288,7 +288,7 @@ done:
             H5FL_FREE(H5O_pline_t,dst);
     }
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -347,7 +347,7 @@ H5O_pline_size (H5F_t UNUSED *f, const void *mesg)
     ret_value=size;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -386,7 +386,7 @@ H5O_pline_reset (void *mesg)
     HDmemset(pline, 0, sizeof *pline);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -416,7 +416,7 @@ H5O_pline_free (void *mesg)
     H5FL_FREE(H5O_pline_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -489,5 +489,5 @@ H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -91,7 +91,7 @@ H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     ret_value=cont;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -128,7 +128,7 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     H5F_ENCODE_LENGTH(f, p, cont->size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -174,5 +174,5 @@ H5O_cont_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
 	      (int) (cont->chunkno));
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -111,7 +111,7 @@ H5F_init(void)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -429,7 +429,7 @@ H5F_init_interface(void)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -470,7 +470,7 @@ H5F_term_interface(void)
 	    n = 1; /*H5I*/
 	}
     }
-    FUNC_LEAVE(n);
+    FUNC_LEAVE_NOAPI(n);
 }
 
 
@@ -525,7 +525,7 @@ H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -579,7 +579,7 @@ H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -631,7 +631,7 @@ H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -658,7 +658,7 @@ H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 
     H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE, FALSE);
 
-    FUNC_LEAVE(0);
+    FUNC_LEAVE_NOAPI(0);
 }
 
 
@@ -689,7 +689,7 @@ H5F_flush_all(hbool_t invalidate)
     H5I_search(H5I_FILE,(H5I_search_func_t)H5F_flush_all_cb,(void*)&invalidate);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -722,7 +722,7 @@ H5F_close_all(void)
 	HGOTO_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "unable to close one or more files");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -806,7 +806,7 @@ H5Fget_create_plist(hid_t file_id)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -893,7 +893,7 @@ H5Fget_access_plist(hid_t file_id)
     } 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -930,7 +930,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types, unsigned *obj_id_count)
     ret_value = H5F_get_obj_count(f, types, obj_id_count);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -962,7 +962,7 @@ H5F_get_obj_count(H5F_t *f, unsigned types, unsigned *obj_id_count)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get counts of opened file IDs and object IDs in the file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -998,7 +998,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *oid_list)
     ret_value = H5F_get_obj_ids(f, types, oid_list);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1027,7 +1027,7 @@ H5F_get_obj_ids(H5F_t *f, unsigned types, hid_t *oid_list)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object IDs opened in the file");  
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1099,7 +1099,7 @@ done:
 #endif /* LATER */
     if(olist!=NULL)
 	H5MM_xfree(olist);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1169,7 +1169,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     }
 
 done:
-    FUNC_LEAVE(ret_value); 
+    FUNC_LEAVE_NOAPI(ret_value); 
 }
 
 
@@ -1205,7 +1205,7 @@ herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
     ret_value=H5F_get_vfd_handle(file, fapl, file_handle);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1237,7 +1237,7 @@ herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void**file_handle)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1269,7 +1269,7 @@ H5F_equal(void *_haystack, hid_t UNUSED id, const void *_needle)
 
     retval = (0==H5FD_cmp(haystack->shared->lf, needle));
 
-    FUNC_LEAVE(retval);
+    FUNC_LEAVE_NOAPI(retval);
 }
 
 
@@ -1337,7 +1337,7 @@ H5F_locate_signature(H5FD_t *file)
     ret_value=addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1387,7 +1387,7 @@ done:
         if(H5FD_close(file)<0 && ret_value>=0)
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -1508,7 +1508,7 @@ done:
 	H5FL_FREE(H5F_t,f);
     }
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1622,7 +1622,7 @@ H5F_dest(H5F_t *f)
     }
 
 done:    
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2081,7 +2081,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 done:
     if (!ret_value && file)
         H5F_dest(file); /* Don't indicate error here, to leave the error stack with the correct error */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2194,7 +2194,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
 done:
     if (ret_value<0 && new_file)
         H5F_close(new_file);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2270,7 +2270,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 done:
     if (ret_value<0 && new_file)
         H5F_close(new_file);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2354,7 +2354,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -2640,7 +2640,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
     ret_value= (nerrors ? FAIL : SUCCEED);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_flush() */
 
 
@@ -2843,7 +2843,7 @@ H5F_close(H5F_t *f)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_close() */
 
 
@@ -2888,7 +2888,7 @@ H5Fclose(hid_t file_id)
 	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3006,7 +3006,7 @@ done:
     if (ret_value<0 && mount_point)
 	H5G_close(mount_point);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3129,7 +3129,7 @@ done:
         if(H5G_close(mounted)<0 && ret_value>=0)
 	    HDONE_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "can't close group");
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3200,7 +3200,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
     } while (!cmp);
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3234,7 +3234,7 @@ H5F_has_mount(const H5F_t *file)
         ret_value=FALSE;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_has_mount() */
 
 
@@ -3268,7 +3268,7 @@ H5F_is_mount(const H5F_t *file)
         ret_value=FALSE;
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_is_mount() */
 
 
@@ -3315,7 +3315,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3360,7 +3360,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3412,7 +3412,7 @@ H5Freopen(hid_t file_id)
 done:
     if (ret_value<0 && new_file)
 	H5F_close(new_file);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -3440,7 +3440,7 @@ H5F_get_intent(const H5F_t *f)
 
     assert(f);
 
-    FUNC_LEAVE(f->intent);
+    FUNC_LEAVE_NOAPI(f->intent);
 }
 
 
@@ -3472,7 +3472,7 @@ H5F_sizeof_addr(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE(f->shared->sizeof_addr);
+    FUNC_LEAVE_NOAPI(f->shared->sizeof_addr);
 }
 
 
@@ -3504,7 +3504,7 @@ H5F_sizeof_size(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE(f->shared->sizeof_size);
+    FUNC_LEAVE_NOAPI(f->shared->sizeof_size);
 }
 
 
@@ -3537,7 +3537,7 @@ unsigned H5F_sym_leaf_k(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE(f->shared->sym_leaf_k);
+    FUNC_LEAVE_NOAPI(f->shared->sym_leaf_k);
 }
 
 
@@ -3572,7 +3572,7 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     assert(f->shared);
     assert(type);
 
-    FUNC_LEAVE(f->shared->btree_k[type->id]);
+    FUNC_LEAVE_NOAPI(f->shared->btree_k[type->id]);
 } /* end H5F_Kvalue() */
 
 
@@ -3602,7 +3602,7 @@ H5F_get_driver_id(const H5F_t *f)
     assert(f->shared);
     assert(f->shared->lf);
 
-    FUNC_LEAVE(f->shared->lf->driver_id);
+    FUNC_LEAVE_NOAPI(f->shared->lf->driver_id);
 }
 
 
@@ -3639,7 +3639,7 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 	HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_get_fileno() */
 
 
@@ -3668,7 +3668,7 @@ H5F_get_base_addr(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-    FUNC_LEAVE(f->shared->base_addr);
+    FUNC_LEAVE_NOAPI(f->shared->base_addr);
 } /* end H5F_get_base_addr() */
 
 
@@ -3723,7 +3723,7 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_
 	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3782,7 +3782,7 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
 	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -3911,7 +3911,7 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
     *addr_p |= ((uint64_t)objno[1]) << (8*sizeof(long));
 #endif
     
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -4026,5 +4026,5 @@ H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

@@ -400,7 +400,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -760,7 +760,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     *hdr++ = (flags >> 16) & 0xff;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -810,7 +810,7 @@ done:
             H5FL_FREE(H5T_t,dt);
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -849,7 +849,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode type");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -897,7 +897,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     ret_value=dst;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -986,7 +986,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1017,7 +1017,7 @@ H5O_dtype_reset(void *_mesg)
         H5T_free(dt);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1047,7 +1047,7 @@ H5O_dtype_free (void *mesg)
     H5FL_FREE(H5T_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1086,7 +1086,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type is not sharable");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1131,7 +1131,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     dt->state = H5T_STATE_NAMED;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1423,5 +1423,5 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

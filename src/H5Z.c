@@ -53,7 +53,7 @@ H5Z_init_interface (void)
     H5Z_register (H5Z_FILTER_SHUFFLE, "shuffle", H5Z_filter_shuffle);
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -177,7 +177,7 @@ H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -235,7 +235,7 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -272,7 +272,7 @@ H5Zunregister(H5Z_filter_t id)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to unregister filter");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Zunregister() */
 
 
@@ -316,7 +316,7 @@ H5Z_unregister (H5Z_filter_t id)
     H5Z_table_used_g--;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5Z_unregister() */
 
 
@@ -355,7 +355,7 @@ H5Zfilter_avail(H5Z_filter_t id)
         } /* end if */
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 } /* end H5Zfilter_avail() */
 
 
@@ -423,7 +423,7 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     pline->nfilters++;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -458,7 +458,7 @@ H5Z_find(H5Z_filter_t id)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -586,6 +586,6 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
     *filter_mask = failed;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

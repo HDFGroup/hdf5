@@ -235,7 +235,7 @@ H5F_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
 	     4 +			/*filter mask		*/
 	     udata->mesg.ndims*8;	/*dimension indices	*/
 
-    FUNC_LEAVE(nbytes);
+    FUNC_LEAVE_NOAPI(nbytes);
 }
 
 
@@ -277,7 +277,7 @@ H5F_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 	UINT64DECODE(raw, key->offset[i]);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -319,7 +319,7 @@ H5F_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
 	UINT64ENCODE(raw, key->offset[i]);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -361,7 +361,7 @@ H5F_istore_debug_key (FILE *stream, int indent, int fwidth,
     HDfputs ("}\n", stream);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -406,7 +406,7 @@ H5F_istore_cmp2(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     ret_value = H5V_vector_cmp_s(udata->mesg.ndims, lt_key->offset, rt_key->offset);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -464,7 +464,7 @@ H5F_istore_cmp3(H5F_t UNUSED *f, void *_lt_key, void *_udata,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -541,7 +541,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -604,7 +604,7 @@ H5F_istore_found(H5F_t UNUSED *f, haddr_t addr, const void *_lt_key,
         udata->key.offset[u] = lt_key->offset[u];
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -744,7 +744,7 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -779,7 +779,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
 
     bt_udata->total_storage += lt_key->nbytes;
 
-    FUNC_LEAVE(H5B_ITER_CONT);
+    FUNC_LEAVE_NOAPI(H5B_ITER_CONT);
 } /* H5F_istore_iter_allocated() */
 
 
@@ -832,7 +832,7 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
         bt_udata->total_storage++;
     }
 
-    FUNC_LEAVE(H5B_ITER_CONT);
+    FUNC_LEAVE_NOAPI(H5B_ITER_CONT);
 } /* H5F_istore_iter_dump() */
 
 
@@ -868,7 +868,7 @@ H5F_istore_init (H5F_t *f)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -989,7 +989,7 @@ done:
         if(ent->chunk)
             ent->chunk = H5MM_xfree(ent->chunk);
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1058,7 +1058,7 @@ H5F_istore_preempt(H5F_t *f, H5F_rdcc_ent_t * ent, hbool_t flush)
     H5FL_FREE(H5F_rdcc_ent_t, ent);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1104,7 +1104,7 @@ H5F_istore_flush (H5F_t *f, hbool_t preempt)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1151,7 +1151,7 @@ H5F_istore_dest (H5F_t *f)
     HDmemset (rdcc, 0, sizeof(H5F_rdcc_t));
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1269,7 +1269,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFLUSH, FAIL, "unable to preempt one or more raw data cache entry");
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1524,7 +1524,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 done:
     if (!ret_value)
         H5MM_xfree (chunk);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1625,7 +1625,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->locked = FALSE;
     }
     
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1806,7 +1806,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1988,7 +1988,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     } /* end while */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2037,7 +2037,7 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree");
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2077,7 +2077,7 @@ H5F_istore_allocated(H5F_t *f, unsigned ndims, haddr_t addr)
     ret_value=udata.total_storage;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2116,7 +2116,7 @@ H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims, haddr_t addr)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2181,7 +2181,7 @@ H5F_istore_stats (H5F_t *f, hbool_t headers)
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2215,7 +2215,7 @@ H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent,
     H5B_debug (f, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2267,7 +2267,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
     ret_value=udata.addr;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* H5F_istore_get_addr() */
 
 
@@ -2537,7 +2537,7 @@ done:
     if(chunk!=NULL)
         H5MM_xfree(chunk);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2717,7 +2717,7 @@ H5F_istore_prune_by_extent(H5F_t *f, const H5O_layout_t *layout, const H5S_t * s
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over B-tree");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2777,7 +2777,7 @@ H5F_istore_prune_extent(H5F_t *f, void *_lt_key, haddr_t UNUSED addr,
 	} /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2816,7 +2816,7 @@ H5F_istore_remove(H5F_t *f, haddr_t addr, void *_lt_key /*in,out */ ,
     *rt_key_changed = FALSE;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -2995,6 +2995,6 @@ done:
     if(space_chunk)
 	H5S_close(space_chunk);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

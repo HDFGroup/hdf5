@@ -262,7 +262,7 @@ H5E_get_stack(void)
     ret_value=estack;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 #endif  /* H5_HAVE_THREADSAFE */
 
@@ -292,7 +292,7 @@ H5E_init_interface (void)
 
     H5E_auto_data_g = stderr;
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -334,7 +334,7 @@ H5Eset_auto(H5E_auto_t func, void *client_data)
     H5E_auto_data_g = client_data;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -366,7 +366,7 @@ H5Eget_auto(H5E_auto_t *func, void **client_data)
     if (client_data) *client_data = H5E_auto_data_g;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -395,7 +395,7 @@ H5Eclear(void)
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -453,7 +453,7 @@ H5Eprint(FILE *stream)
     ret_value = H5E_walk (H5E_WALK_DOWNWARD, H5E_walk_cb, (void*)stream);
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -484,7 +484,7 @@ H5Ewalk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
     ret_value = H5E_walk (direction, func, client_data);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -549,7 +549,7 @@ H5E_walk_cb(int n, H5E_error_t *err_desc, void *client_data)
     fprintf (stream, "%*sminor(%02d): %s\n",
 	     indent*2, "", err_desc->min_num, min_str);
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -591,7 +591,7 @@ H5Eget_major (H5E_major_t n)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -633,7 +633,7 @@ H5Eget_minor (H5E_minor_t n)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -696,7 +696,7 @@ H5E_push(H5E_major_t maj_num, H5E_minor_t min_num, const char *function_name,
 	estack->nused++;
     }
     
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -734,7 +734,7 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
     ret_value = H5E_push(maj, min, func, file, line, str);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -763,7 +763,7 @@ H5E_clear(void)
     if (estack) estack->nused = 0;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -821,6 +821,6 @@ H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 

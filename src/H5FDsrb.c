@@ -174,7 +174,7 @@ H5FD_srb_init(void)
     ret_value=H5FD_SRB_g;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -228,7 +228,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     ret_value = H5P_set_driver(plist, H5FD_SRB, &fa);
  
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -273,7 +273,7 @@ H5Pget_fapl_srb(hid_t fapl_id, SRB_Info *info/*out*/)
         *info = fa->info;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_API(ret_value);
 }
 
 
@@ -408,7 +408,7 @@ done:
         if(srb_fid>=0)
             srbFileClose(fa->srb_conn, srb_fid);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -439,7 +439,7 @@ H5FD_srb_close(H5FD_t *_file)
     H5MM_xfree(file);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -475,7 +475,7 @@ H5FD_srb_query(const UNUSED H5FD_t *_f, unsigned long *flags /* out */)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -508,7 +508,7 @@ H5FD_srb_get_eoa(H5FD_t *_file)
     ret_value=file->eoa; 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -541,7 +541,7 @@ H5FD_srb_set_eoa(H5FD_t *_file, haddr_t addr)
     file->eoa = addr;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -573,7 +573,7 @@ H5FD_srb_get_eof(H5FD_t *_file)
     ret_value=file->eof; 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -605,7 +605,7 @@ H5FD_srb_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     *file_handle = &(file->fd);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -676,7 +676,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -741,7 +741,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -775,7 +775,7 @@ done:
         clFinish(file->srb_conn);    
     } /* end if */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_SRB */

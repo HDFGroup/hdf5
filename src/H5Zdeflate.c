@@ -127,7 +127,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 done:
     if(outbuf)
         H5MM_xfree(outbuf);
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif /* H5_HAVE_FILTER_DEFLATE */

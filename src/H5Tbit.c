@@ -197,7 +197,7 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     ret_value=val;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -398,7 +398,7 @@ H5T_bit_find (uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -466,5 +466,5 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
 	buf[idx] |= acc & mask;
     }
 
-    FUNC_LEAVE(carry ? TRUE : FALSE);
+    FUNC_LEAVE_NOAPI(carry ? TRUE : FALSE);
 }

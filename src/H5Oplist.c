@@ -263,7 +263,7 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     ret_value = new_plist;  /* success */
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -370,7 +370,7 @@ H5O_plist_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -438,7 +438,7 @@ H5O_plist_size(H5F_t UNUSED *f, const void *mesg)
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -464,7 +464,7 @@ H5O_plist_free(void *mesg)
     ret_value = H5P_close(plist);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -549,5 +549,5 @@ H5O_plist_debug(H5F_t UNUSED *f, const void *mesg, FILE *stream,
     HDfprintf(stream, "%*s}\n", indent, "");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

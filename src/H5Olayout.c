@@ -139,7 +139,7 @@ done:
         if(mesg)
             H5FL_FREE(H5O_layout_t,mesg);
     } /* end if */
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -216,7 +216,7 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -268,7 +268,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     ret_value=dest;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -315,7 +315,7 @@ H5O_layout_meta_size(H5F_t *f, const void *_mesg)
         ret_value += H5F_SIZEOF_ADDR(f); /* file address of data or B-tree for chunked dataset */ 
 
 done:                
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }   
                  
 
@@ -354,7 +354,7 @@ H5O_layout_size(H5F_t *f, const void *_mesg)
     if(mesg->type==H5D_COMPACT)
         ret_value += mesg->size;/* data for compact dataset             */
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -391,7 +391,7 @@ H5O_layout_reset (void *_mesg)
     } /* end if */
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -426,7 +426,7 @@ H5O_layout_free (void *_mesg)
     H5FL_FREE(H5O_layout_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -478,5 +478,5 @@ H5O_layout_debug(H5F_t UNUSED *f, const void *_mesg, FILE * stream,
     HDfprintf(stream, "}\n");
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

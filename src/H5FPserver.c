@@ -226,7 +226,7 @@ H5FP_sap_receive_loop(void)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -269,7 +269,7 @@ H5FP_sap_receive(struct SAP_request *req, int source, int tag, char **buf)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -286,7 +286,7 @@ static int H5FP_object_lock_cmp(struct sap_obj_lock *o1,
     FUNC_ENTER_NOINIT(H5FP_object_lock_cmp);
     assert(o1);
     assert(o2);
-    FUNC_LEAVE(HDmemcmp(o1->oid, o2->oid, sizeof(o1->oid)));
+    FUNC_LEAVE_NOAPI(HDmemcmp(o1->oid, o2->oid, sizeof(o1->oid)));
 }
 
 /*
@@ -322,7 +322,7 @@ H5FP_new_object_lock(const unsigned char *oid, unsigned int rank,
     ret_value->rw_lock = rw_lock;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -337,7 +337,7 @@ H5FP_free_object_lock(struct sap_obj_lock *ol)
 {
     FUNC_ENTER_NOINIT(H5FP_free_object_lock);
     HDfree(ol);
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 /*
@@ -370,7 +370,7 @@ H5FP_find_object_lock(struct sap_file_struct *fs, unsigned char *oid)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -396,7 +396,7 @@ H5FP_remove_object_lock_from_list(struct sap_file_struct *fs,
         ret_value = SUCCEED;
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -412,7 +412,7 @@ H5FP_file_mod_cmp(struct sap_file_mod *k1, struct sap_file_mod *k2, int UNUSED c
     FUNC_ENTER_NOINIT(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE(k1->key - k2->key);
+    FUNC_LEAVE_NOAPI(k1->key - k2->key);
 }
 
 /*
@@ -429,7 +429,7 @@ H5FP_new_file_mod_key(void)
     static unsigned long key = 0;
 
     FUNC_ENTER_NOINIT(H5FP_new_file_mod_key);
-    FUNC_LEAVE(key++);
+    FUNC_LEAVE_NOAPI(key++);
 }
 
 /*
@@ -452,7 +452,7 @@ H5FP_free_mod_node(struct sap_file_mod *fs)
         HDfree(fs);
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 /*
@@ -494,7 +494,7 @@ H5FP_new_file_mod_node(unsigned rank, enum sap_obj_type obj_type,
     ret_value->key = H5FP_new_file_mod_key();
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -525,7 +525,7 @@ H5FP_add_file_mod_to_list(struct sap_file_struct *fs, enum sap_obj_type obj_type
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -555,7 +555,7 @@ H5FP_remove_mod_from_list(struct sap_file_struct *fs, struct sap_file_mod *mod)
         ret_value = SUCCEED;
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -582,7 +582,7 @@ H5FP_free_file_struct_node(struct sap_file_struct *fs)
         HDfree(fs);
     }
 
-    FUNC_LEAVE(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 /*
@@ -598,7 +598,7 @@ H5FP_file_struct_cmp(struct sap_file_struct *k1, struct sap_file_struct *k2, int
     FUNC_ENTER_NOINIT(H5FP_file_struct_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE(k1->sap_file_id - k2->sap_file_id);
+    FUNC_LEAVE_NOAPI(k1->sap_file_id - k2->sap_file_id);
 }
 
 /*
@@ -638,7 +638,7 @@ H5FP_new_file_struct_node(unsigned int sap_file_id, char *filename)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -666,7 +666,7 @@ H5FP_find_file_struct(unsigned int sap_file_id)
             ret_value = (struct sap_file_struct *)node->data;
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -694,7 +694,7 @@ H5FP_add_new_file_struct_to_list(unsigned int sap_file_id, char *filename)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -726,7 +726,7 @@ H5FP_remove_file_id_from_list(unsigned int sap_file_id)
         ret_value = SUCCEED;
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /** Functions to reply to requests **/
@@ -750,7 +750,7 @@ H5FP_send_reply(unsigned int to, unsigned int req_id, unsigned int file_id,
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /** Functions to handle SAP requests **/
@@ -768,7 +768,7 @@ H5FP_gen_sap_file_id()
 {
     static unsigned int i = 0;
     FUNC_ENTER_NOINIT(H5FP_gen_sap_file_id);
-    FUNC_LEAVE(i++);
+    FUNC_LEAVE_NOAPI(i++);
 }
 
 /*
@@ -819,7 +819,7 @@ H5FP_sap_handle_open_request(struct SAP_request req, char *mdata, int UNUSED md_
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -1032,7 +1032,7 @@ HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
 
     HDfree(oids);
     H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 } 
 
 /*
@@ -1139,7 +1139,7 @@ done:
 HDfprintf(stderr, "exit_state == %d\n", exit_state);
     HDfree(oids);
     H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -1189,7 +1189,7 @@ H5FP_sap_handle_change_request(struct SAP_request req, char *mdata, int md_len)
     }
 
     H5FP_send_reply(req.proc_rank, req.req_id, req.sap_file_id, exit_state);
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -1270,7 +1270,7 @@ HDfprintf(stderr, "%s: Trying to Synchronize!\n", FUNC);
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 /*
@@ -1301,7 +1301,7 @@ H5FP_sap_handle_close_request(struct SAP_request req)
     }
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 #endif  /* H5_HAVE_FPHDF5 */

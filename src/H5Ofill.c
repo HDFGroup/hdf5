@@ -149,7 +149,7 @@ done:
 	H5FL_FREE(H5O_fill_new_t,mesg);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -201,7 +201,7 @@ done:
 	H5FL_FREE(H5O_fill_t,mesg);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -251,7 +251,7 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
         } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -286,7 +286,7 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
         HDmemcpy(p, mesg->buf, mesg->size);
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -362,7 +362,7 @@ done:
             H5FL_FREE(H5O_fill_new_t,dest);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -426,7 +426,7 @@ done:
             H5FL_FREE(H5O_fill_t,dest);
     }
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -469,7 +469,7 @@ H5O_fill_new_size(H5F_t UNUSED *f, const void *_mesg)
 		(mesg->size>0 ? mesg->size : 0);	/* Size of fill value	 */
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -506,7 +506,7 @@ H5O_fill_size(H5F_t UNUSED *f, const void *_mesg)
     ret_value=4+mesg->size;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -548,7 +548,7 @@ H5O_fill_new_reset(void *_mesg)
     mesg->fill_defined = (H5D_fill_value_t)0; 
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -585,7 +585,7 @@ H5O_fill_reset(void *_mesg)
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -615,7 +615,7 @@ H5O_fill_new_free (void *mesg)
     H5FL_FREE(H5O_fill_new_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -645,7 +645,7 @@ H5O_fill_free (void *mesg)
     H5FL_FREE(H5O_fill_t,mesg);
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -689,7 +689,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -733,7 +733,7 @@ H5O_fill_debug(H5F_t UNUSED *f, const void *_mesg, FILE *stream,
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -826,5 +826,5 @@ done:
     if (bkg)
         H5MM_xfree(bkg);
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }

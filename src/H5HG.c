@@ -202,7 +202,7 @@ H5HG_create (H5F_t *f, size_t size)
         H5FL_ARR_FREE (H5HG_obj_t,heap->obj);
         H5FL_FREE (H5HG_heap_t,heap);
     }
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -383,7 +383,7 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void * UNUSED udata1,
         H5FL_ARR_FREE(H5HG_obj_t,heap->obj);
         H5FL_FREE (H5HG_heap_t,heap);
     }
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -443,7 +443,7 @@ H5HG_flush (H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t 
     }
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -539,7 +539,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     }
 
     heap->dirty = 1;
-    FUNC_LEAVE (idx);
+    FUNC_LEAVE_NOAPI(idx);
 }
 
 
@@ -632,7 +632,7 @@ H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/)
     hobj->idx = idx;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -694,7 +694,7 @@ H5HG_peek (H5F_t *f, H5HG_t *hobj)
     }
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -763,7 +763,7 @@ H5HG_read (H5F_t *f, H5HG_t *hobj, void *object/*out*/)
     ret_value=object;
 
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -818,7 +818,7 @@ H5HG_link (H5F_t *f, H5HG_t *hobj, int adjust)
     ret_value=heap->obj[hobj->idx].nrefs;
 
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -918,7 +918,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
     }
     
 done:
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
 
 
@@ -1018,5 +1018,5 @@ H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
     }
     
 done:
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value);
 }
