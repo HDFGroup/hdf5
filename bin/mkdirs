@@ -16,9 +16,7 @@ chmodprog="${CHMODPROG-chmod}"
 mkdirprog="${MKDIRPROG-mkdir}"
 
 make_dir () {
-  if test -d $1; then
-    :
-  else
+  if test ! -d $1; then
     make_dir `echo $1 | sed -e 's#/[^/]*$##'`
     $mkdirprog $1
     $chmodprog 755 $1
