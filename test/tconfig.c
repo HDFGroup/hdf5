@@ -214,6 +214,8 @@ test_config_malloc(void)
 	    "expected non-NULL, got NULL\n");
 	num_errs++;
     }
+
+    free(pt);
 #else
     if (pt!=NULL){
 	print_func("Error verifying H5_MALLOC_WORKS: "
