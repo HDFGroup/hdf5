@@ -31,9 +31,7 @@ Description:
 PropList::PropList( const hid_t plist_id ) : IdComponent(0)
 {
     if (H5I_GENPROP_CLS == H5Iget_type(plist_id)
-            || plist_id==H5P_FILE_CREATE
             || plist_id==H5P_FILE_ACCESS
-            || plist_id==H5P_DATASET_CREATE
             || plist_id==H5P_MOUNT) {
         // call C routine to create the new property
         id = H5Pcreate(plist_id);
