@@ -1167,6 +1167,7 @@
 ./tools/h5repack/testh5repack_main.c
 ./tools/h5repack/testh5repack_make.c
 ./tools/h5repack/testh5repack_util.c
+./tools/h5repack/testh5repack_detect_szip.c
 
 ./tools/h5ls/Dependencies
 ./tools/h5ls/Makefile.in

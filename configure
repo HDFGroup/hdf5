@@ -24786,7 +24786,6 @@ fi
 
 
  USE_FILTER_SZIP="no"
- USE_FILTER_SZIP_ENCODER="no"
 
 # Check whether --with-szlib or --without-szlib was given.
 if test "${with_szlib+set}" = set; then
@@ -25280,14 +25279,8 @@ fi
 
 
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define SZIP_CAN_ENCODE 1
-_ACEOF
-
         echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-        USE_FILTER_SZIP_ENCODER="yes"
     else
         echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -25297,6 +25290,11 @@ echo "${ECHO_T}no" >&6
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
+    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(encoder)"
+    else
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(no encoder)"
+    fi
 fi
 
  PABLO=""
@@ -34661,7 +34659,6 @@ s,@AR@,$AR,;t t
 s,@DEPEND@,,;t t
 s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
 s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
-s,@USE_FILTER_SZIP_ENCODER@,$USE_FILTER_SZIP_ENCODER,;t t
 s,@PABLO@,$PABLO,;t t
 s,@HAVE_PABLO@,$HAVE_PABLO,;t t
 s,@SSL@,$SSL,;t t
