@@ -137,7 +137,8 @@ PRINT_TRAILER()
 {
     PRINT "*** finished tests in $HOSTNAME ***"
     date; TotalEndTime=`SecOfDay`
-    PRINT Grand total tests time = `ElapsedTime $TotalStartTime $TotalEndTime`
+    PRINT "${HOSTNAME}: Ran $n_test $runtest_type, Grand total test time = " \
+          "`ElapsedTime $TotalStartTime $TotalEndTime`" | tee -a $TIMELOG
     PRINT_BLANK
 }
 
@@ -538,6 +539,7 @@ SNAPYARD=`cd $HOME/snapshots-${H5VERSION} && /bin/pwd`
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
 PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}
 FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
+TIMELOG=${SNAPYARD}/log/TIME_LOG_${TODAY}
 CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
 DIFFLOG=${SNAPYARD}/log/DIFF_LOG_${TODAY}
@@ -623,7 +625,8 @@ fi
 if [ -z "$NODIFF" ]; then
     $SNAPSHOT diff >> $DIFFLOG 2>&1
     errcode=$?
-    if [ $errcode -eq 0 ]; then
+    # check the errcode only if NOT in DEBUG MODE
+    if [ -z "$DEBUGMODE" -a $errcode -eq 0 ]; then
 	# no need to run test
 	PRINT "NO TEST: no significant differences between current and previous versions" |
 	    tee -a $PASSEDLOG
@@ -642,7 +645,10 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     PRINT_BLANK
     TEST_TYPE="launching"
     cd ${SNAPYARD}/log
+    n_test=0
+    runtest_type="hosts"
     for h in $TESTHOST; do
+	n_test=`expr $n_test + 1`
 	TMP_OUTPUT="#$h.out"
 	(PRINT "=============="
 	 PRINT "Testing $h"
@@ -680,7 +686,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	TMP_OUTPUT="#$h.out"
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
-	(tail -2 $TMP_OUTPUT | grep -s '^Grand total' > /dev/null 2>&1) ||
+	(tail -2 $TMP_OUTPUT | grep -s 'Grand total' > /dev/null 2>&1) ||
 	    (REPORT_ERR "****FAILED ${h}: snaptest did not complete****" &&
 		PRINT_BLANK)
 	rm $TMP_OUTPUT
@@ -698,6 +704,7 @@ fi
 # test at all.
 # 
 n_test=1
+runtest_type="tests"
 TEST="`echo $TEST_TYPES | cut -f1 -d';'`"
 while [ -n "$TEST" ]; do
     StartTime=`SecOfDay`
