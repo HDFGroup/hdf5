@@ -6,7 +6,7 @@
  * under name /G/D and data is printed out. 
  */
 
-#include<hdf5.h>
+#include "hdf5.h"
 
 #define FILE1 "mount1.h5"
 #define FILE2 "mount2.h5"

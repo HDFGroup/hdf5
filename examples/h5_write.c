@@ -3,7 +3,7 @@
  *  Data conversion is performed during write operation.  
  */
  
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define FILE        "SDS.h5"
 #define DATASETNAME "IntArray" 
