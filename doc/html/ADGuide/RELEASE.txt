@@ -1,4 +1,4 @@
-HDF5 version 1.7.31 released on Thu Jul 15 22:46:46 CDT 2004
+HDF5 version 1.7.32 released on Sun Aug  1 03:44:41 CDT 2004
 ================================================================================
 
 
@@ -36,17 +36,39 @@ New Features
 
     Configuration:
     --------------
+        - Added some initial support for making purify (or similar memory
+            checking products) happier by initializing buffers to zero and
+            disabling the internal free list code.  To take advantage of this,
+            define 'H5_USING_PURIFY' in your CFLAGS when building the library.
+            QAK - 2004/07/23
         - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
-	  is used with optimization NOT off.  AKC - 2004/05/20
+	    is used with optimization NOT off.  AKC - 2004/05/20
 	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
         - Prefix default is changed from /usr/local to `pwd`/hdf5.
-          AKC - 2003/07/09
+            AKC - 2003/07/09
 
     Library:
     --------
+        - 4 new API functions, H5Tencode, H5Tdecode, H5Sencode, H5Sdecode were
+            added to the library.  Given object ID, these functions encode and 
+            decode HDF5 objects(data type and space) information into and from 
+            binary buffer.        SLU - 2004/07/21
+        - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for 
+            SZIP compression. Now there is no restriction on the size and shape of the
+            chunk except that the total number of elements in the chunk cannot be 
+            bigger than 'pixels_per_block' parameter provided by the user.  
+                                                                     EIP - 2004/07/21  
+        - Added support for SZIP without encoder.  Added H5Zget_filter_info
+            and changed H5Pget_filter and H5Pget_filter_by_id to support this
+            change.  JL/NF - 2004/06/30
+        - SZIP always uses K13 compression.  This flag no longer needs to
+            be set when calling H5Pset_szip.  If the flag for CHIP
+            compression is set, it will be ignored (since the two are mutually
+            exclusive).  JL/NF - 2004/6/30
         - A new API function H5Fget_name was added.  It returns the name
             of the file by object(file, group, data set, named data type,
             attribute) ID.  SLU - 2004/06/29
+        - Added support for user defined identifier types.  NF/JL - 2004/06/29
         - A new API function H5Fget_filesize was added.  It returns the
             actual file size of the opened file.  SLU - 2004/06/24
 	- New Feature of Data transformation is added.  AKC - 2004/05/03.
@@ -88,10 +110,6 @@ New Features
             field in the H5G_stat_t struct for testing if two objects are the
             same within a file.  QAK - 2003/08/08
         - Switched over to new error API. SLU - 2003/07/25
-        - Added support for user defined identifier types.  NF/JL - 2004/06/29
-        - Added support for SZIP without encoder.  Added H5Zget_filter_info
-          and changed H5Pget_filter and H5Pget_filter_by_id to support this
-          change.
 
     Parallel Library:
     -----------------
@@ -132,8 +150,18 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Absoft compiler f95 v9.0 supported on Linux 2.4
+                            EIP - 2004/07/29
+        - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
+          compiler version 8.1. This is a default compiler.
+        - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
+          version 8.2; set F9X environment varibale to f95, for example
+          setenv F9X f95
+          Use --disable-shared --enable-static configure flags when Absoft
+          compiler is used.
+                             EIP - 2004/07/27
         - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
-            Compiler version 8.1 Beta. Use "--disable-shared --enable-static"
+            Compiler version 8.1 Use "--disable-shared --enable-static"
             configure flags along with the "--enable-fortran" flag to build
             Fortran library.  EIP - 2004/01/07
 
@@ -142,6 +170,30 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed obscure bug where a filter which failed during chunk allocation
+            could allow library to write uncompressed data to disk but think
+            the data was compressed.  QAK - 2004/07/29
+        - Fixed bug where I/O to an extendible chunked dataset with zero-sized
+            dimensions would cause library to fail an assertion.
+            QAK - 2004/07/27
+        - Fixed bug where chunked datasets which have filters defined,
+            allocation time set to "late" and whose chunks don't align with
+            the dataspace bounds could have incorrect data stored when
+            overwriting the entire dataset on the first write.  QAK - 2004/07/27
+        - Added check to ensure that dataspaces have extents set. JML-2004/07/26
+        - Fixed bug on some Solaris systems where HDF5 would try to use
+            gettimeofday() when that function didn't work properly.
+            JML - 2004/07/23
+        - Fixed bug in H5Sset_extent_simple where setting maximum size to
+            non-zero, then to zero would cause an error.  JML - 2004/07/20
+        - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite
+            when not writing data ("none" selection or hyperslab or point
+            selection with no elements defined).  QAK - 2004/07/20
+        - Calling H5Gcreate() on "/" or "." throws an error instead of
+            failing quietly. JML - 2004/07/19
+        - Fixed bug where setting file address size to be very small could
+            trigger an assert if the file grew to more than 64 KB.  Now throws
+            an error and data can be recovered. JL/NF - 2004/07/14
         - Fixed bug where "resurrecting" a dataset was failing.
             QAK - 2004/07/14
         - Fixed bug where incorrect data could be read from a chunked dataset
@@ -339,8 +391,9 @@ Platforms Tested
                                   g++ 3.2.2, 3.2.3
                                   Intel(R) C++ Version 7.1
                                   Intel(R) Fortran Compiler Version 7.1
-                                  PGI compilers (pgcc, pgf90, pgCC) version 4.0-2
+                                  PGI compilers (pgcc, pgf90, pgCC) version 5.0-2
                                   MPIch 1.2.4
+                                  Absoft Fortran v9.0
     OSF1 V5.1                     Compaq C V6.4-014
                                   Compaq C V6.3-027
 				  Compaq Fortran V5.5-1877
@@ -374,7 +427,8 @@ Platforms Tested
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
-                                  IBM XL Fortran compiler version 8.1 Beta
+                                  IBM XL Fortran compiler version 8.1 
+                                  Absoft Fortran v8.2
                                   
 
 
@@ -524,13 +578,12 @@ Known Problems
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
+ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
-* On some platforms that use Intel compilers to build HDF5 fortran library,
+* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
-
-  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.0/F90_source_for_Crays
 
 * On IA32 and IA64 systems, if you use a compiler other than GCC (such as
   Intel's ecc or icc compilers), you will need to modify the generated
