@@ -46,7 +46,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
  *-------------------------------------------------------------------------
  */	
 
-int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
+int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id,int h4_attr) {
 
   /* define variables for hdf4. */
 
@@ -72,7 +72,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
 
   VOIDP     vd_data;
 
-  char      vdlabel[10];
+  char      vdlabel[LABEL_LENG];
   char      vdata_name[MAX_NC_NAME];
   char      fieldname[MAX_NC_NAME];
   char      vdata_class[VSNAMELENMAX];
@@ -387,7 +387,17 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
   }
 
   /* converting predefined attributes. */
-  strcpy(vdlabel,VDATALABEL);
+
+  if(h4_attr != 0) {
+  istat = VSisattr(vdata_id);
+  if (istat == FAIL) {
+    printf("error in checking vdata attribute. \n");
+    VSdetach(vdata_id);
+    return FAIL;
+  }
+
+  if(istat) strcpy(vdlabel,VDATTRLAB);
+  else strcpy(vdlabel,VDATALABEL);
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,vdlabel)==FAIL){
     printf("error in transfering vdata attributes.\n");
     free(h5memtype);
@@ -409,7 +419,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
       return FAIL;
     }
   }
-        
+  
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,vdata_ref)==FAIL){
     printf("error in transfering vdata attributes.\n");
     free(h5memtype);
@@ -419,7 +429,7 @@ int Vdata_h4_to_h5(int32 file_id,int32 vdata_id, hid_t group_id) {
     free(vd_data);
     return FAIL;
   }
- 
+  }
   H5Sclose(h5d_sid);
   H5Dclose(h5dset);
   VSdetach(vdata_id);
@@ -796,7 +806,6 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
        printf("error closing array datatype.\n");
        return FAIL;
      }
-
      
    }
 
@@ -829,3 +838,4 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
 
 
  
+

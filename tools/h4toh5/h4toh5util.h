@@ -87,12 +87,13 @@ converter.*/
 /* 6. define HDF object label.*/
 #define SDSLABEL    "SDS"
 #define VDATALABEL  "Vdata"
+#define VDATTRLAB   "Vdata attribute"
 #define VGROUPLABEL "Vgroup"
 #define GRLABEL     "GR"
 #define RAST8LABEL  "raster8"
 #define RAST24LABEL "raster24"
 #define PALABEL     "palette"
-
+#define LABEL_LENG   20
 /* 7. define "IMAGE" CLASS required by image spec. */
 #define IM_CLASS    "IMAGE"
 
@@ -135,7 +136,13 @@ converter.*/
 independent vdata is hdf chunking table _HDF_CHK_TBL_CLASS, if it becomes
 public constant for hdf lib, this constant can be released.*/
 #define _HDF_CHK_TBL_CLASS "_HDF_CHK_TBL_"
+
+/*11. the compression level currently is set to the maximum level.*/
+#define GZIP_COMLEVEL 9
  
+/*12. fake sds dimension name*/
+#define fakeDim  "fakeDim"
+
 extern int32 estnum_vg;
 extern int32 estnum_vd;
 extern int32 num_sds;
@@ -211,7 +218,7 @@ herr_t h4type_to_h5type(const int32 h4type, hid_t* h5memtype,
 /* routines for translating predefined hdf4 attributes into hdf5 attributes*/
 int h4_transpredattrs(hid_t ,const char *,char*data);
 int h4_transnumattr(hid_t h5g,const char *,uint16 group_ref);
-int vg_transattrs(int32,hid_t);
+int vg_transattrs(int32,hid_t,int);
 
 /*string and int conversion routines.*/
 hid_t mkstr(int size, H5T_str_t pad);

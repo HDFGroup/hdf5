@@ -67,6 +67,7 @@ int main(int argc, char ** argv) {
 	char *h4_filename=NULL;
 	char *h5_extension;
 	int status = 0;
+	int h4_attr = 1;
 
 	argc--;
 	argv++;
@@ -86,6 +87,15 @@ int main(int argc, char ** argv) {
 		}
 	}
 
+	/* check whether the flag for HDF4 attributes is set.*/
+	{   int i;
+	for (i=0; i < argc; i++){
+	      if ( HDstrcmp(argv[i],"-na") == 0 ) {
+		  h4_attr = 0;
+		  break;
+	      }
+	}
+	}
 
 	switch(argc) {
 
@@ -94,105 +104,49 @@ int main(int argc, char ** argv) {
 		PrintOptions_h4toh5();
 		break;
 
-	case 1:	/* h4toh5 file1 */
-		h4_filename = argv[0];
-#ifndef WIN32
-		if (test_file(h4_filename,O_EXCL,292) != 0 ) { 
-		  /* 292 Decimal - 0444 Octal, a+r */
-		  printf("the current hdf4 file name is not set properly.\n");
-		  status = -1;
-		  break;
-		}
-		if (test_dir(h4_filename) != 0 ) {
-		   fprintf(stderr,"%s: Is a directory\n",h4_filename);
-		   status = -1;
-		   break;
-		}
-#endif
-		/*0. check whether this file is an hdf file. */
+	case 1:	/* two cases: 
+		  1.  h4toh5 file1 without HDF4 specified attributes 
+                     this is the option where h4toh5 -na appears.
+		     nothing is done.
+                  2. h4toh5 file1 including HDF4 specified attributes.
+		     this is the default behavior.
+		*/
 
-		if(!Hishdf(h4_filename)){
-		  printf("error: not an hdf file. \n");
-		  printf("the file will not be converted. \n");
-		  status = -1;
-		  break;
-		}
-		h5_extension = HDstrdup("h5");
-		h5_filename = BuildFilename(h4_filename,h5_extension);
-		if (h5_filename == NULL) {
-		  printf("error in creating hdf5 file name.\n");
-		  status = -1;
-		  break;
-		}
-#ifndef WIN32
-		if (test_file(h5_filename,O_CREAT|O_EXCL,436) != 0) {
-		  /* 436 Decimal - 0664 Octal, ug+rw,o+r */
-		  printf("permission of hdf5 file is not set properly.\n");
-		  status = -1;
-		  break;
-		}
-#endif
-		status = h4toh5(h4_filename, h5_filename);
-
-		if ( status == FAIL ) {
-		  printf("error in converting %s into %s\n",h4_filename,h5_filename);
-		  break;
-		}
-		if (h5_filename != NULL) {
-		   HDfree(h5_filename);
-		}
-
+	  if(HDstrcmp(argv[0],"-na")==0){
+	    PrintOptions_h4toh5();
+	    break;
+	  }
+	    
+	  if(gen_h4toh5(argv[0],NULL,h4_attr)<0){
+	    status = -1;
+	    return status;
+	  }
 		break;
 	
-	case 2:	/* h4toh5 file_in file_out */
+	case 2:	/* h4toh5 file_in file_out with HDF4 predefined attributes
+		   h4toh5 file_in file_in.h5 without HDF4 predefined attributes*/
 
+	  if(h4_attr !=0){
 		h4_filename = argv[0];
 		h5_filename = argv[1];
+		status = gen_h4toh5(h4_filename,h5_filename,h4_attr);
+	  }
 
-#ifndef WIN32
-		if (test_file(h4_filename,O_EXCL,292) != 0 ) { 
-		  /* 292 Decimal - 0444 Octal, a+r */
-		  printf("permission of hdf4 file is not set properly.\n");    
-		  status = -1;
-		  break;
-		}
+	  else 
+	    status = gen_h4toh5(argv[1],NULL,h4_attr);
 
-		if (test_dir(h4_filename) != 0 ) {
-		   fprintf(stderr,"%s: Is a directory\n",h4_filename);
-		   status = -1;
-		   break;
-		}
+	  if(status <0) return status;
+	  break;
 
-#endif
-		/*0. check whether this file is a hdf file. */
+	case 3:/* h4toh5 file_in file_out without HDF4 predefined attributes.*/
 
-		if(!Hishdf(h4_filename)){
-		  printf("error: not an hdf file. \n");
-		  printf("the file will not be converted. \n");
-		  status = -1;
-		  break;
-		}
-
-#ifndef WIN32
-		if (test_file(h5_filename,O_CREAT|O_RDWR,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
-		  printf("permission of hdf5 file is not set properly.\n");
-		  status = -1;
-		  break;
-		}
-
-		if (test_dir(h4_filename) != 0 ) {
-		  fprintf(stderr,"%s: Is a directory\n",h4_filename);
-		  status = -1;
-		  break;
-		}
-
-#endif
-		status = h4toh5(h4_filename, h5_filename);
-		if ( status == FAIL ) {
-		   printf("error in converting %sinto %s\n",h4_filename,h5_filename);
-		  break;
-		}
-		break;
+	  if(h4_attr==0){
+	    h4_filename = argv[1];
+	    h5_filename = argv[2];
+	    status = gen_h4toh5(h4_filename,h5_filename,h4_attr);
+	    if(status <0) return status;
+	  }
+	  break;
 
 	default:	
 		break;
@@ -211,7 +165,7 @@ int main(int argc, char ** argv) {
 	     
  *-------------------------------------------------------------------------
  */	   
-int h4toh5(char*filename4, char*filename5) {
+int h4toh5(char*filename4, char*filename5,int h4_attr) {
   
   /* define variables for hdf4. */
   int32  istat ; /* hdf4 library routine return value. */
@@ -351,7 +305,7 @@ int h4toh5(char*filename4, char*filename5) {
    }
 
  /* convert all objects in lone vgroups into corresponding hdf5 objects. */  
-  if(h4toh5lonevgs(file_id,sd_id,h5_root,h5_dimg,h5_palg)== FAIL) {
+  if(h4toh5lonevgs(file_id,sd_id,h5_root,h5_dimg,h5_palg,h4_attr)== FAIL) {
     printf("error in translating lone vgroup into hdf5 objects.\n");
     SDend(sd_id);
     GRend(gr_id);
@@ -366,7 +320,7 @@ int h4toh5(char*filename4, char*filename5) {
   }
 
 /*convert all objects in group rings into corresponding hdf5 objects. */
-  if(h4toh5vgrings(file_id,sd_id,h5_root,h5_dimg,h5_palg) == FAIL){
+  if(h4toh5vgrings(file_id,sd_id,h5_root,h5_dimg,h5_palg,h4_attr) == FAIL){
     printf("error in translating vgroup rings into hdf5 objects.\n");
     SDend(sd_id);
     GRend(gr_id);
@@ -382,7 +336,7 @@ int h4toh5(char*filename4, char*filename5) {
 
   /*convert all independent lone vdata into corresponding hdf5 datasets with 
     2 ô Lock    ype. */
-  if(h4toh5lonevds(file_id,h5_root) == FAIL){
+  if(h4toh5lonevds(file_id,h5_root,h4_attr) == FAIL){
     printf("error in translating lone independent vdata into hdf5 objects.\n");
     SDend(sd_id);
     GRend(gr_id);
@@ -413,7 +367,7 @@ int h4toh5(char*filename4, char*filename5) {
 
   /*** deal with untouched sds objects.convert them into hdf5 datasets under root group.***/
 
-  if(h4toh5unvisitedsds(file_id,sd_id,h5_root,h5_dimg) == FAIL) {
+  if(h4toh5unvisitedsds(file_id,sd_id,h5_root,h5_dimg,h4_attr) == FAIL) {
     printf("error in converting unvisited sds objects into hdf5 file.\n");  
     SDend(sd_id);
     GRend(gr_id);
@@ -429,7 +383,7 @@ int h4toh5(char*filename4, char*filename5) {
 
   /*** deal with untouched image objects. convert them into hdf5 datasets under root group. ***/
 
-  if(h4toh5unvisitedimages(file_id,h5_root,h5_palg) == FAIL) {
+  if(h4toh5unvisitedimages(file_id,h5_root,h5_palg,h4_attr) == FAIL) {
     printf("error in converting unvisited image objects into hdf5 file.\n");
     SDend(sd_id);
     GRend(gr_id);
@@ -702,7 +656,7 @@ int set_hashtables(void) {
    Modification:
  *-------------------------------------------------------------------------
  */	
-int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5_palg) {
+int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5_palg,int h4_attr) {
 		   
   int32  vgroup_id;
   int    num_lonevg; /* number of lone vgroup.*/
@@ -850,7 +804,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
        return FAIL;
      }
      
-     if(Vgroup_h4_to_h5(file_id,vgroup_id,sd_id,h5group,h5_dimg,h5_palg)==FAIL){
+     if(Vgroup_h4_to_h5(file_id,vgroup_id,sd_id,h5group,h5_dimg,h5_palg,h4_attr)==FAIL){
        printf("error in translating vgroup into hdf5 objects.\n");
        Vdetach(vgroup_id);
        free(h5cgroup_name);
@@ -889,7 +843,7 @@ int h4toh5lonevgs(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
  *-------------------------------------------------------------------------
  */	
 
-int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5_palg){
+int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5_palg,int h4_attr){
 
   int32  vgroup_id;
   int32  ref_num;
@@ -1019,7 +973,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
 	 return FAIL;
        }
 
-       if(Vgroup_h4_to_h5(file_id,vgroup_id,sd_id,h5group,h5_dimg,h5_palg)
+       if(Vgroup_h4_to_h5(file_id,vgroup_id,sd_id,h5group,h5_dimg,h5_palg,h4_attr)
 	  ==FAIL){
 			  
 	printf("error in translating vgroup into hdf5 group\n");
@@ -1053,7 +1007,7 @@ int h4toh5vgrings(int32 file_id,int32 sd_id,hid_t h5group,hid_t h5_dimg,hid_t h5
    Modification:
  *-------------------------------------------------------------------------
  */	
-int h4toh5lonevds(int32 file_id, hid_t h5group){
+int h4toh5lonevds(int32 file_id, hid_t h5group,int h4_attr){
 
   int32  vdata_id;
   int32  *ref_vdata_array;
@@ -1192,7 +1146,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
 	     return FAIL;
 	   }
 
-	   if(Vdata_h4_to_h5(file_id,vdata_id,h5group)== FAIL) {
+	   if(Vdata_h4_to_h5(file_id,vdata_id,h5group,h4_attr)== FAIL) {
 	     printf("error in translating independent vdata into");
 	     printf(" hdf5 datasets.\n");
 	     free(h5cvdata_name);
@@ -1231,7 +1185,7 @@ int h4toh5lonevds(int32 file_id, hid_t h5group){
  */	
 
 
-int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
+int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg,int h4_attr) {
 
   int     i;
   int32   sds_id;/* sd dataset identifer*/
@@ -1326,7 +1280,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
        }
 
        /* do the convertion from sds into hdf5 dataset.*/
-       if(Sds_h4_to_h5(file_id,sds_id,h5root,h5_dimg)== FAIL){
+       if(Sds_h4_to_h5(file_id,sds_id,h5root,h5_dimg,h4_attr)== FAIL){
 	  printf("error in translating sds into hdf5 dataset.\n");
           SDendaccess(sds_id);
 	  free(h5csds_name);
@@ -1360,7 +1314,7 @@ int h4toh5unvisitedsds(int32 file_id,int32 sd_id,hid_t h5root,hid_t h5_dimg) {
  *-------------------------------------------------------------------------
  */	
 
-int h4toh5unvisitedimages(int32 file_id,hid_t h5_root,hid_t h5_palg) {
+int h4toh5unvisitedimages(int32 file_id,hid_t h5_root,hid_t h5_palg,int h4_attr) {
 
   int     i;
   int32   istat;
@@ -1451,7 +1405,7 @@ int h4toh5unvisitedimages(int32 file_id,hid_t h5_root,hid_t h5_palg) {
 	}
 
 	/* do the convertion from the image into hdf5 dataset.*/
-	if(Image_h4_to_h5(file_id,ri_id,h5_root,h5_palg)== FAIL) {
+	if(Image_h4_to_h5(file_id,ri_id,h5_root,h5_palg,h4_attr)== FAIL) {
 	   printf("error in transferring image name into hdf5 dataset.\n");
 	   GRendaccess(ri_id);
 	   free(h5cimage_name);
@@ -1619,11 +1573,109 @@ void PrintOptions_h4toh5(void)
 {
 		fprintf(stderr,"\nUsage: ");
 		fprintf(stderr,"\n  h4toh5 -h (gives this print-out)\n");
+                fprintf(stderr,"  h4toh5 -na(can convert without HDF4 specified attributes)\n");
 		fprintf(stderr,"  h4toh5 input.hdf output.h5\n");
 		fprintf(stderr,"  h4toh5 input.hdf\n");
+		fprintf(stderr,"  h4toh5 -na input.hdf output.h5\n");
+		fprintf(stderr,"  h4toh5 -na input.hdf\n");
 }
 
 
+/*****************************************************************************
 
+  Routine: gen_h4toh5()
+ 
+  Description: This routine prints the acceptable argument formats out to stderr.
+           
+  Input: h4_filename: HDF4 file name
+         h5_filename: HDF5 file name
+	 h4_attr:     flag to indicate whether to include HDF4 
+	 predefined attribute or not.
+ 
+  Output: -1 FAIL
+          0  SUCCEED
+
+*****************************************************************************/
+
+
+int gen_h4toh5(char*h4_filename,char*h5_filename,int h4_attr){
+  char* h5_extension;
+  int status;
+
+#ifndef WIN32
+		if (test_file(h4_filename,O_EXCL,292) != 0 ) { 
+		  /* 292 Decimal - 0444 Octal, a+r */
+		  printf("the current hdf4 file name is not set properly.\n");
+		  status = -1;
+		  return status;
+		}
+		if (test_dir(h4_filename) != 0 ) {
+		   fprintf(stderr,"%s: Is a directory\n",h4_filename);
+		   status = -1;
+		   return status;
+		}
+#endif
+		/*0. check whether this file is an hdf file. */
+
+		if(!Hishdf(h4_filename)){
+		  printf("error: not an hdf file. \n");
+		  printf("the file will not be converted. \n");
+		  status = -1;
+		  return status;
+		}
+
+		if(h5_filename == NULL){
+		h5_extension = HDstrdup("h5");
+		h5_filename = BuildFilename(h4_filename,h5_extension);
+		if (h5_filename == NULL) {
+		  printf("error in creating hdf5 file name.\n");
+		  status = -1;
+		  return status;
+		}
+#ifndef WIN32
+		if (test_file(h5_filename,O_CREAT|O_EXCL,436) != 0) {
+		  /* 436 Decimal - 0664 Octal, ug+rw,o+r */
+		  printf("permission of hdf5 file is not set properly.\n");
+		  status = -1;
+		  return status;
+		}
+#endif
+	
+		status = h4toh5(h4_filename, h5_filename,h4_attr);
+
+		if ( status == FAIL ) {
+		  printf("error in converting %s into %s\n",h4_filename,h5_filename);
+		  return status;
+		}
+		if (h5_filename != NULL) {
+		   HDfree(h5_filename);
+		}
+		return 0;
+		}
+
+		else {
+
+#ifndef WIN32
+		if (test_file(h5_filename,O_CREAT|O_RDWR,436) != 0) { /* 436 Decimal - 0664 Octal, ug+rw,o+r */
+		  printf("permission of hdf5 file is not set properly.\n");
+		  status = -1;
+		  return status;
+		}
+
+		if (test_dir(h4_filename) != 0 ) {
+		  fprintf(stderr,"%s: Is a directory\n",h4_filename);
+		  status = -1;
+		  return status;
+		}
+
+#endif
+		status = h4toh5(h4_filename, h5_filename,h4_attr);
+		if ( status == FAIL ) {
+		   printf("error in converting %sinto %s\n",h4_filename,h5_filename);
+		   return status;
+		}
+		}
+		return 0;
+}
 
 

@@ -45,7 +45,7 @@ Author:  Kent Yang(ymuqun@ncsa.uiuc.edu)
  *-------------------------------------------------------------------------
  */	
 
-int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
+int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name,int h4_attr) {
 
   int32   ncomp;
   int32   pal_ref;
@@ -160,11 +160,13 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
     return FAIL;
   }
 
+  if(h4_attr!=0){
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,palette_label)==FAIL) {
     printf("unable to transfer palette label to HDF4 OBJECT TYPE.\n");
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     return FAIL;
+  }
   }
 
   if(h4_transpredattrs(h5dset,HDF4_PALETTE_CLASS,palette_class)==FAIL){
@@ -187,11 +189,14 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
     H5Dclose(h5dset);
     return FAIL;
   }
+
+  if(h4_attr !=0){
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,pal_ref)==FAIL) {
     printf("unable to transfer palette reference number to HDF4 REF. NUM.\n");
     H5Sclose(h5d_sid);
     H5Dclose(h5dset);
     return FAIL;
+  }
   }
   return SUCCEED;
 }

@@ -1078,7 +1078,7 @@ int h4_transpredattrs(hid_t h5g,const char *attrname,char*data){
  *-------------------------------------------------------------------------
  */	
 
-int vg_transattrs(int32 h4vg,hid_t h5g) {
+int vg_transattrs(int32 h4vg,hid_t h5g,int h4_attr) {
 
   /* define variables for hdf4. */
    char      vgroup_name[VGNAMELENMAX];
@@ -1108,7 +1108,7 @@ int vg_transattrs(int32 h4vg,hid_t h5g) {
    int       i;
 
    num_vgattr = Vnattrs(h4vg);
- 
+
    for (i = 0;i <num_vgattr;i++) {
 
      if (Vattrinfo(h4vg,i,vgattr_name,&vg_atype,
@@ -1238,6 +1238,8 @@ int vg_transattrs(int32 h4vg,hid_t h5g) {
    }
   
    /*** check this line later. ***/
+
+   if(h4_attr != 0) {
    strcpy(obtype,VGROUPLABEL);
    vgroup_class[0] = '\0';
 
@@ -1282,7 +1284,7 @@ int vg_transattrs(int32 h4vg,hid_t h5g) {
      printf("error in data attribute transferring.\n");
      return FAIL;
    }
-   
+   }
    return SUCCEED;
 }
 
