@@ -133,7 +133,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
                 if (NULL==(sdim->perm=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 for (u = 0; u < sdim->rank; u++)
-                    UINT32DECODE(p, sdim->perm[u]);
+                    H5F_DECODE_LENGTH (f, p, sdim->perm[u]);
             }
 #endif /* LATER */
         }
@@ -220,7 +220,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 #ifdef LATER
         if (flags & H5S_VALID_PERM) {
             for (u = 0; u < sdim->rank; u++)
-                UINT32ENCODE(p, sdim->perm[u]);
+                H5F_ENCODE_LENGTH (f, p, sdim->perm[u]);
         }
 #endif
     }

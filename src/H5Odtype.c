@@ -649,9 +649,9 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                     *(*pp)++ = 0;
 
                     /* Reserved */
-                    *(*pp)++ = '\0';
-                    *(*pp)++ = '\0';
-                    *(*pp)++ = '\0';
+                    *(*pp)++ = 0;
+                    *(*pp)++ = 0;
+                    *(*pp)++ = 0;
 
                     /* Dimension permutation */
                     UINT32ENCODE(*pp, 0);
@@ -767,6 +767,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
     }
 
+    /* Encode the type's class, version and bit field */
     *hdr++ = ((unsigned)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && dt->u.compnd.has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
