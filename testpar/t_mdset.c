@@ -36,7 +36,7 @@ void get_slab(hssize_t[], hsize_t[], hsize_t[], hsize_t[]);
  * Example of using PHDF5 to create ndatasets datasets.  Each process write
  * a slab of array to the file.
  */
-void multiple_dset_write(char *filename, int ndatasets)
+void multiple_dset_write(void)
 {
     int i, j, n, mpi_size, mpi_rank;
     hid_t iof, plist, dataset, memspace, filespace;
@@ -49,6 +49,13 @@ void multiple_dset_write(char *filename, int ndatasets)
     double fill=1.0;                    /* Fill value */
     char dname [100];
     herr_t ret;
+    H5Ptest_param_t *pt;
+    char	*filename;
+    int		ndatasets;
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+    ndatasets = pt->count;
 
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
@@ -106,7 +113,7 @@ void multiple_dset_write(char *filename, int ndatasets)
 
 /* Example of using PHDF5 to create, write, and read compact dataset.  
  */
-void compact_dataset(char *filename)
+void compact_dataset(void)
 {
     int i, j, mpi_size, mpi_rank, err_num=0;
     hbool_t use_gpfs = FALSE;
@@ -115,10 +122,12 @@ void compact_dataset(char *filename)
     double outme [SIZE][SIZE], inme[SIZE][SIZE];
     char dname[]="dataset";
     herr_t ret;
+    char *filename;
                                 
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
+    filename = (char *) GetTestParameters();
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
@@ -193,7 +202,7 @@ void compact_dataset(char *filename)
  * sizes (2GB, 4GB, etc.), but the metadata for the file pushes the file over
  * the boundary of interest.
  */
-void big_dataset(const char *filename)
+void big_dataset(void)
 {
     int mpi_size, mpi_rank;     /* MPI info */
     hbool_t use_gpfs = FALSE;   /* Don't use GPFS stuff for this test */
@@ -205,10 +214,12 @@ void big_dataset(const char *filename)
     char dname[]="dataset";     /* Name of dataset */
     MPI_Offset file_size;       /* Size of file on disk */
     herr_t ret;                 /* Generic return value */
+    char *filename;
                                 
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
+    filename = (char *) GetTestParameters();
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
     fapl = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type, use_gpfs);
@@ -310,7 +321,7 @@ void big_dataset(const char *filename)
  * not have actual data written to the entire raw data area and relies on the
  * default fill value of zeros to work correctly.
  */
-void dataset_fillvalue(const char *filename)
+void dataset_fillvalue(void)
 {
     int mpi_size, mpi_rank;     /* MPI info */
     hbool_t use_gpfs = FALSE;   /* Don't use GPFS stuff for this test */
@@ -330,10 +341,12 @@ void dataset_fillvalue(const char *filename)
     int *twdata, *trdata;        /* Temporary pointer into buffer */
     int acc, i, j, k, l;        /* Local index variables */
     herr_t ret;                 /* Generic return value */
+    char *filename;
                                 
     MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size (MPI_COMM_WORLD, &mpi_size);
 
+    filename = (char *) GetTestParameters();
     VRFY((mpi_size <= SIZE), "mpi_size <= SIZE");
 
     /* Set the dataset dimension to be one row more than number of processes */
@@ -484,7 +497,7 @@ void dataset_fillvalue(const char *filename)
 /* Write multiple groups with a chunked dataset in each group collectively. 
  * These groups and datasets are for testing independent read later.
  */
-void collective_group_write(char *filename, int ngroups)
+void collective_group_write(void)
 {
     int mpi_rank, mpi_size;
     int i, j, m;
@@ -496,6 +509,13 @@ void collective_group_write(char *filename, int ngroups)
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
     const hsize_t chunk_size[2] = {SIZE/2, SIZE/2};  /* Chunk dimensions */
     herr_t ret1, ret2;
+    H5Ptest_param_t *pt;
+    char	*filename;
+    int		ngroups;
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+    ngroups = pt->count;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -563,11 +583,18 @@ void collective_group_write(char *filename, int ngroups)
 /* Let two sets of processes open and read different groups and chunked 
  * datasets independently. 
  */
-void independent_group_read(char *filename, int ngroups)
+void independent_group_read(void)
 {
     int      mpi_rank, m;
     hid_t    plist, fid;
     hbool_t  use_gpfs = FALSE;
+    H5Ptest_param_t *pt;
+    char	*filename;
+    int		ngroups;
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+    ngroups = pt->count;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     
@@ -654,7 +681,7 @@ void group_dataset_read(hid_t fid, int mpi_rank, int m)
  *      + means the group has attribute(s).
  *      ' means the datasets in the groups have attribute(s).
  */
-void multiple_group_write(char *filename, int ngroups)
+void multiple_group_write(void)
 {
     int mpi_rank, mpi_size;
     int m;
@@ -664,6 +691,13 @@ void multiple_group_write(char *filename, int ngroups)
     hssize_t chunk_origin[DIM];
     hsize_t chunk_dims[DIM], file_dims[DIM], count[DIM];
     herr_t ret;
+    H5Ptest_param_t *pt;
+    char	*filename;
+    int		ngroups;
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+    ngroups = pt->count;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -799,7 +833,7 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
  * This function is to verify the data from multiple group testing.  It opens
  * every dataset in every group and check their correctness.  
  */
-void multiple_group_read(char *filename, int ngroups)
+void multiple_group_read(void)
 {
     int      mpi_rank, mpi_size, error_num;
     int      m;
@@ -808,6 +842,13 @@ void multiple_group_read(char *filename, int ngroups)
     hid_t    plist, fid, gid, memspace, filespace;
     hssize_t chunk_origin[DIM];
     hsize_t  chunk_dims[DIM], file_dims[DIM], count[DIM];
+    H5Ptest_param_t *pt;
+    char	*filename;
+    int		ngroups;
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+    ngroups = pt->count;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

@@ -363,6 +363,8 @@ done:
 int main(int argc, char **argv)
 {
     int mpi_size, mpi_rank;				/* mpi variables */
+    H5Ptest_param_t ndsets_params, ngroups_params;
+    H5Ptest_param_t collngroups_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -395,6 +397,93 @@ int main(int argc, char **argv)
 	       "===================================\n");
     }
 
+    {
+    int                     Summary = 0;
+    int                     CleanUp = 1;
+
+
+
+
+    /* Initialize testing framework */
+    TestInit();
+
+    /* Tests are generally arranged from least to most complexity... */
+    AddTest("mpio_dup", test_fapl_mpio_dup, NULL, 
+	    "fapl_mpio_dup", NULL);
+    AddTest("mpiposix_dup", test_fapl_mpiposix_dup, NULL, 
+	    "fapl_mpiposix_dup", NULL);
+
+    ndsets_params.name = filenames[3];
+    ndsets_params.count = ndatasets;
+    AddTest("ndatasets", multiple_dset_write, NULL, 
+	    "multiple datasets write", &ndsets_params);
+
+    ngroups_params.name = filenames[4];
+    ngroups_params.count = ngroups;
+    AddTest("ngroups", multiple_group_write, NULL, 
+	    "multiple groups write", &ngroups_params);
+    AddTest("ngroups_read", multiple_group_read, NULL, 
+	    "multiple groups read", &ngroups_params);
+
+    AddTest("split", test_split_comm_access, NULL, 
+	    "dataset using split communicators", filenames[0]);
+    AddTest("indwrite", dataset_writeInd, NULL, 
+	    "dataset independent write", filenames[0]);
+    AddTest("collwrite", dataset_writeAll, NULL, 
+	    "dataset collective write", filenames[1]);
+    AddTest("indwriteext", extend_writeInd, NULL, 
+	    "extendible dataset independent write", filenames[2]);
+    AddTest("collwriteext", extend_writeAll, NULL, 
+	    "extendible dataset collective write", filenames[2]);
+
+    AddTest("indread", dataset_readInd, NULL, 
+	    "dataset independent read", filenames[0]);
+    AddTest("collread", dataset_readAll, NULL, 
+	    "dataset collective read", filenames[1]);
+    AddTest("indreadext", extend_readInd, NULL, 
+	    "extendible dataset independent read", filenames[2]);
+    AddTest("collreadext", extend_readAll, NULL, 
+	    "extendible dataset collective read", filenames[2]);
+
+    AddTest("compact", compact_dataset, NULL, 
+	    "compact dataset test", filenames[5]);
+
+    collngroups_params.name = filenames[6];
+    collngroups_params.count = ngroups;
+    AddTest("coll_ngroups", collective_group_write, NULL, 
+	    "collective group and dataset write", &collngroups_params);
+    AddTest("indngroupsread", independent_group_read, NULL, 
+	    "independent group and dataset read", &collngroups_params);
+
+    if (dobig && sizeof(MPI_Offset)>4){
+	AddTest("bigdataset", big_dataset, NULL, 
+		"big dataset test", filenames[7]);
+    }
+    AddTest("fillvalue", dataset_fillvalue, NULL, 
+	    "dataset fill value", filenames[8]);
+
+    /* Display testing information */
+    TestInfo(argv[0]);
+
+    /* Parse command line arguments */
+/*    TestParseCmdLine(argc,argv,&Summary,&CleanUp); */
+
+    /* Perform requested testing */
+    PerformTests();
+
+    /* Display test summary, if requested */
+    if (Summary)
+        TestSummary();
+
+    /* Clean up test files, if allowed */
+    if (CleanUp && !getenv("HDF5_NOCLEANUP"))
+        TestCleanup();
+
+    nerrors = GetTestNumErrs();
+
+    }
+
+#if 0
     MPI_BANNER("test_fapl_mpio_dup...");
     test_fapl_mpio_dup();
 
@@ -488,6 +577,7 @@ int main(int argc, char **argv)
     
     MPI_BANNER("dataset fill value test...");
     dataset_fillvalue(filenames[8]); 
+#endif
     
     if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig )){
 	usage();
