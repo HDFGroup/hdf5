@@ -2294,6 +2294,7 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 {
     H5S_t *tmp_mspace=NULL;     /* Temporary memory dataspace */
     H5S_t *equiv_mspace=NULL;   /* Equivalent memory dataspace */
+    hbool_t equiv_mspace_init=0;/* Equivalent memory dataspace was created */
     hid_t f_tid=(-1);           /* Temporary copy of file datatype for iteration */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
@@ -2333,25 +2334,18 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
             dims[u]=1;
         if((equiv_mspace = H5S_create_simple(dataset->layout.ndims-1,dims,NULL))==NULL)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create equivalent dataspace for scalar space")
+
+        /* Indicate that this space needs to be released */
+        equiv_mspace_init=1;
     } /* end else */
-    else {
-        if((equiv_mspace = H5S_copy(mem_space))==NULL)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
-    } /* end else */
- 
-    /* Make a copy of equivalent memory space */
-    if((tmp_mspace = H5S_copy(equiv_mspace))==NULL)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+    else
+        equiv_mspace=(H5S_t *)mem_space; /* Casting away 'const' OK... */
  
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims=f_ndims=dataset->layout.ndims-1;
-    if((sm_ndims = H5S_get_simple_extent_ndims(tmp_mspace))<0)
+    if((sm_ndims = H5S_get_simple_extent_ndims(equiv_mspace))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
     H5_ASSIGN_OVERFLOW(fm->m_ndims,sm_ndims,int,unsigned);
-
-    /* De-select the mem space copy */
-    if(H5S_select_none(tmp_mspace)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space");
 
     if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
@@ -2379,9 +2373,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Initialize TBBT for chunk selections */
     if((fm->fsel=H5TB_fast_dmake(H5TB_FAST_HSIZE_COMPARE))==NULL)
         HGOTO_ERROR(H5E_DATASET,H5E_CANTMAKETREE,FAIL,"can't create TBBT for chunk selections");
-
-    /* Save chunk template information */
-    fm->mchunk_tmpl=tmp_mspace;
 
     /* Initialize "last chunk" information */
     fm->last_index=(hsize_t)-1;
@@ -2481,6 +2472,17 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     else {
         size_t elmt_size;           /* Memory datatype size */
 
+        /* Make a copy of equivalent memory space */
+        if((tmp_mspace = H5S_copy(equiv_mspace))==NULL)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+     
+        /* De-select the mem space copy */
+        if(H5S_select_none(tmp_mspace)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space")
+
+        /* Save chunk template information */
+        fm->mchunk_tmpl=tmp_mspace;
+
         /* Create temporary datatypes for selection iteration */
         if(f_tid<0) {
             if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
@@ -2541,7 +2543,7 @@ done:
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping");
     } /* end if */
 
-    if(equiv_mspace) {
+    if(equiv_mspace_init && equiv_mspace) {
         if(H5S_close(equiv_mspace)<0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
     } /* end if */
