@@ -546,12 +546,13 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_read)
 
-    /* check parameters */
-    assert(s);
-    assert(buf);
+    if(len>0) {
+        /* check parameters */
+        assert(s);
+        assert(buf);
 
-    if(len>0)
         HDmemcpy(buf,s,len);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* end H5T_vlen_str_mem_read() */
@@ -782,7 +783,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
 
     /* check parameters */
     assert(vl);
-    assert(buf);
+    assert(seq_len==0 || buf);
     assert(f);
     
     /* Free heap object for old data.  */

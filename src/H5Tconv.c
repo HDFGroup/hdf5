@@ -2539,11 +2539,6 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             src_base_size=H5T_get_size(src->parent);
             dst_base_size=H5T_get_size(dst->parent);
 
-            /* Get initial conversion buffer */
-            conv_buf_size=MAX(src_base_size,dst_base_size);
-            if ((conv_buf=H5FL_BLK_CALLOC(vlen_seq,conv_buf_size))==NULL)
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-
             /* Set up conversion path for base elements */
             if (NULL==(tpath=H5T_path_find(src->parent, dst->parent, NULL, NULL, dxpl_id))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes");
