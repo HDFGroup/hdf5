@@ -35,6 +35,10 @@ CONTENTS
 
 New Features
 ============
+
+    * A helper script called ``h5cc'', which helps compilation of HDF5
+      programs, is now distributed with HDF5. See the reference manual
+      for information on how to use this feature.
     * Added perform programs to test the HDF5 library performance.  Programs
       are installed in directory perform/.
     * Improved performance of byte-swapping during data conversions.
