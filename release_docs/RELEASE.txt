@@ -60,11 +60,11 @@ New Features
  
     o APIs
     ------
-      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were overloaded
-        with "dims" argument to be assumed size array of type INTEGER(HSIZE_T). We 
-        recommend to use the subroutines with the new type. Module subroutines that
-        accept "dims" as INTEGER array of size 7 will be depricated in 1.6 release.
-        EIP - 2002/05/06
+      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were
+        overloaded with "dims" argument to be assumed size array of type
+        INTEGER(HSIZE_T). We recommend to use the subroutines with the new type.
+        Module subroutines that accept "dims" as INTEGER array of size 7 will
+        be deprecated in 1.6 release.  EIP - 2002/05/06
  
     o Performance
     -------------
@@ -95,6 +95,9 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where regular hyperslab selection could get incorrectly
+        transferred when the number of elements in a row did not fit evenly
+        into the buffer provided.  QAK 2002/06/12
     * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
         (one with no members) to be used to create a dataset or committed to a
         file.  QAK - 2002/06/11

@@ -1116,11 +1116,22 @@ for(i=0; i<ndims+1; i++)
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 #ifdef QAK
 for(i=0; i<ndims; i++) {
+    printf("%s: file_iter->hyp.pos[%d]=%d\n",FUNC,(int)i,(int)file_iter->hyp.pos[i]);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].start=%d\n",FUNC,(int)i,(int)file_space->select.sel_info.hslab.diminfo[i].start);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].stride=%d\n",FUNC,(int)i,(int)file_space->select.sel_info.hslab.diminfo[i].stride);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].block=%d\n",FUNC,(int)i,(int)file_space->select.sel_info.hslab.diminfo[i].block);
+    printf("%s: file_space->select.sel_info.hslab.diminfo[%d].count=%d\n",FUNC,(int)i,(int)file_space->select.sel_info.hslab.diminfo[i].count);
     printf("%s: tmp_count[%d]=%d, tmp_block[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)tmp_block[i]);
     printf("%s: slab[%d]=%d\n",FUNC,(int)i,(int)slab[i]);
 }
@@ -1241,11 +1252,18 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
 
             /* Increment the offset and count for the other dimensions */
             temp_dim=fast_dim-1;
+#ifdef QAK
+printf("%s: temp_dim=%u\n",FUNC,(unsigned)temp_dim);
+#endif /* QAK */
             while(temp_dim>=0) {
                 /* Move to the next row in the curent dimension */
                 offset[temp_dim]++;
                 buf_off+=slab[temp_dim];
                 tmp_block[temp_dim]++;
+#ifdef QAK
+printf("%s: tmp_block[%d]=%u\n",FUNC,temp_dim,(unsigned)tmp_block[temp_dim]);
+printf("%s: tdiminfo[%d].block=%u\n",FUNC,temp_dim,(unsigned)tdiminfo[temp_dim].block);
+#endif /* QAK */
 
                 /* If this block is still in the range of blocks to output for the dimension, break out of loop */
                 if(tmp_block[temp_dim]<tdiminfo[temp_dim].block)
@@ -1703,8 +1721,14 @@ printf("%s: Check 2.0\n",FUNC);
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -2257,8 +2281,14 @@ printf("%s: Check 2.0\n",FUNC);
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            if(mem_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -2664,7 +2694,7 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
     hsize_t actual_bytes;     /* The actual number of bytes to copy */
     hsize_t num_write=0;      /* Number of elements read */
 
-    FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
+    FUNC_ENTER (H5S_hyper_mwrite_opt, 0);
 
 #ifdef QAK
 printf("%s: Called!, elmt_size=%d\n",FUNC,(int)elmt_size);
@@ -2773,8 +2803,14 @@ printf("%s: Check 2.0\n",FUNC);
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            if(mem_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (mem_iter->hyp.pos[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -2792,7 +2828,7 @@ printf("%s: buf_off=%u, actual_bytes=%u\n",FUNC,(unsigned)buf_off,(int)actual_by
 
 #ifdef QAK
 printf("%s: actual_write=%d\n",FUNC,(int)actual_write);
-for(i=0; i<file_space->extent.u.simple.rank; i++)
+for(i=0; i<mem_space->extent.u.simple.rank; i++)
     printf("%s: diminfo: start[%d]=%d, stride[%d]=%d, block[%d]=%d, count[%d]=%d\n",FUNC,
         (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].start,
         (int)i,(int)mem_space->select.sel_info.hslab.diminfo[i].stride,
