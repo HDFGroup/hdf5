@@ -1,4 +1,4 @@
-HDF5 version 1.4.4-snap1 released on Sat Apr 20 07:44:01 CDT 2002
+HDF5 version 1.4.4-snap2 released on Tue Apr 23 11:42:19 CDT 2002
 ==============================================================================
 
 
@@ -170,7 +170,7 @@ Supported Configuration Features Summary
                                                      (5)
     Solaris2.7     y  y (1)     y    n         y     y          y     y
     Solaris2.8 64  y  n         y    n         y     y          y     y
-    Solaris2.8 32  y  n         y    n         y     y          y     y
+    Solaris2.8 32  y  y (1)     y    n         y     y          y     y
     IA-64          y  n         n    n         n     n          y     y 
     IRIX6.5        y  y (1)     n    n         n     y          y     y
     IRIX64_6.5 64  y  y (2)     y    y         n     y          y     y
@@ -197,7 +197,7 @@ Supported Configuration Features Summary
                    compatibility  exec      safe                VFD
     Solaris2.7     n              x         y        n    n     y
     Solaris2.8 64  n              y         n        n    n     y
-    Solaris2.8 32  n              x         n        n    n     y
+    Solaris2.8 32  n              x         y        n    n     y
     IA-64          n              n         n        n    n     y   
     IRIX6.5        n              x         y        n    n     y
     IRIX64_6.5 64  n              x         y        n    y     y
