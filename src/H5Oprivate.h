@@ -91,7 +91,7 @@ typedef struct H5O_fill_new_t {
     void		*buf;		/*the fill value		     */
     H5D_alloc_time_t	alloc_time;	/* time to allocate space	     */
     H5D_fill_time_t	fill_time;	/* time to write fill value	     */	
-    htri_t		fill_defined;   /* whether fill value is defined     */	
+    hbool_t		fill_defined;   /* whether fill value is defined     */	
 } H5O_fill_new_t;
 
 /*

@@ -1141,8 +1141,7 @@ done:
  *		be the same type as the dataset but the library must be able
  *		to convert VALUE to the dataset type when the dataset is
  *		created.  If VALUE is NULL, it will be interpreted as 
- *		undefining fill value.  The fill value property will be 
- *		removed from property list. 
+ *		undefining fill value.
  *
  * Return:	Non-negative on success/Negative on failure
  *
