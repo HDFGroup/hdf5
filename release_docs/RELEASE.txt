@@ -58,6 +58,17 @@ New Features
     * The H5Pset_fapl_split() accepts raw and meta file names similar to the
       syntax of H5Pset_fapl_multi() in addition to what it used to accept.
 
+    C++ API:
+    * Added operator= to class PredType
+    * Add the overloaded member function Attribute::getName to return
+      the attribute name's length as in C API.  Note that the current
+      Attribute::getName, that returns "string", is still available.
+    * Following the change in the C library, the corresponding C++ API
+      is changed from:
+        void Attribute::write( const DataType& mem_type, void *buf )
+      to:
+        void Attribute::write( const DataType& mem_type, const void *buf )
+
    o Performance
    -------------
     * Added perform programs to test the HDF5 library performance.  Programs
@@ -202,33 +213,33 @@ Supported Configuration Features Summary
          ( ) = footnote appears below second table
 
 
-    Platform       C  C         F90  F90       C++  Shared     zlib  Tools
-                      parallel       parallel       libraries
-                                                    (5)
-    Solaris2.6     y  n         y    n         y    y          y     y
-    Solaris2.7     y  y (1)     y    n         y    y          y     y
-    Solaris2.8 64  y  n         n    n         y    y          y     y
-    Solaris2.8 32  y  n         y    n         y    y          y     y
-    IA-64          y  n         n    n         n    n          y     y 
-    IRIX6.5        y  y (1)     n    n         n    y          y     y
-    IRIX64_6.5 64  y  y (2)     y    y         n    y          y     y
-    IRIX64_6.5 32  y  y (2)     n    n         n    y          y     y
-    HPUX10.20      y  n         y    n         n    y          y     y
-    HPUX11.00      y  y         y    n         n    y          y     y
-    HPUX11 SysV    y  y         y    n         n    y          y     y
-    DECOSF         y  n         y    n         y    y          y     y
-    T3E            y  y         y    y         n    n          y     y
-    SV1            y  n         y    n         n    n          y     y
-    TFLOPS         y  y (1)     n    n         n    n          y     y (4)
-    AIX-4.3 SP2    y  y         y    y         n    n          y     n
-    AIX-4.3 SP3    y  y         y    y         y    n          y     n
-    Win2000        y  n         y    n         y    y          y     y
-    Win98          y  n         y    n         y    y          y     y
-    WinNT          y  n         y    n         y    y          y     y
-    WinNT CW       y  n         n    n         n    n          y     y
-    FreeBSD        y  n         n    n         y    y          y     y
-    Linux 2.2      y  y (1)     y    n         y    y          y     y
-    Linux 2.4      y  y (1)     n    n         y    y          y     y
+    Platform       C  C         F90  F90       C++   Shared     zlib  Tools
+                      parallel       parallel        libraries
+                                                     (5)
+    Solaris2.6     y  n         y    n         y     y          y     y
+    Solaris2.7     y  y (1)     y    n         y     y          y     y
+    Solaris2.8 64  y  n         n    n         y     y          y     y
+    Solaris2.8 32  y  n         y    n         y     y          y     y
+    IA-64          y  n         n    n         n     n          y     y 
+    IRIX6.5        y  y (1)     n    n         n     y          y     y
+    IRIX64_6.5 64  y  y (2)     y    y         n     y          y     y
+    IRIX64_6.5 32  y  y (2)     n    n         n     y          y     y
+    HPUX10.20      y  n         y    n         n     y          y     y
+    HPUX11.00      y  y         y    n         n     y          y     y
+    HPUX11 SysV    y  y         y    n         n     y          y     y
+    DECOSF         y  n         y    n         y     y          y     y
+    T3E            y  y         y    y         n     n          y     y
+    SV1            y  n         y    n         n     n          y     y
+    TFLOPS         y  y (1)     n    n         n     n          y     y (4)
+    AIX-4.3 SP2    y  y         y    y         n     n          y     n
+    AIX-4.3 SP3    y  y         y    y         y     n          y     n
+    Win2000        y  n         y    n         y (6) y          y     y
+    Win98          y  n         y    n         y (6) y          y     y
+    WinNT          y  n         y    n         y (6) y          y     y
+    WinNT CW       y  n         n    n         n     n          y     y
+    FreeBSD        y  n         n    n         y     y          y     y
+    Linux 2.2      y  y (1)     y    n         y     y          y     y
+    Linux 2.4      y  y (1)     n    n         y     y          y     y
 
 
     Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
@@ -265,6 +276,7 @@ Supported Configuration Features Summary
                     in serial mode.
                 (4) No HDF4-related tools.
                 (5) Shared libraries are provided only for the C library.
+		(6) Exception of (5): DLL is available for C++ API on Windows
 
 
 Known Problems
