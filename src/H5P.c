@@ -430,7 +430,7 @@ herr_t H5P_release(hatom_t oid)
     H5P_dim_t *dim;         /* dimensionality object to release */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Prelease, H5P_init_interface, FAIL);
+    FUNC_ENTER(H5P_release, H5P_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;

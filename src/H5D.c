@@ -680,7 +680,7 @@ herr_t H5D_release(hatom_t oid)
     H5MM_xfree (dataset);
 
     /* Delete the dataset from the atom group */
-    if(H5Aatom_object(oid)==NULL)
+    if(H5Aremove_atom(oid)==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
 done:

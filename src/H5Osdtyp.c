@@ -184,6 +184,7 @@ H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
               sdtype->len=*p++;
               sdtype->arch=*p++;
               UINT16DECODE(p,sdtype->base);
+              sdtype->base=MAKE_ATOM(H5_DATATYPE,sdtype->base);   /* convert into atomic base type */
             } /* end if */
      } /* end if */
    else

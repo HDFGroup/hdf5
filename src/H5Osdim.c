@@ -217,6 +217,7 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
 
    /* check args */
    assert (ent);
+   assert (mesg);
 
    if (H5G_CACHED_SDATA==ent->type)
      {
@@ -280,7 +281,7 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
         modified = BTRUE;
         ent->type = H5G_CACHED_SDATA;
         UINT32ENCODE(p,sdim->rank);
-        for(u=0; u<=sdim->rank; u++);
+        for(u=0; u<=sdim->rank; u++)
             UINT32ENCODE(p,sdim->size[u]);
       } /* end if */
     else

@@ -256,7 +256,7 @@ H5G_namei (hdf5_file_t *f, H5G_entry_t *cwd, const char *name,
 	  * prevents us from saying `/foo/foo' where the root object has
 	  * the name `foo'.
 	  */
-	 H5O_name_t mesg;
+	 H5O_name_t mesg={0};
 	 if (!aside && dir->header==f->root_sym->header &&
 	     H5O_read (f, dir->header, dir, H5O_NAME, 0, &mesg)) {
 	    if (!HDstrcmp (mesg.s, comp)) {
@@ -334,7 +334,7 @@ static herr_t
 H5G_mkroot (hdf5_file_t *f, size_t size_hint)
 {
    H5O_stab_t	stab;			/*symbol table message		*/
-   H5O_name_t	name;			/*object name message		*/
+   H5O_name_t	name={0};		/*object name message		*/
    H5G_entry_t	root;			/*old root entry		*/
    const char	*root_name=NULL;	/*name of old root object	*/
    intn		nlinks;			/*number of links		*/
