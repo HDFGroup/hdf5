@@ -1,4 +1,4 @@
-HDF5 version 1.7.4 released on Sun Sep 21 06:11:04 CDT 2003
+HDF5 version 1.7.5 released on Tue Oct  7 06:13:37 CDT 2003
 ================================================================================
 
 
@@ -41,6 +41,8 @@ New Features
 
     Library:
     --------
+        - Added backward compatbility with v1.6 for new Error API. SLU - 
+            2003/09/24
         - Changed 'objno' field in H5G_stat_t structure from 'unsigned long[2]'
             to 'haddr_t'.  QAK - 2003/08/08
         - Changed 'fileno' field in H5G_stat_t structure from 'unsigned long[2]'
@@ -74,6 +76,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Changed implementation of internal ID searching algorithm to avoid
+            O(n) behavior for many common cases.  QAK 2003/10/06
+        - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
+        - Correctly create reference to shared datatype in attribute, instead
+            of making a copy of the shared datatype in the attribute.
+            QAK - 2003/10/01
         - Revert changes which caused files >2GB to fail when created with
             MPI-I/O file driver on certain platforms.  QAK - 2003/09/16
         - Allow compound datatypes to grow in size.  SLU - 2003/09/10
