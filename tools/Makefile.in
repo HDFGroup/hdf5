@@ -24,7 +24,7 @@ TEST_SCRIPTS=$(srcdir)/testh5dump.sh @TESTH5TOH4@
 LT_LINK_LIB=$(LT) --mode=link $(CC) -static -rpath $(libdir)
 LIB=libh5tools.la
 LIBHDF5=../src/libhdf5.la
-PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
+PROGS=h5debug h5import h5ls h5repart h5dump h5dumptst @H5TOH4@
 
 # Source and object files for the library; do not install
 LIB_SRC=h5tools.c h5findshd.c
@@ -32,7 +32,8 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
 # Source and object files for programs...
-PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c h5toh4.c
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c \
+	h5toh4.c h5dumptst.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 PRIVATE_HDR=h5tools.h
 
@@ -64,5 +65,8 @@ h5dump: h5dump.lo h5dumputil.lo
 
 h5toh4: h5toh4.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5toh4.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+h5dumptst: h5dumptst.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dumptst.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
