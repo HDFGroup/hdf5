@@ -21,7 +21,6 @@
 #ifndef _H5TEST_H
 #define _H5TEST_H
 
-#undef NDEBUG
 #include "hdf5.h"
 #include "H5private.h"
 
