@@ -61,11 +61,14 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
 
     # Production
     # Check for MPI wrapper being used and tweak down compiler options
-    if test "X-" == "X-$is_mpi"; then
-        PROD_FFLAGS="-fast -s -Mnoframe"
-    else
-        PROD_FFLAGS="-O2 -s"
-    fi
+    # Comment out the Tweaking since it caused problems to mpich1.2.6.
+    # Need to investigate the reasons to tweak.
+    #if test "X-" == "X-$is_mpi"; then
+    #    PROD_FFLAGS="-fast -s -Mnoframe"
+    #else
+    #    PROD_FFLAGS="-O2 -s"
+    #fi
+    PROD_FFLAGS="-fast -s -Mnoframe"
 
     # Debug
     DEBUG_FFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr"
