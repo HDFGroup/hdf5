@@ -248,6 +248,8 @@ test_mpio_gb_file(char *filename)
     /* open a new file. Remove it first in case it exists. */
     if (MAINPROCESS)
 	remove(filename);
+    MPI_Barrier(MPI_COMM_WORLD);	/* prevent racing condition */
+
     mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
 		info, &fh);
     VRFY((mrc==MPI_SUCCESS), "");
