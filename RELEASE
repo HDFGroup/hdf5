@@ -35,9 +35,11 @@ CONTENTS
 
 New features
 ============
-VFL(?) 
+   * The Virtual File Layer, VFL, is added to replace the old file
+     drivers.  It also provides an API for user defined file drivers.
    * New features added to snapshots.  Use 'snapshot help' to see a
      complete list of features.
+   * Added Thread-Safe support.  Phase I implemented.
 
 Bug fixes since HDF5-1.2.0
 ==========================
