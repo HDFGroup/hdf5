@@ -38,49 +38,49 @@ TEST_SRC=dsetexample.f90 fileexample.f90 rwdsetexample.f90 attrexample.f90	\
 	 mountexample.f90 compound.f90
 TEST_OBJ=$(TEST_SRC:.f90=.lo)
 
-## How to build the programs... they all depend on the Fortran HDF5 library
-$(TEST_PROGS): $(FLIB)
+## How to build the programs... they all depend on the Fortran & C hdf5 libraries
+$(TEST_PROGS): $(FLIB) $(HDF5LIB)
 
-dsetexample: dsetexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ dsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+dsetexample: dsetexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ dsetexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-fileexample: fileexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fileexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+fileexample: fileexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fileexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-rwdsetexample: rwdsetexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ rwdsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+rwdsetexample: rwdsetexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ rwdsetexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-attrexample: attrexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ attrexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+attrexample: attrexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ attrexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-groupexample: groupexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ groupexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+groupexample: groupexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ groupexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-grpsexample: grpsexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpsexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+grpsexample: grpsexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpsexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-grpdsetexample: grpdsetexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpdsetexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+grpdsetexample: grpdsetexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpdsetexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-hyperslab: hyperslab.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ hyperslab.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+hyperslab: hyperslab.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ hyperslab.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-selectele: selectele.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ selectele.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+selectele: selectele.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ selectele.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-grpit: grpit.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpit.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+grpit: grpit.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ grpit.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-refobjexample: refobjexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refobjexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+refobjexample: refobjexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refobjexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-refregexample: refregexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refregexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+refregexample: refregexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ refregexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-mountexample: mountexample.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ mountexample.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+mountexample: mountexample.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ mountexample.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
-compound: compound.f90 
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ compound.f90 $(FLIB) $(LIBS) $(HDF5LIB)
+compound: compound.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ compound.lo $(FLIB) $(LIBS) $(HDF5LIB)
 
 @CONCLUDE@
