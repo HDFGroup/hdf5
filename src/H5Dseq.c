@@ -271,6 +271,23 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
             break;
 
         case H5D_CHUNKED:
+            /*
+             * This method is unable to access external raw data files 
+             */
+            if (efl && efl->nused>0) {
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
+                      "chunking and external files are mutually exclusive");
+            }
+            /* Compute the file offset coordinates and hyperslab size */
+            if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
+            
+            /* Build the array of cumulative hyperslab sizes */
+            for(acc=1, i=(ndims-1); i>=0; i--) {
+                down_size[i]=acc;
+                acc*=dset_dims[i];
+            } /* end for */
+
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
                 file_offset=file_offset_arr[v];
@@ -278,30 +295,12 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 buf=real_buf;
 
                 {
-                    /*
-                     * This method is unable to access external raw data files 
-                     */
-                    if (efl && efl->nused>0) {
-                        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                              "chunking and external files are mutually exclusive");
-                    }
-                    /* Compute the file offset coordinates and hyperslab size */
-                    if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
-                        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
-                    
-
                     /* Set location in dataset from the file_offset */
                     addr=file_offset;
 
                     /* Convert the bytes into elements */
                     seq_len/=elmt_size;
                     addr/=elmt_size;
-
-                    /* Build the array of cumulative hyperslab sizes */
-                    for(acc=1, i=(ndims-1); i>=0; i--) {
-                        down_size[i]=acc;
-                        acc*=dset_dims[i];
-                    } /* end for */
 
                     /* Compute the hyperslab offset from the address given */
                     for(i=ndims-1; i>=0; i--) {
@@ -660,6 +659,23 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
             break;
 
         case H5D_CHUNKED:
+            /*
+             * This method is unable to access external raw data files 
+             */
+            if (efl && efl->nused>0) {
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
+                      "chunking and external files are mutually exclusive");
+            }
+            /* Compute the file offset coordinates and hyperslab size */
+            if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
+                HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
+
+            /* Build the array of cumulative hyperslab sizes */
+            for(acc=1, i=(ndims-1); i>=0; i--) {
+                down_size[i]=acc;
+                acc*=dset_dims[i];
+            } /* end for */
+
             /* Brute-force, stupid way to implement the vectors, but too complex to do other ways... */
             for(v=0; v<nseq; v++) {
                 file_offset=file_offset_arr[v];
@@ -667,29 +683,12 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 buf=real_buf;
 
                 {
-                    /*
-                     * This method is unable to access external raw data files 
-                     */
-                    if (efl && efl->nused>0) {
-                        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                              "chunking and external files are mutually exclusive");
-                    }
-                    /* Compute the file offset coordinates and hyperslab size */
-                    if((ndims=H5S_get_simple_extent_dims(file_space,dset_dims,NULL))<0)
-                        HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unable to retrieve dataspace dimensions");
-
                     /* Set location in dataset from the file_offset */
                     addr=file_offset;
 
                     /* Convert the bytes into elements */
                     seq_len/=elmt_size;
                     addr/=elmt_size;
-
-                    /* Build the array of cumulative hyperslab sizes */
-                    for(acc=1, i=(ndims-1); i>=0; i--) {
-                        down_size[i]=acc;
-                        acc*=dset_dims[i];
-                    } /* end for */
 
                     /* Compute the hyperslab offset from the address given */
                     for(i=ndims-1; i>=0; i--) {
