@@ -196,13 +196,32 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_mpio_init(void)
 {
-    hid_t ret_value=H5FD_MPIO_g;        /* Return value */
+#ifdef H5FDmpio_DEBUG
+    static int H5FD_mpio_Debug_inited=0;
+#endif /* H5FDmpio_DEBUG */
+    hid_t ret_value;        	/* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_init, FAIL);
 
     if (H5I_VFL!=H5Iget_type(H5FD_MPIO_g))
         H5FD_MPIO_g = H5FDregister(&H5FD_mpio_g);
 
+#ifdef H5FDmpio_DEBUG
+    if (!H5FD_mpio_Debug_inited)
+    {
+	/* set debug mask */
+	/* Should this be done in H5F global initialization instead of here? */
+        const char *s = HDgetenv ("H5FD_mpio_Debug");
+        if (s) {
+	    while (*s){
+		H5FD_mpio_Debug[(int)*s]++;
+		s++;
+	    }
+        }
+	H5FD_mpio_Debug_inited++;
+    }
+#endif /* H5FDmpio_DEBUG */
+    
     /* Set return value */
     ret_value=H5FD_MPIO_g;
 
@@ -1043,25 +1062,11 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
 #ifdef H5FDmpio_DEBUG
-    {
-	/* set debug mask */
-	/* Should this be done in H5F global initialization instead of here? */
-        const char *s = HDgetenv ("H5FD_mpio_Debug");
-        if (s) {
-	    while (*s){
-		H5FD_mpio_Debug[(int)*s]++;
-		s++;
-	    }
-        }
-    }
-    
     /* Check for debug commands in the info parameter */
-#if 0
-    /* Temporary KLUGE rky 2000-06-29, because fa->info is invalid (-1)*/
     {
 	char debug_str[128];
         int infoerr, flag, i;
-        if (fa->info) {
+        if (MPI_INFO_NULL != info_dup) {
             infoerr = MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, 127,
 				   debug_str, &flag);
             if (flag) {
@@ -1074,8 +1079,6 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
             }
         }
     }
-    /* END Temporary KLUGE rky 2000-06-29, because fa->info is invalid (-1) */
-#endif
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
