@@ -241,8 +241,9 @@ precision (detected_t *d)
    precision (&(INFO));							      \
 }
 
+#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
 #define ALIGNMENT(TYPE,ALIGN) {						      \
-    char	*_buf=malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
+    char	*_buf;							      \
     TYPE	_val=0;							      \
     size_t	_ano;							      \
     pid_t	_child;							      \
@@ -252,7 +253,9 @@ precision (detected_t *d)
         fflush(stdout);							      \
         fflush(stderr);							      \
 	if (0==(_child=fork())) {					      \
+            _buf = malloc(sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
 	    _val = *((TYPE*)(_buf+align_g[_ano]));			      \
+            free(_buf);							      \
 	    exit(0);							      \
 	} else if (_child<0) {						      \
 	    perror("fork");						      \
@@ -277,6 +280,10 @@ precision (detected_t *d)
 	fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);     \
     }									      \
 }
+#else
+#define ALIGNMENT(TYPE,ALIGN) (ALIGN)=0
+#endif
+
 	
 
 /*-------------------------------------------------------------------------

@@ -503,7 +503,7 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
     */
     HDmemcpy(fhyper_info->dst,
 	     node->cinfo.pos,
-	     region_size*fhyper_info->elmt_size);
+	     (size_t)(region_size*fhyper_info->elmt_size));
 
     /*
      * Decrement the number of elements left in block to read & move the
@@ -559,7 +559,7 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
     */
     HDmemcpy(node->cinfo.pos,
 	     fhyper_info->src,
-	     region_size*fhyper_info->elmt_size);
+	     (size_t)(region_size*fhyper_info->elmt_size));
 
     /*
      * Decrement the number of elements left in block to read & move the

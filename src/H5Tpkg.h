@@ -61,11 +61,29 @@ typedef struct H5T_atomic_t {
     } u;
 } H5T_atomic_t;
 
+/* How members are sorted for compound or enum data types */
+typedef enum H5T_sort_t {
+    H5T_SORT_NONE	= 0,		/*not sorted			     */
+    H5T_SORT_NAME	= 1,		/*sorted by member name		     */
+    H5T_SORT_VALUE	= 2 		/*sorted by memb offset or enum value*/
+} H5T_sort_t;
+
+/* A compound data type */
 typedef struct H5T_compnd_t {
     intn		nalloc;		/*num entries allocated in MEMB array*/
     intn		nmembs;		/*number of members defined in struct*/
-    struct H5T_member_t *memb;		/*array of struct members	     */
+    H5T_sort_t		sorted;		/*how are members sorted?	     */
+    struct H5T_cmemb_t	*memb;		/*array of struct members	     */
 } H5T_compnd_t;
+
+/* An enumeration data type */
+typedef struct H5T_enum_t {
+    intn		nalloc;		/*num entries allocated		     */
+    intn		nmembs;		/*number of members defined in enum  */
+    H5T_sort_t		sorted;		/*how are members sorted?	     */
+    uint8_t		*value;		/*array of values		     */
+    char		**name;		/*array of symbol names		     */
+} H5T_enum_t;
 
 typedef enum H5T_state_t {
     H5T_STATE_TRANSIENT, 		/*type is a modifiable transient     */
@@ -81,13 +99,16 @@ struct H5T_t {
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
+    struct H5T_t	*parent;/*parent type for derived data types	     */
     union {
 	H5T_atomic_t	atomic; /*an atomic data type			     */
 	H5T_compnd_t	compnd; /*a compound data type (struct)		     */
+	H5T_enum_t	enumer; /*an enumeration type (enum)		     */
     } u;
 };
 
-typedef struct H5T_member_t {
+/* A compound data type member */
+typedef struct H5T_cmemb_t {
     char		*name;		/*name of this member		     */
     size_t		offset;		/*offset from beginning of struct    */
     size_t		size;		/*total size: dims * type_size	     */
@@ -95,7 +116,7 @@ typedef struct H5T_member_t {
     size_t		dim[4];		/*size in each dimension	     */
     intn		perm[4];	/*index permutation		     */
     struct H5T_t	*type;		/*type of this member		     */
-} H5T_member_t;
+} H5T_cmemb_t;
 
 /* The master list of soft conversion functions */
 typedef struct H5T_soft_t {
@@ -142,6 +163,8 @@ herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
+herr_t H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg);
 herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

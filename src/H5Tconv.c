@@ -24,6 +24,13 @@ typedef struct H5T_conv_struct_t {
     size_t	*memb_nelmts;		/*member element count		     */
 } H5T_conv_struct_t;
 
+/* Conversion data for H5T_conv_enum() */
+typedef struct H5T_enum_struct_t {
+    intn	base;			/*lowest `in' value		     */
+    intn	length;			/*num elements in arrays	     */
+    intn	*src2dst;		/*map from src to dst index	     */
+} H5T_enum_struct_t;
+
 /* Conversion data for the hardware conversion functions */
 typedef struct H5T_conv_hw_t {
     hsize_t	s_aligned;		/*number source elements aligned     */
@@ -336,7 +343,7 @@ static intn interface_initialize_g = 0;
     }									      \
 }
 #else
-#   define CI_PRINT_STATS /*void*/
+#   define CI_PRINT_STATS(STYPE,DTYPE) /*void*/
 #endif
 
 /*-------------------------------------------------------------------------
@@ -543,8 +550,8 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	/*
 	 * Insure that members are sorted.
 	 */
-	H5T_sort_by_offset (src);
-	H5T_sort_by_offset (dst);
+	H5T_sort_value(src);
+	H5T_sort_value(dst);
 
 	/*
 	 * Build a mapping from source member number to destination member
@@ -582,8 +589,8 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	 */
 	for (i=0; i<src->u.compnd.nmembs; i++) {
 	    if (src2dst[i]>=0) {
-		H5T_member_t *src_memb = src->u.compnd.memb + i;
-		H5T_member_t *dst_memb = dst->u.compnd.memb + src2dst[i];
+		H5T_cmemb_t *src_memb = src->u.compnd.memb + i;
+		H5T_cmemb_t *dst_memb = dst->u.compnd.memb + src2dst[i];
 		if (src_memb->ndims != dst_memb->ndims) {
 		    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 				  "source and dest members have incompatible "
@@ -687,8 +694,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
     intn	*src2dst = NULL;	/*maps src member to dst member	*/
-    H5T_member_t *src_memb = NULL;	/*source struct member descript.*/
-    H5T_member_t *dst_memb = NULL;	/*destination struct memb desc.	*/
+    H5T_cmemb_t	*src_memb = NULL;	/*source struct member descript.*/
+    H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	src_delta, dst_delta;	/*source & destination stride	*/
     uintn	elmtno;
@@ -754,8 +761,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/*
 	 * Insure that members are sorted.
 	 */
-	H5T_sort_by_offset (src);
-	H5T_sort_by_offset (dst);
+	H5T_sort_value(src);
+	H5T_sort_value(dst);
 	src2dst = priv->src2dst;
 
 	/*
@@ -857,6 +864,298 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }
     
     FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_enum_init
+ *
+ * Purpose:	Initialize information for H5T_conv_enum().
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, January  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+{
+    H5T_enum_struct_t	*priv=NULL;	/*private conversion data	*/
+    intn		n;		/*src value cast as native int	*/
+    intn		domain[2];	/*min and max source values	*/
+    intn		*map=NULL;	/*map from src value to dst idx	*/
+    intn		length;		/*nelmts in map array		*/
+    herr_t		ret_value=FAIL;	/*return value			*/
+    intn		i, j;		/*counters			*/
+    
+    FUNC_ENTER(H5T_conv_enum_init, FAIL);
+
+    cdata->need_bkg = H5T_BKG_NO;
+    if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(*priv)))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		      "memory allocation failed");
+    }
+    if (0==src->u.enumer.nmembs) {
+	HRETURN(SUCCEED);
+    }
+
+    /*
+     * Check that the source symbol names are a subset of the destination
+     * symbol names and build a map from source member index to destination
+     * member index.
+     */
+    H5T_sort_name(src);
+    H5T_sort_name(dst);
+    if (NULL==(priv->src2dst=H5MM_malloc(src->u.enumer.nmembs*sizeof(int)))) {
+	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		      "memory allocation failed");;
+    }
+    for (i=0, j=0;
+	 i<src->u.enumer.nmembs && j<dst->u.enumer.nmembs;
+	 i++, j++) {
+	while (j<dst->u.enumer.nmembs &&
+	       HDstrcmp(src->u.enumer.name[i], dst->u.enumer.name[j])) j++;
+	if (j>=dst->u.enumer.nmembs) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "source type is not a subset of destination type");
+	}
+	priv->src2dst[i] = j;
+    }
+
+    /*
+     * The conversion function will use an O(log N) lookup method for each
+     * value converted. However, if all of the following constraints are met
+     * then we can build a perfect hash table and use an O(1) lookup method.
+     *
+     *	  A: The source data type size matches one of our native data type
+     *	     sizes.
+     *	     
+     *	  B: After casting the source value bit pattern to a native type
+     *	     the size of the range of values is less than 20% larger than
+     *	     the number of values.
+     *
+     * If this special case is met then we use the source bit pattern cast as
+     * a native integer type as an index into the `val2dst'. The values of
+     * that array are the index numbers in the destination type or negative
+     * if the entry is unused.
+     */
+    if (1==src->size || sizeof(short)==src->size || sizeof(int)==src->size) {
+	for (i=0; i<src->u.enumer.nmembs; i++) {
+	    if (1==src->size) {
+		n = *((signed char*)(src->u.enumer.value+i));
+	    } else if (sizeof(short)==src->size) {
+		n = *((short*)(src->u.enumer.value+i*src->size));
+	    } else {
+		n = *((int*)(src->u.enumer.value+i*src->size));
+	    }
+	    if (0==i) {
+		domain[0] = domain[1] = n;
+	    } else {
+		domain[0] = MIN(domain[0], n);
+		domain[1] = MAX(domain[1], n);
+	    }
+	}
+
+	length = (domain[1]-domain[0])+1;
+	if (src->u.enumer.nmembs<2 ||
+	    (double)length/src->u.enumer.nmembs<1.2) {
+	    priv->base = domain[0];
+	    priv->length = length;
+	    if (NULL==(map=H5MM_malloc(length*sizeof(int)))) {
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			    "memory allocation failed");
+	    }
+	    for (i=0; i<length; i++) map[i] = -1; /*entry unused*/
+	    for (i=0; i<src->u.enumer.nmembs; i++) {
+		if (1==src->size) {
+		    n = *((signed char*)(src->u.enumer.value+i));
+		} else if (sizeof(short)==src->size) {
+		    n = *((short*)(src->u.enumer.value+i*src->size));
+		} else {
+		    n = *((int*)(src->u.enumer.value+i*src->size));
+		}
+		n -= priv->base;
+		assert(n>=0 && n<priv->length);
+		assert(map[n]<0);
+		map[n] = priv->src2dst[i];
+	    }
+
+	    /*
+	     * Replace original src2dst array with our new one. The original
+	     * was indexed by source member number while the new one is
+	     * indexed by source values.
+	     */
+	    H5MM_xfree(priv->src2dst);
+	    priv->src2dst = map;
+	    HGOTO_DONE(SUCCEED);
+	}
+    }
+    ret_value = SUCCEED;
+
+ done:
+    if (ret_value<0 && priv) {
+	H5MM_xfree(priv->src2dst);
+	H5MM_xfree(priv);
+	cdata->priv = NULL;
+    }
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_enum
+ *
+ * Purpose:	Converts one type of enumerated data to another.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, January  4, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+	      size_t nelmts, void *_buf, void __unused__ *bkg)
+{
+    uint8_t	*buf = (uint8_t*)_buf;	/*cast for pointer arithmetic	*/
+    H5T_t	*src=NULL, *dst=NULL;	/*src and dst data types	*/
+    uint8_t	*s=NULL, *d=NULL;	/*src and dst BUF pointers	*/
+    intn	src_delta, dst_delta;	/*conversion strides		*/
+    intn	n;			/*src value cast as native int	*/
+    size_t	i;			/*counters			*/
+    H5T_enum_struct_t *priv = (H5T_enum_struct_t*)(cdata->priv);
+    
+    FUNC_ENTER(H5T_conv_enum, FAIL);
+    switch (cdata->command) {
+    case H5T_CONV_INIT:
+	/*
+	 * Determine if this conversion function applies to the conversion
+	 * path SRC_ID->DST_ID.  If not return failure; otherwise initialize
+	 * the `priv' field of `cdata' with information about the underlying
+	 * integer conversion.
+	 */
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
+	    NULL == (src = H5I_object(src_id)) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
+	    NULL == (dst = H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	assert (H5T_ENUM==src->type);
+	assert (H5T_ENUM==dst->type);
+	if (H5T_conv_enum_init(src, dst, cdata)<0) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			  "unable to initialize private data");
+	}
+	break;
+
+    case H5T_CONV_FREE:
+#ifdef H5T_DEBUG
+	if (H5DEBUG(T)) {
+	    fprintf(H5DEBUG(T), "      Using %s mapping function (%s)\n",
+		    priv->length?"O(N)":"O(N log N)", "N==nelmts");
+	}
+#endif
+	if (priv) {
+	    H5MM_xfree(priv->src2dst);
+	    H5MM_xfree(priv);
+	}
+	cdata->priv = NULL;
+	break;
+
+    case H5T_CONV_CONV:
+	if (H5I_DATATYPE != H5I_get_type(src_id) ||
+	    NULL == (src = H5I_object(src_id)) ||
+	    H5I_DATATYPE != H5I_get_type(dst_id) ||
+	    NULL == (dst = H5I_object(dst_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	assert (H5T_ENUM==src->type);
+	assert (H5T_ENUM==dst->type);
+	H5T_sort_name(src);
+	H5T_sort_name(dst);
+
+	/*
+	 * Direction of conversion.
+	 */
+	if (dst->size <= src->size) {
+	    src_delta = src->size;
+	    dst_delta = dst->size;
+	    s = d = buf;
+	} else {
+	    src_delta = -(src->size);
+	    dst_delta = -(dst->size);
+	    s = buf + (nelmts-1) * src->size;
+	    d = buf + (nelmts-1) * dst->size;
+	}
+
+	for (i=0; i<nelmts; i++, s+=src_delta, d+=dst_delta) {
+	    if (priv->length) {
+		/* Use O(1) lookup */
+		if (1==src->size) {
+		    n = *((signed char*)s);
+		} else if (sizeof(short)==src->size) {
+		    n = *((short*)s);
+		} else {
+		    n = *((int*)s);
+		}
+		if (n<0 || n>=priv->length || priv->src2dst[n]<0) {
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			HDmemset(d, 0xff, dst->size);
+		    }
+		} else {
+		    HDmemcpy(d,
+			     dst->u.enumer.value+priv->src2dst[n]*dst->size,
+			     dst->size);
+		}
+	    } else {
+		/* Use O(log N) lookup */
+		int lt = 0;
+		int rt = src->u.enumer.nmembs;
+		int md, cmp;
+		while (lt<rt) {
+		    md = (lt+rt)/2;
+		    cmp = HDmemcmp(s, src->u.enumer.value+md*src->size,
+				   src->size);
+		    if (cmp<0) {
+			rt = md;
+		    } else if (cmp>0) {
+			lt = md+1;
+		    } else {
+			break;
+		    }
+		}
+		if (lt>=rt) {
+		    if (!H5T_overflow_g ||
+			(H5T_overflow_g)(src_id, dst_id, s, d)<0) {
+			HDmemset(d, 0xff, dst->size);
+		    }
+		} else {
+		    HDmemcpy(d,
+			     dst->u.enumer.value+priv->src2dst[md]*dst->size,
+			     dst->size);
+		}
+	    }
+	}
+	break;
+
+    default:
+	/* Some other command we don't know about yet.*/
+	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		       "unknown conversion command");
+    }
+    FUNC_LEAVE(SUCCEED);
 }
 
 

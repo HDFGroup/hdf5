@@ -706,6 +706,10 @@ H5I_remove(hid_t id)
  *	zero and no `free' function has been defined.  The object is still
  *	removed from the list.
  *
+ * 	Robb Matzke, 30 Dec 1998
+ *	Fixed a bug where the return value was always zero instead of the new
+ *	reference count.
+ *
  *-------------------------------------------------------------------------
  */
 intn
@@ -742,7 +746,6 @@ H5I_dec_ref(hid_t id)
 		}
 	    }
 	}
-	ret_value = SUCCEED;
     }
     FUNC_LEAVE(ret_value);
 }

@@ -18,6 +18,10 @@
 
 #include <H5config.h>           /*from configure                             */
 #include <sys/types.h>
+#ifdef STDC_HEADERS
+#   include <limits.h>		/*for H5T_NATIVE_CHAR defn in H5Tpublic.h    */
+#endif
+
 #include <stddef.h>
 #ifdef HAVE_PARALLEL
 #  include <mpi.h>

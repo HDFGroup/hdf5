@@ -34,13 +34,13 @@ FILE *fdopen(int fd, const char *mode);
 
 #define PABLO_MASK      H5_mask
 
-hbool_t                 library_initialize_g = FALSE;
+hbool_t                 H5_libinit_g = FALSE;
 hbool_t                 dont_atexit_g = FALSE;
 H5_debug_t		H5_debug_g;		/*debugging info	*/
 static void		H5_debug_mask(const char*);
 
 /* Interface initialization */
-static intn          interface_initialize_g = 0;
+static intn          	interface_initialize_g = 0;
 #define INTERFACE_INIT 	NULL
 
 /*--------------------------------------------------------------------------
@@ -131,7 +131,7 @@ void
 H5_term_library(void)
 {
     /* Don't do anything if the library is already closed */
-    if (!library_initialize_g) return;
+    if (!H5_libinit_g) return;
 
     /*
      * Close interfaces in a well-defined order based on dependencies. The
@@ -179,7 +179,7 @@ H5_term_library(void)
     H5Z_term_interface(0);
 
     /* Mark library as closed */
-    library_initialize_g = FALSE;
+    H5_libinit_g = FALSE;
 }
 
 
@@ -2191,34 +2191,37 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5T_class_t type_class = va_arg (ap, H5T_class_t);
+		    H5T_class_t type_class = va_arg(ap, H5T_class_t);
 		    switch (type_class) {
 		    case H5T_NO_CLASS:
-			fprintf (out, "H5T_NO_CLASS");
+			fprintf(out, "H5T_NO_CLASS");
 			break;
 		    case H5T_INTEGER:
-			fprintf (out, "H5T_INTEGER");
+			fprintf(out, "H5T_INTEGER");
 			break;
 		    case H5T_FLOAT:
-			fprintf (out, "H5T_FLOAT");
+			fprintf(out, "H5T_FLOAT");
 			break;
 		    case H5T_TIME:
-			fprintf (out, "H5T_TIME");
+			fprintf(out, "H5T_TIME");
 			break;
 		    case H5T_STRING:
-			fprintf (out, "H5T_STRING");
+			fprintf(out, "H5T_STRING");
 			break;
 		    case H5T_BITFIELD:
-			fprintf (out, "H5T_BITFIELD");
+			fprintf(out, "H5T_BITFIELD");
 			break;
 		    case H5T_OPAQUE:
-			fprintf (out, "H5T_OPAQUE");
+			fprintf(out, "H5T_OPAQUE");
 			break;
 		    case H5T_COMPOUND:
-			fprintf (out, "H5T_COMPOUND");
+			fprintf(out, "H5T_COMPOUND");
+			break;
+		    case H5T_ENUM:
+			fprintf(out, "H5T_ENUM");
 			break;
 		    default:
-			fprintf (out, "%ld", (long)type_class);
+			fprintf(out, "%ld", (long)type_class);
 			break;
 		    }
 		}
