@@ -22,17 +22,12 @@ width=78 height=27 alt="NCSA"><P></A>
 <UL>
     <LI> <A HREF="#def">References to Dataset Regions</A>
     <LI> <A HREF="#def1">Creating and Storing References to Dataset Regions</A>
-    <LI> Programming Example 
-    <UL>
-      <LI> <A HREF="#desc1">Description</A> 
-      <LI> <A HREF="#rem1">Remarks</A> 
-      <LI> <A HREF="#fc1">File Contents</A>
-    </UL>
     <LI> <A HREF="#def2">Reading References to Dataset Regions</A> 
     <LI> Programming Example 
     <UL>
-      <LI> <A HREF="#desc2">Description</A> 
-      <LI> <A HREF="#rem2">Remarks</A> 
+      <LI> <A HREF="#desc">Description</A> 
+      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#fc">File Contents</A>
     </UL>
 </UL>
 <HR>
@@ -41,481 +36,308 @@ width=78 height=27 alt="NCSA"><P></A>
 Previously you learned about creating, reading, and writing
 dataset selections. Here you will learn how to store dataset
 selections in a file, and how to read them back using references
-to the dataset regions.
+to dataset regions.
 <P>
 A dataset region reference points to the dataset selection by storing the
 relative file address  of the dataset header and the global heap offset of
 the referenced selection.  The selection referenced is located by retrieving
 the coordinates of the areas in the selection from the global heap. This
 internal mechanism of storing and retrieving dataset selections is transparent
-to the user. A reference to the dataset selection ( region ) is constant for 
+to the user. A reference to a dataset selection (a region) is constant for 
 the life of the dataset.
 <A NAME="def1">
 <H2>Creating and Storing References to Dataset Regions</H2>
 The following steps are involved in creating and storing references to
-the dataset regions:
+dataset regions:
 <OL>
 
-<LI> Create a dataset to store the dataset regions (selections).
+<LI> Create a dataset in which to store the dataset regions (the selections).
 <P>
-<LI> Create selections in the dataset(s). Dataset(s) should already exist in the
-   file.
+<LI> Create selections in the dataset(s). 
+The dataset(s) should already exist in the file.
 <P>
 <LI> Create references to the selections and store them in a buffer.
 <P>
-<LI> Write references to the dataset regions in the file.
+<LI> Write the dataset region references to the file.
 <P>
 <LI> Close all objects.
 </OL>
 
-<H2> Programming Example</H2>
-<A NAME="desc1">
-<H3><U>Description</U></H3>      
-The example below creates a dataset in the file. Then it creates a 
-dataset to store references to the dataset regions (selections).
-The first selection is a 6 x 6 hyperslab. The second selection is a point 
-selection in the same dataset.
-References to both selections are created and stored in the buffer, and then
-written to the dataset in the file.
-
-[<A HREF="examples/h5_ref2regw.c">Download h5_ref2regw.c</A>]
-<PRE>
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-#include &lt;stdlib.h&gt;
-#include &lt;hdf5.h&gt;
-
-#define FILE2	"trefer2.h5"
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK     1
-#define SPACE1_DIM1     4
-
-/* Dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	10
-#define SPACE2_DIM2	10
-
-/* Element selection information */
-#define POINT1_NPOINTS 10
-
-int
-main(void)
-{
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
-                sid2;       /* Dataspace ID	#2		*/
-    hsize_t		dims1[] = {SPACE1_DIM1},
-            	dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
-    hssize_t	start[SPACE2_RANK];     /* Starting location of hyperslab */
-    hsize_t		stride[SPACE2_RANK];    /* Stride of hyperslab */
-    hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
-    hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
-    hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; 
-                                    /* Coordinates for point selection */
-    hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
-    int     *dwbuf;      /* Buffer for writing numeric data to disk */
-    int        i;          /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
-
-
-    /* Allocate write & read buffers */
-    wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    dwbuf=malloc(sizeof(int)*SPACE2_DIM1*SPACE2_DIM2);
-
-    /* Create file */
-    fid1 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Create dataspace for datasets */
-    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
-
-    /* Create a dataset */
-    dset2=H5Dcreate(fid1,"Dataset2",H5T_STD_U8LE,sid2,H5P_DEFAULT);
-
-    for(i=0; i &lt; SPACE2_DIM1*SPACE2_DIM2; i++)
-        dwbuf[i]=i*3;
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,dwbuf);
-
-    /* Close Dataset */
-    ret = H5Dclose(dset2);
-
-    /* Create dataspace for the reference dataset */
-    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
-
-    /* Create a dataset */
-    dset1=H5Dcreate(fid1,"Dataset1",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
-
-    /* Create references */
-
-    /* Select 6x6 hyperslab for first reference */
-    start[0]=2; start[1]=2;
-    stride[0]=1; stride[1]=1;
-    count[0]=6; count[1]=6;
-    block[0]=1; block[1]=1;
-    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
-
-    /* Store first dataset region */
-    ret = H5Rcreate(&wbuf[0],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
-
-    /* Select sequence of ten points for second reference */
-    coord1[0][0]=6; coord1[0][1]=9;
-    coord1[1][0]=2; coord1[1][1]=2;
-    coord1[2][0]=8; coord1[2][1]=4;
-    coord1[3][0]=1; coord1[3][1]=6;
-    coord1[4][0]=2; coord1[4][1]=8;
-    coord1[5][0]=3; coord1[5][1]=2;
-    coord1[6][0]=0; coord1[6][1]=4;
-    coord1[7][0]=9; coord1[7][1]=0;
-    coord1[8][0]=7; coord1[8][1]=1;
-    coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
-
-    /* Store second dataset region */
-    ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
-
-    /* Write selection to disk */
-    ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
-
-    /* Close all objects */
-    ret = H5Sclose(sid1);
-    ret = H5Dclose(dset1);
-    ret = H5Sclose(sid2);
-    
-    /* Close file */
-    ret = H5Fclose(fid1);
-
-    free(wbuf);
-    free(dwbuf);
-    return 0;
-}   
-
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
-
-<A NAME="rem1">
-<H3><U>Remarks</U></H3>
-<UL>
-<LI> The code, 
-<PRE>
-    dset1=H5Dcreate(fid1,"Dataset1",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
-</PRE>
-   creates a dataset to store references to the dataset(s) regions(selections).
-   Notice that the H5T_STD_REF_DSETREG data type is used.
-<P>
-
-<LI> This program uses hyperslab and point selections. We used the dataspace 
-   handle <I>sid2</I> for the calls to H5Sselect_hyperslab and 
-   H5Sselect_elements.  The handle was created when dataset "Dataset2" was 
-   created and it describes the dataset's dataspace. We did not close it when 
-   the dataset was closed to decrease the number of function calls used 
-   in the example. 
-   In a real application program, one should open the dataset and determine 
-   its dataspace using the H5Dget_space function. 
-<P>
-<LI> H5Rcreate is used to create a dataset region reference and store it in a 
-   buffer.  The signature of the function is:
-<PRE>
-     herr_t H5Rcreate(void *buf, hid_t loc_id, const char *name,
-                      H5R_type_t ref_type, hid_t space_id)
-</PRE>
-<UL>
-    <LI> The first argument specifies the buffer to store the reference.
-    <LI> The second and third arguments specify the name of the referenced 
-         dataset.  In our example the file identifier <I>fid1</I> and the 
-         absolute name of the dataset "/Dataset2" were used to identify the 
-         dataset. The reference to the region of this dataset is stored in 
-         the buffer <I>buf</I>.  
-    
-    <LI> The fourth argument specifies the type of the reference. Since we are
-       creating references to the dataset regions, the H5R_DATASET_REGION
-       data type is used. 
-    <LI> The fifth argument is a dataspace identifier of the referenced dataset. 
-</UL>
-</UL>
-<A NAME="fc1">
-<H3><U>File Contents</U></H3>
-The contents of the file "trefer2.h5" created by this program are as follows:
-
-<PRE>
-HDF5 "trefer2.h5" {
-GROUP "/" {
-   DATASET "Dataset1" {
-      DATATYPE { H5T_REFERENCE }
-      DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
-      DATA {
-         DATASET 0:744 {(2,2)-(7,7)}, DATASET 0:744 {(6,9), (2,2), (8,4), (1,6),
-          (2,8), (3,2), (0,4), (9,0), (7,1), (3,3)}, NULL, NULL
-      }
-   }
-   DATASET "Dataset2" {
-      DATATYPE { H5T_STD_U8LE }
-      DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) }
-      DATA {
-         0, 3, 6, 9, 12, 15, 18, 21, 24, 27,
-         30, 33, 36, 39, 42, 45, 48, 51, 54, 57,
-         60, 63, 66, 69, 72, 75, 78, 81, 84, 87,
-         90, 93, 96, 99, 102, 105, 108, 111, 114, 117,
-         120, 123, 126, 129, 132, 135, 138, 141, 144, 147,
-         150, 153, 156, 159, 162, 165, 168, 171, 174, 177,
-         180, 183, 186, 189, 192, 195, 198, 201, 204, 207,
-         210, 213, 216, 219, 222, 225, 228, 231, 234, 237,
-         240, 243, 246, 249, 252, 255, 255, 255, 255, 255,
-         255, 255, 255, 255, 255, 255, 255, 255, 255, 255
-      }
-   }
-}
-}
-</PRE>
-Notice how raw data of the dataset with the dataset regions is displayed.
-Each element of the raw data consists of a reference to the dataset 
-(DATASET  number1:number2) and its selected region. 
-If the selection is a hyperslab, the corner coordinates of the hyperslab 
-are displayed. 
-For the point selection, the coordinates of each point are displayed.
-Since only two selections were stored, the third and fourth elements of the 
-dataset "Dataset1" are set to NULL. This was done by the buffer 
-inizialization in the program.
-
 <A NAME="def2">
 <H2>Reading References to Dataset Regions</H2>
 
-The following steps are involved in reading references to the dataset 
+The following steps are involved in reading references to dataset 
 regions and referenced dataset regions (selections).
 <OL>
 <LI> Open and read the dataset containing references to the dataset regions.
-   The data type H5T_STD_REF_DSETREG must be used during read operation.
+   The datatype <CODE>H5T_STD_REF_DSETREG</CODE> must be used during 
+the read operation.
 <P>
-<LI>Use H5Rdereference to obtain the dataset identifier from the read 
+<LI>Use <CODE>H5Rdereference</CODE> / <CODE>h5rdeference_f</CODE> to 
+obtain the dataset identifier from the read 
     dataset region reference.
-    <PRE>                       <B>OR</B>
-    </PRE>
-   Use H5Rget_region to obtain the dataspace identifier for the dataset 
+   <dir><dir><dir>
+   <B><font size=-1>OR</font></B>
+   </dir></dir></dir>
+   Use <CODE>H5Rget_region</CODE> / <CODE>h5rget_region_f</CODE> to obtain 
+   the dataspace identifier for the dataset 
    containing the selection from the read dataset region reference. 
 <P>
-<LI> With the dataspace identifier, the H5S interface functions,  
-     H5Sget_select_*, can be used to obtain information about the 
-     selection.
+<LI> Obtain information about the selection or read selected data from
+     the dataset.    
 <P>
 <LI> Close all objects when they are no longer needed.
 </OL>
 
 <H2> Programming Example</H2>
-<A NAME="desc2">
+<A NAME="desc">
 <H3><U>Description</U></H3>      
-The following example reads a dataset containing dataset region references.
+The example below first creates a dataset in the file. Then it creates a 
+dataset to store references to the dataset regions (selections).
+The first selection is a 6 x 6 hyperslab. The second selection is a point 
+selection in the same dataset.
+References to both selections are created and stored in the buffer and then
+written to the dataset in the file.
+<P>
+After creating the dataset and references, the program reads the dataset 
+containing the dataset region references.
 It reads data from the dereferenced dataset and displays the number of 
-elements and raw data. Then it reads two selections:
-hyperslab and point. The program queries a number of points in the 
-hyperslab  and the coordinates and displays them. Then it queries a number of 
+elements and raw data. Then it reads two selections, a hyperslab selection
+and a point selection. The program queries a number of points in the 
+hyperslab and their coordinates and displays them. Then it queries a number of 
 selected points and their coordinates and displays the  information.<BR>
-[ <A HREF="examples/h5_ref2regr.c">Download h5_ref2regr.c</A> ]
+<P>
+To obtain the example, download:
+<UL>
+[<A HREF="examples/h5_ref2reg.c">C example</A> ] 
+    - <code>h5_ref2reg.c</code><BR>
+[<A HREF="examples/refregexample.f90">FORTRAN example</A> ] 
+    - <code>refregexample.f90</code>
+</UL>
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
+<P>
+
+Following is the output from the examples:
+<P>
+<I><U>Output of C Example</U></I>
 <PRE>
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-   
-#include &lt;stdlib.h&gt;
-#include &lt;hdf5.h&gt;
-
-#define FILE2	"trefer2.h5"
-#define NPOINTS 10
- 
-/* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
-
-/* 2-D dataset with fixed dimensions */
-#define SPACE2_NAME  "Space2"
-#define SPACE2_RANK	2
-#define SPACE2_DIM1	10
-#define SPACE2_DIM2	10
-
-int 
-main(void)
-{
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dset1,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
-    hid_t		sid1,       /* Dataspace ID	#1		*/
-                sid2;       /* Dataspace ID	#2		*/
-    hsize_t *   coords;             /* Coordinate buffer */
-    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
-    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
-    hdset_reg_ref_t      *rbuf;      /* buffer to to read disk */
-    int    *drbuf;      /* Buffer for reading numeric data from disk */
-    int        i, j;          /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
-
-    /* Output message about test being performed */
-
-    /* Allocate write & read buffers */
-    rbuf=malloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
-    drbuf=calloc(sizeof(int),SPACE2_DIM1*SPACE2_DIM2);
-
-    /* Open the file */
-    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
-
-    /* Open the dataset */
-    dset1=H5Dopen(fid1,"/Dataset1");
-
-    /* Read selection from disk */
-    ret=H5Dread(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
-
-    /* Try to open objects */
-    dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
-
-    /* Check information in referenced dataset */
-    sid1 = H5Dget_space(dset2);
-
-    ret=H5Sget_simple_extent_npoints(sid1);
-    printf(" Number of elements in the dataset is : %d\n",ret);
-
-    /* Read from disk */
-    ret=H5Dread(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf);
-
-    for(i=0; i &lt; SPACE2_DIM1; i++) {
-        for (j=0; j &lt; SPACE2_DIM2; j++) printf (" %d ", drbuf[i*SPACE2_DIM2+j]);
-        printf("\n"); }
-
-    /* Get the hyperslab selection */
-    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[0]);
-
-    /* Verify correct hyperslab selected */
-    ret = H5Sget_select_npoints(sid2);
-    printf(" Number of elements in the hyperslab is : %d \n", ret);
-    ret = H5Sget_select_hyper_nblocks(sid2);
-    coords=malloc(ret*SPACE2_RANK*sizeof(hsize_t)*2); /* allocate space for the hyperslab blocks */
-    ret = H5Sget_select_hyper_blocklist(sid2,0,ret,coords);
-    printf(" Hyperslab coordinates are : \n");
-    printf (" ( %lu , %lu ) ( %lu , %lu ) \n", \
-(unsigned long)coords[0],(unsigned long)coords[1],(unsigned long)coords[2],(unsigned long)coords[3]); 
-    free(coords);
-    ret = H5Sget_select_bounds(sid2,low,high);
-
-    /* Close region space */
-    ret = H5Sclose(sid2);
-
-    /* Get the element selection */
-    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[1]);
-
-    /* Verify correct elements selected */
-    ret = H5Sget_select_elem_npoints(sid2);
-    printf(" Number of selected elements is : %d\n", ret);
-
-    /* Allocate space for the element points */
-    coords= malloc(ret*SPACE2_RANK*sizeof(hsize_t)); 
-    ret = H5Sget_select_elem_pointlist(sid2,0,ret,coords);
-    printf(" Coordinates of selected elements are : \n");
-    for (i=0; i &lt; 2*NPOINTS; i=i+2) 
-         printf(" ( %lu , %lu ) \n", (unsigned long)coords[i],(unsigned long)coords[i+1]); 
-          
-    free(coords);
-    ret = H5Sget_select_bounds(sid2,low,high);
-
-    /* Close region space */
-    ret = H5Sclose(sid2);
-
-    /* Close first space */
-    ret = H5Sclose(sid1);
-
-    /* Close dereferenced Dataset */
-    ret = H5Dclose(dset2);
-
-    /* Close Dataset */
-    ret = H5Dclose(dset1);
-
-    /* Close file */
-    ret = H5Fclose(fid1);
-
-    /* Free memory buffers */
-    free(rbuf);
-    free(drbuf);
-    return 0;
-}   
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
-Output of this program is :
+Selected hyperslab: 
+0 0 0 3 3 4 0 0 0 
+0 0 0 3 4 4 0 0 0 
+Selected points: 
+1 0 0 0 0 0 0 0 6 
+0 0 0 0 0 0 5 0 0 
+</PRE> 
+<I><U>Output of FORTRAN Example</U></I>
 <PRE>
+ Hyperslab selection
 
- Number of elements in the dataset is : 100
- 0  3  6  9  12  15  18  21  24  27 
- 30  33  36  39  42  45  48  51  54  57 
- 60  63  66  69  72  75  78  81  84  87 
- 90  93  96  99  102  105  108  111  114  117 
- 120  123  126  129  132  135  138  141  144  147 
- 150  153  156  159  162  165  168  171  174  177 
- 180  183  186  189  192  195  198  201  204  207 
- 210  213  216  219  222  225  228  231  234  237 
- 240  243  246  249  252  255  255  255  255  255 
- 255  255  255  255  255  255  255  255  255  255 
- Number of elements in the hyperslab is : 36 
- Hyperslab coordinates are : 
- ( 2 , 2 ) ( 7 , 7 ) 
- Number of selected elements is : 10
- Coordinates of selected elements are : 
- ( 6 , 9 ) 
- ( 2 , 2 ) 
- ( 8 , 4 ) 
- ( 1 , 6 ) 
- ( 2 , 8 ) 
- ( 3 , 2 ) 
- ( 0 , 4 ) 
- ( 9 , 0 ) 
- ( 7 , 1 ) 
- ( 3 , 3 ) 
- 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3*0,  2*3,  4,  3*0
+ 3*0,  3,  2*4,  3*0
+
+ Point selection
+
+ 1,  7*0,  6
+ 6*0,  5,  2*0
 </PRE>
-<A NAME="rem2">
+
+<A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
-<LI> The dataset with the region references was read by H5Dread with 
-   the H5T_STD_REF_DSETREG data type specified.
+<LI> The following code creates a dataset to store references to the 
+     dataset(s) regions (selections).  Notice that the 
+     <CODE>H5T_STD_REF_DSETREG</CODE> datatype is used.
 <P>
-<LI> The read reference can be used to obtain the dataset identifier as we 
-    did with the following call:
-<PRE>
-    dset2 = H5Rdereference (dset1,H5R_DATASET_REGION,&rbuf[0]);
-</PRE>
-   or to obtain spacial information ( dataspace and selection ) with the call
-   to H5Rget_region:
-<PRE>
-    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[0]);
-</PRE> 
-   The reference to the dataset region has information for both the dataset 
-   itself and its selection. In both functions:
-<UL>
-       <LI> The first parameter is an identifier of the dataset with the region
-         references.
-       <LI> The second parameter specifies the type of  reference stored. In
-         this example a reference to the dataset region is stored.
-       <LI> The third parameter is a buffer containing the reference of the 
-         specified type.
-</UL>
+<I><B>C:</I></B>
+<pre>
+    dset1 = H5Dcreate (file_id, dsetnamer, H5T_STD_REF_DSETREG,
+                       spacer_id, creation_prp);
+</pre>
 <P>
-<LI> This example introduces several H5Sget_select* functions used to obtain
-   information about selections:
+<I><B>FORTRAN:</B></I>
+<pre>
+    CALL h5dcreate_f (file_id, dsetnamer, H5T_STD_REF_DSETREG, &
+                     spacer_id, dset1, hdferr, creation_prp)
+</pre>
+<P>
 
+<LI> This program uses hyperslab and point selections. We used the dataspace 
+   identifier for the calls to <CODE>H5Sselect_hyperslab</CODE> / 
+   <CODE>h5sselect_hyperslab_f</CODE> and 
+   <CODE>H5Sselect_elements</CODE> / <CODE>h5sselect_elements_f</CODE>.  
+   The identifier was obtained when the dataset was 
+   created and it describes the dataset's dataspace. We did not close it when 
+   the dataset was closed to decrease the number of function calls used 
+   in the example. 
+   In a real application program, one should open the dataset and determine 
+   its dataspace using the <CODE>H5Dget_space</CODE> / 
+   <CODE>h5dget_space_f</CODE> function. 
+<P>
+<LI> <CODE>H5Rcreate</CODE> / <CODE>h5rcreate_f</CODE> is used to create a 
+dataset region reference. The signature of the function is as follows:
+<P>
+<I><B>C</B></I>:
+<pre>
+    herr_t H5Rcreate (void *ref, hid_t loc_id, const char *name,
+                      H5R_type_t ref_type, hid_t space_id)
+</pre>
+<P>
+<I><B>FORTRAN</B></I>: &nbsp;
+<pre>
+    h5rcreate_f (loc_id, name, space_id, ref, hdferr)
+
+        loc_id      IN: INTEGER (HID_T)
+        name        IN: CHARACTER (LEN=*) 
+        space_id    IN:  INTEGER (HID_T)
+        ref_type   OUT: TYPE(hdset_reg_ref_t_f)
+        hdferr     OUT: INTEGER 
+</pre>
+<P>
 <UL>
-    <B>H5Sget_select_npoints:</B>  returns the number of elements in the 
-       hyperslab<BR>
-    <B>H5Sget_select_hyper_nblocks:</B> returns the number of blocks in 
-       the hyperslab<BR>
-    <B>H5Sget_select_blocklist:</B> returns the "lower left" and "upper right" 
-       coordinates of the blocks in the hyperslab selection<BR>
-    <B>H5Sget_select_bounds:</B> returns the coordinates of the "minimal" 
-    block containing a hyperslab selection<BR>
-    <B>H5Sget_select_elem_npoints:</B> returns the number of points in the 
-       element selection<BR>  
-    <B>H5Sget_select_elem_points:</B> returns the coordinates of the element 
-       selection
+    <LI> The <em>ref</em> argument specifies the buffer in which
+         to store the reference.
+<P>
+    <LI> The <I>loc_id</I> and <I>name</I> arguments specify the 
+         referenced dataset. 
+<P>    
+    <LI> In C, the <I>ref_type</I> argument specifies the reference type. 
+         Since we are creating references to the dataset regions, 
+         the <CODE>H5R_DATASET_REGION</CODE> datatype is used. 
+<P>
+    <LI> The <I>space_id</I> argument is a dataspace identifier.
+         This dataspace includes a selection in the referenced dataset. 
+<P>
+    <LI> In C, the function <CODE>H5Rcreate</CODE> returns a non-negative 
+         value if successful and a negative value otherwise.  In FORTRAN, the
+         return code from the <CODE>h5rcreate_f</CODE> subroutine is
+         returned in <I>hdferr</I>: 0 if succesful and -1 otherwise.  
 </UL>
+<P>
+<LI> The dataset with the region references was read by 
+    <CODE>H5Dread</CODE> / <CODE>h5dread_f</CODE> with 
+   the <CODE>H5T_STD_REF_DSETREG</CODE> datatype specified.
+<P>
+<LI> The read reference can be used to obtain the dataset identifier, as we 
+    did with the following call:
+<P>
+<I><B>C:</B></I>
+<pre>
+    dset2 = H5Rdereference (dset1, H5R_DATASET_REGION, &ref_out[0]);
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    CALL h5rdereference_f (dset1, ref_out(1), dset2, hdferr)
+</pre>
+<P>
+   or to obtain spacial information ( dataspace and selection ) with the call
+   to <CODE>H5Rget_region</CODE> / <CODE>h5rget_region_f</CODE>:
+<P>
+<I><B>C:</B></I>
+<pre>
+    dspace2 = H5Rget_region (dset1, H5R_DATASET_REGION, &ref_out[0]);
+</pre> 
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    CALL H5rget_region_f (dset1, ref_out(1), dspace2, hdferr)
+</pre>
+<P>
+   The reference to the dataset region has information for both the dataset 
+   itself and its selection. In both calls,
+<UL>
+       <LI> the <em>dset1</em> parameter is the identifier for the dataset 
+         with the region references and
+<P>
+       <LI> the <em>ref_out</em> parameter specifies the type of reference 
+         stored. In this example a reference to the dataset region is stored.
 </UL>
+<P>
+       The C function returns the dataspace identifier or a 
+           negative value if it is not successful.  
+       In FORTRAN, the dataset identifier or dataspace identifier 
+           is returned in <I>dset2</I> or <I>dspace2</I>
+           and the return code for the call is returned in <I>hdferr</I>:
+           0 if successful and -1 otherwise.
+<P>
+</UL>
+
+
+</UL>
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+<P>
+<I><U>HDF5 File Created by C Example</U></I>
+<P>
+<B>Fig. A</B> &nbsp; <I><code>REF_REG.h5</code> in DDL</I>
+<PRE>
+
+HDF5 "REF_REG.h5" {
+GROUP "/" {
+   DATASET "MATRIX" {
+      DATATYPE { H5T_STD_I32BE }
+      DATASPACE { SIMPLE ( 2, 9 ) / ( 2, 9 ) }
+      DATA {
+         1, 1, 2, 3, 3, 4, 5, 5, 6,
+         1, 2, 2, 3, 4, 4, 5, 6, 6
+      }
+   }
+   DATASET "REGION_REFERENCES" {
+      DATATYPE { H5T_REFERENCE }
+      DATASPACE { SIMPLE ( 2 ) / ( 2 ) }
+      DATA {
+         DATASET 0:744 {(0,3)-(1,5)}, DATASET 0:744 {(0,0), (1,6), (0,8)}
+      }
+   }
+}
+}
+
+</PRE>
+<I><U>HDF5 File Created by FORTRAN Example</U></I>:
+<P>
+<B>Fig. B</B> &nbsp; <I><code>FORTRAN.h5</code> in DDL</I>
+<PRE>
+
+HDF5 "FORTRAN.h5" {
+GROUP "/" {
+   DATASET "MATRIX" {
+      DATATYPE { H5T_STD_I32BE }
+      DATASPACE { SIMPLE ( 9, 2 ) / ( 9, 2 ) }
+      DATA {
+         1, 1,
+         1, 2,
+         2, 2,
+         3, 3,
+         3, 4,
+         4, 4,
+         5, 5,
+         5, 6,
+         6, 6
+      }
+   }
+   DATASET "REGION_REFERENCES" {
+      DATATYPE { H5T_REFERENCE }
+      DATASPACE { SIMPLE ( 2 ) / ( 2 ) }
+      DATA {
+         DATASET 0:744 {(3,0)-(5,1)}, DATASET 0:744 {(0,0), (6,1), (8,0)}
+      }
+   }
+}
+}
+</PRE>
+
+Notice how the raw data in the dataset with the dataset regions is displayed.
+Each element of the raw data consists of a reference to the dataset 
+(DATASET  number1:number2) and its selected region. 
+If the selection is a hyperslab, the corner coordinates of the hyperslab 
+are displayed. 
+For the point selection, the coordinates of each point are displayed.
+<!--
+Since only two selections were stored, the third and fourth elements of the 
+dataset are set to NULL. This was done by the buffer 
+inizialization in the program.
+-->
 
 
 <!-- BEGIN FOOTER INFO -->
@@ -532,8 +354,9 @@ Output of this program is :
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: January 19, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

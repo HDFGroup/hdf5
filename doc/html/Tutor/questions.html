@@ -1,5 +1,5 @@
 <HTML><HEAD>
-<TITLE>HDF5 Tutorial - Introductory Topics Questions
+<TITLE>HDF5 Tutorial - Introductory Topics Quiz
 </TITLE> 
 </HEAD>
 
@@ -13,106 +13,125 @@ width=78 height=27 alt="NCSA"><P></A>
 
  [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
 <H1>
-<BIG><BIG><BIG><FONT COLOR="#c101cd">Introductory Topics Questions</FONT>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Introductory Topics Quiz</FONT>
 </BIG></BIG></BIG></H1>
 
 <hr noshade size=1>
-<PRE>
 
 
-Section 2: HDF File Organization
-================================
+<h3>Section 2: HDF File Organization</h3>
 
-1. Name and describe the two primary objects that can be stored in an HDF5
-   file:
+<ol>
+<li>Name and describe the two primary objects that can be stored in an HDF5
+   file.
 
-2. What is an attribute?
+<p>
+<li>What is an attribute?
 
-3. Give the path name for an object called "harry" that is a member of a
-   group called "dick," which in turn is a member of the root group.
-
-
-Section 3: The HDF5 API
-=======================
-
-Describe the purpose of each of the following HDF5 APIs:
-
-H5A, H5D, H5E, F5F, H5G, H5T, H5Z
+<p>
+<li>Give the path name for an object called <code>harry</code> that is a member of a
+   group called <code>dick</code>, which, in turn, is a member of the root group.
+</ol>
 
 
+<h3>Section 3: The HDF5 API</h3>
 
-Section 4: Creating an HDF File
-===============================
-
-1. What two HDF5 routines must be called in order to create an HDF5 file?
-
-2. What include file must be included in any file that uses the HDF5 library.
-
-3. An HDF5 file is never completely empty because as soon as an HDF5 file
-   is created, it automatically contains a certain primary object.  What is
-   that object?
+<ol>
+<li>Describe the purpose of each of the following HDF5 APIs:
+    <dir>
+    H5A, H5D, H5E, H5F, H5G, H5T, H5Z
+    </dir>
+</ol>
 
 
+<h3>Section 4: Creating an HDF5 File</h3>
 
-Section 5: Creating a Dataset
-=============================
+<ol>
+<li>What two HDF5 routines must be called to create an HDF5 file?
 
-1. Name and describe two major datatype categories.
+<p>
+<li>What include file must be included in any file that uses the HDF5 library?
 
-2. List the HDF5 atomic datatypes. Give an example of a predefined datatype.
-
-3. What does the dataspace describe? What are the major characteristics of the
-   simple dataspace? 
-
-4. What information needs to be passed to the H5Dcreate function, i.e.
-   what information is needed to describe a dataset at creation time?
+<p>
+<li>An HDF5 file is never completely empty because as soon as it is created,
+   it automatically contains a certain primary object.  What is that object?
+</ol>
 
 
-Section 6: Reading from/Writing to a Dataset
-============================================
+<h3>Section 5: Creating a Dataset</h3>
 
-1. What are six pieces of information which need to be specified for
+<ol>
+<li>Name and describe two major datatype categories.
+
+<p>
+<li>List the HDF5 atomic datatypes. Give an example of a predefined datatype.
+
+<p>
+<li>What does the dataspace describe? What are the major characteristics of 
+   the simple dataspace? 
+
+<p>
+<li>What information needs to be passed to the <code>H5Dcreate</code> 
+   function, i.e., what information is needed to describe a dataset at 
+   creation time?
+</ol>
+
+
+<h3>Section 6: Reading from and Writing to a Dataset</h3>
+
+<ol>
+<li>What are six pieces of information which need to be specified for
    reading and writing a dataset?
 
-2. Why are both the memory dataspace and file dataspace needed for 
-   read/write operations, but only the memory datatype is specified for the 
-   datatype?
+<p>
+<li>Why are both the memory dataspace and file dataspace needed for 
+   read/write operations, while only the memory datatype is required?
 
-3. What does the line DATASPACE { SIMPLE (4 , 6 ) / ( 4 , 6 ) } in Fig 6.1 
-   means?
-
-
-Section 7: Creating an Attribute
-================================
-
-1. What is an attribute?
-
-2. Can partial I/O operations be performed on attributes?
+<p>
+<li>What does the line 
+    <br>&nbsp;&nbsp;&nbsp;
+    <code>DATASPACE { SIMPLE (4 , 6 ) / ( 4 , 6 ) } </code> 
+    <br>in Figure 6.1 mean?
+</ol>
 
 
-Section 8: Creating a Group
-===========================
+<h3>Section 7: Creating an Attribute</h3>
 
-What are the two primary objects that can be included in
-a group?
+<ol>
+<li>What is an attribute?
 
-
-Section 9: Creating Groups using Absolute/Relative Names
-========================================================
-
-1. Group names can be specified in two "ways".  What are these
-   two types of group names that you can specify?
-
-2. You have a dataset named "moo" in the group "boo", which is 
-   in the group "foo", which in turn, is in the root group.  How would 
-   you specify an absolute name to access this dataset?
+<p>
+<li>Can partial I/O operations be performed on attributes?
+</ol>
 
 
-Section 10: Creating Datasets in Groups
-=======================================
+<h3>Section 8: Creating a Group</h3>
 
-Describe a way to access the dataset "moo" described in the previous section
-(Section 9, question 2), using a relative and absolute pathname.
+<ol>
+<li>What are the two primary objects that can be included in a group?
+</ol>
+
+
+<h3>Section 9: Creating Groups Using Absolute and Relative Names</h3>
+
+<ol>
+<li>Group names can be specified in two ways.  What are these two types 
+   of group names?
+
+<p>
+<li>You have a dataset named <code>moo</code> in the group <code>boo</code>, which is 
+   in the group <code>foo</code>, which, in turn, is in the root group.  
+   How would you specify an absolute name to access this dataset?
+</ol>
+
+
+<h3>Section 10: Creating Datasets in Groups</h3>
+
+<ol>
+<li>Describe a way to access the dataset <code>moo</code> described in the 
+previous section (Section&nbsp;9, question&nbsp;2) using a relative name.
+Describe a way to access the same dataset using an absolute name.
+</ol>
 
 </PRE>
 <!-- BEGIN FOOTER INFO -->
@@ -129,7 +148,7 @@ Describe a way to access the dataset "moo" described in the previous section
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 2, 1999</H6><BR>
+<BR> <H6>Last Modified: January 13, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
 </FONT>
 <BR>

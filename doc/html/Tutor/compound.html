@@ -1,5 +1,5 @@
 <HTML><HEAD>
-<TITLE>HDF5 Tutorial - Compound Data Types 
+<TITLE>HDF5 Tutorial - Compound Datatypes 
 </TITLE> 
 </HEAD>
 
@@ -13,7 +13,7 @@ width=78 height=27 alt="NCSA"><P></A>
 
  [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
 <H1>
-<BIG><BIG><BIG><FONT COLOR="#c101cd">Compound Data Types</FONT>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Compound Datatypes</FONT>
 </BIG></BIG></BIG></H1>
 
 <hr noshade size=1>
@@ -21,7 +21,7 @@ width=78 height=27 alt="NCSA"><P></A>
 <BODY>
 <H2>Contents:</H2>
 <UL>
-    <LI><A HREF="#def">Creating Compound Data Types</A>
+    <LI><A HREF="#def">Creating Compound Datatypes</A>
     <LI>Programming Example 
 <UL>
       <LI> <A HREF="#desc">Description</A> 
@@ -29,43 +29,48 @@ width=78 height=27 alt="NCSA"><P></A>
       <LI> <A HREF="#fc">File Contents</A>
 </UL>
 </UL>
+<em><b>Note:</b>  The FORTRAN API does not yet support compound datatypes.</em>
 <HR>
 <A NAME="def">
-<H2>Creating Compound Data Types</H2>
-A compound data type is similar to a struct in C or a common block in 
-Fortran. It is a collection of one or more atomic types or small arrays of 
-such types. To create and use a compound data type you need to refer to 
-various properties of the data compound data type: 
+<H2>Creating Compound Datatypes</H2>
+A compound datatype is similar to a struct in C or a common block in 
+FORTRAN. It is a collection of one or more atomic types or small arrays of 
+such types. To create and use a compound datatype you need to be familiar 
+with various properties of the compound datatype: 
 <UL>
-  <LI>It is of class compound. 
+  <LI>It is of class <strong>compound</strong>. 
   <LI>It has a fixed total size, in bytes. 
   <LI>It consists of zero or more members (defined in any order) with 
-      unique names and which occupy non-overlapping regions within the datum. 
-  <LI>Each member has its own data type. 
-  <LI>Each member is referenced by an index number between zero and N-1, 
-      where N is the number of members in the compound data type. 
+      unique names and occupying non-overlapping regions within the datum. 
+  <LI>Each member has its own datatype. 
+  <LI>Each member is referenced by an index number between zero and <em>N</em>-1, 
+      where <em>N</em> is the number of members in the compound datatype. 
   <LI>Each member has a name which is unique among its siblings in a 
-      compound data type. 
-  <LI>Each member has a fixed byte offset, which is the first byte 
-      (smallest byte address) of that member in a compound data type. 
+      compound datatype. 
+  <LI>Each member has a fixed byte offset, which locates the first byte 
+      (smallest byte address) of that member in the compound datatype. 
   <LI>Each member can be a small array of up to four dimensions.
 </UL>
-Properties of members of a compound data type are defined when the 
-member is added to the compound type and cannot be subsequently modified. 
+Properties of members of a compound datatype are defined when the 
+member is added to the compound datatype and cannot be subsequently modified. 
 <P>
-Compound data types must be built out of other data types. First, one 
-creates an empty compound data type and specifies its total size. Then 
-members are added to the compound data type in any order. 
+Compound datatypes must be built out of other datatypes. First, one 
+creates an empty compound datatype and specifies its total size. Then 
+members are added to the compound datatype in any order. 
 
 <H2> Programming Example</H2>
 <A NAME="desc">
 <H3><U>Description</U></H3>      
 
-This example shows how to create a compound data type, write an array 
-to the file which uses the compound data type, and read back subsets of 
-the members.<BR> 
-
-[<A HREF="examples/h5_compound.c">Download h5_compound.c</A>]
+This example shows how to create a compound datatype, write an array 
+to the file which uses the compound datatype, and read back subsets of 
+the members.
+<p> 
+<UL>
+[ <A HREF="examples/h5_compound.c">C Example</A> ] - <code>h5_compound.c</code>
+<BR>
+[ <A HREF="examples/java/Compound.java">Java Example</A> ] - <code>Compound.java</code>
+</UL>
 <PRE>
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #include "hdf5.h"
@@ -126,7 +131,7 @@ main(void)
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
-     * Create the memory data type. 
+     * Create the memory datatype. 
      */
     s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
@@ -159,7 +164,7 @@ main(void)
     dataset = H5Dopen(file, DATASETNAME);
 
     /* 
-     * Create a data type for s2
+     * Create a datatype for s2
      */
     s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
 
@@ -186,7 +191,7 @@ main(void)
     printf("\n");
 
     /* 
-     * Create a data type for s3.
+     * Create a datatype for s3.
      */
     s3_tid = H5Tcreate(H5T_COMPOUND, sizeof(float));
 
@@ -235,33 +240,34 @@ Field b :
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
-<LI>H5Tcreate creates a new data type of the specified class with
+<LI><CODE>H5Tcreate</CODE> creates a new datatype of the specified class with
 the specified number of bytes.
 <PRE>
     hid_t H5Tcreate ( H5T_class_t class, size_t size ) 
 </PRE>
 <UL>
-<LI>The <I>class</I> parameter specifies the data type to create.
-Currently only the H5T_COMPOUND data type class is supported with this
+<LI>The <I>class</I> parameter specifies the datatype to create.
+Currently only the <CODE>H5T_COMPOUND</CODE> datatype class is supported with this
 function.
 <LI>The <I>size</I> parameter specifies the number of bytes in the
-data type to create.
+datatype to create.
 </UL>
 <P>
-<LI>H5Tinsert adds a member to the compound data type specified by
+<LI><CODE>H5Tinsert</CODE> adds a member to the compound datatype specified by
 <I>type_id</I>. 
 <PRE>
-   herr_t H5Tinsert ( hid_t type_id, const char * name, off_t offset, hid_t field_id ) 
+   herr_t H5Tinsert ( hid_t type_id, const char * name, off_t offset, 
+                      hid_t field_id ) 
 </PRE>
 <UL>
-<LI>The <I>type_id</I> parameter is the identifier of the compound data type
+<LI>The <I>type_id</I> parameter is the identifier of the compound datatype
 to modify.
 <LI>The <I>name</I> parameter is the name of the field to insert.  The new
-member name must be unique within a compound data type.
+member name must be unique within a compound datatype.
 <LI>The <I>offset</I> parameter is the offset in the memory structure of
 the field to insert.
 
-The library defines the HOFFSET macro to compute the offset of a member within 
+The library defines the <CODE>HOFFSET</CODE> macro to compute the offset of a member within 
 a struct: 
 <PRE>
   HOFFSET ( s, m ) 
@@ -269,15 +275,15 @@ a struct:
 This macro computes the offset of member <I>m</I> within a struct 
 variable <I>s</I>. 
 
-<LI>The <I>field_id</I> parameter is the data type identifier of the
+<LI>The <I>field_id</I> parameter is the datatype identifier of the
 field to insert.
 </UL>
 <P>
-<LI>H5Tclose releases a data type.
+<LI><CODE>H5Tclose</CODE> releases a datatype.
 <PRE>
    herr_t H5Tclose ( hid_t type_id ) 
 </PRE>
-The <I>type_id</I> parameter is the identifier of the data type to release.
+The <I>type_id</I> parameter is the identifier of the datatype to release.
 </UL>
 <A NAME="fc">
 <H3><U>File Contents</U></H3>
@@ -365,8 +371,9 @@ GROUP "/" {
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: April 5, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

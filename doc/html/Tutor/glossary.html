@@ -44,8 +44,8 @@ number of entries in symbol tables (used to store groups) and additional version
             manner, called a complex dataspace.
 
 <P>
-<DT><B>DATA TYPE</B>    
-<DD>An HDF5 Data Type is an object that describes the type of the 
+<DT><B>DATATYPE</B>    
+<DD>An HDF5 Datatype is an object that describes the type of the 
             element in an HDF5 multi-dimensional array. There are two 
             categories of datatypes: atomic and compound data types. An 
             atomic type is a type which cannot be decomposed into smaller 
@@ -181,6 +181,13 @@ A hyperslab is a portion of a dataset. A hyperslab selection can be a
 logically contiguous collection of points in a dataspace, or it
 can be a regular pattern of points or blocks in a dataspace. 
 <P>
+<DT><B>MOUNTING FILES</B>
+<DD>
+HDF5 allows you to combine two or more HDF5 files in a manner similar
+to mounting files in UNIX.  The group structure and metadata
+from one file appear as though they exist in another file. 
+<P>
+
 <DT><B>NAMES</B> 
 <DD>HDF5 object names are a slash-separated list of components.  A name 
             which begins with a slash is an absolute name which is accessed 
@@ -192,6 +199,28 @@ can be a regular pattern of points or blocks in a dataspace.
 MPI (Message Passing Interface).  
 <P> 
 
+<DT><B>REFERENCE</B>
+<DD>
+<B>OBJECT REFERENCE:</B><BR>
+    A reference to an entire object in the current HDF5 file.  
+    <P>
+    An object
+    reference points to an entire object in the current HDF5 file by storing 
+    the relative file address (OID) of the object header for the object
+    pointed to.  The relative file address of an object header is constant
+    for the life of the object.  An object reference is of a fixed size in
+    the file.
+<P>
+<B>DATASET REGION REFERENCE:</B><BR>
+    Reference to a specific dataset region.
+    <P>  
+    A dataset region reference points to a region of a dataset in the 
+    current HDF5 file by storing the OID of the dataset and the global
+    heap offset of the region referenced.  The region referenced is
+    located by retrieving the coordinates of the areas in the region
+    from the global heap.  A dataset region reference is of a variable 
+    size in the file.
+<P>
 <DT><B>THREADSAFE (HDF5)</B>
 <DD>A "thread-safe" version of HDF-5 (TSHDF5) is one that can be called from any thread of a multi-threaded program. Any calls to HDF
 can be made in any order, and each individual HDF call will perform correctly. A calling program does not have to explicitly lock the HDF
@@ -221,7 +250,7 @@ library as regular HDF-5 library, with additional code to synchronize access to 
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: September 1, 1999</H6><BR>
+<BR> <H6>Last Modified: January 5, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
 </FONT>
 <BR>

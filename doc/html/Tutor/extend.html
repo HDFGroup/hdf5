@@ -35,16 +35,19 @@ width=78 height=27 alt="NCSA"><P></A>
 <HR>
 <A NAME="def">
 <H2>Creating an Extendible Dataset</H2>
-An extendible dataset is one whose dimensions can grow. In HDF5, it is possible to define a dataset to have certain initial dimensions, then later
-to increase the size of any of the initial dimensions. 
+An extendible dataset is one whose dimensions can grow.  
+HDF5 allows you to define a dataset to have certain initial dimensions, 
+then to later increase the size of any of the initial dimensions. 
 <P>
-HDF5 requires you to use chunking in order to define extendible datasets. Chunking makes it possible to extend datasets efficiently, without
-having to reorganize storage excessively. 
+HDF5 requires you to use chunking to define extendible datasets. 
+This makes it possible to extend datasets efficiently without
+having to excessively reorganize storage. 
 <P>
 The following operations are required in order to write an extendible dataset: 
 <OL>
    <LI>Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended. 
-   <LI>Set dataset creation properties to enable chunking and create a dataset. 
+   <LI>Set dataset creation properties to enable chunking.
+   <LI>Create the dataset. 
    <LI>Extend the size of the dataset.
 </OL>
 <H2> Programming Example</H2>
@@ -52,229 +55,197 @@ The following operations are required in order to write an extendible dataset:
 <H3><U>Description</U></H3>      
 This example shows how to create a 3 x 3 extendible dataset, write to that
 dataset, extend the dataset to 10x3, and write to the dataset again.
-[<A HREF="examples/h5_extend.c">Download h5_extend.c</A>]
-<PRE>
+<UL>
+[<A HREF="examples/h5_extend.c">C example</A> ] 
+    - <code>h5_extend.c</code><BR>
+[<A HREF="examples/chunk.f90">FORTRAN example</A> ] 
+    - <code>chunk.f90</code>
+</UL>
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
 
-/**************************************************************  
- *
- *   This example shows how to work with extendible datasets.
- *   In the current version of the library a dataset MUST be
- *   chunked in order to be extendible.  
- *
- *   This example is derived from the h5_extend_write.c and 
- *   h5_read_chunk.c examples that are in the "Introduction 
- *   to HDF5".
- *   
- *************************************************************/
- 
-#include "hdf5.h"
-
-#define FILE        "ext.h5"
-#define DATASETNAME "ExtendibleArray" 
-#define RANK         2
-
-int
-main (void)
-{
-    hid_t       file;                          /* handles */
-    hid_t       dataspace, dataset;  
-    hid_t       filespace;                   
-    hid_t       cparms;                     
-    hid_t       memspace;
-
-    hsize_t      dims[2]  = { 3, 3};           /* dataset dimensions			
-                                                  at creation time */
-    hsize_t      dims1[2] = { 3, 3};           /* data1 dimensions */ 
-    hsize_t      dims2[2] = { 7, 1};           /* data2 dimensions */  
-
-    hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t      size[2];
-    hssize_t     offset[2];
-    hsize_t      i,j;
-    herr_t       status, status_n;                             
-    int          data1[3][3] = { {1, 1, 1},      /* data to write */
-                                 {1, 1, 1},
-                                 {1, 1, 1} };      
-
-    int          data2[7]    = { 2, 2, 2, 2, 2, 2, 2};
-
-    /* Variables used in reading data back */
-    hsize_t      chunk_dims[2] ={2, 5};
-    hsize_t      chunk_dimsr[2];
-    hsize_t      dimsr[2];
-    int          data_out[10][3];
-    int          rank, rank_chunk;
-
-    /* Create the data space with unlimited dimensions. */
-    dataspace = H5Screate_simple (RANK, dims, maxdims); 
-
-    /* Create a new file. If file exists its contents will be overwritten. */
-    file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Modify dataset creation properties, i.e. enable chunking  */
-    cparms = H5Pcreate (H5P_DATASET_CREATE);
-    status = H5Pset_chunk ( cparms, RANK, chunk_dims);
-
-    /* Create a new dataset within the file using cparms
-       creation properties.  */
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, dataspace,
-                         cparms);
-
-    /* Extend the dataset. This call assures that dataset is 3 x 3.*/
-    size[0]   = 3; 
-    size[1]   = 3; 
-    status = H5Dextend (dataset, size);
-
-    /* Select a hyperslab  */
-    filespace = H5Dget_space (dataset);
-    offset[0] = 0;
-    offset[1] = 0;
-    status = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, offset, NULL,
-                                  dims1, NULL);  
-
-    /* Write the data to the hyperslab  */
-    status = H5Dwrite (dataset, H5T_NATIVE_INT, dataspace, filespace,
-                       H5P_DEFAULT, data1);
-
-    /* Extend the dataset. Dataset becomes 10 x 3  */
-    dims[0]   = dims1[0] + dims2[0];
-    size[0]   = dims[0];  
-    size[1]   = dims[1]; 
-    status = H5Dextend (dataset, size);
-
-    /* Select a hyperslab  */
-    filespace = H5Dget_space (dataset);
-    offset[0] = 3;
-    offset[1] = 0;
-    status = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, offset, NULL,
-                                  dims2, NULL);  
-
-    /* Define memory space */
-    dataspace = H5Screate_simple (RANK, dims2, NULL); 
-
-    /* Write the data to the hyperslab  */
-    status = H5Dwrite (dataset, H5T_NATIVE_INT, dataspace, filespace,
-                       H5P_DEFAULT, data2);
-
-    /* Close resources */
-    status = H5Dclose (dataset);
-    status = H5Sclose (dataspace);
-    status = H5Sclose (filespace);
-    status = H5Fclose (file);
-
-/****************************************************************
-    Read the data back 
- ***************************************************************/
-
-    file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-    dataset = H5Dopen (file, DATASETNAME);
-    filespace = H5Dget_space (dataset);
-    rank = H5Sget_simple_extent_ndims (filespace);
-    status_n = H5Sget_simple_extent_dims (filespace, dimsr, NULL);
-
-    cparms = H5Dget_create_plist (dataset);
-    if (H5D_CHUNKED == H5Pget_layout (cparms))
-    {
-       rank_chunk = H5Pget_chunk (cparms, 2, chunk_dimsr);
-    }
-
-    memspace = H5Screate_simple (rank,dimsr,NULL);
-    status = H5Dread (dataset, H5T_NATIVE_INT, memspace, filespace,
-                      H5P_DEFAULT, data_out);
-    printf("\n");
-    printf("Dataset: \n");
-    for (j = 0; j &lt; dimsr[0]; j++)
-    {
-       for (i = 0; i &lt; dimsr[1]; i++)
-           printf("%d ", data_out[j][i]);
-       printf("\n");
-    }
-
-    status = H5Pclose (cparms);
-    status = H5Dclose (dataset);
-    status = H5Sclose (filespace);
-    status = H5Sclose (memspace);
-    status = H5Fclose (file);
-}     
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
 
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <P>
 <UL>
-<LI>The function H5Pcreate creates a new property as an instance of 
-    a property list.  The signature of this function is as follows:
-<PRE>
-  hid_t H5Pcreate ( H5P_class_t type )
-</PRE>
+<LI>The routine <CODE>H5Pcreate</CODE> / <CODE>h5pcreate_f</CODE> 
+creates a new property as an instance of 
+    a property list.  The signature is as follows:
+<P>
+<I><B>C:</B></I> 
+<pre>
+    hid_t H5Pcreate (H5P_class_t classtype)
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5pcreate_f (classtype, prp_id, hdferr) 
+
+            classtype  IN: INTEGER 
+            prp_id    OUT: INTEGER(HID_T)
+            hdferr    OUT: INTEGER 
+</pre>
+<P>
 <UL>
-<LI>The parameter <I>type</I> is the type of property list to create.<BR>
-    The class types are:  H5P_FILE_CREATE, H5P_FILE_ACCESS, H5P_DATASET_CREATE,
-    H5P_DATASET_XFER, and H5P_MOUNT 
+<LI>The parameter <I>classtype</I> is the type of property list to create.
+    Valid class types are as follows:  
+<center>
+<table border=1>
+  <tr align=center>
+    <td><b>C</b></td>
+    <td><b>FORTRAN</b></td>
+  </tr><tr align=left>
+    <td><code>          <BR>
+      H5P_FILE_CREATE   <BR>
+      H5P_FILE_ACCESS   <BR>
+      H5P_DATASET_CREATE<BR>
+      H5P_DATASET_XFER  <BR>
+      H5P_MOUNT         <BR><BR>
+    </code></td>
+    <td><code>            <BR>
+      H5P_FILE_CREATE_F   <BR>
+      H5P_FILE_ACCESS_F   <BR>
+      H5P_DATASET_CREATE_F<BR>
+      H5P_DATASET_XFER_F  <BR>
+      H5P_MOUNT_F         <BR><BR>
+    </code></td>
+  </tr>
+</table>
+</center>
+<LI>In C, the property list identifier is returned if successful;
+otherwise a negative value is returned, if not.  
+In FORTRAN, the property list identifier is returned in <I>prp_id</I> 
+and the return value for the call is returned in <I>hdferr</I>.
 </UL>
 <P>
-<LI>The function H5Pset_chunk sets the size of the chunks used
+<LI>The routine <CODE>H5Pset_chunk</CODE> / <CODE>h5pset_chunk_f</CODE> 
+sets the size of the chunks used
     to store a chunked layout dataset.
-    The signature of this function is as follows:
-<PRE>
-  herr_t H5Pset_chunk ( hid_t plist, int ndims, const hsize_t * dim ) 
-</PRE>
+    The signature of this routine is as follows:
+<P>
+<I><B>C:</B></I> 
+<pre>
+    herr_t H5Pset_chunk (hid_t prp_id, int ndims, 
+                         const hsize_t * dims) 
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5pset_chunk_f (prp_id, ndims, dims, hdferr) 
+
+            prp_id    IN: INTEGER(HID_T)
+            ndims     IN: INTEGER
+            dims      IN: INTEGER(HSIZE_T), DIMENSION(ndims) 
+            hdferr   OUT: INTEGER
+
+</pre>
+<P>
 <UL>
-<LI>The first parameter, <I>plist</I>, is the identifier for the property
+<LI>The <em>prp_id</em> parameter is the identifier for the property
     list to query.
-<LI>The second parameter, <I>ndims</I>, is the number of dimensions of 
+<LI>The <em>ndims</em> parameter is the number of dimensions of 
     each chunk.
-<LI>The third parameter, <I>dim</I>, is an array containing the size of
+<LI>The <em>dims</em> parameter is an array containing the size of
     each chunk.
+<LI>In C, a non-negative value is returned if successful; otherwise a 
+    negative value is returned.
+    In FORTRAN, the return value is returned in <em>hdferr</em>: 0 if
+    successful and -1 otherwise.
 </UL>
 <P>
-A non-negative value is returned if successful; otherwise a negative
-value is returned.
-<P>
-<LI>The function H5Dextend extends a dataset that has an unlimited
+<LI>The  <CODE>H5Dextend</CODE> / <CODE>h5dextend_f</CODE> routine
+extends a dataset that has an unlimited
     dimension.  The signature is as follows:
-<PRE>
-  herr_t H5Dextend ( hid_t dataset_id, const hsize_t * size ) 
-</PRE>
+<P>
+<I><B>C:</B></I>
+<pre>
+    herr_t H5Dextend (hid_t dset_id, const hsize_t * size) 
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5dextend_f (dset_id, size, hdferr) 
+
+            dset_id   IN: INTEGER(HID_T) 
+            size         IN: INTEGER(HSIZE_T), DIMENSION(*)  
+            hdferr      OUT: INTEGER<BR> 
+</pre>
+<P>
 <UL>
-<LI>The first parameter, <I>dataset_id</I>, is the identifier of
-    the dataset.
-<LI>The second parater, <I>size</I>, is an array containing the
+<LI>The <em>dset_id</em> parameter is the dataset identifier.
+<LI>The <em>size</em> parameter, is an array containing the
     new magnitude of each dimension.
+<LI>In C, this function returns a non-negative value if successful and
+    a negative value otherwise. 
+    In FORTRAN, the return value is returned in <em>hdferr</em>: 
+    0 if successful and -1 otherwise.
 </UL>
 <P>
-This function returns a non-negative value if successful; otherwise 
-it returns a negative value.
-<P>
-<LI>The H5Dget_create_plist function returns an identifier  for a 
+<LI>The <CODE>H5Dget_create_plist</CODE> / <CODE>h5dget_create_plist_f</CODE> 
+routine returns an identifier  for a 
 copy of the dataset creation property list for a dataset.
 <P>
-<LI>The H5Pget_layout function returns the layout of the raw data for a 
-dataset.  Valid types are H5D_COMPACT, H5D_CONTIGUOUS, and H5D_CHUNKED.
+<LI>The C function, <CODE>H5Pget_layout</CODE>, returns the layout of the raw data for a 
+dataset.  Valid types are <CODE>H5D_CONTIGUOUS</CODE> and 
+<CODE>H5D_CHUNKED</CODE>.
+A FORTRAN routine for <CODE>H5Pget_layout</CODE> does not yet exist.
 <P>
-<LI>The H5Pget_chunk function retrieves the size of chunks for the
-raw data of a chunked layout dataset.
-The signature of this function is:
-<PRE>
-  int H5Pget_chunk ( hid_t plist, int max_ndims, hsize_t * dims ) 
-</PRE>
+<LI>The <CODE>H5Pget_chunk</CODE> / <CODE>h5pget_chunk_f</CODE> 
+routine retrieves the size of chunks 
+for the raw data of a chunked layout dataset.
+The signature is as follows:
+<P>
+<I><B>C:</B></I>
+<pre>
+    int H5Pget_chunk (hid_t prp_id, int ndims, hsize_t * dims) 
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5pget_chunk_f (prp_id, ndims, dims, hdferr)
+
+            prp_id    IN: INTEGER(HID_T) 
+            ndims     IN: INTEGER
+            dims     OUT: INTEGER(HSIZE_T), DIMENSION(ndims) 
+            hdferr   OUT: INTEGER 
+</pre>
+<P>
 <UL>
-<LI>The first parameter, <I>plist</I>, is the identifier of the 
+
+<LI>The <em>prp_id</em> parameter is the identifier of the 
     property list to query.
-<LI>The second parameter, <I>max_ndims</I>, is the size of the <I>dims</I>
+<LI>The <em>ndims</em> parameter is the size of the <em>dims</em>
     array.
-<LI>The third parameter, <I>dims</I>, is the array to store the chunk
-    dimensions
+<LI>The <em>dims</em> parameter is the array in which to store the chunk
+    dimensions.
+<LI>In C, this function returns the chunk dimensionality if successful
+    and a negative value otherwise.  
+    In FORTRAN, the return value is returned in <em>hdferr</em>: 
+    the chunked rank if successful and -1 otherwise.
 </UL>
 <P>
-<LI>The H5Pclose function terminates access to a property list.
-    The signature of this function is:
-<PRE>
-  herr_t H5Pclose ( hid_t plist ) 
-</PRE>
-where <I>plist</I> is the identifier of the property list to terminate
-access to.
+<LI>The <CODE>H5Pclose</CODE> / <CODE>h5pclose_f</CODE> routine
+ terminates access to a property list.
+    The signature is as follows:
+<P>
+<I><B>C:</B></I>
+<pre>
+    herr_t H5Pclose (hid_t prp_id) 
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5pclose_f (prp_id, hdferr) 
+
+            prp_id    IN: INTEGER(HID_T) 
+            hdferr   OUT: INTEGER 
+</pre>
+<P>
+<ul>
+<li>The <em>prp_id</em> parameter is the identifier of the property list 
+    to terminate access to.
+</ul>
 </UL>
 
 
@@ -301,8 +272,9 @@ access to.
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: January 19, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

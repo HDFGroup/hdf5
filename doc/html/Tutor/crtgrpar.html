@@ -1,5 +1,5 @@
 <HTML><HEAD>
-<TITLE>HDF5 Tutorial - Creating Groups using Absolute/Relative Names
+<TITLE>HDF5 Tutorial - Creating Groups using Absolute and Relative Names
 </TITLE> 
 </HEAD>
 
@@ -13,8 +13,8 @@ width=78 height=27 alt="NCSA"><P></A>
 
  [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
 <H1>
-<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating Groups using 
-Absolute/Relative Names</FONT>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating Groups Using 
+Absolute and Relative Names</FONT>
 </BIG></BIG></BIG></H1>
 
 <hr noshade size=1>
@@ -39,95 +39,103 @@ object is to be created. This location is determined by the identifier of an HDF
 object and the name of the object to be created. The name of the created
 object can be either an absolute name or a name relative to the specified 
 identifier.
-In Example 5, we used the file identifier and the absolute name "/MyGroup" to create a
-group. The file identifier and the name "/" specifies the location where the group
-"MyGroup" was created.
+In the previous example, we used the file identifier and the absolute name 
+<code>/MyGroup</code> to create a group. 
 <P>
-In this section, we discuss HDF5 names and show how to use absolute/relative
-names by giving an example of creating groups in a file.
+In this section, we discuss HDF5 names and show how to use absolute and 
+relative names.
 
 <H3>Names</H3>
 
 HDF5 object names are a slash-separated list of components. There are few
 restrictions on names: component names may be any length except zero and may
-contain any character except slash ("/") and the null terminator. A full name
+contain any character except slash (<code>/</code>) and the null terminator. 
+A full name
 may be composed of any number of component names separated by slashes, with any
-of the component names being the special name ".". A name which begins with a
-slash is an absolute name which is accessed beginning with the root group of the
-file while all other relative names are accessed beginning with the specified
-group. Multiple consecutive slashes in a full name are treated as single slashes
-and trailing slashes are not significant. A special case is the name "/" (or
+of the component names being the special name <code>.</code> (a dot or period).
+A name which begins with a slash is an absolute name which is accessed 
+beginning with the root group of the file; 
+all other names are relative names and and the named object is
+accessed beginning with the specified group. 
+Multiple consecutive slashes in a full name are treated as single slashes
+and trailing slashes are not significant. A special case is the name <code>/</code> (or
 equivalent) which refers to the root group.
 <P>
-Functions which operate on names generally take a location identifier which
-is either a file ID or a group ID and perform the lookup with respect to that
-location. Some possibilities are:
+Functions which operate on names generally take a location identifier, which
+can be either a file identifier or a group identifier, and perform the lookup 
+with respect to that location. 
+Several possibilities are described in the following table:
 
-<table width="67%" border="1" bordercolor="#000000" cellpadding="4">
+<center>
+<table border="1" width=80% bordercolor="#000000" cellpadding="4">
   <tr bgcolor="#ffcc99" bordercolor="#FFFFFF"> 
     <td><b> Location Type </b></td>
     <td><b>Object Name</b></td>
     <td><b>Description</b></td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc" height="22">File ID</td>
+    <td bgcolor="#99cccc" height="22">File identifier</td>
     <td height="22" bgcolor="#CCCCCC"> 
-      <div align="center">/foo/bar</div>
+      <div align="center"><code>/foo/bar</code></div>
     </td>
-    <td height="22">The object bar in group foo in the root group. </td>
+    <td height="22">The object <code>bar</code> in group <code>foo</code> 
+      in the root group. </td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">Group ID </td>
+    <td bgcolor="#99cccc">Group identifier </td>
     <td bgcolor="#CCCCCC"> 
-      <div align="center">/foo/bar</div>
+      <div align="center"><code>/foo/bar</code></div>
     </td>
-    <td>The object bar in group foo in the root group of the file containing the 
-      specified group. In other words, the group ID's only purpose is to supply 
-      a file. </td>
+    <td>The object <code>bar</code> in group <code>foo</code> in the 
+      root group of the file containing the specified group. 
+      In other words, the group identifier's only purpose is to 
+      specify a file. </td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">File ID</td>
+    <td bgcolor="#99cccc">File identifier</td>
     <td bgcolor="#CCCCCC"> 
       <div align="center">/</div>
     </td>
     <td>The root group of the specified file.</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">Group ID</td>
+    <td bgcolor="#99cccc">Group identifier</td>
     <td bgcolor="#CCCCCC"> 
       <div align="center">/</div>
     </td>
     <td>The root group of the file containing the specified group.</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">Group ID</td>
+    <td bgcolor="#99cccc">Group identifier</td>
     <td bgcolor="#CCCCCC"> 
-      <div align="center">foo/bar</div>
+      <div align="center"><code>foo/bar</code></div>
     </td>
-    <td>The object bar in group foo in the specified group.</td>
+    <td>The object <code>bar</code> in group <code>foo</code> in 
+      the specified group.</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">File ID</td>
+    <td bgcolor="#99cccc">File identifier</td>
     <td bgcolor="#CCCCCC"> 
-      <div align="center">.</div>
+      <div align="center"><b>.</b></div>
     </td>
     <td>The root group of the file.</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">Group ID</td>
+    <td bgcolor="#99cccc">Group identifier</td>
     <td bgcolor="#CCCCCC"> 
-      <div align="center">.</div>
+      <div align="center"><b>.</b></div>
     </td>
     <td>The specified group.</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
-    <td bgcolor="#99cccc">Other ID</td>
+    <td bgcolor="#99cccc">Other identifier</td>
     <td bgcolor="#CCCCCC"> 
-      <div align="center">.</div>
+      <div align="center"><b>.</b></div>
     </td>
     <td>The specified object.</td>
   </tr>
 </table>
+</center>
 
 
 <P>
@@ -136,74 +144,51 @@ location. Some possibilities are:
 <H3><U>Description</U></H3>      
 The following example code shows how to create groups using absolute
 and relative names. It creates three groups: the first two groups are
-created using the file identifier and the group absolute names, and the 
-third group is created using a group identifier and the name relative 
+created using the file identifier and the group absolute names while the 
+third group is created using a group identifier and a name relative 
 to the specified group. <BR>
-[ <A HREF="examples/h5_crtgrpar.c">Download h5_crtgrpar.c</A> ]
+<UL>
+[ <A HREF="examples/h5_crtgrpar.c">C Example</A> ] - <code>h5_crtgrpar.c</code><BR>
+[ <A HREF="examples/grpsexample.f90">Fortran Example</A> ] - <code>grpsexample.f90</code><BR>
+[ <A HREF="examples/java/CreateGroupAR.java">Java Example</A> ] - <code>CreateGroupAR.java</code>
+</UL>
 
-<PRE>
-
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-#include &lt;hdf5.h&gt;
-#define FILE "groups.h5"
-
-main() {
-
-   hid_t       file_id, group1_id, group2_id, group3_id;  /* identifiers */
-   herr_t      status;
-
-   /* Create a new file using default properties. */
-   file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-   /* Create group "MyGroup" in the root group using absolute name. */
-   group1_id = H5Gcreate(file_id, "/MyGroup", 0);
-
-   /* Create group "Group_A" in group "MyGroup" using absolute name. */
-   group2_id = H5Gcreate(file_id, "/MyGroup/Group_A", 0);
-
-   /* Create group "Group_B" in group "MyGroup" using relative name. */
-   group3_id = H5Gcreate(group1_id, "Group_B", 0);
-
-   /* Close groups. */
-   status = H5Gclose(group1_id);
-   status = H5Gclose(group2_id);
-   status = H5Gclose(group3_id);
-
-   /* Close the file. */
-   status = H5Fclose(file_id);
-}
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
 
 
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
-<LI> H5Gcreate creates a group at the location specified by a location ID and a
-   name. The location ID can be a file ID or a group ID and the name can be
-   relative or absolute.
-
-<LI> The first H5Gcreate creates the group 'MyGroup' in the root group of the
-   specified file.
-
-<LI> The second H5Gcreate creates the group 'Group_A' in the group 'MyGroup'
-   in the root group of the specified file. Note that the parent group (MyGroup)
-   already exists.
-
-<LI> The third H5Gcreate creates the group 'Group_B' in the specified group.
+<LI><code>H5Gcreate</code>/<code>h5gcreate_f</code> creates a group at the 
+    location specified by a location identifier and a name. 
+    The location identifier can be a file identifier or a group identifier 
+    and the name can be relative or absolute.
+<P>
+<LI>The first <code>H5Gcreate</code>/<code>h5gcreate_f</code> creates the group 
+    <code>MyGroup</code> in the root group of the specified file.
+<P>
+<LI>The second <code>H5Gcreate</code>/<code>h5gcreate_f</code> creates the group 
+    <code>Group_A</code> in the group <code>MyGroup</code> in the root group 
+    of the specified file. Note that the parent group (<code>MyGroup</code>)
+    already exists.
+<P>
+<LI>The third <code>H5Gcreate</code>/<code>h5gcreate_f</code> creates the group 
+    <code>Group_B</code> in the specified group.
 </UL>
 <A NAME="fc">
 <H3><U>File Contents</U></H3>
 The file contents are shown below:
 <P>
-<B>Fig. 9.1</B>  &nbsp; <I>The Contents of 'groups.h5'</I>
+<B>Fig. 9.1</B>  &nbsp; <I>The Contents of <code>groups.h5</code> 
+   (<code>groupsf.h5</code> for FORTRAN)</I>
 <P>
 <!--<IMG src="groupsh5.jpg" width="285" height="383"></P> -->
 <IMG src="img004.gif"></P>
 
 
-     <B> Fig. 9.2</B> &nbsp; <I>'groups.h5' in DDL</I>
+     <B> Fig. 9.2</B> &nbsp; <I><code>groups.h5</code> in DDL 
+         (for FORTRAN, the name in the first line is <code>groupsf.h5</code>)</I>
 <PRE>
 
       HDF5 "groups.h5" {
@@ -233,7 +218,7 @@ The file contents are shown below:
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: April 5, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
 </FONT>
 <BR>

@@ -35,244 +35,196 @@ width=78 height=27 alt="NCSA"><P></A>
 <A NAME="def">
 <H2>Mounting Files</H2>
 
-HDF5 allows you to combine two or more HDF5 files in a manner similar to mounting
-files in UNIX. The group structure and metadata from one file appear as though
+HDF5 allows you to combine two or more HDF5 files in memory 
+in a manner similar to mounting files in UNIX. 
+The group structure and metadata from one file appear as though
 they exist in another file. The following steps are involved:
 <OL>
 <LI>Open the files.
 
-<LI>Choose the "mount point" in the first file (parent). The "mount point" in 
-    HDF5 is a group ( it can also be the root group ).
+<LI>Choose the <strong>mount point</strong> in the first file 
+    (the parent file). The mount point in 
+    HDF5 is a group, which CANNOT be the root group.
 
-<LI>Use the HDF5 API function H5Fmount to mount the second file (child) in 
-    the first one.
+<LI>Use the HDF5 routine <CODE>H5Fmount</CODE> / <CODE>h5fmount_f</CODE> 
+    to mount the second file (the child file) in the first file.
 
 <LI>Work with the objects in the second file as if they were members of 
-   the "mount point" group in the first file.  The previous contents of
-   the "mount point" group are temporarily hidden.
+    the mount point group in the first file.  The previous contents of
+    the mount point group are temporarily hidden.
 
-<LI>Unmount the second file using the H5Funmount function when the work is done.
+<LI>Unmount the second file using <CODE>H5Funmount</CODE> / 
+    <CODE>h5funmount_f</CODE> when the work is done.
 </OL>
 
 <H2> Programming Example</H2>
 <A NAME="desc">
 <H3><U>Description</U></H3>      
 
-In the following example we create one file with a group in it, and another
-file with a dataset. Mounting is used to access the dataset from the second 
-file as a member of a group in the first file. The following picture 
-illustrates this concept.
+In the following example, we create one file containing a group and 
+another file containing a dataset. 
+Mounting is used to access the dataset from the second 
+file as a member of a group in the first file. 
+The following figures illustrate this concept.
 <PRE>
 
-    'FILE1'                                 'FILE2'
+             FILE1                                   FILE2
   
---------------------                   --------------------
-!                  !                   !                  !
-!      /           !                   !       /          !
-!       |          !                   !        |         !
-!       |          !                   !        |         !
-!       V          !                   !        V         !
-!     --------     !                   !     ----------   !
-!     ! Group !    !                   !     ! Dataset!   !
-!     ---------    !                   !     ----------   !
-!------------------!                   !------------------! 
+      --------------------                   --------------------
+      !                  !                   !                  !
+      !      /           !                   !       /          !
+      !       |          !                   !        |         !
+      !       |          !                   !        |         !
+      !       V          !                   !        V         !
+      !     --------     !                   !     ----------   !
+      !     ! Group !    !                   !     ! Dataset!   !
+      !     ---------    !                   !     ----------   !
+      !------------------!                   !------------------! 
 </PRE>
-After mounting the second file, 'FILE2', under the group in the file, 'FILE1', 
-the parent has the following structure:
+After mounting <code>FILE2</code> under the group in <code>FILE1</code>, 
+the parent file has the following structure:
 <PRE>
  
-                                'FILE1'                                 
+                                FILE1                                 
   
-                           --------------------                   
-                           !                  !                  
-                           !      /           !               
-                           !       |          !            
-                           !       |          !         
-                           !       V          !    
-                           !     --------     !              
-                           !     ! Group !    !            
-                           !     ---------    !           
-                           !         |        !
-                           !         |        !
-                           !         V        !
-                           !    -----------   !
-                           !    ! Dataset !   !
-                           !    !----------   !
-                           !                  !
-                           !------------------!                    
+                         --------------------                   
+                         !                  !                  
+                         !      /           !               
+                         !       |          !            
+                         !       |          !         
+                         !       V          !    
+                         !     --------     !              
+                         !     ! Group !    !            
+                         !     ---------    !           
+                         !         |        !
+                         !         |        !
+                         !         V        !
+                         !    -----------   !
+                         !    ! Dataset !   !
+                         !    !----------   !
+                         !                  !
+                         !------------------!                    
 
 </PRE>
-[ <A HREF="examples/h5_mount.c">Download h5_mount.c</A> ]
-<PRE>
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+[ <A HREF="examples/h5_mount.c">C program</A> ] 
+    - <code>h5_mount.c</code><BR>
+[ <A HREF="examples/mount.f90">FORTRAN program</A> ] 
+    - <code>mount.f90</code>
+<P>
 
-#include&lt;hdf5.h&gt;
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
 
-#define FILE1 "mount1.h5"
-#define FILE2 "mount2.h5"
-
-#define RANK 2
-#define NX 4
-#define NY 5
-
-int main(void) 
-{
-
-   hid_t fid1, fid2, gid;  /* Files and group identifiers */
-   hid_t did, tid, sid;    /* Dataset and datatype identifiers */ 
-
-   herr_t status;
-   hsize_t dims[] = {NX,NY}; /* Dataset dimensions */
-
-   int i, j;
-   int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
-
-   /*
-    * Initialization of buffer matrix "bm" 
-    */
-   for(i =0; i &lt; NX; i++) {
-    for(j = 0; j &lt; NY; j++)
-      bm[i][j] = i + j;
-   }
-
-   /* 
-    * Create first file and a group in it.
-    */
-   fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   gid = H5Gcreate(fid1, "/G", 0);
-
-   /* 
-    * Close group and file 
-    */
-   H5Gclose(gid);
-   H5Fclose(fid1);
-
-   /* 
-    * Create second file and dataset "D" in it.
-    */
-   fid2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   dims[0] = NX;
-   dims[1] = NY;
-   sid = H5Screate_simple(RANK, dims, NULL);
-   did = H5Dcreate(fid2, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT);
-  
-   /*
-    * Write data to the dataset.
-    */
-   status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm);
-
-   /* 
-    * Close all identifiers.
-    */
-   H5Sclose(sid);
-   H5Dclose(did);
-   H5Fclose(fid2);
-
-   /* 
-    * Reopen both files
-    */
-   fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
-   fid2 = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
-  
-   /* 
-    * Mount second file under G in the first file.
-    */
-   H5Fmount(fid1, "/G", fid2, H5P_DEFAULT);
-
-   /* 
-    * Access dataset D in the first file under /G/D name.
-    */
-   did = H5Dopen(fid1,"/G/D");
-   tid = H5Dget_type(did);
-   status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm_out);
-
-   /*
-    * Print out the data.
-    */
-   for(i=0; i &lt; NX; i++){
-    for(j=0; j &lt; NY; j++)
-        printf("  %d", bm_out[i][j]);
-	printf("\n");
-   }
-
-   /* 
-    * Close all identifers
-    */
-   H5Tclose(tid);
-   H5Dclose(did);
-	
-   /* 
-    * Unmounting second file
-    */
-   H5Funmount(fid1, "/G");
-
-   /*
-    * Close both files
-    */
-   H5Fclose(fid1);
-   H5Fclose(fid2);
-
-   return 0;
-}
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
 <LI> The first part of the program creates a group in one file and creates 
      and writes a dataset to another file. 
 <P>
-<LI> Both files are reopened with the H5F_ACC_RDONLY access flag since no 
-     objects will be modified. The child should be opened with H5F_ACC_RDWR if 
-     the dataset is to be modified. 
+<LI> Both files are reopened and the second file is mounted in the first 
+     using <CODE>H5Fmount</CODE> / <CODE>h5fmount_f</CODE>.  
+     If no objects will be modified, the
+     files can be opened with <CODE>H5F_ACC_RDONLY</CODE> 
+     (<CODE>H5F_ACC_RDONLY_F</CODE> in FORTRAN).
+     If the data is to be modified, the files should be opened with
+     <CODE>H5F_ACC_RDWR</CODE> (<CODE>H5F_ACC_RDWR_F</CODE> in FORTRAN).
 <P>
-<LI> The second file is mounted in the first using the H5Fmount function.
-<PRE>
-  herr_t  H5Fmount(hid_t loc_id, const char *name, hid_t file_id, hid_t plist_id)  
-</PRE>
+<I><B>C:</B></I>
+<pre>
+    herr_t H5Fmount (hid_t loc_id, const char *dsetname, 
+                     hid_t file_id, hid_t access_prp)  
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5fmount_f (loc_id, dsetname, file_id, hdferr, access_prp)
+
+            loc_id       IN: INTEGER (HID_T) 
+            dsetname     IN: CHARACTER (LEN=*)
+            file_id      IN:  INTEGER (HID_T)
+            hdferr      OUT: INTEGER
+            access_prp   IN: INTEGER (HID_T), OPTIONAL
+                         (Default value: H5P_DEFAULT_F)  
+</pre>
+<P>
 <UL>
-   <LI> The first two arguments specify the location of the "mount point" 
-        ( a group ).  In this example the "mount point" is a group "/G" in the 
-        file specified by its handle <I>fid1</I>. Since group G is in the root 
-        group of the first file, one can also use just "G" to identify it. 
+   <LI> The <em>loc_id</em> and <em>dsetname</em> arguments 
+        specify the location of the mount point.
+        In this example, the mount point is a group <code>/G</code> in the 
+        specified file. Since the group <code>/G</code> is in the root 
+        group of the first file, one can also use just <code>G</code> to 
+        identify it. 
 <P>
-        Below is a description of another scenario:<BR>
-        Suppose group G was a member of group D in the first file (<I>fid1</I>).
-        Then mounting point G can be specified in two different ways:
+        Below is a description of another scenario:
+        <p>
+        Suppose the group <code>G</code> were a member of 
+        the group <code>H</code> in the first file.
+        Then the mount point <code>G</code> can be specified in 
+        two different ways:
 <P>
 <UL>
-          <LI> <I>loc_id</I> is <I>fid1</I><BR>
-               <I>name</I> is "D/G"      
+          <LI> <em>loc_id</em> is the file identifier for the first file.<BR>
+               <em>dsetname</em> is <code>H/G</code>.      
 <P>
-          <LI> <I>loc_id</I> is an identifier of the group "D"<BR> 
-               <I>name</I> is just "G"  
+          <LI> <em>loc_id</em> is the identifier for the group <code>H</code>.<BR> 
+               <em>dsetname</em> is <code>G</code>.  
 </UL>
    <P>  
-    <LI> The third argument is an identifier of the file which will be mounted.
-         Only one file can be mounted per "mount point".
+    <LI> The <em>file_id</em> argument is the identifier for the file 
+         which will be mounted.
+         Only one file can be mounted per mount point.
 <P>
-    <LI> The fourth argument is an identifier of the property list to be used.
-         Currently, only the default property list, H5P_DEFAULT, can be used.
+    <LI> The <I>access_prp</I> argument is the identifier for the property list
+         to be used.  Currently, only the default property list, 
+         <CODE>H5P_DEFAULT</CODE>, can be used in C.  
+         In FORTRAN, this argument can be omitted or
+         <CODE>H5P_DEFAULT_F</CODE> can be used.
+<P>
+    <LI> The C function <CODE>H5Fmount</CODE> returns a non-negative
+         value if successful and a negative value otherwise.  
+         With the FORTRAN routine, <CODE>h5fmount_f</CODE>, 
+         the return value of the call is returned in <em>hdferr</em>: 
+         0 if successful and -1 otherwise. 
 </UL>
 <P>
-<LI>  In this example we just read data from the dataset D. One can modify
-    data also. If the dataset is modified while the file is mounted, it becomes
-    modified in the original file too after the file is unmounted.
+<LI>In this example, we only read data from the dataset <code>D</code>. 
+    One can also modify data. 
+    If the dataset is modified while the file is mounted, it is
+    modified in the original file after the file is unmounted.
 <P>
-<LI> The file is unmounted with the H5Funmount function:
-<PRE>
-  herr_t H5Funmount(hid_t loc_id, const char *name)
-</PRE>
-    Arguments to this function specify the location of the "mount point".
-    In our example <I>loc_id</I> is an identifier of the first file, and 
-    <I>name</I> is the name of group G, "/G". One could also use "G" 
-    instead of "/G" since G is a member of the root group in the file 
-    <I>fid1</I>.  Notice that H5Funmount does not close files.  They are closed
-    with the respective calls to the H5Fclose function. Closing the parent
-    automatically unmounts the child.
+<LI> The file is unmounted with <CODE>H5Funmount</CODE> / 
+<CODE>h5funmount_f</CODE>:
+<P>
+<I><B>C:</B></I>
+<pre>
+    herr_t H5Funmount (hid_t loc_id, const char *dsetname)
+</pre>
+<P>
+<I><B>FORTRAN:</B></I>
+<pre>
+    h5funmount_f (loc_id, dsetname, hdferr)
+
+            loc_id     IN: INTEGER (HID_T)
+            dsetname   IN: CHARACTER (LEN=*)
+            hdferr    OUT: INTEGER
+</pre>
+<P>
+<ul>
+    <li>The <I>loc_id</I> and <I>dsetname</I> arguments specify the location 
+        of the mount point.
+        In our example <I>loc_id</I> is the first file's file identifier 
+        and <I>dsetname</I> is the name of group <code>/G</code>. 
+</ul>
 <P> 
-<LI>The h5dump utility cannot display files in memory, therefore no output 
-    of FILE1 after FILE2 was mounted is provided. 
+<li>Note that <CODE>H5Funmount</CODE> / <CODE>h5funmount_f</CODE> 
+    does not close files.  Files are closed with the respective calls to 
+    the <CODE>H5Fclose</CODE> / <CODE>h5fclose_f</CODE> function. 
+<P> 
+<li>Closing the parent file automatically unmounts the child file.
+<P> 
+<LI>The <code>h5dump</code> utility cannot display files in memory.
+    Therefore, no output of <code>FILE1</code> after <code>FILE2</code>
+    was mounted is provided. 
 </UL>       
 </UL>
 
@@ -291,8 +243,9 @@ int main(void)
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: January 19, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

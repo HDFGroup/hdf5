@@ -1,5 +1,5 @@
 <HTML><HEAD>
-<TITLE>HDF5 Tutorial - Selections using H5Sselect_elements and H5Scopy
+<TITLE>HDF5 Tutorial - Selecting Individual Points and Copying a Dataspace 
 </TITLE> 
 </HEAD>
 
@@ -13,7 +13,8 @@ width=78 height=27 alt="NCSA"><P></A>
 
  [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
 <H1>
-<BIG><BIG><BIG><FONT COLOR="#c101cd">Selections using H5Sselect_elements and H5SCopy</FONT>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Selecting Individual Points and Copying 
+a Dataspace</FONT>
 </BIG></BIG></BIG></H1>
 
 <hr noshade size=1>
@@ -21,7 +22,7 @@ width=78 height=27 alt="NCSA"><P></A>
 <BODY>
 <H2>Contents:</H2>
 <UL>
-    <LI> <A HREF="#def">Selecting Independent Points and Copying a Dataspace</A>
+    <LI> <A HREF="#def">Description</A>
     <LI> Programming Example 
     <UL>
       <LI> <A HREF="#desc">Description</A> 
@@ -31,197 +32,125 @@ width=78 height=27 alt="NCSA"><P></A>
 </UL>
 <HR>
 <A NAME="def">
-<H2>Selecting Independent Points and Copying a Dataspace</h2>
-You can select independent points to read or write to in a 
-dataspace by use of the H5Sselect_elements function. 
+<H2>Description</h2>
+You can select independent points to read from or write to in a 
+dataspace by use of the <CODE>H5Sselect_elements</CODE> / 
+<CODE>h5sselect_elements_f</CODE> function. 
 <P>
-The H5Scopy function allows you to make an exact copy of a dataspace,
-which can help cut down on the number of function calls needed when
+The <CODE>H5Scopy</CODE> / <CODE>h5scopy_f</CODE> function allows 
+you to make an exact copy of a dataspace.
+This can reduce the number of function calls needed when
 selecting a dataspace.
 <P>
 <H2> Programming Example</H2>
+
 <A NAME="desc">
 <H3><U>Description</U></H3>      
-This example shows you how to use H5Sselect_elements to select individual
-points in a dataset and how to use H5Scopy to make a copy of a dataspace.
+This example shows how to use <CODE>H5Sselect_elements</CODE> / 
+<CODE>h5sselect_elements_f</CODE> 
+to select individual points in a dataset and how to use 
+<CODE>H5Scopy</CODE> / <CODE>h5scopy_f</CODE> 
+to make a copy of a dataspace.
+<UL>
+[ <A HREF="examples/h5_copy.c">C example</A> ] 
+    - <code>h5_copy.c</code><BR>
+[ <A HREF="examples/selectele.f90">FORTRAN example</A> ] 
+    - <code>selectele.f90</code><BR>
+[ <A HREF="examples/java/Copy.java">Java example</A> ] 
+    - <code>Copy.java</code>
+</UL>
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
 
-[ <A HREF="examples/h5_copy.c">Download h5_copy.c</A> ]
-<PRE>
-/***********************************************************************/
-/*                                                                     */
-/*  PROGRAM:   h5_copy.c                                               */
-/*  PURPOSE:   Shows how to use the H5SCOPY function.                  */
-/*  DESCRIPTION:                                                       */
-/*             This program creates two files, copy1.h5, and copy2.h5. */
-/*             In copy1.h5, it creates a 3x4 dataset called 'Copy1',   */
-/*             and write 0's to this dataset.                          */
-/*             In copy2.h5, it create a 3x4 dataset called 'Copy2',    */
-/*             and write 1's to this dataset.                          */
-/*             It closes both files, reopens both files, selects two   */
-/*             points in copy1.h5 and writes values to them.  Then it  */
-/*             does an H5Scopy from the first file to the second, and  */
-/*             writes the values to copy2.h5.  It then closes the      */
-/*             files, reopens them, and prints the contents of the     */
-/*             two datasets.                                           */
-/*                                                                     */
-/***********************************************************************/
- 
-#include "hdf5.h"
-#define FILE1 "copy1.h5"
-#define FILE2 "copy2.h5"
-
-#define RANK  2
-#define DIM1  3
-#define DIM2  4
-#define NUMP  2 
-
-int main (void)
-{
-     hid_t   file1, file2, dataset1, dataset2;
-     hid_t   mid1, mid2, fid1, fid2;
-     hsize_t fdim[] = {DIM1, DIM2};
-     hsize_t mdim[] = {DIM1, DIM2};
-     hsize_t start[2], stride[2], count[2], block[2];
-     int buf1[DIM1][DIM2];
-     int buf2[DIM1][DIM2];
-     int bufnew[DIM1][DIM2];
-     int val[] = {53, 59};
-     hsize_t marray[] = {2};
-     hssize_t coord[NUMP][RANK];
-     herr_t ret;
-     uint  i, j;
-
-/***********************************************************************/
-/*                                                                     */
-/* Create two files containing identical datasets. Write 0's to one    */
-/* and 1's to the other.                                               */
-/*                                                                     */
-/***********************************************************************/
-
-     for ( i = 0; i &lt DIM1; i++ ) 
-         for ( j = 0; j &lt DIM2; j++ )
-             buf1[i][j] = 0;
-
-     for ( i = 0; i &lt DIM1; i++ ) 
-         for ( j = 0; j &lt DIM2; j++ )
-             buf2[i][j] = 1;
-
-     file1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-     file2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-     fid1 = H5Screate_simple (RANK, fdim, NULL);
-     fid2 = H5Screate_simple (RANK, fdim, NULL);
-
-     dataset1 = H5Dcreate (file1, "Copy1", H5T_NATIVE_INT, fid1, H5P_DEFAULT);
-     dataset2 = H5Dcreate (file2, "Copy2", H5T_NATIVE_INT, fid2, H5P_DEFAULT);
-
-     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1);
-     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
-
-     ret = H5Dclose (dataset1);
-     ret = H5Dclose (dataset2);
-
-     ret = H5Sclose (fid1);
-     ret = H5Sclose (fid2);
-
-     ret = H5Fclose (file1);
-     ret = H5Fclose (file2);
-
-/***********************************************************************/
-/*                                                                     */
-/* Open the two files.  Select two points in one file, write values to */
-/* those point locations, then do H5Scopy and write the values to the  */
-/* other file.  Close files.                                           */
-/*                                                                     */
-/***********************************************************************/
- 
-     file1 = H5Fopen (FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-     file2 = H5Fopen (FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
-     dataset1 = H5Dopen (file1, "Copy1");
-     dataset2 = H5Dopen (file2, "Copy2");
-     fid1 = H5Dget_space (dataset1);
-     mid1 = H5Screate_simple(1, marray, NULL); 
-     coord[0][0] = 0; coord[0][1] = 3;
-     coord[1][0] = 0; coord[1][1] = 1;
-
-     ret = H5Sselect_elements (fid1, H5S_SELECT_SET, NUMP, (const hssize_t **)coord);
-
-     ret = H5Dwrite (dataset1, H5T_NATIVE_INT, mid1, fid1, H5P_DEFAULT, val); 
-
-     fid2 = H5Scopy (fid1);
-
-     ret = H5Dwrite (dataset2, H5T_NATIVE_INT, mid1, fid2, H5P_DEFAULT, val); 
-
-     ret = H5Dclose (dataset1);
-     ret = H5Dclose (dataset2);
-     ret = H5Sclose (fid1);
-     ret = H5Sclose (fid2);
-     ret = H5Fclose (file1);
-     ret = H5Fclose (file2);
-     ret = H5Sclose (mid1);
-
-/***********************************************************************/
-/*                                                                     */
-/* Open both files and print the contents of the datasets.             */
-/*                                                                     */
-/***********************************************************************/
-
-     file1 = H5Fopen (FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-     file2 = H5Fopen (FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
-     dataset1 = H5Dopen (file1, "Copy1");
-     dataset2 = H5Dopen (file2, "Copy2");
-
-     ret = H5Dread (dataset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                    H5P_DEFAULT, bufnew);
-     
-     printf ("\nDataset 'Copy1' in file 'copy1.h5' contains: \n");
-     for (i=0;i&lt;DIM1; i++) {
-        for (j=0;j&lt;DIM2;j++) printf ("%3d  ", bufnew[i][j]);
-        printf("\n");
-     }
-
-     printf ("\nDataset 'Copy2' in file 'copy2.h5' contains: \n");
-
-     ret = H5Dread (dataset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                    H5P_DEFAULT, bufnew);
-
-     for (i=0;i&lt;DIM1; i++) {
-        for (j=0;j&lt;DIM2;j++) printf ("%3d  ", bufnew[i][j]);
-        printf("\n");
-     }
-     ret = H5Dclose (dataset1);
-     ret = H5Dclose (dataset2);
-     ret = H5Fclose (file1);
-     ret = H5Fclose (file2);
-
-}
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
 
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
-<LI>H5Sselect_elements selects array elements to be included in the
-selection for a dataspace:
-<PRE>
-   herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t op, 
-                              size_t num_elem, const hssize_t **coord ) 
-</PRE>
+<LI><CODE>H5Sselect_elements</CODE> / <CODE>h5sselect_elements_f</CODE> 
+selects array elements to be 
+included in the selection for a dataspace:
+<P>
+<I><B>C</B></I>:
+<pre>
+   herr_t H5Sselect_elements (hid_t space_id, H5S_seloper_t operator,
+                              size_t num_elements, 
+                              const hssize_t **coord ) 
+</pre>
+<P>
+<I><B>FORTRAN</B></I>:
+<pre>
+   h5sselect_elements_f (space_id, operator, num_elements, coord, hdferr)
+
+      space_id       IN: INTEGER(HID_T) 
+      operator       IN: INTEGER
+      num_elements   IN: INTEGER
+      coord          IN: INTEGER(HSSIZE_T), DIMENSION(*,*)
+      hdferr        OUT: INTEGER
+</pre>
+<P>
 <UL>
-<LI>The <I>space_id</I> parameter is the dataspace identifier.<BR>
-<LI>The <I>op</I> parameter currently can only be set to H5S_SELECT_SET and
-specifies to replace the existing selection with the parameters from this
-call.
-<LI>The <I>coord</I> array is a two-dimensional array of size 'dataspace rank'
-by the number of elements to be selected, <I>num_elem</I>.<BR>
+<LI>The <I>space_id</I> parameter is the dataspace identifier.
+<P>
+<LI>The <I>operator</I> parameter can be set to one of the following values: 
+<dir><DL>
+    <dt><CODE>H5S_SELECT_SET</CODE> (<CODE>H5S_SELECT_SET_F</CODE> in FORTRAN)
+    <dd>Replace the existing selection with the parameters from this call. 
+        Overlapping blocks are not supported with this operator. 
+    <dt><CODE>H5S_SELECT_OR</CODE> (<CODE>H5S_SELECT_OR_F</CODE> in FORTRAN)
+    <dd>Add the new selection to the existing selection. 
+</DL></dir>
+<P>
+<LI>The <I>coord</I> array is a two-dimensional array of size 
+<code><em>NUMP</em> x <em>RANK</em></code> in C 
+(<code><em>RANK</em> x <em>NUMP</em></code> in FORTRAN)
+where <code><em>NUMP</em></code> is the number of selected points 
+and <code><em>RANK</em></code> is the rank of the dataset.
+Note that these coordinates are 0-based in C and 1-based in FORTRAN.
+<p>
+    Consider the non-zero elements of the following array:
+    <pre>
+            0  59   0  53
+            0   0   0   0
+            0   0   1   0    </pre>
+    In C, the <em>coord</em> array selecting these points would be as follows:
+    <pre>
+            0   1
+            0   3
+            2   2            </pre>
+    While in FORTRAN, the <em>coord</em> array would be as follows:
+    <pre>
+            1   1   3
+            2   4   3        </pre>
+<P>
+<LI>In C, this function returns a non-negative value if successful and 
+a negative value otherwise.  In FORTRAN, the value returned in <I>hdferr</I>
+indicates whether it was successful (0) or not (-1).
 </UL>
 <P>
-<LI>H5Scopy creates an exact copy of a dataspace:
+<LI><CODE>H5Scopy</CODE> / <CODE>h5scopy_f</CODE> creates an exact copy of a dataspace:
+<P>
+<I><B>C</B></I>:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
 <PRE>
-   hid_t H5Scopy(hid_t space_id ) 
+   hid_t H5Scopy (hid_t space_id) 
 </PRE>
+<I><B>FORTRAN</B></I>: &nbsp;
+<PRE>
+   h5scopy_f (space_id, new_space_id, hdferr)  
+
+      space_id       IN: INTEGER(HID_T) 
+      new_space_id  OUT: INTEGER(HID_T)
+      hdferr        OUT: INTEGER 
+</PRE>
+<P>
 <UL>
 <LI>The <I>space_id</I> parameter is the dataspace identifier to copy. 
+<P>
+<LI>In C, the identifier to the dataspace's copy is returned if the
+function is successful and a negative value is returned if not.  In 
+FORTRAN, the new dataspace identifier is returned in <I>new_space_id</I> 
+and the return value is returned in <I>hdferr</I> ( 0 if successful and
+-1 if not). 
 </UL>
 </UL>
 </UL>
@@ -231,42 +160,83 @@ by the number of elements to be selected, <I>num_elem</I>.<BR>
 <H3><U>File Contents</U></H3>
 
 Following is the DDL for <I>copy1.h5</I> and <I>copy2.h5</I>, as viewed with 
-the commands "h5dump copy1.h5" and "h5dump copy2.h5".
+the following commands:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<code>h5dump copy1.h5</code> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<code>h5dump copy2.h5</code>
+
 <P>
-<B>Fig. S.1</B> &nbsp; <I>'copy1.h5' in DDL</I>
+<HR>
+<B><I><U>C</U></B></I>:<P>
+<B>Fig. S.1a</B> &nbsp; <I><code>copy1.h5</code> in DDL</I>
 <PRE>
-HDF5 "copy1.h5" {
-GROUP "/" {
-   DATASET "Copy1" {
-      DATATYPE { H5T_STD_I32BE }
-      DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) }
-      DATA {
-         0, 59, 0, 53,
-         0, 0, 0, 0,
-         0, 0, 0, 0
+   HDF5 "copy1.h5" {
+   GROUP "/" {
+      DATASET "Copy1" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) }
+         DATA {
+            0, 59, 0, 53,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+         }
       }
    }
-}
-}
+   }
 </PRE>
-<B>Fig. S.2</B> &nbsp; <I>'copy2.h5' in DDL</I>
+<B>Fig. S.1b</B> &nbsp; <I><code>copy2.h5</code> in DDL</I>
 <PRE>
-HDF5 "copy2.h5" {
-GROUP "/" {
-   DATASET "Copy2" {
-      DATATYPE { H5T_STD_I32BE }
-      DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) }
-      DATA {
-         1, 59, 1, 53,
-         1, 1, 1, 1,
-         1, 1, 1, 1
+   HDF5 "copy2.h5" {
+   GROUP "/" {
+      DATASET "Copy2" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) }
+         DATA {
+            1, 59, 1, 53,
+            1, 1, 1, 1,
+            1, 1, 1, 1
+         }
       }
    }
-}
-}
-
+   }
 </PRE>
-
+<HR>
+<I><B><U>FORTRAN</U></B></I>:<P>
+<B>Fig. S.2a</B> &nbsp; <I><code>copy1.h5</code> in DDL</I>
+<PRE>
+   HDF5 "copy1.h5" {
+   GROUP "/" {
+      DATASET "Copy1" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 4, 3 ) / ( 4, 3 ) }
+         DATA {
+            0, 0, 0,
+            53, 0, 0,
+            0, 0, 0,
+            59, 0, 0
+         }
+      }
+   }
+   }
+</PRE>
+<B>Fig. S.2b</B> &nbsp; <I><code>copy2.h5</code> in DDL</I>
+<PRE>
+   HDF5 "copy2.h5" {
+   GROUP "/" {
+      DATASET "Copy2" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 4, 3 ) / ( 4, 3 ) }
+         DATA {
+            1, 1, 1,
+            53, 1, 1,
+            1, 1, 1,
+            59, 1, 1
+         }
+      }
+   }
+   }
+</PRE>
 
 
 <!-- BEGIN FOOTER INFO -->
@@ -283,8 +253,9 @@ GROUP "/" {
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: April 5, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

@@ -21,11 +21,21 @@ width=78 height=27 alt="NCSA"><P></A>
 
 <BODY>
 <P>
-The HDF5 library provides several interfaces, and is currently implemented in
-C.  The APIs provide routines for accessing HDF5 files and creating and
-manipulating HDF5 objects. All C routines in the HDF5 library begin with
-a prefix of the form H5*, where * is a single letter indicating the object on
-which the operation is to be performed. The APIs are listed below:
+The HDF5 library provides several interfaces, or APIs.
+These APIs provide routines for creating, accessing, and manipulating
+HDF5 files and objects. 
+<P>
+The library itself is implemented in C.  To facilitate the work of 
+FORTRAN90 and Java programmers, HDF5 function wrappers have been developed 
+in each of these languages.
+At the time of this writing, a set of C++ wrappers is in development.
+This tutorial discusses the use of the C functions and the FORTRAN wrappers.
+<P>
+All C routines in the HDF5 library begin with a prefix of the form <I>H5</I>*, 
+where * is one or two uppercase letters indicating the type of object on which the 
+function operates.  
+The FORTRAN wrappers come in the form of subroutines that begin with 
+<I>h5</I> and end with <I>_f</I>. The APIs are listed below:
 <P>
 <table width="65%" border="2" cellpadding="4">
   <tr bgcolor="#FFCC99" bordercolor="#FFFFFF"> 
@@ -40,76 +50,78 @@ which the operation is to be performed. The APIs are listed below:
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5</b></div>
     </td>
-    <td width="89%">Library Functions: the general-purpose H5 functions.</td>
+    <td width="89%">Library Functions: general-purpose H5 functions</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5A</b></div>
     </td>
-    <td width="89%">Annotation Interface: attribute access and manipulating routines.</td>
+    <td width="89%">Annotation Interface: attribute access and manipulation 
+     routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5D</b></div>
     </td>
-    <td width="89%">Dataset Interface: dataset access and manipulating routines. 
-    </td>
+    <td width="89%">Dataset Interface: dataset access and manipulation 
+     routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5E</b></div>
     </td>
-    <td width="89%">Error Interface: error handling routines.</td>
+    <td width="89%">Error Interface: error handling routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5F</b></div>
     </td>
-    <td width="89%">File Interface: file access routines.</td>
+    <td width="89%">File Interface: file access routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5G</b></div>
     </td>
-    <td width="89%">Group Interface: group creating and operating routines.</td>
+    <td width="89%">Group Interface: group creation and operation routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5I</b></div>
     </td>
-    <td width="89%">Identifier Interface: identifier routines.</td>
+    <td width="89%">Identifier Interface: identifier routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5P</b></div>
     </td>
-    <td width="89%">Property List Interface: object property list manipulating 
-      routines.</td>
+    <td width="89%">Property List Interface: object property list manipulation 
+      routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5R</b></div>
     </td>
-    <td width="89%">Reference Interface: reference routines.</td>
+    <td width="89%">Reference Interface: reference routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5S</b></div>
     </td>
-    <td width="89%">Dataspace Interface: routines for defining dataspaces.</td>
+    <td width="89%">Dataspace Interface: dataspace definition and access
+     routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5T</b></div>
     </td>
-    <td width="89%">Data type Interface: routines for creating and manipulating 
-      the data type of dataset elements.</td>
+    <td width="89%">Datatype Interface: datatype creation and manipulation 
+     routines</td>
   </tr>
   <tr bordercolor="#FFFFFF"> 
     <td width="11%" bgcolor="#99CCCC"> 
       <div align="center"><b>H5Z</b></div>
     </td>
-    <td width="89%">Compression Interface: compression routine(s).</td>
+    <td width="89%">Compression Interface: compression routine(s)</td>
   </tr>
 </table>
 
@@ -127,8 +139,9 @@ which the operation is to be performed. The APIs are listed below:
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: July 30, 1999</H6><BR>
+<BR> <H6>Last Modified: December 10, 1999</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

@@ -21,11 +21,13 @@ width=78 height=27 alt="NCSA"><P></A>
 <BODY>
 <H2>Contents:</H2>
 <UL>
-    <LI><A HREF="#def">How to Iterate Over Group Members</A>
+    <LI><A HREF="#def">How to Iterate over Group Members Using C </A>
+    <LI><A HREF="#deff">How to Iterate over Group Members Using FORTRAN</A>
     <LI>Programming Example 
 <UL>
       <LI> <A HREF="#desc">Description</A> 
-      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#remc">Remarks for C Example</A> 
+      <LI> <A HREF="#remf">Remarks for FORTRAN Example</A> 
 <!--
       <LI> <A HREF="#fc">File Contents</A>
       <LI> <A HREF="#ddl">Dataset Definition in DDL</A>
@@ -34,15 +36,15 @@ width=78 height=27 alt="NCSA"><P></A>
 </UL>
 <HR>
 <A NAME="def">
-<H2>How to Iterate Over Group Members</H2>
+<H2>How to Iterate over Group Members Using C</H2>
 This section discusses how to find names and object types of HDF5 group 
-members.
+members using C.
 <P>
-The HDF5 Group interface has a function, H5Giterate, to iterate over the 
-group members.
+The HDF5 Group interface includes the <CODE>H5Giterate</CODE> function,
+which iterates over the group members.  
 <P>
-Operations on each group member can be performed during the iteration process.
-The operator function and its data are passed to the iterator as parameters. 
+Operations on each group member can be performed during the iteration process
+by passing the operator function and its data to the iterator as parameters. 
 There are no restrictions on what kind of operations can be performed on 
 group members during the iteration procedure.
 <P>
@@ -52,168 +54,91 @@ The following steps are involved:
 <LI> Write an operator function which will be used during the iteration process.
      The HDF5 library defines the operator function signature and return values.
 <LI> Open the group to iterate through.
-<LI> Use H5Giterate to iterate through the group or just a few members of 
-     the group.
+<LI> Iterate through the group or just a few members of the group.
 </OL>
+<A NAME="deff">
+<H2>How to Iterate Over Group Members using FORTRAN</H2>
+There is no FORTRAN call to iterate over group members. 
+Instead, this functionality is provided by two FORTRAN calls: 
+<ul>
+  <li><CODE>hgn_members_f</CODE> returns the number of group members.
+  <li><CODE>h5gget_obj_info_idx_f</CODE> returns the name and type of the 
+      group member, which is identified by its index.
+</ul>
+<P>
 <H2> Programming Example</H2>
 <A NAME="desc">
 <H3><U>Description</U></H3>      
-In this example we iterate through the members of the root group. The 
-operator function displays the members' names and their object types.
-The object type can be a group, dataset, or named datatype.
-[ <A HREF="examples/h5_iterate.c">Download h5_iterate.c</A> ]
+In this example we iterate through the members of the root group. 
+<UL>
+[ <A HREF="examples/h5_iterate.c">C example</A> ]  
+    - <code>h5_iterate.c</code><BR>
+[ <A HREF="examples/grpit.f90">FORTRAN example</A> ]  
+    - <code>grpit.f90</code>
+</UL>
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
+<P>
+Following is the output from these examples:
+<P>
+<I><U>Output from C Example</U></I>
 <PRE>
+  Objects in the root group are:
 
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-#include &lt;hdf5.h&gt;
-
-#define FILE   "iterate.h5"
-#define  FALSE 0
-
-/* 1-D dataset with fixed dimensions */
-#define SPACE1_NAME  "Space1"
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
-
-herr_t file_info(hid_t loc_id, const char *name, void *opdata);
-                                     /* Operator function */
-int 
-main(void) {
-    hid_t		file;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		group;      /* Group ID             */
-    hid_t		sid;       /* Dataspace ID			*/
-    hid_t		tid;       /* Datatype ID			*/
-    hsize_t		dims[] = {SPACE1_DIM1};
-    herr_t		ret;		/* Generic return value		*/
-
-/* Compound datatype */
-typedef struct s1_t {
-    unsigned int a;
-    unsigned int b;
-    float c;
-} s1_t;
-
-    /* Create file */
-    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Create dataspace for datasets */
-    sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
-
-    /* Create a group */
-    group=H5Gcreate(file,"Group1",-1);
-
-    /* Close a group */
-    ret = H5Gclose(group);
-
-    /* Create a dataset  */
-    dataset=H5Dcreate(file,"Dataset1",H5T_STD_U32LE,sid,H5P_DEFAULT);
-
-    /* Close Dataset */
-    ret = H5Dclose(dataset);
-
-    /* Create a datatype */
-    tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-
-    /* Insert fields */
-    ret=H5Tinsert (tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
-
-    ret=H5Tinsert (tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
-
-    ret=H5Tinsert (tid, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
-
-    /* Save datatype for later */
-    ret=H5Tcommit (file, "Datatype1", tid);
-
-    /* Close datatype */
-    ret = H5Tclose(tid);
-
-    /* Iterate through the file to see members of the root group */
-
-    printf(" Objects in the root group are:\n");
-    printf("\n");
-
-    H5Giterate(file, "/", NULL, file_info, NULL);
-
-    /* Close file */
-    ret = H5Fclose(file);
-
-    return 0;
-}
-
-/*
- * Operator function.
- */
-herr_t file_info(hid_t loc_id, const char *name, void *opdata)
-{
-    H5G_stat_t statbuf;
-
-    /*
-     * Get type of the object and display its name and type.
-     * The name of the object is passed to this function by 
-     * the Library. Some magic :-)
-     */
-    H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
-    switch (statbuf.type) {
-    case H5G_GROUP: 
-         printf(" Object with name %s is a group \n", name);
-         break;
-    case H5G_DATASET: 
-         printf(" Object with name %s is a dataset \n", name);
-         break;
-    case H5G_TYPE: 
-         printf(" Object with name %s is a named datatype \n", name);
-         break;
-    default:
-         printf(" Unable to identify an object ");
-    }
-    return 0;
- }
-
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Object with name Dataset1 is a dataset 
+  Object with name Datatype1 is a named datatype 
+  Object with name Group1 is a group 
 </PRE>
-The output of this program is:
+<I><U>Output from FORTRAN Example</U></I>
 <PRE>
- Objects in the root group are:
-
- Object with name Dataset1 is a dataset 
- Object with name Datatype1 is a named datatype 
- Object with name Group1 is a group 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ Number of root group member is 1
+ MyGroup             1
+ Number of group MyGroup member  is 2
+ Group_A             1
+ dset1               2
+ Number of group MyGroup/Group_A member  is 1
+ dset2               2
 </PRE>
-<A NAME="rem">
-<H3><U>Remarks</U></H3>
+<A NAME="remc">
+<H3><U>Remarks for C Example</U></H3>
 <P>
 <UL>
 <LI> The operator function in this example is called <I>file_info</I>.
    The signature of the operator function is as follows:
 <PRE>
-  herr_t *(H5G_operator_t) (hid_group_id, const char* name, void *operator_data)
+    herr_t *(H5G_operator_t) (hid group_id, const char* name, 
+             void *operator_data)
 </PRE>
 <UL>
-      <LI>The first parameter is a group identifier for the group being iterated
-        over. It is passed to the operator by the iterator function, H5Giterate.
-      <LI> The second parameter is the name of the current object. The name is
-        passed to the operator function by the HDF5 library.
-      <LI> The third parameter is the operator data. It is passed to and from
-        the operator by the iterator, H5Giterate.
-
-       The operator function in this example just prints the name and type 
+      <LI>The <em>group_id</em> parameter is a group identifier for the 
+          group being iterated over. 
+          It is passed to the operator by the iterator function, 
+          <CODE>H5Giterate</CODE>.
+<P>
+      <LI>The <em>name</em> parameter is the name of the current object. 
+        The name is passed to the operator function by the HDF5 library.
+<P>
+      <LI> The <em>operator_data</em> parameter is the operator data. 
+        It is passed to and from
+        the operator by the iterator, <CODE>H5Giterate</CODE>.
+</UL>
+<P>
+       The operator function in this example simply prints the name and type 
        of the current object and then exits.
-
        This information can also be used to open the object and perform 
        different operations or queries. For example a named datatype object's
        name can be used to open the datatype and query its properties. 
-</UL>
 <P>
   The operator return value defines the behavior of the iterator.
   <UL>
+<P>
       <LI>A zero return value causes the iterator to continue, returning
         zero when all group members have been processed.
+<P>
       <LI>A positive value causes the iterator to immediately return that
         value, indicating a short-circuit success. The iterator can be restarted
         at the next group member.
+<P>
       <LI>A negative value causes the iterator to immediately return that value,
        indicating failure. The iterator can be restarted at the next group 
        member. 
@@ -222,56 +147,119 @@ The output of this program is:
    In this example the operator function returns 0, which causes the iterator
    to continue and go through all group members.
 <P>
-<LI>The function H5Gget_objinfo is used to determine the type of the object. 
+<LI>The function <CODE>H5Gget_objinfo</CODE> is used to determine the type of the object. 
    It also returns the modification time, number of hard links, and some
    other information.
 <P>
    The signature of this function is as follows:
 <PRE>
-     herr_t H5Gget_objinfo(hid_t loc_id, const char * name, hbool_t follow_link,
+     herr_t H5Gget_objinfo (hid_t loc_id, const char * name, 
+                            hbool_t follow_link, 
                             H5G_stat_t *statbuf)
 </PRE>
 <UL>
-       <LI> The first two arguments specify the object by its location and name.
+       <LI>The <em>loc_id</em> and <em>name</em> arguments 
+           specify the object by its location and name.
          This example uses the group identifier and name relative to the group
          to specify the object. 
-       <LI> The third argument is a flag  which indicates whether a 
-            symbolic link should be followed or not. A zero value indicates 
+<P>
+       <LI>The <em>follow_link</em> argument is a flag which indicates 
+           whether a symbolic link should be followed. A zero value indicates 
             that information should be returned for the link itself, but not 
             about the object it points to.
+<P>
             The root group in this example does not have objects that are
             links, so this flag is not important for our example.
-       <LI> The fourth argument is a buffer to return information in.
-         Type information is returned into the field "type" of the 
-         H5G_stat_t data structure (statbuf.type). Possible values are:
-         H5G_GROUP, H5G_DATASET, H5G_TYPE, and H5G_LINK.
+<P>
+       <LI>The <em>statbuf</em> argument is the buffer in which to return 
+           information.
+         Type information is returned into the field <em>type</em> of the 
+         <CODE>H5G_stat_t</CODE> data structure (<code>statbuf.type</code>). 
+         Valid values are 
+         <CODE>H5G_GROUP</CODE>, <CODE>H5G_DATASET</CODE>, 
+         <CODE>H5G_TYPE</CODE>, and <CODE>H5G_LINK</CODE>.
 </UL>
 <P>
-<LI> The H5Giterate function has the following signature:
+<LI> The <CODE>H5Giterate</CODE> function has the following signature:
 <PRE>
-   int H5Giterate(hid_t loc_id, const char *name , idx,
-                  H5G_operator_t operator, void * operator_data) 
+    int H5Giterate (hid_t loc_id, const char *name , int *idx,
+                    H5G_operator_t operator, void * operator_data) 
 </PRE>
 <UL>
-   <LI> The first parameter is the group for the group being iterated over.
-   <LI> The second parameter is the group name.
-   <LI> The third parameter specifies that iteration begins with the 
-        <I>idx</I> object in the group and the next element to be processed 
-        is returned in the <I>idx</I> parameter. In our example NULL is 
+   <LI> The <em>loc_id</em> parameter is the group identifier for the 
+        group being iterated over.
+   <LI> The <em>name</em> parameter is the group name.
+   <LI> The <em>idx</em> parameter is an index specifying that iteration 
+        begins with the <em>idx</em>-th object in the group.
+        Upon the function's return, the index of the next element 
+        to be processed is returned in <I>idx</I>. In our example, NULL is 
         used to start at the first group member. Since no stopping point 
         is returned in this case, the iterator cannot be restarted if one 
         of the calls to its operator returns a non-zero value.
-   <LI> The fourth parameter is an operator function.
-   <LI> The fifth argument is the operator data. We used NULL since no 
-        data was passed to and from the operator. 
+   <LI> The <em>operator</em> parameter is the operator function.
+   <LI> The <em>operator_data</em> argument is the operator data. 
+        We used NULL since no data was passed to or from the operator. 
 </UL>
 </UL>
 
-<!--
-<A NAME="fc">
-<H3><U>File Contents</U></H3>
--->
+<A NAME="remf">
+<H3><U>Remarks for FORTRAN Example</U></H3>
+<P>
+<UL>
+<LI>This program creates an HDF5 file with groups in it and
+    then uses <CODE>h5gn_members_f</CODE> to get the number of members in
+    each group and <CODE>h5gget_obj_idx_f</CODE> to obtain the group member's
+    name and type.
+<P>
+<LI>The number of members in a group are obtained with the
+<CODE>h5gn_members_f</CODE> call:
+<PRE>
+    h5gn_members_f (loc_id, name, nmembers, hdferr)
+     
+            loc_id    IN: INTEGER (HID_T) 
+            name      IN: CHARACTER (LEN=*) 
+            nmembers OUT: INTEGER
+            hdferr   OUT: INTEGER 
+</PRE>
+<UL>
+   <LI>The <I>loc_id</I> parameter is the file or group identifier. 
+   <LI>The <I>name</I> parameter is the name of the group to obtain the number
+       of members in.
+   <LI>The number of members in the group is returned in <I>nmembers</I>.
+   <LI>The <I>hdferr</I> parameter contains the return code from the
+       call: 0 if successful and -1 otherwise.
+</UL>
+<P>
+<LI>The name of each group and its type are obtained with the
+<CODE>h5gget_obj_info_idx_f</CODE> call:
+<PRE>
+    h5gget_obj_info_idx_f (loc_id, name, idx, &
+                           obj_name, obj_type, hdferr)
 
+            loc_id     IN: INTEGER (HID_T)
+            name       IN: CHARACTER (LEN=*)
+            idx        IN: INTEGER
+            obj_name  OUT: CHARACTER (LEN=*)
+            obj_type  OUT: INTEGER
+            hdferr    OUT: INTEGER
+ </PRE>
+<UL>
+<LI>The <I>loc_id</I> parameter is the file or group identifier.
+<LI>The <I>name</I> parameter is the name of the group.
+<LI>The <I>idx</I> parameter is the index of the member object.
+<LI>The <I>obj_name</I> parameter is the name of the object that gets returned.
+<LI>The <I>obj_type</I> parameter is the object type that gets returned.
+    Valid values are as follows:
+<PRE>
+        H5G_LINK_F 
+        H5G_GROUP_F 
+        H5G_DATASET_F 
+        H5G_TYPE_F 
+</PRE>
+<LI>The <I>hdferr</I> parameter contains the return code from the
+       call: 0 if successful and -1 otherwise.
+</UL>
+</UL>
 
 
 
@@ -290,8 +278,9 @@ The output of this program is:
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: January 19, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+<!-- modified by Frank Baker - fbaker@ncsa.uiuc.edu -->
 </FONT>
 <BR>
 <!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->

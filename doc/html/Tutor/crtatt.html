@@ -36,160 +36,212 @@ width=78 height=27 alt="NCSA"><P></A>
 <P>
 Attributes are small datasets that can be used to describe the nature and/or
 the intended usage of the object they are attached to. In this section, we
-show how to create and read/write an attribute.
+show how to create, read, and write an attribute.
 <P>
 <P>
 <H3>Creating an attribute</H3>
 <P>
-  Creating an attribute is similar to the creation of a dataset. To create an
-  attribute the application must specify the object which the attribute is
-  attached to, the data type and space of the attribute data and the creation
-  properties.
+  Creating an attribute is similar to creating a dataset. To create an
+  attribute, the application must specify the object which the attribute is
+  attached to, the datatype and dataspace of the attribute data,
+  and the attribute creation property list.
 <P>
   The steps to create an attribute are as follows:
 <OL>
     <LI> Obtain the object identifier that the attribute is to be attached to.
-    <LI> Define the characteristics of the attribute and specify creation
-       properties.
+    <LI> Define the characteristics of the attribute and specify the 
+         attribute creation property list.
     <UL>
-       <LI> Define the data type.
+       <LI> Define the datatype.
        <LI> Define the dataspace.
-       <LI> Specify the creation properties.
+       <LI> Specify the attribute creation property list.
     </UL>
     <LI> Create the attribute.
-    <LI> Close the attribute and data type, dataspace, and creation property
-       list if necessary.
+    <LI> Close the attribute and datatype, dataspace, and 
+         attribute creation property list, if necessary.
 </OL>
 <P>
- To create an attribute, the calling program must contain the following calls:
+ To create and close an attribute, the calling program must use
+<code>H5Acreate</code>/<code>h5acreate_f</code> and 
+<code>H5Aclose</code>/<code>h5aclose_f</code>.  For example: 
+<P>
+<I>C</I>:
 <PRE>
-     attr_id = H5Acreate(loc_id, attr_name, type_id, space_id, create_plist);
-     H5Aclose(attr_id);
+     attr_id = H5Acreate (dset_id, attr_name, type_id, space_id, creation_prp);
+     status = H5Aclose (attr_id);
 </PRE>
+<I>FORTRAN</I>:
+<PRE>
+     CALL h5acreate_f (dset_id, attr_nam, type_id, space_id, attr_id, &
+                       hdferr, creation_prp=creat_plist_id)
+          <i>or</i>
+     CALL h5acreate_f (dset_id, attr_nam, type_id, space_id, attr_id, hdferr)
+
+     CALL h5aclose_f (attr_id, hdferr)
+</PRE>    
 
 <H3>Reading/Writing an attribute</H3>
 <P>
-  Attributes may only be read/written as an entire object. No partial I/O is
-  currently supported. Therefore, to perform I/O operations on an attribute, the
+  Attributes may only be read or written as an entire object; no partial I/O is
+  supported. Therefore, to perform I/O operations on an attribute, the
   application needs only to specify the attribute and the attribute's memory
-  data type.
+  datatype.
 <P>
-  The steps to read/write an attribute are as follows.
+  The steps to read or write an attribute are as follows.
 <OL>
     <LI> Obtain the attribute identifier.
-    <LI> Specify the attribute's memory data type.
+    <LI> Specify the attribute's memory datatype.
     <LI> Perform the desired operation.
-    <LI> Close the memory data type if necessary.
+    <LI> Close the memory datatype if necessary.
 </OL>
 <P>
-To read/write an attribute, the calling program must contain the following
-  calls:
+To read and/or write an attribute, the calling program must contain the
+<code>H5Aread</code>/<code>h5aread_f</code> and/or 
+<code>H5Awrite</code>/<code>h5awrite_f</code> routines.  For example:
+<P>
+<I>C</I>:
 <PRE>
-    status = H5Aread(attr_id, mem_type_id, buf);
+    status = H5Aread (attr_id, mem_type_id, buf);
+    status = H5Awrite (attr_id, mem_type_id, buf);
 </PRE>
-    or
+<I>FORTRAN</I>:
 <PRE>
-    status = H5Awrite(attr_id, mem_type_id, buf);
+    CALL h5awrite_f (attr_id, mem_type_id, buf, hdferr)  
+    CALL h5aread_f (attr_id, mem_type_id, buf, hdferr)
 </PRE>
 <P>
 <H2> Programming Example</H2>
 <A NAME="desc">
 <H3><U>Description</U></H3>      
 This example shows how to create and write a dataset attribute.
-It opens an existing file 'dset.h5', obtains the id of the dataset "/dset1",
+It opens an existing file <code>dset.h5</code> in C 
+(<code>dsetf.h5</code> in FORTRAN), 
+obtains the identifier of the dataset <code>/dset</code>, 
 defines the attribute's dataspace, creates the dataset attribute, writes
 the attribute, and then closes the attribute's dataspace, attribute, dataset,
 and file. <BR>
-[ <A HREF="examples/h5_crtatt.c">Download h5_crtatt.c</A> ]
-<PRE>
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+<UL>
+[ <A HREF="examples/h5_crtatt.c">C Example </A> ] - <code>h5_crtatt.c</code><BR>
+[ <A HREF="examples/attrexample.f90">FORTRAN Example</A> ] - <code>attrexample.f90</code><BR>
+[ <A HREF="examples/java/CreateAttribute.java">Java Example </A> ] 
+- <code>CreateAttribute.java</code><BR>
+</UL>
 
-#include &lt;hdf5.h&gt;
-#define FILE "dset.h5"
+<B>NOTE:</B> To download a tar file of the examples, including a Makefile,
+please go to the <A HREF="references.html">References</A> page.
 
-main() {
-
-   hid_t       file_id, dataset_id, attribute_id, dataspace_id;  /* identifiers
-*/
-   hsize_t     dims;
-   int         attr_data[2];
-   herr_t      status;
-
-   /* Initialize the attribute data. */
-   attr_data[0] = 100;
-   attr_data[1] = 200;
-
-   /* Open an existing file. */
-   file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
-
-   /* Open an existing dataset. */
-   dataset_id = H5Dopen(file_id, "/dset");
-
-   /* Create the data space for the attribute. */
-   dims = 2;
-   dataspace_id = H5Screate_simple(1, &dims, NULL);
-
-   /* Create a dataset attribute. */
-   attribute_id = H5Acreate(dataset_id, "attr", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT);
-
-   /* Write the attribute data. */
-   status = H5Awrite(attribute_id, H5T_NATIVE_INT, attr_data);
-
-   /* Close the attribute. */
-   status = H5Aclose(attribute_id);
-
-   /* Close the dataspace. */
-   status = H5Sclose(dataspace_id);
-
-   /* Close to the dataset. */
-   status = H5Dclose(dataset_id);
-
-   /* Close the file. */
-   status = H5Fclose(file_id);
-}
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-</PRE>
 
 <A NAME="rem">
 <H3><U>Remarks</U></H3>
 <UL>
-<LI> H5Acreate creates an attribute which is attached to the object specified by
-   the first parameter, and returns an identifier.
+<LI><code>H5Acreate</code>/<code>h5acreate_f</code> creates an attribute 
+    which is attached to the object specified by the first parameter, 
+    and returns an identifier.
+<P>
+<I>C</I>:
 <PRE>
-  hid_t H5Acreate (hid_t loc_id, const char *name, hid_t type_id, 
-                   hid_t space_id, hid_t create_plist) 
+  hid_t H5Acreate (hid_t obj_id, const char *name, hid_t type_id, 
+                   hid_t space_id, hid_t creation_prp) 
+</PRE>
+<I>FORTRAN</I>:
+<PRE>
+  h5acreate_f (obj_id, name, type_id, space_id, attr_id, &
+               hdferr, creation_prp) 
+
+            obj_id        INTEGER(HID_T)
+            name          CHARACTER(LEN=*)
+            type_id       INTEGER(HID_T)
+            space_id      INTEGER(HID_T)
+            attr_id       INTEGER(HID_T)
+            hdferr        INTEGER
+                          (Possible values: 0 on success and -1 on failure)
+            creation_prp  INTEGER(HID_T), OPTIONAL
+
 </PRE>
 <UL>
-   <LI> The first parameter is the identifier of the object which the attribute is
-      attached to.
-
-   <LI> The second parameter is the name of the attribute to create.
-
-   <LI> The third parameter is the identifier of the attribute's datatype.
-
-   <LI> The fourth parameter is the identifier of the attribute's dataspace.
-
-   <LI> The last parameter is the identifier of the creation property list.
-      H5P_DEFAULT specifies the default creation property list.
+   <LI> The <I>obj_id</I> parameter is the identifier of the object that 
+        the attribute is attached to.
+ <P>
+   <LI> The <I>name</I> parameter is the name of the attribute to create.
+<P>
+   <LI> The <I>type_id</I> parameter is the identifier of the 
+        attribute's datatype.
+<P>
+   <LI> The <I>space_id</I> parameter is the identifier of the attribute's 
+        dataspace.
+<P>
+   <LI> The <I>creation_prp</I> parameter is the creation property list
+        identifier.
+        <code>H5P_DEFAULT</code> in C (<code>H5P_DEFAULT_F</code> in FORTRAN)
+        specifies the default creation property list.
+        This parameter is optional in FORTRAN; when it is omitted, 
+        the default creation property list is used.
+<P>
+   <LI> In FORTRAN, the return code for this call is returned in <I>hdferr</I>:
+        0 if successful, -1 if not.  The attribute identifier is returned
+        in <I>attr_id</I>.  In C, the function returns the 
+        attribute identifier if successful and a negative value if not.
+        
+        
 </UL>
 <P>
-<LI> H5Awrite writes the entire attribute, and returns the status of the write.
+<LI><code>H5Awrite</code>/<code>h5awrite_f</code> writes the entire attribute,
+    and returns the status of the write.
+<P>
+<I>C</I>:
 <PRE>
   herr_t H5Awrite (hid_t attr_id, hid_t mem_type_id, void *buf) 
 </PRE>
+<I>FORTRAN</I>:
+<PRE>
+  h5awrite_f (attr_id, mem_type_id, buf, hdferr)   
+
+            attr_id     INTEGER(HID_T)
+            memtype_id  INTEGER(HID_T)
+            buf         TYPE(VOID)
+            hdferr      INTEGER
+                        (Possible values: 0 on success and -1 on failure)
+
+</PRE>   
 <UL>
-   <LI> The first parameter is the identifier of the attribute to write.
-
-   <LI> The second parameter is the identifier of the attribute's memory datatype.
-
-   <LI> The last parameter is the data buffer.
+   <LI> The <I>attr_id</I> parameter is the identifier of the attribute 
+        to write.
+<P>
+   <LI> The <I>mem_type_id</I> parameter is the identifier of the 
+        attribute's memory datatype.
+<P>
+   <LI> The <I>buf</I> parameter is the data buffer to write out.
+<P>
+   <LI>In C, this function returns a non-negative value if successful and
+   a negative value, otherwise.  In FORTRAN, the return value is in the
+   <I>hdferr</I> parameter: 0 if successful, -1 otherwise.
 </UL>
 <P>
-<LI> When an attribute is no longer accessed by a program, H5Aclose must be called
-   to release the attribute from use. This call is mandatory.
-<PRE>
+<LI> When an attribute is no longer accessed by a program, 
+     <code>H5Aclose</code>/<code>h5aclose_f</code> must be called
+     to release the attribute from use. 
+     The C routine returns a non-negative value if successful;
+     otherwise it returns a negative value.  
+     In FORTRAN, the return value is in the <I>hdferr</I> parameter: 
+     0 if successful, -1 otherwise.
+<P>
+<I>C</I>: 
+<pre>
   herr_t H5Aclose (hid_t attr_id) 
-</PRE>
+</pre>
+
+<I>FORTRAN</I>: 
+<pre>
+  h5aclose_f (attr_id, hdferr)
+
+            attr_id  INTEGER(HID_T)
+            hdferr   INTEGER
+                     (Possible values: 0 on success and -1 on failure)
+
+</pre>
+  <ul>
+  <li> An <code>H5Aclose</code>/<code>h5aclose_f</code> call is mandatory.
+  </ul>
 </UL>
 
 
@@ -197,35 +249,61 @@ main() {
 <A NAME="fc">
 <H3><U>File Contents</U></H3>
 <P>
-The contents of 'dset.h5' and the attribute definition are given in the
-following:
+The contents of <code>dset.h5</code> (<code>dsetf.h5</code> for FORTRAN) and the 
+attribute definition are shown below:
 <P>
-<B>Fig. 7.1</B> &nbsp;  <I>'dset.h5' in DDL</I>
+<B>Fig. 7.1a</B> &nbsp;  <I><code>dset.h5</code> in DDL</I>
 
 <PRE>
-
-     HDF5 "dset.h5" {
-      GROUP "/" {
-         DATASET "dset" {
-            DATATYPE { H5T_STD_I32BE }
-            DATASPACE { SIMPLE ( 4, 6 ) / ( 4, 6 ) }
-            DATA {
-               1, 2, 3, 4, 5, 6,
-               7, 8, 9, 10, 11, 12,
-               13, 14, 15, 16, 17, 18,
-               19, 20, 21, 22, 23, 24
-            }
-            ATTRIBUTE "attr" {
-               DATATYPE { H5T_STD_I32BE }
-               DATASPACE { SIMPLE ( 2 ) / ( 2 ) }
-               DATA {
-                  100, 200
-               }
-            }
+HDF5 "dset.h5" {
+GROUP "/" {
+   DATASET "dset" {
+      DATATYPE { H5T_STD_I32BE }
+      DATASPACE { SIMPLE ( 4, 6 ) / ( 4, 6 ) }
+      DATA {
+         1, 2, 3, 4, 5, 6,
+         7, 8, 9, 10, 11, 12,
+         13, 14, 15, 16, 17, 18,
+         19, 20, 21, 22, 23, 24
+      }
+      ATTRIBUTE "attr" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 2 ) / ( 2 ) }
+         DATA {
+            100, 200
          }
       }
-      }
+   }
+}
+}
 </PRE>
+<B>Fig. 7.1b</B> &nbsp;  <I><code>dsetf.h5</code> in DDL</I>
+<PRE>
+HDF5 "dsetf.h5" {
+GROUP "/" {
+   DATASET "dset" {
+      DATATYPE { H5T_STD_I32BE }
+      DATASPACE { SIMPLE ( 6, 4 ) / ( 6, 4 ) }
+      DATA {
+         1, 7, 13, 19,
+         2, 8, 14, 20,
+         3, 9, 15, 21,
+         4, 10, 16, 22,
+         5, 11, 17, 23,
+         6, 12, 18, 24
+      }
+      ATTRIBUTE "attr" {
+         DATATYPE { H5T_STD_I32BE }
+         DATASPACE { SIMPLE ( 2 ) / ( 2 ) }
+         DATA {
+            100, 200
+         }
+      }
+   }
+}
+}
+</PRE>
+
 
 
 <A NAME="ddl">
@@ -254,7 +332,7 @@ following:
 <!-- <A HREF="helpdesk.mail.html"> -->
 <A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
 hdfhelp@ncsa.uiuc.edu</A>
-<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<BR> <H6>Last Modified: April 5, 2000</H6><BR>
 <!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
 </FONT>
 <BR>
