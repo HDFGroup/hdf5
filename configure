@@ -4091,6 +4091,7 @@ echo "configure:4091: checking for parallel support" >&5;
 
 
 
+
 if test "mpicc" = "$CC_BASENAME" -a "X-" = "X-$PARALLEL"; then
     PARALLEL=mpio
 fi
@@ -4113,23 +4114,27 @@ case "X-$PARALLEL" in
 #define HAVE_PARALLEL 1
 EOF
 
-        echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:4118: checking for main in -lmpi" >&5
-ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
+        echo $ac_n "checking for MPI_Init in -lmpi""... $ac_c" 1>&6
+echo "configure:4119: checking for MPI_Init in -lmpi" >&5
+ac_lib_var=`echo mpi'_'MPI_Init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4126 "configure"
+#line 4127 "configure"
 #include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char MPI_Init();
 
 int main() {
-main()
+MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:4133: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4138: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4155,23 +4160,28 @@ EOF
 else
   echo "$ac_t""no" 1>&6
 fi
-          echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:4160: checking for main in -lmpio" >&5
-ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
+
+        echo $ac_n "checking for MPI_File_open in -lmpio""... $ac_c" 1>&6
+echo "configure:4166: checking for MPI_File_open in -lmpio" >&5
+ac_lib_var=`echo mpio'_'MPI_File_open | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4168 "configure"
+#line 4174 "configure"
 #include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char MPI_File_open();
 
 int main() {
-main()
+MPI_File_open()
 ; return 0; }
 EOF
-if { (eval echo configure:4175: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4185: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4197,13 +4207,19 @@ EOF
 else
   echo "$ac_t""no" 1>&6
 fi
- 	if test "X-" = "X-$RUNSERIAL" -o "X-none" = "X-$RUNSERIAL"; then
+
+	if test "X-" = "X-$RUNSERIAL" -o "X-none" = "X-$RUNSERIAL"; then
 	    RUNSERIAL=
 	fi
 	if test "X-" = "X-$RUNPARALLEL"; then
 	    RUNPARALLEL="mpirun -np 2"
 	elif test "X-none" = "X-$RUNPARALLEL"; then
 	    RUNPARALLEL=
+	fi
+	if test "X-" = "X-$TESTPARALLEL"; then
+	    TESTPARALLEL="testpar"
+	elif test "X-none" = "X-$TESTPARALLEL"; then
+	    TESTPARALLEL=
 	fi
         ;;
 
@@ -4389,6 +4405,7 @@ s%@H5TOH4@%$H5TOH4%g
 s%@TESTH5TOH4@%$TESTH5TOH4%g
 s%@RUNSERIAL@%$RUNSERIAL%g
 s%@RUNPARALLEL@%$RUNPARALLEL%g
+s%@TESTPARALLEL@%$TESTPARALLEL%g
 /@COMMENCE@/r $COMMENCE
 s%@COMMENCE@%%g
 /@CONCLUDE@/r $CONCLUDE

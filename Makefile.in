@@ -11,7 +11,7 @@
 @COMMENCE@
 
 # Subdirectories in build-order
-SUBDIRS=src test tools
+SUBDIRS=src test tools @TESTPARALLEL@
 
 ##############################################################################
 #			    T A R G E T S

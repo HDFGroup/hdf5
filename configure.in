@@ -488,6 +488,7 @@ AC_ARG_ENABLE(parallel,
 AC_MSG_CHECKING(for parallel support);
 AC_SUBST(RUNSERIAL)
 AC_SUBST(RUNPARALLEL)
+AC_SUBST(TESTPARALLEL)
 
 if test "mpicc" = "$CC_BASENAME" -a "X-" = "X-$PARALLEL"; then
     PARALLEL=mpio
@@ -508,8 +509,8 @@ case "X-$PARALLEL" in
         # list also so we don't have to ifdef out the whole file.
         AC_MSG_RESULT(mpio)
         AC_DEFINE(HAVE_PARALLEL)
-        AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
-        AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
+        AC_CHECK_LIB(mpi,MPI_Init)
+        AC_CHECK_LIB(mpio,MPI_File_open)
 	if test "X-" = "X-$RUNSERIAL" -o "X-none" = "X-$RUNSERIAL"; then
 	    RUNSERIAL=
 	fi
@@ -517,6 +518,11 @@ case "X-$PARALLEL" in
 	    RUNPARALLEL="mpirun -np 2"
 	elif test "X-none" = "X-$RUNPARALLEL"; then
 	    RUNPARALLEL=
+	fi
+	if test "X-" = "X-$TESTPARALLEL"; then
+	    TESTPARALLEL="testpar"
+	elif test "X-none" = "X-$TESTPARALLEL"; then
+	    TESTPARALLEL=
 	fi
         ;;
 
