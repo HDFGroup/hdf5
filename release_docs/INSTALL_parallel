@@ -6,8 +6,8 @@
 -----------
 
 This file contains instructions for the installation of parallel
-HDF5. Platforms supported by this release are SGI Origin 2000, IBM SP2,
-Intel TFLOPs, and Linux version 2.4 and greater. The steps are kind of
+HDF5.  Platforms supported by this release are SGI Origin 2000, IBM SP2,
+Intel TFLOPs, and Linux version 2.2 and greater. The steps are kind of
 unnatural and will be more automized in the next release. If you have
 difficulties installing the software in your system, please send mail to
 
@@ -29,6 +29,20 @@ The following shows particular steps to run the parallel HDF5
 configure for a few machines we've tested. If your particular platform
 is not shown or somehow the steps do not work for yours, please go
 to the next section for more detailed explanations.
+
+------
+Know parallel compilers
+------
+
+HDF5 knows serveral parallel compilers: mpicc, hcc, mpcc, mpcc_r.
+To build parallel HDF5 with one of the above, just set CC as it
+and configure.  The "--enable-parallel" is optional in this case.
+
+    $ CC=/usr/local/mpi/bin/mpicc ./configure --prefix=<install-directory>
+    $ make
+    $ make check
+    $ make install
+
 
 ------
 TFLOPS
@@ -68,7 +82,7 @@ Then do the following steps:
 ---------------
 SGI Origin 2000
 Cray T3E
-(where MPI-IO is part of system MPI library such as mpt 1.3)
+(where MPI-IO is part of system MPI library such as the mpt module)
 ---------------
 
 #!/bin/sh
@@ -97,6 +111,9 @@ Search for a string that looks like the following:
 Replace it with something that knows how to find the right libmpi.a.
 E.g.,
     LD="/opt/MIPSpro/MIPSpro_default/opt/MIPSpro/bin/cc -n32"
+
+Or you can pre-empt it by setting LD at configure time
+    $ LD="cc" ./configure --enable-parallel ...
 
 
 ---------------
@@ -156,10 +173,11 @@ Follow the instructions in section 3.
 The HDF5 library can be configured to use MPI and MPI-IO for parallelism
 on a distributed multi-processor system. The easiest way to do this is to
 have a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's
-mpcc) and supply that executable as the value of the CC environment
-variable:
+mpcc_r) and supply that executable as the value of the CC environment
+variable.  For examples,
 
-    $ CC=mpcc ./configure
+    $ CC=mpcc_r ./configure
+    
     $ CC=/usr/local/mpi/bin/mpicc ./configure
 
 If no such wrapper script is available then you must specify your normal

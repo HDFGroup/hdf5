@@ -227,10 +227,11 @@
 
 	    $ CC=cc ./configure
 
-	A parallel version of hdf5 can be built by specifying `mpicc' as the
-	C compiler (the `--enable-parallel' flag documented below is
-	optional). Using the `mpicc' compiler will insure that the correct
-	MPI and MPI-IO header files and libraries are used.
+	A parallel version of hdf5 can be built by specifying `mpicc'
+	as the C compiler (the `--enable-parallel' flag documented
+	below is optional in this case).  Using the `mpicc' compiler
+	will insure that the correct MPI and MPI-IO header files and
+	libraries are used.
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
