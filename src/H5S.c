@@ -28,7 +28,6 @@ static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
-static herr_t H5S_release_simple(H5S_simple_t *simple);
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
@@ -301,8 +300,10 @@ H5S_create(H5S_class_t type)
     FUNC_ENTER_NOAPI(H5S_create, NULL);
 
     /* Create a new data space */
-    if((ret_value = H5FL_CALLOC(H5S_t))!=NULL) {
+    if((ret_value = H5FL_MALLOC(H5S_t))!=NULL) {
         ret_value->extent.type = type;
+        ret_value->extent.rank = 0;
+        ret_value->extent.size = ret_value->extent.max = NULL;
 
         switch(type) {
             case H5S_SCALAR:
@@ -316,8 +317,12 @@ H5S_create(H5S_class_t type)
                 break;
         } /* end switch */
 
+        /* Start with "all" selection */
         if(H5S_select_all(ret_value,0)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+
+        /* Reset common selection info pointer */
+        ret_value->select.sel_info.hslab=NULL;
     } /* end if */
 
 done:
@@ -396,28 +401,13 @@ H5S_extent_release(H5S_extent_t *extent)
 
     assert(extent);
 
-    /* release extent */
-    switch (extent->type) {
-        case H5S_NO_CLASS:
-            /*nothing needed */
-            break;
-
-        case H5S_SCALAR:
-            /*nothing needed */
-            break;
-
-        case H5S_SIMPLE:
-            ret_value=H5S_release_simple(&(extent->u.simple));
-            break;
-
-        case H5S_COMPLEX:
-            /* nothing yet */
-            break;
-
-        default:
-            assert("unknown dataspace (extent) type" && 0);
-            break;
-    }
+    /* Release extent */
+    if(extent->type==H5S_SIMPLE) {
+        if(extent->size)
+            H5FL_ARR_FREE(hsize_t,extent->size);
+        if(extent->max)
+            H5FL_ARR_FREE(hsize_t,extent->max);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -495,41 +485,6 @@ H5Sclose(hid_t space_id)
 
 done:
     FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_release_simple
- *
- * Purpose:	Releases all memory associated with a simple data space.
- *          (but doesn't free the simple space itself)
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, April  17, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5S_release_simple(H5S_simple_t *simple)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_release_simple);
-
-    assert(simple);
-
-    if(simple->size)
-        H5FL_ARR_FREE(hsize_t,simple->size);
-    if(simple->max)
-        H5FL_ARR_FREE(hsize_t,simple->max);
-#ifdef LATER
-    if(simple->perm)
-        H5FL_ARR_FREE(hsize_t,simple->perm);
-#endif /* LATER */
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -645,29 +600,29 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     /* Copy the regular fields */
     dst->type=src->type;
     dst->nelem=src->nelem;
-    dst->u.simple.rank=src->u.simple.rank;
+    dst->rank=src->rank;
 
     switch (src->type) {
         case H5S_SCALAR:
-            dst->u.simple.size=NULL;
-            dst->u.simple.max=NULL;
+            dst->size=NULL;
+            dst->max=NULL;
             break;
 
         case H5S_SIMPLE:
-            if (src->u.simple.size) {
-                dst->u.simple.size = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank);
-                for (u = 0; u < src->u.simple.rank; u++)
-                    dst->u.simple.size[u] = src->u.simple.size[u];
+            if (src->size) {
+                dst->size = H5FL_ARR_MALLOC(hsize_t,src->rank);
+                for (u = 0; u < src->rank; u++)
+                    dst->size[u] = src->size[u];
             }
             else
-                dst->u.simple.size=NULL;
-            if (src->u.simple.max) {
-                dst->u.simple.max = H5FL_ARR_MALLOC(hsize_t,src->u.simple.rank);
-                for (u = 0; u < src->u.simple.rank; u++)
-                    dst->u.simple.max[u] = src->u.simple.max[u];
+                dst->size=NULL;
+            if (src->max) {
+                dst->max = H5FL_ARR_MALLOC(hsize_t,src->rank);
+                for (u = 0; u < src->rank; u++)
+                    dst->max[u] = src->max[u];
             }
             else
-                dst->u.simple.max=NULL;
+                dst->max=NULL;
             break;
 
         case H5S_COMPLEX:
@@ -715,11 +670,6 @@ H5S_copy(const H5S_t *src, hbool_t share_selection)
 
     if (NULL==(dst = H5FL_MALLOC(H5S_t)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
-#ifdef LATER
-    /* Copy the field in the struct */
-    *dst = *src;
-#endif /* LATER */
 
     /* Copy the source dataspace's extent */
     if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
@@ -851,19 +801,19 @@ H5S_get_npoints_max(const H5S_t *ds)
             break;
 
         case H5S_SIMPLE:
-            if (ds->extent.u.simple.max) {
-                for (ret_value=1, u=0; u<ds->extent.u.simple.rank; u++) {
-                    if (H5S_UNLIMITED==ds->extent.u.simple.max[u]) {
+            if (ds->extent.max) {
+                for (ret_value=1, u=0; u<ds->extent.rank; u++) {
+                    if (H5S_UNLIMITED==ds->extent.max[u]) {
                         ret_value = HSIZET_MAX;
                         break;
                     }
                     else
-                        ret_value *= ds->extent.u.simple.max[u];
+                        ret_value *= ds->extent.max[u];
                 }
             }
             else {
-                for (ret_value=1, u=0; u<ds->extent.u.simple.rank; u++)
-                    ret_value *= ds->extent.u.simple.size[u];
+                for (ret_value=1, u=0; u<ds->extent.rank; u++)
+                    ret_value *= ds->extent.size[u];
             }
             break;
 
@@ -950,7 +900,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            ret_value = ds->extent.u.simple.rank;
+            ret_value = ds->extent.rank;
             break;
 
         case H5S_COMPLEX:
@@ -1043,15 +993,15 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
             break;
 
         case H5S_SIMPLE:
-            ret_value = ds->extent.u.simple.rank;
+            ret_value = ds->extent.rank;
             for (i=0; i<ret_value; i++) {
                 if (dims)
-                    dims[i] = ds->extent.u.simple.size[i];
+                    dims[i] = ds->extent.size[i];
                 if (max_dims) {
-                    if (ds->extent.u.simple.max)
-                        max_dims[i] = ds->extent.u.simple.max[i];
+                    if (ds->extent.max)
+                        max_dims[i] = ds->extent.max[i];
                     else
-                        max_dims[i] = ds->extent.u.simple.size[i];
+                        max_dims[i] = ds->extent.size[i];
                 }
             }
             break;
@@ -1378,27 +1328,28 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     if (rank == 0) {		/* scalar variable */
         space->extent.type = H5S_SCALAR;
         space->extent.nelem = 1;
-        space->extent.u.simple.rank = 0;	/* set to scalar rank */
+        space->extent.rank = 0;	/* set to scalar rank */
     } else {
         hsize_t nelem;  /* Number of elements in extent */
         unsigned u;     /* Local index variable */
 
         space->extent.type = H5S_SIMPLE;
 
-        /* Set the rank and copy the dims */
-        space->extent.u.simple.rank = rank;
-        space->extent.u.simple.size = H5FL_ARR_MALLOC(hsize_t,rank);
-        HDmemcpy(space->extent.u.simple.size, dims, sizeof(hsize_t) * rank);
+        /* Set the rank and allocate space for the dims */
+        space->extent.rank = rank;
+        space->extent.size = H5FL_ARR_MALLOC(hsize_t,rank);
 
-        /* Compute the number of elements in the extent */
-        for(u=0, nelem=1; u<space->extent.u.simple.rank; u++)
-            nelem*=space->extent.u.simple.size[u];
+        /* Copy the dimensions & compute the number of elements in the extent */
+        for(u=0, nelem=1; u<space->extent.rank; u++) {
+            space->extent.size[u]=dims[u];
+            nelem*=dims[u];
+        } /* end for */
         space->extent.nelem = nelem;
 
         /* Copy the maximum dimensions if specified */
         if(max!=NULL) {
-            space->extent.u.simple.max = H5FL_ARR_MALLOC(hsize_t,rank);
-            HDmemcpy(space->extent.u.simple.max, max, sizeof(hsize_t) * rank);
+            space->extent.max = H5FL_ARR_MALLOC(hsize_t,rank);
+            HDmemcpy(space->extent.max, max, sizeof(hsize_t) * rank);
         } /* end if */
     }
 
@@ -1608,11 +1559,11 @@ H5S_extend (H5S_t *space, const hsize_t *size)
     assert (size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for (u=0; u<space->extent.u.simple.rank; u++) {
-        if (space->extent.u.simple.size[u]<size[u]) {
-            if (space->extent.u.simple.max &&
-                    H5S_UNLIMITED!=space->extent.u.simple.max[u] &&
-                    space->extent.u.simple.max[u]<size[u])
+    for (u=0; u<space->extent.rank; u++) {
+        if (space->extent.size[u]<size[u]) {
+            if (space->extent.max &&
+                    H5S_UNLIMITED!=space->extent.max[u] &&
+                    space->extent.max[u]<size[u])
                 HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased");
             ret_value++;
         }
@@ -1623,11 +1574,11 @@ H5S_extend (H5S_t *space, const hsize_t *size)
         hsize_t nelem;  /* Number of elements in extent */
 
         /* Change the dataspace size & re-compute the number of elements in the extent */
-        for (u=0, nelem=1; u<space->extent.u.simple.rank; u++) {
-            if (space->extent.u.simple.size[u]<size[u])
-                space->extent.u.simple.size[u] = size[u];
+        for (u=0, nelem=1; u<space->extent.rank; u++) {
+            if (space->extent.size[u]<size[u])
+                space->extent.size[u] = size[u];
 
-            nelem*=space->extent.u.simple.size[u];
+            nelem*=space->extent.size[u];
         }
         space->extent.nelem = nelem;
 
@@ -1900,7 +1851,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (space->extent.u.simple.rank==0 || H5S_GET_EXTENT_TYPE(space)==H5S_SCALAR)
+    if (space->extent.rank==0 || H5S_GET_EXTENT_TYPE(space)==H5S_SCALAR)
         HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar dataspace");
     if (offset == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
@@ -1942,10 +1893,9 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     assert( size);
 
     /* Verify that the dimensions being changed are allowed to change */
-    for ( u = 0; u < space->extent.u.simple.rank; u++ ) {
-        if ( space->extent.u.simple.max &&
-                 H5S_UNLIMITED != space->extent.u.simple.max[u] &&
-                 space->extent.u.simple.max[u]!=size[u] )
+    for ( u = 0; u < space->extent.rank; u++ ) {
+        if ( space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                 space->extent.max[u]!=size[u] )
              HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
         ret_value++;
     } /* end for */
@@ -1988,9 +1938,9 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
     assert(size);
 
     /* Change the dataspace size & re-compute the number of elements in the extent */
-    for (u=0, nelem=1; u < space->extent.u.simple.rank; u++ ) {
-        space->extent.u.simple.size[u] = size[u];
-        nelem*=space->extent.u.simple.size[u];
+    for (u=0, nelem=1; u < space->extent.rank; u++ ) {
+        space->extent.size[u] = size[u];
+        nelem*=space->extent.size[u];
     } /* end for */
     space->extent.nelem = nelem;
 

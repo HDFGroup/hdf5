@@ -407,11 +407,11 @@ H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hssize_t *
         if((new_node = H5FL_MALLOC(H5S_pnt_node_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
 
-        if((new_node->pnt = H5MM_malloc(space->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+        if((new_node->pnt = H5MM_malloc(space->extent.rank*sizeof(hssize_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
 
         /* Copy over the coordinates */
-        HDmemcpy(new_node->pnt,coord+(i*space->extent.u.simple.rank),(space->extent.u.simple.rank*sizeof(hssize_t)));
+        HDmemcpy(new_node->pnt,coord+(i*space->extent.rank),(space->extent.rank*sizeof(hssize_t)));
 
         /* Link into list */
         new_node->next=NULL;
@@ -612,9 +612,9 @@ H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
         /* Create each point */
         if((new_node=H5FL_MALLOC(H5S_pnt_node_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate point node");
-        if((new_node->pnt = H5MM_malloc(src->extent.u.simple.rank*sizeof(hssize_t)))==NULL)
+        if((new_node->pnt = H5MM_malloc(src->extent.rank*sizeof(hssize_t)))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate coordinate information");
-        HDmemcpy(new_node->pnt,curr->pnt,(src->extent.u.simple.rank*sizeof(hssize_t)));
+        HDmemcpy(new_node->pnt,curr->pnt,(src->extent.rank*sizeof(hssize_t)));
         new_node->next=NULL;
 
         /* Keep the order the same when copying */
@@ -668,10 +668,10 @@ H5S_point_is_valid (const H5S_t *space)
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
         /* Check each dimension */
-        for(u=0; u<space->extent.u.simple.rank; u++) {
+        for(u=0; u<space->extent.rank; u++) {
             /* Check if an offset has been defined */
             /* Bounds check the selected point + offset against the extent */
-            if(((curr->pnt[u]+space->select.offset[u])>(hssize_t)space->extent.u.simple.size[u])
+            if(((curr->pnt[u]+space->select.offset[u])>(hssize_t)space->extent.size[u])
                     || ((curr->pnt[u]+space->select.offset[u])<0)) {
                 ret_value=FALSE;
                 break;
@@ -764,7 +764,7 @@ H5S_point_serial_size (const H5S_t *space)
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
         /* Add 4 bytes times the rank for each element selected */
-        ret_value+=4*space->extent.u.simple.rank;
+        ret_value+=4*space->extent.rank;
         curr=curr->next;
     } /* end while */
 
@@ -813,7 +813,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     buf+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(buf, (uint32_t)space->extent.u.simple.rank);
+    UINT32ENCODE(buf, (uint32_t)space->extent.rank);
     len+=4;
 
     /* Encode number of elements */
@@ -824,10 +824,10 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
         /* Add 4 bytes times the rank for each element selected */
-        len+=4*space->extent.u.simple.rank;
+        len+=4*space->extent.rank;
 
         /* Encode each point */
-        for(u=0; u<space->extent.u.simple.rank; u++)
+        for(u=0; u<space->extent.rank; u++)
             UINT32ENCODE(buf, (uint32_t)curr->pnt[u]);
 
         curr=curr->next;
@@ -879,7 +879,7 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
     /* Deserialize points to select */
     buf+=16;    /* Skip over selection header */
     UINT32DECODE(buf,rank);  /* decode the rank of the point selection */
-    if(rank!=space->extent.u.simple.rank)
+    if(rank!=space->extent.rank)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of pointer does not match dataspace");
     UINT32DECODE(buf,num_elem);  /* decode the number of points */
 
@@ -946,7 +946,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
     assert(buf);
 
     /* Get the dataspace extent rank */
-    rank=space->extent.u.simple.rank;
+    rank=space->extent.rank;
 
     /* Get the head of the point list */
     node=space->select.sel_info.pnt_lst->head;
@@ -1063,7 +1063,7 @@ H5S_point_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
     assert(end);
 
     /* Get the dataspace extent rank */
-    rank=space->extent.u.simple.rank;
+    rank=space->extent.rank;
 
     /* Set the start and end arrays up */
     for(i=0; i<rank; i++) {

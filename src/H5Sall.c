@@ -623,12 +623,12 @@ H5S_all_bounds(const H5S_t *space, hssize_t *start, hssize_t *end)
     assert(end);
 
     /* Get the dataspace extent rank */
-    rank=space->extent.u.simple.rank;
+    rank=space->extent.rank;
 
     /* Just copy over the complete extent */
     for(i=0; i<rank; i++) {
         start[i]=0;
-        H5_ASSIGN_OVERFLOW(end[i],space->extent.u.simple.size[i]-1,hsize_t,hssize_t);
+        H5_ASSIGN_OVERFLOW(end[i],space->extent.size[i]-1,hsize_t,hssize_t);
     } /* end for */
 
 done:

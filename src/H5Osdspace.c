@@ -115,45 +115,37 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in data space message");
 
         /* Get rank */
-        sdim->u.simple.rank = *p++;
-        if (sdim->u.simple.rank>H5S_MAX_RANK)
+        sdim->rank = *p++;
+        if (sdim->rank>H5S_MAX_RANK)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "simple data space dimensionality is too large");
 
         /* Get dataspace flags for later */
         flags = *p++;
 
         /* Set the dataspace type to be simple or scalar as appropriate */
-        if(sdim->u.simple.rank>0)
+        if(sdim->rank>0)
             sdim->type = H5S_SIMPLE;
         else
             sdim->type = H5S_SCALAR;
 
         p += 5; /*reserved*/
 
-        if (sdim->u.simple.rank > 0) {
-            if (NULL==(sdim->u.simple.size=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
+        if (sdim->rank > 0) {
+            if (NULL==(sdim->size=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            for (i = 0; i < sdim->u.simple.rank; i++)
-                H5F_DECODE_LENGTH (f, p, sdim->u.simple.size[i]);
+            for (i = 0; i < sdim->rank; i++)
+                H5F_DECODE_LENGTH (f, p, sdim->size[i]);
             if (flags & H5S_VALID_MAX) {
-                if (NULL==(sdim->u.simple.max=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
+                if (NULL==(sdim->max=H5FL_ARR_MALLOC(hsize_t,sdim->rank)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                for (i = 0; i < sdim->u.simple.rank; i++)
-                    H5F_DECODE_LENGTH (f, p, sdim->u.simple.max[i]);
+                for (i = 0; i < sdim->rank; i++)
+                    H5F_DECODE_LENGTH (f, p, sdim->max[i]);
             }
-#ifdef LATER
-            if (flags & H5S_VALID_PERM) {
-                if (NULL==(sdim->u.simple.perm=H5FL_ARR_MALLOC(hsize_t,sdim->u.simple.rank)))
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-                for (i = 0; i < sdim->u.simple.rank; i++)
-                    H5F_DECODE_LENGTH (f, p, sdim->u.simple.perm[i]);
-            }
-#endif /* LATER */
         }
 
         /* Compute the number of elements in the extent */
-        for(i=0, sdim->nelem=1; i<sdim->u.simple.rank; i++)
-            sdim->nelem*=sdim->u.simple.size[i];
+        for(i=0, sdim->nelem=1; i<sdim->rank; i++)
+            sdim->nelem*=sdim->size[i];
     }
 
     /* Set return value */
@@ -210,16 +202,12 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     assert(sdim);
 
     /* set flags */
-    if (sdim->u.simple.max)
+    if (sdim->max)
         flags |= H5S_VALID_MAX;
-#ifdef LATER
-    if (sdim->u.simple.perm)
-        flags |= H5S_VALID_PERM;
-#endif
 
     /* encode */
     *p++ = H5O_SDSPACE_VERSION;
-    *p++ = sdim->u.simple.rank;
+    *p++ = sdim->rank;
     *p++ = flags;
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
@@ -227,19 +215,13 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
 
-    if (sdim->u.simple.rank > 0) {
-        for (u = 0; u < sdim->u.simple.rank; u++)
-            H5F_ENCODE_LENGTH (f, p, sdim->u.simple.size[u]);
+    if (sdim->rank > 0) {
+        for (u = 0; u < sdim->rank; u++)
+            H5F_ENCODE_LENGTH (f, p, sdim->size[u]);
         if (flags & H5S_VALID_MAX) {
-            for (u = 0; u < sdim->u.simple.rank; u++) 
-                H5F_ENCODE_LENGTH (f, p, sdim->u.simple.max[u]);
+            for (u = 0; u < sdim->rank; u++) 
+                H5F_ENCODE_LENGTH (f, p, sdim->max[u]);
         }
-#ifdef LATER
-        if (flags & H5S_VALID_PERM) {
-            for (u = 0; u < sdim->u.simple.rank; u++)
-                H5F_ENCODE_LENGTH (f, p, sdim->u.simple.perm[u]);
-        }
-#endif
     }
 
 done:
@@ -322,15 +304,10 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     FUNC_ENTER_NOAPI(H5O_sdspace_size, 0);
 
     /* add in the dimension sizes */
-    ret_value += space->u.simple.rank * H5F_SIZEOF_SIZE (f);
+    ret_value += space->rank * H5F_SIZEOF_SIZE (f);
 
     /* add in the space for the maximum dimensions, if they are present */
-    ret_value += space->u.simple.max ? space->u.simple.rank * H5F_SIZEOF_SIZE (f) : 0;
-
-#ifdef LATER
-    /* add in the space for the dimension permutations, if they are present */
-    ret_value += space->u.simple.perm ? space->u.simple.rank * 4 : 0;
-#endif
+    ret_value += space->max ? space->rank * H5F_SIZEOF_SIZE (f) : 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -434,38 +411,28 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Rank:",
-	    (unsigned long) (sdim->u.simple.rank));
+	    (unsigned long) (sdim->rank));
     
-    if(sdim->u.simple.rank>0) {
+    if(sdim->rank>0) {
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-        for (u = 0; u < sdim->u.simple.rank; u++)
-            HDfprintf (stream, "%s%Hu", u?", ":"", sdim->u.simple.size[u]);
+        for (u = 0; u < sdim->rank; u++)
+            HDfprintf (stream, "%s%Hu", u?", ":"", sdim->size[u]);
         HDfprintf (stream, "}\n");
         
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
-        if (sdim->u.simple.max) {
+        if (sdim->max) {
             HDfprintf (stream, "{");
-            for (u = 0; u < sdim->u.simple.rank; u++) {
-                if (H5S_UNLIMITED==sdim->u.simple.max[u]) {
+            for (u = 0; u < sdim->rank; u++) {
+                if (H5S_UNLIMITED==sdim->max[u]) {
                     HDfprintf (stream, "%sINF", u?", ":"");
                 } else {
-                    HDfprintf (stream, "%s%Hu", u?", ":"", sdim->u.simple.max[u]);
+                    HDfprintf (stream, "%s%Hu", u?", ":"", sdim->max[u]);
                 }
             }
             HDfprintf (stream, "}\n");
         } else {
             HDfprintf (stream, "CONSTANT\n");
         }
-
-#ifdef LATER
-        if (sdim->u.simple.perm) {
-            HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Perm:");
-            for (u = 0; u < sdim->u.simple.rank; u++) {
-                HDfprintf (stream, "%s%lu", u?", ":"",
-                     (unsigned long) (sdim->u.simple.perm[u]));
-            }
-        }
-#endif
     } /* end if */
 
 done:
