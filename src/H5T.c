@@ -1356,8 +1356,8 @@ H5Tcreate(H5T_class_t type, size_t size)
     FUNC_ENTER_API(H5Tcreate, FAIL);
     H5TRACE2("i","Ttz",type,size);
 
-    /* check args */
-    if (size == 0)
+    /* check args. We start to support size adjustment for compound type. */
+    if (size == 0 && type != H5T_COMPOUND)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
 
     /* create the type */
@@ -2629,8 +2629,6 @@ H5T_create(H5T_class_t type, size_t size)
 
     FUNC_ENTER_NOAPI(H5T_create, NULL);
 
-    assert(size != 0);
-
     switch (type) {
         case H5T_INTEGER:
         case H5T_FLOAT:
@@ -3378,7 +3376,6 @@ H5T_set_size(H5T_t *dt, size_t size)
     assert(size!=0);
     assert(H5T_REFERENCE!=dt->shared->type);
     assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
-    assert(!(H5T_COMPOUND==dt->shared->type && 0==dt->shared->u.compnd.nmembs));
 
     if (dt->shared->parent) {
         if (H5T_set_size(dt->shared->parent, size)<0)
@@ -3415,8 +3412,33 @@ H5T_set_size(H5T_t *dt, size_t size)
                 break;
 
             case H5T_COMPOUND:
-                if(size<dt->shared->size)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "can't shrink compound datatype");
+                /* If decreasing size, check the last member isn't being cut. */
+                if(size<dt->shared->size) {
+                    int         num_membs;
+                    unsigned    i, max_index=0;
+                    H5T_t       *memb_type;
+                    size_t      memb_offset, max_offset=0;
+                    size_t      max_size;
+
+                    if((num_membs = H5T_get_nmembers(dt))<0)    
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get number of members");
+
+                    for(i=0; i<num_membs; i++) {
+                        memb_offset = H5T_get_member_offset(dt, i);
+                        if(memb_offset > max_offset) {
+                            max_offset = memb_offset;
+                            max_index = i;
+                        }
+                    }
+                    
+                    if((memb_type = H5T_get_member_type(dt, max_index))==NULL)    
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get type of member");
+
+                    max_size = H5T_get_size(memb_type);
+
+                    if(size<(max_offset+max_size))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
+                }
                 break;
 
             case H5T_STRING:

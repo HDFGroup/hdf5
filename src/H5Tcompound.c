@@ -38,7 +38,6 @@ static herr_t H5T_init_compound_interface(void);
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Static local functions */
-static size_t H5T_get_member_offset(H5T_t *dt, int membno);
 static herr_t H5T_pack(H5T_t *dt);
 
 
@@ -128,7 +127,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+size_t
 H5T_get_member_offset(H5T_t *dt, int membno)
 {
     size_t	ret_value;

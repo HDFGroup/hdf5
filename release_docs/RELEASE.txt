@@ -39,6 +39,10 @@ New Features
 
     Library:
     --------
+        - Compound datatype has been enhanced with a new feature of size 
+            adjustment.  The size can be increased and decreased(without
+            cutting the last member).  No API change is involved.  SLU - 
+            2004/10/1
 
     Parallel Library:
     -----------------

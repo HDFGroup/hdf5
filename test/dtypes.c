@@ -2034,6 +2034,77 @@ test_compound_11(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_12
+ *
+ * Purpose:     Tests size adjustment of compound data types.  Start with 
+ *              no member and 0 size, increase the size as inserting 
+ *              members.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, September 29, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_12(void)
+{
+    complex_t               tmp;
+    hid_t                   complex_id;
+    size_t                  size = 0;
+    size_t                  offset, new_size;
+    herr_t ret;
+
+    TESTING("adjust size of compound data types");
+
+    /* Create the empty compound type */
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, 0))<0) goto error;
+
+    /* Add a couple fields and adjust the size */
+    offset = size;
+    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tinsert(complex_id, "real", offset,
+		  H5T_NATIVE_DOUBLE)<0) goto error;
+
+    offset = size;
+    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tinsert(complex_id, "imaginary", offset,
+		  H5T_NATIVE_DOUBLE)<0) goto error;
+
+    /* Increase and decrease the size. */
+    if((size+=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if (H5Tset_size(complex_id, size)<0) goto error;
+   
+    if((size-=H5Tget_size(H5T_NATIVE_DOUBLE))<0) goto error; 
+    if (H5Tset_size(complex_id, size)<0) goto error;
+
+    /* Verify the size */
+    if((new_size=H5Tget_size(complex_id))<0) goto error; 
+    if(new_size!=size) goto error;
+
+    /* Tries to cut last member.  Supposed to fail. */
+    size--;
+    H5E_BEGIN_TRY {
+        H5Tset_size(complex_id, size);
+    } H5E_END_TRY;  
+    
+    if (H5Tclose (complex_id)<0) goto error;
+    PASSED();
+    return 0;
+
+  error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_query
  *
  * Purpose:     Tests query functions of compound and enumeration types.
@@ -5216,6 +5287,7 @@ main(void)
     nerrors += test_compound_9();
     nerrors += test_compound_10();
     nerrors += test_compound_11();
+    nerrors += test_compound_12();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();

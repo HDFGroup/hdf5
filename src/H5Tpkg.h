@@ -877,5 +877,6 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
 
 /* Compound functions */
 H5_DLL htri_t H5T_is_packed(H5T_t *dt);
+H5_DLL size_t H5T_get_member_offset(H5T_t *dt, int membno);
 
 #endif
