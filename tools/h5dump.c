@@ -3,6 +3,7 @@
 #include "H5private.h"
 #include "h5tools.h"
 
+static int display_oid = 0;
 static int display_data = 1;
 static int status = 0;
 static int unamedtype = 0;  /* shared data type with no name */
@@ -33,7 +34,7 @@ void indentation(int);
 static void print_enum(hid_t type);
 
 extern int print_data(hid_t, hid_t, int);
-
+static void dump_oid(hid_t oid);
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -52,17 +53,20 @@ usage(void)
 fprintf(stderr, 
 "\nUsage of HDF5 Dumper:\n\n  \
 h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
-       [-l <names>] [-t <names>] <file>\n\n\
+       [-l <names>] [-t <names>] [-w <number>] <file>\n\n\
   -h            Print information on this command.\n\
   -bb           Display the conent of the boot block. The default is not to display.\n\
   -header       Display header only; no data is displayed.\n\
+  -v			Display the object ids\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
   -l <names>    Displays the value(s) of the specified soft link(s).\n\
   -t <names>    Display the specified named data type(s).\n\
+  -w <number>   Display the information with the specified maximum number of columns.\n\
   \n\
-  <names> is one or more appropriate object names.\n\n");
+  <names> is one or more appropriate object names.\n\
+  <number> is an integer greater than 1.\n\n");
 }
 
 
@@ -485,6 +489,9 @@ hid_t  attr_id, type, space;
         space = H5Aget_space(attr_id);
         dump_datatype(type);
         dump_dataspace(space);
+		if (display_oid){
+			dump_oid(attr_id);
+		}
         if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
@@ -587,10 +594,13 @@ H5G_stat_t statbuf;
         space = H5Aget_space(attr_id);
         dump_datatype(type);
         dump_dataspace(space);
+		if(display_oid){
+			dump_oid(attr_id);
+		}
         if (display_data) dump_data(attr_id, ATTRIBUTE_DATA);
         H5Tclose(type);
         H5Sclose(space);
-	H5Aclose (attr_id);
+		H5Aclose (attr_id);
         end_obj();
 
     } else {
@@ -813,7 +823,6 @@ size_t dims[H5DUMP_MAX_RANK];
     end_obj();
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    dump_group
  *
@@ -840,7 +849,7 @@ int i;
     indentation (indent);
     begin_obj(GROUPNAME, name);
     indent += COL;
-
+	dump_oid(gid);
     if (!strcmp(name,"/") && unamedtype) { /* dump unamed type in root group */
         for (i = 0; i < type_table.nobjs; i++)
              if (!type_table.objs[i].recorded) {
@@ -917,6 +926,9 @@ hid_t  type, space;
     space = H5Dget_space (did);
     dump_datatype(type);
     dump_dataspace(space);
+	if (display_oid){
+		dump_oid(did);
+	}
 
     if (display_data)
     switch (H5Tget_class(type)) {
@@ -1278,7 +1290,7 @@ main(int argc, char *argv[]) {
 hid_t fid, gid, dsetid, typeid;
 hid_t plist=H5P_DEFAULT;
 const char *fname = NULL;
-int i, index, curr_arg, display_bb=0, display_all=1;
+int i, index, curr_arg, display_bb=0, display_all=1, newwidth= 0;
 int nopts=0, *opts;
 char *buf, name[128], name1[128];
 H5G_stat_t statbuf;
@@ -1320,6 +1332,17 @@ H5Eset_auto (NULL, NULL);
 
                  display_data=0;
 
+			 else if (!strcmp(argv[curr_arg],"-v"))
+
+				 display_oid = 1;
+
+			 else if (!strcmp(argv[curr_arg],"-w")){
+				 /*
+				 this way we know which arg was the -w
+				 we know it won't be 0 since curr_arg starts at 1
+				 */
+				 newwidth = curr_arg;
+			 }
              else if (strcmp(argv[curr_arg],"-a") &&
                       strcmp(argv[curr_arg],"-d") &&
                       strcmp(argv[curr_arg],"-g") &&
@@ -1346,7 +1369,8 @@ H5Eset_auto (NULL, NULL);
         for (i = 0; i < nopts-1; i++) {
              if (opts[i+1]-opts[i] == 1) {
                 if (strcmp(argv[opts[i]], "-bb") &&
-                    strcmp(argv[opts[i]], "-header") ) {
+                    strcmp(argv[opts[i]], "-header") &&
+					strcmp(argv[opts[i]], "-v")) {
                     fprintf(stderr,"h5dump error: no <names> after option %s\n",
                             argv[opts[i]]);
                     usage();
@@ -1363,8 +1387,9 @@ H5Eset_auto (NULL, NULL);
         } 
         if (argc - opts[nopts-1] == 2) {
             if (strcmp(argv[opts[i]], "-bb") &&
-                strcmp(argv[opts[i]], "-header") ) {
-                fprintf (stderr, "h5dump error: no <file> or no <names> after option %s\n", argv[opts[i]]);
+                strcmp(argv[opts[i]], "-header") &&
+                strcmp(argv[opts[i]], "-v")) {
+                fprintf (stderr, "h5dump error: no <file> or no <names> or no <number> after option %s\n", argv[opts[i]]);
                 usage();
                 free(opts);
                 exit(1);
@@ -1407,8 +1432,13 @@ H5Eset_auto (NULL, NULL);
     /* start to dump */
     begin_obj("HDF5", fname);
 
+	
     if (display_bb) dump_bb();
- 
+	
+	if (newwidth) {
+		sscanf(argv[newwidth + 1], "%d", &nCols);
+	}
+
     if (display_all) {
 
         if ((gid = H5Gopen (fid, "/")) < 0 ) {
@@ -1573,7 +1603,7 @@ H5Eset_auto (NULL, NULL);
                          if (H5Tclose(typeid) < 0) status = 1;
                      }
                 }
-           }
+           } 
       }
 
     end_obj();
@@ -1685,5 +1715,25 @@ static void print_enum(hid_t type){
    /* return TRUE;*/
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    dump_oid
+ *
+ * Purpose:     Prints the object ids
+ *
+ * Return:      void
+ *
+ * Programmer:  Patrick Lu
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+static void 
+dump_oid(hid_t oid){	
+    indent += COL;
+    indentation (indent);
 
-
+    printf ("%s %s ", OBJECTID, BEGIN);
+	printf("%d", oid);
+    printf (" %s\n", END);  
+	indent -= COL;
+}
