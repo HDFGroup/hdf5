@@ -337,6 +337,52 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5G_ent_copy
+ *
+ * Purpose: Do a deep copy of symbol table entries
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: August 2002
+ *
+ * Comments: 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst )
+{
+
+	herr_t ret_value=SUCCEED;   /* Return value */
+
+	FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
+
+	assert( src );
+	assert( dst );
+
+	HDmemcpy(dst,src,sizeof(H5G_entry_t));
+
+	if (src->name){
+		dst->name=H5MM_strdup(src->name);
+	}
+	if (src->old_name){
+		dst->old_name=H5MM_strdup(src->old_name);
+	}
+	
+	
+done:
+	FUNC_LEAVE(SUCCEED);
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_ent_debug

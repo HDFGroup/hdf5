@@ -37,6 +37,16 @@
 #include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5MMprivate.h"
 
+#define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
+#define H5I_DEBUG_OUTPUT
+
+
+#include "H5Gprivate.h"  /*symbol tables	*/
+#include "H5Gpkg.h"
+#include "H5Dprivate.h"		/*datasets				  */
+#include "H5Tprivate.h"		/*data types				*/
+#include "H5Aprivate.h"		/*attributes				*/
+
 /* Interface initialialization? */
 #define PABLO_MASK	H5I_mask
 static int interface_initialize_g = 0;
@@ -1107,20 +1117,88 @@ done:
     FUNC_LEAVE(ret_value);
 }
 
-
+
+
+
 /*-------------------------------------------------------------------------
- * Function:	H5I_debug
+ * Function: H5Iget_name
  *
- * Purpose:	Dump the contents of a group to stderr for debugging.
+ * Purpose: Gets a name of an object from its ID. 
  *
- * Return:	Success:	Non-negative
+ * Return: Success: 0, Failure: -1
  *
- * 		Failure:	Negative
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Programmer:	Robb Matzke
- *		Friday, February 19, 1999
+ * Date: July 26, 2002
+ *
+ * Comments: Public function
+ *  If `name' is non-NULL then write up to `size' bytes into that
+ *  buffer and always return the length of the entry name.
+ *  Otherwise `size' is ignored and the function does not store the name,
+ *  just returning the number of characters required to store the name.
+ *  If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
+ *  is unchanged and the function returns a negative value.
+ *  If a zero is returned for the name's length, then there is no name
+ *  associated with the ID.
  *
  * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+ssize_t H5Iget_name(hid_t id, char *name/*out*/, size_t size)
+{
+ H5G_entry_t   *ent;       /*symbol table entry */
+ size_t        len=0;
+ size_t        count;
+ ssize_t       ret_value;  
+ 
+ FUNC_ENTER_API (H5Iget_name, FAIL);
+ 
+ /* get symbol table entry */
+ if ( NULL== ( ent = H5G_loc( id ))) 
+  goto done;
+  
+ if ( ent->name != NULL ) {
+  
+  len = HDstrlen(ent->name);
+  count = MIN(len+1,size);
+  
+  if ( name ) {
+   HDstrncpy( name, ent->name, count );
+   if ( len >= size ) {
+    name[size-1]='\0';
+   }
+  }
+ }
+ else
+ {
+  len = 0;
+ }
+ 
+done:
+ ret_value = len;
+ FUNC_LEAVE( ret_value );
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5I_debug
+ *
+ * Purpose: Dump the contents of a group to stderr for debugging.
+ *
+ * Return: Success: Non-negative
+ *
+ *   Failure: Negative
+ *
+ * Programmer: Robb Matzke
+ *  Friday, February 19, 1999
+ *
+ * Modifications:
+ *
+ * Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ * Added `id to name' support.
  *
  *-------------------------------------------------------------------------
  */
@@ -1128,48 +1206,265 @@ done:
 static herr_t
 H5I_debug(H5I_type_t grp)
 {
-    H5I_id_group_t	*grp_ptr;
-    H5I_id_info_t	*cur;
-    int			is, js;
-    unsigned int	iu;
-
-    FUNC_ENTER_NOAPI(H5I_debug, FAIL);
+ H5I_id_group_t *grp_ptr;
+ H5I_id_info_t *cur;
+ int   is, js;
+ unsigned int iu;
+ herr_t ret_value;  /* Return value */
+ 
+ 
+ H5G_entry_t *ent = NULL;
+ 
+ FUNC_ENTER_API(H5I_debug, FAIL);
+ 
+ fprintf(stderr, "Dumping group %d\n", (int)grp);
+ grp_ptr = H5I_id_group_list_g[grp];
+ 
+ /* Header */
+ fprintf(stderr, "	 count	   = %u\n", grp_ptr->count);
+ fprintf(stderr, "	 reserved  = %u\n", grp_ptr->reserved);
+ fprintf(stderr, "	 wrapped   = %u\n", grp_ptr->wrapped);
+ fprintf(stderr, "	 hash_size = %lu\n",
+  (unsigned long)grp_ptr->hash_size);
+ fprintf(stderr, "	 ids	   = %u\n", grp_ptr->ids);
+ fprintf(stderr, "	 nextid	   = %u\n", grp_ptr->nextid);
+ 
+ /* Cache */
+ fprintf(stderr, "	 Cache:\n");
+ for (is=0; is<ID_CACHE_SIZE; is++) {
+  if (H5I_cache_g[is] && H5I_GROUP(H5I_cache_g[is]->id)==grp) {
+   fprintf(stderr, "	     Entry-%d, ID=%lu\n",
+    is, (unsigned long)(H5I_cache_g[is]->id));
+  }
+ }
+ 
+ /* List */
+ fprintf(stderr, "	 List:\n");
+ for (iu=0; iu<grp_ptr->hash_size; iu++) {
+  for (js=0, cur=grp_ptr->id_list[iu]; cur; cur=cur->next, js++) {
+   fprintf(stderr, "	     #%u.%d\n", iu, js);
+   fprintf(stderr, "		 id = %lu\n",
+    (unsigned long)(cur->id));
+   fprintf(stderr, "		 count = %u\n", cur->count);
+   fprintf(stderr, "		 obj   = 0x%08lx\n",
+    (unsigned long)(cur->obj_ptr));
+   
+   
+   switch(grp) {
     
-    fprintf(stderr, "Dumping group %d\n", (int)grp);
-    grp_ptr = H5I_id_group_list_g[grp];
-
-    /* Header */
-    fprintf(stderr, "	 count	   = %u\n", grp_ptr->count);
-    fprintf(stderr, "	 reserved  = %u\n", grp_ptr->reserved);
-    fprintf(stderr, "	 wrapped   = %u\n", grp_ptr->wrapped);
-    fprintf(stderr, "	 hash_size = %lu\n",
-	    (unsigned long)grp_ptr->hash_size);
-    fprintf(stderr, "	 ids	   = %u\n", grp_ptr->ids);
-    fprintf(stderr, "	 nextid	   = %u\n", grp_ptr->nextid);
-
-    /* Cache */
-    fprintf(stderr, "	 Cache:\n");
-    for (is=0; is<ID_CACHE_SIZE; is++) {
-	if (H5I_cache_g[is] && H5I_GROUP(H5I_cache_g[is]->id)==grp) {
-	    fprintf(stderr, "	     Entry-%d, ID=%lu\n",
-		    is, (unsigned long)(H5I_cache_g[is]->id));
-	}
-    }
-
-    /* List */
-    fprintf(stderr, "	 List:\n");
-    for (iu=0; iu<grp_ptr->hash_size; iu++) {
-	for (js=0, cur=grp_ptr->id_list[iu]; cur; cur=cur->next, js++) {
-	    fprintf(stderr, "	     #%u.%d\n", iu, js);
-	    fprintf(stderr, "		 id = %lu\n",
-		    (unsigned long)(cur->id));
-	    fprintf(stderr, "		 count = %u\n", cur->count);
-	    fprintf(stderr, "		 obj   = 0x%08lx\n",
-		    (unsigned long)(cur->obj_ptr));
-	}
-    }
-
-    FUNC_LEAVE(SUCCEED);
+   case H5I_GROUP:
+    ent = H5G_entof((H5G_t*)cur->obj_ptr);
+    break;
+   case H5I_DATASET:
+    ent = H5D_entof((H5D_t*)cur->obj_ptr);
+    break;
+   case H5I_DATATYPE:
+    ent = H5T_entof((H5T_t*)cur->obj_ptr);
+    break;
+   default:
+    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+     "unknown data object");
+   }/* switch*/
+   
+   fprintf(stderr, "name = %s\n",ent->name);
+   
+   
+   
+  }
+ }
+ 
+done:
+ FUNC_LEAVE(SUCCEED);
 }
 #endif /* H5I_DEBUG_OUTPUT */
 
+
+/*-------------------------------------------------------------------------
+ * Function: H5I_debug_grp
+ *
+ * Purpose: Dump the contents of a group to stderr for debugging
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: July 26, 2002
+ *
+ * Comments: Public function
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef H5I_DEBUG_OUTPUT
+herr_t H5Idebug_grp(H5I_type_t grp)
+{
+ H5I_id_group_t *grp_ptr;
+ H5I_id_info_t *cur;
+ int   is, js;
+ unsigned int iu;
+ herr_t ret_value;  /* Return value */
+ 
+ FUNC_ENTER_API(H5Idebug_grp, FAIL);
+ 
+ fprintf(stderr, "Dumping group %d\n", (int)grp);
+ grp_ptr = H5I_id_group_list_g[grp];
+ 
+ /* Header */
+ fprintf(stderr, "	 count	   = %u\n", grp_ptr->count);
+ fprintf(stderr, "	 reserved  = %u\n", grp_ptr->reserved);
+ fprintf(stderr, "	 wrapped   = %u\n", grp_ptr->wrapped);
+ fprintf(stderr, "	 hash_size = %lu\n",
+  (unsigned long)grp_ptr->hash_size);
+ fprintf(stderr, "	 ids	   = %u\n", grp_ptr->ids);
+ fprintf(stderr, "	 nextid	   = %u\n", grp_ptr->nextid);
+ 
+ /* Cache */
+ fprintf(stderr, "	 Cache:\n");
+ for (is=0; is<ID_CACHE_SIZE; is++) {
+  if (H5I_cache_g[is] && H5I_GROUP(H5I_cache_g[is]->id)==grp) {
+   fprintf(stderr, "	     Entry-%d, ID=%lu\n",
+    is, (unsigned long)(H5I_cache_g[is]->id));
+  }
+ }
+ 
+ /* List */
+ fprintf(stderr, "	 List:\n");
+ for (iu=0; iu<grp_ptr->hash_size; iu++) {
+  for (js=0, cur=grp_ptr->id_list[iu]; cur; cur=cur->next, js++) {
+   
+   /* avoid no named datatypes */
+   if( grp==H5I_DATATYPE && H5T_is_immutable((H5T_t*)cur->obj_ptr)) 
+    break;
+   
+   
+   fprintf(stderr, "	     #%u.%d\n", iu, js);
+   fprintf(stderr, "		 id = %lu\n",
+    (unsigned long)(cur->id));
+   fprintf(stderr, "		 count = %u\n", cur->count);
+   fprintf(stderr, "		 obj   = 0x%08lx\n",
+    (unsigned long)(cur->obj_ptr));
+  }
+ }
+ 
+done:
+ FUNC_LEAVE(SUCCEED);
+}
+#endif /* H5I_DEBUG_OUTPUT */
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Idebug_name
+ *
+ * Purpose: Dump the contents of a group to stderr for debugging
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: July 26, 2002
+ *
+ * Comments: Public function
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef H5I_DEBUG_OUTPUT
+herr_t H5Idebug_name(hid_t id)
+{
+ 
+ H5I_type_t     grp_type;   /* group type */
+ H5I_id_group_t *grp_ptr;   /* ptr to the atomic group */
+ H5I_id_info_t  *cur=NULL;  /* Current node being worked with */
+ H5I_id_info_t  *next=NULL; /* Next node in list */
+ unsigned i;
+ 
+ H5G_entry_t *ent = NULL;
+ H5G_t *group=NULL;
+ H5T_t *dt=NULL;
+ H5D_t *dset=NULL;
+ herr_t ret_value;  /* Return value */
+ 
+ FUNC_ENTER_API (H5Idebug_name, FAIL);
+ 
+ grp_type = H5I_get_type(id);
+ 
+ /* Check it */
+ if (grp_type <= H5I_BADID || grp_type >= H5I_NGROUPS) {
+  HRETURN(FAIL);
+ }
+ 
+ grp_ptr = H5I_id_group_list_g[grp_type];
+ if (grp_ptr == NULL || grp_ptr->count <= 0) {
+  HRETURN(FAIL);
+ }
+ 
+ /* Cache */
+ fprintf(stderr, "\n");
+ fprintf(stderr, "Cache:\n");
+ for (i=0; i<ID_CACHE_SIZE; i++) {
+  if (H5I_cache_g[i] && H5I_GROUP(H5I_cache_g[i]->id)==grp_type) {
+   
+   cur = H5I_cache_g[i];
+   fprintf(stderr, "	     Entry-%d, ID=%lu\n", i, cur->id);
+   
+   switch(grp_type) {
+   case H5I_GROUP:
+    ent = H5G_entof((H5G_t*)cur->obj_ptr);
+    break;
+   case H5I_DATASET:
+    ent = H5D_entof((H5D_t*)cur->obj_ptr);
+    break;
+   case H5I_DATATYPE:
+    ent = H5T_entof((H5T_t*)cur->obj_ptr);
+    break;
+   default:
+    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+     "unknown data object");
+   }/* switch*/
+   
+   fprintf(stderr, "name = %s\n",ent->name);
+   
+  }
+ }
+ 
+ /* List */
+ fprintf(stderr, "List:\n");
+ for (i=0; i<grp_ptr->hash_size; i++) {
+  for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+   
+   switch(grp_type) {
+    
+   case H5I_GROUP:
+    ent = H5G_entof((H5G_t*)cur->obj_ptr);
+    break;
+   case H5I_DATASET:
+    ent = H5D_entof((H5D_t*)cur->obj_ptr);
+    break;
+   case H5I_DATATYPE:
+    ent = H5T_entof((H5T_t*)cur->obj_ptr);
+    break;
+   default:
+    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+     "unknown data object");
+   }/* switch*/
+   
+   /* can be NULL in case of named datatypes */
+   if (ent)
+   {
+    fprintf(stderr, "id = %lu\n",(unsigned long)(cur->id));
+    fprintf(stderr, "name = %s\n",ent->name);
+   }
+   
+  }
+ }
+ 
+done:
+ FUNC_LEAVE(SUCCEED);
+}
+#endif /* H5I_DEBUG_OUTPUT */

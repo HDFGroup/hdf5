@@ -201,6 +201,10 @@ done:
  *		April 2, 1998
  *
  * Modifications:
+ *
+ *	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *	 Added a deep copy of the symbol table entry
+	*
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -240,8 +244,9 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     /* Mark it initially set to initialized */
     attr->initialized = TRUE; /*for now, set to false later*/
 
-    /* Copy the symbol table entry */
-    attr->ent=*ent;
+				/* Deep copy of the symbol table entry */
+				if (H5G_ent_copy(ent,&(attr->ent))<0)
+					HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
     /* Compute the internal sizes */
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
@@ -472,6 +477,9 @@ done:
  *
  * Modifications:
  *
+	*	 Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *	 Added a deep copy of the symbol table entry
+	*
  *-------------------------------------------------------------------------
  */
 static hid_t
@@ -490,9 +498,10 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
     if (NULL==(attr=H5O_read(ent, H5O_ATTR, (int)idx, attr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header");
     attr->initialized=1;
-
-    /* Copy the symbol table entry */
-    attr->ent=*ent;
+   
+				/* Deep copy of the symbol table entry */
+				if (H5G_ent_copy(ent,&(attr->ent))<0)
+					HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
     /* Hold the symbol table entry (and file) open */
     if (H5O_open(&(attr->ent)) < 0) {

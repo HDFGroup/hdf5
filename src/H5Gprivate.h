@@ -10,7 +10,10 @@
  *
  * Purpose:             Library-visible declarations.
  *
- * Modifications:
+ * Modifications:       Aug 22, 2002
+	*                      Pedro Vicente <pvn@ncsa.uiuc.edu>
+	*                      Added 'names' field to H5G_entry_t
+	*                      Added H5G_replace_name
  *
  *-------------------------------------------------------------------------
  */
@@ -92,6 +95,8 @@ typedef struct H5G_entry_t {
     H5G_type_t  type;                   /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
+				char        *name;                  /*name associated with atom          */
+				char        *old_name;              /*old name hidden by a file mount    */
 } H5G_entry_t;
 
 typedef struct H5G_t H5G_t;
@@ -106,6 +111,25 @@ typedef struct H5G_typeinfo_t {
     htri_t	(*isa)(H5G_entry_t*);	/*function to determine type	     */
     char	*desc;			/*description of object type	     */
 } H5G_typeinfo_t;
+
+
+	typedef enum H5G_names_op_t {
+    OP_MOVE   = 0,  /* H5*move call    */
+				OP_LINK   = 1,  /* H5Glink call  */
+    OP_UNLINK = 2,  /* H5Gunlink call  */
+    OP_MOUNT  = 3,  /* H5Fmount call   */
+				OP_UNMOUNT= 4   /* H5Funmount call */
+	}H5G_names_op_t;
+
+/* Struct only used by change name callback function */
+typedef struct H5G_names_t {
+	H5I_type_t obj_type;
+	const char *src_name;
+	const char *dst_name;
+	H5G_entry_t	*loc;
+	H5G_names_op_t op;
+} H5G_names_t;  
+
 
 /*
  * Library prototypes...  These are the ones that other packages routinely
@@ -168,4 +192,8 @@ __DLL__ H5G_cache_t *H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type);
 __DLL__ herr_t H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type);
 __DLL__ herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent, FILE * stream,
 			     int indent, int fwidth, haddr_t heap);
+__DLL__  herr_t H5G_replace_name( int type, H5G_entry_t	*loc, const char *src_name, 
+																								 const char *dst_name, int op );
+__DLL__  herr_t H5G_insert_name( H5G_entry_t	*loc, H5G_entry_t	*obj, const char *name);
+__DLL__  herr_t H5G_ent_copy( const H5G_entry_t *src, H5G_entry_t *dst );
 #endif

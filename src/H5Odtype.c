@@ -1108,6 +1108,9 @@ done:
  *
  * Modifications:
  *
+ *	Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
+ *	Added `id to name' support.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1123,8 +1126,13 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     assert (sh);
     assert (!sh->in_gh);
 
-    dt->ent = sh->u.ent;
-    dt->state = H5T_STATE_NAMED;
+				dt->ent = sh->u.ent;
+
+				dt->ent.name = NULL;
+				dt->ent.old_name = NULL;
+
+				dt->state = H5T_STATE_NAMED;
+
 
 done:
     FUNC_LEAVE (ret_value);
