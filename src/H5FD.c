@@ -1215,28 +1215,42 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 	need_aligned = file->alignment > 1 && size >= file->threshold;
         while (cur) {
             file->maxsize = MAX(file->maxsize, cur->size);
-	    if (need_aligned){
-		if ((head = cur->addr % file->alignment) == 0){
+	    if (need_aligned) {
+		if ((head = cur->addr % file->alignment) == 0) {
 		    /* got aligned address*/
-		    if (cur->size==size){
+		    if (cur->size==size) {
 			/* exact match */
 			ret_value = cur->addr;
-			if (prev)
-			    prev->next = cur->next;
-			else
-			    file->fl[mapped_type] = cur->next;
-			H5MM_xfree(cur);
-			if (size==file->maxsize)
-			    file->maxsize=0; /*unknown*/
-			HRETURN(ret_value);
-		    }
-		    if (cur->size>size){
+
+                        /*
+                         * Make certain we don't hand out a block of raw data
+                         * from the free list which overlaps with the metadata
+                         * aggregation buffer (if it's turned on)
+                         */
+                        if(type==H5FD_MEM_DRAW &&
+                                (file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
+                                H5F_addr_overlap(ret_value,size,file->accum_loc,file->accum_size)) {
+                            ret_value=HADDR_UNDEF;
+                        } /* end if */
+                        else {
+                            if (prev)
+                                prev->next = cur->next;
+                            else
+                                file->fl[mapped_type] = cur->next;
+                            H5MM_xfree(cur);
+                            if (size==file->maxsize)
+                                file->maxsize=0; /*unknown*/
+                            HGOTO_DONE(ret_value);
+                        } /* end else */
+		    } /* end if */
+		    if (cur->size>size) {
 			if (!best || !found_aligned || cur->size<best->size) {
 			    best = cur;
 			    found_aligned = 1;
-			}
-		    }
-		}else{
+			} /* end if */
+		    } /* end if */
+		} /* end if */
+                else {
 		    /* non-aligned address.
 		     * check to see if this block is big enough to skip
 		     * to the next aligned address and is still big enough
@@ -1249,72 +1263,124 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
 		     */
 		    head = file->alignment - head;	/* actual head size */
 		    if (!found_aligned &&
-			cur->size > head && cur->size-head >= size &&
-			(!best || cur->size < best->size)){
-			best =cur;
-		    }
-		}
-	    }else{
+                            (cur->size > head && cur->size-head >= size) &&
+                            (!best || cur->size < best->size)) {
+			best = cur;
+		    } /* end if */
+		} /* end else */
+	    } /* end if */
+            else {
 		/* !need_aligned */
 		if (cur->size==size) {
 		    ret_value = cur->addr;
-		    if (prev)
-			prev->next = cur->next;
-		    else
-			file->fl[mapped_type] = cur->next;
-		    H5MM_xfree(cur);
-		    if (size==file->maxsize)
-			file->maxsize=0; /*unknown*/
-		    HRETURN(ret_value);
-		} else if (cur->size>size && (!best || cur->size<best->size)) {
-		    best = cur;
-		}
-	    }
+
+                    /*
+                     * Make certain we don't hand out a block of raw data
+                     * from the free list which overlaps with the metadata
+                     * aggregation buffer (if it's turned on)
+                     */
+                    if(type==H5FD_MEM_DRAW &&
+                            (file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
+                            H5F_addr_overlap(ret_value,size,file->accum_loc,file->accum_size)) {
+                        ret_value=HADDR_UNDEF;
+                    } /* end if */
+                    else {
+                        if (prev)
+                            prev->next = cur->next;
+                        else
+                            file->fl[mapped_type] = cur->next;
+                        H5MM_xfree(cur);
+                        if (size==file->maxsize)
+                            file->maxsize=0; /*unknown*/
+                        HGOTO_DONE(ret_value);
+                    } /* end else */
+		} /* end if */
+                else
+                    if (cur->size>size && (!best || cur->size<best->size)) {
+                        best = cur;
+                    } /* end if */
+	    } /* end else */
             prev = cur;
             cur = cur->next;
-        }
+        } /* end while */
+
+        /* Couldn't find exact match, use best fitting piece found */
         if (best) {
 	    if (best->size==file->maxsize)
 		file->maxsize=0; /*unknown*/
-	    if (!need_aligned || found_aligned){
+	    if (!need_aligned || found_aligned) {
 		/* free only tail */
 		ret_value = best->addr;
-		best->addr += size;
-		best->size -= size;
-		HRETURN(ret_value);
-	    }else{
-		/* split into 3 pieces.  Keep the the head and tail in */
-		/* the freelist. 				*/
-		H5FD_free_t *tmp = H5MM_malloc(sizeof(H5FD_free_t));
+
+                /*
+                 * Make certain we don't hand out a block of raw data
+                 * from the free list which overlaps with the metadata
+                 * aggregation buffer (if it's turned on)
+                 */
+                if(type==H5FD_MEM_DRAW &&
+                        (file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
+                        H5F_addr_overlap(ret_value,size,file->accum_loc,file->accum_size)) {
+                    ret_value=HADDR_UNDEF;
+                } /* end if */
+                else {
+                    best->addr += size;     /* Reduce size of block on free list */
+                    best->size -= size;
+                    HGOTO_DONE(ret_value);
+                } /* end else */
+	    } /* end if */
+            else {
+		/* Split into 3 pieces. */
+                /* Keep the the head and tail in the freelist. */
+		H5FD_free_t *tmp = NULL;
 
 		head = file->alignment - (best->addr % file->alignment);
 		ret_value = best->addr + head;
+
+                /*
+                 * Make certain we don't hand out a block of raw data
+                 * from the free list which overlaps with the metadata
+                 * aggregation buffer (if it's turned on)
+                 */
+                if(type==H5FD_MEM_DRAW &&
+                        (file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
+                        H5F_addr_overlap(ret_value,size,file->accum_loc,file->accum_size)) {
+                    ret_value=HADDR_UNDEF;
+                } /* end if */
+                else {
+
+                    /* Attempt to allocate memory for temporary node */ 
+                    tmp = H5MM_malloc(sizeof(H5FD_free_t));
 #ifdef H5F_DEBUG
-		if (H5DEBUG(F)) {
-		    HDfprintf(H5DEBUG(F),
-		    "%s: 3 pieces, begin best->addr=%a, best->size=%Hd, "
-		    "head=%Hd, size=%Hd\n",
-		    FUNC, best->addr, best->size, head, size);
-		}
+                    if (H5DEBUG(F)) {
+                        HDfprintf(H5DEBUG(F),
+                            "%s: 3 pieces, begin best->addr=%a, best->size=%Hd, "
+                            "head=%Hd, size=%Hd\n",
+                            FUNC, best->addr, best->size, head, size);
+                    }
 #endif
-		assert(tmp);		/* bark in debug mode */
-		if (tmp) {
-		    if ((tmp->size = (best->size - head - size))) {
-			tmp->addr = best->addr + head + size;
-			tmp->next = best->next;
-			best->next = tmp;
-		    } else {
-			/* no tail piece */
-			H5MM_xfree(tmp);
-		    }
-		} else {
-		    /* cannot keep the tail piece.  leak file memory. */
-		}
-		best->size = head;
-		HRETURN(ret_value);
-	    }
-        }
-    }
+                    assert(tmp);		/* bark in debug mode */
+                    if (tmp) {
+                        if ((tmp->size = (best->size - head - size))) {
+                            tmp->addr = best->addr + head + size;
+                            tmp->next = best->next;
+                            best->next = tmp;
+                        } /* end if */
+                        else {
+                            /* no tail piece */
+                            H5MM_xfree(tmp);
+                        } /* end else */
+                    } /* end if */
+                    else {
+                        /* Cannot keep the tail piece.  Leak file memory. */
+                        /* (Only happens if memory allocation fails) */
+                    } /* end else */
+                    best->size = head;
+                    HGOTO_DONE(ret_value);
+                } /* end else */
+	    } /* end else */
+        } /* end if */
+    } /* end if */
+
 #ifdef H5F_DEBUG
     if (H5DEBUG(F)) {
 	fprintf(H5DEBUG(F), "%s: Could not allocate from freelists\n", FUNC);
@@ -1364,6 +1430,7 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
         ret_value=H5FD_real_alloc(file,type,size);
     } /* end else */
 
+done:
     FUNC_LEAVE(ret_value);
 }
 
@@ -2029,9 +2096,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 
     /* Check if this information is in the metadata accumulator */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
-        ((addr>=file->accum_loc && addr <(file->accum_loc+file->accum_size))
-        || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
-        || (addr<file->accum_loc && (addr+size)>file->accum_loc))) {
+        H5F_addr_overlap(addr,size,file->accum_loc,file->accum_size)) {
 
         unsigned char *read_buf=(unsigned char *)buf; /* Pointer to the buffer being read in */
         size_t amount_read;         /* Amount to read at a time */

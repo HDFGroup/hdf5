@@ -138,9 +138,7 @@ main(int argc, char *argv[])
     int                     Summary = 0;
     int                     CleanUp = 1;
     int                     Cache = 1;
-    unsigned                   major, minor, release;
-
-
+    unsigned                major, minor, release;
 
 #if !(defined MAC || defined __MWERKS__ || defined SYMANTEC_C)
     /* Un-buffer the stdout and stderr */
@@ -170,6 +168,7 @@ main(int argc, char *argv[])
     InitTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
     InitTest("array", test_array, cleanup_array,  "Array Datatypes");
     InitTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
+    InitTest("misc", test_misc, cleanup_misc,  "Miscellaneous");
 
     Verbosity = 4;              /* Default Verbosity is Low */
     H5get_libversion(&major, &minor, &release);

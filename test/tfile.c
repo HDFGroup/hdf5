@@ -830,9 +830,9 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 
     /* close the two new files */
     ret = H5Fclose(fid3);
-    CHECK(fid3, FAIL, "H5Fclose");
+    CHECK(ret, FAIL, "H5Fclose");
     ret = H5Fclose(fid4);
-    CHECK(fid4, FAIL, "H5Fclose");
+    CHECK(ret, FAIL, "H5Fclose");
 }
 
 /****************************************************************
