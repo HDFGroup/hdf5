@@ -6,17 +6,17 @@
 
 ! If you change the value of these parameters, do not forget to change corresponding
 ! values in the H5f90.h file. 
-        INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 
-        INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
-
-        TYPE hobj_ref_t_f
-             INTEGER ref(REF_OBJ_BUF_LEN)  
-        END TYPE 
-
-        TYPE hdset_reg_ref_t_f
-             INTEGER ref(REF_REG_BUF_LEN) 
-        END TYPE 
-
+!        INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2 
+!        INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
+!
+!        TYPE hobj_ref_t_f
+!             INTEGER ref(REF_OBJ_BUF_LEN)  
+!        END TYPE 
+!
+!        TYPE hdset_reg_ref_t_f
+!             INTEGER ref(REF_REG_BUF_LEN) 
+!        END TYPE 
+!
           INTERFACE h5rcreate_f
 
             MODULE PROCEDURE h5rcreate_object_f
@@ -98,7 +98,7 @@
               USE H5GLOBAL
               !MS$ATTRIBUTES C,reference,alias:'_H5RCREATE_OBJECT_C':: h5rcreate_object_c
               !DEC$ATTRIBUTES reference :: name 
-              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
+!              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)
               INTEGER(HID_T), INTENT(IN) :: loc_id  
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -167,7 +167,7 @@
               USE H5GLOBAL
               !MS$ATTRIBUTES C,reference,alias:'_H5RCREATE_REGION_C':: h5rcreate_region_c
               !DEC$ATTRIBUTES reference :: name 
-              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
+!              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
               INTEGER(HID_T), INTENT(IN) :: loc_id  
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -235,7 +235,7 @@
               INTEGER FUNCTION h5rdereference_object_c(dset_id, ref_f, obj_id)
               USE H5GLOBAL
            !MS$ATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_OBJECT_C':: h5rdereference_object_c
-              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
+!              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)
               INTEGER(HID_T), INTENT(OUT) :: obj_id 
@@ -300,7 +300,7 @@
               USE H5GLOBAL
            !MS$ATTRIBUTES C,reference,alias:'_H5RDEREFERENCE_REGION_C':: h5rdereference_region_c
               INTEGER(HID_T), INTENT(IN) :: dset_id  
-              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
+!              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
               INTEGER(HID_T), INTENT(OUT) :: obj_id 
               END FUNCTION h5rdereference_region_c
@@ -364,7 +364,7 @@
               USE H5GLOBAL
            !MS$ATTRIBUTES C,reference,alias:'_H5RGET_REGION_REGION_C':: h5rget_region_region_c
               INTEGER(HID_T), INTENT(IN) :: dset_id  
-              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
+!              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3 
               INTEGER :: ref_f(REF_REG_BUF_LEN)
               INTEGER(HID_T), INTENT(OUT) :: space_id 
               END FUNCTION h5rget_region_region_c
@@ -437,7 +437,7 @@
               INTEGER FUNCTION h5rget_object_type_obj_c(dset_id, ref_f, obj_type)
               USE H5GLOBAL
            !MS$ATTRIBUTES C,reference,alias:'_H5RGET_OBJECT_TYPE_OBJ_C':: h5rget_object_type_obj_c
-              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
+!              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
               INTEGER(HID_T), INTENT(IN) :: dset_id  
               INTEGER :: ref_f(REF_OBJ_BUF_LEN)
               INTEGER, INTENT(OUT) :: obj_type 

@@ -3,7 +3,7 @@
 ! 
       MODULE H5D
         USE H5GLOBAL
-        USE H5R
+!        USE H5R
 
           INTERFACE h5dwrite_f
 
