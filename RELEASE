@@ -261,11 +261,28 @@ Configuration
 
 Tools
 -----
-    * h5dump now accepts both short and long command-line parameters. A
-      change from the old way is that multiple attributes, datasets,
-      groups, soft-links, and object-ids cannot be specified with just
-      one flag but you have to use a flag with each object. I.e., instead
-      of doing this:
+    * h5dump now accepts both short and long command-line parameters:
+          -h, --help          Print a usage message and exit
+          -B, --bootblock     Print the content of the boot block
+          -H, --header        Print the header only; no data is displayed
+          -i, --object-ids    Print the object ids
+          -V, --version       Print version number and exit
+          -a P, --attribute=P Print the specified attribute
+          -d P, --dataset=P   Print the specified dataset
+          -g P, --group=P     Print the specified group and all members
+          -l P, --soft-link=P Print the value(s) of the specified soft link
+          -o F, --output=F    Output raw data into file F
+          -t T, --datatype=T  Print the specified named data type
+          -w #, --width=#     Set the number of columns
+
+      P - is the full path from the root group to the object.
+      T - is the name of the data type.
+      F - is a filename.
+      # - is an integer greater than 1.
+    * A change from the old way command line parameters were interpreted
+      is that multiple attributes, datasets, groups, soft-links, and
+      object-ids cannot be specified with just one flag but you have to
+      use a flag with each object. I.e., instead of doing this:
 
         h5dump -a /attr1 /attr2 foo.h5
 
@@ -352,6 +369,14 @@ Platforms Tested
 Known Problems
 ==============
 
+* The gcc 2.95.2 compiler has a bug which causes spurious warnings such
+  as:
+
+    "warning: pointer of type `void *' used in arithmetic"
+
+  and other such warnings having to do with string handling. These
+  warnings are innocuous and don't effect the resulting executable.
+
 * When building the HDF5 test project on Windows NT 4.0 (testhdf5
   and testhdf5dll), the compiler fails to compile tvstr.c within
   the whole project; however, when separately selecting the 
@@ -364,8 +389,10 @@ Known Problems
   done manually by copying the *.mod files from the fortran/src
   directory.
 
-* Fortran modules are not installed when created. This should be done
-  manually by copying the modules from the fortran/src directory.
+* Fortran modules may not be installed when created. The install process
+  tries to check for modules, but if it fails to find the correct ones,
+  then they won't be installed. If this occurs, simply copy those modules
+  to the appropriate install directory and set the permissions for them.
 
 * SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
