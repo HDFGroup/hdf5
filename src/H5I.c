@@ -708,10 +708,11 @@ H5Iget_type(hid_t id)
     FUNC_ENTER(H5Iget_type, H5I_BADID);
     H5TRACE1("It","i",id);
 
+    ret_value = H5I_get_type(id);
+
     if (ret_value <= H5I_BADID || ret_value >= H5I_NGROUPS) {
 	HGOTO_DONE(H5I_BADID);
     }
-    ret_value = H5I_get_type(id);
 
 done:
     FUNC_LEAVE(ret_value);
