@@ -1,4 +1,4 @@
-HDF5 version 1.5.37 released on Sat Sep 28 03:36:08 CDT 2002
+HDF5 version 1.5.38 released on Sat Oct 12 03:39:55 CDT 2002
 ================================================================================
 
 
@@ -223,6 +223,10 @@ Documentation
 New Features
 ============
 
+    * Added API functions to return pointer to low-level file handle
+      (H5Fget_vfd_handle and H5FDget_vfd_handle) and related property list
+      setting functions(H5Pset_family_offset and H5Pset_multi_type).
+      SLU - 2002/09/30
     * Changed "H5P[set|get]_space_time" functions to "H5P[set|get]_alloc_time"
       Unify all symbolic names for these functions to use "alloc time" instead
       of other names.  QAK - 2002/09/13
@@ -390,9 +394,20 @@ New Features
                       h5get_libversion_f  h5dont_atexit_f
                       h5check_version_f   h5garbage_collect_f
                                                               EIP - 2002/09/24
+              H5F APIs:
+                      h5fget_obj_count_f  h5fget_obj_ids_f
+                                                              EIP - 2002/10/01
               H5G APIs:
                       h5glink2_f and h5gmove2_f
                                                               EIP - 2002/09/25
+              H5P APIs:
+                      h5pequal_f 
+                      h5pget(set)_fclose_degree_f
+                      h5pget(set)_buffer_f
+
+              H5T APIs:
+                      h5tget_member_index_f
+                                                              EIP - 2002/10/01
                       
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
