@@ -1,4 +1,4 @@
-HDF5 version 1.5.20 released on Sat Feb  9 04:51:29 CST 2002
+HDF5 version 1.5.21 released on Wed Feb 27 14:41:52 CST 2002
 ================================================================================
 
 
@@ -103,6 +103,12 @@ Library
       correctly.
     * Fixed bug where raw data re-allocated from the free-list would sometimes
       overlap with the metadata accumulator and get corrupted. QAK - 1/23/02
+    * Fixed bug where a preempted chunk in the chunk data could still be
+      used by an internal pointer and cause an assertion failure or core
+      dump. QAK - 2/13/02
+    * Fixed bug where non-zero fill-value was not being read correctly from
+      certain chunked datasets when using an "all" or contiguous hyperslab
+      selection.  QAK - 2/14/02
 
 Configuration
 -------------
