@@ -55,6 +55,7 @@
 ./config/gnu-flags
 ./config/hpux10.20
 ./config/hpux9.03
+./config/i386-pc-cygwin32
 ./config/intel-osf1
 ./config/irix5.x
 ./config/irix6.x
