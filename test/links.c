@@ -105,10 +105,10 @@ mklinks(hid_t fapl)
 static int
 new_links(hid_t fapl)
 {
-    hid_t		file_a, file_b;
-    hid_t		grp1_a, grp1_b, grp2_a, grp2_b;
-    hid_t		scalar;
-    hid_t		dset1, dset2;
+    hid_t		file_a, file_b=(-1);
+    hid_t		grp1_a=(-1), grp1_b=(-1), grp2_a=(-1), grp2_b=(-1);
+    hid_t		scalar=(-1);
+    hid_t		dset1=(-1), dset2=(-1);
     char		filename[1024]; 
     static hsize_t      size[1] = {1};
 

@@ -356,7 +356,7 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
             /* Check for a 'free' function and call it, if it exists */
             if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
                 if (force) {
-#if H5I_DEBUG
+#ifdef H5I_DEBUG
                     if (H5DEBUG(I)) {
                         fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
                             "failure ignored\n", (int)grp,
@@ -879,7 +879,7 @@ H5I_dec_ref(hid_t id)
     H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
-    int		ret_value;	/*return value		*/
+    int		ret_value=FAIL;	/*return value		*/
 
     FUNC_ENTER_NOAPI(H5I_dec_ref, FAIL);
 

@@ -537,7 +537,7 @@ htri_t
 H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
     H5S_hyper_span_t *span1=NULL,*span2=NULL;   /* Hyperslab span node */
-    hsize_t	elmts1,elmts2;                  /* Number of elements in each dimension of selection */
+    hsize_t	elmts1=0,elmts2=0;              /* Number of elements in each dimension of selection */
     unsigned	u;                              /* Index variable */
     htri_t ret_value=TRUE;  /* return value */
 
@@ -1141,7 +1141,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     H5P_genplist_t *dx_plist;   /* Dataset transfer property list */
     H5S_sel_iter_t *mem_iter=NULL;   /* Memory selection iteration info */
     H5S_sel_iter_t *file_iter=NULL;  /* File selection iteration info */
-    uint8_t *buf;               /* Local buffer pointer, for address arithmetic */
+    uint8_t *buf=NULL;          /* Local buffer pointer, for address arithmetic */
     hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
     hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
     size_t vector_size;         /* Value for vector size */
@@ -1156,7 +1156,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     size_t curr_file_seq;       /* Current file sequence to operate on */
     size_t tmp_file_len;        /* Temporary number of bytes in file sequence */
     unsigned partial_file;      /* Whether a partial file sequence was accessed */
-    size_t orig_file_len;       /* Original file sequence length for partial file access */
+    size_t orig_file_len=0;     /* Original file sequence length for partial file access */
     size_t orig_file_seq;       /* Original file sequence to operate on */
     size_t tot_file_seq;        /* Number of file sequences to access */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -1371,7 +1371,7 @@ H5S_select_write(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     H5P_genplist_t *dx_plist;   /* Dataset transfer property list */
     H5S_sel_iter_t *mem_iter=NULL;   /* Memory selection iteration info */
     H5S_sel_iter_t *file_iter=NULL;  /* File selection iteration info */
-    const uint8_t *buf;         /* Local buffer pointer, for address arithmetic */
+    const uint8_t *buf=NULL;    /* Local buffer pointer, for address arithmetic */
     hsize_t *mem_off=NULL;      /* Array to store sequence offsets in memory */
     hsize_t *file_off=NULL;     /* Array to store sequence offsets in the file */
     size_t vector_size;         /* Value for vector size */
@@ -1386,7 +1386,7 @@ H5S_select_write(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     size_t curr_file_seq;       /* Current file sequence to operate on */
     size_t tmp_file_len;        /* Temporary number of bytes in file sequence */
     unsigned partial_file;      /* Whether a partial file sequence was accessed */
-    size_t orig_file_len;       /* Original file sequence length for partial file access */
+    size_t orig_file_len=0;     /* Original file sequence length for partial file access */
     size_t orig_file_seq;       /* Original file sequence to operate on */
     size_t tot_file_seq;        /* Number of file sequences to access */
     herr_t ret_value=SUCCEED;   /* Return value */

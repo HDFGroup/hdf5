@@ -298,8 +298,8 @@ test_rename(hid_t file)
 static int
 test_new_move(void)
 {
-    hid_t 	fapl, file_a, file_b;
-    hid_t	grp_1, grp_2, grp_move, moved_grp;
+    hid_t 	fapl, file_a, file_b=(-1);
+    hid_t	grp_1=(-1), grp_2=(-1), grp_move=(-1), moved_grp=(-1);
     char 	filename[1024];
 
     TESTING("new move");

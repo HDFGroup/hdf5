@@ -28,9 +28,9 @@ int main( void )
 {
  
  hid_t   file_id;
- hid_t   dataset_id;
- hid_t   space_id;  
- hid_t   plist_id;
+ hid_t   dataset_id=(-1);
+ hid_t   space_id=(-1);  
+ hid_t   plist_id=(-1);
  hsize_t dims[RANK] = { 90, 90 };
  hsize_t dims_new[RANK] = { 70, 70 };
  hsize_t dims_chunk[RANK] = { 20, 20 };

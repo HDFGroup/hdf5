@@ -153,7 +153,7 @@ H5S_none_release (H5S_t * UNUSED space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_none_npoints (const H5S_t *space)
+H5S_none_npoints (const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI(H5S_none_npoints, 0);
 
@@ -215,7 +215,7 @@ H5S_none_is_valid (const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hssize_t
-H5S_none_serial_size (const H5S_t *space)
+H5S_none_serial_size (const H5S_t UNUSED *space)
 {
     hssize_t ret_value=FAIL;    /* return value */
 
@@ -556,9 +556,9 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_none_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
-    hsize_t *off, size_t *len)
+H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t UNUSED *iter,
+    size_t UNUSED elem_size, size_t UNUSED maxseq, size_t UNUSED maxbytes, size_t *nseq, size_t *nbytes,
+    hsize_t UNUSED *off, size_t UNUSED *len)
 {
     FUNC_ENTER_NOAPI (H5S_none_get_seq_list, FAIL);
 

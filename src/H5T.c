@@ -6612,7 +6612,7 @@ char *
 H5T_enum_nameof(H5T_t *dt, void *value, char *name/*out*/, size_t size)
 {
     int	lt, md, rt;		/*indices for binary search	*/
-    int	cmp;			/*comparison result		*/
+    int	cmp=(-1);		/*comparison result		*/
     char *ret_value;            /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_nameof, NULL);
@@ -6686,7 +6686,7 @@ herr_t
 H5T_enum_valueof(H5T_t *dt, const char *name, void *value/*out*/)
 {
     int	lt, md, rt;		/*indices for binary search	*/
-    int	cmp;			/*comparison result		*/
+    int	cmp=(-1);		/*comparison result		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_enum_valueof, FAIL);

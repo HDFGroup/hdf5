@@ -908,7 +908,7 @@ H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
     ret_value=acc;
 
 done:
-    FUNC_LEAVE (acc);
+    FUNC_LEAVE (ret_value);
 }
 
 

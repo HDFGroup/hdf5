@@ -226,7 +226,7 @@ H5S_all_is_valid (const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hssize_t
-H5S_all_serial_size (const H5S_t *space)
+H5S_all_serial_size (const H5S_t UNUSED *space)
 {
     hssize_t ret_value=FAIL;    /* return value */
 
@@ -588,8 +588,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
-    size_t elem_size, size_t maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
+H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
+    size_t elem_size, size_t UNUSED maxseq, size_t maxbytes, size_t *nseq, size_t *nbytes,
     hsize_t *off, size_t *len)
 {
     hsize_t bytes_left;         /* The number of bytes left in the selection */
