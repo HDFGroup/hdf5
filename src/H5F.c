@@ -30,6 +30,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
 #include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
 #include <H5FDstdio.h>		/* Standard C buffered I/O		  */
+#include <H5FDlog.h>        /* sec2 driver with logging, for debugging */
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
