@@ -39,6 +39,7 @@ typedef struct H5P_sdim_t {
 #define H5P_RESERVED_ATOMS  2
 
 /* Private functions */
+herr_t H5P_init(void);
 hid_t H5P_create(hid_t owner_id, hobjtype_t type, const char *name);
 uint32 H5P_get_lrank(H5P_sdim_t *sdim);
 hbool_t H5P_is_simple(H5P_dim_t *sdim);

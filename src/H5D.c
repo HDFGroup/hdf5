@@ -80,6 +80,10 @@ static herr_t H5D_init_interface(void)
     herr_t ret_value = SUCCEED;
     FUNC_ENTER (H5D_init_interface, NULL, FAIL);
 
+    /* Make certain the H5T & H5P interfaces have been initialized */
+    H5T_init();
+    H5P_init();
+
     /* Initialize the atom group for the file IDs */
     if((ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS,NULL))!=FAIL)
         ret_value=H5_add_exit(&H5D_term_interface);
@@ -202,6 +206,7 @@ hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
 
+printf("%s: check 1.0\n",FUNC);
     /* Convert atom arguments to pointers */
     if(H5Aatom_group(grp_id)!=H5_FILE)
         HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL);
@@ -215,20 +220,25 @@ hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
     dset->file = file;
     dset->dirty = FALSE;
     
+printf("%s: check 2.0, name=%s\n",FUNC,name);
     /* Open the dataset object */
     if (NULL==(dset->ent=H5G_open (file, name))) {
        HGOTO_ERROR (H5E_DATASET, H5E_NOTFOUND, FAIL);
     }
 
+printf("%s: check 2.5\n",FUNC);
     /* Get the dataset's type (currently only atomic types) */
     if((type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+printf("%s: check 2.6\n",FUNC);
     if (NULL==H5O_read (dset->file, NO_ADDR, dset->ent, H5O_SIM_DTYPE, 0,
 			type))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
+printf("%s: check 2.7\n",FUNC);
     if((dset->tid=H5Aregister_atom(H5_DATATYPE, (const VOIDP)type))==FAIL)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);
     
+printf("%s: check 3.0\n",FUNC);
     /* Get the dataset's dimensionality (currently only simple dataspaces) */
     if((dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
@@ -245,6 +255,7 @@ hid_t H5D_find_name(hid_t grp_id, hobjtype_t obj_type, const char *name)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
     dset->data_addr=store.off;
 
+printf("%s: check 4.0\n",FUNC);
     /* Register the new OID and get an ID for it */
     if((ret_value=H5Aregister_atom(H5_DATASET, (const VOIDP)dset))==FAIL)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL);

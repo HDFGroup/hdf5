@@ -81,6 +81,29 @@ static herr_t H5T_init_interface(void)
 }	/* H5T_init_interface */
 
 /*--------------------------------------------------------------------------
+NAME
+   H5T_init -- Make certain that the interface has been initialized
+USAGE
+    herr_t H5T_init()
+   
+RETURNS
+   SUCCEED/FAIL
+DESCRIPTION
+    Library public routine to make certain the H5T interface has been properly
+    initialized.
+
+--------------------------------------------------------------------------*/
+herr_t H5T_init(void)
+{
+    herr_t ret_value = SUCCEED;
+    FUNC_ENTER (H5T_init, H5T_init_interface, FAIL);
+
+    /* Actual work is done in the FUNC_ENTER macro */
+
+    FUNC_LEAVE(ret_value);
+}	/* H5T_init */
+
+/*--------------------------------------------------------------------------
  NAME
     H5T_term_interface
  PURPOSE
