@@ -80,7 +80,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
 
   size_t   h4size;
   size_t   h4memsize;
-  size_t   fielddim[1];
+  hsize_t   fielddim[1];
   hsize_t  h5dims[2];
   herr_t   ret;
   hid_t    create_plist;
@@ -254,8 +254,19 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
 
      fielddim[0] = ncomp;
 
-     ret = H5Tinsert_array(h5_ctype,"HDF4Image_data",0,1,fielddim,NULL,
-			   h5ty_id);
+     {
+     hid_t arr_type;    /* Array datatype for inserting fields */
+
+     /* Create array datatype */
+     if((arr_type=H5Tarray_create(h5ty_id,1,fielddim,NULL))<0) {
+       printf("error creating array datatype.\n");
+       free(image_data);
+       free(h5cimage_name);
+       H5Pclose(create_plist);
+       return FAIL;
+     }
+
+     ret = H5Tinsert(h5_ctype,"HDF4Image_data",0,arr_type);
      if(ret < 0) {
        printf("error in inserting array of compound datatype. \n");
        free(image_data);
@@ -264,14 +275,41 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup) {
        return FAIL;
      }
 
-     ret = H5Tinsert_array(h5_cmemtype,"HDF4Image_data",0,1,fielddim,NULL,
-			   h5memtype);
+     /* Close array datatype */
+     if(H5Tclose(arr_type)<0) {
+       printf("error closing array datatype.\n");
+       free(image_data);
+       free(h5cimage_name);
+       H5Pclose(create_plist);
+       return FAIL;
+     }
+
+     /* Create array datatype */
+     if((arr_type=H5Tarray_create(h5memtype,1,fielddim,NULL))<0) {
+       printf("error creating array datatype.\n");
+       free(image_data);
+       free(h5cimage_name);
+       H5Pclose(create_plist);
+       return FAIL;
+     }
+
+     ret = H5Tinsert(h5_cmemtype,"HDF4Image_data",0,arr_type);
      if(ret < 0) {
        printf("error in inserting array of compound datatype at memory. \n");
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
        return FAIL;
+     }
+     
+     /* Close array datatype */
+     if(H5Tclose(arr_type)<0) {
+       printf("error closing array datatype.\n");
+       free(image_data);
+       free(h5cimage_name);
+       H5Pclose(create_plist);
+       return FAIL;
+     }
      }
 
      h5d_sid     = H5Screate_simple(2,h5dims,NULL);

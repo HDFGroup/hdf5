@@ -675,7 +675,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
   size_t  fil_offset;
   size_t  mem_offset;
   size_t  fieldsizef;
-  size_t  fielddim[1];
+  hsize_t  fielddim[1];
   hid_t   h5str_type;
   int     check_ifstr;/* flag to check if the h5 type is string.*/
   int     i;
@@ -754,16 +754,39 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
    }
       
    else {
+     hid_t arr_type;    /* Array datatype for inserting fields */
 
-     if(H5Tinsert_array(h5_ctype,fieldname,fil_offset,1,fielddim,
-			NULL,sh5type[i])<0) {
+     /* Create array datatype */
+     if((arr_type=H5Tarray_create(sh5type[i],1,fielddim,NULL))<0) {
+       printf("error creating array datatype.\n");
+       return FAIL;
+     }
+
+     if(H5Tinsert(h5_ctype,fieldname,fil_offset,arr_type)<0) {
        printf("error inserting array into hdf5 compound datatype. \n");
        return FAIL;
      }
 
-     if(H5Tinsert_array(h5_cmemtype,fieldname,mem_offset,1,fielddim,
-			NULL,sh5memtype[i])<0) {
+     /* Close array datatype */
+     if(H5Tclose(arr_type)<0) {
+       printf("error closing array datatype.\n");
+       return FAIL;
+     }
+
+     /* Create array datatype */
+     if((arr_type=H5Tarray_create(sh5memtype[i],1,fielddim,NULL))<0) {
+       printf("error creating array datatype.\n");
+       return FAIL;
+     }
+
+     if(H5Tinsert(h5_cmemtype,fieldname,fil_offset,arr_type)<0) {
        printf("error inserting array into hdf5 compound datatype for memory. \n");
+       return FAIL;
+     }
+
+     /* Close array datatype */
+     if(H5Tclose(arr_type)<0) {
+       printf("error closing array datatype.\n");
        return FAIL;
      }
 

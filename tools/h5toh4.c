@@ -57,6 +57,7 @@ static int prefix_len = 1024;
 static char *prefix;
 static table_t *group_table, *dset_table, *type_table;
 
+static herr_t h5atomic_type_to_h4type(const hid_t h5type, hid_t* h5memtype, size_t* h5memsize, int32* h4type);
 
 
 /*****************************************************************************
@@ -613,7 +614,7 @@ int32 dim_sizes[32], start[32], edges[32];
 int ndims;
 int ndimf;
 hsize_t dims[32], maxdims[32];
-size_t dimf[4];
+hsize_t dimf[4];
 int permf[4];
 int32 hfile_id;
 int32 sd_id;
@@ -774,6 +775,9 @@ int32 order_array[512];
     case H5T_OPAQUE:
         fprintf(stderr,"Warning: H5T_OPAQUE not yet implemented.\n");
         break;
+    case H5T_ARRAY:
+        fprintf(stderr,"Warning: H5T_OPAQUE not yet implemented.\n");
+        break;
     case H5T_COMPOUND:
 	if (ndims==1) {
 		if ((nmembers = H5Tget_nmembers(type)) <= 0 ) {
@@ -784,16 +788,44 @@ int32 order_array[512];
 
 		offset = 0;
 		for (idx=0;idx<nmembers;idx++) {
-			if ((ndimf = H5Tget_member_dims(type, idx, dimf, permf)) < 0 || ndimf > 4 ) {
-				fprintf(stderr, "Error: rank of members of compound type should not be %d\n",ndimf);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-       				return FAIL;
-			} 
 			if ((fieldtype = H5Tget_member_type(type, idx)) < 0 ) {
         			fprintf(stderr,"Error: H5 datasets of H5T_COMPOUND type with fieldtype %d, idx %d.\n",fieldtype,idx);
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
 				break;
 			}
+            /* Special case for array fields */
+            if(H5Tget_class(fieldtype)==H5T_ARRAY) {
+                hid_t   arr_base_type;
+
+                /* Get the number of dimensions */
+                if ((ndimf = H5Tget_array_ndims(fieldtype)) < 0 || ndimf > H5S_MAX_RANK ) {
+                    fprintf(stderr, "Error: rank of members of compound type should not be %d\n",ndimf);
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                } 
+                /* Get the dimensions and dimension permutations */
+                if (H5Tget_array_dims(fieldtype,dimf,permf) < 0) {
+                    fprintf(stderr, "Error: cannot retrieve dimensions for array\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                } 
+                /* Get the 'real' field type */
+                if ((arr_base_type=H5Tget_super(fieldtype)) < 0) {
+                    fprintf(stderr, "Error: cannot retrieve base type for array\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                } 
+                if (H5Tclose(fieldtype) < 0 ) {
+                    fprintf(stderr,"Error: closing type\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                }
+
+                /* Assign the array's base type as the field type for future use */
+                fieldtype=arr_base_type;
+            } /* end if */
+            else
+                ndimf=0;
 #ifdef NEWWAY
 			if (FAIL==h5atomic_type_to_h4type(fieldtype, &mem_type, &typesize, &h4_type)){
 				fprintf(stderr, "Error: Problems translating h5 type to h4 type\n");
@@ -874,11 +906,36 @@ int32 order_array[512];
 			break;
 		}
 		for (idx=0;idx<nmembers;idx++) {
-			if ((ndimf = H5Tget_member_dims(type, idx, dimf, permf)) < 0 || ndimf > 4 ) {
-				fprintf(stderr, "Error: rank of members of compound type should not be %d\n",ndimf);
-				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
-       				return FAIL;
-			}
+            /* Special case for array fields */
+            if(H5Tget_member_class(type,idx)==H5T_ARRAY) {
+                hid_t   arr_type;
+
+                if ((arr_type = H5Tget_member_type(type, idx)) < 0 ) {
+                        fprintf(stderr,"Error: H5 datasets of H5T_COMPOUND type with fieldtype %d, idx %d.\n",arr_type,idx);
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                    break;
+                }
+                /* Get the number of dimensions */
+                if ((ndimf = H5Tget_array_ndims(arr_type)) < 0 || ndimf > H5S_MAX_RANK ) {
+                    fprintf(stderr, "Error: rank of members of compound type should not be %d\n",ndimf);
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                } 
+                /* Get the dimensions and dimension permutations */
+                if (H5Tget_array_dims(arr_type,dimf,permf) < 0) {
+                    fprintf(stderr, "Error: cannot retrieve dimensions for array\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                } 
+                if (H5Tclose(arr_type) < 0 ) {
+                    fprintf(stderr,"Error: closing type\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                }
+            } /* end if */
+            else
+                ndimf=0;
+
 			if ((fieldname = H5Tget_member_name(type, idx)) == NULL ) {
 				fprintf(stderr, "Error: Unable to get fieldname for compound type %d, idx %d\n", type, idx);
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
@@ -896,12 +953,26 @@ int32 order_array[512];
        					return FAIL;
 				}
 			} else {
-				if ((status = H5Tinsert_array(type2,fieldname,offset_array[idx]+offset,ndimf,dimf,permf,
-											memtype_array[idx])) != SUCCEED ) {
-					fprintf(stderr, "Error: Problems inserting array field into compound datatype\n");
+                hid_t   arr_type;
+
+                /* Create the array datatype */
+                if ((arr_type = H5Tarray_create(memtype_array[idx], ndimf, dimf, permf)) < 0 ) {
+                        fprintf(stderr,"Error: cannot create array datatype\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                    break;
+                }
+
+				if ((status = H5Tinsert(type2,fieldname,offset_array[idx]+offset,arr_type)) != SUCCEED ) {
+					fprintf(stderr, "Error: Problems inserting field into compound datatype\n");
 					DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
        					return FAIL;
 				}
+
+                if (H5Tclose(arr_type) < 0 ) {
+                    fprintf(stderr,"Error: closing type\n");
+                    DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
+                        return FAIL;
+                }
 			}
 			if ((status = VSfdefine(vdata_id, fieldname, h4type_array[idx], order_array[idx])) != SUCCEED ) {
 				fprintf(stderr, "Error: Unable to set field %d\n", idx);
@@ -2104,7 +2175,7 @@ H5T_str_t strpad;
  * Modifications:
  *
  *-----------------------------------------------------------------------*/
-herr_t h5atomic_type_to_h4type(const hid_t h5type, hid_t* h5memtype, size_t* h5memsize, int32* h4type)
+static herr_t h5atomic_type_to_h4type(const hid_t h5type, hid_t* h5memtype, size_t* h5memsize, int32* h4type)
 {
     H5T_class_t class;
     size_t h5typesize, h4typesize;
