@@ -1,4 +1,4 @@
-HDF5 version 1.7.14 released on Sun Jan  4 03:13:02 CST 2004
+HDF5 version 1.7.15 released on Sun Jan 11 03:18:04 CST 2004
 ================================================================================
 
 
@@ -36,11 +36,14 @@ New Features
 
     Configuration:
     --------------
+	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
         - Prefix default is changed from /usr/local to `pwd`/hdf5.
-            AKC - 2003/07/09
+          AKC - 2003/07/09
 
     Library:
     --------
+        - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
+            routines.  QAK - 2004/01/07
         - Data type conversion between integers and floats was added.
             SLU 2003/11/21
         - New function H5Iget_file_id() was added.  It returns file ID given
@@ -72,6 +75,8 @@ New Features
 
     Tools:
     ------
+	- Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
+	  AKC - 2004/01/08
         - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
             respectively if library is built in parallel mode.
             WCW - 2003/11/04
@@ -86,13 +91,18 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
-
+        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
+            Compiler version 8.1 Beta. Use "--disable-shared --enable-static"
+            configure flags along with the "--enable-fortran" flag to build
+            Fortran library.  EIP - 2004/01/07
 
 Bug Fixes since HDF5-1.6.0 release
 ==================================
 
     Library
     -------
+        - Fixed small internal memory leak of fill-value information.
+            QAK - 2004/01/06
         - Detect situation where szip 'pixels per block' is larger than the
             fastest changing dimension of a dataset's chunk size and disallow
             this (due to limits in szip library).  QAK - 2003/12/31
@@ -292,6 +302,7 @@ Platforms Tested
     MAC OS X                      Darwin 6.5
                                   gcc and g++ Apple Computer, Inc. GCC 
                                   version 1161, based on gcc version 3.1
+                                  IBM XL Fortran compiler version 8.1 Beta
                                   
 
 
