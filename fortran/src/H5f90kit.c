@@ -70,7 +70,8 @@ DESCRIPTION
 char *
 HD5f2cstring(_fcd fdesc, int len)
 {
-    char       *cstr, *str;
+    char       *cstr = NULL;
+    char       *str;
     int         i;
 
     str = _fcdtocp(fdesc);
@@ -78,7 +79,7 @@ HD5f2cstring(_fcd fdesc, int len)
     for(i=len-1; i>=0 && !isgraph((int)str[i]); i--)
         /*EMPTY*/;
     cstr = (char *) HDmalloc( (i + 2));
-    if (!cstr) return NULL;
+    if (cstr == NULL) return NULL;
     cstr[i + 1] = '\0';
     HDmemcpy(cstr,str,i+1);
     return cstr;
