@@ -100,7 +100,7 @@ typedef struct H5FD_fphdf5_fapl_t {
 /*
  * The FPHDF5 file driver information
  */
-static const H5FD_class_t H5FD_fphdf5_g = {
+const H5FD_class_t H5FD_fphdf5_g = {
     "fphdf5",                                   /*name                  */
     HADDR_MAX,                                  /*maxaddr               */
     H5F_CLOSE_SEMI,                             /*fc_degree             */
@@ -166,7 +166,7 @@ static char H5FD_mpio_native[] = "native";
  * Purpose:	Initialize this driver by registering the driver with the
  *		library.
  * Return:	Success:    The driver ID for the FPHDF5 driver.
- *		Failure:    FAIL
+ *		Failure:    Doesn't fail.
  * Programmer:	Bill Wendling
  *              30. January 2003
  * Modifications:
@@ -380,7 +380,7 @@ done:
  * Function:    H5FD_fphdf5_mpi_rank
  * Purpose:     Returns the MPI rank for a process
  * Return:      Success:    MPI rank
- *              Failure:    FAIL
+ *              Failure:    Doesn't fail
  * Programmer:  Bill Wendling
  *              30. January 2003
  * Modifications:
@@ -410,7 +410,7 @@ done:
  * Function:    H5FD_fphdf5_mpi_size
  * Purpose:     Returns the number of MPI processes
  * Return:      Success:    Number of MPI processes
- *              Failure:    FAIL
+ *              Failure:    Doesn't fail
  * Programmer:  Bill Wendling
  *              30. January 2003
  * Modifications:
@@ -430,6 +430,66 @@ H5FD_fphdf5_mpi_size(H5FD_t *_file)
 
     /* Set return value */
     ret_value = file->mpi_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_fphdf5_file_id
+ * Purpose:     Returns the file ID for the file.
+ * Return:      Success:    File ID
+ *              Failure:    Doesn't fail
+ * Programmer:  Bill Wendling
+ *              19. February 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5FD_fphdf5_file_id(H5FD_t *_file)
+{
+    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    unsigned        ret_value; 
+
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_file_id, 0);
+
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* Set return value */
+    ret_value = file->file_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_fphdf5_is_sap
+ * Purpose:     Asks the question "Is this process the SAP?".
+ * Return:      Success:    Non-zero if it is, 0 otherwise
+ *              Failure:    Doesn't fails
+ * Programmer:  Bill Wendling
+ *              19. February 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5FD_fphdf5_is_sap(H5FD_t *_file)
+{
+    H5FD_fphdf5_t  *file = (H5FD_fphdf5_t*)_file;
+    hbool_t         ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(H5FD_fphdf5_is_sap, FALSE);
+
+    /* check args */
+    assert(file);
+    assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* Set return value */
+    ret_value = ((unsigned)file->mpi_rank == H5FP_sap_rank);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -677,13 +737,19 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     int                         mpi_size;
     int                         mrc;
     MPI_Offset                  size;
+    MPI_Offset                  mpi_off;
     H5FD_fphdf5_fapl_t          _fa;
     const H5FD_fphdf5_fapl_t   *fa = NULL;
     H5P_genplist_t             *plist;
-    H5FD_t                     *ret_value = NULL;
+    unsigned long               feature_flags;
+    hsize_t                     meta_block_size = 0;
+    hsize_t                     sdata_block_size = 0;
+    hsize_t                     threshold;
+    hsize_t                     alignment;
     unsigned                    file_id;
     unsigned                    req_id;
     MPI_Status                  status;
+    H5FD_t                     *ret_value = NULL;
 
     /* Flag to indicate that the file was successfully opened */
     unsigned                    file_opened = FALSE;
@@ -707,6 +773,11 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         assert(fa);
     }
 
+    /* Some numeric conversions */
+    if (H5FD_fphdf5_haddr_to_MPIOff(maxaddr, &mpi_off) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, NULL,
+                    "can't convert from haddr_t to MPI offset");
+
     /*
      * Convert HDF5 flags to MPI-IO flags. Some combinations are illegal;
      * let MPI-IO figure it out
@@ -723,10 +794,30 @@ H5FD_fphdf5_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 
     file_opened = TRUE;
 
-    if (H5FP_request_open(H5FP_OBJ_FILE, (MPI_Offset)maxaddr, &file_id, &req_id) == FAIL)
+    if (H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &meta_block_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data block size");
+
+    if (H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &sdata_block_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' block size");
+
+    if (H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold");
+
+    if (H5P_get(plist, H5F_ACS_ALIGN_NAME, &alignment) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
+
+    /* Retrieve the VFL driver feature flags */
+    if (H5FD_query((H5FD_t *)file, &feature_flags) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");
+
+    /* Inform the SAP that the file was opened */
+    if (H5FP_request_open(H5FP_OBJ_FILE, mpi_off, feature_flags,
+                          meta_block_size, sdata_block_size, threshold,
+                          alignment, &file_id, &req_id) == FAIL)
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENFILE, NULL,
                     "can't inform SAP of file open");
 
+    /* Grab the rank of this process */
     if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &mpi_rank)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_rank failed", mrc);
 
@@ -869,8 +960,19 @@ H5FD_fphdf5_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
          * the application would hang.
          */
 
+#if 0
+        /*
+         * FIXME: For now, having metadata accumulate causes problems for
+         * the SAP when it goes to allocate data (oddly enough, an
+         * allocation can result in a call to H5FD_free...which can
+         * result in a call to H5FD_write...which needs a data xfer
+         * property list...but only when metadata accumulation is turned
+         * on...go figure). Turn it off for now. -- BW 02/19/2003
+         */
+
         /* OK to accumulate metadata for faster writes */
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA_WRITE;
+#endif  /* 0 */
 
         /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;
@@ -1334,7 +1436,8 @@ H5FD_fphdf5_write(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
                                         mpi_off, size_i, buf, &req_id,
                                         &sap_status) != SUCCEED) {
             /* FIXME: Couldn't write metadata. This is bad... */
-HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n", FUNC, __LINE__, sap_status);
+HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
+          FUNC, __LINE__, sap_status);
         }
 
         switch (sap_status) {
@@ -1354,7 +1457,8 @@ HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n", FUNC, __LINE__
         case H5FP_STATUS_BAD_FILE_ID:
         default:
             /* FIXME: Something bad happened */
-HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n", FUNC, __LINE__, sap_status);
+HDfprintf(stderr, "%s:%d: Couldn't write metadata to SAP (%d)\n",
+          FUNC, __LINE__, sap_status);
             break;
         }
     }

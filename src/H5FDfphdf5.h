@@ -16,8 +16,7 @@
 #define H5FDFPHDF5_H__
 
 #include "H5FDmpio.h"
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
+#include "H5FDprivate.h"
 
 #ifdef H5_HAVE_PARALLEL
 #   define H5FD_FPHDF5      (H5FD_fphdf5_init())
@@ -27,19 +26,24 @@
 
 /* Macros */
 
+#ifndef H5_HAVE_FPHDF5
+
+/* If FPHDF5 isn't specified, make this a "FALSE" value */
+#define IS_H5FD_FPHDF5(f)   (0)
+
+#else
+
 #define IS_H5FD_FPHDF5(f)   (H5F_get_driver_id(f) == H5FD_FPHDF5)
 
-#ifdef H5_HAVE_PARALLEL
-
 /* Turn on H5FDfphdf5_debug if H5F_DEBUG is on */
-#ifdef H5F_DEBUG
-#   ifndef H5FDfphdf5_DEBUG
-#       define H5FDfphdf5_DEBUG
-#   endif
-#endif
+#if defined(H5F_DEBUG) && !defined(H5FDfphdf5_DEBUG)
+#   define H5FDfphdf5_DEBUG
+#endif  /* H5F_DEBUG && ! H5FDfphdf5_DEBUG */
 
 #define H5FD_FPHDF5_XFER_DUMPING_METADATA   "H5FD_fphdf5_dumping_metadata"
 #define H5FD_FPHDF5_XFER_DUMPING_SIZE       sizeof(unsigned)
+
+extern const H5FD_class_t H5FD_fphdf5_g;
 
 /* Function prototypes */
 #ifdef __cplusplus
@@ -73,6 +77,8 @@ H5_DLL herr_t   H5FD_fphdf5_setup(hid_t dxpl_id, MPI_Datatype btype,
 H5_DLL herr_t   H5FD_fphdf5_teardown(hid_t dxpl_id);
 H5_DLL int      H5FD_fphdf5_mpi_rank(H5FD_t *_file);
 H5_DLL int      H5FD_fphdf5_mpi_size(H5FD_t *_file);
+H5_DLL unsigned H5FD_fphdf5_file_id(H5FD_t *_file);
+H5_DLL hbool_t  H5FD_fphdf5_is_sap(H5FD_t *_file);
 
 H5_DLL herr_t   H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id,
                                        MPI_Offset mpi_off, int size,
