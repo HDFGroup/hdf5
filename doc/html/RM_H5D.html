@@ -79,6 +79,7 @@ and set and retrieve their constant or persistent properties.
     <li><a href="#Dataset-Debug">H5Ddebug</a>
 -->
     <li><a href="#Dataset-Extend">H5Dextend</a>
+    <li><a href="#Dataset-Fill">H5Dfill</a>
 </ul>
 </td></tr>
 </table>
@@ -911,6 +912,65 @@ facilitate moving easily between them.</i>
 </dl>
 
 
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Fill">H5Dfill</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dfill</code>(
+        <em>const void *</em><code>fill</code>,
+        <em>hid_t </em><code>fill_type_id</code>,
+        <em>void *</em><code>buf</code>,
+        <em>hid_t </em><code>buf_type_id</code>,
+        <em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Fills dataspace elements with a fill value in a memory buffer.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dfill</code> explicitly fills a dataspace selection 
+        in memory with the fill value specified in <code>fill</code>.
+        <p>
+        If <code>fill</code> is <code>NULL</code>, 
+        a fill value of <code>0</code> (zero) is used.
+        <p>
+        Note that if the fill value datatype differs 
+        from the memory buffer datatype, the fill value 
+        will be converted to the memory buffer datatype 
+        before filling the selection.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>const void *</em><code>fill</code>
+            <dd>IN: Pointer to the fill value to be used.
+        <dt><em>hid_t </em><code>fill_type_id</code>
+            <dd>IN:  Fill value datatype identifier.
+        <dt><em>void *</em><code>buf</code>
+            <dd>IN/OUT: Pointer to the memory buffer containing the 
+                selection to be filled.
+        <dt><em>hid_t </em><code>buf_type_id</code>
+            <dd>IN: Datatype of dataspace elements to be filled.
+        <dt><em>hid_t </em><code>space_id</code>
+            <dd>IN: Dataspace describing memory buffer and 
+                    containing the selection to be filled.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5d_FORTRAN.html#h5diterate_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+
+
+
+
+
+
 
 <hr>
 <center>
@@ -952,7 +1012,7 @@ H5D&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  8 October 2001
+Last modified:  19 April 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
