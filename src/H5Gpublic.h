@@ -71,8 +71,8 @@ typedef enum H5G_obj_t {
 
 /* Information about an object */
 typedef struct H5G_stat_t {
-    unsigned long 	fileno[2];	/*file number			*/
-    unsigned long 	objno[2];	/*object number			*/
+    unsigned long 	fileno;		/*file number			*/
+    haddr_t 		objno;		/*object number			*/
     unsigned 		nlink;		/*number of hard links to object*/
     H5G_obj_t 		type;		/*basic object type		*/
     time_t		mtime;		/*modification time		*/
