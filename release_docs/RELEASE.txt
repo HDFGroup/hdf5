@@ -81,6 +81,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     Configuration
     -------------
+	- Long double is assumed to be a supported C data type.  It is a
+	  stanadard C89 type. AKC - 2004/10/22
+
 
     Performance
     -------------
