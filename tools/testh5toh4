@@ -39,119 +39,87 @@ CONVERT()
 {
     # Run h5toh4 convert.
     TESTING $h5toh4 $@
-    (
-        case "$1" in
 
-        "-m")
-   	    if [ $# -eq 2 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $OUTDIR
-		    set - $1 $OUTDIR/$2
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2
-		fi
-	    elif [ $# -eq 3 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3
-		fi
-	    elif [ $# -eq 4 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4
-		fi
-	    elif [ $# -eq 5 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4 $5
-		fi
-	    elif [ $# -eq 6 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4 $5 $6
-		fi
-	    elif [ $# -eq 7 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4 $5 $6 $7
-		fi
-	    elif [ $# -eq 8 ]
-	    then
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7 $OUTDIR/$8
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4 $5 $6 $7 $8
-		fi
-	    else
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $INDIR/$9
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $INDIR/$9 $OUTDIR
-		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7 $OUTDIR/$8 $OUTDIR/$9
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $2 $3 $4 $5 $6 $7 $8 $9
-		fi
-	    fi
-            ;;
-	* )
-   	    if [ $# -eq 1 ]
-	    then 
-		if test "$INDIR" = "$OUTDIR"; then
-		    set - $INDIR/$1
-        	    $h5toh4 "$@" 2>/dev/null
-		else
-		    cp $INDIR/$1 $OUTDIR
-		    set - $OUTDIR/$1
-        	    $h5toh4 "$@" 2>/dev/null
-		    $RM $1
-		fi
-	    else
- 		set - $INDIR/$1 $OUTDIR/$2
-        	$h5toh4 "$@" 2>/dev/null
-	    fi
-            ;;
-        esac
-    )
+#
+# Set up arguments to run the conversion test.
+# The converter assumes all hdf5 files has the .h5 suffix as in the form
+# of foo.h5.  It creates the corresponding hdf4 files with the .hdf suffix
+# as in the form of foo.hdf.  One exception is that if exactly two file names
+# are given, it treats the first argument as an hdf5 file and creates the
+# corresponding hdf4 file with the name as the second argument, WITOUT
+# any consideration of the suffix.
+#
+# If INDIR != OUTDIR, need to copy the input hdf5 files from the INDIR
+# to the OUTDIR and transform the input file pathname because of the suffix
+# convention mentioned above.  This way, the hdf4 files are always created
+# in the OUTDIR directory.
 
+# Need to run the following in a separate shell to preserve the
+# positional parameters of THIS shell.  The current shell parameters
+# are needed for the verification.  (In the next revision, will use
+# the $OUTFILES values to do the verification.)
+#
+
+(
+    INFILES=""
+    OUTFILES=""
+
+    case "$1" in
+    "-m")	# multiple files conversion
+	shift
+	while [ $# -gt 0 ]
+	do
+	    if [ "$INDIR" != "$OUTDIR" ]
+	    then
+		cp $INDIR/$1 $OUTDIR/$1
+	    fi
+	    INFILES="$INFILES $OUTDIR/$1"
+	    OUTFILES="$OUTFILES $OUTDIR/`basename $1 .h5`.hdf"
+	    shift
+	done
+	set - "-m" $INFILES
+	;;
+
+    * ) # one file conversion
+	case $# in
+	1)  
+	    if [ "$INDIR" != "$OUTDIR" ]
+	    then
+		cp $INDIR/$1 $OUTDIR/$1
+	    fi
+	    INFILES="$OUTDIR/$1"
+	    OUTFILES="$OUTDIR/`basename $1 .h5`.hdf"
+	    set - $INFILES
+	    ;;
+	    
+	2)  # hdf4 file specified
+	    if [ "$INDIR" != "$OUTDIR" ]
+	    then
+		cp $INDIR/$1 $OUTDIR/$1
+	    fi
+	    INFILES="$OUTDIR/$1"
+	    OUTFILES="$2"
+	    set - $OUTDIR/$1 $OUTDIR/$2
+	    ;;
+
+	*)  # Illegal
+	    echo "Illegal arguments"
+	    exit 1
+	    ;;
+	esac
+	;;
+    esac
+
+    # run the conversion and remove input files that have been copied over
+    $h5toh4 "$@" 2>/dev/null
+    if [ "$INDIR" != "$OUTDIR" ]
+    then
+	$RM $INFILES
+    fi
+
+)
+
+    # verify results
     case "$1" in
 
     "-m")
