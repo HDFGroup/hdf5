@@ -962,7 +962,7 @@ H5AC_protect(H5F_t *f,
         
             info_ptr = (H5AC_info_t *)thing;
 
-            HDassert(info_ptr->dirty == FALSE);
+            HDassert(info_ptr->is_dirty == FALSE);
 
             info_ptr->addr = addr;
             info_ptr->type = type;
@@ -1136,7 +1136,7 @@ H5AC_unprotect(H5F_t *f,
             /* Flush a thing to the SAP */
             if ( thing ) {
 
-                if ( ((H5AC_info_t *)thing)->dirty ) {
+                if ( ((H5AC_info_t *)thing)->is_dirty ) {
 
                     if ( type->flush(f, dxpl_id, FALSE, addr, thing) < 0 ) {
 

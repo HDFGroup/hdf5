@@ -78,6 +78,7 @@ typedef struct H5D_rdcdc_t {
  */
 struct H5D_t {
     H5G_entry_t         ent;            /* cached object header stuff   */
+    hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
     hid_t               dcpl_id;        /* dataset creation property id */

@@ -922,7 +922,7 @@ H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr)
     unsigned	u;
     size_t	size;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_compute_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_compute_size);
 
     /* check args */
     HDassert(f);

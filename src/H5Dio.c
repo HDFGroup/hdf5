@@ -70,10 +70,10 @@ typedef struct fm_map {
 } fm_map;
 
 /* Local functions */
-static herr_t H5D_read(H5D_t *dataset, const H5T_t *mem_type,
+static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
 			const H5S_t *mem_space, const H5S_t *file_space,
 			hid_t dset_xfer_plist, void *buf/*out*/);
-static herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
+static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
 			 const H5S_t *mem_space, const H5S_t *file_space,
 			 hid_t dset_xfer_plist, const void *buf);
 static herr_t 
@@ -444,7 +444,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
     H5D_t		   *dset = NULL;
-    const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
     herr_t                  ret_value=SUCCEED;  /* Return value */
@@ -458,8 +457,6 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if (NULL == dset->ent.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5S_ALL != mem_space_id) {
 	if (NULL == (mem_space = H5I_object_verify(mem_space_id, H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
@@ -487,7 +484,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* read raw data */
-    if (H5D_read(dset, mem_type, mem_space, file_space, plist_id, buf/*out*/) < 0)
+    if (H5D_read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -535,7 +532,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t plist_id, const void *buf)
 {
     H5D_t		   *dset = NULL;
-    const H5T_t		   *mem_type = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
     herr_t                  ret_value=SUCCEED;  /* Return value */
@@ -549,8 +545,6 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if (NULL == dset->ent.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
     if (H5S_ALL != mem_space_id) {
 	if (NULL == (mem_space = H5I_object_verify(mem_space_id, H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
@@ -578,7 +572,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     /* write raw data */
-    if (H5D_write(dset, mem_type, mem_space, file_space, plist_id, buf) < 0)
+    if (H5D_write(dset, mem_type_id, mem_space, file_space, plist_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -634,13 +628,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
-    hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
+    const H5T_t	*mem_type = NULL;       /* Memory datatype */
     H5S_conv_t	*sconv=NULL;	        /*space conversion funcs*/
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
@@ -655,8 +649,11 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     /* check args */
     assert(dataset && dataset->ent.file);
-    assert(mem_type);
     assert(buf);
+
+    /* Get memory datatype */
+    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
     if (!file_space)
         file_space = dataset->space;
@@ -727,13 +724,8 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL, dxpl_id))) {
+    if (NULL==(tpath=H5T_path_find(dataset->type, mem_type, NULL, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-    } else if (!H5T_path_noop(tpath)) {
-        if ((src_id=H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0 ||
-                (dst_id=H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-    } /* end if */
 
     /* Set the storage flags for the space conversion check */
     switch(dataset->layout.type) {
@@ -766,12 +758,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, dataset->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
         if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, dataset->type_id, mem_type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end else */
 
@@ -781,14 +773,6 @@ done:
     if (xfer_mode_changed)
         H5D_io_restore_mpio(dxpl_id);
 #endif /*H5_HAVE_PARALLEL*/
-    if (src_id >= 0) {
-        if(H5I_dec_ref(src_id)<0)
-            HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    } /* end if */
-    if (dst_id >= 0) {
-        if(H5I_dec_ref(dst_id)<0)
-            HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_read() */
@@ -841,13 +825,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
-    hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
+    const H5T_t	*mem_type = NULL;       /* Memory datatype */
     H5S_conv_t	*sconv=NULL;		/*space conversion funcs*/
     hbool_t     use_par_opt_io=FALSE;   /* Whether the 'optimized' I/O routines with be parallel */
 #ifdef H5_HAVE_PARALLEL
@@ -862,26 +846,17 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     /* check args */
     assert(dataset && dataset->ent.file);
-    assert(mem_type);
     assert(buf);
+
+    /* Get the memory datatype */
+    if (NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
     /* All filters in the DCPL must have encoding enabled. */
     if(! dataset->checked_filters)
     {
-        hid_t type_id;
-
-        type_id = H5I_register(H5I_DATATYPE, dataset->type);
-        if(type_id < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data type")
-
-        if(H5Z_can_apply(dataset->dcpl_id, type_id) <0)
-        {
-            H5I_remove(type_id);
+        if(H5Z_can_apply(dataset->dcpl_id, dataset->type_id) <0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
-        }
-
-        if(H5I_remove(type_id) == NULL)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to release data type id")
 
         dataset->checked_filters = TRUE;
     }
@@ -966,13 +941,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
-    if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL, dxpl_id))) {
+    if (NULL==(tpath=H5T_path_find(mem_type, dataset->type, NULL, NULL, dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-    } else if (!H5T_path_noop(tpath)) {
-	if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
-                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-    } /* end if */
 
     /* Set the storage flags for the space conversion check */
     switch(dataset->layout.type) {
@@ -1005,12 +975,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, mem_type_id, dataset->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
         if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv,
-                dxpl_cache, dxpl_id, src_id, dst_id, buf)<0)
+                dxpl_cache, dxpl_id, mem_type_id, dataset->type_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end else */
 
@@ -1035,14 +1005,6 @@ done:
     if (xfer_mode_changed)
         H5D_io_restore_mpio(dxpl_id);
 #endif /*H5_HAVE_PARALLEL*/
-    if (src_id >= 0) {
-        if(H5I_dec_ref(src_id)<0)
-            HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    } /* end if */
-    if (dst_id >= 0) {
-        if(H5I_dec_ref(dst_id)<0)
-            HDONE_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_write() */

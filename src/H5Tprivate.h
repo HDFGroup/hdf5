@@ -77,8 +77,9 @@ H5_DLL size_t H5T_get_size(const H5T_t *dt);
 H5_DLL int    H5T_cmp(const H5T_t *dt1, const H5T_t *dt2);
 H5_DLL herr_t H5T_debug(const H5T_t *dt, FILE * stream);
 H5_DLL H5G_entry_t *H5T_entof(H5T_t *dt);
-H5_DLL htri_t H5T_is_immutable(H5T_t *dt);
-H5_DLL htri_t H5T_is_named(H5T_t *dt);
+H5_DLL htri_t H5T_is_immutable(const H5T_t *dt);
+H5_DLL htri_t H5T_is_named(const H5T_t *dt);
+H5_DLL htri_t H5T_is_relocatable(const H5T_t *dt);
 H5_DLL H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
 				  const char *name, H5T_conv_t func, hid_t dxpl_id);
 H5_DLL hbool_t H5T_path_noop(const H5T_path_t *p);
