@@ -7025,7 +7025,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         /* Call property creation callback, if it exists */
         if(new_prop->create) {
             if((new_prop->create)(new_prop->name,new_prop->size,new_prop->value)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't initialize property");
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property");
         } /* end if */
 
         /* Insert property into property list class */
