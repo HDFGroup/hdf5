@@ -275,8 +275,8 @@
                  fortran/src/H5Dff.f90
                  fortran/src/H5Aff.f90
                  fortran/src/H5Pff.f90
-               Check for "On T3E ..." comment and comment out specified
-               lines.       
+               Check for "Comment if on T3E ..." comment and comment out 
+               specified lines.       
           
 
 5.3.5. Specifying other programs
