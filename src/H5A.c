@@ -754,7 +754,7 @@ H5Aread(hid_t attr_id, hid_t type_id, void *buf)
  ERRORS
 
  DESCRIPTION
-    This function read a complete attribute to disk.
+    This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 static herr_t
 H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
@@ -781,39 +781,45 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
     src_type_size = H5T_get_size(attr->dt);
     dst_type_size = H5T_get_size(mem_type);
 
-    /* Get the maximum buffer size needed and allocate it */
-    buf_size = nelmts*MAX(src_type_size,dst_type_size);
-    if (NULL==(tconv_buf = H5MM_malloc (buf_size))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		     "memory allocation failed");
-    }
-
-    /* Copy the attribute data into the buffer for conversion */
-    HDmemcpy(tconv_buf,attr->data,src_type_size*nelmts);
-
-    /* Convert memory buffer into disk buffer */
-    /* Set up type conversion function */
-    if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL))) {
-        HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
-		    "unable to convert between src and dest data types");
-    } else if (!H5T_IS_NOOP(tpath)) {
-        if ((src_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
-	    (dst_id = H5I_register(H5I_DATATYPE,
-				   H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
-			"unable to register types for conversion");
+    /* Check if the attribute has any data yet, if not, fill with zeroes */
+    if(attr->ent_opened && !attr->initialized) {
+        HDmemset(buf,0,dst_type_size*nelmts);
+    }   /* end if */
+    else {  /* Attribute exists and has a value */
+        /* Get the maximum buffer size needed and allocate it */
+        buf_size = nelmts*MAX(src_type_size,dst_type_size);
+        if (NULL==(tconv_buf = H5MM_malloc (buf_size))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                 "memory allocation failed");
         }
-    }
 
-    /* Perform data type conversion.  */
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, tconv_buf, NULL)<0) {
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
-		    "data type conversion failed");
-    }
+        /* Copy the attribute data into the buffer for conversion */
+        HDmemcpy(tconv_buf,attr->data,src_type_size*nelmts);
 
-    /* Copy the converted data into the user's buffer */
-    HDmemcpy(buf,tconv_buf,dst_type_size*nelmts);
+        /* Convert memory buffer into disk buffer */
+        /* Set up type conversion function */
+        if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL))) {
+            HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL,
+                "unable to convert between src and dest data types");
+        } else if (!H5T_IS_NOOP(tpath)) {
+            if ((src_id = H5I_register(H5I_DATATYPE,
+                       H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
+            (dst_id = H5I_register(H5I_DATATYPE,
+                       H5T_copy(mem_type, H5T_COPY_ALL)))<0) {
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL,
+                "unable to register types for conversion");
+            }
+        }
+
+        /* Perform data type conversion.  */
+        if (H5T_convert(tpath, src_id, dst_id, nelmts, tconv_buf, NULL)<0) {
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
+                "data type conversion failed");
+        }
+
+        /* Copy the converted data into the user's buffer */
+        HDmemcpy(buf,tconv_buf,dst_type_size*nelmts);
+    } /* end else */
 
     ret_value=SUCCEED;
 
