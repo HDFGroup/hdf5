@@ -3380,6 +3380,7 @@ done:
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
+    H5T_vlen_alloc_info_t vl_alloc_info; /* VL allocation info */
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
@@ -3398,8 +3399,12 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
         if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
+    /* Get the allocation info */
+    if(H5T_vlen_get_alloc_info(plist_id,&vl_alloc_info)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
+
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&plist_id);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&vl_alloc_info);
 
 done:
     FUNC_LEAVE_API(ret_value)

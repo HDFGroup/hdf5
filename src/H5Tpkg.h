@@ -37,6 +37,7 @@
 /* Get package's private header */
 #include "H5Tprivate.h"
 
+/* Other private headers needed by this file */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5HGprivate.h"	/* Global heaps				*/
@@ -60,25 +61,17 @@ struct H5T_stats_t {
     H5_timer_t	timer;			/*total time for conversion	     */
 };
 
-/* The data type conversion database */
+/* The datatype conversion database */
 struct H5T_path_t {
     char	name[H5T_NAMELEN];	/*name for debugging only	     */
-    H5T_t	*src;			/*source data type ID		     */
-    H5T_t	*dst;			/*destination data type ID	     */
+    H5T_t	*src;			/*source datatype ID		     */
+    H5T_t	*dst;			/*destination datatype ID	     */
     H5T_conv_t	func;			/*data conversion function	     */
     hbool_t	is_hard;		/*is it a hard function?	     */
     hbool_t	is_noop;		/*is it the noop conversion?	     */
     H5T_stats_t	stats;			/*statistics for the conversion	     */
     H5T_cdata_t	cdata;			/*data for this function	     */
 };
-
-/* VL types */
-typedef enum {
-    H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
-    H5T_VLEN_SEQUENCE=0,    /* VL sequence */
-    H5T_VLEN_STRING,        /* VL string */
-    H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
-} H5T_vlen_type_t;
 
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */
@@ -113,14 +106,14 @@ typedef struct H5T_atomic_t {
     } u;
 } H5T_atomic_t;
 
-/* How members are sorted for compound or enum data types */
+/* How members are sorted for compound or enum datatypes */
 typedef enum H5T_sort_t {
     H5T_SORT_NONE	= 0,		/*not sorted			     */
     H5T_SORT_NAME	= 1,		/*sorted by member name		     */
     H5T_SORT_VALUE	= 2 		/*sorted by memb offset or enum value*/
 } H5T_sort_t;
 
-/* A compound data type */
+/* A compound datatype */
 typedef struct H5T_compnd_t {
     int		nalloc;		/*num entries allocated in MEMB array*/
     int		nmembs;		/*number of members defined in struct*/
@@ -129,21 +122,29 @@ typedef struct H5T_compnd_t {
     struct H5T_cmemb_t	*memb;	/*array of struct members	     */
 } H5T_compnd_t;
 
-/* An enumeration data type */
+/* An enumeration datatype */
 typedef struct H5T_enum_t {
     int		nalloc;		/*num entries allocated		     */
     int		nmembs;		/*number of members defined in enum  */
-    H5T_sort_t		sorted;		/*how are members sorted?	     */
-    uint8_t		*value;		/*array of values		     */
-    char		**name;		/*array of symbol names		     */
+    H5T_sort_t	sorted;		/*how are members sorted?	     */
+    uint8_t	*value;		/*array of values		     */
+    char	**name;		/*array of symbol names		     */
 } H5T_enum_t;
 
 /* VL function pointers */
 typedef hssize_t (*H5T_vlen_getlenfunc_t)(void *vl_addr);
 typedef htri_t (*H5T_vlen_isnullfunc_t)(H5F_t *f, void *vl_addr);
 typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t len);
-typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, void *_bg, hsize_t seq_len, hsize_t base_size);
+typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, hsize_t seq_len, hsize_t base_size);
 typedef herr_t (*H5T_vlen_setnullfunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
+
+/* VL types */
+typedef enum {
+    H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
+    H5T_VLEN_SEQUENCE=0,    /* VL sequence */
+    H5T_VLEN_STRING,        /* VL string */
+    H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
+} H5T_vlen_type_t;
 
 /* A VL datatype */
 typedef struct H5T_vlen_t {
@@ -160,16 +161,16 @@ typedef struct H5T_vlen_t {
     H5T_vlen_setnullfunc_t setnull; /* Function to set a VL value to NIL */
 } H5T_vlen_t;
 
-/* An opaque data type */
+/* An opaque datatype */
 typedef struct H5T_opaque_t {
     char		*tag;		/*short type description string	     */
 } H5T_opaque_t;
 
 /* An array datatype */
 typedef struct H5T_array_t {
-    size_t		nelem;		/* total number of elements in array */
+    size_t	nelem;		/* total number of elements in array */
     int		ndims;		/* member dimensionality        */
-    size_t		dim[H5S_MAX_RANK];  /* size in each dimension       */
+    size_t	dim[H5S_MAX_RANK];  /* size in each dimension       */
     int		perm[H5S_MAX_RANK]; /* index permutation            */
 } H5T_array_t;
 
@@ -187,19 +188,19 @@ struct H5T_t {
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
-    hbool_t     force_conv;     /* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
-    struct H5T_t	*parent;/*parent type for derived data types	     */
+    hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
+    struct H5T_t	*parent;/*parent type for derived datatypes	     */
     union {
-        H5T_atomic_t	atomic; /* an atomic data type              */
-        H5T_compnd_t	compnd; /* a compound data type (struct)    */
-        H5T_enum_t	    enumer; /* an enumeration type (enum)       */
-        H5T_vlen_t	    vlen;   /* a variable-length datatype       */
-        H5T_opaque_t	opaque; /* an opaque data type              */
-        H5T_array_t	    array;  /* an array datatype                */
+        H5T_atomic_t	atomic; /* an atomic datatype              */
+        H5T_compnd_t	compnd; /* a compound datatype (struct)    */
+        H5T_enum_t	enumer; /* an enumeration type (enum)       */
+        H5T_vlen_t	vlen;   /* a variable-length datatype       */
+        H5T_opaque_t	opaque; /* an opaque datatype              */
+        H5T_array_t	array;  /* an array datatype                */
     } u;
 };
 
-/* A compound data type member */
+/* A compound datatype member */
 typedef struct H5T_cmemb_t {
     char		*name;		/*name of this member		     */
     size_t		offset;		/*offset from beginning of struct    */
@@ -210,8 +211,8 @@ typedef struct H5T_cmemb_t {
 /* The master list of soft conversion functions */
 typedef struct H5T_soft_t {
     char	name[H5T_NAMELEN];	/*name for debugging only	     */
-    H5T_class_t src;			/*source data type class	     */
-    H5T_class_t dst;			/*destination data type class	     */
+    H5T_class_t src;			/*source datatype class	     */
+    H5T_class_t dst;			/*destination datatype class	     */
     H5T_conv_t	func;			/*the conversion function	     */
 } H5T_soft_t;
 
@@ -860,7 +861,7 @@ H5_DLL ssize_t H5T_bit_find(uint8_t *buf, size_t offset, size_t size,
 H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */
-H5_DLL H5T_t * H5T_vlen_create(H5T_t *base);
+H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
 
 /* Array functions */
 H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
