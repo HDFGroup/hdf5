@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * -O caused errors in AIX 5.x platforms.  Removed it from
+      --enable-production mode.  AKC - 2003/03/31
     * Corrected metadata caching bug in parallel I/O which could cause hangs
       when chunked datasets were accessed with independent transfer mode.
       QAK - 2003/02/10
