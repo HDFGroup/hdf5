@@ -139,7 +139,7 @@ Support for new platforms, languages and compilers.
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
           compiler version 8.1. This is a default compiler.
         - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
-          version 8.2; set F9X environment varibale to f95, for example
+          version 8.2; set F9X environment variable to f95, for example
           setenv F9X f95
           Use --disable-shared --enable-static configure flags when Absoft
           compiler is used.
@@ -164,7 +164,7 @@ Bug Fixes since HDF5-1.6.2 release
           value and an unwritten chunk is uncountered.  QAK - 2004/08/25
         - Fixed error which could cause a core dump when a type conversion
           routine was registered after a compound datatype had been
-          converted and then an equivalment compound datatype was converted
+          converted and then an equivalent compound datatype was converted
           again.  QAK - 2004/08/07
         - Fixed memory overwrite when encoding "multi" file driver information
           for file's superblock.  QAK - 2004/08/05
@@ -227,6 +227,16 @@ Bug Fixes since HDF5-1.6.2 release
                                              EIP - 2004/09/21 
     Documentation 
     ------------- 
+        - Several descriptive errors have been fixed throughout the 
+          documentation, particularly in the reference manual (RM).
+          A selection particularly worthy of note would be these: 
+        - The H5Pset_szip description in the RM has been expanded and
+          corrected to facilitate use of SZIP compression.
+        - A note has been added to the H5Dcreate description that an
+          unexplained failure is likely to be due to a property list error 
+          that is detected only at the time of dataset creation.
+        -
+        FMB - 2004/09/21
 
     F90 API
     -------
@@ -248,8 +258,36 @@ Bug Fixes since HDF5-1.6.2 release
 
 Documentation
 =============
-    Windows 
-    -------
+    HDF5 Library documentation
+    --------------------------
+        - HDF5 C++ API Reference Manual
+          This document has been added to the HDF5 document set.  
+          The predecessor document, "HDF5 C++ Interfaces," has been removed.
+        - HDF5 C++ API Design Specification
+          A first draft of this document has been added to the HDF5 document 
+          set.  The draft has been posted on the HDF5 website and a link 
+          has been added to the HDF5 documents index (index.html at the top 
+          level of the document set).
+        - Parallel HDF5
+          In prior releases, the HDF5 document set included two parallel
+          HDF5 documents.  Those documents have been deleted and the 
+          HDF5 documents index (index.html) now links to a "Parallel HDF5" 
+          page on the HDF5 website (http://hdf.ncsa.uiuc.edu/HDF5/PHDF5/).
+        - HDF5 High Level APIs
+          Links to the HDF5 High Level APIs and to the HDF5 High Level 
+          Reference Manual have been added to the HDF5 documents index
+          (index.html).
+        - HDF5 Reference Manual
+          Tools: h5repack -- A description of the new h5repack tool has been 
+              added to the Tools page.
+          Tools: h5dump -- Several new options have been added to h5dump.
+          New functions -- All new functions have been added to the RM.
+          API changes -- Relevant function descriptions have been updated in
+              instances where programming interfaces have changed. 
+        FMB - 2004/09/21
+
+    Windows installation documentation
+    ----------------------------------
         -  INSTALL_Windows.txt has been enhanced to include instructions building 
            HDF5 with FORTRAN and C++. 
         -  Two optional installation documents have been added. They are
@@ -363,13 +401,102 @@ Platforms Tested
 Supported Configuration Features Summary
 ========================================
 
-  *******************************************************************
-  A copy of the current version of the table that belongs in this
-  spot is placed for review in the HDF Lobby or can be obtained from 
-  Frank Baker.  Please review and give any revisions to him.
-  All changes entered into the table in RELEASE.txt on or prior to 
-  15 Sept '04 will be captured and posted for review on 16 Sept.
-  *******************************************************************
+Key:   y = tested and supported
+       n = not supported or not tested in this release
+       x = not working in this release
+       dna = does not apply
+       ( ) = footnote appears below second table
+
+Platform                             C        F90    F90      C++  zlib  SZIP
+                                     parallel        parallel      
+Solaris2.7 64-bit                    y (1)    y      y (1)    y    y     y
+Solaris2.7 32-bit                    y (1)    y      y (1)    y    y     y
+Solaris2.8 64-bit                    y (1)    y      y (1)    y    y     y
+Solaris2.8 32-bit                    y        y      y (1)    y    y     y
+IRIX64_6.5 64-bit                    y (2)    y      y        y    y     y
+IRIX64_6.5 32-bit                    y (2)    n      n        n    y     y
+HPUX11.00                            y (1)    y      y        y    y     y
+OSF1 v5.1                            y        y      y        y    y     y
+T90 IEEE                             n        y      n        n    y     n
+T3E                                  y (5)    y      y (5)    n    y     n
+SV1                                  y (5)    y      y (5)    n    y     n
+TFLOPS                               y (1)    n      n        n    y     n
+AIX-5.1 & 5.2 32-bit                 y        y      y        y    y     y
+AIX-5.1 & 5.2 64-bit                 y        y      y        y    y     y
+WinXP Visual Studio 6.0              n        y (9)  n        y    y     y
+WinXP .Net                           n        n      n        y    y     y
+WinXP Code Warrior                   n        n      n        n    y     y
+Win2000 Visual Studio 6.0            n        y (10) n        y    y     y
+Win2000 Visual Studio Intel (6)      n        y      n        y    y     y
+Win2000 .Net                         n        n      n        y    y     y
+Mac OS X 10.3                        n        y (11) n        y    y     y
+FreeBSD 4.9                          y (1)    n      n        y    y     y
+RedHat 7   W        (3)              y (1)    y (12) n        y    y     y
+RedHat 7.3  W Intel (3)              n        y      n        y    y     y
+RedHat 7.3  W PGI   (3)              n        y      n        y    y     y
+RedHat 8 & SuSe x86_64 gcc     (3)   n        y (13) n        y    y     y
+Linux 2.4 Xeon C Lustre Intel (3,7)  n        y      n        y    y     y
+Linux 2.4 SuSE ia64 C   Intel (3,8)  y        y      y        y    y     y
+Linux 2.4 SGI Altix ia64 Intel (3)   y        y      y        y    y     y
+
+
+Platform                             Shared         static-  Thread-  STREAM- 
+                                     libraries (4)  exec     safe     VFD    
+Solaris2.7 64-bit                    y              x        y        y
+Solaris2.7 32-bit                    y              x        y        y
+Solaris2.8 64-bit                    y              x        y        y
+Solaris2.8 32-bit                    y              x        y        y
+IRIX64_6.5 64-bit                    y              y        y        y
+IRIX64_6.5 32-bit                    y              y        y        y
+HPUX11.00                            y              x        n        y
+OSF1 v5.1                            y              y        n        y
+T90 IEEE                             n              y        n        y
+T3E                                  n              y        n        y
+SV1                                  n              y        n        y
+TFLOPS                               n              y        n        n
+AIX-5.1 & 5.2 32-bit                 n              y        n        y
+AIX-5.1 & 5.2 64-bit                 n              y        n        y
+WinXP Visual Studio 6.0              y              y        n        n
+WinXP .Net                           y              y        n        n
+WinXP Code Warrior                   n              y        n        n
+Win2000 Visual Studio 6.0            y              y        n        n
+Win2000 Visual Studio Intel (6)      y              y        n        n
+Win2000 .Net                         y              y        n        n
+Mac OS X 10.3                        y              y        n        y
+FreeBSD 4.9                          y              y        y        y
+RedHat 7    W       (3)              y              y        y        y
+RedHat 7.3  W Intel (3)              n              y        n        y
+RedHat 7.3  W PGI   (3)              n              y        n        y
+RedHat 8 & SuSe x86_64 gcc     (3)   n              y        n        y
+Linux 2.4 Xeon C Lustre Intel (3,7)  y              y        n        y
+Linux 2.4 SuSE ia64 C Intel   (3,8)  y              y        n        n
+Linux 2.4 SGI Altix ia64 Intel (3)   y              y        n        y
+
+
+
+Compiler versions for each platform are listed in the "Platforms Tested" 
+table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
+compilers used are the system compilers.
+
+Footnotes:  (1) Using mpich 1.2.4
+            (2) Using mpt and mpich 1.2.4
+            (3) Linux 2.4 with GNU, Intel, and PGI compilers, as indicated  
+                W or C indicates workstation or cluster, respectively
+            (4) Shared libraries are provided only for the C library, 
+                except on Windows where they are provided for C and C++
+            (5) Using mpt
+            (6) Intel 7.1 compilers in Visual Studio 6.0 environment
+            (7) Linux 2.4.20-31.9.  Xeon cluster with smp_perfctr_lustre 
+                and Intel compilers
+            (8) Linux 2.4.21, SuSE_128.befl.  Ia64 cluster with Intel compilers
+            (9) DEC Visual Fortran 6.0 and Intel 7.1
+            (10) DEC Visual Fortran 6.0
+            (11) IBM XLF and Absoft
+            (12) PGI, Absoft
+            (13) PGI
+       FMB/EIP - 2004/09/21
+
+
 
 Known Problems
 ==============
@@ -454,7 +581,7 @@ Known Problems
       Testing random sw long double -> double conversions
   If -ieee is used, the converted doubles spread over the range 0.0 to 1**-308.
   If -ieee is not used, the converted double values are mostly 0.0 but
-  occassionaly as 1**-308.  This has been reported to the system staff.
+  occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
 
 * On at least one system, (SDSC DataStar), the scheduler (in this case
@@ -500,7 +627,7 @@ Known Problems
 
         exit $RETURN_VALUE
 
-  You get the HDF make files and test scipts to execute your filter script
+  You get the HDF make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.
