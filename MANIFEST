@@ -1266,6 +1266,7 @@
 ./test/Makefile.in
 ./test/big.c
 ./test/bittests.c
+./test/cache.c
 ./test/cmpd_dset.c
 ./test/dangle.c
 ./test/deflate.h5
