@@ -1863,9 +1863,9 @@ dnl
   if test "X$FPHDF5" = "Xyes"; then
     AC_DEFINE(HAVE_FPHDF5, 1,
               [Define if we want flexible parallel HDF5 support])
-    echo "yes"
+    AC_MSG_RESULT(yes)
   else
-    echo "no"
+    AC_MSG_RESULT(no)
   fi
 fi
 
@@ -2312,8 +2312,11 @@ PRINT "Features:"
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
 
-PRINT_N "           internal I/O filters"
-PRINT "$FILTERS"
+PRINT_N "          Flexible Parallel HDF"
+IF_YES_NO "$FPHDF5"
+
+PRINT_N "         Function Stack Tracing"
+IF_ENABLED_DISABLED "$FUNCSTACK"
 
 PRINT_N "                           GASS"
 IF_YES_NO "$GASS"
@@ -2323,6 +2326,9 @@ IF_YES_NO "$GPFS"
 
 PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
+
+PRINT_N "           Internal I/O filters"
+PRINT "$FILTERS"
 
 PRINT_N "                        hsize_t"
 case "$HSIZET" in
@@ -2354,9 +2360,6 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
-
-PRINT_N "         Function Stack Tracing"
-IF_ENABLED_DISABLED "$FUNCSTACK"
 
 PRINT_N "               Zlib-compression"
 IF_YES_NO "$HAVE_ZLIB"
