@@ -1,4 +1,4 @@
-HDF5 version 1.6.1-post0 released on Mon Nov  3 00:35:58 CST 2003
+HDF5 version 1.6.1-post1 released on Sun Nov 16 20:45:32 CST 2003
 ================================================================================
 
 
@@ -60,6 +60,8 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed problems with fill values and variable-length types and also
+            I/O on VL values that were set to NULL.  QAK - 2003/11/08
         - Fixed problems with MPI datatypes that caused ASCI Q machine to
             hang.  QAK - 2003/10/28
         - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,
@@ -77,12 +79,17 @@ Bug Fixes since HDF5-1.6.1 release
 
     Performance
     -------------
+        - More optimizations to inner loops of datatype conversions for
+            integers and floats which give a 10-50% speedup.  QAK - 2003/11/07
         - Hoisted invariant 'if/else's out of inner datatype conversion loop for
             integer and floating-point values, giving about a 20% speedup.
             QAK - 2003/10/20
 
     Tools
     -----
+	- Fixed h5redeploy which sometimes complain too many argument for the
+	  test command. (The complain did not hinder the h5redploy to proceed
+	  correctly.) AKC - 2003/11/03
 
     Documentation 
     ------------- 
