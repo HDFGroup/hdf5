@@ -207,6 +207,7 @@ WAITFOR()
     fi
     while [ ! -f $wait_file ]; do
 	if [ $nminutes -gt 0 ]; then
+	    echo "Wait For $wait_file to appear"
 	    sleep 60			#sleep 1 minute
 	else
 	    WAIT_STATUS=1
@@ -239,6 +240,7 @@ WAITTILL()
     fi
     while [ -f $wait_file ]; do
 	if [ $nminutes -gt 0 ]; then
+	    echo "Wait till $wait_file has disappeared"
 	    sleep 60			#sleep 1 minute
 	else
 	    WAIT_STATUS=1
@@ -518,8 +520,11 @@ if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
     fi
     PRINT_BLANK
 else
-    # make sure the cvs update, if done by another host, has completed
-    WAITFOR $CVSLOG 30
+    # make sure the cvs update, if done by another host, has completed.
+    # First wait for the presence of $CVSLOG which signals some host
+    # has started the cvs update.  Then wait for the absense of $CVSLOG_LOCK
+    # which signals the host has completed the cvs update.
+    WAITFOR $CVSLOG 90
     if [ $WAIT_STATUS -ne 0 ]; then
 	errcode=$WAIT_STATUS
 	REPORT_ERR "****Time expired waiting CVS update to start****"
