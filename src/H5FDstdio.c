@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "h5private.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -300,8 +301,8 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 
     /* The unique key */
 #ifdef WIN32
-#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"
-    filehandle = _get_osfhandle(fd);
+//#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"
+    filehandle = _get_osfhandle(f);
     results = GetFileInformationByHandle(filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
     file->fileindexlo = fileinfo.nFileIndexLow;
