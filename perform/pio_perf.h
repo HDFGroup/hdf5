@@ -36,9 +36,10 @@ typedef struct parameters_ {
     int		num_procs;      /* Maximum number of processes to use   */
     long	num_files;      /* Number of files to create            */
     long	num_dsets;      /* Number of datasets to create         */
-    off_t	num_elmts;      /* Number of native ints in each dset   */
+    off_t	num_bytes;      /* Number of bytes in each dset         */
     int         num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
+    size_t 	blk_size;       /* Block size                           */
     unsigned    interleaved;    /* Interleaved vs. contiguous blocks    */
     unsigned    collective;     /* Collective vs. independent I/O       */
     hsize_t 	h5_align;       /* HDF5 object alignment                */

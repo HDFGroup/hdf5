@@ -109,7 +109,7 @@ int         pio_debug_level = 0;/* The debug level:
                                  */
 
 /* local variables */
-static const char  *progname = "pio_perf";
+static const char  *progname = "h5perf";
 
 /*
  * Command-line options: The user can specify short or long-named
@@ -117,14 +117,11 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:cCD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "a:A:B:cCd:D:e:F:hi:Ino:p:P:stT:wx:X:";
 #else
-static const char *s_opts = "ha:A:bcCD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "a:A:bB:cCd:D:e:F:hi:Ino:p:P:stT:wx:X:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
-    { "help", no_arg, 'h' },
-    { "hel", no_arg, 'h' },
-    { "he", no_arg, 'h' },
     { "align", require_arg, 'a' },
     { "alig", require_arg, 'a' },
     { "ali", require_arg, 'a' },
@@ -139,6 +136,15 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "block-size", require_arg, 'B' },
+    { "block-siz", require_arg, 'B' },
+    { "block-si", require_arg, 'B' },
+    { "block-s", require_arg, 'B' },
+    { "block-", require_arg, 'B' },
+    { "block", require_arg, 'B' },
+    { "bloc", require_arg, 'B' },
+    { "blo", require_arg, 'B' },
+    { "bl", require_arg, 'B' },
     { "chunk", no_arg, 'c' },
     { "chun", no_arg, 'c' },
     { "chu", no_arg, 'c' },
@@ -156,13 +162,9 @@ static struct long_options l_opts[] = {
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
     { "de", require_arg, 'D' },
-    { "file-size", require_arg, 'f' },
-    { "file-siz", require_arg, 'f' },
-    { "file-si", require_arg, 'f' },
-    { "file-s", require_arg, 'f' },
-    { "file", require_arg, 'f' },
-    { "fil", require_arg, 'f' },
-    { "fi", require_arg, 'f' },
+    { "help", no_arg, 'h' },
+    { "hel", no_arg, 'h' },
+    { "he", no_arg, 'h' },
     { "interleaved", require_arg, 'I' },
     { "interleave", require_arg, 'I' },
     { "interleav", require_arg, 'I' },
@@ -213,6 +215,11 @@ static struct long_options l_opts[] = {
     { "no-f", no_arg, 'n' },
     { "no-", no_arg, 'n' },
     { "no", no_arg, 'n' },
+    { "num-bytes", require_arg, 'e' },
+    { "num-byte", require_arg, 'e' },
+    { "num-byt", require_arg, 'e' },
+    { "num-by", require_arg, 'e' },
+    { "num-b", require_arg, 'e' },
     { "num-dsets", require_arg, 'd' },
     { "num-dset", require_arg, 'd' },
     { "num-dse", require_arg, 'd' },
@@ -260,14 +267,15 @@ static struct long_options l_opts[] = {
 struct options {
     long io_types;              /* bitmask of which I/O types to test   */
     const char *output_file;    /* file to print report to              */
-    off_t file_size;            /* size of file                         */
     long num_dsets;             /* number of datasets                   */
     long num_files;             /* number of files                      */
+    size_t num_bpp;             /* number of bytes per proc per dset    */
     int num_iters;              /* number of iterations                 */
     int max_num_procs;          /* maximum number of processes to use   */
     int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
+    size_t blk_size;            /* Block size                           */
     unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
     unsigned collective;        /* Collective vs. independent I/O       */
     int print_times;       	/* print times as well as throughputs   */
@@ -410,6 +418,7 @@ run_test_loop(struct options *opts)
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
+    parms.blk_size = opts->blk_size;
     parms.interleaved = opts->interleaved;
     parms.collective = opts->collective;
     parms.h5_align = opts->h5_alignment;
@@ -439,17 +448,16 @@ run_test_loop(struct options *opts)
             for (buf_size = opts->min_xfer_size;
                     buf_size <= opts->max_xfer_size; buf_size <<= 1) {
                 parms.buf_size = buf_size;
-                parms.num_elmts = opts->file_size /
-                                    (off_t)(parms.num_dsets * sizeof(int));
+                parms.num_bytes = (off_t)opts->num_bpp*parms.num_procs;
 
                 print_indent(1);
                 output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
                               buf_size,
-                              ((double)parms.num_dsets * (double)parms.num_elmts *
-                                    (double)sizeof(int)) / ONE_MB);
+                              ((double)parms.num_dsets * (double)parms.num_bytes)
+                                / ONE_MB);
                 print_indent(1);
-                output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
-                              parms.num_files, parms.num_dsets, parms.num_elmts);
+                output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
+                              parms.num_files, parms.num_dsets, (double)parms.num_bytes/ONE_MB);
 
                 if (opts->io_types & PIO_POSIX)
                     run_test(POSIXIO, parms, opts);
@@ -503,7 +511,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     minmax          read_gross_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_raw_mm = {0.0, 0.0, 0.0, 0};
 
-    raw_size = (off_t)parms.num_dsets * (off_t)parms.num_elmts * (off_t)sizeof(int);
+    raw_size = (off_t)parms.num_dsets * (off_t)parms.num_bytes;
     parms.io_type = iot;
     print_indent(2);
     output_report("IO API = ");
@@ -996,8 +1004,8 @@ report_parameters(struct options *opts)
     HDfprintf(output, "rank %d: IO API=", rank);
     print_io_api(opts->io_types);
 
-    HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long_long)opts->file_size, "\n");
+    HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
+    recover_size_and_print((long_long)opts->num_bpp, "\n");
 
     HDfprintf(output, "rank %d: Number of files=%Hd\n", rank,
               (long_long)opts->num_files);
@@ -1008,9 +1016,21 @@ report_parameters(struct options *opts)
     HDfprintf(output, "rank %d: Number of processes=%d:%d\n", rank,
               opts->min_num_procs, opts->max_num_procs);
 
+    HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
+
+    HDfprintf(output, "rank %d: File size=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs
+                                            * opts->num_dsets), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs
+                                            * opts->num_dsets), "\n");
+
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+    HDfprintf(output, "rank %d: Block size=", rank);
+    recover_size_and_print((long_long)opts->blk_size, "\n");
 
     HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);
     if(opts->interleaved)
@@ -1055,15 +1075,16 @@ parse_command_line(int argc, char *argv[])
     cl_opts = (struct options *)malloc(sizeof(struct options));
 
     cl_opts->output_file = NULL;
-    cl_opts->file_size = 64 * ONE_MB;
     cl_opts->io_types =  0;    /* will set default after parsing options */
     cl_opts->num_dsets = 1;
     cl_opts->num_files = 1;
+    cl_opts->num_bpp = 256 * ONE_KB;
     cl_opts->num_iters = 1;
     cl_opts->max_num_procs = comm_world_nprocs_g;
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
+    cl_opts->blk_size = 128 * ONE_KB;   /* Default to writing 128K per block */
     cl_opts->interleaved = 0;       /* Default to contiguous blocks in dataset */
     cl_opts->collective = 0;        /* Default to independent I/O access */
     cl_opts->print_times = FALSE;   /* Printing times is off by default */
@@ -1119,6 +1140,9 @@ parse_command_line(int argc, char *argv[])
             /* the future "binary" option */
             break;
 #endif  /* 0 */
+        case 'B':
+            cl_opts->blk_size = parse_size_directive(opt_arg);
+            break;
         case 'c':
             /* Turn on chunked HDF5 dataset creation */
             cl_opts->h5_use_chunks = TRUE;
@@ -1187,8 +1211,8 @@ parse_command_line(int argc, char *argv[])
             }
 
             break;
-        case 'f':
-            cl_opts->file_size = parse_size_directive(opt_arg);
+        case 'e':
+            cl_opts->num_bpp = parse_size_directive(opt_arg);
             break;
         case 'F':
             cl_opts->num_files = atoi(opt_arg);
@@ -1318,15 +1342,20 @@ usage(const char *prog)
 #if 0
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
+        printf("     -B S, --block-size=S        Block size within transfer buffer\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default:128K]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
-        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs [default: off (i.e. independent I/O)]\n");
+        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
+        printf("                                 [default: off (i.e. independent I/O)]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");
         printf("                                 [default: no debugging]\n");
-        printf("     -f S, --file-size=S         Size of a single file [default: 64M]\n");
+        printf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
+        printf("                                 [default: 256K]\n");
         printf("     -F N, --num-files=N         Number of files [default: 1]\n");
         printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-        printf("     -I --interleaved            Interleaved block I/O (see below for example)\n");
+        printf("     -I, --interleaved           Interleaved block I/O (see below for example)\n");
         printf("                                 [default: Contiguous block I/O]\n");
         printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
         printf("                                 (Supported in HDF5 library v1.5 only)\n");
@@ -1348,7 +1377,7 @@ usage(const char *prog)
         printf("          M - Megabyte (%d)\n", ONE_MB);
         printf("          G - Gigabyte (%d)\n", ONE_GB);
         printf("\n");
-        printf("      Example: 37M = 37 Megabytes = %d bytes\n", 37*ONE_MB);
+        printf("      Example: '37M' is 37 megabytes or %d bytes\n", 37*ONE_MB);
         printf("\n");
         printf("  AL - is an API list. Valid values are:\n");
         printf("          phdf5 - Parallel HDF5\n");
@@ -1357,24 +1386,50 @@ usage(const char *prog)
         printf("\n");
         printf("      Example: --api=mpiio,phdf5\n");
         printf("\n");
+        printf("  Block size vs. Transfer buffer size:\n");
+        printf("      The transfer buffer size is the size of a buffer in memory, which is\n");
+        printf("      broken into 'block size' pieces and written to the file.  The pattern\n");
+        printf("      of the blocks in the file is described below in the 'Interleaved vs.\n");
+        printf("      Contiguous blocks' example.\n");
+        printf("\n");
+        printf("      If the collective I/O option is given, the blocks in each transfer buffer\n");
+        printf("      are written at once with an MPI derived type, for the MPI-I/O and PHDF5\n");
+        printf("      APIs.\n");
+        printf("\n");
         printf("  Interleaved vs. Contiguous blocks:\n");
-        printf("      For example, with a 4 process run,\n");
-        printf("          Contiguous blocks are written to the file like so:\n");
-        printf("              1111222233334444\n");
-        printf("          Interleaved blocks are written to the file like so:\n");
-        printf("              1234123412341234\n");
+        printf("      When contiguous blocks are written to a dataset, the dataset is divided\n");
+        printf("      into '# processes' regions and each process writes data to its own region.\n");
+        printf("      When interleaved blocks are written to a dataset, space for the first\n");
+        printf("      block of the first process is allocated in the dataset, then space is\n");
+        printf("      allocated for the first block of the second process, etc. until space is\n");
+        printf("      allocated for the first block of each process, then space is allocated for\n");
+        printf("      the second block of the first process, the second block of the second\n");
+        printf("      process, etc.\n");
+        printf("\n");
+        printf("      For example, with a 4 process run, 1MB bytes-per-process, 256KB transfer\n");
+        printf("        buffer size, and 64KB block size,\n");
+        printf("          16 contiguous blocks per process are written to the file like so:\n");
+        printf("              1111111111111111222222222222222233333333333333334444444444444444\n");
+        printf("          16 interleaved blocks per process are written to the file like so:\n");
+        printf("              1234123412341234123412341234123412341234123412341234123412341234\n");
+        printf("        If collective I/O is turned on, all of the four blocks per transfer\n");
+        printf("        buffer will be written in one collective I/O call.\n");
         printf("\n");
         printf("  DL - is a list of debugging flags. Valid values are:\n");
         printf("          1 - Minimal\n");
         printf("          2 - Not quite everything\n");
         printf("          3 - Everything\n");
-        printf("          4 - Everything and the kitchen sink\n");
+        printf("          4 - The kitchen sink\n");
         printf("          r - Raw data I/O throughput information\n");
         printf("          t - Times as well as throughputs\n");
         printf("          v - Verify data correctness\n");
         printf("\n");
         printf("      Example: --debug=2,r,t\n");
         printf("\n");
+        printf("  Environment variables:\n");
+        printf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
+        printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
+        printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
         fflush(stdout);
     }
 }
