@@ -130,6 +130,12 @@
 #ifdef H5_HAVE_WINDOWS_H
 #include <windows.h>
 #endif
+
+#ifdef WIN32
+#include <io.h>
+#include <process.h>
+#include <windows.h>
+#endif
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
@@ -721,10 +727,23 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#if !defined strdup && !defined HAVE_STRDUP
+/*
+if !defined strdup && !defined HAVE_STRDUP && !defined _strdup
 char *strdup(const char *s);
 #endif
 #define HDstrdup(S)		strdup(S)
+*/
+
+
+#ifdef WIN32
+#define HDstrdup(S)    _strdup(S)
+#elif !defined strdup && !defined HAVE_STRDUP 
+char *strdup(const char *s);
+#define HDstrdup(S)     strdup(S)
+#else
+#define HDstrdup(S)     strdup(S)
+#endif
+
 
 #ifndef H5_HAVE_SNPRINTF
 __DLL__ int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
