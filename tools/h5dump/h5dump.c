@@ -2157,21 +2157,21 @@ handle_datasets(hid_t fid, char *dset, void *data)
     H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
 
     if (statbuf.nlink > 1) {
-        int index = search_obj(dset_table, statbuf.objno);
+        int idx = search_obj(dset_table, statbuf.objno);
 
-        if (index >= 0) {
-            if (dset_table->objs[index].displayed) {
+        if (idx >= 0) {
+            if (dset_table->objs[idx].displayed) {
                 begin_obj(dump_header_format->datasetbegin, dset,
                           dump_header_format->datasetblockbegin);
                 indentation(indent + COL);
                 printf("%s \"%s\"\n", HARDLINK,
-                       dset_table->objs[index].objname);
+                       dset_table->objs[idx].objname);
                 indentation(indent);
                 end_obj(dump_header_format->datasetend,
                         dump_header_format->datasetblockend);
             } else {
-                strcpy(dset_table->objs[index].objname, dset);
-                dset_table->objs[index].displayed = 1;
+                strcpy(dset_table->objs[idx].objname, dset);
+                dset_table->objs[idx].displayed = 1;
                 dump_dataset(dsetid, dset, sset);
             }
         } else {
@@ -2300,29 +2300,29 @@ handle_datatypes(hid_t fid, char *type, void UNUSED *data)
 
     if ((typeid = H5Topen(fid, type)) < 0) {
         /* check if type is unamed data type */
-        int index = 0;
+        int idx = 0;
 
-        while (index < type_table->nobjs ) {
+        while (idx < type_table->nobjs ) {
             char name[128], name1[128];
 
-            if (!type_table->objs[index].recorded) {
+            if (!type_table->objs[idx].recorded) {
                 /* unamed data type */
                 sprintf(name, "#%lu:%lu\n",
-                        type_table->objs[index].objno[0], 
-                        type_table->objs[index].objno[1]);
+                        type_table->objs[idx].objno[0], 
+                        type_table->objs[idx].objno[1]);
                 sprintf(name1, "/#%lu:%lu\n",
-                        type_table->objs[index].objno[0], 
-                        type_table->objs[index].objno[1]);
+                        type_table->objs[idx].objno[0], 
+                        type_table->objs[idx].objno[1]);
 
             if (!strncmp(name, type, strlen(type)) || 
                 !strncmp(name1, type, strlen(type)))
                 break;
             } 
 
-            index++;
+            idx++;
         }
 
-        if (index ==  type_table->nobjs) {
+        if (idx ==  type_table->nobjs) {
             /* unknown type */
             begin_obj(dump_header_format->datatypebegin, type,
                       dump_header_format->datatypeblockbegin); 
@@ -2332,7 +2332,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED *data)
                     dump_header_format->datatypeblockend);
             d_status = EXIT_FAILURE;
         } else {
-            hid_t dsetid = H5Dopen(fid, type_table->objs[index].objname);
+            hid_t dsetid = H5Dopen(fid, type_table->objs[idx].objname);
             typeid = H5Dget_type(dsetid);
             dump_named_datatype(typeid, type);
             H5Tclose(typeid);

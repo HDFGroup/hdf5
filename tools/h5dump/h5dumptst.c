@@ -927,7 +927,7 @@ static void test_many(void) {
     dset1_t dset1[6];
 
     hsize_t dim[4];
-    int index[4] = {0,1,2,3};  /* normal indicies */
+    int idx[4] = {0,1,2,3};  /* normal indicies */
     const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   fid = H5Fcreate(FILE12, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1005,20 +1005,20 @@ static void test_many(void) {
 
   for (j=0; j<(int)sdim; j++) {
 	for (i3 = 0; i3 < 2; i3++) {
-		index[perm[3]] = i3;
+		idx[perm[3]] = i3;
 	for (i2 = 0; i2 < 2; i2++) {
-		index[perm[2]] = i2;
+		idx[perm[2]] = i2;
 	for (i1 = 0; i1 < 2; i1++) {
-		index[perm[1]] = i1;
+		idx[perm[1]] = i1;
 	for (i0 = 0; i0 < 2; i0++) {
-		index[perm[0]] = i0;
+		idx[perm[0]] = i0;
 		
-		dset1[j].a[index[3]][index[2]][index[1]][index[0]] = i0+j;
-		dset1[j].b[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j);
+		dset1[j].a[idx[3]][idx[2]][idx[1]][idx[0]] = i0+j;
+		dset1[j].b[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j);
 #if WIN32
-		dset1[j].c[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j+(signed __int64)sdim);
+		dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+(signed __int64)sdim);
 #else
-		dset1[j].c[index[3]][index[2]][index[1]][index[0]] = (double)(i0+j+sdim);
+		dset1[j].c[idx[3]][idx[2]][idx[1]][idx[0]] = (double)(i0+j+sdim);
 #endif
 	}
 	}
