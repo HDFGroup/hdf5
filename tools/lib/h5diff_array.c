@@ -243,7 +243,7 @@ int diff_array_mem( void       *_mem1,
   break;
 
 /*-------------------------------------------------------------------------
- * H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE, H5T_ENUM:
+ * H5T_STRING
  *-------------------------------------------------------------------------
  */
  case H5T_STRING:
@@ -271,7 +271,7 @@ int diff_array_mem( void       *_mem1,
   break;
 
 /*-------------------------------------------------------------------------
- * H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE, H5T_ENUM:
+ * H5T_BITFIELD, H5T_OPAQUE, H5T_ENUM
  *-------------------------------------------------------------------------
  */
  case H5T_BITFIELD:
