@@ -44,11 +44,11 @@ New Features
     --------- 
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
 	2002/04/11
-      * Added serial multi-gigabyte file size test.  "test/big -h" shows
-        the help page.  AKC - 2002/03/29
       * A new query function H5Tget_member_index has been added for compound
 	and enumeration data types, to retrieve member's index by name.
 	SLU - 2002/04/05
+      * Added serial multi-gigabyte file size test.  "test/big -h" shows
+        the help page.  AKC - 2002/03/29
  
     o APIs
     ------
@@ -63,6 +63,10 @@ New Features
 
   o Parallel Library
   ==================
+    * Changed method for allocating chunked dataset blocks to only allocate
+      blocks that don't already exist, instead of attempting to create all the
+      blocks all the time.  This improves performance for chunked
+      datasets.  QAK - 2002/05/17
     * Allowed the call to MPI_File_sync to be avoided when the file is going to
       immediately be closed, improving performance.  QAK - 2002/05/13
     * Allow the metadata writes to be shared among all processes, easing the
