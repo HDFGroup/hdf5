@@ -1,5 +1,5 @@
 /*
- * Copyright © 1998 NCSA
+ * Copyright (C) 1998 NCSA
  *		    All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
