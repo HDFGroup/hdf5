@@ -43,10 +43,10 @@ int H5Pget_ndims (hid_t space_id);
 int H5Pget_dims (hid_t space_id, size_t dims[]);
 hbool_t H5Pis_simple (hid_t space_id);
 herr_t H5Pset_space (hid_t space_id, int rank, const size_t *dims);
-herr_t H5Pset_hyperslab(hid_t sid, const int *start, const int *count,
-			const int *stride);
+herr_t H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count,
+			const size_t *stride);
 int H5Pget_hyperslab (hid_t sid, int offset[]/*out*/,
-		      int size[]/*out*/, int stride[]/*out*/);
+		      size_t size[]/*out*/, size_t stride[]/*out*/);
 
 #ifdef __cplusplus
 }

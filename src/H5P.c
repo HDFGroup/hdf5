@@ -937,7 +937,7 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
  USAGE
     herr_t H5Pset_hyperslab(sid, start, count, stride)
         hid_t sid;            IN: Dataspace object to select hyperslab from
-        const size_t *start;  IN: Starting location for hyperslab to select
+        const int *start;  IN: Starting location for hyperslab to select
         const size_t *count;  IN: Number of elements in hyperslab
         const size_t *stride; IN: Packing of elements in hyperslab
  RETURNS
@@ -952,7 +952,7 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset_hyperslab(hid_t sid, const intn *start, const intn *count, const intn *stride)
+H5Pset_hyperslab(hid_t sid, const int *start, const size_t *count, const size_t *stride)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
     intn                   *tmp_stride=NULL;    /* temp. copy of stride */
@@ -1037,8 +1037,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, int size[]/*out*/,
-		  int stride[]/*out*/)
+H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, size_t size[]/*out*/,
+		  size_t stride[]/*out*/)
 {
     const H5P_t	*ds = NULL;
     intn	ret_value = FAIL;
@@ -1079,7 +1079,7 @@ H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, int size[]/*out*/,
  */
 intn
 H5P_get_hyperslab (const H5P_t *ds, int offset[]/*out*/,
-		   int size[]/*out*/, int stride[]/*out*/)
+		   size_t size[]/*out*/, size_t stride[]/*out*/)
 {
     intn		i;
     intn		ret_value = FAIL;
