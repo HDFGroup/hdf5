@@ -106,7 +106,7 @@
             INTEGER, EXTERNAL :: h5dcreate_c
 
             creation_prp_default = H5P_DEFAULT_F
-     if (present(creation_prp)) creation_prp_default = creation_prp 
+            if (present(creation_prp)) creation_prp_default = creation_prp 
             namelen = LEN(name)
             hdferr = h5dcreate_c(loc_id, name, namelen, type_id, space_id, & 
                                  creation_prp_default, dset_id) 

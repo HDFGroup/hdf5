@@ -889,21 +889,26 @@ extern int_f nh5eget_minor_c(int_f* error_no, _fcd name);
 extern int_f nh5eset_auto_c(int_f* printflag);
 
 /*
- * Functions from H5f90misc.c 
+ * Functions from H5f.c 
  */
-#ifndef H5MISCf90_FNAMES
-#    define H5MISCf90_FNAMES
+#ifndef H5_FNAMES
+#    define H5_FNAMES
 #ifdef DF_CAPFNAMES 
+#   define nh5open_c         FNAME(H5OPEN_C)
+#   define nh5close_c         FNAME(H5CLOSE_C)
 #   define nh5init_type_c    FNAME(H5INIT_TYPES_C)
 #   define nh5close_types_c   FNAME(H5CLOSE_TYPES_C)
 #   define nh5init_flags_c    FNAME(H5INIT_FLAGS_C)
 #else 
+#   define nh5open_c         FNAME(h5open_c)
+#   define nh5close_c         FNAME(h5close_c)
 #   define nh5init_types_c    FNAME(h5init_types_c)
 #   define nh5close_types_c   FNAME(h5close_types_c)
 #   define nh5init_flags_c    FNAME(h5init_flags_c)
 #endif
 #endif
-
+extern int_f nh5open_c(void);
+extern int_f nh5close_c(void);
 extern int_f nh5init_types_c(hid_t_f *types, hid_t_f * floatingtypes, hid_t_f * integertypes);
 extern int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f * floatingtypes, int_f * floatinglen, hid_t_f * integertypes,  int_f * integerlen);
  

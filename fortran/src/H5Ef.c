@@ -152,9 +152,9 @@ nh5eget_minor_c(int_f* error_no, _fcd name)
  * Inputs:      printflag - flag to turn automatic error printing on or off.
  * Outputs:    
  * Returns:     0 on success, -1 on failure
- * Programmer:  Xiangyang Su
- *              Wednesday, March 29, 2000
- * Modifications:
+ * Programmer:  Elena Pourmal
+ *              Friday, November 17, 2000
+ * Modifications:  major bug fix. Function never disabled printing.
  *---------------------------------------------------------------------------*/
 int_f
 nh5eset_auto_c(int_f* printflag)
@@ -164,6 +164,8 @@ nh5eset_auto_c(int_f* printflag)
 
   if (*printflag == 1)
     status = H5Eset_auto((H5E_auto_t)H5Eprint, stderr);
+  if (*printflag == 0)
+    status = H5Eset_auto(NULL,NULL);
   if (status >= 0) ret_val = 0;
   return ret_val;
 }

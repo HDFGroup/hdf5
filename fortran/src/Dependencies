@@ -18,6 +18,7 @@ H5Df.lo: \
 H5Dff.lo: \
    $(srcdir)/H5Dff.f90 \
    H5fortran_types.f90 \
+   $(srcdir)/H5Rff.f90 \
    $(srcdir)/H5f90global.f90
 H5Ef.lo: \
    $(srcdir)/H5Ef.c \
@@ -111,13 +112,13 @@ H5f90kit.lo: \
    $(srcdir)/H5f90.h \
    $(srcdir)/H5f90i.h \
    $(srcdir)/H5f90proto.h
-H5f90misc.lo: \
-   $(srcdir)/H5f90misc.c \
+H5f.lo: \
+   $(srcdir)/H5f.c \
    $(srcdir)/H5f90.h \
    $(srcdir)/H5f90i.h \
    $(srcdir)/H5f90proto.h
-H5f90miscf.lo: \
-   $(srcdir)/H5f90miscf.f90 \
+H5ff.lo: \
+   $(srcdir)/H5ff.f90 \
    $(srcdir)/H5f90global.f90
 HDF5.lo: \
    $(srcdir)/HDF5.f90 \

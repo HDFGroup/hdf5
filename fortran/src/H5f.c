@@ -307,3 +307,37 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
     ret_value = 0; 
     return ret_value;
 }
+/*---------------------------------------------------------------------------
+ * Name:              h5open_c
+ * Purpose:           Calls H5open call to initialize C HDF5 library
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Friday, November 17, 2000 
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5open_c()
+{
+
+    int ret_value = -1;
+    if (H5open() < 0) return ret_value;  
+    ret_value = 0; 
+    return ret_value;
+}    
+/*---------------------------------------------------------------------------
+ * Name:              h5close_c
+ * Purpose:           Calls H5close call to close C HDF5 library
+ * Returns:           0 on success, -1 on failure
+ * Programmer:        Elena Pourmal  
+ *                    Friday, November 17, 2000 
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5close_c()
+{
+
+    int ret_value = -1;
+    if (H5close() < 0) return ret_value;  
+    ret_value = 0; 
+    return ret_value;
+}    
