@@ -913,6 +913,65 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 
 /****************************************************************
 **
+**  test_file_perm(): low-level file test routine.  
+**      This test verifies that a file can be opened for both 
+**      read-only and read-write access and things will be handled
+**      appropriately.
+**
+*****************************************************************/
+static void 
+test_file_perm(void)
+{
+    hid_t    file;      /* File opened with read-write permission */
+    hid_t    filero;    /* Same file opened with read-only permission */
+    hid_t    dspace;    /* Dataspace ID */
+    hid_t    dset;      /* Dataset ID */
+    herr_t   ret;
+ 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Low-Level File Permissions\n"));
+
+    dspace = H5Screate(H5S_SCALAR);
+    CHECK(dspace, FAIL, "H5Screate");
+
+    /* Create the file (with read-write permission) */
+    file = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Create a dataset with the read-write file handle */
+    dset = H5Dcreate(file, F2_DSET, H5T_NATIVE_INT, dspace, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate");
+
+    ret = H5Dclose(dset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Open the file (with read-only permission) */
+    filero = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(filero, FAIL, "H5Fopen");
+
+    /* Create a dataset with the read-only file handle (should fail) */
+    H5E_BEGIN_TRY {
+        dset = H5Dcreate(filero, F2_DSET, H5T_NATIVE_INT, dspace, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(dset, FAIL, "H5Dcreate");
+    if(dset!=FAIL) {
+        ret = H5Dclose(dset);
+        CHECK(ret, FAIL, "H5Dclose");
+    } /* end if */
+
+    ret = H5Fclose(filero);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
+
+} /* end test_file_perm() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 ** 
 ****************************************************************/
@@ -927,6 +986,7 @@ test_file(void)
 #ifndef H5_NO_SHARED_WRITING 
     test_file_close();          /* Test file close behavior */
 #endif /* H5_NO_SHARED_WRITING */     
+    test_file_perm();           /* Test file access permissions */
 }				/* test_file() */
 
 

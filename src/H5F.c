@@ -3103,38 +3103,41 @@ H5F_close(H5F_t *f)
     H5F_istore_stats(f, FALSE);
 #endif /* H5F_ISTORE_DEBUG */
 
+    /* Only try to flush the file if it was opened with write access */
+    if(f->intent&H5F_ACC_RDWR) {
 #ifdef H5_HAVE_FPHDF5
-    /*
-     * We only want the captain to perform the flush of the metadata
-     * to the file.
-     */
-    if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
-            H5FD_fphdf5_is_captain(f->shared->lf)) {
-#endif  /* H5_HAVE_FPHDF5 */
-
-        /* Flush and destroy all caches */
-        if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-
-#ifdef H5_HAVE_FPHDF5
-    } else {
         /*
-         * If this isn't the captain process, flush but only clear
-         * the flags.
+         * We only want the captain to perform the flush of the metadata
+         * to the file.
          */
-        if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
-                      H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
-    }
-
-    /* Let's all meet up now... */
-    /* XXX: Calls which end up here are already required to be
-     * collective, is this barrier really necessary? -QAK
-     */
-    if (H5FD_is_fphdf5_driver(f->shared->lf))
-        MPI_Barrier(H5FP_SAP_BARRIER_COMM);
+        if (!H5FD_is_fphdf5_driver(f->shared->lf) ||
+                H5FD_fphdf5_is_captain(f->shared->lf)) {
 #endif  /* H5_HAVE_FPHDF5 */
+
+            /* Flush and destroy all caches */
+            if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+                          H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+
+#ifdef H5_HAVE_FPHDF5
+        } else {
+            /*
+             * If this isn't the captain process, flush but only clear
+             * the flags.
+             */
+            if (H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL,
+                          H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING | H5F_FLUSH_CLEAR_ONLY) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+        }
+
+        /* Let's all meet up now... */
+        /* XXX: Calls which end up here are already required to be
+         * collective, is this barrier really necessary? -QAK
+         */
+        if (H5FD_is_fphdf5_driver(f->shared->lf))
+            MPI_Barrier(H5FP_SAP_BARRIER_COMM);
+#endif  /* H5_HAVE_FPHDF5 */
+    } /* end if */
 
     /*
      * Destroy the H5F_t struct and decrement the reference count for the
