@@ -33,7 +33,7 @@
 /* Used to make certain a return value _is_not_ a value */
 #ifdef H5_WANT_H5_V1_6_COMPAT
 #define CHECK(ret, val, where) do {					      \
-    if (GetTestVerbosity()>9) print_func("   Call to routine: %15s at line %4d " \
+    if (GetTestVerbosity()>=VERBO_HI) print_func("   Call to routine: %15s at line %4d " \
 				"in %s returned %ld \n",		      \
 				where, (int)__LINE__, __FILE__,		      \
 				(long)(ret));				      \
@@ -45,7 +45,7 @@
 } while(0)
 
 #define CHECK_I(ret,where) {						      \
-   if (GetTestVerbosity()>9) {						      \
+   if (GetTestVerbosity()>=VERBO_HI) {						      \
       print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", \
                  (where), (int)__LINE__, __FILE__, (long)(ret));	      \
    }									      \
@@ -57,7 +57,7 @@
 }
 
 #define CHECK_PTR(ret,where) {						      \
-   if (GetTestVerbosity()>9) {						      \
+   if (GetTestVerbosity()>=VERBO_HI) {						      \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
                  (where), (int)__LINE__, __FILE__, (ret));		      \
    }									      \
@@ -70,7 +70,7 @@
 
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(x, val, where) do {					      \
-    if (GetTestVerbosity()>9) {						      \
+    if (GetTestVerbosity()>=VERBO_HI) {						      \
 	print_func("   Call to routine: %15s at line %4d in %s had value "    \
 		   "%ld \n", (where), (int)__LINE__, __FILE__, (long)(x));    \
     }									      \
@@ -83,11 +83,11 @@
 
 /* Used to document process through a test and to check for errors */
 #define RESULT(ret,func) do {						      \
-    if (GetTestVerbosity()>8) {						      \
+    if (GetTestVerbosity()>VERBO_MED) {						      \
 	print_func("   Call to routine: %15s at line %4d in %s returned "     \
 		   "%ld\n", func, (int)__LINE__, __FILE__, (long)(ret));      \
     }									      \
-    if (GetTestVerbosity()>9)						      \
+    if (GetTestVerbosity()>=VERBO_HI)						      \
         H5Eprint(stdout);						      \
     if ((ret) == FAIL) {						      \
 	TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "     \
@@ -98,7 +98,7 @@
 
 #else
 #define CHECK(ret, val, where) do {					      \
-    if (GetTestVerbosity()>9) print_func("   Call to routine: %15s at line %4d " \
+    if (GetTestVerbosity()>=VERBO_HI) print_func("   Call to routine: %15s at line %4d " \
 				"in %s returned %ld \n",		      \
 				where, (int)__LINE__, __FILE__,		      \
 				(long)(ret));				      \
@@ -110,7 +110,7 @@
 } while(0)
 
 #define CHECK_I(ret,where) {						      \
-   if (GetTestVerbosity()>9) {						      \
+   if (GetTestVerbosity()>=VERBO_HI) {						      \
       print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", \
                  (where), (int)__LINE__, __FILE__, (long)(ret));	      \
    }									      \
@@ -122,7 +122,7 @@
 }
 
 #define CHECK_PTR(ret,where) {						      \
-   if (GetTestVerbosity()>9) {						      \
+   if (GetTestVerbosity()>=VERBO_HI) {						      \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
                  (where), (int)__LINE__, __FILE__, (ret));		      \
    }									      \
@@ -135,7 +135,7 @@
 
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(x, val, where) do {					      \
-    if (GetTestVerbosity()>9) {						      \
+    if (GetTestVerbosity()>=VERBO_HI) {						      \
 	print_func("   Call to routine: %15s at line %4d in %s had value "    \
 		   "%ld \n", (where), (int)__LINE__, __FILE__, (long)(x));    \
     }									      \
@@ -148,11 +148,11 @@
 
 /* Used to document process through a test and to check for errors */
 #define RESULT(ret,func) do {						      \
-    if (GetTestVerbosity()>8) {						      \
+    if (GetTestVerbosity()>VERBO_MED) {						      \
 	print_func("   Call to routine: %15s at line %4d in %s returned "     \
 		   "%ld\n", func, (int)__LINE__, __FILE__, (long)(ret));      \
     }									      \
-    if (GetTestVerbosity()>9)						      \
+    if (GetTestVerbosity()>=VERBO_HI)						      \
         H5Eprint(H5E_DEFAULT, stdout);					      \
     if ((ret) == FAIL) {						      \
 	TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "     \

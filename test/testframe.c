@@ -43,7 +43,7 @@ typedef struct TestStruct {
  * Variables used by testing framework.
  */
 static int num_errs = 0;        /* Total number of errors during testing */
-static int Verbosity = 4;       /* Default Verbosity is Low */
+static int Verbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static TestStruct Test[MAXNUMOFTESTS];
 static int    Index = 0;
 
@@ -117,7 +117,7 @@ void TestUsage(void)
 {
 	int i;
 
-	print_func("Usage: ttsafe [-v[erbose] (l[ow]|m[edium]|h[igh]|0-10)] \n");
+	print_func("Usage: ttsafe [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] \n");
 	print_func("              [-[e]x[clude] name+] \n");
 	print_func("              [-o[nly] name+] \n");
 	print_func("              [-b[egin] name] \n");
@@ -170,11 +170,11 @@ void TestParseCmdLine(int argc, char *argv[], int *Summary, int *CleanUp)
         if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
                                     (HDstrcmp(argv[CLLoop], "-v") == 0))) {
             if (argv[CLLoop + 1][0] == 'l')
-                Verbosity = 4;
+                Verbosity = VERBO_LO;
             else if (argv[CLLoop + 1][0] == 'm')
-                Verbosity = 6;
+                Verbosity = VERBO_MED;
             else if (argv[CLLoop + 1][0] == 'h')
-                Verbosity = 10;
+                Verbosity = VERBO_HI;
             else
                 Verbosity = atoi(argv[CLLoop + 1]);
         }                       /* end if */

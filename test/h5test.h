@@ -31,6 +31,33 @@
 #endif
 
 /*
+ * Predefined test verbosity levels.
+ *
+ * Convention:
+ * 
+ * The higher the verbosity value, the more information printed.
+ * So, output for higher verbosity also include output of all lower
+ * verbosity.
+ * 
+ *  Value     Description
+ *  0         None:   No informational message.
+ *  1                 "All tests passed"
+ *  2                 Header of overall test
+ *  3         Default: header and results of individual test
+ *  4         
+ *  5         Low:    Major category of tests.
+ *  6
+ *  7         Medium: Minor category of tests such as functions called.
+ *  8
+ *  9         High:   Highest level.  All information.
+ */
+#define VERBO_NONE 0     /* None    */
+#define VERBO_DEF  3     /* Default */
+#define VERBO_LO   5     /* Low     */
+#define VERBO_MED  7     /* Medium  */
+#define VERBO_HI   9     /* High    */
+
+/*
  * This contains the filename prefix specificied as command line option for
  * the parallel test files. 
  */
