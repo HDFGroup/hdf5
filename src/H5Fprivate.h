@@ -331,7 +331,7 @@ typedef struct H5F_file_t {
 #ifdef LATER
    file_access_temp_t file_access_parms; /* File-access template	*/
 #endif
-   struct H5G_entry_t *root_ent; /* Root symbol table entry		*/
+   struct H5G_entry_t *root_ent;/* Root symbol table entry		*/
 } H5F_file_t;
 
 /*
@@ -344,6 +344,8 @@ typedef struct H5F_t {
    char		*name;		/* Name used to open file		*/
    H5F_file_t	*shared;	/* The shared file info			*/
    struct H5G_cwgstk_t *cwg_stack; /* CWG stack for push/pop functions	*/
+   uintn	nopen;		/* Number of open object headers	*/
+   hbool_t	close_pending;	/* File close is pending		*/
 } H5F_t;
 
 

@@ -45,11 +45,8 @@ const H5O_class_t H5O_CSTORE[1] = {{
    H5O_CSTORE_ID,	    	/* message id number 			*/
    "cstore",                	/* message name for debugging 		*/
    sizeof (H5O_cstore_t),	/* native message size 			*/
-   H5G_NOTHING_CACHED, 	    	/* symtab entry `type' field 		*/
    H5O_cstore_decode,		/* decode message 			*/
    H5O_cstore_encode,		/* encode message			*/
-   NULL,            	        /* get message from stab entry		*/
-   NULL,			/* put message into stab entry		*/
    H5O_cstore_copy,      	/* copy the native value 		*/
    H5O_cstore_size,      	/* size of symbol table entry 		*/
    NULL,                    	/* default reset method 		*/

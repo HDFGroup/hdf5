@@ -24,11 +24,8 @@ const H5O_class_t H5O_NULL[1] = {{
    H5O_NULL_ID,				/*message id number		*/
    "null",				/*message name for debugging	*/
    0,					/*native message size		*/
-   H5G_NOTHING_CACHED, 			/*symtab entry `type' field	*/
    NULL,				/*no decode method		*/
    NULL,				/*no encode method		*/
-   NULL,				/*no fast method		*/
-   NULL,				/*no cache method		*/
    NULL,				/*no copy method		*/
    NULL,				/*no size method		*/
    NULL,				/*no reset method		*/

@@ -36,7 +36,6 @@ static char RcsId[] = "@(#)$Revision$";
  * A dataset is the following struct.
  */
 struct H5D_t {
-   H5F_t		*file;		/*file store for this object	*/
    H5G_entry_t		ent;		/*cached object header stuff	*/
    H5T_t		*type;		/*datatype of this dataset	*/
    H5P_t		*space;		/*dataspace of this dataset	*/
@@ -310,7 +309,7 @@ H5Dclose (hid_t dataset_id)
    /* Check args */
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
-       NULL==dataset->file) {
+       NULL==dataset->ent.file) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
 
@@ -378,7 +377,7 @@ H5Dread (hid_t dataset_id, hid_t type_id, hid_t space_id,
    /* check arguments */
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
-       NULL==dataset->file) {
+       NULL==dataset->ent.file) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
@@ -458,7 +457,7 @@ H5Dwrite (hid_t dataset_id, hid_t type_id, hid_t space_id,
    /* check arguments */
    if (H5_DATASET!=H5Aatom_group (dataset_id) ||
        NULL==(dataset=H5Aatom_object (dataset_id)) ||
-       NULL==dataset->file) {
+       NULL==dataset->ent.file) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
    }
    if (H5_DATATYPE!=H5Aatom_group (type_id) ||
@@ -575,7 +574,6 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    
    /* Initialize the dataset object */
    new_dset = H5MM_xcalloc (1, sizeof(H5D_t));
-   new_dset->file = f;
    H5F_addr_undef (&(new_dset->ent.header));
    new_dset->type = H5T_copy (type);
    new_dset->space = H5P_copy (space);
@@ -590,7 +588,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    }
 
    /* Update the type and space header messages */
-   if (H5O_modify (f, &(new_dset->ent), H5O_DTYPE, 0, new_dset->type)<0 ||
+   if (H5O_modify (&(new_dset->ent), H5O_DTYPE, 0, 0, new_dset->type)<0 ||
        H5P_modify (f, &(new_dset->ent), new_dset->space)<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		   "can't update type or space header messages");
@@ -608,7 +606,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	 HGOTO_ERROR (H5E_DATASET, H5E_NOSPACE, NULL,
 		      "can't allocate raw file storage");
       }
-      if (H5O_modify (f, &(new_dset->ent), H5O_CSTORE, 0,
+      if (H5O_modify (&(new_dset->ent), H5O_CSTORE, 0, 0,
 		      &(new_dset->storage.cstore))<0) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't update dataset object header");
@@ -635,7 +633,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't initialize chunked storage");
       }
-      if (H5O_modify (f, &(new_dset->ent), H5O_ISTORE, 0,
+      if (H5O_modify (&(new_dset->ent), H5O_ISTORE, 0, 0,
 		      &(new_dset->storage.istore))<0) {
 	 HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		      "can't update dataset object header");
@@ -648,7 +646,7 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
    }
 
    /* Give the dataset a name */
-   if (H5G_insert (f, name, &(new_dset->ent))<0) {
+   if (H5G_insert (name, &(new_dset->ent))<0) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
    }
 
@@ -661,9 +659,9 @@ H5D_create (H5F_t *f, const char *name, const H5T_t *type, const H5P_t *space,
       if (new_dset->type) H5T_close (new_dset->type);
       if (new_dset->space) H5P_close (new_dset->space);
       if (H5F_addr_defined (&(new_dset->ent.header))) {
-	 H5O_close (f, &(new_dset->ent));
+	 H5O_close (&(new_dset->ent));
       }
-      new_dset->file = NULL;
+      new_dset->ent.file = NULL;
       H5MM_xfree (new_dset);
    }
    
@@ -705,7 +703,6 @@ H5D_open (H5F_t *f, const char *name)
    assert (name && *name);
 
    dataset = H5MM_xcalloc (1, sizeof(H5D_t));
-   dataset->file = f;
    dataset->create_parms = H5D_create_dflt;
    H5F_addr_undef (&(dataset->ent.header));
     
@@ -718,9 +715,8 @@ H5D_open (H5F_t *f, const char *name)
    }
 
    /* Get the type and space */
-   if (NULL==(dataset->type = H5O_read (f, &(dataset->ent), H5O_DTYPE,
-					0, NULL)) ||
-       NULL==(dataset->space = H5P_read (f, &(dataset->ent)))) {
+   if (NULL==(dataset->type=H5O_read (&(dataset->ent), H5O_DTYPE, 0, NULL)) ||
+       NULL==(dataset->space=H5P_read (f, &(dataset->ent)))) {
       HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		   "can't load type of space info from dataset header");
    }
@@ -731,12 +727,11 @@ H5D_open (H5F_t *f, const char *name)
     * values are copied to the dataset create template so the user can query
     * them.
     */
-   if (H5O_read (dataset->file, &(dataset->ent), H5O_CSTORE, 0,
-		 &(dataset->storage.cstore))) {
+   if (H5O_read (&(dataset->ent), H5O_CSTORE, 0, &(dataset->storage.cstore))) {
       /* Contiguous storage */
       dataset->create_parms.layout = H5D_CONTIGUOUS;
       
-   } else if (H5O_read (dataset->file, &(dataset->ent), H5O_ISTORE, 0,
+   } else if (H5O_read (&(dataset->ent), H5O_ISTORE, 0,
 			&(dataset->storage.istore))) {
       /*
        * Chunked storage.  The creation template's dimension is one less than
@@ -763,11 +758,11 @@ H5D_open (H5F_t *f, const char *name)
  done:
    if (!ret_value && dataset) {
       if (H5F_addr_defined (&(dataset->ent.header))) {
-	 H5O_close (f, &(dataset->ent));
+	 H5O_close (&(dataset->ent));
       }
       if (dataset->type) H5T_close (dataset->type);
       if (dataset->space) H5P_close (dataset->space);
-      dataset->file = NULL;
+      dataset->ent.file = NULL;
       H5MM_xfree (dataset);
    }
    
@@ -805,10 +800,10 @@ H5D_close (H5D_t *dataset)
    FUNC_ENTER (H5D_close, FAIL);
 
    /* check args */
-   assert (dataset && dataset->file);
+   assert (dataset && dataset->ent.file);
    
    /* Close the dataset object */
-   H5O_close (dataset->file, &(dataset->ent));
+   H5O_close (&(dataset->ent));
 
    /*
     * Release dataset type and space - there isn't much we can do if one of
@@ -823,7 +818,7 @@ H5D_close (H5D_t *dataset)
     * sure we're not accessing an already freed dataset (see the assert()
     * above).
     */
-   dataset->file = NULL;
+   dataset->ent.file = NULL;
    H5MM_xfree (dataset);
 
    if (free_failed) {
@@ -869,7 +864,7 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    FUNC_ENTER (H5D_read, FAIL);
 
    /* check args */
-   assert (dataset && dataset->file);
+   assert (dataset && dataset->ent.file);
    assert (type);
    assert (xfer_parms);
    assert (buf);
@@ -895,7 +890,7 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       /*
        * Read a block of contiguous data.
        */
-      if (H5F_block_read (dataset->file, &(dataset->storage.cstore.addr),
+      if (H5F_block_read (dataset->ent.file, &(dataset->storage.cstore.addr),
 			  nbytes, buf)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
@@ -908,7 +903,7 @@ H5D_read (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
       H5P_get_dims (dataset->space, size);
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
-      if (H5F_istore_read (dataset->file, &(dataset->storage.istore),
+      if (H5F_istore_read (dataset->ent.file, &(dataset->storage.istore),
 			   offset, size, buf)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "read failed");
       }
@@ -958,7 +953,7 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
    FUNC_ENTER (H5D_write, FAIL);
 
    /* check args */
-   assert (dataset && dataset->file);
+   assert (dataset && dataset->ent.file);
    assert (type);
    assert (xfer_parms);
    assert (buf);
@@ -985,7 +980,7 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       /*
        * Write a contiguous chunk of data.
        */
-      if (H5F_block_write (dataset->file, &(dataset->storage.cstore.addr),
+      if (H5F_block_write (dataset->ent.file, &(dataset->storage.cstore.addr),
 			   nbytes, buf)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }
@@ -998,7 +993,7 @@ H5D_write (H5D_t *dataset, const H5T_t *type, const H5P_t *space,
       for (i=0; i<dataset->storage.istore.ndims; i++) offset[i] = 0;
       H5P_get_dims (dataset->space, size);
       size[dataset->storage.istore.ndims-1] = H5T_get_size (dataset->type);
-      if (H5F_istore_write (dataset->file, &(dataset->storage.istore),
+      if (H5F_istore_write (dataset->ent.file, &(dataset->storage.istore),
 			    offset, size, buf)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
       }

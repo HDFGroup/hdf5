@@ -19,6 +19,7 @@
 #ifndef _H5public_H
 #define _H5public_H
 #include <H5config.h>			/* From configure		*/
+#include <sys/types.h>
 
 /*
  * Data types

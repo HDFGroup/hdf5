@@ -42,11 +42,8 @@ const H5O_class_t H5O_DTYPE[1] = {{
    H5O_DTYPE_ID,		    	/* message id number		*/
    "data_type",				/* message name for debugging	*/
    sizeof (H5T_t),			/* native message size		*/
-   H5G_NOTHING_CACHED, 			/* symtab entry `type' field	*/
    H5O_dtype_decode,			/* decode message		*/
    H5O_dtype_encode,			/* encode message		*/
-   NULL,				/* get message from stab entry	*/
-   NULL,				/* put message into stab entry	*/
    H5O_dtype_copy,			/* copy the native value 	*/
    H5O_dtype_size,			/* size of raw message		*/
    H5O_dtype_reset,			/* reset method 		*/

@@ -23,6 +23,7 @@
 /* Public headers needed by this file */
 #include <H5public.h>
 #include <H5Apublic.h>
+#include <H5Dpublic.h>
 
 /* Template classes */
 typedef enum H5C_class_t {
@@ -35,37 +36,6 @@ typedef enum H5C_class_t {
    H5C_NCLASSES		=4	/* This must be last!			*/
 } H5C_class_t;
    
-/* Template properties, grouped by class */
-typedef enum H5C_prop_t {
-   
-   /* File Creation Properties */
-   H5F_SIZEOF_USERBLOCK,/* Size of the user block in the file in bytes	*/
-   H5F_SIZEOF_ADDR,	/* Number of bytes for addresses		*/
-   H5F_SIZEOF_SIZE,	/* Number of bytes for sizes			*/
-   H5F_SYM_LEAF_K,	/* 1/2 rank for symbol table leaf nodes		*/
-   H5F_SYM_INTERN_K,	/* 1/2 rank for symbol table internal nodes	*/
-   H5F_ISTORE_K,	/* 1/2 rank for indexed storage nodes		*/
-   H5F_BOOTBLOCK_VER,	/* Version # of the boot-block format		*/
-   H5F_SMALLOBJECT_VER,	/* Version # of the small-object heap format	*/
-   H5F_FREESPACE_VER,	/* Version # of the free-space info format	*/
-   H5F_OBJECTDIR_VER,	/* Version # of the object-directory format	*/
-   H5F_SHAREDHEADER_VER,/* Version # of the shared-header format	*/
-
-   /* File Access Properties */
-   /* None defined yet */
-
-   /* Dataset Creation Properties */
-   H5D_LAYOUT,		/* Storage layout				*/
-   H5D_CHUNK_NDIMS, 	/* Chunk dimensionality				*/
-   H5D_CHUNK_SIZE, 	/* Chunk size vector				*/
-   H5D_COMPRESS, 	/* Raw data compression				*/
-   H5D_PRE_OFFSET, 	/* Precompression offset			*/
-   H5D_PRE_SCALE 	/* Precompression scale				*/
-
-   /* Dataset Transfer Properties */
-   /* None defined yet */
-   
-} H5C_prop_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,9 +45,32 @@ extern "C" {
 hid_t H5Ccreate (H5C_class_t type);
 herr_t H5Cclose (hid_t template);
 hid_t H5Ccopy (hid_t template);
-herr_t H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf);
-herr_t H5Cset_prop (hid_t template, H5C_prop_t prop, ...);
+
 H5C_class_t H5Cget_class (hid_t template);
+
+herr_t H5Cget_version (hid_t template, int *boot/*out*/, int *heap/*out*/,
+		       int *freelist/*out*/, int *stab/*out*/,
+		       int *shhdr/*out*/);
+
+herr_t H5Cset_userblock (hid_t template, size_t size);
+herr_t H5Cget_userblock (hid_t template, size_t *size);
+
+herr_t H5Cset_sizes (hid_t template, size_t sizeof_addr, size_t sizeof_size);
+herr_t H5Cget_sizes (hid_t template, size_t *sizeof_addr/*out*/,
+		     size_t *sizeof_size/*out*/);
+
+herr_t H5Cset_sym_k (hid_t template, int ik, int lk);
+herr_t H5Cget_sym_k (hid_t template, int *ik/*out*/, int *lk/*out*/);
+
+herr_t H5Cset_istore_k (hid_t template, int ik);
+herr_t H5Cget_istore_k (hid_t template, int *ik/*out*/);
+
+herr_t H5Cset_layout (hid_t template, H5D_layout_t layout);
+H5D_layout_t H5Cget_layout (hid_t template);
+
+herr_t H5Cset_chunk (hid_t template, int ndims, size_t dim[]);
+int H5Cget_chunk (hid_t template, int max_ndims, size_t dim[]/*out*/);
+
 
 #ifdef __cplusplus
 }

@@ -1246,6 +1246,28 @@ H5F_close (H5F_t *f)
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't flush cache");
    }
 
+   /*
+    * If object headers are still open then delay deletion of resources until
+    * they have all been closed.  The file is in a consistent state now, so
+    * forgetting to close everything is not a major problem.
+    */
+   if (f->nopen>0) {
+#ifndef NDEBUG
+      fprintf (stderr, "HDF5-DIAG: H5F_close: %d object header%s still "
+	       "open (file close will complete when %s closed)\n", 
+	       f->nopen,
+	       1==f->nopen?" is":"s are",
+	       1==f->nopen?"that header is":"those headers are");
+#endif
+      f->close_pending = TRUE;
+      HRETURN (SUCCEED);
+   } else if (f->close_pending) {
+#ifndef NDEBUG
+      fprintf (stderr, "HDF5-DIAG: H5F_close: operation completed\n");
+#endif
+   }
+   
+
    /* Dump debugging info */
    if (f->intent & H5F_ACC_DEBUG) H5AC_debug (f);
 

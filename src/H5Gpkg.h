@@ -50,7 +50,6 @@ typedef struct H5G_node_key_t {
  * above the H5G layer.
  */
 struct H5G_t {
-   H5F_t	*file;		/*file containing group			*/
    int		nref;		/*open reference count			*/
    H5G_entry_t	ent;		/*info about the group			*/
 };
@@ -122,12 +121,12 @@ extern const H5AC_class_t H5AC_SNODE[1];
  * the library and appear in H5Gprivate.h.
  */
 herr_t H5G_stab_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
-herr_t H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+herr_t H5G_stab_find (H5G_entry_t *grp_ent, const char *name,
 		      H5G_entry_t *obj_ent/*out*/);
-herr_t H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+herr_t H5G_stab_insert (H5G_entry_t *grp_ent, const char *name,
 			H5G_entry_t *obj_ent);
-intn H5G_stab_list (H5F_t *f, H5G_entry_t *self, intn maxentries,
-		    char *names[], H5G_entry_t entries[]);
+intn H5G_stab_list (H5G_entry_t *self, intn maxentries,
+		    char *names[]/*out*/, H5G_entry_t entries[]/*out*/);
 
 /*
  * Functions that understand symbol table entries.

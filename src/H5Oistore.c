@@ -26,11 +26,8 @@ const H5O_class_t H5O_ISTORE[1] = {{
    H5O_ISTORE_ID, 			/*message id number		*/
    "istore", 				/*message name for debugging	*/
    sizeof(H5O_istore_t), 		/*native message size		*/
-   H5G_NOTHING_CACHED, 			/*symtab entry `type' field	*/
    H5O_istore_decode, 			/*decode message		*/
    H5O_istore_encode, 			/*encode message		*/
-   NULL, 				/*get messsage from stab entry	*/
-   NULL, 				/*put message into stab entry	*/
    H5O_istore_copy, 			/*copy the native value		*/
    H5O_istore_size, 			/*size of message on disk	*/
    NULL, 				/*reset method			*/

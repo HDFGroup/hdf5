@@ -242,7 +242,6 @@ H5Cclose (hid_t template)
    FUNC_LEAVE (SUCCEED);
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Cget_class
@@ -282,473 +281,595 @@ H5Cget_class (hid_t template)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cget_prop
+ * Function:	H5Cget_version
  *
- * Purpose:	Retrieves a property value from a template.  The value is
- *		returned through an argument, BUF, of the appropriate pointer
- *		type.
+ * Purpose:	Retrieves version information for various parts of a file.
  *
- *		Properties of H5C_FILE_CREATE templates and the type for the
- *		return argument(s):
+ * 		BOOT:		The file boot block.
+ *		HEAP:		The global heap.
+ *		FREELIST:	The global free list.
+ *		STAB:		The root symbol table entry.
+ *		SHHDR:		Shared object headers.
  *
- *	 		H5F_USERBLOCK_SIZE	(size_t*)
- *			Size of the initial part of the file that is not used
- *			by HDF5 and may contain user-defined data.
+ *		Any (or even all) of the output arguments can be null
+ *		pointers.
  *
- *			H5F_SIZEOF_ADDR		(size_t*)
- *			Size in bytes of addresses stored in the file.  This
- *			is similar in nature to the `off_t' type in memory.
- *
- *			H5F_SIZEOF_SIZE		(size_t*)
- *			Size in bytes of fields that contains object sizes in
- *			the file.  This is similar in nature to the `size_t'
- *			type in memory.
- *
- *			H5F_SYM_LEAF_K		(int*)
- *			One half of the number of symbols that can be stored
- *			in a symbol table node.  A symbol table node is the
- *			leaf of a symbol table tree which is used to store a
- *			group.  When symbols are insterted randomly into a
- *			group, the group's symbol table nodes are 75% full on
- *			average.  That is, they contain 1.5 times the number
- *			of symbols specified by this property.
- *
- *			H5F_SYM_INTERN_K	(int*)
- *			One half the rank of a tree that stores a symbol
- *			table.  Internal nodes of the symbol table are on
- *			average 75% full.  That is, the average rank of the
- *			tree is 1.5 times the value specified for this
- *			property.
- *
- *			H5F_ISTORE_K		(int*)
- *			One half the rank of a tree that stores chunked raw
- *			data. On average, such a tree will be 75% full, or
- *			have an average rank of 1.5 times the value specified
- *			for this property.
- *
- *			H5F_BOOTBLOCK_VER	(int*)
- *			The version number of the file boot block.  This is a
- *			read-only property.
- *
- *			H5F_SMALLOBJECT_VER	(int*)
- *			The version number of the global heap.  This is a
- *			read-only property.
- *
- *			H5F_FREESPACE_VER	(int*)
- *			The version number of the free list.  This is a
- *			read-only property.
- *
- *			H5F_OBJECTDIR_VER	(int*)
- *			The version number of the root symbol table entry.
- *			This is a read-only property.
- *
- *			H5F_SHAREDHEADER_VER	(int*)
- *			The version number for shared object header messages.
- *			This is a read-only property.
- *
- *		Properties of H5C_FILE_ACCESS templates and the type for the
- *		return argument(s):
- *
- * 			** None defined yet **
- *
- *		Properties of H5C_DATASET_CREATE templates and the type for
- *		the return argument(s):
- *
- * 			H5D_LAYOUT		(H5D_layout_t*)
- *			The layout of raw data on disk.
- *
- * 			H5D_CHUNK_NDIMS		(int*)
- *			The number of dimensions per chunk.  This is actually
- *			one less than the real number of dimensions since the
- *			real chunk dimensions also include the data type
- *			itself.  The number of dimensions returned here
- *			should be the same as the number of dimensions
- *			returned by H5Pget_ndims().
- *
- * 			H5D_CHUNK_SIZE		(size_t[])
- *			An array that specifies the chunk size in each
- *			dimension. The actual dimension list omits the final
- *			dimension corresponding to the data type and returns
- *			only the dimensions corresponding to the data space.
- *			The array should be large enough to hold at least the
- *			number of dimension sizes returned by the
- *			H5D_CHUNK_NDIMS property.
- *
- * 			H5D_COMPRESS		(H5D_compress_t*)
- *			The raw data compression algorithm.
- *
- * 			H5D_PRE_OFFSET		(double*)
- *			The value which is added to each data point before
- *			compression or subtracted from each data point after
- *			uncompression.
- *
- *			H5D_PRE_SCALE		(double*)
- *			The value by which each data point is multiplied
- *			before compression or divided after uncompression.
- *
- *		Properties of H5C_DATASET_XFER templates and the type for
- *		the return argument(s):
- * 			
- * 			** None defined yet **
- *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	SUCCEED, version information is returned
+ *				through the arguments.
  *
  *		Failure:	FAIL
  *
- * Errors:
- *		ARGS      BADRANGE      Unknown property for dataset create
- *		                        template. 
- *		ARGS      BADRANGE      Unknown property for dataset transfer
- *		                        template. 
- *		ARGS      BADRANGE      Unknown property for file access
- *		                        template. 
- *		ARGS      BADRANGE      Unknown property for file create
- *		                        template. 
- *		ARGS      BADRANGE      Unknown template class. 
- *		ARGS      BADTYPE       Not a template. 
- *		INTERNAL  UNSUPPORTED   Not implemented yet. 
- *		TEMPLATE  UNINITIALIZED Chunk dimensionality is not initialized
- *		TEMPLATE  UNINITIALIZED Chunk size is not initialized. 
- *
  * Programmer:	Robb Matzke
- *              Thursday, December 11, 1997
+ *              Wednesday, January  7, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cget_prop (hid_t template, H5C_prop_t prop, void *buf/*out*/)
+H5Cget_version (hid_t template, int *boot/*out*/, int *heap/*out*/,
+		int *freelist/*out*/, int *stab/*out*/, int *shhdr/*out*/)
 {
-   const void		*tmpl = NULL;
-   const H5F_create_t	*file_create = NULL;
-   const H5D_create_t	*dset_create = NULL;
-   H5C_class_t		type;
-   intn			i;
+   H5F_create_t	*tmpl = NULL;
    
-   FUNC_ENTER (H5Cget_prop, FAIL);
-   H5ECLEAR;
-
+   FUNC_ENTER (H5Cget_version, FAIL);
    
-   /* check args */
-   if ((type=H5Cget_class (template))<0 ||
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
        NULL==(tmpl=H5Aatom_object (template))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a template");
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
    }
 
-   /* Handle each class of template */
-   switch (type) {
-   case H5C_FILE_CREATE:
-      file_create = (const H5F_create_t *)tmpl;
-      
-      switch (prop) {
-      case H5F_SIZEOF_USERBLOCK:
-	 *(size_t *)buf = file_create->userblock_size;
-	 break;
+   /* Get values */
+   if (boot) *boot = tmpl->bootblock_ver;
+   if (heap) *heap = tmpl->smallobject_ver;
+   if (freelist) *freelist = tmpl->freespace_ver;
+   if (stab) *stab = tmpl->objectdir_ver;
+   if (shhdr) *shhdr = tmpl->sharedheader_ver;
 
-      case H5F_SIZEOF_ADDR:
-	 *(size_t *)buf = file_create->sizeof_addr;
-	 break;
-
-      case H5F_SIZEOF_SIZE:
-	 *(size_t *)buf = file_create->sizeof_size;
-	 break;
-
-      case H5F_SYM_LEAF_K:
-	 *(int *)buf=file_create->sym_leaf_k;
-	 break;
-
-      case H5F_SYM_INTERN_K:
-	 *(int *)buf = file_create->btree_k[H5B_SNODE_ID];
-	 break;
-
-      case H5F_ISTORE_K:
-	 *(int *)buf = file_create->btree_k[H5B_ISTORE_ID];
-	 break;
-
-      case H5F_BOOTBLOCK_VER:
-	 *(int *)buf=file_create->bootblock_ver;
-	 break;
-
-      case H5F_SMALLOBJECT_VER:
-	 *(int *)buf=file_create->smallobject_ver;
-	 break;
-
-      case H5F_FREESPACE_VER:
-	 *(int *)buf=file_create->freespace_ver;
-	 break;
-
-      case H5F_OBJECTDIR_VER:
-	 *(int *)buf=file_create->objectdir_ver;
-	 break;
-
-      case H5F_SHAREDHEADER_VER:
-	 *(int *)buf=file_create->sharedheader_ver;
-	 break;
-
-      default:
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			"unknown property for file create template");
-      }
-      break;
-
-   case H5C_FILE_ACCESS:
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		     "unknown property for file access template");
-       
-   case H5C_DATASET_CREATE:
-      dset_create = (const H5D_create_t *)tmpl;
-      switch (prop) {
-      case H5D_LAYOUT:
-	 *(H5D_layout_t*)buf = dset_create->layout;
-	 break;
-
-      case H5D_CHUNK_NDIMS:
-	 if (H5D_CHUNKED==dset_create->layout) {
-	    *(int*)buf = dset_create->chunk_ndims; 
-	 } else {
-	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL,
-			   "chunk dimensionality is not initialized");
-	 }
-	 break;
-
-      case H5D_CHUNK_SIZE:
-	 if (H5D_CHUNKED==dset_create->layout) {
-	    for (i=0; i<dset_create->chunk_ndims; i++) {
-	       ((size_t*)buf)[i] = dset_create->chunk_size[i];
-	    }
-	 } else {
-	    HRETURN_ERROR (H5E_TEMPLATE, H5E_UNINITIALIZED, FAIL,
-			   "chunk size is not initialized");
-	 }
-	 break;
-
-      case H5D_COMPRESS:
-      case H5D_PRE_OFFSET:
-      case H5D_PRE_SCALE:
-	 HRETURN_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
-			"not implemented yet");
-
-      default:
-	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			"unknown property for dataset create template");
-      }
-      break;
-       
-   case H5C_DATASET_XFER:
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		     "unknown property for dataset transfer template");
-
-   default:
-      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		     "unknown template class");
-   }
    FUNC_LEAVE (SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Cset_prop
+ * Function:	H5Cset_userblock
  *
- * Purpose:	Sets a property, PROP, to a specified value in a TEMPLATE.
- *		The value data type depends on the property being set and is
- *		documented in H5Cget_prop().  The data type does not include
- *		the pointer (that is, property values are passed by value,
- *		not reference).
- *
- * Note:	Not all properties that can be queried with H5Cget_prop() can
- *		be set to a value with H5Cset_prop().  Such properties are
- *		documented as read-only in H5Cget_prop().
+ * Purpose:	Sets the userblock size field of a file creation template.
  *
  * Return:	Success:	SUCCEED
  *
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
- *              Thursday, December 11, 1997
+ *              Tuesday, January  6, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Cset_prop (hid_t template, H5C_prop_t prop, ...)
+H5Cset_userblock (hid_t template, size_t size)
 {
-   void			*tmpl = NULL;
-   H5F_create_t		*file_create = NULL;
-   H5D_create_t		*dset_create = NULL;
-   H5C_class_t		type;
-   H5D_layout_t		layout;
-   size_t		size, *dims = NULL;
-   intn			i, n;
-   va_list		ap;
-   herr_t		ret_value = FAIL;
-
-   FUNC_ENTER (H5Cset_prop, FAIL);
-   H5ECLEAR;
-
-   va_start (ap, prop);
+   intn		i;
+   H5F_create_t	*tmpl = NULL;
    
-   if ((type=H5Cget_class (template))<0 ||
+   FUNC_ENTER (H5Cset_userblock, FAIL);
+
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
        NULL==(tmpl=H5Aatom_object (template))) {
-      HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a template");
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+   for (i=8; i<8*sizeof(int); i++) {
+      uintn p2 = 8==i ? 0 :1<<i;
+      if (size==p2) break;
+   }
+   if (i>=8*sizeof(int)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "userblock size is not valid");
    }
 
-   /* Handle each class of template */
-   switch (type) {
-   case H5C_FILE_CREATE:
-      file_create = (H5F_create_t *)tmpl;
-      
-      switch (prop) {
-      case H5F_SIZEOF_USERBLOCK:
-	 size = va_arg (ap, size_t);
-	 for (i=8; i<8*sizeof(int); i++) {
-	    uintn p2 = 8==i ? 0 :1<<i;
-	    if (size==p2) break;
-	 }
-	 if (i>=8*sizeof(int)) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			 "userblock size is not valid");
-	 }
-	 file_create->userblock_size = size;
-	 break;
+   /* Set value */
+   tmpl->userblock_size = size;
 
-      case H5F_SIZEOF_ADDR:
-	 size = va_arg (ap, size_t);
-	 if (size!=2 && size!=4 && size!=8 && size!=16) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			 "file haddr_t size is not valid");
-	 }
-	 file_create->sizeof_addr = size;
-	 break;
+   FUNC_LEAVE (SUCCEED);
+}
 
-      case H5F_SIZEOF_SIZE:
-	 size = va_arg (ap, size_t);
-	 if (size!=2 && size!=4 && size!=8 && size!=16) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			 "file size_t size is not valid");
-	 }
-	 file_create->sizeof_size = size;
-	 break;
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_userblock
+ *
+ * Purpose:	Queries the size of a user block in a file creation template.
+ *
+ * Return:	Success:	SUCCEED, size returned through SIZE argument.
+ *
+ *		Failure:        FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cget_userblock (hid_t template, size_t *size)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_userblock, FAIL);
 
-      case H5F_SYM_LEAF_K:
-	 n = va_arg (ap, int);
-	 if (n<2) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			 "symbol leaf node 1/2 rank is not valid");
-	 }
-	 file_create->sym_leaf_k = n;
-	 break;
-
-      case H5F_SYM_INTERN_K:
-	 n = va_arg (ap, int);
-	 if (n<2) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			 "symbol internal node 1/2 rank is not valid");
-	 }
-	 file_create->btree_k[H5B_SNODE_ID] = n;
-	 break;
-
-      case H5F_ISTORE_K:
-	 n = va_arg (ap, int);
-	 if (n<2) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			 "indexed storage internal node 1/2 rank not valid");
-	 }
-	 file_create->btree_k[H5B_ISTORE_ID] = n;
-	 break;
-	    
-      case H5F_BOOTBLOCK_VER:
-      case H5F_SMALLOBJECT_VER:
-      case H5F_FREESPACE_VER:
-      case H5F_OBJECTDIR_VER:
-      case H5F_SHAREDHEADER_VER:
-	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		      "this is a read-only property");
-
-      default:
-	 HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-		     "unknown file creation property");
-      }
-      break;
-
-   case H5C_FILE_ACCESS:
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		   "unknown property for file access template");
-       
-   case H5C_DATASET_CREATE:
-      dset_create = (H5D_create_t *)tmpl;
-      
-      switch (prop) {
-      case H5D_LAYOUT:
-	 layout = va_arg (ap, H5D_layout_t);
-	 if (layout<0 || layout>=H5D_NLAYOUTS) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-			 "raw data layout method is not valid");
-	 }
-	 dset_create->layout = layout;
-	 break;
-	 
-      case H5D_CHUNK_NDIMS:
-	 n = va_arg (ap, int);
-	 if (H5D_CHUNKED!=dset_create->layout) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			 "not a chunked layout template");
-	 }
-	 if (n<=0 || n>NELMTS (dset_create->chunk_size)) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			 "invalid number of dimensions");
-	 }
-	 dset_create->chunk_ndims = n;
-	 for (i=0; i<n; i++) dset_create->chunk_size[i] = 1;
-	 break;
-
-      case H5D_CHUNK_SIZE:
-	 dims = va_arg (ap, size_t*);
-	 if (H5D_CHUNKED!=dset_create->layout) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			 "not a chunked layout template");
-	 }
-	 if (!dims) {
-	    HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no dims");
-	 }
-	 for (i=0; i<dset_create->chunk_ndims; i++) {
-	    if (dims[i]<=0) {
-	       HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
-			    "invalid dimension size");
-	    }
-	 }
-	 for (i=0; i<dset_create->chunk_ndims; i++) {
-	    dset_create->chunk_size[i] = dims[i];
-	 }
-	 break;
-
-      case H5D_COMPRESS:
-      case H5D_PRE_OFFSET:
-      case H5D_PRE_SCALE:
-	 HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
-		      "not implemented yet");
-
-      default:
-	 HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		      "unknown property for dataset create template");
-      }
-      break;
-       
-   case H5C_DATASET_XFER:
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		   "unknown property for dataset transfer template");
-
-   default:
-      HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
-		   "unknown template class");
+   /* Check args */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
    }
 
-   ret_value = SUCCEED;
+   /* Get value */
+   if (size) *size = tmpl->userblock_size;
 
- done:
-   va_end (ap);
-   FUNC_LEAVE (ret_value);
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_sizes
+ *
+ * Purpose:	Sets file size-of addresses and sizes.  TEMPLATE
+ *		should be a file creation template.  A value of zero causes
+ *		the property to not change.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_sizes (hid_t template, size_t sizeof_addr, size_t sizeof_size)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cset_sizeof_addr, FAIL);
+   
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+   if (sizeof_addr) {
+      if (sizeof_addr!=2 && sizeof_addr!=4 &&
+	  sizeof_addr!=8 && sizeof_addr!=16) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			"file haddr_t size is not valid");
+      }
+   }
+   if (sizeof_size) {
+      if (sizeof_size!=2 && sizeof_size!=4 &&
+	  sizeof_size!=8 && sizeof_size!=16) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			"file size_t size is not valid");
+      }
+   }
+
+   /* Set value */
+   if (sizeof_addr) tmpl->sizeof_addr = sizeof_addr;
+   if (sizeof_size) tmpl->sizeof_size = sizeof_size;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_sizes
+ *
+ * Purpose:	Returns the size of address and size quantities stored in a
+ *		file according to a file creation template.  Either (or even
+ *		both) SIZEOF_ADDR and SIZEOF_SIZE may be null pointers.
+ *
+ * Return:	Success:	SUCCEED, sizes returned through arguments.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cget_sizes (hid_t template,
+	      size_t *sizeof_addr/*out*/, size_t *sizeof_size/*out*/)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_sizes, FAIL);
+   
+   /* Check args */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+
+   /* Get values */
+   if (sizeof_addr) *sizeof_addr = tmpl->sizeof_addr;
+   if (sizeof_size) *sizeof_size = tmpl->sizeof_size;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_sym_k
+ *
+ * Purpose:	IK is one half the rank of a tree that stores a symbol
+ *		table for a group.  Internal nodes of the symbol table are on
+ *		average 75% full.  That is, the average rank of the tree is
+ *		1.5 times the value of IK.
+ *
+ * 		LK is one half of the number of symbols that can be stored in
+ *		a symbol table node.  A symbol table node is the leaf of a
+ *		symbol table tree which is used to store a group.  When
+ *		symbols are inserted randomly into a group, the group's
+ *		symbol table nodes are 75% full on average.  That is, they
+ *		contain 1.5 times the number of symbols specified by LK.
+ *
+ *		Either (or even both) of IK and LK can be zero in which case
+ *		that value is left unchanged.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_sym_k (hid_t template, int ik, int lk)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cset_sym_k, FAIL);
+   
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+
+   /* Set values */
+   if (ik>0) {
+      tmpl->btree_k[H5B_SNODE_ID] = ik;
+   }
+   if (lk>0) {
+      tmpl->sym_leaf_k = lk;
+   }
+   
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_sym_k
+ *
+ * Purpose:	Retrieves the symbol table B-tree 1/2 rank (IK) and the
+ *		symbol table leaf node 1/2 size (LK).  See H5Cset_sym_k() for
+ *		details. Either (or even both) IK and LK may be null
+ *		pointers.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cget_sym_k (hid_t template, int *ik/*out*/, int *lk/*out*/)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_sym_k, FAIL);
+   
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+
+   /* Get values */
+   if (ik) *ik = tmpl->btree_k[H5B_SNODE_ID];
+   if (lk) *lk = tmpl->sym_leaf_k;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_istore_k
+ *
+ * Purpose:	IK is one half the rank of a tree that stores chunked raw
+ *		data.  On average, such a tree will be 75% full, or have an
+ *		average rank of 1.5 times the value of IK.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_istore_k (hid_t template, int ik)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cset_istore_k, FAIL);
+   
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+   if (ik<=0) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "istore IK value must be positive");
+   }
+
+   /* Set value */
+   tmpl->btree_k[H5B_ISTORE_ID] = ik;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_istore_k
+ *
+ * Purpose:	Queries the 1/2 rank of an indexed storage B-tree.  See
+ *		H5Cset_istore_k() for details.  The argument IK may be the
+ *		null pointer.
+ *
+ * Return:	Success:	SUCCEED, size returned through IK
+ *
+ *		Failure:	
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cget_istore_k (hid_t template, int *ik/*out*/)
+{
+   H5F_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_istore_k, FAIL);
+   
+   /* Check arguments */
+   if (H5C_FILE_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a file creation template");
+   }
+
+   /* Get value */
+   if (ik) *ik = tmpl->btree_k[H5B_ISTORE_ID];
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_layout
+ *
+ * Purpose:	Sets the layout of raw data in the file.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_layout (hid_t template, H5D_layout_t layout)
+{
+   H5D_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cset_layout, FAIL);
+   
+   /* Check arguments */
+   if (H5C_DATASET_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a dataset creation template");
+   }
+   if (layout<0 || layout>=H5D_NLAYOUTS) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "raw data layout method is not valid");
+   }
+
+   /* Set value */
+   tmpl->layout = layout;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_layout
+ *
+ * Purpose:	Retrieves layout type of a dataset creation template.
+ *
+ * Return:	Success:	The layout type
+ *
+ *		Failure:	H5D_LAYOUT_ERROR (-1, same as FAIL)
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_layout_t
+H5Cget_layout (hid_t template)
+{
+   H5D_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_layout, H5D_LAYOUT_ERROR);
+   
+   /* Check arguments */
+   if (H5C_DATASET_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5D_LAYOUT_ERROR,
+		     "not a dataset creation template");
+   }
+
+   FUNC_LEAVE (tmpl->layout);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cset_chunk
+ *
+ * Purpose:	Sets the number of dimensions and the size of each chunk to
+ *		the values specified.  The dimensionality of the chunk should
+ *		match the dimensionality of the data space.
+ *
+ *		As a side effect, the layout method is changed to
+ *		H5D_CHUNKED.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_chunk (hid_t template, int ndims, size_t dim[])
+{
+   int		i;
+   H5D_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cset_chunk, FAIL);
+   
+   /* Check arguments */
+   if (H5C_DATASET_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a dataset creation template");
+   }
+   if (ndims<=0) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "chunk dimensionality must be positive");
+   }
+   if (ndims>NELMTS (tmpl->chunk_size)) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+		     "chunk dimensionality is too large");
+   }
+   if (!dim) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "no chunk dimensions specified");
+   }
+   for (i=0; i<ndims; i++) {
+      if (dim[i]<=0) {
+	 HRETURN_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL,
+			"all chunk dimensions must be positive");
+      }
+   }
+
+   /* Set value */
+   tmpl->layout = H5D_CHUNKED;
+   tmpl->chunk_ndims = ndims;
+   for (i=0; i<ndims; i++) tmpl->chunk_size[i] = dim[i];
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Cget_chunk
+ *
+ * Purpose:	Retrieves the chunk size of chunked layout.  The chunk
+ *		dimensionality is returned and the chunk size in each
+ *		dimension is returned through the DIM argument.  At most
+ *		MAX_NDIMS elements of DIM will be initialized.
+ *
+ * Return:	Success:	Positive Chunk dimensionality.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Cget_chunk (hid_t template, int max_ndims, size_t dim[]/*out*/)
+{
+   int		i;
+   H5D_create_t	*tmpl = NULL;
+   
+   FUNC_ENTER (H5Cget_chunk, FAIL);
+   
+   /* Check arguments */
+   if (H5C_DATASET_CREATE!=H5Cget_class (template) ||
+       NULL==(tmpl=H5Aatom_object (template))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		     "not a dataset creation template");
+   }
+   if (H5D_CHUNKED!=tmpl->layout) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		     "not a chunked storage layout");
+   }
+
+   for (i=0; i<tmpl->chunk_ndims && i<max_ndims && dim; i++) {
+      dim[i] = tmpl->chunk_size[i];
+   }
+
+   FUNC_LEAVE (tmpl->chunk_ndims);
 }
 
 /*--------------------------------------------------------------------------

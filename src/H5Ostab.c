@@ -26,9 +26,6 @@
 static void *H5O_stab_decode (H5F_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_stab_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static void *H5O_stab_fast (const H5G_cache_t *cache, void *_mesg);
-static hbool_t H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
-			       const void *_mesg);
 static void *H5O_stab_copy (const void *_mesg, void *_dest);
 static size_t H5O_stab_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_debug (H5F_t *f, const void *_mesg,
@@ -39,11 +36,8 @@ const H5O_class_t H5O_STAB[1] = {{
    H5O_STAB_ID,				/*message id number		*/
    "stab",				/*message name for debugging	*/
    sizeof (H5O_stab_t),			/*native message size		*/
-   H5G_CACHED_STAB, 			/*symtab entry `type' field	*/
    H5O_stab_decode,			/*decode message		*/
    H5O_stab_encode,			/*encode message		*/
-   H5O_stab_fast,			/*get message from stab entry	*/
-   H5O_stab_cache,			/*put message into stab entry	*/
    H5O_stab_copy,			/*copy the native value		*/
    H5O_stab_size,			/*size of symbol table entry	*/
    NULL,				/*default reset method		*/
@@ -151,75 +145,25 @@ H5O_stab_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5O_stab_fast (const H5G_cache_t *cache, void *_mesg)
+void *
+H5O_stab_fast (const H5G_cache_t *cache, const H5O_class_t *type, void *_mesg)
 {
-   H5O_stab_t	*stab = (H5O_stab_t *)_mesg;
+   H5O_stab_t	*stab = NULL;
    
    FUNC_ENTER (H5O_stab_fast, NULL);
 
    /* check args */
    assert (cache);
+   assert (type);
 
-   if (!stab) stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
-   stab->btree_addr = cache->stab.btree_addr;
-   stab->heap_addr = cache->stab.heap_addr;
-
-   FUNC_LEAVE (stab);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_stab_cache
- *
- * Purpose:	Copies a message into the cache portion of a symbol table
- *		entry.
- *
- * Return:	Success:	TRUE if modified; FALSE if not modified.
- *				In either case, the new cache type is
- *				returned through the CACHE_TYPE argument.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  6 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-H5O_stab_cache (H5G_type_t *cache_type, H5G_cache_t *cache, const void *_mesg)
-{
-   const H5O_stab_t	*stab = (const H5O_stab_t *)_mesg;
-   hbool_t		modified = FALSE;
-   
-   FUNC_ENTER (H5O_stab_cache, FAIL);
-
-   /* check args */
-   assert (cache_type);
-   assert (cache);
-   assert (stab);
-
-   if (H5G_CACHED_STAB != *cache_type) {
-      modified = TRUE;
-      *cache_type = H5G_CACHED_STAB;
-      cache->stab.btree_addr = stab->btree_addr;
-      cache->stab.heap_addr = stab->heap_addr;
-   } else {
-      if (H5F_addr_ne (&(cache->stab.btree_addr), &(stab->btree_addr))) {
-	 modified = TRUE;
-	 cache->stab.btree_addr = stab->btree_addr;
-      }
-
-      if (H5F_addr_ne (&(cache->stab.heap_addr), &(stab->heap_addr))) {
-	 modified = TRUE;
-	 cache->stab.heap_addr = stab->heap_addr;
-      }
+   if (H5O_STAB==type) {
+      if (_mesg) stab = (H5O_stab_t *)_mesg;
+      else stab = H5MM_xcalloc (1, sizeof(H5O_stab_t));
+      stab->btree_addr = cache->stab.btree_addr;
+      stab->heap_addr = cache->stab.heap_addr;
    }
 
-   FUNC_LEAVE (modified);
+   FUNC_LEAVE (stab);
 }
 
 

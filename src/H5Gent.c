@@ -34,75 +34,14 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 H5G_entry_t *
-H5G_ent_calloc (void)
+H5G_ent_calloc (H5G_entry_t *init)
 {
    H5G_entry_t *ent;
    
    ent = H5MM_xcalloc (1, sizeof(H5G_entry_t));
-   H5F_addr_undef (&(ent->header));
+   if (init) *ent = *init;
+   else H5F_addr_undef (&(ent->header));
    return ent;
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_ent_invalidate
- *
- * Purpose:	Invalidates the cache in a symbol table entry.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_ent_invalidate (H5G_entry_t *ent)
-{
-   FUNC_ENTER (H5G_ent_invalidate, FAIL);
-   
-   if (ent && H5G_NOTHING_CACHED!=ent->type) {
-      ent->dirty = TRUE;
-      ent->type = H5G_NOTHING_CACHED;
-   }
-
-   FUNC_LEAVE (SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_ent_addr
- *
- * Purpose:	Returns the header address associated with a symbol table
- *		entry.
- *
- * Return:	Success:	SUCCED with the address returned in the ADDR
- *				argument.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *              Friday, September 19, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_ent_addr (H5G_entry_t *ent, haddr_t *addr/*out*/)
-{
-   FUNC_ENTER (H5G_ent_addr, FAIL);
-   
-   assert (ent);
-   *addr = ent->header;
-   
-   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -248,6 +187,8 @@ H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
    assert (pp);
    assert (ent);
 
+   ent->file = f;
+
    /* decode header */
    H5F_decode_length (f, *pp, ent->name_off);
    H5F_addr_decode (f, pp, &(ent->header));
@@ -256,15 +197,6 @@ H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
    /* decode scratch-pad */
    switch (ent->type) {
    case H5G_NOTHING_CACHED:
-      break;
-
-   case H5G_CACHED_SDSPACE:
-      assert (5*4 <= H5G_SIZEOF_SCRATCH);
-      UINT32DECODE (*pp, ent->cache.sdspace.ndim);
-      UINT32DECODE (*pp, ent->cache.sdspace.dim[0]);
-      UINT32DECODE (*pp, ent->cache.sdspace.dim[1]);
-      UINT32DECODE (*pp, ent->cache.sdspace.dim[2]);
-      UINT32DECODE (*pp, ent->cache.sdspace.dim[3]);
       break;
 
    case H5G_CACHED_STAB:
@@ -376,15 +308,6 @@ H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
       case H5G_NOTHING_CACHED:
 	 break;
 
-      case H5G_CACHED_SDSPACE:
-	 assert (5*4 <= H5G_SIZEOF_SCRATCH);
-	 UINT32ENCODE (*pp, ent->cache.sdspace.ndim);
-	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[0]);
-	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[1]);
-	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[2]);
-	 UINT32ENCODE (*pp, ent->cache.sdspace.dim[3]);
-	 break;
-
       case H5G_CACHED_STAB:
 	 assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
 	 H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
@@ -433,9 +356,6 @@ herr_t
 H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
 	       intn fwidth)
 {
-   int		i;
-   char		buf[64];
-   
    FUNC_ENTER (H5G_ent_debug, FAIL);
 
    fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
@@ -455,19 +375,6 @@ H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
    switch (ent->type) {
    case H5G_NOTHING_CACHED:
       fprintf (stream, "Nothing Cached\n");
-      break;
-	 
-   case H5G_CACHED_SDSPACE:
-      fprintf (stream, "Simple data space\n");
-      fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-	       "Dimensionality:",
-	       (unsigned)(ent->cache.sdspace.ndim));
-      for (i=0; i<ent->cache.sdspace.ndim && i<4; i++) {
-	 sprintf (buf, "Dimension %d", i);
-	 fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-		  buf,
-		  (unsigned)(ent->cache.sdspace.dim[i]));
-      }
       break;
 	 
    case H5G_CACHED_STAB:

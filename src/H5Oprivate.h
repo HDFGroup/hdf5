@@ -31,6 +31,10 @@
 #define H5O_NEW_MESG	(-1)		/*new message			*/
 #define H5O_ALL		(-1)		/*delete all messages of type	*/
 
+/* Flags which are part of the message id */
+#define H5O_FLAG_CONSTANT	0x8000
+#define H5O_FLAG_BITS		0x8000
+
 #define H5O_VERSION	1
 #define H5O_ALIGNMENT	4
 #define H5O_ALIGN(X,A)	((X)=(A)*(((X)+(A)-1)/(A)))
@@ -46,11 +50,12 @@ typedef struct H5O_class_t {
    intn		id;			/*message type ID on disk	*/
    const char	*name;			/*message name for debugging	*/
    size_t	native_size;		/*size of native message	*/
-   H5G_type_t	cache_type;		/*type field in symbol table	*/
    void		*(*decode)(H5F_t*,size_t,const uint8*);
    herr_t	(*encode)(H5F_t*,size_t,uint8*,const void*);
+#if 0
    void		*(*fast)(const H5G_cache_t*, void*);/*get from of entry	*/
    hbool_t	(*cache)(H5G_type_t*, H5G_cache_t*,const void*); /*into entry*/
+#endif
    void		*(*copy)(const void*,void*); /*copy native value	*/
    size_t	(*raw_size)(H5F_t*,const void*); /*sizeof raw val	*/
    herr_t	(*reset)(void*); /*free nested data structures		*/
@@ -60,6 +65,7 @@ typedef struct H5O_class_t {
 typedef struct H5O_mesg_t {
    const H5O_class_t *type;		/*type of message		*/
    hbool_t	dirty;			/*raw out of date wrt native	*/
+   hbool_t	constant;		/*is message constant?		*/
    void		*native;		/*native format message		*/
    uint8	*raw;			/*ptr to raw data		*/
    size_t	raw_size;		/*size with alignment		*/
@@ -172,6 +178,8 @@ typedef struct H5O_cont_t {
  */
 #define H5O_STAB_ID	0x0011
 extern const H5O_class_t H5O_STAB[1];
+void *H5O_stab_fast (const H5G_cache_t *cache, const H5O_class_t *type,
+		     void *_mesg);
 
 typedef struct H5O_stab_t {
    haddr_t	btree_addr;		/*address of B-tree		*/
@@ -182,16 +190,13 @@ typedef struct H5O_stab_t {
 
 herr_t H5O_create (H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/);
 herr_t H5O_open (H5F_t *f, H5G_entry_t *ent);
-herr_t H5O_close (H5F_t *f, H5G_entry_t *ent);
-intn H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust);
-void *H5O_read (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-		intn sequence, void *mesg);
-const void *H5O_peek (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-		      intn sequence);
-intn H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-		 intn overwrite, const void *mesg);
-herr_t H5O_remove (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-		   intn sequence);
+herr_t H5O_close (H5G_entry_t *ent);
+intn H5O_link ( H5G_entry_t *ent, intn adjust);
+void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence,
+		void *mesg);
+intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
+		 uintn flags, const void *mesg);
+herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
 herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream,
 		  intn indent, intn fwidth);

@@ -75,11 +75,13 @@ test_1 (void)
    /* create the object */
    status = H5O_create (f, 0, &ent1);
    CHECK_I (status, "H5O_create");
-   status = H5G_insert (f, "/", &ent1);
+   status = H5G_insert ("/", &ent1);
    CHECK_I (status, "H5G_insert");
+   status = H5O_close (&ent1);
+   CHECK_I (status, "H5O_close");
 
    /* look for a name message -- it shouldn't be present */
-   status_ptr = H5O_read (f, &ent1, H5O_NAME, 0, &name_mesg);
+   status_ptr = H5O_read (&ent1, H5O_NAME, 0, &name_mesg);
    VERIFY (status_ptr, NULL, "H5O_read [didn't fail but should have]");
    
    /*
@@ -105,8 +107,10 @@ test_1 (void)
    /* create the object */
    status = H5O_create (f, 0, &ent2);
    CHECK_I (status, "H5O_create");
-   status = H5G_insert (f,  "/second", &ent2);
+   status = H5G_insert ("/second", &ent2);
    CHECK_I (status, "H5G_insert");
+   status = H5O_close (&ent2);
+   CHECK_I (status, "H5O_close");
 
    /* try to read the first object */
    HDmemset (&obj_ent, 0xff, sizeof(H5G_entry_t));
@@ -137,11 +141,13 @@ test_1 (void)
    /* create the object */
    status = H5O_create (f, 0, &ent1);
    CHECK_I (status, "H5O_create");
-   status = H5G_insert (f, "/foo", &ent1);
+   status = H5G_insert ("/foo", &ent1);
    CHECK_I (status, "H5G_insert");
+   status = H5O_close (&ent1);
+   CHECK_I (status, "H5O_close");
 
    /* does it have the correct name message? */
-   status_ptr = H5O_read (f, &ent1, H5O_NAME, 0, &name_mesg);
+   status_ptr = H5O_read (&ent1, H5O_NAME, 0, &name_mesg);
    CHECK_PTR (status_ptr, "H5O_read");
    CHECK_PTR (name_mesg.s, "H5O_read");
    VERIFY (strcmp(name_mesg.s, "foo"), 0, "H5G_insert");
@@ -179,8 +185,10 @@ test_1 (void)
    /* create the object */
    status = H5O_create (f, 0, &ent2);
    CHECK_I (status, "H5O_create");
-   status = H5G_insert (f, "/second", &ent2);
+   status = H5G_insert ("/second", &ent2);
    CHECK_I (status, "H5G_insert");
+   status = H5O_close (&ent2);
+   CHECK_I (status, "H5O_close");
 
    /* try to read the first object */
    HDmemset (&obj_ent, 0, sizeof(H5G_entry_t));
@@ -190,7 +198,7 @@ test_1 (void)
    VERIFY (b, TRUE, "H5G_insert");
 
    /* the first object should not have a name message */
-   status_ptr = H5O_read (f, &ent1, H5O_NAME, 0, &name_mesg);
+   status_ptr = H5O_read (&ent1, H5O_NAME, 0, &name_mesg);
    VERIFY (status_ptr, NULL, "H5O_read [didn't fail but should have]");
 
    /* close the file */
@@ -217,13 +225,12 @@ test_1 (void)
 static void
 test_2 (void)
 {
-   hid_t	fid, props;
+   hid_t	fid, props, dir;
    H5F_t	*f;
    int		i;
    char		name[256];
    herr_t	status;
    int		nsyms = 5000;
-   H5G_t	*dir = NULL;
    
    MESSAGE (2, ("........large directories\n"));
 
@@ -233,8 +240,7 @@ test_2 (void)
     */
    props = H5Ccreate (H5C_FILE_CREATE);
 #if 1
-   H5Cset_prop (props, H5F_SYM_LEAF_K, 16);
-   H5Cset_prop (props, H5F_SYM_INTERN_K, 16);
+   H5Cset_sym_k (props, 16, 16);
 #endif
 
    /* create the file */
@@ -248,20 +254,23 @@ test_2 (void)
     * Create a directory that has so many entries that the root
     * of the B-tree ends up splitting.
     */
-   dir = H5G_create (f, "/big", nsyms*12+2);
-   CHECK_PTR (dir, "H5G_mkdir");
-   status = H5G_close (dir);
-   CHECK_I (status, "H5G_close");
+   dir = H5Gcreate (fid, "/big", nsyms*16+2);
+   CHECK_I (dir, "H5Gcreate");
+   status = H5Gclose (dir);
+   CHECK_I (status, "H5Gclose");
+   status = H5Gset (fid, "/big");
+   CHECK_I (status, "H5Gset");
+   
    
    for (i=0; i<nsyms; i++) {
-      sprintf (name, "/big/%05d%05d", rand()%100000, i);
+      sprintf (name, "%05d%05d", rand()%100000, i);
       MESSAGE (8, ("%s\n", name));
-      dir = H5G_create (f, name, 0);
-      CHECK_PTR (dir, "H5G_create");
-      H5G_close (dir);
+      dir = H5Gcreate (fid, name, 0);
+      CHECK_I (dir, "H5Gcreate");
+      status = H5Gclose (dir);
+      CHECK_I (status, "H5Gclose");
    }
    
-
    /* close the file */
    status = H5Fclose (fid);
    CHECK_I (status, "H5Fclose");

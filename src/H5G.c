@@ -204,8 +204,11 @@ H5Gclose (hid_t grp_id)
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
    }
 
-   /* close it */
-   if (H5G_close (grp)<0) {
+   /*
+    * Decrement the counter on the group atom.  It will be freed if the count
+    * reaches zero.
+    */
+   if (H5A_dec_ref (grp_id)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
    }
 
@@ -241,7 +244,7 @@ H5Gclose (hid_t grp_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gset (hid_t file_id, hid_t grp_id)
+H5Gset (hid_t file_id, const char *name)
 {
    H5F_t	*f=NULL;
    H5G_t	*grp;
@@ -254,15 +257,22 @@ H5Gset (hid_t file_id, hid_t grp_id)
        NULL==(f=H5Aatom_object (file_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
    }
-   if (H5_GROUP!=H5Aatom_group (grp_id) ||
-       NULL==(grp=H5Aatom_object (grp_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+   }
+   if (NULL==(grp=H5G_open (f, name))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_NOTFOUND, FAIL, "no such group");
    }
 
    /* Set the current working group */
    if (H5G_set (f, grp)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		     "unable to change current working group");
+   }
+
+   /* Close the handle */
+   if (H5G_close (grp)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
    }
 
    FUNC_LEAVE (SUCCEED);
@@ -297,7 +307,7 @@ H5Gset (hid_t file_id, hid_t grp_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gpush (hid_t file_id, hid_t grp_id)
+H5Gpush (hid_t file_id, const char *name)
 {
    H5F_t	*f=NULL;
    H5G_t	*grp;
@@ -310,9 +320,11 @@ H5Gpush (hid_t file_id, hid_t grp_id)
        NULL==(f=H5Aatom_object (file_id))) {
       HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
    }
-   if (H5_GROUP!=H5Aatom_group (grp_id) ||
-       NULL==(grp=H5Aatom_object (grp_id))) {
-      HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
+   if (!name || !*name) {
+      HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
+   }
+   if (NULL==(grp=H5G_open (f, name))) {
+      HRETURN_ERROR (H5E_ARGS, H5E_NOTFOUND, FAIL, "no such group");
    }
    
    /* Push group onto stack */
@@ -321,6 +333,11 @@ H5Gpush (hid_t file_id, hid_t grp_id)
 		     "can't change current working group");
    }
 
+   /* Close the handle */
+   if (H5G_close (grp)<0) {
+      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to close group");
+   }
+   
    FUNC_LEAVE (SUCCEED);
 }
    
@@ -610,7 +627,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
       HDmemcpy (comp, name, nchars);
       comp[nchars] = '\0';
 
-      if (H5G_stab_find (f, grp_ent, comp, obj_ent/*out*/)<0) {
+      if (H5G_stab_find (grp_ent, comp, obj_ent/*out*/)<0) {
 	 /*
 	  * Component was not found in the current symbol table, possibly
 	  * because GRP_ENT isn't a symbol table.  If it is the root symbol
@@ -622,7 +639,7 @@ H5G_namei (H5F_t *f, H5G_entry_t *cwg, const char *name,
 	 if (!aside &&
 	     H5F_addr_eq (&(grp_ent->header),
 			  &(f->shared->root_ent->header)) &&
-	     H5O_read (f, grp_ent, H5O_NAME, 0, &mesg) &&
+	     H5O_read (grp_ent, H5O_NAME, 0, &mesg) &&
 	     !HDstrcmp (mesg.s, comp)) {
 	    H5O_reset (H5O_NAME, &mesg);
 	    *obj_ent = *grp_ent;
@@ -689,9 +706,9 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     * If we already have a root object, then get it's name.
     */
    if (f->shared->root_ent) {
-      if (H5O_read (f, f->shared->root_ent, H5O_STAB, 0, &stab)) {
+      if (H5O_read (f->shared->root_ent, H5O_STAB, 0, &stab)) {
 	 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, -2, "root group already exists");
-      } else if (NULL==H5O_read (f, f->shared->root_ent, H5O_NAME, 0, &name)) {
+      } else if (NULL==H5O_read (f->shared->root_ent, H5O_NAME, 0, &name)) {
 	 obj_name = "Root Object";
       } else {
 	 obj_name = name.s; /*don't reset message until the end!*/
@@ -704,7 +721,7 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
    if (H5G_stab_create (f, size_hint, &new_root/*out*/)<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "cant create root");
    }
-   if (1!=H5O_link (f, &new_root, 1)) {
+   if (1!=H5O_link (&new_root, 1)) {
       HGOTO_ERROR (H5E_SYM, H5E_LINK, FAIL,
 		   "internal error (wrong link count)");
    }
@@ -715,9 +732,9 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
     * new symbol table.
     */
    if (f->shared->root_ent) {
-      assert (1==H5O_link (f, f->shared->root_ent, 0));
+      assert (1==H5O_link (f->shared->root_ent, 0));
       
-      if (H5G_stab_insert (f, &new_root, obj_name, f->shared->root_ent)<0) {
+      if (H5G_stab_insert (&new_root, obj_name, f->shared->root_ent)<0) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 		      "can't reinsert old root object");
       }
@@ -727,17 +744,16 @@ H5G_mkroot (H5F_t *f, size_t size_hint)
        * a name message should ever appear is to give the root object a name,
        * but the old root object is no longer the root object.
        */
-      H5O_remove (f, f->shared->root_ent, H5O_NAME, H5O_ALL);
+      H5O_remove (f->shared->root_ent, H5O_NAME, H5O_ALL);
       H5ECLEAR; /*who really cares?*/
 
       *(f->shared->root_ent) = new_root;
       
    } else {
-      f->shared->root_ent = H5MM_xmalloc (sizeof(H5G_entry_t));
-      *(f->shared->root_ent) = new_root;
+      f->shared->root_ent = H5G_ent_calloc (&new_root);
    }
 
-   H5O_close (f, &new_root);
+   H5O_close (&new_root);
    ret_value = SUCCEED;
    
  done:
@@ -822,17 +838,16 @@ H5G_create (H5F_t *f, const char *name, size_t size_hint)
       }
    }
    
-   /* create and open group */
+   /* create an open group */
    grp = H5MM_xcalloc (1, sizeof(H5G_t));
-   grp->file = f;
    if (H5G_stab_create (f, size_hint, &(grp->ent)/*out*/)<0) {
       grp = H5MM_xfree (grp);
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
    }
 
    /* insert child name into parent */
-   if (H5G_stab_insert (f, &grp_ent, rest, &(grp->ent))<0) {
-      H5O_close (f, &(grp->ent));
+   if (H5G_stab_insert (&grp_ent, rest, &(grp->ent))<0) {
+      H5O_close (&(grp->ent));
       grp = H5MM_xfree (grp);
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, NULL, "can't insert");
    }
@@ -879,7 +894,6 @@ H5G_open (H5F_t *f, const char *name)
    if (H5O_open (f, &(grp->ent))<0) {
       HGOTO_ERROR (H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group");
    }
-   grp->file = f;
    grp->nref = 1;
    ret_value = grp;
    
@@ -948,7 +962,7 @@ H5G_close (H5G_t *grp)
    assert (grp->nref>0);
 
    if (1==grp->nref) {
-      if (H5O_close (grp->file, &(grp->ent))<0) {
+      if (H5O_close (&(grp->ent))<0) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to close");
       }
    }
@@ -994,14 +1008,6 @@ H5G_set (H5F_t *f, H5G_t *grp)
    /* check args */
    assert (f);
    assert (grp);
-
-   /*
-    * Are the group and file compatible?
-    */
-   if (grp->file->shared!=f->shared) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-		     "group is not compatible with file");
-   }
 
    /*
     * If there is no stack then create one, otherwise close the current
@@ -1092,14 +1098,6 @@ H5G_push (H5F_t *f, H5G_t *grp)
    /* check args */
    assert (f);
    assert (grp);
-
-   /*
-    * Are the group and file compatible?
-    */
-   if (grp->file->shared!=f->shared) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
-		     "group is not compatible with file");
-   }
    
    /*
     * Push a new entry onto the stack.
@@ -1162,7 +1160,8 @@ H5G_pop (H5F_t *f)
 /*-------------------------------------------------------------------------
  * Function:	H5G_insert
  *
- * Purpose:	Inserts a symbol table entry into the group graph.
+ * Purpose:	Inserts a symbol table entry into the group graph.  The file
+ *		that is used is contained in the ENT argument.
  *
  * Errors:
  *
@@ -1178,7 +1177,7 @@ H5G_pop (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
+H5G_insert (const char *name, H5G_entry_t *ent)
 {
    const char	*rest = NULL;		/*part of name not existing yet	*/
    H5G_entry_t	grp;			/*entry for group to contain obj*/
@@ -1190,14 +1189,13 @@ H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
    FUNC_ENTER (H5G_insert, FAIL);
 
    /* Check args. */
-   assert (f);
    assert (name && *name);
    assert (ent);
 
    /*
     * Look up the name -- it shouldn't exist yet.
     */
-   if (H5G_namei (f, NULL, name, &rest, &grp, NULL)>=0) {
+   if (H5G_namei (ent->file, NULL, name, &rest, &grp, NULL)>=0) {
       HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
    }
    H5ECLEAR; /*it's OK that we didn't find it*/
@@ -1209,15 +1207,14 @@ H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
        * doesn't have a name or we shouldn't interfere with the name
        * it already has as a message.
        */
-      if (f->shared->root_ent) {
+      if (ent->file->shared->root_ent) {
 	 HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "root exists");
       }
-      if (1!=H5O_link (f, ent, 1)) {
+      if (1!=H5O_link (ent, 1)) {
 	 HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "bad link count");
       }
-      f->shared->root_ent = H5MM_xmalloc (sizeof(H5G_entry_t));
       ent->name_off = 0;
-      *(f->shared->root_ent) = *ent;
+      ent->file->shared->root_ent = H5G_ent_calloc (ent);
       HRETURN (SUCCEED);
    }
 
@@ -1238,7 +1235,7 @@ H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
       }
    }
 
-   if (!f->shared->root_ent) {
+   if (!ent->file->shared->root_ent) {
       /*
        * This will be the only object in the file. Insert it as the root
        * object and add a name messaage to the object header (or modify
@@ -1246,15 +1243,14 @@ H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
        */
       H5O_name_t name_mesg;
       name_mesg.s = rest;
-      if (H5O_modify (f, ent, H5O_NAME, 0, &name_mesg)<0) {
+      if (H5O_modify (ent, H5O_NAME, 0, 0, &name_mesg)<0) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			"cannot add/change name message");
       }
-      if (1!=H5O_link (f, ent, 1)) {
+      if (1!=H5O_link (ent, 1)) {
 	 HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "bad link count");
       }
-      f->shared->root_ent = H5MM_xmalloc (sizeof(H5G_entry_t));
-      *(f->shared->root_ent) = *ent;
+      ent->file->shared->root_ent = H5G_ent_calloc (ent);
       HRETURN (SUCCEED);
    }
 
@@ -1263,22 +1259,22 @@ H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent)
     * because the group already exists.
     */
    update_grp = H5F_addr_eq (&(grp.header),
-			     &(f->shared->root_ent->header));
-   if ((status=H5G_mkroot (f, H5G_SIZE_HINT))<0 && -2!=status) {
+			     &(ent->file->shared->root_ent->header));
+   if ((status=H5G_mkroot (ent->file, H5G_SIZE_HINT))<0 && -2!=status) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
    }
    H5ECLEAR;
-   if (update_grp) grp = *(f->shared->root_ent);
+   if (update_grp) grp = *(ent->file->shared->root_ent);
 
    
    /*
     * This is the normal case.  The object is just being inserted as a normal
     * entry into a symbol table.
     */
-   if (H5O_link (f, ent, 1)<0) {
+   if (H5O_link (ent, 1)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "link inc failure");
    }
-   if (H5G_stab_insert (f, &grp, rest, ent)<0) {
+   if (H5G_stab_insert (&grp, rest, ent)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't insert");
    }
 

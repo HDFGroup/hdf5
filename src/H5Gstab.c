@@ -89,11 +89,17 @@ H5G_stab_create (H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create header");
    }
    
-   /* insert the symbol table message */
-   if (H5O_modify (f, self, H5O_STAB, H5O_NEW_MESG, &stab)<0) {
-      H5O_close (f, self);
+   /*
+    * Insert the symbol table message into the object header and the symbol
+    * table entry.
+    */
+   if (H5O_modify (self, H5O_STAB, H5O_NEW_MESG, H5O_FLAG_CONSTANT, &stab)<0) {
+      H5O_close (self);
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "can't create message");
    }
+   self->cache.stab.btree_addr = stab.btree_addr;
+   self->cache.stab.heap_addr = stab.heap_addr;
+   self->type = H5G_CACHED_STAB;
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -121,7 +127,7 @@ H5G_stab_create (H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
+H5G_stab_find (H5G_entry_t *grp_ent, const char *name,
 	       H5G_entry_t *obj_ent/*out*/)
 {
    H5G_bt_ud1_t         udata;		/*data to pass through B-tree	*/
@@ -130,12 +136,12 @@ H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
    FUNC_ENTER (H5G_stab_find, FAIL);
 
    /* Check arguments */
-   assert (f);
    assert (grp_ent);
+   assert (grp_ent->file);
    assert (name && *name);
 
    /* set up the udata */
-   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "can't read message");
    }
    udata.operation = H5G_OPER_FIND;
@@ -143,7 +149,7 @@ H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
    udata.heap_addr = stab.heap_addr;
 
    /* search the B-tree */
-   if (H5B_find (f, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
+   if (H5B_find (grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "not found");
    }
 
@@ -174,8 +180,7 @@ H5G_stab_find (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
-		 H5G_entry_t *obj_ent)
+H5G_stab_insert (H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
 {
    H5O_stab_t		stab;		/*symbol table message		*/
    H5G_bt_ud1_t		udata;		/*data to pass through B-tree	*/
@@ -183,13 +188,13 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
    FUNC_ENTER (H5G_stab_insert, FAIL);
 
    /* check arguments */
-   assert (f);
-   assert (grp_ent && H5F_addr_defined (&(grp_ent->header)));
+   assert (grp_ent && grp_ent->file);
    assert (name && *name);
-   assert (obj_ent && H5F_addr_defined (&(obj_ent->header)));
+   assert (obj_ent && obj_ent->file);
+   assert (grp_ent->file->shared==obj_ent->file->shared);
    
    /* initialize data to pass through B-tree */
-   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
    }
 
@@ -199,7 +204,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
    udata.ent = *obj_ent;
 
    /* insert */
-   if (H5B_insert (f, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
+   if (H5B_insert (grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert entry");
    }
 
@@ -241,8 +246,8 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *grp_ent, const char *name,
  *-------------------------------------------------------------------------
  */
 intn
-H5G_stab_list (H5F_t *f, H5G_entry_t *grp_ent, intn maxentries,
-	       char *names[], H5G_entry_t entries[])
+H5G_stab_list (H5G_entry_t *grp_ent, intn maxentries, char *names[]/*out*/,
+	       H5G_entry_t entries[]/*out*/)
 {
    H5G_bt_ud2_t		udata;
    H5O_stab_t		stab;
@@ -251,12 +256,11 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *grp_ent, intn maxentries,
    FUNC_ENTER (H5G_stab_list, FAIL);
 
    /* check args */
-   assert (f);
-   assert (grp_ent && H5F_addr_defined (&(grp_ent->header)));
+   assert (grp_ent && grp_ent->file);
    assert (maxentries>=0);
 
    /* initialize data to pass through B-tree */
-   if (NULL==H5O_read (f, grp_ent, H5O_STAB, 0, &stab)) {
+   if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab)) {
       HRETURN_ERROR (H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
    }
    udata.entry = entries;
@@ -267,7 +271,7 @@ H5G_stab_list (H5F_t *f, H5G_entry_t *grp_ent, intn maxentries,
    if (names) HDmemset (names, 0, maxentries);
 
    /* list */
-   if (H5B_list (f, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
+   if (H5B_list (grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata)<0) {
       if (names) {
 	 for (i=0; i<maxentries; i++) H5MM_xfree (names[i]);
       }

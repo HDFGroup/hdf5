@@ -140,13 +140,9 @@ test_create (hid_t file)
     */
    create_parms = H5Ccreate (H5C_DATASET_CREATE);
    assert (create_parms>=0);
-   status = H5Cset_prop (create_parms, H5D_LAYOUT, H5D_CHUNKED);
-   assert (status>=0);
-   status = H5Cset_prop (create_parms, H5D_CHUNK_NDIMS, 2);
-   assert (status>=0);
    csize[0] = 5;
    csize[1] = 100;
-   status = H5Cset_prop (create_parms, H5D_CHUNK_SIZE, csize);
+   status = H5Cset_chunk (create_parms, 2, csize);
    assert (status>=0);
 
    dataset = H5Dcreate (file, DSET_CHUNKED_NAME, H5T_NATIVE_DOUBLE, space,
@@ -269,6 +265,8 @@ test_simple_io (hid_t file)
 	 }
       }
    }
+
+   H5Dclose (dataset);
 
    puts (" PASSED");
    return SUCCEED;

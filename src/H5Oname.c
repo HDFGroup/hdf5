@@ -36,11 +36,8 @@ const H5O_class_t H5O_NAME[1] = {{
    H5O_NAME_ID,				/*message id number		*/
    "name",				/*message name for debugging	*/
    sizeof (H5O_name_t),			/*native message size		*/
-   H5G_NOTHING_CACHED, 			/*symbol table entry type field	*/
    H5O_name_decode,			/*decode message		*/
    H5O_name_encode,			/*encode message		*/
-   NULL,				/*no stab entry fields		*/
-   NULL,				/*no stab entry fields		*/
    H5O_name_copy,			/*copy the native value		*/
    H5O_name_size,			/*raw message size		*/
    H5O_name_reset,			/*free internal memory		*/

@@ -122,7 +122,7 @@ new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
       }
    }
    H5F_istore_create (f, &istore, ndims, alignment);
-   if (H5O_modify (f, ent, H5O_ISTORE, H5O_NEW_MESG, &istore)<0) {
+   if (H5O_modify (ent, H5O_ISTORE, H5O_NEW_MESG, 0, &istore)<0) {
       printf ("*FAILED*\n");
       if (!isatty (1)) {
 	 AT();
@@ -132,7 +132,7 @@ new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
    }
 
    /* Give the object header a name */
-   if (H5G_insert (f, name, ent)<0) {
+   if (H5G_insert (name, ent)<0) {
       printf ("*FAILED*\n");
       if (!isatty (1)) {
 	 AT ();
@@ -142,7 +142,7 @@ new_object (H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
    }
 
    /* Close the header */
-   H5O_close (f, ent);
+   H5O_close (ent);
 
    return 0;
 }
@@ -250,7 +250,7 @@ test_extend (H5F_t *f, const char *prefix,
       }
       goto error;
    }
-   if (NULL==H5O_read (f, &handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (&handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -458,7 +458,7 @@ test_sparse (H5F_t *f, const char *prefix, size_t nblocks,
       }
       goto error;
    }
-   if (NULL==H5O_read (f, &handle, H5O_ISTORE, 0, &istore)) {
+   if (NULL==H5O_read (&handle, H5O_ISTORE, 0, &istore)) {
       puts ("*FAILED*");
       if (!isatty (1)) {
 	 AT ();
@@ -534,7 +534,6 @@ main (int argc, char *argv[])
    herr_t	status;
    int		nerrors = 0;
    uintn	size_of_test;
-   size_t	offset_size;
    hid_t	template_id;
    H5F_create_t	*creation_template = NULL;
    H5G_t	*dir = NULL;
@@ -568,9 +567,8 @@ main (int argc, char *argv[])
    /*
     * Use larger file addresses...
     */
-   offset_size = 8;
    template_id = H5Ccreate (H5C_FILE_CREATE);
-   H5Cset_prop (template_id, H5F_SIZEOF_ADDR, offset_size);
+   H5Cset_sizes (template_id, 8, 0);
    creation_template = H5Aatom_object (template_id);
    
    /* Create the test file */

@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#define addr_defined(X) (-1!=(X)->offset && (X)->offset>=0)
 
 #define PABLO_MASK	H5F_low
 static hbool_t	interface_initialize_g = FALSE;
@@ -167,7 +168,7 @@ H5F_low_read (H5F_low_t *lf, const haddr_t *addr, size_t size,
    FUNC_ENTER (H5F_low_read, FAIL);
 
    assert (lf && lf->type);
-   assert (addr && H5F_addr_defined (addr));
+   assert (addr && addr_defined (addr));
    assert (buf);
 
    if (lf->type->read) {
@@ -217,7 +218,7 @@ H5F_low_write (H5F_low_t *lf, const haddr_t *addr, size_t size,
    FUNC_ENTER (H5F_low_write, FAIL);
 
    assert (lf && lf->type);
-   assert (addr && H5F_addr_defined (addr));
+   assert (addr && addr_defined (addr));
    assert (buf);
 
    /* Extend the file eof marker if we write past it */
@@ -277,7 +278,7 @@ H5F_low_flush (H5F_low_t *lf)
 
    /* Make sure the last block of the file has been allocated on disk */
    H5F_addr_reset (&last_byte);
-   if (H5F_addr_defined (&(lf->eof)) && H5F_addr_gt (&(lf->eof), &last_byte)) {
+   if (addr_defined (&(lf->eof)) && H5F_addr_gt (&(lf->eof), &last_byte)) {
       last_byte = lf->eof;
       last_byte.offset -= 1;
       if (H5F_low_read (lf, &last_byte, 1, buf)>=0) {
@@ -472,7 +473,7 @@ H5F_low_seteof (H5F_low_t *lf, const haddr_t *addr)
    FUNC_ENTER (H5F_low_seteof, FAIL);
 
    assert (lf);
-   assert (addr && H5F_addr_defined (addr));
+   assert (addr && addr_defined (addr));
 
    lf->eof = *addr;
 
@@ -503,8 +504,8 @@ H5F_addr_cmp (const haddr_t *a1, const haddr_t *a2)
 {
    FUNC_ENTER (H5F_addr_cmp, FAIL);
    
-   assert (a1 && H5F_addr_defined (a1));
-   assert (a2 && H5F_addr_defined (a2));
+   assert (a1 && addr_defined (a1));
+   assert (a2 && addr_defined (a2));
 
    if (a1->offset<a2->offset) HRETURN (-1);
    if (a1->offset>a2->offset) HRETURN (1);
@@ -556,7 +557,7 @@ hbool_t
 H5F_addr_defined (const haddr_t *addr)
 {
    FUNC_ENTER (H5F_addr_defined, FAIL);
-   FUNC_LEAVE (-1!=addr->offset && addr->offset>=0);
+   FUNC_LEAVE (addr_defined (addr));
 }
 
 
@@ -632,7 +633,7 @@ H5F_addr_encode (H5F_t *f, uint8 **pp, const haddr_t *addr)
    assert (pp && *pp);
    assert (addr);
 
-   if (H5F_addr_defined (addr)) {
+   if (addr_defined (addr)) {
       tmp = *addr;
       for (i=0; i<H5F_SIZEOF_ADDR (f); i++) {
 	 *(*pp)++ = tmp.offset & 0xff;
@@ -719,7 +720,7 @@ H5F_addr_print (FILE *stream, const haddr_t *addr)
    assert (stream);
    assert (addr);
 
-   if (H5F_addr_defined (addr)) {
+   if (addr_defined (addr)) {
       /*
        * It would be nice if we could use the `%Lu', `%llu', or `%qu', but
        * we don't know which is supported.  So we split the address into a
@@ -784,7 +785,7 @@ H5F_addr_pow2 (uintn n, haddr_t *addr/*out*/)
 void
 H5F_addr_inc (haddr_t *addr/*in,out*/, size_t inc)
 {
-   assert (addr && H5F_addr_defined (addr));
+   assert (addr && addr_defined (addr));
    assert (addr->offset<=addr->offset+inc);
    addr->offset += inc;
 }
@@ -807,8 +808,8 @@ H5F_addr_inc (haddr_t *addr/*in,out*/, size_t inc)
 void
 H5F_addr_add (haddr_t *a1/*in,out*/, const haddr_t *a2)
 {
-   assert (a1 && H5F_addr_defined (a1));
-   assert (a2 && H5F_addr_defined (a2));
+   assert (a1 && addr_defined (a1));
+   assert (a2 && addr_defined (a2));
    a1->offset += a2->offset;
 }
 
@@ -833,7 +834,7 @@ H5F_addr_add (haddr_t *a1/*in,out*/, const haddr_t *a2)
 uintn
 H5F_addr_hash (const haddr_t *addr, uintn mod)
 {
-   assert (addr && H5F_addr_defined (addr));
+   assert (addr && addr_defined (addr));
    assert (mod>0);
 
    return addr->offset % mod; /*ignore file number*/

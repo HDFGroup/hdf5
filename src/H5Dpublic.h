@@ -25,6 +25,8 @@
 
 /* Values for the H5D_LAYOUT property */
 typedef enum H5D_layout_t {
+   H5D_LAYOUT_ERROR	=-1,
+   
    H5D_COMPACT		=0, 		/*raw data is very small	*/
    H5D_CONTIGUOUS	=1, 		/*the default			*/
    H5D_CHUNKED		=2, 		/*slow and fancy		*/

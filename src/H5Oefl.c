@@ -27,11 +27,8 @@ const H5O_class_t H5O_EFL[1] = {{
    H5O_EFL_ID, 				/*message id number		*/
    "external file list", 		/*message name for debugging	*/
    sizeof(H5O_efl_t), 			/*native message size		*/
-   H5G_NOTHING_CACHED, 			/*symtab entry `type' field	*/
    H5O_efl_decode, 			/*decode message		*/
    H5O_efl_encode, 			/*encode message		*/
-   NULL, 				/*get messaage from stab entry	*/
-   NULL, 				/*put message into stab entry	*/
    H5O_efl_copy, 			/*copy native value		*/
    H5O_efl_size, 			/*size of message on disk	*/
    H5O_efl_reset,			/*reset method			*/

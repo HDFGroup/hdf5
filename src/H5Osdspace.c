@@ -28,9 +28,6 @@ static char RcsId[] = "@(#)$Revision$";
 static void *H5O_sdspace_decode (H5F_t *f, size_t raw_size, const uint8 *p);
 static herr_t H5O_sdspace_encode (H5F_t *f, size_t size, uint8 *p,
 			       const void *_mesg);
-static void *H5O_sdspace_fast (const H5G_cache_t *cache, void *_mesg);
-static hbool_t H5O_sdspace_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
-				  const void *_mesg);
 static void *H5O_sdspace_copy (const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_debug (H5F_t *f, const void *_mesg,
@@ -41,11 +38,8 @@ const H5O_class_t H5O_SDSPACE[1] = {{
    H5O_SDSPACE_ID,		/* message id number			*/
    "simple_dspace",		/* message name for debugging		*/
    sizeof (H5P_simple_t),	/* native message size			*/
-   H5G_CACHED_SDSPACE,		/* symtab entry `type' field		*/
    H5O_sdspace_decode,		/* decode message			*/
    H5O_sdspace_encode,		/* encode message			*/
-   H5O_sdspace_fast,		/* get message from stab entry		*/
-   H5O_sdspace_cache,		/* put message into stab entry		*/
    H5O_sdspace_copy,		/* copy the native value		*/
    H5O_sdspace_size,		/* size of symbol table entry		*/
    NULL,			/* default reset method			*/
@@ -176,118 +170,6 @@ H5O_sdspace_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
       } /* end if */
 
     FUNC_LEAVE (SUCCEED);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5O_sdspace_fast
- PURPOSE
-    Initializes a new simple dimensionality struct with info from a symbol
-	table entry.
- USAGE
-    void *H5O_sdspace_fast(ent, mesg)
-	const H5G_entry_t *ent; IN: pointer to the symbol table entry
-	const void *mesg;	IN: Pointer to the simple dimensionality struct
- RETURNS
-    Pointer to the message structure (allocated if none is supplied) on success,
-	NULL on failure
- DESCRIPTION
-	This function fills the native memory form of the simple dimensionality
-    message from a symbol-table entry cache fields.  (This method is required
-    for simple dimensionality, as they can be cached in the symbol-table entry)
---------------------------------------------------------------------------*/
-static void *
-H5O_sdspace_fast (const H5G_cache_t *cache, void *mesg)
-{
-   H5P_simple_t *sdim = (H5P_simple_t *)mesg;
-   uintn u;		       /* local counting variable */
-   
-   FUNC_ENTER (H5O_sdspace_fast, NULL);
-
-   /* check args */
-   assert (cache);
-
-   if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5P_simple_t));
-   sdim->rank = cache->sdspace.ndim;
-   assert (sdim->rank<=NELMTS (cache->sdspace.dim));
-   sdim->dim_flags = 0;
-   sdim->size = H5MM_xmalloc (sizeof(uint32) * sdim->rank);
-   for (u=0; u<sdim->rank; u++) {
-      sdim->size[u] = cache->sdspace.dim[u];
-   }
-   
-   FUNC_LEAVE (sdim);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5O_sdspace_cache
- PURPOSE
-    Copies a simple dimensionality message into the cache portion of a symbol
-	table entry.
- USAGE
-    hbool_t H5O_sdspace_cache(ent, mesg)
-	const H5G_entry_t *ent; IN: Pointer to the symbol table entry
-	const void *mesg;	IN: Pointer to the simple dimensionality struct
- RETURNS
-    BTRUE if symbol-table modified, BFALSE if not modified, BFAIL on failure.
-    The new cache type is returned through the CACHE_TYPE argument.
- DESCRIPTION
-	This function is the opposite of the H5O_sdspace_fast method, it
-    copies a message into the cached portion of a symbol-table entry.  (This
-    method is required for simple dimensionalities, as they can be cached in
-    the symbol-table entry)
---------------------------------------------------------------------------*/
-static hbool_t
-H5O_sdspace_cache (H5G_type_t *cache_type, H5G_cache_t *cache,
-		   const void *mesg)
-{
-    const H5P_simple_t *sdim = (const H5P_simple_t *)mesg;
-    uintn u;	    /* Local counting variable */
-    hbool_t modified = BFALSE;
-   
-    FUNC_ENTER (H5O_sdspace_cache, BFAIL);
-
-    /* check args */
-    assert (cache_type);
-    assert (cache);
-    assert (sdim);
-
-    if (sdim->rank <= NELMTS (cache->sdspace.dim)) {
-       if (H5G_CACHED_SDSPACE != *cache_type) {
-	  modified = BTRUE;
-	  *cache_type = H5G_CACHED_SDSPACE;
-	  cache->sdspace.ndim = sdim->rank;
-	  for (u=0; u<=sdim->rank; u++) {
-	     cache->sdspace.dim[u] = sdim->size[u];
-	  }
-       } else {
-	  if(cache->sdspace.ndim != sdim->rank) {
-	     modified = BTRUE;
-	     cache->sdspace.ndim = sdim->rank;
-	  }
-
-	  /* Check each dimension */
-	  if (NULL==cache->sdspace.dim) {
-	     modified = BTRUE;
-	  } else {
-	     for (u=0; u<sdim->rank; u++) {
-		if (cache->sdspace.dim[u] != sdim->size[u]) {
-		   modified = BTRUE;
-		   cache->sdspace.dim[u] = sdim->size[u];
-		}
-	     }
-	  }
-       }
-    } else if (H5G_CACHED_SDSPACE == *cache_type) {
-       /*
-	* Number of dimensions is too large to cache.
-	*/
-       modified = TRUE;
-       *cache_type = H5G_NOTHING_CACHED;
-    }
-       
-    FUNC_LEAVE (modified);
 }
 
 /*--------------------------------------------------------------------------

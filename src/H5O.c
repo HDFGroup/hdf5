@@ -45,7 +45,8 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
 
 /* Interface initialization */
 static intn interface_initialize_g = FALSE;
-#define INTERFACE_INIT	NULL
+#define INTERFACE_INIT	H5O_init_interface
+static herr_t H5O_init_interface (void);
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {
@@ -68,6 +69,46 @@ static const H5O_class_t *const message_type_g[] = {
    H5O_CONT,	/*0x0010 Object header continuation			*/
    H5O_STAB,	/*0x0011 Symbol table					*/
 };
+
+/*
+ * An array of functions indexed by symbol table entry cache type
+ * (H5G_type_t) that are called to retrieve constant messages cached in the
+ * symbol table entry.
+ */
+static void *(*H5O_fast_g[H5G_NCACHED])(const H5G_cache_t*,
+					const H5O_class_t *,
+					void*);
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_init_interface
+ *
+ * Purpose:	Initialize the H5O interface.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, January  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_init_interface (void)
+{
+   FUNC_ENTER (H5O_init_interface, FAIL);
+
+   /*
+    * Initialize functions that decode messages from symbol table entries.
+    */
+   H5O_fast_g[H5G_CACHED_STAB] = H5O_stab_fast;
+
+   FUNC_LEAVE (SUCCEED);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -185,12 +226,19 @@ H5O_open (H5F_t *f, H5G_entry_t *obj_ent)
 {
    FUNC_ENTER (H5O_open, FAIL);
 
-   /*
-    * There is nothing to do here now.  Opening an object header should
-    * eventually do something to prevent the object header from being deleted,
-    * but since object deletion isn't implemented yet, we don't care.
-    */
+   /* Check args */
+   assert (f);
+   assert (obj_ent);
 
+#ifdef H5O_DEBUG
+   fprintf (stderr, ">");
+   H5F_addr_print (stderr, &(obj_ent->header));
+   fprintf (stderr, "\n");
+#endif
+
+   /* Increment open-lock counters */
+   obj_ent->file = f;
+   obj_ent->file->nopen++;
    FUNC_LEAVE (SUCCEED);
 }
 
@@ -212,17 +260,32 @@ H5O_open (H5F_t *f, H5G_entry_t *obj_ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_close (H5F_t *f, H5G_entry_t *obj_ent)
+H5O_close (H5G_entry_t *obj_ent)
 {
    FUNC_ENTER (H5O_close, FAIL);
 
-   /*
-    * There is nothing to do here now.  See H5O_open().  Eventually this
-    * function will free resources if the object header hard link count is
-    * zero and this was the last oustanding open for the object.  Since
-    * object deletion isn't implemented yet, we don't care.
-    */
+   /* Check args */
+   assert (obj_ent);
+   assert (obj_ent->file);
+   assert (obj_ent->file->nopen>0);
 
+   /* Decrement open-lock counters */
+   --obj_ent->file->nopen;
+
+   /*
+    * If the file open-lock count has reached zero and the file has a close
+    * pending then close the file.
+    */
+   if (0==obj_ent->file->nopen && obj_ent->file->close_pending) {
+      H5F_close (obj_ent->file);
+   }
+
+#ifdef H5O_DEBUG
+   fprintf (stderr, "<");
+   H5F_addr_print (stderr, &(obj_ent->header));
+   fprintf (stderr, "\n");
+#endif
+   
    FUNC_LEAVE (SUCCEED);
 }
 
@@ -245,6 +308,9 @@ H5O_close (H5F_t *f, H5G_entry_t *obj_ent)
  * 	Robb Matzke, 30 Aug 1997
  *	Plugged memory leaks that occur during error handling.
  *
+ * 	Robb Matzke, 7 Jan 1998
+ *	Able to distinguish between constant and variable messages.
+ *
  *-------------------------------------------------------------------------
  */
 static H5O_t *
@@ -259,6 +325,8 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
    haddr_t	chunk_addr;
    size_t	chunk_size;
    H5O_cont_t	*cont=NULL;
+   hbool_t	constant;		/*is message a constant mesg?	*/
+   
 
    FUNC_ENTER (H5O_load, NULL);
 
@@ -337,6 +405,13 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	   p += mesg_size) {
 	 UINT16DECODE (p, id);
 	 UINT16DECODE (p, mesg_size);
+
+	 /*
+	  * The message ID field actually contains some bits near the
+	  * high-order end that are not part of the ID.
+	  */
+	 constant = (id & H5O_FLAG_CONSTANT) ? TRUE : FALSE;
+	 id &= ~H5O_FLAG_BITS;
       
 	 if (id>=NELMTS(message_type_g) || NULL==message_type_g[id]) {
 	    HGOTO_ERROR (H5E_OHDR, H5E_BADMESG, NULL,
@@ -362,6 +437,7 @@ H5O_load (H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	    mesgno = oh->nmesgs++;
 	    oh->mesg[mesgno].type = message_type_g[id];
 	    oh->mesg[mesgno].dirty = FALSE;
+	    oh->mesg[mesgno].constant = constant;
 	    oh->mesg[mesgno].native = NULL;
 	    oh->mesg[mesgno].raw = p;
 	    oh->mesg[mesgno].raw_size = mesg_size;
@@ -418,13 +494,16 @@ done:
  *
  * Modifications:
  *
+ * 	Robb Matzke, 7 Jan 1998
+ *	Handles constant vs non-constant messages.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 {
    uint8	buf[16], *p;
-   int		i;
+   intn		i, id;
    H5O_cont_t	*cont = NULL;
    
    FUNC_ENTER (H5O_flush, FAIL);
@@ -463,8 +542,13 @@ H5O_flush (H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
       for (i=0; i<oh->nmesgs; i++) {
 	 if (oh->mesg[i].dirty) {
 	    p = oh->mesg[i].raw - 4;
-	    UINT16ENCODE (p, oh->mesg[i].type->id);
+
+	    /* The message id has some flags in the high-order bits. */
+	    id = oh->mesg[i].type->id;
+	    id |= oh->mesg[i].constant ? H5O_FLAG_CONSTANT : 0;
+	    UINT16ENCODE (p, id);
 	    UINT16ENCODE (p, oh->mesg[i].raw_size);
+	    
 	    if (oh->mesg[i].native) {
 	       assert (oh->mesg[i].type->encode);
 
@@ -569,7 +653,6 @@ H5O_reset (const H5O_class_t *type, void *native)
    if (native) {
       if (type->reset) {
 	 if ((type->reset)(native)<0) {
-	    /* reset class method failed */
 	    HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
 			   "reset method failed");
 	 }
@@ -601,43 +684,46 @@ H5O_reset (const H5O_class_t *type, void *native)
  *-------------------------------------------------------------------------
  */
 intn
-H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
+H5O_link (H5G_entry_t *ent, intn adjust)
 {
    H5O_t	*oh = NULL;
-   haddr_t	addr;
+   intn		ret_value = FAIL;
    
    FUNC_ENTER (H5O_link, FAIL);
 
    /* check args */
-   assert (f);
    assert (ent);
-   H5G_ent_addr (ent, &addr);
-   assert (H5F_addr_defined (&addr));
+   assert (ent->file);
+   assert (H5F_addr_defined (&(ent->header)));
    
    /* get header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
-		     "unable to load object header");
+   if (NULL==(oh=H5AC_protect (ent->file, H5AC_OHDR, &(ent->header),
+			       NULL, NULL))) {
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		   "unable to load object header");
    }
 
    /* adjust link count */
    if (adjust<0) {
       if (oh->nlink + adjust < 0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL,
-			"link could would be negative");
+	 HGOTO_ERROR (H5E_OHDR, H5E_LINKCOUNT, FAIL,
+		      "link count would be negative");
       }
       oh->nlink += adjust;
-      if (1==oh->nlink && ent) {
-	 fprintf (stderr, "H5O_link: no symbol table entry caching "
-		  "(not implemented yet)\n");
-      }
    } else {
       oh->nlink += adjust;
-      if (oh->nlink>1) H5G_ent_invalidate (ent);
    }
 
    oh->dirty = TRUE;
-   FUNC_LEAVE (oh->nlink);
+   ret_value = oh->nlink;
+
+ done:
+   if (oh && H5AC_unprotect (ent->file, H5AC_OHDR, &(ent->header), oh)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_PROTECT, FAIL,
+		     "unable to release object header");
+   }
+
+   FUNC_LEAVE (ret_value);
 }
    
 
@@ -663,8 +749,7 @@ H5O_link (H5F_t *f, H5G_entry_t *ent, intn adjust)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-	  intn sequence, void *mesg)
+H5O_read (H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 {
    H5O_t	*oh = NULL;
    void		*retval = NULL;
@@ -675,32 +760,40 @@ H5O_read (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
    FUNC_ENTER (H5O_read, NULL);
 
    /* check args */
-   assert (f);
    assert (ent);
+   assert (ent->file);
    assert (H5F_addr_defined (&(ent->header)));
    assert (type);
    assert (sequence>=0);
 
-   /* can we get it from the symbol table? */
+   /* can we get it from the symbol table entry? */
    cache = H5G_ent_cache (ent, &cache_type);
-   if (type && cache_type==type->cache_type && type->fast) {
-      retval = (type->fast)(cache, mesg);
+   if (H5O_fast_g[cache_type]) {
+      retval = (H5O_fast_g[cache_type])(cache, type, mesg);
       if (retval) HRETURN (retval);
-      H5ECLEAR;
+      H5ECLEAR; /*don't care, try reading from header*/
    }
 
    /* can we get it from the object header? */
-   if ((idx = H5O_find_in_ohdr (f, &(ent->header), &type, sequence))<0) {
+   if ((idx = H5O_find_in_ohdr (ent->file, &(ent->header), &type,
+				sequence))<0) {
       HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
 		     "unable to find message in object header");
    }
 
    /* copy the message to the user-supplied buffer */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
+   if (NULL==(oh=H5AC_protect (ent->file, H5AC_OHDR, &(ent->header),
+			       NULL, NULL))) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
 		     "unable to load object header");
    }
    retval = (type->copy)(oh->mesg[idx].native, mesg);
+   if (H5AC_unprotect (ent->file, H5AC_OHDR, &(ent->header), oh)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_PROTECT, NULL,
+		     "unable to release object header");
+   }
+   oh = NULL;
+   
    if (!retval) {
       HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
 		     "unable to copy object header message to user space");
@@ -778,60 +871,14 @@ H5O_find_in_ohdr (H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_peek
- *
- * Purpose:	Returns a pointer to a message stored in native format.
- *		The returned memory is read-only, and points directly into
- *		the cache.  It is therefore valid only until the next cache
- *		function is called.
- *
- * Return:	Success:	Ptr to read-only message in native format.
- *				The pointer is guranteed to be valid only
- *				until the next call (directly or indirectly)
- *				to an H5AC function.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  6 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-const void *
-H5O_peek (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-	  intn sequence)
-{
-   intn		idx;
-   H5O_t	*oh = NULL;
-   
-   FUNC_ENTER (H5O_peek, NULL);
-
-   /* check args */
-   assert (f);
-   assert (ent && H5F_addr_defined (&(ent->header)));
-
-   if ((idx = H5O_find_in_ohdr (f, &(ent->header), &type, sequence))<0) {
-      HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, NULL,
-		     "unable to find object header message");
-   }
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
-		     "unable to load object header");
-   }
-
-   FUNC_LEAVE (oh->mesg[idx].native);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_modify
  *
  * Purpose:	Modifies an existing message or creates a new message.
- *		The cache fields in that symbol table entry ENT are updated
- *		as appropriate.
+ *		The cache fields in that symbol table entry ENT are *not*
+ *		updated, you must do that separately because they often
+ *		depend on multiple object header messages.  Besides, we
+ *		don't know which messages will be constant and which will
+ *		not.
  *
  * 		The OVERWRITE argument is either a sequence number of a
  *		message to overwrite (usually zero) or the constant
@@ -853,28 +900,35 @@ H5O_peek (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 7 Jan 1998
+ *	Handles constant vs non-constant messages.  Once a message is made
+ *	constant it can never become non-constant.  Constant messages cannot
+ *	be modified.
+ *
  *-------------------------------------------------------------------------
  */
 intn
-H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
-	    intn overwrite, const void *mesg)
+H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
+	    uintn flags, const void *mesg)
 {
    H5O_t	*oh = NULL;
    intn		idx, sequence;
+   intn		ret_value = FAIL;
    size_t	size;
    
    FUNC_ENTER (H5O_modify, FAIL);
 
    /* check args */
-   assert (f);
    assert (ent);
+   assert (ent->file);
    assert (H5F_addr_defined (&(ent->header)));
    assert (type);
    assert (mesg);
    
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
-		     "unable to load object header");
+   if (NULL==(oh=H5AC_protect (ent->file, H5AC_OHDR, &(ent->header),
+			       NULL, NULL))) {
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		   "unable to load object header");
    }
 
    /* Count similar messages */
@@ -891,41 +945,44 @@ H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
       if (overwrite==sequence+1) {
 	 overwrite = -1;
       } else {
-	 HRETURN_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found");
+	 HGOTO_ERROR (H5E_OHDR, H5E_NOTFOUND, FAIL, "message not found");
       }
    }
 
-   /* Allocate space for the new message */
    if (overwrite<0) {
-      size = (type->raw_size)(f, mesg);
+      /* Allocate space for the new message */
+      size = (type->raw_size)(ent->file, mesg);
       H5O_ALIGN (size, oh->alignment);
-      idx = H5O_alloc (f, oh, type, size);
+      idx = H5O_alloc (ent->file, oh, type, size);
       if (idx<0) {
-	 HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
-			"unable to allocate object header space for message");
+	 HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+		      "unable to allocate object header space for message");
       }
       sequence++;
+      
+   } else if (oh->mesg[idx].constant) {
+      HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+		   "unable to modify constant message");
    }
 
    /* Copy the native value into the object header */
    oh->mesg[idx].native = (type->copy)(mesg, oh->mesg[idx].native);
    if (NULL==oh->mesg[idx].native) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
-		     "unable to copy message to object header");
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+		   "unable to copy message to object header");
    }
+   oh->mesg[idx].constant = (flags & H5O_FLAG_CONSTANT) ? TRUE : FALSE;
    oh->mesg[idx].dirty = TRUE;
    oh->dirty = TRUE;
+   ret_value = sequence;
 
-   /* Copy into the symbol table entry */
-   if (oh->nlink<=1 && type->cache) {
-      H5G_type_t cache_type;
-      H5G_cache_t *cache = H5G_ent_cache (ent, &cache_type);
-      hbool_t modified = (type->cache)(&cache_type, cache, mesg);
-      if (modified) H5G_ent_modified (ent, cache_type);
-      
+ done:
+   if (oh && H5AC_unprotect (ent->file, H5AC_OHDR, &(ent->header), oh)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_PROTECT, FAIL,
+		     "unable to release object header");
    }
 
-   FUNC_LEAVE (sequence);
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -937,12 +994,6 @@ H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
  *		specified type are removed.  Removing a message causes
  *		the sequence numbers to change for subsequent messages of
  *		the same type.
- *
- * 		If the messaage was cached in the symbol table entry then
- *		the type field of the symbol table entry is changed to
- *		H5G_NOTHING_CACHED and the ENT_MODIFIED argument will point
- *		to non-zero (the ENT_MODIFIED argument is unchanged if
- *		the ENT type field doesn't change).
  *
  * 		No attempt is made to join adjacent free areas of the
  *		object header into a single larger free area.
@@ -957,37 +1008,44 @@ H5O_modify (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type,
  *
  * Modifications:
  *
+ * 	Robb Matzke, 7 Jan 1998
+ *	Does not remove constant messages.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
+H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 {
    H5O_t	*oh = NULL;
-   intn		i, seq;
+   intn		i, seq, nfailed=0;
+   herr_t	ret_value = FAIL;
    
    FUNC_ENTER (H5O_remove, FAIL);
 
    /* check args */
-   assert (f);
    assert (ent);
+   assert (ent->file);
    assert (H5F_addr_defined (&(ent->header)));
    assert (type);
 
    /* load the object header */
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, &(ent->header), NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
-		     "unable to load object header");
+   if (NULL==(oh=H5AC_protect (ent->file, H5AC_OHDR, &(ent->header),
+			       NULL, NULL))) {
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		   "unable to load object header");
    }
 
    for (i=seq=0; i<oh->nmesgs; i++) {
       if (type->id != oh->mesg[i].type->id) continue;
       if (seq++ == sequence || H5O_ALL==sequence) {
-	 H5G_type_t cache_type;
-	 H5G_ent_cache (ent, &cache_type);
 
-	 /* clear symbol table entry cache */
-	 if (ent && type->cache && type->cache_type==cache_type) {
-	    H5G_ent_invalidate (ent);
+	 /*
+	  * Keep track of how many times we failed trying to remove constant
+	  * messages.
+	  */
+	 if (oh->mesg[i].constant) {
+	    nfailed++;
+	    continue;
 	 }
 
 	 /* change message type to nil and zero it */
@@ -1001,7 +1059,21 @@ H5O_remove (H5F_t *f, H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
       }
    }
 
-   FUNC_LEAVE (SUCCEED);
+   /* Fail if we tried to remove any constant messages */
+   if (nfailed) {
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+		   "unable to remove constant message(s)");
+   }
+
+   ret_value = SUCCEED;
+
+ done:
+   if (oh && H5AC_unprotect (ent->file, H5AC_OHDR, &(ent->header), oh)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_PROTECT, FAIL,
+		     "unable to release object header");
+   }
+
+   FUNC_LEAVE (ret_value);
 }
 
 
@@ -1412,6 +1484,7 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    size_t	mesg_total=0, chunk_total=0;
    int		*sequence;
    haddr_t	tmp_addr;
+   herr_t	ret_value = FAIL;
    
    FUNC_ENTER (H5O_debug, FAIL);
 
@@ -1422,8 +1495,8 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
    assert (indent>=0);
    assert (fwidth>=0);
 
-   if (NULL==(oh=H5AC_find (f, H5AC_OHDR, addr, NULL, NULL))) {
-      HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+   if (NULL==(oh=H5AC_protect (f, H5AC_OHDR, addr, NULL, NULL))) {
+      HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
 		     "unable to load object header");
    }
 
@@ -1497,7 +1570,9 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
       fprintf (stream, "%*s%-*s %lu\n", indent+3, "", MAX (0, fwidth-3),
 	       "Raw size in bytes:",
 	       (unsigned long)(oh->mesg[i].raw_size));
-
+      fprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
+	       "Constant:",
+	       oh->mesg[i].constant ? "Yes" : "No");
       fprintf (stream, "%*s%-*s %d\n", indent+3, "", MAX(0,fwidth-3),
 	       "Chunk number:",
 	       (int)(oh->mesg[i].chunkno));
@@ -1534,5 +1609,13 @@ H5O_debug (H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
       fprintf (stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
    }
 
-   FUNC_LEAVE (SUCCEED);
+   ret_value = SUCCEED;
+
+ done:
+   if (oh && H5AC_unprotect (f, H5AC_OHDR, addr, oh)<0) {
+      HRETURN_ERROR (H5E_OHDR, H5E_PROTECT, FAIL,
+		     "unable to release object header");
+   }
+
+   FUNC_LEAVE (ret_value);
 }

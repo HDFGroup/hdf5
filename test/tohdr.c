@@ -74,11 +74,11 @@ test_ohdr (void)
    MESSAGE (8, ("Creating new message...\n"));
    stab.btree_addr.offset = 11111111;
    stab.heap_addr.offset  = 22222222;
-   status = H5O_modify (f, &oh_ent, H5O_STAB, H5O_NEW_MESG, &stab);
+   status = H5O_modify (&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab);
    VERIFY (status, 0, "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
-   ptr = H5O_read (f, &oh_ent, H5O_STAB, 0, &ro);
+   ptr = H5O_read (&oh_ent, H5O_STAB, 0, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
    VERIFY (ro.btree_addr.offset, stab.btree_addr.offset, "H5O_read");
@@ -90,11 +90,11 @@ test_ohdr (void)
    MESSAGE (8, ("Modifying message...\n"));
    stab.btree_addr.offset = 33333333;
    stab.heap_addr.offset  = 44444444;
-   status = H5O_modify (f, &oh_ent, H5O_STAB, 0, &stab);
+   status = H5O_modify (&oh_ent, H5O_STAB, 0, 0, &stab);
    VERIFY (status, 0, "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
-   ptr = H5O_read (f, &oh_ent, H5O_STAB, 0, &ro);
+   ptr = H5O_read (&oh_ent, H5O_STAB, 0, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
    VERIFY (ro.btree_addr.offset, stab.btree_addr.offset, "H5O_read");
@@ -107,17 +107,11 @@ test_ohdr (void)
    MESSAGE (8, ("Creating a duplicate message...\n"));
    stab.btree_addr.offset = 55555555;
    stab.heap_addr.offset  = 66666666;
-   status = H5O_modify (f, &oh_ent, H5O_STAB, H5O_NEW_MESG, &stab);
+   status = H5O_modify (&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab);
    VERIFY (status, 1, "H5O_modify");
-   VERIFY (oh_ent.dirty, TRUE, "H5O_modify");
-   VERIFY (oh_ent.type, H5G_CACHED_STAB, "H5O_modify");
-   VERIFY (oh_ent.cache.stab.heap_addr.offset, stab.heap_addr.offset,
-	   "H5O_modify");
-   VERIFY (oh_ent.cache.stab.btree_addr.offset, stab.btree_addr.offset,
-	   "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
-   ptr = H5O_read (f, &oh_ent, H5O_STAB, 1, &ro);
+   ptr = H5O_read (&oh_ent, H5O_STAB, 1, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
    VERIFY (ro.btree_addr.offset, stab.btree_addr.offset, "H5O_read");
@@ -129,17 +123,11 @@ test_ohdr (void)
    MESSAGE (8, ("Modifying the duplicate message...\n"));
    stab.btree_addr.offset = 77777777;
    stab.heap_addr.offset  = 88888888;
-   status = H5O_modify (f, &oh_ent, H5O_STAB, 1, &stab);
+   status = H5O_modify (&oh_ent, H5O_STAB, 1, 0, &stab);
    VERIFY (status, 1, "H5O_modify");
-   VERIFY (oh_ent.dirty, TRUE, "H5O_modify");
-   VERIFY (oh_ent.type, H5G_CACHED_STAB, "H5O_modify");
-   VERIFY (oh_ent.cache.stab.heap_addr.offset, stab.heap_addr.offset,
-	   "H5O_modify");
-   VERIFY (oh_ent.cache.stab.btree_addr.offset, stab.btree_addr.offset,
-	   "H5O_modify");
 
    H5AC_flush (f, NULL, 0, TRUE);
-   ptr = H5O_read (f, &oh_ent, H5O_STAB, 1, &ro);
+   ptr = H5O_read (&oh_ent, H5O_STAB, 1, &ro);
    CHECK_PTR (ptr, "H5O_read");
    VERIFY (ptr, &ro, "H5O_read");
    VERIFY (ro.btree_addr.offset, stab.btree_addr.offset, "H5O_read");
@@ -153,7 +141,7 @@ test_ohdr (void)
    for (i=0; i<40; i++) {
       stab.btree_addr.offset = (i+1)*1000 + 1;
       stab.heap_addr.offset  = (i+1)*1000 + 2;
-      status = H5O_modify (f, &oh_ent, H5O_STAB, H5O_NEW_MESG, &stab);
+      status = H5O_modify (&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab);
       VERIFY (status, 2+i, "H5O_modify");
    }
    H5AC_flush (f, NULL, 0, TRUE);
@@ -166,7 +154,7 @@ test_ohdr (void)
    for (i=0; i<10; i++) {
       stab.btree_addr.offset = (i+1)*1000 + 10;
       stab.heap_addr.offset  = (i+1)*1000 + 20;
-      status = H5O_modify (f, &oh_ent, H5O_STAB, H5O_NEW_MESG, &stab);
+      status = H5O_modify (&oh_ent, H5O_STAB, H5O_NEW_MESG, 0, &stab);
       VERIFY (status, 42+i, "H5O_modify");
       H5AC_flush (f, NULL, 0, TRUE);
    }
@@ -174,9 +162,10 @@ test_ohdr (void)
    /*
     * Delete all symbol table messages.
     */
-   status = H5O_remove (f, &oh_ent, H5O_STAB, H5O_ALL);
+   status = H5O_remove (&oh_ent, H5O_STAB, H5O_ALL);
    CHECK_I (status, "H5O_remove");
 
-   /* close the file */
+   /* release resources */
+   H5O_close (&oh_ent);
    H5Fclose (fid);
 }

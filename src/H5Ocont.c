@@ -36,11 +36,8 @@ const H5O_class_t H5O_CONT[1] = {{
    H5O_CONT_ID,				/*message id number		*/
    "hdr continuation",			/*message name for debugging	*/
    sizeof (H5O_cont_t),			/*native message size		*/
-   H5G_NOTHING_CACHED, 			/*symbol table type field	*/   
    H5O_cont_decode,			/*decode message		*/
    H5O_cont_encode,			/*encode message		*/
-   NULL,				/*no fast method		*/
-   NULL,				/*no cache method		*/
    NULL,				/*no copy method		*/
    NULL,				/*no size method		*/
    NULL,				/*default reset method		*/

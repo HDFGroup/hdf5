@@ -52,20 +52,19 @@
  */
 typedef enum H5G_type_t {
    H5G_NOTHING_CACHED		=0,	/*nothing is cached, must be 0	*/
-   H5G_CACHED_SDSPACE		=1,	/*simple data space		*/
-   H5G_CACHED_STAB		=2 	/*symbol table, `stab'		*/
+   H5G_CACHED_STAB		=1, 	/*symbol table, `stab'		*/
+   
+   H5G_NCACHED			=2 	/*THIS MUST BE LAST		*/
 } H5G_type_t;
 
 /*
  * A symbol table entry caches these parameters from object header
- * messages...
+ * messages...  The values are entered into the symbol table when an object
+ * header is created (by hand) and are extracted from the symbol table with a
+ * callback function registered in H5O_init_interface().  Be sure to update
+ * H5G_ent_decode(), H5G_ent_encode(), and H5G_ent_debug() as well.
  */
 typedef union H5G_cache_t {
-   struct {
-      uint32 ndim;		/*number of dimensions			*/
-      uint32 dim[4];		/*dimension sizes			*/
-   } sdspace;
-
    struct {
       haddr_t btree_addr;	/*file address of symbol table B-tree	*/
       haddr_t heap_addr;	/*file address of stab name heap	*/
@@ -84,6 +83,7 @@ typedef struct H5G_entry_t {
    haddr_t	header;		/*file address of object header		*/
    H5G_type_t	type;		/*type of information cached		*/
    H5G_cache_t	cache;		/*cached data from object header	*/
+   H5F_t	*file;		/*file to which this obj hdr belongs	*/
 } H5G_entry_t;
 
 typedef struct H5G_t H5G_t;
@@ -99,11 +99,11 @@ herr_t H5G_close (H5G_t *grp);
 herr_t H5G_set (H5F_t *f, H5G_t *grp);
 herr_t H5G_push (H5F_t *f, H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
-herr_t H5G_insert (H5F_t *f, const char *name, H5G_entry_t *ent);
-herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent,
-		 H5G_entry_t *ent);
+herr_t H5G_insert (const char *name, H5G_entry_t *ent);
+herr_t H5G_find (H5F_t *f, const char *name, H5G_entry_t *grp_ent/*out*/,
+		 H5G_entry_t *ent/*out*/);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
-herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent);
+herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent/*out*/);
 
 /*
  * These functions operate on symbol table nodes.
@@ -116,9 +116,7 @@ herr_t H5G_node_debug (H5F_t *f, const haddr_t *addr, FILE *stream,
  * in the H5O package where header messages are cached in symbol table
  * entries.  The subclasses of H5O probably don't need them though.
  */
-H5G_entry_t *H5G_ent_calloc (void);
-herr_t H5G_ent_invalidate (H5G_entry_t *ent);
-herr_t H5G_ent_addr (H5G_entry_t *ent, haddr_t *retval/*out*/);
+H5G_entry_t *H5G_ent_calloc (H5G_entry_t *init);
 H5G_cache_t *H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type);
 herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
 herr_t H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream,
