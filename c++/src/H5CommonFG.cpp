@@ -47,16 +47,15 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
    // location id which can be a file id or a group id
    hid_t group_id = H5Gcreate( getLocId(), name, size_hint );
 
-   // If the group id is valid, create and return the Group object
+   // If the creation of the group failed, throw an exception
    if( group_id > 0 )
-   {
-      Group group( group_id );
-      return( group );
-   }
-   else
    {
       throwException("createGroup", "H5Gcreate failed");
    }
+
+   // No failure, create and return the Group object
+   Group group( group_id );
+   return( group );
 }
 
 // Opens an existing group in a location which can be a file or another group
@@ -70,16 +69,15 @@ Group CommonFG::openGroup( const char* name ) const
    // location id which can be a file id or a group id
    hid_t group_id = H5Gopen( getLocId(), name );
 
-   // If the group id is valid, create and return the Group object
-   if( group_id > 0 )
-   {
-      Group group( group_id );
-      return( group );
-   }
-   else
+   // If the opening of the group failed, throw an exception 
+   if( group_id <= 0 )
    {
       throwException("openGroup", "H5Gopen failed");
    }
+
+   // No failure, create and return the Group object
+   Group group( group_id );
+   return( group );
 }
 
 // Creates a new dataset at this location.
@@ -97,16 +95,13 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
    // Call C routine H5Dcreate to create the named dataset
    hid_t dataset_id = H5Dcreate( getLocId(), name, type_id, space_id, create_plist_id );
 
-   // If the dataset id is valid, create and return the DataSet object
-   if( dataset_id > 0 )
-   {
-      DataSet dataset( dataset_id );
-      return( dataset );
-   }
-   else
-   {
+   // If the creation of the dataset failed, throw an exception 
+   if( dataset_id <= 0 )
       throwException("createDataSet", "H5Dcreate failed");
-   }
+
+   // No failure, create and return the DataSet object
+   DataSet dataset( dataset_id );
+   return( dataset );
 }
 
 // Opens an existing dataset at this location.
@@ -120,16 +115,15 @@ DataSet CommonFG::openDataSet( const char* name ) const
    // the location id and the dataset's name 
    hid_t dataset_id = H5Dopen( getLocId(), name );
 
-   // If the dataset id is valid, create and return the DataSet object
-   if( dataset_id > 0 )
-   {
-      DataSet dataset( dataset_id );
-      return( dataset );
-   }
-   else
+   // If the dataset's opening failed, throw an exception
+   if( dataset_id <= 0 )
    {
       throwException("openDataSet", "H5Dopen failed");
    }
+
+   // No failure, create and return the DataSet object
+   DataSet dataset( dataset_id );
+   return( dataset );
 }
 
 // Creates a link of the specified type from new_name to current_name;
@@ -291,13 +285,14 @@ hid_t CommonFG::p_openDataType( const char* name ) const
    // giving either the file or group id 
    hid_t datatype_id = H5Topen( getLocId(), name );
    
-   // If the datatype id is valid, return it, otherwise, throw an exception.
-   if( datatype_id > 0 ) 
-      return( datatype_id );
-   else
+   // If the datatype's opening failed, throw an exception
+   if( datatype_id <= 0 ) 
    { 
       throwException("openDataType", "H5Topen failed");
    }  
+
+   // No failure, return the datatype id
+   return( datatype_id );
 }  
 
 //
@@ -379,12 +374,11 @@ int CommonFG::iterateElems( const string& name, int *idx, H5G_iterate_t op , voi
 int CommonFG::iterateElems( const char* name, int *idx, H5G_iterate_t op , void* op_data )
 {
    int ret_value = H5Giterate( getLocId(), name, idx, op, op_data );
-   if( ret_value >= 0 )
-      return( ret_value );
-   else  // raise exception when H5Giterate returns a negative value
+   if( ret_value < 0 )
    {
       throwException("iterateElems", "H5Giterate failed");
    }
+   return( ret_value );
 }
 
 CommonFG::CommonFG() 
