@@ -76,6 +76,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_NOSPACE, 	"No space available for allocation"},
     {H5E_CANTCOPY, 	"Unable to copy object"},
     {H5E_CANTFREE, 	"Unable to free object"},
+    {H5E_ALREADYEXISTS, "Object already exists"},
 
     /* File accessability errors */
     {H5E_FILEEXISTS, 	"File already exists"},
