@@ -332,6 +332,10 @@ RUNSNAPTEST()
 		# skip this test
 		skiptest=yes
 		;;
+	    srcdirname)
+		shift
+		SRCDIRNAME=$1
+		;;
 	    *) # unknown test
 		PRINT "$0: unknown type of test ($1)"
 		retcode=1
@@ -407,6 +411,7 @@ RUNSNAPTEST()
 #		        set environment variable with <N> values
 #		        e.g., setenvN 3 x a b c is same as setenv x="a b c".
 #    skip		skip this test
+#    srcdirname <name>	use <name> as the build-directory.
 SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do
