@@ -123,8 +123,8 @@ done:
 int
 H5Z_term_interface (void)
 {
-    size_t	i;
 #ifdef H5Z_DEBUG
+    size_t	i;
     int		dir, nprint=0;
     char	comment[16], bandwidth[32];
 #endif

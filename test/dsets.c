@@ -593,7 +593,7 @@ test_max_compact(hid_t fapl)
     herr_t      status;
     int         *wbuf, *rbuf;
     char	filename[1024];
-    int         i, j, n;
+    int         i,  n;
 
     TESTING("compact dataset of maximal size");
 
