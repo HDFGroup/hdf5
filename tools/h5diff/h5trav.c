@@ -18,6 +18,8 @@
 
 #include "hdf5.h"
 #include "h5trav.h"
+#include "H5private.h"
+
 
 #ifndef FALSE
 #define FALSE 0
@@ -168,7 +170,7 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
   return 1;
 
  ((info_t *)op_data)->type = statbuf.type;
- ((info_t *)op_data)->name = (char *)strdup(name);
+ ((info_t *)op_data)->name = (char *)HDstrdup(name);
 
  /* Define 1 for return. This will cause the iterator to stop */
  return 1;
@@ -271,7 +273,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
   /* add to array */
   if ( info )
   {
-   info[*idx].name = strdup(path);
+   info[*idx].name = (char *)HDstrdup(path);
    info[*idx].type = type;
    (*idx)++;
   }
@@ -486,7 +488,7 @@ void table_add(unsigned long *objno, char *objname, table_t *table)
  table->objs[i].objno[0] = objno[0];
  table->objs[i].objno[1] = objno[1];
  free(table->objs[i].objname);
- table->objs[i].objname = strdup(objname);
+ table->objs[i].objname = (char *)HDstrdup(objname);
 
 
 }
