@@ -51,7 +51,7 @@
 <hr>
 
 
-<h1>The Reference Interface (H5R) and <br> the Indentifier Interface (H5I)</h1>
+<h1>The Reference Interface (H5R) and <br> the Identifier Interface (H5I)</h1>
 
 <h2>1. Introduction</h2>
 
@@ -70,8 +70,6 @@ implemented, or planned for implementation, in HDF5.
 <dl>
     <dt>Object reference
         <dd>Reference to an entire object in the current HDF5 file.
-            <br>
-            <em>The only kind of reference currently implemented.</em>
             <p>
             An object reference points to an entire object in the 
             current HDF5 file by storing the relative file address 
@@ -82,8 +80,6 @@ implemented, or planned for implementation, in HDF5.
             <p>
     <dt>Dataset region reference
         <dd>Reference to a specific dataset region.
-            <br>
-            <em>Not yet implemented.</em>
             <p>
             A dataset region reference points to a region of a 
             dataset in the current HDF5 file by storing the OID 
@@ -92,16 +88,6 @@ implemented, or planned for implementation, in HDF5.
             by retrieving the coordinates of the areas in the 
             region from the global heap.  A dataset region 
             reference is of a variable size in the file.
-            <p>
-    <dt>Internal dataset region reference
-        <dd>Reference to a region within the current dataset.
-            <br>
-            <em>Not yet implemented.</em>
-            <p>
-            An internal dataset region reference points to a 
-            region of the current dataset by storing the 
-            coordinates of the region.  An internal dataset 
-            region reference is of a fixed size in the file.
 </dl>
 
 
@@ -113,31 +99,30 @@ is deleted, moved, or not yet available.
 
 <h2>3. Reference Types</h2>
 
-This section lists valid HDF5 reference types for use in the 
-H5R functions.
+Valid HDF5 reference types for use in the H5R functions
+are as follows:
 
 <center>
 <table>
 <tr><th align=left>Reference Type</th><th align=left>Value&nbsp;&nbsp;</th><th align=left>Description</th></tr>
+<!-- NOT USER-LEVEL INFORMATION; DELETED FROM HDF5 USER'S GUIDE
 <tr><td><code>H5R_BADTYPE</code></td>
     <td align=right><code>-1&nbsp;&nbsp;</code></td>
     <td>Invalid reference type</td></tr>
+-->
 <tr><td><code>H5R_OBJECT</code></td>
     <td align=right><code>0&nbsp;&nbsp;</code></td>
     <td>Object reference</td></tr>
 <tr><td><code>H5R_DATASET_REGION</code></td>
     <td align=right><code>1&nbsp;&nbsp;</code></td>
     <td>Dataset region reference</td></tr>
-<tr><td><code>H5R_INTERNAL</code></td>
-    <td align=right><code>2&nbsp;&nbsp;</code></td>
-    <td>Internal reference</td></tr>
 </table>
 </center>
 
 
 <h2>4. Functions</h2>
 
-Four functions, three in the H5R interface and one in the 
+Five functions, four in the H5R interface and one in the 
 H5I interface,  have been implemented to support references.
 The H5I function is also useful outside the context of references.
 <p>
@@ -166,6 +151,17 @@ The H5I function is also useful outside the context of references.
         <code>dset</code>.
         <p>
 
+    <dt><em>int</em> <code>H5Rget_object_type(</code><em>hid_t</em> <code>obj_id,</code>
+        <em>void *</em><code>reference)</code>
+    <dd><code>H5Rget_object_type</code> retrieves the type of object 
+        that an object reference points to.
+        The parameter <code>obj_id</code> specifies the dataset 
+        containing the reference object or the location identifier 
+        of the object that the dataset is located within.
+        The parameter <code>reference</code> specifies the 
+        reference being queried.
+        <p>
+
     <dt><em>H5S_t</em> <code>H5Rget_region(</code><em>H5D_t</em> <code>dataset,</code>
         <em>H5R_type_t</em> <code>type,</code>
         <em>void *</em><code>reference)</code>
@@ -183,19 +179,17 @@ The H5I function is also useful outside the context of references.
         in the following list:
         <center>
         <table>
-        <tr><td><code>H5I_BADID</code></td>
-            <td>Invalid ID</td></tr>
-        <tr><td><code>H5I_FILE</code></td>
+        <tr valign=bottom><td><code>H5I_FILE</code></td>
             <td>File objects</td></tr>
-        <tr><td><code>H5I_GROUP</code></td>
+        <tr valign=bottom><td><code>H5I_GROUP</code></td>
             <td>Group objects</td></tr>
-        <tr><td><code>H5I_DATATYPE</code></td>
+        <tr valign=bottom><td><code>H5I_DATATYPE</code></td>
             <td>Datatype objects</td></tr>
-        <tr><td><code>H5I_DATASPACE</code></td>
+        <tr valign=bottom><td><code>H5I_DATASPACE</code></td>
             <td>Dataspace objects</td></tr>
-        <tr><td><code>H5I_DATASET</code></td>
+        <tr valign=bottom><td><code>H5I_DATASET</code></td>
             <td>Dataset objects</td></tr>
-        <tr><td><code>H5I_ATTR</code></td>
+        <tr valign=bottom><td><code>H5I_ATTR</code></td>
             <td>Attribute objects</td></tr>
         </table>
         </center>
@@ -527,7 +521,7 @@ Notes:
 <dt>Disk Offset Reference
     <dd>Points to a sequence of bytes in the current
         HDF5 file by storing the byte length and offset of the sequence within
-        the file, relative to the boot-block (as are all the other high-level
+        the file, relative to the super block (as are all the other high-level
         addresses used in the file).  The offset is the absolute byte offset
         within the file, no interpretation of the data at that location is
         provided.  Fixed size in file.

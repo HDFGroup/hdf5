@@ -447,11 +447,15 @@ H5Pset_external (plist, "scan3.data", 0, 16);
 	  *<em>name</em>, hid_t <em>type_id</em>, hid_t
 	  <em>space_id</em>, hid_t <em>create_plist_id</em>)</code>
       <dd>A dataset is created by calling <code>H5Dcreate</code> with
-	a file identifier, a dataset name, a datatype, a data space,
-	and constant properties.  The datatype and data space are the
+	a file identifier, a dataset name, a datatype, a dataspace,
+	and constant properties.  The datatype and dataspace are the
 	type and space of the dataset as it will exist in the file,
-	which may be different than in application memory.  The
-	<em>create_plist_id</em> is a <code>H5P_DATASET_CREATE</code>
+	which may be different than in application memory.  
+        Dataset names within a group must be unique: 
+        <code>H5Dcreate</code> returns an error if a dataset with the
+        name specified in <code><em>name</em></code> already exists 
+        at the location specified in <code><em>file_id</em></code>.
+        The <em>create_plist_id</em> is a <code>H5P_DATASET_CREATE</code>
 	property list created with <code>H5Pcreate()</code> and
 	initialized with the various functions described above.
 	<code>H5Dcreate()</code> returns a dataset handle for success

@@ -72,7 +72,7 @@
       and a name which exists as a member of some other group. In this
       way, groups can be linked together to form a directed graph.
       One particular group is called the <em>Root Group</em> and is
-      the group to which the HDF5 file boot block points.  Its name is
+      the group to which the HDF5 file super block points.  Its name is
       "/" by convention.  The <em>full name</em> of an object is
       created by joining component names with slashes much like Unix.
 
@@ -180,6 +180,11 @@
 
 	</table>
       </center>
+
+    <p>Note, however, that object names within a group must be unique. 
+       For example, <code>H5Dcreate</code> returns an error if a 
+       dataset with the dataset name specified in the parameter list
+       already exists at the location specified in the parameter list.
 
 
     <h2>3. Creating, Opening, and Closing Groups</h2>
