@@ -14,6 +14,12 @@
 #
 # Tests for the h5dump tool
 
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
+USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
+
 DUMPER=h5dump               # The tool name
 DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
 
@@ -208,3 +214,6 @@ if test $nerrors -eq 0 ; then
 fi
 
 exit $nerrors
+
+
+

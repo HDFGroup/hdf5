@@ -24108,6 +24108,7 @@ echo "$as_me: error: couldn't find dmalloc library" >&2;}
     ;;
 esac
 
+ USE_FILTER_DEFLATE="no"
 
 # Check whether --with-zlib or --without-zlib was given.
 if test "${with_zlib+set}" = set; then
@@ -24683,6 +24684,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_DEFLATE 1
 _ACEOF
 
+    USE_FILTER_DEFLATE="yes"
 
         if test "X$EXTERNAL_FILTERS" != "X"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
@@ -24691,6 +24693,7 @@ _ACEOF
 fi
 
 
+ USE_FILTER_SZIP="no"
 
 # Check whether --with-szlib or --without-szlib was given.
 if test "${with_szlib+set}" = set; then
@@ -25130,6 +25133,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_SZIP 1
 _ACEOF
 
+    USE_FILTER_SZIP="yes"
 
         if test "X$EXTERNAL_FILTERS" != "X"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
@@ -33188,6 +33192,8 @@ echo "${ECHO_T}no" >&6
 fi
 
 
+ USE_FILTER_SHUFFLE="no"
+ USE_FILTER_FLETCHER32="no"
 echo "$as_me:$LINENO: checking for I/O filters" >&5
 echo $ECHO_N "checking for I/O filters... $ECHO_C" >&6
 # Check whether --enable-filters or --disable-filters was given.
@@ -33222,6 +33228,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_SHUFFLE 1
 _ACEOF
 
+      USE_FILTER_SHUFFLE="yes"
     fi
     if test $filter = "FLETCHER32"; then
 
@@ -33229,6 +33236,7 @@ cat >>confdefs.h <<\_ACEOF
 #define HAVE_FILTER_FLETCHER32 1
 _ACEOF
 
+      USE_FILTER_FLETCHER32="yes"
     fi
   done
 fi
@@ -33719,7 +33727,7 @@ if test "X$HDF_CXX" = "Xyes"; then
              c++/examples/Makefile"
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5import/Makefile tools/h5diff/Makefile tools/h5repack/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES"
+ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5repack/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES"
 
 
 cat >confcache <<\_ACEOF
@@ -34219,6 +34227,7 @@ do
   "perform/Makefile" ) CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;
   "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "tools/h5dump/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
+  "tools/h5dump/testh5dump.sh" ) CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dump.sh" ;;
   "tools/h5import/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5import/Makefile" ;;
   "tools/h5diff/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5diff/Makefile" ;;
   "tools/h5repack/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5repack/Makefile" ;;
@@ -34380,6 +34389,8 @@ s,@PERL@,$PERL,;t t
 s,@AR@,$AR,;t t
 /@DEPEND@/r $DEPEND
 s,@DEPEND@,,;t t
+s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
+s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
 s,@PABLO@,$PABLO,;t t
 s,@HAVE_PABLO@,$HAVE_PABLO,;t t
 s,@SSL@,$SSL,;t t
@@ -34398,6 +34409,8 @@ s,@TESTPARALLEL@,$TESTPARALLEL,;t t
 s,@ADD_PARALLEL_FILES@,$ADD_PARALLEL_FILES,;t t
 s,@MPE@,$MPE,;t t
 s,@FILTERS@,$FILTERS,;t t
+s,@USE_FILTER_SHUFFLE@,$USE_FILTER_SHUFFLE,;t t
+s,@USE_FILTER_FLETCHER32@,$USE_FILTER_FLETCHER32,;t t
 s,@H5_VERSION@,$H5_VERSION,;t t
 s,@CONFIG_DATE@,$CONFIG_DATE,;t t
 s,@CONFIG_USER@,$CONFIG_USER,;t t
