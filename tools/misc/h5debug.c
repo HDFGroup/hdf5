@@ -28,14 +28,14 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"
-#include "H5Iprivate.h"
 #include "H5Bprivate.h"
-#include "H5Pprivate.h"
 #include "H5Fpkg.h"
 #include "H5Gprivate.h"
 #include "H5HGprivate.h"
 #include "H5HLprivate.h"
+#include "H5Iprivate.h"
 #include "H5Opkg.h"
+#include "H5Pprivate.h"
 
 /* File drivers */
 #include "H5FDfamily.h"
@@ -128,7 +128,7 @@ main(int argc, char *argv[])
         /*
          * Debug the boot block.
          */
-        status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5F_debug(f, H5P_DATASET_XFER_DEFAULT, stdout, 0, VCOL);
 
     } else if (!HDmemcmp(sig, H5HL_MAGIC, H5HL_SIZEOF_MAGIC)) {
         /*
