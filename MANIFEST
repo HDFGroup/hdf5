@@ -971,7 +971,7 @@
 ./tools/gifconv/Dependencies
 ./tools/gifconv/Makefile.in
 ./tools/gifconv/decompress.c
-./tools/gifconf/gif.h
+./tools/gifconv/gif.h
 ./tools/gifconv/gif2hdf.c
 ./tools/gifconv/gif2mem.c
 ./tools/gifconv/gifread.c
