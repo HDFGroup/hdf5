@@ -15,6 +15,7 @@
 /* This files contains C stubs for H5I Fortran APIs */
 
 #include "H5f90.h"
+#include "H5Eprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5iget_type_c
@@ -86,5 +87,92 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
 
 DONE:
       HDfree(c_buf);
+      return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5iinc_ref_c
+ * Purpose:     Call H5Iinc_ref to increment object's reference count
+ * Inputs:      obj_id - object identifier 
+ * Outputs:     ref_count - Reference count of ID
+ * Returns:     current reference count on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              Tuesday, December  9, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
+{
+     int ret_value;
+
+     /*
+      * Call H5Iinc_ref function
+      */
+     if ((ret_value = H5Iinc_ref(*obj_id)) < 0)
+         HGOTO_DONE(FAIL);
+
+    /* Set output & return values */
+    *ref_count=ret_value;
+    ret_value=0;
+
+done:
+      return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5idec_ref_c
+ * Purpose:     Call H5Idec_ref to decrement object's reference count
+ * Inputs:      obj_id - object identifier 
+ * Outputs:     ref_count - Reference count of ID
+ * Returns:     current reference count on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              Tuesday, December  9, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
+{
+     int ret_value;
+
+     /*
+      * Call H5Idec_ref function
+      */
+     if ((ret_value = H5Idec_ref(*obj_id)) < 0)
+         HGOTO_DONE(FAIL);
+
+    /* Set output & return values */
+    *ref_count=ret_value;
+    ret_value=0;
+
+done:
+      return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5iget_ref_c
+ * Purpose:     Call H5Iget_ref to retrieve object's reference count
+ * Inputs:      obj_id - object identifier 
+ * Outputs:     ref_count - Reference count of ID
+ * Returns:     current reference count on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              Tuesday, December  9, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
+{
+     int ret_value;
+
+     /*
+      * Call H5Iget_ref function
+      */
+     if ((ret_value = H5Iget_ref(*obj_id)) < 0)
+         HGOTO_DONE(FAIL);
+
+    /* Set output & return values */
+    *ref_count=ret_value;
+    ret_value=0;
+
+done:
       return ret_value;
 }

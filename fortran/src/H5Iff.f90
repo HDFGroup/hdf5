@@ -86,6 +86,7 @@
             END INTERFACE
             hdferr = h5iget_type_c(obj_id, type)
           END SUBROUTINE h5iget_type_f
+
 !----------------------------------------------------------------------
 ! Name:		h5iget_name_f 
 !
@@ -145,10 +146,152 @@
             hdferr = h5iget_name_c(obj_id, buf, buf_size, name_size)
           END SUBROUTINE h5iget_name_f
 
+!----------------------------------------------------------------------
+! Name:		h5iinc_ref_f
+!
+! Purpose:	Increments the reference count of an ID
+!
+! Inputs: 	obj_id		- object identifier 
+! Outputs:  
+!		ref_count       - Current reference count of the ID
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Quincey Koziol
+!		December  9, 2003	
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+          SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5iinc_ref_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+!            INTEGER, EXTERNAL :: h5iinc_ref_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5iinc_ref_c(obj_id, ref_count)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5IINC_REF_C':: h5iinc_ref_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER, INTENT(OUT) :: ref_count
+              END FUNCTION h5iinc_ref_c
+            END INTERFACE
+            hdferr = h5iinc_ref_c(obj_id, ref_count)
+          END SUBROUTINE h5iinc_ref_f
+
+!----------------------------------------------------------------------
+! Name:		h5idec_ref_f
+!
+! Purpose:	Decrements the reference count of an ID
+!
+! Inputs: 	obj_id		- object identifier 
+! Outputs:  
+!		ref_count       - Current reference count of the ID
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Quincey Koziol
+!		December  9, 2003	
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+          SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5idec_ref_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+!            INTEGER, EXTERNAL :: h5idec_ref_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5idec_ref_c(obj_id, ref_count)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5IDEC_REF_C':: h5idec_ref_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER, INTENT(OUT) :: ref_count
+              END FUNCTION h5idec_ref_c
+            END INTERFACE
+            hdferr = h5idec_ref_c(obj_id, ref_count)
+          END SUBROUTINE h5idec_ref_f
+
+!----------------------------------------------------------------------
+! Name:		h5iget_ref_f
+!
+! Purpose:	Retrieves the reference count of an ID
+!
+! Inputs: 	obj_id		- object identifier 
+! Outputs:  
+!		ref_count       - Current reference count of the ID
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Quincey Koziol
+!		December  9, 2003	
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+          SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5iget_ref_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+            INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+!            INTEGER, EXTERNAL :: h5iget_ref_c
+!  Interface is needed for MS FORTRAN
+!
+            INTERFACE
+              INTEGER FUNCTION h5iget_ref_c(obj_id, ref_count)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5IGET_REF_C':: h5iget_ref_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: obj_id 
+              INTEGER, INTENT(OUT) :: ref_count
+              END FUNCTION h5iget_ref_c
+            END INTERFACE
+            hdferr = h5iget_ref_c(obj_id, ref_count)
+          END SUBROUTINE h5iget_ref_f
 
       END MODULE H5I
-            
-
-                                     
-
 
