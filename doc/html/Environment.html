@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+<title>HDF5 Library Environment Variables and Configuration Parameters</title>
+</head>
+
+<body>
+
+<h1>HDF5 Library Environment Variables and Configuration Parameters</h1>
+
+<h2>1. Environment Variables</h2>
+
+The HDF5 library uses UNIX environment variables to control
+or adjust certain library features at runtime.  The variables and 
+their defined effects are as follows:
+
+<dir>
+<dl>
+    <dt><tt>HDF5_DEBUG</tt>
+        <dd>Defines a list of debugging switches documented in the
+            <a href="Debugging.html">Debugging</a> section of the
+            <cite>HDF5 User's Guide</cite>.
+
+    <dt><tt>HDF5_NOCLEANUP</tt>
+        <dd>When set to a non-empty value, the programs in the test
+            directory do not remove temporary HDF5 data files.
+            The default is for each test to remove the files before exit.
+
+    <dt><tt>HDF5_MPI_OPT_TYPES</tt> 
+            &nbsp;&nbsp;(for parallel beta version only)
+        <dd>When set to <code>1</code>, PHDF5 will use the MPI optimized 
+            code to perform parallel read/write accesses to datasets.
+            Currently, this optimization fails when accessing extendable
+            datasets.  The default is not to use the optimized code.
+
+    <dt><tt>HDF5_MPI_1_METAWRITE</tt> 
+            &nbsp;&nbsp;(for parallel beta version only)
+        <dd>When set to <code>1</code>, PHDF5 will write the metadata 
+            via process 0 of each opened parallel HDF5 file.  This should 
+            improve I/O throughput.  The default is not to use this 
+            optimization.
+
+</dl>
+</dir>
+
+<h2>2. Configuration Parameters</h2>
+
+The HDF5 configuration script accepts a list of parameters to control
+configuration features when creating the Makefiles for the library.  
+The command
+<br>
+<code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;configure --help </code>
+<br>
+will display the current list of parameters and their effects.
+
+<hr>
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+</address>
+
+Last modified: 9 September 1998
+
+</body>
+</html>
+
