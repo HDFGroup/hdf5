@@ -339,7 +339,7 @@
         INTERFACE
           INTEGER FUNCTION h5dont_atexit_c()
           !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-          !MS$ATTRIBUTES C,reference,alias:'_H5dont_atexit_C'::h5dont_atexit_c
+          !MS$ATTRIBUTES C,reference,alias:'_H5DONT_ATEXIT_C'::h5dont_atexit_c
           !DEC$ ENDIF
           END FUNCTION h5dont_atexit_c
         END INTERFACE
