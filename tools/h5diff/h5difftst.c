@@ -738,10 +738,10 @@ int do_test_files(void)
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file3_id,1,dims1_1,"dset3",H5T_NATIVE_INT,0);
- write_dataset(file4_id,1,dims1_1,"dset3",H5T_NATIVE_INT,0);
- write_dataset(file3_id,1,dims1_1,"dset4",H5T_NATIVE_INT,0);
- write_dataset(file4_id,1,dims1_1,"dset5",H5T_NATIVE_INT,0);
+ write_dataset(file3_id,1,dims1_1,"dset_A",H5T_NATIVE_INT,0);
+ write_dataset(file4_id,1,dims1_1,"dset_A",H5T_NATIVE_INT,0);
+ write_dataset(file3_id,1,dims1_1,"dset_B",H5T_NATIVE_INT,0);
+ write_dataset(file4_id,1,dims1_1,"dset_C",H5T_NATIVE_INT,0);
 
 
 

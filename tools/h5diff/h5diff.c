@@ -36,6 +36,7 @@ typedef struct options_t
  double p_relative; /* relative error value */
  int    n_; /* count */
  int    n_number_count; /* value */
+ int    m_; /* do not make the diff on a sequencial match, default yes */
 } options_t;
 
 /*-------------------------------------------------------------------------
@@ -114,6 +115,7 @@ void usage(void)
  printf("[-n count]        Print difference up to count number for each variable\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
  printf("[-p relative]     Print differences which are within a relative error value\n");
+ printf("[-m ]             Print differences on a sequencial match iteration\n");
 }
 
 
@@ -167,8 +169,6 @@ int main(int argc, const char *argv[])
  const char *obj1_name  = NULL;
  const char *obj2_name  = NULL;
  
- /*do_test_files();*/
-
 
 /*-------------------------------------------------------------------------
  * print the command line options
@@ -218,6 +218,9 @@ int main(int argc, const char *argv[])
      break;
     case 'r': 
      options.r_ = 1;
+     break;
+    case 'm': 
+     options.m_ = 1;
      break;
     case 'd': 
      /* if it is not another option */
@@ -726,8 +729,11 @@ void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1
     info1[curr1].name, file1_name, info2[curr2].name, file2_name);
 
    /* do the diff */
-   diff( file1_id, info1[curr1].name, file2_id, info1[curr1].name, options, 
-         info1[curr1].type );
+   if ( options.m_ )
+   {
+    diff( file1_id, info1[curr1].name, file2_id, info1[curr1].name, options, 
+          info1[curr1].type );
+   }
 
    curr1++;
    curr2++;
@@ -769,7 +775,7 @@ void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1
   while ( curr2<nobjects2 )
   {
    printf( "<%s> is in <%s>, but not in <%s>\n", info2[curr2].name, 
-    file1_name, file2_name);
+    file2_name, file1_name);
    curr2++;
   }
  }
