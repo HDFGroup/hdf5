@@ -165,6 +165,8 @@ New Features
       the return type of H5Pget_class changed from H5P_class_t to hid_t.
       Further changes are still necessary and will be documented here as they
       are made.
+    * Improved performance of single, contiguous hyperslabs when reading or
+      writing.
 
 Platforms Tested
 ================
