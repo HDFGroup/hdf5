@@ -27,9 +27,38 @@ typedef enum H5D_layout_t {
     H5D_COMPACT		= 0,	/*raw data is very small		     */
     H5D_CONTIGUOUS	= 1,	/*the default				     */
     H5D_CHUNKED		= 2,	/*slow and fancy			     */
-
     H5D_NLAYOUTS	= 3	/*this one must be last!		     */
 } H5D_layout_t;
+
+/* Values for the space allocation time property */
+typedef enum H5D_space_time_t {
+    H5D_SPACE_ALLOC_ERROR	=-1,
+    H5D_SPACE_ALLOC_LATE  	=0,
+    H5D_SPACE_ALLOC_EARLY	=1
+} H5D_space_time_t;   
+
+/* Values for the status of space allocation */
+typedef enum H5D_space_status_t {
+    H5D_SPACE_STATUS_ERROR	=-1,
+    H5D_SPACE_STATUS_NOT_ALLOCATED	=0,
+    H5D_SPACE_STATUS_PART_ALLOCATED	=1,
+    H5D_SPACE_STATUS_ALLOCATED		=2
+} H5D_space_status_t;
+
+/* Values for time of writing fill value property */
+typedef enum H5D_fill_time_t {
+    H5D_FILL_TIME_ERROR	=-1,
+    H5D_FILL_TIME_ALLOC =0,
+    H5D_FILL_TIME_NEVER	=1
+} H5D_fill_time_t;
+
+/* Values for fill value status */
+typedef enum H5D_fill_value_t {
+    H5D_FILL_VALUE_ERROR        =-1,
+    H5D_FILL_VALUE_UNDEFINED    =0,
+    H5D_FILL_VALUE_DEFAULT      =1,
+    H5D_FILL_VALUE_USER_DEFINED =2
+} H5D_fill_value_t;
 
 /* Define the operator function pointer for H5Diterate() */
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, hsize_t ndim,
@@ -44,6 +73,8 @@ __DLL__ hid_t H5Dcreate (hid_t file_id, const char *name, hid_t type_id,
 __DLL__ hid_t H5Dopen (hid_t file_id, const char *name);
 __DLL__ herr_t H5Dclose (hid_t dset_id);
 __DLL__ hid_t H5Dget_space (hid_t dset_id);
+__DLL__ herr_t H5Dget_space_status(hid_t dset_id, 
+				H5D_space_status_t *allocation);
 __DLL__ hid_t H5Dget_type (hid_t dset_id);
 __DLL__ hid_t H5Dget_create_plist (hid_t dset_id);
 __DLL__ hsize_t H5Dget_storage_size(hid_t dset_id);

@@ -6590,7 +6590,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_select_fill_gen(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+H5S_hyper_select_fill_gen(const void *fill, size_t fill_size, const H5S_t *space, void *buf)
 {
     H5S_hyper_span_info_t *spans=NULL;      /* Pointer to copy of the span tree */
     H5S_hyper_span_info_t *tmp_spans;       /* Temporary pointer to a span tree */
@@ -6794,7 +6794,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_select_fill_opt(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+H5S_hyper_select_fill_opt(const void *fill, size_t fill_size, const H5S_t *space, void *buf)
 {
     H5S_hyper_dim_t *diminfo;               /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
@@ -6935,7 +6935,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+H5S_hyper_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *buf)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 

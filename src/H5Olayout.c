@@ -39,7 +39,10 @@ const H5O_class_t H5O_LAYOUT[1] = {{
     H5O_layout_debug,       	/*debug the message             */
 }};
 
-#define H5O_LAYOUT_VERSION	1
+/* For forward and backward compatibility.  Version is 1 when space is 
+ * allocated; 2 when space is delayed for allocation. */
+#define H5O_LAYOUT_VERSION_1	1
+#define H5O_LAYOUT_VERSION_2	2
 
 /* Interface initialization */
 #define PABLO_MASK      H5O_layout_mask
@@ -67,6 +70,10 @@ H5FL_DEFINE(H5O_layout_t);
  * 	Robb Matzke, 1998-07-20
  *	Rearranged the message to add a version number at the beginning.
  *
+ *      Raymond Lu, 2002-2-26
+ *      Added version number 2 case depends on if space has been allocated
+ *      at the moment when layout header message is updated.
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -89,9 +96,9 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 		       "memory allocation failed");
     }
 
-    /* Version */
+    /* Version. 1 when space allocated; 2 when space allocation is delayed */
     version = *p++;
-    if (version!=H5O_LAYOUT_VERSION) {
+    if (version!=H5O_LAYOUT_VERSION_1 && version!=H5O_LAYOUT_VERSION_2) {
         HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
 		      "bad version number for layout message");
     }
@@ -136,6 +143,10 @@ H5O_layout_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
  * 	Robb Matzke, 1998-07-20
  *	Rearranged the message to add a version number at the beginning.
  *
+ *	Raymond Lu, 2002-2-26
+ *	Added version number 2 case depends on if space has been allocated
+ *	at the moment when layout header message is updated.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -152,8 +163,14 @@ H5O_layout_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     assert(mesg->ndims > 0 && mesg->ndims <= H5O_LAYOUT_NDIMS);
     assert(p);
 
-    /* Version */
-    *p++ = H5O_LAYOUT_VERSION;
+    /* Version: 1 when space allocated; 2 when space allocation is delayed */
+    if(mesg->type==H5D_CONTIGUOUS) {
+    	if(mesg->addr==HADDR_UNDEF)
+            *p++ = H5O_LAYOUT_VERSION_2;
+    	else 
+	    *p++ = H5O_LAYOUT_VERSION_1;
+    } else
+	*p++ = H5O_LAYOUT_VERSION_1;
 
     /* number of dimensions */
     *p++ = mesg->ndims;

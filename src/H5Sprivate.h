@@ -222,11 +222,11 @@ __DLL__ htri_t H5S_select_single(const H5S_t *space);
 __DLL__ htri_t H5S_select_regular(const H5S_t *space);
 __DLL__ htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 __DLL__ herr_t H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space,
-				  H5D_operator_t op, void *operator_data);
+				H5D_operator_t op, void *operator_data);
 __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
-				    H5S_sel_iter_t *sel_iter);
-__DLL__ herr_t H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space,
-                                    void *buf);
+                                H5S_sel_iter_t *sel_iter);
+__DLL__ herr_t H5S_select_fill(const void *fill, size_t fill_size,
+                                const H5S_t *space, void *buf);
 
 /* Needed for internal use of selections in H5Fistore code */
 __DLL__ herr_t H5S_select_all(H5S_t *space);

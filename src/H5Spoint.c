@@ -1458,7 +1458,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_point_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
+H5S_point_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_buf)
 {
     hsize_t size[H5O_LAYOUT_NDIMS];     /* Total size of memory buf */
     uint8_t *buf=(uint8_t *)_buf;   /* Alias for memory buffer */

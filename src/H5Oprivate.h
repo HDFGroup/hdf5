@@ -18,6 +18,7 @@
 #define _H5Oprivate_H
 
 #include "H5Opublic.h"
+#include "H5Dpublic.h"
 
 /* Private headers needed by this file */
 #include "H5private.h"
@@ -136,16 +137,33 @@ __DLLVAR__ const H5O_class_t H5O_DTYPE[1];
 /* operates on an H5T_t struct */
 
 /*
- * Fill Value Message.
+ * Old Fill Value Message.
  */
-#define H5O_FILL_ID		0x0004
-__DLLVAR__ const H5O_class_t	H5O_FILL[1];
+#define H5O_FILL_ID         0x0004
+__DLLVAR__ const H5O_class_t    H5O_FILL[1];
 
 typedef struct H5O_fill_t {
-    H5T_t	*type;			/*type. Null implies same as dataset */
-    size_t	size;			/*number of bytes in the fill value  */
-    void	*buf;			/*the fill value		     */
+    H5T_t               *type;          /*type. Null implies same as dataset */
+    size_t              size;           /*number of bytes in the fill value  */
+    void                *buf;           /*the fill value                     */
 } H5O_fill_t;
+
+/*
+ * New Fill Value Message.  The new fill value message is fill value plus 
+ * space allocation time and fill value writing time and whether fill 
+ * value is defined.
+ */
+#define H5O_FILL_NEW_ID           0x0005
+__DLLVAR__ const H5O_class_t	H5O_FILL_NEW[1];
+
+typedef struct H5O_fill_new_t {
+    H5T_t		*type;		/*type. Null implies same as dataset */
+    ssize_t		size;		/*number of bytes in the fill value  */
+    void		*buf;		/*the fill value		     */
+    H5D_space_time_t	space_time;	/* time to allocate space	     */
+    H5D_fill_time_t	fill_time;	/* time to write fill value	     */	
+    htri_t		fill_defined;   /* whether fill value is defined     */	
+} H5O_fill_new_t;
 
 
 /*
@@ -302,6 +320,6 @@ __DLL__ herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t addr,
 			     size_t size, const uint8_t *buf);
 
 /* Fill value operators */
-__DLL__ herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);
+__DLL__ herr_t H5O_fill_convert(void *_fill, H5T_t *type);
 
 #endif

@@ -230,6 +230,14 @@ __DLL__ herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
 __DLL__ herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,
      void *value/*out*/);
+__DLL__ herr_t H5Pfill_value_defined(hid_t plist, H5D_fill_value_t *status);
+__DLL__ herr_t H5Pset_space_time(hid_t plist_id, H5D_space_time_t 
+	alloc_time);
+__DLL__ herr_t H5Pget_space_time(hid_t plist_id, H5D_space_time_t 
+	*alloc_time/*out*/);
+__DLL__ herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
+__DLL__ herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t 
+	*fill_time/*out*/);
 __DLL__ herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
 __DLL__ herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
 __DLL__ herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);

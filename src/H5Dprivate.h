@@ -55,10 +55,19 @@
 #define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(hsize_t[32])
 #define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
                                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-/* Definitions for fill value */
-#define H5D_CRT_FILL_VALUE_NAME    "fill"
+/* Definitions for fill value.  size=0 means fill value will be 0 as 
+ * library default; size=-1 means fill value is undefined. */
+#define H5D_CRT_FILL_VALUE_NAME    "fill_value"
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
 #define H5D_CRT_FILL_VALUE_DEF     {NULL, 0, NULL}
+/* Definitions for space allocation time */
+#define H5D_CRT_SPACE_TIME_NAME   "space_time"
+#define H5D_CRT_SPACE_TIME_SIZE   sizeof(H5D_space_time_t)
+#define H5D_CRT_SPACE_TIME_DEF    H5D_SPACE_ALLOC_LATE
+/* Definitions for time of fill value writing */
+#define H5D_CRT_FILL_TIME_NAME     "fill_time"
+#define H5D_CRT_FILL_TIME_SIZE     sizeof(H5D_fill_time_t)
+#define H5D_CRT_FILL_TIME_DEF      H5D_FILL_TIME_ALLOC 
 /* Definitions for external file list */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"
 #define H5D_CRT_EXT_FILE_LIST_SIZE sizeof(H5O_efl_t)

@@ -1084,7 +1084,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_all_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *buf)
+H5S_all_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *buf)
 {
     hssize_t nelemts;          /* Number of elements in dataspace */
     herr_t ret_value=SUCCEED;  /* return value */

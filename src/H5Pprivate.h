@@ -46,6 +46,8 @@ __DLL__ herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
 __DLL__ herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);
+__DLL__ herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
+        H5D_fill_value_t *status);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 __DLL__ htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);

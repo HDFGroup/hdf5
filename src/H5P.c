@@ -3210,7 +3210,9 @@ done:
  *		VALUE is interpretted as being of type TYPE, which need not
  *		be the same type as the dataset but the library must be able
  *		to convert VALUE to the dataset type when the dataset is
- *		created.
+ *		created.  If VALUE is NULL, it will be interpreted as 
+ *		undefining fill value.  The fill value property will be 
+ *		removed from property list. 
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -3229,11 +3231,11 @@ done:
 herr_t
 H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 {
-    H5O_fill_t          fill;
+    H5O_fill_t	        fill;
     H5T_t		*type = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
-    
+   
     FUNC_ENTER(H5Pset_fill_value, FAIL);
     H5TRACE3("e","iix",plist_id,type_id,value);
 
@@ -3245,26 +3247,36 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
+    /* Get the "basic" fill value structure */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value");
 
-    if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(type=H5I_object(type_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-    if (!value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value specified");
+    /* Reset the fill structure */
+    if(H5O_reset(H5O_FILL, &fill)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset fill value");
 
-    /* Set the fill value */
-    H5O_reset(H5O_FILL, &fill);
-    if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
-    fill.size = H5T_get_size(type);
-    if (NULL==(fill.buf=H5MM_malloc(fill.size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value");
-    HDmemcpy(fill.buf, value, fill.size);
+    if(value) {
+	if (H5I_DATATYPE!=H5I_get_type(type_id) || 
+	    NULL==(type=H5I_object(type_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+	/* Set the fill value */
+        if (NULL==(fill.type=H5T_copy(type, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, 
+			"unable to copy data type");
+        fill.size = H5T_get_size(type);
+        if (NULL==(fill.buf=H5MM_malloc(fill.size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, 
+			"memory allocation failed for fill value");
+        HDmemcpy(fill.buf, value, fill.size);
+    } else {
+	fill.type = fill.buf = NULL;
+	fill.size = (size_t)-1;
+    }
 
     if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set fill value");
-
+  	     
 done:
     FUNC_LEAVE(ret_value);
 }
@@ -3314,8 +3326,8 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     if (H5I_DATATYPE!=H5I_get_type(type_id) || NULL==(type=H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if (!value)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no fill value output buffer");
-
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,"no fill value output buffer");
+ 
     /* Get the plist structure */
     if(NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -3323,14 +3335,20 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
     /*
      * If no fill value is defined then return an error.  We can't even
      * return zero because we don't know the data type of the dataset and
-     * data type conversion might not have resulted in zero.
+     * data type conversion might not have resulted in zero.  If fill value
+     * is undefined, also return error.
      */
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
-    if(NULL == fill.buf)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no fill value defined");
+    if(fill.size == (size_t)-1)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+		"fill value is undefined");
 
-    /*
+    if(fill.size == 0) {
+	HDmemset(value, 0, H5T_get_size(type));
+   	HRETURN(SUCCEED);
+    } 	    
+     /*
      * Can we convert between the source and destination data types?
      */
     if(NULL==(tpath=H5T_path_find(fill.type, type, NULL, NULL)))
@@ -3373,6 +3391,266 @@ done:
         H5I_dec_ref(src_id);
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_fill_value_defined
+ *
+ * Purpose:	Check if fill value is defined.  Internal version of function
+ * 
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *              
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status)
+{
+    herr_t		ret_value = SUCCEED;
+    H5O_fill_t		fill;
+
+    FUNC_ENTER(H5P_fill_value_defined, FAIL);
+
+    assert(plist);
+    assert(status);
+
+    /* Get the fill value struct */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+
+    /* Check if the fill value was never set */
+    if(fill.size == (size_t)-1 && !fill.buf) {
+	*status = H5D_FILL_VALUE_UNDEFINED;
+    }
+    /* Check if the fill value was set to the default fill value by the library */
+    else if(fill.size == 0 && !fill.buf) {
+	*status = H5D_FILL_VALUE_DEFAULT;
+    }
+    /* Check if the fill value was set by the application */
+    else if(fill.size > 0 && fill.buf) {
+	*status = H5D_FILL_VALUE_USER_DEFINED;
+    }
+    else {
+	*status = H5D_FILL_VALUE_ERROR;
+        HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid combination of fill-value info"); 
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5P_fill_value_defined() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pfill_value_defined
+ *
+ * Purpose:	Check if fill value is defined.
+ * 
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *              
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
+{
+    H5P_genplist_t 	*plist;
+    herr_t		ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Pfill_value_defined, FAIL);
+
+    assert(status);
+
+    /* Check arguments */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation proprety list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Call the internal function */
+    if(H5P_fill_value_defined(plist, status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value info"); 
+
+done:
+    FUNC_LEAVE(ret_value);
+} /* end H5Pfill_value_defined() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_space_time
+ *
+ * Purpose:     Set space allocation time for dataset during creation.
+ *		Valid values are H5D_EARLY, H5D_LATE.
+ * 
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ * 		Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *		
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_space_time(hid_t plist_id, H5D_space_time_t alloc_time)
+{
+    H5P_genplist_t *plist; 	/* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value 	 */
+
+    FUNC_ENTER(H5Pset_space_time, FAIL);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5D_CRT_SPACE_TIME_NAME, &alloc_time) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
+
+done:
+    FUNC_LEAVE(ret_value);  
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_space_time
+ *
+ * Purpose:     Get space allocation time for dataset creation.  Valid 
+ *		values are H5D_EARLY, H5D_LATE.
+ * 
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *              
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_space_time(hid_t plist_id, H5D_space_time_t *alloc_time/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER(H5Pget_space_time, FAIL);
+    H5TRACE2("e","ix",plist_id,alloc_time);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get values */
+    if(!alloc_time || H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, alloc_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get space allocation time");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_fill_time
+ *
+ * Purpose:	Set fill value writing time for dataset.  Valid values are
+ *		H5D_ALLOC and H5D_NEVER.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER(H5Pset_fill_time, FAIL);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_fill_time
+ *
+ * Purpose:	Get fill value writing time.  Valid values are H5D_NEVER
+ *		and H5D_ALLOC.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              Wednesday, January 16, 2002
+ *
+ * Modifications:
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t *fill_time/*out*/)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER(H5Pget_fill_time, FAIL);
+    H5TRACE2("e","ix",plist_id,fill_time);
+
+    /* Check args */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Set values */
+    if(!fill_time || H5P_get(plist, H5D_CRT_FILL_TIME_NAME, fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set space allocation time");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
 
 
 /*-------------------------------------------------------------------------

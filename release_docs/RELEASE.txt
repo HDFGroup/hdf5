@@ -156,6 +156,10 @@ Documentation
 New Features
 ============
 
+    * Fill-value's behaviors for contiguous dataset have been redefined.  
+      Basicly, dataset won't allocate space until it's necessary.  Full details
+      are available at http://hdf.ncsa.uiuc.edu/RFC/Fill_Value, at this moment.
+      SLU - 2002/04/11
     * Added new routine "H5Dfill" to fill a selection with a particular value
       in memory.  QAK - 2002/04/09
     * A new query function H5Tget_member_index has been added for compound

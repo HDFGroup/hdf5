@@ -52,12 +52,15 @@ struct H5D_t {
     H5O_layout_t	layout;		/*data layout			*/
 };
 
-/* Interface initialization? */
+
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
 H5D_t * H5D_new(hid_t dcpl_id);
+static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
+    const H5T_t *buf_type, const H5S_t *space);
+static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation);
 
 /* Declare a free list to manage the H5D_t struct */
 H5FL_DEFINE_STATIC(H5D_t);
@@ -173,6 +176,8 @@ H5D_init_interface(void)
     int             chunk_ndims              = H5D_CRT_CHUNK_DIM_DEF;
     hsize_t         chunk_size[32]           = H5D_CRT_CHUNK_SIZE_DEF;
     H5O_fill_t      fill                     = H5D_CRT_FILL_VALUE_DEF;
+    H5D_space_time_t    space_time           = H5D_CRT_SPACE_TIME_DEF;
+    H5D_fill_time_t     fill_time            = H5D_CRT_FILL_TIME_DEF;   
     H5O_efl_t       efl                      = H5D_CRT_EXT_FILE_LIST_DEF;
     H5O_pline_t     pline                    = H5D_CRT_DATA_PIPELINE_DEF;
 
@@ -300,7 +305,15 @@ H5D_init_interface(void)
         /* Register the fill value property */
         if(H5P_register(crt_pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
-       
+
+        /* Register the space allocation time property */
+        if(H5P_register(crt_pclass, H5D_CRT_SPACE_TIME_NAME, H5D_CRT_SPACE_TIME_SIZE, &space_time, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+        /* Register the fill value writing time property */
+        if(H5P_register(crt_pclass, H5D_CRT_FILL_TIME_NAME, H5D_CRT_FILL_TIME_SIZE, &fill_time, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
         /* Register the external file list property */
         if(H5P_register(crt_pclass, H5D_CRT_EXT_FILE_LIST_NAME, H5D_CRT_EXT_FILE_LIST_SIZE, &efl, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
@@ -407,8 +420,13 @@ H5D_crt_copy(hid_t new_plist_id, hid_t old_plist_id, void UNUSED *copy_data)
 
     /* Make copies of fill value, external file list, and data pipeline */
     HDmemset(&dst_fill,0,sizeof(H5O_fill_t));
-    if(NULL==H5O_copy(H5O_FILL, &src_fill, &dst_fill)) 
+    if(src_fill.buf && (NULL==H5O_copy(H5O_FILL, &src_fill, &dst_fill))) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy fill value");
+    }
+    else if (!src_fill.buf) {
+	dst_fill.type = dst_fill.buf = NULL;
+	dst_fill.size = src_fill.size;
+    }
     HDmemset(&dst_efl,0,sizeof(H5O_efl_t));
     if(NULL==H5O_copy(H5O_EFL, &src_efl, &dst_efl)) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list");
@@ -905,6 +923,107 @@ H5D_get_space(H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Dget_space_status
+ *
+ * Purpose:	Returns the status of data space allocation.
+ *
+ * Return:	
+ *		Success:	Non-negative
+ *		
+ *		Failture:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *
+ * Modification:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
+{
+    H5D_t 	*dset = NULL;
+    herr_t 	ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Dget_space_status, FAIL);
+
+    /* Check arguments */
+    if(H5I_DATASET != H5I_get_type(dset_id) || NULL==(dset=H5I_object(dset_id)))
+	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Read data space address and return */
+    if(FAIL==(ret_value=H5D_get_space_status(dset, allocation)))
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_get_space_status
+ *
+ * Purpose:     Returns the status of data space allocation.
+ *
+ * Return:
+ *              Success:        Non-negative
+ *
+ *              Failture:       Negative
+ *
+ * Programmer:  Raymond Lu
+ *
+ * Modification:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation)
+{
+    H5S_t      *space=NULL;         /* Dataset's dataspace */
+    hsize_t     space_allocated;    /* The number of bytes allocated for chunks */
+    hssize_t    total_elem;         /* The total number of elements in dataspace */
+    size_t      type_size;          /* The size of the datatype for the dataset */
+    hsize_t     full_size;          /* The number of bytes in the dataset when fully populated */
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER(H5D_get_space_status, FAIL);
+
+    /* Get the dataset's dataspace */
+    if((space=H5D_get_space(dset))==NULL)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    /* Get the total number of elements in dataset's dataspace */
+    if((total_elem=H5S_get_simple_extent_npoints(space))<0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get # of dataspace elements");
+
+    /* Get the size of the dataset's datatype */
+    if((type_size=H5T_get_size(dset->type))==0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get size of datatype");
+
+    /* Compute the maximum size of the dataset in bytes */
+    H5_CHECK_OVERFLOW(total_elem,hssize_t,hsize_t);
+    full_size=((hsize_t)total_elem)*type_size;
+
+    /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
+    space_allocated=H5D_get_storage_size(dset);
+
+    /* Decide on how much of the space is allocated */
+    if(space_allocated==0)
+        *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
+    else if(space_allocated==full_size)
+        *allocation = H5D_SPACE_STATUS_ALLOCATED;
+    else {
+        /* Should only happen for chunked datasets currently */
+        assert(dset->layout.type==H5D_CHUNKED);
+
+        *allocation = H5D_SPACE_STATUS_PART_ALLOCATED;
+    } /* end else */
+
+done:
+    if(space)
+	H5S_close(space);
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Dget_type
  *
  * Purpose:	Returns a copy of the file data type for a dataset.
@@ -998,8 +1117,8 @@ H5Dget_create_plist(hid_t dset_id)
 {
     H5D_t		*dset = NULL;
     H5O_fill_t          copied_fill={NULL,0,NULL};
-    H5P_genplist_t     *dcpl_plist;
-    H5P_genplist_t     *new_plist;
+    H5P_genplist_t      *dcpl_plist;
+    H5P_genplist_t      *new_plist;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_create_plist, FAIL);
@@ -1379,6 +1498,11 @@ done:
  *      Changed the way to retrieve and set property for generic property 
  *      list.
  *
+ *	Raymond Lu, 26 Feb 2002
+ *	A new fill value message is added.  Two properties, space allocation
+ *	time and fill value writing time, govern space allocation and fill
+ *      value writing.   
+ *	
  *-------------------------------------------------------------------------
  */
 H5D_t *
@@ -1396,9 +1520,13 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     H5D_layout_t        dcpl_layout;
     int                 chunk_ndims = 0;
     hsize_t             chunk_size[32]={0};
-    H5O_fill_t          fill={NULL,0,NULL};
-    H5P_genplist_t *plist;      /* Property list */
-    H5P_genplist_t *new_plist;  /* New Property list */
+    H5D_space_time_t    space_time;
+    H5D_fill_time_t	fill_time;
+    H5O_fill_t		fill_prop={NULL,0,NULL};
+    H5O_fill_new_t      fill={NULL, 0, NULL, H5D_SPACE_ALLOC_LATE, H5D_FILL_TIME_ALLOC, TRUE};
+    H5D_fill_value_t	fill_status;
+    H5P_genplist_t 	*plist;      /* Property list */
+    H5P_genplist_t 	*new_plist;  /* New Property list */
 
     FUNC_ENTER(H5D_create, NULL);
 
@@ -1528,14 +1656,49 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if (H5O_create(f, 256, &(new_dset->ent)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset object header");
 
-    /* Convert the fill value to the dataset type and write the message */
-    if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value");
-    if (H5O_fill_convert(&fill, new_dset->type) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to convert fill value to dataset type");
-    if (fill.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT, &fill) < 0) 
+    /* Retrieve properties of fill value and others.  Copy them into new fill
+     * value struct.  Convert the fill value to the dataset type and write 
+     * the message */
+    if(H5P_get(new_plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+    if(H5P_get(new_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill time");
+    if(H5P_fill_value_defined(new_plist, &fill_status)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
+    if(fill_status== H5D_FILL_VALUE_DEFAULT || fill_status==H5D_FILL_VALUE_USER_DEFINED) {
+	if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value");
+        if(NULL==H5O_copy(H5O_FILL, &fill_prop, &fill))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL, "unable to copy fill value");
+        if (fill_prop.buf && fill_prop.size>0 && H5O_fill_convert(&fill, new_dset->type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to convert fill value to dataset type");
+	fill.fill_defined = TRUE;
+    } else if(fill_status==H5D_FILL_VALUE_UNDEFINED) {
+	fill.size = -1;
+ 	fill.type = fill.buf = NULL;
+ 	fill.fill_defined = FALSE;
+    } else {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to determine if fill value is defined");
+    } /* end else */
+    fill.space_time = space_time;
+    fill.fill_time   = fill_time;
+   
+    if(fill.fill_defined == FALSE && fill_time != H5D_FILL_TIME_NEVER)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL, "unable to create dataset");
+    /* Write new fill value message */
+    if (H5O_modify(&(new_dset->ent), H5O_FILL_NEW, 0, H5O_FLAG_CONSTANT, 
+			&fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");        
-    if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+
+    H5O_reset(H5O_FILL, &fill_prop);
+    if(fill.buf && (NULL==H5O_copy(H5O_FILL, &fill, &fill_prop)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL,"unable to copy fill value");
+    /* Write old fill value */
+    if (fill_prop.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, 
+	H5O_FLAG_CONSTANT, &fill_prop) < 0)        
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
+			"unable to update fill value header message");
+    if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set fill value");  
 
     /* Update the type and space header messages */
@@ -1563,16 +1726,34 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     /*
      * Initialize storage.  We assume that external storage is already
      * initialized by the caller, or at least will be before I/O is performed.
+     * For parallelization, space is always allocated now except using 
+     * external storage. For contiguous layout, space is allocated now if 
+     * space allocate time is early; otherwise delay allocation until H5Dwrite.
      */
+#ifdef H5_HAVE_PARALLEL
+    if (0==efl.nused && H5F_arr_create(f, &(new_dset->layout))<0) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
+			"unable to initialize storage");
+    } else if(0<efl.nused) {
+	new_dset->layout.addr = HADDR_UNDEF;
+    }
+#else
     if (0==efl.nused) {
-        if (H5F_arr_create(f, &(new_dset->layout)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+        if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && 
+                space_time==H5D_SPACE_ALLOC_EARLY)) {
+            if (H5F_arr_create(f, &(new_dset->layout))<0)
+            	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage"); 
+        } /* end if */
+        else
+	    new_dset->layout.addr = HADDR_UNDEF;
+	
     } else {
         new_dset->layout.addr = HADDR_UNDEF;
     }
+#endif
 
     /* Update layout message */
-    if (H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT, &(new_dset->layout)) < 0)
+    if (H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, 0, &(new_dset->layout))<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update layout message");
 
     /* Update external storage message */
@@ -1596,9 +1777,22 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update external file list message");
     } /* end if */
 
-    /* Initialize the raw data */
+    /* Initialize the raw data when it's 
+     *  1. Parallel I/O
+     *  2. layout is contiguous, space allocation time is early, fill value 
+     *     writing time is upon allocation 
+     *  3. external space is treated the same as internal except it's always
+     *     assumed as early for space allocation time. */
+#ifdef H5_HAVE_PARALLEL
     if (H5D_init_storage(new_dset, space)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+#else
+    if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && 
+            fill_time==H5D_FILL_TIME_ALLOC && ((space_time==H5D_SPACE_ALLOC_EARLY && !efl.nused) ||
+            (efl.nused))))
+	if (H5D_init_storage(new_dset, space)<0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+#endif
     
     /* Success */
     ret_value = new_dset;
@@ -1736,6 +1930,10 @@ done:
  *              Tuesday, October 2, 2001
  *              Changed the way to set property for generic property list.
  *
+ *		Raymond Lu
+ *		Feb 26, 2002
+ *		A new fill value message and two new properties are added.
+ *
  *-------------------------------------------------------------------------
  */
 H5D_t *
@@ -1744,10 +1942,11 @@ H5D_open_oid(H5G_entry_t *ent)
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
     H5S_t	*space = NULL;		/*data space			*/
-    H5O_fill_t  fill;
-    H5O_pline_t pline;   
-    H5O_efl_t   efl;
-    H5D_layout_t layout;
+    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_SPACE_ALLOC_LATE, H5D_FILL_TIME_ALLOC, TRUE}; 
+    H5O_fill_t      fill_prop = {NULL, 0, NULL};
+    H5O_pline_t pline;                  /* I/O pipeline information */
+    H5O_efl_t   efl;                    /* External file information */
+    H5D_layout_t layout;                /* Dataset layout */
     int         chunk_ndims;
     H5P_genplist_t *plist;      /* Property list */
     
@@ -1777,14 +1976,38 @@ H5D_open_oid(H5G_entry_t *ent)
     if (NULL == (plist = H5I_object(dataset->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
 
-    /* Get the optional fill value message */
-    HDmemset(&fill,0,sizeof(H5O_fill_t));
-    if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, &fill)) {
+    /* Retrieve & release the previous fill-value settings */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't get fill value");
+    H5O_reset(H5O_FILL, &fill_prop);
+
+    /* Get the new fill value message */
+    if(NULL == H5O_read(&(dataset->ent), H5O_FILL_NEW, 0, &fill)) {
         H5E_clear();
         HDmemset(&fill, 0, sizeof(fill));
     }
-
-    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+    if(fill.fill_defined) {
+        if(NULL==H5O_copy(H5O_FILL, &fill, &fill_prop))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy fill value");
+    } else {
+	/* For compatibility with v1.4.  Retrieve the old fill value message.
+ 	 * If size is 0, make it -1 for undefined. */
+        if(NULL == H5O_read(&(dataset->ent), H5O_FILL, 0, &fill_prop)) {
+            H5E_clear();
+            HDmemset(&fill_prop, 0, sizeof(fill_prop));
+        }
+        if(fill_prop.size == 0) {
+	    fill_prop.type = fill_prop.buf = NULL;
+	    fill_prop.size = (size_t)-1;
+	}
+    } /* end else */
+	
+    /* Set fill value properties */ 
+    if(H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
+    if(H5P_set(plist, H5D_CRT_SPACE_TIME_NAME, &fill.space_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
+    if(H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill.fill_time) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set fill value");
 
     /* Get the optional filters message */
@@ -1837,13 +2060,13 @@ H5D_open_oid(H5G_entry_t *ent)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
     } /* end switch */
 
-    /* Get the external file list message, which might not exist */
-    if( !H5F_addr_defined(dataset->layout.addr) ) {
+    /* Get the external file list message, which might not exist.  Space is
+     * also undefined when space allocate time is H5D_SPACE_ALLOC_LATE. */
+    if( !H5F_addr_defined(dataset->layout.addr)) {
         HDmemset(&efl,0,sizeof(H5O_efl_t));
-        if(NULL == H5O_read(&(dataset->ent), H5O_EFL, 0, &efl))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "storage address is undefined and no external file list");
-        if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list");
+        if(NULL != H5O_read(&(dataset->ent), H5O_EFL, 0, &efl))
+            if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+            	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list");
     }
     /*
      * Make sure all storage is properly initialized for chunked datasets.
@@ -1967,6 +2190,11 @@ H5D_close(H5D_t *dataset)
  *      Raymond Lu, 2001-10-2
  *      Changed the way to retrieve property for generic property list.
  *
+ *	Raymond Lu, 2002-2-26
+ *	For the new fill value design, data space can either be allocated 
+ *	or not allocated at this stage.  Fill value or data from space is
+ *	returned to outgoing buffer.
+ *
  *      QAK - 2002/04/02
  *      Removed the must_convert parameter and move preconditions to
  *      H5S_<foo>_opt_possible() routine
@@ -1977,37 +2205,39 @@ herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
-    hssize_t    nelmts;			    /*number of elements	*/
-    hsize_t		smine_start;		/*strip mine start loc	*/
-    hsize_t		n, smine_nelmts;	/*elements per strip	*/
-    uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
-    uint8_t		*bkg_buf = NULL;	/*background buffer	*/
+    hssize_t    nelmts;			/*number of elements	*/
+    hsize_t	smine_start;		/*strip mine start loc	*/
+    hsize_t	n, smine_nelmts;	/*elements per strip	*/
+    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
-    hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
-    H5S_conv_t	*sconv=NULL;	    /*space conversion funcs*/
-    H5S_sel_iter_t 	mem_iter;       /*mem selection iteration info*/
-    H5S_sel_iter_t	bkg_iter;	    /*background iteration info*/
-    H5S_sel_iter_t	file_iter;      /*file selection iter info*/
-    herr_t		ret_value = SUCCEED;	/*return value		*/
-    herr_t		status;			    /*function return status*/
-    size_t		src_type_size;		/*size of source type	*/
-    size_t		dst_type_size;	    /*size of destination type*/
-    size_t		target_size;		/*desired buffer size	*/
-    hsize_t		request_nelmts;		/*requested strip mine	*/
-    H5T_bkg_t	need_bkg;		    /*type of background buf*/
-    H5S_t		*free_this_space=NULL;  /*data space to free	*/
+    hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
+    H5S_conv_t	*sconv=NULL;	        /*space conversion funcs*/
+    H5S_sel_iter_t mem_iter;            /*mem selection iteration info*/
+    H5S_sel_iter_t bkg_iter;	        /*background iteration info*/
+    H5S_sel_iter_t file_iter;           /*file selection iter info*/
+    herr_t	ret_value = SUCCEED;	/*return value		*/
+    herr_t	status=SUCCEED;  	/*function return status*/
+    size_t	src_type_size;		/*size of source type	*/
+    size_t	dst_type_size;	        /*size of destination type*/
+    size_t	target_size;		/*desired buffer size	*/
+    hsize_t	request_nelmts;		/*requested strip mine	*/
+    H5T_bkg_t	need_bkg;               /*type of background buf*/
+    H5S_t	*free_this_space=NULL;  /*data space to free	*/
 #ifdef H5_HAVE_PARALLEL
-    H5FD_mpio_dxpl_t	*dx = NULL;
-    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
-    hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
-    hbool_t		doing_mpio=0;		/*This is an MPIO access */
+    H5FD_mpio_dxpl_t *dx = NULL;
+    H5FD_mpio_xfer_t xfer_mode;		/*xfer_mode for this request */
+    hbool_t	xfer_mode_changed=0;	/*xfer_mode needs restore */
+    hbool_t	doing_mpio=0;		/*This is an MPIO access */
 #endif
 #ifdef H5S_DEBUG
-    H5_timer_t		timer;
+    H5_timer_t	timer;
 #endif
-    H5O_pline_t         pline;
-    H5O_efl_t           efl;
-    H5O_fill_t          fill;    
+    H5O_pline_t pline;                  /* I/O pipeline struct */
+    H5O_efl_t   efl;                    /* External File List info */
+    H5O_fill_t	fill;                   /* Fill value information */
+    H5D_fill_time_t	fill_time;      /* When to write the fill values */
+    H5D_fill_value_t	fill_status;    /* Whether/How the fill value is defined */
     H5P_genplist_t *dx_plist=NULL;      /* Property list */
     H5P_genplist_t *dc_plist;      /* Property list */
     unsigned		sconv_flags=0;	        /* Flags for the space conversion */
@@ -2074,6 +2304,39 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
     if (nelmts!=H5S_get_select_npoints (file_space))
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
 
+    /* Retrieve dataset properties */
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve data pipeline");
+    if(H5P_fill_value_defined(dc_plist, &fill_status)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
+    if((fill_status==H5D_FILL_VALUE_DEFAULT || fill_status==H5D_FILL_VALUE_USER_DEFINED) && H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,"can't retrieve fill value");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,"can't retrieve fill value");
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
+
+    /* If space hasn't been allocated and not using external storage, 
+     * return fill value to buffer if fill time is upon allocation, or
+     * do nothing if fill time is never. */ 
+    if(nelmts > 0 && efl.nused==0 && dataset->layout.type==H5D_CONTIGUOUS 
+            && dataset->layout.addr==HADDR_UNDEF) {
+
+        /* Should be impossible, but check anyway... */
+        if(fill_status == H5D_FILL_VALUE_UNDEFINED && fill_time == H5D_FILL_TIME_ALLOC)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "read failed: dataset doesn't exist, no data can be read");
+
+        /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
+        if(fill_time == H5D_FILL_TIME_NEVER)
+            HGOTO_DONE(SUCCEED);
+
+        /* Go fill the user's selection with the dataset's fill value */
+        if(H5D_fill(fill.buf,fill.type,buf,mem_type,mem_space)<0) {
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed");
+        } else
+            HGOTO_DONE(SUCCEED);
+    } /* end if */
+
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -2115,6 +2378,7 @@ printf("%s: check 1.0, nelmts=%d, H5S_get_select_npoints(file_space)=%d\n",FUNC,
 #ifdef QAK
 printf("%s: check 1.1, \n",FUNC);
 #endif /* QAK */
+
     /*
      * If there is no type conversion then try reading directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
@@ -2123,36 +2387,22 @@ printf("%s: check 1.1, \n",FUNC);
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
-        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
-        if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
-        status = (sconv->read)(dataset->ent.file, &(dataset->layout), &pline, 
-                       &fill, &efl, H5T_get_size(dataset->type), file_space, 
-                       mem_space, dxpl_id, buf/*out*/);
+  	/* Sanity check dataset, then read it */
+        assert(dataset->layout.addr!=HADDR_UNDEF || efl.nused>0);
+        status = (sconv->read)(dataset->ent.file, &(dataset->layout), 
+                     &pline, &fill, &efl, H5T_get_size(dataset->type), 
+                     file_space, mem_space, dxpl_id, buf/*out*/);
+#ifdef H5S_DEBUG
+        H5_timer_end(&(sconv->stats[1].read_timer), &timer);
+        sconv->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->type);
+        sconv->stats[1].read_ncalls++;
+#endif
 
-        /* Supports only no conversion, type or space, for now. */
+        /* Check return value from optimized read */
         if (status<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed");
-        } else {
-            /* direct xfer accomplished successfully */
-#ifdef H5S_DEBUG
-            H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-            sconv->stats[1].read_nbytes += nelmts *
-                           H5T_get_size(dataset->type);
-            sconv->stats[1].read_ncalls++;
-#endif
+        } else
             HGOTO_DONE(SUCCEED);
-        } /* end else */
-#ifdef H5D_DEBUG
-        if (H5DEBUG(D)) {
-            fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
-                 "optimized for this case (using general method instead)\n");
-        } /* end if */
-#endif
-        H5E_clear ();
     } /* end if */
 	
 #ifdef QAK
@@ -2246,14 +2496,6 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
     printf("%s: check 4.0, nelmts=%d, need_bkg=%d\n", FUNC,(int)nelmts,(int)need_bkg);
 #endif
 
-    /* Get some necessary information for later */
-    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve data pipeline");
-    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
-    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve external file list");
-    
     /* Start strip mining... */
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
     for (smine_start=0; smine_start<(hsize_t)nelmts; smine_start+=smine_nelmts) {
@@ -2272,11 +2514,11 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), &pline, 
-                             &fill, &efl, src_type_size, file_space, 
-                             &file_iter, smine_nelmts, dxpl_id, 
-                             tconv_buf/*out*/);
-
+	/* Sanity check that space is allocated, then read data from it */ 
+        assert(dataset->layout.addr!=HADDR_UNDEF || efl.nused > 0);
+        n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout), 
+                &pline, &fill, &efl, src_type_size, file_space, 
+                &file_iter, smine_nelmts, dxpl_id, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[1].gath_timer), &timer);
@@ -2439,6 +2681,11 @@ done:
  *      Raymond Lu, 2001-10-2
  *      Changed the way to retrieve property for generic property list.
  *
+ *	Raymond Lu, 2002-2-26
+ *	For the new fill value design, space may not be allocated until 
+ *	this function is called.  Allocate and initialize space if it 
+ *	hasn't been.
+ *
  *      QAK - 2002/04/02
  *      Removed the must_convert parameter and move preconditions to
  *      H5S_<foo>_opt_possible() routine
@@ -2449,40 +2696,41 @@ herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
-    hssize_t	nelmts;			    /*total number of elmts	*/
-    hsize_t		smine_start;		/*strip mine start loc	*/
-    hsize_t		n, smine_nelmts;	/*elements per strip	*/
-    uint8_t		*tconv_buf = NULL;	/*data type conv buffer	*/
-    uint8_t		*bkg_buf = NULL;	/*background buffer	*/
+    hssize_t	nelmts;                 /*total number of elmts	*/
+    hsize_t	smine_start;		/*strip mine start loc	*/
+    hsize_t	n, smine_nelmts;	/*elements per strip	*/
+    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
-    hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
+    hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t	*sconv=NULL;		/*space conversion funcs*/
-    H5S_sel_iter_t	mem_iter;       /*memory selection iteration info*/
-    H5S_sel_iter_t	bkg_iter;       /*background iteration info*/
-    H5S_sel_iter_t	file_iter;      /*file selection iteration info*/
-    herr_t		ret_value = SUCCEED;	/*return value		*/
-    herr_t		status;			    /*function return status*/
-    size_t		src_type_size;		/*size of source type	*/
-    size_t		dst_type_size;	    /*size of destination type*/
-    size_t		target_size;		/*desired buffer size	*/
-    hsize_t		request_nelmts;		/*requested strip mine	*/
-    H5T_bkg_t	need_bkg;		    /*type of background buf*/
-    H5S_t		*free_this_space=NULL;	/*data space to free	*/
+    H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
+    H5S_sel_iter_t bkg_iter;            /*background iteration info*/
+    H5S_sel_iter_t file_iter;           /*file selection iteration info*/
+    herr_t	ret_value = SUCCEED;	/*return value		*/
+    herr_t	status;                 /*function return status*/
+    size_t	src_type_size;		/*size of source type	*/
+    size_t	dst_type_size;	        /*size of destination type*/
+    size_t	target_size;		/*desired buffer size	*/
+    hsize_t	request_nelmts;		/*requested strip mine	*/
+    H5T_bkg_t	need_bkg;		/*type of background buf*/
+    H5S_t	*free_this_space=NULL;	/*data space to free	*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_dxpl_t	*dx = NULL;
-    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
-    hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
-    hbool_t		doing_mpio=0;		/*This is an MPIO access */
+    H5FD_mpio_xfer_t	xfer_mode;	/*xfer_mode for this request */
+    hbool_t	xfer_mode_changed=0;	/*xfer_mode needs restore */
+    hbool_t	doing_mpio=0;		/*This is an MPIO access */
 #endif
 #ifdef H5S_DEBUG
-    H5_timer_t		timer;
+    H5_timer_t	timer;
 #endif
-    H5O_pline_t         pline;
-    H5O_efl_t           efl;
-    H5O_fill_t          fill;    
-    H5P_genplist_t *dx_plist=NULL;      /* Property list */
-    H5P_genplist_t *dc_plist;      /* Property list */
-    unsigned		sconv_flags=0;	        /* Flags for the space conversion */
+    H5O_pline_t pline;                  /* I/O Pipeline info */
+    H5O_efl_t   efl;                    /* External file list info */
+    H5O_fill_t  fill;                   /* Fill value info */
+    H5D_fill_time_t fill_time;
+    H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
+    H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
+    unsigned	sconv_flags=0;	        /* Flags for the space conversion */
 
     FUNC_ENTER(H5D_write, FAIL);
 
@@ -2570,6 +2818,37 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (nelmts!=H5S_get_select_npoints (file_space))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes");
 
+    /* Retrieve properties.  Allocate space and initialize the space with
+     * fill value if it has been done so.  Remember, if H5D_write fails,
+     * need to deallocate space(?). */
+    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+    if(H5P_get(dc_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill time");
+    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
+
+    /* Allocate data space and initialize it if it hasn't been.  Also modify
+     * header message for layout(this is only for forward compatibility). */
+    if(nelmts > 0 && efl.nused==0 && dataset->layout.type==H5D_CONTIGUOUS &&
+            dataset->layout.addr==HADDR_UNDEF) {
+ 	/* Allocate storage */
+        if(H5F_arr_create(dataset->ent.file, &(dataset->layout))<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
+
+        /* Initialize raw data */
+        if(fill_time==H5D_FILL_TIME_ALLOC)
+            if(H5D_init_storage(dataset, file_space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
+
+        /* Update layout message */
+        if (H5O_modify (&(dataset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT, 
+	    		&(dataset->layout)) < 0)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message");
+    } /* end if */
+
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -2618,16 +2897,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef QAK
     printf("%s: check 0.7, H5T_IS_NOOP(path)=%d, sconv->write=%p\n", FUNC, (int)H5T_IS_NOOP(tpath), sconv->write);
 #endif /* QAK */
+
     if (H5T_IS_NOOP(tpath) && sconv->write) {
+
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-        if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
-        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve fill value");
-        if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
         status = (sconv->write)(dataset->ent.file, &(dataset->layout), &pline, 
                         &fill, &efl, H5T_get_size(dataset->type), file_space,
                         mem_space, dxpl_id, buf/*out*/);
@@ -2733,14 +3008,6 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #ifdef QAK
     printf("%s: check 4.0, nelmts=%d, request_nelmts=%d, need_bkg=%d\n", FUNC,(int)nelmts,(int)request_nelmts,(int)need_bkg);
 #endif
-
-    /* Get some necessary information for later */
-    if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data pipeline");
-    if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
-    if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get external file list");
 
     /* Start strip mining... */
     H5_CHECK_OVERFLOW(nelmts,hssize_t,hsize_t);
@@ -2888,6 +3155,7 @@ done:
         H5FL_BLK_FREE(bkgr_conv,bkg_buf);
     if (free_this_space)
         H5S_close(free_this_space);
+
     FUNC_LEAVE(ret_value);
 }
 
@@ -3106,15 +3374,14 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     switch (dset->layout.type) {
         case H5D_CONTIGUOUS:
             /*
-             * If the fill value is set then write it to the specified selection
-             * even if it is all zero.  This allows the application to force
-             * filling when the underlying storage isn't initialized to zero.
+             * If the fill value is set then write it to the entire extent
+             * of the dataset.
              */
             snpoints = H5S_get_simple_extent_npoints(space);
             assert(snpoints>=0);
             H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
             
-            if (fill.buf && npoints==(size_t)H5S_get_select_npoints(space)) {
+            if (fill.buf) {
                 /*
                  * Fill the entire current extent with the fill value.  We can do
                  * this quite efficiently by making sure we copy the fill value
@@ -3147,12 +3414,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                     npoints -= MIN(ptsperbuf, npoints);
                     addr += size;
                 } /* end while */
-            } else if(fill.buf) {
-                /*
-                 * Fill the specified selection with the fill value.
-                 */
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to initialize dataset with fill value");
-            }
+            } /* end if */
             break;
 
         case H5D_CHUNKED:
@@ -3246,21 +3508,28 @@ H5Dget_storage_size(hid_t dset_id)
 hsize_t
 H5D_get_storage_size(H5D_t *dset)
 {
-    hsize_t	size;
-    unsigned		u;
+    unsigned	u;              /* Index variable */
+    hsize_t	ret_value=0;
     
     FUNC_ENTER(H5D_get_storage_size, 0);
 
     if (H5D_CHUNKED==dset->layout.type) {
-        size = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
+        ret_value = H5F_istore_allocated(dset->ent.file, dset->layout.ndims,
 				    dset->layout.addr);
     } else {
-        for (u=0, size=1; u<dset->layout.ndims; u++) {
-            size *= dset->layout.dim[u];
-        }
-    }
+        /* Sanity Check */
+        assert(dset->layout.type==H5D_CONTIGUOUS);
+
+        /* Datasets which are not allocated yet are using no space on disk */
+	if(dset->layout.addr == HADDR_UNDEF)
+            ret_value=0;
+        else {
+            for (u=0, ret_value=1; u<dset->layout.ndims; u++)
+                ret_value *= dset->layout.dim[u];
+        } /* end else */
+    } /* end else */
 	
-    FUNC_LEAVE(size);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -3597,6 +3866,95 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5D_fill
+ PURPOSE
+    Fill a selection in memory with a value (internal version)
+ USAGE
+    herr_t H5Dfill(fill, fill_type, buf, buf_type, space)
+        const void *fill;       IN: Pointer to fill value to use
+        H5T_t *fill_type;       IN: Datatype of the fill value
+        void *buf;              IN/OUT: Memory buffer to fill selection within
+        H5T_t *buf_type;        IN: Datatype of the elements in buffer
+        H5S_t *space;           IN: Dataspace describing memory buffer &
+                                    containing selection to use.
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Use the selection in the dataspace to fill elements in a memory buffer.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    If "fill" parameter is NULL, use all zeros as fill value.  If "fill_type"
+    parameter is NULL, use "buf_type" for the fill value datatype.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type, const H5S_t *space)
+{
+    H5T_path_t *tpath = NULL;   /* Conversion information*/
+    uint8_t *tconv_buf = NULL;  /* Data type conv buffer */
+    uint8_t *bkg_buf = NULL;    /* Temp conversion buffer */
+    hid_t src_id = -1, dst_id = -1;     /* Temporary type IDs */
+    size_t src_type_size;       /* Size of source type	*/
+    size_t dst_type_size;       /* Size of destination type*/
+    size_t buf_size;            /* Desired buffer size	*/
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER (H5D_fill, FAIL);
+
+    /* Check args */
+    assert(buf);
+    assert(buf_type);
+    assert(space);
+
+    /* Check for "default" fill value */
+    if(fill_type==NULL)
+        fill_type=buf_type;
+
+    /* Get the memory and file datatype sizes */
+    src_type_size = H5T_get_size(fill_type);
+    dst_type_size = H5T_get_size(buf_type);
+
+    /* Get the maximum buffer size needed and allocate it */
+    buf_size=MAX(src_type_size,dst_type_size);
+    if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* Copy the user's data into the buffer for conversion */
+    if(fill==NULL)
+        HDmemset(tconv_buf,0,src_type_size);
+    else
+        HDmemcpy(tconv_buf,fill,src_type_size);
+
+    /* Convert memory buffer into disk buffer */
+    /* Set up type conversion function */
+    if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL))) {
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
+    } else if (!H5T_IS_NOOP(tpath)) {
+        if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL)))<0 ||
+                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL)))<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
+    }
+
+    /* Perform data type conversion */
+    if (H5T_convert(tpath, src_id, dst_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
+
+    /* Fill the selection in the memory buffer */
+    if(H5S_select_fill(tconv_buf, dst_type_size, space, buf)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
+
+done:
+    if (tconv_buf)
+        H5MM_xfree(tconv_buf);
+    if (bkg_buf)
+        H5MM_xfree(bkg_buf);
+    FUNC_LEAVE (ret_value);
+}   /* H5Dfill() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Dfill
  PURPOSE
     Fill a selection in memory with a value
@@ -3614,6 +3972,7 @@ done:
     Use the selection in the dataspace to fill elements in a memory buffer.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
+    If "fill" parameter is NULL, use all zeros as fill value
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
@@ -3623,20 +3982,12 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     H5S_t *space;               /* Dataspace */
     H5T_t *fill_type;           /* Fill-value datatype */
     H5T_t *buf_type;            /* Buffer datatype */
-    H5T_path_t *tpath = NULL;   /* Conversion information*/
-    uint8_t *tconv_buf = NULL;  /* Data type conv buffer */
-    uint8_t *bkg_buf = NULL;    /* Temp conversion buffer */
-    size_t src_type_size;       /* Size of source type	*/
-    size_t dst_type_size;       /* Size of destination type*/
-    size_t buf_size;            /* Desired buffer size	*/
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER (H5Dfill, FAIL);
     H5TRACE5("e","xixii",fill,fill_type_id,buf,buf_type_id,space_id);
 
     /* Check args */
-    if (fill==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid fill value");
     if (buf==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
     if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space=H5I_object(space_id)))
@@ -3646,42 +3997,59 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     if (H5I_DATATYPE != H5I_get_type(buf_type_id) || NULL == (buf_type=H5I_object(buf_type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
 
-    /* Get the memory and file datatype sizes */
-    src_type_size = H5T_get_size(fill_type);
-    dst_type_size = H5T_get_size(buf_type);
-
-    /* Get the maximum buffer size needed and allocate it */
-    buf_size=MAX(src_type_size,dst_type_size);
-    if (NULL==(tconv_buf = H5MM_malloc (buf_size)) || NULL==(bkg_buf = H5MM_calloc(buf_size)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-    /* Copy the user's data into the buffer for conversion */
-    HDmemcpy(tconv_buf,fill,src_type_size);
-
-    /* Convert memory buffer into disk buffer */
-    /* Set up type conversion function */
-    if (NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL)))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-
-    /* Perform data type conversion */
-    if (H5T_convert(tpath, fill_type_id, buf_type_id, (hsize_t)1, 0, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed");
-
     /* Fill the selection in the memory buffer */
-    if(H5S_select_fill(tconv_buf, dst_type_size, space, buf)<0)
+    if(H5D_fill(fill,fill_type,buf,buf_type,space)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
 
 done:
-    if (tconv_buf)
-        H5MM_xfree(tconv_buf);
-    if (bkg_buf)
-        H5MM_xfree(bkg_buf);
     FUNC_LEAVE (ret_value);
 }   /* H5Dfill() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ddebug
+ *
+ * Purpose:	Prints various information about a dataset.  This function is
+ *		not to be documented in the API at this time.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 28, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
+{
+    H5D_t	*dset=NULL;
 
+    FUNC_ENTER(H5Ddebug, FAIL);
+    H5TRACE2("e","iIu",dset_id,flags);
 
+    /* Check args */
+    if (H5I_DATASET!=H5I_get_type(dset_id) ||
+	NULL==(dset=H5I_object(dset_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
 
+    /* Print B-tree information */
+    if (H5D_CHUNKED==dset->layout.type) {
+	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
+			      dset->layout.addr);
+    } else if (H5D_CONTIGUOUS==dset->layout.type) {
+	HDfprintf(stdout, "    %-10s %a\n", "Address:",
+		  dset->layout.addr);
+    }
+    
+    FUNC_LEAVE(SUCCEED);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: H5Dset_extent
  *
@@ -3879,49 +4247,3 @@ done:
      H5S_close( space );
  FUNC_LEAVE( ret_value );
 }
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Ddebug
- *
- * Purpose:	Prints various information about a dataset.  This function is
- *		not to be documented in the API at this time.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, April 28, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
-{
-    H5D_t	*dset=NULL;
-
-    FUNC_ENTER(H5Ddebug, FAIL);
-    H5TRACE2("e","iIu",dset_id,flags);
-
-    /* Check args */
-    if (H5I_DATASET!=H5I_get_type(dset_id) ||
-	NULL==(dset=H5I_object(dset_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    }
-
-    /* Print B-tree information */
-    if (H5D_CHUNKED==dset->layout.type) {
-	H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims,
-			      dset->layout.addr);
-    } else if (H5D_CONTIGUOUS==dset->layout.type) {
-	HDfprintf(stdout, "    %-10s %a\n", "Address:",
-		  dset->layout.addr);
-    }
-    
-    FUNC_LEAVE(SUCCEED);
-}
-
