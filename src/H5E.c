@@ -344,6 +344,8 @@ H5Eclear(void)
  * Modifications:
  *	Albert Cheng, 2000/12/02
  *	Show MPI process rank id if applicable.
+ *	Albert Cheng, 2001/07/14
+ *	Show HDF5 library version information string too.
  *
  *-------------------------------------------------------------------------
  */
@@ -358,7 +360,7 @@ H5Eprint(FILE *stream)
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
-    fprintf (stream, "HDF5-DIAG: Error detected in ");
+    fprintf (stream, "HDF5-DIAG: Error detected in %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     {   int mpi_rank, mpi_initialized;
