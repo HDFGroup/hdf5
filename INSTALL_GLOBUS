@@ -43,7 +43,8 @@ The installation steps are similar to the ones in INSTALL file:
    The writing really depends on your web server.  You have to set up your 
    server in right way to accept writing in files.  We have tested it using 
    Apache Server(1.3.12) without authentication.  If you need more details 
-   about our testing, please contact us.   
+   about our testing, please contact us.  Globus suggests using their GASS
+   server. 
 
-   There is another program called 'gass_append' used for experiments.  It 
-   does not work for current Globus-GASS.  
+   There is another program called 'gass_append' used for experiments.
+
