@@ -135,7 +135,7 @@ ln -s `pwd` ../hdf5-$VERS || exit 1
 mv Makefile ../Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
 echo "This is hdf5-$VERS released on `date`" >README.x
-tail -n +2 <README >>README.x
+tail +2l README >>README.x
 mv README.x README
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
