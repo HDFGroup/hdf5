@@ -122,7 +122,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
    OBJECTS\n\
       Each object consists of an HDF5 file name optionally followed by a\n\
       slash and an object name within the file (if no object is specified\n\
-      within the file then the contents of the root group are dispalyed).\n\
+      within the file then the contents of the root group are displayed).\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n",
 	    progname);
