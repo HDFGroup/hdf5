@@ -17,7 +17,7 @@
 #include <H5TBprivate.h>
 
 /* Interface initialization */
-#define PABLO_MASK      H5S_select_mask
+#define PABLO_MASK      H5Sselect_mask
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = 0;
 

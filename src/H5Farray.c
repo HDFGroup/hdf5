@@ -20,7 +20,7 @@
 #include <H5Vprivate.h>
 
 /* Interface initialization */
-#define PABLO_MASK	H5F_arr_mask
+#define PABLO_MASK	H5Farray_mask
 #define INTERFACE_INIT	NULL
 static intn interface_initialize_g = 0;
 

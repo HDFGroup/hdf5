@@ -27,7 +27,7 @@
 /* const hbool_t H5S_mpio_avail = FALSE; */
 #else /* HAVE_PARALLEL */
 /* Interface initialization */
-#define PABLO_MASK      H5S_all_mask
+#define PABLO_MASK      H5Sall_mask
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = 0;
 

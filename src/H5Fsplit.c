@@ -21,7 +21,7 @@
 #define H5F_SPLIT_META_EXT	".meta"
 #define H5F_SPLIT_RAW_EXT	".raw"
 
-#define PABLO_MASK H5F_split_mask
+#define PABLO_MASK H5Fsplit_mask
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 

@@ -64,7 +64,7 @@
 /* #define H5F_ISTORE_DEBUG */
 
 /* Interface initialization */
-#define PABLO_MASK	H5F_istore_mask
+#define PABLO_MASK	H5Fistore_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 

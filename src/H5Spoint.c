@@ -15,7 +15,7 @@
 #include <H5Dprivate.h>
 
 /* Interface initialization */
-#define PABLO_MASK      H5S_point_mask
+#define PABLO_MASK      H5Spoint_mask
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = 0;
 

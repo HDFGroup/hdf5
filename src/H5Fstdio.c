@@ -13,7 +13,7 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
-#define PABLO_MASK	H5F_stdio_mask
+#define PABLO_MASK	H5Fstdio_mask
 static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 

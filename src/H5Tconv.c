@@ -9,7 +9,7 @@
  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
-#define PABLO_MASK    H5T_conv_mask
+#define PABLO_MASK    H5Tconv_mask
 #include <H5Iprivate.h>
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
