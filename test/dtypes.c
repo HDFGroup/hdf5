@@ -370,22 +370,80 @@ reset_hdf5(void)
 static int
 test_classes(void)
 {
-    H5T_class_t		tcls;
-    
+    struct complex {    /* Struct with complex fields */
+        hvl_t vl_c;
+        hvl_t vl_s;
+    };
+    hid_t cmpd_id;      /* Compound datatype */
+    hid_t vlc_id;       /* VL type of char   */
+    hid_t vls_id;       /* VL string         */
+    hid_t memb_id;      /* Compound member datatype */
+    H5T_class_t         memb_cls;
+    H5T_class_t         tcls;
+    int                 nmembs, i;   
+
     TESTING("H5Tget_class()");
 
-    if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) goto error;
-    if (H5T_INTEGER!=tcls) {
-	H5_FAILED();
-        HDputs("    Invalid type class for H5T_NATIVE_INT");
-        goto error;
+    /*-------------------------------------------------------------
+     *  Check class of some atomic types. 
+     *-----------------------------------------------------------*/
+    if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) TEST_ERROR
+    if (H5T_INTEGER!=tcls) TEST_ERROR
+    
+    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) TEST_ERROR
+    if (H5T_FLOAT!=tcls) TEST_ERROR
+
+    /* Create a VL datatype of char.  It should be a VL, not a string class. */
+    if((vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR))<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if ((tcls=H5Tget_class(vlc_id))<0) TEST_ERROR
+    if (H5T_VLEN!=tcls) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if (H5T_STRING==tcls) TEST_ERROR
+
+    /* Create a VL string.  It should be a string, not a VL class. */
+    if((vls_id=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
+    if(H5Tset_size(vls_id, H5T_VARIABLE)<0) TEST_ERROR;
+
+    /* Make certain that the correct classes can be detected */
+    if ((tcls=H5Tget_class(vls_id))<0) TEST_ERROR
+    if (H5T_STRING!=tcls) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if (H5T_VLEN==tcls) TEST_ERROR
+
+    /*-------------------------------------------------------------
+     *  Check class for member types of compound type. 
+     *-----------------------------------------------------------*/
+    /* Create a compound datatype and insert some complex types */
+    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex)))<0) TEST_ERROR
+    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id)<0) TEST_ERROR
+    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id)<0) TEST_ERROR
+
+    nmembs = H5Tget_nmembers(cmpd_id);
+  
+    for (i=0;i<nmembs;i++) 
+    {
+        /* Get member type ID */
+        if((memb_id = H5Tget_member_type(cmpd_id, i))<0) TEST_ERROR
+
+        /* Get member type class */
+        if((memb_cls = H5Tget_member_class (cmpd_id, i))<0) TEST_ERROR
+
+        /* Verify member class */
+        if(H5Tdetect_class (memb_id, memb_cls)<0) TEST_ERROR
+
+        /* Close member type ID */
+        if(H5Tclose(memb_id)<0) TEST_ERROR
     }
-    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) goto error;
-    if (H5T_FLOAT!=tcls) {
-	H5_FAILED();
-	HDputs("    Invalid type class for H5T_NATIVE_DOUBLE");
-        goto error;
-    }
+
+    /* Close datatypes */
+    if(H5Tclose(cmpd_id)<0) TEST_ERROR
+    if(H5Tclose(vlc_id)<0) TEST_ERROR
+    if(H5Tclose(vls_id)<0) TEST_ERROR
+
     PASSED();
     return 0;
 
@@ -475,13 +533,18 @@ test_detect(void)
     };
     hid_t atom_cmpd_id; /* Atomic Compound datatype */
     hid_t atom_arr_id;  /* Atomic Array datatype */
-    hid_t atom_vl_id;   /* Atomic VL datatype */
+    hid_t atom_vlf_id;  /* Atomic VL datatype of float */
+    hid_t atom_vlc_id;  /* Atomic VL datatype of char */
+    hid_t atom_vls_id;       /* Atomic VL string datatype */
     hid_t cplx_cmpd_id; /* Complex Compound datatype */
     int rank=2;         /* Rank for array datatype */
     hsize_t dims[2]={3,3};      /* Dimensions for array datatype */
 
     TESTING("H5Tdetect_class()");
 
+    /*--------------------------------------------------------------------------------
+     *  Test class of some atomic types.
+     *------------------------------------------------------------------------------*/
     /* Native integers should be in the integer class */
     if(H5Tdetect_class(H5T_NATIVE_INT,H5T_INTEGER)!=TRUE) TEST_ERROR
 
@@ -490,7 +553,10 @@ test_detect(void)
     if(H5Tdetect_class(H5T_NATIVE_INT,H5T_ARRAY)!=FALSE) TEST_ERROR
     if(H5Tdetect_class(H5T_NATIVE_INT,H5T_ENUM)!=FALSE) TEST_ERROR
 
-    /* Create a compound datatype and insert some atomic types */
+    /*--------------------------------------------------------------------------------
+     *  Test class of a compound type with some atomic types as fields.
+     *------------------------------------------------------------------------------*/
+    /* Create a compound datatype and insert some atomic types */ 
     if ((atom_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct atomic)))<0) TEST_ERROR
     if (H5Tinsert(atom_cmpd_id, "i", HOFFSET(struct atomic, i), H5T_NATIVE_INT)<0) TEST_ERROR
     if (H5Tinsert(atom_cmpd_id, "f", HOFFSET(struct atomic, f), H5T_NATIVE_FLOAT)<0) TEST_ERROR
@@ -506,6 +572,9 @@ test_detect(void)
     /* Make certain that an incorrect class is not detected */
     if(H5Tdetect_class(atom_cmpd_id,H5T_VLEN)!=FALSE) TEST_ERROR
 
+    /*--------------------------------------------------------------------------------
+     *  Test class of some complex types.
+     *------------------------------------------------------------------------------*/
     /* Create an array datatype with an atomic base type */
     if((atom_arr_id=H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, NULL))<0) TEST_ERROR
 
@@ -518,22 +587,46 @@ test_detect(void)
     if(H5Tdetect_class(atom_arr_id,H5T_FLOAT)!=FALSE) TEST_ERROR
     if(H5Tdetect_class(atom_arr_id,H5T_INTEGER)!=FALSE) TEST_ERROR
 
-    /* Create a VL datatype with an atomic base type */
-    if((atom_vl_id=H5Tvlen_create(H5T_NATIVE_FLOAT))<0) TEST_ERROR
+    /* Create a VL datatype with an atomic base type of float*/
+    if((atom_vlf_id=H5Tvlen_create(H5T_NATIVE_FLOAT))<0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
-    if(H5Tdetect_class(atom_vl_id,H5T_VLEN)!=TRUE) TEST_ERROR
-    if(H5Tdetect_class(atom_vl_id,H5T_FLOAT)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_vlf_id,H5T_VLEN)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_vlf_id,H5T_FLOAT)!=TRUE) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
-    if(H5Tdetect_class(atom_vl_id,H5T_COMPOUND)!=FALSE) TEST_ERROR
-    if(H5Tdetect_class(atom_vl_id,H5T_INTEGER)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(atom_vlf_id,H5T_COMPOUND)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(atom_vlf_id,H5T_INTEGER)!=FALSE) TEST_ERROR
 
-    /* Create a compound datatype and insert some atomic types */
+    /* Create a VL datatype with an atomic base type of char.  It should be a VL
+     * but not a string class. */
+    if((atom_vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR))<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(atom_vlc_id,H5T_VLEN)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_vlc_id,H5T_INTEGER)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(atom_vlc_id,H5T_STRING)!=FALSE) TEST_ERROR
+
+    /* Create a VL string.  It should be a string, not a VL class. */
+    if((atom_vls_id=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
+    if(H5Tset_size(atom_vls_id, H5T_VARIABLE)<0) TEST_ERROR;
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(atom_vls_id,H5T_STRING)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(atom_vls_id,H5T_VLEN)!=FALSE) TEST_ERROR
+
+    /*--------------------------------------------------------------------------------
+     *  Test class of a compound type with some complex types as fields.
+     *------------------------------------------------------------------------------*/
+    /* Create a compound datatype and insert some complex types */
     if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex)))<0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id)<0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT)<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vl_id)<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vlf_id)<0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR)<0) TEST_ERROR
     if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT)<0) TEST_ERROR
 
@@ -553,8 +646,14 @@ test_detect(void)
     /* Close complex compound datatype */
     if(H5Tclose(cplx_cmpd_id)<0) TEST_ERROR
 
-    /* Close atomic VL datatype */
-    if(H5Tclose(atom_vl_id)<0) TEST_ERROR
+    /* Close atomic VL datatype of float */
+    if(H5Tclose(atom_vlf_id)<0) TEST_ERROR
+
+    /* Close atomic VL datatype of char */
+    if(H5Tclose(atom_vlc_id)<0) TEST_ERROR
+        
+    /* Close atomic VL string datatype  */
+    if(H5Tclose(atom_vls_id)<0) TEST_ERROR
 
     /* Close atomic array datatype */
     if(H5Tclose(atom_arr_id)<0) TEST_ERROR

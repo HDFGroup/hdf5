@@ -201,6 +201,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - For variable-length string, H5Tget_class returned H5T_STRING as its
+            class.  But H5Tdetect_class and H5Tget_member_class considered it
+            as H5T_VLEN.  This is fixed to let all these 3 functions treat it
+            as H5T_STRING.  SLU - 2005/02/08
         - The byte order of 1-byte integer types was fixed as little endian
             even on a big-endian machine.  This has been corrected.  SLU -
             2005/02/07 

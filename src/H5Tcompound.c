@@ -170,8 +170,9 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     if (membno >= dt->shared->u.compnd.nmembs)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number")
 
-    /* Value */
-    ret_value = dt->shared->u.compnd.memb[membno].type->shared->type;
+    /* Get the type's class.  We have to use this function to get type class
+     * because of the concern of variable-length string. */
+    ret_value = H5T_get_class(dt->shared->u.compnd.memb[membno].type, FALSE);
 
 done:
     FUNC_LEAVE_API(ret_value)
