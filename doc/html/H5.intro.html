@@ -164,9 +164,9 @@ Example: <CODE>H5Eprint</CODE>, which prints the current error stack.</LI></UL>
 <H3><A NAME="_Toc429885308">Include files</A> </H3>
 <FONT FACE="Times"><P>There are a number definitions and declarations that should be included with any HDF5 program. These definitions and declarations are contained in several <I>include</I> files. The main include </FONT>file is <CODE>hdf5.h</CODE>. This file<FONT FACE="Times"> includes all of the other files that your program is likely to need. <I>Be sure to include hdf5.h in any program that accesses HDF5.
 </I></FONT><H3><A NAME="_Toc429885309">Predefined atomic datatypes</A></H3>
-<P>A <i>datatype</i> is a collection of data type properties, all of which can be stored on disk, and which when taken as a whole, provide complete information for data conversion to or from that data type.  The datatype (H5D) interface  provides functions to set and query properties of a data type.
-<P>A <i>data point</i> is an instance of a <i>data type</i>, which is an instance of a <i>type class</i>.  We have defined a set of type classes and properties which can be extended at a later time.  The <i>atomic type classes</i> describe types that cannot be decomposed at the data type interface  level; all other classes are <i>compound</i>.
-<B><CODE><P>NATIVE </CODE>datatypes.</B>  Although it is possible to describe nearly any kind of atomic data type, most applications will use predefined datatypes that are supported by their compiler.  In HDF5 these are called "native" datatypes. <CODE>NATIVE </CODE> datatypes are C-like datatypes that are generally supported by the hardware of the machine on which the library was compiled. In order to be portable, applications should almost always use the <CODE>NATIVE </CODE>designation to describe data values in memory.
+<P>A <i>datatype</i> is a collection of data type properties, all of which can be stored on disk, and which when taken as a whole, provide complete information for data conversion to or from that data type.  The datatype interface (H5T) provides functions to set and query properties of a data type.
+<P>A <i>data point</i> is an instance of a <i>data type</i>, which is an instance of a <i>type class</i>.  We have defined a set of type classes and properties which can be extended at a later time.  The <i>atomic type classes</i> describe types that cannot be decomposed at the data type interface level; all other classes are <i>compound</i>.
+<B><CODE><P>NATIVE </CODE>datatypes.</B>  Although it is possible to describe nearly any kind of atomic data type, most applications will use predefined datatypes that are supported by their compiler.  In HDF5 these are called <i>native</i> datatypes. <CODE>NATIVE</CODE> datatypes are C-like datatypes that are generally supported by the hardware of the machine on which the library was compiled. In order to be portable, applications should almost always use the <CODE>NATIVE </CODE>designation to describe data values in memory.
 <P>The <CODE>NATIVE</CODE> architecture has base names which do not follow the same rules as the others.  Instead, native type names are similar to the C type names.  Here are some examples:
 <P ALIGN="CENTER"><CENTER><TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=462>
 <TR><TD WIDTH="49%" VALIGN="TOP">
@@ -370,9 +370,7 @@ status_n  = H5Sextent_dims(dataspace, dims_out);
 printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);</PRE>
 </CODE><H4><A NAME="_Toc429885316">Reading and writing a portion of a dataset</A></H4>
 <P>In the previous discussion, we describe how to access an entire dataset with one write (or read) operation. HDF5 also supports access to portions (or selections) of a dataset in one read/write operation. Currently selections are limited to hyperslabs and the lists of independent points. Both types of selection will be discussed in the following sections. Several sample cases of selection reading/writing are shown on the following figure.
-<B><P>&lt;&lt;&lt; Insert dataspace figure here.  (If you see this
-note, check the copy of this <i>Introduction</i> at
-<a href="http://hdf.ncsa.uiuc.edu/HDF5/H5.intro.html">http://hdf.ncsa.uiuc.edu/HDF5/H5.intro.html</a> to see the figure.) &gt;&gt;&gt;
+<p align=center><img src="H5.intro.datamap.gif"></p>
 </B><P>In example (a) a single hyperslab is read from the midst of a 2-D array in a file and stored in the corner of a smaller 2-D array in memory.  In (b) a regular series of blocks is read from a 2-D array in the file and stored as a contiguous sequence of values at a certain offset in a 1-D array in memory.  In (c) a sequence of points with no regular pattern is read from a 2-D array in a file and stored as a sequence of points with no regular pattern in a 3-D array in memory. 
 <P>As these examples illustrate, whenever we perform partial read/write operations on the data, the following information must be provided: file dataspace, file dataspace selection, memory dataspace and memory dataspace selection. After the required information is specified, actual read/write operation on the portion of data is done in a single call to the HDF5 read/write functions H5Dread(write).
 <H5><A NAME="_Toc429885317">Selecting hyperslabs</A></H5>
@@ -2682,14 +2680,20 @@ herr_t attr_info(hid_t loc_id, const char *name, void *opdata)
 
 <P>&nbsp;
 
+
 <hr>
 <address>
+<table width=100% border=0>
+<tr><td align=left valign=top>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
-</address>
-
+<br>
 Last modified:  11 September 1998
 
-  </body>
+</td><td align=right valign=top>
+<a href="Copyright.html">Copyright</a>&nbsp;&nbsp;
+</td></tr>
+</table>             
+
 
 </BODY>
 </HTML>
