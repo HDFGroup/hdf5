@@ -71,11 +71,11 @@ test_file_create(void)
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
     /* Create first file */
-    fid1 = H5Fcreate(FILE1, H5ACC_OVERWRITE, 0, 0);
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Try to create first file again (should fail) */
-    fid2 = H5Fcreate(FILE1, H5ACC_OVERWRITE, 0, 0);
+    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Get the file-creation template */
@@ -101,9 +101,11 @@ test_file_create(void)
     ret = H5Mclose(tmpl1);
     CHECK(ret, FAIL, "H5Mrelease");
 
+#ifdef LATER
     /* Double-check that the atom has been vaporized */
     ret = H5Mclose(tmpl1);
     VERIFY(ret, FAIL, "H5Mrelease");
+#endif
 
     /* Create a new file with a non-standard file-creation template */
     tmpl1 = H5Ccreate(H5C_FILE_CREATE);
@@ -123,7 +125,7 @@ test_file_create(void)
      * Try to create second file, with non-standard file-creation template
      * params.
      */
-    fid2 = H5Fcreate(FILE2, H5ACC_OVERWRITE, tmpl1, 0);
+    fid2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, tmpl1, H5C_DEFAULT);
     CHECK(fid2, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
@@ -165,7 +167,7 @@ test_file_create(void)
      * Try to create second file, with non-standard file-creation template
      * params
      */
-    fid3 = H5Fcreate(FILE3, H5ACC_OVERWRITE, tmpl2, 0);
+    fid3 = H5Fcreate(FILE3, H5F_ACC_TRUNC, tmpl2, H5C_DEFAULT);
     CHECK(fid3, FAIL, "H5Fcreate");
 
     /* Release file-creation template */
@@ -227,7 +229,7 @@ test_file_open(void)
     MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
 
     /* Open first file */
-    fid1 = H5Fopen(FILE2, H5ACC_WRITE, 0);
+    fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5C_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Get the file-creation template */

@@ -19,6 +19,7 @@
 #include <H5private.h>
 #include <H5Aprivate.h>
 #include <H5ACprivate.h>
+#include <H5Cprivate.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
 #include <H5Oprivate.h>
@@ -58,7 +59,7 @@ test_ohdr(void)
     MESSAGE(5, ("Testing Object Headers\n"));
 
     /* create the file */
-    fid = H5Fcreate("tohdr.h5", H5ACC_OVERWRITE, 0, 0);
+    fid = H5Fcreate("tohdr.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");

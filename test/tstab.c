@@ -67,7 +67,7 @@ test_1(void)
      */
 
     /* create the file */
-    fid = H5Fcreate("tstab1.h5", H5ACC_OVERWRITE, 0, 0);
+    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
@@ -130,7 +130,7 @@ test_1(void)
      */
 
     /* create the file */
-    fid = H5Fcreate("tstab1.h5", H5ACC_OVERWRITE, 0, 0);
+    fid = H5Fcreate("tstab1.h5", H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");
@@ -220,7 +220,7 @@ test_1(void)
 static void
 test_2(void)
 {
-    hid_t                   fid, props, dir;
+    hid_t                   fid, create_plist, access_plist, dir;
     H5F_t                  *f;
     int                     i;
     char                    name[256];
@@ -233,13 +233,17 @@ test_2(void)
      * Use larger symbol table data structures to be more efficient, use
      * defaults to bang harder on the library for testing.
      */
-    props = H5Ccreate(H5C_FILE_CREATE);
-#if 1
-    H5Cset_sym_k(props, 16, 16);
-#endif
+    create_plist = H5Ccreate(H5C_FILE_CREATE);
+    H5Cset_sym_k(create_plist, 16, 16);
+
+    /*
+     * File access property list.
+     */
+    access_plist = H5Ccreate (H5C_FILE_ACCESS);
+    H5Cset_core (access_plist, 3000000);
 
     /* create the file */
-    fid = H5Fcreate("tstab2.h5", H5ACC_OVERWRITE, props, 0);
+    fid = H5Fcreate("tstab2.h5", H5F_ACC_TRUNC, create_plist, access_plist);
     CHECK(fid, FAIL, "H5Fcreate");
     f = H5A_object(fid);
     CHECK(f, NULL, "H5Aatom_object");

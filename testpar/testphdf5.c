@@ -85,7 +85,7 @@ phdf5write()
 #endif
 
     /* create the file collectively */
-    fid1=H5Fcreate(FILE1,H5ACC_OVERWRITE,0,acc_tpl1);
+    fid1=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5C_DEFAULT,acc_tpl1);
     assert(fid1 != FAIL);
     MESG("H5Fcreate succeed");
 
@@ -216,7 +216,7 @@ phdf5read()
 
 
     /* open the file collectively */
-    fid1=H5Fopen(FILE1,H5ACC_WRITE,acc_tpl1);
+    fid1=H5Fopen(FILE1,H5F_ACC_RDWR,acc_tpl1);
     assert(fid1 != FAIL);
 
     /* Release file-access template */

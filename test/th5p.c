@@ -70,7 +70,7 @@ test_h5p_basic(void)
     MESSAGE(5, ("Testing Datatype Manipulation\n"));
 
     /* Create file */
-    fid1 = H5Fcreate(FILE, H5ACC_OVERWRITE, 0, 0);
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5C_DEFAULT, H5C_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     sid1 = H5Pcreate_simple(SPACE1_RANK, dims1, NULL);

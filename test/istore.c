@@ -578,8 +578,8 @@ main(int argc, char *argv[])
     creation_template = H5A_object(template_id);
 
     /* Create the test file */
-    if (NULL == (f = H5F_open(FILETYPE, FILENAME,
-                            (H5F_ACC_CREAT | H5F_ACC_WRITE | H5F_ACC_TRUNC |
+    if (NULL == (f = H5F_open(FILENAME,
+                            (H5F_ACC_CREAT | H5F_ACC_RDWR | H5F_ACC_TRUNC |
                              H5F_ACC_DEBUG),
                               creation_template, NULL))) {
         printf("Cannot create file %s; test aborted\n", FILENAME);
