@@ -1006,8 +1006,9 @@
 ./test/big.c
 ./test/bittests.c
 ./test/cmpd_dset.c
-./test/dsets.c
+./test/dangle.c
 ./test/deflate.h5
+./test/dsets.c
 ./test/dtypes.c
 ./test/enum.c
 ./test/extend.c
