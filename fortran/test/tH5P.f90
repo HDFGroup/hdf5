@@ -167,7 +167,7 @@
           INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
           INTEGER, DIMENSION(7) :: data_dims
           INTEGER :: mdc_nelmts
-          INTEGER :: rdcc_nelmts
+          INTEGER(SIZE_T) :: rdcc_nelmts
           INTEGER(SIZE_T) :: rdcc_nbytes
           REAL :: rdcc_w0
           memb_fapl = H5P_DEFAULT_F
