@@ -1,4 +1,4 @@
-HDF5 version 1.7.38 released on Sun Sep 26 04:46:18 CDT 2004
+HDF5 version 1.7.39 released on Sun Oct  3 04:01:30 CDT 2004
 ================================================================================
 
 
@@ -50,6 +50,10 @@ New Features
 
     Library:
     --------
+        - Compound datatype has been enhanced with a new feature of size 
+            adjustment.  The size can be increased and decreased(without
+            cutting the last member).  No API change is involved.  SLU - 
+            2004/10/1
         - Put back 6 old error API functions to be backward compatible with
             version 1.6.  They are H5Epush, H5Eprint, H5Ewalk, H5Eclear,
             H5Eset_auto, H5Eget_auto.  Their new equivalent functions are
@@ -180,6 +184,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed address check in Core VFL driver to avoid spurious address/size
+            overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
 	- Fixed parallel bug in which some processes attempted collective
 	    I/O while others did independent I/O.  Bug appeared when some
 	    processes used point selections, and others didn't.  JRM - 2004/9/15
