@@ -137,5 +137,6 @@ void                    test_stab(void);
 void                    test_h5t(void);
 void                    test_h5p(void);
 void                    test_h5d(void);
+void                    test_attr(void);
 
 #endif /* HDF5TEST_H */

@@ -170,7 +170,7 @@ test_compound(void)
         goto error;
     }
     /* Add a couple fields */
-    status = H5Tinsert(complex_id, "real", HOFFSET(tmp, re),
+    status = H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
                        H5T_NATIVE_DOUBLE);
     if (status < 0) {
         puts("*FAILED*");
@@ -180,7 +180,7 @@ test_compound(void)
         }
         goto error;
     }
-    status = H5Tinsert(complex_id, "imaginary", HOFFSET(tmp, im),
+    status = H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im),
                        H5T_NATIVE_DOUBLE);
     if (status < 0) {
         puts("*FAILED*");
