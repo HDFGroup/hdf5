@@ -11,9 +11,7 @@
 #undef HAVE_TZNAME
 
 /* Define as __inline if that's what the C compiler calls it.  */
-#ifndef __cplusplus
 #undef inline
-#endif
 
 /* Define to `long' if <sys/types.h> doesn't define.  */
 #undef off_t
