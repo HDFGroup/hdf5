@@ -41,7 +41,7 @@
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
-#include "H5Pprivate.h"
+#include "H5Pprivate.h"         /* Property lists */
 #include "H5Vprivate.h"
 
 /* MPIO driver needed for special checks */
@@ -1348,6 +1348,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
     void		*ret_value=NULL;	/*return value		*/
+    H5P_genplist_t *plist=NULL;                 /* Property list */
 
     FUNC_ENTER (H5F_istore_lock, NULL);
 
@@ -1501,8 +1502,9 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->chunk = chunk;
         
         assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-        assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
-        H5Pget(dxpl_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(ent->split_ratios));
+        assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+        assert((plist=H5I_object(dxpl_id))!=NULL);
+        H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(ent->split_ratios));
         
         /* Add it to the cache */
         assert(NULL==rdcc->slot[idx]);
@@ -1610,6 +1612,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5F_rdcc_ent_t	*ent = NULL;
     int		found = -1;
     unsigned		u;
+    H5P_genplist_t *plist;      /* Property list */
     
     FUNC_ENTER (H5F_istore_unlock, FAIL);
 
@@ -1644,8 +1647,9 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             x.chunk = chunk;
 
             assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-            assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER));
-            H5Pget(dxpl_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(x.split_ratios));
+            assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+            assert((plist=H5I_object(dxpl_id))!=NULL);
+            H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(x.split_ratios));
             
             H5F_istore_flush_entry (f, &x, TRUE);
         } else {
