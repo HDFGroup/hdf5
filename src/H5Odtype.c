@@ -391,8 +391,9 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                 dt->u.array.nelem *= dt->u.array.dim[j];
             } /* end for */
 
-            /* Skip dimension permutations (unused currently) */
-            *pp += 4*dt->u.array.ndims;
+            /* Decode array dimension permutations (even though they are unused currently) */
+            for (j=0; j<dt->u.array.ndims; j++)
+                UINT32DECODE(*pp, dt->u.array.perm[j]);
 
             /* Decode base type of array */
             if (NULL==(dt->parent = H5FL_ALLOC(H5T_t,1)))
