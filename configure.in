@@ -717,14 +717,17 @@ AC_ARG_WITH(zlib,
 
 case $withval in
   yes)
+    HAVE_ZLIB="yes"
     AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes",)
+    AC_CHECK_LIB(z, compress,, unset HAVE_ZLIB)
     ;;
   no)
+    HAVE_ZLIB="no"
     AC_MSG_CHECKING(for GNU zlib)
     AC_MSG_RESULT(suppressed)
     ;;
   *)
+    HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
         zlib_inc="`echo $withval |cut -f1 -d,`"
@@ -751,9 +754,10 @@ case $withval in
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes", LDFLAGS="$saved_LDFLAGS")
+    AC_CHECK_LIB(z, compress,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
     ;;
 esac
+echo "LIBS == $LIBS"
 
 dnl ----------------------------------------------------------------------
 dnl Is GLOBUS-GASS(1.1.0 or 1.1.1) Library present? It is also needed by 
@@ -1845,15 +1849,6 @@ case "X-$DEBUG_PKG" in
   *)            echo "$DEBUG_PKG" ;;
 esac
 
-PRINT "hsize_t"
-case "$HSIZET" in
-  no|small)  echo "Small" ;;
-  *)         echo "Large" ;;
-esac
-
-PRINT "HDF5 v1.4 Compatibility"
-IF_YES_NO "$HDF5_V1_4_COMPAT"
-
 PRINT "Shared Libraries"
 IF_YES_NO "$enable_shared"
 
@@ -1863,8 +1858,12 @@ IF_YES_NO "$enable_static"
 PRINT "Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
 
-PRINT "Stream VFD"
-IF_ENABLED_DISABLED "$STREAM_VFD"
+PRINT "Tracing"
+if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
+  echo "Yes"
+else
+  echo "No"
+fi
 
 echo ""
 echo "Features:"
@@ -1884,6 +1883,15 @@ IF_YES_NO "$GRIDSTORAGE"
 PRINT "HDF4"
 IF_YES_NO "$HAVE_HDF4"
 
+PRINT "HDF5 v1.4 Compatibility"
+IF_YES_NO "$HDF5_V1_4_COMPAT"
+
+PRINT "hsize_t"
+case "$HSIZET" in
+  no|small)  echo "Small" ;;
+  *)         echo "Large" ;;
+esac
+
 PRINT "Linux Large File Support (LFS)"
 IF_ENABLED_DISABLED "$LINUX_LFS"
 
@@ -1897,15 +1905,11 @@ fi
 PRINT "SRB"
 IF_YES_NO "$SRB"
 
+PRINT "Stream VFD"
+IF_ENABLED_DISABLED "$STREAM_VFD"
+
 PRINT "Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
-
-PRINT "Tracing"
-if test -z "$TRACE" -o "X$TRACE" = "Xyes"; then
-  echo "Yes"
-else
-  echo "No"
-fi
 
 PRINT "Zlib-compression"
 IF_YES_NO "$HAVE_ZLIB"
