@@ -72,6 +72,8 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         A tool for converting an HDF4 file to an HDF5 file
     <li><a href="#Tools-H5CC">h5cc</a> --
         A tool for compiling HDF5 programs
+    <li><a href="#Tools-H5FC">h5fc</a> --
+        A tool for compiling HDF5 programs written in Fortran90
     <li><a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html/">Java-based tools for HDF5</a> -- 
         <em>(at <code>http://hdf.ncsa.uiuc.edu/java-hdf5-html/</code>)</em>
         <br>
@@ -296,7 +298,6 @@ to convert files from HDF4 format to HDF5 format and vice versa.
     </dl>
     <p>
 
-
 <dt><strong>Examples:</strong>
     <ol>
        <li>Dumping the group <code>/GroupFoo/GroupBar</code> in the file
@@ -410,6 +411,7 @@ to convert files from HDF4 format to HDF5 format and vice versa.
 
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Ls">h5ls</a>
@@ -485,6 +487,7 @@ to convert files from HDF4 format to HDF5 format and vice versa.
     <dd>
 -->
 </dl>
+
 
 <hr>
 <dl>
@@ -835,6 +838,7 @@ to convert files from HDF4 format to HDF5 format and vice versa.
 -->
 </dl>
 
+
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-H5CC">h5cc</a>
@@ -844,21 +848,16 @@ to convert files from HDF4 format to HDF5 format and vice versa.
 <dt><strong>Purpose:</strong>
     <dd>Helper script to compile HDF5 applications.
 <dt><strong>Description:</strong>
-    <dd><p>
-        <code>h5cc</code> can be used in much the same way MPIch is used
-        to compile HDF5 program. It takes care of specifying where the
+    <dd><code>h5cc</code> can be used in much the same way MPIch is used
+        to compile an HDF5 program. It takes care of specifying where the
         HDF5 header files and libraries are on the commandline.
-        </p>
-
         <p>
         <code>h5cc</code> supercedes all other compiler scripts in that
         if you've used them to compile the HDF5 library, then
-        <code>h5cc</code> also uses those scripts. For examples, when
+        <code>h5cc</code> also uses those scripts. For example, when
         compiling an MPIch program, you use the <code>mpicc</code>
         script. If you've built HDF5 using MPIch, then <code>h5cc</code>
         uses the MPIch program for compilation.
-        </p>
-
         <p>
         Some programs use HDF5 in only a few modules. It isn't necessary
         to use <code>h5cc</code> to compile those modules which don't use
@@ -866,30 +865,28 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         script, you are still able to compile HDF5 modules in the normal
         way. In that case, you will have to specify the HDF5 libraries
         and include paths yourself.
-        </p>
-
         <p>
         An example of how to use HDF5 to compile the program
-        <code>hdf_prog</code> which consists of modules
+        <code>hdf_prog</code>, which consists of modules
         <code>prog1.c</code> and <code>prog2.c</code> and uses the HDF5
-        shared library:
-
+        shared library, would be as follows:
         <pre>
         # h5cc -c prog1.c
         # h5cc -c prog2.c
         # h5cc -shlib -o hdf_prog prog1.o prog2.o
         </pre>
-    <p>
 <dt><strong>Options and Parameters:</strong>
+    <dd>
     <dl>
         <dt><code>-help</code>
             <dd>Prints a help message.
         <dt><code>-echo</code>
             <dd>Show all the shell commands executed.
         <dt><code>-prefix=DIR</code>
-            <dd>Use the directory DIR to find HDF5 lib/ and include/
-                subdirectories [default: prefix specified when
-                configuring HDF5].
+            <dd>Use the directory <code><em>DIR</em></code> to find the HDF5 
+	        <code>lib/</code> and <code>include/</code> subdirectories. 
+                <br>
+		Default: prefix specified when configuring HDF5.
         <dt><code>-show</code>
             <dd>Show the commands without executing them.
         <dt><code>-shlib</code>
@@ -897,16 +894,14 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         <dt><code>-noshlib</code>
             <dd>Compile using static HDF5 libraries [default].
         <dt><em>&lt;compile line&gt;</em>
-            <dd>The normal compile line options for your compiler. h5cc
-                uses the same compiler you used to compile HDF5. Check
-                with your compiler's manual for more information on which
+            <dd>The normal compile line options for your compiler. 
+	        <code>h5cc</code> uses the same compiler you used to compile HDF5. 
+                Check your compiler's manual for more information on which
                 options are needed.
     </dl>
-    <p>
 <dt><strong>Environment Variables:</strong>
-<br>
-    When set, these environment variables override some of the built-in
-    defaults of <code>h5cc</code>.
+    <dd>When set, these environment variables override some of the built-in
+        defaults of <code>h5cc</code>.
 
     <dl>
         <dt><code>HDF5_CC</code>
@@ -923,6 +918,82 @@ to convert files from HDF4 format to HDF5 format and vice versa.
     <dd>
  -->
 </dl>
+
+
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H5FC">h5fc</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5fc
+        [</code><em>OPTIONS</em><code>]</code> <em>&lt;compile line&gt;</em>
+<dt><strong>Purpose:</strong>
+    <dd>Helper script to compile HDF5 Fortran90 applications.
+<dt><strong>Description:</strong>
+    <dd><p>
+        <code>h5fc</code> can be used in much the same way MPIch is used
+        to compile an HDF5 program. It takes care of specifying where the
+        HDF5 header files and libraries are on the commandline.
+        <p>
+        <code>h5fc</code> supercedes all other compiler scripts in that
+        if you've used them to compile the HDF5 Fortran library, then
+        <code>h5fc</code> also uses those scripts. For example, when
+        compiling an MPIch program, you use the <code>mpif90</code>
+        script. If you've built HDF5 using MPIch, then <code>h5fc</code>
+        uses the MPIch program for compilation.
+        <p>
+        Some programs use HDF5 in only a few modules. It isn't necessary
+        to use <code>h5fc</code> to compile those modules which don't use
+        HDF5. In fact, since <code>h5fc</code> is only a convenience
+        script, you are still able to compile HDF5 Fortran modules in the 
+        normal way. In that case, you will have to specify the HDF5 libraries
+        and include paths yourself.
+        <p>
+        An example of how to use HDF5 to compile the program
+        <code>hdf_prog</code>, which consists of modules
+        <code>prog1.f90</code> and <code>prog2.f90</code> 
+	and uses the HDF5 Fortran library, would be as follows:
+        <pre>
+        # h5fc -c prog1.f90
+        # h5fc -c prog2.f90
+        # h5fc -o hdf_prog prog1.o prog2.o
+        </pre>
+<dt><strong>Options and Parameters:</strong>
+    <dd>
+    <dl>
+        <dt><code>-help</code>
+            <dd>Prints a help message.
+        <dt><code>-echo</code>
+            <dd>Show all the shell commands executed.
+        <dt><code>-prefix=DIR</code>
+            <dd>Use the directory <code>DIR</code> to find HDF5 
+	        <code>lib/</code> and <code>include/</code> subdirectories 
+		<br>
+                Default: prefix specified when configuring HDF5.
+        <dt><code>-show</code>
+            <dd>Show the commands without executing them.
+        <dt><em>&lt;compile line&gt;</em>
+            <dd>The normal compile line options for your compiler. 
+	        <code>h5fc</code> uses the same compiler you used 
+                to compile HDF5. Check your compiler's manual for 
+		more information on which options are needed.
+    </dl>
+<dt><strong>Environment Variables:</strong>
+    <dd>When set, these environment variables override some of the built-in
+        defaults of <code>h5cc</code>.
+        <dl>
+          <dt><code>HDF5_FC</code>
+            <dd>Use a different Fortran90 compiler.
+          <dt><code>HDF5_FLINKER</code>
+            <dd>Use a different linker.
+        </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+ -->
+</dl>
+
 
 <!--                     Template, next 40 lines            -->
 <!--                     Template, next 40 lines            -->
@@ -1010,7 +1081,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 13. September 2001 
+Last modified: 6 May 2003
 
 </body>
 </html>
