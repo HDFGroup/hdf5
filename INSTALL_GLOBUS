@@ -3,11 +3,9 @@
 I. Overview
 -----------
 This file contains instructions for remote-accessing HDF5.  The SGI IRIX64
-(IRIX) 6.5 platform have been tested.  If you have difficulties installing the
-software in your system, please send mail to
-        hdfhelp@ncsa.uiuc.edu
-In your mail, please enclose the output of "uname -a".  Also attach the
-content of "config.log" if you have run the "configure" command.
+(and IRIX) 6.5 platform have been tested.  If you have difficulties installing
+the software in your system, please send mails to me(Raymond Lu) at
+        slu@ncsa.uiuc.edu
 
 First, you must obtain and unpack the HDF5 source as described in the file 
 INSTALL.  You need the Globus 1.1.x and SSL(should have come with Globus) 
@@ -15,7 +13,7 @@ packages.
 
 HDF5 is built on the top of Globus-GASS(1.1.x) to handle remote access.  
 Globus-GASS(1.1.x) only supports HTTP and HTTPS protocals for 'whole file 
-read'.  More features may be added in the future.  
+read and write'.  More features may be added in the future.  
 
 II. Installation Steps
 ----------------------
@@ -37,8 +35,15 @@ The installation steps are similar to the ones in INSTALL file:
 2. Run 'make'
 
 3. Run testing program:
-   There is one testing program called 'gass_read' in the 'test' directory.  
-   It does whole file read through HTTP protocal.  The URL is hard coded as 
+   There is one read testing program called 'gass_read' in the 'test' 
+   directory.  It does whole file read through HTTP protocal.  The URL is 
+   hard coded as 
       http://hdf/GLOBUS/a.h5
-   There are other programs called 'gass_write' and 'gass_append' used for 
-   experiments.  They don't work for current Globus-GASS.  
+
+   The writing really depends on your web server.  You have to set up your 
+   server in right way to accept writing in files.  We have tested it using 
+   Apache Server(1.3.12) without authentication.  If you need more details 
+   about our testing, please contact us.   
+
+   There is another program called 'gass_append' used for experiments.  It 
+   does not work for current Globus-GASS.  
