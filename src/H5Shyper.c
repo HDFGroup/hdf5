@@ -695,35 +695,61 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 	 * dimension and should input those regions).
 	 */
 #ifdef QAK
-	printf("%s: check 2.0, rank=%d, cache_hyper=%d\n",
-	       FUNC,(int)io_info->space->extent.u.simple.rank,
-           (int)io_info->xfer_parms->cache_hyper);
+    if(dim>=0) {
+        printf("%s: check 2.0, rank=%d, ",
+               FUNC,(int)io_info->space->extent.u.simple.rank);
+        printf("pos={",FUNC);
+        for(j=0; j<io_info->space->extent.u.simple.rank; j++) {
+            printf("%d",(int)io_info->iter->hyp.pos[j]);
+            if(j<io_info->space->extent.u.simple.rank-1)
+                printf(", ");
+        } /* end for */
+        printf("}\n");
+    } /* end if */
+    else
+        printf("%s: check 2.0, rank=%d\n",
+               FUNC,(int)io_info->space->extent.u.simple.rank);
 	for(i=0; i<num_regions; i++)
 	    printf("%s: check 2.1, region #%d: start=%d, end=%d\n",
 		   FUNC,i,(int)regions[i].start,(int)regions[i].end);
 #endif /* QAK */
         if((dim+2)==io_info->space->extent.u.simple.rank) {
+#ifdef QAK
+	printf("%s: check 2.1.1, num_regions=%d\n",FUNC,(int)num_regions);
+#endif /* QAK */
             /* perform I/O on data from regions */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
                 /* Compute the size of the region to read */
                 region_size=MIN(io_info->nelmts,
 				(regions[i].end-regions[i].start)+1);
 
+#ifdef QAK
+	printf("%s: check 2.1.2, region=%d, region_size=%d\n",FUNC,(int)i,(int)region_size);
+#endif /* QAK */
                 /* Check if this hyperslab block is cached or could be cached */
                 if(!regions[i].node->cinfo.cached &&
 		   (xfer_parms->cache_hyper &&
 		    (xfer_parms->block_limit==0 ||
 		     xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
+#ifdef QAK
+	printf("%s: check 2.1.3, caching block\n",FUNC);
+#endif /* QAK */
                     H5S_hyper_block_cache(regions[i].node,io_info,1);
                 } /* end if */
 
                 /* Read information from the cached block */
                 if(regions[i].node->cinfo.cached) {
+#ifdef QAK
+	printf("%s: check 2.1.4, reading block from cache\n",FUNC);
+#endif /* QAK */
                     if(H5S_hyper_block_read(regions[i].node,io_info,region_size)<0)
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
                 }
                 else {
+#ifdef QAK
+	printf("%s: check 2.1.5, reading block from file\n",FUNC);
+#endif /* QAK */
                     /* Set up hyperslab I/O parameters which apply to all regions */
                     if(!parm_init) {
                         /* Copy the location of the region in the file */
@@ -753,12 +779,17 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                         HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0,
 				       "read error");
                     }
+                } /* end else */
 #ifdef QAK
     printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
-    for(j=0; j<io_info->space->extent.u.simple.rank; j++)
-    printf("%s: %d - pos=%d\n", FUNC,j,(int)io_info->iter->hyp.pos[j]);
+    printf("pos={");
+    for(j=0; j<io_info->space->extent.u.simple.rank; j++) {
+        printf("%d",(int)io_info->iter->hyp.pos[j]);
+        if(j<io_info->space->extent.u.simple.rank-1)
+            printf(", ");
+    } /* end for */
+    printf("}\n");
 #endif /* QAK */
-                } /* end else */
 
                 /* Advance the pointer in the buffer */
                 io_info->dst = ((uint8_t *)io_info->dst) +
@@ -771,10 +802,21 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start + region_size;
+#ifdef QAK
+    printf("%s: check 2.3.5, region #%d\n",FUNC,(int)i);
+    printf("pos={");
+    for(j=0; j<io_info->space->extent.u.simple.rank; j++) {
+        printf("%d",(int)io_info->iter->hyp.pos[j]);
+        if(j<io_info->space->extent.u.simple.rank-1)
+            printf(", ");
+    } /* end for */
+    printf("}\n");
+#endif /* QAK */
 
                 /* Decrement the iterator count */
                 io_info->iter->hyp.elmt_left-=region_size;
@@ -791,8 +833,22 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
+#ifdef QAK
+    printf("%s: check 3.5, dim=%d, region #%d={%d, %d}\n",FUNC,(int)dim,(int)i,(int)regions[i].start,(int)regions[i].end);
+{
+    intn k;
+
+    printf("pos={");
+    for(k=0; k<io_info->space->extent.u.simple.rank; k++) {
+        printf("%d",(int)io_info->iter->hyp.pos[k]);
+        if(k<io_info->space->extent.u.simple.rank-1)
+            printf(", ");
+    } /* end for */
+    printf("}\n");
+}
+#endif /* QAK */
                 /* Step through each location in each region */
-                for(j=regions[i].start; j<=regions[i].end && io_info->nelmts>0; j++) {
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
 #ifdef QAK
     printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
@@ -807,9 +863,38 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                     if(io_info->iter->hyp.pos[dim+1]==(-1))
                         io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
-                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1))
+#ifdef QAK
+{
+    intn k;
+
+    printf("%s: check 5.0, dim=%d, j=%d, region #%d={%d, %d}\n",FUNC,(int)dim,(int)j,(int)i,(int)regions[i].start,(int)regions[i].end);
+    printf("pos={");
+    for(k=0; k<io_info->space->extent.u.simple.rank; k++) {
+        printf("%d",(int)io_info->iter->hyp.pos[k]);
+        if(k<io_info->space->extent.u.simple.rank-1)
+            printf(", ");
+    } /* end for */
+    printf("}\n");
+}
+#endif /* QAK */
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
+#ifdef QAK
+{
+    intn k;
+
+    printf("%s: check 6.0, dim=%d\n",FUNC,(int)dim);
+    printf("pos={");
+    for(k=0; k<io_info->space->extent.u.simple.rank; k++) {
+        printf("%d",(int)io_info->iter->hyp.pos[k]);
+        if(k<io_info->space->extent.u.simple.rank-1)
+            printf(", ");
+    } /* end for */
+    printf("}\n");
+}
+#endif /* QAK */
         } /* end else */
 
         /* Release the temporary buffer */
@@ -818,6 +903,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 
     FUNC_LEAVE (num_read);
 }   /* H5S_hyper_fread() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_hyper_fgath
@@ -883,6 +969,32 @@ H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         (When another iteration order besides the default 'C' order is chosen,
         this is the correct place to change the order of the array iterations)
     */
+#ifdef QAK
+    printf("%s: hyperslab count=%d\n",FUNC,file_space->select.sel_info.hslab.hyper_lst->count);
+{
+    H5S_hyper_node_t *tmp=file_space->select.sel_info.hslab.hyper_lst->head;     /* Pointer to head of hyperslab list */
+    intn node_count=0;
+
+    while(tmp!=NULL) {
+        printf("%s: hyperslab node %d:\n",FUNC,node_count++);
+        printf("\tstart={");
+        for(i=0; i<file_space->extent.u.simple.rank; i++) {
+            printf("%d",(int)tmp->start[i]);
+            if(i<file_space->extent.u.simple.rank-1)
+                printf(", ");
+        } /* end for */
+        printf("}\n");
+        printf("\tend={");
+        for(i=0; i<file_space->extent.u.simple.rank; i++) {
+            printf("%d",(int)tmp->end[i]);
+            if(i<file_space->extent.u.simple.rank-1)
+                printf(", ");
+        } /* end for */
+        printf("}\n");
+        tmp=tmp->next;
+    } /* end while */
+}
+#endif /* QAK */
     for(i=0; i<file_space->extent.u.simple.rank; i++) {
         lo_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->lo_bounds[i];
         hi_bounds[i]=file_space->select.sel_info.hslab.hyper_lst->hi_bounds[i];
@@ -1047,7 +1159,8 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start +
@@ -1064,7 +1177,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
                 /* Step through each location in each region */
-                for(j=regions[i].start; j<=regions[i].end && io_info->nelmts>0; j++) {
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
@@ -1075,7 +1188,8 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                     if(io_info->iter->hyp.pos[dim+1]==(-1))
                         io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
-                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1))
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
@@ -1288,7 +1402,8 @@ H5S_hyper_mread (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] =regions[i].start +
@@ -1308,24 +1423,24 @@ H5S_hyper_mread (intn dim, H5S_hyper_io_info_t *io_info)
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
                 /* Step through each location in each region */
-                for(j=regions[i].start; j<=regions[i].end && io_info->nelmts>0; j++) {
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
 #ifdef QAK
 		    printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
-
-                    /*
-                     * If we are moving to a new position in this dim, reset
-                     * the next lower dim. location.
-                     */
-                    if(io_info->iter->hyp.pos[dim]!=j)
-                        io_info->iter->hyp.pos[dim+1]=(-1);
 
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
                     /* Go get the regions in the next lower dimension */
                     num_read+=H5S_hyper_mread(dim, io_info);
+
+                    /* Advance to the next row if we got the whole region */
+                    if(io_info->iter->hyp.pos[dim+1]==(-1))
+                        io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
+                    io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
 
@@ -1544,7 +1659,8 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start +
@@ -1569,23 +1685,21 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_io_info_t *io_info)
 		       FUNC, i, (int)regions[i].start, i,
 		       (int)regions[i].end, (int)io_info->nelmts);
 #endif /* QAK */
-                for(j=regions[i].start;
-		    j<=regions[i].end && io_info->nelmts>0;
-		    j++) {
-
-                    /*
-		     * If we are moving to a new position in this dim, reset
-		     * the next lower dim. location.
-		     */
-                    if(io_info->iter->hyp.pos[dim]!=j)
-                        io_info->iter->hyp.pos[dim+1]=(-1);
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
 
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
                     /* Go get the regions in the next lower dimension */
                     num_read+=H5S_hyper_mwrite(dim, io_info);
+
+                    /* Advance to the next row if we got the whole region */
+                    if(io_info->iter->hyp.pos[dim+1]==(-1))
+                        io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
+                    io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
 
