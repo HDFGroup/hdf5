@@ -1575,15 +1575,17 @@ H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side)
 static      herr_t
 H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
 {
+    H5TB_leaf  olcnt, orcnt;    /* Old left & right counts for node */
+    H5TB_flag  odouble;         /* Old 'double' status */
     int        deeper = added; /* 1 if sub-tree got longer; -1 if got shorter */
     int        odelta;
-    int        obal;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_balance);
 
     while (NULL != ptr) {
-          odelta = Delta(ptr, side);    /* delta before the node was added */
-          obal = UnBal(ptr);
+          olcnt = LeftCnt(ptr);
+          orcnt = RightCnt(ptr);
+          odouble = Double(ptr);
           if (LEFT == side)     /* One more/fewer left child: */
               if (0 < added)
                   ptr->lcnt++;  /* LeftCnt(ptr)++ */
@@ -1595,6 +1597,7 @@ H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
               ptr->rcnt--;  /* RightCnt(ptr)-- */
           if (0 != deeper)
             {   /* One leg got longer or shorter: */
+                odelta = DeltaCnt(olcnt, orcnt, odouble, side);    /* compute delta before the node was added */
                 if ((deeper < 0 && odelta < 0) || (deeper > 0 && odelta > 0))
                   {     /* Became too unbalanced: */
                       H5TB_NODE  *kid;
@@ -1623,7 +1626,7 @@ H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
                             ptr = H5TB_swapkid(root, ptr, side);
                         }
                   }
-                else if (obal)
+                else if (olcnt!=orcnt)
                   {     /* Just became balanced: */
                       ptr->flags &= ~H5TB_UNBAL;
                       if (0 < deeper)
