@@ -161,6 +161,7 @@ static h5dump_t         dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
+    1       /*array indices */
 };
 
 /**
@@ -243,6 +244,7 @@ static h5dump_t         xml_dataformat = {
     "%s",			/*dset_blockformat_pre */
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
+     0      /*array indices */
 };
 
 /** XML **/
@@ -1923,7 +1925,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
         }
 
  /* print the matrix indices */
- if (pindex)
+ outputformat->pindex=pindex;
+ if (outputformat->pindex)
  {
   outputformat->idx_fmt = "(%s)";
   outputformat->idx_n_fmt = "%lu";

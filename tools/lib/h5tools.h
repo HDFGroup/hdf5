@@ -320,6 +320,9 @@ typedef struct h5dump_t {
     const char *dset_ptformat_pre;
     const char *dset_ptformat;
 
+    /*print array indices in output matrix */
+    int pindex;
+
 } h5dump_t;
 
 typedef struct dump_header{
