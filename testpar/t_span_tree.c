@@ -38,7 +38,169 @@
 #include "testphdf5.h"
 
 
-void coll_irregular_cont_write()
+static void coll_write_test(int chunk_factor);
+static void coll_read_test(int chunk_factor);
+
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_cont_write
+ *
+ * Purpose:	Test the collectively irregular hyperslab write in contiguous 
+                storage
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_cont_write(void)
+{
+
+  coll_write_test(0);
+
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_cont_read
+ *
+ * Purpose:	Test the collectively irregular hyperslab read in contiguous 
+                storage
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_cont_read(void)
+{
+
+  coll_read_test(0);
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_simple_chunk_write
+ *
+ * Purpose:	Test the collectively irregular hyperslab write in chunk 
+                storage(1 chunk)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_simple_chunk_write(void)
+{
+
+  coll_write_test(1);
+
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_simple_chunk_read
+ *
+ * Purpose:	Test the collectively irregular hyperslab read in chunk 
+                storage(1 chunk)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_simple_chunk_read(void)
+{
+
+  coll_read_test(1);
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_complex_chunk_write
+ *
+ * Purpose:	Test the collectively irregular hyperslab write in chunk 
+                storage(4 chunks)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_complex_chunk_write(void)
+{
+
+  coll_write_test(4);
+
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	coll_irregular_complex_chunk_read
+ *
+ * Purpose:	Test the collectively irregular hyperslab read in chunk 
+                storage(1 chunk)
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Unknown
+ *		Dec 2nd, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+coll_irregular_complex_chunk_read(void)
+{
+
+  coll_read_test(4);
+
+}
+
+
+void coll_write_test(int chunk_factor)
 {
 
   char *filename;
@@ -61,7 +223,7 @@ void coll_irregular_cont_write()
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
   hsize_t  block[2];  /* Block sizes */
-
+  hsize_t  chunk_dims[RANK];
 
   herr_t   ret;
   unsigned i,j;
@@ -111,7 +273,14 @@ void coll_irregular_cont_write()
 
   ret   = H5Pset_fill_value(plist, H5T_NATIVE_INT, &fillvalue); 
   VRFY((ret >= 0),"Fill value creation property list succeeded");
-   
+
+  if(chunk_factor != 0) {
+
+    chunk_dims[0] = FSPACE_DIM1/chunk_factor;
+    chunk_dims[1] = FSPACE_DIM2/chunk_factor;
+     ret = H5Pset_chunk(plist, 2, chunk_dims);
+    VRFY((ret >= 0),"chunk creation property list succeeded");
+  }
   /* 
    * Create dataspace for the dataset in the file.
    */
@@ -181,7 +350,7 @@ void coll_irregular_cont_write()
   ret = H5Sselect_hyperslab(mspaceid1, H5S_SELECT_SET, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
-
+  
   ret = H5Dwrite(dataseti, H5T_NATIVE_INT, mspaceid1, fspaceid, H5P_DEFAULT, vector);
   VRFY((ret >= 0),"dataset independent write succeed");
   xfer_plist = H5Pcreate(H5P_DATASET_XFER);
@@ -192,6 +361,7 @@ void coll_irregular_cont_write()
 
 
   ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, xfer_plist, vector);
+  /*ret = H5Dwrite(datasetc, H5T_NATIVE_INT, mspaceid1, fspaceid, H5P_DEFAULT, vector);*/
   VRFY((ret >= 0),"dataset collective write succeed"); 
 
   ret = H5Sclose(mspaceid1);
@@ -391,7 +561,7 @@ void coll_irregular_cont_write()
 }
 
 
-void coll_irregular_cont_read()
+void coll_read_test(int chunk_factor)
 {
 
   char *filename;

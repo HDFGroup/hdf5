@@ -259,6 +259,10 @@ void coll_chunk3(void);
 void coll_chunk4(void);
 void coll_irregular_cont_read(void);
 void coll_irregular_cont_write(void);
+void coll_irregular_simple_chunk_read(void);
+void coll_irregular_simple_chunk_write(void);
+void coll_irregular_complex_chunk_read(void);
+void coll_irregular_complex_chunk_write(void);
 void io_mode_confusion(void);
 #ifdef H5_HAVE_FILTER_DEFLATE
 void compress_readAll(void);
