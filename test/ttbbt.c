@@ -75,7 +75,7 @@ test_tbbt(void)
     int       ins_arr[MAX_TEST_SIZE];
     int       rem_arr[MAX_TEST_SIZE];
     intn        t;
-    TBBT_TREE  *tree;
+    H5TB_TREE  *tree;
     void *      *r;
 
     t = (intn)time(NULL);
@@ -133,7 +133,7 @@ test_tbbt(void)
                       key = rem_arr[i];
                       r = (void * *) H5TB_dfind(tree, (void *) &key, NULL);
                       MESSAGE(9, ("removing %d\n", (int) key));
-                      H5TB_rem((TBBT_NODE **) tree, (TBBT_NODE *) r, NULL);
+                      H5TB_rem((H5TB_NODE **) tree, (H5TB_NODE *) r, NULL);
 #ifdef H5TB_DEBUG
                       if(Verbosity>9)
                           H5TB_dump(tree, -1);
