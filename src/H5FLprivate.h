@@ -29,8 +29,8 @@
  */
 
 /* Data structure to store each block in free list */
-typedef struct H5FL_node_t {
-    struct H5FL_node_t *next;   /* Pointer to next block in free list */
+typedef struct H5FL_reg_node_t {
+    struct H5FL_reg_node_t *next;   /* Pointer to next block in free list */
 #ifdef H5FL_DEBUG
     uintn inuse;                /* Indicate when object is in use */
 #endif /* H5FL_DEBUG */
@@ -38,36 +38,36 @@ typedef struct H5FL_node_t {
         double unused1;         /* Unused normally, just here for aligment */
         haddr_t unused2;        /* Unused normally, just here for aligment */
     }align;             /* Bogus union, just here to align following block */
-} H5FL_node_t;
+} H5FL_reg_node_t;
 
 /* Data structure for free list of blocks */
-typedef struct H5FL_head_t {
+typedef struct H5FL_reg_head_t {
     uintn init;         /* Whether the free list has been initialized */
     uintn allocated;    /* Number of blocks allocated */
     uintn onlist;       /* Number of blocks on free list */
     size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
     size_t size;        /* Size of the blocks in the list */
-    H5FL_node_t *list;  /* List of free blocks */
-} H5FL_head_t;
+    H5FL_reg_node_t *list;  /* List of free blocks */
+} H5FL_reg_head_t;
 
 /*
  * Macros for defining & using free lists for a type
  */
 /* Declare a free list to manage objects of type 't' */
-#define H5FL_DEFINE(t)  H5FL_head_t t##_free_list={0,0,0,0,#t,sizeof(t),NULL}
+#define H5FL_DEFINE(t)  H5FL_reg_head_t t##_free_list={0,0,0,0,#t,sizeof(t),NULL}
 
 /* Reference a free list for type 't' defined in another file */
-#define H5FL_EXTERN(t)  extern H5FL_head_t t##_free_list
+#define H5FL_EXTERN(t)  extern H5FL_reg_head_t t##_free_list
 
 /* Declare a static free list to manage objects of type 't' */
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE(t)
 
 /* Allocate an object of type 't' */
-#define H5FL_ALLOC(t,clr) H5FL_alloc(&(t##_free_list),clr)
+#define H5FL_ALLOC(t,clr) H5FL_reg_alloc(&(t##_free_list),clr)
 
 /* Free an object of type 't' */
-#define H5FL_FREE(t,obj) H5FL_free(&(t##_free_list),obj)
+#define H5FL_FREE(t,obj) H5FL_reg_free(&(t##_free_list),obj)
 
 /* Re-allocating an object of type 't' is not defined, because these free-lists
  * only support fixed sized types, like structs, etc..
@@ -174,8 +174,8 @@ typedef struct H5FL_arr_head_t {
 __DLL__ void * H5FL_blk_alloc(H5FL_blk_head_t *head, size_t size, uintn clear);
 __DLL__ void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
 __DLL__ void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size);
-__DLL__ void * H5FL_alloc(H5FL_head_t *head, uintn clear);
-__DLL__ void * H5FL_free(H5FL_head_t *head, void *obj);
+__DLL__ void * H5FL_reg_alloc(H5FL_reg_head_t *head, uintn clear);
+__DLL__ void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
 __DLL__ void * H5FL_arr_alloc(H5FL_arr_head_t *head, uintn elem, uintn clear);
 __DLL__ void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 __DLL__ void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, uintn new_elem);
