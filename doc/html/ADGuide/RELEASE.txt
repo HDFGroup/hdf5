@@ -1,4 +1,4 @@
-HDF5 version 1.5.15 released on Sat Nov 10 04:23:57 CST 2001
+HDF5 version 1.5.16 released on Thu Dec  6 10:06:46 CST 2001
 ================================================================================
 
 
@@ -86,6 +86,10 @@ Library
       currently.
     * Fixed a bug where 'or'ing a hyperslab with a 'none' selection would
       fail.  Now adds that hyperslab as the first hyperlab in the selection.
+    * Fixed a bug in the 'big' test where quota limits weren't being detected
+      properly if they caused close() to fail.
+    * Fixed a bug in internal B-tree code where a B-tree was not being copied
+      correctly.
 
 Configuration
 -------------

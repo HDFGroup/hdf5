@@ -996,7 +996,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, int lk)
     herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIsIu",plist_id,ik,lk);
+    H5TRACE3("e","iIsIs",plist_id,ik,lk);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_CREATE))
@@ -2152,7 +2152,8 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_cache, FAIL);
-    H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE5("e","iIsIszd",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
+             rdcc_w0);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) )
@@ -2213,7 +2214,8 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pget_cache, FAIL);
-    H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE5("e","i*Is*Is*z*d",plist_id,mdc_nelmts,_rdcc_nelmts,rdcc_nbytes,
+             rdcc_w0);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -2341,7 +2343,8 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pget_cache, FAIL);
-    H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
+             rdcc_w0);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -2403,7 +2406,7 @@ H5Pset_buffer(hid_t plist_id, hsize_t _size, void *tconv, void *bkg)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pset_buffer, FAIL);
-    H5TRACE4("e","izxx",plist_id,_size,tconv,bkg);
+    H5TRACE4("e","ihxx",plist_id,_size,tconv,bkg);
 
     /* Check arguments */
     if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
@@ -2452,7 +2455,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     hsize_t ret_value=0;        /* Type conversion buffer size */
 
     FUNC_ENTER (H5Pget_buffer, 0);
-    H5TRACE3("z","ixx",plist_id,tconv,bkg);
+    H5TRACE3("h","ixx",plist_id,tconv,bkg);
 
     /* Check arguments */
     if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
@@ -3654,7 +3657,7 @@ H5Pset_meta_block_size(hid_t plist_id, hsize_t _size)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
-    H5TRACE2("e","iz",plist_id,_size);
+    H5TRACE2("e","ih",plist_id,_size);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
@@ -3864,7 +3867,7 @@ H5Pset_sieve_buf_size(hid_t plist_id, hsize_t _size)
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
-    H5TRACE2("e","iz",plist_id,_size);
+    H5TRACE2("e","ih",plist_id,_size);
 
     /* Check args */
     if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
