@@ -62,6 +62,7 @@ uninstall-local:
 
 # Put in dependencies to the THDF5 module so that things will be built
 # in the correct order.
+thdf5.lo:		   thdf5.o
 thyperslab_wr.o:           $(srcdir)/thyperslab_wr.f90 thdf5.lo
 ptesthdf5_fortran.o:       $(srcdir)/ptesthdf5_fortran.f90 thdf5.lo
 
