@@ -22,13 +22,15 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5FO_mask
+
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access                          */
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Oprivate.h"		/* Object headers		  	*/
-
-#define PABLO_MASK	H5FO_mask
 
 /* Interface initialization */
 static int		interface_initialize_g = 0;
@@ -67,11 +69,11 @@ H5FL_DEFINE_STATIC(H5FO_open_obj_t);
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_create(H5F_t *f)
+H5FO_create(const H5F_t *f)
 {
     herr_t ret_value=SUCCEED;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_create,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_create,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -79,10 +81,10 @@ H5FO_create(H5F_t *f)
 
     /* Create TBBT used to store open object info */
     if((f->shared->open_objs=H5TB_fast_dmake(H5TB_FAST_HADDR_COMPARE))==NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object TBBT");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to create open object TBBT")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_create() */
 
 
@@ -113,7 +115,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_opened,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_opened,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -132,7 +134,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
         ret_value=FAIL;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_opened() */
 
 
@@ -158,12 +160,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
+H5FO_insert(const H5F_t *f, haddr_t addr, hid_t id)
 {
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_insert,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_insert,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -174,7 +176,7 @@ H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
 
     /* Allocate new opened object information structure */
     if((open_obj=H5FL_MALLOC(H5FO_open_obj_t))==NULL)
-        HGOTO_ERROR(H5E_CACHE,H5E_NOSPACE,FAIL,"memory allocation failed");
+        HGOTO_ERROR(H5E_CACHE,H5E_NOSPACE,FAIL,"memory allocation failed")
 
     /* Assign information */
     open_obj->addr=addr;
@@ -183,10 +185,10 @@ H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
 
     /* Insert into TBBT */
     if(H5TB_dins(f->shared->open_objs,open_obj,open_obj)==NULL)
-        HGOTO_ERROR(H5E_CACHE,H5E_CANTINSERT,FAIL,"can't insert object into TBBT");
+        HGOTO_ERROR(H5E_CACHE,H5E_CANTINSERT,FAIL,"can't insert object into TBBT")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_insert() */
 
 
@@ -216,7 +218,7 @@ H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_delete,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_delete,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -226,23 +228,23 @@ H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
     /* Get the object node from the TBBT */
     if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))==NULL)
-        HGOTO_ERROR(H5E_CACHE,H5E_NOTFOUND,FAIL,"can't locate object in TBBT");
+        HGOTO_ERROR(H5E_CACHE,H5E_NOTFOUND,FAIL,"can't locate object in TBBT")
 
     /* Remove from TBBT */
     if((open_obj=H5TB_rem(&f->shared->open_objs->root,obj_node,NULL))==NULL)
-        HGOTO_ERROR(H5E_CACHE,H5E_CANTRELEASE,FAIL,"can't remove object from TBBT");
+        HGOTO_ERROR(H5E_CACHE,H5E_CANTRELEASE,FAIL,"can't remove object from TBBT")
 
     /* Check if the object was deleted from the file */
     if(open_obj->deleted) {
         if(H5O_delete(f, dxpl_id, addr)<0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
     } /* end if */
 
     /* Release the object information */
     H5FL_FREE(H5FO_open_obj_t,open_obj);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_delete() */
 
 
@@ -262,19 +264,17 @@ done:
     Mark an opened object for deletion from the file when it is closed.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    There is currently no way to "undelete" an opened object that is marked
-    for deletion.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_mark(const H5F_t *f, haddr_t addr)
+H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
 {
     H5TB_NODE *obj_node;        /* TBBT node holding open object */
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_mark,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_mark,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -286,14 +286,61 @@ H5FO_mark(const H5F_t *f, haddr_t addr)
     if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
         open_obj=H5TB_NODE_DATA(obj_node);
         assert(open_obj);
-        open_obj->deleted=1;
+        open_obj->deleted=deleted;
     } /* end if */
     else
         ret_value=FAIL;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_mark() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5FO_marked
+ PURPOSE
+    Check if an object is marked to be deleted when it is closed
+ USAGE
+    htri_t H5FO_mark(f,addr)
+        const H5F_t *f;         IN: File opened object is in
+        haddr_t addr;           IN: Address of object to delete
+
+ RETURNS
+    Returns a TRUE/FALSE on success, negative on failure
+ DESCRIPTION
+    Checks if the object is currently in the "opened objects" tree and
+    whether its marks for deletion from the file when it is closed.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5FO_marked(const H5F_t *f, haddr_t addr)
+{
+    H5TB_NODE *obj_node;        /* TBBT node holding open object */
+    H5FO_open_obj_t *open_obj;  /* Information about open object */
+    htri_t ret_value=FAIL;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FO_marked,FAIL)
+
+    /* Sanity check */
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->open_objs);
+    assert(H5F_addr_defined(addr));
+
+    /* Get the object node from the TBBT */
+    if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
+        open_obj=H5TB_NODE_DATA(obj_node);
+        assert(open_obj);
+        ret_value=open_obj->deleted;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FO_marked() */
 
 
 /*--------------------------------------------------------------------------
@@ -315,11 +362,11 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_dest(H5F_t *f)
+H5FO_dest(const H5F_t *f)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_dest,FAIL);
+    FUNC_ENTER_NOAPI(H5FO_dest,FAIL)
 
     /* Sanity check */
     assert(f);
@@ -328,12 +375,12 @@ H5FO_dest(H5F_t *f)
 
     /* Check if the object info set is empty */
     if(H5TB_count(f->shared->open_objs)!=0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set");
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "objects still in open object info set")
 
     /* Release the open object info set TBBT */
     f->shared->open_objs=H5TB_dfree(f->shared->open_objs,NULL,NULL);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_dest() */
 

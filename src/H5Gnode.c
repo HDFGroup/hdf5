@@ -1048,7 +1048,8 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	if (H5G_node_create(f, dxpl_id, H5B_INS_FIRST, NULL, NULL, NULL,
 			    new_node_p/*out*/)<0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node");
-	if (NULL==(snrt=H5AC_find(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL)))
+
+	if (NULL == (snrt = H5AC_protect(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL)))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node");
 
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
@@ -1078,7 +1079,6 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 		*rt_key_changed = TRUE;
 	    }
 	}
-
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
@@ -1099,7 +1099,9 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     insert_into->nsyms += 1;
 
 done:
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0 && ret_value!=H5B_INS_ERROR)
+    if (snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, FALSE) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node");
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1729,17 +1731,21 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     fwidth = MAX(0, fwidth - 3);
     for (i = 0; i < sn->nsyms; i++) {
 	fprintf(stream, "%*sSymbol %d:\n", indent - 3, "", i);
-	if (H5F_addr_defined(heap) &&
+	if (heap>0 && H5F_addr_defined(heap) &&
 	    (s = H5HL_peek(f, dxpl_id, heap, sn->entry[i].name_off))) {
 	    fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth,
 		    "Name:",
 		    s);
 	}
+        else
+            fprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Warning: Invalid heap address given, name not displayed!");
+
 	H5G_ent_debug(f, dxpl_id, sn->entry + i, stream, indent, fwidth, heap);
     }
 
-    H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE);
-
 done:
+    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, FALSE) < 0)
+	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node");
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
