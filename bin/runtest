@@ -301,7 +301,6 @@ RUNSNAPTEST()
 		# option for snapshot
 		shift
 		SNAPCMD_OPT="$SNAPCMD_OPT $1"
-		shift
 		;;
 	    setenv)
 		# set environment variable
