@@ -1935,7 +1935,7 @@ cd ..
 echo $ac_n "checking how $F9X finds modules""... $ac_c" 1>&6
 echo "configure:1937: checking how $F9X finds modules" >&5
 
-for flag in "-M" "-I" "-p"; do
+for flag in "-I" "-M" "-p"; do
   cat >conftest.$ac_ext <<EOF
       program conftest
           use module
