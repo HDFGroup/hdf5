@@ -283,6 +283,8 @@ Documentation
 New Features
 ============
 
+    * Added option to print 1-byte integer datasets as ASCII to h5dump. BW -
+      2003/04/30
     * Added a new utility "h5fc". It can be used to compile easily Fortran
       programs which use HDF5. It automatically uses the compiler the HDF5
       library was built with and links in any libraries HDF5 requires.
