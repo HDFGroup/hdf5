@@ -602,12 +602,12 @@ Supported Configuration Features Summary
     Win98          y  n         y    n         y (6) y          y     y
     WinNT          y  n         y    n         y (6) y          y     y
     WinNT CW       y  n         n    n         n     n          y     y
-    FreeBSD        y  n         n    n         y     y          y     y
+    FreeBSD 4.8    y  n         n    n         y     y          y     y
     Linux 2.2      y  y (1)     y    n         y     y          y     y
     Linux 2.4      y  y (1)     n    n         y     y          y     y
 
 
-    Platform       1.2            static-   Thread-  SRB  GASS	STREAM-
+    Platform       1.4            static-   Thread-  SRB  GASS	STREAM-
                    compatibility  exec      safe                VFD
     Solaris2.7     n              x         y        n    n     y
     Solaris2.8 64  n              y         n        n    n     y
@@ -629,7 +629,7 @@ Supported Configuration Features Summary
     Win98          n              y         n        n    n     n
     WinNT          n              y         n        n    n     n
     WinNT CW       n              n         n        n    n     n
-    FreeBSD        n              y         y        n    n     y
+    FreeBSD 4.8    n              n         n        n    n     y
     Linux 2.2      n              y         y        n    n     y
     Linux 2.4      n              y         y        n    n     y
 
