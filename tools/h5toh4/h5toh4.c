@@ -315,7 +315,7 @@ int h5toh4(char *h5_filename, char *h4_filename)
 	hid_t (*func)(void*);
 
 
-	find_objs_t *info = malloc(sizeof(find_objs_t));
+	find_objs_t *info = HDmalloc(sizeof(find_objs_t));
 
 
 
