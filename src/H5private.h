@@ -177,6 +177,7 @@
 #define HDF5_FREESPACE_VERSION	0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION 0	/* of the Shared-Header Info	  */
+#define HDF5_DRIVERINFO_VERSION	0	/* of the Driver Information Block*/
 
 /*
  * Status return values for the `herr_t' type.
@@ -392,15 +393,6 @@ typedef double float64;
  */
 typedef int intn;
 typedef unsigned uintn;
-
-/*
- * File addresses.
- */
-typedef struct {
-    uint64_t		offset;	    /*offset within an HDF5 file    */
-} haddr_t;
-
-#define H5F_ADDR_UNDEF {((uint64_t)(-1L))}
 
 /*
  * Maximum and minimum values.	These should be defined in <limits.h> for the
@@ -706,9 +698,12 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwrite(F,M,Z)		write(F,M,Z)
 
 /*
- * And now for a couple non-Posix functions...
+ * And now for a couple non-Posix functions...  Watch out for systems that
+ * define these in terms of macros.
  */
+#ifndef strdup
 char *strdup(const char *s);
+#endif
 #define HDstrdup(S)		strdup(S)
 
 #ifndef HAVE_SNPRINTF
