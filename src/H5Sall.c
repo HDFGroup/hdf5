@@ -564,9 +564,9 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hssize_t    count;              /* Regular hyperslab count */
-    hsize_t	size[H5S_MAX_RANK];
-    hssize_t	file_offset[H5S_MAX_RANK];
-    hssize_t	mem_offset[H5S_MAX_RANK];
+    hsize_t	size[H5O_LAYOUT_NDIMS];
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
     int		i;
 
     FUNC_ENTER(H5S_all_read, FAIL);
@@ -722,9 +722,9 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hssize_t    count;              /* Regular hyperslab count */
-    hsize_t	size[H5S_MAX_RANK];
-    hssize_t	file_offset[H5S_MAX_RANK];
-    hssize_t	mem_offset[H5S_MAX_RANK];
+    hsize_t	size[H5O_LAYOUT_NDIMS];
+    hssize_t	file_offset[H5O_LAYOUT_NDIMS];
+    hssize_t	mem_offset[H5O_LAYOUT_NDIMS];
     int		i;
     
     FUNC_ENTER(H5S_all_write, FAIL);
