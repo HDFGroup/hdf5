@@ -287,8 +287,6 @@ run_test_loop(FILE *output, struct options *opts)
         /* we want to run only a select subset of these tests */
         io_runs = 0;
 
-        printf("0x%02x\n", opts->io_types);
-
         if (opts->io_types & PIO_HDF5)
             io_runs |= PIO_HDF5;
 
@@ -297,8 +295,6 @@ run_test_loop(FILE *output, struct options *opts)
 
         if (opts->io_types & PIO_RAW)
             io_runs |= PIO_RAW;
-
-        printf("0x%02x\n", io_runs);
     }
 
     parms.num_files = opts->num_files;
