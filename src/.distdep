@@ -214,32 +214,6 @@ H5Flow.o: \
    H5Fprivate.h \
    H5Fpublic.h \
    H5Dpublic.h
-H5Fmpio.o: \
-   H5Fmpio.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5Ipublic.h \
-   H5Dprivate.h \
-   H5Dpublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h \
-   H5Zpublic.h
 H5Fsec2.o: \
    H5Fsec2.c \
    H5private.h \
@@ -392,22 +366,6 @@ H5Gstab.o: \
    H5Sprivate.h \
    H5Spublic.h \
    H5Zprivate.h
-H5HG.o: \
-   H5HG.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5ACprivate.h \
-   H5ACpublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Ipublic.h \
-   H5Dpublic.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5MFprivate.h
 H5HL.o: \
    H5HL.c \
    H5private.h \
@@ -655,32 +613,6 @@ H5Olayout.o: \
    H5Zpublic.h \
    H5Eprivate.h \
    H5Epublic.h
-H5Omtime.o: \
-   H5Omtime.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5Ipublic.h \
-   H5MMprivate.h \
-   H5MMpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Dpublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h
 H5Oname.o: \
    H5Oname.c \
    H5private.h \
@@ -806,32 +738,6 @@ H5Ostab.o: \
    H5Sprivate.h \
    H5Spublic.h \
    H5Zprivate.h
-H5R.o: \
-   H5R.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Iprivate.h \
-   H5Ipublic.h \
-   H5Dprivate.h \
-   H5Dpublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h \
-   H5Zpublic.h \
-   H5Eprivate.h
 H5RA.o: \
    H5RA.c \
    H5RAprivate.h \
@@ -941,27 +847,6 @@ H5Shyper.o: \
    H5Zprivate.h \
    H5Zpublic.h \
    H5Vprivate.h
-H5Smpio.o: \
-   H5Smpio.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5Ipublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Dpublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h
 H5Snone.o: \
    H5Snone.c \
    H5private.h \
@@ -1119,37 +1004,6 @@ H5Z.o: \
    H5Sprivate.h \
    H5Spublic.h \
    H5Zprivate.h
-H5.o: \
-   H5.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5ACprivate.h \
-   H5ACpublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Ipublic.h \
-   H5Dpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5Iprivate.h \
-   H5MMprivate.h \
-   H5MMpublic.h \
-   H5Pprivate.h \
-   H5Ppublic.h \
-   H5Zpublic.h \
-   H5Rpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h
 H5P.o: \
    H5P.c \
    H5private.h \
@@ -1176,37 +1030,6 @@ H5P.o: \
    H5Zprivate.h \
    H5Zpublic.h \
    H5Eprivate.h
-H5T.o: \
-   H5T.c \
-   H5private.h \
-   H5public.h \
-   H5config.h \
-   H5Dprivate.h \
-   H5Dpublic.h \
-   H5Ipublic.h \
-   H5Fprivate.h \
-   H5Fpublic.h \
-   H5Gprivate.h \
-   H5Gpublic.h \
-   H5Bprivate.h \
-   H5Bpublic.h \
-   H5Oprivate.h \
-   H5Opublic.h \
-   H5HGprivate.h \
-   H5HGpublic.h \
-   H5Tprivate.h \
-   H5Tpublic.h \
-   H5Sprivate.h \
-   H5Spublic.h \
-   H5Zprivate.h \
-   H5Zpublic.h \
-   H5Iprivate.h \
-   H5Eprivate.h \
-   H5Epublic.h \
-   H5MMprivate.h \
-   H5MMpublic.h \
-   H5Tpkg.h \
-   H5Rprivate.h
 H5Tconv.o: \
    H5Tconv.c \
    H5Iprivate.h \
@@ -1251,3 +1074,180 @@ H5Tinit.o: \
    H5Rpublic.h \
    H5Tprivate.h \
    H5Tpublic.h
+H5.o: \
+   H5.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5ACprivate.h \
+   H5ACpublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Ipublic.h \
+   H5Dpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Iprivate.h \
+   H5MMprivate.h \
+   H5MMpublic.h \
+   H5Pprivate.h \
+   H5Ppublic.h \
+   H5Zpublic.h \
+   H5Rpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h
+H5Fmpio.o: \
+   H5Fmpio.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5Dprivate.h \
+   H5Dpublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Zprivate.h \
+   H5Zpublic.h
+H5HG.o: \
+   H5HG.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5ACprivate.h \
+   H5ACpublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Ipublic.h \
+   H5Dpublic.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5MFprivate.h
+H5Omtime.o: \
+   H5Omtime.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5MMprivate.h \
+   H5MMpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Dpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Zprivate.h
+H5R.o: \
+   H5R.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Iprivate.h \
+   H5Ipublic.h \
+   H5Dprivate.h \
+   H5Dpublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Zprivate.h \
+   H5Zpublic.h \
+   H5Eprivate.h
+H5Smpio.o: \
+   H5Smpio.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5Ipublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Dpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h
+H5T.o: \
+   H5T.c \
+   H5private.h \
+   H5public.h \
+   H5config.h \
+   H5Dprivate.h \
+   H5Dpublic.h \
+   H5Ipublic.h \
+   H5Fprivate.h \
+   H5Fpublic.h \
+   H5Gprivate.h \
+   H5Gpublic.h \
+   H5Bprivate.h \
+   H5Bpublic.h \
+   H5Oprivate.h \
+   H5Opublic.h \
+   H5HGprivate.h \
+   H5HGpublic.h \
+   H5Tprivate.h \
+   H5Tpublic.h \
+   H5Sprivate.h \
+   H5Spublic.h \
+   H5Zprivate.h \
+   H5Zpublic.h \
+   H5Iprivate.h \
+   H5Eprivate.h \
+   H5Epublic.h \
+   H5MMprivate.h \
+   H5MMpublic.h \
+   H5Tpkg.h \
+   H5Rprivate.h

@@ -202,7 +202,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
     H5HG_heap_t	*ret_value = NULL;
     uint8_t	*p = NULL;
     intn	i;
-    size_t	nalloc;
+    size_t	nalloc, need;
     
     FUNC_ENTER (H5HG_load, NULL);
 
@@ -294,7 +294,18 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	    p += 4; /*reserved*/
 	    H5F_decode_length (f, p, heap->obj[idx].size);
 	    heap->obj[idx].begin = begin;
-	    p = begin + H5HG_ALIGN(heap->obj[idx].size);
+	    /*
+	     * The total storage size includes the size of the object header
+	     * and is zero padded so the next object header is properly
+	     * aligned. The last bit of space is the free space object whose
+	     * size is never padded and already includes the object header.
+	     */
+	    if (idx>0) {
+		need = H5HG_ALIGN(H5HG_SIZEOF_OBJHDR(f) + heap->obj[idx].size);
+	    } else {
+		need = heap->obj[idx].size;
+	    }
+	    p = begin + need;
 	}
     }
     assert(p==heap->chunk+heap->size);
