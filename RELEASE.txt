@@ -118,13 +118,9 @@ Due to the nature of this release only C, C++ libraries and tools were tested.
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
     IRIX 6.5                      MIPSpro cc 7.30
-                                  mpich-1.2.1
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
-                                  mpt.1.4.0.2
-                                  mpich-1.2.1
     Linux 2.2.18smp               gcc-2.95.2
                                   g++ 2.95.2
-                                  mpich-1.2.1
     OSF1 V4.0                     DEC-V5.2-040
                                   Digital Fortran 90 V4.1-270
     SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
@@ -132,7 +128,6 @@ Due to the nature of this release only C, C++ libraries and tools were tested.
 
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0
-                                  mpich-1.2.1
     TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
     Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
     Windows 98                    MSVC++ 6.0
@@ -149,6 +144,12 @@ Known Problems
 
     * The --enable-static-exec configure flag fails to compile for HP-UX
       11.00 platforms.
+
+    * The executable are always dynamic on IRIX64 6.5(64 and n32) and 
+      IRIX 6.5 even if they are configured with --enable-static-exec.
+
+    * The shared library failed compilation on IRIX 6.5.
+
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.
 
