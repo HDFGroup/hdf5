@@ -411,7 +411,6 @@ int main(int argc, char **argv)
     TestInit();
 
     /* Tests are generally arranged from least to most complexity... */
-#if 0
     AddTest("mpio_dup", test_fapl_mpio_dup, NULL, 
 	    "fapl_mpio_dup", NULL);
     AddTest("mpiposix_dup", test_fapl_mpiposix_dup, NULL, 
@@ -468,7 +467,6 @@ int main(int argc, char **argv)
 	    "big dataset test", filenames[7]);
     AddTest("fillvalue", dataset_fillvalue, NULL, 
 	    "dataset fill value", filenames[8]);
-#endif
 
     if(mpi_size > 24) {
      if(MAINPROCESS) {
