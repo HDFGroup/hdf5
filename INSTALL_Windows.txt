@@ -888,8 +888,8 @@ Removing the zlib library completely:
 
     Open the all.dsw workspace file in Microsoft Visual C++. Go to the
     hdf5 project. Select the zlib.lib file from this project and
-    delete(press the 'delete' key) it. Next open the H5config.h file
-    from the src directory. Remove the the following two lines:
+    delete(press the 'delete' key) it. Next open the H5config.h and H5pubconf.h 
+    files from the src directory. Remove the the following two lines:
 
 		#define HAVE_LIBZ 1
 		#define HAVE_COMPRESS2
