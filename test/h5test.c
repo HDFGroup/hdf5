@@ -673,15 +673,12 @@ int
 h5_set_info_object(void)
 {
     char	*envp;			/* environment pointer */
-    char	*envendp;		/* end of environment string */
     char	*namep, *valp;		/* name, value pointers */
-    int		mpi_err;
     int		ret_value=0;
 
     /* handle any MPI INFO hints via $HDF5_MPI_INFO */
     if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
 	envp = HDstrdup(envp);
-	envendp = HDstrchr(envp, NULL);		/* remember end of string */
 
 	/* create an INFO object if not created yet */
 	if (pio_info_g==MPI_INFO_NULL)
@@ -722,7 +719,6 @@ h5_dump_info_object(MPI_Info info)
     char	value[MPI_MAX_INFO_VAL+1];
     int  	flag;
     int		i, nkeys;
-    int		mpi_err;
 
     printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", info,
 	MPI_MAX_INFO_VAL);
@@ -730,11 +726,11 @@ h5_dump_info_object(MPI_Info info)
 	printf("object is MPI_INFO_NULL\n");
     }
     else {
-	mpi_err=MPI_Info_get_nkeys(info, &nkeys);
+	MPI_Info_get_nkeys(info, &nkeys);
 	printf("object has %d items\n", nkeys);
 	for (i=0; i<nkeys; i++){
-	    mpi_err=MPI_Info_get_nthkey(info, i, key);
-	    mpi_err=MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+	    MPI_Info_get_nthkey(info, i, key);
+	    MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
 	    printf("%s=%s\n", key, value);
 	}
 
