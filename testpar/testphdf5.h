@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <hdf5.h>
+#include <h5test.h>
 
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */

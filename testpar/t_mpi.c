@@ -17,7 +17,7 @@
 #define MPIO_TEST_WRITE_SIZE 1024*1024     /* 1 MB */
 
 void
-test_mpio_overlap_writes(char *filename[])
+test_mpio_overlap_writes(char *filename)
 {
     int mpi_size, mpi_rank;
     MPI_Comm comm;
@@ -38,7 +38,7 @@ test_mpio_overlap_writes(char *filename[])
 
     if (verbose)
 	printf("MPIO independent overlapping writes test on file %s\n",
-	    filename[0]);
+	    filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -59,7 +59,7 @@ test_mpio_overlap_writes(char *filename[])
 
     if (color==0){
 	/* First n-1 processes (color==0) open a file and write it */
-	mrc = MPI_File_open(comm, filename[0], MPI_MODE_CREATE|MPI_MODE_RDWR,
+	mrc = MPI_File_open(comm, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
 		info, &fh);
 	VRFY((mrc==MPI_SUCCESS), "");
 
@@ -104,7 +104,7 @@ test_mpio_overlap_writes(char *filename[])
 	mrc = MPI_Barrier(MPI_COMM_WORLD);
 	VRFY((mrc==MPI_SUCCESS), "Sync after writes");
 
-	mrc = MPI_File_open(comm, filename[0], MPI_MODE_RDONLY,
+	mrc = MPI_File_open(comm, filename, MPI_MODE_RDONLY,
 		info, &fh);
 	VRFY((mrc==MPI_SUCCESS), "");
 

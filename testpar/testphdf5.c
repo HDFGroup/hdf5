@@ -14,28 +14,20 @@ int chunkdim1;
 int nerrors = 0;			/* errors count */
 int verbose = 0;			/* verbose, default as no. */
 
-/* FilePrefix defines where the temporary parallel test files should be. */
-/* In a parallel system, filesystem suitable for compiling are unlikly */
-/* the right place for parallel I/O.  There is no common used pathname */
-/* for the parallel file system.  So, /tmp is used as the default. */
-#ifdef __PUMAGON__
-/* For the PFS of TFLOPS */
-char *fileprefix = "pfs:/pfs_grande/multi/tmp_1/";
-#else
-char *fileprefix = "/tmp/";
-#endif
-size_t fileprefixlen;			/* file prefix length */
-
 herr_t (*old_func)(void*);		/* previous error handler */
 void *old_client_data;			/* previous error handler arg.*/
 
 /* other option flags */
 int doread=1;				/* read test */
 int dowrite=1;				/* write test */
-char    *filenames[]={ "ParaEg1.h5f",
-		       "ParaEg2.h5f",
-		       "ParaEg3.h5f",
-                       "ParaMdset.h5f" };
+/* FILENAME and filenames must have the same number of names */
+const char *FILENAME[5]={
+	    "ParaEg1",
+	    "ParaEg2",
+	    "ParaEg3",
+	    "ParaMdset",
+	    NULL};
+char	filenames[5][200];
 
 
 
@@ -143,7 +135,7 @@ parse_options(int argc, char **argv)
 				nerrors++;
 				return(1);
 			    }
-			    fileprefix = *argv;
+			    paraprefix = *argv;
 			    break;
 		case 'd':   /* dimensizes */
 			    if (--argc < 2){
@@ -195,23 +187,29 @@ parse_options(int argc, char **argv)
 	return(1);
     }
 
-    /* compose the filenames if file prefix is defined */
-    if (fileprefix != NULL) {
-	char *tmpptr;
-	int i;
+    /* compose the test filenames */
+    {
+	int i, n;
+	hid_t plist;
 
-	fileprefixlen = strlen(fileprefix);
-	i = sizeof(filenames)/sizeof(filenames[0]);
-	while (i-- > 0){
-	    tmpptr = filenames[i];
-            filenames[i] = (char *)malloc (fileprefixlen + strlen(tmpptr) + 1);
-            if (!filenames[i]) {
-		printf("%s\n","memory allocation failed");
+	plist = H5Pcreate (H5P_FILE_ACCESS);
+	H5Pset_fapl_mpio(plist, MPI_COMM_WORLD, MPI_INFO_NULL);
+	n = sizeof(FILENAME)/sizeof(FILENAME[0]) - 1;	/* exclude the NULL */
+
+	for (i=0; i < n; i++)
+	    if (h5_fixname(FILENAME[i],plist,filenames[i],sizeof(filenames[i]))
+		== NULL){
+		printf("h5_fixname failed\n");
 		nerrors++;
+		H5Pclose(plist);
 		return(1);
 	    }
-	    strcpy(filenames[i],fileprefix);
-	    strcat(filenames[i],tmpptr);
+	H5Pclose(plist);
+	if (verbose){
+	    int i;
+	    printf("Test filenames are:\n");
+	    for (i=0; i < n; i++)
+		printf("    %s\n", filenames[i]);
 	}
     }
 
@@ -241,10 +239,10 @@ main(int argc, char **argv)
 
     if (dowrite){
 	MPI_BANNER("testing MPIO independent overlapping writes...");
-	test_mpio_overlap_writes(filenames);
+	test_mpio_overlap_writes(filenames[0]);
 
 	MPI_BANNER("testing dataset using split communicators...");
-	test_split_comm_access(filenames);
+	test_split_comm_access(filenames[0]);
 
 	MPI_BANNER("testing dataset independent write...");
 	dataset_writeInd(filenames[0]);
@@ -259,6 +257,7 @@ main(int argc, char **argv)
 	multiple_dset_write(filenames[3]);
 
     }
+
     if (doread){
 	MPI_BANNER("testing dataset independent read...");
 	dataset_readInd(filenames[0]);
