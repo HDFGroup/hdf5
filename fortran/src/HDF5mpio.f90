@@ -10,6 +10,6 @@
        USE H5A
        USE H5T
        USE H5P
-       USE H5P_parallel
+       USE H5FDMPIO
        USE H5R
     END MODULE HDF5

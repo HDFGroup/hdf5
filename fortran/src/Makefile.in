@@ -22,8 +22,8 @@ LIB=libhdf5_fortran.la
 DISTCLEAN=H5fortran_types.f90
 
 ## Source and object files for the library
-CPAR_SRC=H5Pf_parallel.c
-FPAR_SRC=H5Pff_parallel.f90 HDF5_parallel.f90
+CPAR_SRC=H5FDmpiof.c
+FPAR_SRC=H5FDmpioff.f90 HDF5mpio.f90
 
 ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
 CPARALLEL=${ADD_PARALLEL_FILES:yes=$(CPAR_SRC)}

@@ -1,7 +1,7 @@
 !
 ! This file contains Fortran90 interfaces for H5P functions needed by || MPI programs.
 !
-     MODULE H5P_parallel
+     MODULE H5FDMPIO
          USE H5FORTRAN_TYPES
          USE H5FORTRAN_FLAGS
          CONTAINS
@@ -54,4 +54,4 @@
             hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
           END SUBROUTINE h5pget_dxpl_mpio_f
 
-    END MODULE H5P_parallel
+    END MODULE H5FDMPIO
