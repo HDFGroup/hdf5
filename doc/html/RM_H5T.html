@@ -379,7 +379,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         specified by <code>loc_id</code> and returns an identifier 
         for the datatype.  <code>loc_id</code> is either a file or 
         group identifier.  The identifier should eventually be closed 
-        by calling <code>H5Tclose()</code> to release resources.    
+        by calling <code>H5Tclose</code> to release resources.    
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
@@ -747,6 +747,9 @@ H5Tget_overflow ()
 <dt><strong>Description:</strong>
     <dd><code>H5Tvlen_create</code> determines whether the datatype 
         identified in <code>dtype_id</code> is a variable-length string.
+        <p>
+        This function can be used to distinguish between 
+        fixed and variable-length string datatypes.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dtype_id</code>
@@ -977,11 +980,16 @@ H5Tget_overflow ()
         <em>H5T_class_t</em><code>dtype_class</code>
     )
 <dt><strong>Purpose:</strong>
-    <dd>Determines whether a datatype is of the given datatype class.
+    <dd>Determines whether a datatype contains any datatypes of the 
+        given datatype class.
 <dt><strong>Description:</strong>
     <dd><code>H5Tdetect_class</code> determines whether the datatype 
-        specified in <code>dtype_id</code> is of the 
+        specified in <code>dtype_id</code> contains any datatypes of the 
         datatype class specified in <code>dtype_class</code>.
+        <p>
+        This function is useful primarily in recursively examining 
+        all the fields and/or base types 
+        of compound, array, and variable-length datatypes.
         <p>
         Valid class identifiers are as defined in 
 	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
@@ -1115,7 +1123,7 @@ H5Tget_overflow ()
     <dd>Returns the native datatype of a specified datatype.
 <dt><strong>Description:</strong>
     <dd><code>H5Tget_native_type</code> returns the equivalent native datatype  
-        for the dataset datatype specified in <code>type_id</code>.  
+        for the datatype specified in <code>type_id</code>.  
         <p>
         <code>H5Tget_native_type</code> is a high-level function designed
 	primarily to facilitate use of the <code>H5Dread</code> function,
@@ -1166,6 +1174,10 @@ H5Tget_overflow ()
 	use with intenger and floating point datatypes.
 	Time, bifield, opaque, and reference datatypes are returned
 	as a copy of <code>type_id</code>.
+        <p>
+        The identifier returned by <code>H5Tget_native_type</code> 
+        should eventually be closed by calling <code>H5Tclose</code> 
+        to release resources.    
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>type_id</code>
