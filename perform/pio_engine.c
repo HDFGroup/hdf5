@@ -6,9 +6,13 @@
  * Author: Albert Cheng of NCSA, Oct 24, 2001.
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "hdf5.h"
 
@@ -80,7 +84,7 @@
 #define RAWCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
 #define RAWOPEN(fn, F)          HDopen(fn, F, 0600)
 #define RAWCLOSE(F)             HDclose(F)
-#define RAWSEEK(F,L)            HDseek(F,L,SEEK_SET)
+#define RAWSEEK(F,L)            HDseek(F,(off_t) L,SEEK_SET)
 #define RAWWRITE(F,B,S)         HDwrite(F,B,S)
 #define RAWREAD(F,B,S)          HDread(F,B,S)
 
@@ -104,6 +108,7 @@ enum {
 #    define HDF5_PARAPREFIX "/tmp"
 #  endif    /* __PUMAGON__ */
 #endif  /* !HDF5_PARAPREFIX */
+#define MIN(a,b) (a < b ? a : b)
 
 /* the different types of file descriptors we can expect */
 typedef union _file_descr {
@@ -115,10 +120,11 @@ typedef union _file_descr {
 /* local functions */
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
-static herr_t do_write(file_descr fd, iotype iot, unsigned long ndsets,
-                       unsigned long nelmts, hid_t h5dset_space_id, char *buffer);
-static herr_t do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags);
-static herr_t do_close(iotype iot, file_descr fd);
+static herr_t do_write(file_descr fd, iotype iot, long ndsets,
+                       long nelmts, hid_t h5dset_space_id, char *buffer);
+static herr_t do_fopen(iotype iot, char *fname, file_descr fd /*out*/,
+    int flags, MPI_Comm comm);
+static herr_t do_fclose(iotype iot, file_descr fd);
 
 herr_t
 do_pio(parameters param)
@@ -132,11 +138,11 @@ do_pio(parameters param)
     iotype          iot;
 
     char            fname[FILENAME_MAX];
-    unsigned int    maxprocs, nfiles, nf;
-    unsigned long   ndsets;
-    unsigned long   nelmts;
-    unsigned int    niters;
-    unsigned long   nelmts_toread, nelmts_read;
+    int    	    maxprocs, nfiles, nf;
+    long   	    ndsets;
+    long   	    nelmts;
+    int    	    niters;
+    long   	    nelmts_toread, nelmts_read;
     off_t           next_offset;            /*offset of next I/O            */
     int             color;                  /*for communicator creation     */
     char           *buffer = NULL;          /*data buffer pointer           */
@@ -182,14 +188,14 @@ do_pio(parameters param)
     niters = param.num_iters;       /* number of iterations of reads/writes */
     maxprocs = param.max_num_procs; /* max number of mpi-processes to use   */
 
-    if (nelmts == 0 ) {
+    if (nelmts <= 0 ) {
         fprintf(stderr,
                 "number of elements per dataset must be > 0 (%lu)\n",
                 nelmts);
         GOTOERROR(FAIL);
     }
 
-    if (maxprocs == 0 ) {
+    if (maxprocs <= 0 ) {
         fprintf(stderr,
                 "maximun number of process to use must be > 0 (%u)\n",
                 maxprocs);
@@ -264,20 +270,20 @@ MSG("creating file");
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
 
-        rc = do_open(iot, fname, fd, PIO_CREATE | PIO_WRITE);
-        VRFY((rc == SUCCESS), "do_open failed\n");
+        rc = do_fopen(iot, fname, fd, PIO_CREATE | PIO_WRITE, comm);
+        VRFY((rc == SUCCESS), "do_fopen failed\n");
         rc = do_write(fd, iot, ndsets, nelmts, h5dset_space_id, buffer);
         VRFY((rc == SUCCESS), "do_write failed\n");
 
 	/* Close file for write */
 MSG("closing write file");
-        rc = do_close(iot, fd);
-        VRFY((rc == SUCCESS), "do_close failed\n");
+        rc = do_fclose(iot, fd);
+        VRFY((rc == SUCCESS), "do_fclose failed\n");
 
         /* Open file for read */
 MSG("opening file to read");
-        hrc = do_open(iot, fname, fd, PIO_READ);
-        VRFY((rc == SUCCESS), "do_open failed\n");
+        hrc = do_fopen(iot, fname, fd, PIO_READ, comm);
+        VRFY((rc == SUCCESS), "do_fopen failed\n");
 
         /* Calculate dataset offset within a file */
 
@@ -295,8 +301,8 @@ MSG("opening file to read");
 
         /* Close file for read */
 MSG("closing read file");
-        rc = do_close(iot, fd);
-        VRFY((rc == SUCCESS), "do_close failed\n");
+        rc = do_fclose(iot, fd);
+        VRFY((rc == SUCCESS), "do_fclose failed\n");
         remove(fname);
     }
 
@@ -326,7 +332,7 @@ done:
     }
 
     /* close any opened files */
-    rc = do_close(iot, fd);
+    rc = do_fclose(iot, fd);
 
     /* release generic resources */
     free(buffer);
@@ -455,15 +461,15 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Modifications:
  */
 static herr_t
-do_write(file_descr fd, iotype iot, unsigned long ndsets,
-         unsigned long nelmts, hid_t h5dset_space_id, char *buffer)
+do_write(file_descr fd, iotype iot, long ndsets,
+         long nelmts, hid_t h5dset_space_id, char *buffer)
 {
     int ret_code = SUCCESS;
-    register unsigned long ndset;
-    unsigned long nelmts_towrite, nelmts_written;
+    register long ndset;
+    long nelmts_towrite, nelmts_written;
     char dname[64];
     off_t dset_offset;          /*dataset offset in a file  */
-    unsigned long dset_size;    /*one dataset size in bytes */
+    long dset_size;    /*one dataset size in bytes */
 
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * ELMT_SIZE;
@@ -553,14 +559,15 @@ done:
 }
 
 /*
- * Function:    do_open
+ * Function:    do_fopen
  * Purpose:     Open the specified file.
  * Return:      SUCCESS or FAIL
  * Programmer:  Bill Wendling, 14. November 2001
  * Modifications:
  */
 static herr_t
-do_open(iotype iot, char *fname, file_descr fd /*out*/, int flags)
+do_fopen(iotype iot, char *fname, file_descr fd /*out*/, int flags,
+    MPI_Comm comm)
 {
     int ret_code = SUCCESS, mrc;
     herr_t hrc;
@@ -640,14 +647,14 @@ done:
 }
 
 /*
- * Function:    do_close
+ * Function:    do_fclose
  * Purpose:     Close the specified file descriptor.
  * Return:      SUCCESS or FAIL
  * Programmer:  Bill Wendling, 14. November 2001
  * Modifications:
  */
 static herr_t
-do_close(iotype iot, file_descr fd)
+do_fclose(iotype iot, file_descr fd)
 {
     herr_t ret_code = SUCCESS, hrc;
     int mrc = 0, rc = 0;
