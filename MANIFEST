@@ -6,6 +6,7 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
+./.autom4te.cfg             _DO_NOT_DISTRIBUTE_
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
@@ -211,8 +212,6 @@
 ./doc/html/TechNotes/SWControls.html
 ./doc/html/TechNotes/SymbolTables.html
 ./doc/html/TechNotes/TestReview.html
-./doc/html/TechNotes/TestReview/H5Dget_offset.html
-./doc/html/TechNotes/TestReview/H5Tget_native_type.html
 ./doc/html/TechNotes/ThreadSafeLibrary.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
@@ -808,6 +807,8 @@
 ./src/H5FDcore.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
+./src/H5FDfphdf5.c
+./src/H5FDfphdf5.h
 ./src/H5FDgass.c
 ./src/H5FDgass.h
 ./src/H5FDlog.c
