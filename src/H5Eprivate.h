@@ -78,6 +78,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_UNSUPPORTED,   "Feature is unsupported"},
     {H5E_BADTYPE,       "Incorrect type found"},
     {H5E_BADRANGE,      "Argument out of range"},
+    {H5E_BADVALUE,      "Bad value for argument"},
     {H5E_NOSPACE,       "No space available for allocation"},
     {H5E_FILEEXISTS,    "File already exists"},
     {H5E_FILEOPEN,      "File already open"},
