@@ -8472,7 +8472,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             /* Allocate enough space for the buffer holding temporary 
              * converted value
              */ 
-            buf_size = (int)HDpow((double)2.0, (double)src.u.f.esize) / 8 + 1;          
+            buf_size = (size_t)HDpow((double)2.0, (double)src.u.f.esize) / 8 + 1;          
             int_buf = (uint8_t*)H5MM_calloc(buf_size);
 
             /* The conversion loop */
@@ -8564,7 +8564,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * the source exponent bias.
                  */
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
-                    /*Don't get this part*/
                     bitno = H5T_bit_find(s, src.u.f.mpos, src.u.f.msize,
                                          H5T_BIT_MSB, TRUE);
                     assert(bitno>=0);
@@ -8607,11 +8606,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
                  * or by mantissa size minus exponent(left shift).
                  */
-                if( H5T_NORM_IMPLIED==src.u.f.norm) {
-                    H5T_bit_shift(int_buf, expo - src.u.f.msize, buf_size);
-                } else if(H5T_NORM_NONE==src.u.f.norm) {
-                    /* How to do this? */
-                }
+                H5T_bit_shift(int_buf, expo - src.u.f.msize, buf_size);
 
                 /*fprintf(stderr, "int_buf=");
                 for(i=0; i<buf_size; i++)
@@ -8721,6 +8716,384 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     }
                 }
 
+                /*
+                 * If we had used a temporary buffer for the destination then we
+                 * should copy the value to the true destination buffer.
+                 */
+                if (d==dbuf)
+                    HDmemcpy (dp, d, dst_p->size);
+                if (buf_stride) {
+                    sp += direction * buf_stride;
+                    dp += direction * buf_stride;
+                } else {
+                    sp += direction * src_p->size;
+                    dp += direction * dst_p->size;
+                }
+
+                HDmemset(int_buf, 0, buf_size);
+            }
+           
+            H5MM_xfree(int_buf);
+
+            break;
+                
+        default:
+            HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_i_f
+ *
+ * Purpose:	Convert one integer type to a floating-point type.  This is 
+ *              the catch-all function for integer-float conversions and 
+ *              is probably not particularly fast.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Friday, Feb 6, 2004
+ *
+ * Modifications:
+ *		
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
+    size_t buf_stride, size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
+    hid_t UNUSED dxpl_id)
+{
+    /* Traversal-related variables */
+    H5T_t	*src_p;			/*source data type		*/
+    H5T_t	*dst_p;			/*destination data type		*/
+    H5T_atomic_t src;			/*atomic source info		*/
+    H5T_atomic_t dst;			/*atomic destination info	*/
+    int	direction;		/*forward or backward traversal	*/
+    hsize_t	elmtno;			/*element number		*/
+    size_t	half_size;		/*half the type size		*/
+    hsize_t	olap;			/*num overlapping elements	*/
+    ssize_t	bitno;			/*bit number			*/
+    uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
+    uint8_t	dbuf[64];		/*temp destination buffer	*/
+
+    /* Conversion-related variables */
+    hsize_t	expo;			/*destiny exponent		*/
+    hsize_t	expo_max;		/*maximal possible exponent value       */
+    /*hsize_t     sign = 0;*/               /*source sign bit value         */
+    /*hsize_t     is_max_neg = 0;*/         /*source is maximal negative value*/
+    /*hsize_t     do_round = 0;*/           /*whether there is roundup      */
+    /*hsize_t     trailing = 0;*/           /*whether there is trailing after 1st roundup bit*/
+    uint8_t     *int_buf;               /*buffer for temporary value    */ 
+    size_t      buf_size;               /*buffer size for temporary value */
+    size_t      msize;                  /*mantissa size after restored implied 1  */
+    size_t	i;			/*miscellaneous counters	*/
+    size_t	first;                  /*first bit(MSB) in an integer  */
+    ssize_t	sfirst;			/*a signed version of `first'	*/
+    herr_t      ret_value=SUCCEED;       /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5T_conv_i_f, FAIL);
+
+    switch (cdata->command) {
+        case H5T_CONV_INIT:
+            if (NULL==(src_p=H5I_object(src_id)) ||
+                    NULL==(dst_p=H5I_object(dst_id)))
+                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            src = src_p->u.atomic;
+            dst = dst_p->u.atomic;
+            if (H5T_ORDER_LE!=dst.order && H5T_ORDER_BE!=dst.order)
+                HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported byte order");
+            if (dst_p->size>sizeof(dbuf))
+                HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "destination size is too large");
+            if (8*sizeof(expo)-1<src.u.f.esize)
+                HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "exponent field is too large");
+            cdata->need_bkg = H5T_BKG_NO;
+            break;
+
+        case H5T_CONV_FREE:
+            break;
+
+        case H5T_CONV_CONV:
+            /* Get the data types */
+            if (NULL==(src_p=H5I_object(src_id)) ||
+                    NULL==(dst_p=H5I_object(dst_id)))
+                HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+            src = src_p->u.atomic;
+            dst = dst_p->u.atomic;
+
+            /*
+             * Do we process the values from beginning to end or vice versa? Also,
+             * how many of the elements have the source and destination areas
+             * overlapping?
+             */
+            if (src_p->size==dst_p->size || buf_stride) {
+                sp = dp = (uint8_t*)buf;
+                direction = 1;
+                olap = nelmts;
+            } else if (src_p->size>=dst_p->size) {
+                double olap_d = HDceil((double)(dst_p->size)/
+                                       (double)(src_p->size-dst_p->size));
+                olap = (size_t)olap_d;
+                sp = dp = (uint8_t*)buf;
+                direction = 1;
+            } else {
+                double olap_d = HDceil((double)(src_p->size)/
+                                       (double)(dst_p->size-src_p->size));
+                olap = (size_t)olap_d;
+                sp = (uint8_t*)buf + (nelmts-1) * src_p->size;
+                dp = (uint8_t*)buf + (nelmts-1) * dst_p->size;
+                direction = -1;
+            }
+
+            /* Allocate enough space for the buffer holding temporary 
+             * converted value
+             */ 
+            buf_size = (src.prec > dst.u.f.msize ? src.prec : dst.u.f.msize)/8 + 1;
+            int_buf = (uint8_t*)H5MM_calloc(buf_size);
+
+            /* The conversion loop */
+            for (elmtno=0; elmtno<nelmts; elmtno++) {
+                hsize_t     sign = 0;               /*source sign bit value         */
+                hsize_t     is_max_neg = 0;         /*source is maximal negative value*/
+                hsize_t     do_round = 0;           /*whether there is roundup      */
+                hsize_t     trailing = 0;           /*whether there is trailing after 1st roundup bit*/
+
+                /*
+                 * If the source and destination buffers overlap then use a
+                 * temporary buffer for the destination.
+                 */
+                if (direction>0) {
+                    s = sp;
+                    d = elmtno<olap ? dbuf : dp;
+                } else {
+                    s = sp;
+                    d = elmtno+olap >= nelmts ? dbuf : dp;
+                }
+#ifndef NDEBUG
+                /* I don't quite trust the overlap calculations yet --rpm */
+                if (d==dbuf) {
+                    assert ((dp>=sp && dp<sp+src_p->size) ||
+                            (sp>=dp && sp<dp+dst_p->size));
+                } else {
+                    assert ((dp<sp && dp+dst_p->size<=sp) ||
+                            (sp<dp && sp+src_p->size<=dp));
+                }
+#endif
+
+                /*
+                 * Put the data in little endian order so our loops aren't so
+                 * complicated.  We'll do all the conversion stuff assuming
+                 * little endian and then we'll fix the order at the end.
+                 */
+                if (H5T_ORDER_BE==src.order) {
+                    half_size = src_p->size/2;
+                    for (i=0; i<half_size; i++) {
+                        uint8_t tmp = s[src_p->size-(i+1)];
+                        s[src_p->size-(i+1)] = s[i];
+                        s[i] = tmp;
+                    }
+                }
+                
+                /*zero-set all destination bits*/ 
+                H5T_bit_set (d, dst.offset, dst.prec, FALSE);
+                
+                /* Copy source into a temporary buffer */
+                H5T_bit_copy(int_buf, 0, s, src.offset, src.prec);
+
+
+/* For debug */
+/*HDmemset(int_buf, 0, buf_size);
+H5T_bit_set(int_buf, 0, src.prec, 1);*/
+
+/*fprintf(stderr, "\n no. %d int_buf=0x ", elmtno);
+for(i=0; i<buf_size; i++)
+    	fprintf(stderr, "%02x ", int_buf[i]);*/
+/*fprintf(stderr, "\n     s=0x ");
+for(i=0; i<buf_size-1; i++)
+    	fprintf(stderr, "%02x ", s[i]);*/
+
+                /*
+                 * Find the sign bit value of the source.
+                 */
+                if (H5T_SGN_2 == src.u.i.sign)
+                    sign = H5T_bit_get_d(int_buf, src.prec-1, 1);
+
+                /*
+                 * What is the bit position(starting from 0 as first one) for the most significant 
+		 * bit(MSB) of S which is set?
+                 */
+                if(H5T_SGN_2 == src.u.i.sign) {
+                    sfirst = H5T_bit_find(int_buf, 0, src.prec-1, H5T_BIT_MSB, TRUE);
+                    if(sign && sfirst < 0)
+			/* The case 0x80...00, which is negative with maximal value */
+                        is_max_neg = 1;    
+                } else if(H5T_SGN_NONE == src.u.i.sign)
+                    sfirst = H5T_bit_find(int_buf, 0, src.prec, H5T_BIT_MSB, TRUE);
+/*fprintf(stderr, "\n     is_max_neg=%d", is_max_neg);*/
+
+                /* Handle special cases here.  Integer is zero */
+                if(!sign && sfirst < 0)
+                    goto padding;
+                
+                /*
+                 * Convert source integer if it's negative
+                 */
+                if (H5T_SGN_2 == src.u.i.sign && sign) {
+                    if(!is_max_neg) {
+                        /* Equivalent to ~(i - 1) */
+                        H5T_bit_dec(int_buf, 0, buf_size*8);
+                        H5T_bit_neg(int_buf, 0, buf_size*8);
+                        sfirst = H5T_bit_find(int_buf, 0, src.prec-1, H5T_BIT_MSB, TRUE);
+                    } else {
+			/* If it's maximal negative number 0x80...000, treat it as if it overflows
+			 * (create a carry) to help conversion.  i.e. a character type number 0x80
+			 * is treated as 0x100.
+			 */
+                        sfirst = src.prec-1;
+                        is_max_neg = 0;
+                    }
+/*fprintf(stderr, "\n     after negate int_buf=0x ");
+for(i=0; i<buf_size; i++)
+    fprintf(stderr, "%02x ", int_buf[i]);*/
+
+                    /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of 
+                     * sign bit to 0 in the temporary buffer because they're all negated from the previous
+		     * step. */
+                    H5T_bit_set(int_buf, src.prec, buf_size*8-src.prec, 0);
+/*fprintf(stderr, "\n     after bits in front of sign off int_buf=0x ");
+for(i=0; i<buf_size; i++)
+    fprintf(stderr, "%02x ", int_buf[i]);*/
+
+                    /* Set sign bit in destiny */
+                    H5T_bit_set_d(d, dst.u.f.sign, 1, sign);
+                }
+
+                first = (size_t)sfirst;
+/*fprintf(stderr, "\n     first=%d", first);*/
+
+                
+                /*
+                 * Calculate the true destination exponent by adjusting according to
+                 * the destination exponent bias.
+                 */
+                if (H5T_NORM_NONE==src.u.f.norm) {
+                    expo = first + 1 + dst.u.f.ebias;
+                } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                    expo = first + dst.u.f.ebias;
+                } else {
+                    assert("normalization method not implemented yet" && 0);
+                    HDabort();
+                }
+
+/*fprintf(stderr, "\n     expo=%d,", expo); 
+fprintf(stderr, "\n     expo_max=%d,", expo_max);*/
+
+                /* Handle mantissa part here */
+                if (H5T_NORM_IMPLIED==src.u.f.norm) {
+                    /* Imply first bit */
+                    H5T_bit_set(int_buf, first, 1, 0);
+/*fprintf(stderr, "\n     after 1st bit implied int_buf=0x ");
+for(i=0; i<buf_size; i++)
+    fprintf(stderr, "%02x ", int_buf[i]);*/
+       		} else if (H5T_NORM_NONE==src.u.f.norm) {
+		    first++;
+		}
+
+                /* Roundup for mantissa */ 
+                if(first > dst.u.f.msize) {
+		    /* If the bit sequence is bigger than the mantissa part, we need to drop off the 
+		     * extra bits at the end and do rounding.  If we have .50...0(decimal) after radix 
+		     * point, we do roundup when the least significant digit before radix is odd, we do 
+		     * rounddown if it's even.
+		     */
+			
+                    /* Check 1st dropoff bit, see if it's set. */
+                    if(H5T_bit_get_d(int_buf, (first-dst.u.f.msize-1), 1)) {
+                    	/* Check all bits after 1st dropoff bit, see if any of them is set. */
+                        if((first-dst.u.f.msize-1) > 0 && H5T_bit_get_d(int_buf, 0, (first-dst.u.f.msize-1)))
+                            do_round = 1;
+                        else {  /* The .50...0 case */
+                            /* Check if the least significant bit is odd. */
+                            if(H5T_bit_get_d(int_buf, (first-dst.u.f.msize), 1))
+                               do_round = 1;
+                        }
+		    } 
+
+                    /* Right shift to drop off extra bits */
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), buf_size);
+
+                    if(do_round) {
+                        H5T_bit_inc(int_buf, 0, buf_size*8);
+                        do_round = 0;
+
+			/* If integer is like 0x0ff...fff and we need to round up the 
+			 * last f, we get 0x100...000.  Treat this special case here.
+			 */  
+                    	if(H5T_bit_get_d(int_buf, dst.u.f.msize, 1)) {
+                	    if (H5T_NORM_IMPLIED==src.u.f.norm) {
+			        /* The bit at this 1's position was impled already, so this 
+			         * number should be 0x200...000.  We need to increment the 
+			         * exponent in this case.  
+			         */ 
+			    	expo++;
+       			    } else if (H5T_NORM_NONE==src.u.f.norm) {
+				/* Right shift 1 bit to let the carried 1 fit in the mantissa,
+				 * and increment exponent by 1.
+				 */
+                    		H5T_bit_shift(int_buf, -1, buf_size);
+			 	expo++;    
+			    }
+			}
+                    }
+                } else {
+                    /* The bit sequence can fit mantissa part.  Left shift to fit in from high-order of
+		     * bit position. */
+                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize-first), buf_size);
+                } 
+                    
+
+                /* Check if the exponent is too big */
+                expo_max = (hsize_t)HDpow((double)2.0, (double)dst.u.f.esize) - 1;          
+                if(expo > expo_max)
+                    expo = expo_max;
+
+                /* Set exponent in destiny */
+                H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, expo);
+
+                /* Copy mantissa into destiny */
+                H5T_bit_copy(d, dst.u.f.mpos, int_buf, 0, buf_size*8 > dst.u.f.msize ? dst.u.f.msize : buf_size*8);
+
+            padding:
+                /*
+                 * Set padding areas in destination.
+                 */
+                if (dst.offset>0) {
+                    assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
+                    H5T_bit_set (d, 0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                }
+                if (dst.offset+dst.prec!=8*dst_p->size) {
+                    assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
+                    H5T_bit_set (d, dst.offset+dst.prec,
+                                 8*dst_p->size - (dst.offset+ dst.prec),
+                                 (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
+                }
+
+                /*
+                 * Put the destination in the correct byte order.  See note at
+                 * beginning of loop.
+                 */
+                if (H5T_ORDER_BE==dst.order) {
+                    half_size = dst_p->size/2;
+                    for (i=0; i<half_size; i++) {
+                        uint8_t tmp = d[dst_p->size-(i+1)];
+                        d[dst_p->size-(i+1)] = d[i];
+                        d[i] = tmp;
+                    }
+                }
+                
                 /*
                  * If we had used a temporary buffer for the destination then we
                  * should copy the value to the true destination buffer.

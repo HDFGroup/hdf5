@@ -954,6 +954,7 @@ H5T_init_interface(void)
     status = 0;
 
     status |= H5T_register(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T_conv_i_i, H5AC_dxpl_id);
+    status |= H5T_register(H5T_PERS_SOFT, "i_f", fixedpt, floatpt, H5T_conv_i_f, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "f_f", floatpt, floatpt, H5T_conv_f_f, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "f_i", floatpt, fixedpt, H5T_conv_f_i, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_SOFT, "s_s", string, string, H5T_conv_s_s, H5AC_dxpl_id);

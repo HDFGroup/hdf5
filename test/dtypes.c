@@ -27,7 +27,11 @@
 #define NTESTS	1
 
 /* Number of elements in each test */
+#ifndef TMP
 #define NTESTELEM	100000
+#else
+#define NTESTELEM       10
+#endif /*TMP*/
 
 /* Define if you want to see a count of overflows */
 #undef SHOW_OVERFLOWS
@@ -5399,7 +5403,7 @@ static int
 run_int_float_conv(const char *name)
 {
     int		nerrors = 0;
-    
+
     nerrors += test_conv_int_float(name, H5T_NATIVE_CHAR, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_CHAR, H5T_NATIVE_DOUBLE);
 
@@ -5456,7 +5460,7 @@ static int
 run_float_int_conv(const char *name)
 {
     int		nerrors = 0;
-#ifndef TMP    
+
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_CHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_CHAR);
     
@@ -5472,9 +5476,7 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_INT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_INT);
     
-#endif /*TMP*/ 
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_UINT);
-#ifndef TMP    
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_UINT);
     
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
@@ -5498,7 +5500,6 @@ run_float_int_conv(const char *name)
         nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
     }
 #endif
-#endif /*TMP*/ 
     
     return nerrors;
 }
@@ -5580,7 +5581,7 @@ main(void)
     
     /* Test hardware float-integer conversion functions */
     nerrors += run_float_int_conv("hw");
-
+    
     /*----------------------------------------------------------------------
      * Software tests
      *---------------------------------------------------------------------- 
@@ -5604,6 +5605,9 @@ main(void)
     
     /* Test software float-integer conversion functions */
     nerrors += run_float_int_conv("sw");
+    
+    /* Test software integer-float conversion functions */
+    nerrors += run_int_float_conv("sw");
 
     reset_hdf5();
     

@@ -383,6 +383,10 @@ H5_DLL herr_t H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    hsize_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *_buf, void *bkg,
                             hid_t dset_xfer_plist);
+H5_DLL herr_t H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    hsize_t nelmts, size_t buf_stride,
+                            size_t bkg_stride, void *_buf, void *bkg,
+                            hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    hsize_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *_buf, void *bkg,

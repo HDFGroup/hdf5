@@ -166,7 +166,8 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
  *
  * Purpose:	Simulation of hardware shifting.  Shifts a bit vector
  *              in a way similar to shifting a variable value, like
- *              value <<= 3, or value >>= 16.
+ *              value <<= 3, or value >>= 16.  SHIFT_DIST is positive for 
+ *              left shift, negative for right shift.
  *
  * Return:	void
  *
@@ -174,6 +175,9 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
  *              Wednesday, Febuary 4, 2004
  *
  * Modifications:
+ *
+ * 		Can generalize it to handle a bit vector of any START 
+ * 		position and any SIZE.
  *
  *-------------------------------------------------------------------------
  */
@@ -219,7 +223,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_bit_get_d
  *
- * Purpose:	Return a small bit sequence as a number.
+ * Purpose:	Return a small bit sequence as a number.  Bit vector starts
+ *              at OFFSET and is SIZE bits long.
  *
  * Return:	Success:	The bit sequence interpretted as an unsigned
  *				integer.
@@ -369,7 +374,9 @@ H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
  * Purpose:	Finds the first bit with the specified VALUE within a region
  *		of a bit vector.  The region begins at OFFSET and continues
  *		for SIZE bits, but the region can be searched from the least
- *		significat end toward the most significant end with 
+ *		significat end toward the most significant end(H5T_BIT_MSB
+ *		as DIRECTION), or from the most significant end to the least 
+ *		significant end(H5T_BIT_LSB as DIRECTION).
  *
  * Return:	Success:	The position of the bit found, relative to
  *				the offset.
@@ -473,7 +480,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_bit_inc
  *
- * Purpose:	Increment part of a bit field by adding 1.
+ * Purpose:	Increment part of a bit field by adding 1.  The bit field 
+ *              starts with bit position START and is SIZE bits long.
  *
  * Return:	Success:        The carry-out value, one if overflow zero
  *				otherwise.
@@ -542,8 +550,8 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
  * Function:	H5T_bit_dec
  *
  * Purpose:	decrement part of a bit field by 1.
- *              At this moment, START is always 0 and the algorithm only 
- *              works from the end to the front for the buffer.
+ *              At this moment, START is always 0 and SIZE is a multiply 
+ *              of 8(in bit).  This is different from H5T_bit_inc.
  *
  * Return:	void
  *
@@ -552,6 +560,9 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
  *              Wednesday, Jan 28, 2004
  *
  * Modifications:
+ *
+ * 		Need to generalize it to handle random START and SIZE like
+ *              H5T_bit_inc. 
  *
  *-------------------------------------------------------------------------
  */
@@ -579,7 +590,8 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
  * Function:	H5T_bit_neg
  *
  * Purpose:	Bit-negate buffer.
- *              At this moment, START is always 0. 
+ *              At this moment, START is always 0 and SIZE is always a
+ *              multiply of 8 (in bit). 
  *
  * Return:	void
  *
@@ -587,6 +599,9 @@ H5T_bit_dec(uint8_t *buf, size_t start, size_t size)
  *              Wednesday, Jan 28, 2004
  *
  * Modifications:
+ *
+ * 		Need to generalize it to handle rand START and SIZE like
+ * 		H5T_bit_inc.
  *
  *-------------------------------------------------------------------------
  */
