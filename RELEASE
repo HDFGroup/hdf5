@@ -41,7 +41,8 @@ Bug fixes since HDF5-1.2.1
    * Corrected a floating point number conversion error for the
      Cray J90 platform.  The error did not convert the value 0.0
      correctly.
-
+   * h5dump correctly displays the committed copy of predefined types
+     correctly.
 
 Bug fixes since HDF5-1.2.0
 ==========================
