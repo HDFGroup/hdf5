@@ -2369,8 +2369,8 @@ dump_fcpl(hid_t fid)
  int      sym_lk;         
 #else 
  unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
- int      istore_ik; /* indexed storage B-tree initial 'K' value */
 #endif 
+ int      istore_ik; /* indexed storage B-tree initial 'K' value */
  hid_t    fcpl;      /* file creation property list ID */
  hid_t		  fapl;      /* file access property list ID */
  hsize_t  userblock; /* userblock size retrieved from FCPL */
