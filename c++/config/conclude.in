@@ -100,7 +100,7 @@ install-examples: $(EXAMPLE_PROGS) $(EXAMPLEDIR)
 
 uninstall-examples:
 	@if test -n "$(EXAMPLE_PROGS)"; then 				      \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_DOCS);		      \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
 	fi
 
 ## Removes those things that `make install' (would have) installed.
