@@ -824,6 +824,8 @@ H5FD_mpiposix_close(H5FD_t *_file)
     if (HDclose(file->fd)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
+    /* make sure all processes have closed the file before returning. */
+    MPI_Barrier(file->comm);
     /* Clean up other stuff */
     MPI_Comm_free(&file->comm);
     H5MM_xfree(file);
