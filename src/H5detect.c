@@ -83,9 +83,9 @@ typedef struct malign_t {
 } malign_t;
 
 /* global variables types detection code */
-detected_t	d[MAXDETECT];
-malign_t        m[MAXDETECT];
-volatile int	nd = 0, na = 0;
+static detected_t	d[MAXDETECT];
+static malign_t        m[MAXDETECT];
+static volatile int	nd = 0, na = 0;
    
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
