@@ -83,7 +83,6 @@ typedef struct H5FD_mpiposix_t {
     MPI_Comm	comm;		/*communicator				*/
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
-    int         mpi_round;      /* Current round robin process (for metadata I/O) */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
@@ -936,7 +935,6 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     file->comm = comm_dup;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
-    file->mpi_round = 0;        /* Start metadata writes with process 0 */
 
     /* Reset the last file I/O operation */
     file->pos = HADDR_UNDEF;
@@ -1422,7 +1420,7 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
         /* Only p<round> will do the actual write if all procs in comm write same metadata */
         if (H5_mpiposix_1_metawrite_g)
-            if (file->mpi_rank != file->mpi_round)
+            if (file->mpi_rank != H5_PAR_META_WRITE)
                 HGOTO_DONE(SUCCEED) /* skip the actual write */
     } /* end if */
 
@@ -1497,11 +1495,8 @@ done:
     else {
         /* if only p<round> writes, need to broadcast the ret_value to other processes */
         if ((type!=H5FD_MEM_DRAW) && H5_mpiposix_1_metawrite_g) {
-            if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm)))
+            if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
-
-            /* Round-robin rotate to the next process */
-            file->mpi_round = (file->mpi_round+1)%file->mpi_size;
         } /* end if */
     } /* end else */
 
@@ -1543,7 +1538,7 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
     /* Extend the file to make sure it's large enough */
     if(file->eoa>file->last_eoa) {
         /* Use the round-robin process to truncate (extend) the file */
-        if(file->mpi_rank == file->mpi_round) {
+        if(file->mpi_rank == H5_PAR_META_WRITE) {
 #ifdef WIN32
             /* Map the posix file handle to a Windows file handle */
             filehandle = _get_osfhandle(fd);

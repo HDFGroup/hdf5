@@ -368,6 +368,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_MNT_SYM_LOCAL_SIZE		sizeof(hbool_t) 	
 #define H5F_MNT_SYM_LOCAL_DEF	 	FALSE	
 
+#ifdef H5_HAVE_PARALLEL
+/* Which process writes metadata */
+#define H5_PAR_META_WRITE 0
+#endif /* H5_HAVE_PARALLEL */
+
 /* Forward declarations for prototype arguments */
 struct H5B_class_t;
 union H5D_storage_t;

@@ -185,6 +185,7 @@ struct H5F_t {
 };
 
 #ifdef H5_HAVE_PARALLEL
+/* Whether a single process writes metadata */
 H5_DLLVAR  hbool_t H5_mpi_1_metawrite_g;
 H5_DLLVAR  hbool_t H5_mpiposix_1_metawrite_g;
 #endif /* H5_HAVE_PARALLEL */

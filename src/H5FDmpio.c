@@ -60,7 +60,6 @@ typedef struct H5FD_mpio_t {
     MPI_Info	info;		/*file information			*/
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
-    int         mpi_round;      /* Current round robin process (for metadata I/O) */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
@@ -1883,7 +1882,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
         /* Only p<round> will do the actual write if all procs in comm write same metadata */
         if (H5_mpi_1_metawrite_g) {
-            if (file->mpi_rank != file->mpi_round) {
+            if (file->mpi_rank != H5_PAR_META_WRITE) {
 #ifdef H5FDmpio_DEBUG
                 if (H5FD_mpio_Debug[(int)'w']) {
                     fprintf(stdout,
@@ -1975,11 +1974,8 @@ done:
     if(ret_value!=FAIL) {
         /* if only p<round> writes, need to broadcast the ret_value to other processes */
         if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
-            if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, file->mpi_round, file->comm)))
+            if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
-
-            /* Round-robin rotate to the next process */
-            file->mpi_round = (file->mpi_round+1)%file->mpi_size;
         } /* end if */
     } /* end if */
 

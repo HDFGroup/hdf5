@@ -2159,7 +2159,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
     int         mpi_rank=(-1);  /* This process's rank  */
     int         mpi_size=(-1);  /* Total # of processes */
-    int         mpi_round=0;    /* Current process responsible for I/O */
     int         mpi_code;       /* MPI return code */
     unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
     unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
@@ -2355,11 +2354,10 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 /* Check if this file is accessed with an MPI-capable file driver */
                 if(using_mpi) {
                     /* Round-robin write the chunks out from only one process */
-                    if(mpi_round==mpi_rank) {
+                    if(H5_PAR_META_WRITE==mpi_rank) {
                         if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
                     } /* end if */
-                    mpi_round = (mpi_round+1)%mpi_size;
 
                     /* Indicate that blocks are being written */
                     blocks_written=1;
