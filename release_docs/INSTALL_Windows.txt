@@ -2,7 +2,7 @@ HDF5 Build and Install Instructions for Windows 2000/NT/98.
 ----------------------------------------------------------
 
 The instructions which follow assume that you will be using the 
-source code release 'zip' file (hdf5-1_4_2.zip).
+source code release 'zip' file (hdf5-1_4_3.zip).
 
 ***************************WARNINGS****************************
 Please read CAREFULLY about Preconditions before you go to the 
@@ -19,7 +19,7 @@ Preconditions
 	    c:\					(any drive)
 	   MyHDFstuff\				(any folder name)
 
-   3. Run WinZip on hdf5-1_4_2.zip (the entire source tree) and
+   3. Run WinZip on hdf5-1_4_3.zip (the entire source tree) and
       extract hdf5 package into c:\MyHDFstuff(or whatever drive 
       and folder name you would like to choose). This creates a 
       directory called 'hdf5xxx'under MyHDFstuff which contains 
@@ -146,16 +146,6 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
           single-threaded static libraries, multithreaded DLLs
           and tests.
 
-      
-       NOTE : "all" is a dummy target. You will get a link  
-              error when "all.exe." is built:
-
-             LINK: error LNK2001: unresolved external symbol
-			_mainCRTStartup.....
-             all.exe - 2 error(s), ....
-
-       Warning messages can be ignored. The "all.exe" is never 
-       created, so it is OK.
 
        When the debug or release build is done the directories 
        listed below will contain the following files:
@@ -456,35 +446,35 @@ Additionally, it also builds and tests hdf4-related tools. We may refer some dup
      a) you don't install hdf libraries and related tools in
         your machine, 
      b) or if the top directory of your hdf4 libraries and 
-        tools are not under C:\hdf41r4 and you are not familar
+        tools are not under C:\hdf41r5 and you are not familar
         on how to change settings of VC++ projects.
 
    you may get binary distribution from 
-ftp://ftp.ncsa.uiuc.edu/HDF/HDF/HDF4.1r4/windows_precompiled_code/HDF41r4.zip 
-and use Winzip to unpack HDF41r4.zip into C:\hdf41r4.
+ftp://ftp.ncsa.uiuc.edu/HDF/HDF/HDF4.1r5/windows_precompiled_code/HDF41r5.zip 
+and use Winzip to unpack HDF41r5.zip into C:\hdf41r5.
 
 4. We assume that you've installed hdf4(mfhdf and hdf) 
 libraries into drive C. The top level path should be 
-C:\HDF41r4. Under C:\HDF41r4 it should at least 
+C:\HDF41r5. Under C:\HDF41r5 it should at least 
 include the following six directories: 
 
-C:\HDF41r4\bin where hdf4 utilities are stored
+C:\HDF41r5\bin where hdf4 utilities are stored
 
-C:\HDF41r4\dlllib where release dll versions of hdf and mfhdf 
+C:\HDF41r5\dlllib where release dll versions of hdf and mfhdf 
 libraries and export libraries of dlls are stored
 
-C:\HDF41r4\dlllibdbg where debug dll versions of hdf and mfhdf 
+C:\HDF41r5\dlllibdbg where debug dll versions of hdf and mfhdf 
 libraries and export libraries of dlls are stored
 
-C:\HDF41r4\lib where release versions of hdf and mfhdf 
+C:\HDF41r5\lib where release versions of hdf and mfhdf 
 libraries are stored
 
-C:\HDF41r4\libdbg where debug versions of hdf and mfhdf 
+C:\HDF41r5\libdbg where debug versions of hdf and mfhdf 
 libraries are stored
 
-C:\HDF41r4\include where header files are included 
+C:\HDF41r5\include where header files are included 
 
-Make sure that you copy all *.dll files under C:\HDF41r4 into Windows
+Make sure that you copy all *.dll files under C:\HDF41r5 into Windows
 system directory before the next step.
 
 If your path of hdf libraries and mfhdf libraries is different 
@@ -534,7 +524,7 @@ Step 1.
 
     4. This part is for users who are familar with handling 
        settings of VC++ project and store their hdf4 libraries 
-       not under C:\hdf41r4. Other users can skip this part. 
+       not under C:\hdf41r5. Other users can skip this part. 
         
        4.1 Change the path where hdf4 library header files are 
        located
@@ -568,10 +558,10 @@ Step 1.
           c6)In the middle of "Project Settings" windows, you 
              may find a box called 
              "Additional include directories:" . You may notice
-             "C:\hdf41r4\include" inside this box. This is the 
+             "C:\hdf41r5\include" inside this box. This is the 
              path where the default hdf4 header files is 
              included. Replace only this path
-             (C:\hdf41r4\include) with your own path that
+             (C:\hdf41r5\include) with your own path that
              includes your hdf4 header files. Don't touch any 
              other paths.
           c7)After you've done this, click OK at the bottom of 
@@ -589,23 +579,23 @@ Step 1.
        a) select project h4toh5 following instruction 4.1 a) 
           and b). 
        b) click h4toh5, you may find four libraries: 
-          hm414d.lib,hd414d.lib and hm414.lib,hd414.lib 
-          attached under the project h4toh5. hm414d.lib and 
-          hd414d.lib are debug versions of mfhdf and hdf 
-          libraries. hm414.lib and hd414.lib are release 
+          hm415d.lib,hd415d.lib and hm415.lib,hd415.lib 
+          attached under the project h4toh5. hm415d.lib and 
+          hd415d.lib are debug versions of mfhdf and hdf 
+          libraries. hm415.lib and hd415.lib are release 
           versions of mfhdf and hdf libraries.
        c) select these four libraries; go back to Edit menu and 
           choose "delete" option to delete template of these 
           libraries. 
        d) select project h4toh5 and right click the mouse, find 
           "Add Files to Projects", follow the instructions on 
-          the pop-up box, to insert your own hm414d.lib, 
-          hd414d.lib,hm414.lib and hd414.lib. You must know 
+          the pop-up box, to insert your own hm415d.lib, 
+          hd415d.lib,hm415.lib and hd415.lib. You must know 
           their paths at first.
        e) select project h4toh5dll following instruction 4.1 a) 
           and b).
        f) click h4toh5dll, you may also find four libraries: 
-          hd414m.lib,hd414md.lib and hm414m.lib,hd414m.lib 
+          hd415m.lib,hd415md.lib and hm415m.lib,hd415m.lib 
           attached under the project h4toh5dll. These libraries 
           are debug and release versions of Export libraries of 
           mfhdf and hdf DLLs. 
@@ -614,8 +604,8 @@ Step 1.
           libraries. 
        h) select project h4toh5dll and right click the mouse, 
           find "Add Files to Projects", follow the instructions 
-          on the pop-up box, to insert your own hd414m.lib, 
-          hd414md.lib,hm414m.lib and hd414m.lib. You must know 
+          on the pop-up box, to insert your own hd415m.lib, 
+          hd415md.lib,hm415m.lib and hd415m.lib. You must know 
           their paths at first.
 	 i) repeat a)-h) for h5toh4 and h5toh4dll.
 
@@ -633,16 +623,6 @@ Step 1.
                                    libraries, and tests.
 
       
-       NOTE : "all" is a dummy target. You will get a link 
-              error when "all.exe." is built:
-
-             LINK: error LNK2001: unresolved external symbol
-			_mainCRTStartup.....
-             all.exe - 2 error(s), ....
-
-       Warning messages can be ignored. The "all.exe" is never 
-       created, so it is OK.
-
        You should see hdf5 libraries, tests and tools under   
        section II Step 1. 
        In addtion, under  c:\MyHDFstuff\hdf5\tools\       
@@ -704,7 +684,7 @@ STEP 2:   testing hdf5 libraries and all hdf5 tools
         for all test cases possibly due to windows dealing
         with "free memory" conventions for dll versions.      
 
-       1) If your hdp utility is located at C:\hdf41r4\bin,
+       1) If your hdp utility is located at C:\hdf41r5\bin,
           you may skip this part. Otherwise, copy your hdp.exe
           file into the directory where your hdf5 tools are 
           located. For example, if your hdf5 tools directory is
@@ -826,7 +806,7 @@ using the Visual C++ Development Environment.
 Project name and location issues: 
        
     The files in all.zip must end up in the hdf5\ directory installed by
-    hdf5-1_4_2.zip
+    hdf5-1_4_3.zip
 
     If you must install all.dsw and all.dsp in another directory,
     relative to hdf5\ , you will be asked to locate the sub-project
