@@ -8,7 +8,7 @@ DATASET "3d" {
    STORAGE_LAYOUT {
       CONTIGUOUS
       SIZE 1600
-      OFFSET 48688
+      OFFSET 42544
    }
    FILTERS {
       NONE
