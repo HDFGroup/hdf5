@@ -2392,8 +2392,9 @@ facilitate moving easily between them.</i>
             address objects in an HDF5 file.  This function is only valid for
             file creation property lists.  Passing in a value of 0 for one of the
             sizeof parameters retains the current value.  The default value
-            for both values is 4 bytes.  Valid values currently are 2, 4, 8 and
-            16.
+            for both values is same as <code>sizeof(hsize_t)</code> in the library
+            (normally 8 bytes).  Valid values currently are 2, 4,
+            8 and 16.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -2557,8 +2558,6 @@ facilitate moving easily between them.</i>
         <dd><code>H5Pset_istore_k</code> sets the size of the parameter 
             used to control the B-trees for indexing chunked datasets.  
             This function is only valid for file creation property lists.
-            Passing in a value of 0 for one of the parameters retains 
-            the current value. 
             <p>
             <code>ik</code> is one half the rank of a tree that stores 
             chunked raw data.  On average, such a tree will be 75% full, 
