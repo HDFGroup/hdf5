@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+
 #include "hdf5.h"
 #include "h5test.h"
 
@@ -34,6 +35,26 @@
     H5Eclear();                                                               \
 } while(0)
 
+/*
+ * Checking for information purpose.
+ * If val is false, print mesg; else nothing.
+ * Either case, no error setting.
+ */
+#define INFO(val, mesg) do {                                                  \
+    if (val) {                                                                \
+	if (*mesg != '\0'){						      \
+	    MESG(mesg);							      \
+	}								      \
+    }								      	      \
+    else{								      \
+	printf("Proc %d: ", mpi_rank); \
+        printf("*** PHDF5 Assertion failed (%s) at line %4d in %s\n",         \
+	    mesg, (int)__LINE__, __FILE__);     			      \
+	fflush(stdout);							      \
+    }                                                                         \
+    H5Eclear();                                                               \
+} while(0)
+
 #define MPI_BANNER(mesg)\
     {printf("--------------------------------\n");\
     printf("Proc %d: ", mpi_rank); \
@@ -58,6 +79,8 @@
 #define BYCOL		2	/* divide into blocks of columns */
 #define ZROW		3	/* same as BYCOL except process 0 gets 0 rows */
 #define ZCOL		4	/* same as BYCOL except process 0 gets 0 columns */
+#define MAX_ERR_REPORT	10		/* Maximum number of errors reported */
+
 
 
 /* dataset data type.  Int's can be easily octo dumped. */
