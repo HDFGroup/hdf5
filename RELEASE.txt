@@ -48,6 +48,7 @@ Configuration
 -------------
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
+    * Basic port to Compaq (nee DEC) Alpha OSF 5.
 
 
 
