@@ -2,7 +2,9 @@
 require 5.003;
 use Cwd;
 
+# Get the current directory and build the source files name based on it.
 ($cwd)=(cwd()=~m#(.*?hdf5)/.*#);
+
 $hdr = "$cwd/src/H5public.h";
 $bak = "$cwd/src/H5public.h~";
 $tmp = "$cwd/src/H5public.$$";
