@@ -123,6 +123,13 @@
 #define FACC_MULTI      0x4     /* Multi File */
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
+/* type definitions */
+typedef struct H5Ptest_param_t  /* holds extra test parameters */
+{
+    char	*name;
+    int		count;
+} H5Ptest_param_t;
+
 /* Dataset data type.  Int's can be easily octo dumped. */
 typedef int DATATYPE;
 
@@ -134,28 +141,30 @@ extern H5E_auto_t old_func;		        /* previous error handler */
 extern void *old_client_data;			/*previous error handler arg.*/
 extern int facc_type;				/*Test file access type */
 
-/* Prototypes */
-hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);
-MPI_Offset h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info);
-void multiple_dset_write(char *filename, int ndatasets);
-void multiple_group_write(char *filename, int ngroups);
-void multiple_group_read(char *filename, int ngroups);
-void collective_group_write(char *filename, int ngroups);
-void independent_group_read(char *filename, int ngroups);
+/* Test program prototypes */
+void multiple_dset_write(void);
+void multiple_group_write(void);
+void multiple_group_read(void);
+void collective_group_write(void);
+void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_fapl_mpiposix_dup(void);
-void test_split_comm_access(char *filename);
-void dataset_writeInd(char *filename);
-void dataset_writeAll(char *filename);
-void extend_writeInd(char *filename);
-void extend_writeAll(char *filename);
-void dataset_readInd(char *filename);
-void dataset_readAll(char *filename);
-void extend_readInd(char *filename);
-void extend_readAll(char *filename);
-void compact_dataset(char *filename);
-void big_dataset(const char *filename);
-void dataset_fillvalue(const char *filename);
+void test_split_comm_access(void);
+void dataset_writeInd(void);
+void dataset_writeAll(void);
+void extend_writeInd(void);
+void extend_writeAll(void);
+void dataset_readInd(void);
+void dataset_readAll(void);
+void extend_readInd(void);
+void extend_readAll(void);
+void compact_dataset(void);
+void big_dataset(void);
+void dataset_fillvalue(void);
+
+/* commonly used prototypes */
+hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);
+MPI_Offset h5_mpi_get_file_size(const char *filename, MPI_Comm comm, MPI_Info info);
 int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[],
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 

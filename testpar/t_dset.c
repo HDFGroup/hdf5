@@ -223,7 +223,7 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], hsize_t bl
  */
 
 void
-dataset_writeInd(char *filename)
+dataset_writeInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -234,6 +234,7 @@ dataset_writeInd(char *filename)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
+    char *filename;
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -245,6 +246,7 @@ dataset_writeInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Independent write test on file %s\n", filename);
 
@@ -368,7 +370,7 @@ MPI_Barrier(MPI_COMM_WORLD);
 
 /* Example of using the parallel HDF5 library to read a dataset */
 void
-dataset_readInd(char *filename)
+dataset_readInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -378,6 +380,7 @@ dataset_readInd(char *filename)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    char *filename;
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -389,6 +392,7 @@ dataset_readInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Independent read test on file %s\n", filename);
 
@@ -489,7 +493,7 @@ dataset_readInd(char *filename)
  */
 
 void
-dataset_writeAll(char *filename)
+dataset_writeAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -502,6 +506,7 @@ dataset_writeAll(char *filename)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
+    char *filename;
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -513,6 +518,7 @@ dataset_writeAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Collective write test on file %s\n", filename);
 
@@ -848,7 +854,7 @@ dataset_writeAll(char *filename)
  */
 
 void
-dataset_readAll(char *filename)
+dataset_readAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -859,6 +865,7 @@ dataset_readAll(char *filename)
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    char *filename;
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -870,6 +877,7 @@ dataset_readAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Collective read test on file %s\n", filename);
 
@@ -1069,7 +1077,7 @@ dataset_readAll(char *filename)
  */
 
 void
-extend_writeInd(char *filename)
+extend_writeInd(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -1078,6 +1086,7 @@ extend_writeInd(char *filename)
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
+    char *filename;
     hsize_t dims[RANK];   	/* dataset dim sizes */
     hsize_t max_dims[RANK] =
 		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
@@ -1096,6 +1105,7 @@ extend_writeInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend independent write test on file %s\n", filename);
 
@@ -1293,7 +1303,7 @@ extend_writeInd(char *filename)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readInd(char *filename)
+extend_readInd(void)
 {
     hid_t fid;			/* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -1305,6 +1315,7 @@ extend_readInd(char *filename)
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_array2 = NULL;	/* data buffer */
     DATATYPE *data_origin1 = NULL; 	/* expected data buffer */
+    char *filename;
 
     hssize_t   start[RANK];			/* for hyperslab setting */
     hsize_t count[RANK], stride[RANK];		/* for hyperslab setting */
@@ -1316,6 +1327,7 @@ extend_readInd(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend independent read test on file %s\n", filename);
 
@@ -1470,7 +1482,7 @@ extend_readInd(char *filename)
  */
 
 void
-extend_writeAll(char *filename)
+extend_writeAll(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -1480,6 +1492,7 @@ extend_writeAll(char *filename)
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
+    char *filename;
     hsize_t dims[RANK];   	/* dataset dim sizes */
     hsize_t max_dims[RANK] =
 		{H5S_UNLIMITED, H5S_UNLIMITED};	/* dataset maximum dim sizes */
@@ -1498,6 +1511,7 @@ extend_writeAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend independent write test on file %s\n", filename);
 
@@ -1710,7 +1724,7 @@ extend_writeAll(char *filename)
 
 /* Example of using the parallel HDF5 library to read an extendible dataset */
 void
-extend_readAll(char *filename)
+extend_readAll(void)
 {
     hid_t fid;			/* HDF5 file ID */
     hid_t acc_tpl;		/* File access templates */
@@ -1719,6 +1733,7 @@ extend_readAll(char *filename)
     hid_t mem_dataspace;	/* memory dataspace ID */
     hid_t dataset1, dataset2;	/* Dataset ID */
     hbool_t use_gpfs = FALSE;   /* Use GPFS hints */
+    char *filename;
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
     DATATYPE *data_array2 = NULL;	/* data buffer */
@@ -1734,6 +1749,7 @@ extend_readAll(char *filename)
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    filename = (char *) GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend independent read test on file %s\n", filename);
 
