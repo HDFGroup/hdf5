@@ -76,7 +76,7 @@ int main(void)
     int           i, j;
     SRB_Info srb_info={ "ghidorah.sdsc.edu",  /* Using SDSC SRB server,
                                                * don't append port number.   */
-                        "5557",               /* SRB host port number        */
+                        NULL,                 /* SRB host default port number*/
                         NULL,                 /* SRB Authentication-password,
                                                * using the one in 
                                                * ~/.srb/.MdasAuth            */
