@@ -241,6 +241,8 @@ Documentation
 New Features
 ============
 
+    * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
+      it.  AKC - 2003/1/3
     * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
       are added to the library.  SLU - 2002/11/25
     * H5Dget_offset is added to return the offset of a dataset's data relative
