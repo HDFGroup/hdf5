@@ -216,6 +216,8 @@ void TestInfo(const char *ProgName)
  */
 void TestParseCmdLine(int argc, char *argv[])
 {
+    int ret_code;
+
     while (argv++, --argc > 0){
 	if ((HDstrcmp(*argv, "-verbose") == 0) ||
 				(HDstrcmp(*argv, "-v") == 0)) {
@@ -278,7 +280,9 @@ void TestParseCmdLine(int argc, char *argv[])
 
     /* Call extra parsing function if provided. */
     if (NULL != TestPrivateParser){
-	TestPrivateParser(argc+1, argv-1);
+	ret_code=TestPrivateParser(argc+1, argv-1);
+	if (ret_code != 0)
+	    exit(-1);
     }
 }
 
