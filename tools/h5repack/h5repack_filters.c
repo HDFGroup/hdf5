@@ -18,79 +18,160 @@
 
 
 /*-------------------------------------------------------------------------
- * Function: aux_objinsert_filter
+ * Function: aux_find_obj
  *
- * Purpose: auxiliary function, inserts the filter in object OBJ
- *
- * Return: void
+ * Purpose: find the object name NAME (got from the traverse list)
+ *  in the repack options list
  *
  *-------------------------------------------------------------------------
  */
-static void aux_objinsert_filter(pack_info_t *obj,
-                                 filter_info_t filt)
+static 
+int aux_find_obj(const char* name,          /* object name from traverse list */
+                 pack_opt_t *options,       /* repack options */	
+																	pack_info_t *obj /*OUT*/)  /* info about object to filter */
 {
- obj->nfilters=1;
- obj->filter[0]=filt;
-
+ char *pdest;
+ int  result;
+	int  i;
+ 
+ for ( i=0; i<options->op_tbl->nelems; i++) 
+ {
+  if (strcmp(options->op_tbl->objs[i].path,name)==0)
+		{
+			*obj =  options->op_tbl->objs[i];
+			return i;
+		}
+		
+		pdest  = strstr(name,options->op_tbl->objs[i].path);
+		result = (int)(pdest - name);
+		
+		/* found at position 1, meaning without '/' */
+		if( pdest != NULL && result==1 )
+		{
+			*obj =  options->op_tbl->objs[i];
+			return i;
+		}
+ }/*i*/
+ 
+ return -1;
 }
 
+
 /*-------------------------------------------------------------------------
- * Function: filter_this
+ * Function: aux_assign_obj
  *
  * Purpose: find the object name NAME (got from the traverse list)
  *  in the repack options list; assign the filter information OBJ
  *
  * Return: 0 not found, 1 found
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 19, 2003
- *
  *-------------------------------------------------------------------------
  */
-int filter_this(const char* name,    /* object name from traverse list */
-                pack_opt_t *options, /* repack options */
-                pack_info_t *obj /*OUT*/)    /* info about object to filter */
+static
+int aux_assign_obj(const char* name,            /* object name from traverse list */
+                   pack_opt_t *options,         /* repack options */
+                   pack_info_t *obj /*OUT*/)    /* info about object to filter */
 {
- char *pdest;
- int  result;
- int  i, j;
+
+ int  index, i;
+	pack_info_t tmp;
+
+	init_packobject(&tmp);
+
+	index = aux_find_obj(name,options,&tmp);
+	
+	/* name was on input */
+	if (index>=0)
+	{
+		
+		/* applying to all objects */
+  if (options->all_layout)
+		{
+   /* assign the global layout info to the OBJ info */
+   tmp.layout=options->layout_g;
+			switch (options->layout_g)
+			{
+			case H5D_CHUNKED:
+				tmp.chunk.rank=options->chunk_g.rank;
+				for ( i=0; i<tmp.chunk.rank; i++) 
+					tmp.chunk.chunk_lengths[i]=options->chunk_g.chunk_lengths[i];
+				break;
+			default:
+				break;
+			}/*switch*/
+		}
+		else
+		{
+			tmp.layout = options->op_tbl->objs[index].layout;
+			switch (tmp.layout)
+			{
+			case H5D_CHUNKED:
+				tmp.chunk.rank = options->op_tbl->objs[index].chunk.rank;
+				for ( i=0; i<tmp.chunk.rank; i++) 
+					tmp.chunk.chunk_lengths[i]=options->op_tbl->objs[index].chunk.chunk_lengths[i];
+				break;
+			default:
+				break;
+			}/*switch*/
+			
+		}
+		
+		/* applying to all objects */
+		if (options->all_filter)
+		{
+			/* assign the global filter */
+			tmp.nfilters=1;
+			tmp.filter[0]=options->filter_g;
+		} /* if all */
+		else
+		{
+   tmp.nfilters=options->op_tbl->objs[index].nfilters;
+			for ( i=0; i<tmp.nfilters; i++) 
+			{
+    tmp.filter[i] = options->op_tbl->objs[index].filter[i];
+			}
+		}
+		
+		
+	} /* if index */
+	
+
+ /* no input name */
+
+	else
+	{
+		
+		if (options->all_filter)
+		{
+   /* assign the global filter */
+			tmp.nfilters=1;
+			tmp.filter[0]=options->filter_g;
+		}
+	
+		
+		if (options->all_layout)
+		{
+			/* assign the global layout info to the OBJ info */
+			tmp.layout=options->layout_g;
+			switch (options->layout_g)
+			{
+			case H5D_CHUNKED:
+				tmp.chunk.rank=options->chunk_g.rank;
+				for ( i=0; i<tmp.chunk.rank; i++) 
+					tmp.chunk.chunk_lengths[i]=options->chunk_g.chunk_lengths[i];
+				break;
+			default:
+				break;
+			}/*switch*/
+			
+		}
+		
+		
+	}
  
- /* if we are applying to all objects just return true */
- if (options->all_filter)
- {
-  /* assign the global filter and chunk info to the OBJ info */
-  aux_objinsert_filter( obj, options->filter_g );
-  obj->chunk=options->chunk_g;
-  return 1;
- }
- 
- for ( i=0; i<options->op_tbl->nelems; i++) 
- {
-  for ( j=0; j<options->op_tbl->objs[i].nfilters; j++)
-  {
-   if (options->op_tbl->objs[i].filter[j].filtn != -1 )
-   {
-    if (strcmp(options->op_tbl->objs[i].path,name)==0)
-    {
-     *obj=options->op_tbl->objs[i];
-     return 1;
-    }
-    
-    pdest  = strstr(name,options->op_tbl->objs[i].path);
-    result = (int)(pdest - name);
-    
-    /* found at position 1, meaning without '/' */
-    if( pdest != NULL && result==1 )
-    {
-     *obj=options->op_tbl->objs[i];
-     return 1;
-    }
-   } /*if*/
-  }/*j*/
- }/*i*/
- 
- return 0;
+ *obj = tmp;
+ return 1;
+																			
 }
 
 
@@ -115,37 +196,31 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
                   hid_t type_id,       /* dataset datatype */
-                  pack_opt_t *options, /* repack options */
-																		int has_layout,      /* input chunk */
-                  pack_info_t *obj)    /* info about object to filter */
-{
- int          nfilters;       /* number of filters in DCPL */
+                  pack_opt_t *options) /* repack options */
+{										
+	int          nfilters;       /* number of filters in DCPL */
  unsigned     aggression;     /* the deflate level */
  hsize_t      nelmts;         /* number of elements in dataset */
  size_t       size;           /* size of datatype in bytes */
  int          i;
-
- /* check first if the object is to be filtered */
- if (filter_this(name,options,obj)==0)
-  return 0;
-
+	pack_info_t  obj;
+		
  if (rank==0)
   goto out;
 
 /*-------------------------------------------------------------------------
- * filters require CHUNK layout; if we do not have one define a default
+ * initialize the assigment object
  *-------------------------------------------------------------------------
  */
-	if (has_layout)
-	{
-		layout_this(dcpl_id,name,options,obj);
-	}
-	else
-	{
-		obj->chunk.rank=rank;
-  for (i=0; i<rank; i++) 
-   obj->chunk.chunk_lengths[i] = dims[i];
-	}
+	init_packobject(&obj);
+
+
+/*-------------------------------------------------------------------------
+ * find options
+ *-------------------------------------------------------------------------
+ */
+ if (aux_assign_obj(name,options,&obj)==0)
+  return 0;
 
 
  /* check for datasets too small */
@@ -175,8 +250,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
    return -1;
  }
 
-	
-
 /*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
  * type can be one of the filters
@@ -187,9 +260,24 @@ int apply_filters(const char* name,    /* object name from traverse list */
  * H5Z_FILTER_SZIP       4 , szip compression 
  *-------------------------------------------------------------------------
  */
- for ( i=0; i<obj->nfilters; i++)
+
+	if (obj.nfilters)
+	{
+		
+/*-------------------------------------------------------------------------
+ * filters require CHUNK layout; if we do not have one define a default
+ *-------------------------------------------------------------------------
+		*/
+		if (obj.layout==-1)
+		{
+			obj.chunk.rank=rank;
+			for (i=0; i<rank; i++) 
+				obj.chunk.chunk_lengths[i] = dims[i];
+		}
+
+ for ( i=0; i<obj.nfilters; i++)
  {
-  switch (obj->filter[i].filtn)
+  switch (obj.filter[i].filtn)
   {
   default:
    break;
@@ -199,9 +287,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_DEFLATE:
-   aggression=obj->filter[i].cd_values[0];
+   aggression=obj.filter[i].cd_values[0];
    /* set up for deflated data */
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
     return -1;
    if(H5Pset_deflate(dcpl_id,aggression)<0)
     return -1;
@@ -216,14 +304,14 @@ int apply_filters(const char* name,    /* object name from traverse list */
     unsigned  options_mask;
     unsigned  pixels_per_block;
 
-    pixels_per_block=obj->filter[i].cd_values[0];
-    if (obj->filter[i].szip_coding==0)
+    pixels_per_block=obj.filter[i].cd_values[0];
+    if (obj.filter[i].szip_coding==0)
      options_mask=H5_SZIP_NN_OPTION_MASK;
     else 
      options_mask=H5_SZIP_EC_OPTION_MASK;
 
     /* set up for szip data */
-    if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
+    if(H5Pset_chunk(dcpl_id,obj.chunk.rank,obj.chunk.chunk_lengths)<0)
      return -1;
     if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0) 
      return -1;
@@ -236,7 +324,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_SHUFFLE:
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
     return -1;
    if (H5Pset_shuffle(dcpl_id)<0) 
     return -1;
@@ -247,13 +335,39 @@ int apply_filters(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_FLETCHER32:
-   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
+   if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
     return -1;
    if (H5Pset_fletcher32(dcpl_id)<0) 
     return -1;
    break;
   } /* switch */
  }/*i*/
+
+	}
+	/*obj.nfilters*/
+	else
+	{
+		/* just apply layout */
+
+		/* no layout info was found, define the default */
+		if (obj.layout==-1)
+			obj.layout = H5D_CONTIGUOUS;
+
+		
+		if (H5Pset_layout(dcpl_id, obj.layout)<0) 
+			return -1;
+		
+		if (H5D_CHUNKED==obj.layout) { /* set up chunk */
+			if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
+				return -1;
+		}
+		else if (H5D_COMPACT==obj.layout) {
+			if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0) 
+				return -1;
+		}
+
+
+	}
 
  return 0;
 
