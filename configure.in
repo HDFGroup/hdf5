@@ -848,7 +848,7 @@ else
    AC_SUBST_FILE(DEPEND1) DEPEND1=$srcdir/src/.distdep
    AC_SUBST_FILE(DEPEND2) DEPEND2=$srcdir/test/.distdep
    AC_SUBST_FILE(DEPEND3) DEPEND3=$srcdir/testpar/.distdep
-   AC_SUBST_FILE(DEPEND4) DEPEND4=$srcdirtools/.distdep
+   AC_SUBST_FILE(DEPEND4) DEPEND4=$srcdir/tools/.distdep
 fi
 
 dnl We don't need to say when we're entering directories if we're using
