@@ -219,6 +219,7 @@ static void test_h5d_basic_read(void)
     ret=H5Dread(did1,H5P_SCALAR,buf);
     CHECK(ret,FAIL,"H5Dread");
     VERIFY(HDmemcmp(buf,data1,buf_size),0,"H5Dread");
+    HDfree(buf);
     
     ret=H5Mrelease(tid1);
     CHECK(ret,FAIL,"H5Mrelease");
