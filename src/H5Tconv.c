@@ -2023,7 +2023,7 @@ H5T_conv_uchar_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_char_short, FAIL);
     H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, signed char, CHAR_MAX);
+		unsigned char, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2481,7 +2481,7 @@ H5T_conv_short_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_short_char, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		short, signed char, CHAR_MIN, CHAR_MAX);
+		short, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2535,7 +2535,7 @@ H5T_conv_ushort_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ushort_char, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, signed char, CHAR_MAX);
+		unsigned short, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2965,7 +2965,7 @@ H5T_conv_int_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_int_char, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		int, signed char, CHAR_MIN, CHAR_MAX);
+		int, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3019,7 +3019,7 @@ H5T_conv_uint_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_uint_char, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, signed char, CHAR_MAX);
+		unsigned, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3450,7 +3450,7 @@ H5T_conv_long_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_long_char, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long, signed char, CHAR_MIN, CHAR_MAX);
+		long, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3504,7 +3504,7 @@ H5T_conv_ulong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ulong_char, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, signed char, CHAR_MAX);
+		unsigned long, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3936,7 +3936,7 @@ H5T_conv_llong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_llong_char, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long_long, signed char, CHAR_MIN, CHAR_MAX);
+		long_long, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3990,7 +3990,7 @@ H5T_conv_ullong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     FUNC_ENTER(H5T_conv_ullong_char, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, signed char, CHAR_MAX);
+		unsigned long_long, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 

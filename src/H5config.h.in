@@ -173,6 +173,9 @@
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
 
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
 /* Define if you have the system function.  */
 #undef HAVE_SYSTEM
 

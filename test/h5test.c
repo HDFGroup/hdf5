@@ -94,15 +94,15 @@ h5_cleanup(hid_t fapl)
 		break; /*nothing to remove*/
 		
 	    case H5F_LOW_SPLIT:
-		snprintf(temp, sizeof temp, "%s.raw", filename);
+		HDsnprintf(temp, sizeof temp, "%s.raw", filename);
 		remove(temp);
-		snprintf(temp, sizeof temp, "%s.meta", filename);
+		HDsnprintf(temp, sizeof temp, "%s.meta", filename);
 		remove(temp);
 		break;
 
 	    case H5F_LOW_FAMILY:
 		for (j=0; /*void*/; j++) {
-		    snprintf(temp, sizeof temp, filename, j);
+		    HDsnprintf(temp, sizeof temp, filename, j);
 		    if (access(temp, F_OK)<0) break;
 		    remove(temp);
 		}
@@ -180,7 +180,7 @@ h5_fixname(const char *basename, hid_t fapl, char *fullname, size_t size)
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-	if (snprintf(fullname, size, "%s/%s", prefix, basename)==(int)size) {
+	if (HDsnprintf(fullname, size, "%s/%s", prefix, basename)==(int)size) {
 	    return NULL; /*buffer is too small*/
 	}
     } else if (strlen(basename)>=size) {

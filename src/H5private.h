@@ -595,6 +595,9 @@ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDsin(X)                sin(X)
 #define HDsinh(X)               sinh(X)
 #define HDsleep(N)              sleep(N)
+#ifdef HAVE_SNPRINTF
+#   define HDsnprintf		snprintf /*varargs*/
+#endif
 /* sprintf() variable arguments */
 #define HDsqrt(X)               sqrt(X)
 #define HDsrand(N)              srand(N)
@@ -662,8 +665,12 @@ int64_t HDstrtoll (const char *s, const char **rest, int base);
 /*
  * And now for a couple non-Posix functions...
  */
-extern char *strdup(const char *s);
+char *strdup(const char *s);
 #define HDstrdup(S)             strdup(S)
+
+#ifndef HAVE_SNPRINTF
+int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
+#endif
 
 /*
  * These macros check whether debugging has been requested for a certain

@@ -358,7 +358,7 @@ dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
 AC_CHECK_FUNCS(getpwuid gethostname system getrusage fork waitpid)
-AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime sigaction)
+AC_CHECK_FUNCS(gettimeofday BSDgettimeofday difftime sigaction snprintf)
 
 AC_TRY_COMPILE([#include<sys/types.h>],
 	       [off64_t n = 0;],

@@ -438,6 +438,47 @@ H5close (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	HDsnprintf
+ *
+ * Purpose:	Writes output to the string BUF under control of the format
+ *		FMT that specifies how subsequent arguments are converted for
+ *		output.  It is similar to sprintf except that SIZE specifies
+ *		the maximum number of characters to produce.  The trailing
+ *		null character is counted towards this limit, so you should
+ *		allocated at least SIZE characters for the string BUF.
+ *
+ * Note:	This function is for compatibility on systems that don't have
+ *		snprintf(3). It doesn't actually check for overflow like the
+ *		real snprintf() would.
+ *
+ * Return:	Success:	Number of characters stored, not including
+ *				the terminating null.  If this value equals
+ *				SIZE then there was not enough space in BUF
+ *				for all the output.
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, November 24, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+HDsnprintf(char *buf, size_t __unused__ size, const char *fmt, ...)
+{
+    int		n;
+    va_list	ap;
+
+    va_start(ap, fmt);
+    n = vsprintf(buf, fmt, ap);
+    va_end(ap);
+    return n;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	HDfprintf
  *
  * Purpose:	Prints the optional arguments under the control of the format
