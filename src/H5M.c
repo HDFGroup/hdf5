@@ -614,17 +614,19 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Mflush(hatom_t oid)
 {
-    group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
+    group_t group;   /* Atom group for incoming object */
     intn i;         /* local counting variable */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Mflush, H5M_init_interface, FAIL);
+    FUNC_ENTER(H5Mflush, H5M_init_interface, FAIL); /* Insert function initialization code and variables */
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
+    group=H5Aatom_group(oid);   /* look up group for incoming object */
     if(group<=BADGROUP || group>=MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
 
+    /* Find correct function pointer set from static array */
     i=H5M_find_type(group);
     if(meta_func_arr[i].flush==NULL)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
@@ -638,7 +640,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(ret_value);  /* Insert function prologue code */
 } /* end H5Mflush() */
 
 /*--------------------------------------------------------------------------

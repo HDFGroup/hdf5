@@ -256,7 +256,8 @@ done:
  DESCRIPTION
         This function flushes a dataset to disk.  (i.e. makes the disk version
     agree with what's in memory, it does _not_ update the memory version with
-    any changes on disk)
+    any changes on disk)  This function is primarily called from H5Mflush, but
+    internal library routines may call it also.
 --------------------------------------------------------------------------*/
 herr_t H5D_flush(hatom_t oid)
 {
