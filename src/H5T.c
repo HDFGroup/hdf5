@@ -3029,12 +3029,12 @@ H5T_t* H5T_get_native_integer(size_t size, H5T_sign_t sign, H5T_direction_t dire
             match=H5T_NATIVE_INT_MATCH_INT;
         else if(size==sizeof(long))
             match=H5T_NATIVE_INT_MATCH_LONG;
-        else if(size==sizeof(long long))
+        else if(size==sizeof(long_long))
             match=H5T_NATIVE_INT_MATCH_LLONG;
         else   /* If no native type matches the querried datatype, simply choose the type of biggest size. */
             match=H5T_NATIVE_INT_MATCH_LLONG;
     } else if(direction == H5T_DIR_DESCEND) {         
-        if(size==sizeof(long long))
+        if(size==sizeof(long_long))
             match=H5T_NATIVE_INT_MATCH_LLONG;
         else if(size==sizeof(long))
             match=H5T_NATIVE_INT_MATCH_LONG;
