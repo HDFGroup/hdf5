@@ -306,6 +306,11 @@ __DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 #define H5F_ACS_FILE_DRV_INFO_SIZE             sizeof(void*)
 #define H5F_ACS_FILE_DRV_INFO_DEF              NULL
 
+/* Definition for file close degree */
+#define H5F_CLOSE_DEGREE_NAME		       "close_degree"
+#define H5F_CLOSE_DEGREE_SIZE		       sizeof(H5F_close_degree_t)
+#define H5F_CLOSE_DEGREE_DEF		       H5F_CLOSE_DEFAULT
+
 /* ======================== File Mount properties ====================*/
 /* Definition for whether absolute symlinks local to file. */
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"

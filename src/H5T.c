@@ -1924,7 +1924,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5T_unlock_cb (void *_dt, const void * UNUSED key)
+H5T_unlock_cb (void *_dt, hid_t id,  const void * UNUSED key)
 {
     H5T_t	*dt = (H5T_t *)_dt;
     
@@ -7637,6 +7637,37 @@ H5T_entof (H5T_t *dt)
     }
 
     FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_is_immutable
+ *
+ * Purpose:     Check is a datatype is immutable. 
+ *
+ * Return:      TRUE 
+ *
+ *              FALSE 
+ *
+ * Programmer:  Raymond Lu 
+ *              Friday, Dec 7, 2001 
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_is_immutable(H5T_t *dt)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER(H5T_is_immutable, FAIL);
+    assert(dt);
+
+    if(dt->state == H5T_STATE_IMMUTABLE)
+	ret_value = TRUE;
+
+    FUNC_LEAVE(ret_value);
 }
 
 

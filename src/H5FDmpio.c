@@ -93,6 +93,7 @@ typedef struct H5FD_mpio_fapl_t {
 static const H5FD_class_t H5FD_mpio_g = {
     "mpio",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
+    H5F_CLOSE_SEMI,				/* fc_degree		*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/

@@ -133,6 +133,7 @@ static herr_t H5FD_multi_flush(H5FD_t *_file);
 static const H5FD_class_t H5FD_multi_g = {
     "multi",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
     H5FD_multi_sb_size,				/*sb_size		*/
     H5FD_multi_sb_encode,			/*sb_encode		*/
     H5FD_multi_sb_decode,			/*sb_decode		*/

@@ -133,6 +133,7 @@ typedef struct H5FD_gass_fapl_t {
 static const H5FD_class_t H5FD_gass_g = {
     "gass",					/*name			*/
     MAXADDR,					/*maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/

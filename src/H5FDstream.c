@@ -171,6 +171,7 @@ static const H5FD_class_t H5FD_stream_g =
 {
   "stream",                         /* name                                */
   MAXADDR,                          /* maxaddr                             */
+  H5F_CLOSE_WEAK,		    /* fc_degree			   */
   NULL,                             /* sb_size                             */
   NULL,                             /* sb_encode                           */
   NULL,                             /* sb_decode                           */

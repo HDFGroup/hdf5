@@ -33,7 +33,6 @@
  */
 #include "H5FDmpio.h"
 
-
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #   include "H5Rpublic.h"

@@ -9,6 +9,7 @@
 #define _H5FDpublic_H
 
 #include "H5public.h"
+#include "H5Fpublic.h"		/*for H5F_close_degree_t */
 
 #define H5_HAVE_VFL 1 /*define a convenient app feature test*/
 #define H5FD_VFD_DEFAULT 0   /* Default VFL driver value */
@@ -108,6 +109,7 @@ typedef struct H5FD_t H5FD_t;
 typedef struct H5FD_class_t {
     const char *name;
     haddr_t maxaddr;
+    H5F_close_degree_t fc_degree;
     hsize_t (*sb_size)(H5FD_t *file);
     herr_t (*sb_encode)(H5FD_t *file, char *name/*out*/,
 			unsigned char *p/*out*/);
@@ -149,28 +151,28 @@ typedef struct H5FD_free_t {
  * declared here and the driver appends private fields in memory.
  */
 struct H5FD_t {
-    hid_t		driver_id;	/*driver ID for this file	*/
-    const H5FD_class_t	*cls;		/*constant class info		*/
+    hid_t			driver_id;	/*driver ID for this file*/
+    const H5FD_class_t		*cls;		/*constant class info	*/
 
-    unsigned long feature_flags;  /* VFL Driver feature Flags */
-    hsize_t     threshold;      /* Threshold for alignment              */
-    hsize_t     alignment;      /* Allocation alignment                 */
+    unsigned long 		feature_flags;  /* VFL Driver feature Flags */
+    hsize_t     		threshold;      /* Threshold for alignment  */
+    hsize_t     		alignment;      /* Allocation alignment     */
 
     /* Metadata aggregation fields */
-    hsize_t def_meta_block_size;  /* Metadata allocation block size (if aggregating metadata) */
-    hsize_t cur_meta_block_size;  /* Current size of metadata allocation region left */
-    haddr_t eoma;       /* End of metadata allocated region */
+    hsize_t 			def_meta_block_size;  /* Metadata allocation block size (if aggregating metadata) */
+    hsize_t 			cur_meta_block_size;  /* Current size of metadata allocation region left */
+    haddr_t 			eoma;       /*End of metadata allocated region*/
 
     /* Metadata accumulator fields */
-    unsigned char *meta_accum;  /* Buffer to hold the accumulated metadata */
-    haddr_t accum_loc;      /* File location (offset) of the accumulated metadata */
-    size_t accum_size;      /* Size of the accumulated metadata buffer used (in bytes) */
-    size_t accum_buf_size;  /* Size of the accumulated metadata buffer allocated (in bytes) */
-    unsigned accum_dirty;   /* Flag to indicate that the accumulated metadata is dirty */
+    unsigned char 		*meta_accum; /*Buffer to hold the accumulated metadata */
+    haddr_t 			accum_loc;      /* File location (offset) of the accumulated metadata */
+    size_t 			accum_size;      /* Size of the accumulated metadata buffer used (in bytes) */
+    size_t 			accum_buf_size;  /* Size of the accumulated metadata buffer allocated (in bytes) */
+    unsigned 			accum_dirty;   /* Flag to indicate that the accumulated metadata is dirty */
 
-    haddr_t		maxaddr;	/*for this file, overrides class*/
-    H5FD_free_t		*fl[H5FD_MEM_NTYPES];/*freelist per allocation type*/
-    hsize_t		maxsize;	/*largest object on FL, or zero	*/
+    haddr_t			maxaddr;/*for this file, overrides class*/
+    H5FD_free_t			*fl[H5FD_MEM_NTYPES];/*freelist per allocation type*/
+    hsize_t			maxsize;/*largest object on FL, or zero	*/
 };
 
 #ifdef __cplusplus

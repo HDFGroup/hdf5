@@ -36,6 +36,11 @@
 #define H5F_ACC_DEBUG	(H5check(),0x0008u)	/*print debug info	     */
 #define H5F_ACC_CREAT	(H5check(),0x0010u)	/*create non-existing files  */
 
+#define H5F_OBJ_FILE	(0x0001u)
+#define H5F_OBJ_DATASET	(0x0002u)
+#define H5F_OBJ_GROUP	(0x0004u)
+#define H5F_OBJ_DATATYPE (0x0008u)
+#define H5F_OBJ_ALL 	(H5F_OBJ_FILE|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_DATATYPE)
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -64,21 +69,39 @@ typedef enum H5T_bkg_t {
     H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
+/* How does file close behave?
+ * H5F_CLOSE_DEFAULT - Use the degree pre-defined by underlining VFL
+ * H5F_CLOSE_WEAK    - file closes only after all opened objects are closed 
+ * H5F_CLOSE_SEMI    - if no opened objects, file is close; otherwise, file
+		       close fails
+ * H5F_CLOSE_STRONG  - if there are opened objects, close them first, then
+		       close file
+ */
+typedef enum H5F_close_degree_t {
+    H5F_CLOSE_DEFAULT   = 0,
+    H5F_CLOSE_WEAK      = 1,
+    H5F_CLOSE_SEMI      = 2,
+    H5F_CLOSE_STRONG    = 3
+} H5F_close_degree_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Functions in H5F.c */
 __DLL__ htri_t H5Fis_hdf5 (const char *filename);
-__DLL__ hid_t H5Fcreate (const char *filename, unsigned flags,
-			 hid_t create_plist, hid_t access_plist);
-__DLL__ hid_t H5Fopen (const char *filename, unsigned flags,
-		       hid_t access_plist);
-__DLL__ hid_t H5Freopen(hid_t file_id);
+__DLL__ hid_t  H5Fcreate (const char *filename, unsigned flags,
+		  	  hid_t create_plist, hid_t access_plist);
+__DLL__ hid_t  H5Fopen (const char *filename, unsigned flags,
+		        hid_t access_plist);
+__DLL__ hid_t  H5Freopen(hid_t file_id);
 __DLL__ herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
 __DLL__ herr_t H5Fclose (hid_t file_id);
-__DLL__ hid_t H5Fget_create_plist (hid_t file_id);
-__DLL__ hid_t H5Fget_access_plist (hid_t file_id);
+__DLL__ hid_t  H5Fget_create_plist (hid_t file_id);
+__DLL__ hid_t  H5Fget_access_plist (hid_t file_id);
+__DLL__ herr_t H5Fget_obj_count(hid_t file_id, unsigned types, 
+                                unsigned *obj_id_count);
+__DLL__ herr_t H5Fget_obj_ids(hid_t file_id, unsigned types, hid_t *obj_id_list);
 __DLL__ herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 __DLL__ herr_t H5Funmount(hid_t loc, const char *name);
 

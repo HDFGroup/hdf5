@@ -754,6 +754,7 @@ test_types(hid_t file)
     for (i=0; i<sizeof buf; i++) buf[i] = (unsigned char)0xff ^ (unsigned char)i;
     if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
 	goto error;
+
     if (H5Sclose(space)<0) goto error;
     if (H5Tclose(type)<0) goto error;
     if (H5Dclose(dset)<0) goto error;

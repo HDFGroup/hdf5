@@ -50,6 +50,19 @@
 #define F3_SYM_INTERN_K	   F2_SYM_INTERN_K
 #define FILE3	"tfile3.h5"
 
+#define OBJ_ID_COUNT_0     0
+#define OBJ_ID_COUNT_1     1 
+#define OBJ_ID_COUNT_2     2
+#define OBJ_ID_COUNT_3     3 
+#define OBJ_ID_COUNT_4     4 
+#define OBJ_ID_COUNT_6	   6    
+#define OBJ_ID_COUNT_8     8 
+
+static void
+create_objects(hid_t, hid_t, hid_t *, hid_t *, hid_t *, hid_t *);
+static void
+test_obj_count_and_id(hid_t, hid_t, hid_t, hid_t, hid_t, hid_t);
+
 /****************************************************************
 **
 **  test_file_create(): Low-level file creation I/O test routine.
@@ -345,6 +358,483 @@ test_file_open(void)
 
 /****************************************************************
 **
+**  test_file_close():  low-level file close test routine.  
+**                      It mainly tests behavior with close degree.
+**
+*****************************************************************/
+static void 
+test_file_close()
+{
+    hid_t               fid1, fid2;
+    hid_t               fapl_id, access_id;
+    hid_t		dataset_id, group_id1, group_id2, group_id3;
+    H5F_close_degree_t  fc_degree;
+    unsigned            fid_count, oid_count;
+    herr_t              ret;
+
+    /* Test behavior while opening file multiple times with different
+     * file close degree value
+     */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+ 
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl_id, FAIL, "H5Pcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    ret = H5Pget_fclose_degree(fapl_id, &fc_degree);
+    VERIFY(fc_degree, H5F_CLOSE_STRONG, "H5Pget_fclose_degree");
+
+    /* should fail */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    VERIFY(fid2, FAIL, "H5Fopen");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+   
+    /* should succeed */ 
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close second open */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Test behavior while opening file multiple times with file close 
+     * degree STRONG */
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should fail */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    VERIFY(fid2, FAIL, "H5Fopen");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should succeed */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a dataset and a group in each file open respectively */
+    create_objects(fid1, fid2, NULL, NULL, NULL, NULL);
+
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close second open */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Test behavior while opening file multiple times with file close
+     * degree SEMI */
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should fail */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    VERIFY(fid2, FAIL, "H5Fopen");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should succeed */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a dataset and a group in each file open respectively */
+    create_objects(fid1, fid2, &dataset_id, &group_id1, &group_id2, &group_id3);
+
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close second open, should fail since it is SEMI and objects are 
+     * still open. */
+    ret = H5Fclose(fid2);
+    VERIFY(ret, FAIL, "H5Fclose");
+
+    ret = H5Dclose(dataset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+  
+    ret = H5Gclose(group_id1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(group_id2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close second open, should fail since it is SEMI and one group ID is 
+     * still open. */
+    ret = H5Fclose(fid2);
+    VERIFY(ret, FAIL, "H5Fclose");
+
+    ret = H5Gclose(group_id3);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close second open again.  Should succeed. */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Test behavior while opening file multiple times with file close
+     * degree WEAK */
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should fail */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    VERIFY(fid2, FAIL, "H5Fopen");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_WEAK);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should succeed */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a dataset and a group in each file open respectively */
+    create_objects(fid1, fid2, &dataset_id, &group_id1, &group_id2, &group_id3);
+
+    /* Create more new files and test object count and ID list functions */
+    test_obj_count_and_id(fid1, fid2, dataset_id, group_id1, 
+				group_id2, group_id3);
+ 
+    /* Close first open */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close second open.  File will be finally closed after all objects 
+     * are closed. */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Dclose(dataset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Gclose(group_id1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(group_id2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(group_id3);
+    CHECK(ret, FAIL, "H5Gclose");
+
+
+    /* Test behavior while opening file multiple times with file close
+     * degree DEFAULT */
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_SEMI);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should fail */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    VERIFY(fid2, FAIL, "H5Fopen");
+
+    ret = H5Pset_fclose_degree(fapl_id, H5F_CLOSE_DEFAULT);
+    CHECK(ret, FAIL, "H5Pset_fclose_degree");
+
+    /* should succeed */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, fapl_id);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Create a dataset and a group in each file open respectively */
+    create_objects(fid1, fid2, &dataset_id, &group_id1, &group_id2, &group_id3);
+    
+    access_id = H5Fget_access_plist(fid1);
+    CHECK(access_id, FAIL, "H5Fget_access_plist");
+
+    ret= H5Pget_fclose_degree(access_id, &fc_degree);
+    CHECK(ret, FAIL, "H5Pget_fclose_degree");
+
+    switch(fc_degree) {
+	case H5F_CLOSE_STRONG:
+    	    /* Close first open */
+    	    ret = H5Fclose(fid1);
+    	    CHECK(ret, FAIL, "H5Fclose");
+    	    /* Close second open */
+    	    ret = H5Fclose(fid2);
+    	    CHECK(ret, FAIL, "H5Fclose");
+	    break;
+	case H5F_CLOSE_SEMI:
+            /* Close first open */
+            ret = H5Fclose(fid1);
+            CHECK(ret, FAIL, "H5Fclose");
+    	    ret = H5Dclose(dataset_id);
+            CHECK(ret, FAIL, "H5Dclose");
+            ret = H5Gclose(group_id1);
+    	    CHECK(ret, FAIL, "H5Gclose");
+            ret = H5Gclose(group_id2);
+            CHECK(ret, FAIL, "H5Gclose");
+            ret = H5Gclose(group_id3);
+            CHECK(ret, FAIL, "H5Gclose");
+            /* Close second open */
+            ret = H5Fclose(fid2);
+            CHECK(ret, FAIL, "H5Fclose");
+	    break;
+	case H5F_CLOSE_WEAK:
+            /* Close first open */
+            ret = H5Fclose(fid1);
+            CHECK(ret, FAIL, "H5Fclose");
+            /* Close second open */
+            ret = H5Fclose(fid2);
+            CHECK(ret, FAIL, "H5Fclose");
+            ret = H5Dclose(dataset_id);
+            CHECK(ret, FAIL, "H5Dclose");
+            ret = H5Gclose(group_id1);
+            CHECK(ret, FAIL, "H5Gclose");
+            ret = H5Gclose(group_id2);
+            CHECK(ret, FAIL, "H5Gclose");
+            ret = H5Gclose(group_id3);
+            CHECK(ret, FAIL, "H5Gclose");
+	    break;
+    }
+
+    /* Close file access property list */
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(access_id);
+    CHECK(ret, FAIL, "H5Pclose");
+}
+
+/****************************************************************
+**
+**  create_objects(): routine called by test_file_close to create
+**                    a dataset and a group in file.
+**
+****************************************************************/
+static void
+create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1, 
+		hid_t *ret_gid2, hid_t *ret_gid3)
+{
+    unsigned	oid_count;
+    herr_t	ret;
+
+    /* Check reference counts of file IDs and opened object IDs.
+     * The verification is hard-coded.  If in any case, this testing
+     * is changed, remember to check this part and update the macros.
+     */
+    {
+       ret = H5Fget_obj_count(fid1, H5F_OBJ_ALL, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_2, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
+				H5F_OBJ_DATATYPE, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid2, H5F_OBJ_ALL, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_2, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
+                                H5F_OBJ_DATATYPE, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
+    }
+
+    /* create a dataset in the first file open */
+    {
+       hid_t       dataset_id, dataspace_id;  /* identifiers */
+       hsize_t     dims[F2_RANK];
+       int         data[F2_DIM0][F2_DIM1];
+       unsigned    i,j;
+
+       /* Create the data space for the dataset. */
+       dims[0] = F2_DIM0;
+       dims[1] = F2_DIM1;
+       dataspace_id = H5Screate_simple(F2_RANK, dims, NULL);
+       CHECK(dataspace_id, FAIL, "H5Screate_simple");
+
+       /* Create the dataset. */
+       dataset_id = H5Dcreate(fid1, "/dset", H5T_NATIVE_INT, dataspace_id,
+                        H5P_DEFAULT);
+       CHECK(dataset_id, FAIL, "H5Dcreate");
+
+       for(i=0; i<F2_DIM0; i++)
+           for(j=0; j<F2_DIM1; j++)
+               data[i][j]=i*10+j;
+
+       /* Write data to the new dataset */
+       ret = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                H5P_DEFAULT, data);
+       CHECK(ret, FAIL, "H5Dwrite");
+
+       if(ret_did != NULL)
+           *ret_did = dataset_id;
+
+       /* Terminate access to the data space. */
+       ret = H5Sclose(dataspace_id);
+       CHECK(ret, FAIL, "H5Sclose");
+    }
+
+    /* Create a group in the second file open */
+    {
+        hid_t   gid1, gid2, gid3;
+        gid1 = H5Gcreate(fid2, "/group", 0);
+        if(ret_gid1 != NULL)
+            *ret_gid1 = gid1;
+
+        gid2 = H5Gopen(fid2, "/group");
+        if(ret_gid2 != NULL)
+            *ret_gid2 = gid2;
+
+        gid3 = H5Gopen(fid2, "/group");
+        if(ret_gid3 != NULL)
+            *ret_gid3 = gid3;
+    }
+
+    /* Check reference counts of file IDs and opened object IDs.
+     * The verification is hard-coded.  If in any case, this testing
+     * is changed, remember to check this part and update the macros.
+     */
+    {
+       ret = H5Fget_obj_count(fid1, H5F_OBJ_ALL, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_6, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid1, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
+                                H5F_OBJ_DATATYPE, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid2, H5F_OBJ_ALL, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_6, "H5Fget_obj_count");
+
+       ret = H5Fget_obj_count(fid2, H5F_OBJ_DATASET|H5F_OBJ_GROUP|
+                                H5F_OBJ_DATATYPE, &oid_count);
+       CHECK(ret, FAIL, "H5Fget_obj_count");
+       VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
+    }
+}
+
+/****************************************************************
+**
+**  test_obj_count_and_id(): test object count and ID list functions. 
+**
+****************************************************************/
+static void 
+test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, 
+			hid_t gid2, hid_t gid3)
+{
+    hid_t    fid3, fid4;
+    unsigned oid_count;
+    herr_t   ret;
+
+    /* Create two new files */
+    fid3 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid3, FAIL, "H5Fcreate");
+    fid4 = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid4, FAIL, "H5Fcreate");
+
+    /* test object count of all files IDs open */
+    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_FILE, &oid_count);
+    CHECK(ret, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_4, "H5Fget_obj_count");
+
+    /* test object count of all dataset open */
+    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATASET, &oid_count);
+    CHECK(ret, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_1, "H5Fget_obj_count");
+
+    /* test object count of all group open */
+    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_GROUP, &oid_count);
+    CHECK(ret, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_3, "H5Fget_obj_count");
+
+    /* test object count of all datatype open */
+    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_DATATYPE, &oid_count);
+    CHECK(ret, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_0, "H5Fget_obj_count");
+
+    /* test object count of all objects currently open */
+    ret = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL, &oid_count);
+    CHECK(ret, FAIL, "H5Fget_obj_count");
+    VERIFY(oid_count, OBJ_ID_COUNT_8, "H5Fget_obj_count");
+
+    {
+        hid_t      *oid_list;
+        unsigned   i;
+        H5I_type_t id_type;
+
+        oid_list = (hid_t*)calloc(oid_count, sizeof(hid_t));
+        if(oid_list != NULL) {
+	    ret = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, oid_list);
+	    CHECK(ret, FAIL, "H5Fget_obj_ids");
+        }
+
+        for(i=0; i<oid_count; i++) {
+	    id_type = H5Iget_type(oid_list[i]);
+	    switch(id_type) {
+	        case H5I_FILE:
+		    if(oid_list[i]!=fid1 && oid_list[i]!=fid2 &&
+			oid_list[i]!=fid3 && oid_list[i]!=fid4) {
+			ret = FAIL;
+			CHECK(ret, FAIL, "H5Fget_obj_ids");
+		    }
+		    break;
+	        case H5I_GROUP:
+                    if(oid_list[i]!=gid1 && oid_list[i]!=gid2 &&
+                        oid_list[i]!=gid3) {
+			ret = FAIL;
+                        CHECK(ret, FAIL, "H5Fget_obj_ids");
+                    }   
+		    break;
+	        case H5I_DATASET:
+	 	    VERIFY(oid_list[i], did, "H5Fget_obj_ids");
+		    break;
+		default:
+		    ret = FAIL;
+                    CHECK(ret, FAIL, "H5Fget_obj_ids");
+	    }
+        }	
+
+        free(oid_list);
+    }
+
+    /* close the two new files */
+    ret = H5Fclose(fid3);
+    CHECK(fid3, FAIL, "H5Fclose");
+    ret = H5Fclose(fid4);
+    CHECK(fid4, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 ** 
 ****************************************************************/
@@ -354,8 +844,9 @@ test_file(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
-    test_file_create();		/* Test file creation (also creation templates) */
+    test_file_create();		/* Test file creation(also creation templates)*/
     test_file_open();		/* Test file opening */
+    test_file_close();          /* Test file close behavior */
 }				/* test_file() */
 
 
@@ -380,4 +871,3 @@ cleanup_file(void)
     remove(FILE2);
     remove(FILE3);
 }
-

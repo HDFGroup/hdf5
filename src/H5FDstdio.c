@@ -144,6 +144,7 @@ static herr_t H5FD_stdio_flush(H5FD_t *_file);
 static const H5FD_class_t H5FD_stdio_g = {
     "stdio",				        /*name			*/
     MAXADDR,				        /*maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/

@@ -888,6 +888,11 @@ H5I_remove(hid_t id)
  *	removed from the group and its reference count is not decremented.
  *	The group number is now passed to the free method.
  *
+ *	Raymond, 11 Dec 2001
+ *	If the freeing function fails, return failure instead of reference
+ *	count 1.  This feature is needed by file close with H5F_CLOSE_SEMI
+ *	value.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -924,7 +929,7 @@ H5I_dec_ref(hid_t id)
 		H5I_remove(id);
 		ret_value = 0;
 	    } else {
-		ret_value = 1;
+		ret_value = FAIL;
 	    }
 	} else {
 	    ret_value = --(id_ptr->count);
@@ -1020,7 +1025,7 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
     for (i=0; i<grp_ptr->hash_size; i++) {
 	id_ptr = grp_ptr->id_list[i];
 	while (id_ptr) {
-	    if ((*func)(id_ptr->obj_ptr, key)) {
+	    if ((*func)(id_ptr->obj_ptr, id_ptr->id, key)) {
 		HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
 	    }
 	    id_ptr = id_ptr->next;

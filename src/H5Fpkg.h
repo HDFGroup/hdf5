@@ -119,6 +119,7 @@ typedef struct H5F_file_t {
     unsigned sieve_dirty;       /* Flag to indicate that the data sieve buffer is dirty */
 
     H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
+    H5F_close_degree_t fc_degree;	/* File close behavior degree	*/
 } H5F_file_t;
 
 /* A record of the mount table */

@@ -131,7 +131,7 @@ struct H5T_t {
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
-    hbool_t     force_conv; /* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
+    hbool_t     force_conv;     /* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived data types	     */
     union {
         H5T_atomic_t	atomic; /* an atomic data type              */
