@@ -84,7 +84,7 @@ Expected output for 'h5dump --xml tcompound_complex.h5'
             <hdf5:Field FieldName="g_name">
                <hdf5:DataType>
                   <hdf5:AtomicType>
-                     <hdf5:IntegerType ByteOrder="LE" Sign="true" Size="1" />
+                     <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="1" />
                   </hdf5:AtomicType>
                </hdf5:DataType>
             </hdf5:Field>

@@ -654,6 +654,7 @@ print_datatype(hid_t type,unsigned in_group)
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
     H5T_cset_t  cset;
+    H5T_order_t order;
     H5G_stat_t  statbuf;
     hid_t       super;
     hid_t       tmp_type;
@@ -809,26 +810,58 @@ print_datatype(hid_t type,unsigned in_group)
             indentation(indent + COL);
             printf("%s ", CTYPE);
 
+            /* Check C variable-length string first. Are the two types equal? */
             if (H5Tequal(tmp_type, str_type)) {
                 printf("H5T_C_S1;\n");
                 H5Tclose(str_type);
-            } else {
-                H5Tclose(str_type);
-                str_type = H5Tcopy(H5T_FORTRAN_S1);
-                H5Tset_cset(str_type, cset);
-                H5Tset_size(str_type, size);
-                H5Tset_strpad(str_type, str_pad);
+                goto done;
+            } 
+           
+            /* Change the endianness and see if they're equal. */ 
+            order = H5Tget_order(tmp_type);
+            if(order==H5T_ORDER_LE)
+                H5Tset_order(str_type, H5T_ORDER_LE);
+            else if(order==H5T_ORDER_BE)
+                H5Tset_order(str_type, H5T_ORDER_BE);
 
-                if (H5Tequal(tmp_type, str_type)) {
-                    printf("H5T_FORTRAN_S1;\n");
-                } else {
-                    printf("unknown_one_character_type;\n ");
-                    d_status = EXIT_FAILURE;
-                }
-
+            if (H5Tequal(tmp_type, str_type)) {
+                printf("H5T_C_S1;\n");
                 H5Tclose(str_type);
+                goto done;
             }
 
+            /* If not equal to C variable-length string, check Fortran type. */
+            H5Tclose(str_type);
+            str_type = H5Tcopy(H5T_FORTRAN_S1);
+            H5Tset_cset(str_type, cset);
+            H5Tset_size(str_type, size);
+            H5Tset_strpad(str_type, str_pad);
+
+            /* Are the two types equal? */
+            if (H5Tequal(tmp_type, str_type)) {
+                printf("H5T_FORTRAN_S1;\n");
+                H5Tclose(str_type);
+                goto done;
+            }
+
+            /* Change the endianness and see if they're equal. */ 
+            order = H5Tget_order(tmp_type);
+            if(order==H5T_ORDER_LE)
+                H5Tset_order(str_type, H5T_ORDER_LE);
+            else if(order==H5T_ORDER_BE)
+                H5Tset_order(str_type, H5T_ORDER_BE);
+
+            if (H5Tequal(tmp_type, str_type)) {
+                printf("H5T_FORTRAN_S1;\n");
+                H5Tclose(str_type);
+                goto done;
+            }
+
+            printf("unknown_one_character_type;\n ");
+            d_status = EXIT_FAILURE;
+            H5Tclose(str_type);
+
+done:
             H5Tclose(tmp_type);
 
             indent -= COL;

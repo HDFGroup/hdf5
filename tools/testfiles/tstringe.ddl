@@ -32,7 +32,7 @@ GROUP "/" {
    }
    DATASET "str3" {
       DATATYPE  H5T_COMPOUND {
-         H5T_STD_I32LE "a";
+         H5T_STD_I32BE "a";
          H5T_STRING {
             STRSIZE 255;
             STRPAD H5T_STR_NULLTERM;
@@ -49,7 +49,7 @@ GROUP "/" {
       }
    }
    DATASET "str4" {
-      DATATYPE  H5T_STD_I8LE
+      DATATYPE  H5T_STD_I8BE
       DATASPACE  SIMPLE { ( 93 ) / ( 93 ) }
       DATA {
       (0): 70, 111, 117, 114, 32, 115, 99, 111, 114, 101, 32, 97, 110, 100,

@@ -655,7 +655,7 @@ static void make_dset_reg_ref(hid_t loc_id)
  sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
  
  /* Create a dataset */
- dset2=H5Dcreate(loc_id,"dsetreg",H5T_STD_U8LE,sid2,H5P_DEFAULT);
+ dset2=H5Dcreate(loc_id,"dsetreg",H5T_NATIVE_UCHAR,sid2,H5P_DEFAULT);
  
  for(i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++)
   dwbuf[i]=i*3; 

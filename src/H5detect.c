@@ -195,17 +195,31 @@ precision (detected_t *d)
  */
 #define DETECT_I(TYPE,VAR,INFO) {					      \
    TYPE _v;								      \
+   int _int_v;                                                                \
    int _i, _j;								      \
    unsigned char *_x;							      \
+                                                                              \
    memset (&INFO, 0, sizeof(INFO));					      \
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
-   for (_i=sizeof(TYPE),_v=0; _i>0; --_i) _v = (_v<<8) + _i;		      \
-   for (_i=0,_x=(unsigned char *)&_v; _i<(signed)sizeof(TYPE); _i++) {	      \
-      _j = (*_x++)-1;							      \
-      assert (_j<(signed)sizeof(TYPE));					      \
-      INFO.perm[_i] = _j;						      \
-   }									      \
+                                                                              \
+   if(sizeof(TYPE)!=1) {                                                      \
+       for (_i=sizeof(TYPE),_v=0; _i>0; --_i) _v = (_v<<8) + _i;	      \
+       for (_i=0,_x=(unsigned char *)&_v; _i<(signed)sizeof(TYPE); _i++) {    \
+          _j = (*_x++)-1;						      \
+          assert (_j<(signed)sizeof(TYPE));				      \
+          INFO.perm[_i] = _j;						      \
+       }								      \
+   } else { /*Not able to detect order if type size is 1 byte. Use native int \
+             *instead. No effect on data, just make it look correct. */       \
+       for (_i=sizeof(int),_int_v=0; _i>0; --_i) _int_v = (_int_v<<8) + _i;   \
+       for (_i=0,_x=(unsigned char *)&_int_v; _i<(signed)sizeof(int); _i++) { \
+          _j = (*_x++)-1;						      \
+          assert (_j<(signed)sizeof(int));				      \
+          INFO.perm[_i] = _j;						      \
+       }								      \
+   }                                                                          \
+                                                                              \
    INFO.sign = ('U'!=*(#VAR));						      \
    precision (&(INFO));							      \
    ALIGNMENT(TYPE, INFO);						      \
