@@ -2393,6 +2393,7 @@ AC_SUBST([FILTERS])
 AC_SUBST(USE_FILTER_SHUFFLE) USE_FILTER_SHUFFLE="no"
 AC_SUBST(USE_FILTER_FLETCHER32) USE_FILTER_FLETCHER32="no"
 AC_SUBST(USE_FILTER_NBIT) USE_FILTER_NBIT="no"
+AC_SUBST(USE_FILTER_SCALEOFFSET) USE_FILTER_SCALEOFFSET="no"
 AC_MSG_CHECKING([for I/O filters])
 AC_ARG_ENABLE([filters],
               [AC_HELP_STRING([--enable-filters=all],
@@ -2403,7 +2404,7 @@ AC_ARG_ENABLE([filters],
               [FILTERS=$enableval])
 
 dnl Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32,nbit"
+all_filters="shuffle,fletcher32,nbit,scaleoffset"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -2438,6 +2439,11 @@ if test -n "$FILTERS"; then
       AC_DEFINE([HAVE_FILTER_NBIT], [1],
                 [Define if support for nbit filter is enabled])
       USE_FILTER_NBIT="yes"
+    fi
+    if test $filter = "SCALEOFFSET"; then
+      AC_DEFINE([HAVE_FILTER_SCALEOFFSET], [1],
+                [Define if support for scaleoffset filter is enabled])
+      USE_FILTER_SCALEOFFSET="yes"
     fi
   done
 fi
