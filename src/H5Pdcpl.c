@@ -1222,11 +1222,11 @@ done:
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Kent Yang
- *              Wednesday, November 13, 2002
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, December 22, 2004
  *
  * Modifications:
- *              Xiaowen Wu
+ *              
  *
  *-------------------------------------------------------------------------
  */
@@ -1259,8 +1259,64 @@ H5Pset_nbit(hid_t plist_id)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pset_nbit() */
-
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_scaleoffset
+ *
+ * Purpose:     Sets scaleoffset filter for a dataset creation property list
+ *              and user-supplied minimum number of bits
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, February 9, 2005
+ *
+ * Modifications:
+ *              
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_scaleoffset(hid_t plist_id, unsigned min_bits)
+{
+    H5O_pline_t         pline;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    unsigned cd_values[1];      /* Filter parameters */
+    unsigned int config_flags;
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_scaleoffset, FAIL);
+    H5TRACE2("e","iIu",plist_id,min_bits);
+
+    /* Check arguments */
+    if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_CREATE))
+        HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    if(min_bits < 0)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "minimum number of bits can't be positive");
+    
+    /* Set the parameter for the filter */
+    /* if min_bits is zero, the scaleoffset filter will automatically calculate min_bits */
+    cd_values[0] = min_bits;
+
+    /* Add the scaleoffset filter */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if(H5Z_append(&pline, H5Z_FILTER_SCALEOFFSET, H5Z_FLAG_OPTIONAL, 1, cd_values)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add scaleoffset filter to pipeline");
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+} /* end H5Pset_scaleoffset() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fletcher32
  *
