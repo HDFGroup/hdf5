@@ -1397,6 +1397,7 @@ main(int argc, char *argv[])
              if (opts[i+1]-opts[i] == 1) {
                 if (strcmp(argv[opts[i]], "-bb") &&
                     strcmp(argv[opts[i]], "-header") &&
+					strcmp(argv[opts[i]], "-xml") &&
 					strcmp(argv[opts[i]], "-v")) {
                     fprintf(stderr,"h5dump error: no <names> after option %s\n",
                             argv[opts[i]]);
