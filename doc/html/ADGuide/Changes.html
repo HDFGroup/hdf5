@@ -186,31 +186,38 @@ H5Pget_family
 H5Pget_mpi
 H5Pget_sec2
 H5Pget_split
+H5Pget_stdio
+H5Pget_xfer
 </pre>
         </td><td>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </td><td>
 <pre>
-H5Pget_stdio
-H5Pget_xfer
 H5Pset_core
 H5Pset_family
 H5Pset_mpi
 H5Pset_sec2
+H5Pset_split
+H5Pset_stdio
+H5Pset_xfer
 </pre>
         </td><td>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </td><td>
 <pre>
-H5Pset_split
-H5Pset_stdio
-H5Pset_xfer
+H5RAclose
+H5RAcreate
+H5RAopen
+H5RAread
+H5RAwrite
 H5Tget_member_dims
 H5Tinsert_array
 </pre>
         </td></tr>
         </table>
         </dir>
+        Note that the entire H5RA interface, an esperimental interface for 
+        ragged arrays, has been removed from the library.
 
 
     <h3>Functions with Changed Syntax</h3>
@@ -1555,7 +1562,7 @@ Ragged Arrays (alpha)
 
 <!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified:  12 January 2001 
+Last modified:  22 January 2001 
 <!-- hhmts end -->
 
 <br>
