@@ -229,6 +229,7 @@ static void get_minmax(minmax *mm, double val);
 static minmax accumulate_minmax_stuff(minmax *mm, long raw_size, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
+static void output_report(FILE *output, const char *fmt, ...);
 static void print_indent(register FILE *output, register int indent);
 static void usage(const char *prog);
 
@@ -754,7 +755,7 @@ destroy_comm_world(void)
  * Programmer:  Bill Wendling, 19. December 2001
  * Modifications:
  */
-void
+static void
 output_report(FILE *output, const char *fmt, ...)
 {
     int myrank;
@@ -778,7 +779,7 @@ output_report(FILE *output, const char *fmt, ...)
  * Programmer:  Bill Wendling, 29. October 2001
  * Modifications:
  */
-void
+static void
 print_indent(register FILE *output, register int indent)
 {
     int myrank;

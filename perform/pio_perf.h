@@ -57,8 +57,6 @@ extern "C" {
 #endif  /* __cplusplus */
 
 extern results do_pio(FILE * output, parameters param);
-extern void output_report(FILE *output, const char *fmt, ...);
-extern void print_indent(register FILE *output, register int indent);
 
 #ifdef __cplusplus
 }
