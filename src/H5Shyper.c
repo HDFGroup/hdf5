@@ -7265,8 +7265,8 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     mem_size[ndims]=elmt_size;
 
     /* initialize row sizes for each dimension */
-    for(i=(ndims-1),acc=1; i>=0; i--) {
-        slab[i]=acc*elmt_size;
+    for(i=(ndims-1),acc=elmt_size; i>=0; i--) {
+        slab[i]=acc;
         acc*=mem_size[i];
     } /* end for */
 
@@ -7323,12 +7323,11 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         nelmts=io_left;
 
         /* Compute the arrays to perform I/O on */
-        /* Copy the location of the point to get */
-        HDmemcpy(offset, iter->u.hyp.off,ndims*sizeof(hssize_t));
 
-        /* Add in the selection offset */
+        /* Copy the location of the point to get */
+        /* (Add in the selection offset) */
         for(i=0; i<ndims; i++)
-            offset[i] += sel_off[i];
+            offset[i] = iter->u.hyp.off[i] + sel_off[i];
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
@@ -7617,12 +7616,10 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Update the iterator */
 
-        /* Subtract out the selection offset */
-        for(i=0; i<ndims; i++)
-            offset[i] -= sel_off[i];
-
         /* Update the iterator with the location we stopped */
-        HDmemcpy(iter->u.hyp.off, offset, ndims*sizeof(hssize_t));
+        /* (Subtract out the selection offset) */
+        for(i=0; i<ndims; i++)
+            iter->u.hyp.off[i] = offset[i] - sel_off[i];
 
         /* Decrement the number of elements left in selection */
         iter->elmt_left-=(nelmts-io_left);
