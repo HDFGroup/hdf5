@@ -1,14 +1,21 @@
-/*
- * Copyright © 1999-2001 NCSA
- *                       All rights reserved.
- *
- * Programmer:  Robb Matzke <matzke@llnl.gov>
- *              Friday, August 27, 1999
- */
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5MMprivate.h"
-#include "H5Zprivate.h"
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Zprivate.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_SZIP
 
@@ -21,7 +28,6 @@
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_szip
@@ -29,94 +35,132 @@ static int interface_initialize_g = 0;
  * Purpose:	Implement an I/O filter around the 'rice' algorithm in
  *              libsz
  *
- * Return:	Success:	
+ * Return:	Success: Size of buffer filtered
+ *		Failure: 0	
  *
- *		Failure:	
- *
- * Programmer:	Robb Matzke
- *              Thursday, April 16, 1998
+ * Programmer:	Kent Yang
+ *              Tuesday, April 1, 2003
  *
  * Modifications:
+ *              Quincey Koziol, April 2, 2003
+ *              Cleaned up code.
  *
  *-------------------------------------------------------------------------
  */
 size_t
-H5Z_filter_szip (unsigned flags, 
-		 size_t cd_nelmts,
-		 const unsigned cd_values[], 
-		 size_t nbytes,
-		 size_t *buf_size, 
-		 void **buf)
+H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+    size_t nbytes, size_t *buf_size, void **buf)
 {
+    size_t ret_value = 0;       /* Return value */
+    size_t size_out  = 0;       /* Size of output buffer */
+    unsigned char *outbuf = NULL;    /* Pointer to new output buffer */
+    unsigned char *newbuf = NULL;    /* Pointer to input buffer */
+    SZ_com_t sz_param;          /* szip parameter block */
 
-  size_t ret_value = 0;
-  size_t size_out  = 0; 
-  size_t size_in   = 0; 
-  char *outbuf     = NULL;
-  char *newbuf     = NULL;
-  int status;
-  SZ_com_t sz_param; 
+    FUNC_ENTER_NOAPI(H5Z_filter_szip, 0);
 
-  sz_param.options_mask        = cd_values[0];
-  sz_param.bits_per_pixel      = cd_values[1];
-  sz_param.pixels_per_block    = cd_values[2];
-  sz_param.pixels_per_scanline = cd_values[3];
+    /* Sanity check to make certain that we haven't drifted out of date with
+     * the mask options from the szlib.h header */
+    assert(H5_SZIP_RAW_OPTION_MASK==SZ_RAW_OPTION_MASK);
+    assert(H5_SZIP_NN_OPTION_MASK==SZ_NN_OPTION_MASK);
 
-  FUNC_ENTER_NOAPI(H5Z_filter_szip, 0);
+    /* Check arguments */
+    if (cd_nelmts!=4)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level");
 
-  if (flags & H5Z_FLAG_REVERSE) {
+    /* Copy the filter parameters into the szip parameter block */
+    sz_param.options_mask        = cd_values[0];
+    sz_param.bits_per_pixel      = cd_values[1];
+    sz_param.pixels_per_block    = cd_values[2];
+    sz_param.pixels_per_scanline = cd_values[3];
+
     /* Input; uncompress */
+    if (flags & H5Z_FLAG_REVERSE) {
+        uint32_t stored_nalloc;  /* Number of bytes the compressed block will expand into */
+        size_t nalloc;  /* Number of bytes the compressed block will expand into */
 
-    size_t nalloc;
+        /* Get the size of the uncompressed buffer */
+        newbuf = *buf;
+        UINT32DECODE(newbuf,stored_nalloc);
+        H5_ASSIGN_OVERFLOW(nalloc,stored_nalloc,uint32_t,size_t);
+        
+        /* Check for uncompressed buffer */
+        if(nalloc==0) {
+            /* Set the correct number of bytes to allocate */
+            nalloc=nbytes-4;
 
-    newbuf = *buf;
-    UINT32DECODE(newbuf,nalloc);
+            /* Allocate space for the uncompressed buffer */
+            if(NULL==(outbuf = H5MM_malloc(nalloc)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
 
-    size_out = nalloc;
-    size_in = nbytes;
+            /* Copy over the uncompressed data */
+            HDmemcpy((void*)outbuf, (void*)newbuf, nalloc);
+        } /* end if */
+        else {
+            /* Allocate space for the uncompressed buffer */
+            if(NULL==(outbuf = H5MM_malloc(nalloc)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
 
-    if(NULL==(outbuf = H5MM_malloc(nalloc)))
-      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for szip decompression");
+            /* Decompress the buffer */
+            size_out=nalloc;
+            if(SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, nbytes-4, &sz_param) != SZ_OK)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
+            assert(size_out==nalloc);
+        } /* end else */
 
-     status = SZ_BufftoBuffDecompress(outbuf, &size_out, newbuf, size_in-4, &sz_param);
+        /* Free the input buffer */
+        H5MM_xfree(*buf);
 
-     if(status != SZ_OK) {
-      HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "szip_filter: decompression failed");
+        /* Set return values */
+        *buf = outbuf;
+        outbuf = NULL;
+        *buf_size = nalloc;
+        ret_value = nalloc;
     }
-
-      *buf = newbuf -4;
-      H5MM_xfree(*buf);
-      *buf = outbuf;
-      outbuf = NULL;
-      *buf_size = nalloc;
-      ret_value = size_out;
-  }
-
+    /* Output; compress */
     else {
+        unsigned char *dst = NULL;    /* Temporary pointer to new output buffer */
 
-      size_in = nbytes;
-      size_out = nbytes;
-      if(NULL==(outbuf = H5MM_malloc(size_out+4)))
-	 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer");
+        /* Allocate space for the compressed buffer (assume it won't get bigger) */
+        if(NULL==(dst=outbuf = H5MM_malloc(nbytes+4)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate szip destination buffer");
 
-      UINT32ENCODE(outbuf,nbytes);
-      status = SZ_BufftoBuffCompress(outbuf, &size_out, *buf, size_in, &sz_param);
-      if(SZ_OK!=status)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "szip_filter: Compression failed"); 
+        /* Compress the buffer */
+        size_out = nbytes;
+        if(SZ_OK!= SZ_BufftoBuffCompress(outbuf+4, &size_out, *buf, nbytes, &sz_param)) {
+            /* In the event that an error occurs, assume that the buffer
+             * could not be compressed and just copy the input buffer to the
+             * proper location in the output buffer */
+            /* (This is necessary for the szip filter due to the uncompressed
+             * size needing to be encoded for the decompression side of things)
+             */
+            HDmemcpy((void*)(outbuf+4), (void*)(*buf), nbytes);
 
-      if(*buf) H5MM_xfree(*buf);
-      *buf = outbuf-4;
-      outbuf = NULL;
-      *buf_size = size_out+4;
-      ret_value = size_out+4;
+            /* Set correct output size (again) */
+            size_out=nbytes;
+
+            /* Reset the "nbytes" to encode, so that the decompression side knows that the buffer is uncompressed */
+            nbytes=0;
+        } /* end if */
+
+        /* Encode the uncompressed length */
+        H5_CHECK_OVERFLOW(nbytes,size_t,uint32_t);
+        UINT32ENCODE(dst,nbytes);
+
+        /* Free the input buffer */
+        H5MM_xfree(*buf);
+
+        /* Set return values */
+        *buf = outbuf;
+        outbuf = NULL;
+        *buf_size = size_out+4;
+        ret_value = size_out+4;
     }
 
-  done: 
-    if(outbuf) H5MM_xfree(outbuf);
+done: 
+    if(outbuf)
+        H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value);
-  }
-  
-#endif
+}
+#endif /* H5_HAVE_FILTER_SZIP */
 
-
-  
