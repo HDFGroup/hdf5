@@ -236,7 +236,8 @@ typedef enum {
  * Define the low-level file interface.
  */
 typedef struct H5F_low_class_t {
-   struct H5F_low_t *(*open)(const char*, uintn);
+   hbool_t (*access)(const char*, int, H5F_search_t*);
+   struct H5F_low_t *(*open)(const char*, uintn, H5F_search_t*);
    herr_t (*close)(struct H5F_low_t*);
    herr_t (*read)(struct H5F_low_t*, haddr_t, size_t, uint8*);
    herr_t (*write)(struct H5F_low_t*, haddr_t, size_t, const uint8*);
@@ -261,6 +262,13 @@ typedef struct H5F_low_t {
 	 H5F_fileop_t	op;	/* Previous file operation		*/
 	 haddr_t	cur;	/* Current file position		*/
       } stdio;
+
+      /* In-core temp file */
+      struct {
+	 uint8		*mem;	/* Mem image of the file		*/
+	 size_t		size;	/* Current file size			*/
+	 size_t		alloc;	/* Current size of MEM buffer		*/
+      } core;
       
    } u;
 } H5F_low_t;
@@ -271,6 +279,7 @@ typedef struct H5F_low_t {
 #endif
 extern const H5F_low_class_t H5F_LOW_SEC2[];	/* Posix section 2	*/
 extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio 		*/
+extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
 
    
 /*
@@ -381,8 +390,10 @@ herr_t H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf);
 herr_t H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf);
 
 /* Functions that operate directly on low-level files */
+hbool_t H5F_low_access (const H5F_low_class_t *type, const char *name,
+			int mode, H5F_search_t *key);
 H5F_low_t *H5F_low_open (const H5F_low_class_t *type, const char *name,
-			 uintn flags);
+			 uintn flags, H5F_search_t *key);
 H5F_low_t *H5F_low_close (H5F_low_t *lf);
 size_t H5F_low_size (H5F_low_t *lf);
 herr_t H5F_low_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf);

@@ -14,11 +14,11 @@ LIB=libhdf5.a
 PROGS=debug
 
 # Source and object files for the library (lexicographically)...
-LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dconv.c H5E.c H5F.c H5Fistore.c \
-        H5Flow.c H5Fsec2.c H5Fstdio.c H5G.c H5Gent.c H5Gnode.c H5Gshad.c      \
-        H5Gstab.c H5H.c H5M.c H5MF.c H5MM.c H5O.c H5Ocont.c H5Oistore.c       \
-	H5Oname.c H5Onull.c H5Osdtyp.c H5Osdim.c H5Ostab.c H5Ostdst.c H5P.c   \
-	H5T.c H5V.c
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5Dconv.c H5E.c H5F.c H5Fcore.c   \
+        H5Fistore.c H5Flow.c H5Fsec2.c H5Fstdio.c H5G.c H5Gent.c H5Gnode.c    \
+        H5Gshad.c H5Gstab.c H5H.c H5M.c H5MF.c H5MM.c H5O.c H5Ocont.c         \
+        H5Oistore.c H5Oname.c H5Onull.c H5Osdtyp.c H5Osdim.c H5Ostab.c        \
+        H5Ostdst.c H5P.c H5T.c H5V.c
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 

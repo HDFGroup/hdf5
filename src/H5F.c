@@ -339,7 +339,7 @@ hbool_t H5Fis_hdf5(const char *filename)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, BFAIL); /*no filename specified*/
 
     /* Open the file */
-    if (NULL==(f_handle=H5F_low_open (H5F_LOW_DFLT, filename, 0))) {
+    if (NULL==(f_handle=H5F_low_open (H5F_LOW_DFLT, filename, 0, NULL))) {
        /* Low-level file open failure */
        HGOTO_ERROR(H5E_FILE, H5E_BADFILE, BFAIL);
     }
@@ -557,7 +557,6 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
    H5F_t	*f = NULL;		/*return value			*/
    H5F_t	*ret_value = NULL;	/*a copy of `f'			*/
    H5F_t	*old = NULL;		/*a file already opened		*/
-   struct stat	sb;			/*file stat info		*/
    H5F_search_t search;			/*file search key		*/
    H5F_low_t	*fd = NULL;		/*low level file desc		*/
    hbool_t	empty_file = FALSE;	/*is file empty?		*/
@@ -593,7 +592,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
     * with hard or soft links) it doesn't work to compare files based only on
     * their full path name.
     */
-   file_exists = (stat (name, &sb)>=0);
+   file_exists = H5F_low_access (type, name, F_OK, &search);
 
    /*
     * Open the low-level file (if necessary) and create an H5F_t struct that
@@ -604,17 +603,16 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	 /* File already exists - CREAT EXCL failed */
 	 HRETURN_ERROR (H5E_FILE, H5E_FILEEXISTS, NULL);
       }
-      if (access (name, R_OK)<0) {
+      if (!H5F_low_access (type, name, R_OK, NULL)) {
 	 /* File is not readable */
 	 HRETURN_ERROR (H5E_FILE, H5E_READERROR, NULL);
       }
-      if ((flags & H5F_ACC_WRITE) && access (name,  W_OK)<0) {
+      if ((flags & H5F_ACC_WRITE) &&
+	  !H5F_low_access (type, name,  W_OK, NULL)) {
 	 /* File is not writable */
 	 HRETURN_ERROR (H5E_FILE, H5E_WRITEERROR, NULL);
       }
 
-      search.dev = sb.st_dev;
-      search.ino = sb.st_ino;
       if ((old=H5Asearch_atom (H5_FILE, H5F_compare_files, &search))) {
 	 if (flags & H5F_ACC_TRUNC) {
 	    /* File already open - TRUNC failed */
@@ -622,7 +620,7 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	 }
 	 if ((flags & H5F_ACC_WRITE) &&
 	     0==(old->shared->flags & H5F_ACC_WRITE)) {
-	    if (NULL==(fd=H5F_low_open (type, name, H5F_ACC_WRITE))) {
+	    if (NULL==(fd=H5F_low_open (type, name, H5F_ACC_WRITE, NULL))) {
 	       /* File cannot be reopened with write access */
 	       HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
 	    }
@@ -639,20 +637,19 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	    /* Can't truncate without write intent */
 	    HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
 	 }
-	 fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_TRUNC);
+	 fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_TRUNC, NULL);
 	 if (!fd) {
 	    /* Can't truncate file */
 	    HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
 	 }
 	 f = H5F_new (NULL);
-	 f->shared->key.dev = sb.st_dev;
-	 f->shared->key.ino = sb.st_ino;
+	 f->shared->key = search;
 	 f->shared->flags = flags;
 	 f->shared->file_handle = fd;
 	 empty_file = TRUE;
 	 
       } else {
-	 fd = H5F_low_open (type, name, (flags & H5F_ACC_WRITE));
+	 fd = H5F_low_open (type, name, (flags & H5F_ACC_WRITE), NULL);
 	 if (!fd) {
 	    /* Cannot open existing file */
 	    HRETURN_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL);
@@ -668,18 +665,15 @@ H5F_open (const H5F_low_class_t *type, const char *name, uintn flags,
 	 /* Can't create file without write intent */
 	 HRETURN_ERROR (H5E_FILE, H5E_BADVALUE, NULL);
       }
-      fd = H5F_low_open (type, name, H5F_ACC_WRITE|H5F_ACC_CREAT|H5F_ACC_EXCL);
+      fd = H5F_low_open (type, name,
+			 H5F_ACC_WRITE|H5F_ACC_CREAT|H5F_ACC_EXCL,
+			 &search);
       if (!fd) {
 	 /* Can't create file */
 	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
       }
-      if (stat (name, &sb)<0) {
-	 /* Can't stat file - can't get dev or inode */
-	 HRETURN_ERROR (H5E_FILE, H5E_CANTCREATE, NULL);
-      }
       f = H5F_new (NULL);
-      f->shared->key.dev = sb.st_dev;
-      f->shared->key.ino = sb.st_ino;
+      f->shared->key = search;
       f->shared->flags = flags;
       f->shared->file_handle = fd;
       empty_file = TRUE;

@@ -15,6 +15,10 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
 #define PABLO_MASK	H5F_low
 static hbool_t	interface_initialize_g = FALSE;
 
@@ -41,6 +45,10 @@ static hbool_t	interface_initialize_g = FALSE;
  *				is opened.  This allows existing files to be
  *				overwritten.
  *
+ *		The KEY argument is initialized with data which is unique to
+ *		this file.  For unix files, it's the device number and
+ *		i-node. Other low level drivers might use data.
+ *
  * Errors:
  *		IO        CANTOPENFILE  Open failed. 
  *
@@ -56,7 +64,8 @@ static hbool_t	interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 H5F_low_t *
-H5F_low_open (const H5F_low_class_t *type, const char *name, uintn flags)
+H5F_low_open (const H5F_low_class_t *type, const char *name, uintn flags,
+	      H5F_search_t *key)
 {
    H5F_low_t	*lf = NULL;
    
@@ -65,7 +74,7 @@ H5F_low_open (const H5F_low_class_t *type, const char *name, uintn flags)
    assert (type && type->open);
    assert (name && *name);
 
-   if (NULL==(lf=(type->open)(name, flags))) {
+   if (NULL==(lf=(type->open)(name, flags, key))) {
       HRETURN_ERROR (H5E_IO, H5E_CANTOPENFILE, NULL);/*open failed*/
    }
    lf->type = type;
@@ -232,3 +241,48 @@ H5F_low_size (H5F_low_t *lf)
    FUNC_LEAVE (size);
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_low_access
+ *
+ * Purpose:	Sort of like access(2) except it might do special things for
+ *		various types of low-level file drivers.
+ *
+ * Return:	Success:	TRUE or FALSE.  If TRUE, then KEY is
+ *				initialized with data that makes this file
+ *				unique.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 24, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_low_access (const H5F_low_class_t *type, const char *name, int mode,
+		H5F_search_t *key)
+{
+   hbool_t	ret_value;
+   struct stat	sb;
+   
+   FUNC_ENTER (H5F_low_size, NULL, 0);
+   assert (type);
+
+   if (type->access) {
+      ret_value = (type->access)(name, mode, key);
+      
+   } else {
+      ret_value = (0==access (name, mode));
+      if (key) {
+	 stat (name, &sb);
+	 key->dev = sb.st_dev;
+	 key->ino = sb.st_ino;
+      }
+   }
+
+   FUNC_LEAVE (ret_value);
+}

@@ -19,10 +19,14 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
 #define PABLO_MASK	H5F_sec2
 static hbool_t interface_initialize_g = FALSE;
 
-static H5F_low_t *H5F_sec2_open (const char *name, uintn flags);
+static H5F_low_t *H5F_sec2_open (const char *name, uintn flags, H5F_search_t*);
 static herr_t H5F_sec2_close (H5F_low_t *lf);
 static herr_t H5F_sec2_read (H5F_low_t *lf, haddr_t addr, size_t size,
 			     uint8 *buf);
@@ -33,6 +37,7 @@ static size_t H5F_sec2_size (H5F_low_t *lf);
 
 
 const H5F_low_class_t H5F_LOW_SEC2[1] = {{
+   NULL, 			/* use default access(2) func		*/
    H5F_sec2_open, 		/* open method				*/
    H5F_sec2_close, 		/* close method				*/
    H5F_sec2_read,		/* read method				*/
@@ -64,11 +69,12 @@ const H5F_low_class_t H5F_LOW_SEC2[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_sec2_open (const char *name, uintn flags)
+H5F_sec2_open (const char *name, uintn flags, H5F_search_t *key)
 {
    uintn		oflags;
    H5F_low_t		*lf = NULL;
    int			fd;
+   struct stat		sb;
 
    FUNC_ENTER (H5F_sec2_open, NULL, NULL);
 
@@ -85,6 +91,12 @@ H5F_sec2_open (const char *name, uintn flags)
    lf->u.sec2.fd = fd;
    lf->u.sec2.op = H5F_OP_SEEK;
    lf->u.sec2.cur = 0;
+
+   if (key) {
+      fstat (fd, &sb);
+      key->dev = sb.st_dev;
+      key->ino = sb.st_ino;
+   }
 
    FUNC_LEAVE (lf);
 }

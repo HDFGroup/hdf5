@@ -13,10 +13,15 @@
 #include <H5Fprivate.h>
 #include <H5MMprivate.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+
 #define PABLO_MASK	H5F_sec2
 static hbool_t interface_initialize_g = FALSE;
 
-static H5F_low_t *H5F_stdio_open (const char *name, uintn flags);
+static H5F_low_t *H5F_stdio_open (const char *name, uintn flags,
+				  H5F_search_t *key);
 static herr_t H5F_stdio_close (H5F_low_t *lf);
 static herr_t H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size,
 			      uint8 *buf);
@@ -27,6 +32,7 @@ static size_t H5F_stdio_size (H5F_low_t *lf);
 
 
 const H5F_low_class_t H5F_LOW_STDIO[1] = {{
+   NULL,			/* use default access(2) func  		*/
    H5F_stdio_open, 		/* open method				*/
    H5F_stdio_close, 		/* close method				*/
    H5F_stdio_read,		/* read method				*/
@@ -64,10 +70,11 @@ const H5F_low_class_t H5F_LOW_STDIO[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
-H5F_stdio_open (const char *name, uintn flags)
+H5F_stdio_open (const char *name, uintn flags, H5F_search_t *key)
 {
    H5F_low_t	*lf=NULL;
    FILE		*f=NULL;
+   struct stat	sb;
 
    FUNC_ENTER (H5F_stdio_open, NULL, NULL);
 
@@ -97,6 +104,13 @@ H5F_stdio_open (const char *name, uintn flags)
    lf->u.stdio.f = f;
    lf->u.stdio.op = H5F_OP_SEEK;
    lf->u.stdio.cur = 0;
+
+   /* The unique key */
+   if (key) {
+      fstat (fileno (f), &sb);
+      key->dev = sb.st_dev;
+      key->ino = sb.st_ino;
+   }
 
    FUNC_LEAVE (lf);
 }
