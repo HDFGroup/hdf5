@@ -3338,16 +3338,16 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 {
     hssize_t            snpoints;       /* Number of points in space (for error checking) */
     size_t              npoints;        /* Number of points in space */
-    size_t              ptsperbuf;
-    size_t		bufsize=8*1024;
-    size_t		size;
-    haddr_t		addr;
-    herr_t		ret_value = FAIL;
-    void		*buf = NULL;
-    H5O_fill_t          fill;
-    H5O_efl_t           efl;
-    H5O_pline_t         pline;
-    H5P_genplist_t *plist;      /* Property list */
+    size_t              ptsperbuf;      /* Maximum # of points which fit in the buffer */
+    size_t		bufsize=64*1024;    /* Size of buffer to write */
+    size_t		size;           /* Current # of points to write */
+    haddr_t		addr;           /* Offset in dataset */
+    void		*buf = NULL;    /* Buffer for fill value writing */
+    H5O_fill_t          fill;           /* Fill value information */
+    H5O_efl_t           efl;            /* External File List information */
+    H5O_pline_t         pline;          /* I/O pipeline information */
+    H5P_genplist_t     *plist;          /* Property list */
+    herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER(H5D_init_storage, FAIL);
     assert(dset);
@@ -3388,21 +3388,17 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
 
                 H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
-                if (efl.nused) {
-                    addr = 0;
-                } else {
-                    addr = dset->layout.addr;
-		}                
+                
+                /* Start at the beginning of the dataset */
+                addr = 0;
 
+                /* Loop through writing the fill value to the dataset */
                 while (npoints>0) {
                     size = MIN(ptsperbuf, npoints) * fill.size;
-                    if(efl.nused) {
-		        if(H5O_efl_write(dset->ent.file, &efl, addr, size, buf) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
-                    } else {
-                        if (H5F_block_write(dset->ent.file, H5FD_MEM_DRAW, addr, size, H5P_DATASET_XFER_DEFAULT, buf)<0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
-                    }
+                    if (H5F_seq_write(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
+                            &(dset->layout), &pline, &fill, &efl, space,
+                            fill.size, size, addr, buf)<0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
                     npoints -= MIN(ptsperbuf, npoints);
                     addr += size;
                 } /* end while */
@@ -3432,7 +3428,6 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 #endif /*H5_HAVE_PARALLEL*/
             break;
     } /* end switch */
-    ret_value = SUCCEED;
 
 done:
     if (buf)
