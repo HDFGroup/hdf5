@@ -1,7 +1,7 @@
 #############################
  output for 'h5ls -w80 -r -d tsaf.h5'
 #############################
-/tsaf.h5/.DSL_METADATA   Dataset {5919/Inf}
+/.DSL_METADATA           Dataset {5919/Inf}
     Data:
         (0) 47, 32, 67, 79, 78, 84, 65, 73, 78, 69, 82, 10, 47, 46, 97, 116,
         (16) 116, 114, 105, 98, 117, 116, 101, 115, 32, 67, 79, 78, 84, 65, 73,
@@ -399,14 +399,14 @@
         (5878) 10, 47, 109, 101, 116, 97, 98, 108, 111, 98, 48, 48, 48, 48, 48,
         (5893) 46, 98, 108, 111, 98, 32, 68, 65, 84, 65, 83, 69, 84, 32, 68, 83,
         (5909) 76, 95, 79, 102, 102, 115, 101, 116, 59, 10
-/tsaf.h5/.attributes     Group
-/tsaf.h5/.attributes/database Group
-/tsaf.h5/.attributes/database/.SAF_DbProps Dataset {1}
+/.attributes             Group
+/.attributes/database    Group
+/.attributes/database/.SAF_DbProps Dataset {1}
     Data:
         (0) {-604320037, ".", "don't import", 1, {0, 0, 0, "none"}, {0, 1, 0, 
         (0)  "devel"}, {1, 3, 0, ""}, {0, 0, 0, "none"}, {1, 2, 1, ""}, {1, 2, 
         (0)  0, ""}, 1, 0, 1, 0}
-/tsaf.h5/Blob            Dataset {24/Inf}
+/Blob                    Dataset {24/Inf}
     Data:
         (0) {-1, 1, 0, 1, 9, 0, 1}, {-1, 2, 0, 1, 4, 1, 1},
         (2) {-1, 3, 0, 1, 7, 2, 1}, {-1, 4, 0, 1, 4, 3, 1},
@@ -420,12 +420,12 @@
         (18) {-1, 19, 0, 1, 5, 18, 1}, {-1, 20, 0, 1, 5, 19, 1},
         (20) {-1, 21, 0, 1, 36, 20, 1}, {-1, 22, 0, 1, 12, 21, 1},
         (22) {-1, 23, 0, 1, 7, 22, 1}, {-1, 24, 0, 1, 2, 23, 1}
-/tsaf.h5/Cat             Dataset {5/Inf}
+/Cat                     Dataset {5/Inf}
     Data:
         (0) {"nodes", TOPO, 0, 0, 1}, {"elems", TOPO, 2, 1, 1},
         (2) {"edges", USERD, 1, 2, 1}, {"blocks", BLOCK, 2, 3, 1},
         (4) {"side_sets", USERD, 1, 4, 1}
-/tsaf.h5/Collection      Dataset {24/Inf}
+/Collection              Dataset {24/Inf}
     Data:
         (0) {0, 0, POINT, 18, 0, 0, -2, 0, 1},
         (1) {0, 1, MIXED, 12, 1, 1, -2, 1, 1}, {0, 3, NONE, 4, 2, 1, 0, 2, 1},
@@ -445,7 +445,7 @@
         (20)  1}, {8, 0, POINT, 4, 21, 0, -2, 21, 1},
         (22) {8, 1, QUAD, 1, 22, 1, -2, 22, 1}, {8, 3, NONE, 1, 23, 1, 6, 23, 
         (23)  1}
-/tsaf.h5/Field           Dataset {14/Inf}
+/Field                   Dataset {14/Inf}
     Data:
         (0) {1, "X", -7, -2, NONE, -2, 0, 1, 0, PWLINEAR, 1, 0, -2, -2, -2, 
         (0)  -2, 0, 1},
@@ -475,7 +475,7 @@
         (12)  -2, -2, 22, 12, 1},
         (13) {7, "pressure", -7, -2, NONE, -2, 2, 1, 2, PWCONST, 1, 0, -2, -2, 
         (13)  -2, 23, 13, 1}
-/tsaf.h5/FieldTmpl       Dataset {8/Inf}
+/FieldTmpl               Dataset {8/Inf}
     Data:
         (0) {"coordinate_tmpl", 0, VECTOR, CARTESIAN, 2, 2, 0, 0, 1},
         (1) {"coordinate_tmpl_component", 0, SCALAR, CARTESIAN, 2, 1, 0, 1, 1},
@@ -485,7 +485,7 @@
         (5) {"stress_on_cell_1_tmpl_component", 1, SCALAR, UPPER_TRI, 0, 1, 0, 
         (5)  5, 1}, {"temp_on_cell_2_tmpl", 2, SCALAR, UNITY, 1, 1, 0, 6, 1},
         (7) {"pressure_on_ss1", 4, SCALAR, UNITY, 0, 1, 0, 7, 1}
-/tsaf.h5/IndexSpec       Dataset {24/Inf}
+/IndexSpec               Dataset {24/Inf}
     Data:
         (0) {1, {[0,0,0,0,0,0,0,0]}, {[18,0,0,0,0,0,0,0]}, {[0,0,0,0,0,0,0,
         (0)  0]}, C_ORDER, 0, 1},
@@ -535,7 +535,7 @@
         (22)  0]}, C_ORDER, 22, 1},
         (23) {1, {[0,0,0,0,0,0,0,0]}, {[1,0,0,0,0,0,0,0]}, {[0,0,0,0,0,0,0,
         (23)  0]}, C_ORDER, 23, 1}
-/tsaf.h5/Relation        Dataset {21/Inf}
+/Relation                Dataset {21/Inf}
     Data:
         (0) {1, 0, -2, 0, 0, -2, EQUAL, TLIST, -2, 0, 0, 1},
         (1) {1, 1, -2, 0, 1, -2, EQUAL, TLIST, -2, 1, 1, 1},
@@ -558,7 +558,7 @@
         (18) {7, 1, -2, 0, 0, -2, SUBSET, UNSTRUCTURED, -2, 14, 18, 1},
         (19) {8, 1, -2, 0, 0, -2, SUBSET, UNSTRUCTURED, -2, 15, 19, 1},
         (20) {3, 1, -2, 0, 0, -2, SUBSET, UNSTRUCTURED, -2, 16, 20, 1}
-/tsaf.h5/Set             Dataset {9/Inf}
+/Set                     Dataset {9/Inf}
     Data:
         (0) {0, "TOP_CELL", 2, SPACE, {[0,1,-2,2,3,-2,-2,-2,-2,-2,-2,-2,-2,-2,
         (0)  -2,-2]}, 1, 0, -2, -2, 0, 1},
@@ -578,86 +578,86 @@
         (7)  -2,-2,-2,-2]}, 0, 0, -2, -2, 7, 1},
         (8) {0, "CELL_2_QUADS", 2, SPACE, {[21,22,-2,23,-2,-2,-2,-2,-2,-2,-2,
         (8)  -2,-2,-2,-2,-2]}, 0, 0, -2, -2, 8, 1}
-/tsaf.h5/field-coords_0002 Dataset {36}
+/field-coords_0002       Dataset {36}
     Data:
         (0) 0, 4, 1, 4, 2, 4, 2.5, 4, 0, 3, 1, 3, 2, 3, 2.5, 3, 0, 2, 1, 2, 2,
         (21) 2, 2.5, 2, 0, 1, 2, 1, 2.5, 1, 0, 0, 2, 0, 2.5, 0
-/tsaf.h5/field-displacements_0007 Dataset {36}
+/field-displacements_0007 Dataset {36}
     Data:
         (0) 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25,
         (11) 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25,
         (22) 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25,
         (33) 0.25, 0.25, 0.25
-/tsaf.h5/field-distribution_factors_0003 Dataset {5}
+/field-distribution_factors_0003 Dataset {5}
     Data:
         (0) 4, 3, 2, 1, 0
-/tsaf.h5/field-pressure_0013 Dataset {2}
+/field-pressure_0013     Dataset {2}
     Data:
         (0) 45, 55
-/tsaf.h5/field-stress_0011 Dataset {12}
+/field-stress_0011       Dataset {12}
     Data:
         (0) 0.5, 0.25, 0.5, 0.5, 0.25, 0.5, 0.5, 0.25, 0.5, 0.5, 0.25, 0.5
-/tsaf.h5/field-temperature_0004 Dataset {5}
+/field-temperature_0004  Dataset {5}
     Data:
         (0) 100, 150, 150, 100, 75
-/tsaf.h5/field-temperature_0012 Dataset {7}
+/field-temperature_0012  Dataset {7}
     Data:
         (0) 75, 95, 120, 80, 115, 85, 110
-/tsaf.h5/metablob00000.blob Dataset {19/Inf}
+/metablob00000.blob      Dataset {19/Inf}
     Data:
         (0) 1, 7, 8, 3, -2, -2, -2, -2, -2, -2, -2, -2, 0, 1, 5, 6, 8, 9, 10
-/tsaf.h5/metablob00000.index Dataset {10/Inf}
+/metablob00000.index     Dataset {10/Inf}
     Data:
         (0) {0, 4}, {4, 2}, {6, 1}, {7, 2}, {9, 1}, {10, 1}, {11, 1}, {12, 2},
         (8) {14, 2}, {16, 3}
-/tsaf.h5/ssrel-_0000     Dataset {9}
+/ssrel-_0000             Dataset {9}
     Data:
         (0) 1, 2, 3, 5, 6, 7, 9, 10, 11
-/tsaf.h5/ssrel-_0001     Dataset {4}
+/ssrel-_0001             Dataset {4}
     Data:
         (0) 1, 2, 4, 5
-/tsaf.h5/ssrel-_0002     Dataset {7}
+/ssrel-_0002             Dataset {7}
     Data:
         (0) 9, 10, 11, 13, 14, 16, 17
-/tsaf.h5/ssrel-_0003     Dataset {4}
+/ssrel-_0003             Dataset {4}
     Data:
         (0) 7, 8, 9, 11
-/tsaf.h5/ssrel-_0004     Dataset {5}
+/ssrel-_0004             Dataset {5}
     Data:
         (0) 9, 10, 11, 13, 14
-/tsaf.h5/ssrel-_0005     Dataset {3}
+/ssrel-_0005             Dataset {3}
     Data:
         (0) 7, 8, 9
-/tsaf.h5/ssrel-_0006     Dataset {4}
+/ssrel-_0006             Dataset {4}
     Data:
         (0) 13, 14, 16, 17
-/tsaf.h5/ssrel-_0007     Dataset {1}
+/ssrel-_0007             Dataset {1}
     Data:
         (0) 11
-/tsaf.h5/ssrel-_0008     Dataset {10}
+/ssrel-_0008             Dataset {10}
     Data:
         (0) 3, 4, 7, 8, 11, 12, 14, 15, 17, 18
-/tsaf.h5/ssrel-_0009     Dataset {4}
+/ssrel-_0009             Dataset {4}
     Data:
         (0) 3, 6, 10, 12
-/tsaf.h5/ssrel-_0010     Dataset {3}
+/ssrel-_0010             Dataset {3}
     Data:
         (0) 9, 10, 11
-/tsaf.h5/ssrel-_0011     Dataset {5}
+/ssrel-_0011             Dataset {5}
     Data:
         (0) 1, 5, 9, 13, 16
-/tsaf.h5/ssrel-_0012     Dataset {5}
+/ssrel-_0012             Dataset {5}
     Data:
         (0) 4, 8, 12, 15, 18
-/tsaf.h5/toporel-_0017   Dataset {16}
+/toporel-_0017           Dataset {16}
     Data:
         (0) 1, 2, 6, 5, 2, 3, 7, 6, 5, 6, 10, 9, 6, 7, 11, 10
-/tsaf.h5/toporel-_0018   Dataset {9}
+/toporel-_0018           Dataset {9}
     Data:
         (0) 9, 10, 13, 10, 14, 13, 10, 11, 14
-/tsaf.h5/toporel-_0019   Dataset {4}
+/toporel-_0019           Dataset {4}
     Data:
         (0) 13, 14, 17, 16
-/tsaf.h5/toporel-_0020   Dataset {16}
+/toporel-_0020           Dataset {16}
     Data:
         (0) 3, 4, 8, 7, 7, 8, 12, 11, 11, 12, 15, 14, 14, 15, 18, 17
