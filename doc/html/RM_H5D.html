@@ -56,12 +56,14 @@ and set and retrieve their constant or persistent properties.
 <ul>
     <li><a href="#Dataset-Create">H5Dcreate</a>
     <li><a href="#Dataset-Open">H5Dopen</a>
+    <li><a href="#Dataset-Close">H5Dclose</a>
     <li><a href="#Dataset-GetSpace">H5Dget_space</a>
     <li><a href="#Dataset-GetType">H5Dget_type</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
+    <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
     <li><a href="#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
     <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
 </ul>
@@ -69,8 +71,11 @@ and set and retrieve their constant or persistent properties.
 <ul>
     <li><a href="#Dataset-Read">H5Dread</a>
     <li><a href="#Dataset-Write">H5Dwrite</a>
+    <li><a href="#Dataset-Iterate">H5Diterate</a>
+<!--
+    <li><a href="#Dataset-Debug">H5Ddebug</a>
+-->
     <li><a href="#Dataset-Extend">H5Dextend</a>
-    <li><a href="#Dataset-Close">H5Dclose</a>
 </ul>
 </td></tr>
 </table>
@@ -226,6 +231,32 @@ and set and retrieve their constant or persistent properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset creation property list identifier if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetStorageSize">H5Dget_storage_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hsize_t </em><code>H5Dget_storage_size</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the amount of storage required for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_storage_size</code> returns the amount of storage 
+        that is required for the specified dataset, <code>dataset_id</code>. 
+        For chunked datasets, this is the number of allocated chunks times 
+        the chunk size.        
+        The return value may be zero if no data has been stored.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dataset_id</code>
+            <dd>Identifier of the dataset to query.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the amount of storage space allocated for the dataset, 
+        not counting meta data; 
         otherwise returns a negative value.
 </dl>
 
@@ -501,6 +532,56 @@ and set and retrieve their constant or persistent properties.
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 </dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Iterate">H5Diterate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Diterate</code>(
+        <em>void *</em><code>buf</code>,
+        <em>hid_t </em><code>type_id</code>,
+        <em>hid_t </em><code>space_id</code>,
+        <em>H5D_operator_t </em><code>operator</code>,
+        <em>void *</em><code>operator_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Iterates over all selected elements in a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Diterate</code> iterates over all the elements selected 
+        in a memory buffer.  The callback function is called once for each 
+        element selected in the dataspace.  
+        <p>
+        The selection in the dataspace is modified so that any elements 
+        already iterated over are removed from the selection if the 
+        iteration is interrupted (by the <code>H5D_operator_t</code> 
+        function returning non-zero) before the iteration is complete;
+        the iteration may then be re-started by the user where it left off.  
+        
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>void *</em><code>buf</code>
+            <dd>IN/OUT: Pointer to the buffer in memory containing the 
+                elements to iterate over.
+        <dt><em>hid_t </em><code>type_id</code>
+            <dd>IN:  Datatype identifier for the elements stored in 
+                <code>buf</code>.
+        <dt><em>hid_t </em><code>space_id</code>
+            <dd>IN: Dataspace identifier for <code>buf</code>.  
+                Also contains the selection to iterate over.
+        <dt><em>H5D_operator_t </em><code>operator</code>
+            <dd>IN: Function pointer to the routine to be called 
+                for each element in <code>buf</code> iterated over.
+        <dt><em>void *</em><code>operator_data</code>
+            <dd>IN/OUT: Pointer to any user-defined data associated 
+                with the operation.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the return value of the last operator if it was non-zero,
+        or zero if all elements have been processed.
+        Otherwise returns a negative value.
+</dl>
+
 
 
 <hr>

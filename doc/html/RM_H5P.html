@@ -78,6 +78,7 @@ many different parameters to be easily manipulated.
     <p><i>Variable-length Datatype Properties</i>
     <ul>
     <li><a href="#Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+    <li><a href="#Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
     </ul>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
@@ -101,8 +102,12 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-GetCache">H5Pget_cache</a>
     <li><a href="#Property-SetSplit">H5Pset_split</a>
     <li><a href="#Property-GetSplit">H5Pget_split</a>
+    <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
+    <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
     </ul>
 
+<br>&nbsp;
+<br>&nbsp;
 <br>&nbsp;
 <br>&nbsp;
 <br>
@@ -139,6 +144,10 @@ parallel HDF5 library.</i>
     <li><a href="#Property-GetBuffer">H5Pget_buffer</a>
     <li><a href="#Property-SetPreserve">H5Pset_preserve</a>
     <li><a href="#Property-GetPreserve">H5Pget_preserve</a>
+    <li><a href="#Property-SetHyperCache">H5Pset_hyper_cache</a>
+    <li><a href="#Property-GetHyperCache">H5Pget_hyper_cache</a>
+    <li><a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+    <li><a href="#Property-GetBTreeRatios">H5Pget_btree_ratios</a>
     <li><a href="#Property-SetXfer">H5Pset_xfer</a>&nbsp;&nbsp;&nbsp;||
     <li><a href="#Property-GetXfer">H5Pget_xfer</a>&nbsp;&nbsp;&nbsp;||
     </ul>
@@ -1590,6 +1599,70 @@ parallel HDF5 library.</i>
 
 <hr>
 <dl>
+  <dt><strong>Name:</strong> <a name="Property-SetGCReferences">H5Pset_gc_references</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_split</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>gc_ref</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets garbage collecting references flag.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_gc_references</code> sets the flag for 
+        garbage collecting references for the file.  
+        <p>
+        Dataset region references and other reference types use space 
+        in an HDF5 file's global heap.  If garbage collection is on 
+        and the user passes in an uninitialized value in a reference structure, 
+        the heap might get corrupted.  When garbage collection is off, however,
+        and the user re-uses a reference, the previous heap block will be 
+        orphaned and not returned to the free heap space.  
+        <p>
+        When garbage collection is on, the user must initialize the 
+        reference structures to 0 or risk heap corruption.
+        <p>
+        The default value for garbage collecting references is off.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>unsigned</em> <code>gc_ref</code>
+            <dd>IN: 
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetGCReferences">H5Pget_gc_references</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_split</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> *<code>gc_ref</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns garbage collecting references setting.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_gc_references</code> returns the current setting 
+        for the garbage collection references property from 
+        the specified file access property list.  
+        The garbage collection references property is set 
+        by <a href="#Property-SetGCReferences">H5Pset_gc_references</a>.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: File access property list identifier.
+        <dt><em>unsigned</em> <code>gc_ref</code>
+            <dd>OUT:
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
   <dt><strong>Name:</strong> <a name="Property-SetFamily">H5Pset_family</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_family</code>(<em>hid_t</em> <code>plist</code>,
@@ -1755,6 +1828,153 @@ parallel HDF5 library.</i>
             <dd>IN/OUT: Total size of the raw data chunk cache, in bytes.
         <dt><em>double</em> <code>*rdcc_w0</code>
             <dd>IN/OUT: Preemption policy.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetHyperCache">H5Pset_hyper_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>cache</code>,
+        <em>unsigned</em> <code>limit</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Indicates whether to cache hyperslab blocks during I/O.
+  <dt><strong>Description:</strong>
+    <dd>Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
+        indicates whether to cache hyperslab blocks during I/O, 
+        a process which can significantly increase I/O speeds.  
+        <p>
+        The parameter <code>limit</code> sets the maximum size of the 
+        hyperslab block to cache.  If a block is smaller than that limit, 
+        it may still not be cached if no memory is available. 
+        Setting the limit to <code>0</code> (zero) indicates no limitation on the size of 
+        block to attempt to cache.
+        <p>
+        The default is to cache blocks with no limit on block size 
+        for serial I/O and to not cache blocks for parallel I/O.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>unsigned</em> <code>cache</code>
+            <dd>IN: 
+        <dt><em>unsigned</em> <code>limit</code>
+            <dd>IN: Maximum size of the hyperslab block to cache. 
+                <code>0</code> (zero) indicates no limit.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetHyperCache">H5Pget_hyper_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>cache</code>,
+        <em>unsigned</em> <code>limit</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information regarding the caching of hyperslab blocks during I/O.
+  <dt><strong>Description:</strong>
+    <dd>Given a dataset transfer property list, <code>H5Pget_hyper_cache</code> 
+        returns instructions regarding the caching of hyperslab blocks during I/O.
+        These parameters are set with the <code>H5Pset_hyper_cache</code> function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>unsigned</em> <code>cache</code>
+            <dd>OUT: 
+        <dt><em>unsigned</em> <code>limit</code>
+            <dd>OUT: Maximum size of the hyperslab block to cache. 
+                <code>0</code> (zero) indicates no limit.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_btree_ratios</code>(<em>hid_t</em> <code>plist</code>,
+        <em>double</em> <code>left</code>,
+        <em>double</em> <code>middle</code>,
+        <em>double</em> <code>right</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets B-tree split ratios for a dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_btree_ratios</code> sets the B-tree split ratios 
+        for a dataset transfer property list. The split ratios determine 
+        what percent of children go in the first node when a node splits.  
+        <p>
+        The ratio <code>left</code> is used when the splitting node is 
+        the left-most node at its level in the tree; 
+        the ratio <code>right</code> is used when the splitting node is 
+        the right-most node at its level; 
+        and the ratio <code>middle</code> is used for all other cases.  
+        <p>
+        A node which is the only node at its level in the tree uses 
+        the ratio <code>right</code> when it splits.  
+        <p>
+        All ratios are real numbers between 0 and 1, inclusive. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: The dataset transfer property list identifier.
+        <dt><em>double</em> <code>left</code>
+            <dd>IN: The B-tree split ratio for left-most nodes.
+        <dt><em>double</em> <code>right</code>
+            <dd>IN: The B-tree split ratio for right-most nodes and lone nodes.
+        <dt><em>double</em> <code>middle</code>
+            <dd>IN: The B-tree split ratio for all other nodes.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetBTreeRatios">H5Pget_btree_ratios</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_btree_ratios</code>(<em>hid_t</em> <code>plist</code>,
+        <em>double</em> *<code>left</code>,
+        <em>double</em> *<code>middle</code>,
+        <em>double</em> *<code>right</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets B-tree split ratios for a dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_btree_ratios</code> returns the B-tree split ratios 
+        for a dataset transfer property list.
+        <p>
+        The B-tree split ratios are returned through the non-<code>NULL</code>
+        arguments <code>left</code>, <code>middle</code>, and <code>right</code>,
+        as set by the <a href="#Property-SetBTreeRatios">H5Pset_btree_ratios</a> function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: The dataset transfer property list identifier.
+        <dt><em>double</em> <code>left</code>
+            <dd>OUT: The B-tree split ratio for left-most nodes.
+        <dt><em>double</em> <code>right</code>
+            <dd>OUT: The B-tree split ratio for right-most nodes and lone nodes.
+        <dt><em>double</em> <code>middle</code>
+            <dd>OUT: The B-tree split ratio for all other nodes.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -2060,7 +2280,7 @@ parallel HDF5 library.</i>
         variable-length datatype allocation in <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
         <p>
         Setting the <code>alloc</code> and <code>free</code> parameters to 
-        non-NULL values invokes the user's custom memory management routines.  
+        non-<code>NULL</code> values invokes the user's custom memory management routines.  
         Setting the <code>alloc</code> and <code>free</code> parameters 
         to &nbsp; <code> NULL</code> invokes the system's &nbsp; <code> malloc</code> and 
         <code>free</code> memory management routines.
@@ -2089,6 +2309,46 @@ parallel HDF5 library.</i>
             <dd>IN: User's free routine, or &nbsp; <code> NULL</code> for system <code>free</code>. 
         <dt><em>void</em> *<code>free_info</code>
             <dd>IN: Extra parameter for user's free routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> *<code>alloc</code>,
+        <em>void</em> **<code>alloc_info</code>,
+        <em>H5MM_free_t</em> *<code>free</code>,
+        <em>void</em> **<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Gets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_vlen_mem_manager</code> is the companion function to
+        <code>H5Pset_vlen_mem_manager</code>, returning the parameters
+        set by that function.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset transfer property list.
+        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
+            <dd>OUT: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>. 
+        <dt><em>void</em> *<code>alloc_info</code>
+            <dd>OUT: Extra parameter for user's allocation routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+        <dt><em>H5MM_free_t</em> <code>free</code>
+            <dd>OUT: User's free routine, or &nbsp; <code> NULL</code> for 
+                system <code>free</code>. 
+        <dt><em>void</em> *<code>free_info</code>
+            <dd>OUT: Extra parameter for user's free routine.  
                 Ignored if preceding parameter is &nbsp; <code> NULL</code>.
     </dl>
   <dt><strong>Returns:</strong>
