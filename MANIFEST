@@ -63,6 +63,7 @@
 ./config/hpux11.00
 ./config/hpux9.03
 ./config/i386-pc-cygwin32
+./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/intel-fflags
 ./config/intel-flags
