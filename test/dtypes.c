@@ -1015,7 +1015,7 @@ main(void)
     nerrors += test_named ()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
 
-#ifdef LATER
+#ifndef LATER
     /*
      * NOT READY FOR TESTING YET BECAUSE SOME SYSTEMS GENERATE A SIGFPE WHEN
      * AN OVERFLOW OCCURS CASTING A DOUBLE TO A FLOAT.
