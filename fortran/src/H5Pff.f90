@@ -3148,4 +3148,183 @@
             hdferr = h5pget_btree_ratios_c(prp_id, left, middle, right)
           END SUBROUTINE h5pget_btree_ratios_f
 
+!----------------------------------------------------------------------
+! Name:		h5pget_fclose_degree_f 
+!
+! Purpose: 	Returns the degree for the file close behavior.
+!
+! Inputs:  
+!		fapl_id		- file access property list identifier
+! Outputs:  
+!		degree  	- one of the following:
+!				  Possible values are:
+!				  H5F_CLOSE_DEFAULT_F
+!				  H5F_CLOSE_WEAK_F
+!				  H5F_CLOSE_SEMI_F
+!				  H5F_CLOSE_STRONG_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        September 26, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pget_fclose_degree_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
+            INTEGER, INTENT(OUT) :: degree     ! Possible values
+                                              ! are: 
+						!  H5F_CLOSE_DEFAULT_F
+						!  H5F_CLOSE_WEAK_F
+						!  H5F_CLOSE_SEMI_F
+						!  H5F_CLOSE_STRONG_F
+
+            INTEGER, INTENT(OUT) :: hdferr    ! Error code
+
+!            INTEGER, EXTERNAL :: h5pget_fclose_degree_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5pget_fclose_degree_c(fapl_id, degree)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FCLOSE_DEGREE_C'::h5pget_fclose_degree_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: fapl_id
+              INTEGER, INTENT(OUT) :: degree
+              END FUNCTION h5pget_fclose_degree_c
+            END INTERFACE
+
+            hdferr = h5pget_fclose_degree_c(fapl_id, degree) 
+          END SUBROUTINE h5pget_fclose_degree_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_fclose_degree_f 
+!
+! Purpose: 	Sets the degree for the file close behavior.
+!
+! Inputs:  
+!		fapl_id		- file access property list identifier
+!		degree  	- one of the following:
+!				  Possible values are:
+!				  H5F_CLOSE_DEFAULT_F
+!				  H5F_CLOSE_WEAK_F
+!				  H5F_CLOSE_SEMI_F
+!				  H5F_CLOSE_STRONG_F
+! Outputs:  
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        September 26, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pset_fclose_degree_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
+            INTEGER, INTENT(IN) :: degree     ! Possible values
+                                              ! are: 
+						!  H5F_CLOSE_DEFAULT_F
+						!  H5F_CLOSE_WEAK_F
+						!  H5F_CLOSE_SEMI_F
+						!  H5F_CLOSE_STRONG_F
+
+            INTEGER, INTENT(OUT) :: hdferr    ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5pset_fclose_degree_c(fapl_id, degree)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FCLOSE_DEGREE_C'::h5pset_fclose_degree_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: fapl_id
+              INTEGER, INTENT(IN) :: degree
+              END FUNCTION h5pset_fclose_degree_c
+            END INTERFACE
+
+            hdferr = h5pset_fclose_degree_c(fapl_id, degree) 
+          END SUBROUTINE h5pset_fclose_degree_f
+
+!----------------------------------------------------------------------
+! Name:		h5pequal_f 
+!
+! Purpose: 	Checks if two property lists are eqaul
+!
+! Inputs:  
+!		plist1_id	- property list identifier
+!		plist2_id	- property list identifier
+! Outputs:  
+!               flag		- flag, possible values
+!				  .TRUE. or .FALSE.
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1, flag is set to .FALSE.   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!	        September 30, 2002	
+!
+! Modifications: 
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5pequal_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier 
+            INTEGER(HID_T), INTENT(IN) :: plist2_id ! Property list identifier 
+            LOGICAL, INTENT(OUT)       :: flag      ! Flag
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+            INTEGER                    :: c_flag
+
+            INTERFACE
+              INTEGER FUNCTION h5pequal_c(plist1_id, plist2_id, c_flag)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+        !MS$ATTRIBUTES C,reference,alias:'_H5PEQUAL_C'::h5pequal_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: plist1_id
+              INTEGER(HID_T), INTENT(IN) :: plist2_id
+              INTEGER, INTENT(OUT) :: c_flag
+              END FUNCTION h5pequal_c
+            END INTERFACE
+
+            flag = .FALSE.
+            hdferr = h5pequal_c(plist1_id, plist2_id, c_flag) 
+            if (c_flag .GT. 0) flag = .TRUE.
+          END SUBROUTINE h5pequal_f
+
      END MODULE H5P

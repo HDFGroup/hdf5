@@ -128,6 +128,193 @@ FORTRAN File API -- h5f
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5freopen_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5freopen_f</strong>
+<pre>
+         SUBROUTINE h5freopen_f(file_id, new_file_id, hdferr)
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: file_id     ! File identifier 
+           INTEGER(HID_T), INTENT(OUT) :: new_file_id ! New file identifier 
+           INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                                      ! 0 on success and -1 on failure
+         END SUBROUTINE h5freopen_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fflush_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fflush_f</strong>
+<pre>
+         SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: obj_id      ! Object identifier
+           INTEGER, INTENT(IN)         :: scope       ! Flag with two possible values:
+                                                      ! H5F_SCOPE_GLOBAL_F  
+                                                      ! H5F_SCOPE_LOCAL_F  
+           INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                                      ! 0 on success and -1 on failure
+         END SUBROUTINE h5fflush_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fmount_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fmount_f</strong>
+<pre>
+         SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr)
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN):: name        ! Group name at locationloc_id
+           INTEGER(HID_T), INTENT(IN)  :: child_id    ! File(to be mounted) identifier
+           INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                                      ! 0 on success and -1 on failure
+         END SUBROUTINE h5fmount_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5funmount_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5funmount_f</strong>
+<pre>
+         SUBROUTINE h5funmount_f(loc_id, name, child_id, hdferr)
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: loc_id      ! File or group identifier
+           CHARACTER(LEN=*), INTENT(IN):: name        ! Group name at location loc_id
+           INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                                      ! 0 on success and -1 on failure
+         END SUBROUTINE h5funmount_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fget_create_plist_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_create_plist_f</strong>
+<pre>
+         SUBROUTINE h5fget_create_plist_f(file_id, fcpl_id, hdferr)
+
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+           INTEGER(HID_T), INTENT(OUT)  :: fcpl_id ! File creation property list identifier
+           INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                                   ! 0 on success and -1 on failure
+         END SUBROUTINE h5fget_create_plist_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fget_access_plist_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_access_plist_f</strong>
+<pre>
+         SUBROUTINE h5fget_access_plist_f(file_id, fcpl_id, hdferr)
+
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+           INTEGER(HID_T), INTENT(OUT)  :: fapl_id ! File access property list identifier
+           INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                                   ! 0 on success and -1 on failure
+         END SUBROUTINE h5fget_access_plist_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fget_obj_count_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_obj_count_f</strong>
+<pre>
+         SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
+
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: file_id  ! File identifier
+           INTEGER, INTENT(IN)         :: obj_type ! Object types, possible values are:
+						    ! H5F_OBJ_FILE_F
+						    ! H5F_OBJ_GROUP_F
+						    ! H5F_OBJ_DATASET_F
+						    ! H5F_OBJ_DATATYPE_F
+						    ! H5F_OBJ_ALL_F
+           INTEGER, INTENT(OUT)        :: obj_count ! number of opened objects
+           INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                                    ! 0 on success and -1 on failure
+         END SUBROUTINE h5fget_obj_count_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fget_obj_ids_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_obj_ids_f</strong>
+<pre>
+         SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, obj_ids, hdferr)
+
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)   :: file_id  ! File identifier
+           INTEGER,        INTENT(IN)   :: obj_type ! Object types, possible values are:
+						    ! H5F_OBJ_FILE_F
+						    ! H5F_OBJ_GROUP_F
+						    ! H5F_OBJ_DATASET_F
+						    ! H5F_OBJ_DATATYPE_F
+						    ! H5F_OBJ_ALL_F
+           INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: obj_ids
+                                                    ! array of requested object identifiers
+           INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                                    ! 0 on success and -1 on failure
+         END SUBROUTINE h5fget_obj_ids_f 
+</pre>
+
 
 </dl>
 
@@ -141,7 +328,7 @@ FORTRAN File API -- h5f
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  20 October 1999
+Last modified:  30 September, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

@@ -97,9 +97,37 @@ nh5pcopy_c ( hid_t_f *prp_id , hid_t_f *new_prp_id)
   hid_t c_new_prp_id;
 
   c_prp_id = *prp_id;
-  c_new_prp_id = H5Tcopy(c_prp_id); 
+  c_new_prp_id = H5Pcopy(c_prp_id); 
   if ( c_new_prp_id < 0  ) ret_value = -1;
   *new_prp_id = (hid_t_f)c_new_prp_id;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pequal_c
+ * Purpose:     Call H5Pequal to check if two property lists are equal 
+ * Inputs:      plist1_id - property list identifier
+ *              plist2_id - property list identifier
+ * Outputs:     c_flag    - flag to indicate that lists are eqaul
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Monday, September 30, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f * c_flag)
+{
+  int ret_value = 0;
+  hid_t c_plist1_id;
+  hid_t c_plist2_id;
+  htri_t c_c_flag;
+
+  c_plist1_id = (hid_t)*plist1_id;
+  c_plist2_id = (hid_t)*plist2_id;
+  c_c_flag = H5Pequal(c_plist1_id, c_plist2_id); 
+  if ( c_c_flag < 0  ) ret_value = -1;
+  *c_flag = (int_f)c_c_flag;
   return ret_value;
 }
 
@@ -1798,3 +1826,63 @@ nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
      ret_value = 0;
      return ret_value;
 } 
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_fclose_degree_c
+ * Purpose:     Call H5Pget_fclose_degree to determine file close behavior
+ * Inputs:      fapl_id - file access identifier 
+ * Outputs:
+ *              degree  - possible values are:
+ *              		H5F_CLOSE_DEFAULT
+ *              		H5F_CLOSE_WEAK
+ *              		H5F_CLOSE_SEMI
+ *              		H5F_CLOSE_STRONG
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, September 26, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pget_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
+{
+  int ret_value = -1;
+  hid_t c_fapl_id;
+  H5F_close_degree_t c_degree; 
+
+  c_fapl_id = (hid_t)*fapl_id;
+  if( H5Pget_fclose_degree(c_fapl_id, &c_degree) < 0) return ret_value;
+  
+  *degree = (int_f)c_degree;
+  ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_fclose_degree_c
+ * Purpose:     Call H5Pset_fclose_degree to set file close behavior
+ * Inputs:      fapl_id - file access identifier 
+ *              degree  - possible values are:
+ *              		H5F_CLOSE_DEFAULT
+ *              		H5F_CLOSE_WEAK
+ *              		H5F_CLOSE_SEMI
+ *              		H5F_CLOSE_STRONG
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Thursday, September 26, 2002
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
+{
+  int ret_value = -1;
+  hid_t c_fapl_id;
+  hid_t c_degree; 
+
+  c_fapl_id = (hid_t)*fapl_id;
+  c_degree = (H5F_close_degree_t)*degree;
+  if( H5Pset_fclose_degree(c_fapl_id, c_degree) < 0) return ret_value;
+  
+  ret_value = 0;
+  return ret_value;
+}

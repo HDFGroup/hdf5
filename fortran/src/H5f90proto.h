@@ -22,6 +22,8 @@ H5_DLL int HD5packFstring(char *src, char *dest, int len);
 #   define nh5freopen_c              FNAME(H5FREOPEN_C)
 #   define nh5fget_create_plist_c    FNAME(H5FGET_CREATE_PLIST_C)
 #   define nh5fget_access_plist_c    FNAME(H5FGET_ACCESS_PLIST_C)
+#   define nh5fget_obj_count_c       FNAME(H5FGET_OBJ_COUNT_C)
+#   define nh5fget_obj_ids_c         FNAME(H5FGET_OBJ_IDS_C)
 #else                                              /* !DF_CAPFNAMES */
 #   define nh5fcreate_c            FNAME(h5fcreate_c)
 #   define nh5fflush_c             FNAME(h5fflush_c)
@@ -33,6 +35,8 @@ H5_DLL int HD5packFstring(char *src, char *dest, int len);
 #   define nh5freopen_c            FNAME(h5freopen_c)
 #   define nh5fget_create_plist_c  FNAME(h5fget_create_plist_c)
 #   define nh5fget_access_plist_c  FNAME(h5fget_access_plist_c)
+#   define nh5fget_obj_count_c     FNAME(h5fget_obj_count_c)
+#   define nh5fget_obj_ids_c       FNAME(h5fget_obj_ids_c)
 #endif                                             /* DF_CAPFNAMES */
 #endif                                             /* H5Ff90_FNAMES */
 
@@ -51,8 +55,15 @@ H5_DLL int_f nh5fmount_c
 H5_DLL int_f nh5funmount_c 
 (hid_t_f *loc_id, _fcd dsetname, int_f *namelen);
 H5_DLL int_f nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2);
+
 H5_DLL int_f nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id);
+
 H5_DLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
+
+H5_DLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_count);
+
+H5_DLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_ids);
+
 /*
  * Functions from H5Sf.c
  */
@@ -424,6 +435,7 @@ H5_DLL int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tget_member_offset_c        FNAME(H5TGET_MEMBER_OFFSET_C)
 #   define nh5tget_member_dims_c        FNAME(H5TGET_MEMBER_DIMS_C)
 #   define nh5tget_member_type_c        FNAME(H5TGET_MEMBER_TYPE_C)
+#   define nh5tget_member_index_c        FNAME(H5TGET_MEMBER_INDEX_C)
 #   define nh5tinsert_c        FNAME(H5TINSERT_C)
 #   define nh5tcreate_c        FNAME(H5TCREATE_C)
 #   define nh5tpack_c                   FNAME(H5TPACK_C)
@@ -478,6 +490,7 @@ H5_DLL int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tget_member_offset_c        FNAME(h5tget_member_offset_c)
 #   define nh5tget_member_dims_c        FNAME(h5tget_member_dims_c)
 #   define nh5tget_member_type_c        FNAME(h5tget_member_type_c)
+#   define nh5tget_member_index_c        FNAME(h5tget_member_index_c)
 #   define nh5tinsert_c                 FNAME(h5tinsert_c)
 #   define nh5tcreate_c        FNAME(h5tcreate_c)
 #   define nh5tpack_c                   FNAME(h5tpack_c)
@@ -547,6 +560,8 @@ H5_DLL int_f nh5tget_member_name_c ( hid_t_f *type_id ,int_f* index, _fcd member
 H5_DLL int_f nh5tget_member_dims_c ( hid_t_f *type_id ,int_f* field_idx, int_f * dims, size_t_f * field_dims, int_f * perm );
 H5_DLL int_f nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f* offset);
 H5_DLL int_f nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype);
+H5_DLL int_f nh5tget_member_index_c ( hid_t_f *type_id ,_fcd name, int_f* namelen, int_f *index);
+
 H5_DLL int_f nh5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_t_f * field_id);
 H5_DLL int_f nh5tpack_c(hid_t_f * type_id);
 
@@ -587,6 +602,7 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pcreate_c       FNAME(H5PCREATE_C)
 #   define nh5pclose_c        FNAME(H5PCLOSE_C)
 #   define nh5pcopy_c         FNAME(H5PCOPY_C)
+#   define nh5pequal_c         FNAME(H5PEQUAL_C)
 #   define nh5pget_class_c    FNAME(H5PGET_CLASS_C)
 #   define nh5pset_deflate_c  FNAME(H5PSET_DEFLATE_C)
 #   define nh5pset_preserve_c  FNAME(H5PSET_PRESERVE_C)
@@ -639,11 +655,14 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_fapl_mpio_c         FNAME(H5PGET_FAPL_MPIO_C)
 #   define nh5pset_dxpl_mpio_c        FNAME(H5PSET_DXPL_MPIO_C)
 #   define nh5pget_dxpl_mpio_c        FNAME(H5PGET_DXPL_MPIO_C)
+#   define nh5pget_fclose_degree_c    FNAME(H5PGET_FCLOSE_DEGREE_C)
+#   define nh5pset_fclose_degree_c    FNAME(H5PSET_FCLOSE_DEGREE_C)
 
 #else
 #   define nh5pcreate_c       FNAME(h5pcreate_c)
 #   define nh5pclose_c        FNAME(h5pclose_c)
 #   define nh5pcopy_c         FNAME(h5pcopy_c)
+#   define nh5pequal_c         FNAME(h5pequal_c)
 #   define nh5pget_class_c    FNAME(h5pget_class_c)
 #   define nh5pset_deflate_c  FNAME(h5pset_deflate_c)
 #   define nh5pset_preserve_c  FNAME(h5pset_preserve_c)
@@ -696,6 +715,9 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 #   define nh5pget_fapl_mpio_c         FNAME(h5pget_fapl_mpio_c)
 #   define nh5pset_dxpl_mpio_c        FNAME(h5pset_dxpl_mpio_c)
 #   define nh5pget_dxpl_mpio_c        FNAME(h5pget_dxpl_mpio_c)
+#   define nh5pget_fclose_degree_c    FNAME(h5pget_fclose_degree_c)
+#   define nh5pset_fclose_degree_c    FNAME(h5pset_fclose_degree_c)
+
 
 #endif
 #endif
@@ -705,6 +727,8 @@ H5_DLL int_f nh5pcreate_c ( int_f *classtype, hid_t_f *prp_id );
 H5_DLL int_f nh5pclose_c ( hid_t_f *prp_id );
 
 H5_DLL int_f nh5pcopy_c ( hid_t_f *prp_id , hid_t_f *new_prp_id);
+
+H5_DLL int_f nh5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f *c_flag);
 
 H5_DLL int_f nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype);
 
@@ -815,7 +839,8 @@ H5_DLL int_f
 nh5pget_dxpl_mpio_rc(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_DLL int_f
 nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
-
+H5_DLL int_f nh5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);
+H5_DLL int_f nh5pget_fclose_degree_c(hid_t_f *fapl, int_f *degree);
 /*
  * Functions frome H5Rf.c 
  */

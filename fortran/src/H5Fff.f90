@@ -102,7 +102,6 @@
 !				  H5F_SCOPE_GLOBAL_F
 !				  H5F_SCOPE_LOCAL_F
 ! Outputs:  
-!		file_id		- file identifier
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -669,4 +668,122 @@
 
           END SUBROUTINE h5fclose_f
 
+!----------------------------------------------------------------------
+! Name:		h5fget_obj_count_f
+!
+! Purpose:	Gets number of the objects open within a file
+!
+! Inputs:  
+!		file_id		- file identifier
+!               obj_type        - type of the object; possible values are:
+!                                 H5F_OBJ_FILE_F 
+!                                 H5F_OBJ_DATASET_F 
+!                                 H5F_OBJ_GROUP_F 
+!                                 H5F_OBJ_DATATYPE_F 
+!                                 H5F_OBJ_ALL_F 
+! Outputs:  
+!               obj_count       - number of open objects
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		September 30, 2002
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+          
+          SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_obj_count_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+            INTEGER, INTENT(IN)  :: obj_type      ! Object type
+            INTEGER, INTENT(OUT) :: obj_count     ! Number of open objects
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5fget_obj_count_c(file_id, obj_type, obj_count)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+       !MS$ATTRIBUTES C,reference,alias:'_H5FGET_OBJ_COUNT_C':: h5fget_obj_count_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER, INTENT(IN)  :: obj_type      ! Object type
+              INTEGER, INTENT(OUT) :: obj_count    ! Number of open objects
+              END FUNCTION h5fget_obj_count_c
+            END INTERFACE
+
+            hdferr = h5fget_obj_count_c(file_id, obj_type, obj_count)
+
+          END SUBROUTINE h5fget_obj_count_f
+
+!----------------------------------------------------------------------
+! Name:		h5fget_obj_ids_f
+!
+! Purpose:	Get list of open objects identifiers within a file
+!
+! Inputs:  
+!		file_id		- file identifier
+!               obj_type        - type of the object; possible values are:
+!                                 H5F_OBJ_FILE_F 
+!                                 H5F_OBJ_DATASET_F 
+!                                 H5F_OBJ_GROUP_F 
+!                                 H5F_OBJ_DATATYPE_F 
+!                                 H5F_OBJ_ALL_F 
+! Outputs:  
+!               obj_ids         - array of open object identifiers
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		September 30, 2002
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+          
+          SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, obj_ids, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5fget_obj_ids_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+            INTEGER, INTENT(IN)  :: obj_type   ! Object type
+            INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids
+                                               ! Array of open objects iidentifiers
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5fget_obj_ids_c(file_id, obj_type, obj_ids)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+       !MS$ATTRIBUTES C,reference,alias:'_H5FGET_OBJ_IDS_C':: h5fget_obj_ids_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: file_id
+              INTEGER, INTENT(IN)  :: obj_type      
+              INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids  
+              END FUNCTION h5fget_obj_ids_c
+            END INTERFACE
+
+            hdferr = h5fget_obj_ids_c(file_id, obj_type, obj_ids)
+
+          END SUBROUTINE h5fget_obj_ids_f
       END MODULE H5F

@@ -1317,6 +1317,83 @@ FORTRAN Property List API -- h5p
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_fclose_degree_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pget_fclose_degree_f</strong>
+<pre>
+
+         SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+            INTEGER, INTENT(OUT) :: degree ! Info about file close behavior, 
+                                           ! possible values:
+                                           ! H5F_CLOSE_DEFAULT_F
+                                           ! H5F_CLOSE_WEAK_F
+                                           ! H5F_CLOSE_SEMI_F
+                                           ! H5F_CLOSE_STRONG_F
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pget_fclose_degree_f 
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_fclose_degree_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5pset_fclose_degree_f</strong>
+<pre>
+
+         SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+            INTEGER, INTENT(IN) :: degree  ! Info about file close behavior, 
+                                           ! possible values:
+                                           ! H5F_CLOSE_DEFAULT_F
+                                           ! H5F_CLOSE_WEAK_F
+                                           ! H5F_CLOSE_SEMI_F
+                                           ! H5F_CLOSE_STRONG_F
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+          END SUBROUTINE h5pset_fclose_degree_f 
+
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pequal_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5peqaul_f</strong>
+<pre>
+
+         SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: plist1_id !  property list identifier
+            INTEGER(HID_T), INTENT(IN) :: plist2_id !  property list identifier
+            LOGICAL, INTENET(OUT)      :: flag      !  flag, equals to .TRUE. if
+                                                    !  if lists are equal, otherwise
+                                                    !  equals to .FALSE.
+            INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+          END SUBROUTINE h5pequal_f 
+
+</pre>
+
 
 
 </dl>
@@ -1331,7 +1408,7 @@ FORTRAN Property List API -- h5p
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  21 August 2001
+Last modified:  30 Septemeber, 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 

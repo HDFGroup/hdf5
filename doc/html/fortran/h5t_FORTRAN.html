@@ -853,6 +853,31 @@ FORTRAN Datatype API -- h5t
 </pre>
 
 
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_member_index_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_member_index_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tget_member_index_f(type_id, member_name, index , hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: member_name  !name of a field of
+                                                         !a compound datatype 
+                                                         ! or a member of ENUM type
+            INTEGER, INTENT(OUT) :: index !Field index (0-based) of the field name to retrieve 
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+          END SUBROUTINE h5tget_member_index_f
+</pre>
+
 <p>&nbsp;
 <p>&nbsp;
 <hr>

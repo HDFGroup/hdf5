@@ -209,6 +209,15 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
       h5f_flags[4] = (int_f)H5F_ACC_DEBUG;
       h5f_flags[5] = (int_f)H5F_SCOPE_LOCAL;
       h5f_flags[6] = (int_f)H5F_SCOPE_GLOBAL;
+      h5f_flags[7] = (int_f)H5F_CLOSE_DEFAULT;
+      h5f_flags[8] = (int_f)H5F_CLOSE_WEAK;
+      h5f_flags[9] = (int_f)H5F_CLOSE_SEMI;
+      h5f_flags[10] = (int_f)H5F_CLOSE_STRONG;
+      h5f_flags[11] = (int_f)H5F_OBJ_FILE;
+      h5f_flags[12] = (int_f)H5F_OBJ_DATASET;
+      h5f_flags[13] = (int_f)H5F_OBJ_GROUP;
+      h5f_flags[14] = (int_f)H5F_OBJ_DATATYPE;
+      h5f_flags[15] = (int_f)H5F_OBJ_ALL;
 
 /*
  *  H5FD flags

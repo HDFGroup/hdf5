@@ -543,6 +543,132 @@
         END SUBROUTINE plisttest
               
      
+!
+!    The following subroutine tests h5pget(set)_fclose_degree_f
+!
+
+        SUBROUTINE file_close(cleanup, total_error)
+        USE HDF5  ! This module contains all necessary modules
+          IMPLICIT NONE
+          LOGICAL, INTENT(IN) :: cleanup
+          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER              :: error
+     
+          !
+          CHARACTER(LEN=10), PARAMETER :: filename = "file_close"
+          CHARACTER(LEN=80)  :: fix_filename 
+
+          INTEGER(HID_T) :: fid, fid_d, fid1, fid2, fid3  ! File identifiers 
+          INTEGER(HID_T) :: fapl, fapl1, fapl2, fapl3 ! File access identifiers
+          INTEGER(HID_T) :: fid_d_fapl, fid1_fapl     ! File access identifiers
+          LOGICAL        :: flag
+          INTEGER        :: obj_count, obj_countf
+          INTEGER(HID_T), ALLOCATABLE, DIMENSION(:) :: obj_ids
+          INTEGER        :: i
+          
+          CALL h5eset_auto_f(0, error)
+
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error)
+               CALL check("h5fcreate_f",error,total_error)
+
+          CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
+               CALL check("h5pcreate_f",error,total_error)
+          CALL h5pset_fclose_degree_f(fapl, H5F_CLOSE_DEFAULT_F, error)
+               CALL check("h5pset_fclose_degree_f",error,total_error)
+
+
+          CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl1, error)
+               CALL check("h5pcreate_f",error,total_error)
+          CALL h5pset_fclose_degree_f(fapl1, H5F_CLOSE_WEAK_F, error)
+               CALL check("h5pset_fclose_degree_f",error,total_error)
+
+
+          CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl2, error)
+               CALL check("h5pcreate_f",error,total_error)
+          CALL h5pset_fclose_degree_f(fapl2, H5F_CLOSE_SEMI_F, error)
+               CALL check("h5pset_fclose_degree_f",error,total_error)
+
+          CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl3, error)
+               CALL check("h5pcreate_f",error,total_error)
+          CALL h5pset_fclose_degree_f(fapl3, H5F_CLOSE_STRONG_F, error)
+               CALL check("h5pset_fclose_degree_f",error,total_error)
+
+          CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid1, error, access_prp=fapl1)
+               CALL check("h5fopen_f",error,total_error)
+          CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid_d, error, access_prp=fapl)
+               CALL check("h5fopen_f",error,total_error)
+          CALL h5fget_access_plist_f(fid1, fid1_fapl, error)
+               CALL check("h5fget_access_plist_f",error,total_error)
+          CALL h5fget_access_plist_f(fid_d, fid_d_fapl, error)
+               CALL check("h5fget_access_plist_f",error,total_error)
+
+          CALL h5pequal_f(fid_d_fapl, fid1_fapl, flag, error)
+               CALL check("h5pequal_f",error,total_error)
+          if (.NOT. flag) then
+               write(*,*) " File access lists should be equal, error "
+               total_error=total_error + 1
+          endif
+
+          CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid2, error, access_prp=fapl2)
+               if( error .ne. -1) then
+                   total_error = total_error + 1
+                   write(*,*) " Open with H5F_CLOSE_SEMI should fail "
+               endif
+          CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, fid3, error, access_prp=fapl3)
+               if( error .ne. -1) then
+                   total_error = total_error + 1
+                   write(*,*) " Open with H5F_CLOSE_STRONG should fail "
+               endif
+
+          CALL h5fget_obj_count_f(fid1, H5F_OBJ_ALL_F, obj_count, error)
+               CALL check("h5fget_obj_count_f",error,total_error)
+               if(error .eq.0 .and. obj_count .ne. 3) then
+                 total_error = total_error + 1
+                 write(*,*) "Wrong number of open objects reported, error"
+               endif
+          CALL h5fget_obj_count_f(fid1, H5F_OBJ_FILE_F, obj_countf, error)
+               CALL check("h5fget_obj_count_f",error,total_error)
+               if(error .eq.0 .and. obj_countf .ne. 3) then
+                 total_error = total_error + 1
+                 write(*,*) "Wrong number of open objects reported, error"
+               endif
+          allocate(obj_ids(obj_countf), stat = error) 
+          CALL h5fget_obj_ids_f(fid, H5F_OBJ_FILE_F, obj_ids, error)
+               CALL check("h5fget_obj_ids_f",error,total_error)
+          if(error .eq. 0) then
+             do i = 1, obj_countf
+                    CALL h5fclose_f(obj_ids(i), error)
+                         CALL check("h5fclose_f",error,total_error)
+             enddo
+          endif
+          
+          CALL h5fclose_f(fid, error)
+              if(error .eq. 0) then
+                 total_error = total_error + 1
+                 write(*,*) "File should be closed at this point, error"
+              endif 
+          CALL h5fclose_f(fid1, error)
+              if(error .eq. 0) then
+                 total_error = total_error + 1
+                 write(*,*) "File should be closed at this point, error"
+              endif 
+          CALL h5fclose_f(fid_d, error)
+              if(error .eq. 0) then
+                 total_error = total_error + 1
+                 write(*,*) "File should be closed at this point, error"
+              endif 
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          deallocate(obj_ids)
+          RETURN
+
+        END SUBROUTINE file_close 
 
 
 

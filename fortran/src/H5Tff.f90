@@ -1912,7 +1912,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5tget_member_name_f(type_id,index, member_name,  namelen, hdferr) 
+          SUBROUTINE h5tget_member_name_f(type_id, index, member_name,  namelen, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -2004,6 +2004,63 @@
 
             hdferr = h5tget_member_offset_c(type_id, member_no, offset )
           END SUBROUTINE h5tget_member_offset_f
+!----------------------------------------------------------------------
+! Name:		h5tget_member_index_f 
+!
+! Purpose: 	Retrieves the index of a compound or enumeration datatype member. 
+!
+! Inputs:  
+!		type_id		- datatype identifier
+!		name		- name of the field or member whose index to
+!                                 to be retrieved from the datatype.
+! Outputs:  
+!               index           - 0-based index of the filed or member (0 to N-1)
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		September 26, 2002
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_index_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name   ! Field or member name
+            INTEGER, INTENT(OUT) :: index          ! Field or member index
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+            INTEGER :: namelen          ! Name length 
+
+            INTERFACE
+              INTEGER FUNCTION h5tget_member_index_c(type_id, name, namelen, index)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_INDEX_C'::h5tget_member_index_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference ::name 
+              INTEGER(HID_T), INTENT(IN) :: type_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER, INTENT(IN)  :: namelen
+              INTEGER, INTENT(OUT) :: index  
+              END FUNCTION h5tget_member_index_c
+            END INTERFACE
+
+            namelen = LEN(name)
+            hdferr = h5tget_member_index_c(type_id, name, namelen, index)
+          END SUBROUTINE h5tget_member_index_f
+
 
 !----------------------------------------------------------------------
 ! Name:		h5tget_member_dim_f 

@@ -26,6 +26,7 @@
      INTEGER :: error 
      INTEGER :: mounting_total_error = 0
      INTEGER :: reopen_total_error = 0
+     INTEGER :: fclose_total_error = 0
      INTEGER :: dataset_total_error = 0
      INTEGER :: extend_dataset_total_error = 0
      INTEGER :: refobj_total_error = 0
@@ -88,6 +89,14 @@
      write(*, fmt = '(58x,a)', advance = 'no') ' ' 
      write(*, fmt = e_format) error_string
      total_error = total_error + reopen_total_error 
+
+     error_string = failure
+     CALL file_close(cleanup, fclose_total_error)
+     IF (fclose_total_error == 0) error_string = success
+     write(*, fmt = '(21a)', advance = 'no') ' File open/close test'     
+     write(*, fmt = '(49x,a)', advance = 'no') ' ' 
+     write(*, fmt = e_format) error_string
+     total_error = total_error + fclose_total_error 
 
 
 !     write(*,*)
