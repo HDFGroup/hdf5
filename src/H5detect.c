@@ -934,7 +934,7 @@ main(void)
 
     print_header();
 
-    DETECT_I(signed char,	  CHAR,	   d[nd]); nd++;
+    DETECT_I(signed char,	  SCHAR,   d[nd]); nd++;
     DETECT_I(unsigned char,	  UCHAR,   d[nd]); nd++;
     DETECT_I(short,		  SHORT,   d[nd]); nd++;
     DETECT_I(unsigned short,	  USHORT,  d[nd]); nd++;

@@ -112,7 +112,7 @@ main (int argc, char *argv[])
 	if ((space = H5Screate_simple (1, size, size))<0) goto next;
 
 	/* Dataset */
-	if ((dset=H5Dcreate (file, dset_name, H5T_NATIVE_CHAR,
+	if ((dset=H5Dcreate (file, dset_name, H5T_NATIVE_SCHAR,
 			     space, H5P_DEFAULT))<0) goto next;
 
 	

@@ -1975,7 +1975,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_uchar
+ * Function:	H5T_conv_schar_uchar
  *
  * Purpose:	Converts `signed char' to `unsigned char'
  *
@@ -1991,10 +1991,10 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_uchar, FAIL);
+    FUNC_ENTER(H5T_conv_schar_uchar, FAIL);
     H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
 		signed char, unsigned char);
     FUNC_LEAVE(SUCCEED);
@@ -2002,7 +2002,7 @@ H5T_conv_char_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_char
+ * Function:	H5T_conv_uchar_schar
  *
  * Purpose:	Converts `unsigned char' to `signed char'
  *
@@ -2018,10 +2018,10 @@ H5T_conv_char_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_short, FAIL);
+    FUNC_ENTER(H5T_conv_uchar_schar, FAIL);
     H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
 		unsigned char, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -2029,7 +2029,7 @@ H5T_conv_uchar_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_short
+ * Function:	H5T_conv_schar_short
  *
  * Purpose:	Converts `signed char' to `short'
  *
@@ -2045,18 +2045,18 @@ H5T_conv_uchar_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_schar_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		     void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_short, FAIL);
+    FUNC_ENTER(H5T_conv_schar_short, FAIL);
     H5T_CONV_sS(cdata, buf, nelmts, signed char, short);
     FUNC_LEAVE(SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_ushort
+ * Function:	H5T_conv_schar_ushort
  *
  * Purpose:	Converts `signed char' to `unsigned short'
  *
@@ -2072,10 +2072,10 @@ H5T_conv_char_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_ushort, FAIL);
+    FUNC_ENTER(H5T_conv_schar_ushort, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
 		signed char, unsigned short);
     FUNC_LEAVE(SUCCEED);
@@ -2137,7 +2137,7 @@ H5T_conv_uchar_ushort(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_int
+ * Function:	H5T_conv_schar_int
  *
  * Purpose:	Converts `signed char' to `int'
  *
@@ -2153,18 +2153,18 @@ H5T_conv_uchar_ushort(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		  H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		  void __unused__ *bkg)
+H5T_conv_schar_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		   void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_int, FAIL);
+    FUNC_ENTER(H5T_conv_schar_int, FAIL);
     H5T_CONV_sS(cdata, buf, nelmts, signed char, int);
     FUNC_LEAVE(SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_uint
+ * Function:	H5T_conv_schar_uint
  *
  * Purpose:	Converts `signed char' to `unsigned int'
  *
@@ -2180,10 +2180,10 @@ H5T_conv_char_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_uint, FAIL);
+    FUNC_ENTER(H5T_conv_schar_uint, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, signed char, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2244,7 +2244,7 @@ H5T_conv_uchar_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_long
+ * Function:	H5T_conv_schar_long
  *
  * Purpose:	Converts `signed char' to `long'
  *
@@ -2260,18 +2260,18 @@ H5T_conv_uchar_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		   void __unused__ *bkg)
+H5T_conv_schar_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		    void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_long, FAIL);
+    FUNC_ENTER(H5T_conv_schar_long, FAIL);
     H5T_CONV_sS(cdata, buf, nelmts, signed char, long);
     FUNC_LEAVE(SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_ulong
+ * Function:	H5T_conv_schar_ulong
  *
  * Purpose:	Converts `signed char' to `unsigned long'
  *
@@ -2287,10 +2287,10 @@ H5T_conv_char_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_ulong, FAIL);
+    FUNC_ENTER(H5T_conv_schar_ulong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
 		signed char, unsigned long);
     FUNC_LEAVE(SUCCEED);
@@ -2352,7 +2352,7 @@ H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_llong
+ * Function:	H5T_conv_schar_llong
  *
  * Purpose:	Converts `signed char' to `long_long'
  *
@@ -2368,18 +2368,18 @@ H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_schar_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
+		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
+		     void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_llong, FAIL);
+    FUNC_ENTER(H5T_conv_schar_llong, FAIL);
     H5T_CONV_sS(cdata, buf, nelmts, signed char, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_char_ullong
+ * Function:	H5T_conv_schar_ullong
  *
  * Purpose:	Converts `signed char' to `unsigned long_long'
  *
@@ -2395,10 +2395,10 @@ H5T_conv_char_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_char_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_char_ullong, FAIL);
+    FUNC_ENTER(H5T_conv_schar_ullong, FAIL);
     H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
 		signed char, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
@@ -2460,7 +2460,7 @@ H5T_conv_uchar_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_char
+ * Function:	H5T_conv_short_schar
  *
  * Purpose:	Converts `short' to `signed char'
  *
@@ -2476,10 +2476,10 @@ H5T_conv_uchar_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_short_char, FAIL);
+    FUNC_ENTER(H5T_conv_short_schar, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
 		short, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -2514,7 +2514,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_char
+ * Function:	H5T_conv_ushort_schar
  *
  * Purpose:	Converts `unsigned short' to `signed char'
  *
@@ -2530,10 +2530,10 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_ushort_char, FAIL);
+    FUNC_ENTER(H5T_conv_ushort_schar, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
 		unsigned short, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -2944,7 +2944,7 @@ H5T_conv_ushort_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_char
+ * Function:	H5T_conv_int_schar
  *
  * Purpose:	Converts `int' to `signed char'
  *
@@ -2960,10 +2960,10 @@ H5T_conv_ushort_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		  size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_int_char, FAIL);
+    FUNC_ENTER(H5T_conv_int_schar, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
 		int, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -2998,7 +2998,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_char
+ * Function:	H5T_conv_uint_schar
  *
  * Purpose:	Converts `unsigned int' to `signed char'
  *
@@ -3014,10 +3014,10 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_uint_char, FAIL);
+    FUNC_ENTER(H5T_conv_uint_schar, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
 		unsigned, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -3429,7 +3429,7 @@ H5T_conv_uint_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_char
+ * Function:	H5T_conv_long_schar
  *
  * Purpose:	Converts `long' to `signed char'
  *
@@ -3445,10 +3445,10 @@ H5T_conv_uint_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		   size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_long_char, FAIL);
+    FUNC_ENTER(H5T_conv_long_schar, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
 		long, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -3483,7 +3483,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_char
+ * Function:	H5T_conv_ulong_schar
  *
  * Purpose:	Converts `unsigned long' to `signed char'
  *
@@ -3499,10 +3499,10 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_ulong_char, FAIL);
+    FUNC_ENTER(H5T_conv_ulong_schar, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
 		unsigned long, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -3915,7 +3915,7 @@ H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_char
+ * Function:	H5T_conv_llong_schar
  *
  * Purpose:	Converts `long_long' to `signed char'
  *
@@ -3931,10 +3931,10 @@ H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		    size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_llong_char, FAIL);
+    FUNC_ENTER(H5T_conv_llong_schar, FAIL);
     H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
 		long_long, signed char, SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
@@ -3969,7 +3969,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_char
+ * Function:	H5T_conv_ullong_schar
  *
  * Purpose:	Converts `unsigned long_long' to `signed char'
  *
@@ -3985,10 +3985,10 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_char(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
-		     size_t nelmts, void *buf, void __unused__ *bkg)
+H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
-    FUNC_ENTER(H5T_conv_ullong_char, FAIL);
+    FUNC_ENTER(H5T_conv_ullong_schar, FAIL);
     H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
 		unsigned long_long, signed char, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);

@@ -317,17 +317,17 @@ h5_fileaccess(void)
 void
 h5_no_hwconv(void)
 {
-    H5Tunregister(H5T_conv_char_uchar);
-    H5Tunregister(H5T_conv_char_short);
-    H5Tunregister(H5T_conv_char_ushort);
-    H5Tunregister(H5T_conv_char_int);
-    H5Tunregister(H5T_conv_char_uint);
-    H5Tunregister(H5T_conv_char_long);
-    H5Tunregister(H5T_conv_char_ulong);
-    H5Tunregister(H5T_conv_char_llong);
-    H5Tunregister(H5T_conv_char_ullong);
+    H5Tunregister(H5T_conv_schar_uchar);
+    H5Tunregister(H5T_conv_schar_short);
+    H5Tunregister(H5T_conv_schar_ushort);
+    H5Tunregister(H5T_conv_schar_int);
+    H5Tunregister(H5T_conv_schar_uint);
+    H5Tunregister(H5T_conv_schar_long);
+    H5Tunregister(H5T_conv_schar_ulong);
+    H5Tunregister(H5T_conv_schar_llong);
+    H5Tunregister(H5T_conv_schar_ullong);
 
-    H5Tunregister(H5T_conv_uchar_char);
+    H5Tunregister(H5T_conv_uchar_schar);
     H5Tunregister(H5T_conv_uchar_short);
     H5Tunregister(H5T_conv_uchar_ushort);
     H5Tunregister(H5T_conv_uchar_int);
@@ -337,7 +337,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_uchar_llong);
     H5Tunregister(H5T_conv_uchar_ullong);
 
-    H5Tunregister(H5T_conv_short_char);
+    H5Tunregister(H5T_conv_short_schar);
     H5Tunregister(H5T_conv_short_uchar);
     H5Tunregister(H5T_conv_short_ushort);
     H5Tunregister(H5T_conv_short_int);
@@ -347,7 +347,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_short_llong);
     H5Tunregister(H5T_conv_short_ullong);
 
-    H5Tunregister(H5T_conv_ushort_char);
+    H5Tunregister(H5T_conv_ushort_schar);
     H5Tunregister(H5T_conv_ushort_uchar);
     H5Tunregister(H5T_conv_ushort_short);
     H5Tunregister(H5T_conv_ushort_int);
@@ -357,7 +357,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_ushort_llong);
     H5Tunregister(H5T_conv_ushort_ullong);
 
-    H5Tunregister(H5T_conv_int_char);
+    H5Tunregister(H5T_conv_int_schar);
     H5Tunregister(H5T_conv_int_uchar);
     H5Tunregister(H5T_conv_int_short);
     H5Tunregister(H5T_conv_int_ushort);
@@ -367,7 +367,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_int_llong);
     H5Tunregister(H5T_conv_int_ullong);
 
-    H5Tunregister(H5T_conv_uint_char);
+    H5Tunregister(H5T_conv_uint_schar);
     H5Tunregister(H5T_conv_uint_uchar);
     H5Tunregister(H5T_conv_uint_short);
     H5Tunregister(H5T_conv_uint_ushort);
@@ -377,7 +377,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_uint_llong);
     H5Tunregister(H5T_conv_uint_ullong);
 
-    H5Tunregister(H5T_conv_long_char);
+    H5Tunregister(H5T_conv_long_schar);
     H5Tunregister(H5T_conv_long_uchar);
     H5Tunregister(H5T_conv_long_short);
     H5Tunregister(H5T_conv_long_ushort);
@@ -387,7 +387,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_long_llong);
     H5Tunregister(H5T_conv_long_ullong);
 
-    H5Tunregister(H5T_conv_ulong_char);
+    H5Tunregister(H5T_conv_ulong_schar);
     H5Tunregister(H5T_conv_ulong_uchar);
     H5Tunregister(H5T_conv_ulong_short);
     H5Tunregister(H5T_conv_ulong_ushort);
@@ -397,7 +397,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_ulong_llong);
     H5Tunregister(H5T_conv_ulong_ullong);
 
-    H5Tunregister(H5T_conv_llong_char);
+    H5Tunregister(H5T_conv_llong_schar);
     H5Tunregister(H5T_conv_llong_uchar);
     H5Tunregister(H5T_conv_llong_short);
     H5Tunregister(H5T_conv_llong_ushort);
@@ -407,7 +407,7 @@ h5_no_hwconv(void)
     H5Tunregister(H5T_conv_llong_ulong);
     H5Tunregister(H5T_conv_llong_ullong);
 
-    H5Tunregister(H5T_conv_ullong_char);
+    H5Tunregister(H5T_conv_ullong_schar);
     H5Tunregister(H5T_conv_ullong_uchar);
     H5Tunregister(H5T_conv_ullong_short);
     H5Tunregister(H5T_conv_ullong_ushort);

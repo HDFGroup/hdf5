@@ -323,7 +323,8 @@ test_attr_compound_write(void)
     ret = H5Tinsert(tid1, ATTR4_FIELDNAME2, attr4_field2_off, H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
     attr4_field3_off=HOFFSET(struct attr4_struct, c);
-    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, attr4_field3_off, H5T_NATIVE_CHAR);
+    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, attr4_field3_off,
+		    H5T_NATIVE_SCHAR);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create dataspace for 1st attribute */
@@ -474,9 +475,9 @@ test_attr_compound_read(void)
     class=H5Tget_class(field);
     VERIFY(class, H5T_INTEGER, "H5Tget_class");
     order=H5Tget_order(field);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_CHAR), "H5Tget_order");
+    VERIFY(order, H5Tget_order(H5T_NATIVE_SCHAR), "H5Tget_order");
     size=H5Tget_size(field);
-    VERIFY(size, H5Tget_size(H5T_NATIVE_CHAR), "H5Tget_size");
+    VERIFY(size, H5Tget_size(H5T_NATIVE_SCHAR), "H5Tget_size");
     H5Tclose(field);
 
     /* Read attribute information */

@@ -324,7 +324,7 @@ test_h5s_compound_scalar_write(void)
     CHECK(tid1, FAIL, "H5Tcreate");
     space4_field1_off=HOFFSET(struct space4_struct, c1);
     ret = H5Tinsert(tid1, SPACE4_FIELDNAME1, space4_field1_off,
-		    H5T_NATIVE_CHAR);
+		    H5T_NATIVE_SCHAR);
     CHECK(ret, FAIL, "H5Tinsert");
     space4_field2_off=HOFFSET(struct space4_struct, u);
     ret = H5Tinsert(tid1, SPACE4_FIELDNAME2, space4_field2_off,
@@ -336,7 +336,7 @@ test_h5s_compound_scalar_write(void)
     CHECK(ret, FAIL, "H5Tinsert");
     space4_field4_off=HOFFSET(struct space4_struct, c2);
     ret = H5Tinsert(tid1, SPACE4_FIELDNAME4, space4_field4_off,
-		    H5T_NATIVE_CHAR);
+		    H5T_NATIVE_SCHAR);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create scalar dataspace */

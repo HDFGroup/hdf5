@@ -42,7 +42,8 @@ main(void)
     time_t	now;
     struct tm	*tm;
     H5G_stat_t	sb1, sb2;
-    char	buf1[32], buf2[32], filename[1024];
+    signed char	buf1[32], buf2[32];
+    char	filename[1024];
 
     h5_reset();
     fapl = h5_fileaccess();
@@ -54,7 +55,7 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	return 1;
     if ((space=H5Screate_simple(1, size, NULL))<0) return 1;
-    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_CHAR, space, H5P_DEFAULT))<0)
+    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT))<0)
 	return 1;
     now = time(NULL);
     if (H5Dclose(dset)<0) return 1;

@@ -165,8 +165,8 @@ display_string(const char *s)
 static hbool_t
 display_native_type(hid_t type, int __unused__ indent)
 {
-    if (H5Tequal(type, H5T_NATIVE_CHAR)) {
-	printf("native char");
+    if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+	printf("native signed char");
     } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
 	printf("native unsigned char");
     } else if (H5Tequal(type, H5T_NATIVE_INT)) {

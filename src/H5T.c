@@ -70,7 +70,7 @@ hid_t H5T_C_S1_g = FAIL;
 
 hid_t H5T_FORTRAN_S1_g = FAIL;
 
-hid_t H5T_NATIVE_CHAR_g = FAIL;
+hid_t H5T_NATIVE_SCHAR_g = FAIL;
 hid_t H5T_NATIVE_UCHAR_g = FAIL;
 hid_t H5T_NATIVE_SHORT_g = FAIL;
 hid_t H5T_NATIVE_USHORT_g = FAIL;
@@ -775,8 +775,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("llong_char", H5T_NATIVE_LLONG, H5T_NATIVE_CHAR,
-			 H5T_conv_llong_char)<0) {
+    if (H5Tregister_hard("llong_schar", H5T_NATIVE_LLONG, H5T_NATIVE_SCHAR,
+			 H5T_conv_llong_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -785,8 +785,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("ullong_char", H5T_NATIVE_ULLONG, H5T_NATIVE_CHAR,
-			 H5T_conv_ullong_char)<0) {
+    if (H5Tregister_hard("ullong_schar", H5T_NATIVE_ULLONG, H5T_NATIVE_SCHAR,
+			 H5T_conv_ullong_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -867,8 +867,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("long_char", H5T_NATIVE_LONG, H5T_NATIVE_CHAR,
-			 H5T_conv_long_char)<0) {
+    if (H5Tregister_hard("long_schar", H5T_NATIVE_LONG, H5T_NATIVE_SCHAR,
+			 H5T_conv_long_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -877,8 +877,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("ulong_char", H5T_NATIVE_ULONG, H5T_NATIVE_CHAR,
-			 H5T_conv_ulong_char)<0) {
+    if (H5Tregister_hard("ulong_schar", H5T_NATIVE_ULONG, H5T_NATIVE_SCHAR,
+			 H5T_conv_ulong_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -959,8 +959,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("short_char", H5T_NATIVE_SHORT, H5T_NATIVE_CHAR,
-			 H5T_conv_short_char)<0) {
+    if (H5Tregister_hard("short_schar", H5T_NATIVE_SHORT, H5T_NATIVE_SCHAR,
+			 H5T_conv_short_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -969,8 +969,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("ushort_char", H5T_NATIVE_USHORT, H5T_NATIVE_CHAR,
-			 H5T_conv_ushort_char)<0) {
+    if (H5Tregister_hard("ushort_schar", H5T_NATIVE_USHORT, H5T_NATIVE_SCHAR,
+			 H5T_conv_ushort_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1051,8 +1051,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("int_char", H5T_NATIVE_INT, H5T_NATIVE_CHAR,
-			 H5T_conv_int_char)<0) {
+    if (H5Tregister_hard("int_schar", H5T_NATIVE_INT, H5T_NATIVE_SCHAR,
+			 H5T_conv_int_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1061,8 +1061,8 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("uint_char", H5T_NATIVE_UINT, H5T_NATIVE_CHAR,
-			 H5T_conv_uint_char)<0) {
+    if (H5Tregister_hard("uint_schar", H5T_NATIVE_UINT, H5T_NATIVE_SCHAR,
+			 H5T_conv_uint_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1073,13 +1073,13 @@ H5T_init_interface(void)
     }
 
     /* From char */
-    if (H5Tregister_hard("char_llong", H5T_NATIVE_CHAR, H5T_NATIVE_LLONG,
-			 H5T_conv_char_llong)<0) {
+    if (H5Tregister_hard("schar_llong", H5T_NATIVE_SCHAR, H5T_NATIVE_LLONG,
+			 H5T_conv_schar_llong)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_ullong", H5T_NATIVE_CHAR, H5T_NATIVE_ULLONG,
-			 H5T_conv_char_ullong)<0) {
+    if (H5Tregister_hard("schar_ullong", H5T_NATIVE_SCHAR, H5T_NATIVE_ULLONG,
+			 H5T_conv_schar_ullong)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1093,13 +1093,13 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_long", H5T_NATIVE_CHAR, H5T_NATIVE_LONG,
-			 H5T_conv_char_long)<0) {
+    if (H5Tregister_hard("schar_long", H5T_NATIVE_SCHAR, H5T_NATIVE_LONG,
+			 H5T_conv_schar_long)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_ulong", H5T_NATIVE_CHAR, H5T_NATIVE_ULONG,
-			 H5T_conv_char_ulong)<0) {
+    if (H5Tregister_hard("schar_ulong", H5T_NATIVE_SCHAR, H5T_NATIVE_ULONG,
+			 H5T_conv_schar_ulong)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1113,13 +1113,13 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_short", H5T_NATIVE_CHAR, H5T_NATIVE_SHORT,
-			 H5T_conv_char_short)<0) {
+    if (H5Tregister_hard("schar_short", H5T_NATIVE_SCHAR, H5T_NATIVE_SHORT,
+			 H5T_conv_schar_short)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_ushort", H5T_NATIVE_CHAR, H5T_NATIVE_USHORT,
-			 H5T_conv_char_ushort)<0) {
+    if (H5Tregister_hard("schar_ushort", H5T_NATIVE_SCHAR, H5T_NATIVE_USHORT,
+			 H5T_conv_schar_ushort)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1133,13 +1133,13 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_int", H5T_NATIVE_CHAR, H5T_NATIVE_INT,
-			 H5T_conv_char_int)<0) {
+    if (H5Tregister_hard("schar_int", H5T_NATIVE_SCHAR, H5T_NATIVE_INT,
+			 H5T_conv_schar_int)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_uint", H5T_NATIVE_CHAR, H5T_NATIVE_UINT,
-			 H5T_conv_char_uint)<0) {
+    if (H5Tregister_hard("schar_uint", H5T_NATIVE_SCHAR, H5T_NATIVE_UINT,
+			 H5T_conv_schar_uint)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1153,13 +1153,13 @@ H5T_init_interface(void)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("char_uchar", H5T_NATIVE_CHAR, H5T_NATIVE_UCHAR,
-			 H5T_conv_char_uchar)<0) {
+    if (H5Tregister_hard("schar_uchar", H5T_NATIVE_SCHAR, H5T_NATIVE_UCHAR,
+			 H5T_conv_schar_uchar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_hard("uchar_char", H5T_NATIVE_UCHAR, H5T_NATIVE_CHAR,
-			 H5T_conv_uchar_char)<0) {
+    if (H5Tregister_hard("uchar_schar", H5T_NATIVE_UCHAR, H5T_NATIVE_SCHAR,
+			 H5T_conv_uchar_schar)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }

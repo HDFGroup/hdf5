@@ -189,15 +189,16 @@ generates_sigfpe(void)
     
     while (pid!=waitpid(pid, &status, 0)) /*void*/;
     if (WIFEXITED(status) && 0==WEXITSTATUS(status)) {
-	printf("Overflow cases will be tested.\n");
+	puts("Floating-point overflow cases will be tested.");
 	skip_overflow_tests_g = FALSE;
     } else if (WIFSIGNALED(status) && SIGFPE==WTERMSIG(status)) {
-	printf("Overflow cases cannot be safely tested.\n");
+	puts("Floating-point overflow cases cannot be safely tested.");
 	skip_overflow_tests_g = TRUE;
     }
 #else
-    printf("Cannot determine if overflows generate a SIGFPE; assuming yes.\n");
-    printf("Overflow cases will not be tested.\n");
+    puts("Cannot determine if floating-point overflows generate a SIGFPE;");
+    puts("assuming yes.");
+    puts("Overflow cases will not be tested.");
     skip_overflow_tests_g = TRUE;
 #endif
 }
@@ -301,7 +302,7 @@ test_copy(void)
 
     /* We should not be able to close a built-in byte */
     H5E_BEGIN_TRY {
-	status = H5Tclose (H5T_NATIVE_CHAR);
+	status = H5Tclose (H5T_NATIVE_SCHAR);
     } H5E_END_TRY;
     if (status>=0) {
 	FAILED();
@@ -1133,10 +1134,11 @@ test_conv_int (void)
  * Purpose:	Test conversion of random integer values from SRC to DST.
  *		These types should be any combination of:
  *
- * 			H5T_NATIVE_CHAR		H5T_NATIVE_UCHAR
+ * 			H5T_NATIVE_SCHAR	H5T_NATIVE_UCHAR
  *			H5T_NATIVE_SHORT	H5T_NATIVE_USHORT
  *			H5T_NATIVE_INT		H5T_NATIVE_UINT
  *			H5T_NATIVE_LONG		H5T_NATIVE_ULONG
+ *			H5T_NATIVE_LLONG	H5T_NATIVE_ULLONG
  *
  * Return:	Success:	0
  *
@@ -1184,7 +1186,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     
     
     /* What are the names of the source and destination types */
-    if (H5Tequal(src, H5T_NATIVE_CHAR)) {
+    if (H5Tequal(src, H5T_NATIVE_SCHAR)) {
 	src_type_name = "signed char";
 	src_type = INT_CHAR;
     } else if (H5Tequal(src, H5T_NATIVE_UCHAR)) {
@@ -1219,7 +1221,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	src_type = INT_OTHER;
     }
     
-    if (H5Tequal(dst, H5T_NATIVE_CHAR)) {
+    if (H5Tequal(dst, H5T_NATIVE_SCHAR)) {
 	dst_type_name = "signed char";
 	dst_type = INT_CHAR;
     } else if (H5Tequal(dst, H5T_NATIVE_UCHAR)) {
@@ -2417,21 +2419,21 @@ run_integer_tests(const char *name)
 {
     int		nerrors = 0;
     
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_UCHAR);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_SHORT);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_USHORT);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_INT);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_INT);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_UINT);
 #if SIZEOF_LONG!=SIZEOF_INT
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_LONG);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_ULONG);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_ULONG);
 #endif
 #if SIZEOF_LONG_LONG!=SIZEOF_LONG
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_LLONG);
-    nerrors += test_conv_int_1(name, H5T_NATIVE_CHAR, H5T_NATIVE_ULLONG);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_LLONG);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SCHAR, H5T_NATIVE_ULLONG);
 #endif
     
-    nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_USHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_INT);
@@ -2445,7 +2447,7 @@ run_integer_tests(const char *name)
     nerrors += test_conv_int_1(name, H5T_NATIVE_UCHAR, H5T_NATIVE_ULLONG);
 #endif
     
-    nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_USHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_INT);
@@ -2459,7 +2461,7 @@ run_integer_tests(const char *name)
     nerrors += test_conv_int_1(name, H5T_NATIVE_SHORT, H5T_NATIVE_ULLONG);
 #endif
 
-    nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_INT);
@@ -2473,7 +2475,7 @@ run_integer_tests(const char *name)
     nerrors += test_conv_int_1(name, H5T_NATIVE_USHORT, H5T_NATIVE_ULLONG);
 #endif
 
-    nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_USHORT);
@@ -2487,7 +2489,7 @@ run_integer_tests(const char *name)
     nerrors += test_conv_int_1(name, H5T_NATIVE_INT, H5T_NATIVE_ULLONG);
 #endif
 
-    nerrors += test_conv_int_1(name, H5T_NATIVE_UINT, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_UINT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UINT, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UINT, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_UINT, H5T_NATIVE_USHORT);
@@ -2502,7 +2504,7 @@ run_integer_tests(const char *name)
 #endif
 
 #if SIZEOF_LONG!=SIZEOF_INT
-    nerrors += test_conv_int_1(name, H5T_NATIVE_LONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_LONG, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LONG, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LONG, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LONG, H5T_NATIVE_USHORT);
@@ -2516,7 +2518,7 @@ run_integer_tests(const char *name)
 #endif
     
 #if SIZEOF_LONG!=SIZEOF_INT
-    nerrors += test_conv_int_1(name, H5T_NATIVE_ULONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_ULONG, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULONG, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULONG, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULONG, H5T_NATIVE_USHORT);
@@ -2530,7 +2532,7 @@ run_integer_tests(const char *name)
 #endif
 
 #if SIZEOF_LONG_LONG!=SIZEOF_LONG
-    nerrors += test_conv_int_1(name, H5T_NATIVE_LLONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_LLONG, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LLONG, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LLONG, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_LLONG, H5T_NATIVE_USHORT);
@@ -2544,7 +2546,7 @@ run_integer_tests(const char *name)
 #endif
     
 #if SIZEOF_LONG_LONG!=SIZEOF_LONG
-    nerrors += test_conv_int_1(name, H5T_NATIVE_ULLONG, H5T_NATIVE_CHAR);
+    nerrors += test_conv_int_1(name, H5T_NATIVE_ULLONG, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULLONG, H5T_NATIVE_UCHAR);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULLONG, H5T_NATIVE_SHORT);
     nerrors += test_conv_int_1(name, H5T_NATIVE_ULLONG, H5T_NATIVE_USHORT);

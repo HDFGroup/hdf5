@@ -1189,7 +1189,7 @@ int32 h5type_to_h4type(hid_t h5_datatype)
  		h4_datatype = DFNT_FLOAT32;
 	} else if (H5Tequal(h5_datatype,H5T_IEEE_F64LE)) {
  		h4_datatype = DFNT_FLOAT64;
-	} else if (H5Tequal(h5_datatype,H5T_NATIVE_CHAR)) {
+	} else if (H5Tequal(h5_datatype,H5T_NATIVE_SCHAR)) {
  		h4_datatype = DFNT_INT8;
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_UCHAR)) {
  		h4_datatype = DFNT_UINT8;
@@ -1244,7 +1244,7 @@ hid_t h4type_to_memtype(int32 h4_datatype)
 	case DFNT_INT8:
 	case DFNT_NINT8:
 	case DFNT_LINT8:
-		mem_datatype = H5T_NATIVE_CHAR; break;
+		mem_datatype = H5T_NATIVE_SCHAR; break;
 	case DFNT_UINT8:
 	case DFNT_NUINT8:
 	case DFNT_LUINT8:

@@ -113,7 +113,7 @@ create_dataset (void)
 {
     hid_t	file, space, dcpl, dset;
     hsize_t	size[2];
-    char	*buf;
+    signed char	*buf;
 
     /* The file */
     file = H5Fcreate (FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_g);
@@ -130,12 +130,12 @@ create_dataset (void)
     H5Pset_filter (dcpl, FILTER_COUNTER, 0, 0, NULL);
         
     /* The dataset */
-    dset = H5Dcreate (file, "dset", H5T_NATIVE_CHAR, space, dcpl);
+    dset = H5Dcreate (file, "dset", H5T_NATIVE_SCHAR, space, dcpl);
     assert (dset>=0);
 
     /* The data */
     buf = calloc (1, SQUARE (DS_SIZE*CH_SIZE));
-    H5Dwrite (dset, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    H5Dwrite (dset, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     free (buf);
 
     /* Close */
@@ -165,7 +165,7 @@ static double
 test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
 {
     hid_t	file, dset, mem_space, file_space;
-    char	*buf = calloc (1, SQUARE(io_size));
+    signed char	*buf = calloc (1, SQUARE(io_size));
     hsize_t	i, j, hs_size[2];
     hssize_t	hs_offset[2];
     int		mdc_nelmts, rdcc_nelmts;
@@ -200,10 +200,10 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
 				 NULL, hs_size, NULL);
 
 	    if (READ==op) {
-		H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
+		H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
 			 H5P_DEFAULT, buf);
 	    } else {
-		H5Dwrite (dset, H5T_NATIVE_CHAR, mem_space, file_space,
+		H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
 			  H5P_DEFAULT, buf);
 	    }
 	    H5Sclose (mem_space);
@@ -243,7 +243,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
     hssize_t	hs_offset[2];
-    char	*buf = calloc (1, SQUARE (io_size));
+    signed char	*buf = calloc (1, SQUARE (io_size));
     int		mdc_nelmts, rdcc_nelmts;
     double	w0;
 
@@ -268,10 +268,10 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
 	H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL,
 			     hs_size, NULL);
 	if (READ==op) {
-	    H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
+	    H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
 		     H5P_DEFAULT, buf);
 	} else {
-	    H5Dwrite (dset, H5T_NATIVE_CHAR, mem_space, file_space,
+	    H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
 		      H5P_DEFAULT, buf);
 	}
 	H5Sclose (mem_space);

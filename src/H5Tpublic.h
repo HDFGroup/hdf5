@@ -329,7 +329,8 @@ extern hid_t H5T_FORTRAN_S1_g;
  * to C's `long_long' and LDOUBLE is `long double' (these types might be the
  * same as `LONG' and `DOUBLE' respectively.
  */
-#define H5T_NATIVE_CHAR         (H5open(), H5T_NATIVE_CHAR_g)
+#define H5T_NATIVE_CHAR		(CHAR_MIN?H5T_NATIVE_SCHAR:H5T_NATIVE_UCHAR)
+#define H5T_NATIVE_SCHAR        (H5open(), H5T_NATIVE_SCHAR_g)
 #define H5T_NATIVE_UCHAR        (H5open(), H5T_NATIVE_UCHAR_g)
 #define H5T_NATIVE_SHORT        (H5open(), H5T_NATIVE_SHORT_g)
 #define H5T_NATIVE_USHORT       (H5open(), H5T_NATIVE_USHORT_g)
@@ -351,7 +352,7 @@ extern hid_t H5T_FORTRAN_S1_g;
 #define H5T_NATIVE_HSSIZE	(H5open(), H5T_NATIVE_HSSIZE_g)
 #define H5T_NATIVE_HERR		(H5open(), H5T_NATIVE_HERR_g)
 #define H5T_NATIVE_HBOOL	(H5open(), H5T_NATIVE_HBOOL_g)
-extern hid_t H5T_NATIVE_CHAR_g;
+extern hid_t H5T_NATIVE_SCHAR_g;
 extern hid_t H5T_NATIVE_UCHAR_g;
 extern hid_t H5T_NATIVE_SHORT_g;
 extern hid_t H5T_NATIVE_USHORT_g;

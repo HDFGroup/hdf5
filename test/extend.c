@@ -50,9 +50,9 @@ main (void)
     hssize_t			offset[2];
     char			filename[1024];
 
-    TESTING("dataset extend");
     h5_reset();
     fapl = h5_fileaccess();
+    TESTING("dataset extend");
 
     /* Initialize buffer and space */
     for (i=0; i<NX; i++) {

@@ -138,8 +138,8 @@ H5G_stat_t statbuf;
             printf( "H5T_STD_U64BE");
         else if (H5Tequal(type, H5T_STD_U64LE))
             printf( "H5T_STD_U64LE");
-        else if (H5Tequal(type, H5T_NATIVE_CHAR)) 
-            printf( "H5T_NATIVE_CHAR");
+        else if (H5Tequal(type, H5T_NATIVE_SCHAR)) 
+            printf( "H5T_NATIVE_SCHAR");
         else if (H5Tequal(type, H5T_NATIVE_UCHAR))
             printf( "H5T_NATIVE_UCHAR");
         else if (H5Tequal(type, H5T_NATIVE_SHORT))

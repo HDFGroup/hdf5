@@ -126,7 +126,7 @@ h5dump_sprint(char *s/*out*/, const h5dump_t *info, hid_t type, void *vp)
 	sprintf(temp, "%g", *((double*)vp));
     } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
 	sprintf(temp, "%g", *((float*)vp));
-    } else if (H5Tequal(type, H5T_NATIVE_CHAR) ||
+    } else if (H5Tequal(type, H5T_NATIVE_SCHAR) ||
 	       H5Tequal(type, H5T_NATIVE_UCHAR)) {
 	switch (*((char*)vp)) {
 	case '"':
@@ -436,7 +436,7 @@ h5dump_fixtype(hid_t f_type)
 	 * memory type available.
 	 */
 	if (size<=sizeof(char)) {
-	    m_type = H5Tcopy(H5T_NATIVE_CHAR);
+	    m_type = H5Tcopy(H5T_NATIVE_SCHAR);
 	} else if (size<=sizeof(short)) {
 	    m_type = H5Tcopy(H5T_NATIVE_SHORT);
 	} else if (size<=sizeof(int)) {

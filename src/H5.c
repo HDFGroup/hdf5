@@ -1532,8 +1532,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			}
 			break;
 		    case H5I_DATATYPE:
-			if (obj==H5T_NATIVE_CHAR_g) {
-			    fprintf(out, "H5T_NATIVE_CHAR");
+			if (obj==H5T_NATIVE_SCHAR_g) {
+			    fprintf(out, "H5T_NATIVE_SCHAR");
 			} else if (obj==H5T_NATIVE_UCHAR_g) {
 			    fprintf(out, "H5T_NATIVE_UCHAR");
 			} else if (obj==H5T_NATIVE_SHORT_g) {
