@@ -21,10 +21,12 @@
 /*
  * Example of using the parallel HDF5 library to access datasets.
  *
- * This program contains two major parts.  Part 1 tests fixed dimension
+ * This program contains three major parts.  Part 1 tests fixed dimension
  * datasets, for both independent and collective transfer modes.
  * Part 2 tests extendible datasets, for independent transfer mode
- * only.  Collective mode for extendible datasets are not supported yet.
+ * only.
+ * Part 3 tests extendible datasets, for collective transfer mode
+ * only.
  */
 
 #include "testphdf5.h"
