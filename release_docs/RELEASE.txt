@@ -275,8 +275,8 @@ Platforms Tested
                                   Intel(R) Fortran Compiler Version 7.1
 
     IA-64 Linux 2.4.21.SuSE_128.bef1 ia64
-                                  Intel(R) C++ Version 7.1
-                                  Intel(R) Fortran Compiler Version 7.1
+                                  Intel(R) C++ Version 8.0
+                                  Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..intel
 
     Windows 2000 (NT5.0)          MSVC++ 6.0
@@ -337,7 +337,9 @@ Linux 2.4 SGI Altix ia64    y   n        y      n        y    y             y
 Xeon Linux 2.4.20-31.9      y   n	 y	n	 y    y		    y
     smp_perfctr_lustre 
     C Intel (3)
-
+IA-64 Linux 2.4.21.         y   n        y      n        y    y             y
+    SuSE_128.bef1 C
+    Intel (3)
 
 Platform                    static-  Thread-  SZIP  GASS  STREAM-  High-  H4/H5 
                             exec     safe                 VFD      level  tools
@@ -376,6 +378,9 @@ Linux 2.4 SGI Altix ia64    y        n        y     n     y        y      y
 Xeon Linux 2.4.20-31.9      n        n	      y	    n     y	   n	  n
     smp_perfctr_lustre 
     C Intel (3)
+IA-64 Linux 2.4.21.         n        n        y     n     y        n      n 
+    SuSE_128.bef1 C
+    Intel (3)
 
 
 
