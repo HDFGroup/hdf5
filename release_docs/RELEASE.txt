@@ -57,7 +57,10 @@ New Features
     --------
         - Modified registration of SZIP to dynamically detect the presence
             or absence of the encoder.  Changed configure and Makefiles,
-            and tests to dynamically detect encoder.  2004/02/11
+            and tests to dynamically detect encoder. BEM - 2004/11/02
+	- Added function H5Pget_data_transform, together with the previously
+	    added H5Pset_data_transform, to support the data transform
+	    feature. AKC - 2004/10/26
         - Compound datatype has been enhanced with a new feature of size 
             adjustment.  The size can be increased and decreased(without
             cutting the last member) as long as it doesn't go down to zero.  
