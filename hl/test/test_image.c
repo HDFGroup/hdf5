@@ -11,8 +11,6 @@
  *                                                                          *
  ****************************************************************************/
 
-
-
 #include "H5IM.h"
 #include "pal_rgb.h"
 #include <stdlib.h>
@@ -40,7 +38,7 @@
 
 /* struct to store RGB values read from a .pal file */
 typedef struct rgb_t {
-	   unsigned char r;
+    unsigned char r;
     unsigned char g;
     unsigned char b;
 } rgb_t;
@@ -52,10 +50,8 @@ static int test_generate(void);
 static int read_data(const char* file_name, hsize_t *width, hsize_t *height );
 static int read_palette(const char* file_name, rgb_t *palette, int palette_size);
 
-
 /* globals */
 unsigned char *image_data = NULL;            
-
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -317,7 +313,7 @@ static int test_data(void)
  hsize_t        width;
  hsize_t        height;
  unsigned char  pal[256*3]; /* buffer to hold an HDF5 palette */
-	rgb_t          rgb[256];   /* buffer to hold a .pal file palette */
+ rgb_t          rgb[256];   /* buffer to hold a .pal file palette */
  int            i, n;
 
  /* create a file using default properties */
@@ -369,23 +365,23 @@ static int test_data(void)
  *-------------------------------------------------------------------------
  */
 
-	/* read a PAL file */
+ /* read a PAL file */
  if (read_palette(PAL2_FILE, rgb, sizeof(rgb))<0)
   goto out;
 
-	/* transfer to the HDF5 buffer */
-	for ( i=0, n=0; i<256*3; i+=3, n++)
-	{
-		pal[i]  =rgb[n].r;
-		pal[i+1]=rgb[n].g;
-		pal[i+2]=rgb[n].b;
-	}
+ /* transfer to the HDF5 buffer */
+ for ( i=0, n=0; i<256*3; i+=3, n++)
+ {
+  pal[i]  =rgb[n].r;
+  pal[i+1]=rgb[n].g;
+  pal[i+2]=rgb[n].b;
+ }
 
-	/* make a palette */
+ /* make a palette */
  if (H5IMmake_palette(fid,PAL2_NAME,pal_dims,pal)<0)
   goto out;
 
-	/* attach the palette to the image dataset */
+ /* attach the palette to the image dataset */
  if (H5IMlink_palette(fid,IMAGE1_NAME,PAL2_NAME)<0)
   goto out;
 
@@ -395,24 +391,24 @@ static int test_data(void)
  *-------------------------------------------------------------------------
  */
 
-	
-	/* read a PAL file */
+ 
+ /* read a PAL file */
  if (read_palette(PAL3_FILE, rgb, sizeof(rgb))<0)
   goto out;
 
-	/* transfer to the HDF5 buffer */
-	for ( i=0, n=0; i<256*3; i+=3, n++)
-	{
-		pal[i]  =rgb[n].r;
-		pal[i+1]=rgb[n].g;
-		pal[i+2]=rgb[n].b;
-	}
+ /* transfer to the HDF5 buffer */
+ for ( i=0, n=0; i<256*3; i+=3, n++)
+ {
+  pal[i]  =rgb[n].r;
+  pal[i+1]=rgb[n].g;
+  pal[i+2]=rgb[n].b;
+ }
 
-	/* make a palette */
+ /* make a palette */
  if (H5IMmake_palette(fid,PAL3_NAME,pal_dims,pal)<0)
   goto out;
 
-	/* attach the palette to the image dataset */
+ /* attach the palette to the image dataset */
  if (H5IMlink_palette(fid,IMAGE1_NAME,PAL3_NAME)<0)
   goto out;
 
@@ -651,7 +647,7 @@ static int test_generate(void)
  if ((H5IMmake_palette(fid,PAL1_NAME,pal_dims,pal_rgb))<0)
   goto out;
  
- /* Attach the palette to the image datasets */
+ /* attach the palette to the image datasets */
  if ((H5IMlink_palette(fid,"All data",PAL1_NAME))<0)
   goto out;
  if ((H5IMlink_palette(fid,"Land data",PAL1_NAME))<0)
@@ -770,13 +766,10 @@ static int read_data( const char* fname, /*IN*/
  * Read an ASCII palette file .PAL into an array
  * the files have a header of the type
  *
- * Parameters:          filename - name of file to read.
- *                      palette - array of RwPalleteEntry to store the
- *                                read palette.
- *                      palette_size - number of elements in 'palette' array
- *
- * Return Value:        Returns number of entries read or 0 on error
- *                      palette contains palette.
+ * Parameters:          
+ *  fname - name of file to read.
+ *  palette - array of rgb_t to store the read palette.
+ *  palette_size - number of elements in 'palette' array
  *
  *-------------------------------------------------------------------------
  */
@@ -787,15 +780,17 @@ static int read_data( const char* fname, /*IN*/
 #define STRING_CWPAL  "CWPAL"
 #define VERSION_CWPAL "100"
 
-static int read_palette(const char* fname, rgb_t *palette, int palette_size)
+static int read_palette(const char* fname, 
+                        rgb_t *palette, 
+                        int palette_size)
 {
-	FILE          *file;
+ FILE          *file;
  char          buffer[80];
  int           i;
  unsigned int  red;
  unsigned int  green;
  unsigned int  blue;
-	int 		        numEntries;
+ int           nentries;
  char          *srcdir = getenv("srcdir"); /* the source directory */
  char          data_file[512];             /* buffer to hold name of existing data file */
 
@@ -810,98 +805,98 @@ static int read_palette(const char* fname, rgb_t *palette, int palette_size)
   strcat(data_file, "/");
  }
  strcat(data_file,fname);
-	
+ 
  /* ensure the given palette is valid */
  if (!palette)
-		return -1;
-	
+  return -1;
+ 
  /* open the input file */
-	if (!(file = fopen(data_file, "r")))
+ if (!(file = fopen(data_file, "r")))
  {
   printf( "Could not open file %s. Try set $srcdir \n", data_file );
   return -1;
  }
-	
+ 
  /* read the file ident string */
-	if (fgets(buffer, sizeof(buffer), file) == NULL)
-	{
-		fclose(file);
-		return -1;
-	}
-	
- /* ensure it matches the palette file ident string */
- if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 && 
-		    strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
-	{
-		fclose(file);
-  return -1;
- }
-		
-	/* read the version string */
-	if (fgets(buffer, sizeof(buffer), file) == NULL)
- {
-		fclose(file);
-  return -1;
- }
-	
- /* ensure it matches the palette file version string */ 
-	if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 && 
-	    	strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
- {
-		fclose(file);
-  return -1;
- }
-
-	/* read the number of colors */
  if (fgets(buffer, sizeof(buffer), file) == NULL)
  {
-		fclose(file);
+  fclose(file);
   return -1;
  }
-	
-	
+ 
+ /* ensure it matches the palette file ident string */
+ if ( strncmp(buffer, STRING_JASC, sizeof(STRING_JASC) - 1) != 0 && 
+      strncmp(buffer, STRING_CWPAL, sizeof(STRING_CWPAL) - 1) != 0 )
+ {
+  fclose(file);
+  return -1;
+ }
+  
+ /* read the version string */
+ if (fgets(buffer, sizeof(buffer), file) == NULL)
+ {
+  fclose(file);
+  return -1;
+ }
+ 
+ /* ensure it matches the palette file version string */ 
+ if ( strncmp(buffer, VERSION_JASC, sizeof(VERSION_JASC) - 1) != 0 && 
+      strncmp(buffer, VERSION_CWPAL, sizeof(VERSION_CWPAL) - 1) != 0 )
+ {
+  fclose(file);
+  return -1;
+ }
+
+ /* read the number of colors */
+ if (fgets(buffer, sizeof(buffer), file) == NULL)
+ {
+  fclose(file);
+  return -1;
+ }
+ 
+ 
  /* extract the number of colors. 
-	   check for missing version or number of colors
-	   in this case it reads the first entry
+    check for missing version or number of colors
+    in this case it reads the first entry
     */
-	if ( strlen( buffer ) > 4 ) 
+ if ( strlen( buffer ) > 4 ) 
  {
-		fclose(file);
+  fclose(file);
   return -1;
  }
-	
- if (sscanf(buffer, "%d", &numEntries) != 1)
+ 
+ if (sscanf(buffer, "%d", &nentries) != 1)
  {
-		fclose(file);
+  fclose(file);
   return -1;
  }
-	
-	/* ensure there are a sensible number of colors in the palette */ 
- if ((numEntries < 0) || (numEntries > 256) || (numEntries > palette_size))
+ 
+ /* ensure there are a sensible number of colors in the palette */ 
+ if ((nentries < 0) || (nentries > 256) || (nentries > palette_size))
  {
-		fclose(file);
-  return(0);
+  fclose(file);
+  return(-1);
  }
-		
-	/* read the palette entries */
-	for (i = 0; i < numEntries; i++)
-	{
-		/* Extract the red, green and blue color components.  */
-		if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3)
-		{
-			fclose(file);
-			return -1;
-		}
-		/* sore this palette entry */
-		palette[i].r = (unsigned char)red;
-		palette[i].g = (unsigned char)green;
-		palette[i].b = (unsigned char)blue;
-	}
+  
+ /* read the palette entries */
+ for (i = 0; i < nentries; i++)
+ {
+  /* extract the red, green and blue color components.  */
+  if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3)
+  {
+   fclose(file);
+   return -1;
+  }
+  /* store this palette entry */
+  palette[i].r = (unsigned char)red;
+  palette[i].g = (unsigned char)green;
+  palette[i].b = (unsigned char)blue;
+ }
 
  /* close file */
-	fclose(file);
-	
-	return numEntries;
+ fclose(file);
+ 
+ return nentries;
 }
 
 
