@@ -23,6 +23,7 @@ const char *FILENAME[] = {
 #define DSET_COMPACT_IO_NAME    "compact_io"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_COMPRESS_NAME	"compressed"
+#define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 #define DSET_BOGUS_NAME		"bogus"
 
 #define H5Z_BOGUS		305
@@ -799,6 +800,131 @@ test_compression(hid_t file)
     return -1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_onebyte_shuffle
+ *
+ * Purpose:	Tests the 8-bit array with shuffling algorithm.
+                The shuffled array  should be the same result as 
+		that before the shuffling.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Kent Yang
+ *              Wednesday, , 2002 Nov. 13th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_onebyte_shuffle(hid_t file)
+{
+    hid_t		dataset, space,dc;
+    const hsize_t	size[2] = {10, 20};
+    const hsize_t       chunk_size[2] = {10, 20};
+    unsigned char       orig_data[10][20];
+    unsigned char       new_data[10][20];
+    unsigned            level;
+#ifndef H5_HAVE_FILTER_SHUFFLE
+    const char		*not_supported;
+#endif
+    
+    hsize_t		i, j;
+
+#ifndef H5_HAVE_FILTER_SHUFFLE
+    not_supported = "    Data shuffling is not supported.\n"
+		    "    The  shuffling flag was not found when hdf5 was configured.";
+#endif
+    
+    TESTING("8-bit shuffling (setup)");
+    
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use shuffling algorithm with 8-bit  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    level = sizeof(unsigned char);
+    if (level != 1) goto error;
+    if (H5Pset_shuffle (dc, level)<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, DSET_ONEBYTE_SHUF_NAME, H5T_NATIVE_UCHAR, 
+			     space,dc))<0) goto error;
+
+    for (i= 0;i< 10; i++)
+      for (j = 0; j < 20; j++)
+	orig_data[i][j] = rand();
+
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test shuffling by setting up a chunked dataset and writing
+     * to it.
+     *---------------------------------------------------------------------- 
+     */
+    TESTING("8-bit shuffling (write)");
+
+    if (H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+		 orig_data)<0)
+	goto error;
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *---------------------------------------------------------------------- 
+     */
+    TESTING("8-bit shuffling (read)");
+
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+		new_data)<0)
+	goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<size[0]; i++) {
+	for (j=0; j<size[1]; j++) {
+	    if (new_data[i][j] != orig_data[i][j]) {
+		H5_FAILED();
+		printf("    Read different values than written.\n");
+		printf("    At index %lu,%lu\n",
+		       (unsigned long)i, (unsigned long)j);
+		goto error;
+	    }
+	}
+    }
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *---------------------------------------------------------------------- 
+     */
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+    return 0;
+
+  error:
+    return -1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_multiopen
@@ -1019,6 +1145,7 @@ main(void)
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
     nerrors += test_compression(file)<0	?1:0;
+    nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
 
