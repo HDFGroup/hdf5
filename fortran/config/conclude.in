@@ -26,8 +26,8 @@ check test _test: tests
 	      echo "============================";			      \
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
-	      PATH=".:$$PATH" srcdir=$(srcdir)				      \
-		 $(RUNTEST) $$test $(TEST_FLAGS) ||			      \
+	      srcdir="$(srcdir)"					      \
+		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
 		 exit 1;						      \
 	      echo "";							      \
 	   fi;								      \
@@ -38,7 +38,7 @@ check test _test: tests
 	      echo "Testing $$test $(TEST_FLAGS)";			      \
 	      echo "============================";			      \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	      srcdir=$(srcdir)						      \
+	      srcdir="$(srcdir)"					      \
 		 /bin/sh $$test $(TEST_FLAGS) ||		              \
 		 exit 1;						      \
 	      echo "";							      \
