@@ -1617,8 +1617,19 @@ H5FD_mpio_flush(H5FD_t *_file)
 #else /* OLD_WAY */
         if (haddr_to_MPIOff(file->eoa, &mpi_off)<0)
             HRETURN_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
+
+        /* Extend the file's size */
         if (MPI_SUCCESS != MPI_File_set_size(file->f, mpi_off))
             HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_File_set_size failed");
+
+	/* Don't let any proc return until all have extended the file.
+         * (Prevents race condition where some processes go ahead and write
+         * more data to the file before all the processes have finished making
+         * it the shorter length, potentially truncating the file and dropping
+         * the new data written)
+         */
+        if (MPI_SUCCESS!= MPI_Barrier(file->comm))
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Barrier failed");
 #endif /* OLD_WAY */
 
         /* Update the 'last' eoa value */
