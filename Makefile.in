@@ -90,9 +90,3 @@ maintainer-clean:
 	done
 	$(RM) config.cache config.log config.status src/H5config.h
 	$(RM) configure src/H5config.h.in
-
-
-# This file does not end with the `CONCLUDE' statement since it has
-# redefined all the standard targets anyway.  However, we do need the
-# `DEPEND' so we can automatically rerun configure if we have GNU make.
-@DEPEND@

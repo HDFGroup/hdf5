@@ -2103,9 +2103,11 @@ esac
  CONCLUDE=config/conclude
 
 if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
-    DEPEND=config/depend
+    DEPEND1=config/depend
+    DEPEND2=/dev/null
 else
-    DEPEND='# Use GNU make/GCC if you want auto dependencies'
+    DEPEND1=src/.distdep
+    DEPEND2=test/.distdep
 fi
 
 if test "X$GMAKE" = "Xyes"; then
@@ -2273,8 +2275,10 @@ s%@RUNTEST@%$RUNTEST%g
 s%@COMMENCE@%%g
 /@CONCLUDE@/r $CONCLUDE
 s%@CONCLUDE@%%g
-/@DEPEND@/r $DEPEND
-s%@DEPEND@%%g
+/@DEPEND1@/r $DEPEND1
+s%@DEPEND1@%%g
+/@DEPEND2@/r $DEPEND2
+s%@DEPEND2@%%g
 s%@SETX@%$SETX%g
 s%@ROOT@%$ROOT%g
 

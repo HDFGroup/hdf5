@@ -207,9 +207,11 @@ AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
 AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
 
 if test "X$GCC" = "Xyes" && test "X$GMAKE" = "Xyes"; then
-   AC_SUBST_FILE(DEPEND) DEPEND=config/depend
+   AC_SUBST_FILE(DEPEND1) DEPEND1=config/depend
+   AC_SUBST_FILE(DEPEND2) DEPEND2=/dev/null
 else
-   AC_SUBST(DEPEND) DEPEND='# Use GNU make/GCC if you want auto dependencies'
+   AC_SUBST_FILE(DEPEND1) DEPEND1=src/.distdep
+   AC_SUBST_FILE(DEPEND2) DEPEND2=test/.distdep
 fi
 
 dnl We don't need to say when we're entering directories if we're using

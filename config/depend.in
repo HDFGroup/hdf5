@@ -1,8 +1,4 @@
-#------------------------------------------------------------- -*- makefile -*-
-# The following section of this makefile comes from the
-# `./config/targets' file which was generated with config.status
-# from `./config/targets.in'.
-#------------------------------------------------------------------------------
+#                                                              -*- makefile -*-
 
 # We keep a list of dependencies in `.depend' for each of the source
 # files on which it depends.  When one of the source files is modified
@@ -18,8 +14,12 @@
 # have dependency information rebuilt, and the Makefile is not
 # modified.
 #
-.PRECIOUS: .depend
-dep depend: .depend
+.PRECIOUS: .depend .distdep
+dep depend: .distdep
+
+.distdep: .depend
+	touch .distdep
+	-perl -p $(ROOT)/bin/distdep .depend >.distdep
 
 .depend: $(LIB_SRC) $(PROG_SRC)
 	@touch .depend
@@ -30,7 +30,8 @@ dep depend: .depend
 	      sed "/$$obj/,/[^\\]$$/d" <$@ >$@- && mv $@- $@;		      \
 	      $(CC) -M -MG $(CPPFLAGS) $$dep >>$@;			      \
 	   fi;								      \
-	done
+	done;
+	-perl -p $(ROOT)/bin/distdep .depend >.distdep
 
 -include .depend
 
