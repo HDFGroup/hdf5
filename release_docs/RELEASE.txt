@@ -203,6 +203,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed a racing condition in MPIPOSIX virtual file drive close
+	  function.  Now all processes must completed the close before any
+	  of them is returned.  This prevents some "faster" processes start
+	  accessing the file for another purpose (e.g., open with truncate)
+	  while other "slower" processes have not closed the same file with
+	  the previous purpose.  AKC - 2005/03/01
         - H5Tget_member_value calls for enum datatype didn't return correct 
             value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
             2005/02/08
