@@ -157,7 +157,7 @@ FORTRAN Datatype API -- h5t
           SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
-            INTEGER, INTENT(OUT) :: size ! Datatype size
+            INTEGER(SIZE_T), INTENT(OUT) :: size ! Datatype size
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                                  ! 0 on success and -1 on failure
           END SUBROUTINE h5tget_size_f
@@ -229,7 +229,7 @@ FORTRAN Datatype API -- h5t
           SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
-            INTEGER, INTENT(IN) :: size ! Datatype size
+            INTEGER(SIZE_T), INTENT(IN) :: size ! Datatype size
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                                  ! 0 on success and -1 on failure
           END SUBROUTINE h5tset_size_f
@@ -1225,7 +1225,7 @@ FORTRAN Datatype API -- h5t
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 </address>
 
-Last modified:  19 February 2001
+Last modified:  18 April 2002
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
