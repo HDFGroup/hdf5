@@ -44,11 +44,13 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     int ret_value = -1;
     hid_t c_type_id;
     if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-#if defined(_UNICOS)
-    if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
-#else
-    if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
-#endif
+    /* Accomodate Crays with this check */
+    if(sizeof(real_f)==sizeof(double)) {
+        if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+    } /* end if */
+    else {
+        if ((types[1] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+    } /* end else */
     if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
 /*
     if ((types[3] = H5Tcopy(H5T_NATIVE_UINT8)) < 0) return ret_value;
