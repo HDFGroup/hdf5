@@ -1,0 +1,136 @@
+<html>
+<head><title>
+HDF5/H5I Draft API Specification
+</title></head>
+
+<body>
+
+<hr>
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+H5I&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+<a href="RM_H5R.html">H5R</a>&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
+<a href="Glossary.html">Glossary</a>
+-->
+</center>
+<hr>
+
+<center>
+<h1>H5I: Identifier Interface</h1>
+</center>
+
+<h2>Identifier API Functions</h2>
+
+This function provides a tool for working with object identifiers.
+<p>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Identify-GetType">H5Iget_type</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    &nbsp;
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    &nbsp;
+</ul>
+</td></tr>
+</table>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetType">H5Iget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5I_type_t</em> <code>H5Iget_type</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the type of an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_type</code> retrieves the type of the object
+        identified by <code>obj_id</code>.
+        <p>
+        Valid types returned by the function are 
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_FILE</code>
+           </td><td>File</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_GROUP</code>
+           </td><td>Group</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATATYPE</code>
+           </td><td>Datatype</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASPACE</code>
+           </td><td>Dataspace</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASET</code>
+           </td><td>Dataset</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_ATTR</code>
+           </td><td>Attribute</td></tr>
+        </table>
+        If no valid type can be determined or the identifier 
+        submitted is invalid, the function returns
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_BADID</code>
+           </td><td>Invalid identifier</td></tr>
+        </table>
+        <p>
+        This function is of particular value in determining the 
+        type of object closing function (<code>H5Dclose</code>, 
+        <code>H5Gclose</code>, etc.) to call after a call to 
+        <code>H5Rdereference</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>obj_id</code>
+            <dd>IN: Object identifier whose type is to be determined.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the object type if successful;
+        otherwise <code>H5I_BADID</code>.
+</dl>
+
+
+<hr>
+
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+H5R&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
+<a href="Glossary.html">Glossary</a>
+-->
+</center>
+<hr>
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+
+<br>
+Last modified:  27 October 1998
+
+</body>
+</html>

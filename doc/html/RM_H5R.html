@@ -1,0 +1,213 @@
+<html>
+<head><title>
+HDF5/H5R Draft API Specification
+</title></head>
+
+<body>
+
+<hr>
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+H5R&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
+<a href="Glossary.html">Glossary</a>
+-->
+</center>
+<hr>
+
+<center>
+<h1>H5R: Reference Interface</h1>
+</center>
+
+<h2>Reference API Functions</h2>
+
+The Reference interface allows the user to create references 
+to specific objects and data regions in an HDF5 file.
+<p>
+
+<table border=0>
+<tr><td valign=top>
+<ul>
+    <li><a href="#Reference-Create">H5Rcreate</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Reference-Dereference">H5Rdereference</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Reference-GetRegion">H5Rget_region</a> (NYI)
+</ul>
+</td></tr>
+<tr><td colspan=5 align=right><font size=-1>
+NYI = Not yet implemented.</font>
+</td></tr>
+</table>
+
+<p>
+<i>Note: The only type of reference implemented in this release 
+is an object reference pointing to a dataset.</i>
+<p>
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-Create">H5Rcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Rcreate</code>(<em>href_t *</em><code>ref</code>,
+        <em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>H5R_type_t</em> <code>ref_type</code>,
+        <em>hid_t</em> <code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a reference.
+<dt><strong>Description:</strong>
+    <dd><code>H5Rcreate</code> creates the reference, <code>ref</code>,
+        of the type specified in <code>ref_type</code>, pointing to 
+        the object <code>name</code> located at <code>loc_id</code>.
+        <p>
+        The parameters <code>loc_id</code> and <code>name</code> are 
+        used to locate the object.
+        <p>
+        The parameter <code>space_id</code> identifies the region 
+        to be pointed to (for dataset region references).  
+        <p>
+        <i>Note: Only object references of type <code>H5T_STD_REF_OBJ</code>
+        pointing to entire datasets are implemented at this time.</i>
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>href_t *</em><code>ref</code>
+            <dd>OUT: Reference created by the function call.
+        <dt><em>hid_t</em> <code>loc_id</code>
+            <dd>IN: Location identifier used to locate the object being 
+                    pointed to.
+        <dt><em>const char *</em><code>name</code>
+            <dd>IN: Name of object at location <code>loc_id</code>.
+        <dt><em>H5R_type_t</em> <code>ref_type</code>
+            <dd>IN: Type of reference.
+        <dt><em>hid_t</em> <code>space_id</code>
+            <dd>IN: Dataspace identifier with selection. 
+                    Used for dataset region references. 
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-Dereference">H5Rdereference</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Rdereference</code>(<em>hid_t</em> <code>dataset</code>,
+        <em>H5R_type_t</em> <code>ref_type</code>,
+        <em>href_t *</em><code>ref</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Opens the HDF5 object referenced.
+<dt><strong>Description:</strong>
+    <dd>Given a reference to some object, <code>H5Rdereference</code>
+        opens that object and returns an identifier.
+        <p>
+        The parameter <code>ref_type</code> specifies the reference type
+        of <code>ref</code>.  See 
+        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
+        <a href="References.html"><i>References (H5R)</i></a> 
+        for a list of valid reference types.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dataset</code>
+            <dd>IN: Dataset containing reference object.
+        <dt><em>H5R_type_t</em> <code>ref_type</code>
+            <dd>IN: The reference type of <code>ref</code>.
+        <dt><em>void *</em><code>ref</code>
+            <dd>IN: Reference to open.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns valid identifier if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a>
+&nbsp;&nbsp;<i>(Not yet implemented.)</i>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Rget_region</code>(<em>hid_t</em> <code>dataset</code>,
+    <em>H5R_type_t</em> <code>ref_type</code>,
+    <em>href_t *</em><code>ref</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves a dataspace with the specified region selected.
+<dt><strong>Description:</strong>
+    <dd>Given a reference to an object <code>ref</code>, 
+        <code>H5Rget_region</code> creates a copy of the dataspace 
+        of the dataset pointed to and defines a selection in the copy 
+        which is the region pointed to.
+        <p>
+        The parameter <code>ref_type</code> specifies the reference type
+        of <code>ref</code>.  See 
+        <a href="References.html#Reference-RefTypes">Reference Types</a> in 
+        <a href="References.html"><i>References (H5R)</i></a> 
+        for a list of valid reference types.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dataset</code>,
+            <dd>IN: Dataset containing reference object.
+        <dt><em>H5R_type_t</em> <code>ref_type</code>,
+            <dd>IN: The reference type of <code>ref</code>.
+        <dt><em>href_t *</em><code>ref</code>
+            <dd>IN: Reference to open.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid identifier if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+
+<center>
+<a href="RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;
+<a href="RM_H5.html">H5</a>&nbsp;&nbsp;
+<a href="RM_H5A.html">H5A</a>&nbsp;&nbsp;
+<a href="RM_H5D.html">H5D</a>&nbsp;&nbsp;
+<a href="RM_H5E.html">H5E</a>&nbsp;&nbsp;
+<a href="RM_H5F.html">H5F</a>&nbsp;&nbsp;
+<a href="RM_H5G.html">H5G</a>&nbsp;&nbsp;
+<a href="RM_H5I.html">H5I</a>&nbsp;&nbsp;
+<a href="RM_H5P.html">H5P</a>&nbsp;&nbsp;
+H5R&nbsp;&nbsp;
+<a href="RM_H5RA.html">H5RA</a>&nbsp;&nbsp;
+<a href="RM_H5S.html">H5S</a>&nbsp;&nbsp;
+<a href="RM_H5T.html">H5T</a>&nbsp;&nbsp;
+<a href="RM_H5Z.html">H5Z</a>&nbsp;&nbsp;
+<a href="Tools.html">Tools</a>&nbsp;&nbsp;
+<!--
+<a href="Glossary.html">Glossary</a>
+-->
+</center>
+<hr>
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
+
+<br>
+Last modified:  27 October 1998
+
+</body>
+</html>
