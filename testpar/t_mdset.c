@@ -156,7 +156,7 @@ void write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     for(n=0; n < NDATASET; n++) {
          sprintf(dname, "dataset%d", n);
-         did = H5Dcreate(gid, dname, H5T_NATIVE_DOUBLE, filespace, 
+         did = H5Dcreate(gid, dname, H5T_NATIVE_INT, filespace, 
                          H5P_DEFAULT);
          VRFY((did > 0), dname);
 
@@ -164,7 +164,7 @@ void write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
              for(j=0; j < SIZE; j++)
                  outme[i][j] = n*1000 + mpi_rank;
 
-         H5Dwrite(did, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, 
+         H5Dwrite(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, 
                   outme);
          H5Dclose(did);
     }
@@ -283,7 +283,7 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
         did = H5Dopen(gid, dname);
         VRFY((did>0), dname);
 
-        H5Dread(did, H5T_NATIVE_DOUBLE, memspace, filespace, H5P_DEFAULT, 
+        H5Dread(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, 
                 indata);
 
         for(i=0; i<SIZE; i++)
