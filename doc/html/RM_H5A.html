@@ -51,9 +51,6 @@ H5A&nbsp;&nbsp;
 These functions create and manipulate attributes 
 and information about attributes.
 
-<p>
-<strong>The C Interfaces:</strong>
-
 <table border=0>
 <tr><td valign=top>
 <ul>
@@ -78,47 +75,6 @@ and information about attributes.
 </ul>
 </td></tr>
 </table>
-
-<p>
-<strong>The FORTRAN90 Interfaces:</strong>
-
-<br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
-
-<table border=0>
-<tr><td valign=top>
-<ul>
-    <li><a href="#Annot-Create">h5acreate_f</a>
-    <li><a href="#Annot-Write">h5awrite_f</a>
-    <li><a href="#Annot-Read">h5aread_f</a>
-    <li><a href="#Annot-Close">h5aclose_f</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Annot-GetName">h5aget_name_f</a>
-    <li><a href="#Annot-OpenName">h5aopen_name_f</a>
-    <li><a href="#Annot-OpenIdx">h5aopen_idx_f</a>
-    <li><a href="#Annot-GetSpace">h5aget_space_f</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Annot-GetType">h5aget_type_f</a>
-    <li><a href="#Annot-NumAttrs">h5aget_num_attrs_f</a>
- <!--<li><a href="#Annot-Iterate">h5aiterate_f</a>-->
-    <li><a href="#Annot-Delete">h5adelete_f</a>
-</ul>
-</td></tr>
-</table>
-
 
 <p>
 The Attribute interface, H5A, is primarily designed to easily allow 
@@ -184,13 +140,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns an attribute identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5acreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -223,13 +172,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns attribute identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_name_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -263,13 +205,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns attribute identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aopen_idx_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -308,13 +243,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5awrite_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -353,13 +281,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aread_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -383,13 +304,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns attribute dataspace identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_space_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -419,13 +333,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -460,13 +367,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
     <dd>Returns the length of the attribute's name, which may be
         longer than <code>buf_size</code>, if successful.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_name_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -490,13 +390,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns the number of attributes if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aget_num_attrs_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -561,14 +454,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
     <dd>If successful, returns the return value of the last operator 
         if it was non-zero, or zero if all attributes were processed.
         Otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aiterate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -599,13 +484,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5adelete_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -629,13 +507,6 @@ See <a href="Attributes.html"><cite>Attributes</cite></a> in the
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5a_FORTRAN.html#h5aclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -679,7 +550,7 @@ H5A&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  20 October 1999
+Last modified:  30 October 1998
 
 </body>
 </html>

@@ -51,10 +51,6 @@ H5T&nbsp;&nbsp;
 These functions create and manipulate the datatype which describes elements
 of a dataset.
 
-
-<p>
-<strong>The C Interfaces:</strong>
-
 <table border=0>
 <tr><td valign=top>
 <i>General Datatype Operations</i>
@@ -133,103 +129,6 @@ of a dataset.
 </table>
 
 <p>
-<strong>The FORTRAN90 Interfaces:</strong>
-<br>
-
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
-
-<table border=0>
-<tr><td valign=top>
-<i>General Datatype Operations</i>
-<!--<li><a href="#Datatype-Create">h5tcreate_f</a>                      -->
-    <li><a href="#Datatype-Open">h5topen_f</a>
-    <li><a href="#Datatype-Commit">h5tcommit_f</a>
-<!--<li><a href="#Datatype-Committed">h5tcommitted_f</a>                -->
-    <li><a href="#Datatype-Copy">h5tcopy_f</a>
-<!--<li><a href="#Datatype-Equal">h5tequal_f</a>                        -->
-<!--<li><a href="#Datatype-Lock">h5tlock_f</a>                          -->
-</td><td valign=top>
-<br>
-    <li><a href="#Datatype-GetClass">h5tget_class_f</a>
-    <li><a href="#Datatype-GetSize">h5tget_size_f</a>
-<!--<li><a href="#Datatype-GetSuper">h5tget_super_f</a>                 -->
-    <li><a href="#Datatype-Close">h5tclose_f</a>
-<!--<p>                                                                     -->
-<!--<i>Conversion Functions</i>                                             -->
-<!--<li><a href="#Datatype-Convert">h5tconvert_f</a>                    -->
-<!--<li><a href="#Datatype-Find">h5tfind_f</a>                          -->
-<!--<li><a href="#Datatype-SetOverflow">h5tset_overflow_f</a>           -->
-<!--<li><a href="#Datatype-GetOverflow">h5tget_overflow_f</a>           -->
-<!--<li><a href="#Datatype-Register">h5tregister_f</a>                  -->
-<!--<li><a href="#Datatype-Unregister">h5tunregister_f</a>              -->
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<i>Atomic Datatype Properties</i>
-<!--  <table><tr><td valign=top>                                            -->
-    <li><a href="#Datatype-SetSize">h5tset_size_f</a>
-    <li><a href="#Datatype-GetOrder">h5tget_order_f</a>
-    <li><a href="#Datatype-SetOrder">h5tset_order_f</a>
-<!--<li><a href="#Datatype-GetPrecision">h5tget_precision_f</a>         -->
-<!--<li><a href="#Datatype-SetPrecision">h5tset_precision_f</a>         -->
-<!--<li><a href="#Datatype-GetOffset">h5tget_offset_f</a>               -->
-<!--<li><a href="#Datatype-SetOffset">h5tset_offset_f</a>               -->
-<!--<li><a href="#Datatype-GetPad">h5tget_pad_f</a>                     -->
-<!--<li><a href="#Datatype-SetPad">h5tset_pad_f</a>                     -->
-<!--<li><a href="#Datatype-GetSign">h5tget_sign_f</a>                   -->
-<!--<li><a href="#Datatype-SetSign">h5tset_sign_f</a>                   -->
-<!--<li><a href="#Datatype-GetFields">h5tget_fields_f</a>               -->
-<!--<li><a href="#Datatype-SetFields">h5tset_fields_f</a>               -->
-<!--<li><a href="#Datatype-GetEbias">h5tget_ebias_f</a>                 -->
-<!--<li><a href="#Datatype-SetEbias">h5tset_ebias_f</a>                 -->
-<!--  </td><td valign=top>                                                  -->
-<!--<li><a href="#Datatype-GetNorm">h5tget_norm_f</a>                   -->
-<!--<li><a href="#Datatype-SetNorm">h5tset_norm_f</a>                   -->
-<!--<li><a href="#Datatype-GetInpad">h5tget_inpad_f</a>                 -->
-<!--<li><a href="#Datatype-SetInpad">h5tset_inpad_f</a>                 -->
-<!--<li><a href="#Datatype-GetCset">h5tget_cset_f</a>                   -->
-<!--<li><a href="#Datatype-SetCset">h5tset_cset_f</a>                   -->
-<!--<li><a href="#Datatype-GetStrpad">h5tget_strpad_f</a>               -->
-<!--<li><a href="#Datatype-SetStrpad">h5tset_strpad_f</a>               -->
-<!--  </td></tr></table>                                                    -->
-<!--<p>                                                                     -->
-<!--<i>Variable-length Datatypes</i>                                        -->
-<!--<li><a href="#Datatype-VLCreate">h5tvlen_create_f</a>               -->
-<!--</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>       -->
-<!--<i>Compound Datatype Properties</i>                                     -->
-<!--<li><a href="#Datatype-GetNmembers">h5tget_nmembers_f</a>           -->
-<!--<li><a href="#Datatype-GetMemberName">h5tget_member_name_f</a>      -->
-<!--<li><a href="#Datatype-GetMemberOffset">h5tget_member_offset_f</a>  -->
-<!--<li><a href="#Datatype-GetMemberDims">h5tget_member_dims_f</a>      -->
-<!--<li><a href="#Datatype-GetMemberType">h5tget_member_type_f</a>      -->
-<!--<li><a href="#Datatype-Insert">h5tinsert_f</a>                      -->
-<!--<li><a href="#Datatype-Pack">h5tpack_f</a>                          -->
-<!--<li><a href="#Datatype-InsertArray">h5tinsert_array_f</a>           -->
-<!--<p>                                                                     -->
-<!--<i>Enumeration Datatypes</i>                                            -->
-<!--<li><a href="#Datatype-EnumCreate">h5tenum_create_f</a>             -->
-<!--<li><a href="#Datatype-EnumInsert">h5tenum_insert_f</a>             -->
-<!--<li><a href="#Datatype-EnumNameOf">h5tenum_nameof_f</a>             -->
-<!--<li><a href="#Datatype-EnumValueOf">h5tenum_valueof_f</a>           -->
-<!--<li><a href="#Datatype-GetMemberValue">h5tget_member_value_f</a>    -->
-<!--<p>                                                                     -->
-<!--<i>Opaque Datatypes</i>                                                 -->
-<!--<li><a href="#Datatype-SetTag">h5tset_tag_f</a>                     -->
-<!--<li><a href="#Datatype-GetTag">h5tget_tag_f</a>                     -->
-</td></tr>
-</table>
-
-
-<p>
 The Datatype interface, H5T, provides a mechanism to describe the
       storage format of individual data points of a data set and is
       hopefully designed in such a way as to allow new features to be
@@ -283,13 +182,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a named datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5topen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -321,13 +213,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcommit_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -356,14 +241,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         if the datatype has been committed, or <code>0</code> (zero), 
         for <code>FALSE</code>, if the datatype has not been committed.
         Otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -425,14 +302,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -466,14 +335,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
         Otherwise returns NULL.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -519,14 +380,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -560,14 +413,6 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -594,14 +439,6 @@ H5Tget_overflow ()
     <dd>Returns a pointer to an application-defined function if successful.
         Otherwise returns NULL; this can happen if no overflow handling
         function is registered.  
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -639,14 +476,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -679,14 +508,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns datatype identifier if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -774,13 +595,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tcopy_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -808,14 +622,6 @@ H5Tget_overflow ()
         if the datatype identifiers refer to the same datatype, 
         or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -842,14 +648,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -883,13 +681,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns datatype class identifier if successful;
         otherwise H5T_NO_CLASS (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_class_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -911,13 +702,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the size of the datatype in bytes if successful;
         otherwise 0.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -951,13 +735,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -982,14 +759,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the base datatype if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1022,13 +791,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a byte order constant if successful;
         otherwise <code>H5T_ORDER_ERROR</code> (-1).
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_order_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1062,13 +824,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tset_order_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1092,14 +847,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns the number of significant bits if successful;
         otherwise 0.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1134,14 +881,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1209,14 +948,6 @@ H5Tget_overflow ()
 <dt><strong>Returns:</strong>
     <dd>Returns a positive offset value if successful;
         otherwise 0.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1294,14 +1025,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1340,14 +1063,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1383,14 +1098,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1419,14 +1126,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid sign type if successful;
         otherwise <code>H5T_SGN_ERROR</code> (-1).
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1457,14 +1156,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1502,14 +1193,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1549,14 +1232,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1578,14 +1253,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns the bias if successful;
         otherwise 0.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1610,14 +1277,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1648,14 +1307,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid normalization type if successful;
         otherwise <code>H5T_NORM_ERROR</code> (-1).
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1689,14 +1340,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1728,14 +1371,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid padding type if successful;
         otherwise <code>H5T_PAD_ERROR</code> (-1).
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1772,14 +1407,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1806,14 +1433,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid character set type if successful;
         otherwise <code>H5T_CSET_ERROR</code> (-1).
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1846,14 +1465,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1882,14 +1493,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid string padding type if successful;
         otherwise <code>H5T_STR_ERROR</code> (-1).
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1924,14 +1527,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1953,14 +1548,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns number of members datatype has if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1990,14 +1577,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a valid pointer if successful;
         otherwise NULL.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2028,14 +1607,6 @@ zero.
         Note that zero is a valid offset and that this function 
         will fail only if a call to <code>H5Tget_member_dims()</code> 
         fails with the same arguments.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2074,14 +1645,6 @@ zero.
     <dd>Returns the number of dimensions, a number from 0 to 4, 
         if successful.
         Otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2108,14 +1671,6 @@ zero.
     <dd>Returns the identifier of a copy of the datatype of the field
         if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2154,14 +1709,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2184,14 +1731,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2261,14 +1800,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2293,14 +1824,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2324,14 +1847,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns the datatype identifier for the new enumeration datatype if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2370,14 +1885,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2420,14 +1927,6 @@ zero.
         and, if <code>size</code> allows it, 
         the first character of <code>name</code> is 
         set to <code>NULL</code>.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2461,14 +1960,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2501,14 +1992,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2534,14 +2017,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2567,14 +2042,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to an allocated string if successful;
         otherwise returns <code>NULL</code>.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2598,13 +2065,6 @@ zero.
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5t_FORTRAN.html#h5tclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2648,7 +2108,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  20 October 1999
+Last modified:  30 September 1999
 
 </body>
 </html>

@@ -51,9 +51,6 @@ H5D&nbsp;&nbsp;
 These functions create and manipulate dataset objects, 
 and set and retrieve their constant or persistent properties.
 
-<p>
-<strong>The C Interfaces:</strong>
-
 <table border=0>
 <tr><td valign=top>
 <ul>
@@ -79,48 +76,6 @@ and set and retrieve their constant or persistent properties.
     <li><a href="#Dataset-Debug">H5Ddebug</a>
 -->
     <li><a href="#Dataset-Extend">H5Dextend</a>
-</ul>
-</td></tr>
-</table>
-
-<p>
-<strong>The FORTRAN90 Interfaces:</strong>
-
-<br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
-
-<table border=0>
-<tr><td valign=top>
-<ul>
-    <li><a href="#Dataset-Create">h5dcreate_f</a>
-    <li><a href="#Dataset-Open">h5dopen_f</a>
-    <li><a href="#Dataset-Close">h5dclose_f</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Dataset-GetSpace">h5dget_space_f</a>
-    <li><a href="#Dataset-GetType">h5dget_type_f</a>
-    <li><a href="#Dataset-GetCreatePlist">h5dget_create_plist_f</a>
-<!--<li><a href="#Dataset-GetStorageSize">h5dget_storage_size_f</a>      -->
-<!--<li><a href="#Dataset-GetVLBuf">h5dget_vlen_buf_size_f</a>           -->
-<!--<li><a href="#Dataset-VLReclaim">h5dvlen_reclaim_f</a>               -->
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Dataset-Read">h5dread_f</a>
-    <li><a href="#Dataset-Write">h5dwrite_f</a>
-<!--<li><a href="#Dataset-Iterate">h5diterate_f</a>                     -->
-<!--<li><a href="#Dataset-Debug">h5ddebug_f</a>                         -->
-    <li><a href="#Dataset-Extend">h5dextend_f</a>
 </ul>
 </td></tr>
 </table>
@@ -173,13 +128,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -207,13 +155,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -238,13 +179,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_space_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -273,13 +207,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a datatype identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -305,13 +232,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataset creation property list identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_create_plist_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -338,14 +258,6 @@ facilitate moving easily between them.</i>
     <dd>Returns the amount of storage space allocated for the dataset, 
         not counting meta data; 
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_storage_size" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -384,14 +296,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dget_vlen_buf_size_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -437,14 +341,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dvlen_reclaim_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -513,13 +409,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dread_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -590,13 +479,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dwrite_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -625,13 +507,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dextend_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -656,13 +531,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5dclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -712,14 +580,6 @@ facilitate moving easily between them.</i>
     <dd>Returns the return value of the last operator if it was non-zero,
         or zero if all elements have been processed.
         Otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5d_FORTRAN.html#h5diterate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -764,7 +624,7 @@ H5D&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  20 October 1999
+Last modified:  30 October 1998
 
 </body>
 </html>

@@ -50,10 +50,6 @@ H5P&nbsp;&nbsp;
 These functions manipulate property list objects to allow objects which require
 many different parameters to be easily manipulated.
 
-
-<p>
-<strong>The C Interfaces:</strong>
-
 <table border=0>
 <tr><td valign=top>
 
@@ -111,6 +107,8 @@ many different parameters to be easily manipulated.
 
 <br>&nbsp;
 <br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
 <br>
 ||&nbsp;&nbsp;<i>Available only in the 
 parallel HDF5 library.</i>
@@ -164,117 +162,6 @@ parallel HDF5 library.</i>
 
 </table>
 
-<p>
-<strong>The FORTRAN90 Interfaces:</strong>
-
-<br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
-
-<table border=0>
-<tr><td valign=top>
-
-    <i>General Property List Operations</i>
-    <ul>
-    <li><a href="#Property-Create">h5pcreate_f</a>
-    <li><a href="#Property-GetClass">h5pget_class_f</a>
-    <li><a href="#Property-Copy">h5pcopy_f</a>
-    <li><a href="#Property-Close">h5pclose_f</a>
-    </ul>
-
-<!--<p><i>File Creation Properties</i>                                    -->
-<!--<ul>                                                                  -->
-<!--<li><a href="#Property-GetVersion">h5pget_version_f</a>               -->
-<!--<li><a href="#Property-SetUserblock">h5pset_userblock_f</a>           -->
-<!--<li><a href="#Property-GetUserblock">h5pget_userblock_f</a>           -->
-<!--<li><a href="#Property-SetSizes">h5pset_sizes_f</a>                   -->
-<!--<li><a href="#Property-GetSizes">h5pget_sizes_f</a>                   -->
-<!--<li><a href="#Property-SetSymK">h5pset_sym_k_f</a>                    -->
-<!--<li><a href="#Property-GetSymK">h5pget_sym_k_f</a>                    -->
-<!--<li><a href="#Property-SetIstoreK">h5pset_istore_k_f</a>              -->
-<!--<li><a href="#Property-GetIstoreK">h5pget_istore_k_f</a>              -->
-<!--</ul>                                                                 -->
-
-<!--<p><i>Variable-length Datatype Properties</i>                         -->
-<!--<ul>                                                                  -->
-<!--<li><a href="#Property-SetVLMemManager">h5pset_vlen_mem_manager_f</a> -->
-<!--<li><a href="#Property-GetVLMemManager">h5pget_vlen_mem_manager_f</a> -->
-<!--</ul>                                                                 -->
-
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-
-<!-- DELETE THIS LINE AND NEXT IF ANY APIs IN THIS SECTION COME INTO USE -->
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-<!--<i>File Access Properties</i>                                         -->
-<!--<ul>                                                                  -->
-<!--<li><a href="#Property-GetDriver">h5pget_driver_f</a>                 -->
-<!--<li><a href="#Property-SetStdio">h5pset_stdio_f</a>                   -->
-<!--<li><a href="#Property-GetStdio">h5pget_stdio_f</a>                   -->
-<!--<li><a href="#Property-SetSec2">h5pset_sec2_f</a>                     -->
-<!--<li><a href="#Property-GetSec2">h5pget_sec2_f</a>                     -->
-<!--<li><a href="#Property-SetAlignment">h5pset_alignment_f</a>           -->
-<!--<li><a href="#Property-GetAlignment">h5pget_alignment_f</a>           -->
-<!--<li><a href="#Property-SetCore">h5pset_core_f</a>                     -->
-<!--<li><a href="#Property-GetCore">h5pget_core_f</a>                     -->
-<!--<li><a href="#Property-SetMPI">h5pset_mpi_f</a>&nbsp;&nbsp;&nbsp;||   -->
-<!--<li><a href="#Property-GetMPI">h5pget_mpi_f</a>&nbsp;&nbsp;&nbsp;||   -->
-<!--<li><a href="#Property-SetFamily">h5pset_family_f</a>                 -->
-<!--<li><a href="#Property-GetFamily">h5pget_family_f</a>                 -->
-<!--<li><a href="#Property-SetCache">h5pset_cache_f</a>                   -->
-<!--<li><a href="#Property-GetCache">h5pget_cache_f</a>                   -->
-<!--<li><a href="#Property-SetSplit">h5pset_split_f</a>                   -->
-<!--<li><a href="#Property-GetSplit">h5pget_split_f</a>                   -->
-<!--<li><a href="#Property-SetGCReferences">h5pset_gc_references_f</a>    -->
-<!--<li><a href="#Property-GetGCReferences">h5pget_gc_references_f</a>    -->
-<!--</ul>                                                                 -->
-
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-
-    <i>Dataset Creation Properties</i>
-    <ul>
-<!--<li><a href="#Property-SetLayout">h5pset_layout_f</a>                 -->
-<!--<li><a href="#Property-GetLayout">h5pget_layout_f</a>                 -->
-    <li><a href="#Property-SetChunk">h5pset_chunk_f</a>
-    <li><a href="#Property-GetChunk">h5pget_chunk_f</a>
-    <li><a href="#Property-SetDeflate">h5pset_deflate_f</a>
-<!--<li><a href="#Property-GetDeflate">h5pget_deflate_f</a>               -->
-<!--<li><a href="#Property-SetCompression">h5pset_compression_f</a>       -->
-<!--<li><a href="#Property-GetCompression">h5pget_compression_f</a>       -->
-    <li><a href="#Property-SetFillValue">h5pset_fill_value_f</a>
-    <li><a href="#Property-GetFillValue">h5pget_fill_value_f</a>
-<!--<li><a href="#Property-SetFilter">h5pset_filter_f</a>                 -->
-<!--<li><a href="#Property-GetNFilters">h5pget_nfilters_f</a>             -->
-<!--<li><a href="#Property-GetFilter">h5pget_filter_f</a>                 -->
-<!--<li><a href="#Property-SetExternal">h5pset_external_f</a>             -->
-<!--<li><a href="#Property-GetExternalCount">h5pget_external_count_f</a>  -->
-<!--<li><a href="#Property-GetExternal">h5pget_external_f</a>             -->
-    </ul>
-
-<!--<p><i>Dataset Memory and Transfer Properties</i>                      -->
-<!--<ul>                                                                  -->
-<!--<li><a href="#Property-SetBuffer">h5pset_buffer_f</a>                 -->
-<!--<li><a href="#Property-GetBuffer">h5pget_buffer_f</a>                 -->
-<!--<li><a href="#Property-SetPreserve">h5pset_preserve_f</a>             -->
-<!--<li><a href="#Property-GetPreserve">h5pget_preserve_f</a>             -->
-<!--<li><a href="#Property-SetHyperCache">h5pset_hyper_cache_f</a>        -->
-<!--<li><a href="#Property-GetHyperCache">h5pget_hyper_cache_f</a>        -->
-<!--<li><a href="#Property-SetBTreeRatios">h5pset_btree_ratios_f</a>      -->
-<!--<li><a href="#Property-GetBTreeRatios">h5pget_btree_ratios_f</a>      -->
-<!--<li><a href="#Property-SetXfer">h5pset_xfer_f</a>&nbsp;&nbsp;&nbsp;|| -->
-<!--<li><a href="#Property-GetXfer">h5pget_xfer_f</a>&nbsp;&nbsp;&nbsp;|| -->
-<!--</ul>                                                                 -->
-
-</td></tr>
-</table>
 
 <hr>
 <dl>
@@ -323,13 +210,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
         otherwise Fail (-1).
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 <hr>
@@ -353,13 +233,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -384,13 +257,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list class if successful.
         Otherwise returns H5P_NO_CLASS (-1).
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_class_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -415,13 +281,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pcopy_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -458,14 +317,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -493,14 +344,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -526,14 +369,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -567,14 +402,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -604,14 +431,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -653,14 +472,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -692,14 +503,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if the file access property list is set to the MPI.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -738,14 +541,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -773,14 +568,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -824,14 +611,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -866,14 +645,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -908,14 +679,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -945,14 +708,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -993,14 +748,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1034,14 +781,6 @@ facilitate moving easily between them.</i>
     <dd>Returns the layout type of a a dataset creation property list 
         if successful.
         Otherwise returns H5D_LAYOUT_ERROR (-1).
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1076,13 +815,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_chunk_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1115,13 +847,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns chunk dimensionality successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_chunk_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1162,14 +887,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1201,14 +918,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1254,14 +963,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1284,14 +985,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of external files if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1341,14 +1034,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 <hr>
@@ -1393,14 +1078,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_fill_value_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 
 <hr>
@@ -1436,13 +1113,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pget_fill_value_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1518,14 +1188,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1562,14 +1224,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the number of filters in the pipeline if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1644,14 +1298,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns the filter identification number if successful.
         Otherwise returns H5Z_FILTER_ERROR (-1).
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1682,14 +1328,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a low-level driver identifier if successful.
         Otherwise returns H5F_LOW_ERROR (-1).
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1713,14 +1351,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1746,14 +1376,6 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the stdio driver.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1778,14 +1400,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1811,14 +1425,6 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the sec2 driver.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1850,14 +1456,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1889,14 +1487,6 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the core driver.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -1942,14 +1532,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2010,14 +1592,6 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the split driver.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2055,14 +1629,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 <hr>
@@ -2090,14 +1656,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2151,14 +1709,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2198,14 +1748,6 @@ facilitate moving easily between them.</i>
     <dd>Returns a non-negative value if the file access property list is set 
         to the family driver.
         Otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2254,14 +1796,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2296,14 +1830,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2343,14 +1869,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2381,14 +1899,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2432,14 +1942,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2475,14 +1977,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2535,14 +2029,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2573,14 +2059,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns buffer size if successful;
         otherwise 0 on failure.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2613,14 +2091,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2642,14 +2112,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns TRUE or FALSE if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2703,11 +2165,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -2748,11 +2205,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns compression method if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -2784,13 +2236,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#h5pset_deflate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2816,11 +2261,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns compression level, a value between 0 and 9, if successful.
         Otherwise returns a negative value.
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
 </dl>
 
 -->
@@ -2896,14 +2336,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2944,14 +2376,6 @@ facilitate moving easily between them.</i>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <!--
-  <dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5p_FORTRAN.html#xxx" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-  -->   <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -2995,7 +2419,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  20 October 1999
+Last modified:  6 October 1999
 
 </body>
 </html>

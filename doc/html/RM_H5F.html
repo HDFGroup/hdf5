@@ -52,9 +52,6 @@ These functions are designed to provide file-level access to HDF5 files.
 Further manipulation of objects inside a file is performed through one of APIs
 documented below.
 
-<p>
-<strong>The C Interfaces:</strong>
-
 <table border=0>
 <tr><td valign=top>
 <ul>
@@ -74,47 +71,6 @@ documented below.
 <ul>
     <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
-</ul>
-</td></tr>
-</table>
-
-<p>
-<strong>The FORTRAN90 Interfaces:</strong>
-
-<br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font>
-
-<table border=0>
-<tr><td valign=top>
-<ul>
-    <li><a href="#File-Create">h5fcreate_f</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#File-Open">h5fopen_f</a>
-<!--<li><a href="#File-Reopen">h5freopen_f</a>                        -->
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#File-Close">h5fclose_f</a>
-<!--<li><a href="#File-Flush">h5fflush_f</a>                          -->
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#File-IsHDF5">h5fis_hdf5_f</a>
-<!--<li><a href="#File-Mount">h5fmount_f</a>                          -->
-<!--<li><a href="#File-Unmount">h5funmount_f</a>                      -->
-<!--<li><a href="#File-GetCreatePlist">h5fget_create_plist_f</a>      -->
-<!--<li><a href="#File-GetAccessPlist">h5fget_access_plist_f</a>      -->
 </ul>
 </td></tr>
 </table>
@@ -182,13 +138,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -252,13 +201,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fcreate_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -302,14 +244,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fflush_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -333,13 +267,6 @@ facilitate moving easily between them.</i>
     <dd>When successful, returns a positive value, for <code>TRUE</code>,
         or <code>0</code> (zero), for <code>FALSE</code>.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fis_hdf5_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -372,14 +299,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file creation property list identifier if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_create_plist_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -409,14 +328,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a file access property list identifier if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_access_plist_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -441,13 +352,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fclose_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -487,14 +391,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5fmount_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -533,14 +429,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5funmount_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -553,7 +441,7 @@ facilitate moving easily between them.</i>
 <dt><strong>Purpose:</strong>
         <dd>Reopens an HDF5 file.
 <dt><strong>Description:</strong>
-            <code>H5Freopen</code> reopens an HDF5 file.  The new 
+        <dd><code>H5Freopen</code> reopens an HDF5 file.  The new 
             file identifier which is returned points to the same file 
             as the specified file idetifier, <code>file_id</code>.  
             Both identifiers share caches and other information.  
@@ -568,14 +456,6 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns a new file identifier if successful;
         otherwise returns a negative value.
-<!--
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5f_FORTRAN.html#h5freopen_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
--->     <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 
@@ -619,7 +499,7 @@ H5F&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  20 October 1999
+Last modified:  30 October 1998
 
 </body>
 </html>
