@@ -2,7 +2,7 @@
 Expected output for 'h5diff -d -4 h5diff_test1.h5 h5diff_test2.h5'
 #############################
 <-d -4> is not a valid option
-h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relativet] FILE1_NAME FILE2_NAME
+h5diff [OBJ1_NAME] [OBJ2_NAME] [-h] [-l] [-r] [-d] [-n count] [-d delta] [-p relative] FILE1_NAME FILE2_NAME
 
   [OBJ1_NAME]       Name of an HDF5 object
   [OBJ2_NAME]       Name of an HDF5 object
