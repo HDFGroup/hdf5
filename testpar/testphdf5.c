@@ -547,6 +547,8 @@ finish:
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
-    return(nerrors);
+
+    /* cannot just return (nerrors) because exit code is limited to 1byte */
+    return(nerrors!=0);
 }
 
