@@ -852,8 +852,8 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
 
 #define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
    CONSTR (FUNC, #func_name);						      \
-   PABLO_SAVE (ID_ ## func_name);					      \
    H5TRACE_DECL;							      \
+   PABLO_SAVE (ID_ ## func_name);					      \
 									      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
