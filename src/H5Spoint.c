@@ -1064,7 +1064,7 @@ H5S_point_is_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sselect_elements (hid_t spaceid, H5S_seloper_t op, size_t num_elem,
+H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
     const hssize_t **coord)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */

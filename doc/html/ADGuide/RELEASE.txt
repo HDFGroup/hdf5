@@ -1,4 +1,4 @@
-HDF5 version 1.5.31 released on Sat Jul  6 07:24:49 CDT 2002
+HDF5 version 1.5.32 released on Sat Aug  3 11:14:45 CDT 2002
 ================================================================================
 
 
@@ -35,16 +35,23 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed metadata corruption problem which could occur when many objects
+      are created in a file during parallel I/O.  QAK - 2002/07/19
+    * Fixed VL memory leak when data is overwritten.  The heap objects holding
+      old data are freed.  If the fill value writting time is set to 
+      H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
+      The library free all the heap objects storing VL type if there is nested 
+      VL type(a VL type contains another VL type).  SLU - 2002/07/10 
     * Fixed bug in parallel I/O routines where a collective I/O which used
       MPI derived types, followed by an independent I/O would cause the library
-      to hang.  QAK 2002/06/24
+      to hang.  QAK - 2002/06/24
     * Fixed bug in chunking routines where they were using internal allocation
       free routines, instead of malloc/free, preventing user filters from
       working correctly.  Chunks are now allocated/freed with malloc/free and
-      so should the chunks in user filters.  QAK 2002/06/18
+      so should the chunks in user filters.  QAK - 2002/06/18
     * Fixed bug where regular hyperslab selection could get incorrectly
       transferred when the number of elements in a row did not fit evenly
-      into the buffer provided.  QAK 2002/06/12
+      into the buffer provided.  QAK - 2002/06/12
     * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
       (one with no members) to be used to create a dataset or committed to a
       file.  QAK - 2002/06/11
@@ -157,6 +164,8 @@ Library
 Configuration
 -------------
 
+    * Added "--with-dmalloc" flag, to easily enable support for the 'dmalloc'
+      debugging malloc implementation. -QAK, 2002/07/15
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
       support.
     * Require HDF (a.k.a. hdf4) software that consists of a newer version
@@ -188,6 +197,14 @@ Documentation
 New Features
 ============
 
+    * Added MPI-posix VFL driver.  This VFL driver uses MPI functions to
+      coordinate actions, but performs I/O directly with POSIX sec(2)
+      (i.e. open/close/read/write/etc.) calls.  This driver should _NOT_
+      be used to access files that are not on a parallel filesystem.
+      The following API functions were added:
+            herr_t H5Pset_fapl_mpiposix(hid_t fapl_id, MPI_Comm comm);
+            herr_t H5Pget_fapl_mpiposix(hid_t fapl_id, MPI_Comm *comm/*out*/);
+        -QAK, 2002/07/15
     * Added environment variable flag to control whether creating MPI derived
       typed is preferred or not.  This can affect performance, depending on
       which way the MPI-I/O library is optimized for.  The default is set to
@@ -365,9 +382,9 @@ Platforms Tested
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
                                 mpich-1.2.1
-  Linux 2.4.4                   gcc-2.95.3
+  Linux 2.4.18                  gcc-2.95.3
                                 g++ 2.95.3
-  Linux 2.2.16-3smp             gcc-2.95.2
+  Linux 2.2.18smp               gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
   OSF1 V4.0                     DEC-V5.2-040
@@ -456,20 +473,13 @@ Supported Configuration Features Summary
                     in serial mode.
                 (4) No HDF4-related tools.
                 (5) Shared libraries are provided only for the C library.
-		(6) Exception of (5): DLL is available for C++ API on Windows
+                (6) Exception of (5): DLL is available for C++ API on Windows
 
 
 Known Problems
 ==============
 * Datasets or attributes which have a variable-length string datatype are not
   printing correctly with h5dump and h5ls.
-
-* DLLs do not work on Windows 98 
-
-* RELEASE DLLs will fail on some tests on Windows 2000 with Microsoft visual 
-  studio 6.0 due to memory allocation problems caused by compiler.  
-  Users are encouraged to go to microsoft site  to find and install
-  visual studio 6.0 service pack 5. After that, release dlls will work.
 
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
