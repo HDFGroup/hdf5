@@ -33,7 +33,7 @@ PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the library; do not install
 ##
-LIB_SRC=h5tools.c h5tools_str.c
+LIB_SRC=h5tools.c h5tools_str.c h5tools_utils.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
