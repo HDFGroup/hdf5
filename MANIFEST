@@ -1128,6 +1128,8 @@
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack_list.c
+./tools/h5repack/h5repack_filters.c
+./tools/h5repack/h5repack_verify.c
 ./tools/h5repack/h5repack_copy.c
 ./tools/h5repack/h5repack_refs.c
 ./tools/h5repack/h5repack_main.c
@@ -1136,6 +1138,7 @@
 ./tools/h5repack/testh5repack_attr.c
 ./tools/h5repack/testh5repack_dset.c
 ./tools/h5repack/testh5repack_filters.c
+./tools/h5repack/testh5repack_make.c
 ./tools/h5repack/testh5repack_main.c
 
 
