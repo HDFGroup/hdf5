@@ -429,10 +429,18 @@ herr_t H5DSattach_scale(hid_t did,
   /* store the IDX information (index of the dataset that has the DS) */
   dsl.dim_idx = idx;
   dsbuf[nelmts-1] = dsl;
-  
+
   /* create a new data space for the new references array */
-  if ((sid = H5Screate_simple(1,&nelmts,NULL))<0)
+  dims = (hsize_t*) malloc ( (size_t)nelmts * sizeof (hsize_t));
+  if (dims == NULL)
    goto out;
+  dims[0] = nelmts;
+  
+  if ((sid = H5Screate_simple(1,dims,NULL))<0)
+   goto out;
+
+  if (dims)
+   free(dims);
   
   /* create the attribute again with the changes of space */
   if ((aid = H5Acreate(dsid,REFERENCE_LIST,tid,sid,H5P_DEFAULT))<0)
@@ -712,8 +720,8 @@ herr_t H5DSdetach_scale(hid_t did,
   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb4)<0)
    goto out;
   
-  /* same object, reset */
-  if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno) {
+  /* same object, reset. we want to detach only for this DIM */
+  if (sb3.fileno==sb4.fileno && sb3.objno==sb4.objno && (int)idx==dsbuf[i].dim_idx) {
    dsbuf[i].ref=0;
    dsbuf[i].dim_idx=-1;
    found_dset=1;
