@@ -174,21 +174,21 @@ static int
 test(fill_t fill_style, const double splits[],
      hbool_t verbose, hbool_t use_rdcc)
 {
-    hid_t	file, fapl, dcpl, xfer, mspace, fspace, dset;
+    hid_t	file = (-1), fapl = (-1), dcpl = (-1), xfer = (-1), mspace = (-1), fspace = (-1), dset = (-1);
     hsize_t	ch_size[1] = {1};		/*chunk size		*/
     hsize_t	cur_size[1] = {1000};		/*current dataset size	*/
     hsize_t	max_size[1] = {H5S_UNLIMITED};	/*maximum dataset size	*/
     hssize_t	hs_start[1];			/*hyperslab start offset*/
     hsize_t	hs_count[1] = {1};		/*hyperslab nelmts	*/
-    int		fd;				/*h5 file direct	*/
+    int		fd = (-1);			/*h5 file direct	*/
     static int	*had = NULL;			/*for random filling	*/
-    const char	*sname;				/*fill style nam	*/
+    const char	*sname=NULL;			/*fill style nam	*/
     int		mdc_nelmts;			/*num meta objs to cache*/
     hsize_t	i;
     int		j;
     struct stat	sb;
 
-    if (!had) had = calloc(cur_size[0], sizeof(int));
+    if (!had) had = calloc((size_t)cur_size[0], sizeof(int));
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) goto error;
     if (!use_rdcc) {
 	if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;

@@ -807,8 +807,7 @@ H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 	    H5G_type_g[i].isa = isa;
 	    H5MM_xfree(H5G_type_g[i].desc);
 	    H5G_type_g[i].desc = desc;
-	    ret_value = SUCCEED;
-	    goto done;
+            HGOTO_DONE(SUCCEED);
 	}
     }
 

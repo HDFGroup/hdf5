@@ -363,13 +363,12 @@ test_file_open(void)
 **
 *****************************************************************/
 static void 
-test_file_close()
+test_file_close(void)
 {
     hid_t               fid1, fid2;
     hid_t               fapl_id, access_id;
     hid_t		dataset_id, group_id1, group_id2, group_id3;
     H5F_close_degree_t  fc_degree;
-    unsigned            fid_count, oid_count;
     herr_t              ret;
 
     /* Test behavior while opening file multiple times with different
@@ -620,6 +619,9 @@ test_file_close()
             ret = H5Gclose(group_id3);
             CHECK(ret, FAIL, "H5Gclose");
 	    break;
+        default:
+            CHECK(fc_degree, H5F_CLOSE_DEFAULT, "H5Pget_fclose_degree");
+            break;
     }
 
     /* Close file access property list */

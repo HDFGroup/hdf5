@@ -1977,7 +1977,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_sel_iter_t 	mem_iter;       /*mem selection iteration info*/
     H5S_sel_iter_t	bkg_iter;	    /*background iteration info*/
     H5S_sel_iter_t	file_iter;      /*file selection iter info*/
-    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t		ret_value = SUCCEED;	/*return value		*/
     herr_t		status;			    /*function return status*/
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;	    /*size of destination type*/
@@ -1998,7 +1998,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5O_pline_t         pline;
     H5O_efl_t           efl;
     H5O_fill_t          fill;    
-    H5P_genplist_t *dx_plist;      /* Property list */
+    H5P_genplist_t *dx_plist=NULL;      /* Property list */
     H5P_genplist_t *dc_plist;      /* Property list */
     
 
@@ -2136,7 +2136,7 @@ printf("%s: check 1.1, \n",FUNC);
                            H5T_get_size(dataset->type);
             sconv->stats[1].read_ncalls++;
 #endif
-            goto succeed;
+            HGOTO_DONE(SUCCEED);
         }
 #ifdef H5D_DEBUG
         if (H5DEBUG(D)) {
@@ -2382,10 +2382,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #endif /* QAK */
     }
     
- succeed:
-    ret_value = SUCCEED;
-    
- done:
+done:
 #ifdef H5_HAVE_PARALLEL
     /* restore xfer_mode due to the kludge */
     if (doing_mpio && xfer_mode_changed){
@@ -2408,6 +2405,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         H5I_dec_ref(src_id);
     if (dst_id >= 0)
         H5I_dec_ref(dst_id);
+    assert(dx_plist);
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))
@@ -2468,7 +2466,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5S_sel_iter_t	mem_iter;       /*memory selection iteration info*/
     H5S_sel_iter_t	bkg_iter;       /*background iteration info*/
     H5S_sel_iter_t	file_iter;      /*file selection iteration info*/
-    herr_t		ret_value = FAIL;	/*return value		*/
+    herr_t		ret_value = SUCCEED;	/*return value		*/
     herr_t		status;			    /*function return status*/
     size_t		src_type_size;		/*size of source type	*/
     size_t		dst_type_size;	    /*size of destination type*/
@@ -2489,7 +2487,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5O_pline_t         pline;
     H5O_efl_t           efl;
     H5O_fill_t          fill;    
-    H5P_genplist_t *dx_plist;      /* Property list */
+    H5P_genplist_t *dx_plist=NULL;      /* Property list */
     H5P_genplist_t *dc_plist;      /* Property list */
 
     FUNC_ENTER(H5D_write, FAIL);
@@ -2647,7 +2645,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    sconv->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
 	    sconv->stats[0].write_ncalls++;
 #endif
-	    goto succeed;
+	    HGOTO_DONE(SUCCEED);
 	}
 #ifdef H5D_DEBUG
 	if (H5DEBUG(D)) {
@@ -2874,10 +2872,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 		    "unable to update modification time");
     }
 
- succeed:
-    ret_value = SUCCEED;
-    
- done:
+done:
 #ifdef H5_HAVE_PARALLEL
     /* restore xfer_mode due to the kludge */
     if (doing_mpio && xfer_mode_changed){
@@ -2900,6 +2895,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
         H5I_dec_ref(src_id);
     if (dst_id >= 0)
         H5I_dec_ref(dst_id);
+    assert(dx_plist);
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
     if (bkg_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))

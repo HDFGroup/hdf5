@@ -632,7 +632,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate)
+H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
 {
     hbool_t	invalidate = *((const hbool_t*)_invalidate);
     H5F_flush(f, H5F_SCOPE_LOCAL, invalidate, FALSE);
@@ -1064,7 +1064,9 @@ H5F_get_objects(H5F_t *f, unsigned types, hid_t *obj_id_list,
         H5I_search(H5I_DATATYPE, (H5I_search_func_t)H5F_get_objects_cb, olist);
     }
 
+#ifdef LATER
 done:
+#endif /* LATER */
     if(olist!=NULL)
 	H5MM_xfree(olist);
     FUNC_LEAVE(ret_value);
@@ -1118,12 +1120,14 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    case H5I_DATATYPE:
 	        ent = H5T_entof((H5T_t*)obj_ptr);
 		break;
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                              "unknown data object");
 	}
 
-    	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && 
-		H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
-	    || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
-            || (ent && ent->file->shared == olist->shared) ) {
+    	if( (!olist->shared && olist->obj_type==H5I_DATATYPE && H5T_is_immutable((H5T_t*)obj_ptr)==FALSE) 
+                || (!olist->shared && olist->obj_type!=H5I_DATATYPE) 
+                || (ent && ent->file->shared == olist->shared) ) {
             if(olist->obj_id_list) {
             	olist->obj_id_list[olist->list_index] = obj_id;
 		olist->list_index++;
@@ -1156,7 +1160,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_equal(void *_haystack, UNUSED hid_t id, const void *_needle)
+H5F_equal(void *_haystack, hid_t UNUSED id, const void *_needle)
 {
     H5F_t		*haystack = (H5F_t*)_haystack;
     const H5FD_t	*needle = (const H5FD_t*)_needle;

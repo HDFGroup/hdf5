@@ -424,7 +424,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     /* fill in the remaining return values */
     *count = 1;			/* only have to move one of these suckers! */
     *is_derived_type = 1;
-    goto done;
+    HGOTO_DONE(SUCCEED);
 
 empty:
     /* special case: empty hyperslab */

@@ -7813,7 +7813,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass, const char *name)
+H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t UNUSED *src_pclass, const char *name)
 {
     H5P_genprop_t *prop;            /* Temporary property pointer */
     herr_t ret_value=SUCCEED;       /* return value */

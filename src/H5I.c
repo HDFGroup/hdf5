@@ -43,58 +43,7 @@ static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5I_init_interface
 static herr_t H5I_init_interface(void);
 
-/*
- * Define the following macro for fast hash calculations (but limited
- * hash sizes)
- */
-#define HASH_SIZE_POWER_2
-
-/* Define the following macro for atom caching over all the atoms */
-#define IDS_ARE_CACHED
-
 /*-------------------- Locally scoped variables -----------------------------*/
-
-#ifdef IDS_ARE_CACHED
-#  define ID_CACHE_SIZE 4	      /*# of previous atoms cached	   */
-#endif
-
-/*
- * Number of bits to use for Group ID in each atom. Increase if H5I_NGROUPS
- * becomes too large (an assertion would fail in H5I_init_interface). This is
- * the only number that must be changed since all other bit field sizes and
- * masks are calculated from GROUP_BITS.
- */
-#define GROUP_BITS	5
-#define GROUP_MASK	((1<<GROUP_BITS)-1)
-
-/*
- * Number of bits to use for the Atom index in each atom (assumes 8-bit
- * bytes). We don't use the sign bit.
- */
-#define ID_BITS		((sizeof(hid_t)*8)-(GROUP_BITS+1))
-#define ID_MASK		((1<<ID_BITS)-1)
-
-/* Map an atom to a Group number */
-#define H5I_GROUP(a)	((H5I_type_t)(((hid_t)(a)>>ID_BITS) & GROUP_MASK))
-
-
-#ifdef HASH_SIZE_POWER_2
-/*
- * Map an ID to a hash location (assumes s is a power of 2 and smaller
- * than the ID_MASK constant).
- */
-#  define H5I_LOC(a,s)		((hid_t)((size_t)(a)&((s)-1)))
-#  define POWER_OF_TWO(n)	((((n) - 1) & (n)) == 0 && (n) > 0)
-#else
-/*
- * Map an ID to a hash location.
- */
-#  define H5I_LOC(a,s)	(((hid_t)(a)&ID_MASK)%(s))
-#endif
-
-/* Combine a Group number and an atom index into an atom */
-#define H5I_MAKE(g,i)	((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|	  \
-			     ((hid_t)(i)&ID_MASK))
 
 #ifdef IDS_ARE_CACHED
 /* ID Cache */

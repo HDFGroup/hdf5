@@ -410,7 +410,7 @@ H5S_hyper_fread (H5F_t *f, const struct H5O_layout_t *layout,
     int curr_dim;      /* Current dimension being operated on */
     int ndims;         /* Number of dimensions of dataset */
     hsize_t loc_off;    /* Element offset in the dataspace */
-    size_t span_size;   /* Number of bytes in current span to actually process */
+    size_t span_size=0;   /* Number of bytes in current span to actually process */
     size_t io_bytes_left;   /* Number of bytes left to process */
     int i;             /* Index variable */
     size_t *seq_len_arr=NULL;   /* Array of sequence lengths */
@@ -1509,7 +1509,7 @@ H5S_hyper_fwrite (H5F_t *f, const struct H5O_layout_t *layout,
     int curr_dim;      /* Current dimension being operated on */
     int ndims;         /* Number of dimensions of dataset */
     hsize_t loc_off;    /* Element offset in the dataspace */
-    size_t span_size;  /* Number of bytes in current span to actually process */
+    size_t span_size=0;  /* Number of bytes in current span to actually process */
     size_t io_bytes_left;   /* Number of bytes left to process */
     int i;             /* Index variable */
     size_t *seq_len_arr=NULL;   /* Array of sequence lengths */
@@ -2599,7 +2599,7 @@ H5S_hyper_mread (const void *_buf, size_t elmt_size, const H5S_t *space,
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
     int ndims;         /* Number of dimensions of dataset */
-    size_t span_size;   /* Number of bytes in current span to actually process */
+    size_t span_size=0;   /* Number of bytes in current span to actually process */
     size_t io_bytes_left;   /* Number of bytes left to process */
     int i;             /* Index variable */
     hssize_t ret_value=FAIL;
@@ -3472,7 +3472,7 @@ H5S_hyper_mwrite (const void *_tconv_buf, size_t elmt_size, const H5S_t *space,
     int fast_dim;      /* Rank of the fastest changing dimension for the dataspace */
     int curr_dim;      /* Current dimension being operated on */
     int ndims;         /* Number of dimensions of dataset */
-    size_t span_size;   /* Number of bytes in current span to actually process */
+    size_t span_size=0;   /* Number of bytes in current span to actually process */
     size_t io_bytes_left;   /* Number of bytes left to process */
     int i;             /* Index variable */
     hssize_t ret_value=FAIL;

@@ -411,7 +411,7 @@ H5O_efl_read (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
 #ifndef NDEBUG
     hsize_t     tempto_read;
 #endif /* NDEBUG */
-    hsize_t     skip;
+    hsize_t     skip=0;
     haddr_t     cur;
     ssize_t	n;
     herr_t	ret_value = FAIL;
@@ -508,7 +508,7 @@ H5O_efl_write (H5F_t UNUSED *f, const H5O_efl_t *efl, haddr_t addr,
     hsize_t	tempto_write;
 #endif /* NDEBUG */
     haddr_t     cur;
-    hsize_t     skip;
+    hsize_t     skip=0;
     herr_t	ret_value = FAIL;
     
     FUNC_ENTER (H5O_efl_write, FAIL);

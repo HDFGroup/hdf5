@@ -1024,7 +1024,6 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 #define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name)  					      \
-   static unsigned know_api=0, is_api=0;                                      \
    H5TRACE_DECL;							      \
 									      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
@@ -1055,14 +1054,8 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
       }									      \
    }									      \
                                                                               \
-   /* Check if we know this is an API function yet or not */                  \
-   if(!know_api) {                                                            \
-       know_api=1;                                                            \
-       is_api=H5_IS_API(FUNC);                                                \
-   }                                                                          \
-   									      \
    /* Clear thread error stack entering public functions */		      \
-   if (is_api && H5E_clearable_g) {				              \
+   if (H5_IS_API(FUNC) && H5E_clearable_g) {				      \
        H5E_clear ();							      \
    }									      \
    {

@@ -381,7 +381,7 @@ test_genprop_cls_cb1(hid_t list_id, void *create_data)
 }
 
 static herr_t 
-test_genprop_cls_cb2(hid_t new_list_id, hid_t old_list_id, void *create_data)
+test_genprop_cls_cb2(hid_t new_list_id, hid_t UNUSED old_list_id, void *create_data)
 {
     struct {                /* Struct for iterations */
         int count;

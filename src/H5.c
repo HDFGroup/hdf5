@@ -1725,157 +1725,158 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		} else if (obj<0) {
 		    fprintf (out, "FAIL");
 		} else {
-		    switch (H5I_get_type (obj)) {
-		    case H5I_BADID:
-			fprintf (out, "%ld (error)", (long)obj);
-			break;
-		    case H5I_FILE:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "file")) {
-			    fprintf (out, " (file)");
-			}
-			break;
-		    case H5I_GROUP:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "group")) {
-			    fprintf (out, " (group)");
-			}
-			break;
-		    case H5I_DATATYPE:
-			if (obj==H5T_NATIVE_SCHAR_g) {
-			    fprintf(out, "H5T_NATIVE_SCHAR");
-			} else if (obj==H5T_NATIVE_UCHAR_g) {
-			    fprintf(out, "H5T_NATIVE_UCHAR");
-			} else if (obj==H5T_NATIVE_SHORT_g) {
-			    fprintf(out, "H5T_NATIVE_SHORT");
-			} else if (obj==H5T_NATIVE_USHORT_g) {
-			    fprintf(out, "H5T_NATIVE_USHORT");
-			} else if (obj==H5T_NATIVE_INT_g) {
-			    fprintf(out, "H5T_NATIVE_INT");
-			} else if (obj==H5T_NATIVE_UINT_g) {
-			    fprintf(out, "H5T_NATIVE_UINT");
-			} else if (obj==H5T_NATIVE_LONG_g) {
-			    fprintf(out, "H5T_NATIVE_LONG");
-			} else if (obj==H5T_NATIVE_ULONG_g) {
-			    fprintf(out, "H5T_NATIVE_ULONG");
-			} else if (obj==H5T_NATIVE_LLONG_g) {
-			    fprintf(out, "H5T_NATIVE_LLONG");
-			} else if (obj==H5T_NATIVE_ULLONG_g) {
-			    fprintf(out, "H5T_NATIVE_ULLONG");
-			} else if (obj==H5T_NATIVE_FLOAT_g) {
-			    fprintf(out, "H5T_NATIVE_FLOAT");
-			} else if (obj==H5T_NATIVE_DOUBLE_g) {
-			    fprintf(out, "H5T_NATIVE_DOUBLE");
-			} else if (obj==H5T_NATIVE_LDOUBLE_g) {
-			    fprintf(out, "H5T_NATIVE_LDOUBLE");
-			} else if (obj==H5T_IEEE_F32BE_g) {
-			    fprintf(out, "H5T_IEEE_F32BE");
-			} else if (obj==H5T_IEEE_F32LE_g) {
-			    fprintf(out, "H5T_IEEE_F32LE");
-			} else if (obj==H5T_IEEE_F64BE_g) {
-			    fprintf(out, "H5T_IEEE_F64BE");
-			} else if (obj==H5T_IEEE_F64LE_g) {
-			    fprintf(out, "H5T_IEEE_F64LE");
-			} else if (obj==H5T_STD_I8BE_g) {
-			    fprintf(out, "H5T_STD_I8BE");
-			} else if (obj==H5T_STD_I8LE_g) {
-			    fprintf(out, "H5T_STD_I8LE");
-			} else if (obj==H5T_STD_I16BE_g) {
-			    fprintf(out, "H5T_STD_I16BE");
-			} else if (obj==H5T_STD_I16LE_g) {
-			    fprintf(out, "H5T_STD_I16LE");
-			} else if (obj==H5T_STD_I32BE_g) {
-			    fprintf(out, "H5T_STD_I32BE");
-			} else if (obj==H5T_STD_I32LE_g) {
-			    fprintf(out, "H5T_STD_I32LE");
-			} else if (obj==H5T_STD_I64BE_g) {
-			    fprintf(out, "H5T_STD_I64BE");
-			} else if (obj==H5T_STD_I64LE_g) {
-			    fprintf(out, "H5T_STD_I64LE");
-			} else if (obj==H5T_STD_U8BE_g) {
-			    fprintf(out, "H5T_STD_U8BE");
-			} else if (obj==H5T_STD_U8LE_g) {
-			    fprintf(out, "H5T_STD_U8LE");
-			} else if (obj==H5T_STD_U16BE_g) {
-			    fprintf(out, "H5T_STD_U16BE");
-			} else if (obj==H5T_STD_U16LE_g) {
-			    fprintf(out, "H5T_STD_U16LE");
-			} else if (obj==H5T_STD_U32BE_g) {
-			    fprintf(out, "H5T_STD_U32BE");
-			} else if (obj==H5T_STD_U32LE_g) {
-			    fprintf(out, "H5T_STD_U32LE");
-			} else if (obj==H5T_STD_U64BE_g) {
-			    fprintf(out, "H5T_STD_U64BE");
-			} else if (obj==H5T_STD_U64LE_g) {
-			    fprintf(out, "H5T_STD_U64LE");
-			} else if (obj==H5T_STD_B8BE_g) {
-			    fprintf(out, "H5T_STD_B8BE");
-			} else if (obj==H5T_STD_B8LE_g) {
-			    fprintf(out, "H5T_STD_B8LE");
-			} else if (obj==H5T_STD_B16BE_g) {
-			    fprintf(out, "H5T_STD_B16BE");
-			} else if (obj==H5T_STD_B16LE_g) {
-			    fprintf(out, "H5T_STD_B16LE");
-			} else if (obj==H5T_STD_B32BE_g) {
-			    fprintf(out, "H5T_STD_B32BE");
-			} else if (obj==H5T_STD_B32LE_g) {
-			    fprintf(out, "H5T_STD_B32LE");
-			} else if (obj==H5T_STD_B64BE_g) {
-			    fprintf(out, "H5T_STD_B64BE");
-			} else if (obj==H5T_STD_B64LE_g) {
-			    fprintf(out, "H5T_STD_B64LE");
-			} else if (obj==H5T_C_S1_g) {
-			    fprintf(out, "H5T_C_S1");
-			} else if (obj==H5T_FORTRAN_S1_g) {
-			    fprintf(out, "H5T_FORTRAN_S1");
-			} else {
-			    fprintf(out, "%ld", (long)obj);
-			    if (HDstrcmp (argname, "type")) {
-				fprintf (out, " (type)");
-			    }
-			}
-			break;
-		    case H5I_DATASPACE:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "space")) {
-			    fprintf (out, " (space)");
-			}
-			/*Save the rank of simple data spaces for arrays*/
-			{
-			    H5S_t *space = H5I_object(obj);
-			    if (H5S_SIMPLE==H5S_get_simple_extent_type(space)) {
-				asize[argno] = H5S_get_simple_extent_ndims(space);
-			    }
-			}
-			break;
-		    case H5I_DATASET:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "dset")) {
-			    fprintf (out, " (dset)");
-			}
-			break;
-		    case H5I_ATTR:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp (argname, "attr")) {
-			    fprintf (out, " (attr)");
-			}
-			break;
-		    case H5I_TEMPBUF:
-			fprintf(out, "%ld", (long)obj);
-			if (HDstrcmp(argname, "tbuf")) {
-			    fprintf(out, " (tbuf");
-			}
-			break;
-		    case H5I_REFERENCE:
-			fprintf(out, "%ld (reference)", (long)obj);
-			break;
-		    case H5I_VFL:
-			fprintf(out, "%ld (file driver)", (long)obj);
-			break;
-		    default:
-			fprintf(out, "%ld", (long)obj);
-			fprintf (out, " (unknown class)");
-			break;
+		    switch (H5I_GROUP(obj)) { /* Use internal H5I macro instead of function call */
+                        case H5I_BADID:
+                            fprintf (out, "%ld (error)", (long)obj);
+                            break;
+                        case H5I_FILE:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp (argname, "file")) {
+                                fprintf (out, " (file)");
+                            }
+                            break;
+                        case H5I_GROUP:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp (argname, "group")) {
+                                fprintf (out, " (group)");
+                            }
+                            break;
+                        case H5I_DATATYPE:
+                            if (obj==H5T_NATIVE_SCHAR_g) {
+                                fprintf(out, "H5T_NATIVE_SCHAR");
+                            } else if (obj==H5T_NATIVE_UCHAR_g) {
+                                fprintf(out, "H5T_NATIVE_UCHAR");
+                            } else if (obj==H5T_NATIVE_SHORT_g) {
+                                fprintf(out, "H5T_NATIVE_SHORT");
+                            } else if (obj==H5T_NATIVE_USHORT_g) {
+                                fprintf(out, "H5T_NATIVE_USHORT");
+                            } else if (obj==H5T_NATIVE_INT_g) {
+                                fprintf(out, "H5T_NATIVE_INT");
+                            } else if (obj==H5T_NATIVE_UINT_g) {
+                                fprintf(out, "H5T_NATIVE_UINT");
+                            } else if (obj==H5T_NATIVE_LONG_g) {
+                                fprintf(out, "H5T_NATIVE_LONG");
+                            } else if (obj==H5T_NATIVE_ULONG_g) {
+                                fprintf(out, "H5T_NATIVE_ULONG");
+                            } else if (obj==H5T_NATIVE_LLONG_g) {
+                                fprintf(out, "H5T_NATIVE_LLONG");
+                            } else if (obj==H5T_NATIVE_ULLONG_g) {
+                                fprintf(out, "H5T_NATIVE_ULLONG");
+                            } else if (obj==H5T_NATIVE_FLOAT_g) {
+                                fprintf(out, "H5T_NATIVE_FLOAT");
+                            } else if (obj==H5T_NATIVE_DOUBLE_g) {
+                                fprintf(out, "H5T_NATIVE_DOUBLE");
+                            } else if (obj==H5T_NATIVE_LDOUBLE_g) {
+                                fprintf(out, "H5T_NATIVE_LDOUBLE");
+                            } else if (obj==H5T_IEEE_F32BE_g) {
+                                fprintf(out, "H5T_IEEE_F32BE");
+                            } else if (obj==H5T_IEEE_F32LE_g) {
+                                fprintf(out, "H5T_IEEE_F32LE");
+                            } else if (obj==H5T_IEEE_F64BE_g) {
+                                fprintf(out, "H5T_IEEE_F64BE");
+                            } else if (obj==H5T_IEEE_F64LE_g) {
+                                fprintf(out, "H5T_IEEE_F64LE");
+                            } else if (obj==H5T_STD_I8BE_g) {
+                                fprintf(out, "H5T_STD_I8BE");
+                            } else if (obj==H5T_STD_I8LE_g) {
+                                fprintf(out, "H5T_STD_I8LE");
+                            } else if (obj==H5T_STD_I16BE_g) {
+                                fprintf(out, "H5T_STD_I16BE");
+                            } else if (obj==H5T_STD_I16LE_g) {
+                                fprintf(out, "H5T_STD_I16LE");
+                            } else if (obj==H5T_STD_I32BE_g) {
+                                fprintf(out, "H5T_STD_I32BE");
+                            } else if (obj==H5T_STD_I32LE_g) {
+                                fprintf(out, "H5T_STD_I32LE");
+                            } else if (obj==H5T_STD_I64BE_g) {
+                                fprintf(out, "H5T_STD_I64BE");
+                            } else if (obj==H5T_STD_I64LE_g) {
+                                fprintf(out, "H5T_STD_I64LE");
+                            } else if (obj==H5T_STD_U8BE_g) {
+                                fprintf(out, "H5T_STD_U8BE");
+                            } else if (obj==H5T_STD_U8LE_g) {
+                                fprintf(out, "H5T_STD_U8LE");
+                            } else if (obj==H5T_STD_U16BE_g) {
+                                fprintf(out, "H5T_STD_U16BE");
+                            } else if (obj==H5T_STD_U16LE_g) {
+                                fprintf(out, "H5T_STD_U16LE");
+                            } else if (obj==H5T_STD_U32BE_g) {
+                                fprintf(out, "H5T_STD_U32BE");
+                            } else if (obj==H5T_STD_U32LE_g) {
+                                fprintf(out, "H5T_STD_U32LE");
+                            } else if (obj==H5T_STD_U64BE_g) {
+                                fprintf(out, "H5T_STD_U64BE");
+                            } else if (obj==H5T_STD_U64LE_g) {
+                                fprintf(out, "H5T_STD_U64LE");
+                            } else if (obj==H5T_STD_B8BE_g) {
+                                fprintf(out, "H5T_STD_B8BE");
+                            } else if (obj==H5T_STD_B8LE_g) {
+                                fprintf(out, "H5T_STD_B8LE");
+                            } else if (obj==H5T_STD_B16BE_g) {
+                                fprintf(out, "H5T_STD_B16BE");
+                            } else if (obj==H5T_STD_B16LE_g) {
+                                fprintf(out, "H5T_STD_B16LE");
+                            } else if (obj==H5T_STD_B32BE_g) {
+                                fprintf(out, "H5T_STD_B32BE");
+                            } else if (obj==H5T_STD_B32LE_g) {
+                                fprintf(out, "H5T_STD_B32LE");
+                            } else if (obj==H5T_STD_B64BE_g) {
+                                fprintf(out, "H5T_STD_B64BE");
+                            } else if (obj==H5T_STD_B64LE_g) {
+                                fprintf(out, "H5T_STD_B64LE");
+                            } else if (obj==H5T_C_S1_g) {
+                                fprintf(out, "H5T_C_S1");
+                            } else if (obj==H5T_FORTRAN_S1_g) {
+                                fprintf(out, "H5T_FORTRAN_S1");
+                            } else {
+                                fprintf(out, "%ld", (long)obj);
+                                if (HDstrcmp (argname, "type")) {
+                                    fprintf (out, " (type)");
+                                }
+                            }
+                            break;
+                        case H5I_DATASPACE:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp (argname, "space")) {
+                                fprintf (out, " (space)");
+                            }
+                            /* Save the rank of simple data spaces for arrays */
+                            /* This may generate recursive call to the library... -QAK */
+                            {
+                                H5S_t *space = H5I_object(obj);
+                                if (H5S_SIMPLE==H5S_get_simple_extent_type(space)) {
+                                    asize[argno] = H5S_get_simple_extent_ndims(space);
+                                }
+                            }
+                            break;
+                        case H5I_DATASET:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp (argname, "dset")) {
+                                fprintf (out, " (dset)");
+                            }
+                            break;
+                        case H5I_ATTR:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp (argname, "attr")) {
+                                fprintf (out, " (attr)");
+                            }
+                            break;
+                        case H5I_TEMPBUF:
+                            fprintf(out, "%ld", (long)obj);
+                            if (HDstrcmp(argname, "tbuf")) {
+                                fprintf(out, " (tbuf");
+                            }
+                            break;
+                        case H5I_REFERENCE:
+                            fprintf(out, "%ld (reference)", (long)obj);
+                            break;
+                        case H5I_VFL:
+                            fprintf(out, "%ld (file driver)", (long)obj);
+                            break;
+                        default:
+                            fprintf(out, "%ld", (long)obj);
+                            fprintf (out, " (unknown class)");
+                            break;
 		    }
 		}
 	    }
@@ -2091,6 +2092,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
                 H5P_genclass_t *pclass;
 
                 /* Get the class name and print it */
+                /* This may generate recursive call to the library... -QAK */
                 if(NULL != (pclass = H5I_object(pclass_id)) &&
                         (class_name=H5P_get_class_name(pclass))!=NULL) {
 		    fprintf (out, class_name);

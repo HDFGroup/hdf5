@@ -192,6 +192,8 @@ New Features
       several hyperslab selection calls).
     * Removed H5P(get|set)_hyper_cache API function, since the property is no
       longer used.
+    * Changed internal error handling macros to reduce code size of library by
+      about 10-20%.
 
 Platforms Tested
 ================
