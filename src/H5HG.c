@@ -425,13 +425,13 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	} else if (H5HG_NCWFS==f->shared->ncwfs) {
 	    for (i=H5HG_NCWFS-1; i>=0; --i) {
 		if (f->shared->cwfs[i]->obj[0].size < heap->obj[0].size) {
-		    HDmemcpy (f->shared->cwfs+1, f->shared->cwfs, i * sizeof(H5HG_heap_t*));
+		    HDmemmove (f->shared->cwfs+1, f->shared->cwfs, i * sizeof(H5HG_heap_t*));
 		    f->shared->cwfs[0] = heap;
 		    break;
 		}
 	    }
 	} else {
-	    HDmemcpy (f->shared->cwfs+1, f->shared->cwfs, f->shared->ncwfs*sizeof(H5HG_heap_t*));
+	    HDmemmove (f->shared->cwfs+1, f->shared->cwfs, f->shared->ncwfs*sizeof(H5HG_heap_t*));
 	    f->shared->ncwfs += 1;
 	    f->shared->cwfs[0] = heap;
 	}

@@ -528,6 +528,7 @@ H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
     herr_t              ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pset_family_offset, FAIL);
+    H5TRACE2("e","ih",fapl_id,offset);
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
@@ -604,6 +605,7 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
     herr_t              ret_value=SUCCEED;      /* return value */
                                
     FUNC_ENTER_API(H5Pget_family_offset, FAIL);
+    H5TRACE2("e","i*h",fapl_id,offset);
                                             
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
@@ -680,6 +682,7 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     herr_t              ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER_API(H5Pset_multi_type, FAIL);
+    H5TRACE2("e","iMt",fapl_id,type);
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
@@ -756,6 +759,7 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
     herr_t              ret_value=SUCCEED;      /* return value */
                                 
     FUNC_ENTER_API(H5Pget_multi_type, FAIL);
+    H5TRACE2("e","i*Mt",fapl_id,type);
                                         
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
