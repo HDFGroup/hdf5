@@ -417,6 +417,15 @@ int GetTestNumErrs(void)
 
 
 /*
+ * Increment the number of testing errors
+ */
+void IncTestNumErrs(void)
+{
+    num_errs++;
+}
+
+
+/*
  * Retrieve the current Test Parameters pointer.
  */
 const void *GetTestParameters(void)
