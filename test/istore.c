@@ -37,8 +37,9 @@
 #define AT() printf ("   at %s:%d in %s()...\n",                            \
                      __FILE__, __LINE__, __FUNCTION__);
 
-size_t                  align_g[3] =
-{50, 50, 50};
+size_t align_g[3] = {50, 50, 50};
+size_t zero[H5O_LAYOUT_NDIMS];
+
 
 /*-------------------------------------------------------------------------
  * Function:    print_array
@@ -97,7 +98,7 @@ print_array(uint8 *array, size_t nx, size_t ny, size_t nz)
  *-------------------------------------------------------------------------
  */
 static int
-new_object(H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent /*out */ )
+new_object(H5F_t *f, const char *name, size_t ndims, H5G_entry_t *ent/*out*/)
 {
     H5O_layout_t            layout;
     intn                    i;
@@ -313,7 +314,7 @@ test_extend(H5F_t *f, const char *prefix,
         memset(buf, 128 + ctr, nelmts);
 
         /* Write to disk */
-        if (H5F_arr_write(f, &layout, offset, size, buf) < 0) {
+        if (H5F_arr_write(f, &layout, size, offset, zero, size, buf) < 0) {
             puts("*FAILED*");
             if (!isatty(1)) {
                 AT();
@@ -323,7 +324,7 @@ test_extend(H5F_t *f, const char *prefix,
         }
         /* Read from disk */
         memset(check, 0xff, nelmts);
-        if (H5F_arr_read(f, &layout, offset, size, check) < 0) {
+        if (H5F_arr_read(f, &layout, size, offset, zero, size, check) < 0) {
             puts("*FAILED*");
             if (!isatty(1)) {
                 AT();
@@ -356,7 +357,7 @@ test_extend(H5F_t *f, const char *prefix,
 
     /* Now read the entire array back out and check it */
     memset(buf, 0xff, nx * ny * nz);
-    if (H5F_arr_read(f, &layout, H5V_ZERO, whole_size, buf) < 0) {
+    if (H5F_arr_read(f, &layout, whole_size, zero, zero, whole_size, buf)<0) {
         puts("*FAILED*");
         if (!isatty(1)) {
             AT();
@@ -475,7 +476,7 @@ test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
         memset(buf, 128 + ctr, nx * ny * nz);
 
         /* write to disk */
-        if (H5F_arr_write(f, &layout, offset, size, buf) < 0) {
+        if (H5F_arr_write(f, &layout, size, offset, zero, size, buf) < 0) {
             puts("*FAILED*");
             if (!isatty(1)) {
                 AT();

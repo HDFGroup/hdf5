@@ -36,7 +36,7 @@
  */
 #define PABLO_MASK      H5AC_mask
 #define INTERFACE_INIT  NULL
-static int              interface_initialize_g = FALSE;         /*initialized? */
+static int              interface_initialize_g = FALSE;
 
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t          *current_cache_g = NULL;         /*for sorting */
@@ -179,7 +179,8 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
     unsigned                idx;
     herr_t                  status;
     void                   *thing = NULL;
-    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *, void *) = NULL;
+    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *,
+				      void *) = NULL;
     H5AC_slot_t            *slot = NULL;
     H5AC_t                 *cache = NULL;
 
@@ -340,7 +341,8 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 {
     uintn                   i;
     herr_t                  status;
-    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *, void *) = NULL;
+    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *,
+				      void *) = NULL;
     H5AC_slot_t            *slot;
     intn                   *map = NULL;
     intn                    nslots;
@@ -464,7 +466,8 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr, void *thing)
 {
     herr_t                  status;
     uintn                   idx;
-    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *, void *) = NULL;
+    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *,
+				      void *) = NULL;
     H5AC_slot_t            *slot = NULL;
     H5AC_t                 *cache = NULL;
 
@@ -533,7 +536,8 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type,
             const haddr_t *old_addr, const haddr_t *new_addr)
 {
     uintn                   old_idx, new_idx;
-    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *, void *);
+    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *,
+				      void *);
     herr_t                  status;
     H5AC_t                 *cache = NULL;
 
@@ -553,10 +557,12 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type,
         int                     i;
 
         for (i = 0; i < cache->slot[old_idx].nprots; i++) {
-            assert(H5F_addr_ne(old_addr, &(cache->slot[old_idx].prot[i].addr)));
+            assert(H5F_addr_ne(old_addr,
+			       &(cache->slot[old_idx].prot[i].addr)));
         }
         for (i = 0; i < cache->slot[new_idx].nprots; i++) {
-            assert(H5F_addr_ne(new_addr, &(cache->slot[new_idx].prot[i].addr)));
+            assert(H5F_addr_ne(new_addr,
+			       &(cache->slot[new_idx].prot[i].addr)));
         }
     }
 #endif
@@ -743,7 +749,8 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 {
     herr_t                  status;
     uintn                   idx;
-    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *, void *) = NULL;
+    herr_t                  (*flush) (H5F_t *, hbool_t, const haddr_t *,
+				      void *) = NULL;
     H5AC_t                 *cache = NULL;
     H5AC_slot_t            *slot = NULL;
 

@@ -101,37 +101,40 @@
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t        H5B_insert_helper(H5F_t *f, const haddr_t *addr,
                                           const H5B_class_t *type,
-                                     uint8 *lt_key, hbool_t *lt_key_changed,
+					  uint8 *lt_key,
+					  hbool_t *lt_key_changed,
                                           uint8 *md_key, void *udata,
-                                     uint8 *rt_key, hbool_t *rt_key_changed,
+					  uint8 *rt_key,
+					  hbool_t *rt_key_changed,
                                           haddr_t *retval);
 static herr_t           H5B_insert_child(H5F_t *f, const H5B_class_t *type,
-                                  H5B_t *bt, intn idx, const haddr_t *child,
+					 H5B_t *bt, intn idx,
+					 const haddr_t *child,
                                          H5B_ins_t anchor, void *md_key);
-static herr_t           H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
-                                  H5B_t *b);
-static H5B_t           *H5B_load(H5F_t *f, const haddr_t *addr, const void *_type,
-                                 void *udata);
+static herr_t           H5B_flush(H5F_t *f, hbool_t destroy,
+				  const haddr_t *addr, H5B_t *b);
+static H5B_t           *H5B_load(H5F_t *f, const haddr_t *addr,
+				 const void *_type, void *udata);
 static herr_t           H5B_decode_key(H5F_t *f, H5B_t *bt, intn idx);
 static herr_t           H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx);
 static size_t           H5B_nodesize(H5F_t *f, const H5B_class_t *type,
                                size_t *total_nkey_size, size_t sizeof_rkey);
-static herr_t           H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
-                                  const haddr_t *old_addr, void *udata,
-                                  haddr_t *new_addr /*out */ );
+static herr_t           H5B_split(H5F_t *f, const H5B_class_t *type,
+				  H5B_t *old_bt, const haddr_t *old_addr,
+				  void *udata, haddr_t *new_addr /*out*/ );
 #ifdef H5B_DEBUG
 static herr_t           H5B_assert(H5F_t *f, const haddr_t *addr,
                                    const H5B_class_t *type, void *udata);
 #endif
 
 /* H5B inherits cache-like properties from H5AC */
-static const H5AC_class_t H5AC_BT[1] =
-{
+static const H5AC_class_t H5AC_BT[1] = {
     {
         H5AC_BT_ID,
         (void *(*)(H5F_t *, const haddr_t *, const void *, void *)) H5B_load,
         (herr_t (*)(H5F_t *, hbool_t, const haddr_t *, void *)) H5B_flush,
-    }};
+    }
+};
 
 /* Interface initialization? */
 #define INTERFACE_INIT NULL
@@ -1101,8 +1104,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 
     } else if (cmp < 0 && idx <= 0 && bt->level > 0) {
         /*
-         * The value being inserted is less than any value in this tree.  Follow
-         * the minimum branch out of this node to a subtree.
+	 * The value being inserted is less than any value in this tree.
+	 * Follow the minimum branch out of this node to a subtree.
          */
         idx = 0;
         if (H5B_decode_keys(f, bt, idx) < 0) {
@@ -1206,8 +1209,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         }
         my_ins = H5B_INS_RIGHT;
         HDmemcpy(md_key, bt->key[idx + 1].nkey, type->sizeof_nkey);
-        if ((type->new) (f, H5B_INS_RIGHT, md_key, udata, bt->key[idx + 1].nkey,
-                         &child_addr /*out */ ) < 0) {
+        if ((type->new) (f, H5B_INS_RIGHT, md_key, udata,
+			 bt->key[idx + 1].nkey, &child_addr /*out */ ) < 0) {
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
                         "can't insert maximum leaf node");
         }
@@ -1284,13 +1287,16 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         if (H5B_INS_RIGHT == my_ins)
             idx++;
 
-        /* If this node is full then split it before inserting the new child. */
+        /*
+	 * If this node is full then split it before inserting the new child.
+	 */
         if (bt->nchildren == 2 * H5B_K(f, type)) {
             if (H5B_split(f, type, bt, addr, udata, new_node /*out */ ) < 0) {
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, H5B_INS_ERROR,
                             "can't split node");
             }
-            if (NULL == (twin = H5AC_protect(f, H5AC_BT, new_node, type, udata))) {
+            if (NULL == (twin = H5AC_protect(f, H5AC_BT, new_node, type,
+					     udata))) {
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR,
                             "can't load B-tree");
             }
@@ -1328,7 +1334,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
          * in the new node.
          */
         if (!bt->key[bt->nchildren].nkey) {
-            herr_t                  status = H5B_decode_key(f, bt, bt->nchildren);
+            herr_t status = H5B_decode_key(f, bt, bt->nchildren);
             assert(status >= 0);
         }
         cmp = (type->cmp2) (f, bt->key[bt->nchildren].nkey, udata,
@@ -1341,9 +1347,9 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 
   done:
     {
-        herr_t                  e1 = (bt && H5AC_unprotect(f, H5AC_BT, addr, bt) < 0);
-        herr_t                  e2 = (twin && H5AC_unprotect(f, H5AC_BT, new_node, twin) < 0);
-        if (e1 || e2) {         /*use vars to prevent short-circuit of side effects */
+        herr_t e1 = (bt && H5AC_unprotect(f, H5AC_BT, addr, bt) < 0);
+        herr_t e2 = (twin && H5AC_unprotect(f, H5AC_BT, new_node, twin) < 0);
+        if (e1 || e2) { /*use vars to prevent short-circuit of side effects */
             HRETURN_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR,
                           "unable to release node(s)");
         }
@@ -1403,8 +1409,11 @@ H5B_list(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
         }
     } else {
 
-        for (cur_addr = addr; !H5F_addr_defined(cur_addr); cur_addr = &next_addr) {
-            if (NULL == (bt = H5AC_protect(f, H5AC_BT, cur_addr, type, udata))) {
+        for (cur_addr = addr;
+	     !H5F_addr_defined(cur_addr);
+	     cur_addr = &next_addr) {
+            if (NULL == (bt = H5AC_protect(f, H5AC_BT, cur_addr, type,
+					   udata))) {
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL,
                             "unable to protect B-tree node");
             }
@@ -1610,7 +1619,7 @@ H5B_assert(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         haddr_t                 addr;
         int                     level;
         struct child_t         *next;
-    }                      *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
+    } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
     FUNC_ENTER(H5B_assert, FAIL);
     if (0 == ncalls++) {
@@ -1669,7 +1678,8 @@ H5B_assert(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
                 /* Check that the keys are monotonically increasing */
                 status = H5B_decode_keys(f, bt, i);
                 assert(status >= 0);
-                cmp = (type->cmp2) (f, bt->key[i].nkey, udata, bt->key[i + 1].nkey);
+                cmp = (type->cmp2) (f, bt->key[i].nkey, udata,
+				    bt->key[i + 1].nkey);
                 assert(cmp < 0);
             }
         }

@@ -28,30 +28,33 @@
 /* A null pointer is equivalent to a zero vector */
 #define H5V_ZERO        NULL
 
-size_t                  H5V_hyper_stride(size_t n, const size_t *size,
-                             const size_t *total_size, const size_t *offset,
-                                         intn *stride);
-hbool_t                 H5V_hyper_disjointp(size_t n,
-                                 const size_t *offset1, const size_t *size1,
-                                const size_t *offset2, const size_t *size2);
-hbool_t                 H5V_hyper_eq(size_t n, const size_t *offset1, const size_t *size1,
-                                const size_t *offset2, const size_t *size2);
-herr_t                  H5V_hyper_fill(size_t n, const size_t *total_size,
-                                   const size_t *offset, const size_t *size,
-                                       void *buf, uint8 val);
-herr_t                  H5V_hyper_copy(size_t n, const size_t *size,
-                     const size_t *dst_total_size, const size_t *dst_offset,
-                                   void *_dst, const size_t *src_total_size,
-                                const size_t *src_offset, const void *_src);
-herr_t                  H5V_stride_fill(size_t n, size_t elmt_size, const size_t *size,
-                          const intn *stride, void *_dst, uint8 fill_value);
-herr_t                  H5V_stride_copy(size_t n, size_t elmt_size, const size_t *_size,
-                                        const intn *dst_stride, void *_dst,
-                                  const intn *src_stride, const void *_src);
-herr_t                  H5V_stride_copy2(size_t nelmts, size_t elmt_size, size_t dst_n,
-                             const size_t *dst_size, const intn *dst_stride,
-                           void *_dst, size_t src_n, const size_t *src_size,
-                                  const intn *src_stride, const void *_src);
+size_t H5V_hyper_stride(size_t n, const size_t *size, const size_t *total_size,
+			const size_t *offset, intn *stride);
+hbool_t H5V_hyper_disjointp(size_t n, const size_t *offset1,
+			    const size_t *size1, const size_t *offset2,
+			    const size_t *size2);
+hbool_t H5V_hyper_eq(size_t n, const size_t *offset1, const size_t *size1,
+		     const size_t *offset2, const size_t *size2);
+herr_t H5V_hyper_fill(size_t n, const size_t *total_size, const size_t *offset,
+		      const size_t *size, void *buf, uint8 val);
+herr_t H5V_hyper_copy(size_t n, const size_t *size,
+		      const size_t *dst_total_size, const size_t *dst_offset,
+		      void *_dst, const size_t *src_total_size,
+		      const size_t *src_offset, const void *_src);
+herr_t H5V_stride_fill(size_t n, size_t elmt_size, const size_t *size,
+		       const intn *stride, void *_dst, uint8 fill_value);
+herr_t H5V_stride_copy(size_t n, size_t elmt_size, const size_t *_size,
+		       const intn *dst_stride, void *_dst,
+		       const intn *src_stride, const void *_src);
+herr_t H5V_stride_copy2(size_t nelmts, size_t elmt_size, size_t dst_n,
+			const size_t *dst_size, const intn *dst_stride,
+			void *_dst, size_t src_n, const size_t *src_size,
+			const intn *src_stride, const void *_src);
+herr_t H5V_stride_optimize1(size_t *np, size_t *elmt_size, size_t *size,
+			    intn *stride1);
+herr_t H5V_stride_optimize2(size_t *np, size_t *elmt_size, size_t *size,
+			    intn *stride1, intn *stride2);
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5V_vector_reduce_product
