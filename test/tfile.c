@@ -175,6 +175,7 @@ test_file_create(void)
        hid_t       dataset_id, dataspace_id;  /* identifiers */
        hsize_t     dims[F2_RANK];
        int         data[F2_DIM0][F2_DIM1];
+       unsigned i,j;
 
        /* Create the data space for the dataset. */
        dims[0] = F2_DIM0; 
@@ -185,6 +186,10 @@ test_file_create(void)
        /* Create the dataset. */
        dataset_id = H5Dcreate(fid2, "/dset", H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT);
        CHECK(dataset_id, FAIL, "H5Dcreate");
+
+       for(i=0; i<F2_DIM0; i++)
+           for(j=0; j<F2_DIM1; j++)
+               data[i][j]=i*10+j;
 
        /* Write data to the new dataset */
        ret = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
