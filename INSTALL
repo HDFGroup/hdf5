@@ -32,12 +32,13 @@
 	5.3.1. Specifying the installation directories
 	5.3.2. Using an alternate C compiler
 	5.3.3. Additional compilation flags
-	5.3.4. Specifying other programs
-	5.3.5. Specifying other libraries and headers
-	5.3.6. Static versus shared linking
-	5.3.7. Optimization versus symbolic debugging
-	5.3.8. Large (>2GB) vs. small (<2GB) file capability
-	5.3.9. Parallel vs. serial library
+	5.3.4. Compiling HDF5 wrapper libraries
+	5.3.5. Specifying other programs
+	5.3.6. Specifying other libraries and headers
+	5.3.7. Static versus shared linking
+	5.3.8. Optimization versus symbolic debugging
+	5.3.9. Large (>2GB) vs. small (<2GB) file capability
+	5.3.10. Parallel vs. serial library
 	5.4. Building
 	5.5. Testing
 	5.6. Installing
@@ -146,13 +147,13 @@
 	$ tar xf hdf5-1.2.0.tar
 
 5.1.2. Compressed tar archive (*.tar.Z)
-	$ uncompress -c <hdf5-1.2.0.tar.Z |tar xf -
+	$ uncompress -c < hdf5-1.2.0.tar.Z | tar xf -
 
 5.1.3. Gzip'd tar archive (*.tar.gz)
-	$ gunzip <hdf5-1.2.0.tar.gz |tar xf -
+	$ gunzip < hdf5-1.2.0.tar.gz | tar xf -
 
 5.1.4. Bzip'd tar archive (*.tar.bz2)
-	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
+	$ bunzip2 < hdf5-1.2.0.tar.gz | tar xf -
 
 5.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than
@@ -247,7 +248,27 @@
 
 	    $ CFLAGS=-g ./confgure --enable-production
 
-5.3.4. Specifying other programs
+5.3.4. Compiling HDF5 wrapper libraries
+	One can optionally build the Fortran 90 and/or C++ interface to
+	the HDF5 C library. By default, both options are disabled. To
+	build them, specify `--enable-fortran' and `--enable-cxx'.
+
+	    $ ./configure --enable-fortran
+	    $ ./configure --enable-cxx
+	
+	Configuration will halt if a working Fortran 90 compiler or C++
+	compiler is not found. Currently, the Fortran 90 configure tests
+	for these compilers in order: f90, pgf90, f95. To use an
+	alternative compiler specify it with the F9X variable:
+	
+	    $ F9X=/usr/local/bin/g95 ./configure --enable-fortran
+	
+	Note: The Fortran 90 and C++ interfaces may not support all the
+	platforms the main HDF5 library supports. The Fortran 90
+	interface supports parallel HDF5 while the C++ interface does
+	not.
+
+5.3.5. Specifying other programs
 	The build system has been tuned for use with GNU make but
 	works also with other versions of make.  If the `make' command 
 	runs a non-GNU version but a GNU version is available under a
@@ -265,12 +286,11 @@
 
 	The HDF5 library, include files, and utilities are installed
 	during `make install' (described below) with a BSD-compatible
-	install program detected automatically by configure. If none
-	is found then the shell script bin/install-sh is
-	used. Configure doesn't check that the install script actually 
-	works, but if a bad install is detected on your system (e.g.,
-	on the ASCI blue machine as of March 2, 1999) you have two
-	choices:
+	install program detected automatically by configure. If none is
+	found then the shell script bin/install-sh is used. Configure
+	doesn't check that the install script actually works, but if a
+	bad install is detected on your system (e.g., on the ASCI blue
+	machine as of March 2, 1999) you have two choices:
 
 	    1. Copy the bin/install-sh program to your $HOME/bin
 	       directory, name it `install', and make sure that
@@ -284,7 +304,7 @@
 	       program to also change file ownership and/or access
 	       permissions.
 
-5.3.5. Specifying other libraries and headers
+5.3.6. Specifying other libraries and headers
 	Configure searches the standard places (those places known by
 	the systems compiler) for include files and header
 	files. However, additional directories can be specified by
@@ -311,24 +331,28 @@
 	      LDFLAGS=-L/usr/unsup/lib \
 	      ./configure
 
-        The HDF5-to-HDF4 and HDF4-to-HDF5 conversion tool requires the HDF4 
-	library and 
-        header files which are detected the same way as zlib. The
-        switch to give to configure is `--with-hdf4'.  Note that HDF5
-        requires a newer version of zlib than the one shipped with
-        some versions of HDF4. Also, unless you have the "correct"
-        version of hdf4 the confidence testing will fail in the tools
-        directory.
+	The HDF5-to-HDF4 and HDF4-to-HDF5 conversion tool requires the
+	HDF4 library and header files which are detected the same way as
+	zlib. The switch to give to configure is `--with-hdf4'.  Note
+	that HDF5 requires a newer version of zlib than the one shipped
+	with some versions of HDF4. Also, unless you have the "correct"
+	version of hdf4 the confidence testing will fail in the tools
+	directory.
 
-5.3.6. Static versus shared linking
+5.3.7. Static versus shared linking
 	The build process will create static libraries on all systems
 	and shared libraries on systems that support dynamic linking
 	to a sufficient degree.  Either form of library may be
 	suppressed by saying `--disable-static' or `--disable-shared'.
 
 	    $ ./configure --disable-shared
+	
+	To build only statically linked executables, on platforms which
+	support shared libraries, use the `--enable-static-exec'.
 
-5.3.7. Optimization versus symbolic debugging
+	    $ ./configure --enable-static-exec
+
+5.3.8. Optimization versus symbolic debugging
 	The library can be compiled to provide symbolic debugging
 	support so it can be debugged with gdb, dbx, ddd, etc or it
 	can be compiled with various optimizations.  To compile for
@@ -367,7 +391,7 @@
 	releases). The tracing must also be enabled at runtime to see
 	any output (see Debugging.html).
 
-5.3.8. Large (>2GB) vs. small (<2GB) file capability
+5.3.9. Large (>2GB) vs. small (<2GB) file capability
 	In order to read or write files that could potentially be
 	larger than 2GB it is necessary to use the non-ANSI `long
 	long' data type on some platforms. However, some compilers
@@ -378,7 +402,7 @@
 
 	    $ ./configure --disable-hsizet
 
-5.3.9. Parallel vs. serial library
+5.3.10. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
@@ -395,7 +419,7 @@
 	must be used here.
 
 	When using GNU make you can add `-j -l6' to the make command
-	to compile in arallel on SMP machines. Do not give a number
+	to compile in parallel on SMP machines. Do not give a number
 	after th `-j' since GNU make will turn it off for recursive
 	invocations of make.
 
