@@ -2618,6 +2618,164 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_can_extend
+ *
+ * Purpose:	Check if a block in the file can be extended.
+ *
+ *		This is a simple check currently, which only checks for the
+ *              block being at the end of the file.  A more sophisticated check
+ *              would also use the free space list to see if there is a block
+ *              appropriately placed to accomodate the space requested.
+ *
+ * Return:	Success:	TRUE(1)/FALSE(0)
+ *
+ * 		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, June 11, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FD_can_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t UNUSED extra_requested)
+{
+    haddr_t     eoa;                    /* End of address space in the file */
+    htri_t      ret_value=FALSE;        /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_can_extend, FAIL)
+
+    /* Retrieve the end of the address space */
+    if (HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+
+    /* Check if the block is exactly at the end of the file */
+    if((addr+size)==eoa)
+        HGOTO_DONE(TRUE)
+    /* Check if block is inside the metadata or small data accumulator */
+    else {
+        if(type!=H5FD_MEM_DRAW) {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+                /* If the metadata block is at the end of the file, and
+                 * the block to test adjoins the beginning of the metadata
+                 * block, then it's extendable
+                 */
+                if (file->eoma + file->cur_meta_block_size == eoa &&
+                        (addr+size)==file->eoma)
+                    HGOTO_DONE(TRUE)
+            } /* end if */
+        } /* end if */
+        else {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+                /* If the small data block is at the end of the file, and
+                 * the block to test adjoins the beginning of the small data
+                 * block, then it's extendable
+                 */
+                if (file->eosda + file->cur_sdata_block_size == eoa &&
+                        (addr+size)==file->eosda)
+                    HGOTO_DONE(TRUE)
+            } /* end if */
+        } /* end else */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_can_extend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_extend
+ *
+ * Purpose:	Extend a block in the file.
+ *
+ *		This is simple code currently, which only checks for the
+ *              block being at the end of the file.  A more sophisticated check
+ *              would also use the free space list to see if there is a block
+ *              appropriately placed to accomodate the space requested.
+ *
+ * Return:	Success:	TRUE(1)/FALSE(0)
+ *
+ * 		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
+{
+    haddr_t     eoa;                    /* End of address space in the file */
+    hbool_t     update_eoma=FALSE;      /* Whether we need to update the eoma */
+    hbool_t     update_eosda=FALSE;     /* Whether we need to update the eosda */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5FD_extend, FAIL)
+
+    /* Retrieve the end of the address space */
+    if (HADDR_UNDEF==(eoa=H5FD_get_eoa(file)))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+
+    /* Check if the block is exactly at the end of the file */
+    /* (Check if block is inside the metadata or small data accumulator) */
+    if((addr+size)!=eoa) {
+        if(type!=H5FD_MEM_DRAW) {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA) {
+                /* If the metadata block is at the end of the file, and
+                 * the block to test adjoins the beginning of the metadata
+                 * block, then it's extendable
+                 */
+                if (file->eoma + file->cur_meta_block_size == eoa &&
+                        (addr+size)==file->eoma)
+                    update_eoma=TRUE;
+                else
+                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+            } /* end if */
+            else
+                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+        } /* end if */
+        else {
+            if (file->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA) {
+                /* If the small data block is at the end of the file, and
+                 * the block to test adjoins the beginning of the small data
+                 * block, then it's extendable
+                 */
+                if (file->eosda + file->cur_sdata_block_size == eoa &&
+                        (addr+size)==file->eosda)
+                    update_eosda=TRUE;
+                else
+                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+            } /* end if */
+            else
+                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "can't extend block")
+        } /* end else */
+    } /* end else */
+
+    /* Check for overflowing the file */
+    if (H5F_addr_overflow(eoa, extra_requested) || eoa + extra_requested > file->maxaddr)
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+
+    /* Extend the file */
+    eoa += extra_requested;
+    if (file->cls->set_eoa(file, eoa) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+
+    /* Update the metadata and/or small data block */
+    assert(!(update_eoma && update_eosda));
+    if(update_eoma)
+        file->eoma+=extra_requested;
+    if(update_eosda)
+        file->eosda+=extra_requested;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_extend() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDget_eoa
  *
  * Purpose:	Returns the address of the first byte after the last

@@ -209,3 +209,79 @@ H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_can_extend
+ *
+ * Purpose:	Check if a block in the file can be extended.
+ *
+ *		This is a simple check currently, which only checks for the
+ *              block being at the end of the file.  A more sophisticated check
+ *              would also use the free space list to see if there is a block
+ *              appropriately placed to accomodate the space requested.
+ *
+ * Return:	Success:	TRUE(1)/FALSE(0)
+ *
+ * 		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, June 11, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5MF_can_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
+{
+    htri_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5MF_can_extend, FAIL);
+
+    /* Convert old relative address to absolute address */
+    addr += f->shared->base_addr;
+
+    /* Pass the request down to the virtual file layer */
+    if((ret_value=H5FD_can_extend(f->shared->lf, type, addr, size, extra_requested))<0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate new file memory");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5MF_can_extend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MF_extend
+ *
+ * Purpose:	Extend a block in the file.
+ *
+ * Return:	Success:	TRUE(1)/FALSE(0)
+ *
+ * 		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5MF_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hsize_t extra_requested)
+{
+    htri_t	ret_value;      /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5MF_extend, FAIL);
+
+    /* Convert old relative address to absolute address */
+    addr += f->shared->base_addr;
+
+    /* Pass the request down to the virtual file layer */
+    if((ret_value=H5FD_extend(f->shared->lf, type, addr, size, extra_requested))<0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate new file memory");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5MF_extend() */
+

@@ -68,6 +68,12 @@
 #define H5HG_MINSIZE	4096
 
 /*
+ * Limit global heap collections to the some reasonable size.  This is
+ * fairly arbitrary...
+ */
+#define H5HG_MAXSIZE	65536
+
+/*
  * Maximum length of the CWFS list, the list of remembered collections that
  * have free space.
  */
@@ -352,8 +358,30 @@ H5HG_load (H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	    uint8_t *begin = p;
 
 	    UINT16DECODE (p, idx);
-	    assert (idx<heap->nalloc);
+
+            /* Check if we need more room to store heap objects */
+            if(idx>=heap->nalloc) {
+                size_t new_alloc;       /* New allocation number */
+                H5HG_obj_t *new_obj;	/* New array of object descriptions */
+
+                /* Determine the new number of objects to index */
+                new_alloc=MAX(heap->nalloc*2,(idx+1));
+
+                /* Reallocate array of objects */
+                if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+                /* Reset new objects to zero */
+                HDmemset(&new_obj[heap->nalloc],0,sizeof(H5HG_obj_t)*(new_alloc-heap->nalloc));
+
+                /* Update heap information */
+                heap->nalloc=new_alloc;
+                heap->obj=new_obj;
+            } /* end if */
+
+            /* Check that we haven't double-allocated an index */
 	    assert (NULL==heap->obj[idx].begin);
+
 	    UINT16DECODE (p, heap->obj[idx].nrefs);
 	    p += 4; /*reserved*/
 	    H5F_DECODE_LENGTH (f, p, heap->obj[idx].size);
@@ -561,13 +589,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static unsigned
-H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
+H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, size_t size)
 {
     unsigned	idx;
     uint8_t	*p = NULL;
     size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
+    unsigned ret_value;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HG_alloc);
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_alloc);
 
     /* Check args */
     assert (heap);
@@ -577,11 +606,29 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
      * Find an ID for the new object. ID zero is reserved for the free space
      * object.
      */
-    for (idx=1; idx<heap->nalloc; idx++) {
+    for (idx=1; idx<heap->nalloc; idx++)
 	if (NULL==heap->obj[idx].begin)
             break;
-    }
-    assert (idx < heap->nalloc);
+
+    /* Check if we need more room to store heap objects */
+    if(idx>=heap->nalloc) {
+        size_t new_alloc;       /* New allocation number */
+        H5HG_obj_t *new_obj;	/* New array of object descriptions */
+
+        /* Determine the new number of objects to index */
+        new_alloc=MAX(heap->nalloc*2,(idx+1));
+
+        /* Reallocate array of objects */
+        if (NULL==(new_obj = H5FL_SEQ_REALLOC (H5HG_obj_t, heap->obj, new_alloc)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
+
+        /* Reset new objects to zero */
+        HDmemset(&new_obj[heap->nalloc],0,sizeof(H5HG_obj_t)*(new_alloc-heap->nalloc));
+
+        /* Update heap information */
+        heap->nalloc=new_alloc;
+        heap->obj=new_obj;
+    } /* end if */
 
     /* Initialize the new object */
     heap->obj[idx].nrefs = 0;
@@ -596,16 +643,10 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     /* Fix the free space object */
     if (need==heap->obj[0].size) {
 	/*
-	 * All free space has been exhausted from this collection. Remove the
-	 * heap from the CWFS list.
+	 * All free space has been exhausted from this collection.
 	 */
 	heap->obj[0].size = 0;
 	heap->obj[0].begin = NULL;
-	if (cwfsno>=0) {
-	    f->shared->ncwfs -= 1;
-	    HDmemmove (f->shared->cwfs+cwfsno, f->shared->cwfs+cwfsno+1,
-		       (f->shared->ncwfs-cwfsno)*sizeof(H5HG_heap_t*));
-	}
 		
     } else if (heap->obj[0].size-need >= H5HG_SIZEOF_OBJHDR (f)) {
 	/*
@@ -631,9 +672,103 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	assert(H5HG_ISALIGNED(heap->obj[0].size));
     }
 
+    /* Mark the heap as dirty */
     heap->cache_info.dirty = 1;
-    FUNC_LEAVE_NOAPI(idx);
+
+    /* Set the return value */
+    ret_value=idx;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HG_extend
+ *
+ * Purpose:	Extend a heap to hold an object of SIZE bytes.
+ *		SIZE is the exact size of the object data to be
+ *		stored. It will be increased to make room for the object
+ *		header and then rounded up for alignment.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, June 12, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
+{
+    size_t  need;                   /* Actual space needed to store object */
+    size_t  old_size;               /* Previous size of the heap's chunk */
+    uint8_t *new_chunk=NULL;        /* Pointer to new chunk information */
+    uint8_t *p = NULL;              /* Pointer to raw heap info */
+    unsigned u;                     /* Local index variable */
+    herr_t  ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_extend);
+
+    /* Check args */
+    assert (f);
+    assert (heap);
+
+    /* Compute total space need to add to this heap */
+    need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
+
+    /* Decrement the amount needed in the heap by the amount of free space available */
+    assert(need>heap->obj[0].size);
+    need -= heap->obj[0].size;
+
+    /* Don't do anything less than double the size of the heap */
+    need = MAX(heap->size,need);
+
+    /* Extend the space allocated for this heap on disk */
+    if(H5MF_extend(f,H5FD_MEM_GHEAP,heap->addr,(hsize_t)heap->size,(hsize_t)need)<0)
+	HGOTO_ERROR (H5E_HEAP, H5E_NOSPACE, FAIL, "can't extend heap on disk");
+
+    /* Re-allocate the heap information in memory */
+    if (NULL==(new_chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size+need)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "new heap allocation failed");
+
+    /* Adjust the size of the heap */
+    old_size=heap->size;
+    heap->size+=need;
+
+    /* Encode the new size of the heap */
+    p = new_chunk + H5HG_SIZEOF_MAGIC + 1 /* version */ + 3 /* reserved */;
+    H5F_ENCODE_LENGTH (f, p, heap->size);
+
+    /* Move the pointers to the existing objects to their new locations */
+    for (u=0; u<heap->nalloc; u++)
+        if(heap->obj[u].begin)
+            heap->obj[u].begin = new_chunk + (heap->obj[u].begin - heap->chunk);
+
+    /* Update the heap chunk pointer now */
+    heap->chunk=new_chunk;
+
+    /* Update the free space information for the heap  */
+    heap->obj[0].size+=need;
+    if(heap->obj[0].begin==NULL)
+        heap->obj[0].begin=heap->chunk+old_size;
+    p = heap->obj[0].begin;
+    UINT16ENCODE(p, 0);	/*id*/
+    UINT16ENCODE(p, 0);	/*nrefs*/
+    UINT32ENCODE(p, 0);	/*reserved*/
+    H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
+    assert(H5HG_ISALIGNED(heap->obj[0].size));
+
+    /* Mark the heap as dirty */
+    heap->cache_info.dirty = 1;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5HG_extend() */
 
 
 /*-------------------------------------------------------------------------
@@ -667,6 +802,7 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     int	cwfsno;
     unsigned	idx;
     H5HG_heap_t	*heap = NULL;
+    hbool_t     found=0;        /* Flag to indicate a heap with enough space was found */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5HG_insert, FAIL);
@@ -683,35 +819,53 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
     for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
 	if (f->shared->cwfs[cwfsno]->obj[0].size>=need) {
-	    /*
-	     * Found. Move the collection forward in the CWFS list.
-	     */
-	    heap = f->shared->cwfs[cwfsno];
-	    if (cwfsno>0) {
-		H5HG_heap_t *tmp = f->shared->cwfs[cwfsno];
-		f->shared->cwfs[cwfsno] = f->shared->cwfs[cwfsno-1];
-		f->shared->cwfs[cwfsno-1] = tmp;
-		--cwfsno;
-	    }
+            found=1;
 	    break;
-	}
-    }
+	} /* end if */
+    } /* end for */
+
+    /*
+     * If we didn't find any collection with enough free space the check if
+     * we can extend any of the collections to make enough room.
+     */
+    if (!found) {
+        for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
+            if((f->shared->cwfs[cwfsno]->size+need)<=H5HG_MAXSIZE && H5MF_can_extend(f,H5FD_MEM_GHEAP,f->shared->cwfs[cwfsno]->addr,(hsize_t)f->shared->cwfs[cwfsno]->size,(hsize_t)need)) {
+                if(H5HG_extend(f,f->shared->cwfs[cwfsno],size)<0)
+                    HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL, "unable to extend global heap collection");
+                found=1;
+                break;
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
     /*
      * If we didn't find any collection with enough free space then allocate a
      * new collection large enough for the message plus the collection header.
      */
-    if (cwfsno>=f->shared->ncwfs) {
+    if (!found) {
 	if (NULL==(heap=H5HG_create (f, dxpl_id, need+H5HG_SIZEOF_HDR (f))))
 	    HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL, "unable to allocate a global heap collection");
 	assert (f->shared->ncwfs>0);
 	assert (f->shared->cwfs[0]==heap);
 	assert (f->shared->cwfs[0]->obj[0].size >= need);
 	cwfsno = 0;
-    }
+    } /* end if */
+    else {
+        /* Found a heap with enough space */
+        heap = f->shared->cwfs[cwfsno];
+
+        /* Move the collection forward in the CWFS list, if it's not already at the front */
+        if (cwfsno>0) {
+            H5HG_heap_t *tmp = f->shared->cwfs[cwfsno];
+            f->shared->cwfs[cwfsno] = f->shared->cwfs[cwfsno-1];
+            f->shared->cwfs[cwfsno-1] = tmp;
+            --cwfsno;
+        } /* end if */
+    } /* end else */
     
     /* Split the free space to make room for the new object */
-    idx = H5HG_alloc (f, heap, cwfsno, size);
+    idx = H5HG_alloc (f, heap, size);
     assert (idx>0);
     
     /* Copy data into the heap */
