@@ -126,6 +126,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 
     /* Check args */
     assert(space);
+    assert(space->extent.u.simple.rank);
     assert(offset);
 
     /* Allocate space for new offset */
@@ -178,10 +179,14 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 /* Need to copy order information still */
 
     /* Copy offset information */
-    if (NULL==(dst->select.offset = H5FL_ARR_CALLOC(hssize_t,src->extent.u.simple.rank)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    if(src->select.offset!=NULL)
-        HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));
+    if(src->extent.u.simple.rank>0) {
+        if (NULL==(dst->select.offset = H5FL_ARR_CALLOC(hssize_t,src->extent.u.simple.rank)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        if(src->select.offset!=NULL)
+            HDmemcpy(dst->select.offset,src->select.offset,(src->extent.u.simple.rank*sizeof(hssize_t)));
+    } /* end if */
+    else
+        dst->select.offset=NULL;
 
     /* Perform correct type of copy based on the type of selection */
     switch (src->extent.type) {
@@ -630,12 +635,16 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     /* Save the dataspace's rank */
     sel_iter->rank=space->extent.u.simple.rank;
 
-    /* Allocate room for the dataspace dimensions */
-    sel_iter->dims = H5FL_ARR_MALLOC(hsize_t,sel_iter->rank);
-    assert(sel_iter->dims);
+    if(sel_iter->rank>0) {
+        /* Allocate room for the dataspace dimensions */
+        sel_iter->dims = H5FL_ARR_MALLOC(hsize_t,sel_iter->rank);
+        assert(sel_iter->dims);
 
-    /* Keep a copy of the dataspace dimensions */
-    HDmemcpy(sel_iter->dims,space->extent.u.simple.size,sel_iter->rank*sizeof(hsize_t));
+        /* Keep a copy of the dataspace dimensions */
+        HDmemcpy(sel_iter->dims,space->extent.u.simple.size,sel_iter->rank*sizeof(hsize_t));
+    } /* end if */
+    else
+        sel_iter->dims = NULL;
 
     /* Call initialization routine for selection type */
     ret_value= (*space->select.iter_init)(sel_iter, space, elmt_size);
