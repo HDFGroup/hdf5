@@ -525,7 +525,7 @@ h5_fileaccess(void)
 
 	memset(memb_map, 0, sizeof memb_map);
 	memset(memb_fapl, 0, sizeof memb_fapl);
-	memset(memb_name, 0, sizeof memb_name);
+	memset((void*)(&memb_name[0]), 0, sizeof memb_name);
 	memset(memb_addr, 0, sizeof memb_addr);
 
 	assert(strlen(multi_letters)==H5FD_MEM_NTYPES);
@@ -543,7 +543,7 @@ h5_fileaccess(void)
     } else if (!strcmp(name, "family")) {
 	/* Family of files, each 1MB and using the default driver */
 	if ((val=strtok(NULL, " \t\n\r"))) {
-	    fam_size = strtod(val, NULL) * 1024*1024;
+	    fam_size = (hsize_t)(strtod(val, NULL) * 1024*1024);
 	}
 	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0) return -1;
     } else if (!strcmp(name, "log")) {

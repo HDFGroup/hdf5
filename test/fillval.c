@@ -400,7 +400,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     for (i=0; i<1000; i++) {
 	for (j=0, odd=0; j<5; j++) {
 	    hs_offset[j] = rand() % cur_size[j];
-	    odd += hs_offset[j]%2;
+	    odd += (int)(hs_offset[j]%2);
 	}
 	should_be = odd ? fillval : 9999;
 	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
@@ -598,7 +598,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     for (i=0; i<1000; i++) {
 	for (j=0, odd=0; j<5; j++) {
 	    hs_offset[j] = rand() % cur_size[j];
-	    odd += hs_offset[j]%2;
+	    odd += (int)(hs_offset[j]%2);
 	}
 	should_be = odd ? fillval : 9999;
 	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
@@ -632,7 +632,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 	    if ((hsize_t)hs_offset[j]>=cur_size[j]) {
 		odd = 1;
 	    } else {
-		odd += hs_offset[j]%2;
+		odd += (int)(hs_offset[j]%2);
 	    }
 	}
 	
