@@ -1,0 +1,51 @@
+#############################
+Expected output for 'h5dump --xml tvldtypes3.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Dataset Name="Dataset1" OBJ-XID="/Dataset1" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="4" MaxDimSize="4"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <CompoundType>
+            <Field FieldName="i">
+               <DataType>
+                  <AtomicType>
+                     <IntegerType ByteOrder="LE" Sign="true" Size="4" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="f">
+               <DataType>
+                  <AtomicType>
+                     <FloatType ByteOrder="LE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                  </AtomicType>
+               </DataType>
+            </Field>
+            <Field FieldName="v">
+               <DataType>
+                  <VLType>
+                     <DataType>
+                        <AtomicType>
+                           <IntegerType ByteOrder="LE" Sign="false" Size="4" />
+                        </AtomicType>
+                     </DataType>
+                  </VLType>
+               </DataType>
+            </Field>
+         </CompoundType>
+      </DataType>
+   <!-- Note: format of compound data not specified -->
+      <Data>
+         <DataFromFile>
+         0 0  0  10 6.66667  10 11  20 13.3333  20 21 22  30 20  30 31 32 33 
+         </DataFromFile>
+      </Data>
+   </Dataset>
+</RootGroup>
+</HDF5-File>

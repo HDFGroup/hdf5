@@ -1,0 +1,11 @@
+#############################
+Expected output for 'h5dump --xml tslink.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <SoftLink LinkName="slink1" Target="somevalue" TargetObj="/somevalue" OBJ-XID="/slink1" Source="root"/>
+   <SoftLink LinkName="slink2" Target="linkvalue" TargetObj="/linkvalue" OBJ-XID="/slink2" Source="root"/>
+</RootGroup>
+</HDF5-File>

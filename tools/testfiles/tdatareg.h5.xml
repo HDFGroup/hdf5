@@ -1,0 +1,54 @@
+#############################
+Expected output for 'h5dump --xml tdatareg.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Dataset Name="Dataset1" OBJ-XID="/Dataset1" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="4" MaxDimSize="4"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <AtomicType>
+            <ReferenceType>
+               <ObjectReferenceType />
+            </ReferenceType>
+         </AtomicType>
+      </DataType>
+   <Data>
+   <DataFromFile>
+   </DataFromFile>
+   </Data>
+   </Dataset>
+   <Dataset Name="Dataset2" OBJ-XID="/Dataset2" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="2">
+            <Dimension  DimSize="10" MaxDimSize="10"/>
+            <Dimension  DimSize="10" MaxDimSize="10"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <AtomicType>
+            <IntegerType ByteOrder="BE" Sign="false" Size="1" />
+         </AtomicType>
+      </DataType>
+      <Data>
+         <DataFromFile>
+         0 3 6 9 12 15 18 21 24 27 
+         30 33 36 39 42 45 48 51 54 57 
+         60 63 66 69 72 75 78 81 84 87 
+         90 93 96 99 102 105 108 111 114 117 
+         120 123 126 129 132 135 138 141 144 147 
+         150 153 156 159 162 165 168 171 174 177 
+         180 183 186 189 192 195 198 201 204 207 
+         210 213 216 219 222 225 228 231 234 237 
+         240 243 246 249 252 255 2 5 8 11 
+         14 17 20 23 26 29 32 35 38 41
+         </DataFromFile>
+      </Data>
+   </Dataset>
+</RootGroup>
+</HDF5-File>

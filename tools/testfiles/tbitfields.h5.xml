@@ -1,0 +1,48 @@
+#############################
+Expected output for 'h5dump --xml tbitfields.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Group Name="typetests" OBJ-XID="/typetests" Parents="/" >
+      <Dataset Name="bitfield_1" OBJ-XID="/typetests/bitfield_1" Parents="/typetests">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="32" MaxDimSize="32"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <BitfieldType ByteOrder="LE" Size="1"/>
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0xff 0xfe 0xfd 0xfc 0xfb 0xfa 0xf9 0xf8 0xf7 0xf6 0xf5 0xf4 0xf3 
+            0xf2 0xf1 0xf0 0xef 0xee 0xed 0xec 0xeb 0xea 0xe9 0xe8 0xe7 0xe6 
+            0xe5 0xe4 0xe3 0xe2 0xe1 0xe0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+      <Dataset Name="bitfield_2" OBJ-XID="/typetests/bitfield_2" Parents="/typetests">
+         <Dataspace>
+            <SimpleDataspace Ndims="1">
+               <Dimension  DimSize="16" MaxDimSize="16"/>
+            </SimpleDataspace>
+         </Dataspace>
+         <DataType> 
+            <AtomicType>
+               <BitfieldType ByteOrder="LE" Size="2"/>
+            </AtomicType>
+         </DataType>
+         <Data>
+            <DataFromFile>
+            0xfffe 0xfdfc 0xfbfa 0xf9f8 0xf7f6 0xf5f4 0xf3f2 0xf1f0 0xefee 
+            0xedec 0xebea 0xe9e8 0xe7e6 0xe5e4 0xe3e2 0xe1e0
+            </DataFromFile>
+         </Data>
+      </Dataset>
+   </Group>
+</RootGroup>
+</HDF5-File>

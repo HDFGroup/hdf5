@@ -1,0 +1,38 @@
+#############################
+Expected output for 'h5dump --xml tarray6.h5'
+#############################
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
+<HDF5-File>
+<RootGroup OBJ-XID="root">
+   <Dataset Name="Dataset1" OBJ-XID="/Dataset1" Parents="root">
+      <Dataspace>
+         <SimpleDataspace Ndims="1">
+            <Dimension  DimSize="4" MaxDimSize="4"/>
+         </SimpleDataspace>
+      </Dataspace>
+      <DataType> 
+         <ArrayType Ndims="1">
+            <ArrayDimension DimSize="4" DimPerm="0"/>
+            <DataType>
+               <VLType>
+                  <DataType>
+                     <AtomicType>
+                        <IntegerType ByteOrder="LE" Sign="false" Size="4" />
+                     </AtomicType>
+                  </DataType>
+               </VLType>
+            </DataType>
+         </ArrayType>
+      </DataType>
+      <Data>
+         <DataFromFile>
+           0   10 11   20 21 22   30 31 32 33   
+           100 101   110 111 112   120 121 122 123   130 131 132 133 134   
+           200 201 202   210 211 212 213   220 221 222 223 224   230 231 232 233 234 235   
+           300 301 302 303   310 311 312 313 314   320 321 322 323 324 325   330 331 332 333 334 335 336  
+         </DataFromFile>
+      </Data>
+   </Dataset>
+</RootGroup>
+</HDF5-File>
