@@ -35,6 +35,9 @@ CONTENTS
 
 New Features
 ============
+    * Added perform programs to test the HDF5 library performance.  Programs
+      are installed in directory perform/.
+
 
          
 Bug Fixes since HDF5-1.4.2 Release
