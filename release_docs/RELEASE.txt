@@ -71,6 +71,9 @@ New Features
 
   o Parallel Library
   ==================
+    * Enable MPI type support for collective I/O to be enabled by default.
+      This can be disabled by setting the HDF5_MPI_OPT_TYPES environment
+      variable to the value "0".  QAK - 2002/06/14
     * Allow chunks in chunked datasets to be cached when file is opened for
       read-only access (bug #709).  QAK - 2002/06/10
     * Changed method for allocating chunked dataset blocks to only allocate
