@@ -44,7 +44,7 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Global var whose value comes from environment variable */
-hbool_t         H5_mpi_opt_types_g = TRUE;
+hbool_t         H5_mpi_opt_types_g = FALSE;
 #endif
 
 /* Declare a free list to manage the H5S_simple_t struct */
