@@ -21,6 +21,6 @@ usage: h5ls [OPTIONS] [OBJECTS...]
    OBJECTS
       Each object consists of an HDF5 file name optionally followed by a
       slash and an object name within the file (if no object is specified
-      within the file then the contents of the root group are dispalyed).
+      within the file then the contents of the root group are displayed).
       The file name may include a printf(3C) integer format such as
       "%05d" to open a file family.
