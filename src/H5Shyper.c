@@ -3906,9 +3906,9 @@ done:
 herr_t
 H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hssize_t start[],
-		      const hsize_t stride[],
+		      const hsize_t *stride,
 		      const hsize_t count[],
-		      const hsize_t block[])
+		      const hsize_t *block)
 {
     hsize_t *_stride=NULL;      /* Stride array */
     hsize_t *_block=NULL;       /* Block size array */
@@ -4453,10 +4453,10 @@ done:
  */
 herr_t
 H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
-		      const hssize_t start[],
-		      const hsize_t stride[],
+		      const hssize_t start,
+		      const hsize_t *stride[],
 		      const hsize_t count[],
-		      const hsize_t block[])
+		      const hsize_t *block)
 {
     hsize_t *_stride=NULL;      /* Stride array */
     hsize_t *_block=NULL;       /* Block size array */

@@ -192,8 +192,8 @@ __DLL__ herr_t H5S_select_write(H5F_t *f, struct H5O_layout_t *layout,
 /* Needed for internal use of selections in H5Fistore code */
 __DLL__ herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
 __DLL__ herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
-                const hsize_t stride[], const hsize_t count[],
-                const hsize_t block[]);
+                const hsize_t *stride, const hsize_t count[],
+                const hsize_t *block);
 
 #ifdef H5_HAVE_PARALLEL
 /* MPI-IO function to read directly from app buffer to file rky980813 */
