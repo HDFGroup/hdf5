@@ -48,6 +48,14 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_
 		     hbool_t *use_view,
 		     hbool_t *is_derived_type );
 static herr_t
+H5S_mpio_none_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
+		     /* out: */
+		     MPI_Datatype *new_type,
+		     size_t *count,
+		     hsize_t *extra_offset,
+		     hbool_t *use_view,
+		     hbool_t *is_derived_type );
+static herr_t
 H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_types,
 		     /* out: */
 		     MPI_Datatype *new_type,
@@ -76,6 +84,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
                      const H5S_t *file_space, const H5S_t *mem_space,
                      hid_t dxpl_id, void *buf/*out*/, hbool_t do_write);
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_mpio_all_type
  *
@@ -154,7 +163,70 @@ done:
     HDfprintf(stdout, "Leave %s total_bytes=%Hu\n", FUNC, total_bytes );
 #endif
     FUNC_LEAVE (ret_value);
-}
+} /* H5S_mpio_all_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_mpio_none_type
+ *
+ * Purpose:	Translate an HDF5 "none" selection into an MPI type.
+ *
+ * Return:	non-negative on success, negative on failure.
+ *
+ * Outputs:	*new_type	  the MPI type corresponding to the selection
+ *		*count		  how many objects of the new_type in selection
+ *				  (useful if this is the buffer type for xfer)
+ *		*extra_offset     Number of bytes of offset within dataset
+ *		*use_view         0 if view not needed, 1 if needed
+ *		*is_derived_type  0 if MPI primitive type, 1 if derived
+ *
+ * Programmer:	Quincey Koziol, October 29, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5S_mpio_none_type( const H5S_t *space, size_t UNUSED elmt_size, hbool_t prefer_derived_types,
+		     /* out: */
+		     MPI_Datatype *new_type,
+		     size_t *count,
+		     hsize_t *extra_offset,
+		     hbool_t *use_view,
+		     hbool_t *is_derived_type )
+{
+    int         mpi_code;               /* MPI return code */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOINIT(H5S_mpio_none_type);
+
+    /* Check args */
+    assert(space);
+
+    /* Check if we should prefer creating a derived type */
+    if(prefer_derived_types) {
+        /* fill in the return values */
+        if (MPI_SUCCESS != (mpi_code=MPI_Type_contiguous(0, MPI_BYTE, new_type )))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code);
+        if(MPI_SUCCESS != (mpi_code=MPI_Type_commit(new_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code);
+        *count = 1;
+        *extra_offset = 0;
+        *use_view = 1;
+        *is_derived_type = 1;
+    } /* end if */
+    else {
+        /* fill in the return values */
+        *new_type = MPI_BYTE;
+        *count = 0;
+        *extra_offset = 0;
+        *use_view = 0;
+        *is_derived_type = 0;
+    } /* end else */
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* H5S_mpio_none_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -656,6 +728,11 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derive
         case H5S_SIMPLE:
             switch(space->select.type) {
                 case H5S_SEL_NONE:
+                    if ( H5S_mpio_none_type( space, elmt_size, prefer_derived_types,
+                        /* out: */ new_type, count, extra_offset, use_view, is_derived_type ) <0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,"couldn't convert \"all\" selection to MPI type");
+                    break;
+
                 case H5S_SEL_ALL:
                     if ( H5S_mpio_all_type( space, elmt_size, prefer_derived_types,
                         /* out: */ new_type, count, extra_offset, use_view, is_derived_type ) <0)

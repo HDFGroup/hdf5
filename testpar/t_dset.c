@@ -224,7 +224,7 @@ dataset_writeInd(char *filename)
 
     herr_t ret;         	/* Generic return value */
     int mpi_size, mpi_rank;
-    
+
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
@@ -265,7 +265,7 @@ dataset_writeInd(char *filename)
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
-    
+
     /* create a dataset collectively */
     dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid,
 			H5P_DEFAULT);
@@ -291,9 +291,9 @@ dataset_writeInd(char *filename)
     MESG("data_array initialized");
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* create a memory dataspace independently */
@@ -301,12 +301,12 @@ dataset_writeInd(char *filename)
     VRFY((mem_dataspace >= 0), "");
 
     /* write data independently */
-    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
     /* write data independently */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to write with zero rows for process 0 */
@@ -323,7 +323,7 @@ dataset_writeInd(char *filename)
     MESG("writeInd by some with zero row");
 if ((mpi_rank/2)*2 != mpi_rank){
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);					    
+	    H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
 }
 #ifdef BARRIER_CHECKS
@@ -333,7 +333,7 @@ MPI_Barrier(MPI_COMM_WORLD);
     /* release dataspace ID */
     H5Sclose(file_dataspace);
 
-    /* close dataset collectively */					    
+    /* close dataset collectively */
     ret=H5Dclose(dataset1);
     VRFY((ret >= 0), "H5Dclose1 succeeded");
     ret=H5Dclose(dataset2);
@@ -342,8 +342,8 @@ MPI_Barrier(MPI_COMM_WORLD);
     /* release all IDs created */
     H5Sclose(sid);
 
-    /* close the file collectively */					    
-    H5Fclose(fid);							    
+    /* close the file collectively */
+    H5Fclose(fid);
 
     /* release data buffers */
     if (data_array1) free(data_array1);
@@ -411,7 +411,7 @@ dataset_readInd(char *filename)
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "");
 
     /* create a memory dataspace independently */
@@ -479,7 +479,7 @@ dataset_writeAll(char *filename)
     hid_t sid;   		/* Dataspace ID */
     hid_t file_dataspace;	/* File dataspace ID */
     hid_t mem_dataspace;	/* memory dataspace ID */
-    hid_t dataset1, dataset2;	/* Dataset ID */
+    hid_t dataset1, dataset2, dataset3;	/* Dataset ID */
     hid_t datatype;		/* Datatype ID */
     hsize_t dims[RANK];   	/* dataset dim sizes */
     DATATYPE *data_array1 = NULL;	/* data buffer */
@@ -490,7 +490,7 @@ dataset_writeAll(char *filename)
 
     herr_t ret;         	/* Generic return value */
     int mpi_size, mpi_rank;
-    
+
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
@@ -506,7 +506,7 @@ dataset_writeAll(char *filename)
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* -------------------
-     * START AN HDF5 FILE 
+     * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type);
@@ -531,7 +531,7 @@ dataset_writeAll(char *filename)
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
 
-    
+
     /* create a dataset collectively */
     dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid, H5P_DEFAULT);
     VRFY((dataset1 >= 0), "H5Dcreate succeeded");
@@ -544,6 +544,10 @@ dataset_writeAll(char *filename)
     dataset2 = H5Dcreate(fid, DATASETNAME2, datatype, sid, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "H5Dcreate 2 succeeded");
 
+    /* create a third dataset collectively */
+    dataset3 = H5Dcreate(fid, DATASETNAME3, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    VRFY((dataset1 >= 0), "H5Dcreate succeeded");
+
     /*
      * Set up dimensions of the slab this process accesses.
      */
@@ -552,9 +556,9 @@ dataset_writeAll(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* create a memory dataspace independently */
@@ -578,7 +582,7 @@ dataset_writeAll(char *filename)
     /* write data collectively */
     MESG("writeAll by Row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 succeeded");
 
     /* setup dimensions again to writeAll with zero rows for process 0 */
@@ -594,7 +598,7 @@ dataset_writeAll(char *filename)
     }
     MESG("writeAll by some with zero row");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZROW succeeded");
 
     /* release all temporary handles. */
@@ -616,9 +620,9 @@ dataset_writeAll(char *filename)
     }
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* create a memory dataspace independently */
@@ -641,7 +645,7 @@ dataset_writeAll(char *filename)
 
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset2 succeeded");
 
     /* setup dimensions again to writeAll with zero columns for process 0 */
@@ -657,28 +661,86 @@ dataset_writeAll(char *filename)
     }
     MESG("writeAll by some with zero col");
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dwrite dataset1 by ZCOL succeeded");
+
+    /* release all temporary handles. */
+    /* Could have used them for dataset3 but it is cleaner */
+    /* to create them again.*/
+    H5Sclose(file_dataspace);
+    H5Sclose(mem_dataspace);
+    H5Pclose(xfer_plist);
+
+
+    /* Dataset3: each process takes a block of rows, except process zero uses "none" selection. */
+    slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
+
+    /* create a file dataspace independently */
+    file_dataspace = H5Dget_space (dataset3);
+    VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
+    if (MAINPROCESS) {
+	ret=H5Sselect_none(file_dataspace);
+	VRFY((ret >= 0), "H5Sselect_none file_dataspace succeeded");
+    } /* end if */
+    else {
+        ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+        VRFY((ret >= 0), "H5Sselect_hyperslab succeeded");
+    } /* end else */
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple (RANK, block, NULL);
+    VRFY((mem_dataspace >= 0), "");
+    if (MAINPROCESS) {
+	ret=H5Sselect_none(mem_dataspace);
+	VRFY((ret >= 0), "H5Sselect_none mem_dataspace succeeded");
+    } /* end if */
+
+    /* fill the local slab with some trivial data */
+    dataset_fill(start, block, data_array1);
+    MESG("data_array initialized");
+    if (verbose) {
+	MESG("data_array created");
+	dataset_print(start, block, data_array1);
+    } /* end if */
+
+    /* set up the collective transfer properties list */
+    xfer_plist = H5Pcreate (H5P_DATASET_XFER);
+    VRFY((xfer_plist >= 0), "");
+    ret=H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pcreate xfer succeeded");
+
+    /* write data collectively */
+    MESG("writeAll with none");
+    ret = H5Dwrite(dataset3, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dwrite dataset3 succeeded");
+
+    /* write data collectively (with datatype conversion) */
+    MESG("writeAll with none");
+    ret = H5Dwrite(dataset3, H5T_NATIVE_UCHAR, mem_dataspace, file_dataspace,
+	    xfer_plist, data_array1);
+    VRFY((ret >= 0), "H5Dwrite dataset3 succeeded");
 
     /* release all temporary handles. */
     H5Sclose(file_dataspace);
     H5Sclose(mem_dataspace);
     H5Pclose(xfer_plist);
 
-
     /*
      * All writes completed.  Close datasets collectively
-     */					    
+     */
     ret=H5Dclose(dataset1);
     VRFY((ret >= 0), "H5Dclose1 succeeded");
     ret=H5Dclose(dataset2);
     VRFY((ret >= 0), "H5Dclose2 succeeded");
+    ret=H5Dclose(dataset3);
+    VRFY((ret >= 0), "H5Dclose3 succeeded");
 
     /* release all IDs created */
     H5Sclose(sid);
 
-    /* close the file collectively */					    
-    H5Fclose(fid);							    
+    /* close the file collectively */
+    H5Fclose(fid);
 
     /* release data buffers */
     if (data_array1) free(data_array1);
@@ -729,7 +791,7 @@ dataset_readAll(char *filename)
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     /* -------------------
-     * OPEN AN HDF5 FILE 
+     * OPEN AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type);
@@ -763,9 +825,9 @@ dataset_readAll(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* create a memory dataspace independently */
@@ -788,7 +850,7 @@ dataset_readAll(char *filename)
 
     /* read data collectively */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 succeeded");
 
     /* verify the read data with original expected data */
@@ -808,7 +870,7 @@ dataset_readAll(char *filename)
     }
     MESG("readAll by some with zero col");
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 by ZCOL succeeded");
 
     /* verify the read data with original expected data */
@@ -826,9 +888,9 @@ dataset_readAll(char *filename)
     slab_set(mpi_rank, mpi_size, start, count, stride, block, BYROW);
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* create a memory dataspace independently */
@@ -851,7 +913,7 @@ dataset_readAll(char *filename)
 
     /* read data collectively */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset2 succeeded");
 
     /* verify the read data with original expected data */
@@ -871,7 +933,7 @@ dataset_readAll(char *filename)
     }
     MESG("readAll by some with zero row");
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    xfer_plist, data_array1);					    
+	    xfer_plist, data_array1);
     VRFY((ret >= 0), "H5Dread dataset1 by ZROW succeeded");
 
     /* verify the read data with original expected data */
@@ -886,14 +948,14 @@ dataset_readAll(char *filename)
 
     /*
      * All reads completed.  Close datasets collectively
-     */					    
+     */
     ret=H5Dclose(dataset1);
     VRFY((ret >= 0), "H5Dclose1 succeeded");
     ret=H5Dclose(dataset2);
     VRFY((ret >= 0), "H5Dclose2 succeeded");
 
-    /* close the file collectively */					    
-    H5Fclose(fid);							    
+    /* close the file collectively */
+    H5Fclose(fid);
 
     /* release data buffers */
     if (data_array1) free(data_array1);
@@ -936,7 +998,7 @@ extend_writeInd(char *filename)
 
     herr_t ret;         	/* Generic return value */
     int mpi_size, mpi_rank;
-    
+
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
@@ -956,7 +1018,7 @@ extend_writeInd(char *filename)
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
     /* -------------------
-     * START AN HDF5 FILE 
+     * START AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type);
@@ -1028,14 +1090,14 @@ extend_writeInd(char *filename)
     VRFY((ret >= 0), "H5Dextend succeeded");
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset1);				    
+    file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, data_array1);					    
+	    H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -1067,14 +1129,14 @@ extend_writeInd(char *filename)
     H5Eset_auto(NULL, NULL);
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset2);				    
+    file_dataspace = H5Dget_space (dataset2);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently.  Should fail. */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     VRFY((ret < 0), "H5Dwrite failed as expected");
 
     /* restore auto error reporting */
@@ -1088,14 +1150,14 @@ extend_writeInd(char *filename)
     VRFY((ret >= 0), "H5Dextend succeeded");
 
     /* create a file dataspace independently */
-    file_dataspace = H5Dget_space (dataset2);				    
+    file_dataspace = H5Dget_space (dataset2);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "H5Sset_hyperslab succeeded");
 
     /* write data independently */
-    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,    
-	    H5P_DEFAULT, data_array1);					    
+    ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
+	    H5P_DEFAULT, data_array1);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */
@@ -1105,14 +1167,14 @@ extend_writeInd(char *filename)
     VRFY((ret >= 0), "H5Sclose succeeded");
 
 
-    /* close dataset collectively */					    
+    /* close dataset collectively */
     ret=H5Dclose(dataset1);
     VRFY((ret >= 0), "H5Dclose1 succeeded");
     ret=H5Dclose(dataset2);
     VRFY((ret >= 0), "H5Dclose2 succeeded");
 
-    /* close the file collectively */					    
-    H5Fclose(fid);							    
+    /* close the file collectively */
+    H5Fclose(fid);
 
     /* release data buffers */
     if (data_array1) free(data_array1);
@@ -1158,7 +1220,7 @@ extend_readInd(char *filename)
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     /* -------------------
-     * OPEN AN HDF5 FILE 
+     * OPEN AN HDF5 FILE
      * -------------------*/
     /* setup file access template */
     acc_tpl = create_faccess_plist(comm, info, facc_type);
@@ -1205,7 +1267,7 @@ extend_readInd(char *filename)
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "");
 
     /* create a memory dataspace independently */
@@ -1240,7 +1302,7 @@ extend_readInd(char *filename)
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset2);
     VRFY((file_dataspace >= 0), "");
-    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block); 
+    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret >= 0), "");
 
     /* create a memory dataspace independently */

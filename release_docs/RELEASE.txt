@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed error condition where "none" selections were not being handled
+      correctly in parallel.  QAK - 2002/10/29
     * New functions H5Gget_comment(modification), H5Aget_storage_size, 
       H5Arename.  SLU - 2002/10/29
     * Fixed an assertion of H5S_select_iterate that did not account for scalar

@@ -4969,6 +4969,87 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 
 /****************************************************************
 **
+**  test_zero_none(): Test basic H5S (dataspace) selection code.
+**      Tests I/O on 0-sized point selections
+** 
+****************************************************************/
+static void 
+test_zero_none(void)
+{
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid1,sid2;	/* Dataspace ID			*/
+    hsize_t	dims1[] = {SPACE7_DIM1, SPACE7_DIM2};
+    hsize_t	dims2[] = {SPACE7_DIM1, SPACE7_DIM2};
+    uint8_t    *wbuf,           /* buffer to write to disk */
+               *tbuf;           /* temporary buffer pointer */
+    int         i,j;            /* Counters */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing I/O on 0-sized Selections\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(uint8_t)*SPACE7_DIM1*SPACE7_DIM2);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE7_DIM1; i++)
+        for(j=0; j<SPACE7_DIM2; j++)
+            *tbuf++=(uint8_t)((i*SPACE7_DIM2)+j);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE7_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE7_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Make "none" selection in both disk and memory datasets */
+    ret = H5Sselect_none(sid1);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    ret = H5Sselect_none(sid2);
+    CHECK(ret, FAIL, "H5Sselect_none");
+
+    /* Write "nothing" to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Write "nothing" to disk (with a datatype conversion :-) */
+    ret=H5Dwrite(dataset,H5T_NATIVE_INT,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+}   /* test_zero_none() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -5088,6 +5169,9 @@ test_select(void)
     test_select_fill_hyper_regular(offset);
     test_select_fill_hyper_irregular(NULL);
     test_select_fill_hyper_irregular(offset);
+
+    /* Test 0-sized selections */
+    test_zero_none();
 
 }   /* test_select() */
 
