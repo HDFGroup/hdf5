@@ -45,13 +45,13 @@ ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
 FPAR_MOD=${ADD_PARALLEL_FILES:yes=HDF5mpio.f90}
 
 CPARALLEL=${ADD_PARALLEL_FILES:yes=H5FDmpiof.c}
-CLIB_SRC=H5f90kit.c H5_f.c H5Git.c H5Rf.c H5Ff.c  H5Sf.c H5Df.c H5Gf.c	\
-         H5Af.c H5Tf.c H5Pf.c H5If.c H5Ef.c H5Zf.c ${CPARALLEL:no=}
+CLIB_SRC=H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c \
+         H5If.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c ${CPARALLEL:no=}
 
 FPARALLEL=${ADD_PARALLEL_FILES:yes=H5FDmpioff.f90}
-FLIB_SRC=H5fortran_types.f90 H5fortran_flags.f90 H5f90global.f90 H5_ff.f90	\
-         H5Rff.f90 H5Fff.f90 H5Sff.f90 H5Dff.f90 H5Gff.f90 H5Aff.f90 H5Tff.f90 	\
-         H5Pff.f90 H5Iff.f90 H5Eff.f90 H5Zff.f90 ${FPARALLEL:no=} ${FPAR_MOD:no=HDF5.f90}
+FLIB_SRC=H5fortran_flags.f90 H5f90global.f90 H5fortran_types.f90 H5_ff.f90	\
+         H5Aff.f90 H5Dff.f90 H5Eff.f90 H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Pff.f90	\
+         H5Rff.f90 H5Sff.f90 H5Tff.f90 H5Zff.f90 ${FPARALLEL:no=} ${FPAR_MOD:no=HDF5.f90}
 
 LIB_SRC=$(CLIB_SRC) $(FLIB_SRC)
 LIB_OBJ=$(CLIB_SRC:.c=.lo) $(FLIB_SRC:.f90=.lo)
@@ -61,8 +61,9 @@ LIB_OBJ=$(CLIB_SRC:.c=.lo) $(FLIB_SRC:.f90=.lo)
 ## doing a parallel make, some modules could be made way before the
 ## modules they depend upon are actually made. *sigh*
 H5fortran_flags.lo: $(srcdir)/H5fortran_flags.f90
-H5fortran_types.lo: H5fortran_types.f90
 H5f90global.lo:	    $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_types.lo
+H5fortran_types.lo: H5fortran_types.f90
+H5_ff.lo:	    $(srcdir)/H5_ff.f90 H5f90global.lo
 H5Aff.lo:	    $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:	    $(srcdir)/H5Dff.f90 H5f90global.lo
 H5Eff.lo:	    $(srcdir)/H5Eff.f90 H5f90global.lo
@@ -74,7 +75,6 @@ H5Rff.lo:	    $(srcdir)/H5Rff.f90 H5f90global.lo
 H5Sff.lo:	    $(srcdir)/H5Sff.f90 H5f90global.lo
 H5Tff.lo:	    $(srcdir)/H5Tff.f90 H5f90global.lo
 H5Zff.lo:	    $(srcdir)/H5Zff.f90 H5f90global.lo
-H5_ff.lo:	    $(srcdir)/H5_ff.f90 H5f90global.lo
 HDF5.lo:	    $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo	    \
 		    H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo    \
 		    H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo

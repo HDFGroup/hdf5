@@ -563,8 +563,6 @@
 ./fortran/src/H5Fff.f90
 ./fortran/src/H5Gf.c
 ./fortran/src/H5Gff.f90
-./fortran/src/H5Git.c
-./fortran/src/H5Git.h
 ./fortran/src/H5If.c
 ./fortran/src/H5Iff.f90
 ./fortran/src/H5Pf.c
