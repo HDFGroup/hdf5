@@ -1418,6 +1418,7 @@ hsize_t sdim;
   }
 
   H5Dclose(dataset);
+  H5Gclose(group);
   H5Tclose(fxdlenstr);
   H5Tclose(memtype);
   H5Sclose(mem_space);
@@ -2826,7 +2827,7 @@ void gent_multi(void)
 
 static void gent_large_objname(void)
 {
-    hid_t fid, group;
+    hid_t fid, group, group2;
     char grp_name[128];
     register int i;
   
@@ -2836,7 +2837,8 @@ static void gent_large_objname(void)
 
     for (i = 0; i < 50; ++i) {
         sprintf(grp_name, "this_is_a_large_group_name%d", i);
-        group = H5Gcreate(group, grp_name, 0);
+        group2 = H5Gcreate(group, grp_name, 0);
+        H5Gclose(group2);
     }
 
     H5Gclose(group);
