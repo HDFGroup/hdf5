@@ -1,31 +1,20 @@
+## Top-level HDF5 Makefile(.in)
 ##
-## Copyright by the Board of Trustees of the University of Illinois.
-## All rights reserved.
+## Copyright (C) 2001 National Center for Supercomputing Applications.
+##                    All rights reserved.
 ##
-## This file is part of HDF5.  The full HDF5 copyright notice, including
-## terms governing use, modification, and redistribution, is contained in
-## the files COPYING and Copyright.html.  COPYING can be found at the root
-## of the source code distribution tree; Copyright.html can be found at the
-## root level of an installed copy of the electronic HDF5 document set and
-## is linked from the top-level documents page.  It can also be found at
-## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ## 
 ## This makefile mostly just reinvokes make in the various subdirectories
 ## but does so in the correct order.  You can alternatively invoke make from
 ## each subdirectory manually.
 ##
-## Top-level HDF5 Makefile(.in)
-##
 top_srcdir=@top_srcdir@
-top_builddir=.
+top_builddir=..
 srcdir=@srcdir@
-@COMMENCE@
 
-# Subdirectories in build-order (not including `examples')
-# TESTPARALLEL must be after test since it uses libtest.a.  Putting it
-# before tools allows parallel tests to run sooner.
-SUBDIRS=src test @TESTPARALLEL@ tools @HL@  @PABLO@ @HDF5_INTERFACES@
+
+# Subdirectories in build-order
+SUBDIRS=src test 
 
 ##############################################################################
 ##		    T A R G E T S
@@ -72,91 +61,41 @@ lib progs check test _test uninstall:
 	done
 
 tests TAGS dep depend:
-	@@SETX@; for d in $(SUBDIRS) perform; do		              \
+	@@SETX@; for d in $(SUBDIRS); do			              \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
-
-install-all:
-	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
-	  if test $$d != "dummy"; then					      \
-	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	  fi;								      \
-	done
-	@$(MAKE) install
-	@$(MAKE) install-doc
-	@$(LT) --mode=finish $(libdir)
-
-uninstall-all:
-	@$(MAKE) uninstall
-	@$(MAKE) uninstall-doc
 
 install:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
-	@$(MAKE) install-examples
-	@$(LT) --mode=finish $(libdir)
-
-install-examples:
-	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
-	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	done
-
-uninstall-examples:
-	@@SETX@; for d in examples @HDF5_INTERFACES@; do		      \
-	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	done
+	@$(LT) --mode=finish $(libdir);
 
 install-doc:
-	@$(MAKE) install-examples
 	(cd doc && $(MAKE) $@) || exit 1;
 
 uninstall-doc:
-	@$(MAKE) uninstall-examples
 	(cd doc && $(MAKE) $@) || exit 1;
-
-## Check if installation is correct by checking if examples can be built.
-## This requires a proper "make install" has been done.
-check-install:
-	(cd examples && $(MAKE) check) || exit 1
-	@@SETX@; for d in dummy @HDF5_INTERFACES@; do			      \
-	  if test $$d != "dummy"; then					      \
-	    (cd $$d && $(MAKE) $@) || exit 1;				      \
-	  fi;								      \
-	done
-
-## Number format detection
-H5detect: 
-	(cd src && $(MAKE) $@)
-
-H5Tinit.c: 
-	(cd src && $(MAKE) $@)
 
 .PHONY: all lib progs test _test install uninstall dep depend clean           \
 	mostlyclean distclean maintainer-clean
 
 clean mostlyclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
+	@@SETX@; for d in $(SUBDIRS); do		                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) conftest conftest.c
 
 distclean:
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
+	@@SETX@; for d in $(SUBDIRS); do		                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) config/commence config/conclude
-	-$(RM) config/stamp1 config/stamp2 config/depend?
-	-$(RM) config.cache config.log config.status configure.lineno
-	-$(RM) src/H5config.h src/H5pubconf.h
-	-$(RM) libtool Makefile
+	-$(RM)  Makefile
 
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
+	@@SETX@; for d in $(SUBDIRS); do		                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) config.cache config.log config.status src/H5config.h
-	-$(RM) configure src/H5config.h.in
+
 

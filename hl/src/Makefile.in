@@ -1,0 +1,34 @@
+## HDF5 Library Makefile(.in)
+##
+## Copyright (C) 2001 National Center for Supercomputing Applications.
+##                    All rights reserved.
+##
+## 
+top_srcdir=@top_srcdir@
+top_builddir=../..
+srcdir=@srcdir@
+@COMMENCE@
+
+## Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  -I$(top_srcdir)/tools/lib @CPPFLAGS@
+
+## This is our main target, but also remove the settings file when cleaning.
+LIB=libhdf5_hl.la
+LIBHDF5=$(top_builddir)/src/libhdf5.la
+CLEAN=
+
+## Source and object files for the library (lexicographically)...
+LIB_SRC=H5LT.c H5TA.c H5IM.c
+
+LIB_OBJ=$(LIB_SRC:.c=.lo)
+
+## Temporary files
+MOSTLYCLEAN=
+
+## Public header files (to be installed)...
+PUB_HDR=H5IM.h H5LT.h H5TA.h H5HL.h
+
+## Other header files (not to be installed)...
+PRIVATE_HDR=
+
+@CONCLUDE@

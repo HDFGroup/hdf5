@@ -2816,6 +2816,26 @@ if test -n "$CPPFLAGS"; then
 fi
 
 dnl ----------------------------------------------------------------------
+dnl Check if they would like the High Level library  compiled
+dnl
+
+AC_SUBST(HL) HL=""
+AC_MSG_CHECKING([if high level library is enabled])
+AC_ARG_ENABLE([hl],
+              [AC_HELP_STRING([--enable-hl],
+	                      [Do not compile the high level library [default=yes]])],
+              [HDF5_HL=$enableval],
+	      [HDF5_HL=yes])
+							  
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+else
+ echo "no"
+fi
+  
+
+dnl ----------------------------------------------------------------------
 dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
 dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
 dnl various files from the config directory into the Makefile.
@@ -2895,6 +2915,17 @@ if test "X$HDF_CXX" = "Xyes"; then
              c++/examples/Makefile"
 fi
 
+# conditionally generate the high level makefiles
+# to do : fortran with hl
+
+if test "X$HDF5_HL" = "Xyes"; then
+ HL_FILES="hl/Makefile
+           hl/src/Makefile
+           hl/test/Makefile"
+fi
+
+
+
 AC_CONFIG_FILES([src/libhdf5.settings
                  config/depend1
                  config/depend2
@@ -2922,7 +2953,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/h5cc
                  tools/gifconv/Makefile
                  tools/h5jam/Makefile
-                 tools/h5jam/testh5jam.sh
+                 tools/h5jam/testh5jam.sh                 
                  examples/Makefile
                  doc/Makefile
                  doc/html/Makefile
@@ -2939,7 +2970,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  doc/html/cpplus/Makefile
                  doc/html/fortran/Makefile
                  $FORTRAN_FILES
-                 $CXX_FILES])
+                 $CXX_FILES
+		 $HL_FILES])
 
 AC_OUTPUT
 no_create=$saved_no_create
@@ -3157,3 +3189,7 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
+
+PRINT_N "             High Level library"
+IF_ENABLED_DISABLED "$HDF5_HL"
+
