@@ -1041,7 +1041,7 @@ dump_data (hid_t obj_id, int obj_data) {
 	int status = -1;
 	void *buf;
 	char *attr_name = malloc(sizeof(char)*80);
-	hid_t attr, space, type, p_type;
+	hid_t space, type, p_type;
 	int ndims, i;
 	hsize_t size[64], nelmts = 1;
 	int depth;
