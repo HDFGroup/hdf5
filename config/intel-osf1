@@ -26,7 +26,6 @@ RUNSERIAL="yod -sz 1"
 RUNPARALLEL="yod -sz 8"
 
 # What must *always* be present for things to compile correctly?
-CFLAGS="$CFLAGS -DDOS386"
 #CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?

@@ -69,7 +69,7 @@ static intn          interface_initialize_g = 0;
 /* Global var to allow elimination of redundant metadata writes
  * to be controlled by the value of an environment variable. */
 /* Use the elimination by default unless this is the Intel Red machine */
-#ifndef DOS386
+#ifndef __PUMAGON__
 hbool_t	H5_mpi_1_metawrite_g = TRUE;
 #else
 hbool_t	H5_mpi_1_metawrite_g = FALSE;
