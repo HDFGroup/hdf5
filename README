@@ -1,3 +1,5 @@
+This is hdf5-1.2.1-pre1 release--for internal tests only.
+---------------------------------------------------------
 
 This release is fully functional for the entire API defined in the
 documentation, see the RELEASE file in this directory for information
