@@ -18,6 +18,10 @@
 #include <h5test.h>
 #include <strings.h>
 
+const char *FILENAME[] = {
+    NULL
+};
+
 #ifndef H5_HAVE_GRIDSTORAGE
 int main(void)
 {
