@@ -45,7 +45,6 @@ int dowrite=1;				/* write test */
 int docompact=1;                        /* compact dataset test */
 int doindependent=1;			/* independent test */
 unsigned dobig=0;                       /* "big" dataset tests */
-unsigned doshort=1;                     /* "short" dataset tests */
 
 /* FILENAME and filenames must have the same number of names */
 const char *FILENAME[10]={
@@ -57,7 +56,7 @@ const char *FILENAME[10]={
             "ParaCompact",
             "ParaIndividual",
             "ParaBig",
-            "ParaShort",
+            "ParaFill",
 	    NULL};
 char	filenames[10][PATH_MAX];
 hid_t	fapl;				/* file access property list */
@@ -130,7 +129,6 @@ usage(void)
     printf("\t-o\t\tno compact dataset test\n");
     printf("\t-i\t\tno independent read test\n");
     printf("\t-b\t\trun big dataset test\n");
-    printf("\t-S\t\tno short dataset test\n");
     printf("\t-v\t\tverbose on\n");
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-s\t\tuse Split-file together with MPIO\n");
@@ -228,8 +226,6 @@ parse_options(int argc, char **argv)
 			    break;
 		case 'h':   /* print help message--return with nerrors set */
 			    return(1);
-                case 'S':   doshort = 0;
-                            break;
 		default:    nerrors++;
 			    return(1);
 	    }
@@ -484,15 +480,10 @@ int main(int argc, char **argv)
         MPI_BANNER("big dataset test skipped");
     }
     
-    if (doshort) {
-        MPI_BANNER("short dataset test...");
-        short_dataset(filenames[8]); 
-    }
-    else {
-        MPI_BANNER("short dataset test skipped");
-    }
+    MPI_BANNER("dataset fill value test...");
+    dataset_fillvalue(filenames[8]); 
     
-    if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig || doshort)){
+    if (!(dowrite || doread || ndatasets || ngroups || docompact || doindependent || dobig )){
 	usage();
 	nerrors++;
     }
