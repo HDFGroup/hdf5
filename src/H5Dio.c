@@ -911,12 +911,20 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     } /* end else */
 
+#ifdef OLD_WAY
+/*
+ * This was taken out because it can be called in a parallel program with
+ * independent access, causing the metadata cache to get corrupted. Its been
+ * disabled for all types of access (serial as well as parallel) to make the
+ * modification time consistent for all programs. -QAK
+ */
     /*
      * Update modification time.  We have to do this explicitly because
      * writing to a dataset doesn't necessarily change the object header.
      */
     if (H5O_touch(&(dataset->ent), FALSE, dxpl_id)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time");
+#endif /* OLD_WAY */
 
 done:
     if (src_id >= 0)

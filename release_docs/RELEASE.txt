@@ -58,6 +58,9 @@ Library:
     
     Complete list of changes:
 
+    * Changed dataset modification time to _not_ be updated when raw data is
+      written to a dataset.  The modification time is only updated when the
+      dataset's metadata is modified.  QAK - 2003/06/10
     * Changed H5Sget_select_bounds to use 'hssize_t *' for start and end
       parameters, instead of 'hsize_t *', to better match other parts of the
       dataspace API.  QAK - 2003/06/04
