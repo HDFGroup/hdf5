@@ -277,33 +277,74 @@ This section contains a brief explanation of the symbols used in the DDL.
 <PRE>
 HDF5 "example.h5" {
 GROUP "/" {
-   DATASET "dset1" {
+   ATTRIBUTE "attr1" {
       DATATYPE {
-         H5T_STD_I32BE int_name;
-         H5T_IEEE_F32BE float_name;
-         H5T_IEEE_F64BE double_name;
+         { STRSIZE 17;
+           STRPAD H5T_STR_NULLTERM;
+           CSET H5T_CSET_ASCII;
+           CTYPE H5T_C_S1;
+         }
       }
-      DATASPACE { ARRAY ( 5 ) ( 5 ) }
-      DATA {{0,0,1}, {1,1,0.5}, {2,4,0.333333}, {3,9,0.25}, {4,16,0.2}}
+      DATASPACE { SCALAR }
+      DATA {
+         "string attribute\000"
+      }
+   }
+   DATASET "dset1" {
+      DATATYPE { H5T_STD_I32BE }
+      DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) }
+      DATA {
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+         0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+      }
+   }
+   DATASET "dset2" {
+      DATATYPE {
+         H5T_STD_I32BE "a";
+         H5T_IEEE_F32BE "b";
+         H5T_IEEE_F64BE "c";
+      }
+      DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
+      DATA {
+         {[1], [0.1], [0.001]}, 
+         {[2], [0.2], [0.002]}, 
+         {[3], [0.3], [0.003]}, 
+         {[4], [0.4], [0.004]}, 
+         {[5], [0.5], [0.005]}
+      }
    }
    GROUP "group1" {
-      DATASET "dset2" {
+      DATASET "dset3" {
          DATATYPE {
-            HARDLINK { "/type1" }
+            "/type1"
          }
-         DATASPACE { ARRAY ( 5 ) ( 5 ) }
-         DATA {{0,0}, {1,1.1}, {2,2.2}, {3,3.3}, {4,4.4}}
+         DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
+         DATA {
+            {[100, 100], [0.1]}, 
+            {[200, 200], [0.2]}, 
+            {[300, 300], [0.3]}, 
+            {[400, 400], [0.4]}, 
+            {[500, 500], [0.5]}
+         }
       }
    }
    GROUP "group2" {
-      HARDLINK { "/group1" }
+      HARDLINK "/group1"
    }
    SOFTLINK "slink1" {
       LINKTARGET "somevalue"
    }
    DATATYPE "type1" {
-      H5T_STD_I32BE int_name;
-      H5T_IEEE_F32BE float_name;
+      H5T_STD_I32BE "a"[2];
+      H5T_IEEE_F32BE "b";
    }
 }
 }
