@@ -14,7 +14,7 @@ fi
 
 ARCH="-mcpu=pentiumpro -march=pentiumpro -malign-double"
 NOFP="-fomit-frame-pointer"
-HDF4_FLAGS="-D__i386"
+#HDF4_FLAGS="-D__i386"
 
 # Compiler flags.  We use `-v' to get the version number because it almost
 # always works on Linux systems.
