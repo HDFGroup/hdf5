@@ -30,6 +30,7 @@
      INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
      INTEGER(HID_T) :: dtype_id      ! Compound datatype identifier
      INTEGER(HID_T) :: dtarray_id    ! Compound datatype identifier
+     INTEGER(HID_T) :: arrayt_id    ! Array datatype identifier
      INTEGER(HID_T) :: dt1_id      ! Memory datatype identifier (for character field)
      INTEGER(HID_T) :: dt2_id      ! Memory datatype identifier (for integer field)
      INTEGER(HID_T) :: dt3_id      ! Memory datatype identifier (for double precision field)
@@ -238,12 +239,16 @@
          CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dtarray_id, "char_field", offset, H5T_NATIVE_CHARACTER, error)
+         CALL check("h5tinsert_f", error, total_error)
      offset = type_sizec
-     CALL h5tinsert_array_f(dtarray_id, "array_filed", offset, size(array_dims), &
-                          array_dims, H5T_NATIVE_REAL, error)
-         CALL check("h5tinsert_array_f", error, total_error)
+     CALL h5tarray_create_f(H5T_NATIVE_REAL, size(array_dims), array_dims, arrayt_id, error)
+         CALL check("h5tarray_create_f", error, total_error)
+     CALL h5tinsert_f(dtarray_id,"array_field", offset, arrayt_id, error)
+         CALL check("h5tinsert_f", error, total_error)
      CALL h5tcommit_f(file_id, "Compound_with_array_member", dtarray_id, error)
          CALL check("h5tcommit_f", error, total_error)
+     CALL h5tclose_f(arrayt_id, error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dtarray_id, error)
          CALL check("h5tclose_f", error, total_error)
       
