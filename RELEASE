@@ -1,5 +1,26 @@
-Release information for hdf5-1.0.23a
+Release information for hdf5-1.0.0
 ------------------------------------
+
+		    CHANGES SINCE THE BETA RELEASE
+
+* Added fill values for datasets.  For contiguous datasets fill value
+  performance may be quite poor since the fill value is written to the 
+  entire dataset when the dataset is created.  This will be remedied
+  in a future version.  Chunked datasets using fill values do not
+  incur any additional overhead. See H5Pset_fill_value().
+
+* Multiple hdf5 files can be "mounted" on one another to create a
+  larger virtual file. See H5Fmount().
+
+* Object names can be removed or changed but objects are never
+  actually removed from the file yet. See H5Gunlink() and H5Gmove().
+
+* Added a tuning mechanism for B-trees to insure that sequential
+  writes to chunked datasets use less overhead.  See H5Pset_btree_ratios().
+
+* Various optimizations and bug fixes.
+
+
 		    CHANGES SINCE THE SECOND ALPHA
 
 * Strided hyperslab selections in dataspaces now working.
