@@ -186,10 +186,16 @@ ph5diff_worker(int nID)
 		    memset(outBuff, 0, OUTBUFF_SIZE);
 		    outBuffOffset = 0;
 
-		    MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
+		    /* Since the data type of diff value is hsize_t which can
+		     * be arbitary large such that there is no MPI type that
+		     * matches it, the value is passed between processes as
+		     * an array of bytes in order to be portable.  But this
+		     * may not work in non-homogeneous MPI environments.
+		     */
+		    MPI_Send(&nfound, sizeof(nfound), MPI_BYTE, 0, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD);
 		}
 		else
-		    MPI_Send(&nfound, 1, MPI_LONG_LONG, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
+		    MPI_Send(&nfound, sizeof(nfound), MPI_BYTE, 0, MPI_TAG_DONE, MPI_COMM_WORLD);
 
 	    }
 	    else if(Status.MPI_TAG == MPI_TAG_END)

@@ -458,6 +458,12 @@ diff_match (hid_t file1_id,
 		else
 		{
 		    /* We're in parallel mode */
+		    /* Since the data type of diff value is hsize_t which can
+		     * be arbitary large such that there is no MPI type that
+		     * matches it, the value is passed between processes as
+		     * an array of bytes in order to be portable.  But this
+		     * may not work in non-homogeneous MPI environments.
+		     */
 
 		    /*Set up args to pass to worker task. */ 
 		    if(strlen(table->objs[i].name) > 255)
@@ -480,7 +486,7 @@ diff_match (hid_t file1_id,
 			if(incomingMessage)
 			{
 			    workerTasks[Status.MPI_SOURCE-1] = 1;
-			    MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+			    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
 			    nfound += nFoundbyWorker;
 			    busyTasks--;
 			}
@@ -496,7 +502,7 @@ diff_match (hid_t file1_id,
 			    if(incomingMessage)
 			    {
 				workerTasks[Status.MPI_SOURCE-1] = 1;
-				MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 				nfound += nFoundbyWorker;
 				busyTasks--;
 				havePrintToken = 1;
@@ -549,7 +555,7 @@ diff_match (hid_t file1_id,
 
 			    if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
 			    {
-				MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 				havePrintToken = 1;
 				nfound += nFoundbyWorker;
 				/* send this task the work unit. */
@@ -569,7 +575,7 @@ diff_match (hid_t file1_id,
 
 			    if(Status.MPI_TAG == MPI_TAG_DONE)
 			    {
-				MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
 				nfound += nFoundbyWorker;
 				MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
 			    }
@@ -578,7 +584,7 @@ diff_match (hid_t file1_id,
 				MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
 				MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
 
-				MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+				MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 				nfound += nFoundbyWorker;
 				MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
 			    }
@@ -606,7 +612,7 @@ diff_match (hid_t file1_id,
 		MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
 		if(Status.MPI_TAG == MPI_TAG_DONE)
 		{
-		    MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+		    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
 		    nfound += nFoundbyWorker;
 		    busyTasks--;
 		}
@@ -616,14 +622,14 @@ diff_match (hid_t file1_id,
 		    if(havePrintToken) 
 		    {
 			MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
-			MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+			MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 			nfound += nFoundbyWorker;
 			busyTasks--;
 		    }
 		    else /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
 		    {
 			int source = Status.MPI_SOURCE;
-			MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+			MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 			nfound += nFoundbyWorker;
 			busyTasks--;
 			MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
@@ -631,7 +637,7 @@ diff_match (hid_t file1_id,
 		}
 		else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
 		{
-		    MPI_Recv(&nFoundbyWorker, 1, MPI_LONG_LONG, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+		    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
 		    nfound += nFoundbyWorker;
 		    busyTasks--;
 		    havePrintToken = 1;
