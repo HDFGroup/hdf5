@@ -8,7 +8,7 @@
  * threadsafe environment.
  *
  * Temporary files generated:
- *   ttsafe.h5
+ *   ttsafe_dcreate.h5
  *
  * HDF5 APIs exercised in thread:
  * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate, H5Dwrite, H5Dclose,
@@ -20,6 +20,10 @@
  * Modification History
  * --------------------
  *
+ *	19 May 2000, Bill Wendling
+ *	Changed so that it creates its own HDF5 file and removes it at cleanup
+ *	time. Added num_errs flag.
+ *
  ********************************************************************/
 #include "ttsafe.h"
 
@@ -27,165 +31,157 @@
 static int dummy;	/* just to create a non-empty object file */
 #else
 
-#define FILE "ttsafe.h5"
-#define DATASETNAME_LENGTH 10
-#define NUM_THREAD 16
+#define FILENAME		"ttsafe_dcreate.h5"
+#define DATASETNAME_LENGTH	10
+#define NUM_THREAD		16
+
+/* Global variables */
+extern int num_errs;
+extern int Verbosity;
 
 void *tts_dcreate_creator(void *);
+
+typedef struct thread_info {
+	int id;
+	hid_t file;
+	const char *dsetname;
+} thread_info; 
 
 /*
  **********************************************************************
  * Thread safe test - multiple dataset creation
  **********************************************************************
  */
-void tts_dcreate(void) {
+void tts_dcreate(void)
+{
+	/* Pthread definitions */
+	pthread_t threads[NUM_THREAD];
 
-  /* Pthread definitions
-  */
-  pthread_t threads[NUM_THREAD];
+	/* HDF5 data definitions */
+	hid_t file, dataset, datatype;
+	int datavalue, i;
+	thread_info *thread_out;
+	const char *dsetname[NUM_THREAD];
+	pthread_attr_t attribute;
 
-  /* HDF5 data definitions
-   */
-  hid_t   file, dataset, datatype;
+	/* set pthread attribute to perform global scheduling */
+	pthread_attr_init(&attribute);
+	pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
 
-  int     datavalue;
-  int     i;
+	/*
+	 * Set individual dataset names (rather than generated the names
+	 * automatically)
+	 */
 
-  typedef struct thread_info {
-    int id;
-    hid_t file;
-    char *dsetname;
-  } thread_info;
+	for (i = 0; i < NUM_THREAD; i++)
+		dsetname[i] = malloc(sizeof(char) * DATASETNAME_LENGTH);
 
-  thread_info *thread_out;
+	dsetname[0] = "zero";
+	dsetname[1] = "one";
+	dsetname[2] = "two";
+	dsetname[3] = "three";
+	dsetname[4] = "four";
+	dsetname[5] = "five";
+	dsetname[6] = "six";
+	dsetname[7] = "seven";
+	dsetname[8] = "eight";
+	dsetname[9] = "nine";
+	dsetname[10] = "ten";
+	dsetname[11] = "eleven";
+	dsetname[12] = "twelve";
+	dsetname[13] = "thirteen";
+	dsetname[14] = "fourteen";
+	dsetname[15] = "fifteen";
 
-  char *dsetname[NUM_THREAD];
-  pthread_attr_t attribute;
+	/*
+	 * Create a hdf5 file using H5F_ACC_TRUNC access, default file
+	 * creation plist and default file access plist
+	 */
+	file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  /* set pthread attribute to perform global scheduling */
-  pthread_attr_init(&attribute);
-  pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+	/* simultaneously create a large number of datasets within the file */
+	for (i = 0; i < NUM_THREAD; i++) {
+		thread_out = malloc(sizeof(thread_info));
+		thread_out->id = i;
+		thread_out->file = file;
+		thread_out->dsetname = dsetname[i];
+		pthread_create(&threads[i], NULL, tts_dcreate_creator, thread_out);
+	}
 
-  /* set individual dataset names (rather than generated the names
-     automatically)
-  */
+	for (i = 0;i < NUM_THREAD; i++)
+		pthread_join(threads[i], NULL);
 
-  for (i=0;i<NUM_THREAD;i++) {
-    dsetname[i] = (char *)malloc(sizeof(char)*DATASETNAME_LENGTH);
-  }
-  dsetname[0] = "zero";
-  dsetname[1] = "one";
-  dsetname[2] = "two";
-  dsetname[3] = "three";
-  dsetname[4] = "four";
-  dsetname[5] = "five";
-  dsetname[6] = "six";
-  dsetname[7] = "seven";
-  dsetname[8] = "eight";
-  dsetname[9] = "nine";
-  dsetname[10] = "ten";
-  dsetname[11] = "eleven";
-  dsetname[12] = "twelve";
-  dsetname[13] = "thirteen";
-  dsetname[14] = "fourteen";
-  dsetname[15] = "fifteen";
+	/* compare data to see if it is written correctly */
 
-  /* create a hdf5 file using H5F_ACC_TRUNC access,
-   * default file creation plist and default file
-   * access plist
-   */
-  file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	/* define datatype for the data using native little endian integers */
+	datatype = H5Tcopy(H5T_NATIVE_INT);
 
-  /* simultaneously create a large number of datasets within the file
-  */
-  for (i=0;i<NUM_THREAD;i++) {
-    thread_out = (thread_info *)malloc(sizeof(thread_info));
-    thread_out->id = i;
-    thread_out->file = file;
-    thread_out->dsetname = dsetname[i];
-    pthread_create(&threads[i],NULL,tts_dcreate_creator,thread_out);
-  }
+	for (i = 0; i < NUM_THREAD; i++) {
+		if ((dataset = H5Dopen(file,dsetname[i])) < 0) {
+			fprintf(stderr, "Dataset name not found - test failed\n");
+			H5Fclose(file);
+			num_errs++;
+			return;
+		} else {
+			H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
 
-  for (i=0;i<NUM_THREAD;i++) {
-    pthread_join(threads[i],NULL);
-  }
+			if (datavalue != i) {
+				fprintf(stderr,
+					"Wrong value read %d for dataset name %s - test failed\n",
+					datavalue, dsetname[i]);
+				H5Dclose(dataset);
+				H5Fclose(file);
+				num_errs++;
+				return;
+			}
 
-  /* compare data to see if it is written correctly
-   */
+			H5Dclose(dataset);
+		}
+	}
 
-  /* define datatype for the data using native little endian integers
-   */
-  datatype = H5Tcopy(H5T_NATIVE_INT);
-
-  for (i=0;i<NUM_THREAD;i++) {
-    if ((dataset = H5Dopen(file,dsetname[i])) < 0) {
-      fprintf(stderr,"Dataset name not found - test failed\n");
-      H5Fclose(file);
-      return;
-    } else {
-      H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
-      if (datavalue != i) {
-	fprintf(stderr,
-		"Wrong value read %d for dataset name %s - test failed\n",
-		datavalue, dsetname[i]);
-	H5Dclose(dataset);
+	/* close remaining resources */
 	H5Fclose(file);
-	return;
-      }
-      H5Dclose(dataset);
-    }
-  }
-  /* close remaining resources
-   */
-  H5Fclose(file);
-
 }
 
-void *tts_dcreate_creator(void *thread_data) {
+void *tts_dcreate_creator(void *thread_data)
+{
+	hid_t   dataspace, datatype, dataset;
+	hsize_t dimsf[1]; /* dataset dimensions */
+	struct thread_info {
+		int id;
+		hid_t file;
+		char *dsetname;
+	} thread_in;
 
-  hid_t   dataspace, datatype, dataset;
-  hsize_t dimsf[1];               /* dataset dimensions */
+	thread_in.dsetname = malloc(sizeof(char) * DATASETNAME_LENGTH);
+	thread_in = *((struct thread_info *)thread_data);
 
-  struct thread_info {
-    int id;
-    hid_t file;
-    char *dsetname;
-  } thread_in;
+	/* define dataspace for dataset */
+	dimsf[0] = 1;
+	dataspace = H5Screate_simple(1,dimsf,NULL);
 
-  thread_in.dsetname = (char *)malloc(sizeof(char)*DATASETNAME_LENGTH);
-  thread_in = *((struct thread_info *)thread_data);
+	/* define datatype for the data using native little endian integers */
+	datatype = H5Tcopy(H5T_NATIVE_INT);
+	H5Tset_order(datatype, H5T_ORDER_LE);
 
-  /* define dataspace for dataset
-   */
-  dimsf[0] = 1;
-  dataspace = H5Screate_simple(1,dimsf,NULL);
+	/* create a new dataset within the file */
+	dataset = H5Dcreate(thread_in.file, thread_in.dsetname,
+			    datatype, dataspace, H5P_DEFAULT);
 
-  /* define datatype for the data using native little endian integers
-   */
-  datatype = H5Tcopy(H5T_NATIVE_INT);
-  H5Tset_order(datatype, H5T_ORDER_LE);
+	/* initialize data for dataset and write value to dataset */
+	H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		 H5P_DEFAULT, &thread_in.id);
 
-  /* create a new dataset within the file
-   */
-  dataset = H5Dcreate(thread_in.file, thread_in.dsetname,
-		      datatype, dataspace,
-		      H5P_DEFAULT);
-  
-  /* initialize data for dataset and write value to dataset
-   */
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-	   H5P_DEFAULT, &thread_in.id);
-
-  /* close dataset, datatype and dataspace resources
-   */
-  H5Dclose(dataset);
-  H5Tclose(datatype);
-  H5Sclose(dataspace);
-
-  return NULL;
+	/* close dataset, datatype and dataspace resources */
+	H5Dclose(dataset);
+	H5Tclose(datatype);
+	H5Sclose(dataspace);
+	return NULL;
 }
 
-void cleanup_dcreate(void) {
-  H5close();
+void cleanup_dcreate(void)
+{
+	H5close();
+	HDunlink(FILENAME);
 }
 #endif /*H5_HAVE_THREADSAFE*/

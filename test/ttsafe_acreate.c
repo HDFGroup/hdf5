@@ -21,7 +21,13 @@
  *
  * Modification History
  * --------------------
- * May 15 2000 - incorporated into library tests (Chee Wai LEE)
+ *
+ *	15 May 2000, Chee Wai LEE
+ *	Incorporated into library tests.
+ *
+ *	19 May 2000, Bill Wendling
+ *	Changed so that it creates its own HDF5 file and removes it at cleanup
+ *	time. Added num_errs flag.
  *
  ********************************************************************/
 
@@ -34,136 +40,136 @@ static int dummy;	/* just to create a non-empty object file */
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE "ttsafe.h5"
-#define DATASETNAME "IntData"
-#define NUM_THREADS 16
+#define FILENAME	"ttsafe_acreate.h5"
+#define DATASETNAME	"IntData"
+#define NUM_THREADS	16
+
+/* Global variables */
+extern int num_errs;
+extern int Verbosity;
 
 void *tts_acreate_thread(void *);
 
 typedef struct acreate_data_struct {
-  hid_t dataset;
-  hid_t datatype;
-  hid_t dataspace;
-  int current_index;
+	hid_t dataset;
+	hid_t datatype;
+	hid_t dataspace;
+	int current_index;
 } ttsafe_name_data_t;
 
-void tts_acreate(void) {
+void tts_acreate(void)
+{
+	/* Pthread declarations */
+	pthread_t threads[NUM_THREADS];
 
-  /* Pthread definitions
-  */
-  pthread_t threads[NUM_THREADS];
+	/* HDF5 data declarations */
+	hid_t   file, dataset;
+	hid_t   dataspace, datatype;
+	hid_t   attribute;
+	hsize_t dimsf[1];		/* dataset dimensions */
 
-  /* HDF5 data definitions
-   */
-  hid_t   file, dataset;
-  hid_t   dataspace, datatype;
-  hid_t   attribute;
-  hsize_t dimsf[1];               /* dataset dimensions */
+	/* data declarations */
+	int     data;			/* data to write */
+	int     buffer, ret, i;
 
-  int     data;                   /* data to write */
-  int     buffer, ret;
+	ttsafe_name_data_t *attrib_data; 
 
-  int     i;
-  ttsafe_name_data_t *attrib_data; 
+	/*
+	 * Create an HDF5 file using H5F_ACC_TRUNC access, default file
+	 * creation plist and default file access plist
+	 */
+	file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  /* create a hdf5 file using H5F_ACC_TRUNC access,
-   * default file creation plist and default file
-   * access plist
-   */
-  file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	/* create a simple dataspace for the dataset */
+	dimsf[0] = 1;
+	dataspace = H5Screate_simple(1, dimsf, NULL);
 
-  /* create a simple dataspace for the dataset
-   */
-  dimsf[0] = 1;
-  dataspace = H5Screate_simple(1,dimsf,NULL);
+	/* define datatype for the data using native little endian integers */
+	datatype = H5Tcopy(H5T_NATIVE_INT);
+	H5Tset_order(datatype, H5T_ORDER_LE);
 
-  /* define datatype for the data using native little endian integers
-   */
-  datatype = H5Tcopy(H5T_NATIVE_INT);
-  H5Tset_order(datatype, H5T_ORDER_LE);
+	/* create a new dataset within the file */
+	dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
+			    H5P_DEFAULT);
 
-  /* create a new dataset within the file
-   */
-  dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
-		      H5P_DEFAULT);
+	/* initialize data for dataset and write value to dataset */
+	data = NUM_THREADS;
+	H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+	H5P_DEFAULT, &data);
 
-  /* initialize data for dataset and write value to dataset
-   */
-  data = NUM_THREADS;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-	   H5P_DEFAULT, &data);
+	/*
+	 * Simultaneously create a large number of attributes to be associated
+	 * with the dataset
+	 */
+	for (i = 0; i < NUM_THREADS; i++) {
+		attrib_data = malloc(sizeof(ttsafe_name_data_t));
+		attrib_data->dataset = dataset;
+		attrib_data->datatype = datatype;
+		attrib_data->dataspace = dataspace;
+		attrib_data->current_index = i;
+		pthread_create(&threads[i], NULL, tts_acreate_thread,
+			       attrib_data);
+	}
 
-  /* simultaneously create a large number of attributes to be 
-     associated with the dataset
-  */
+	for (i = 0; i < NUM_THREADS; i++)
+		pthread_join(threads[i], NULL);
 
-  for (i=0;i<NUM_THREADS;i++) {
-    attrib_data = malloc(sizeof(ttsafe_name_data_t));
-    attrib_data->dataset = dataset;
-    attrib_data->datatype = datatype;
-    attrib_data->dataspace = dataspace;
-    attrib_data->current_index = i;
-    pthread_create(&threads[i],NULL,tts_acreate_thread,attrib_data);
-  }
+	/* verify the correctness of the test */
+	for (i = 0; i < NUM_THREADS; i++) {
+		attribute = H5Aopen_name(dataset,gen_name(i));
 
-  for (i=0;i<NUM_THREADS;i++) {
-    pthread_join(threads[i],NULL);
-  }
+		if (attribute < 0) {
+			fprintf(stderr,
+				"unable to open appropriate attribute. "
+				"Test failed!\n");
+			num_errs++;
+		} else {
+			ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
 
-  /* verify the correctness of the test */
-  for (i=0; i<NUM_THREADS; i++) {
-    attribute = H5Aopen_name(dataset,gen_name(i));
-    if (attribute < 0) {
-      fprintf(stderr,"unable to open appropriate attribute. Test failed!\n");
-    } else {
-      ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
-      if ((ret < 0) || (buffer != i)) {
-	fprintf(stderr,"wrong data values. Test failed!\n");
-      }
-      H5Aclose(attribute);
-    }
-  }
+			if (ret < 0 || buffer != i) {
+				fprintf(stderr,
+					"wrong data values. Test failed!\n");
+				num_errs++;
+			}
 
-  /* close remaining resources
-   */
-  H5Sclose(dataspace);
-  H5Tclose(datatype);
-  H5Dclose(dataset);
-  H5Fclose(file);
+			H5Aclose(attribute);
+		}
+	}
+
+	/* close remaining resources */
+	H5Sclose(dataspace);
+	H5Tclose(datatype);
+	H5Dclose(dataset);
+	H5Fclose(file);
 }
 
-void *tts_acreate_thread(void *client_data) {
+void *tts_acreate_thread(void *client_data)
+{
+	hid_t   attribute;
+	char    *attribute_name;
+	int     *attribute_data;	/* data for attributes */
 
-  hid_t   attribute;
-  hsize_t dimsf[1];               /* dataset dimensions */
+	ttsafe_name_data_t *attrib_data;
 
-  char    *attribute_name;
-  int     *attribute_data;         /* data for attributes */
-  int     i;
+	attrib_data = (ttsafe_name_data_t *)client_data;
 
-  ttsafe_name_data_t *attrib_data = (ttsafe_name_data_t *)client_data;
+	/* Create attribute */
+	attribute_name = gen_name(attrib_data->current_index);
+	attribute = H5Acreate(attrib_data->dataset, attribute_name,
+			      attrib_data->datatype, attrib_data->dataspace,
+			      H5P_DEFAULT);
 
-  /* create attribute
-   */
-  attribute_name = gen_name(attrib_data->current_index);
-  attribute = H5Acreate(attrib_data->dataset,
-			attribute_name,
-			attrib_data->datatype,
-			attrib_data->dataspace,
-			H5P_DEFAULT);
-
-  /* Write data to the attribute
-   */
-  attribute_data = malloc(sizeof(int));
-  *attribute_data = attrib_data->current_index;
-  H5Awrite(attribute,H5T_NATIVE_INT,attribute_data);
-  H5Aclose(attribute);
-
-  return NULL;
+	/* Write data to the attribute */
+	attribute_data = malloc(sizeof(int));
+	*attribute_data = attrib_data->current_index;
+	H5Awrite(attribute, H5T_NATIVE_INT, attribute_data);
+	H5Aclose(attribute);
+	return NULL;
 }
 
-void cleanup_acreate(void) {
+void cleanup_acreate(void)
+{
+	HDunlink(FILENAME);
 }
 
 #endif /*H5_HAVE_THREADSAFE*/
-
