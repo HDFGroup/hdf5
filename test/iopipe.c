@@ -57,7 +57,9 @@ print_stats (const char *prefix,
 	     struct timeval *t_start, struct timeval *t_stop,
 	     size_t nbytes)
 {
-    double	u_time, s_time, e_time, bw;
+    double	e_time, bw;
+#ifdef HAVE_GETRUSAGE
+    double	u_time, s_time;
 
     u_time = ((double)(r_stop->ru_utime.tv_sec)+
 	      (double)(r_stop->ru_utime.tv_usec)/1000000.0) -
@@ -68,6 +70,7 @@ print_stats (const char *prefix,
 	      (double)(r_stop->ru_stime.tv_usec)/1000000.0) -
 	     ((double)(r_start->ru_stime.tv_sec)+
 	      (double)(r_start->ru_stime.tv_usec)/1000000.0);
+#endif
 
     e_time = ((double)(t_stop->tv_sec)+
 	      (double)(t_stop->tv_usec)/1000000.0) -
@@ -76,8 +79,13 @@ print_stats (const char *prefix,
 
     bw = (double)nbytes / e_time;
     
+#ifdef HAVE_GETRUSAGE
     printf (HEADING "%1.2fuser %1.2fsystem %1.2felapsed %1.2fMB/s\n", 
 	    prefix, u_time, s_time, e_time, bw/(1024*1024));
+#else
+    printf (HEADING "%1.2felapsed %1.2fMB/s\n", 
+	    prefix, e_time, bw/(1024*1024));
+#endif
 
 }
 
@@ -168,7 +176,9 @@ main (void)
 
     /* Fill raw */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "fill raw");
     for (i=0; i<nwrite; i++) {
@@ -176,7 +186,9 @@ main (void)
 	fflush (stderr);
 	memset (the_data, 0xAA, (size_t)(size[0]*size[1]));
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("fill raw",
@@ -186,7 +198,9 @@ main (void)
 
     /* Fill hdf5 */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "fill hdf5");
     for (i=0; i<nread; i++) {
@@ -196,7 +210,9 @@ main (void)
 			  H5P_DEFAULT, the_data);
 	assert (status>=0);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("fill hdf5",
@@ -205,7 +221,9 @@ main (void)
     
     /* Write the raw dataset */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "out raw");
     for (i=0; i<nwrite; i++) {
@@ -216,7 +234,9 @@ main (void)
 	n = write (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("out raw",
@@ -225,7 +245,9 @@ main (void)
 
     /* Write the hdf5 dataset */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "out hdf5");
     for (i=0; i<nwrite; i++) {
@@ -235,7 +257,9 @@ main (void)
 			   H5P_DEFAULT, the_data);
 	assert (status>=0);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("out hdf5",
@@ -244,7 +268,9 @@ main (void)
 
     /* Read the raw dataset */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "in raw");
     for (i=0; i<nread; i++) {
@@ -255,7 +281,9 @@ main (void)
 	n = read (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("in raw",
@@ -265,7 +293,9 @@ main (void)
 
     /* Read the hdf5 dataset */
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "in hdf5");
     for (i=0; i<nread; i++) {
@@ -275,7 +305,9 @@ main (void)
 			  H5P_DEFAULT, the_data);
 	assert (status>=0);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("in hdf5",
@@ -289,7 +321,9 @@ main (void)
     status = H5Sset_hyperslab (file_space, start, count, NULL);
     assert (status>=0);
     synchronize ();
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_start);
+#endif
     gettimeofday (&t_start, NULL);
     fprintf (stderr, HEADING, "in hdf5 partial");
     for (i=0; i<nread; i++) {
@@ -299,7 +333,9 @@ main (void)
 			  H5P_DEFAULT, the_data);
 	assert (status>=0);
     }
+#ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &r_stop);
+#endif
     gettimeofday (&t_stop, NULL);
     putc ('\n', stderr);
     print_stats ("in hdf5 partial",
