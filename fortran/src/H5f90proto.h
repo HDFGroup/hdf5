@@ -1158,12 +1158,14 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type);
 #  define nh5iinc_ref_c     FNAME(H5IINC_REF_C)
 #  define nh5idec_ref_c     FNAME(H5IDEC_REF_C)
 #  define nh5iget_ref_c     FNAME(H5IGET_REF_C)
+#  define nh5iget_file_id_c FNAME(H5IGET_FILE_ID_C)
 #else
 #  define nh5iget_type_c    FNAME(h5iget_type_c)
 #  define nh5iget_name_c    FNAME(h5iget_name_c)
 #  define nh5iinc_ref_c     FNAME(h5iinc_ref_c)
 #  define nh5idec_ref_c     FNAME(h5idec_ref_c)
 #  define nh5iget_ref_c     FNAME(h5iget_ref_c)
+#  define nh5iget_file_id_c FNAME(h5iget_file_id_c)
 #endif
 #endif
 
@@ -1172,6 +1174,7 @@ H5_FCDLL int_f nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, siz
 H5_FCDLL int_f nh5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count);
 H5_FCDLL int_f nh5idec_ref_c(hid_t_f *obj_id, int_f *ref_count);
 H5_FCDLL int_f nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count);
+H5_FCDLL int_f nh5iget_file_id_c(hid_t_f *obj_id, hid_t *file_id);
 
 
 #ifndef H5Ef90_FNAMES

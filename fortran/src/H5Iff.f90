@@ -293,5 +293,51 @@
             hdferr = h5iget_ref_c(obj_id, ref_count)
           END SUBROUTINE h5iget_ref_f
 
+!----------------------------------------------------------------------
+! Name:		h5iget_file_id_f
+!
+! Purpose:	Obtains file identifier from the object identifier
+!
+! Inputs: 	obj_id		- object identifier 
+! Outputs:       
+!		file_id         - file identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		August 23, 2004
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+          SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5iget_file_id_f
+!DEC$endif
+!
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)  :: obj_id   ! Object identifier 
+            INTEGER(HID_T), INTENT(OUT) :: file_id  ! File identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+
+            INTERFACE
+              INTEGER FUNCTION h5iget_file_id_c(obj_id, file_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5IGET_FILE_ID_C':: h5iget_file_id_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN)  :: obj_id 
+              INTEGER(HID_T), INTENT(OUT) :: file_id 
+              END FUNCTION h5iget_file_id_c
+            END INTERFACE
+            hdferr = h5iget_file_id_c(obj_id, file_id)
+          END SUBROUTINE h5iget_file_id_f
+
       END MODULE H5I
 
