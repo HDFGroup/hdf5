@@ -464,3 +464,6 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #undef ssize_t
+
+/* Define if you have the <inttypes.h> header file.  */ 
+#undef HAVE_INTTYPES_H
