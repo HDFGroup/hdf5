@@ -57,7 +57,7 @@ typedef int hid_t;
 extern "C" {
 #endif
 
-H5I_type_t H5Iget_type(hid_t id);
+HDF5API H5I_type_t H5Iget_type(hid_t id);
 
 
 #ifdef __cplusplus
