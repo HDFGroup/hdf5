@@ -93,6 +93,8 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug (#777) which allowed a compound datatype to be inserted into
+        itself.  QAK - 2002/06/10
     * Fixed bug (#789) where creating 1-D dataset region reference caused the
         library to go into infinite loop.  QAK - 2002/06/10
     * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
