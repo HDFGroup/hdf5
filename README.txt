@@ -10,7 +10,7 @@ file contains instructions on installing the parallel version of the
 library.  The INSTALL* files can be found in the release_docs/ directory.
 
 Documentation for this release is in the html directory.  Start with the
-"index.html" in that dictectory.
+"index.html" in that directory.
 
 Four mailing lists are currently set up for use with the HDF5
 library.
