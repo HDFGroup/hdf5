@@ -1285,8 +1285,10 @@ H5T_term_interface(void)
 		}
 	    }
 
-	    H5T_close (path->src);
-	    H5T_close (path->dst);
+            if(path->src)
+                H5T_close (path->src);
+            if(path->dst)
+                H5T_close (path->dst);
             H5FL_FREE(H5T_path_t,path);
 	    H5T_g.path[i] = NULL;
 	}
@@ -2130,22 +2132,24 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
     assert(name && *name);
 
     if (H5T_PERS_HARD==pers) {
-	/* Locate or create a new conversion path */
-	if (NULL==(new_path=H5T_path_find(src, dst, name, func, dxpl_id)))
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to locate/allocate conversion path");
-	
-	/*
-	 * Notify all other functions to recalculate private data since some
-	 * functions might cache a list of conversion functions.  For
-	 * instance, the compound type converter caches a list of conversion
-	 * functions for the members, so adding a new function should cause
-	 * the list to be recalculated to use the new function.
-	 */
-	for (i=0; i<H5T_g.npaths; i++) {
-	    if (new_path != H5T_g.path[i])
-		H5T_g.path[i]->cdata.recalc = TRUE;
-	} /* end for */
-	
+        /* Only bother to register the path if it's not a no-op path (for this machine) */
+        if(H5T_cmp(src, dst)) {
+            /* Locate or create a new conversion path */
+            if (NULL==(new_path=H5T_path_find(src, dst, name, func, dxpl_id)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to locate/allocate conversion path");
+            
+            /*
+             * Notify all other functions to recalculate private data since some
+             * functions might cache a list of conversion functions.  For
+             * instance, the compound type converter caches a list of conversion
+             * functions for the members, so adding a new function should cause
+             * the list to be recalculated to use the new function.
+             */
+            for (i=0; i<H5T_g.npaths; i++) {
+                if (new_path != H5T_g.path[i])
+                    H5T_g.path[i]->cdata.recalc = TRUE;
+            } /* end for */
+	} /* end if */
     } else {
         /* Add function to end of soft list */
         if (H5T_g.nsoft>=H5T_g.asoft) {
@@ -3806,6 +3810,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 #endif
 	    H5E_clear(NULL); /*ignore the error*/
 	}
+	H5T_g.path[0]->is_noop = TRUE;
 	H5T_g.npaths = 1;
     }
 
@@ -4030,7 +4035,7 @@ H5T_path_noop(const H5T_path_t *p)
 
     assert(p);
 
-    FUNC_LEAVE_NOAPI(p->is_hard && 0==H5T_cmp(p->src, p->dst));
+    FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst)));
 } /* end H5T_path_noop() */
 
 

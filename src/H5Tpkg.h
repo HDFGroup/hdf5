@@ -78,6 +78,7 @@ struct H5T_path_t {
     H5T_t	*dst;			/*destination datatype ID	     */
     H5T_conv_t	func;			/*data conversion function	     */
     hbool_t	is_hard;		/*is it a hard function?	     */
+    hbool_t	is_noop;		/*is it the noop conversion?	     */
     H5T_stats_t	stats;			/*statistics for the conversion	     */
     H5T_cdata_t	cdata;			/*data for this function	     */
 };
