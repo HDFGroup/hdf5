@@ -42,7 +42,7 @@ debug: $(OBJ)
 	$(RANLIB) $(TARGET)
 
 clean:
-	-rm -f *.o core $(TARGET) 
+	-rm -f *.o core debug $(TARGET) 
 	-rm -f *.bak
 
 ###########################################################################
