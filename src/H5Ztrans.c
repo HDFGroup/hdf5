@@ -1685,9 +1685,13 @@ H5Z_xform_create(const char *expr)
 	if(isalpha(expr[i]))
 	    count++;
     }
-    if((data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
-	 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for pointers in transform array")
-	
+    /* When there are no "x"'s in the equation (ie, simple transform case),
+     * we don't need to allocate any space since no array will have to be 
+     * stored */
+    if(count > 0)
+	if((data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for pointers in transform array")
+
     /* Initialize the num_ptrs field, which will be used to keep track of the number of copies
      * of the data we have for polynomial transforms */ 
     data_xform_prop->dat_val_pointers->num_ptrs = 0;
@@ -1807,8 +1811,9 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 	    if(isalpha(new_data_xform_prop->xform_exp[i]))
 		count++;
 	}
-	if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
+	if(count > 0)
+	    if((new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void*) HDcalloc(count, sizeof(void*))) == NULL)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
 	   
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */
 	new_data_xform_prop->dat_val_pointers->num_ptrs = 0;
