@@ -1,4 +1,19 @@
-    SUBROUTINE compoundtest(total_error)
+
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
+    SUBROUTINE compoundtest(cleanup, total_error)
 !
 ! This program creates a dataset that is one dimensional array of
 ! structures  {
@@ -18,9 +33,11 @@
      USE HDF5 ! This module contains all necessary modules 
         
      IMPLICIT NONE
+     LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
 
-     CHARACTER(LEN=11), PARAMETER :: filename = "compound.h5" ! File name
+     CHARACTER(LEN=8), PARAMETER :: filename = "compound" ! File name
+     CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=8), PARAMETER :: dsetname = "Compound"     ! Dataset name
      INTEGER, PARAMETER :: dimsize = 6 ! Size of the dataset
      INTEGER, PARAMETER :: COMP_NUM_MEMBERS = 4 ! Number of members in the compound datatype 
@@ -88,11 +105,6 @@
      enddo
 
      !
-     ! Initialize FORTRAN predefined datatypes.
-     !
-!     CALL h5init_types_f(error)
-!         CALL check("h5init_types_f", error, total_error)
-     !
      ! Set dataset transfer property to preserve partially initialized fields
      ! during write/read to/from dataset with compound datatype.
      !
@@ -103,7 +115,12 @@
      !
      ! Create a new file using default properties.
      ! 
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
          CALL check("h5fcreate_f", error, total_error)
 
      ! 
@@ -229,9 +246,6 @@
          CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt4_id, error)
          CALL check("h5tclose_f", error, total_error)
-! We will keep this type open
-!     CALL h5tclose_f(dt5_id, error)
-!         CALL check("h5tclose_f", error, total_error)
 
      !
      ! Create and store compound datatype with the character and 
@@ -264,7 +278,7 @@
      !
      ! Open the file.
      !
-     CALL h5fopen_f (filename, H5F_ACC_RDWR_F, file_id, error)
+     CALL h5fopen_f (fix_filename, H5F_ACC_RDWR_F, file_id, error)
          CALL check("h5fopen_f", error, total_error)
      !
      ! Open the dataset.
@@ -297,6 +311,7 @@
          CALL check("h5tget_member_name_f", error, total_error)
         CALL h5tget_member_offset_f(dtype_id, i-1, offset_out, error)
          CALL check("h5tget_member_offset_f", error, total_error)
+
         CHECK_NAME: SELECT CASE (member_name(1:len))
         CASE("char_field")
              if(offset_out .ne. 0) then
@@ -455,32 +470,29 @@
          CALL check("h5tclose_f", error, total_error)
      CALL h5fclose_f(file_id, error)
          CALL check("h5fclose_f", error, total_error)
-     !
-     ! Close FORTRAN predefined datatypes.
-     !
-!     CALL h5close_types_f(error)
-!         CALL check("h5close_types_f", error, total_error)
 
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
      RETURN
      END SUBROUTINE compoundtest
 
 
 
      
-    SUBROUTINE basic_data_type_test(total_error)
-!THis subroutine tests following functionalities: 
-!H5tget_precision_f, H5tset_precision_f, H5tget_offset_f
-!H5tset_offset_f, H5tget_pad_f, H5tset_pad_f, H5tget_sign_f,
-!H5tset_sign_f, H5tget_ebias_f,H5tset_ebias_f, H5tget_norm_f,
-!H5tset_norm_f, H5tget_inpad_f, H5tset_inpad_f, H5tget_cset_f,
-!H5tset_cset_f, H5tget_strpad_f, H5tset_strpad_f
+    SUBROUTINE basic_data_type_test(cleanup, total_error)
+
+!   This subroutine tests following functionalities: 
+!   H5tget_precision_f, H5tset_precision_f, H5tget_offset_f
+!   H5tset_offset_f, H5tget_pad_f, H5tset_pad_f, H5tget_sign_f,
+!   H5tset_sign_f, H5tget_ebias_f,H5tset_ebias_f, H5tget_norm_f,
+!   H5tset_norm_f, H5tget_inpad_f, H5tset_inpad_f, H5tget_cset_f,
+!   H5tset_cset_f, H5tget_strpad_f, H5tset_strpad_f
 
      USE HDF5 ! This module contains all necessary modules 
         
      IMPLICIT NONE
+     LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
-
-     CHARACTER(LEN=13), PARAMETER :: filename = "basic_type.h5" ! File name
 
      INTEGER(HID_T) :: dtype1_id, dtype2_id, dtype3_id, dtype4_id, dtype5_id  
                                      ! datatype identifiers
@@ -499,11 +511,6 @@
      INTEGER :: cset   !character set type of a string datatype
      INTEGER :: strpad !string padding method for a string datatype
      INTEGER :: error !error flag
-     !
-     !  Initialize FORTRAN predefined datatypes
-     !
-!     CALL h5init_types_f(error)
-!     CALL check("h5init_types_f",error,total_error)
 
 
      !
@@ -692,8 +699,6 @@
     CALL h5tclose_f(dtype5_id, error)
     CALL check("h5tclose_f", error, total_error)
 
-!    CALL h5close_types_f(error)
-!    CALL check("h5close_types_f", error, total_error)
 
      RETURN
      END SUBROUTINE basic_data_type_test

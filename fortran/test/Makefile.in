@@ -1,8 +1,17 @@
 ## HDF5-Fortran test/Makefile(.in)
+
 ##
-## Copyright (C) 2000 National Center for Supercomputing Applications.
-##                    All rights reserved.
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
 ##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 ##
 top_srcdir=@top_srcdir@/..
 top_builddir=../..
@@ -16,25 +25,31 @@ hdf5_builddir=$(top_builddir)/src
 LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
 FLIB=../src/libhdf5_fortran.la
 HDF5LIB=$(hdf5_builddir)/libhdf5.la
+TCLIB=../../test/.libs/libh5test.a
+LIB=libh5test_fortran.la
+LIB_CSRC=t.c
+LIB_FSRC=tf.f90
+LIB_OBJ=$(LIB_FSRC:.f90=.lo) $(LIB_CSRC:.c=.lo)
 
 TEST_PROGS_SRC=fortranlib_test.f90 fflush1.f90 fflush2.f90
 TEST_PROGS=$(TEST_PROGS_SRC:.f90=)
 
-TEST_SRC=hdf5test.f90 tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	\
-	 tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
-TEST_OBJ=$(TEST_SRC:.f90=.lo)
+TEST_FSRC= tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	\
+	 tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90
+TEST_CSRC = t.c
+TEST_OBJ=$(TEST_FSRC:.f90=.lo) $(TEST_CSRC:.c=.lo)
 
-DISTCLEAN=$(TEST_PROGS_SRC:.f90=.lo) $(TEST_PROGS_SRC:.f90=.o) *.h5
+DISTCLEAN=$(TEST_PROGS_SRC:.f90=.lo) $(TEST_PROGS_SRC:.f90=.o) *.h5 *.tmp
 
-$(TEST_PROGS): $(FLIB)
+$(TEST_PROGS): $(LIB) $(FLIB) 
 
 fortranlib_test: fortranlib_test.lo $(TEST_OBJ)
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fortranlib_test.lo $(TEST_OBJ) $(FLIB) $(LIBS) $(HDF5LIB)
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fortranlib_test.lo $(TEST_OBJ)  $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
-fflush1: fflush1.lo hdf5test.lo
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo hdf5test.lo $(FLIB) $(LIBS) $(HDF5LIB)
+fflush1: fflush1.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush1.lo   $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
-fflush2: fflush2.lo hdf5test.lo
-	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo hdf5test.lo $(FLIB) $(LIBS) $(HDF5LIB)
+fflush2: fflush2.lo 
+	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ fflush2.lo   $(LIB) $(TCLIB) $(FLIB) $(LIBS) $(HDF5LIB)
 
 @CONCLUDE@

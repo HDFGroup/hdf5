@@ -1,28 +1,40 @@
+
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
 !
 ! 
 !    Testing File Interface functionality.
 !
-!      MODULE H5FTEST
-
-!        USE HDF5  ! This module contains all necessary modules
-        
-!      CONTAINS
-
-!In the mountingtest subroutine we create one file with a group in it, 
-!and another file with a dataset. Mounting is used to
-!access the dataset from the second file as a member of a group 
-!in the first file. 
+!    In the mountingtest subroutine we create one file with a group in it, 
+!    and another file with a dataset. Mounting is used to
+!    access the dataset from the second file as a member of a group 
+!    in the first file. 
 !
-        SUBROUTINE mountingtest(total_error)
+        SUBROUTINE mountingtest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
+          LOGICAL, INTENT(IN)  :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
 
           !
           !the respective filename is "mount1.h5" and "mount2.h5"
           !
-          CHARACTER(LEN=9), PARAMETER :: filename1 = "mount1.h5"
-          CHARACTER(LEN=9), PARAMETER :: filename2 = "mount2.h5"
+          CHARACTER(LEN=6)  :: filename1 
+          CHARACTER(LEN=6)  :: filename2
+          CHARACTER(LEN=80) :: fix_filename1
+          CHARACTER(LEN=80) :: fix_filename2
 
           !
           !data space rank and dimensions
@@ -82,12 +94,13 @@
           INTEGER, DIMENSION(NX,NY) :: data_in, data_out
 
           INTEGER, DIMENSION(7) :: data_dims
-          !
-          !Initialize FORTRAN predifined datatypes
-          !
-!          CALL h5init_types_f(error) 
-!               CALL check("h5init_types_f",error,total_error)
+          filename1 = "mount1"
+          filename2 = "mount2"
 
+          do i = 1,80
+             fix_filename1(i:i) = " "
+             fix_filename2(i:i) = " "
+          enddo
           !
           !Initialize data_in buffer
           !
@@ -98,9 +111,17 @@
           end do
 
           !
+          ! Fix names of the files
+          !
+          CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
+          if(error .ne. 0) stop 
+          CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
+          if(error .ne. 0) stop 
+
+          !
           !Create first file "mount1.h5" using default properties.
           ! 
-          CALL h5fcreate_f(filename1, H5F_ACC_TRUNC_F, file1_id, error)
+          CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
                CALL check("h5fcreate_f",error,total_error)
         
 
@@ -121,7 +142,7 @@
           !
           !Create second file "mount2.h5" using default properties.
           ! 
-          CALL h5fcreate_f(filename2, H5F_ACC_TRUNC_F, file2_id, error)
+          CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error)
                CALL check("h5fcreate_f",error,total_error)
 
           !
@@ -158,26 +179,26 @@
           !
           !test whether files are in hdf5 format
           !
-          CALL h5fis_hdf5_f(filename1, status, error)
+          CALL h5fis_hdf5_f(fix_filename1, status, error)
                CALL check("h5fis_hdf5_f",error,total_error)
           IF ( .NOT. status ) THEN
-              write(*,*) "File ", filename1, " is not in hdf5 format"
+              write(*,*) "File ", fix_filename1, " is not in hdf5 format"
               stop
           END IF
 
-          CALL h5fis_hdf5_f(filename2, status, error)
+          CALL h5fis_hdf5_f(fix_filename2, status, error)
                CALL check("h5fis_hdf5_f",error,total_error)
           IF ( .NOT. status ) THEN
-              write(*,*) "File ", filename2, " is not in hdf5 format"
+              write(*,*) "File ", fix_filename2, " is not in hdf5 format"
               stop
           END IF
 
           !
           !reopen both files.
           ! 
-          CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
+          CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
               CALL check("hfopen_f",error,total_error)
-          CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
+          CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
               CALL check("h5fopen_f",error,total_error)
 
           !
@@ -239,34 +260,33 @@
           CALL h5fclose_f(file2_id, error)
               CALL check("h5fclose_f",error,total_error)
 
-          !
-          ! Close FORTRAN predefined datatypes.
-          !
-!          CALL h5close_types_f(error)
-!              CALL check("h5close_types_f",error,total_error)
+          if(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          if(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
           RETURN
         END SUBROUTINE mountingtest
 
 !
-!The following subroutine tests h5freopen_f.
-!It creates the file which has name "reopen.h5" and 
-!the "/dset" dataset inside the file.
-!writes the data to the file, close the dataset.
-!Reopen the file based upon the file_id, open the 
-!dataset use the reopen_id then reads the 
-!dataset back to memory to test whether the data
-!read is identical to the data written  
+!    The following subroutine tests h5freopen_f.
+!    It creates the file which has name "reopen.h5" and 
+!    the "/dset" dataset inside the file.
+!    writes the data to the file, close the dataset.
+!    Reopen the file based upon the file_id, open the 
+!    dataset use the reopen_id then reads the 
+!    dataset back to memory to test whether the data
+!    read is identical to the data written  
 !
 
-        SUBROUTINE reopentest(total_error)
+        SUBROUTINE reopentest(cleanup, total_error)
         USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
+          LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
      
           !
-          !the dataset is stored in file "dsetf.h5"
-          !
-          CHARACTER(LEN=9), PARAMETER :: filename = "reopen.h5"
+          CHARACTER(LEN=6), PARAMETER :: filename = "reopen"
+          CHARACTER(LEN=80)  :: fix_filename 
 
           INTEGER(HID_T) :: file_id, reopen_id  ! File identifiers 
           INTEGER(HID_T) :: dset_id             ! Dataset identifier 
@@ -328,7 +348,12 @@
           !
           !Create file "reopen.h5" using default properties.
           ! 
-          CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
                CALL check("h5fcreate_f",error,total_error)
 
           !
@@ -408,35 +433,34 @@
          CALL h5fclose_f(reopen_id, error)
               CALL check("h5fclose_f",error,total_error)
      
-         !
-         !Close FORTRAN predifined datatypes
-         !
-!         CALL h5close_types_f(error)
-!              CALL check("h5close_types_f",error,total_error)
 
-
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
           RETURN
 
         END SUBROUTINE reopentest
 
 !
-!The following example demonstrates how to get creation property list,
-!and access property list.
-!We first create a file using the default creation and access property
-!list. Then, the file was closed and reopened. We then get the
-!creation and access property lists of the first file. The second file is
-!created using the got property lists 
+!    The following example demonstrates how to get creation property list,
+!    and access property list.
+!    We first create a file using the default creation and access property
+!    list. Then, the file was closed and reopened. We then get the
+!    creation and access property lists of the first file. The second file is
+!    created using the got property lists 
 
-        SUBROUTINE plisttest(total_error)
+        SUBROUTINE plisttest(cleanup, total_error)
          USE HDF5  ! This module contains all necessary modules
           IMPLICIT NONE
+          LOGICAL, INTENT(IN)  :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
 
           !
           !file names are "plist1.h5" and "plist2.h5"
           !
-          CHARACTER(LEN=9), PARAMETER :: filename1 = "plist1.h5"
-          CHARACTER(LEN=9), PARAMETER :: filename2 = "plist2.h5"
+          CHARACTER(LEN=6), PARAMETER :: filename1 = "plist1"
+          CHARACTER(LEN=80) :: fix_filename1
+          CHARACTER(LEN=6), PARAMETER :: filename2 = "plist2"
+          CHARACTER(LEN=80) :: fix_filename2
 
           INTEGER(HID_T) :: file1_id, file2_id   ! File identifiers
           INTEGER(HID_T) :: prop_id    ! File creation property list identifier
@@ -446,15 +470,14 @@
           INTEGER     ::   error
 
           !
-          !Initialize FORTRAN predifined datatypes
-          !
-!          CALL h5init_types_f(error) 
-!               CALL check("h5init_types_f",error,total_error)
-
-          !
           !Create a file1 using default properties.
           ! 
-          CALL h5fcreate_f(filename1, H5F_ACC_TRUNC_F, file1_id, error)
+          CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify file name"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
               CALL check("h5fcreate_f",error,total_error)
 
           !
@@ -466,7 +489,7 @@
           !
           !Open an existing file.
           !
-          CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
+          CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
               CALL check("h5fopen_f",error,total_error)
 
           !
@@ -485,7 +508,12 @@
           !based on the creation property list id and access property list id
           !create a new file
           !
-          CALL h5fcreate_f(filename2, H5F_ACC_TRUNC_F, file2_id, error, &
+          CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify file name"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error, &
                prop_id, access_id)
               CALL check("h5create_f",error,total_error)
 
@@ -506,17 +534,15 @@
           CALL h5fclose_f(file2_id, error)
               CALL check("h5fclose_f",error,total_error)
 
-          !
-          !Close FORTRAN predifined datatypes
-          !
-!          CALL h5close_types_f(error)
-!              CALL check("h5close_types_f",error,total_error)
+          if(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          if(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
           RETURN
 
         END SUBROUTINE plisttest
               
      
 
-!      END MODULE H5FTEST
 
 

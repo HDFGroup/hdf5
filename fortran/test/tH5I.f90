@@ -1,13 +1,16 @@
-    SUBROUTINE identifier_test(total_error)
 
-!THis subroutine tests following functionalities: h5iget_type_f
+    SUBROUTINE identifier_test(cleanup, total_error)
+
+!   This subroutine tests following functionalities: h5iget_type_f
 
    USE HDF5 ! This module contains all necessary modules 
 
      IMPLICIT NONE
+     LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
 
-     CHARACTER(LEN=9), PARAMETER :: filename = "itestf.h5" ! File name
+     CHARACTER(LEN=6), PARAMETER :: filename = "itestf" ! File name
+     CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=9), PARAMETER :: dsetname = "itestdset" ! Dataset name
      CHARACTER(LEN=10), PARAMETER :: groupname = "itestgroup"! group name
      CHARACTER(LEN=10), PARAMETER :: aname = "itestattr"! group name
@@ -40,7 +43,12 @@
      !
      ! Create a new file using default properties.
      ! 
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+     endif
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f",error,total_error)
     
      !
@@ -177,6 +185,9 @@
      !
      CALL h5fclose_f(file_id, error)
      CALL check("h5fclose_f",error,total_error)
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
 
      RETURN
      END SUBROUTINE identifier_test

@@ -1,11 +1,29 @@
+
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
 !
 ! This test writes/reads dataset by hyperslabs collectively. 
 
-     SUBROUTINE dataset_wr_by_hyperslabs(total_error) 
+     SUBROUTINE dataset_wr_by_hyperslabs(cleanup, total_error) 
      USE THDF5
      IMPLICIT NONE
+     LOGICAL, INTENT(IN) :: cleanup
+     INTEGER, INTENT(OUT) :: total_error
 
-     CHARACTER(LEN=7), PARAMETER :: filename = "sdsf.h5"  ! File name
+     CHARACTER(LEN=8), PARAMETER :: filename = "par_sdsf"  ! File name
+     CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=8), PARAMETER :: dsetname = "IntArray" ! Dataset name
 
      INTEGER(HID_T) :: file_id       ! File identifier 
@@ -25,7 +43,7 @@
      INTEGER :: i, j
      INTEGER :: dims(7)
 
-     INTEGER :: total_error, error  ! Error flags
+     INTEGER :: error  ! Error flag
      !
      ! MPI definitions and calls.
      !
@@ -43,11 +61,12 @@
           CALL check("h5pcreate_f", error, total_error)
      CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
+     CALL h5_fixname_f(filename, fix_filename, plac_id, error)
 
      !
      ! Create the file collectively.
      ! 
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plac_id)
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = plac_id)
           CALL check("h5fcreate_f", error, total_error)
      CALL h5pclose_f(plac_id, error)
           CALL check("h5pclose_f", error, total_error)
@@ -137,10 +156,8 @@
           CALL check("h5pcreate_f", error, total_error)
      CALL h5pset_fapl_mpio_f(plac_id, comm, info, error)
           CALL check("h5pset_fapl_mpio_f", error, total_error)
-     CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, error, plac_id)
+     CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, file_id, error, plac_id)
           CALL check("h5fopen_f", error, total_error)
-     CALL h5pclose_f(plac_id, error)
-          CALL check("h5pclose_f", error, total_error)
      !
      ! Open dataset.
      !
@@ -221,4 +238,11 @@
      CALL h5fclose_f(file_id, error)
           CALL check("h5fclose_f", error, total_error)
 
+          if(cleanup) CALL h5_cleanup_f(filename, plac_id, error)
+              CALL check("h5_cleanup_f", error, total_error)
+
+     CALL h5pclose_f(plac_id, error)
+          CALL check("h5pclose_f", error, total_error)
+
+     RETURN
      END SUBROUTINE dataset_wr_by_hyperslabs 

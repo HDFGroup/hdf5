@@ -1,16 +1,33 @@
-    SUBROUTINE group_test(total_error)
 
-!THis subroutine tests following functionalities: 
-! h5gcreate_f, h5gopen_f, h5gclose_f, (?)h5gget_obj_info_idx_f,  h5gn_members_f
-!h5glink_f, h5gunlink_f, h5gmove_f,  h5gget_linkval_f, h5gset_comment_f,
-! h5gget_comment_f 
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
+    SUBROUTINE group_test(cleanup, total_error)
+
+!   This subroutine tests following functionalities: 
+!   h5gcreate_f, h5gopen_f, h5gclose_f, (?)h5gget_obj_info_idx_f,  h5gn_members_f
+!   h5glink_f, h5gunlink_f, h5gmove_f,  h5gget_linkval_f, h5gset_comment_f,
+!   h5gget_comment_f 
 
      USE HDF5 ! This module contains all necessary modules 
         
      IMPLICIT NONE
+     LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
 
-     CHARACTER(LEN=8), PARAMETER :: filename = "gtest.h5"    !File name
+     CHARACTER(LEN=5), PARAMETER :: filename = "gtest"    !File name
+     CHARACTER(LEN=80) :: fix_filename
      CHARACTER(LEN=33), PARAMETER :: comment = "Testing the group functionalities"  
                                               ! comment for this file
      CHARACTER(LEN=7), PARAMETER :: groupname1 = "MyGroup"  ! Group name
@@ -45,7 +62,12 @@
      !
      ! Create the file.
      !
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f",error,total_error)
 
      !
@@ -205,4 +227,7 @@
      CALL check("h5dclose_f", error, total_error)   
      CALL h5sclose_f(dspace_id, error)
      CALL check("h5sclose_f", error, total_error)   
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
   END SUBROUTINE group_test

@@ -1,27 +1,41 @@
+
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the files COPYING and Copyright.html.  COPYING can be found at the root   *
+!   of the source code distribution tree; Copyright.html can be found at the  *
+!   root level of an installed copy of the electronic HDF5 document set and   *
+!   is linked from the top-level documents page.  It can also be found at     *
+!   http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+!   access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+!
 ! 
 !    Testing Selection-related Dataspace Interface functionality.
 !
 
 !
-!The following subroutines tests the following functionalities:
-!h5sget_select_npoints_f, h5sselect_elements_f, h5sselect_all_f,
-!h5sselect_none_f, h5sselect_valid_f, h5sselect_hyperslab_f,
-!h5sget_select_bounds_f, h5sget_select_elem_pointlist_f,
-!h5sget_select_elem_npoints_f, h5sget_select_hyper_blocklist_f, 
-!h5sget_select_hyper_nblocks_f, h5sget_select_npoints_f
+!    The following subroutines tests the following functionalities:
+!    h5sget_select_npoints_f, h5sselect_elements_f, h5sselect_all_f,
+!    h5sselect_none_f, h5sselect_valid_f, h5sselect_hyperslab_f,
+!    h5sget_select_bounds_f, h5sget_select_elem_pointlist_f,
+!    h5sget_select_elem_npoints_f, h5sget_select_hyper_blocklist_f, 
+!    h5sget_select_hyper_nblocks_f, h5sget_select_npoints_f
 !
 
-  SUBROUTINE test_select_hyperslab(total_error)
+  SUBROUTINE test_select_hyperslab(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules 
 
     IMPLICIT NONE
+    LOGICAL, INTENT(IN) :: cleanup
     INTEGER, INTENT(OUT) :: total_error 
 
-    !
-    !the dataset is stored in file "sdsf.h5"
-    !
-    CHARACTER(LEN=7), PARAMETER :: filename = "sdsf.h5"
+    CHARACTER(LEN=7), PARAMETER :: filename = "tselect"
+    CHARACTER(LEN=80) :: fix_filename
 
     !
     !dataset name is "IntArray"
@@ -136,7 +150,12 @@
     !
     !Create a new file using default properties.
     ! 
-    CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+    CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
     CALL check("h5fcreate_f", error, total_error)
 
     !
@@ -197,7 +216,7 @@
     !
     !Open the file.
     !
-    CALL h5fopen_f (filename, H5F_ACC_RDONLY_F, file_id, error)
+    CALL h5fopen_f (fix_filename, H5F_ACC_RDONLY_F, file_id, error)
     CALL check("h5fopen_f", error, total_error)
 
     !
@@ -282,11 +301,9 @@
     CALL h5fclose_f(file_id, error)
     CALL check("h5fclose_f", error, total_error)
 
-    !
-    ! Close FORTRAN predefined datatypes.
-    !
-!    CALL h5close_types_f(error)
-!    CALL check("h5close_types_f", error, total_error)
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
     RETURN
 
   END SUBROUTINE test_select_hyperslab
@@ -295,22 +312,25 @@
   !Subroutine to test element selection
   !
 
-  SUBROUTINE test_select_element(total_error)
+  SUBROUTINE test_select_element(cleanup, total_error)
 
     USE HDF5 ! This module contains all necessary modules 
 
     IMPLICIT NONE
+    LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(OUT) :: total_error 
 
     !
     !the dataset1 is stored in file "copy1.h5"
     !
-    CHARACTER(LEN=8), PARAMETER :: filename1 = "copy1.h5"
+    CHARACTER(LEN=13), PARAMETER :: filename1 = "tselect_copy1"
+    CHARACTER(LEN=80) :: fix_filename1
 
     !
     !the dataset2 is stored in file "copy2.h5"
     !
-    CHARACTER(LEN=8), PARAMETER :: filename2 = "copy2.h5"
+    CHARACTER(LEN=13), PARAMETER :: filename2 = "tselect_copy2"
+    CHARACTER(LEN=80) :: fix_filename2
     !
     !dataset1 name is "Copy1"
     !
@@ -411,10 +431,20 @@
     !
     !Create file1, file2  using default properties.
     ! 
-    CALL h5fcreate_f(filename1, H5F_ACC_TRUNC_F, file1_id, error)
+          CALL h5_fixname_f(filename1, fix_filename1, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+    CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
     CALL check("h5fcreate_f", error, total_error)
 
-    CALL h5fcreate_f(filename2, H5F_ACC_TRUNC_F, file2_id, error)
+          CALL h5_fixname_f(filename2, fix_filename2, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+    CALL h5fcreate_f(fix_filename2, H5F_ACC_TRUNC_F, file2_id, error)
     CALL check("h5fcreate_f", error, total_error)
 
     !
@@ -484,10 +514,10 @@
     !
     !Open the files.
     !
-    CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
+    CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
     CALL check("h5fopen_f", error, total_error)
 
-    CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
+    CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
     CALL check("h5fopen_f", error, total_error)
 
     !
@@ -588,10 +618,10 @@
     !
     !Open the files.
     !
-    CALL h5fopen_f (filename1, H5F_ACC_RDWR_F, file1_id, error)
+    CALL h5fopen_f (fix_filename1, H5F_ACC_RDWR_F, file1_id, error)
     CALL check("h5fopen_f", error, total_error)
 
-    CALL h5fopen_f (filename2, H5F_ACC_RDWR_F, file2_id, error)
+    CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
     CALL check("h5fopen_f", error, total_error)
 
     !
@@ -651,25 +681,27 @@
     CALL h5fclose_f(file2_id, error)
     CALL check("h5fclose_f", error, total_error)
 
-    !
-    ! Close FORTRAN predefined datatypes.
-    !
-!    CALL h5close_types_f(error)
-!    CALL check("h5close_types_f", error, total_error)
 
+          if(cleanup) CALL h5_cleanup_f(filename1, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          if(cleanup) CALL h5_cleanup_f(filename2, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+     RETURN
   END SUBROUTINE  test_select_element
 
 
-  SUBROUTINE test_basic_select(total_error)
+  SUBROUTINE test_basic_select(cleanup, total_error)
     USE HDF5 ! This module contains all necessary modules 
 
     IMPLICIT NONE
+    LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(OUT) :: total_error 
 
      !
      !the dataset is stored in file "testselect.h5"
      !
-     CHARACTER(LEN=13), PARAMETER :: filename = "testselect.h5"
+     CHARACTER(LEN=10), PARAMETER :: filename = "testselect"
+     CHARACTER(LEN=80) :: fix_filename 
 
      !
      !dataspace rank 
@@ -809,16 +841,16 @@
      coord(2,9) = 3
      coord(1,10) = 5
      coord(2,10) = 5
-     !
-     !Initialize FORTRAN predifined datatypes
-     !
-!     CALL h5init_types_f(error) 
-!     CALL check("h5init_types_f", error, total_error)
 
      !
      !Create a new file using default properties.
      ! 
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+     CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
      CALL check("h5fcreate_f", error, total_error)
 
      !
@@ -863,7 +895,7 @@
      !
      !Open the file.
      !
-     CALL h5fopen_f (filename, H5F_ACC_RDONLY_F, file_id, error)
+     CALL h5fopen_f (fix_filename, H5F_ACC_RDONLY_F, file_id, error)
      CALL check("h5fopen_f", error, total_error)
        
      !
@@ -995,12 +1027,11 @@
      CALL h5fclose_f(file_id, error)
      CALL check("h5fclose_f", error, total_error)
 
-     !
-     ! Close FORTRAN predefined datatypes.
-     !
-!     CALL h5close_types_f(error)
-!     CALL check("h5close_types_f", error, total_error)
 
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+
+     RETURN
   END SUBROUTINE  test_basic_select
 
 
