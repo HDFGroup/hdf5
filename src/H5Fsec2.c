@@ -177,9 +177,9 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	HRETURN_ERROR (H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
     }
 #ifdef HAVE_LSEEK64
-    offset = (off64_t)(addr->offset); /*checked for overflow*/
+    offset = (off64_t)(addr->offset); /*checked for overflow above*/
 #else
-    offset = (off_t)(addr->offset); /*checked for overflow*/
+    offset = (off_t)(addr->offset); /*checked for overflow above*/
 #endif
 
     /* Check easy cases */
@@ -196,9 +196,15 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     if (!H5F_OPT_SEEK ||
 	lf->u.sec2.op == H5F_OP_UNKNOWN ||
 	lf->u.sec2.cur != offset) {
+#ifdef HAVE_LSEEK64
+	if (lseek64 (lf->u.sec2.fd, offset, SEEK_SET)<0) {
+	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "lseek64 failed");
+	}
+#else
 	if (lseek(lf->u.sec2.fd, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "lseek failed");
 	}
+#endif
 	lf->u.sec2.cur = offset;
     }
     

@@ -143,10 +143,10 @@
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
    size_t _i;								      \
-   n = 0;							      \
+   n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(int64); _i++, n<<=8) {				      \
-      n |= *(--p);							      \
+   for (_i=0; _i<sizeof(int64); _i++) {					      \
+      n = (n<<8) | *(--p);						      \
    }									      \
    (p) += 8;								      \
 }
@@ -154,10 +154,10 @@
 #  define UINT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
    size_t _i;								      \
-   n = 0;							      \
+   n = 0;								      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(uint64); _i++, n<<=8) {			      \
-      n |= *(--p);							      \
+   for (_i=0; _i<sizeof(uint64); _i++) {				      \
+      n = (n<<8) | *(--p);						      \
    }									      \
    (p) += 8;								      \
 }
@@ -339,7 +339,7 @@ typedef struct H5F_low_t {
 	    FILE	*f;	/* Posix stdio file			*/
 	    H5F_fileop_t op;	/* Previous file operation		*/
 #ifdef HAVE_FSEEK64
-	    long long	cur;	/* Current file position		*/
+	    int64	cur;	/* Current file position		*/
 #else
 	    off_t	cur;	/* Current file position		*/
 #endif

@@ -107,7 +107,12 @@ AC_TYPE_SIZE_T
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(lseek64 fseek64 getpwuid gethostname)
+AC_CHECK_FUNCS(getpwuid gethostname)
+
+AC_TRY_COMPILE([#include<sys/types.h>],
+	       [off64_t n = 0;],
+	       AC_CHECK_FUNCS(lseek64 fseek64),
+	       AC_MSG_RESULT([skipping test for lseek64() and fseek64()]))
 
 
 dnl ----------------------------------------------------------------------

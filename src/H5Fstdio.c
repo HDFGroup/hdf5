@@ -185,7 +185,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     size_t		n;
     uint64		mask;
 #ifdef HAVE_FSEEK64
-    long long		offset;
+    int64		offset;
 #else
     off_t		offset;
 #endif
@@ -200,7 +200,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
 	HRETURN_ERROR (H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
     }
 #ifdef HAVE_FSEEK64
-    offset = (long long)(addr->offset); /*checked for overflow*/
+    offset = (int64)(addr->offset); /*checked for overflow*/
 #else
     offset = (off_t)(addr->offset); /*checked for overflow*/
 #endif
@@ -218,9 +218,15 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     if (!H5F_OPT_SEEK ||
 	lf->u.stdio.op != H5F_OP_READ ||
 	lf->u.stdio.cur != offset) {
+#ifdef HAVE_FSEEK64
+	if (fseek64 (lf->u.stdio.f, offset, SEEK_SET)<0) {
+	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek64 failed");
+	}
+#else
 	if (fseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
 	}
+#endif
 	lf->u.stdio.cur = offset;
     }
 
@@ -250,7 +256,11 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
      * Update the file position data.
      */
     lf->u.stdio.op = H5F_OP_READ;
-    lf->u.stdio.cur = offset + n;
+#ifdef HAVE_FSEEK64
+    lf->u.stdio.cur = (int64)(offset+n); /*checked for overflow above*/
+#else
+    lf->u.stdio.cur = (off_t)(offset+n); /*checked for overflow above*/
+#endif
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -284,7 +294,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     ssize_t		n;
     uint64		mask;
 #ifdef HAVE_FSEEK64
-    long long		offset;
+    int64		offset;
 #else
     off_t		offset;
 #endif
@@ -299,8 +309,8 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	HRETURN_ERROR (H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed");
     }
 #ifdef HAVE_FSEEK64
-    offset = (long long)(addr->offset); /*checked for overflow*/
-    n = (long long)size; /*checked for overflow*/
+    offset = (int64)(addr->offset); /*checked for overflow*/
+    n = (int64)size; /*checked for overflow*/
 #else
     offset = (long)(addr->offset); /*checked for overflow*/
     n = (off_t)size; /*checked for overflow*/
@@ -312,9 +322,15 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     if (!H5F_OPT_SEEK ||
 	lf->u.stdio.op != H5F_OP_WRITE ||
 	lf->u.stdio.cur != offset) {
+#ifdef HAVE_FSEEK64
+	if (fseek64 (lf->u.stdio.f, offset, SEEK_SET)<0) {
+	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek64 failed");
+	}
+#else
 	if (fseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
 	}
+#endif
 	lf->u.stdio.cur = offset;
     }
     /*

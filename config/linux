@@ -33,9 +33,8 @@
 #	$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2
 #
 
-# Unconditionally set the compiler to gcc since the following flags
-# only apply to that compiler.
-CC=gcc      
+# The following flags only apply to the gcc compiler.
+CC=${CC:-gcc}
 
 
 

@@ -983,7 +983,7 @@ H5Pget_driver (hid_t tid)
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
 	NULL == (tmpl = H5A_object (tid))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, H5F_LOW_ERROR,
 		       "not a file access property list");
     }
 

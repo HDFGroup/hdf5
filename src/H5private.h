@@ -24,7 +24,7 @@
 /* Version #'s of library code */
 #define HDF5_MAJOR_VERSION      1       /* For major interface changes    */
 #define HDF5_MINOR_VERSION      0       /* For minor interface changes    */
-#define HDF5_RELEASE_VERSION    0       /* For interface tweaks & bug-fixes */
+#define HDF5_RELEASE_VERSION    1       /* For interface tweaks & bug-fixes */
 #define HDF5_PATCH_VERSION      0       /* For small groups of bug fixes */
 
 /* Version #'s of the major components of the file format */
@@ -38,61 +38,62 @@
  * Include those things that almost all source files need.
  */
 #ifdef STDC_HEADERS
-#  include <assert.h>
-#  include <fcntl.h>
-#  include <stdio.h>
-#  include <stdlib.h>
-#  include <string.h>
-#  include <unistd.h>
+#   include <assert.h>
+#   include <fcntl.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#   include <string.h>
+#   include <sys/types.h>
+#   include <unistd.h>
 #endif
 
 /*
  * Pablo support files.
  */
 #ifdef HAVE_PABLO
-#  define IOTRACE
-#  include "IOTrace.h"
-#  include "ProcIDS.h"
+#   define IOTRACE
+#   include "IOTrace.h"
+#   include "ProcIDS.h"
 #endif
 
 /* Does the compiler support the __attribute__(()) syntax? */
 #ifndef HAVE_ATTRIBUTE
-#  define __attribute__(X)      /*void */
+#   define __attribute__(X)      /*void */
 #endif
 
 /* Does the compiler expand __FUNCTION__? */
 #ifndef HAVE_FUNCTION
-#  define __FUNCTION__  "NoFuntionName"
+#   define __FUNCTION__  "NoFuntionName"
 #endif
 
 /* number of members in an array */
 #ifndef NELMTS
-#   define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
+#    define NELMTS(X)    (sizeof(X)/sizeof(X[0]))
 #endif
 
 /* minimum of two values */
 #ifndef MIN
-#  define MIN(a,b)    (((a)<(b)) ? (a) : (b))
+#   define MIN(a,b)    (((a)<(b)) ? (a) : (b))
 #endif
 
 /* maximum of two values */
 #ifndef MAX
-#  define MAX(a,b)    (((a)>(b)) ? (a) : (b))
+#   define MAX(a,b)    (((a)>(b)) ? (a) : (b))
 #endif
 
 /* absolute value */
 #ifndef ABS
-#  define ABS(a)    (((a)>=0) ? (a) : -(a))
+#   define ABS(a)    (((a)>=0) ? (a) : -(a))
 #endif
 
 /* sign of argument */
 #ifndef SIGN
-#  define SIGN(a)    ((a)>0 ? 1 : (a)<0 ? -1 : 0)
+#   define SIGN(a)    ((a)>0 ? 1 : (a)<0 ? -1 : 0)
 #endif
 
 /* maximum of three values */
 #ifndef MAX3
-#  define MAX3(a,b,c)   MAX(MAX(a,b),c)
+#   define MAX3(a,b,c)   MAX(MAX(a,b),c)
 #endif
 
 /*
@@ -111,29 +112,6 @@
 typedef struct {
     uint64                  offset;     /*offset within an HDF5 file    */
 } haddr_t;
-
-/*
- * We try to use lseek64() and fseek64() if they're available, but they're
- * not Posix and thus take different arguments on different systems.  These
- * macros attempt to overcome those problems.
- */
-#ifdef HAVE_LSEEK64
-#   ifdef _MIPS_SZLONG
-        /* SGI systems */
-#       if (_MIPS_SZLONG == 64)
-#           define OFF64_SET(VAR,VAL) VAR=VAL
-#       elif defined(_LONGLONG)
-#           define OFF64_SET(VAR,VAL) VAR=VAL
-#       else
-#           define OFF64_SET(VAR,VAL) (VAR.hi32=VAL>>32,		      \
-				       VAR.lo32=(int)(VAL & 0xffffffff),      \
-				       VAL)
-#       endif
-#   else
-#       warn "HAVE_LSEEK64 has been turned off"
-#       undef HAVE_LSEEK64
-#   endif
-#endif
 
 /*
  * Some compilers have problems declaring auto variables that point

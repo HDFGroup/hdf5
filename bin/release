@@ -210,9 +210,9 @@ EOF
    if (-d "CVS") {
       my $tag = $ver;
       $tag =~ s/\./-/g;
-      print "Tag CVS sources with \"$tag\"? [y] ";
+      print "Tag CVS sources with \"$tag\"? [n] ";
       chomp ($_ = <STDIN>);
-      if (!$_ || $_ eq 'y') {
+      if ($_ eq 'y') {
 	 print "Tagging CVS sources...\n";
 	 my $status = system "cvs tag -R $tag";
 	 die "cvs tag failed" if $status >> 8;

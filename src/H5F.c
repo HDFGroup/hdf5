@@ -77,8 +77,8 @@ const H5F_create_t	H5F_create_dflt = {
 	0,			/* unused				*/
 	0,			/* unused				*/
     },
-    4,		   /* Default offset size */
-    4,		   /* Default length size */
+    sizeof(size_t),		   /* Default offset size */
+    sizeof(size_t),		   /* Default length size */
     HDF5_BOOTBLOCK_VERSION,	/* Current Boot-Block version # */
     HDF5_SMALLOBJECT_VERSION,	/* Current Small-Object heap version # */
     HDF5_FREESPACE_VERSION,	/* Current Free-Space info version # */
@@ -143,23 +143,23 @@ H5F_init_interface(void)
 
     /* Initialize the default file access template */
     H5F_access_dflt.driver = H5F_LOW_DFLT;
-    switch (H5F_LOW_DFLT) {
-    case H5F_LOW_STDIO:
-    case H5F_LOW_SEC2:
-    case H5F_LOW_CORE:
-    case H5F_LOW_SPLIT:
-    case H5F_LOW_FAMILY:
-	/* nothing more to init */
-	break;
-
-    case H5F_LOW_MPI:
-#ifdef HAVE_PARALLEL
-	H5F_access_dflt.u.mpio.access_mode = 0;
-	H5F_access_dflt.u.mpio.comm = MPI_COMM_NULL;
-	H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
+#if (H5F_LOW_DFLT == H5F_LOW_SEC2)
+    /* Nothing to initialize */
+#elif (H5F_LOW_DFLT == H5F_LOW_STDIO)
+    /* Nothing to initialize */
+#elif (H5F_LOW_DFLT == H5F_LOW_CORE)
+    H5F_access_dflt.u.core.increment = 10*1024;
+#elif (H5F_LOW_DFLT == H5F_LOW_MPI)
+    H5F_access_dflt.u.mpio.access_mode = 0;
+    H5F_access_dflt.u.mpio.comm = MPI_COMM_NULL;
+    H5F_access_dflt.u.mpio.info = MPI_INFO_NULL;
+#elif (H5F_LOW_DFLT == H5F_LOW_SPLIT)
+    /* Nothing to initialize */
+#elif (H5F_LOW_DFLT == H5F_LOW_FAMILY)
+    /* Nothing to initialize */
+#else
+#   error "Unknown default file driver"
 #endif
-	break;
-    }
 
     FUNC_LEAVE(ret_value);
 }
@@ -1388,7 +1388,6 @@ H5F_close(H5F_t *f)
 herr_t 
 H5Fclose(hid_t fid)
 {
-    H5F_t	*file = NULL;	/* file struct for file to close */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fclose, FAIL);
@@ -1397,7 +1396,7 @@ H5Fclose(hid_t fid)
     if (H5_FILE != H5A_group(fid)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     }
-    if (NULL == (file = H5A_object(fid))) {
+    if (NULL == H5A_object(fid)) {
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
     }
 

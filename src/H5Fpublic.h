@@ -55,7 +55,7 @@ typedef enum H5F_driver_t {
     H5F_LOW_MPI		= 2,	/*use indep or collective MPI-IO	*/
     H5F_LOW_CORE	= 3,	/*use malloc() and free()		*/
     H5F_LOW_SPLIT	= 4,	/*separate meta data from raw data	*/
-    H5F_LOW_FAMILY	= 5, 	/*split addr space over many files	*/
+    H5F_LOW_FAMILY	= 5 	/*split addr space over many files	*/
 } H5F_driver_t;
 
 
