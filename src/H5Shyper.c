@@ -4146,9 +4146,9 @@ H5S_hyper_select_valid (const H5S_t *space)
             for(u=0; u<space->extent.u.simple.rank; u++) {
                 /* Check if an offset has been defined */
                 /* Bounds check the selected point + offset against the extent */
-                if(((curr->start[u]+space->select.offset[u])>(hssize_t)space->extent.u.simple.size[u])
+                if(((curr->start[u]+space->select.offset[u])>=(hssize_t)space->extent.u.simple.size[u])
                         || ((curr->start[u]+space->select.offset[u])<0)
-                        || ((curr->end[u]+space->select.offset[u])>(hssize_t)space->extent.u.simple.size[u])
+                        || ((curr->end[u]+space->select.offset[u])>=(hssize_t)space->extent.u.simple.size[u])
                         || ((curr->end[u]+space->select.offset[u])<0)) {
                     ret_value=FALSE;
                     break;
