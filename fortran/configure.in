@@ -268,37 +268,48 @@ dnl Some systems where you need to specify exactly where the zlib is need
 dnl this.
 ac_cv_lib_z_compress=""
 
-AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
-            ,withval=yes)
-case "$withval" in
-   yes)
-      AC_CHECK_HEADERS(zlib.h)
-      AC_CHECK_LIB(z, compress)
-      ;;
-   no)
-      AC_MSG_CHECKING(for GNU zlib)
-      AC_MSG_RESULT(suppressed)
-      ;;
-   *)
-      zlib_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$zlib_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
-         CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-         AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
-      else
-         AC_CHECK_HEADERS(zlib.h)
-      fi
+AC_ARG_WITH(zlib,
+  [  --with-zlib[=DIR]       Use the GNU zlib compression],,
+  withval=yes)
 
-      zlib_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$zlib_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
-         LDFLAGS="$LDFLAGS -L$zlib_lib"
-         ZLIB_DIR=$zlib_lib
-         AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
-      else
-         AC_CHECK_LIB(z, compress)
-      fi
-      ;;
+case "$withval" in
+  yes)
+    AC_CHECK_HEADERS(zlib.h)
+    AC_CHECK_LIB(z, compress)
+    ;;
+  no)
+    AC_MSG_CHECKING(for GNU zlib)
+    AC_MSG_RESULT(suppressed)
+    ;;
+  *)
+    case "$withval" in
+      *,*)
+        zlib_inc="`echo $withval |cut -f1 -d,`"
+        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          zlib_inc="$withval/include"
+          zlib_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+
+    if test -n "$zlib_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+    fi
+
+    AC_CHECK_HEADERS(zlib.h,, CPPFLAGS="$saved_CPPFLAGS")
+
+    if test -n "$zlib_lib"; then
+      LDFLAGS="$LDFLAGS -L$zlib_lib"
+    fi
+
+    AC_CHECK_LIB(z, compress2,, LDFLAGS="$saved_LDFLAGS")
+    ;;
 esac
 
 dnl ----------------------------------------------------------------------
