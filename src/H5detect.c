@@ -508,7 +508,7 @@ int\n\
 H5TN_term_interface(void)\n\
 {\n\
     interface_initialize_g = 0;\n\
-    FUNC_ENTER_NOINIT(H5TN_term_interface);\n\
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TN_term_interface);\n\
     \n\
     FUNC_LEAVE_NOAPI(0);\n\
 }\n");

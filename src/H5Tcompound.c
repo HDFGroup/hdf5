@@ -58,7 +58,7 @@ DESCRIPTION
 static herr_t
 H5T_init_compound_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_compound_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_compound_interface);
 
     FUNC_LEAVE_NOAPI(H5T_init());
 } /* H5T_init_compound_interface() */
@@ -525,7 +525,7 @@ H5T_pack(H5T_t *dt)
     size_t	offset;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_pack);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_pack);
 
     assert(dt);
 

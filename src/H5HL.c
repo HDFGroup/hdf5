@@ -475,7 +475,7 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
     uint8_t        *p;
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5HL_serialize)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_serialize)
 
     /* check args */
     assert(buf);
@@ -614,7 +614,7 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
 {
     H5HL_free_t	*fl;
 
-    FUNC_ENTER_NOINIT(H5HL_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dest);
 
     /* check arguments */
     assert(heap);
@@ -655,7 +655,7 @@ H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5HL_clear);
+    FUNC_ENTER_NOAPI_NOINIT(H5HL_clear);
 
     /* check arguments */
     assert(heap);
@@ -808,9 +808,9 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
 {
     /*
      * We need to have called some other function before this to get a
-     * valid heap pointer. So, this can remain "FUNC_ENTER_NOINIT"
+     * valid heap pointer. So, this can remain "FUNC_ENTER_NOAPI_NOINIT"
      */
-    FUNC_ENTER_NOINIT(H5HL_offset_into)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_offset_into)
     assert(f);
     assert(heap);
     assert(offset < heap->mem_alloc);
@@ -873,7 +873,7 @@ done:
 static H5HL_free_t *
 H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 {
-    FUNC_ENTER_NOINIT(H5HL_remove_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_remove_free);
 
     if (fl->prev) fl->prev->next = fl->next;
     if (fl->next) fl->next->prev = fl->prev;

@@ -93,7 +93,7 @@ done:
 static herr_t
 H5ST_close_internal(H5ST_ptr_t p)
 {
-    FUNC_ENTER_NOINIT(H5ST_close_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_close_internal);
 
     /* Recursively free TST */
     if(p) {
@@ -297,7 +297,7 @@ H5ST_find_internal(H5ST_ptr_t p, const char *s)
 {
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
-    FUNC_ENTER_NOINIT(H5ST_find_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_find_internal);
 
     while (p) {
         if (*s < p->splitchar)
@@ -412,7 +412,7 @@ H5ST_findfirst_internal(H5ST_ptr_t p)
 {   
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
-    FUNC_ENTER_NOINIT(H5ST_findfirst_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_findfirst_internal);
 
     while(p) {
         /* Find least node in current tree */
@@ -491,7 +491,7 @@ H5ST_getnext(H5ST_ptr_t p)
 {
     H5ST_ptr_t ret_value=NULL;  /* Return value */
 
-    FUNC_ENTER_NOINIT(H5ST_getnext);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_getnext);
 
     /* If the node to continue from has higher-valued nodes attached */
     if(p->hikid) {
@@ -593,7 +593,7 @@ H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
     H5ST_ptr_t q,               /* Temporary pointer to TST node */
         newp;                   /* Pointer to node which will replace deleted node in tree */
 
-    FUNC_ENTER_NOINIT(H5ST_delete_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_delete_internal);
 
     /* Find node to replace one being deleted */
     if(p->lokid) {
@@ -743,7 +743,7 @@ done:
 herr_t
 H5ST_dump_internal(H5ST_ptr_t p)
 {
-    FUNC_ENTER_NOINIT(H5ST_dump_internal);
+    FUNC_ENTER_NOAPI_NOINIT(H5ST_dump_internal);
 
     if (p) {
         printf("p=%p\n",p);

@@ -76,7 +76,7 @@ DESCRIPTION
 static herr_t
 H5T_init_vlen_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_vlen_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_vlen_interface)
 
     FUNC_LEAVE_NOAPI(H5T_init())
 } /* H5T_init_vlen_interface() */
@@ -149,7 +149,7 @@ H5T_vlen_create(const H5T_t *base)
     H5T_t	*dt = NULL;		/*new VL datatype	*/
     H5T_t	*ret_value;	/*return value			*/
     
-    FUNC_ENTER_NOINIT(H5T_vlen_create)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_create)
 
     /* Check args */
     assert(base);
@@ -205,7 +205,7 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 {
     htri_t ret_value = 0;       /* Indicate that success, but no location change */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_set_loc)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_set_loc)
 
     /* check parameters */
     assert(dt);
@@ -305,7 +305,7 @@ H5T_vlen_seq_mem_getlen(void *_vl)
 {
     hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_seq_mem_getlen)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_getlen)
 
     /* check parameters */
     assert(vl);
@@ -334,7 +334,7 @@ H5T_vlen_seq_mem_isnull(H5F_t UNUSED *f, void *_vl)
 {
     hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_seq_mem_isnull)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_isnull)
 
     /* check parameters */
     assert(vl);
@@ -363,7 +363,7 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
 {
     hvl_t *vl=(hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_seq_mem_read)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_read)
 
     /* check parameters */
     assert(vl && vl->p);
@@ -400,7 +400,7 @@ H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *_vl, void *buf, voi
     H5P_genplist_t *plist;      /* Property list */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_seq_mem_write)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_seq_mem_write)
 
     /* check parameters */
     assert(_vl);
@@ -466,7 +466,7 @@ H5T_vlen_seq_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
 {
     hvl_t vl;                       /* Temporary hvl_t to use during operation */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_seq_mem_setnull)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_seq_mem_setnull)
 
     /* check parameters */
     assert(_vl);
@@ -501,7 +501,7 @@ H5T_vlen_str_mem_getlen(void *_vl)
 {
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_str_mem_getlen)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_getlen)
 
     /* check parameters */
     assert(s);
@@ -530,7 +530,7 @@ H5T_vlen_str_mem_isnull(H5F_t UNUSED *f, void *_vl)
 {
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_str_mem_isnull)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_isnull)
 
     FUNC_LEAVE_NOAPI(s==NULL ? TRUE : FALSE);
 }   /* end H5T_vlen_str_mem_isnull() */
@@ -556,7 +556,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
 {
     char *s=*(char **)_vl;   /* Pointer to the user's hvl_t information */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_str_mem_read)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_read)
 
     /* check parameters */
     assert(s);
@@ -594,7 +594,7 @@ H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t dxpl_id, void *_vl, void *buf, voi
     H5P_genplist_t *plist;          /* Property list */
     herr_t      ret_value=SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_str_mem_write)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_str_mem_write)
 
     /* check parameters */
     assert(buf);
@@ -651,7 +651,7 @@ H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void 
 {
     char *t=NULL;                   /* Pointer to temporary buffer allocated */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_str_mem_write)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_str_mem_write)
 
     /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
     HDmemcpy(_vl,&t,sizeof(char *));
@@ -680,7 +680,7 @@ H5T_vlen_disk_getlen(void *_vl)
     uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
     hssize_t	seq_len;        /* Sequence length */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_disk_getlen)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_getlen)
 
     /* check parameters */
     assert(vl);
@@ -711,7 +711,7 @@ H5T_vlen_disk_isnull(H5F_t *f, void *_vl)
     uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
     haddr_t addr;               /* Sequence's heap address */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_disk_isnull)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_vlen_disk_isnull)
 
     /* check parameters */
     assert(vl);
@@ -749,7 +749,7 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
     uint32_t seq_len;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_disk_read)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_disk_read)
 
     /* check parameters */
     assert(vl);
@@ -802,7 +802,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, void *_bg, hs
     size_t len;                 /* Size of new sequence on disk (in bytes) */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_disk_write)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_disk_write)
 
     /* check parameters */
     assert(vl);
@@ -871,7 +871,7 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
     H5HG_t hobjid;              /* New VL sequence's heap ID */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5T_vlen_disk_setnull)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_disk_setnull)
 
     /* check parameters */
     assert(f);
@@ -940,7 +940,7 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
     unsigned i;     /* local index variable */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5T_vlen_reclaim_recurse)
+    FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_reclaim_recurse)
 
     assert(elem);
     assert(dt);

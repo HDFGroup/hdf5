@@ -78,7 +78,7 @@ H5S_get_vector_size(hid_t dxpl_id)
 {
     ssize_t ret_value;        /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_get_vector_size);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_get_vector_size);
 
     if(dxpl_id==H5P_DATASET_XFER_DEFAULT) {
         ret_value=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
@@ -674,7 +674,7 @@ H5S_select_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *en
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_select_iter_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_select_iter_block);
 
     /* Check args */
     assert(iter);
@@ -746,7 +746,7 @@ H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_select_iter_has_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_select_iter_has_next_block);
 
     /* Check args */
     assert(iter);
@@ -823,7 +823,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
 {
     herr_t ret_value;         /* return value */
 
-    FUNC_ENTER_NOINIT(H5S_select_iter_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_select_iter_next_block);
 
     /* Check args */
     assert(iter);

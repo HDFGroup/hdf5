@@ -106,7 +106,7 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     hsize_t	total_bytes;
     unsigned		u;
 
-    FUNC_ENTER_NOINIT(H5S_mpio_all_type);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_all_type);
 
     /* Check args */
     assert (space);
@@ -153,7 +153,7 @@ H5S_mpio_none_type( const H5S_t UNUSED *space, size_t UNUSED elmt_size,
 		     hsize_t *extra_offset,
 		     hbool_t *is_derived_type )
 {
-    FUNC_ENTER_NOINIT(H5S_mpio_none_type);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_mpio_none_type);
 
     /* fill in the return values */
     *new_type = MPI_BYTE;
@@ -223,7 +223,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
     int                 mpi_code;               /* MPI return code */
     herr_t		ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5S_mpio_hyper_type);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_hyper_type);
 
     /* Check args */
     assert (space);
@@ -524,7 +524,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
 {
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5S_mpio_space_type);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_space_type);
 
     /* Check args */
     assert (space);
@@ -638,7 +638,7 @@ H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
     int         mpi_code;               /* MPI return code */
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5S_mpio_spaces_xfer);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_mpio_spaces_xfer);
 
     /* Check args */
     assert (f);

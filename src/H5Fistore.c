@@ -241,8 +241,8 @@ H5F_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
     const H5F_istore_ud1_t *udata = (const H5F_istore_ud1_t *) _udata;
     size_t		    nbytes;
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5F_istore_sizeof_rkey);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_istore_sizeof_rkey);
 
     assert(udata);
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
@@ -795,7 +795,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key,
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
 
-    FUNC_ENTER_NOINIT(H5F_istore_iter_allocated);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_istore_iter_allocated);
 
     bt_udata->total_storage += lt_key->nbytes;
 
@@ -832,7 +832,7 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, hadd
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned		u;
 
-    FUNC_ENTER_NOINIT(H5F_istore_iter_dump);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_istore_iter_dump);
 
     if (bt_udata->stream) {
         if (0==bt_udata->total_storage) {
@@ -919,7 +919,7 @@ H5F_istore_flush_entry(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t *ent, hbool_t res
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
    
-    FUNC_ENTER_NOINIT(H5F_istore_flush_entry);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_flush_entry);
 
     assert(f);
     assert(ent);
@@ -1051,7 +1051,7 @@ H5F_istore_preempt(H5F_t *f, hid_t dxpl_id, H5F_rdcc_ent_t * ent, hbool_t flush)
     H5F_rdcc_t             *rdcc = &(f->shared->rdcc);
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_istore_preempt);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_preempt);
 
     assert(f);
     assert(ent);
@@ -1223,7 +1223,7 @@ H5F_istore_prune (H5F_t *f, hid_t dxpl_id, size_t size)
     H5F_rdcc_ent_t	*n[2];		/*list next pointers		*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5F_istore_prune);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_prune);
 
     /*
      * Preemption is accomplished by having multiple pointers (currently two)
@@ -1367,7 +1367,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5Z_EDC_t           edc;
     H5Z_cb_t            cb_struct;
 
-    FUNC_ENTER_NOINIT(H5F_istore_lock);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_lock);
     
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     plist=H5I_object(dxpl_id);
@@ -1630,7 +1630,7 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned		u;
     H5P_genplist_t *plist;      /* Property list */
     
-    FUNC_ENTER_NOINIT(H5F_istore_unlock);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_istore_unlock);
 
     if (UINT_MAX==*idx_hint) {
 	/*not in cache*/
@@ -2068,7 +2068,7 @@ H5F_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned	u;
     haddr_t	ret_value;		/* Return value */
     
-    FUNC_ENTER_NOINIT(H5F_istore_get_addr);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_get_addr);
 
     assert(f);
     assert(layout && (layout->ndims > 0));
@@ -2603,7 +2603,7 @@ H5F_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr_t UNUSED a
      * storage that contains the beginning of the logical address space represented by UDATA.
      */
 
-    FUNC_ENTER_NOINIT(H5F_istore_prune_extent);
+    FUNC_ENTER_NOAPI_NOINIT(H5F_istore_prune_extent);
 
     /* Figure out what chunks are no longer in use for the specified extent and release them */
     for(u = 0; u < bt_udata->mesg.ndims - 1; u++)

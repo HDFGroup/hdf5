@@ -130,7 +130,7 @@ static int		interface_initialize_g = 0;
 static int
 H5TB_strcmp(const void *k1, const void *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5TB_strcmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_strcmp);
 
     assert(k1);
     assert(k2);
@@ -156,7 +156,7 @@ H5TB_strcmp(const void *k1, const void *k2, int UNUSED cmparg)
 static int
 H5TB_addr_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5TB_addr_cmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_addr_cmp);
 
     assert(k1);
     assert(k2);
@@ -182,7 +182,7 @@ H5TB_addr_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 static int
 H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5TB_int_cmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_int_cmp);
 
     assert(k1);
     assert(k2);
@@ -208,7 +208,7 @@ H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 static int
 H5TB_hsize_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 {
-    FUNC_ENTER_NOINIT(H5TB_hsize_cmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_hsize_cmp);
 
     assert(k1);
     assert(k2);
@@ -1291,7 +1291,7 @@ H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *))
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5TB_printNode);
+    FUNC_ENTER_NOAPI_NOINIT(H5TB_printNode);
 
     if (node == NULL) {
         printf("ERROR:  null node pointer\n");
@@ -1335,7 +1335,7 @@ H5TB_dumpNode(H5TB_NODE *node, void (*key_dump)(void *,void *),
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5TB_dumpNode);
+    FUNC_ENTER_NOAPI_NOINIT(H5TB_dumpNode);
 
     if (node == NULL)
         HGOTO_DONE(FAIL);
@@ -1394,7 +1394,7 @@ done:
 static H5TB_NODE *
 H5TB_end(H5TB_NODE * root, int side)
 {
-    FUNC_ENTER_NOINIT(H5TB_end);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_end);
 
     assert(root);
     assert(side==LEFT || side==RIGHT);
@@ -1411,7 +1411,7 @@ H5TB_nbr(H5TB_NODE * ptr, int side)
 {
     H5TB_NODE *ret_value;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5TB_nbr);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_nbr);
 
     if (!HasChild(ptr, side))
         HGOTO_DONE (ptr->link[side]);
@@ -1440,7 +1440,7 @@ H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE 
     int        cmp = 1;
     H5TB_NODE  *ret_value = NULL;
 
-    FUNC_ENTER_NOINIT(H5TB_ffind);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_ffind);
 
     switch(fast_compare) {
         case H5TB_FAST_HADDR_COMPARE:
@@ -1548,7 +1548,7 @@ H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side)
     H5TB_leaf   plcnt, prcnt,   /* current values of the ptr's and kid's leaf count */
                 klcnt, krcnt;
 
-    FUNC_ENTER_NOINIT(H5TB_swapkid);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_swapkid);
 
     deep[2] = (deep[1] = 0) + Delta(kid, side);
     deep[0] = Max(0, deep[2]) + 1 - Delta(ptr, side);
@@ -1650,7 +1650,7 @@ H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added)
     int        odelta;
     int        obal;
 
-    FUNC_ENTER_NOINIT(H5TB_balance);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_balance);
 
     while (NULL != ptr) {
           odelta = Delta(ptr, side);    /* delta before the node was added */

@@ -1622,7 +1622,7 @@ H5FD_fphdf5_MPIOff_to_haddr(MPI_Offset mpi_off)
 {
     haddr_t ret_value;
 
-    FUNC_ENTER_NOINIT(H5FD_fphdf5_MPIOff_to_haddr)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_fphdf5_MPIOff_to_haddr)
     ret_value = (mpi_off != (MPI_Offset)(haddr_t)mpi_off ? HADDR_UNDEF : (haddr_t)mpi_off);
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1644,7 +1644,7 @@ H5FD_fphdf5_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off)
 {
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_NOINIT(H5FD_fphdf5_haddr_to_MPIOff)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_fphdf5_haddr_to_MPIOff)
 
     if (mpi_off)
         *mpi_off = (MPI_Offset)addr;

@@ -162,8 +162,8 @@ H5FL_BLK_DEFINE_STATIC(symbol_node);
 static size_t
 H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5G_node_sizeof_rkey);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_sizeof_rkey);
 
     FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
 }
@@ -303,7 +303,7 @@ done:
 static size_t
 H5G_node_size(H5F_t *f)
 {
-    FUNC_ENTER_NOINIT(H5G_node_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
 
     FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
                      (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
@@ -561,7 +561,7 @@ done:
 static herr_t
 H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
 {
-    FUNC_ENTER_NOINIT(H5G_node_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest);
 
     /*
      * Check arguments.
@@ -600,7 +600,7 @@ H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
     int i;              /* Local index variable */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5G_node_clear);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear);
 
     /*
      * Check arguments.

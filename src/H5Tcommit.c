@@ -55,7 +55,7 @@ DESCRIPTION
 static herr_t
 H5T_init_commit_interface(void)
 {
-    FUNC_ENTER_NOINIT(H5T_init_commit_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_init_commit_interface);
 
     FUNC_LEAVE_NOAPI(H5T_init());
 } /* H5T_init_commit_interface() */
@@ -124,7 +124,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     H5F_t	*file = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOINIT(H5T_commit);
+    FUNC_ENTER_NOAPI_NOINIT(H5T_commit);
 
     assert (loc);
     assert (name && *name);
@@ -229,7 +229,7 @@ htri_t
 H5T_committed(H5T_t *type)
 {
     /* Use no-init for efficiency */
-    FUNC_ENTER_NOINIT(H5T_committed);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_committed);
 
     assert (type);
 

@@ -103,7 +103,7 @@ done:
 static herr_t
 H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *coords)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_coords);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_coords);
 
     /* Check args */
     assert (iter);
@@ -131,7 +131,7 @@ H5S_none_iter_coords (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *coords
 static herr_t
 H5S_none_iter_block (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *start, hssize_t UNUSED *end)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_block);
 
     /* Check args */
     assert (iter);
@@ -159,7 +159,7 @@ H5S_none_iter_block (const H5S_sel_iter_t UNUSED *iter, hssize_t UNUSED *start, 
 static hsize_t
 H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_nelmts);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_nelmts);
 
     /* Check args */
     assert (iter);
@@ -188,7 +188,7 @@ H5S_none_iter_nelmts (const H5S_sel_iter_t UNUSED *iter)
 static htri_t
 H5S_none_iter_has_next_block(const H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_has_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_has_next_block);
 
     /* Check args */
     assert (iter);
@@ -218,7 +218,7 @@ H5S_none_iter_has_next_block(const H5S_sel_iter_t UNUSED *iter)
 static herr_t
 H5S_none_iter_next(H5S_sel_iter_t UNUSED *iter, size_t UNUSED nelem)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next);
 
     /* Check args */
     assert (iter);
@@ -248,7 +248,7 @@ H5S_none_iter_next(H5S_sel_iter_t UNUSED *iter, size_t UNUSED nelem)
 static herr_t
 H5S_none_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next);
 
     /* Check args */
     assert (iter);
@@ -277,7 +277,7 @@ H5S_none_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 static herr_t
 H5S_none_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
-    FUNC_ENTER_NOINIT(H5S_none_iter_release);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_release);
 
     /* Check args */
     assert (iter);

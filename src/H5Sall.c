@@ -110,7 +110,7 @@ H5S_all_iter_coords (const H5S_sel_iter_t *iter, hssize_t *coords)
 {
     herr_t ret_value=SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOINIT(H5S_all_iter_coords);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_all_iter_coords);
 
     /* Check args */
     assert (iter);
@@ -145,7 +145,7 @@ H5S_all_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
 {
     unsigned u;                 /* Local index variable */
 
-    FUNC_ENTER_NOINIT(H5S_all_iter_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_block);
 
     /* Check args */
     assert (iter);
@@ -182,7 +182,7 @@ H5S_all_iter_block (const H5S_sel_iter_t *iter, hssize_t *start, hssize_t *end)
 static hsize_t
 H5S_all_iter_nelmts (const H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_all_iter_nelmts);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_nelmts);
 
     /* Check args */
     assert (iter);
@@ -211,7 +211,7 @@ H5S_all_iter_nelmts (const H5S_sel_iter_t *iter)
 static htri_t
 H5S_all_iter_has_next_block (const H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_all_iter_has_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_has_next_block);
 
     /* Check args */
     assert (iter);
@@ -241,7 +241,7 @@ H5S_all_iter_has_next_block (const H5S_sel_iter_t UNUSED *iter)
 static herr_t
 H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    FUNC_ENTER_NOINIT(H5S_all_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_next);
 
     /* Check args */
     assert (iter);
@@ -274,7 +274,7 @@ H5S_all_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 static herr_t
 H5S_all_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOINIT(H5S_all_iter_next_block);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_next_block);
 
     /* Check args */
     assert (iter);
@@ -303,7 +303,7 @@ H5S_all_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 static herr_t
 H5S_all_iter_release (H5S_sel_iter_t UNUSED * iter)
 {
-    FUNC_ENTER_NOINIT(H5S_all_iter_release);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_all_iter_release);
 
     /* Check args */
     assert (iter);

@@ -57,7 +57,7 @@ H5DZ_init_interface(void)
 {
     herr_t  ret_value = SUCCEED;
 
-    FUNC_ENTER_NOINIT(H5DZ_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT(H5DZ_init_interface)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

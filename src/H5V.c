@@ -72,7 +72,7 @@ static void
 H5V_stride_optimize1(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hssize_t *stride1)
 {
-    FUNC_ENTER_NOINIT(H5V_stride_optimize1);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_optimize1);
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -123,7 +123,7 @@ static void
 H5V_stride_optimize2(unsigned *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
 		     const hsize_t *size, hssize_t *stride1, hssize_t *stride2)
 {
-    FUNC_ENTER_NOINIT(H5V_stride_optimize2)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_optimize2)
 
     /*
      * This has to be true because if we optimize the dimensionality down to
@@ -392,8 +392,8 @@ H5V_hyper_eq(int n,
     int	i;
     htri_t      ret_value=TRUE;         /* Return value */
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5V_hyper_eq)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_eq)
 
     if (n <= 0) HGOTO_DONE(TRUE)
 
@@ -439,8 +439,8 @@ H5V_hyper_disjointp(unsigned n,
     unsigned	u;
     htri_t      ret_value=FALSE;        /* Return value */
 
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5V_hyper_disjointp)
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_disjointp)
 
     if (!n || !size1 || !size2)	HGOTO_DONE(TRUE)
 
@@ -896,7 +896,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     int		j;              /* Local index variable */
     hbool_t	carry;
 
-    FUNC_ENTER_NOINIT(H5V_stride_copy2)
+    FUNC_ENTER_NOAPI_NOINIT(H5V_stride_copy2)
 
     assert (elmt_size < SIZET_MAX);
     assert(dst_n>0);

@@ -951,7 +951,7 @@ H5G_init_interface(void)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5G_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_init_interface);
 
     /* Initialize the atom group for the group IDs */
     if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
@@ -996,7 +996,7 @@ H5G_term_interface(void)
     size_t	i;
     int	n=0;
 
-    FUNC_ENTER_NOINIT(H5G_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_interface);
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
@@ -1124,8 +1124,8 @@ done:
 static const char *
 H5G_component(const char *name, size_t *size_p)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5G_component);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_component);
 
     assert(name);
 
@@ -1165,7 +1165,7 @@ H5G_basename(const char *name, size_t *size_p)
 {
     size_t	i;
     
-    FUNC_ENTER_NOINIT(H5G_basename);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_basename);
 
     /* Find the end of the base name */
     i = HDstrlen(name);
@@ -1208,7 +1208,7 @@ H5G_normalize(const char *name)
     unsigned    last_slash;     /* Flag to indicate last character was a slash */
     char *ret_value;    /* Return value */
     
-    FUNC_ENTER_NOINIT(H5G_normalize);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_normalize);
 
     /* Sanity check */
     assert(name);
@@ -1359,7 +1359,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     unsigned last_comp = 0;     /* Flag to indicate that a component is the last component in the name */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOINIT(H5G_namei);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_namei);
 
     /* Set up "out" parameters */
     if (rest)
@@ -2162,8 +2162,8 @@ done:
 H5G_entry_t *
 H5G_entof (H5G_t *grp)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5G_entof);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_entof);
 
     FUNC_LEAVE_NOAPI(grp ? &(grp->ent) : NULL);
 }
@@ -2188,8 +2188,8 @@ H5G_entof (H5G_t *grp)
 H5F_t *
 H5G_fileof (H5G_t *grp)
 {
-    /* Use FUNC_ENTER_NOINIT here to avoid performance issues */
-    FUNC_ENTER_NOINIT(H5G_fileof);
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_fileof);
 
     assert (grp);
 
@@ -3345,7 +3345,7 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
     size_t  nchars1,nchars2;    /* Number of characters in components */
     htri_t ret_value=FALSE;     /* Return value */
   
-    FUNC_ENTER_NOINIT(H5G_common_path);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_common_path);
   
     /* Get component of each name */
     fullpath=H5RS_get_str(fullpath_r);
@@ -3415,7 +3415,7 @@ H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key)
     H5F_t *top_loc_file;        /* Top file in location's mounted file chain */
     herr_t      ret_value = SUCCEED;       /* Return value */
   
-    FUNC_ENTER_NOINIT(H5G_replace_ent);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_replace_ent);
   
     assert(obj_ptr);
  

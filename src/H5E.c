@@ -142,7 +142,7 @@ H5E_init_interface(void)
     char lib_vers[128];         /* Buffer to constructu library version within */
     herr_t      ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOINIT(H5E_init_interface)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_init_interface)
 
     /* Initialize the atom group for the error class IDs */
     if(H5I_init_group(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
@@ -201,7 +201,7 @@ H5E_term_interface(void)
 {
     int	        ncls, nmsg, nstk, n=0;
 
-    FUNC_ENTER_NOINIT(H5E_term_interface)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_term_interface)
 
     if (interface_initialize_g) {
         /* Check if there are any open error stacks, classes or messages */
@@ -766,7 +766,7 @@ H5Eget_major(H5E_major_t maj)
     char        *msg_str;
     char        *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT(H5Eget_major)
+    FUNC_ENTER_API(H5Eget_major)
     
     /* Get the message object */
     if((msg = H5I_object_verify(maj, H5I_ERROR_MSG))==NULL)
@@ -816,7 +816,7 @@ H5Eget_minor(H5E_minor_t min)
     char        *msg_str;
     char        *ret_value = NULL;
 
-    FUNC_ENTER_API_NOINIT(H5Eget_minor)
+    FUNC_ENTER_API(H5Eget_minor)
     
     /* Get the message object */
     if((msg = H5I_object_verify(min, H5I_ERROR_MSG))==NULL)
@@ -1537,7 +1537,7 @@ H5E_push(H5E_t *estack, const char *file, const char *func, unsigned line,
      *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
      *		be called by FUNC_ENTER().
      */
-    FUNC_ENTER_NOINIT(H5E_push)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_push)
 
     /* Sanity check */
     assert(cls_id>0);
@@ -2145,7 +2145,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
     const char		*min_str = "No minor description";      /* Minor error description */
     unsigned            have_desc=1;    /* Flag to indicate whether the error has a "real" description */
 
-    FUNC_ENTER_NOINIT(H5E_walk_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_cb)
 
     /* Check arguments */
     assert (err_desc);

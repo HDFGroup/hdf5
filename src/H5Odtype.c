@@ -97,7 +97,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
     size_t		z;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_dtype_decode_helper);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode_helper);
 
     /* check args */
     assert(pp && *pp);
@@ -462,7 +462,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     size_t		n, z, aligned;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOINIT(H5O_dtype_encode_helper);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode_helper);
 
     /* check args */
     assert(pp && *pp);

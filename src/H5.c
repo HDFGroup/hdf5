@@ -187,8 +187,8 @@ H5_term_library(void)
     
 #ifdef H5_HAVE_THREADSAFE
     /* explicit locking of the API */
-    H5_FIRST_THREAD_INIT;
-    H5_LOCK_API_MUTEX;
+    H5_FIRST_THREAD_INIT
+    H5_API_LOCK
 #endif
 
     /* Don't do anything if the library is already closed */
@@ -284,7 +284,7 @@ H5_term_library(void)
     H5_INIT_GLOBAL = FALSE;
 done:
 #ifdef H5_HAVE_THREADSAFE
-    H5_UNLOCK_API_MUTEX;
+    H5_API_UNLOCK
 #endif
     return;
 }

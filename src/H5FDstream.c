@@ -388,7 +388,7 @@ H5FD_stream_open_socket (const char *filename, int o_flags,
   int on = 1;
   H5FD_STREAM_SOCKET_TYPE ret_value=H5FD_STREAM_INVALID_SOCKET;
 
-  FUNC_ENTER_NOINIT(H5FD_stream_open_socket)
+  FUNC_ENTER_NOAPI_NOINIT(H5FD_stream_open_socket)
 
   /* Parse "hostname:port" from filename argument */
   for (separator = filename; *separator != ':' && *separator; separator++)
@@ -492,7 +492,7 @@ H5FD_stream_read_from_socket (H5FD_stream_t *stream)
   unsigned char *ptr=NULL;
   herr_t ret_value=SUCCEED;
 
-  FUNC_ENTER_NOINIT(H5FD_stream_read_from_socket)
+  FUNC_ENTER_NOAPI_NOINIT(H5FD_stream_read_from_socket)
 
   stream->eof = 0;
   stream->mem = NULL;
