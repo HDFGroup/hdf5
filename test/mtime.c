@@ -29,7 +29,7 @@ const char *FILENAME[] = {
 };
 
 #define TESTFILE1       "tmtimeo.h5"
-#define MTIME1          1041605080
+#define MTIME1          1055531866
 #define TESTFILE2       "tmtimen.h5"
 #define MTIME2          1041606478
 
