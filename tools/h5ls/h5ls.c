@@ -709,7 +709,7 @@ display_cmpd_type(hid_t type, int ind)
     char	*name=NULL;	/*member name				*/
     size_t	size;		/*total size of type in bytes		*/
     hid_t	subtype;	/*member data type			*/
-    int		i, j, n;	/*miscellaneous counters		*/
+    int		i,n;	/*miscellaneous counters		*/
     
     
     if (H5T_COMPOUND!=H5Tget_class(type)) return FALSE;
