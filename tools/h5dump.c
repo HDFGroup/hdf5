@@ -331,6 +331,7 @@ H5G_stat_t statbuf;
 		print_datatype(super);
 		printf(";");
 		print_enum(type);
+		printf("\n");
 		indentation (indent + 3);
 		printf("}\n");
 		break;
