@@ -102,6 +102,9 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ARCHIVES="$1"
 	    ;;
+	--*)
+	    OP_CONFIGURE="$OP_CONFIGURE $1"
+	    ;;
 	op-configure)
 	    shift
 	    if [ $# -lt 1 ]; then
@@ -127,7 +130,7 @@ if [ "$cmd" = help ]; then
     cat <<EOF
 Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
           [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>]
-	  [op-configure <option>]
+	  [op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
               [Default is all]
     checkout: Run cvs checkout
@@ -153,6 +156,10 @@ Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
     op-configure <option>:
               Pass <option> to the configure command
               E.g., "snapshot op-configure --enable-parallel"
+                  configures for parallel mode
+    --<option>:
+              Pass --<option> to the configure command
+              E.g., "snapshot --enable-parallel"
                   configures for parallel mode
 EOF
     exit $errcode
