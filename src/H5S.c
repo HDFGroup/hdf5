@@ -155,6 +155,7 @@ H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
     else /* rank==0, for scalar data space */
       {
         ds->type = H5S_SCALAR;
+        ds->u.simple.rank = 0;
       } /* end else */
     
     /* Register the new data space and get an ID for it */
