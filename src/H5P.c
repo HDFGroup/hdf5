@@ -3203,9 +3203,9 @@ H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_gc_refernces
+ * Function:	H5Pget_gc_references
  *
- * Purpose:	Returns the current setting for the garbage collection refernces
+ * Purpose:	Returns the current setting for the garbage collection references
  *      property from a file access property list.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -3218,11 +3218,11 @@ H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/)
+H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/)
 {
     H5F_access_t	*fapl = NULL;
 
-    FUNC_ENTER (H5Pget_gc_reference, FAIL);
+    FUNC_ENTER (H5Pget_gc_references, FAIL);
     H5TRACE2("e","ix",fapl_id,gc_ref);
 
     /* Check args */
