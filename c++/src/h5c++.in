@@ -27,6 +27,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
+HL="@HL@"
 
 ############################################################################
 ##                                                                        ##
@@ -237,7 +238,12 @@ if test "x$do_compile" = "xyes"; then
 fi
 
 if test "x$do_link" = "xyes"; then
-  link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a $LIBS"
+  # conditionnaly link with the hl library  
+    if test "X$HL" = "Xhl"; then
+     link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a ${libdir}/libhdf5_hl.a $LIBS"
+    else
+     link_args="$link_args ${libdir}/libhdf5_cpp.a ${libdir}/libhdf5.a $LIBS"
+    fi
   $SHOW $CXXLINKER -I$includedir $CPPFLAGS $CXXFLAGS $LDFLAGS $clibpath $link_objs $link_args
   status=$?
 fi

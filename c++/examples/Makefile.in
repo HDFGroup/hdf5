@@ -25,7 +25,7 @@ HDF_CXX="yes"
 
 ## Replace building CC with the just installed h5cc
 CXX=$(bindir)/h5c++
-CPPFLAGS=-I. -I$(srcdir)
+CPPFLAGS=-I. -I$(srcdir) -I$(top_srcdir)/hl/src
 CFLAGS=
 
 hdf5_srcdir=$(top_srcdir)/src
