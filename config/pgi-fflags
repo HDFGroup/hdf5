@@ -12,7 +12,7 @@
 #   f9x_version:   Version number: 5.0-2, 5.2-2
 #
 if test X = "X$f9x_flags_set"; then
-    f9x_version="`$F9X $FFLAGS -V 2>&1 |grep '^pgf90'`"
+    f9x_version="`$F9X $FFLAGS -V 2>&1 |grep '^pgf90 '`"
     if test X != "X$f9x_version"; then
         f9x_vendor=`echo $f9x_version |sed 's/\([a-z0-9]*\).*/\1/'`
         f9x_version=`echo $f9x_version |sed 's/pgf90 \([-a-z0-9\.\-]*\).*/\1/'`
