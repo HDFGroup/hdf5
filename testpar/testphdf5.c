@@ -34,7 +34,8 @@ int doread=1;				/* read test */
 int dowrite=1;				/* write test */
 char    *filenames[]={ "ParaEg1.h5f",
 		       "ParaEg2.h5f",
-		       "ParaEg3.h5f" };
+		       "ParaEg3.h5f",
+                       "Mdset.h5f" };
 
 
 
@@ -252,6 +253,10 @@ main(int argc, char **argv)
 
 	MPI_BANNER("testing extendible dataset independent write...");
 	extend_writeInd(filenames[2]);
+
+	MPI_BANNER("testing multiple datasets write ...");
+	multiple_dset_write(filenames[3]);
+
     }
     if (doread){
 	MPI_BANNER("testing dataset independent read...");
