@@ -81,6 +81,11 @@ typedef struct malign_t {
     const char          *name;      
     size_t              comp_align;         /*alignment for structure   */
 } malign_t;
+
+/* global variables types detection code */
+detected_t	d[MAXDETECT];
+malign_t        m[MAXDETECT];
+volatile int	nd = 0, na = 0;
    
 static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
@@ -91,6 +96,11 @@ static int imp_bit(int, int *, void *, void *);
 static unsigned long find_bias(int, int, int *, void *);
 static void precision (detected_t*);
 static void print_header(void);
+static void detect_C89_integers(void);
+static void detect_C89_floats(void);
+static void detect_C99_integers(void);
+static void detect_C99_floats(void);
+static void detect_alignments(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
 static jmp_buf jbuf_g;
 
@@ -1093,48 +1103,22 @@ bit.\n";
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:	detect_C89_integers
  *
- * Purpose:	Main entry point.
+ * Purpose:	Detect C89 integer types
  *
- * Return:	Success:	exit(0)
+ * Return:	void
  *
- *		Failure:	exit(1)
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 12, 1996
+ * Programmer:	Albert Cheng
+ *		2004/05/20
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
+static void
+detect_C89_integers(void)
 {
-    detected_t		d[MAXDETECT];
-    malign_t            m[MAXDETECT];
-    volatile int	nd = 0, na = 0;
-    
-#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
-#if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
-    /*
-     * Make sure unaligned access generates SIGBUS and doesn't print warning
-     * messages so that we can detect alignment constraints on the DEC Alpha.
-     */
-    int			nvpairs[2];
-    nvpairs[0] = SSIN_UACPROC;
-    nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
-    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
-	fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
-		strerror(errno));
-    }
-#endif
-#endif
-    
-    print_header();
-
-    /* C89 integer types */
     DETECT_I(signed char,	  SCHAR,        d[nd]); nd++;
     DETECT_I(unsigned char,	  UCHAR,        d[nd]); nd++;
     DETECT_I(short,		  SHORT,        d[nd]); nd++; 
@@ -1143,10 +1127,48 @@ main(void)
     DETECT_I(unsigned int,	  UINT,	        d[nd]); nd++;
     DETECT_I(long,		  LONG,	        d[nd]); nd++;
     DETECT_I(unsigned long,	  ULONG,        d[nd]); nd++;
+}
 
-    /*
-     * C9x integer types.
-     */
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C89_floats
+ *
+ * Purpose:	Detect C89 floating point types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C89_floats(void)
+{
+    DETECT_F(float,		  FLOAT,        d[nd]); nd++;
+    DETECT_F(double,		  DOUBLE,       d[nd]); nd++;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_integers
+ *
+ * Purpose:	Detect C99 integer types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_integers(void)
+{
 #if H5_SIZEOF_INT8_T>0
     DETECT_I(int8_t, 		  INT8,         d[nd]); nd++;
 #endif
@@ -1232,10 +1254,26 @@ main(void)
     DETECT_I(long,		  LLONG,        d[nd]); nd++;
     DETECT_I(unsigned long,	  ULLONG,       d[nd]); nd++;
 #endif
+}
 
-    DETECT_F(float,		  FLOAT,        d[nd]); nd++;
-    DETECT_F(double,		  DOUBLE,       d[nd]); nd++;
-
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_floats
+ *
+ * Purpose:	Detect C99 floating point types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_floats(void)
+{
 #if H5_SIZEOF_DOUBLE == H5_SIZEOF_LONG_DOUBLE
     /*
      * If sizeof(double)==sizeof(long double) then assume that `long double'
@@ -1247,12 +1285,92 @@ main(void)
 #else
     DETECT_F(long double,	  LDOUBLE,      d[nd]); nd++;
 #endif
+}
 
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_alignments
+ *
+ * Purpose:	Detect structure alignments
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_alignments(void)
+{
     /* Detect structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
     DETECT_M(void *,              POINTER,      m[na]); na++;
     DETECT_M(hvl_t,               HVL,          m[na]); na++;
     DETECT_M(hobj_ref_t,          HOBJREF,      m[na]); na++;
     DETECT_M(hdset_reg_ref_t,     HDSETREGREF,  m[na]); na++;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	main
+ *
+ * Purpose:	Main entry point.
+ *
+ * Return:	Success:	exit(0)
+ *
+ *		Failure:	exit(1)
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jun 12, 1996
+ *
+ * Modifications:
+ *	Albert Cheng, 2004/05/20
+ *	Some compilers, e.g., Intel C v7.0, took a long time to compile
+ *      with optimization when a module routine contains many code lines.
+ *      Divide up all those types detections macros into subroutines, both
+ *      to avoid the compiler optimization error and cleaner codes.
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+main(void)
+{
+    
+#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
+#if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
+    /*
+     * Make sure unaligned access generates SIGBUS and doesn't print warning
+     * messages so that we can detect alignment constraints on the DEC Alpha.
+     */
+    int			nvpairs[2];
+    nvpairs[0] = SSIN_UACPROC;
+    nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
+    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
+	fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
+		strerror(errno));
+    }
+#endif
+#endif
+    
+    print_header();
+
+    /* C89 integer types */
+    detect_C89_integers();
+
+    /* C99 integer types */
+    detect_C99_integers();
+
+    /* C89 floating point types */
+    detect_C89_floats();
+
+    /* C99 floating point types */
+    detect_C99_floats();
+
+    /* Detect structure alignment */
+    detect_alignments();
     
     print_results (nd, d, na, m);
     
