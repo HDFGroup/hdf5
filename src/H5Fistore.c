@@ -2320,7 +2320,6 @@ done:
  *              that they should never be written.
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_PARALLEL
 herr_t
 H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 		    const hsize_t *space_dim, H5P_genplist_t *dc_plist)
@@ -2334,11 +2333,14 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     void *chunk=NULL;           /* Chunk buffer for writing fill values */
     H5P_genplist_t *dx_plist;   /* Data xfer property list */
     double	split_ratios[3];/* B-tree node splitting ratios		*/
-    int         mpi_rank;       /* This process's rank  */
-    int         mpi_size;       /* Total # of processes */
+#ifdef H5_HAVE_PARALLEL
+    int         mpi_rank=(-1);  /* This process's rank  */
+    int         mpi_size=(-1);  /* Total # of processes */
     int         mpi_round=0;    /* Current process responsible for I/O */
     int         mpi_code;       /* MPI return code */
     unsigned    blocks_written=0; /* Flag to indicate that chunk was actually written */
+    unsigned    using_mpi=0;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
+#endif /* H5_HAVE_PARALLEL */
     int		carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     int		i;              /* Local index variable */
     unsigned	u;              /* Local index variable */
@@ -2369,9 +2371,36 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     if(H5P_get(dx_plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,split_ratios)<0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get B-tree split ratios");
 
+#ifdef H5_HAVE_PARALLEL
+    /* Retrieve up MPI parameters */
+    if(IS_H5FD_MPIO(f)) {
+        if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+        if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+        /* Set the MPI-capable file driver flag */
+        using_mpi=1;
+    } /* end if */
+    else {
+        if(IS_H5FD_MPIPOSIX(f)) {
+            /* Get the MPI rank & size */
+            if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
+            if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
+
+            /* Set the MPI-capable file driver flag */
+            using_mpi=1;
+        } /* end if */
+    } /* end else */
+#endif /* H5_HAVE_PARALLEL */
+
+#ifdef H5_HAVE_PARALLEL
     /* Can't use data I/O pipeline in parallel (yet) */
-    if (pline.nfilters>0)
+    if (using_mpi && pline.nfilters>0)
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, FAIL, "can't use data pipeline in parallel");
+#endif /* H5_HAVE_PARALLEL */
 
     /*
      * Setup indice to go through all chunks. (Future improvement
@@ -2404,24 +2433,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         } /* end else */
     } /* end if */
 
-    /* Retrieve up MPI parameters */
-    if(IS_H5FD_MPIO(f)) {
-        if ((mpi_rank=H5FD_mpio_mpi_rank(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-        if ((mpi_size=H5FD_mpio_mpi_size(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
-    } /* end if */
-    else {
-        /* Sanity Check */
-        assert(IS_H5FD_MPIPOSIX(f));
-
-        /* Get the MPI rank & size */
-        if ((mpi_rank=H5FD_mpiposix_mpi_rank(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI rank");
-        if ((mpi_size=H5FD_mpiposix_mpi_size(f->shared->lf))<0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "Can't retrieve MPI size");
-    } /* end else */
-
     /* Loop over all chunks */
     carry=0;
     while (carry==0) {
@@ -2441,15 +2452,26 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
             /* Check if fill values should be written to blocks */
             if(fill_time != H5D_FILL_TIME_NEVER) {
-                /* Round-robin write the chunks out from only one process */
-                if(mpi_round==mpi_rank) {
+#ifdef H5_HAVE_PARALLEL
+                /* Check if this file is accessed with an MPI-capable file driver */
+                if(using_mpi) {
+                    /* Round-robin write the chunks out from only one process */
+                    if(mpi_round==mpi_rank) {
+                        if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
+                            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
+                    } /* end if */
+                    mpi_round=(++mpi_round)%mpi_size;
+
+                    /* Indicate that blocks are being written */
+                    blocks_written=1;
+                } /* end if */
+                else {
+#endif /* H5_HAVE_PARALLEL */
                     if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, chunk)<0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
-                } /* end if */
-                mpi_round=(++mpi_round)%mpi_size;
-
-                /* Indicate that blocks are being written */
-                blocks_written=1;
+#ifdef H5_HAVE_PARALLEL
+                } /* end else */
+#endif /* H5_HAVE_PARALLEL */
             } /* end if */
         } /* end if */
 	
@@ -2463,8 +2485,10 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         } /* end for */
     } /* end while */
 
+#ifdef H5_HAVE_PARALLEL
     /* Only need to block at the barrier if we actually allocated a chunk */
-    if(blocks_written) {
+    /* And if we are using an MPI-capable file driver */
+    if(using_mpi && blocks_written) {
         /* Wait at barrier to avoid race conditions where some processes are
          * still writing out chunks and other processes race ahead to read
          * them in, getting bogus data.
@@ -2481,6 +2505,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
         } /* end else */
     } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     /* Free the chunk for fill values */
@@ -2489,7 +2514,6 @@ done:
 
     FUNC_LEAVE(ret_value);
 }
-#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

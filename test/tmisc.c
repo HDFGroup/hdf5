@@ -119,6 +119,20 @@ typedef struct
 #define MISC7_TYPENAME1         "Datatype1"
 #define MISC7_TYPENAME2         "Datatype2"
 
+/* Definitions for misc. test #8 */
+#define MISC8_FILE              "tmisc8.h5"
+#define MISC8_DSETNAME1         "Dataset1"
+#define MISC8_DSETNAME2         "Dataset2"
+#define MISC8_DSETNAME3         "Dataset3"
+#define MISC8_DSETNAME4         "Dataset4"
+#define MISC8_DSETNAME5         "Dataset5"
+#define MISC8_DSETNAME6         "Dataset6"
+#define MISC8_RANK              2
+#define MISC8_DIM0              100
+#define MISC8_DIM1              100
+#define MISC8_CHUNK_DIM0        10
+#define MISC8_CHUNK_DIM1        10
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1012,6 +1026,310 @@ test_misc7(void)
 
 /****************************************************************
 **
+**  test_misc8(): Test storage size of various types of dataset
+**      storage methods.
+**
+****************************************************************/
+static void
+test_misc8(void)
+{
+    hid_t fid, did, sid;
+    hid_t fapl;                 /* File access property list */
+    hid_t dcpl;                 /* Dataset creation property list */
+    int rank=MISC8_RANK;
+    hsize_t dims[MISC8_RANK]={MISC8_DIM0,MISC8_DIM1};
+    hsize_t chunk_dims[MISC8_RANK]={MISC8_CHUNK_DIM0,MISC8_CHUNK_DIM1};
+    hsize_t storage_size;       /* Number of bytes of raw data storage used */
+    int *wdata;                 /* Data to write */
+    int *tdata;                 /* Temporary pointer to data write */
+#ifdef VERIFY_DATA
+    int *rdata;                 /* Data to read */
+    int *tdata2;                /* Temporary pointer to data to read */
+#endif /* VERIFY_DATA */
+    unsigned u,v;               /* Local index variables */
+    int mdc_nelmts;             /* Metadata number of elements */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int rdcc_nelmts;            /* Raw data number of elements */
+#else /* H5_WANT_H5_V1_4_COMPAT */
+    size_t rdcc_nelmts;         /* Raw data number of elements */
+#endif /* H5_WANT_H5_V1_4_COMPAT */
+    size_t rdcc_nbytes;         /* Raw data number of bytes */
+    double rdcc_w0;             /* Raw data write percentage */
+    hssize_t start[MISC8_RANK]; /* Hyperslab start */
+    hsize_t count[MISC8_RANK];  /* Hyperslab block count */
+    herr_t ret;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing dataset storage sizes\n"));
+
+    /* Allocate space for the data to write & read */
+    wdata=malloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    CHECK(wdata,NULL,"malloc");
+#ifdef VERIFY_DATA
+    rdata=malloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    CHECK(rdata,NULL,"malloc");
+#endif /* VERIFY_DATA */
+
+    /* Initialize values */
+    tdata=wdata;
+    for(u=0; u<MISC8_DIM0; u++)
+        for(v=0; v<MISC8_DIM1; v++)
+            *tdata++=((u*MISC8_DIM1)+v)%13;
+
+    /* Create a file acccess property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate"); 
+
+    /* Get the default file access properties for caching */
+    ret=H5Pget_cache(fapl,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0);
+    CHECK(ret, FAIL, "H5Pget_cache");
+
+    /* Decrease the size of the raw data cache */
+    rdcc_nbytes=0;
+
+    /* Set the file access properties for caching */
+    ret=H5Pset_cache(fapl,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    CHECK(ret, FAIL, "H5Pset_cache");
+
+    /* Create the file */
+    fid=H5Fcreate(MISC8_FILE,H5F_ACC_TRUNC,H5P_DEFAULT,fapl);
+    CHECK(fid,FAIL,"H5Fcreate");
+
+    /* Close file access property list */
+    ret=H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Create a simple dataspace */
+    sid = H5Screate_simple(rank,dims,NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Select a hyperslab which coincides with chunk boundaries */
+    /* (For later use) */
+    start[0]=0; start[1]=0;
+    count[0]=MISC8_CHUNK_DIM0*2; count[1]=MISC8_CHUNK_DIM1*2;
+    ret = H5Sselect_hyperslab(sid,H5S_SELECT_SET,start,NULL,count,NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create a dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate"); 
+
+    /* Set the space allocation time to early */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a contiguous dataset, with space allocation early */
+    did = H5Dcreate(fid, MISC8_DSETNAME1, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+#ifndef H5_HAVE_PARALLEL
+    /* Set the space allocation time to late */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a contiguous dataset, with space allocation late */
+    did = H5Dcreate(fid, MISC8_DSETNAME2, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size before data is written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write data */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Set the space allocation time to early */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Use chunked storage for this dataset */
+    ret = H5Pset_chunk(dcpl,rank,chunk_dims);
+    CHECK(ret, FAIL, "H5Pset_chunk"); 
+
+    /* Create a chunked dataset, with space allocation early */
+    did = H5Dcreate(fid, MISC8_DSETNAME3, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+#ifndef H5_HAVE_PARALLEL
+    /* Set the space allocation time to late */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a chunked dataset, with space allocation late */
+    did = H5Dcreate(fid, MISC8_DSETNAME4, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size before data is written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write part of the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after only four chunks are written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Write entire dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+#ifdef VERIFY_DATA
+    /* Read data */
+    ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check values written */
+    tdata=wdata;
+    tdata2=rdata;
+    for(u=0; u<MISC8_DIM0; u++)
+        for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
+            if(*tdata!=*tdata2) {
+                num_errs++;
+                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
+            } 
+#endif /* VERIFY_DATA */
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Set the space allocation time to early */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_EARLY);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Use compression as well as chunking for these datasets */
+    ret = H5Pset_deflate(dcpl,9);
+    CHECK(ret, FAIL, "H5Pset_deflate"); 
+
+    /* Create a chunked dataset, with space allocation early */
+    did = H5Dcreate(fid, MISC8_DSETNAME5, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+#ifndef H5_HAVE_PARALLEL
+    /* Set the space allocation time to late */
+    ret = H5Pset_space_time(dcpl,H5D_SPACE_ALLOC_LATE);
+    CHECK(ret, FAIL, "H5Pset_space_time"); 
+
+    /* Create a chunked dataset, with space allocation late */
+    did = H5Dcreate(fid, MISC8_DSETNAME6, H5T_NATIVE_INT, sid, dcpl);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Check the storage size before data is written */
+    storage_size=H5Dget_storage_size(did);
+    VERIFY(storage_size, 0, "H5Dget_storage_size");
+
+    /* Write part of the dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Check the storage size after only four chunks are written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    } 
+
+    /* Write entire dataset */
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+#ifdef VERIFY_DATA
+    /* Read data */
+    ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Check values written */
+    tdata=wdata;
+    tdata2=rdata;
+    for(u=0; u<MISC8_DIM0; u++)
+        for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
+            if(*tdata!=*tdata2) {
+                num_errs++;
+                printf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
+            } 
+#endif /* VERIFY_DATA */
+
+    /* Check the storage size after data is written */
+    storage_size=H5Dget_storage_size(did);
+    CHECK(storage_size, 0, "H5Dget_storage_size");
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+        num_errs++;
+        printf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
+    } 
+
+    /* Close dataset ID */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Close dataset creation property list */
+    ret=H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close dataspace */
+    ret=H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret=H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free the read & write buffers */
+    free(wdata);
+#ifdef VERIFY_DATA
+    free(rdata);
+#endif /* VERIFY_DATA */
+} /* end test_misc8() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -1028,6 +1346,7 @@ test_misc(void)
     test_misc5();       /* Test several level deep nested compound & VL datatypes */
     test_misc6();       /* Test object header continuation code */
     test_misc7();       /* Test for sensible datatypes stored on disk */
+    test_misc8();       /* Test storage sizes of various types of dataset storage */
 
 } /* test_misc() */
 
@@ -1058,4 +1377,5 @@ cleanup_misc(void)
     remove(MISC5_FILE);
     remove(MISC6_FILE);
     remove(MISC7_FILE);
+    remove(MISC8_FILE);
 }

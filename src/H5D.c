@@ -3196,10 +3196,12 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     hsize_t		addr;           /* Offset in dataset */
     void		*buf = NULL;    /* Buffer for fill value writing */
     H5O_fill_t          fill;           /* Fill value information */
+    H5D_space_time_t    space_time;     /* When to allocate space */
     H5P_genplist_t     *plist;          /* Property list */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOINIT(H5D_init_storage);
+
     assert(dset);
     assert(space);
 
@@ -3208,6 +3210,8 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
     if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value");
+    if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
 
     switch (dset->layout.type) {
         case H5D_CONTIGUOUS:
@@ -3252,12 +3256,15 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
             break;
 
         case H5D_CHUNKED:
-#ifdef H5_HAVE_PARALLEL
             /*
              * If the dataset is accessed via parallel I/O, allocate file space
              * for all chunks now and initialize each chunk with the fill value.
              */
-            if (IS_H5FD_MPIO(dset->ent.file) || IS_H5FD_MPIPOSIX(dset->ent.file)) {
+            if (space_time==H5D_SPACE_ALLOC_EARLY
+#ifdef H5_HAVE_PARALLEL
+                || (IS_H5FD_MPIO(dset->ent.file) || IS_H5FD_MPIPOSIX(dset->ent.file))
+#endif /*H5_HAVE_PARALLEL*/
+                ) {
                 /* We only handle simple data spaces so far */
                 int		ndims;
                 hsize_t		dim[H5O_LAYOUT_NDIMS];
@@ -3271,13 +3278,13 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
                         &(dset->layout), dim, plist)<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset");
             } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
             break;
     } /* end switch */
 
 done:
     if (buf)
         H5FL_BLK_FREE(type_conv,buf);
+
     FUNC_LEAVE(ret_value);
 }
 
