@@ -271,7 +271,7 @@ H5G_stat_t statbuf;
 
             indentation (indent+COL);
             if (i >= 0) {
-                if (!type_table->objs[i].recorded) /* unamed data type */
+                if (!type_table->objs[i].recorded) 
                     printf("\"/#%lu:%lu\"\n", type_table->objs[i].objno[0],
                                              type_table->objs[i].objno[1]);
                 else
@@ -775,48 +775,40 @@ done:
  *-----------------------------------------------------------------------*/
 static void
 dump_named_datatype (hid_t type, const char *name) {
-char *fname ;
-hid_t nmembers, mtype;
-int i, j, ndims, perm[H5DUMP_MAX_RANK];
+	int nmembers = 1, x,j;
+	hid_t comptype;
+	char *compname;
+	int ndims, perm[H5DUMP_MAX_RANK];
 size_t dims[H5DUMP_MAX_RANK];
+;
 
     indentation (indent);
     begin_obj(DATATYPE, name);
 
-    nmembers = H5Tget_nmembers(type);
- 
-    for (i = 0; i < nmembers; i++) {
-
-         fname = H5Tget_member_name(type, i);
-
-         mtype = H5Tget_member_type(type, i);
-
-         ndims = H5Tget_member_dims(type, i, dims, perm);
-
-         indentation (indent+COL);
-		 if (H5T_ENUM == H5Tget_class(type)) {
-			print_datatype(type);
-			break;
-		 }
-		 else {
-			print_datatype(mtype);
-		 }
-         printf (" \"%s\"", fname);
-  
-         if (ndims != 1 || dims[0] != 1) {
-             for (j = 0; j < ndims; j++) 
-                  printf("[%d]",dims[j]);
-         }
-
-         printf (";\n");
-
-         free (fname);
-    }
-        
+	if (H5Tget_class(type) == H5T_COMPOUND){
+		nmembers = H5Tget_nmembers(type);
+		for (x = 0; x < nmembers; x++){
+			comptype = H5Tget_member_type(type,x);
+			compname = H5Tget_member_name(type,x);
+			ndims = H5Tget_member_dims(type, x, dims, perm);
+		    indentation (indent+COL);
+			print_datatype(comptype);
+			printf(" \"%s\"",compname);
+			if (ndims != 1 || dims[0] != 1) {
+				for (j = 0; j < ndims; j++) 
+					printf("[%d]",(int)dims[j]);
+			}
+			printf(";\n");		   
+		}
+	}
+	else {
+		indentation (indent+COL);	
+		print_datatype(type);
+		printf(";\n");
+	}
     indentation (indent);
     end_obj();
 }
-  
 
 /*-------------------------------------------------------------------------
  * Function:    dump_group
