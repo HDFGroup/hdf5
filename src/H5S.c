@@ -307,17 +307,23 @@ H5S_create(H5S_class_t type)
         switch(type) {
             case H5S_SCALAR:
                 ret_value->extent.nelem = 1;
+                if(H5S_select_all(ret_value,0)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
                 break;
             case H5S_SIMPLE:
                 ret_value->extent.nelem = 0;
+                if(H5S_select_all(ret_value,0)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
+                break;
+            case H5S_NULL:
+                ret_value->extent.nelem = 0;
+                if(H5S_select_none(ret_value)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set selection to none");
                 break;
             default:
                 assert("unknown dataspace (extent) type" && 0);
                 break;
         } /* end switch */
-
-        if(H5S_select_all(ret_value,0)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection");
     } /* end if */
 
 done:
@@ -353,7 +359,7 @@ H5Screate(H5S_class_t type)
     H5TRACE1("i","Sc",type);
 
     /* Check args */
-    if(type<=H5S_NO_CLASS || type> H5S_SIMPLE)  /* don't allow complex dataspace yet */
+    if(type<=H5S_NO_CLASS || type> H5S_NULL)  /* don't allow complex dataspace yet */
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dataspace type");
 
     if (NULL==(new_ds=H5S_create(type)))
@@ -402,6 +408,7 @@ H5S_extent_release(H5S_t *ds)
             /*nothing needed */
             break;
 
+        case H5S_NULL:
         case H5S_SCALAR:
             /*nothing needed */
             break;
@@ -648,6 +655,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
     *dst=*src;
 
     switch (src->type) {
+        case H5S_NULL:
         case H5S_SCALAR:
             /*nothing needed */
             break;
@@ -831,10 +839,14 @@ H5S_get_npoints_max(const H5S_t *ds)
     assert(ds);
 
     switch (ds->extent.type) {
+        case H5S_NULL:
+            ret_value = 0;
+            break;
+
         case H5S_SCALAR:
             ret_value = 1;
             break;
-
+            
         case H5S_SIMPLE:
             if (ds->extent.u.simple.max) {
                 for (ret_value=1, u=0; u<ds->extent.u.simple.rank; u++) {
@@ -929,6 +941,7 @@ H5S_get_simple_extent_ndims(const H5S_t *ds)
     assert(ds);
 
     switch (ds->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
             ret_value = 0;
             break;
@@ -1022,6 +1035,7 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     assert(ds);
 
     switch (ds->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
             ret_value = 0;
             break;
@@ -1079,6 +1093,7 @@ H5S_modify(H5G_entry_t *ent, const H5S_t *ds, hbool_t update_time, hid_t dxpl_id
     assert(ds);
 
     switch (ds->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
             if (H5O_modify(ent, H5O_SDSPACE_ID, 0, 0, update_time, &(ds->extent.u.simple), dxpl_id)<0)
@@ -1125,6 +1140,7 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
     assert(ds);
 
     switch (ds->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
             if (H5O_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, &(ds->extent.u.simple))<0)
@@ -1190,7 +1206,8 @@ H5S_read(H5G_entry_t *ent, hid_t dxpl_id)
             nelem*=ds->extent.u.simple.size[u];
         ds->extent.nelem = nelem;
     } /* end if */
-    else {
+/* How to distinguish between H5S_SCALAR and H5S_NULL? */
+    else {  
         ds->extent.type = H5S_SCALAR;
         ds->extent.nelem = 1;
     } /* end else */
@@ -1243,6 +1260,7 @@ H5S_is_simple(const H5S_t *sdim)
 
     /* Check args and all the boring stuff. */
     assert(sdim);
+    /* H5S_NULL shouldn't be simple dataspace */
     ret_value = (sdim->extent.type == H5S_SIMPLE ||
 	  sdim->extent.type == H5S_SCALAR) ? TRUE : FALSE;
 
@@ -1309,6 +1327,10 @@ H5Sis_simple(hid_t space_id)
     dimensions in the DIMS array are used as the maximum dimensions.
     Currently, only the first dimension in the array (the slowest) may be
     unlimited in size.
+
+ MODIFICATION
+    A null dataspace cannot be converted from simple space in this function.
+
 --------------------------------------------------------------------------*/
 herr_t
 H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
@@ -1324,6 +1346,8 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     /* Check args */
     if ((space = H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+    if(space->extent.type == H5S_NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid dataspace");
     if (rank > 0 && dims == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no dimensions specified");
     if (rank<0 || rank>H5S_MAX_RANK)
@@ -1378,7 +1402,7 @@ H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
     /* Check args */
     assert(rank<=H5S_MAX_RANK);
     assert(0==rank || dims);
-    
+
     /* If there was a previous offset for the selection, release it */
     if(space->select.offset!=NULL)
         space->select.offset=H5FL_ARR_FREE(hssize_t,space->select.offset);
@@ -1925,8 +1949,9 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     /* Check args */
     if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
-    if (space->extent.u.simple.rank==0 || space->extent.type==H5S_SCALAR)
-        HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar dataspace");
+    if (space->extent.u.simple.rank==0 || space->extent.type==H5S_SCALAR
+            || space->extent.type==H5S_NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_UNSUPPORTED, FAIL, "can't set offset on scalar or null dataspace");
     if (offset == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
 
@@ -2047,6 +2072,11 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, 
     FUNC_ENTER_NOAPI(H5S_debug, FAIL);
     
     switch (mesg->extent.type) {
+        case H5S_NULL:
+            fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth,
+                    "Space class:");
+            break;
+
         case H5S_SCALAR:
             fprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth,
                     "Space class:");

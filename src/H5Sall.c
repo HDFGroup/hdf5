@@ -763,6 +763,9 @@ herr_t H5Sselect_all (hid_t spaceid)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
+    if (space->extent.type == H5S_NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid data space");
+
     /* Call internal routine to do the work */
     if((ret_value=H5S_select_all(space,1))<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");

@@ -176,7 +176,9 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
     if (NULL == (buf_type=H5I_object_verify(buf_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-
+    if(H5S_NULL == H5S_get_simple_extent_type(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "null dataspace isn't valid")
+            
     /* Fill the selection in the memory buffer */
     if(H5D_fill(fill,fill_type,buf,buf_type,space, H5AC_dxpl_id)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
@@ -485,7 +487,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	if(H5S_select_valid(file_space)!=TRUE)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
     }
-
+    
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
         plist_id= H5P_DATASET_XFER_DEFAULT;
@@ -671,6 +673,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         file_space = dataset->space;
     if (!mem_space)
         mem_space = file_space;
+    if(H5S_NULL == H5S_get_simple_extent_type(mem_space) || 
+       H5S_NULL == H5S_get_simple_extent_type(file_space))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "null dataspace isn't supported")
     if((snelmts = H5S_get_select_npoints(mem_space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
@@ -906,7 +911,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (!file_space)
         file_space = dataset->space;
     if (!mem_space)                                                                                                                      
-        mem_space = file_space;                                                                                                          
+        mem_space = file_space;                                                                                                         
+    if(H5S_NULL == H5S_get_simple_extent_type(mem_space) || 
+       H5S_NULL == H5S_get_simple_extent_type(file_space))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "null dataspace isn't supported")
     if((snelmts = H5S_get_select_npoints(mem_space))<0)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);

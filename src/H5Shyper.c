@@ -5816,6 +5816,8 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if (H5S_SCALAR==H5S_get_simple_extent_type(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
+    if (H5S_NULL==H5S_get_simple_extent_type(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
@@ -6409,6 +6411,8 @@ H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hssize_t start[],
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if (H5S_SCALAR==H5S_get_simple_extent_type(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
+    if (H5S_NULL==H5S_get_simple_extent_type(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
     if(start==NULL || count==NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))

@@ -146,6 +146,7 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 
     /* Perform correct type of copy based on the type of selection */
     switch (src->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
             /*nothing needed */
             break;
@@ -251,6 +252,9 @@ H5Sget_select_npoints(hid_t spaceid)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
 
+    if (space->extent.type == H5S_NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace");
+
     ret_value = H5S_get_select_npoints(space);
 
 done:
@@ -324,6 +328,9 @@ H5Sselect_valid(hid_t spaceid)
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace");
+
+    if (space->extent.type == H5S_NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace");
 
     ret_value = H5S_select_valid(space);
 

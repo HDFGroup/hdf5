@@ -1285,7 +1285,9 @@ H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     if (H5S_SCALAR==H5S_get_simple_extent_type(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
-    if(coord==NULL || num_elem==0)
+    if (H5S_NULL==H5S_get_simple_extent_type(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
+   if(coord==NULL || num_elem==0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "elements not specified");
     if(!(op==H5S_SELECT_SET || op==H5S_SELECT_APPEND || op==H5S_SELECT_PREPEND))
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operations other than H5S_SELECT_SET not supported currently");

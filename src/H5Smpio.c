@@ -531,6 +531,7 @@ H5S_mpio_space_type( const H5S_t *space, size_t elmt_size,
 
     /* Creat MPI type based on the kind of selection */
     switch (space->extent.type) {
+        case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
             switch(space->select.type) {
