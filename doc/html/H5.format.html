@@ -1620,10 +1620,13 @@ TABLE.list TD { border:none; }
             first free block (or the
             <A href="#UndefinedAddress">undefined address</A> if there is no
             free block).  The free block contains "Size of Lengths" bytes that
-            are the offset of the next free chunk (or the
+            are the offset of the next free block (or the
             value '1' if this is the
-            last free chunk) followed by "Size of Lengths" bytes that store
-            the size of this free chunk.
+            last free block) followed by "Size of Lengths" bytes that store
+            the size of this free block.  The size of the free block includes
+            the space used to store the offset of the next free block and
+            the of the current block, making the minimum size of a free block
+            2 * "Size of Lengths".
             </P>
           </td>
         </tr>
