@@ -1,4 +1,4 @@
-HDF5 version 1.5.10 released on Sat Aug  4 03:15:04 CDT 2001
+HDF5 version 1.5.11 released on Sun Sep 30 03:32:03 CDT 2001
 ================================================================================
 
 
@@ -29,11 +29,12 @@ CONTENTS
 - Platforms Tested
 - Known Problems
 
-Bug Fixes since HDF5-1.4.0
+Bug Fixes since HDF5-1.4.2
 ==========================
 
 Library
 -------
+
     * Fixed bug with contiguous hyperslabs not being detected, causing
       slower I/O than necessary.
     * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
@@ -60,9 +61,28 @@ Library
       when --enable-hdf5v1_2 configure flag is enabled.
     * Tweaked a few API functions to use 'size_t' instead of 'unsigned' or
       'hsize_t', which may cause errors in some cases.
+    * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
+      more than once.  hdf5.h now includes H5public.h which includes
+      H5pubconf.h.  Applications should #include hdf5.h which handles multiple
+      inclusion correctly.
+    * Fixed H5FDmpio.h to be C++ friendly by making Parallel HDF5 API's to be
+      external to C++.
+    * Fixed a bug in H5FD_mpio_flush() that might result in negative file seek
+      if both MPIO and Split-file drivers are used together.
+    * Added new parallel hdf5 tests in t_mpi.  The new test checks if the
+      filesystem or the MPI-IO can really handle greater than 2GB files.
+      If it fails, it prints information message only without failing the
+      test.
+    * Fixed a bug when reading chunked datasets where the edge of the dataset
+      would be incorrectly detected and generate an assertion failure.
+    * Fixed a bug where reading an entire dataset wasn't being handled
+      optimally when the dataset had unlimited dimensions.  Dataset is read
+      in a single low-level I/O now, instead of being broken into separate
+      pieces internally.
 
 Configuration
 -------------
+
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
@@ -73,6 +93,10 @@ Configuration
 Tools
 -----
 
+    * Fixed segfault when "-v" flag was used with the h5dumper.
+    * Fixed so that the "-i" flag works correctly with the h5dumper.
+
+
 Documentation
 -------------
 
@@ -80,6 +104,9 @@ Documentation
 New Features
 ============
 
+    * A helper script called ``h5cc'', which helps compilation of HDF5
+      programs, is now distributed with HDF5. See the reference manual
+      for information on how to use this feature.
     * C++ API:
         - Added two new member functions: Exception::getFuncName() and
           Exception::getCFuncName() to provide the name of the member
@@ -114,6 +141,30 @@ New Features
       library to link either with the Trace libraries as before or with the
       Pablo Performance Caputure Facility.
     * Improved regular hyperslab I/O by about a factor of 6 or so.
+    * Added two simple parallel performance tests as mpi-perf.c (MPI
+      performance) and perf.c (PHDF5 performance) in testpar.
+    * Added a parallel HDF5 example examples/ph5example.c to illustrate
+      the basic way of using parallel HDF5.
+    * Added a new public macro, H5_VERS_INFO, which is a string holding
+      the HDF5 library version information.  This string is also compiled
+      into all HDF5 binary code which helps to identify the version
+      information of the binary code.  One may use the Unix strings
+      command on the binary file and looks for the pattern "HDF5 library
+      version".
+    * Added new checking in H5check_version() to verify the five HDF5 version
+      information macros (H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+      H5_VERS_SUBRELEASE and H5_VERS_INFO) are consistent.
+    * Added perform programs to test the HDF5 library performance.  Programs
+      are installed in directory perform/.
+    * The H5Pset_fapl_split() accepts raw and meta file names similar to the
+      syntax of H5Pset_fapl_multi() in addition to what it used to accept.
+    * Added a new test to verify the information provided by the configure
+      command.
+    * As part of the transition to using generic properties everywhere, the
+      parameter of H5Pcreate changed from H5P_class_t to hid_t, as well
+      the return type of H5Pget_class changed from H5P_class_t to hid_t.
+      Further changes are still necessary and will be documented here as they
+      are made.
 
 Platforms Tested
 ================
@@ -155,10 +206,11 @@ Known Problems
 ==============
 * DLLs do not work on Windows 98 (and probably on NT and 2000 too)
 
-* The stream-vfd test uses ip port 10007 for testing.  If another application
-  is already using that port address, the test will hang indefinitely and
-  has to be terminated by the kill command.  To try the test again, change
-  the port address in test/stream_test.c to one not being used in the host.
+* The stream-vfd test uses ip port 10007 for testing. If another
+  application is already using that port address, the test will hang
+  indefinitely and has to be terminated by the kill command. To try the
+  test again, change the port address in test/stream_test.c to one not
+  being used in the host.
 
 * The --enable-static-exec configure flag fails to compile for Solaris
   platforms. This is due to the fact that not all of the system
@@ -184,19 +236,20 @@ Known Problems
 
 * When building hdf5 tools and applications on windows platform, a linking
   warning: defaultlib "LIBC" conflicts with use of other libs will appear
-  on debug version when running VC++6.0. This warning doesn't affect building
-  and testing hdf5 applications. We will continue investigating this.
+  on debug version when running VC++6.0. This warning doesn't affect
+  building and testing hdf5 applications. We will continue investigating
+  this.
 
-* h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll version on
-  windows 2000 and NT. The reason is possibly due to windows NT DLL
-  convention on freeing memory. It seems that memory cannot be free
-  across library or DLL. It is still under investigated.
+* h5toh4 converter fails two cases (tstr.h5 and tmany.h5) for release dll
+  version on windows 2000 and NT. The reason is possibly due to windows
+  NT DLL convention on freeing memory. It seems that memory cannot be
+  free across library or DLL. It is still under investigated.
 
-* The Stream VFD was not tested yet under Windows.
-  It is not supported in the TFLOPS machine.
+* The Stream VFD was not tested yet under Windows. It is not supported
+  in the TFLOPS machine.
 
-* Shared library option is broken for IBM SP and some Origin 2000 platforms.
-  One needs to run ./configure with '--disable-shared'
+* Shared library option is broken for IBM SP and some Origin 2000
+  platforms. One needs to run ./configure with '--disable-shared'
 
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
@@ -205,30 +258,33 @@ Known Problems
   program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
+
     - Solaris x86 2.5.1, Cray T3E and Cray J90 give errors during testing
-        when displaying object references in certain files.  These are benign 
-        differences due to the difference in sizes of the objects created on
-        those platforms.  h5ls appears to be dumping object references
-        correctly.
+      when displaying object references in certain files.  These are
+      benign differences due to the difference in sizes of the objects
+      created on those platforms. h5ls appears to be dumping object
+      references correctly.
+
     - Cray J90 (and Cray T3E?) give errors during testing when displaying
-        some floating-point values.  These are benign differences due to the
-        different precision in the values displayed and h5ls appears to be
-        dumping floating-point numbers correctly.
+      some floating-point values. These are benign differences due to
+      the different precision in the values displayed and h5ls appears to
+      be dumping floating-point numbers correctly.
 
 * Before building HDF5 F90 Library from source on Crays (T3E and J90) 
-  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src subdirectory 
-  in the top level directory with the Cray-specific files from the 
+  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
+  subdirectory in the top level directory with the Cray-specific files
+  from the site:
+
   ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
-  directory.
 
 * The h4toh5 utility produces images that do not correctly conform
   to the HDF5 Image and Palette Specification. 
 
      http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
 
-  Several required HDF5 attributes are omitted, and the dataspace 
-  is reversed (i.e., the ht. and width of the image dataset is 
-  incorrectly described.)  For more information, please see:
+  Several required HDF5 attributes are omitted, and the dataspace is
+  reversed (i.e., the ht. and width of the image dataset is incorrectly
+  described.)  For more information, please see:
 
      http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
 
