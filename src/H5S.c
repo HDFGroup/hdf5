@@ -1351,17 +1351,15 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     if (rank<0 || rank>H5S_MAX_RANK) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid rank");
     }
-#ifdef OLD_WAY
     if (dims) {
         for (u=0; u<rank; u++) {
-            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL) &&
-		dims[u]==0) {
+            if (((max!=NULL && max[u]!=H5S_UNLIMITED) || max==NULL)
+                    && dims[u]==0) {
                 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 			       "invalid dimension size");
             }
         }
     }
-#endif /* OLD_WAY */
     if (max!=NULL) {
         if(dims==NULL) {
             HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1685,11 +1683,22 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "no dimensions specified");
     }
-    if (maxdims) {
-        for (i=0; i<rank; i++) {
+    /* Check whether the current dimensions are valid */
+    for (i=0; i<rank; i++) {
+        if (maxdims) {
             if (H5S_UNLIMITED!=maxdims[i] && maxdims[i]<dims[i]) {
                 HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
                        "maxdims is smaller than dims");
+            }
+            if (H5S_UNLIMITED!=maxdims[i] && dims[i]==0) {
+                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+                       "zero sized dimension for non-unlimited dimension");
+            }
+        }
+        else {
+            if (dims[i]==0) {
+                HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+                       "zero sized dimension for non-unlimited dimension");
             }
         }
     }
