@@ -31,6 +31,7 @@
 ./bin/iostats
 ./bin/locate_hdf4
 ./bin/ltmain.sh
+./bin/mkdirs
 ./bin/release
 ./bin/runtest				_DO_NOT_DISTRIBUTE_
 ./bin/snapshot

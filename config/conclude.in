@@ -66,13 +66,13 @@ check test _test: tests
 
 ## Make installation directories directories if they don't exist.
 $(libdir):
-	$(INSTALL_DIR) $@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(includedir):
-	$(INSTALL_DIR) $@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(bindir):
-	$(INSTALL_DIR) $@
+	$(top_srcdir)/bin/mkdirs $@
 
 ## Install the library, the public header files, and public programs.
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
@@ -105,7 +105,7 @@ install-doc: $(PUB_DOCS)
 	@if test -d $(DOCDIR) ; then                                          \
 	    :;                                                                \
 	else                                                                  \
-	   $(INSTALL_DIR) $(DOCDIR);                                          \
+	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
 	    if test $$d != X; then                                            \
