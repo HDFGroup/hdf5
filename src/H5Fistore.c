@@ -1173,7 +1173,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 		 const H5O_fill_t *fill, const hssize_t offset[],
 		 hbool_t relax, intn *idx_hint/*in,out*/)
 {
-    uintn		idx;			/*hash index number	*/
+    uintn		idx=0;			/*hash index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
     H5F_rdcc_t		*rdcc = &(f->shared->rdcc);/*raw data chunk cache*/
     H5F_rdcc_ent_t	*ent = NULL;		/*cache entry		*/

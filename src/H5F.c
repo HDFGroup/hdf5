@@ -1687,7 +1687,7 @@ H5Fclose(hid_t file_id)
  */
 static herr_t
 H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
-	  const H5F_mprop_t *plist)
+	  const H5F_mprop_t __unused__ *plist)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/
@@ -1809,7 +1809,7 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
     herr_t	ret_value = FAIL;	/*return value			*/
     uintn	i;			/*coutners			*/
-    intn	lt, rt, md, cmp;	/*binary search indices		*/
+    intn	lt, rt, md=(-1), cmp;	/*binary search indices		*/
     
     FUNC_ENTER(H5F_unmount, FAIL);
     assert(loc);
@@ -1909,7 +1909,7 @@ herr_t
 H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 {
     H5F_t	*parent = find->file;
-    intn	lt, rt, md, cmp;
+    intn	lt, rt, md=(-1), cmp;
     H5G_entry_t	*ent = NULL;
     
     FUNC_ENTER(H5F_mountpoint, FAIL);

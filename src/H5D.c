@@ -32,10 +32,6 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Vprivate.h>		/* Vector and array functions		*/
 #include <H5Zprivate.h>		/* Data filters				*/
 
-#ifdef QAK
-int qak_debug=0;
-#endif /* QAK */
-
 #define PABLO_MASK	H5D_mask
 
 /*
@@ -802,6 +798,52 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_new
+ *
+ * Purpose:	Creates a new, empty dataset structure
+ *
+ * Return:	Success:	Pointer to a new dataset descriptor.
+ *
+ *		Failure:	NULL
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 12, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_t *
+H5D_new(const H5D_create_t *create_parms)
+{
+    H5D_t	*ret_value = NULL;	/*return value			*/
+    
+    FUNC_ENTER(H5D_new, NULL);
+
+    /* check args */
+    /* Nothing to check */
+    
+    if (NULL==(ret_value = H5MM_calloc(sizeof(H5D_t)))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+		     "memory allocation failed");
+    }
+    if(create_parms!=NULL)
+        ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
+    else
+        ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE, &H5D_create_dflt);
+    H5F_addr_undef(&(ret_value->ent.header));
+
+    /* Success */
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5D_new() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_create
@@ -871,13 +913,11 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     }
 
     /* Initialize the dataset object */
-    if (NULL==(new_dset = H5MM_calloc(sizeof(H5D_t)))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+    if (NULL==(new_dset = H5D_new(create_parms))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    H5F_addr_undef(&(new_dset->ent.header));
     new_dset->type = H5T_copy(type, H5T_COPY_ALL);
-    new_dset->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
     efl = &(new_dset->create_parms->efl);
 
     /* Total raw data size */
@@ -1078,6 +1118,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
  * Modifications:
  * 	Robb Matzke, 9 Jun 1998
  *	The data space message is no longer cached in the dataset struct.
+ *  Quincey Koziol, 12 Oct 1998
+ *  Moved guts of function into H5D_open_oid
  *
  *-------------------------------------------------------------------------
  */
@@ -1086,8 +1128,6 @@ H5D_open(H5G_entry_t *loc, const char *name)
 {
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
-    intn	i;
-    H5S_t	*space = NULL;
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -1095,52 +1135,93 @@ H5D_open(H5G_entry_t *loc, const char *name)
     assert (loc);
     assert (name && *name);
     
-    if (NULL==(dataset = H5MM_calloc(sizeof(H5D_t)))) {
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+    if (NULL==(dataset = H5D_new(NULL))) {
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    dataset->create_parms = H5P_copy (H5P_DATASET_CREATE, &H5D_create_dflt);
-    H5F_addr_undef(&(dataset->ent.header));
 
-    /* Open the dataset object */
+    /* Find the dataset object */
     if (H5G_find(loc, name, NULL, &(dataset->ent)) < 0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
     }
+    /* Open the dataset object */
+    if (H5D_open_oid(dataset, NULL) < 0) {
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
+    }
+
+    /* Success */
+    ret_value = dataset;
+
+done:
+    FUNC_LEAVE(ret_value);
+}   /* end H5D_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_open_oid
+ *
+ * Purpose:	Opens a dataset for access.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, October 12, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
+{
+    herr_t	ret_value = FAIL;	/*return value			*/
+    intn	i;
+    H5S_t	*space = NULL;
+    
+    FUNC_ENTER(H5D_open_oid, FAIL);
+
+    /* check args */
+    assert (dataset);
+    
+    /* Copy over the symbol table information if it's provided */
+    if(ent!=NULL)
+        HDmemcpy(&(dataset->ent),ent,sizeof(H5G_entry_t));
+
+    /* Find the dataset object */
     if (H5O_open(&(dataset->ent)) < 0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open");
     }
     
     /* Get the type and space */
     if (NULL==(dataset->type=H5O_read(&(dataset->ent), H5O_DTYPE, 0, NULL))) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "unable to load type info from dataset header");
     }
     if (NULL==(space=H5S_read (&(dataset->ent)))) {
-	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "unable to read data space info from dataset header");
     }
 
     /* Get the optional fill value message */
-    if (NULL==H5O_read(&(dataset->ent), H5O_FILL, 0,
-		       &(dataset->create_parms->fill))) {
-	H5E_clear();
-	HDmemset(&(dataset->create_parms->fill), 0,
-		 sizeof(dataset->create_parms->fill));
+    if (NULL==H5O_read(&(dataset->ent), H5O_FILL, 0, &(dataset->create_parms->fill))) {
+        H5E_clear();
+        HDmemset(&(dataset->create_parms->fill), 0,
+                sizeof(dataset->create_parms->fill));
     }
 
     /* Get the optional filters message */
-    if (NULL==H5O_read (&(dataset->ent), H5O_PLINE, 0,
-			&(dataset->create_parms->pline))) {
-	H5E_clear ();
-	HDmemset (&(dataset->create_parms->pline), 0,
-		  sizeof(dataset->create_parms->pline));
+    if (NULL==H5O_read (&(dataset->ent), H5O_PLINE, 0, &(dataset->create_parms->pline))) {
+        H5E_clear ();
+        HDmemset (&(dataset->create_parms->pline), 0,
+                sizeof(dataset->create_parms->pline));
     }
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
-	dataset->create_parms->pline.nfilters>0){
-	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+    if (dataset.ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
+            dataset->create_parms->pline.nfilters>0){
+        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support filters yet");
     }
 #endif
@@ -1152,36 +1233,35 @@ H5D_open(H5G_entry_t *loc, const char *name)
      * them.
      */
     if (NULL==H5O_read(&(dataset->ent), H5O_LAYOUT, 0, &(dataset->layout))) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		    "unable to read data layout message");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                "unable to read data layout message");
     }
     switch (dataset->layout.type) {
-    case H5D_CONTIGUOUS:
-	dataset->create_parms->layout = H5D_CONTIGUOUS;
-	break;
+        case H5D_CONTIGUOUS:
+            dataset->create_parms->layout = H5D_CONTIGUOUS;
+            break;
 
-    case H5D_CHUNKED:
-	/*
-	 * Chunked storage.  The creation plist's dimension is one less than
-	 * the chunk dimension because the chunk includes a dimension for the
-	 * individual bytes of the data type.
-	 */
-	dataset->create_parms->layout = H5D_CHUNKED;
-	dataset->create_parms->chunk_ndims = dataset->layout.ndims - 1;
-	for (i = 0; i < dataset->layout.ndims - 1; i++) {
-	    dataset->create_parms->chunk_size[i] = dataset->layout.dim[i];
-	}
-	break;
+        case H5D_CHUNKED:
+        /*
+         * Chunked storage.  The creation plist's dimension is one less than
+         * the chunk dimension because the chunk includes a dimension for the
+         * individual bytes of the data type.
+         */
+            dataset->create_parms->layout = H5D_CHUNKED;
+            dataset->create_parms->chunk_ndims = dataset->layout.ndims - 1;
+            for (i = 0; i < dataset->layout.ndims - 1; i++) {
+                dataset->create_parms->chunk_size[i] = dataset->layout.dim[i];
+            }
+            break;
 
-    default:
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
+        default:
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
     }
 
     /* Get the external file list message, which might not exist */
-    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
-			&(dataset->create_parms->efl)) &&
-	!H5F_addr_defined (&(dataset->layout.addr))) {
-	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0, &(dataset->create_parms->efl)) &&
+            !H5F_addr_defined (&(dataset->layout.addr))) {
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "storage address is undefined an no external file list");
     }
 
@@ -1190,35 +1270,34 @@ H5D_open(H5G_entry_t *loc, const char *name)
      * This is especially important for parallel I/O where the B-tree must
      * be fully populated before I/O can happen.
      */
-    if ((dataset->ent.file->intent & H5F_ACC_RDWR) &&
-	H5D_CHUNKED==dataset->layout.type) {
-	if (H5D_init_storage(dataset, space)<0) {
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-			"unable to initialize file storage");
-	}
+    if ((dataset->ent.file->intent & H5F_ACC_RDWR) && H5D_CHUNKED==dataset->layout.type) {
+        if (H5D_init_storage(dataset, space)<0) {
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                "unable to initialize file storage");
+        }
     }
 
     /* Success */
-    ret_value = dataset;
+    ret_value = SUCCEED;
 
-  done:
+done:
     if (space)
-	H5S_close (space);
-    if (!ret_value && dataset) {
-	if (H5F_addr_defined(&(dataset->ent.header))) {
-	    H5O_close(&(dataset->ent));
-	}
-	if (dataset->type) {
-	    H5T_close(dataset->type);
-	}
-	if (dataset->create_parms) {
-	    H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
-	}
-	dataset->ent.file = NULL;
-	H5MM_xfree(dataset);
+        H5S_close (space);
+    if (ret_value==FAIL && dataset) {
+        if (H5F_addr_defined(&(dataset->ent.header))) {
+            H5O_close(&(dataset->ent));
+        }
+        if (dataset->type) {
+            H5T_close(dataset->type);
+        }
+        if (dataset->create_parms) {
+            H5P_close (H5P_DATASET_CREATE, dataset->create_parms);
+        }
+        dataset->ent.file = NULL;
+        H5MM_xfree(dataset);
     }
     FUNC_LEAVE(ret_value);
-}
+}   /* end H5D_open_oid() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_close

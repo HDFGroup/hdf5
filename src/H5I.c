@@ -159,11 +159,7 @@ H5I_init_interface(void)
      * Make certain the ID types don't overflow the number of bits allocated
      * for them in an ID.
      */
-#if 0
-    assert((int)H5I_MAXID<=(int)pow((double)2.0,(double)GROUP_BITS));
-#else
     assert(H5I_MAXID<=(1<<GROUP_BITS));
-#endif
 
     /* Registers the cleanup routine with the exit chain */
     ret_value = H5_add_exit(&H5I_term_interface);

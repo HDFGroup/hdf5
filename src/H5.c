@@ -53,6 +53,7 @@ FILE *fdopen(int fd, const char *mode);
 #include <H5Iprivate.h>		/*atoms					*/
 #include <H5MMprivate.h>        /*memory management               	*/
 #include <H5Pprivate.h>		/*property lists			*/
+#include <H5Rpublic.h>		/* References */
 #include <H5Sprivate.h>		/*data spaces				*/
 #include <H5Tprivate.h>         /*data types                      	*/
 #include <H5Zprivate.h>		/*filters				*/
@@ -1908,6 +1909,78 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    fprintf (out, "%ld", (long)plist_class);
 		    break;
 		}
+	    }
+	    break;
+
+	case 'r':
+	    if (ptr) {
+		if (vp) {
+		    fprintf (out, "0x%lx", (unsigned long)vp);
+		} else {
+		    fprintf(out, "NULL");
+		}
+	    } else {
+		href_t ref = va_arg (ap, href_t);
+		switch (ref.type) {
+		case H5R_BADTYPE:
+		    fprintf (out, "H5R_BADTYPE");
+		    break;
+		case H5R_OBJECT:
+		    fprintf (out, "H5R_OBJECT");
+		    break;
+		case H5R_DATASET_REGION:
+		    fprintf (out, "H5R_DATASET_REGION");
+		    break;
+		case H5R_INTERNAL:
+		    fprintf (out, "H5R_INTERNAL");
+		    break;
+		case H5R_MAXTYPE:
+		    fprintf (out, "H5R_MAXTYPE");
+		    break;
+		default:
+		    fprintf (out, "BADTYPE(%ld)", (long)ref.type);
+		    break;
+		}
+	    }
+	    break;
+
+	case 'R':
+	    switch (type[1]) {
+	    case 't':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5R_type_t reftype = va_arg(ap, H5R_type_t);
+		    switch (reftype) {
+		    case H5R_BADTYPE:
+			fprintf(out, "H5R_BADTYPE");
+			break;
+		    case H5R_OBJECT:
+			fprintf(out, "H5R_OBJECT");
+			break;
+		    case H5R_DATASET_REGION:
+			fprintf(out, "H5R_DATASET_REGION");
+			break;
+		    case H5R_INTERNAL:
+			fprintf(out, "H5R_INTERNAL");
+			break;
+		    case H5R_MAXTYPE:
+			fprintf(out, "H5R_MAXTYPE");
+			break;
+		    default:
+			fprintf(out, "BADTYPE(%ld)", (long)reftype);
+			break;
+		    }
+		}
+		break;
+			
+	    default:
+		fprintf(out, "BADTYPE(S%c)", type[1]);
+		goto error;
 	    }
 	    break;
 
