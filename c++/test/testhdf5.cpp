@@ -54,20 +54,20 @@ main(int argc, char *argv[])
     TestInit();
 
     // testing file creation and opening in tfile.cpp
-    AddTest("file", test_file, cleanup_file, "File I/O Operations");
+    AddTest("file", test_file, cleanup_file, "File I/O Operations", NULL);
     // testing dataspace functionalities in th5s.cpp
-    AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces");
+    AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
 
 /* Comment out tests that are not done yet. - BMR, Feb 2001
-    AddTest("attr", test_attr, cleanup_attr,  "Attributes");
-    AddTest("select", test_select, cleanup_select,  "Selections");
-    AddTest("time", test_time, cleanup_time,  "Time Datatypes");
-    AddTest("reference", test_reference, cleanup_reference,  "References");
-    AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes");
-    AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings");
-    AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration");
-    AddTest("array", test_array, cleanup_array,  "Array Datatypes");
-    AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties");
+    AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
+    AddTest("select", test_select, cleanup_select,  "Selections", NULL);
+    AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
+    AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
+    AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
+    AddTest("vlstrings", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
+    AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
+    AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
+    AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
 Comment out tests that are not done yet */
 
     /* Display testing information */

@@ -91,10 +91,10 @@ int main(int argc, char *argv[])
         TestInit();
 
 	/* Tests are generally arranged from least to most complexity... */
-	AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation");
-	AddTest("error", tts_error, cleanup_error, "per-thread error stacks");
-	AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test");
-	AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation");
+	AddTest("dcreate", tts_dcreate, cleanup_dcreate, "multi-dataset creation", NULL);
+	AddTest("error", tts_error, cleanup_error, "per-thread error stacks", NULL);
+	AddTest("cancel", tts_cancel, cleanup_cancel, "thread cancellation safety test", NULL);
+	AddTest("acreate", tts_acreate, cleanup_acreate, "multi-attribute creation", NULL);
 
         /* Display testing information */
         TestInfo(argv[0]);
