@@ -1,8 +1,8 @@
 #############################
-Expected output for 'h5dump -H -p -d fill_time_ifset tfilters.h5'
+Expected output for 'h5dump -H -p -d alloc_time_incr tfilters.h5'
 #############################
 HDF5 "tfilters.h5" {
-DATASET "fill_time_ifset" {
+DATASET "alloc_time_incr" {
    DATATYPE  H5T_STD_I32LE
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {

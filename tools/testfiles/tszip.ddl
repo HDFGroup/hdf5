@@ -5,9 +5,10 @@ HDF5 "tfilters.h5" {
 DATASET "szip" {
    DATATYPE  H5T_STD_I32LE
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
-   STORAGE_LAYOUT CHUNKED {
-      SIZE 372 ( 10, 5 )
-   }
+   STORAGE_LAYOUT {
+      CHUNKED ( 10, 5 )
+      SIZE 372
+    }
    FILTERS {
       COMPRESSION SZIP {
          PIXELS_PER_BLOCK 4

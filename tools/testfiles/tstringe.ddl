@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d string tfilters.h5'
+Expected output for 'h5dump -e -d string tfilters.h5'
 #############################
 HDF5 "tfilters.h5" {
 DATASET "string" {
@@ -11,10 +11,7 @@ DATASET "string" {
       }
    DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
    DATA {
-        (0) "quote "  backspace form feed new line
-            tab	 new line
-            carriage return
-           "
+        (0) "quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"
    }
 }
 }

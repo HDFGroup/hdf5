@@ -47,13 +47,13 @@ static int          display_all       = TRUE;
 static int          display_oid       = FALSE;
 static int          display_data      = TRUE;
 static int          display_attr_data = TRUE;
-static int          display_char      = FALSE;   /*print 1-byte numbers as ASCII? */
+static int          display_char      = FALSE; /*print 1-byte numbers as ASCII? */
 static int          usingdasho        = FALSE;
 static int          display_bb        = FALSE; /*superblock */
 static int          display_dcpl      = FALSE; /*dcpl */   
 static int          display_fi        = FALSE; /*file index */   
 static int          display_ai        = TRUE;  /*array index */   
-static int          display_lf        = FALSE; /*do CR/LF */ 
+static int          display_escape    = FALSE; /*escape non printable characters */ 
 
 
 
@@ -154,7 +154,7 @@ static h5dump_t         dataformat = {
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
      1 ,     /*array indices */
-     1       /*interpret CR/LF information */
+     1       /*escape non printable characters */ 
 
 };
 
@@ -239,7 +239,7 @@ static h5dump_t         xml_dataformat = {
     "%s",			/*dset_ptformat_pre */
     "%s",			/*dset_ptformat */
      0 ,    /*array indices */
-     0      /*interpret CR/LF information */
+     0      /*escape non printable characters */ 
 };
 
 /** XML **/
@@ -341,25 +341,12 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-#if 0
-    /* binary: not implemented yet */
-static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
-#else
-static const char *s_opts = "hnpeBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
-#endif  /* 0 */
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
     { "contents", no_arg, 'n' },
     { "properties", no_arg, 'p' },
-#if 0
-    /* binary: not implemented yet */
-    { "binary", no_arg, 'b' },
-    { "binar", no_arg, 'b' },
-    { "bina", no_arg, 'b' },
-    { "bin", no_arg, 'b' },
-    { "bi", no_arg, 'b' },
-#endif  /* 0 */
     { "boot-block", no_arg, 'B' },
     { "boot-bloc", no_arg, 'B' },
     { "boot-blo", no_arg, 'B' },
@@ -593,10 +580,11 @@ usage(const char *prog)
     fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    fprintf(stdout, "     -e,                  Interpret carriage return (\\n) as new line\n");
+    fprintf(stdout, "     -e,                  Escape non printing characters\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
+    fprintf(stdout, "     -y                   Do not print array indices with the data\n");
     fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
@@ -647,6 +635,7 @@ usage(const char *prog)
     fprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
     fprintf(stdout, "\n");
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    print_datatype
@@ -1888,6 +1877,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     int         stdindent = COL;	/* should be 3 */
 
     outputformat->line_ncols = nCols;
+    outputformat->do_escape=display_escape;
 
     indent += COL;
 
@@ -1959,10 +1949,6 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
   outputformat->line_cont = "        %s ";
   depth=0;
  }
-
- /*interpret CR/LF information */
- outputformat->do_lf=display_lf;
-
 
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);
@@ -2148,6 +2134,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  storage_size=H5Dget_storage_size(obj_id);
  ioffset=H5Dget_offset(obj_id);
  next=H5Pget_external_count(dcpl_id);
+ strcpy(f_name,"\0");
 
  
 /*-------------------------------------------------------------------------
@@ -2155,20 +2142,21 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  *-------------------------------------------------------------------------
  */
  indentation(indent + COL);
- printf("%s ", STORAGE_LAYOUT);
+ printf("%s %s\n", STORAGE_LAYOUT, BEGIN);
 
  if (H5D_CHUNKED == H5Pget_layout(dcpl_id)) 
  {
-  printf("%s %s\n", CHUNKED, BEGIN);
    /*start indent */
   indent += COL;
   indentation(indent + COL);
-  HDfprintf(stdout, "SIZE %Hu ", storage_size);
+  printf("%s ", CHUNKED);
   rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize);
   HDfprintf(stdout,"%s %Hu", dump_header_format->dataspacedimbegin, chsize[0]);
   for ( i=1; i<rank; i++) 
    HDfprintf(stdout, ", %Hu", chsize[i]);
 	 printf(" %s\n", dump_header_format->dataspacedimend);
+  indentation(indent + COL);
+  HDfprintf(stdout, "SIZE %Hu\n ", storage_size);
   /*end indent */
   indent -= COL;
   indentation(indent + COL);
@@ -2176,9 +2164,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
  }
  else if (H5D_COMPACT == H5Pget_layout(dcpl_id)) 
  {
-  printf("%s %s\n", COMPACT, BEGIN);
   /*start indent */
   indent += COL;
+  indentation(indent + COL);
+  printf("%s\n", COMPACT);
   indentation(indent + COL);
   HDfprintf(stdout, "SIZE %Hu\n", storage_size);
   /*end indent */
@@ -2194,10 +2183,14 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
   */
   if (next) 
   {
-   printf("%s %s %s\n", CONTIGUOUS, EXTERNAL, BEGIN);
-    /*start indent */
+   /*start indent */
    indent += COL;
-   
+   indentation(indent + COL);
+   printf("%s\n", CONTIGUOUS);
+   indentation(indent + COL);
+   printf("%s %s\n", EXTERNAL, BEGIN);
+   /*start indent */
+   indent += COL;
    for ( i=0; i<next; i++) {
     H5Pget_external(dcpl_id,i,sizeof(name),name,&offset,&size);
     indentation(indent + COL);
@@ -2207,15 +2200,22 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
    indent -= COL;
    indentation(indent + COL);
    printf("%s\n",END);
+   /*end indent */
+   indent -= COL;
+   indentation(indent + COL);
+   printf("%s\n",END);
   }
   
   else
   {
-   printf("%s %s\n", CONTIGUOUS, BEGIN);
    /*start indent */
    indent += COL;
    indentation(indent + COL);
-   HDfprintf(stdout,"SIZE %Hu OFFSET %Hu\n", storage_size, ioffset);
+   printf("%s\n", CONTIGUOUS);
+   indentation(indent + COL);
+   HDfprintf(stdout,"SIZE %Hu\n", storage_size);
+   indentation(indent + COL);
+   HDfprintf(stdout,"OFFSET %Hu\n", ioffset);
    /*end indent */
    indent -= COL;
    indentation(indent + COL);
@@ -2309,8 +2309,20 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     break;
    default:
     indentation(indent + COL);
-    printf("%s %d %s", UNKNOWN_FILTER, filtn, cd_nelmts? "" : "\n" );
+    if (H5Zfilter_avail(filtn))
+     printf("%s %s\n", "USER_REGISTERED_FILTER", BEGIN);
+    else
+     printf("%s %s\n", "UNKNOWN_FILTER", BEGIN);
+    /*start indent */
+    indent += COL;
+    indentation(indent + COL);
+    printf("FILTER_ID %d\n", filtn);
+    if (f_name[0]!='\0') {
+     indentation(indent + COL);
+     printf("COMMENT %s\n", f_name);
+    }
     if (cd_nelmts) {
+     indentation(indent + COL);
      printf("%s %s ","PARAMS", BEGIN);
      for (j=0; j<cd_nelmts; j++) {
       printf("%d ", cd_values[j]);
@@ -3062,8 +3074,11 @@ parse_start:
         case 'p':
             display_dcpl = TRUE;
             break;
+        case 'y':
+            display_ai = FALSE;
+            break;
         case 'e':
-            display_lf = TRUE;
+            display_escape = TRUE;
             break;
         case 'H':
             display_data = FALSE;

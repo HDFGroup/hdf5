@@ -318,8 +318,8 @@ typedef struct h5dump_t {
      /*print array indices in output matrix */
     int pindex;
 
-    /*interpret CR/LF information */
-    int do_lf;
+     /*escape non printable characters */
+    int do_escape;
 
 } h5dump_t;
 
@@ -480,7 +480,6 @@ extern FILE   *rawdatastream;       /*output stream for raw data            */
 #define SHUFFLE         "PREPROCESSING SHUFFLE"
 #define FLETCHER32      "CHECKSUM FLETCHER32"
 #define SZIP            "COMPRESSION SZIP"
-#define UNKNOWN_FILTER  "UNKNOWN_FILTER"
 #define STORAGE_LAYOUT  "STORAGE_LAYOUT"
 #define CONTIGUOUS      "CONTIGUOUS"
 #define COMPACT         "COMPACT"
