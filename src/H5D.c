@@ -1823,12 +1823,18 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     }
     if (NULL==(tconv_buf=xfer_parms->tconv_buf)) {
+#ifdef QAK
+    printf("%s: check 3.1, allocating conversion buffer\n",FUNC);
+#endif
         /* Allocate temporary buffer */
         if((tconv_buf=H5FL_BLK_ALLOC(type_conv,target_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed for type conversion");
     }
     if (need_bkg && NULL==(bkg_buf=xfer_parms->bkg_buf)) {
+#ifdef QAK
+    printf("%s: check 3.2, allocating conversion buffer\n",FUNC);
+#endif
         /* Allocate temporary buffer */
         if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,request_nelmts*dst_type_size,0))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1876,6 +1882,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 	
 #ifdef QAK
 	printf("%s: check 6.0\n",FUNC);
+#ifdef QAK
 	{
 	    int i;
 	    int *b;
@@ -1889,7 +1896,8 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 		printf("\n");
 	    /* } */
 	}
-#endif
+#endif /* QAK */
+#endif /* QAK */
 	
         if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG

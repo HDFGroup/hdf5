@@ -219,7 +219,7 @@ H5S_hyper_favail (const H5S_t UNUSED *space,
     assert (sel_iter);
 
 #ifdef QAK
-    printf("%s: max=%u\n",FUNC,(unsigned)max);
+    printf("%s: sel_iter->hyp.elmt_left=%u, max=%u\n",FUNC,(unsigned)sel_iter->hyp.elmt_left,(unsigned)max);
 #endif /* QAK */
     FUNC_LEAVE (MIN(sel_iter->hyp.elmt_left,max));
 }   /* H5S_hyper_favail() */
@@ -297,69 +297,83 @@ H5S_hyper_get_regions (size_t *num_regions, uintn rank, uintn dim,
         printf("%s: %d - pos=%d, offset=%d\n",FUNC,i,(int)pos[i],offset!=NULL ? (int)offset[i] : 0);
 #endif /* QAK */
 
-#ifdef QAK
-	printf("%s: check 1.1, bound_count=%d, pos[%d]=%d\n",FUNC,bound_count,(int)dim,(int)pos[dim]);
-#endif /* QAK */
-
     /* Iterate over the blocks which fit the position, or all of the blocks, if pos[dim]==-1 */
     lo_bound_dim=lo_bounds[dim];
     pos_dim=pos[dim];
     off_dim=offset[dim];
-    for(i=0; i<bound_count && (pos_dim<0 || pos_dim>=lo_bound_dim->bound+off_dim); i++,lo_bound_dim++) {
 #ifdef QAK
-printf("%s: check 1.2, i=%d, num_reg=%d, curr_reg=%d\n",FUNC,(int)i,(int)num_reg,(int)curr_reg);
+    printf("%s: check 1.1, bound_count=%d, pos_dim=%d\n",FUNC,bound_count,(int)pos_dim);
+#endif /* QAK */
+
+    for(i=0; i<bound_count; i++,lo_bound_dim++) {
+#ifdef QAK
+    printf("%s: check 1.2, i=%d, num_reg=%d, curr_reg=%d\n",FUNC,(int)i,(int)num_reg,(int)curr_reg);
+    printf("%s: check 1.2.1, lo_bound_dim->bound=%d\n",FUNC,(int)lo_bound_dim->bound);
 #endif /* QAK */
         /* Check if each boundary overlaps in the higher dimensions */
         node=lo_bound_dim->node;
-        temp_dim=(dim-1);
-        node_start=node->start+temp_dim;
-        node_end=node->end+temp_dim;
-        tmp_pos=pos+temp_dim;
-        tmp_off=offset+temp_dim;
-        while(temp_dim>=0 && *tmp_pos>=(*node_start+*tmp_off) && *tmp_pos<=(*node_end+*tmp_off)) {
-            temp_dim--;
-            node_start--;
-            node_end--;
-            tmp_pos--;
-            tmp_off--;
-        }
+        if(pos_dim<0 || (node->end[dim]+off_dim)>=pos_dim) {
+            temp_dim=(dim-1);
+            if(temp_dim>=0) {
+                node_start=node->start+temp_dim;
+                node_end=node->end+temp_dim;
+                tmp_pos=pos+temp_dim;
+                tmp_off=offset+temp_dim;
+                while(temp_dim>=0 && *tmp_pos>=(*node_start+*tmp_off) && *tmp_pos<=(*node_end+*tmp_off)) {
+                    temp_dim--;
+                    node_start--;
+                    node_end--;
+                    tmp_pos--;
+                    tmp_off--;
+                } /* end while */
+            } /* end if */
 
 #ifdef QAK
-printf("%s: check 1.3, i=%d, temp_dim=%d\n",FUNC,(int)i,(int)temp_dim);
+        printf("%s: check 1.3, i=%d, temp_dim=%d\n",FUNC,(int)i,(int)temp_dim);
 #endif /* QAK */
-        /* Yes, all previous positions match, this is a valid region */
-        if(temp_dim<0) {
-            /* Check if we've allocated the array yet */
-            if(num_reg==0) {
-                /* Allocate temporary buffer, big enough for worst case size */
-                reg=H5FL_ARR_ALLOC(H5S_hyper_region_t,(hsize_t)bound_count,0);
+            /* Yes, all previous positions match, this is a valid region */
+            if(temp_dim<0) {
+#ifdef QAK
+        printf("%s: check 1.4, node->start[%d]=%d, node->end[%d]=%d\n",FUNC,(int)dim,(int)node->start[dim],(int)dim,(int)node->end[dim]);
+#endif /* QAK */
+                /* Check if we've allocated the array yet */
+                if(num_reg==0) {
+                    /* Allocate temporary buffer, big enough for worst case size */
+                    reg=H5FL_ARR_ALLOC(H5S_hyper_region_t,(hsize_t)bound_count,0);
 
-                /* Initialize with first region */
-                reg[num_reg].start=MAX(node->start[dim],pos[dim])+offset[dim];
-                reg[num_reg].end=node->end[dim]+offset[dim];
-                reg[num_reg].node=node;
-
-                /* Increment the number of regions */
-                num_reg++;
-                curr_reg++;
-            } else {
-                /* Try to merge regions together in all dimensions, except the final one */
-                if(dim<(rank-1) && (node->start[dim]+offset[dim])<=(reg[curr_reg].end+1)) {
-                    reg[curr_reg].end=MAX(node->end[dim],reg[curr_reg].end)+offset[dim];
-                } else { /* no overlap with previous region, add new region */
-                    /* Initialize with new region */
-                    reg[num_reg].start=node->start[dim]+offset[dim];
+                    /* Initialize with first region */
+                    reg[num_reg].start=MAX(node->start[dim],pos[dim])+offset[dim];
                     reg[num_reg].end=node->end[dim]+offset[dim];
                     reg[num_reg].node=node;
 
-                    /*
-                     * Increment the number of regions & the current
-                     * region.
-                     */
+                    /* Increment the number of regions */
                     num_reg++;
                     curr_reg++;
+                } else {
+                    /* Try to merge regions together in all dimensions, except the final one */
+                    if(dim<(rank-1) && (node->start[dim]+offset[dim])<=(reg[curr_reg].end+1)) {
+#ifdef QAK
+        printf("%s: check 1.4.1\n",FUNC);
+#endif /* QAK */
+                        reg[curr_reg].end=MAX(node->end[dim],reg[curr_reg].end)+offset[dim];
+                    } else { /* no overlap with previous region, add new region */
+#ifdef QAK
+        printf("%s: check 1.4.2\n",FUNC);
+#endif /* QAK */
+                        /* Initialize with new region */
+                        reg[num_reg].start=node->start[dim]+offset[dim];
+                        reg[num_reg].end=node->end[dim]+offset[dim];
+                        reg[num_reg].node=node;
+
+                        /*
+                         * Increment the number of regions & the current
+                         * region.
+                         */
+                        num_reg++;
+                        curr_reg++;
+                    } /* end else */
                 } /* end else */
-            } /* end else */
+            } /* end if */
         } /* end if */
     } /* end for */
 
@@ -471,6 +485,9 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_io_info_t *io_info, hsiz
         !! NOTE !! This will need to be changed for different dimension
             permutations from the standard 'C' ordering!
     */
+#ifdef QAK
+	printf("%s: check 1.0, io_info->dst=%p, node->cinfo.rpos=%p, region_size=%lu, io_info->elmt_size=%lu\n",FUNC,io_info->dst,node->cinfo.rpos,(unsigned long)region_size,(unsigned long)io_info->elmt_size);
+#endif /* QAK */
     HDmemcpy(io_info->dst, node->cinfo.rpos, (size_t)(region_size*io_info->elmt_size));
 
     /*
@@ -588,6 +605,9 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     size_t num_regions;         /* number of regions overlapped */
     size_t i;                   /* Counters */
     intn j;
+#ifdef QAK
+    uintn u;
+#endif /* QAK */
     hsize_t num_read=0;          /* Number of elements read */
     const H5D_xfer_t *xfer_parms;/* Data transfer property list */
 
@@ -613,7 +633,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
             io_info->space->select.sel_info.hslab.hyper_lst->lo_bounds,
             io_info->iter->hyp.pos,io_info->space->select.offset))!=NULL) {
 
-    /*
+        /*
 	 * Check if this is the second to last dimension in dataset (Which
 	 * means that we've got a list of the regions in the fastest changing
 	 * dimension and should input those regions).
@@ -622,10 +642,10 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     if(dim>=0) {
         printf("%s: check 2.0, rank=%d, ",
                FUNC,(int)io_info->space->extent.u.simple.rank);
-        printf("pos={",FUNC);
-        for(j=0; j<io_info->space->extent.u.simple.rank; j++) {
-            printf("%d",(int)io_info->iter->hyp.pos[j]);
-            if(j<io_info->space->extent.u.simple.rank-1)
+        printf("%s: pos={",FUNC);
+        for(u=0; u<io_info->space->extent.u.simple.rank; u++) {
+            printf("%d",(int)io_info->iter->hyp.pos[u]);
+            if(u<io_info->space->extent.u.simple.rank-1)
                 printf(", ");
         } /* end for */
         printf("}\n");
@@ -633,8 +653,8 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     else
         printf("%s: check 2.0, rank=%d\n",
                FUNC,(int)io_info->space->extent.u.simple.rank);
-	for(i=0; i<num_regions; i++)
-	    printf("%s: check 2.1, region #%d: start=%d, end=%d\n",
+    for(i=0; i<num_regions; i++)
+        printf("%s: check 2.1, region #%d: start=%d, end=%d\n",
 		   FUNC,i,(int)regions[i].start,(int)regions[i].end);
 #endif /* QAK */
         if((uintn)(dim+2)==io_info->space->extent.u.simple.rank) {
@@ -648,7 +668,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 region_size=MIN((hssize_t)io_info->nelmts, (regions[i].end-regions[i].start)+1);
 
 #ifdef QAK
-	printf("%s: check 2.1.2, region=%d, region_size=%d\n",FUNC,(int)i,(int)region_size);
+	printf("%s: check 2.1.2, region=%d, region_size=%d, num_read=%lu\n",FUNC,(int)i,(int)region_size,(unsigned long)num_read);
 #endif /* QAK */
                 /* Check if this hyperslab block is cached or could be cached */
                 if(!regions[i].node->cinfo.cached &&
@@ -672,7 +692,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 }
                 else {
 #ifdef QAK
-	printf("%s: check 2.1.5, reading block from file\n",FUNC);
+	printf("%s: check 2.1.5, reading block from file, parm_init=%d\n",FUNC,(int)parm_init);
 #endif /* QAK */
                     /* Set up hyperslab I/O parameters which apply to all regions */
                     if(!parm_init) {
@@ -707,9 +727,9 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 #ifdef QAK
     printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
     printf("pos={");
-    for(j=0; j<io_info->space->extent.u.simple.rank; j++) {
-        printf("%d",(int)io_info->iter->hyp.pos[j]);
-        if(j<io_info->space->extent.u.simple.rank-1)
+    for(u=0; u<io_info->space->extent.u.simple.rank; u++) {
+        printf("%d",(int)io_info->iter->hyp.pos[u]);
+        if(u<io_info->space->extent.u.simple.rank-1)
             printf(", ");
     } /* end for */
     printf("}\n");
@@ -773,7 +793,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 /* Step through each location in each region */
                 for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
 #ifdef QAK
-    printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
+    printf("%s: check 4.0, dim=%d, j=%d, num_read=%lu\n",FUNC,dim,j,(unsigned long)num_read);
 #endif /* QAK */
 
                     /* Set the correct position we are working on */
@@ -788,13 +808,11 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 } /* end for */
 #ifdef QAK
 {
-    intn k;
-
     printf("%s: check 5.0, dim=%d, j=%d, region #%d={%d, %d}\n",FUNC,(int)dim,(int)j,(int)i,(int)regions[i].start,(int)regions[i].end);
-    printf("pos={");
-    for(k=0; k<io_info->space->extent.u.simple.rank; k++) {
-        printf("%d",(int)io_info->iter->hyp.pos[k]);
-        if(k<io_info->space->extent.u.simple.rank-1)
+    printf("%s: pos={",FUNC);
+    for(u=0; u<io_info->space->extent.u.simple.rank; u++) {
+        printf("%d",(int)io_info->iter->hyp.pos[u]);
+        if(u<io_info->space->extent.u.simple.rank-1)
             printf(", ");
     } /* end for */
     printf("}\n");
@@ -4717,6 +4735,25 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
                 /* (Why someone would torture us this way, I don't know... -QAK :-) */
                 for(u=0; u<space->extent.u.simple.rank; u++)
                     slab[u]=count[u]*stride[u];
+#ifdef QAK
+    printf("%s: check 4.2\n",FUNC);
+    printf("%s: start = {",FUNC);
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        printf("%d",(int)start[u]);
+        if(u<(space->extent.u.simple.rank-1))
+            printf(", ");
+        else
+            printf("}\n");
+    }
+    printf("%s: slab = {",FUNC);
+    for(u=0; u<space->extent.u.simple.rank; u++) {
+        printf("%d",(int)slab[u]);
+        if(u<(space->extent.u.simple.rank-1))
+            printf(", ");
+        else
+            printf("}\n");
+    }
+#endif /* QAK */
 
                 /* Add the contiguous hyperslab to the selection */
                 if(H5S_hyper_node_add(&add,0,space->extent.u.simple.rank,start,(const hsize_t *)slab)<0) {
