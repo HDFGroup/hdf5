@@ -75,6 +75,8 @@ Known Problems:
 
 o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
+o TFLOPS: dsets test failes if compiled with optimization turned on 
+o J90: tools fail to dispay data for the datasets with compound datatype 
 
 Platforms tested
 =================
@@ -90,7 +92,7 @@ Platforms tested
 
   Linux 2.2.10 SMP              gcc 2.95.1 
                                 || compiler version egcs-1.1.2 
-  Linux 2.2.14 (RedHat 6.2)     gcc 2.95.2
+  Linux 2.2.16 (RedHat 6.2)     gcc 2.95.2
 
   OSF1 V4.0                     DEC-V5.2-040
   SunOS 5.6                     cc WorkShop Compilers 5.0 no optimization
