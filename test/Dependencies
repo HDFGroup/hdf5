@@ -1949,7 +1949,22 @@ tmisc.o: \
    ../../hdf5/src/H5MPprivate.h \
    ../../hdf5/src/H5FSprivate.h \
    ../../hdf5/src/H5Eprivate.h \
-   ../../hdf5/test/h5test.h
+   ../../hdf5/test/h5test.h \
+   ../../hdf5/src/H5Dpkg.h \
+   ../../hdf5/src/H5Dprivate.h \
+   ../../hdf5/src/H5FDprivate.h \
+   ../../hdf5/src/H5Oprivate.h \
+   ../../hdf5/src/H5HGprivate.h \
+   ../../hdf5/src/H5Fprivate.h \
+   ../../hdf5/src/H5Tprivate.h \
+   ../../hdf5/src/H5Gprivate.h \
+   ../../hdf5/src/H5Bprivate.h \
+   ../../hdf5/src/H5ACprivate.h \
+   ../../hdf5/src/H5RSprivate.h \
+   ../../hdf5/src/H5Rprivate.h \
+   ../../hdf5/src/H5Zprivate.h \
+   ../../hdf5/src/H5Sprivate.h \
+   ../../hdf5/src/H5Pprivate.h
 unlink.o: \
    ../../hdf5/test/unlink.c \
    ../../hdf5/test/h5test.h \

@@ -17,29 +17,35 @@ h5debug.o: \
    ../../../hdf5/src/H5Fpublic.h \
    ../../../hdf5/src/H5Ipublic.h \
    ../../../hdf5/src/H5FDpublic.h \
-   ../../../hdf5/src/H5Fpkg.h \
-   ../../../hdf5/src/H5FOprivate.h \
-   ../../../hdf5/src/H5TBprivate.h \
-   ../../../hdf5/src/H5Gprivate.h \
-   ../../../hdf5/src/H5Gpublic.h \
+   ../../../hdf5/src/H5Dprivate.h \
+   ../../../hdf5/src/H5Dpublic.h \
+   ../../../hdf5/src/H5FDprivate.h \
+   ../../../hdf5/src/H5FDmpi.h \
+   ../../../hdf5/src/H5FDfphdf5.h \
+   ../../../hdf5/src/H5FDmpio.h \
+   ../../../hdf5/src/H5FDmpiposix.h \
+   ../../../hdf5/src/H5Oprivate.h \
    ../../../hdf5/src/H5Opublic.h \
-   ../../../hdf5/src/H5RSprivate.h \
+   ../../../hdf5/src/H5Spublic.h \
    ../../../hdf5/src/H5HGprivate.h \
    ../../../hdf5/src/H5HGpublic.h \
-   ../../../hdf5/src/H5HLprivate.h \
-   ../../../hdf5/src/H5HLpublic.h \
-   ../../../hdf5/src/H5Iprivate.h \
-   ../../../hdf5/src/H5Opkg.h \
-   ../../../hdf5/src/H5Oprivate.h \
-   ../../../hdf5/src/H5Dpublic.h \
-   ../../../hdf5/src/H5Spublic.h \
    ../../../hdf5/src/H5Tprivate.h \
    ../../../hdf5/src/H5Tpublic.h \
    ../../../hdf5/src/H5MMpublic.h \
+   ../../../hdf5/src/H5Gprivate.h \
+   ../../../hdf5/src/H5Gpublic.h \
+   ../../../hdf5/src/H5RSprivate.h \
    ../../../hdf5/src/H5Rprivate.h \
    ../../../hdf5/src/H5Rpublic.h \
    ../../../hdf5/src/H5Zprivate.h \
    ../../../hdf5/src/H5Zpublic.h \
+   ../../../hdf5/src/H5Fpkg.h \
+   ../../../hdf5/src/H5FOprivate.h \
+   ../../../hdf5/src/H5TBprivate.h \
+   ../../../hdf5/src/H5HLprivate.h \
+   ../../../hdf5/src/H5HLpublic.h \
+   ../../../hdf5/src/H5Iprivate.h \
+   ../../../hdf5/src/H5Opkg.h \
    ../../../hdf5/src/H5Pprivate.h \
    ../../../hdf5/src/H5Ppublic.h \
    ../../../hdf5/src/H5FDfamily.h

@@ -245,7 +245,14 @@ pio_perf.o: \
    ../../hdf5/src/H5FDsec2.h \
    ../../hdf5/src/H5FDsrb.h \
    ../../hdf5/src/H5FDstdio.h \
-   ../../hdf5/src/H5FDstream.h
+   ../../hdf5/src/H5FDstream.h \
+   ../../hdf5/tools/lib/h5tools_utils.h \
+   ../../hdf5/perform/pio_perf.h \
+   ../../hdf5/perform/pio_timer.h \
+   ../../hdf5/src/H5private.h \
+   ../../hdf5/src/H5MPprivate.h \
+   ../../hdf5/src/H5FSprivate.h \
+   ../../hdf5/test/h5test.h
 pio_engine.o: \
    ../../hdf5/perform/pio_engine.c \
    ../../hdf5/src/hdf5.h \
@@ -284,7 +291,13 @@ pio_engine.o: \
    ../../hdf5/src/H5FDsec2.h \
    ../../hdf5/src/H5FDsrb.h \
    ../../hdf5/src/H5FDstdio.h \
-   ../../hdf5/src/H5FDstream.h
+   ../../hdf5/src/H5FDstream.h \
+   ../../hdf5/perform/pio_perf.h \
+   ../../hdf5/perform/pio_timer.h \
+   ../../hdf5/src/H5private.h \
+   ../../hdf5/src/H5MPprivate.h \
+   ../../hdf5/src/H5FSprivate.h \
+   ../../hdf5/test/h5test.h
 pio_timer.o: \
    ../../hdf5/perform/pio_timer.c \
    ../../hdf5/perform/pio_timer.h \
@@ -324,4 +337,9 @@ pio_timer.o: \
    ../../hdf5/src/H5FDsec2.h \
    ../../hdf5/src/H5FDsrb.h \
    ../../hdf5/src/H5FDstdio.h \
-   ../../hdf5/src/H5FDstream.h
+   ../../hdf5/src/H5FDstream.h \
+   ../../hdf5/perform/pio_perf.h \
+   ../../hdf5/src/H5private.h \
+   ../../hdf5/src/H5MPprivate.h \
+   ../../hdf5/src/H5FSprivate.h \
+   ../../hdf5/test/h5test.h
