@@ -669,9 +669,24 @@ case "X-$enable_parallel" in
 
     X-yes)
 	# We want to compile a parallel library with a compiler that
-	# already knows how to link with MPI and MPI-IO.
+	# may already know how to link with MPI and MPI-IO.
 	AC_MSG_RESULT(provided by compiler)
 	PARALLEL=yes
+
+	# Try link a simple MPI program.  If fail, try again with -lmpi.
+	AC_TRY_LINK(,MPI_Init(),,AC_CHECK_LIB(mpi,MPI_Init,,PARALLEL=no))
+
+	# Then try link a simple MPI-IO program.  If fail, try again with
+	# -lmpio.
+	if test "yes" = "$PARALLEL"; then
+	    AC_TRY_LINK(,MPI_File_open(),,
+			AC_CHECK_LIB(mpio,MPI_File_open,,PARALLEL=no))
+	fi
+
+	# Set RUNPARALLEL to mpirun if not set yet.
+	if test "yes" = "$PARALLEL" -a "X-" = "X-$RUNPARALLEL"; then
+	    RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+	fi
 	;;
 
     X-mpich)
@@ -718,11 +733,11 @@ if test "X-" != "X-$PARALLEL"; then
     AC_MSG_RESULT($RUNPARALLEL)
 
     # Check that we can link a simple MPI and MPI-IO application
-dnl    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
-dnl    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
-dnl		AC_MSG_RESULT(yes),
-dnl		AC_MSG_RESULT(no)
-dnl	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
+    AC_MSG_CHECKING(whether a simple MPI-IO program can be linked)
+    AC_TRY_LINK(,[MPI_Init();MPI_File_open();],
+		AC_MSG_RESULT(yes),
+		AC_MSG_RESULT(no)
+	        AC_MSG_ERROR('unable to link a simple MPI-IO application'))
 
 
     # There *must* be some way to run in parallel even if it's just the

@@ -5481,9 +5481,149 @@ case "X-$enable_parallel" in
 
     X-yes)
 	# We want to compile a parallel library with a compiler that
-	# already knows how to link with MPI and MPI-IO.
+	# may already know how to link with MPI and MPI-IO.
 	echo "$ac_t""provided by compiler" 1>&6
 	PARALLEL=yes
+
+	# Try link a simple MPI program.  If fail, try again with -lmpi.
+	cat > conftest.$ac_ext <<EOF
+#line 5491 "configure"
+#include "confdefs.h"
+
+int main() {
+MPI_Init()
+; return 0; }
+EOF
+if { (eval echo configure:5498: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  :
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  echo $ac_n "checking for MPI_Init in -lmpi""... $ac_c" 1>&6
+echo "configure:5505: checking for MPI_Init in -lmpi" >&5
+ac_lib_var=`echo mpi'_'MPI_Init | sed 'y%./+-%__p_%'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="-lmpi  $LIBS"
+cat > conftest.$ac_ext <<EOF
+#line 5513 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char MPI_Init();
+
+int main() {
+MPI_Init()
+; return 0; }
+EOF
+if { (eval echo configure:5524: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_lib=HAVE_LIB`echo mpi | sed -e 's/^a-zA-Z0-9_/_/g' \
+    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_lib 1
+EOF
+
+  LIBS="-lmpi $LIBS"
+
+else
+  echo "$ac_t""no" 1>&6
+PARALLEL=no
+fi
+
+fi
+rm -f conftest*
+
+	# Then try link a simple MPI-IO program.  If fail, try again with
+	# -lmpio.
+	if test "yes" = "$PARALLEL"; then
+	    cat > conftest.$ac_ext <<EOF
+#line 5559 "configure"
+#include "confdefs.h"
+
+int main() {
+MPI_File_open()
+; return 0; }
+EOF
+if { (eval echo configure:5566: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  :
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  echo $ac_n "checking for MPI_File_open in -lmpio""... $ac_c" 1>&6
+echo "configure:5573: checking for MPI_File_open in -lmpio" >&5
+ac_lib_var=`echo mpio'_'MPI_File_open | sed 'y%./+-%__p_%'`
+if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  ac_save_LIBS="$LIBS"
+LIBS="-lmpio  $LIBS"
+cat > conftest.$ac_ext <<EOF
+#line 5581 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char MPI_File_open();
+
+int main() {
+MPI_File_open()
+; return 0; }
+EOF
+if { (eval echo configure:5592: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=yes"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_lib_$ac_lib_var=no"
+fi
+rm -f conftest*
+LIBS="$ac_save_LIBS"
+
+fi
+if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_lib=HAVE_LIB`echo mpio | sed -e 's/^a-zA-Z0-9_/_/g' \
+    -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_lib 1
+EOF
+
+  LIBS="-lmpio $LIBS"
+
+else
+  echo "$ac_t""no" 1>&6
+PARALLEL=no
+fi
+
+fi
+rm -f conftest*
+	fi
+
+	# Set RUNPARALLEL to mpirun if not set yet.
+	if test "yes" = "$PARALLEL" -a "X-" = "X-$RUNPARALLEL"; then
+	    RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
+	fi
 	;;
 
     X-mpich)
@@ -5501,7 +5641,7 @@ case "X-$enable_parallel" in
 	# is missing.
 	PARALLEL=mpich
 	echo $ac_n "checking for MPI_Init in -lmpich""... $ac_c" 1>&6
-echo "configure:5505: checking for MPI_Init in -lmpich" >&5
+echo "configure:5645: checking for MPI_Init in -lmpich" >&5
 ac_lib_var=`echo mpich'_'MPI_Init | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -5509,7 +5649,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpich  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 5513 "configure"
+#line 5653 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -5520,7 +5660,7 @@ int main() {
 MPI_Init()
 ; return 0; }
 EOF
-if { (eval echo configure:5524: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:5664: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5569,13 +5709,34 @@ EOF
 
     # Display what we found about running programs
     echo $ac_n "checking prefix for running on one processor""... $ac_c" 1>&6
-echo "configure:5573: checking prefix for running on one processor" >&5
+echo "configure:5713: checking prefix for running on one processor" >&5
     echo "$ac_t""$RUNSERIAL" 1>&6
     echo $ac_n "checking prefix for running in parallel""... $ac_c" 1>&6
-echo "configure:5576: checking prefix for running in parallel" >&5
+echo "configure:5716: checking prefix for running in parallel" >&5
     echo "$ac_t""$RUNPARALLEL" 1>&6
 
     # Check that we can link a simple MPI and MPI-IO application
+    echo $ac_n "checking whether a simple MPI-IO program can be linked""... $ac_c" 1>&6
+echo "configure:5721: checking whether a simple MPI-IO program can be linked" >&5
+    cat > conftest.$ac_ext <<EOF
+#line 5723 "configure"
+#include "confdefs.h"
+
+int main() {
+MPI_Init();MPI_File_open();
+; return 0; }
+EOF
+if { (eval echo configure:5730: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+  rm -rf conftest*
+  echo "$ac_t""yes" 1>&6
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  echo "$ac_t""no" 1>&6
+	        { echo "configure: error: 'unable to link a simple MPI-IO application'" 1>&2; exit 1; }
+fi
+rm -f conftest*
 
 
     # There *must* be some way to run in parallel even if it's just the
