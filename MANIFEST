@@ -70,6 +70,7 @@
 ./config/powerpc-ibm-aix4.3.2.0
 ./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
+./config/sv1-cray
 ./config/unicos
 ./config/unicosmk
 ./config/unicosmk2.0.X
@@ -446,6 +447,7 @@
 ./fortran/config/powerpc-ibm-aix4.x
 ./fortran/config/rs6000-ibm-aix4.x
 ./fortran/config/solaris2.x
+./fortran/config/sv1-cray
 ./fortran/config/unicos
 ./fortran/config/unicosmk
 ./fortran/config/unicosmk2.0.X
