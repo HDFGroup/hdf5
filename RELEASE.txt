@@ -81,6 +81,8 @@ Platforms Tested
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
     IRIX 6.5                      MIPSpro cc 7.30
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
+    Linux 2.4.4                   gcc-2.95.3
+                                  g++ 2.95.3
     Linux 2.2.18smp               gcc-2.95.2
                                   g++ 2.95.2
     OSF1 V4.0                     DEC-V5.2-040
