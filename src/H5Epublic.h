@@ -26,38 +26,31 @@
 
 #ifndef NEW_ERR
 
-typedef struct H5E_cls_t {
-    char *cls_name;
-    const char *lib_name;
-    const char *lib_vers;
-} H5E_cls_t;
-
-typedef struct H5E_maj_t {
-    const char *mesg;
-    H5E_cls_t  *cls;
-} H5E_maj_t;
-
-typedef struct H5E_min_t {
-    const char *mesg;
-    H5E_cls_t  *cls;
-} H5E_min_t;
-
 typedef enum H5E_msg_t {
-    H5E_ERROR   =-1,
-    H5E_MAJOR,
-    H5E_MINOR,
-    H5E_LIMIT
+    H5E_MSG_ERROR   =-1,
+    H5E_MSG_MAJOR,
+    H5E_MSG_MINOR,
+    H5E_MSG_LIMIT
 } H5E_msg_t;
 
+/* When this header is included from H5Eprivate.h, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef _H5Eprivate_H
+#define H5OPEN          H5open(),
+#else   /* _H5Eprivate_H */
+#define H5OPEN
+#endif  /* _H5Eprivate_H */
+
 /* HDF5 error class */
-hid_t    HDF5_ERR_CLS;
+#define H5E_ERR_CLS		(H5OPEN H5E_ERR_CLS_g)
+H5_DLLVAR hid_t H5E_ERR_CLS_g;
 
 #ifdef TMP
 /* HDF5 error class: major errors. */
-hid_t    H5E_NONE_MAJOR;                 /*special zero, no error                     */
+hid_t    H5E_NONE_MAJOR;                /*special zero, no error                     */
 hid_t    H5E_ARGS;                      /*invalid arguments to routine               */
 hid_t    H5E_RESOURCE;                  /*resource unavailable                       */
-hid_t    H5E_INTERNAL;                  /* Internal error (too specific to document in detail) */
+hid_t    H5E_INTERNAL;                  /*Internal error (too specific to document in detail) */
 hid_t    H5E_FILE;                      /*file Accessability                         */
 hid_t    H5E_IO;                        /*Low-level I/O                              */
 hid_t    H5E_FUNC;                      /*function Entry/Exit                        */
@@ -81,6 +74,7 @@ hid_t    H5E_TBBT; 		        /*Threaded, Balanced, Binary Trees           */
 hid_t    H5E_FPHDF5;		        /*Flexible Parallel HDF5                     */
 hid_t    H5E_TST; 		        /*Ternary Search Trees                       */
 hid_t    H5E_RS;  		        /*Reference Counted Strings                  */
+hid_t    H5E_ERROR;  		        /*Error API				     */
 
 
 /* HDF5 error class: minor errors. */
@@ -193,7 +187,7 @@ hid_t    H5E_CANTALLOC;                 /*can't allocate from file              
 hid_t    H5E_NOFILTER;                  /*requested filter is not available          */
 hid_t    H5E_CALLBACK;                  /*callback failed                            */
 hid_t    H5E_CANAPPLY;                  /*error from filter "can apply" callback     */
-hid_t    H5E_SETLOCAL                   /*error from filter "set local" callback     */
+hid_t    H5E_SETLOCAL;                  /*error from filter "set local" callback     */
 
 #endif /* TMP */
 #endif /* NEW_ERR */
@@ -277,7 +271,8 @@ typedef enum H5E_major_t {
     H5E_TBBT, 		        /*Threaded, Balanced, Binary Trees           */
     H5E_FPHDF5,		        /*Flexible Parallel HDF5                     */
     H5E_TST, 		        /*Ternary Search Trees                       */
-    H5E_RS  		        /*Reference Counted Strings                  */
+    H5E_RS, 		        /*Reference Counted Strings                  */
+    H5E_ERROR 		        /*Error API				     */
 } H5E_major_t;
 
 /* Declare an enumerated type which holds all the valid minor HDF error codes */

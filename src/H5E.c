@@ -74,6 +74,7 @@ static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_FPHDF5,	"Flexible Parallel HDF5"},
     {H5E_TST,		"Ternary Search Trees"},
     {H5E_RS,		"Reference Counted Strings"},
+    {H5E_ERROR,		"Error API"},
 };
 
 static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
@@ -195,7 +196,17 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 /* Interface initialization? */
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5E_init_interface
-static herr_t H5E_init_interface (void);
+
+#ifndef NEW_ERR
+/*
+ * Predefined errors. These are initialized at runtime in H5E_init_interface()
+ * in this source file.
+ *
+ * If more of these are added, the new ones must be added to the list of
+ * types to reset in H5E_term_interface().
+ */
+hid_t H5E_ERR_CLS_g			= FAIL;
+#endif /* NEW_ERR */
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -236,6 +247,12 @@ void *H5E_auto_data_g = NULL;
 
 
 /* Static function declarations */
+static herr_t H5E_init_interface (void);
+#ifndef NEW_ERR
+static hid_t  H5E_register_class(const char *cls_name, const char *lib_name, 
+                                const char *version);
+static hid_t  H5E_unregister_class(H5E_cls_t *cls);
+#endif /* NEW_ERR */
 static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
 
 
@@ -302,8 +319,9 @@ H5E_init_interface(void)
     FUNC_ENTER_NOINIT(H5E_init_interface);
 
     /* Initialize the atom group for the dataset IDs */
-    H5I_init_group(H5I_ERROR_CLASS, H5I_ERRORCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_unregister_class);
+    if(H5I_init_group(H5I_ERROR_CLASS, H5I_ERRORCLS_HASHSIZE, H5E_ERRCLS_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_unregister_class)<0)
+	HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
     /* From the old function; take out later */
     H5E_auto_data_g = stderr;
@@ -344,7 +362,7 @@ H5E_init_interface (void)
 #endif /* NEW_ERR */
 
 #ifndef NEW_ERR
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eregister_class
  *
@@ -374,6 +392,7 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_register_class
  *
@@ -388,7 +407,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5E_register_class(const char *cls_name, const char *lib_name, const char *version)
 {
     hid_t       ret_value;   /* Return value */
@@ -396,24 +415,27 @@ H5E_register_class(const char *cls_name, const char *lib_name, const char *versi
     
     FUNC_ENTER_NOAPI(H5E_register_class, FAIL);
     
-    cls = HDmalloc(sizeof(H5E_cls_t));
+    /* Check arguments */
+    assert(cls_name);
+    assert(lib_name);
+    assert(version);
 
-    cls->cls_name = (char*)HDmalloc(sizeof(char)*(HDstrlen(cls_name)+1));
-    HDstrcpy(cls->cls_name, cls_name);
+    /* Need to check for failures from malloc & strdup */
+    cls = H5MM_malloc(sizeof(H5E_cls_t));
 
-    cls->lib_name = HDmalloc(sizeof(char)*(strlen(lib_name)+1));
-    HDstrcpy(cls->lib_name, lib_name);
-
-    cls->lib_vers = HDmalloc(sizeof(char)*(strlen(version)+1));
-    HDstrcpy(cls->lib_vers, version);
+    cls->cls_name = HDstrdup(cls_name);
+    cls->lib_name = HDstrdup(lib_name);
+    cls->lib_vers = HDstrdup(version);
 
     /* Register the new error class to get an ID for it */
+    /* Need to check for error */
     ret_value = H5I_register(H5I_ERROR_CLASS, cls);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Eunregister_class
  *
@@ -437,18 +459,21 @@ H5Eunregister_class(hid_t class_id)
     FUNC_ENTER_API(H5Eunregister_class, FAIL);
     H5TRACE1("e","i",class_id);
     
+    /* Need to check for errors */
     cls = H5I_object_verify(class_id, H5I_ERROR_CLASS);
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.
      */
+    /* Need to check for errors */
     H5I_dec_ref(class_id);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_unregister_class
  *
@@ -463,25 +488,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+static hid_t
 H5E_unregister_class(H5E_cls_t *cls)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5E_unregister_class, FAIL);
     
-    HDfree(cls->cls_name);
-    HDfree(cls->lib_name);
-    HDfree(cls->lib_vers);
-    HDfree(cls);
+    H5MM_xfree(cls->cls_name);
+    H5MM_xfree(cls->lib_name);
+    H5MM_xfree(cls->lib_vers);
+    H5MM_xfree(cls);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-
 #endif /* NEW_ERR */
-
-
 
 
 /*-------------------------------------------------------------------------
