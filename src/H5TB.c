@@ -12,6 +12,19 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* WARNING!!!
+ *
+ * The function H5TB_rem() may not delete the node specified in its parameter 
+ * list -- if the target node is internal, it may swap data with a leaf node 
+ * and delete the leaf instead.
+ *
+ * This implies that any pointer to a node in the supplied tree may be 
+ * invalid after this functions returns.  Thus any function retaining such 
+ * pointers over a call to H5TB_rem() should either discard, or refresh them.
+ *
+ *                                                  JRM - 4/9/04
+ */
+
 /*
  * Programmer: Quincey Koziol <koziol@ncsa.uiuc.edu>
  *	       Saturday, April 22, 2000
@@ -550,6 +563,9 @@ done:
  *              Thursday, May 5, 2000
  *
  * Modifications:
+ *		Fixed function so it seems to perform as advertized.  Two
+ *		tests were inverted in the backtrack case.
+ *							JRM - 4/13/04
  * 
  * Notes:
  * 	
@@ -582,10 +598,10 @@ H5TB_less(H5TB_NODE * root, void * key, H5TB_cmp_t compar, int arg, H5TB_NODE **
     if(cmp!=0) {
         /* If we haven't already found the least node, then backtrack to
          * find it */
-        if(cmp>0) {
+        if(cmp<0) {
             while((ptr=ptr->Parent)!=NULL) {
                   cmp = KEYcmp(key, ptr->key, arg);
-                  if(cmp<0) /* found a node which is less than the search for one */
+                  if(cmp>0) /* found a node which is less than the search for one */
                       break;
               } /* end while */
         } /* end if */
@@ -805,6 +821,19 @@ done:
  * Modifications:
  * 
  * Notes:
+ *
+ *	WARNING!!!
+ *
+ * 	H5TB_rem() may not delete the node specified in its parameter 
+ *	list -- if the target node is internal, it may swap data with a 
+ *	leaf node and delete the leaf instead.
+ *
+ *	This implies that any pointer to a node in the supplied tree may be 
+ *	invalid after this functions returns.  Thus any function retaining 
+ *	such pointers over a call to H5TB_rem() should either discard, or 
+ *	refresh them.
+ *
+ *                                                  JRM - 4/9/04
  * 	
  *-------------------------------------------------------------------------
  */
