@@ -7749,7 +7749,7 @@ if test "${enable_production+set}" = set; then
 fi;
 
 case "X-$enable_production" in
-  X-yes)
+  X-|X-yes)
     echo "$as_me:$LINENO: result: \"production\"" >&5
 echo "${ECHO_T}\"production\"" >&6
 
@@ -7777,7 +7777,7 @@ echo "${ECHO_T}\"production\"" >&6
     CXXFLAGS="$CXXFLAGS $PROD_CXXFLAGS"
     CPPFLAGS="$CPPFLAGS $PROD_CPPFLAGS"
     ;;
-  X-|X-no)
+  X-no)
     echo "$as_me:$LINENO: result: \"development\"" >&5
 echo "${ECHO_T}\"development\"" >&6
     CONFIG_MODE=development
