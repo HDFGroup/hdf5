@@ -1,0 +1,478 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - References to Objects 
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ] 
+<h1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd"> References to Objects</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI><A HREF="#def">References to Objects</A>
+    <LI> <A HREF="#def1">Creating and Storing References to Objects</A>
+    <LI> Programming Example 
+    <UL>
+      <LI> <A HREF="#desc1">Description</A> 
+      <LI> <A HREF="#rem1">Remarks</A> 
+      <LI> <A HREF="#fc1">File Contents</A>
+    </UL>
+    <LI> <A HREF="#def2">Reading References and Accessing Objects Using 
+                         References</A>
+    <LI> Programming Example 
+    <UL>
+      <LI> <A HREF="#desc2">Description</A> 
+      <LI> <A HREF="#rem2">Remarks</A> 
+    </UL>
+</UL>
+<HR>
+<A NAME="def">
+<H2>References to Objects</H2>
+In HDF5, objects (i.e. groups, datasets, and named data types) are usually 
+accessed by name. This access method was discussed in previous sections. 
+There is another way to access stored objects - by reference.
+<P>
+An object reference is based on the relative file address of the object header
+in the file and is constant for the life of the object. Once a reference to
+an object is created and stored in a dataset in the file, it can be used
+to dereference the object it points to. References are handy for creating
+a file index or for grouping related objects by storing references to them in
+one dataset.
+<P>
+<A NAME="def1">
+<H2>Creating and Storing References to Objects</H2>
+The following steps are involved in creating and storing file references
+to objects:
+<OL>
+<LI> Create the objects or open them if they already exist in the file.
+<P>
+<LI> Create a dataset to store the objects' references.
+<P>
+<LI> Create and store references to the objects in a buffer.
+<P>
+<LI> Write a buffer with the references to the dataset.
+</OL>
+
+
+<H2> Programming Example</H2>
+<A NAME="desc1">
+<H3><U>Description</U></H3>      
+The example below creates a group and two datasets and a named data type in the
+group. References to these four objects are stored in the dataset in the root
+group.  [<A HREF="examples/h5_ref2objw.c">Download h5_ref2objw.c</A>]
+<PRE>
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#include &lt;hdf5.h&gt;
+
+#define FILE1   "trefer1.h5"
+
+/* 1-D dataset with fixed dimensions */
+#define SPACE1_NAME  "Space1"
+#define SPACE1_RANK	1
+#define SPACE1_DIM1	4
+
+/* 2-D dataset with fixed dimensions */
+#define SPACE2_NAME  "Space2"
+#define SPACE2_RANK	2
+#define SPACE2_DIM1	10
+#define SPACE2_DIM2	10
+
+int 
+main(void) {
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		group;      /* Group ID             */
+    hid_t		sid1;       /* Dataspace ID			*/
+    hid_t		tid1;       /* Datatype ID			*/
+    hsize_t		dims1[] = {SPACE1_DIM1};
+    hobj_ref_t      *wbuf;      /* buffer to write to disk */
+    int       *tu32;      /* Temporary pointer to int data */
+    int        i;          /* counting variables */
+    const char *write_comment="Foo!"; /* Comments for group */
+    herr_t		ret;		/* Generic return value		*/
+
+/* Compound datatype */
+typedef struct s1_t {
+    unsigned int a;
+    unsigned int b;
+    float c;
+} s1_t;
+
+    /* Allocate write buffers */
+    wbuf=(hobj_ref_t *)malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    tu32=malloc(sizeof(int)*SPACE1_DIM1);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+
+    /* Create a group */
+    group=H5Gcreate(fid1,"Group1",-1);
+
+    /* Set group's comment */
+    ret=H5Gset_comment(group,".",write_comment);
+
+    /* Create a dataset (inside Group1) */
+    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
+
+    for(i=0; i &lt; SPACE1_DIM1; i++)
+        tu32[i] = i*3;
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tu32);
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+
+    /* Create another dataset (inside Group1) */
+    dataset=H5Dcreate(group,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+
+    /* Insert fields */
+    ret=H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+
+    ret=H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+
+    ret=H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
+
+    /* Save datatype for later */
+    ret=H5Tcommit (group, "Datatype1", tid1);
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+
+    /* Close group */
+    ret = H5Gclose(group);
+
+    /* Create a dataset to store references */
+    dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
+
+    /* Create reference to dataset */
+    ret = H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
+
+    /* Create reference to dataset */
+    ret = H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
+
+    /* Create reference to group */
+    ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
+
+    /* Create reference to named datatype */
+    ret = H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    free(wbuf);
+    free(tu32);
+    return 0;
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+<A NAME="rem1">
+<H3><U>Remarks</U></H3>
+
+<UL>
+<LI> The following code, 
+<PRE>
+    dataset = H5Dcreate ( fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT );
+</PRE>
+  creates a dataset to store references. Notice that the H5T_SDT_REF_OBJ 
+  data type is used to specify that references to objects will be 
+  stored. The data type H5T_STD_REF_DSETREG is used to store the dataset 
+  region references and will be discussed later in this tutorial.
+<P>
+<LI>The next few calls to the H5Rcreate function create references to the 
+objects and store them in the buffer <I>wbuf</I>. The signature of the 
+H5Rcreate function is:
+<PRE>
+   herr_t H5Rcreate ( void* buf, hid_t loc_id, const char *name, 
+                      H5R_type_t ref_type, hid_t space_id )    
+</PRE>
+<UL>
+    <LI> The first argument specifies the buffer to store the reference.
+    <LI> The second and third arguments specify the name of the referenced 
+         object.  In our example, the file identifier <I>fid1</I> and 
+         absolute name of the dataset "/Group1/Dataset1" were used to 
+         identify the dataset. One could also use the group identifier 
+         of group "Group1" and the relative name of the dataset "Dataset1" 
+         to create the same reference.
+    <LI> The fourth argument specifies the type of the reference. Our example
+         uses references to the objects (H5R_OBJECT). Another type of 
+         reference, reference to the dataset region ( H5R_DATASET_REGION), 
+         will be discussed later in this tutorial. 
+    <LI> The fifth argument specifies the space identifier. When references 
+         to the objects are created it should be set to -1. 
+</UL>
+<P>
+<LI>The H5Dwrite function writes a dataset with the references to the file. 
+    Notice that the H5T_SDT_REF_OBJ data type is used to describe the 
+    dataset's memory data type.
+<P>
+</UL>
+<A NAME="fc1">
+<H3><U>File Contents</U></H3>
+The contents of the "trefer1.h5" file created by this example are as follows:
+<PRE>
+                       Fig    "trefer1.h5"
+==============================================================================
+
+HDF5 "trefer1.h5" {
+GROUP "/" {
+   DATASET "Dataset3" {
+      DATATYPE { H5T_REFERENCE }
+      DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
+      DATA {
+         DATASET 0:1696, DATASET 0:2152, GROUP 0:1320, DATATYPE 0:2268
+      }
+   }
+   GROUP "Group1" {
+      DATASET "Dataset1" {
+         DATATYPE { H5T_STD_U32LE }
+         DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
+         DATA {
+            0, 3, 6, 9
+         }
+      }
+      DATASET "Dataset2" {
+         DATATYPE { H5T_STD_U8LE }
+         DATASPACE { SIMPLE ( 4 ) / ( 4 ) }
+         DATA {
+            0, 0, 0, 0
+         }
+      }
+      DATATYPE "Datatype1" {
+         H5T_STD_I32BE "a";
+         H5T_STD_I32BE "b";
+         H5T_IEEE_F32BE "c";
+      }
+   }
+}
+}
+===============================================================================
+</PRE>
+Notice how the data in  dataset "Dataset3" is described. The two numbers 
+with the colon in between represent a unique identifier of the object. These 
+numbers are constant for the life of the object.
+ 
+
+<A NAME="def2">
+<H2>Reading References and Accessing Objects Using References</H2>
+
+The following steps are involved:
+<OL>
+<LI> Open the dataset with the references and read them. The H5T_STD_REF_OBJ 
+   data type must be used to describe the memory data type.
+<P>
+<LI> Use the read reference to obtain the identifier of the object the 
+     reference points to.
+<P>
+<LI> Open the dereferenced object and perform the desired operations.
+<P>
+<LI> Close all objects when the task is complete. 
+</OL>
+
+<H2> Programming Example</H2>
+<A NAME="desc2">
+<H3><U>Description</U></H3>      
+The example below  opens and reads dataset "Dataset3" from the file created
+previously. Then the program dereferences the references to 
+dataset "Dataset1", the group and the named data type, and opens those objects. 
+The program reads and displays the dataset's data, the group's comment and 
+the number of members of the compound data type.
+[ <A HREF="examples/h5_ref2objr.c">Download h5_ref2objr.c</A> ]
+
+<PRE>
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#include &lt;stdlib.h&gt;
+#include &lt;hdf5.h&gt;
+
+#define FILE1   "trefer1.h5"
+
+/* dataset with fixed dimensions */
+#define SPACE1_NAME  "Space1"
+#define SPACE1_RANK	1
+#define SPACE1_DIM1	4
+
+int 
+main(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset,	/* Dataset ID			*/
+                dset2;      /* Dereferenced dataset ID */
+    hid_t		group;      /* Group ID             */
+    hid_t		sid1;       /* Dataspace ID			*/
+    hid_t		tid1;       /* Datatype ID			*/
+    hobj_ref_t      *rbuf;      /* buffer to read from disk */
+    int                *tu32;      /* temp. buffer read from disk */
+    int        i;          /* counting variables */
+    char read_comment[10];
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Allocate read buffers */
+    rbuf = malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    tu32 = malloc(sizeof(int)*SPACE1_DIM1);
+
+    /* Open the file */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+
+    /* Open the dataset */
+    dataset=H5Dopen(fid1,"/Dataset3");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
+
+    /* Open dataset object */
+    dset2 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[0]);
+
+    /* Check information in referenced dataset */
+    sid1 = H5Dget_space(dset2);
+
+    ret=H5Sget_simple_extent_npoints(sid1);
+
+    /* Read from disk */
+    ret=H5Dread(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tu32);
+    printf("Dataset data : \n");
+     for (i=0; i &lt; SPACE1_DIM1 ; i++) printf (" %d ", tu32[i]);
+    printf("\n");
+    printf("\n");
+
+    /* Close dereferenced Dataset */
+    ret = H5Dclose(dset2);
+
+    /* Open group object */
+    group = H5Rdereference(dataset,H5R_OBJECT,&rbuf[2]);
+
+    /* Get group's comment */
+    ret=H5Gget_comment(group,".",10,read_comment);
+    printf("Group comment is %s \n", read_comment);
+    printf(" \n");
+    /* Close group */
+    ret = H5Gclose(group);
+
+    /* Open datatype object */
+    tid1 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[3]);
+
+    /* Verify correct datatype */
+    {
+        H5T_class_t tclass;
+
+        tclass= H5Tget_class(tid1);
+        if ((tclass == H5T_COMPOUND))
+           printf ("Number of compound datatype members is %d \n", H5Tget_nmembers(tid1)); 
+    printf(" \n");
+    }
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+
+    /* Free memory buffers */
+    free(rbuf);
+    free(tu32);
+    return 0;
+}   
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+Following is the output of this program:
+<PRE>
+
+Dataset data : 
+ 0  3  6  9 
+
+Group comment is Foo! 
+ 
+Number of compound datatype members is 3 
+</PRE> 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+<A NAME="rem2">
+<H3><U>Remarks</U></H3>
+
+<UL>
+<LI> The H5Dread function was used to read dataset "Dataset3" containing the 
+     references to the objects. The H5T_STD_REF_OBJ memory data type was 
+     used to read references to memory.
+<P>
+<LI> H5Rdereference obtains the object's identifier. The signature of this
+   function is:
+<PRE>
+         hid_t H5Rdereference (hid_t datatset, H5R_type_t ref_type, void *ref)
+</PRE> 
+   <UL>
+    <LI> The first argument is an identifier of the dataset with the references.
+    <LI> The second argument specifies the reference type. We used 
+         H5R_OBJECT to 
+         specify a reference to an object. Another type is 
+         H5R_DATASET_REGION to specify a reference to a dataset region. 
+         This will be discussed later in this tutorial.
+    <LI> The third argument is a buffer to store the reference to be read.
+    <LI> The function returns an identifier of the object the reference 
+         points to.  In our simplified situation we know what type was
+         stored in the dataset. When the type of the object is unknown, then 
+         H5Rget_object_type should be used to identify the type of object 
+         the reference points to. 
+    </UL>
+</UL>
+
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

@@ -1,0 +1,191 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Creating Datasets in Groups
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating Datasets in Groups</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI> <A HREF="#ds"> Creating datasets in groups</A>
+    <LI> Programming Example 
+    <UL>
+      <LI> <A HREF="#desc">Description</A> 
+<!--      <LI> <A HREF="#rem">Remarks</A> -->
+      <LI> <A HREF="#fc">File Contents</A>
+    </UL>
+</UL>
+<HR>
+<A NAME="ds">
+<H2><U>Creating datasets in groups</U></H2>      
+We have shown how to create groups, datasets and attributes. In this section,
+we show how to create datasets in groups. Recall that H5Dcreate creates a
+dataset at the location specified by a location identifier and a name. Similar to
+H5Gcreate, the location identifier can be a file identifier or a group identifier and the name can be
+relative or absolute. The location identifier and the name together determine the
+location where the dataset is to be created. If the location identifier and name
+refers to a group, then the dataset is created in that group.
+
+
+<H2> Programming Example</H2>
+<A NAME="desc">
+<H3><U>Description</U></H3>      
+This example shows how to create a dataset in a particular group.
+It opens the file created in the previous example and creates two datasets.<BR>
+[ <A HREF="examples/h5_crtgrpd.c">Download h5_crtgrpd.c</A> ]
+<PRE>
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#include &lt;hdf5.h&gt;
+#define FILE "groups.h5"
+
+main() {
+
+   hid_t       file_id, group_id, dataset_id, dataspace_id;  /* identifiers */
+   hsize_t     dims[2];
+   herr_t      status;
+   int         i, j, dset1_data[3][3], dset2_data[2][10];
+
+   /* Initialize the first dataset. */
+   for (i = 0; i &lt; 3; i++)
+      for (j = 0; j &lt; 3; j++)
+         dset1_data[i][j] = j + 1;
+
+   /* Initialize the second dataset. */
+   for (i = 0; i &lt; 2; i++)
+      for (j = 0; j &lt; 10; j++)
+         dset2_data[i][j] = j + 1;
+
+   /* Open an existing file. */
+   file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+
+   /* Create the data space for the first dataset. */
+   dims[0] = 3;
+   dims[1] = 3;
+   dataspace_id = H5Screate_simple(2, dims, NULL);
+
+   /* Create a dataset in group "MyGroup". */
+   dataset_id = H5Dcreate(file_id, "/MyGroup/dset1", H5T_STD_I32BE, dataspace_id
+,
+                       H5P_DEFAULT);
+
+   /* Write the first dataset. */
+   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                     dset1_data);
+
+   /* Close the data space for the first dataset. */
+   status = H5Sclose(dataspace_id);
+
+   /* Close the first dataset. */
+   status = H5Dclose(dataset_id);
+
+   /* Open an existing group of the specified file. */
+   group_id = H5Gopen(file_id, "/MyGroup/Group_A");
+
+   /* Create the data space for the second dataset. */
+   dims[0] = 2;
+   dims[1] = 10;
+   dataspace_id = H5Screate_simple(2, dims, NULL);
+
+   /* Create the second dataset in group "Group_A". */
+   dataset_id = H5Dcreate(group_id, "dset2", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT);
+
+   /* Write the second dataset. */
+   status = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                     dset2_data);
+
+   /* Close the data space for the second dataset. */
+   status = H5Sclose(dataspace_id);
+
+   /* Close the second dataset */
+   status = H5Dclose(dataset_id);
+
+   /* Close the group. */
+   status = H5Gclose(group_id);
+
+   /* Close the file. */
+   status = H5Fclose(file_id);
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+
+
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+<P>
+<B>Fig. 10.1</B> &nbsp; <I>The Contents of 'groups.h5'</I>
+<PRE>
+<IMG src="img005.gif"></PRE>
+<!-- <IMG src="groups2.jpg" width="324" height="433"></PRE> -->
+
+</PRE>
+ <B>Fig. 10.2</B> &nbsp; <I>'groups.h5' in DDL</I>
+<PRE>
+
+   HDF5 "groups.h5" {
+      GROUP "/" {
+         GROUP "MyGroup" {
+            GROUP "Group_A" {
+               DATASET "dset2" {
+                  DATATYPE { H5T_STD_I32BE }
+                  DATASPACE { SIMPLE ( 2, 10 ) / ( 2, 10 ) }
+                  DATA {
+                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+                  }
+               }
+            }
+            GROUP "Group_B" {
+            }
+            DATASET "dset1" {
+               DATATYPE { H5T_STD_I32BE }
+               DATASPACE { SIMPLE ( 3, 3 ) / ( 3, 3 ) }
+               DATA {
+                  1, 2, 3,
+                  1, 2, 3,
+                  1, 2, 3
+               }
+            }
+         }
+      }
+      }
+</PRE>
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>The National Center for Supercomputing Applications</A><br>
+ <a href="http://www.uiuc.edu/">University of Illinois at Urbana-Champaign</a><br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<BR><A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

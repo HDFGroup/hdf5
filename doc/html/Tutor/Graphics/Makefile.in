@@ -1,0 +1,39 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/Tutor/Graphics
+
+TRACE=perl $(top_srcdir)/bin/trace
+
+# Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. -I@srcdir@ @CPPFLAGS@
+
+# Temporary files
+MOSTLYCLEAN=
+
+# Public doc files (to be installed)...
+PUB_DOCS= AddInfo.gif AdvTopics.gif BLANK.gif ChunkExt.gif \
+    CompDTypes.gif Copy.gif CreateAttr.gif CreateDset1.gif \
+    CreateDset2.gif CreateFile.gif CreateGrp1.gif CreateGrp2.gif \
+    Examples.gif FileOrg.gif FullTOC1.gif FullTOC2.gif \
+    Glossary.gif H5API.gif Intro.gif IntroTopics.gif Iterate.gif \
+    MountFile.gif Quiz.gif QuizAns.gif RdWrDataset.gif \
+    RefObject.gif RefRegion.gif References.gif SelectElemCp.gif \
+    SelectHyp.gif TOC.gif TOCFull.gif TOCShort.gif TitlePg.gif \
+    Utilities.gif
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
+
+@CONCLUDE@

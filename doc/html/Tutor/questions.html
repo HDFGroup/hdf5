@@ -1,0 +1,142 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Introductory Topics Questions
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Introductory Topics Questions</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+<PRE>
+
+
+Section 2: HDF File Organization
+================================
+
+1. Name and describe the two primary objects that can be stored in an HDF5
+   file:
+
+2. What is an attribute?
+
+3. Give the path name for an object called "harry" that is a member of a
+   group called "dick," which in turn is a member of the root group.
+
+
+Section 3: The HDF5 API
+=======================
+
+Describe the purpose of each of the following HDF5 APIs:
+
+H5A, H5D, H5E, F5F, H5G, H5T, H5Z
+
+
+
+Section 4: Creating an HDF File
+===============================
+
+1. What two HDF5 routines must be called in order to create an HDF5 file?
+
+2. What include file must be included in any file that uses the HDF5 library.
+
+3. An HDF5 file is never completely empty because as soon as an HDF5 file
+   is created, it automatically contains a certain primary object.  What is
+   that object?
+
+
+
+Section 5: Creating a Dataset
+=============================
+
+1. Name and describe two major datatype categories.
+
+2. List the HDF5 atomic datatypes. Give an example of a predefined datatype.
+
+3. What does the dataspace describe? What are the major characteristics of the
+   simple dataspace? 
+
+4. What information needs to be passed to the H5Dcreate function, i.e.
+   what information is needed to describe a dataset at creation time?
+
+
+Section 6: Reading from/Writing to a Dataset
+============================================
+
+1. What are six pieces of information which need to be specified for
+   reading and writing a dataset?
+
+2. Why are both the memory dataspace and file dataspace needed for 
+   read/write operations, but only the memory datatype is specified for the 
+   datatype?
+
+3. What does the line DATASPACE { SIMPLE (4 , 6 ) / ( 4 , 6 ) } in Fig 6.1 
+   means?
+
+
+Section 7: Creating an Attribute
+================================
+
+1. What is an attribute?
+
+2. Can partial I/O operations be performed on attributes?
+
+
+Section 8: Creating a Group
+===========================
+
+What are the two primary objects that can be included in
+a group?
+
+
+Section 9: Creating Groups using Absolute/Relative Names
+========================================================
+
+1. Group names can be specified in two "ways".  What are these
+   two types of group names that you can specify?
+
+2. You have a dataset named "moo" in the group "boo", which is 
+   in the group "foo", which in turn, is in the root group.  How would 
+   you specify an absolute name to access this dataset?
+
+
+Section 10: Creating Datasets in Groups
+=======================================
+
+Describe a way to access the dataset "moo" described in the previous section
+(Section 9, question 2), using a relative and absolute pathname.
+
+</PRE>
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 2, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

@@ -1,0 +1,167 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Creating a Group
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating a Group</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI> <A HREF="#def">What is a Group</A>?
+    <LI> Programming Example 
+    <UL>
+      <LI> <A HREF="#desc">Description</A> 
+      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#fc">File Contents</A>
+    </UL>
+</UL>
+<HR>
+<A NAME="def">
+<H2>What is a Group?</h2>
+<P>
+An HDF5 group is a structure containing zero or more HDF5 objects. The two
+primary HDF5 objects are groups and datasets. To create a group, the calling
+program must:
+<OL>
+  <LI> Obtain the location identifier where the group is to be created.
+  <LI> Create the group.
+  <LI> Close the group.
+</OL>
+To create a group, the calling program must contain the following calls:
+<PRE>
+  group_id = H5Gcreate (loc_id, name, size_hint);
+  H5Gclose (group_id);
+</PRE>
+
+
+
+
+<P>
+<H2> Programming Example</H2>
+<A NAME="desc">
+<H3><U>Description</U></H3>
+The following example shows how to create and close a group. It creates a file
+called 'group.h5', creates a group called <I>MyGroup</I> in the root group, 
+and then closes the group and file. <BR>
+[ <A HREF="examples/h5_crtgrp.c">Download h5_crtgrp.c</A> ]
+<PRE>
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#include &lt;hdf5.h&gt;
+#define FILE "group.h5"
+
+main() {
+
+   hid_t       file_id, group_id;  /* identifiers */
+   herr_t      status;
+
+   /* Create a new file using default properties. */
+   file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /* Create a group named "/MyGroup" in the file. */
+   group_id = H5Gcreate(file_id, "/MyGroup", 0);
+
+   /* Close the group. */
+   status = H5Gclose(group_id);
+
+   /* Terminate access to the file. */
+   status = H5Fclose(file_id);
+}
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+<A NAME="rem">
+<H3><U>Remarks</U></H3>
+<UL>
+<LI> H5Gcreate creates a new empty group and returns a group identifier.
+<PRE>
+  hid_t H5Gcreate (hid_t loc_id, const char *name, size_t size_hint) 
+</PRE>
+<UL>
+   <LI> The first parameter specifies the location to create the group.
+
+   <LI> The second parameter specifies the name of the group to be created.
+
+   <LI> The third parameter specifies how much file space to reserve to store the
+      names that will appear in the group. If a non-positive value is supplied,
+      then a default size is used. Passing a value of zero is usually adequate
+      since the library is able to dynamically resize the name heap.
+</UL>
+<P>
+<LI> H5Gcreate creates a group named <I>MyGroup</I> in the root group of the specified
+   file.
+<P>
+<LI> H5Gclose closes the group. This call is mandatory.
+<PRE>
+  herr_t H5Gclose (hid_t group_id) 
+</PRE>
+</UL>
+
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+The contents of 'group.h5' and the definition of the group are given in the
+following:
+<P>
+<table width="56%" border="1" bordercolor="#FFFFFF" cellpadding="6" cellspacing="6">
+  <tr>
+    <td width="47%"><b>Fig. 8.1</b> &nbsp; <i>The Contents of 'group.h5'.</i> 
+    </td>
+    <td width="53%"><b>Fig. 8.2</b> &nbsp; <i>'group.h5' in DDL</i> </td>
+  </tr>
+  <tr bordercolor="#000000"> 
+<!--    <td width="47%"><IMG src="grouph5.jpg" width="205" height="333"></td> -->
+    <td width="47%"><IMG src="img003.gif"></td>
+    <td width="53%" valign="top"> 
+      <pre>       
+HDF5 "group.h5" {
+GROUP "/" {
+   GROUP "MyGroup" {
+   }
+}
+}
+</pre>
+    </td>
+  </tr>
+</table>
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

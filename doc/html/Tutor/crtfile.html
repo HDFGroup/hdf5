@@ -1,0 +1,224 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Creating an HDF5 File
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Creating an HDF5 file</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI> <A HREF="#def">What is an HDF5 file</A>?
+    <LI>Programming Example 
+    <UL>
+      <LI> <A HREF="#desc">Description</A> 
+      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#fc">File Contents</A>
+      <LI> <A HREF="#ddl">File Definition in DDL</A>
+    </UL>
+</UL>
+<HR>
+<A NAME="def">
+<H2>What is an HDF5 file?</h2>
+<P>
+An HDF5 file is a binary file which contains scientific data and supporting
+metadata. The two primary objects stored in an HDF5 file are groups and 
+datasets. Groups and datasets will be discussed in the other sessions.
+<P>
+To create a file, the program application must specify a file name, file
+access mode, file creation property list, and file access property list.
+<P>
+<UL>
+  <LI><B> File Creation Property List:</B><BR>
+    The file creation property list is used to control the file metadata.
+    File metadata contains information about the size of the user-block, the
+    size of various file data structures used by the HDF5 library, etc.
+<P>
+    The user-block is a fixed length block of data located at the beginning
+    of the file which is ignored by the HDF5 library and may be used to store
+    any data information found to be useful to applications.
+<P>
+    For more details, see the HDF5 documentation. In this tutorial,
+    the default file metadata is used.
+<P>
+  <LI><B> File Access Property List:</B><BR>
+    The file access property list is used to control different methods of
+    performing I/O on files. See the HDF5 User's Guide for details. The default
+    file access property is used in this tutorial.
+</UL>
+<P>
+The steps to create and close an HDF5 file are as follows:
+<OL>
+  <LI> Specify the file creation and access property lists if necessary.
+  <LI> Create a file.
+  <LI> Close the file and close the property lists if necessary.
+</OL>
+To create an HDF5 file, the calling program must contain the following calls:
+
+<PRE>
+   file_id = H5Fcreate(filename, access_mode, create_id, access_id);
+
+   H5Fclose(file_id); 
+</PRE>
+<P>
+<H2>Programming Example</H2>
+<A NAME="desc">
+<H3><U>Description</U></H3>      
+The following example demonstrates how to create and close an HDF5 file. 
+It creates a file called 'file.h5', and then closes the file.<BR>
+[ <A HREF="examples/h5_crtfile.c">Download h5_crtfile.c</A> ]
+<PRE>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+#include &lt;hdf5.h&gt;
+#define FILE "file.h5"
+
+main() {
+
+   hid_t       file_id;   /* file identifier */
+   herr_t      status;
+
+   /* Create a new file using default properties. */
+   file_id = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+   /* Terminate access to the file. */
+   status = H5Fclose(file_id); 
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+</PRE>
+<A NAME="rem">
+<H3><U>Remarks</U></H3>
+<UL>
+<LI>The include file 'hdf5.h' contains definitions and declarations, and it must
+   be included in any file that uses the HDF5 library.
+<P>
+<LI>H5Fcreate creates an HDF5 file and returns the file identifier.
+<PRE>
+ hid_t H5Fcreate (const char *name, unsigned flags, hid_t create_id, 
+                  hid_t access_id) 
+</PRE>
+<UL>
+   <LI> The first parameter specifies the name of the file to be created.
+<P>
+   <LI> The second parameter specifies the file access mode. H5F_ACC_TRUNC will 
+      truncate a file if it already exists.
+<P>
+   <LI> The third parameter specifies the file creation property list.
+      H5P_DEFAULT indicates that the default file creation property list is
+      used.
+
+<P>
+   <LI> The last parameter of H5Fcreate specifies the file access property list.
+    H5P_DEFAULT indicates that the default file access property list is used.
+
+</UL>
+<P>
+<LI> When a file is no longer accessed by a program, H5Fclose must be called to 
+   release the resource used by the file. This call is mandatory.
+<PRE>
+    herr_t H5Fclose (hid_t file_id) 
+</PRE>
+<P>
+<LI>The root group is automatically created when a file is created.
+   Every file has a root group and the path name of the root group is '/'.
+</UL>
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+HDF has developed tools to examine the contents of HDF5 files. The tool used
+in this tutorial is the HDF5 dumper, h5dump. h5dump is a tool that displays 
+the file contents in human readable form to an ASCII file in DDL.  DDL (Data 
+Description Language) is a language that describes HDF5 objects in Backus-Naur 
+Form. To view the file contents, type: 
+<PRE>
+   <B>h5dump &lt;filename&gt</B> 
+</PRE>
+Figure 4.1 describes the file contents of 'file.h5' using a directed graph.
+Each HDF5 object is represented by a rectangle and the arrows indicate 
+the structure of the contents. In Fig. 4.2, 'file.h5' contains
+a group object named '/' (the root group).
+
+<P>
+<B>Fig. 4.1</B> &nbsp;  <I>Contents of 'file.h5'</I>
+<PRE>
+<!--
+<IMG src="fileh5.jpg" width="205" height="208"></PRE> -->
+<IMG src="img001.gif"></PRE>
+Figure 4.2 is the text-description of 'file.h5' generated by h5dump. The HDF5
+file called 'file.h5' contains a group called '/'.
+<P>
+<B> Fig. 4.2</B> &nbsp; <I>'file.h5' in DDL</I>
+<PRE>
+
+         HDF5 "file.h5" {
+         GROUP "/" {
+         }
+         }
+
+</PRE>
+<A NAME="ddl">
+<h3><U>File Definition in DDL</U></H3>
+Figure 4.3 is the simplified DDL file definition for creating an HDF5 file. 
+For simplicity, a simplified DDL is used in this tutorial. A complete and 
+more rigorous DDL can be found in the HDF5 User's Guide.  See the
+<A HREF="references.html">References</A> section of this tutorial. 
+<P>
+<B> Fig. 4.3</B> &nbsp; <I>HDF5 File Definition</I>
+<P>
+     The explanation of the symbols used in the DDL:
+<PRE>
+
+        ::=               defined as
+        &lt;tname&gt           a token with the name <I>tname</I>
+        &lt;a&gt | &lt;b&gt         one of &lt;a&gt or &lt;b&gt
+        &lt;a&gt;*              zero or more occurrences of &lt;a&gt
+</PRE>
+     The simplified DDL file definition:
+<PRE>
+        &lt;file&gt ::= HDF5 "&lt;file_name&gt;" { &lt;root_group&gt }
+
+        &lt;root_group&gt ::= GROUP "/" { &lt;group_attribute&gt* &lt;group_member&gt;* }
+
+        &lt;group_attribute&gt ::= &lt;attribute&gt
+
+        &lt;group_member&gt ::= &lt;group&gt | &lt;dataset&gt
+</PRE>
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

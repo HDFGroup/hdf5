@@ -1,0 +1,378 @@
+<HTML><HEAD>
+<TITLE>HDF5 Tutorial - Compound Data Types 
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">Compound Data Types</FONT>
+</BIG></BIG></BIG></H1>
+
+<hr noshade size=1>
+
+<BODY>
+<H2>Contents:</H2>
+<UL>
+    <LI><A HREF="#def">Creating Compound Data Types</A>
+    <LI>Programming Example 
+<UL>
+      <LI> <A HREF="#desc">Description</A> 
+      <LI> <A HREF="#rem">Remarks</A> 
+      <LI> <A HREF="#fc">File Contents</A>
+</UL>
+</UL>
+<HR>
+<A NAME="def">
+<H2>Creating Compound Data Types</H2>
+A compound data type is similar to a struct in C or a common block in 
+Fortran. It is a collection of one or more atomic types or small arrays of 
+such types. To create and use a compound data type you need to refer to 
+various properties of the data compound data type: 
+<UL>
+  <LI>It is of class compound. 
+  <LI>It has a fixed total size, in bytes. 
+  <LI>It consists of zero or more members (defined in any order) with 
+      unique names and which occupy non-overlapping regions within the datum. 
+  <LI>Each member has its own data type. 
+  <LI>Each member is referenced by an index number between zero and N-1, 
+      where N is the number of members in the compound data type. 
+  <LI>Each member has a name which is unique among its siblings in a 
+      compound data type. 
+  <LI>Each member has a fixed byte offset, which is the first byte 
+      (smallest byte address) of that member in a compound data type. 
+  <LI>Each member can be a small array of up to four dimensions.
+</UL>
+Properties of members of a compound data type are defined when the 
+member is added to the compound type and cannot be subsequently modified. 
+<P>
+Compound data types must be built out of other data types. First, one 
+creates an empty compound data type and specifies its total size. Then 
+members are added to the compound data type in any order. 
+
+<H2> Programming Example</H2>
+<A NAME="desc">
+<H3><U>Description</U></H3>      
+
+This example shows how to create a compound data type, write an array 
+to the file which uses the compound data type, and read back subsets of 
+the members.<BR> 
+
+[<A HREF="examples/h5_compound.c">Download h5_compound.c</A>]
+<PRE>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#include "hdf5.h"
+
+#define FILE          "SDScompound.h5"
+#define DATASETNAME   "ArrayOfStructures"
+#define LENGTH        10
+#define RANK          1
+
+int
+main(void)
+{
+
+    /* First structure  and dataset*/
+    typedef struct s1_t {
+	int    a;
+	float  b;
+	double c; 
+    } s1_t;
+    s1_t       s1[LENGTH];
+    hid_t      s1_tid;     /* File datatype identifier */
+
+    /* Second structure (subset of s1_t)  and dataset*/
+    typedef struct s2_t {
+	double c;
+	int    a;
+    } s2_t;
+    s2_t       s2[LENGTH];
+    hid_t      s2_tid;    /* Memory datatype handle */
+
+    /* Third "structure" ( will be used to read float field of s1) */
+    hid_t      s3_tid;   /* Memory datatype handle */
+    float      s3[LENGTH];
+
+    int        i;
+    hid_t      file, dataset, space; /* Handles */
+    herr_t     status;
+    hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
+
+
+    /*
+     * Initialize the data
+     */
+    for (i = 0; i &lt; LENGTH; i++) {
+        s1[i].a = i;
+        s1[i].b = i*i;
+        s1[i].c = 1./(i+1);
+    }
+
+    /*
+     * Create the data space.
+     */
+    space = H5Screate_simple(RANK, dim, NULL);
+
+    /*
+     * Create the file.
+     */
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /*
+     * Create the memory data type. 
+     */
+    s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+    H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
+    H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+
+    /* 
+     * Create the dataset.
+     */
+    dataset = H5Dcreate(file, DATASETNAME, s1_tid, space, H5P_DEFAULT);
+
+    /*
+     * Wtite data to the dataset; 
+     */
+    status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
+
+    /*
+     * Release resources
+     */
+    H5Tclose(s1_tid);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(file);
+ 
+    /*
+     * Open the file and the dataset.
+     */
+    file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+ 
+    dataset = H5Dopen(file, DATASETNAME);
+
+    /* 
+     * Create a data type for s2
+     */
+    s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
+
+    H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
+    H5Tinsert(s2_tid, "a_name", HOFFSET(s2_t, a), H5T_NATIVE_INT);
+
+    /*
+     * Read two fields c and a from s1 dataset. Fields in the file
+     * are found by their names "c_name" and "a_name".
+     */
+    status = H5Dread(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2);
+
+    /*
+     * Display the fields
+     */
+    printf("\n");
+    printf("Field c : \n");
+    for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s2[i].c);
+    printf("\n");
+
+    printf("\n");
+    printf("Field a : \n");
+    for( i = 0; i &lt; LENGTH; i++) printf("%d ", s2[i].a);
+    printf("\n");
+
+    /* 
+     * Create a data type for s3.
+     */
+    s3_tid = H5Tcreate(H5T_COMPOUND, sizeof(float));
+
+    status = H5Tinsert(s3_tid, "b_name", 0, H5T_NATIVE_FLOAT);
+
+    /*
+     * Read field b from s1 dataset. Field in the file is found by its name.
+     */
+    status = H5Dread(dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3);
+
+    /*
+     * Display the field
+     */
+    printf("\n");
+    printf("Field b : \n");
+    for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s3[i]);
+    printf("\n");
+
+    /*
+     * Release resources
+     */
+    H5Tclose(s2_tid);
+    H5Tclose(s3_tid);
+    H5Dclose(dataset);
+    H5Fclose(file);
+
+    return 0;
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+The program outputs the following:
+<PRE>
+
+Field c : 
+1.0000 0.5000 0.3333 0.2500 0.2000 0.1667 0.1429 0.1250 0.1111 0.1000 
+
+Field a : 
+0 1 2 3 4 5 6 7 8 9 
+
+Field b : 
+0.0000 1.0000 4.0000 9.0000 16.0000 25.0000 36.0000 49.0000 64.0000 81.0000 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</PRE>
+
+<A NAME="rem">
+<H3><U>Remarks</U></H3>
+<UL>
+<LI>H5Tcreate creates a new data type of the specified class with
+the specified number of bytes.
+<PRE>
+    hid_t H5Tcreate ( H5T_class_t class, size_t size ) 
+</PRE>
+<UL>
+<LI>The <I>class</I> parameter specifies the data type to create.
+Currently only the H5T_COMPOUND data type class is supported with this
+function.
+<LI>The <I>size</I> parameter specifies the number of bytes in the
+data type to create.
+</UL>
+<P>
+<LI>H5Tinsert adds a member to the compound data type specified by
+<I>type_id</I>. 
+<PRE>
+   herr_t H5Tinsert ( hid_t type_id, const char * name, off_t offset, hid_t field_id ) 
+</PRE>
+<UL>
+<LI>The <I>type_id</I> parameter is the identifier of the compound data type
+to modify.
+<LI>The <I>name</I> parameter is the name of the field to insert.  The new
+member name must be unique within a compound data type.
+<LI>The <I>offset</I> parameter is the offset in the memory structure of
+the field to insert.
+
+The library defines the HOFFSET macro to compute the offset of a member within 
+a struct: 
+<PRE>
+  HOFFSET ( s, m ) 
+</PRE>
+This macro computes the offset of member <I>m</I> within a struct 
+variable <I>s</I>. 
+
+<LI>The <I>field_id</I> parameter is the data type identifier of the
+field to insert.
+</UL>
+<P>
+<LI>H5Tclose releases a data type.
+<PRE>
+   herr_t H5Tclose ( hid_t type_id ) 
+</PRE>
+The <I>type_id</I> parameter is the identifier of the data type to release.
+</UL>
+<A NAME="fc">
+<H3><U>File Contents</U></H3>
+
+<PRE>
+HDF5 "SDScompound.h5" {
+GROUP "/" {
+   DATASET "ArrayOfStructures" {
+      DATATYPE {
+         H5T_STD_I32BE "a_name";
+         H5T_IEEE_F32BE "b_name";
+         H5T_IEEE_F64BE "c_name";
+      }
+      DATASPACE { SIMPLE ( 10 ) / ( 10 ) }
+      DATA {
+         {
+            [ 0 ],
+            [ 0 ],
+            [ 1 ]
+         },
+         {
+            [ 1 ],
+            [ 1 ],
+            [ 0.5 ]
+         },
+         {
+            [ 2 ],
+            [ 4 ],
+            [ 0.333333 ]
+         },
+         {
+            [ 3 ],
+            [ 9 ],
+            [ 0.25 ]
+         },
+         {
+            [ 4 ],
+            [ 16 ],
+            [ 0.2 ]
+         },
+         {
+            [ 5 ],
+            [ 25 ],
+            [ 0.166667 ]
+         },
+         {
+            [ 6 ],
+            [ 36 ],
+            [ 0.142857 ]
+         },
+         {
+            [ 7 ],
+            [ 49 ],
+            [ 0.125 ]
+         },
+         {
+            [ 8 ],
+            [ 64 ],
+            [ 0.111111 ]
+         },
+         {
+            [ 9 ],
+            [ 81 ],
+            [ 0.1 ]
+         }
+      }
+   }
+}
+}
+</PRE>
+
+
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: August 27, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+

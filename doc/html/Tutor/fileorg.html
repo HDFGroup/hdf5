@@ -1,0 +1,103 @@
+<HTML><HEAD>
+<TITLE>HDF5 File Organization
+</TITLE> 
+</HEAD>
+
+<body bgcolor="#ffffff">
+
+<!-- BEGIN MAIN BODY -->
+
+<A HREF="http://www.ncsa.uiuc.edu/"><img border=0 
+src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+width=78 height=27 alt="NCSA"><P></A>
+
+ [ <A HREF="title.html"><I>HDF5 Tutorial Top</I></A> ]
+<H1>
+<BIG><BIG><BIG><FONT COLOR="#c101cd">HDF5 File Organization</FONT>
+</BIG></BIG></BIG></H1>
+
+
+<hr noshade size=1>
+
+<BODY>
+<P>
+An HDF5 file is a container for storing a variety of scientific data, and the 
+two primary HDF5 objects are groups and datasets.
+<UL>
+  <LI><B>HDF5 group:</B> a grouping structure containing zero or more HDF5 
+      objects, together with supporting metadata.
+
+  <LI><B>HDF5 dataset:</B> a multidimensional array of data elements, together 
+      with supporting metadata. 
+</UL>
+Any HDF5 group or dataset may have an associated attribute list. An HDF5
+attribute is a user-defined HDF5 structure that provides extra information
+about an HDF5 object.
+<P>
+Working with groups and group members (datasets for example) is similar in many
+ways to working with directories and files in UNIX. As with UNIX directories
+and files, objects in an HDF5 file are often described by giving their full (or
+absolute) path names.
+<UL>
+    <CODE>/</CODE> signifies the root group.<BR> 
+    <CODE>/foo</CODE> signifies a member of the root group called <I>foo</I>.
+<BR>
+    <CODE>/foo/zoo</CODE> signifies a member of the group <I>foo</I>, which in 
+    turn is a member of the root group. 
+</UL>
+<P>
+<!--
+In this tutorial, we consider:
+<UL>
+<LI>how to create a file 
+<LI>how to create a group
+<LI>how to create/read/write datasets
+<LI>how to create an attribute 
+<LI>how to create a grouping structure
+<LI>how to create datasets in groups 
+</UL>
+The rest of the tutorial is organized as follows:
+<UL>
+ <LI> Section 3 describes the HDF5 APIs.
+ <LI> Section 4 shows how to create an HDF5 file.
+ <LI> Section 5 shows how to create a dataset.
+ <LI> Section 6 shows how to read from and write to a dataset.
+ <LI> Section 7 shows how to create an attribute.
+ <LI> Section 8 shows how to create a group.
+ <LI> Section 9 discusses HDF5 names and shows how to create groups using absolute and relative names.
+ <LI> Section 10 shows how to create datasets in groups.
+</UL>
+
+Each section contains step by step instructions and an example. After the
+example, an HDF5 tool is used to examine the file contents. A formal definition
+of HDF5 objects in Backus-Naur Form is given last.
+
+The tutorial ends with a glossary and references.
+-->
+<P>
+
+<!-- BEGIN FOOTER INFO -->
+
+<P><hr noshade size=1>
+<font face="arial,helvetica" size="-1">
+  <a href="http://www.ncsa.uiuc.edu/"><img border=0
+     src="http://www.ncsa.uiuc.edu/Images/NCSAhome/footerlogo.gif"
+     width=78 height=27 alt="NCSA"><br>
+  The National Center for Supercomputing Applications</A><br>
+  <a href="http://www.uiuc.edu/">University of Illinois
+    at Urbana-Champaign</a><br>
+  <br>
+<!-- <A HREF="helpdesk.mail.html"> -->
+<A HREF="mailto:hdfhelp@ncsa.uiuc.edu">
+hdfhelp@ncsa.uiuc.edu</A>
+<BR> <H6>Last Modified: July 30, 1999</H6><BR>
+<!-- modified by Barbara Jones - bljones@ncsa.uiuc.edu -->
+</FONT>
+<BR>
+<!-- <A HREF="mailto:hdfhelp@ncsa.uiuc.edu"> -->
+
+</BODY>
+</HTML>
+
+
+
