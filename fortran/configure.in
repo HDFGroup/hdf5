@@ -20,6 +20,8 @@ dnl release!!!
 dnl
 AC_INIT([HDF5 Fortran], [1.4.4], [hdfhelp@ncsa.uiuc.edu])
 AC_CONFIG_SRCDIR([src/HDF5.f90])
+AC_CONFIG_HEADER([src/H5config_fortran.h])
+
 AC_CONFIG_AUX_DIR([../bin])
 
 AC_CANONICAL_HOST
@@ -181,39 +183,39 @@ foo: H5_f.o
 	/bin/rm -f H5_f.o
 	@echo works
 EOF
-   
+
     if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
       SEARCH_RULE='VPATH='
       SEARCH_SEP=' '
       AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
       break
     fi
-   
+
     dnl The second most common method is like above except with the
     dnl directories separated by colons.
     cat >maketest <<EOF
 VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
 .c.o:
 	cp $< H5_f.o
-   
+
 foo: H5_f.o
 	/bin/rm -f H5_f.o
 	@echo works
 EOF
-   
+
     if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
       SEARCH_RULE='VPATH='
       SEARCH_SEP=':'
       AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
       break
     fi
-   
+
     dnl pmake uses the construct `.PATH: DIR1 DIR2
     cat >maketest <<EOF
 .PATH: $srcdir/config $srcdir/src $srcdir/bin
 .c.o:
 	cp $< H5_f.o
-   
+
 foo: H5_f.o
 	/bin/rm -f H5_f.o
 	@echo works
@@ -225,7 +227,7 @@ EOF
       AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
       break
     fi
-   
+
     dnl No way for make to search directories
     SEARCH_RULE='## SEARCH DISABLED: '
     SEARCH_SEP=' '
@@ -297,7 +299,7 @@ dnl Some systems where you need to specify exactly where the zlib is need
 dnl this.
 ac_cv_lib_z_compress=""
 AC_ARG_WITH(zlib,
-  [  --with-zlib[=DIR]         Use the GNU zlib compression],,
+  [  --with-zlib[=DIR]           Use the GNU zlib compression],,
   withval=yes)
 
 case "$withval" in
@@ -558,6 +560,35 @@ if test -n "$PARALLEL"; then
   fi
 
   ADD_PARALLEL_FILES="yes"
+
+  AC_MSG_CHECKING([for MPI_Comm_c2f and MPI_Comm_f2c functions])
+
+  dnl Change to the C language
+  AC_LANG_C
+
+  AC_TRY_LINK([
+#include <mpi.h>
+  ],
+    [MPI_Comm c_comm; MPI_Comm_c2f(c_comm)],
+    AC_DEFINE(HAVE_MPI_MULTI_LANG_Comm, 1,
+              [Define if \`MPI_Comm_c2f' and \`MPI_Comm_f2c' exists])
+    AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no)
+  )
+
+  AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
+  AC_TRY_LINK([
+#include <mpi.h>
+  ],
+    [MPI_Info c_info; MPI_Info_c2f(c_info)],
+    AC_DEFINE(HAVE_MPI_MULTI_LANG_Info, 1,
+              [Define if \`MPI_Info_c2f' and \`MPI_Info_f2c' exists])
+    AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no)
+  )
+
+  dnl Change to the Fortran 90 language
+  AC_LANG_FORTRAN9X
 fi
 AC_SUBST(ADD_PARALLEL_FILES)
 
@@ -670,7 +701,7 @@ dnl The order is such that the first `make' does not need to update any
 dnl configuration information. See config/commence.in for the order in which
 dnl things need to be done.
 
-dnl First the stamp1 file for H5config.h.in
+dnl First the stamp1 file for H5config_fortran.h.in
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
@@ -699,7 +730,7 @@ AC_CONFIG_FILES([config/depend1
 AC_OUTPUT
 no_create=$saved_no_create
 
-dnl Then the stamp2 file for H5config.h
+dnl Then the stamp2 file for H5config_fortran.h
 touch ./config/stamp2
 
 dnl Finally the makefiles

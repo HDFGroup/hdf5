@@ -1011,7 +1011,7 @@ Optional Packages:
     --with-xxx=DIR     - Specify only the directory which contains the
                          include/ and lib/ subdirectories
 
-  --with-zlib=DIR         Use the GNU zlib compression
+  --with-zlib=DIR           Use the GNU zlib compression
 
 Some influential environment variables:
   CC          C compiler command
@@ -1380,6 +1380,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
+
+ac_config_headers="$ac_config_headers src/H5config_fortran.h"
 
 
 ac_aux_dir=
@@ -3876,7 +3879,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3879 "configure"' > conftest.$ac_ext
+  echo '#line 3882 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4417,7 +4420,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4420: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4423: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6228,7 +6231,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6231 "configure"
+#line 6234 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6326,7 +6329,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6329 "configure"
+#line 6332 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8334,6 +8337,120 @@ echo "$as_me: error: no way to run a parallel program" >&2;}
   fi
 
   ADD_PARALLEL_FILES="yes"
+
+  echo "$as_me:$LINENO: checking for MPI_Comm_c2f and MPI_Comm_f2c functions" >&5
+echo $ECHO_N "checking for MPI_Comm_c2f and MPI_Comm_f2c functions... $ECHO_C" >&6
+
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <mpi.h>
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+MPI_Comm c_comm; MPI_Comm_c2f(c_comm)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MPI_MULTI_LANG_Comm 1
+_ACEOF
+
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+
+  echo "$as_me:$LINENO: checking for MPI_Info_c2f and MPI_Info_f2c functions" >&5
+echo $ECHO_N "checking for MPI_Info_c2f and MPI_Info_f2c functions... $ECHO_C" >&6
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <mpi.h>
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+MPI_Info c_info; MPI_Info_c2f(c_info)
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MPI_MULTI_LANG_Info 1
+_ACEOF
+
+    echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+
+    ac_ext=f90
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+cross_compiling=$ac_cv_prog_f9x_cross
+
 fi
 
 
@@ -8512,38 +8629,7 @@ s/^[^=]*=[ 	]*$//;
 }'
 fi
 
-# Transform confdefs.h into DEFS.
-# Protect against shell expansion while executing Makefile rules.
-# Protect against Makefile macro expansion.
-#
-# If the first sed substitution is executed (which looks for macros that
-# take arguments), then we branch to the quote section.  Otherwise,
-# look for a macro that doesn't take arguments.
-cat >confdef2opt.sed <<\_ACEOF
-t clear
-: clear
-s,^[ 	]*#[ 	]*define[ 	][ 	]*\([^ 	(][^ 	(]*([^)]*)\)[ 	]*\(.*\),-D\1=\2,g
-t quote
-s,^[ 	]*#[ 	]*define[ 	][ 	]*\([^ 	][^ 	]*\)[ 	]*\(.*\),-D\1=\2,g
-t quote
-d
-: quote
-s,[ 	`~#$^&*(){}\\|;'"<>?],\\&,g
-s,\[,\\&,g
-s,\],\\&,g
-s,\$,$$,g
-p
-_ACEOF
-# We use echo to avoid assuming a particular line-breaking character.
-# The extra dot is to prevent the shell from consuming trailing
-# line-breaks from the sub-command output.  A line-break within
-# single-quotes doesn't work because, if this script is created in a
-# platform that uses two characters for line-breaks (e.g., DOS), tr
-# would break.
-ac_LF_and_DOT=`echo; echo .`
-DEFS=`sed -n -f confdef2opt.sed confdefs.h | tr "$ac_LF_and_DOT" ' .'`
-rm -f confdef2opt.sed
-
+DEFS=-DHAVE_CONFIG_H
 
 
 : ${CONFIG_STATUS=./config.status}
@@ -8839,9 +8925,14 @@ Usage: $0 [OPTIONS] [FILE]...
       --recheck    update $as_me by reconfiguring in the same conditions
   --file=FILE[:TEMPLATE]
                    instantiate the configuration file FILE
+  --header=FILE[:TEMPLATE]
+                   instantiate the configuration header FILE
 
 Configuration files:
 $config_files
+
+Configuration headers:
+$config_headers
 
 Report bugs to <bug-autoconf@gnu.org>."
 _ACEOF
@@ -8948,6 +9039,7 @@ do
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "$PARALLEL_MAKE" ) CONFIG_FILES="$CONFIG_FILES $PARALLEL_MAKE" ;;
   "examples/Makefile" ) CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
+  "src/H5config_fortran.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/H5config_fortran.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
@@ -8960,6 +9052,7 @@ done
 # bizarre bug on SunOS 4.1.3.
 if $ac_need_defaults; then
   test "${CONFIG_FILES+set}" = set || CONFIG_FILES=$config_files
+  test "${CONFIG_HEADERS+set}" = set || CONFIG_HEADERS=$config_headers
 fi
 
 # Create a temporary directory, and hook for its removal unless debugging.
@@ -9282,6 +9375,223 @@ s,@INSTALL@,$ac_INSTALL,;t t
     rm -f $tmp/out
   fi
 
+done
+_ACEOF
+cat >>$CONFIG_STATUS <<\_ACEOF
+
+#
+# CONFIG_HEADER section.
+#
+
+# These sed commands are passed to sed as "A NAME B NAME C VALUE D", where
+# NAME is the cpp macro being defined and VALUE is the value it is being given.
+#
+# ac_d sets the value in "#define NAME VALUE" lines.
+ac_dA='s,^\([ 	]*\)#\([ 	]*define[ 	][ 	]*\)'
+ac_dB='[ 	].*$,\1#\2'
+ac_dC=' '
+ac_dD=',;t'
+# ac_u turns "#undef NAME" without trailing blanks into "#define NAME VALUE".
+ac_uA='s,^\([ 	]*\)#\([ 	]*\)undef\([ 	][ 	]*\)'
+ac_uB='$,\1#\2define\3'
+ac_uC=' '
+ac_uD=',;t'
+
+for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
+  # Support "outfile[:infile[:infile...]]", defaulting infile="outfile.in".
+  case $ac_file in
+  - | *:- | *:-:* ) # input from stdin
+        cat >$tmp/stdin
+        ac_file_in=`echo "$ac_file" | sed 's,[^:]*:,,'`
+        ac_file=`echo "$ac_file" | sed 's,:.*,,'` ;;
+  *:* ) ac_file_in=`echo "$ac_file" | sed 's,[^:]*:,,'`
+        ac_file=`echo "$ac_file" | sed 's,:.*,,'` ;;
+  * )   ac_file_in=$ac_file.in ;;
+  esac
+
+  test x"$ac_file" != x- && { echo "$as_me:$LINENO: creating $ac_file" >&5
+echo "$as_me: creating $ac_file" >&6;}
+
+  # First look for the input files in the build tree, otherwise in the
+  # src tree.
+  ac_file_inputs=`IFS=:
+    for f in $ac_file_in; do
+      case $f in
+      -) echo $tmp/stdin ;;
+      [\\/$]*)
+         # Absolute (can't be DOS-style, as IFS=:)
+         test -f "$f" || { { echo "$as_me:$LINENO: error: cannot find input file: $f" >&5
+echo "$as_me: error: cannot find input file: $f" >&2;}
+   { (exit 1); exit 1; }; }
+         echo $f;;
+      *) # Relative
+         if test -f "$f"; then
+           # Build tree
+           echo $f
+         elif test -f "$srcdir/$f"; then
+           # Source tree
+           echo $srcdir/$f
+         else
+           # /dev/null tree
+           { { echo "$as_me:$LINENO: error: cannot find input file: $f" >&5
+echo "$as_me: error: cannot find input file: $f" >&2;}
+   { (exit 1); exit 1; }; }
+         fi;;
+      esac
+    done` || { (exit 1); exit 1; }
+  # Remove the trailing spaces.
+  sed 's/[ 	]*$//' $ac_file_inputs >$tmp/in
+
+_ACEOF
+
+# Transform confdefs.h into two sed scripts, `conftest.defines' and
+# `conftest.undefs', that substitutes the proper values into
+# config.h.in to produce config.h.  The first handles `#define'
+# templates, and the second `#undef' templates.
+# And first: Protect against being on the right side of a sed subst in
+# config.status.  Protect against being in an unquoted here document
+# in config.status.
+rm -f conftest.defines conftest.undefs
+# Using a here document instead of a string reduces the quoting nightmare.
+# Putting comments in sed scripts is not portable.
+#
+# `end' is used to avoid that the second main sed command (meant for
+# 0-ary CPP macros) applies to n-ary macro definitions.
+# See the Autoconf documentation for `clear'.
+cat >confdef2sed.sed <<\_ACEOF
+s/[\\&,]/\\&/g
+s,[\\$`],\\&,g
+t clear
+: clear
+s,^[ 	]*#[ 	]*define[ 	][ 	]*\([^ 	(][^ 	(]*\)\(([^)]*)\)[ 	]*\(.*\)$,${ac_dA}\1${ac_dB}\1\2${ac_dC}\3${ac_dD},gp
+t end
+s,^[ 	]*#[ 	]*define[ 	][ 	]*\([^ 	][^ 	]*\)[ 	]*\(.*\)$,${ac_dA}\1${ac_dB}\1${ac_dC}\2${ac_dD},gp
+: end
+_ACEOF
+# If some macros were called several times there might be several times
+# the same #defines, which is useless.  Nevertheless, we may not want to
+# sort them, since we want the *last* AC-DEFINE to be honored.
+uniq confdefs.h | sed -n -f confdef2sed.sed >conftest.defines
+sed 's/ac_d/ac_u/g' conftest.defines >conftest.undefs
+rm -f confdef2sed.sed
+
+# This sed command replaces #undef with comments.  This is necessary, for
+# example, in the case of _POSIX_SOURCE, which is predefined and required
+# on some systems where configure will not decide to define it.
+cat >>conftest.undefs <<\_ACEOF
+s,^[ 	]*#[ 	]*undef[ 	][ 	]*[a-zA-Z_][a-zA-Z_0-9]*,/* & */,
+_ACEOF
+
+# Break up conftest.defines because some shells have a limit on the size
+# of here documents, and old seds have small limits too (100 cmds).
+echo '  # Handle all the #define templates only if necessary.' >>$CONFIG_STATUS
+echo '  if egrep "^[ 	]*#[ 	]*define" $tmp/in >/dev/null; then' >>$CONFIG_STATUS
+echo '  # If there are no defines, we may have an empty if/fi' >>$CONFIG_STATUS
+echo '  :' >>$CONFIG_STATUS
+rm -f conftest.tail
+while grep . conftest.defines >/dev/null
+do
+  # Write a limited-size here document to $tmp/defines.sed.
+  echo '  cat >$tmp/defines.sed <<CEOF' >>$CONFIG_STATUS
+  # Speed up: don't consider the non `#define' lines.
+  echo '/^[ 	]*#[ 	]*define/!b' >>$CONFIG_STATUS
+  # Work around the forget-to-reset-the-flag bug.
+  echo 't clr' >>$CONFIG_STATUS
+  echo ': clr' >>$CONFIG_STATUS
+  sed ${ac_max_here_lines}q conftest.defines >>$CONFIG_STATUS
+  echo 'CEOF
+  sed -f $tmp/defines.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+' >>$CONFIG_STATUS
+  sed 1,${ac_max_here_lines}d conftest.defines >conftest.tail
+  rm -f conftest.defines
+  mv conftest.tail conftest.defines
+done
+rm -f conftest.defines
+echo '  fi # egrep' >>$CONFIG_STATUS
+echo >>$CONFIG_STATUS
+
+# Break up conftest.undefs because some shells have a limit on the size
+# of here documents, and old seds have small limits too (100 cmds).
+echo '  # Handle all the #undef templates' >>$CONFIG_STATUS
+rm -f conftest.tail
+while grep . conftest.undefs >/dev/null
+do
+  # Write a limited-size here document to $tmp/undefs.sed.
+  echo '  cat >$tmp/undefs.sed <<CEOF' >>$CONFIG_STATUS
+  # Speed up: don't consider the non `#undef'
+  echo '/^[ 	]*#[ 	]*undef/!b' >>$CONFIG_STATUS
+  # Work around the forget-to-reset-the-flag bug.
+  echo 't clr' >>$CONFIG_STATUS
+  echo ': clr' >>$CONFIG_STATUS
+  sed ${ac_max_here_lines}q conftest.undefs >>$CONFIG_STATUS
+  echo 'CEOF
+  sed -f $tmp/undefs.sed $tmp/in >$tmp/out
+  rm -f $tmp/in
+  mv $tmp/out $tmp/in
+' >>$CONFIG_STATUS
+  sed 1,${ac_max_here_lines}d conftest.undefs >conftest.tail
+  rm -f conftest.undefs
+  mv conftest.tail conftest.undefs
+done
+rm -f conftest.undefs
+
+cat >>$CONFIG_STATUS <<\_ACEOF
+  # Let's still pretend it is `configure' which instantiates (i.e., don't
+  # use $as_me), people would be surprised to read:
+  #    /* config.h.  Generated by config.status.  */
+  if test x"$ac_file" = x-; then
+    echo "/* Generated by configure.  */" >$tmp/config.h
+  else
+    echo "/* $ac_file.  Generated by configure.  */" >$tmp/config.h
+  fi
+  cat $tmp/in >>$tmp/config.h
+  rm -f $tmp/in
+  if test x"$ac_file" != x-; then
+    if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
+      { echo "$as_me:$LINENO: $ac_file is unchanged" >&5
+echo "$as_me: $ac_file is unchanged" >&6;}
+    else
+      ac_dir=`(dirname "$ac_file") 2>/dev/null ||
+$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+         X"$ac_file" : 'X\(//\)[^/]' \| \
+         X"$ac_file" : 'X\(//\)$' \| \
+         X"$ac_file" : 'X\(/\)' \| \
+         .     : '\(.\)' 2>/dev/null ||
+echo X"$ac_file" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{ s//\1/; q; }
+  	  /^X\(\/\/\)[^/].*/{ s//\1/; q; }
+  	  /^X\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+      { case "$ac_dir" in
+  [\\/]* | ?:[\\/]* ) as_incr_dir=;;
+  *)                      as_incr_dir=.;;
+esac
+as_dummy="$ac_dir"
+for as_mkdir_dir in `IFS='/\\'; set X $as_dummy; shift; echo "$@"`; do
+  case $as_mkdir_dir in
+    # Skip DOS drivespec
+    ?:) as_incr_dir=$as_mkdir_dir ;;
+    *)
+      as_incr_dir=$as_incr_dir/$as_mkdir_dir
+      test -d "$as_incr_dir" ||
+        mkdir "$as_incr_dir" ||
+	{ { echo "$as_me:$LINENO: error: cannot create \"$ac_dir\"" >&5
+echo "$as_me: error: cannot create \"$ac_dir\"" >&2;}
+   { (exit 1); exit 1; }; }
+    ;;
+  esac
+done; }
+
+      rm -f $ac_file
+      mv $tmp/config.h $ac_file
+    fi
+  else
+    cat $tmp/config.h
+    rm -f $tmp/config.h
+  fi
 done
 _ACEOF
 

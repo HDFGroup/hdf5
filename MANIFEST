@@ -571,7 +571,7 @@
 ./fortran/src/H5Sff.f90
 ./fortran/src/H5Tf.c
 ./fortran/src/H5Tff.f90
-./fortran/src/H5config.h.in
+./fortran/src/H5config_fortran.h.in
 ./fortran/src/H5f90.h
 ./fortran/src/H5f90global.f90
 ./fortran/src/H5f90i.h
