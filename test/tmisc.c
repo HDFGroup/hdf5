@@ -191,6 +191,9 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC14_DSET3_NAME       "Dataset3"
 #define MISC14_METADATA_SIZE    4096
 
+/* Definitions for misc. test #15 */
+#define MISC15_FILE             "tmisc15.h5"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -2565,6 +2568,56 @@ test_misc14(void)
 
 /****************************************************************
 **
+**  test_misc15(): Test that checking a file's access property list
+**      more than once correctly increments internal reference counts.
+**
+****************************************************************/
+static void
+test_misc15(void)
+{
+    hid_t file;         /* File ID */
+    hid_t fapl;         /* File access property list */
+    herr_t ret;         /* Generic return value */
+
+    /* Create the file & get it's FAPL */
+    file = H5Fcreate(MISC15_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    fapl = H5Fget_access_plist(file);
+    CHECK(fapl, FAIL, "H5Fget_access_plist");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Open the file & get it's FAPL again */
+    file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+
+    fapl = H5Fget_access_plist(file);
+    CHECK(fapl, FAIL, "H5Fget_access_plist");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Verify that the file is still OK */
+    ret = H5Fis_hdf5(MISC15_FILE);
+    CHECK(ret, FAIL, "H5Fis_hdf5");
+
+    file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc15() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -2588,6 +2641,7 @@ test_misc(void)
     test_misc12();      /* Test VL-strings in chunked datasets operating correctly */
     test_misc13();      /* Test that a user block can be insert in front of file contents */
     test_misc14();      /* Test that deleted dataset's data is removed from sieve buffer correctly */
+    test_misc15();      /* Test that checking a file's access property list more than once works */
 
 } /* test_misc() */
 
@@ -2626,4 +2680,5 @@ cleanup_misc(void)
     HDremove(MISC13_FILE_1);
     HDremove(MISC13_FILE_2);
     HDremove(MISC14_FILE);
+    HDremove(MISC15_FILE);
 }
