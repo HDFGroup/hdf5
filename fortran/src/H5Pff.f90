@@ -172,6 +172,9 @@
 ! Modifications: 	Explicit Fortran interfaces were added for 
 !			called C functions (it is needed for Windows
 !			port).  March 14, 2001 
+!                       Datatype of the flag parameter is changed from 
+!                       INTEGER to LOGICAL 
+!                               June 4, 2003 
 !
 ! Comment:		
 !----------------------------------------------------------------------
@@ -186,26 +189,28 @@
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER, INTENT(IN) ::  flag ! TRUE/FALSE flag to set the dataset
+            LOGICAL, INTENT(IN) ::  flag ! TRUE/FALSE flag to set the dataset
                                          ! transfer property for partila writing/reading
                                          ! compound datatype 
             INTEGER, INTENT(OUT) :: hdferr    ! Error code
+            INTEGER :: flag_c
 
 !            INTEGER, EXTERNAL :: h5pset_preserve_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_preserve_c(prp_id, flag)
+              INTEGER FUNCTION h5pset_preserve_c(prp_id, flag_c)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_PRESERVE_C'::h5pset_preserve_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER, INTENT(IN) ::  flag
+              INTEGER ::  flag_c
               END FUNCTION h5pset_preserve_c
             END INTERFACE
-
-            hdferr = h5pset_preserve_c(prp_id, flag) 
+            flag_c = 0
+            if(flag) flag_c = 1
+            hdferr = h5pset_preserve_c(prp_id, flag_c) 
           END SUBROUTINE h5pset_preserve_f
 
 !----------------------------------------------------------------------
@@ -229,6 +234,9 @@
 ! Modifications: 	Explicit Fortran interfaces were added for 
 !			called C functions (it is needed for Windows
 !			port).  March 14, 2001 
+!                       Datatype of the flag parameter is changed from 
+!                       INTEGER to LOGICAL 
+!                               June 4, 2003 
 !
 ! Comment:		
 !----------------------------------------------------------------------
@@ -242,26 +250,29 @@
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER, INTENT(OUT) ::  flag ! TRUE/FALSE flag. Shows status of the dataset's
+            LOGICAL, INTENT(OUT) ::  flag ! TRUE/FALSE flag. Shows status of the dataset's
                                          ! transfer property for partial writing/reading
                                          ! compound datatype 
             INTEGER, INTENT(OUT) :: hdferr    ! Error code
+            INTEGER :: flag_c
 
 !            INTEGER, EXTERNAL :: h5pget_preserve_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pget_preserve_c(prp_id, flag)
+              INTEGER FUNCTION h5pget_preserve_c(prp_id, flag_c)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_PRESERVE_C'::h5pget_preserve_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER, INTENT(OUT) ::  flag
+              INTEGER ::  flag_c
               END FUNCTION h5pget_preserve_c
             END INTERFACE
 
-            hdferr = h5pget_preserve_c(prp_id, flag) 
+            hdferr = h5pget_preserve_c(prp_id, flag_c) 
+            flag = .FALSE.
+            if(flag_c .eq. 1) flag = .TRUE.
           END SUBROUTINE h5pget_preserve_f
 
 !----------------------------------------------------------------------
@@ -1847,27 +1858,29 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: increment ! File block size in bytes.
-            INTEGER, INTENT(IN) :: backing_store ! flag to indicate that
+            LOGICAL, INTENT(IN) :: backing_store ! flag to indicate that
                                     ! entire file contents are flushed to a file 
                                     ! with the same name as this core file.
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: backing_store_flag 
 
 !            INTEGER, EXTERNAL :: h5pset_fapl_core_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store)
+              INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store_flag)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_FAPL_CORE_C'::h5pset_fapl_core_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(IN) :: increment 
-              INTEGER, INTENT(IN) :: backing_store 
+              INTEGER :: backing_store_flag 
               END FUNCTION h5pset_fapl_core_c
             END INTERFACE
-
-            hdferr = h5pset_fapl_core_c(prp_id, increment, backing_store)
+            backing_store_flag = 0
+            if(backing_store) backing_store_flag = 1
+            hdferr = h5pset_fapl_core_c(prp_id, increment, backing_store_flag)
           END SUBROUTINE h5pset_fapl_core_f
 
 !----------------------------------------------------------------------
@@ -1907,27 +1920,30 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes.
-            INTEGER, INTENT(OUT) :: backing_store ! flag to indicate that
+            LOGICAL, INTENT(OUT) :: backing_store ! flag to indicate that
                                     ! entire file contents are flushed to a file 
                                     ! with the same name as this core file.
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER :: backing_store_flag 
 
 !            INTEGER, EXTERNAL :: h5pget_fapl_core_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store)
+              INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PGET_FAPL_CORE_C'::h5pget_fapl_core_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id 
               INTEGER(SIZE_T), INTENT(OUT) :: increment 
-              INTEGER, INTENT(OUT) :: backing_store 
+              INTEGER :: backing_store_flag 
               END FUNCTION h5pget_fapl_core_c
             END INTERFACE
 
-            hdferr = h5pget_fapl_core_c(prp_id, increment, backing_store)
+            hdferr = h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
+            backing_store =.FALSE.
+            if (backing_store_flag .eq. 1) backing_store =.TRUE.
           END SUBROUTINE h5pget_fapl_core_f
 
 !----------------------------------------------------------------------
