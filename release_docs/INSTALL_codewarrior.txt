@@ -28,6 +28,11 @@ To install the HDF5 library:
    the those compiled with the Microsoft Visual Studio compiler.
 5. Enjoy.
 
+NOTE: The zlib library is needed for building the hdf5 library. The path
+of the zlib library must be defined in Target/Access Paths, for example
+D:\zlib
+
+
 ---------------------------------------------------------------------------
 The HDF Group would like to thank Ron Liechty of Metrowerks technical 
 support for all the help provided during the development of this project.
