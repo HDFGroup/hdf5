@@ -68,7 +68,7 @@ Bug Fixes since HDF5-1.4.0 Release
      is reversed (i.e., the ht. and width of the image dataset is
      incorrectly described.)  For more information, please see:
 
-       http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html
+       http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
 
    * Fixed bug with contiguous hyperslabs not being detected, causing
      slower I/O than necessary.
