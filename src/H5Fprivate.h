@@ -150,22 +150,22 @@
 
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
-   int64 _n = 0;							      \
    intn _i;								      \
+   n = 0;							      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(int64); _i++, _n<<=8) {				      \
-      _n |= *(--p);							      \
+   for (_i=0; _i<sizeof(int64); _i++, n<<=8) {				      \
+      n |= *(--p);							      \
    }									      \
    (p) += 8;								      \
 }
 
 #  define UINT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
-   uint64 _n = 0;							      \
    intn _i;								      \
+   n = 0;							      \
    (p) += 8;								      \
-   for (_i=0; _i<sizeof(uint64); _i++, _n<<=8) {			      \
-      _n |= *(--p);							      \
+   for (_i=0; _i<sizeof(uint64); _i++, n<<=8) {			      \
+      n |= *(--p);							      \
    }									      \
    (p) += 8;								      \
 }
