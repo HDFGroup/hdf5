@@ -1321,6 +1321,7 @@
 ./tools/testfiles/topaque.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
+./tools/testfiles/tscaleoffset.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.h5
