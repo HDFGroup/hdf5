@@ -737,9 +737,6 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDwcstombs(S,P,Z)	wcstombs(S,P,Z)
 #define HDwctomb(S,C)		wctomb(S,C)
 
-
-
-
 #if defined (__MWERKS__)
 /* workaround for a bug in the Metrowerks header file for write
  which is not defined as const void*
@@ -928,7 +925,8 @@ __DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
  *-------------------------------------------------------------------------
  */
 
-/* Is `S' the name of an API function? */
+/* `S' is the name of a function which is being tested to check if its */
+/*      an API function */
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
 
 /* global library version information string */
@@ -942,23 +940,29 @@ extern char	H5_lib_vers_info_g[];
 
 /* replacement structure for original global variable */
 typedef struct H5_api_struct {
-  H5TS_mutex_t init_lock;           /* API entrance mutex */
-  hbool_t H5_libinit_g;
+    H5TS_mutex_t init_lock;  /* API entrance mutex */
+    hbool_t H5_libinit_g;    /* Has the library been initialized? */
 } H5_api_t;
+
+/* Macros for accessing the global variables */
+#define H5_INIT_GLOBAL H5_g.H5_libinit_g
 
 /* Macro for first thread initialization */
 #define H5_FIRST_THREAD_INIT                                                  \
-   pthread_once(&H5TS_first_init_g, H5TS_first_thread_init);
+   pthread_once(&H5TS_first_init_g, H5TS_first_thread_init)
 
 /* Macros for threadsafe HDF-5 Phase I locks */
-#define H5_INIT_GLOBAL H5_g.H5_libinit_g
+#define H5_LOCK_API_MUTEX                                                     \
+     H5TS_mutex_lock(&H5_g.init_lock)
 #define H5_API_LOCK_BEGIN                                                     \
    if (H5_IS_API(FUNC)) {                                                     \
-     H5TS_mutex_lock(&H5_g.init_lock);
+     H5_LOCK_API_MUTEX;
 #define H5_API_LOCK_END }
+#define H5_UNLOCK_API_MUTEX                                                   \
+     H5TS_mutex_unlock(&H5_g.init_lock)
 #define H5_API_UNLOCK_BEGIN                                                   \
   if (H5_IS_API(FUNC)) {                                                      \
-    H5TS_mutex_unlock(&H5_g.init_lock);
+    H5_UNLOCK_API_MUTEX;
 #define H5_API_UNLOCK_END }
 
 /* Macros for thread cancellation-safe mechanism */
@@ -974,16 +978,16 @@ typedef struct H5_api_struct {
 
 extern H5_api_t H5_g;
 
-#else
+#else /* H5_HAVE_THREADSAFE */
 
 /* disable any first thread init mechanism */
 #define H5_FIRST_THREAD_INIT
 
-#define H5_INIT_GLOBAL H5_libinit_g
-
 /* disable locks (sequential version) */
+#define H5_LOCK_API_MUTEX
 #define H5_API_LOCK_BEGIN
 #define H5_API_LOCK_END
+#define H5_UNLOCK_API_MUTEX
 #define H5_API_UNLOCK_BEGIN
 #define H5_API_UNLOCK_END
 
@@ -992,16 +996,19 @@ extern H5_api_t H5_g;
 #define H5_API_SET_CANCEL
 
 /* extern global variables */
+extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
-extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
-#endif
+/* Macros for accessing the global variables */
+#define H5_INIT_GLOBAL H5_libinit_g
+
+#endif /* H5_HAVE_THREADSAFE */
 
 #define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
 
 #define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
    CONSTR (FUNC, #func_name);						      \
    PABLO_SAVE (ID_ ## func_name)  					      \
-   static unsigned know_api=0, is_api=0;                \
+   static unsigned know_api=0, is_api=0;                                      \
    H5TRACE_DECL;							      \
 									      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
@@ -1010,34 +1017,36 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
    H5_FIRST_THREAD_INIT                                                       \
    H5_API_UNSET_CANCEL                                                        \
    H5_API_LOCK_BEGIN                                                          \
-     if (!(H5_INIT_GLOBAL)) {                                                 \
+                                                                              \
+   /* Initialize the library */           				      \
+   if (!(H5_INIT_GLOBAL)) {                                                   \
        H5_INIT_GLOBAL = TRUE;                                                 \
        if (H5_init_library()<0) {					      \
-      HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-            "library initialization failed");		      \
+          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+            "library initialization failed");		                      \
        }								      \
-     }									      \
+   }									      \
    H5_API_LOCK_END                                                            \
-                                                \
+                                                                              \
    /* Initialize this interface or bust */				      \
    if (!interface_initialize_g) {					      \
       interface_initialize_g = 1;					      \
       if (interface_init_func &&					      \
-      ((herr_t(*)(void))interface_init_func)()<0) {			      \
+              ((herr_t(*)(void))interface_init_func)()<0) {		      \
          interface_initialize_g = 0;					      \
-     HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-            "interface initialization failed");		      \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+            "interface initialization failed");		                      \
       }									      \
    }									      \
-                                            \
-   /* Check if we know this is an API function or not */        \
-   if(!know_api) {                          \
-       know_api=1;                          \
-       is_api=H5_IS_API(FUNC);              \
-   }                                        \
+                                                                              \
+   /* Check if we know this is an API function yet or not */                  \
+   if(!know_api) {                                                            \
+       know_api=1;                                                            \
+       is_api=H5_IS_API(FUNC);                                                \
+   }                                                                          \
    									      \
    /* Clear thread error stack entering public functions */		      \
-   if (is_api && H5E_clearable_g) {				      \
+   if (is_api && H5E_clearable_g) {				              \
        H5E_clear ();							      \
    }									      \
    {
