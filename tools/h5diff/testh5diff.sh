@@ -86,7 +86,7 @@ TOOLTEST() {
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###			  T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -156,14 +156,108 @@ TOOLTEST h5diff_16.txt dset1.1 dset1.6 h5diff_test1.h5 h5diff_test2.h5
 # tests 2., Different datatype sizes and different mix of options 
 ##############################################################################
 
-# test 2.1.0: H5T_INTEGER size 1 
+##############################################################################
+# H5T_INTEGER size 1 
+##############################################################################
+
+# test 2.1.0
 TOOLTEST h5diff_210.txt dset2.1 dset2.2 h5diff_test1.h5 h5diff_test2.h5
 
-# test 2.1.1: H5T_INTEGER size 1 
+# test 2.1.1
 TOOLTEST h5diff_211.txt dset2.1 dset2.2 -n 2 h5diff_test1.h5 h5diff_test2.h5
 
-# test 2.1.2: H5T_INTEGER size 1 
+# test 2.1.2
 TOOLTEST h5diff_212.txt dset2.1 dset2.2 -d 3 h5diff_test1.h5 h5diff_test2.h5
+
+# test 2.1.3
+TOOLTEST h5diff_213.txt dset2.1a dset2.1b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# H5T_INTEGER size 2
+##############################################################################
+
+# test 2.2.0
+TOOLTEST h5diff_220.txt dset2.2a dset2.2b h5diff_test1.h5 h5diff_test2.h5
+# test 2.2.1
+TOOLTEST h5diff_221.txt dset2.2a dset2.2b -n 2 h5diff_test1.h5 h5diff_test2.h5
+# test 2.2.2
+TOOLTEST h5diff_222.txt dset2.2a dset2.2b -d 3 h5diff_test1.h5 h5diff_test2.h5
+# test 2.2.3
+TOOLTEST h5diff_223.txt dset2.2a dset2.2b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# H5T_INTEGER size 4
+##############################################################################
+
+# test 2.3.0
+TOOLTEST h5diff_230.txt dset2.3a dset2.3b h5diff_test1.h5 h5diff_test2.h5
+# test 2.3.1
+TOOLTEST h5diff_231.txt dset2.3a dset2.3b -n 2 h5diff_test1.h5 h5diff_test2.h5
+# test 2.3.2
+TOOLTEST h5diff_232.txt dset2.3a dset2.3b -d 3 h5diff_test1.h5 h5diff_test2.h5
+# test 2.3.3
+TOOLTEST h5diff_233.txt dset2.3a dset2.3b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# H5T_INTEGER size 8
+##############################################################################
+
+# test 2.4.0
+TOOLTEST h5diff_240.txt dset2.4a dset2.4b h5diff_test1.h5 h5diff_test2.h5
+# test 2.4.1
+TOOLTEST h5diff_241.txt dset2.4a dset2.4b -n 2 h5diff_test1.h5 h5diff_test2.h5
+# test 2.4.2
+TOOLTEST h5diff_242.txt dset2.4a dset2.4b -d 3 h5diff_test1.h5 h5diff_test2.h5
+# test 2.4.3
+TOOLTEST h5diff_243.txt dset2.4a dset2.4b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# H5T_FLOAT size 4
+##############################################################################
+
+# test 2.5.0
+TOOLTEST h5diff_250.txt dset2.5a dset2.5b h5diff_test1.h5 h5diff_test2.h5
+# test 2.5.1
+TOOLTEST h5diff_251.txt dset2.5a dset2.5b -n 2 h5diff_test1.h5 h5diff_test2.h5
+# test 2.5.2
+TOOLTEST h5diff_252.txt dset2.5a dset2.5b -d 3 h5diff_test1.h5 h5diff_test2.h5
+# test 2.5.3
+TOOLTEST h5diff_253.txt dset2.5a dset2.5b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+##############################################################################
+# H5T_FLOAT size 8
+##############################################################################
+
+# test 2.6.0
+TOOLTEST h5diff_260.txt dset2.6a dset2.6b h5diff_test1.h5 h5diff_test2.h5
+# test 2.6.1
+TOOLTEST h5diff_261.txt dset2.6a dset2.6b -n 2 h5diff_test1.h5 h5diff_test2.h5
+# test 2.6.2
+TOOLTEST h5diff_262.txt dset2.6a dset2.6b -d 3 h5diff_test1.h5 h5diff_test2.h5
+# test 2.6.3
+TOOLTEST h5diff_263.txt dset2.6a dset2.6b -p 3 h5diff_test1.h5 h5diff_test2.h5
+
+
+#######################################################
+# Different combination of objects
+#######################################################
+
+# test 3.0
+TOOLTEST h5diff_30.txt h5diff_test3.h5 h5diff_test4.h5
+
+# test 3.1
+TOOLTEST h5diff_31.txt dset3 dset3 h5diff_test3.h5 h5diff_test4.h5
+
+# test 3.2
+TOOLTEST h5diff_32.txt dset3 dset4 h5diff_test3.h5 h5diff_test4.h5
+
+# test 3.3
+TOOLTEST h5diff_33.txt dset6 dset3 h5diff_test3.h5 h5diff_test4.h5
+
+# test 3.4
+TOOLTEST h5diff_34.txt dset6 dset6 h5diff_test3.h5 h5diff_test4.h5
+
+
 
 
 if test $nerrors -eq 0 ; then
