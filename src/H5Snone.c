@@ -16,7 +16,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5S_none_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = FALSE;
+static intn             interface_initialize_g = 0;
 
 
 /*--------------------------------------------------------------------------

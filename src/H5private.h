@@ -818,7 +818,6 @@ void H5_trace (hbool_t returning, const char *func, const char *type, ...);
  *-------------------------------------------------------------------------
  */
 extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
-extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 
 /* Is `S' the name of an API function? */
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
@@ -839,18 +838,9 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
                         "library initialization failed");		      \
       }									      \
-   }									      \
+   }       								      \
 									      \
-   /* Initialize this thread */						      \
-   if (!thread_initialize_g) {						      \
-      thread_initialize_g = TRUE;					      \
-      if (H5_init_thread()<0) {						      \
-         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-                        "thread initialization failed");		      \
-      }									      \
-   }									      \
-									      \
-   /* Initialize this interface */					      \
+   /* Initialize this interface or bust */				      \
    if (!interface_initialize_g) {					      \
       interface_initialize_g = TRUE;					      \
       if (interface_init_func &&					      \
@@ -858,10 +848,14 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
          HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
                         "interface initialization failed");		      \
       }									      \
+   } else if (interface_initialize_g<0) {				      \
+       HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, err,			      \
+		     "interface is closing");				      \
+       assert("interface is closing" && 0);				      \
    }									      \
 									      \
    /* Clear thread error stack entering public functions */		      \
-   if (H5E_clearable_g && H5_IS_API (FUNC)) {		                      \
+   if (H5E_clearable_g && H5_IS_API (FUNC)) {				      \
        H5E_clear ();							      \
    }									      \
    {
@@ -901,8 +895,21 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 /* Private functions, not part of the publicly documented API */
 herr_t H5_init_library(void);
 void H5_term_library(void);
-herr_t H5_add_exit(void (*func) (void));
-herr_t H5_init_thread(void);
-void H5_term_thread(void);
+
+/* Functions to terminate interfaces */
+void H5A_term_interface(intn status);
+void H5D_term_interface(intn status);
+void H5F_term_interface(intn status);
+void H5G_term_interface(intn status);
+void H5I_term_interface(intn status);
+void H5P_term_interface(intn status);
+void H5RA_term_interface(intn status);
+void H5R_term_interface(intn status);
+void H5S_term_interface(intn status);
+void H5TB_term_interface(intn status);
+void H5T_native_close(intn status);
+void H5T_term_interface(intn status);
+void H5Z_term_interface(intn status);
+
 
 #endif

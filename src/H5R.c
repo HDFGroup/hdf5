@@ -29,9 +29,8 @@ static char		RcsId[] = "@(#)$Revision$";
 /* Interface initialization */
 #define PABLO_MASK	H5R_mask
 #define INTERFACE_INIT	H5R_init_interface
-static intn		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 static herr_t		H5R_init_interface(void);
-static void		H5R_term_interface(void);
 
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
@@ -55,17 +54,17 @@ DESCRIPTION
 static herr_t
 H5R_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5R_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE,
-            H5R_RESERVED_ATOMS, (herr_t (*)(void *)) NULL)) >= 0) {
-        ret_value = H5_add_exit(&H5R_term_interface);
+    if (H5I_init_group(H5I_REFERENCE, H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS,
+		       (herr_t (*)(void *)) NULL)<0) {
+	HRETURN_ERROR (H5E_REFERENCE, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
     }
 
-    FUNC_LEAVE(ret_value);
-}   /* end H5R_init_interface() */
+    FUNC_LEAVE(SUCCEED);
+}
 
 
 /*--------------------------------------------------------------------------
@@ -85,13 +84,16 @@ H5R_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5R_term_interface(void)
+void
+H5R_term_interface(intn status)
 {
-    /* Free ID group */
-    H5I_destroy_group(H5I_REFERENCE);
-    interface_initialize_g = FALSE;
-}   /* end H5R_term_interface() */
+    if (interface_initialize_g>0) {
+	/* Free ID group */
+	H5I_destroy_group(H5I_REFERENCE);
+    }
+    
+    interface_initialize_g = status;
+}
 
 
 /*--------------------------------------------------------------------------

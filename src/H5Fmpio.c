@@ -63,7 +63,7 @@
 #include <mpio.h>
 
 #define PABLO_MASK      H5F_mpio
-static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
+static intn          interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Global var to allow elimination of redundant metadata writes

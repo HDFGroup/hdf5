@@ -61,7 +61,7 @@ static const H5AC_class_t H5AC_LHEAP[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 

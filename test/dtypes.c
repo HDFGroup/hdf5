@@ -8,49 +8,17 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 
-/* See H5private.h for how to include headers */
-#undef NDEBUG
-#include <hdf5.h>
-
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <float.h>
-#   include <math.h>
-#   include <signal.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-#ifdef _POSIX_VERSION
-#   include <sys/wait.h>
-#endif
-
-#define H5T_PACKAGE
-#include <H5Tpkg.h>		/*to turn off hardware conversions*/
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
-#else
-#   define __unused__ __attribute__((unused))
-#endif
+#include <h5test.h>
 
 #if SIZEOF_DOUBLE != SIZEOF_LONG_DOUBLE
 #   define USE_LDOUBLE
 #endif
 
-#ifndef MAX
-#   define MAX(X,Y)	((X)>(Y)?(X):(Y))
-#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
-#endif
-
-#define FILE_NAME_1	"dtypes1.h5"
-#define FILE_NAME_2	"dtypes2.h5"
+const char *FILENAME[] = {
+    "dtypes1",
+    "dtypes2",
+    NULL
+};
 
 typedef struct complex_t {
     double                  re;
@@ -79,10 +47,7 @@ static int noverflows_g = 0;
 /* Skip overflow tests if non-zero */
 static int skip_overflow_tests_g = 0;
 
-/*
- * If set then all known hardware conversion functions are unregistered when
- * the library is reset.
- */
+/* Don't use hardware conversions if set */
 static int without_hardware_g = 0;
 
 /*
@@ -116,11 +81,11 @@ void some_dummy_func(float x);
 static void
 fpe_handler(int __unused__ signo)
 {
-    puts(" -SKIP-");
-    puts("   Test skipped due to SIGFPE.");
+    SKIPPED();
+    puts("    Test skipped due to SIGFPE.");
 #ifndef HANDLE_SIGFPE
-    puts("   Remaining tests could not be run.");
-    puts("   Please turn off SIGFPE on overflows and try again.");
+    puts("    Remaining tests could not be run.");
+    puts("    Please turn off SIGFPE on overflows and try again.");
 #endif
     exit(255);
 }
@@ -234,55 +199,6 @@ generates_sigfpe(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup
- *
- * Purpose:	Removes test files
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Thursday, June  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-cleanup (void)
-{
-    if (!getenv ("HDF5_NOCLEANUP")) {
-	remove (FILE_NAME_1);
-	remove (FILE_NAME_2);
-    }
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	display_error_cb
- *
- * Purpose:	Displays the error stack after printing "*FAILED*".
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *		Wednesday, March  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-display_error_cb (void __unused__ *client_data)
-{
-    puts ("*FAILED*");
-    H5Eprint (stdout);
-    return 0;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	reset_hdf5
  *
  * Purpose:	Reset the hdf5 library.  This causes statistics to be printed
@@ -300,80 +216,9 @@ display_error_cb (void __unused__ *client_data)
 static void
 reset_hdf5(void)
 {
-    fflush(stdout);
-    fflush(stderr);
-    H5close();
-    H5Eset_auto (display_error_cb, NULL);
+    h5_reset();
     H5Tset_overflow(overflow_handler);
-
-    if (without_hardware_g) {
-	H5Tunregister(H5T_conv_char_uchar);
-	H5Tunregister(H5T_conv_char_short);
-	H5Tunregister(H5T_conv_char_ushort);
-	H5Tunregister(H5T_conv_char_int);
-	H5Tunregister(H5T_conv_char_uint);
-	H5Tunregister(H5T_conv_char_long);
-	H5Tunregister(H5T_conv_char_ulong);
-
-	H5Tunregister(H5T_conv_uchar_char);
-	H5Tunregister(H5T_conv_uchar_short);
-	H5Tunregister(H5T_conv_uchar_ushort);
-	H5Tunregister(H5T_conv_uchar_int);
-	H5Tunregister(H5T_conv_uchar_uint);
-	H5Tunregister(H5T_conv_uchar_long);
-	H5Tunregister(H5T_conv_uchar_ulong);
-
-	H5Tunregister(H5T_conv_short_char);
-	H5Tunregister(H5T_conv_short_uchar);
-	H5Tunregister(H5T_conv_short_ushort);
-	H5Tunregister(H5T_conv_short_int);
-	H5Tunregister(H5T_conv_short_uint);
-	H5Tunregister(H5T_conv_short_long);
-	H5Tunregister(H5T_conv_short_ulong);
-
-	H5Tunregister(H5T_conv_ushort_char);
-	H5Tunregister(H5T_conv_ushort_uchar);
-	H5Tunregister(H5T_conv_ushort_short);
-	H5Tunregister(H5T_conv_ushort_int);
-	H5Tunregister(H5T_conv_ushort_uint);
-	H5Tunregister(H5T_conv_ushort_long);
-	H5Tunregister(H5T_conv_ushort_ulong);
-
-	H5Tunregister(H5T_conv_int_char);
-	H5Tunregister(H5T_conv_int_uchar);
-	H5Tunregister(H5T_conv_int_short);
-	H5Tunregister(H5T_conv_int_ushort);
-	H5Tunregister(H5T_conv_int_uint);
-	H5Tunregister(H5T_conv_int_long);
-	H5Tunregister(H5T_conv_int_ulong);
-
-	H5Tunregister(H5T_conv_uint_char);
-	H5Tunregister(H5T_conv_uint_uchar);
-	H5Tunregister(H5T_conv_uint_short);
-	H5Tunregister(H5T_conv_uint_ushort);
-	H5Tunregister(H5T_conv_uint_int);
-	H5Tunregister(H5T_conv_uint_long);
-	H5Tunregister(H5T_conv_uint_ulong);
-
-	H5Tunregister(H5T_conv_long_char);
-	H5Tunregister(H5T_conv_long_uchar);
-	H5Tunregister(H5T_conv_long_short);
-	H5Tunregister(H5T_conv_long_ushort);
-	H5Tunregister(H5T_conv_long_int);
-	H5Tunregister(H5T_conv_long_uint);
-	H5Tunregister(H5T_conv_long_ulong);
-
-	H5Tunregister(H5T_conv_ulong_char);
-	H5Tunregister(H5T_conv_ulong_uchar);
-	H5Tunregister(H5T_conv_ulong_short);
-	H5Tunregister(H5T_conv_ulong_ushort);
-	H5Tunregister(H5T_conv_ulong_int);
-	H5Tunregister(H5T_conv_ulong_uint);
-	H5Tunregister(H5T_conv_ulong_long);
-	
-	H5Tunregister(H5T_conv_float_double);
-	H5Tunregister(H5T_conv_double_float);
-    }
+    if (without_hardware_g) h5_no_hwconv();
 }
 
 
@@ -398,21 +243,21 @@ test_classes(void)
 {
     H5T_class_t		tcls;
     
-    printf("%-70s", "Testing H5Tget_class()");
+    TESTING("H5Tget_class()");
 
     if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) goto error;
     if (H5T_INTEGER!=tcls) {
-        puts("*FAILED*");
-        puts("   Invalid type class for H5T_NATIVE_INT");
+	FAILED();
+        puts("    Invalid type class for H5T_NATIVE_INT");
         goto error;
     }
     if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) goto error;
     if (H5T_FLOAT!=tcls) {
-        puts("*FAILED*");
-	puts("   Invalid type class for H5T_NATIVE_DOUBLE");
+	FAILED();
+	puts("    Invalid type class for H5T_NATIVE_DOUBLE");
         goto error;
     }
-    puts(" PASSED");
+    PASSED();
     return 0;
 
   error:
@@ -440,22 +285,24 @@ static herr_t
 test_copy(void)
 {
     hid_t               a_copy;
+    herr_t		status;
 
-    printf("%-70s", "Testing H5Tcopy()");
+    TESTING("H5Tcopy()");
 
     if ((a_copy = H5Tcopy(H5T_NATIVE_SHORT)) < 0) goto error;
     if (H5Tclose(a_copy) < 0) goto error;
 
     /* We should not be able to close a built-in byte */
     H5E_BEGIN_TRY {
-	if (H5Tclose (H5T_NATIVE_CHAR)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Should not be able to close a predefined type!");
-	    goto error;
-	}
+	status = H5Tclose (H5T_NATIVE_CHAR);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Should not be able to close a predefined type!");
+	goto error;
+    }
 
-    puts(" PASSED");
+    PASSED();
     return 0;
 
   error:
@@ -485,7 +332,7 @@ test_compound(void)
     complex_t               tmp;
     hid_t                   complex_id;
 
-    printf("%-70s", "Testing compound data types");
+    TESTING("compound data types");
 
     /* Create the empty type */
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof tmp))<0) goto error;
@@ -497,7 +344,7 @@ test_compound(void)
 		  H5T_NATIVE_DOUBLE)<0) goto error;
 
     if (H5Tclose (complex_id)<0) goto error;
-    puts(" PASSED");
+    PASSED();
     return 0;
 
   error:
@@ -522,29 +369,37 @@ test_compound(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_transient (void)
+test_transient (hid_t fapl)
 {
     static hsize_t	ds_size[2] = {10, 20};
     hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1;
+    char		filename[1024];
+    herr_t		status;
     
-    printf ("%-70s", "Testing transient data types");
-    if ((file=H5Fcreate (FILE_NAME_1, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			 H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
-    space = H5Screate_simple (2, ds_size, ds_size);
+    TESTING("transient data types");
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+			 H5P_DEFAULT, fapl))<0) goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
 
     /* Predefined types cannot be modified or closed */
     H5E_BEGIN_TRY {
-	if (H5Tset_precision (H5T_NATIVE_INT, 256)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Predefined types should not be modifiable!");
-	    goto error;
-	}
-	if (H5Tclose (H5T_NATIVE_INT)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Predefined types should not be closable!");
-	    goto error;
-	}
+	status = H5Tset_precision (H5T_NATIVE_INT, 256);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Predefined types should not be modifiable!");
+	goto error;
+    }
+    H5E_BEGIN_TRY {
+	status = H5Tclose (H5T_NATIVE_INT);
+    } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Predefined types should not be closable!");
+	goto error;
+    }
 
     /* Copying a predefined type results in a modifiable copy */
     if ((type=H5Tcopy (H5T_NATIVE_INT))<0) goto error;
@@ -552,29 +407,30 @@ test_transient (void)
 
     /* It should not be possible to create an attribute for a transient type */
     H5E_BEGIN_TRY {
-	if (H5Acreate (type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Attributes should not be allowed for transient types!");
-	    goto error;
-	}
+	status = H5Acreate (type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Attributes should not be allowed for transient types!");
+	goto error;
+    }
 
     /* Create a dataset from a transient data type */
     if (H5Tclose (type)<0) goto error;
     if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
-    if ((dset=H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0) {
+    if ((dset=H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0)
 	goto error;
-    }
 
     /* The type returned from a dataset should not be modifiable */
     if ((t2 = H5Dget_type (dset))<0) goto error;
     H5E_BEGIN_TRY {
-	if (H5Tset_precision (t2, 256)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Dataset data types should not be modifiable!");
-	    goto error;
-	}
+	status = H5Tset_precision (t2, 256);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Dataset data types should not be modifiable!");
+	goto error;
+    }
     if (H5Tclose (t2)<0) goto error;
 
     /*
@@ -585,12 +441,13 @@ test_transient (void)
     if ((dset=H5Dopen (file, "dset1"))<0) goto error;
     if ((t2 = H5Dget_type (dset))<0) goto error;
     H5E_BEGIN_TRY {
-	if (H5Tset_precision (t2, 256)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Dataset data types should not be modifiable!");
-	    goto error;
-	}
+	status = H5Tset_precision (t2, 256);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Dataset data types should not be modifiable!");
+	goto error;
+    }
     if (H5Tclose (t2)<0) goto error;
 
     /*
@@ -606,7 +463,7 @@ test_transient (void)
     H5Fclose (file);
     H5Tclose (type);
     H5Sclose (space);
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -638,54 +495,60 @@ test_transient (void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_named (void)
+test_named (hid_t fapl)
 {
     hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, attr1=-1;
     herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
+    char		filename[1024];
     
-    printf ("%-70s", "Testing named data types");
-    if ((file=H5Fcreate (FILE_NAME_2, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			 H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
-    space = H5Screate_simple (2, ds_size, ds_size);
+    TESTING("named data types");
+
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+			 H5P_DEFAULT, fapl))<0) goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY {
-	if (H5Tcommit (file, "test_named_1 (should not exist)",
-		       H5T_NATIVE_INT)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Predefined types should not be committable!");
-	    goto error;
-	}
+	status = H5Tcommit (file, "test_named_1 (should not exist)",
+			    H5T_NATIVE_INT);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Predefined types should not be committable!");
+	goto error;
+    }
 
     /* Copy a predefined data type and commit the copy */
     if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
     if (H5Tcommit (file, "native-int", type)<0) goto error;
     if ((status=H5Tcommitted (type))<0) goto error;
     if (0==status) {
-	puts ("*FAILED*");
-	puts ("   H5Tcommitted() returned false!");
+	FAILED();
+	puts ("    H5Tcommitted() returned false!");
 	goto error;
     }
 
     /* We should not be able to modify a type after it has been committed. */
     H5E_BEGIN_TRY {
-	if (H5Tset_precision (type, 256)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Committed type is not constant!");
-	    goto error;
-	}
+	status = H5Tset_precision (type, 256);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Committed type is not constant!");
+	goto error;
+    }
 
     /* We should not be able to re-commit a committed type */
     H5E_BEGIN_TRY {
-	if (H5Tcommit (file, "test_named_2 (should not exist)", type)>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Committed types should not be recommitted!");
-	    goto error;
-	}
+	status = H5Tcommit(file, "test_named_2 (should not exist)", type);
     } H5E_END_TRY;
+    if (status>=0) {
+	FAILED();
+	puts ("    Committed types should not be recommitted!");
+	goto error;
+    }
 
     /* It should be possible to define an attribute for the named type */
     if ((attr1=H5Acreate (type, "attr1", H5T_NATIVE_INT, space,
@@ -699,8 +562,8 @@ test_named (void)
     if ((t2 = H5Tcopy (type))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (status) {
-	puts ("*FAILED*");
-	puts ("   Copying a named type should result in a transient type!");
+	FAILED();
+	puts ("    Copying a named type should result in a transient type!");
 	goto error;
     }
     if (H5Tset_precision (t2, 256)<0) goto error;
@@ -713,8 +576,8 @@ test_named (void)
     if ((type=H5Topen (file, "native-int"))<0) goto error;
     if ((status=H5Tcommitted (type))<0) goto error;
     if (!status) {
-	puts ("*FAILED*");
-	puts ("   Opened named types should be named types!");
+	FAILED();
+	puts ("    Opened named types should be named types!");
 	goto error;
     }
     
@@ -727,8 +590,8 @@ test_named (void)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	puts ("*FAILED*");
-	puts ("   Dataset type should be a named type!");
+	FAILED();
+	puts ("    Dataset type should be a named type!");
 	goto error;
     }
 
@@ -741,8 +604,8 @@ test_named (void)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	puts ("*FAILED*");
-	puts ("   Dataset type should be a named type!");
+	FAILED();
+	puts ("    Dataset type should be a named type!");
 	goto error;
     }
 
@@ -762,8 +625,8 @@ test_named (void)
     if ((t2 = H5Dget_type (dset))<0) goto error;
     if ((status=H5Tcommitted (t2))<0) goto error;
     if (!status) {
-	puts ("*FAILED*");
-	puts ("   Dataset type should be a named type!");
+	FAILED();
+	puts ("    Dataset type should be a named type!");
 	goto error;
     }
     if (H5Tclose (t2)<0) goto error;
@@ -781,7 +644,7 @@ test_named (void)
     if (H5Tclose (type)<0) goto error;
     if (H5Sclose (space)<0) goto error;
     if (H5Fclose (file)<0) goto error;
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  error:
@@ -846,8 +709,7 @@ test_conv_str_1(void)
     char	*buf=NULL;
     hid_t	src_type, dst_type;
 
-    printf("%-70s", "Testing string conversions");
-    fflush(stdout);
+    TESTING("string conversions");
 
     /*
      * Convert a null-terminated string to a shorter and longer null
@@ -859,19 +721,19 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
-	puts("*FAILED*");
-	puts("   Truncated C-string test failed");
+	FAILED();
+	puts("    Truncated C-string test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   Extended C-string test failed");
+	FAILED();
+	puts("    Extended C-string test failed");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
 
     /*
      * Convert a null padded string to a shorter and then longer string.
@@ -882,19 +744,19 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   Truncated C buffer test failed");
+	FAILED();
+	puts("    Truncated C buffer test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   Extended C buffer test failed");
+	FAILED();
+	puts("    Extended C buffer test failed");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
 
     /*
      * Convert a space-padded string to a shorter and then longer string.
@@ -905,19 +767,19 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   Truncated Fortran-string test failed");
+	FAILED();
+	puts("    Truncated Fortran-string test failed");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcde     abcde     ", 20)) {
-	puts("*FAILED*");
-	puts("   Extended Fortran-string test failed");
+	FAILED();
+	puts("    Extended Fortran-string test failed");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
 
     /*
      * What happens if a null-terminated string is not null terminated?  If
@@ -931,8 +793,8 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   Non-terminated string test 1");
+	FAILED();
+	puts("    Non-terminated string test 1");
 	goto error;
     }
     H5Tclose(dst_type);
@@ -940,20 +802,20 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   Non-terminated string test 2");
+	FAILED();
+	puts("    Non-terminated string test 2");
 	goto error;
     }
     memcpy(buf, "abcdeabcdexxxxxxxxxx", 20);
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   Non-terminated string test 2");
+	FAILED();
+	puts("    Non-terminated string test 2");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
     
     /*
      * Test C string to Fortran and vice versa.
@@ -964,51 +826,51 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdefghi abcdefghi ", 20)) {
-	puts("*FAILED*");
-	puts("   C string to Fortran test 1");
+	FAILED();
+	puts("    C string to Fortran test 1");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdefghi\0abcdefghi\0", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C string test 1");
+	FAILED();
+	puts("    Fortran to C string test 1");
 	goto error;
     }
-    H5Tclose(dst_type);
+    if (H5Tclose(dst_type)<0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   C string to Fortran test 2");
+	FAILED();
+	puts("    C string to Fortran test 2");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C string test 2");
+	FAILED();
+	puts("    Fortran to C string test 2");
 	goto error;
     }
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
     src_type = mkstr(5, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd      abcd      ", 20)) {
-	puts("*FAILED*");
-	puts("   C string to Fortran test 3");
+	FAILED();
+	puts("    C string to Fortran test 3");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C string test 3");
+	FAILED();
+	puts("    Fortran to C string test 3");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
     
     /*
      * Test C buffer to Fortran and vice versa.
@@ -1019,53 +881,53 @@ test_conv_str_1(void)
     memcpy(buf, "abcdefghijabcdefghij", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   C buffer to Fortran test 1");
+	FAILED();
+	puts("    C buffer to Fortran test 1");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C buffer test 1");
+	FAILED();
+	puts("    Fortran to C buffer test 1");
 	goto error;
     }
-    H5Tclose(dst_type);
+    if (H5Tclose(dst_type)<0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   C buffer to Fortran test 2");
+	FAILED();
+	puts("    C buffer to Fortran test 2");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C buffer test 2");
+	FAILED();
+	puts("    Fortran to C buffer test 2");
 	goto error;
     }
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
     src_type = mkstr(5, H5T_STR_NULLPAD);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
     if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd      abcd      ", 20)) {
-	puts("*FAILED*");
-	puts("   C buffer to Fortran test 3");
+	FAILED();
+	puts("    C buffer to Fortran test 3");
 	goto error;
     }
     if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
     if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
-	puts("*FAILED*");
-	puts("   Fortran to C buffer test 3");
+	FAILED();
+	puts("    Fortran to C buffer test 3");
 	goto error;
     }
     free(buf);
-    H5Tclose(src_type);
-    H5Tclose(dst_type);
+    if (H5Tclose(src_type)<0) goto error;
+    if (H5Tclose(dst_type)<0) goto error;
 
-    puts(" PASSED");
+    PASSED();
     reset_hdf5();
     return 0;
 
@@ -1120,10 +982,9 @@ test_conv_str_2(void)
 		(int)(i+1), (int)ntests);
 	printf("%-70s", s);
 	fflush(stdout);
-	
 	if (H5Tconvert(c_type, f_type, nelmts, buf, NULL)<0) goto error;
 	if (H5Tconvert(f_type, c_type, nelmts, buf, NULL)<0) goto error;
-	puts(" PASSED");
+	PASSED();
     }
     ret_value = 0;
 
@@ -1155,19 +1016,13 @@ test_conv_str_2(void)
 static herr_t
 test_conv_int (void)
 {
-    const size_t	ntests=100;
-    const size_t	nelmts=2000;
-    
-    size_t		i, j;
-    void		*buf=NULL, *saved=NULL;
     unsigned char	byte[4];
 
     /*---------------------------------------------------------------------
      * Test some specific overflow/underflow cases.
      *--------------------------------------------------------------------- 
      */
-    printf ("%-70s", "Testing integer overflow conversions");
-    fflush (stdout);
+    TESTING("integer overflow conversions");
 
     /* (unsigned)0x80000000 -> (unsigned)0xffff */
     byte[0] = byte[1] = byte[2] = 0;
@@ -1176,10 +1031,10 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
-	puts ("*FAILED*");
-	printf("   src: 0x80000000 unsigned\n");
-	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
-	printf("   ans: 0xffff     unsigned\n");
+	FAILED();
+	printf("    src: 0x80000000 unsigned\n");
+	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("    ans: 0xffff     unsigned\n");
 	goto error;
     }
 
@@ -1189,10 +1044,10 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
-	puts ("*FAILED*");
-	printf("   src: 0xffffffff unsigned\n");
-	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
-	printf("   ans: 0x7fff     signed\n");
+	FAILED();
+	printf("    src: 0xffffffff unsigned\n");
+	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("    ans: 0x7fff     signed\n");
 	goto error;
     }
 
@@ -1202,10 +1057,10 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x00) {
-	puts ("*FAILED*");
-	printf("   src: 0xffffffff signed\n");
-	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
-	printf("   ans: 0x0000     unsigned\n");
+	FAILED();
+	printf("    src: 0xffffffff signed\n");
+	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("    ans: 0x0000     unsigned\n");
 	goto error;
     }
 
@@ -1216,10 +1071,10 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0xff) {
-	puts ("*FAILED*");
-	printf("   src: 0x7fffffff signed\n");
-	printf("   dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
-	printf("   ans: 0xffff     unsigned\n");
+	FAILED();
+	printf("    src: 0x7fffffff signed\n");
+	printf("    dst: 0x%02x%02x     unsigned\n", byte[1], byte[0]);
+	printf("    ans: 0xffff     unsigned\n");
 	goto error;
     }
 
@@ -1230,10 +1085,10 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0xff || byte[1]!=0x7f) {
-	puts ("*FAILED*");
-	printf("   src: 0x7fffffff signed\n");
-	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
-	printf("   ans: 0x7fff     signed\n");
+	FAILED();
+	printf("    src: 0x7fffffff signed\n");
+	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("    ans: 0x7fff     signed\n");
 	goto error;
     }
 
@@ -1244,60 +1099,18 @@ test_conv_int (void)
 	goto error;
     }
     if (byte[0]!=0x00 || byte[1]!=0x80) {
-	puts ("*FAILED*");
-	printf("   src: 0xbfffffff signed\n");
-	printf("   dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
-	printf("   ans: 0x8000     signed\n");
+	FAILED();
+	printf("    src: 0xbfffffff signed\n");
+	printf("    dst: 0x%02x%02x     signed\n", byte[1], byte[0]);
+	printf("    ans: 0x8000     signed\n");
 	goto error;
     }
 
-    puts (" PASSED");
-    
-    
-    /*-----------------------------------------------------------------------
-     * Test random cases.
-     *----------------------------------------------------------------------- 
-     */
-    printf ("%-70s", "Testing random integer conversions");
-    fflush (stdout);
-    
-    /* Allocate buffers */
-    buf = malloc (nelmts*8);
-    saved = malloc (nelmts*8);
-
-    for (i=0; i<ntests; i++) {
-
-	/* Start with NATIVE_INT */
-	for (j=0; j<nelmts; j++) ((int*)buf)[j] = rand();
-	memcpy (saved, buf, nelmts*sizeof(int));
-
-	/* Convert there and back */
-	if (H5Tconvert (H5T_NATIVE_INT, H5T_STD_I64LE, nelmts, buf,
-			NULL)<0) goto error;
-	if (H5Tconvert (H5T_STD_I64LE, H5T_NATIVE_INT, nelmts, buf,
-			NULL)<0) goto error;
-
-	/* Check results */
-	for (j=0; j<nelmts; j++) {
-	    if (((int*)buf)[j]!=((int*)saved)[j]) {
-		puts ("*FAILED*");
-		printf ("   Test %lu, elmt %lu, got %d instead of %d\n",
-			(unsigned long)i, (unsigned long)j,
-			((int*)buf)[j], ((int*)saved)[j]);
-		goto error;
-	    }
-	}
-    }
-
-    puts (" PASSED");
-    free (buf);
-    free (saved);
+    PASSED();
     reset_hdf5();
     return 0;
 
  error:
-    if (buf) free (buf);
-    if (saved) free (saved);
     reset_hdf5();
     return -1;
 }
@@ -1421,8 +1234,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	sprintf(str, "Testing random %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
 	printf("%-70s", str);
-	puts("*FAILED*");
-	puts("   Unknown data type.");
+	FAILED();
+	puts("    Unknown data type.");
 	goto error;
     }
 
@@ -1817,10 +1630,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    }
 
 	    /* Print errors */
-	    if (0==fails_this_test++) puts("*FAILED*");
-	    printf("   test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
+	    if (0==fails_this_test++) FAILED();
+	    printf("    test %u elmt %u\n", (unsigned)i+1, (unsigned)j);
 
-	    printf("      src = ");
+	    printf("        src = ");
 	    for (k=0; k<src_size; k++) {
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
 	    }
@@ -1854,7 +1667,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		break;
 	    }
 	    
-	    printf("      dst = ");
+	    printf("        dst = ");
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
 	    }
@@ -1888,7 +1701,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		break;
 	    }
 	    
-	    printf("      ans = ");
+	    printf("        ans = ");
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", hw[ENDIAN(dst_size, k)]);
 	    }
@@ -1923,14 +1736,14 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    }
 
 	    if (++fails_all_tests>=max_fails) {
-		puts("   maximum failures reached, aborting test...");
+		puts("    maximum failures reached, aborting test...");
 		goto done;
 	    }
 	}
-	puts(" PASSED");
+	PASSED();
     }
     if (noverflows_g>0) {
-	printf("   %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
+	printf("    %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
     }
 
  done:
@@ -2135,9 +1948,9 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     if (FLT_OTHER==src_type || FLT_OTHER==dst_type) {
 	sprintf(str, "Testing random %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);
-	printf ("%-70s", str);
-	puts("*FAILED*");
-	puts("   Unknown data type.");
+	printf("%-70s", str);
+	FAILED();
+	puts("    Unknown data type.");
 	goto error;
     }
     
@@ -2157,7 +1970,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	 */
 	sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
 		name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
-	printf ("%-70s", str);
+	printf("%-70s", str);
 	fflush(stdout);
 	fails_this_test = 0;
 
@@ -2321,10 +2134,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    }
 #endif
 
-	    if (0==fails_this_test++) puts("*FAILED*");
-	    printf("   test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
+	    if (0==fails_this_test++) FAILED();
+	    printf("    test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
 	    
-	    printf("      src =");
+	    printf("        src =");
 	    for (k=0; k<src_size; k++) {
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
 	    }
@@ -2339,7 +2152,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 	    }
 
-	    printf("      dst =");
+	    printf("        dst =");
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
 	    }
@@ -2354,7 +2167,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 	    }
 
-	    printf("      ans =");
+	    printf("        ans =");
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", hw[ENDIAN(dst_size,k)]);
 	    }
@@ -2370,14 +2183,14 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    }
 
 	    if (++fails_all_tests>=max_fails) {
-		puts("   maximum failures reached, aborting test...");
+		puts("    maximum failures reached, aborting test...");
 		goto done;
 	    }
 	}
-	puts(" PASSED");
+	PASSED();
     }
     if (noverflows_g>0) {
-	printf("  %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
+	printf("   %d overflow%s\n", noverflows_g, 1==noverflows_g?"":"s");
     }
 
  done:
@@ -2424,15 +2237,17 @@ int
 main(void)
 {
     unsigned long	nerrors = 0;
+    hid_t		fapl=-1;
 
     reset_hdf5();
+    fapl = h5_fileaccess();
 
     /* Do the tests */
     nerrors += test_classes()<0 ? 1 : 0;
     nerrors += test_copy()<0 ? 1 : 0;
     nerrors += test_compound()<0 ? 1 : 0;
-    nerrors += test_transient ()<0 ? 1 : 0;
-    nerrors += test_named ()<0 ? 1 : 0;
+    nerrors += test_transient (fapl)<0 ? 1 : 0;
+    nerrors += test_named (fapl)<0 ? 1 : 0;
     reset_hdf5();
     
     nerrors += test_conv_str_1()<0 ? 1 : 0;
@@ -2635,6 +2450,6 @@ main(void)
         exit(1);
     }
     printf("All data type tests passed.\n");
-    cleanup ();
+    h5_cleanup (fapl);
     return 0;
 }

@@ -188,7 +188,7 @@ main (void)
      * 1998-11-06 ptl
      */
     printf ("I/O request size is %1.1fMB\n",
-	    ((double)((hssize_t)(size[0]*size[1])))/(1024.0*1024));
+	    (double)(hssize_t)(size[0]*size[1])/1024.0*1024);
     
     /* Open the files */
     file = H5Fcreate (HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

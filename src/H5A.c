@@ -34,12 +34,11 @@ static char		RcsId[] = "$Revision$";
 #define PABLO_MASK	H5A_mask
 
 /* Is the interface initialized? */
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	H5A_init_interface
 static herr_t		H5A_init_interface(void);
 
 /* PRIVATE PROTOTYPES */
-static void H5A_term_interface(void);
 static hid_t H5A_create(const H5G_entry_t *ent, const char *name,
 			const H5T_t *type, const H5S_t *space);
 static hid_t H5A_open(H5G_entry_t *ent, unsigned idx);
@@ -63,26 +62,18 @@ DESCRIPTION
 static herr_t
 H5A_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
-
     FUNC_ENTER(H5A_init_interface, FAIL);
 
     /*
-     * Register cleanup function.
+     * Create attribute group.
      */
-    if ((ret_value = H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE,
-				    H5A_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5A_close))<0) {
+    if (H5I_init_group(H5I_ATTR, H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS,
+		       (herr_t (*)(void *)) H5A_close)<0) {
         HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		      "unable to initialize attribute group");
-    }
-
-    if (H5_add_exit(H5A_term_interface) < 0) {
-	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		      "unable to install atexit function");
+		      "unable to initialize interface");
     }
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -94,7 +85,6 @@ H5A_init_interface(void)
  USAGE
     void H5A_term_interface()
  RETURNS
-    Non-negative on success/Negative on failure
  DESCRIPTION
     Release any other resources allocated.
  GLOBAL VARIABLES
@@ -103,11 +93,13 @@ H5A_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5A_term_interface(void)
+void
+H5A_term_interface(intn status)
 {
-    H5I_destroy_group(H5I_ATTR);
-    interface_initialize_g = FALSE;
+    if (interface_initialize_g>0) {
+	H5I_destroy_group(H5I_ATTR);
+    }
+    interface_initialize_g = status;
 }
 
 

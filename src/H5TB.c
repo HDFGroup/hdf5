@@ -43,9 +43,8 @@ static char		RcsId[] = "@(#)$Revision$";
 /* Interface init/term information */
 #define PABLO_MASK	H5TB_mask
 #define INTERFACE_INIT	H5TB_init_interface
-static intn		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 static herr_t		H5TB_init_interface(void);
-static void		H5TB_term_interface(void);
 
 /* Local information for managing buffers */
 #define H5TB_RESERVED_ATOMS         0
@@ -80,15 +79,15 @@ DESCRIPTION
 static herr_t
 H5TB_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5TB_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5I_TEMPBUF, H5I_TEMPBUFID_HASHSIZE,
-            H5TB_RESERVED_ATOMS, NULL)) >= 0) {
-        ret_value = H5_add_exit(&H5TB_term_interface);
+    if (H5I_init_group(H5I_TEMPBUF, H5I_TEMPBUFID_HASHSIZE,
+		       H5TB_RESERVED_ATOMS, NULL)<0) {
+	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
     }
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -109,29 +108,32 @@ H5TB_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5TB_term_interface(void)
+void
+H5TB_term_interface(intn status)
 {
     H5TB_t *curr=H5TB_list_head,       /* pointer to current temp. buffer */
         *next;                          /* pointer to next temp. buffer */
 
-    /* Destroy the atom group */
-    H5I_destroy_group(H5I_TEMPBUF);
+    if (interface_initialize_g>0) {
+	/* Destroy the atom group */
+	H5I_destroy_group(H5I_TEMPBUF);
 
-    /* Step through the list and free the buffers */
-    while(curr!=NULL) {
-        next=curr->next;
+	/* Step through the list and free the buffers */
+	while(curr!=NULL) {
+	    next=curr->next;
 
-        if(curr->buf!=NULL)
-            H5MM_xfree(curr->buf);
-        H5MM_xfree(curr);
+	    if(curr->buf!=NULL)
+		H5MM_xfree(curr->buf);
+	    H5MM_xfree(curr);
 
-        curr=next;
-    } /* end while */
+	    curr=next;
+	} /* end while */
 
-    /* Reset head & tail pointers */
-    H5TB_list_head=H5TB_list_tail=NULL;
-    interface_initialize_g = FALSE;
+	/* Reset head & tail pointers */
+	H5TB_list_head=H5TB_list_tail=NULL;
+    }
+    
+    interface_initialize_g = status;
 }
 
 /*-------------------------------------------------------------------------

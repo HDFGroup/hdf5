@@ -20,9 +20,8 @@
 /* Interface initialization */
 #define PABLO_MASK	H5Z_mask
 #define INTERFACE_INIT H5Z_init_interface
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 static herr_t H5Z_init_interface (void);
-static void H5Z_term_interface (void);
 
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
@@ -52,10 +51,8 @@ static herr_t
 H5Z_init_interface (void)
 {
     FUNC_ENTER (H5Z_init_interface, FAIL);
-    H5_add_exit (H5Z_term_interface);
 
-    H5Z_register (H5Z_FILTER_DEFLATE, "deflate",
-		  H5Z_filter_deflate);
+    H5Z_register (H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate);
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -75,69 +72,73 @@ H5Z_init_interface (void)
  *
  *-------------------------------------------------------------------------
  */
-static void
-H5Z_term_interface (void)
+void
+H5Z_term_interface (intn status)
 {
     size_t	i;
-    
 #ifdef H5Z_DEBUG
     int		dir, nprint=0;
     char	comment[16], bandwidth[32];
-
-    if (H5DEBUG(Z)) {
-	for (i=0; i<H5Z_table_used_g; i++) {
-	    for (dir=0; dir<2; dir++) {
-		if (0==H5Z_table_g[i].stats[dir].total) continue;
-
-		if (0==nprint++) {
-		    /* Print column headers */
-		    HDfprintf (H5DEBUG(Z), "H5Z: filter statistics "
-			       "accumulated over life of library:\n");
-		    HDfprintf (H5DEBUG(Z),
-			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			       "Filter", "Total", "Errors", "User",
-			       "System", "Elapsed", "Bandwidth");
-		    HDfprintf (H5DEBUG(Z),
-			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			       "------", "-----", "------", "----",
-			       "------", "-------", "---------");
-		}
-
-		/* Truncate the comment to fit in the field */
-		HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
-		comment[sizeof(comment)-1] = '\0';
-
-		/*
-		 * Format bandwidth to have four significant digits and units
-		 * of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or the word
-		 * `Inf' if the elapsed time is zero.
-		 */
-		H5_bandwidth(bandwidth,
-			     (double)(H5Z_table_g[i].stats[dir].total),
-			     H5Z_table_g[i].stats[dir].timer.etime);
-
-		/* Print the statistics */
-		HDfprintf (H5DEBUG(Z),
-			   "   %s%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
-			   "%10s\n", dir?"<":">", comment, 
-			   H5Z_table_g[i].stats[dir].total,
-			   H5Z_table_g[i].stats[dir].errors,
-			   H5Z_table_g[i].stats[dir].timer.utime,
-			   H5Z_table_g[i].stats[dir].timer.stime,
-			   H5Z_table_g[i].stats[dir].timer.etime,
-			   bandwidth);
-	    }
-	}
-    }
 #endif
 
-    /* Free the table */
-    for (i=0; i<H5Z_table_used_g; i++) {
-	H5MM_xfree(H5Z_table_g[i].name);
+    if (interface_initialize_g>0) {
+#ifdef H5Z_DEBUG
+	if (H5DEBUG(Z)) {
+	    for (i=0; i<H5Z_table_used_g; i++) {
+		for (dir=0; dir<2; dir++) {
+		    if (0==H5Z_table_g[i].stats[dir].total) continue;
+
+		    if (0==nprint++) {
+			/* Print column headers */
+			HDfprintf (H5DEBUG(Z), "H5Z: filter statistics "
+				   "accumulated over life of library:\n");
+			HDfprintf (H5DEBUG(Z),
+				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
+				   "Filter", "Total", "Errors", "User",
+				   "System", "Elapsed", "Bandwidth");
+			HDfprintf (H5DEBUG(Z),
+				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
+				   "------", "-----", "------", "----",
+				   "------", "-------", "---------");
+		    }
+
+		    /* Truncate the comment to fit in the field */
+		    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+		    comment[sizeof(comment)-1] = '\0';
+
+		    /*
+		     * Format bandwidth to have four significant digits and
+		     * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
+		     * the word `Inf' if the elapsed time is zero.
+		     */
+		    H5_bandwidth(bandwidth,
+				 (double)(H5Z_table_g[i].stats[dir].total),
+				 H5Z_table_g[i].stats[dir].timer.etime);
+
+		    /* Print the statistics */
+		    HDfprintf (H5DEBUG(Z),
+			       "   %s%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
+			       "%10s\n", dir?"<":">", comment, 
+			       H5Z_table_g[i].stats[dir].total,
+			       H5Z_table_g[i].stats[dir].errors,
+			       H5Z_table_g[i].stats[dir].timer.utime,
+			       H5Z_table_g[i].stats[dir].timer.stime,
+			       H5Z_table_g[i].stats[dir].timer.etime,
+			       bandwidth);
+		}
+	    }
+	}
+#endif
+
+	/* Free the table */
+	for (i=0; i<H5Z_table_used_g; i++) {
+	    H5MM_xfree(H5Z_table_g[i].name);
+	}
+	H5Z_table_g = H5MM_xfree(H5Z_table_g);
+	H5Z_table_used_g = H5Z_table_alloc_g = 0;
     }
-    H5Z_table_g = H5MM_xfree(H5Z_table_g);
-    H5Z_table_used_g = H5Z_table_alloc_g = 0;
-    interface_initialize_g = FALSE;
+    
+    interface_initialize_g = status;
 }
 
 

@@ -28,12 +28,9 @@ static char		RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK	H5P_mask
 
 /* Is the interface initialized? */
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT H5P_init_interface
 static herr_t		H5P_init_interface(void);
-
-/* PRIVATE PROTOTYPES */
-static void		H5P_term_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -83,14 +80,6 @@ H5P_init_interface(void)
 		      "unable to initialize atom group");
     }
     
-    /*
-     * Register cleanup function.
-     */
-    if (H5_add_exit(H5P_term_interface) < 0) {
-	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		      "unable to install atexit function");
-    }
-    
     FUNC_LEAVE(ret_value);
 }
 
@@ -111,15 +100,18 @@ H5P_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5P_term_interface(void)
+void
+H5P_term_interface(intn status)
 {
     intn		    i;
 
-    for (i = 0; i < H5P_NCLASSES; i++) {
-	H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
+    if (interface_initialize_g>0) {
+	for (i = 0; i < H5P_NCLASSES; i++) {
+	    H5I_destroy_group((H5I_type_t)(H5I_TEMPLATE_0 + i));
+	}
     }
-    interface_initialize_g = FALSE;
+    
+    interface_initialize_g = status;
 }
 
 /*--------------------------------------------------------------------------

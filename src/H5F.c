@@ -98,9 +98,8 @@ const H5F_mprop_t	H5F_mount_dflt = {
 };
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5F_init_interface
-static void H5F_term_interface(void);
 
 /* PRIVATE PROTOTYPES */
 static H5F_t *H5F_new(H5F_file_t *shared, const H5F_create_t *fcpl,
@@ -112,28 +111,27 @@ static herr_t H5F_locate_signature(H5F_low_t *f_handle,
 				   haddr_t *addr/*out*/);
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5F_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5F_init_interface()
-   
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
-ERRORS
-
-Modifications:
-    Robb Matzke, 4 Aug 1997
-    Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
-    It was already H5F_mask for the PABLO_TRACE_ON call.
-
-    rky 980816
-    Added .disp, .btype, .ftype to H5F_access_t.
-
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:	H5F_init_interface
+ *
+ * Purpose:	Initialize interface-specific information.
+ *
+ * Return:	Success:	non-negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 20, 1998
+ *
+ * Modifications:
+ * 	Robb Matzke, 4 Aug 1997
+ *	Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
+ *	It was already H5F_mask for the PABLO_TRACE_ON call.
+ *
+ *  	rky 980816
+ *	Added .disp, .btype, .ftype to H5F_access_t.
+ *-------------------------------------------------------------------------
+ */
 herr_t 
 H5F_init_interface(void)
 {
@@ -154,9 +152,8 @@ H5F_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
-		       (herr_t (*)(void*))H5F_close)<0 ||
-	H5_add_exit(H5F_term_interface)<0) {	
-	HRETURN_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL,
+		       (herr_t (*)(void*))H5F_close)<0) {
+	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }
 
@@ -211,11 +208,13 @@ H5F_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5F_term_interface(void)
+void
+H5F_term_interface(intn status)
 {
-    H5I_destroy_group(H5I_FILE);
-    interface_initialize_g = FALSE;
+    if (interface_initialize_g>0) {
+	H5I_destroy_group(H5I_FILE);
+    }
+    interface_initialize_g = status;
 }
 
 

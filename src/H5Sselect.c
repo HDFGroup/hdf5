@@ -18,59 +18,9 @@
 
 /* Interface initialization */
 #define PABLO_MASK      H5S_select_mask
-#define INTERFACE_INIT  H5S_select_init
-static intn             interface_initialize_g = FALSE;
-static herr_t		H5S_select_init(void);
-static void		H5S_select_term(void);
+#define INTERFACE_INIT  NULL
+static intn             interface_initialize_g = 0;
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S_select_init
- PURPOSE
-    Initialize selection interface
- USAGE
-   herr_t  H5S_select_init(void)
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5S_select_init (void)
-{
-    herr_t		    ret_value = SUCCEED;
-    FUNC_ENTER (H5S_select_init, FAIL);
-
-    /* Register the atexit function for this (sub)interface */
-    ret_value = H5_add_exit(&H5S_select_term);
-    FUNC_LEAVE(ret_value);
-}
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S_select_term
- PURPOSE
-    Terminate various H5S selection objects and free lists
- USAGE
-    void H5S_select_term()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Release the selection resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static void
-H5S_select_term(void)
-{
-}
 
 /*--------------------------------------------------------------------------
  NAME

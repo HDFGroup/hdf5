@@ -7,69 +7,20 @@
  *
  * Purpose:	Tests datasets stored in external raw files.
  */
-
-/* See H5private.h for how to include headers */
-#undef NDEBUG
-#include <H5config.h>
-
-#ifdef STDC_HEADERS
-#   include <assert.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
-#   include <string.h>
-#endif
-
-#ifdef HAVE_IO_H
-#	include <io.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-
-#include <hdf5.h>
-
-#ifndef HAVE_ATTRIBUTE
-#   undef __attribute__
-#   define __attribute__(X) /*void*/
-#   define __unused__ /*void*/
+#if 1 /* have to go, and this is only half baked.... 19981120 rpm*/
+int main(void) {return 0;} 
 #else
-#   define __unused__ __attribute__((unused))
-#endif
 
-#define TEST_FILE_NAME1		"extern_1.h5"
-#define TEST_FILE_NAME2		"extern_2.h5"
-#define TEST_FILE_NAME3		"extern_3.h5"
+#include <h5test.h>
+
+const char *FILENAME[] = {
+    "extern_1",
+    "extern_2",
+    "extern_3",
+    NULL
+};
 
 static int nerrors_g = 0;
-
-
-/*-------------------------------------------------------------------------
- * Function:	display_error_cb
- *
- * Purpose:	Displays the error stack after printing "*FAILED*".
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, March  4, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-display_error_cb (void __unused__ *client_data)
-{
-    puts ("*FAILED*");
-    H5Eprint (stdout);
-    nerrors_g++;
-    return 0;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -135,7 +86,7 @@ same_contents (const char *name1, const char *name2)
  *-------------------------------------------------------------------------
  */
 static void
-test_1 (void) 
+test_1 (hid_t fapl) 
 {
     hid_t	file, plist, space, dset, grp;
     herr_t	status;
@@ -143,42 +94,37 @@ test_1 (void)
     herr_t	(*func)(void*) = NULL;
     void	*client_data = NULL;
     int		n;
-	
+    char	filename[1024];
     
     /*
      * Create the file and an initial group.  This causes messages about
      * debugging to be emitted before we start playing games with what the
      * output looks like.
      */
-    file = H5Fcreate (TEST_FILE_NAME1, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-		      H5P_DEFAULT, H5P_DEFAULT);
-    assert (file>=0);
-    grp = H5Gcreate (file, "emit-diagnostics", 8);
-    H5Gclose (grp);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+			   H5P_DEFAULT, fapl))<0) goto error;
+    if ((grp = H5Gcreate (file, "emit-diagnostics", 8))<0) goto error;
+    if (H5Gclose (grp)<0) goto error;
 
     /*
      * A single external file for a non-extendible dataset.
      */
-    do {
-	printf ("%-70s", "...fixed-size data space, exact storage");
-	fflush (stdout);
-	plist = H5Pcreate (H5P_DATASET_CREATE);
-	assert (plist>=0);
-	status = H5Pset_external (plist, "ext1.data", 0, (hsize_t)400);
-	assert (status>=0);
+    TESTING("fixed-size data space, exact storage");
+    if ((plist = H5Pcreate (H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_external (plist, "ext1.data", 0, (hsize_t)400)<0) goto error;
 
-	size[0] = max_size[0] = 100;
-	space = H5Screate_simple (1, size, max_size);
-	assert (space>=0);
+    size[0] = max_size[0] = 100;
+    if ((space = H5Screate_simple (1, size, max_size))<0) goto error;
 
-	/* Create the dataset, the `dset1' name is used later too */
-	dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, plist);
-	if (dset<0) break;
-	H5Dclose (dset);
-	puts (" PASSED");
-    } while (0);
-    H5Sclose (space);
-    H5Pclose (plist);
+    /* Create the dataset, the `dset1' name is used later too */
+    if ((dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, plist))<0)
+	goto error;
+    if (H5Dclose (dset)<0) goto error;
+    if (H5Sclose (space)<0) goto error;
+    if (H5Pclose (plist)<0) goto error;
+    PASSED();
+
 
     /*
      * A single external file which is too small to represent all the data.
@@ -490,6 +436,8 @@ test_1 (void)
 
     /* END OF TESTS */
     H5Fclose (file);
+
+ error:
 }
 
 
@@ -586,7 +534,7 @@ test_2 (void)
 	    puts ("   Failed to read dataset");
 	    break;
 	}
- 
+
 	for (i=0; i<100; i++) {
 	    if (whole[i]!=(signed)i) {
 		puts ("*FAILED*");
@@ -856,3 +804,4 @@ main (void)
 
     return (nerrors_g?1:0);
 }
+#endif

@@ -9,7 +9,7 @@
 # Add include directory to the C preprocessor flags and the hdf5
 # library to the library list.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
-LIBS=../src/libhdf5.a @LIBS@
+LIBS=libh5test.a ../src/libhdf5.a @LIBS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -17,6 +17,11 @@ TEST_PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset   \
       extend external shtype links unlink big mtime fillval mount flush1     \
       flush2
 TIMINGS=iopipe chunk ragged overhead
+
+# The libh5test.a library provides common support code for the tests.
+LIB=libh5test.a
+LIB_SRC=h5test.c
+LIB_OBJ=$(LIB_SRC:.c=.o)
 
 # Temporary files
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
@@ -55,8 +60,8 @@ timings _timings: $(TIMINGS)
 	   fi;								      \
 	done;
 
-# How to build the tests...  They all depend on the hdf5 library.
-$(TEST_PROGS): ../src/libhdf5.a
+# How to build the tests...  They all depend on the test and hdf5 libraries.
+$(TEST_PROGS): libh5test.a ../src/libhdf5.a
 TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o trefer.o tselect.o tstab.o th5s.o
 testhdf5: $(TESTHDF5_OBJ)
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LDFLAGS) $(LIBS)

@@ -27,7 +27,7 @@
 #include <H5MMprivate.h>
 
 #define PABLO_MASK H5F_family
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 #define H5F_FAM_OFFSET(LF,ADDR)	((off_t)((ADDR)->offset %		     \
@@ -454,11 +454,14 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 	
 	/*
 	 * Make sure the logical eof is large enough to handle the request.
+	 * Do not decrease the EOF
 	 */
 	max_addr = cur_addr;
 	H5F_addr_inc(&max_addr, (hsize_t)nbytes);
-	H5F_low_seteof(lf->u.fam.memb[membno], &max_addr);
-
+	if (H5F_addr_gt(&max_addr, &(lf->u.fam.memb[membno]->eof))) {
+	    H5F_low_seteof(lf->u.fam.memb[membno], &max_addr);
+	}
+	
 	/* Write the data to the member */
 	if (H5F_low_write(lf->u.fam.memb[membno],
 			  access_parms->u.fam.memb_access, xfer_mode,

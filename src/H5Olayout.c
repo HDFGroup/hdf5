@@ -40,7 +40,7 @@ const H5O_class_t H5O_LAYOUT[1] = {{
 
 /* Interface initialization */
 #define PABLO_MASK      H5O_layout_mask
-static hbool_t interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 

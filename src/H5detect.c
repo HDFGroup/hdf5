@@ -321,16 +321,16 @@ print_results(int nd, detected_t *d)
 #include <H5MMprivate.h>\n\
 #include <H5Tpkg.h>\n\
 \n\
-static hbool_t interface_initialize_g = FALSE;\n\
+static intn interface_initialize_g = 0;\n\
 #define INTERFACE_INIT NULL\n\
 \n");
 
     /* The interface termination function */
     printf("\n\
-static void\n\
-H5T_native_close(void)\n\
+void\n\
+H5T_native_close(intn status)\n\
 {\n\
-    interface_initialize_g = FALSE;\n\
+    interface_initialize_g = status;\n\
 }\n");
 
     /* The interface initialization function */
@@ -340,8 +340,7 @@ H5T_native_open (void)\n\
 {\n\
    H5T_t        *dt = NULL;\n\
 \n\
-   FUNC_ENTER (H5T_init, FAIL);\n\
-   H5_add_exit(&H5T_native_close);\n");
+   FUNC_ENTER (H5T_init, FAIL);\n");
 
     for (i = 0; i < nd; i++) {
 

@@ -14,7 +14,7 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5O_pline_mask
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 #define H5O_PLINE_VERSION	1

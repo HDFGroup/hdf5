@@ -26,7 +26,7 @@ typedef struct H5T_conv_struct_t {
 } H5T_conv_struct_t;
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /*

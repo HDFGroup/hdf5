@@ -27,9 +27,8 @@ static char		RcsId[] = "@(#)$Revision$";
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
 #define INTERFACE_INIT	H5S_init_interface
-static intn		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 static herr_t		H5S_init_interface(void);
-static void		H5S_term_interface(void);
 
 /* Tables of file and memory conversion information */
 static const H5S_fconv_t	*H5S_fconv_g[H5S_SEL_N];
@@ -61,13 +60,13 @@ DESCRIPTION
 static herr_t
 H5S_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5S_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
-            H5S_RESERVED_ATOMS, (herr_t (*)(void *)) H5S_close)) >= 0) {
-        ret_value = H5_add_exit(&H5S_term_interface);
+    if (H5I_init_group(H5I_DATASPACE, H5I_DATASPACEID_HASHSIZE,
+		       H5S_RESERVED_ATOMS, (herr_t (*)(void *))H5S_close)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
     }
 
     /* Register space conversion functions */
@@ -88,7 +87,7 @@ H5S_init_interface(void)
     }
 #endif
 
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -109,8 +108,8 @@ H5S_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
-H5S_term_interface(void)
+void
+H5S_term_interface(intn status)
 {
     size_t	i;
     
@@ -118,96 +117,101 @@ H5S_term_interface(void)
     int		j, nprints=0;
     H5S_conv_t	*path=NULL;
     char	buf[256];
-    
-    /*
-     * Print statistics about each conversion path.
-     */
-    if (H5DEBUG(S)) {
-	for (i=0; i<H5S_nconv_g; i++) {
-	    path = H5S_conv_g[i];
-	    for (j=0; j<2; j++) {
-		if (0==path->stats[j].gath_ncalls &&
-		    0==path->stats[j].scat_ncalls &&
-		    0==path->stats[j].bkg_ncalls) {
-		    continue;
-		}
-		if (0==nprints++) {
-		    fprintf(H5DEBUG(S), "H5S: data space conversion "
-			    "statistics accumulated over life of library:\n");
-		    fprintf(H5DEBUG(S),
-			    "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			    "Memory <> File", "Bytes", "Calls",
-			    "User", "System", "Elapsed", "Bandwidth");
-		    fprintf(H5DEBUG(S),
-			    "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			    "--------------", "-----", "-----",
-			    "----", "------", "-------", "---------");
-		}
+#endif
 
-		/* Summary */
-		sprintf(buf, "%s %c %s",
-			path->m->name, 0==j?'>':'<', path->f->name);
-		fprintf(H5DEBUG(S), "   %-16s\n", buf);
+    if (interface_initialize_g>0) {
+#ifdef H5S_DEBUG
+	/*
+	 * Print statistics about each conversion path.
+	 */
+	if (H5DEBUG(S)) {
+	    for (i=0; i<H5S_nconv_g; i++) {
+		path = H5S_conv_g[i];
+		for (j=0; j<2; j++) {
+		    if (0==path->stats[j].gath_ncalls &&
+			0==path->stats[j].scat_ncalls &&
+			0==path->stats[j].bkg_ncalls) {
+			continue;
+		    }
+		    if (0==nprints++) {
+			fprintf(H5DEBUG(S), "H5S: data space conversion "
+				"statistics:\n");
+			fprintf(H5DEBUG(S),
+				"   %-16s %10s %10s %8s %8s %8s %10s\n",
+				"Memory <> File", "Bytes", "Calls",
+				"User", "System", "Elapsed", "Bandwidth");
+			fprintf(H5DEBUG(S),
+				"   %-16s %10s %10s %8s %8s %8s %10s\n",
+				"--------------", "-----", "-----",
+				"----", "------", "-------", "---------");
+		    }
 
-		/* Gather */
-		if (path->stats[j].gath_ncalls) {
-		    H5_bandwidth(buf, (double)(path->stats[j].gath_nbytes),
-				 path->stats[j].gath_timer.etime);
-		    HDfprintf(H5DEBUG(S),
-			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			      "gather",
-			      path->stats[j].gath_nbytes,
-			      path->stats[j].gath_ncalls,
-			      path->stats[j].gath_timer.utime, 
-			      path->stats[j].gath_timer.stime, 
-			      path->stats[j].gath_timer.etime,
-			      buf);
-		}
+		    /* Summary */
+		    sprintf(buf, "%s %c %s",
+			    path->m->name, 0==j?'>':'<', path->f->name);
+		    fprintf(H5DEBUG(S), "   %-16s\n", buf);
 
-		/* Scatter */
-		if (path->stats[j].scat_ncalls) {
-		    H5_bandwidth(buf, (double)(path->stats[j].scat_nbytes),
-				 path->stats[j].scat_timer.etime);
-		    HDfprintf(H5DEBUG(S),
-			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			      "scatter",
-			      path->stats[j].scat_nbytes,
-			      path->stats[j].scat_ncalls,
-			      path->stats[j].scat_timer.utime, 
-			      path->stats[j].scat_timer.stime, 
-			      path->stats[j].scat_timer.etime,
-			      buf);
-		}
+		    /* Gather */
+		    if (path->stats[j].gath_ncalls) {
+			H5_bandwidth(buf, (double)(path->stats[j].gath_nbytes),
+				     path->stats[j].gath_timer.etime);
+			HDfprintf(H5DEBUG(S),
+				  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
+				  "%10s\n", "gather",
+				  path->stats[j].gath_nbytes,
+				  path->stats[j].gath_ncalls,
+				  path->stats[j].gath_timer.utime, 
+				  path->stats[j].gath_timer.stime, 
+				  path->stats[j].gath_timer.etime,
+				  buf);
+		    }
 
-		/* Background */
-		if (path->stats[j].bkg_ncalls) {
-		    H5_bandwidth(buf, (double)(path->stats[j].bkg_nbytes),
-				 path->stats[j].bkg_timer.etime);
-		    HDfprintf(H5DEBUG(S),
-			      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f %10s\n",
-			      "background",
-			      path->stats[j].bkg_nbytes,
-			      path->stats[j].bkg_ncalls,
-			      path->stats[j].bkg_timer.utime, 
-			      path->stats[j].bkg_timer.stime, 
-			      path->stats[j].bkg_timer.etime,
-			      buf);
+		    /* Scatter */
+		    if (path->stats[j].scat_ncalls) {
+			H5_bandwidth(buf, (double)(path->stats[j].scat_nbytes),
+				     path->stats[j].scat_timer.etime);
+			HDfprintf(H5DEBUG(S),
+				  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
+				  "%10s\n", "scatter",
+				  path->stats[j].scat_nbytes,
+				  path->stats[j].scat_ncalls,
+				  path->stats[j].scat_timer.utime, 
+				  path->stats[j].scat_timer.stime, 
+				  path->stats[j].scat_timer.etime,
+				  buf);
+		    }
+
+		    /* Background */
+		    if (path->stats[j].bkg_ncalls) {
+			H5_bandwidth(buf, (double)(path->stats[j].bkg_nbytes),
+				     path->stats[j].bkg_timer.etime);
+			HDfprintf(H5DEBUG(S),
+				  "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
+				  "%10s\n", "background",
+				  path->stats[j].bkg_nbytes,
+				  path->stats[j].bkg_ncalls,
+				  path->stats[j].bkg_timer.utime, 
+				  path->stats[j].bkg_timer.stime, 
+				  path->stats[j].bkg_timer.etime,
+				  buf);
+		    }
 		}
 	    }
 	}
-    }
 #endif
 
-    /* Free data types */
-    H5I_destroy_group(H5I_DATASPACE);
+	/* Free data types */
+	H5I_destroy_group(H5I_DATASPACE);
 
-    /* Clear/free conversion table */
-    HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
-    HDmemset(H5S_mconv_g, 0, sizeof(H5S_mconv_g));
-    for (i=0; i<H5S_nconv_g; i++) H5MM_xfree(H5S_conv_g[i]);
-    H5S_conv_g = H5MM_xfree(H5S_conv_g);
-    H5S_nconv_g = H5S_aconv_g = 0;
-    interface_initialize_g = FALSE;
+	/* Clear/free conversion table */
+	HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
+	HDmemset(H5S_mconv_g, 0, sizeof(H5S_mconv_g));
+	for (i=0; i<H5S_nconv_g; i++) H5MM_xfree(H5S_conv_g[i]);
+	H5S_conv_g = H5MM_xfree(H5S_conv_g);
+	H5S_nconv_g = H5S_aconv_g = 0;
+    }
+    
+    interface_initialize_g = status;
 }
 
 

@@ -91,10 +91,9 @@
 #define PABLO_MASK		H5G_mask
 
 /* Interface initialization */
-static hbool_t interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT	H5G_init_interface
 static herr_t H5G_init_interface(void);
-static void H5G_term_interface(void);
 static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
 static size_t H5G_ntypes_g = 0;			/*entries in type table	*/
 static size_t H5G_atypes_g = 0;			/*entries allocated	*/
@@ -683,8 +682,7 @@ H5G_init_interface(void)
 
     /* Initialize the atom group for the group IDs */
     if (H5I_init_group(H5I_GROUP, H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS,
-		       (herr_t (*)(void *)) H5G_close) < 0 ||
-	H5_add_exit(H5G_term_interface) < 0) {
+		       (herr_t (*)(void *)) H5G_close) < 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to initialize interface");
     }
@@ -717,21 +715,24 @@ H5G_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
-H5G_term_interface(void)
+void
+H5G_term_interface(intn status)
 {
     size_t	i;
+
+    if (interface_initialize_g>0) {
+	/* Empty the object type table */
+	for (i=0; i<H5G_ntypes_g; i++) {
+	    H5MM_xfree(H5G_type_g[i].desc);
+	}
+	H5G_ntypes_g = H5G_atypes_g = 0;
+	H5G_type_g = H5MM_xfree(H5G_type_g);
     
-    /* Empty the object type table */
-    for (i=0; i<H5G_ntypes_g; i++) {
-	H5MM_xfree(H5G_type_g[i].desc);
+	/* Destroy the group object id group */
+	H5I_destroy_group(H5I_GROUP);
     }
-    H5G_ntypes_g = H5G_atypes_g = 0;
-    H5G_type_g = H5MM_xfree(H5G_type_g);
     
-    /* Destroy the group object id group */
-    H5I_destroy_group(H5I_GROUP);
-    interface_initialize_g = FALSE;
+    interface_initialize_g = status;
 }
 
 

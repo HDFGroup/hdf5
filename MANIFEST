@@ -317,6 +317,8 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/gheap.c
+./test/h5test.c
+./test/h5test.h
 ./test/hyperslab.c
 ./test/iopipe.c
 ./test/istore.c

@@ -91,10 +91,9 @@ const H5D_xfer_t	H5D_xfer_dflt = {
 };
 
 /* Interface initialization? */
-static hbool_t interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
-static void H5D_term_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
 H5D_t * H5D_new(const H5D_create_t *create_parms);
 
@@ -114,42 +113,42 @@ DESCRIPTION
 static herr_t
 H5D_init_interface(void)
 {
-    herr_t		    ret_value = SUCCEED;
     FUNC_ENTER(H5D_init_interface, FAIL);
 
     /* Initialize the atom group for the dataset IDs */
-    if ((ret_value = H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE,
-				    H5D_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5D_close)) >=0) {
-	ret_value = H5_add_exit(H5D_term_interface);
+    if (H5I_init_group(H5I_DATASET, H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS,
+		       (herr_t (*)(void *)) H5D_close)<0) {
+        HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+		      "unable to initialize interface");
     }
-    FUNC_LEAVE(ret_value);
+    
+    FUNC_LEAVE(SUCCEED);
 }
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5D_term_interface
- PURPOSE
-    Terminate various H5D objects
- USAGE
-    void H5D_term_interface()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Release the atom group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static void
-H5D_term_interface(void)
+/*-------------------------------------------------------------------------
+ * Function:	H5D_term_interface
+ *
+ * Purpose:	Terminate this interface.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 20, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5D_term_interface(intn status)
 {
-    H5I_destroy_group(H5I_DATASET);
-    interface_initialize_g = FALSE;
+    if (interface_initialize_g>0) {
+	H5I_destroy_group(H5I_DATASET);
+    }
+    interface_initialize_g = status;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dcreate

@@ -29,7 +29,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5S_all_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = FALSE;
+static intn             interface_initialize_g = 0;
 
 static herr_t
 H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,

@@ -47,10 +47,9 @@ struct H5RA_t {
 };
 
 #define PABLO_MASK	H5RA_mask
-static hbool_t interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT H5RA_init_interface
 static herr_t H5RA_init_interface(void);
-static void H5RA_term_interface(void);
 static H5T_t *H5RA_meta_type_g = NULL;
 
 static herr_t H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta,
@@ -74,15 +73,15 @@ static herr_t H5RA_fix_overflow(H5RA_t *ra, H5T_t *type, H5RA_meta_t *meta,
 static herr_t
 H5RA_init_interface(void)
 {
-    herr_t	ret_value = SUCCEED;
     H5T_t	*type = NULL;
     
     FUNC_ENTER(H5RA_init_interface, FAIL);
 
     /* The atom group */
-    if ((ret_value=H5I_init_group(H5I_RAGGED, H5I_RAGGED_HASHSIZE, 0,
-				  (herr_t(*)(void*))H5RA_close))>=0) {
-	ret_value = H5_add_exit(H5RA_term_interface);
+    if (H5I_init_group(H5I_RAGGED, H5I_RAGGED_HASHSIZE, 0,
+		       (herr_t(*)(void*))H5RA_close)<0) {
+	HRETURN_ERROR (H5E_RAGGED, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
     }
 
     /* The meta dataset type */
@@ -98,7 +97,7 @@ H5RA_init_interface(void)
     }
     H5RA_meta_type_g = type;
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -116,13 +115,16 @@ H5RA_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
-H5RA_term_interface(void)
+void
+H5RA_term_interface(intn status)
 {
-    H5I_destroy_group(H5I_RAGGED);
-    H5T_close(H5RA_meta_type_g);
-    H5RA_meta_type_g = NULL;
-    interface_initialize_g = FALSE;
+    if (interface_initialize_g>0) {
+	H5I_destroy_group(H5I_RAGGED);
+	H5T_close(H5RA_meta_type_g);
+	H5RA_meta_type_g = NULL;
+    }
+    
+    interface_initialize_g = status;
 }
 
 

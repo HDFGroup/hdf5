@@ -17,7 +17,7 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5Tbit_mask
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 

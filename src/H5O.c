@@ -45,7 +45,7 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT	H5O_init_interface
 static herr_t H5O_init_interface(void);
 

@@ -22,7 +22,7 @@
 #define H5F_CORE_DEV	0xffff	/*pseudo dev for core until we fix things */
 
 #define PABLO_MASK	H5F_core
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 static htri_t H5F_core_access(const char *name,

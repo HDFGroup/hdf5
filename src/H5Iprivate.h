@@ -70,7 +70,6 @@ void *H5I_object (hid_t id);
 H5I_type_t H5I_get_type (hid_t id);
 void *H5I_remove (hid_t id);
 void *H5I_search (H5I_type_t grp, H5I_search_func_t func, const void *key);
-void H5I_term_interface (void);
 intn H5I_dec_ref (hid_t id);
 hid_t H5I_inc_ref (hid_t id);
 

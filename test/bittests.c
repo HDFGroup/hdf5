@@ -7,6 +7,8 @@
  *
  * Purpose:	Tests functions in H5Tbit.c
  */
+#include <h5test.h>
+
 #define H5T_PACKAGE
 #include <H5Tpkg.h>
 
@@ -38,21 +40,20 @@ test_find (void)
     intn	i;
     ssize_t	n;
     
-    printf ("%-70s", "Testing bit search operations");
-    fflush (stdout);
+    TESTING("bit search operations");
 
     /* The zero length buffer */
     memset (v1, 0xaa, sizeof v1);
     n = H5T_bit_find (v1, 0, 0, H5T_BIT_LSB, TRUE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   Zero length test failed (lsb)!");
+	FAILED();
+	puts ("    Zero length test failed (lsb)!");
 	goto failed;
     }
     n = H5T_bit_find (v1, 0, 0, H5T_BIT_MSB, TRUE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   Zero length test failed (msb)!");
+	FAILED();
+	puts ("    Zero length test failed (msb)!");
 	goto failed;
     }
     
@@ -61,14 +62,14 @@ test_find (void)
     memset (v1, 0, sizeof v1);
     n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, TRUE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   Zero buffer test failed (lsb)!");
+	FAILED();
+	puts ("    Zero buffer test failed (lsb)!");
 	goto failed;
     }
     n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, TRUE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   Zero buffer test failed (msb)!");
+	FAILED();
+	puts ("    Zero buffer test failed (msb)!");
 	goto failed;
     }
 
@@ -78,14 +79,14 @@ test_find (void)
 	v1[i/8] = 1<<(i%8);
 	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, TRUE);
 	if ((ssize_t)i!=n) {
-	    puts ("*FAILED*");
-	    printf ("   Test for set bit %d failed (lsb)!\n", i);
+	    FAILED();
+	    printf ("    Test for set bit %d failed (lsb)!\n", i);
 	    goto failed;
 	}
 	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, TRUE);
 	if ((ssize_t)i!=n) {
-	    puts ("*FAILED*");
-	    printf ("   Test for set bit %d failed (msb)!\n", i);
+	    FAILED();
+	    printf ("    Test for set bit %d failed (msb)!\n", i);
 	    goto failed;
 	}
     }
@@ -94,14 +95,14 @@ test_find (void)
     memset (v1, 0xff, sizeof v1);
     n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   One buffer test failed (lsb)!");
+	FAILED();
+	puts ("    One buffer test failed (lsb)!");
 	goto failed;
     }
     n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, FALSE);
     if (-1!=n) {
-	puts ("*FAILED*");
-	puts ("   One buffer test failed (msb)!");
+	FAILED();
+	puts ("    One buffer test failed (msb)!");
 	goto failed;
     }
 
@@ -111,24 +112,24 @@ test_find (void)
 	v1[i/8] &= ~(1<<(i%8));
 	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_LSB, FALSE);
 	if ((ssize_t)i!=n) {
-	    puts ("*FAILED*");
-	    printf ("   Test for clear bit %d failed (lsb)!\n", i);
+	    FAILED();
+	    printf ("    Test for clear bit %d failed (lsb)!\n", i);
 	    goto failed;
 	}
 	n = H5T_bit_find (v1, 0, 8*sizeof(v1), H5T_BIT_MSB, FALSE);
 	if ((ssize_t)i!=n) {
-	    puts ("*FAILED*");
-	    printf ("   Test for clear bit %d failed (lsb)!\n", i);
+	    FAILED();
+	    printf ("    Test for clear bit %d failed (lsb)!\n", i);
 	    goto failed;
 	}
     }
     
 
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  failed:
-    printf ("   v = 0x");
+    printf ("    v = 0x");
     for (i=0; i<(int)sizeof(v1); i++) printf ("%02x", v1[i]);
     printf ("\n");
     return -1;
@@ -159,8 +160,7 @@ test_copy (void)
     intn	i, j;
     ssize_t	n;
     
-    printf ("%-70s", "Testing bit copy operations");
-    fflush (stdout);
+    TESTING("bit copy operations");
 
     for (i=0; i<NTESTS; i++) {
 	s_offset = rand() % (8*sizeof v1);
@@ -174,13 +174,13 @@ test_copy (void)
 	H5T_bit_copy (v2, d_offset, v1, s_offset, size);
 	for (j=0; j<(intn)sizeof(v2); j++) if (v2[j]) break;
 	if (size>0 && j>=(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Unabled to find copied region in destination");
+	    FAILED();
+	    puts ("    Unabled to find copied region in destination");
 	    goto failed;
 	}
 	if (0==size && j<(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Found copied bits when we shouldn't have");
+	    FAILED();
+	    puts ("    Found copied bits when we shouldn't have");
 	    goto failed;
 	}
 	
@@ -188,26 +188,26 @@ test_copy (void)
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
 	if (size>0 && n!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find first copied bit in destination "
+	    FAILED();
+	    printf ("    Unable to find first copied bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found copied bits and shouldn't have!");
+	    FAILED();
+	    puts ("    Found copied bits and shouldn't have!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, d_offset, 8*sizeof(v2)-d_offset, H5T_BIT_LSB, 0);
 	if (d_offset+size<8*sizeof(v2) && n!=(ssize_t)size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last copied bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last copied bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (d_offset+size==8*sizeof(v2) && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   High-order zeros are present and shouldn't be!");
+	    FAILED();
+	    puts ("    High-order zeros are present and shouldn't be!");
 	    goto failed;
 	}
 
@@ -217,41 +217,41 @@ test_copy (void)
 	 */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 1);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last copied bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last copied bit in destination "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found copied bits but shouldn't have (reverse)!");
+	    FAILED();
+	    puts ("    Found copied bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 0);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find beginning of copied data "
+	    FAILED();
+	    printf ("    Unable to find beginning of copied data "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==d_offset && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found leading original data but shouldn't have!");
+	    FAILED();
+	    puts ("    Found leading original data but shouldn't have!");
 	    goto failed;
 	}
 
     }
 
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  failed:
-    printf ("   i=%d, s_offset=%lu, d_offset=%lu, size=%lu\n",
+    printf ("    i=%d, s_offset=%lu, d_offset=%lu, size=%lu\n",
 	    i, (unsigned long)s_offset, (unsigned long)d_offset,
 	    (unsigned long)size);
-    printf ("   s = 0x");
+    printf ("    s = 0x");
     for (j=sizeof(v1)-1; j>=0; --j) printf ("%02x", v1[j]);
-    printf ("\n   d = 0x");
+    printf ("\n    d = 0x");
     for (j=sizeof(v2)-1; j>=0; --j) printf ("%02x", v2[j]);
     printf ("\n");
     return -1;
@@ -282,8 +282,7 @@ test_set (void)
     intn	i, j;
     ssize_t	n;
     
-    printf ("%-70s", "Testing bit set operations");
-    fflush (stdout);
+    TESTING("bit set operations");
 
     for (i=0; i<NTESTS; i++) {
 	d_offset = rand() % (8*sizeof v2);
@@ -295,13 +294,13 @@ test_set (void)
 	H5T_bit_set (v2, d_offset, size, TRUE);
 	for (j=0; j<(intn)sizeof(v2); j++) if (v2[j]) break;
 	if (size>0 && j>=(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Unabled to find set region in buffer");
+	    FAILED();
+	    puts ("    Unabled to find set region in buffer");
 	    goto failed;
 	}
 	if (0==size && j<(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Found set bits when we shouldn't have");
+	    FAILED();
+	    puts ("    Found set bits when we shouldn't have");
 	    goto failed;
 	}
 	
@@ -309,26 +308,26 @@ test_set (void)
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 1);
 	if (size>0 && n!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find first set bit in destination "
+	    FAILED();
+	    printf ("    Unable to find first set bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found set bits and shouldn't have!");
+	    FAILED();
+	    puts ("    Found set bits and shouldn't have!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, d_offset, 8*sizeof(v2)-d_offset, H5T_BIT_LSB, 0);
 	if (d_offset+size<8*sizeof(v2) && n!=(ssize_t)size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last set bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last set bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (d_offset+size==8*sizeof(v2) && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   High-order zeros are present and shouldn't be!");
+	    FAILED();
+	    puts ("    High-order zeros are present and shouldn't be!");
 	    goto failed;
 	}
 
@@ -338,38 +337,38 @@ test_set (void)
 	 */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 1);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last set bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last set bit in destination "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found set bits but shouldn't have (reverse)!");
+	    FAILED();
+	    puts ("    Found set bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 0);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find beginning of set bit region "
+	    FAILED();
+	    printf ("    Unable to find beginning of set bit region "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==d_offset && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found leading zeros but shouldn't have!");
+	    FAILED();
+	    puts ("    Found leading zeros but shouldn't have!");
 	    goto failed;
 	}
 
     }
 
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  failed:
-    printf ("   i=%d, d_offset=%lu, size=%lu\n",
+    printf ("    i=%d, d_offset=%lu, size=%lu\n",
 	    i, (unsigned long)d_offset, (unsigned long)size);
-    printf ("   d = 0x");
+    printf ("    d = 0x");
     for (j=sizeof(v2)-1; j>=0; --j) printf ("%02x", v2[j]);
     printf ("\n");
     return -1;
@@ -400,8 +399,7 @@ test_clear (void)
     intn	i, j;
     ssize_t	n;
     
-    printf ("%-70s", "Testing bit clear operations");
-    fflush (stdout);
+    TESTING("bit clear operations");
 
     for (i=0; i<NTESTS; i++) {
 	d_offset = rand() % (8*sizeof v2);
@@ -413,13 +411,13 @@ test_clear (void)
 	H5T_bit_set (v2, d_offset, size, FALSE);
 	for (j=0; j<(intn)sizeof(v2); j++) if (0xff!=v2[j]) break;
 	if (size>0 && j>=(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Unabled to find cleared region in buffer");
+	    FAILED();
+	    puts ("    Unabled to find cleared region in buffer");
 	    goto failed;
 	}
 	if (0==size && j<(intn)sizeof(v2)) {
-	    puts ("*FAILED*");
-	    puts ("   Found cleared bits when we shouldn't have");
+	    FAILED();
+	    puts ("    Found cleared bits when we shouldn't have");
 	    goto failed;
 	}
 	
@@ -427,26 +425,26 @@ test_clear (void)
 	/* Look for the zeros and ones */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_LSB, 0);
 	if (size>0 && n!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find first cleared bit in destination "
+	    FAILED();
+	    printf ("    Unable to find first cleared bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found cleared bits and shouldn't have!");
+	    FAILED();
+	    puts ("    Found cleared bits and shouldn't have!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, d_offset, 8*sizeof(v2)-d_offset, H5T_BIT_LSB, 1);
 	if (d_offset+size<8*sizeof(v2) && n!=(ssize_t)size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last cleared bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last cleared bit in destination "
 		    "(n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (d_offset+size==8*sizeof(v2) && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   High-order ones are present and shouldn't be!");
+	    FAILED();
+	    puts ("    High-order ones are present and shouldn't be!");
 	    goto failed;
 	}
 
@@ -456,38 +454,38 @@ test_clear (void)
 	 */
 	n = H5T_bit_find (v2, 0, 8*sizeof(v2), H5T_BIT_MSB, 0);
 	if (size>0 && (size_t)(n+1)!=d_offset+size) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find last cleared bit in destination "
+	    FAILED();
+	    printf ("    Unable to find last cleared bit in destination "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==size && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found cleared bits but shouldn't have (reverse)!");
+	    FAILED();
+	    puts ("    Found cleared bits but shouldn't have (reverse)!");
 	    goto failed;
 	}
 	n = H5T_bit_find (v2, 0, d_offset+size, H5T_BIT_MSB, 1);
 	if (d_offset>0 && n+1!=(ssize_t)d_offset) {
-	    puts ("*FAILED*");
-	    printf ("   Unable to find beginning of cleared bit region "
+	    FAILED();
+	    printf ("    Unable to find beginning of cleared bit region "
 		    "(reverse, n=%d)\n", (int)n);
 	    goto failed;
 	}
 	if (0==d_offset && n>=0) {
-	    puts ("*FAILED*");
-	    puts ("   Found leading ones but shouldn't have!");
+	    FAILED();
+	    puts ("    Found leading ones but shouldn't have!");
 	    goto failed;
 	}
 
     }
 
-    puts (" PASSED");
+    PASSED();
     return 0;
 
  failed:
-    printf ("   i=%d, d_offset=%lu, size=%lu\n",
+    printf ("    i=%d, d_offset=%lu, size=%lu\n",
 	    i, (unsigned long)d_offset, (unsigned long)size);
-    printf ("   d = 0x");
+    printf ("    d = 0x");
     for (j=sizeof(v2)-1; j>=0; --j) printf ("%02x", v2[j]);
     printf ("\n");
     return -1;

@@ -289,7 +289,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
      * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
-    return (double)((hssize_t)(nio/nio_g));
+    return (double)(hssize_t)nio/(hssize_t)nio_g;
 }
 
 

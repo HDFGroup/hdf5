@@ -110,7 +110,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 };
 
 /* Interface initialization? */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 const hbool_t H5E_clearable_g = TRUE;	/* DO NOT CHANGE */
 

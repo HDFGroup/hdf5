@@ -26,9 +26,8 @@ static char		RcsId[] = "@(#)$Revision$";
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5T_init_interface
-static void H5T_term_interface(void);
 
 hid_t H5T_IEEE_F32BE_g = FAIL;
 hid_t H5T_IEEE_F32LE_g = FAIL;
@@ -123,23 +122,25 @@ herr_t
 H5T_init_interface(void)
 {
     H5T_t	*dt = NULL;
-    herr_t	ret_value = SUCCEED;
 
     interface_initialize_g = TRUE;
     FUNC_ENTER(H5T_init_interface, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    if ((ret_value = H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE,
-				    H5T_RESERVED_ATOMS,
-				    (herr_t (*)(void *)) H5T_close)) >= 0) {
-	ret_value = H5_add_exit(&H5T_term_interface);
+    if (H5I_init_group(H5I_DATATYPE, H5I_DATATYPEID_HASHSIZE,
+		       H5T_RESERVED_ATOMS, (herr_t (*)(void *))H5T_close)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
     }
 
     /*
      * Initialize pre-defined native data types from code generated during
      * the library configuration by H5detect.
      */
-    ret_value = H5T_native_open();
+    if (H5T_native_open()<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to initialize interface");
+    }
 
     /*------------------------------------------------------------
      * Native types
@@ -1163,7 +1164,7 @@ H5T_init_interface(void)
 		      "unable to register conversion function");
     }
     
-    FUNC_LEAVE(ret_value);
+    FUNC_LEAVE(SUCCEED);
 }
 
 
@@ -1196,29 +1197,25 @@ H5T_unlock_cb (void *_dt, const void __unused__ *key)
     FUNC_LEAVE (0);
 }
 
-/*--------------------------------------------------------------------------
- NAME
-    H5T_term_interface
- PURPOSE
-    Terminate various H5T objects
- USAGE
-    void H5T_term_interface()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Release the atom group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_term_interface
+ *
+ * Purpose:	Close this interface.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 20, 1998
+ *
+ * Modifications:
  * 	Robb Matzke, 1998-06-11
  *	Statistics are only printed for conversion functions that were
  *	called.
- *	
---------------------------------------------------------------------------*/
-static void
-H5T_term_interface(void)
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_term_interface(intn status)
 {
     intn	i;
     H5T_path_t	*path = NULL;
@@ -1230,110 +1227,115 @@ H5T_term_interface(void)
     H5T_cdata_t	*cdata;
     char	bandwidth[32];
 #endif
-    
-    /* Unregister all conversion functions */
-    for (i=0; i<H5T_npath_g; i++) {
-	path = H5T_path_g[i];
-	assert (path);
 
-	if (path->func) {
-	    path->cdata.command = H5T_CONV_FREE;
-	    if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
+    if (interface_initialize_g>0) {
+	/* Unregister all conversion functions */
+	for (i=0; i<H5T_npath_g; i++) {
+	    path = H5T_path_g[i];
+	    assert (path);
+
+	    if (path->func) {
+		path->cdata.command = H5T_CONV_FREE;
+		if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL,
+				 NULL)<0) {
 #ifdef H5T_DEBUG
-		if (H5DEBUG(T)) {
-		    fprintf (H5DEBUG(T), "H5T: conversion function failed "
-			     "to free private data for %s\n", path->name);
+		    if (H5DEBUG(T)) {
+			fprintf (H5DEBUG(T), "H5T: conversion function failed "
+				 "to free private data for %s\n", path->name);
+		    }
+#endif
+		    H5E_clear(); /*ignore the error*/
+		}
+#ifdef H5T_DEBUG
+		if (H5DEBUG(T) && path->cdata.stats->ncalls>0) {
+		    if (0==nprint++) {
+			HDfprintf (H5DEBUG(T),
+				   "H5T: type conversion statistics:\n");
+			HDfprintf (H5DEBUG(T),
+				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
+				   "Conversion", "Elmts", "Calls", "User",
+				   "System", "Elapsed", "Bandwidth");
+			HDfprintf (H5DEBUG(T),
+				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
+				   "----------", "-----", "-----", "----",
+				   "------", "-------", "---------");
+		    }
+		    nbytes = MAX (H5T_get_size (path->src),
+				  H5T_get_size (path->dst));
+		    nbytes *= path->cdata.stats->nelmts;
+		    H5_bandwidth(bandwidth, (double)nbytes,
+				 path->cdata.stats->timer.etime);
+		    HDfprintf (H5DEBUG(T),
+			       "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
+			       path->name,
+			       path->cdata.stats->nelmts,
+			       path->cdata.stats->ncalls,
+			       path->cdata.stats->timer.utime, 
+			       path->cdata.stats->timer.stime, 
+			       path->cdata.stats->timer.etime,
+			       bandwidth);
 		}
 #endif
-		H5E_clear(); /*ignore the error*/
+		H5T_close (path->src);
+		H5T_close (path->dst);
+		H5MM_xfree (path->cdata.stats);
 	    }
+	    H5MM_xfree (path);
+	    H5T_path_g[i] = NULL;
+	}
+
 #ifdef H5T_DEBUG
-	    if (H5DEBUG(T) && path->cdata.stats->ncalls>0) {
+	/* Print debugging infor for the `noop' conversion */
+	if (H5DEBUG(T) &&
+	    H5T_conv_noop==H5T_find(NULL, NULL, H5T_BKG_NO, &cdata)) {
+	    if (cdata->stats->ncalls>0) {
 		if (0==nprint++) {
-		    HDfprintf (H5DEBUG(T), "H5T: type conversion statistics "
-			       "accumulated over life of function:\n");
 		    HDfprintf (H5DEBUG(T),
-			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			       "Conversion", "Elmts", "Calls", "User",
-			       "System", "Elapsed", "Bandwidth");
-		    HDfprintf (H5DEBUG(T),
-			       "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			       "----------", "-----", "-----", "----",
-			       "------", "-------", "---------");
+			       "H5T: type conversion statistics\n");
+		    HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s "
+			       "%10s\n", "Conversion", "Elmts", "Calls",
+			       "User", "System", "Elapsed", "Bandwidth");
+		    HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s "
+			       "%10s\n", "----------", "-----", "-----",
+			       "----", "------", "-------", "---------");
 		}
-		nbytes = MAX (H5T_get_size (path->src),
-			      H5T_get_size (path->dst));
-		nbytes *= path->cdata.stats->nelmts;
+		nbytes = cdata->stats->nelmts;
 		H5_bandwidth(bandwidth, (double)nbytes,
-			     path->cdata.stats->timer.etime);
+			     cdata->stats->timer.etime);
 		HDfprintf (H5DEBUG(T),
 			   "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
-			   path->name,
-			   path->cdata.stats->nelmts,
-			   path->cdata.stats->ncalls,
-			   path->cdata.stats->timer.utime, 
-			   path->cdata.stats->timer.stime, 
-			   path->cdata.stats->timer.etime,
+			   "no-op",
+			   cdata->stats->nelmts,
+			   cdata->stats->ncalls,
+			   cdata->stats->timer.utime, 
+			   cdata->stats->timer.stime, 
+			   cdata->stats->timer.etime,
 			   bandwidth);
 	    }
-#endif
-	    H5T_close (path->src);
-	    H5T_close (path->dst);
-	    H5MM_xfree (path->cdata.stats);
 	}
-	H5MM_xfree (path);
-	H5T_path_g[i] = NULL;
-    }
-
-#ifdef H5T_DEBUG
-    /* Print debugging infor for the `noop' conversion */
-    if (H5DEBUG(T) &&
-	H5T_conv_noop==H5T_find(NULL, NULL, H5T_BKG_NO, &cdata)) {
-	if (cdata->stats->ncalls>0) {
-	    if (0==nprint++) {
-		HDfprintf (H5DEBUG(T), "H5T: type conversion statistics "
-			   "accumulated over life of library:\n");
-		HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			   "Conversion", "Elmts", "Calls", "User",
-			   "System", "Elapsed", "Bandwidth");
-		HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
-			   "----------", "-----", "-----", "----",
-			   "------", "-------", "---------");
-	    }
-	    nbytes = cdata->stats->nelmts;
-	    H5_bandwidth(bandwidth, (double)nbytes, cdata->stats->timer.etime);
-	    HDfprintf (H5DEBUG(T),
-		       "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
-		       "no-op",
-		       cdata->stats->nelmts,
-		       cdata->stats->ncalls,
-		       cdata->stats->timer.utime, 
-		       cdata->stats->timer.stime, 
-		       cdata->stats->timer.etime,
-		       bandwidth);
-	}
-    }
 #endif
 
-    /* Clear conversion tables */
-    H5T_apath_g = 0;
-    H5T_npath_g = 0;
-    H5T_path_g = H5MM_xfree (H5T_path_g);
+	/* Clear conversion tables */
+	H5T_apath_g = 0;
+	H5T_npath_g = 0;
+	H5T_path_g = H5MM_xfree (H5T_path_g);
 
-    H5T_asoft_g = 0;
-    H5T_nsoft_g = 0;
-    H5T_soft_g = H5MM_xfree (H5T_soft_g);
+	H5T_asoft_g = 0;
+	H5T_nsoft_g = 0;
+	H5T_soft_g = H5MM_xfree (H5T_soft_g);
 
-    /* Clear noop function */
-    if ((cfunc=H5T_find (NULL, NULL, H5T_BKG_NO, &pcdata))) {
-	pcdata->command = H5T_CONV_FREE;
-	(cfunc)(FAIL, FAIL, pcdata, 0, NULL, NULL);
+	/* Clear noop function */
+	if ((cfunc=H5T_find (NULL, NULL, H5T_BKG_NO, &pcdata))) {
+	    pcdata->command = H5T_CONV_FREE;
+	    (cfunc)(FAIL, FAIL, pcdata, 0, NULL, NULL);
+	}
+
+	/* Unlock all datatypes, then free them */
+	H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
+	H5I_destroy_group(H5I_DATATYPE);
     }
-
-    /* Unlock all datatypes, then free them */
-    H5I_search (H5I_DATATYPE, H5T_unlock_cb, NULL);
-    H5I_destroy_group(H5I_DATATYPE);
-    interface_initialize_g = FALSE;
+    
+    interface_initialize_g = status;
 }
 
 

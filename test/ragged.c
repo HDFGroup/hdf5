@@ -8,7 +8,12 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
+#include <hdf5.h>
 #include <H5private.h>	/*for performance monitoring*/
+
+#ifdef STDC_HEADERS
+#   include <signal.h>
+#endif
 
 #define NOTIFY_INTERVAL	2 /*seconds*/
 #define TIME_LIMIT	60 /*seconds*/
@@ -242,7 +247,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	     * 1998-11-06 ptl
 	     */
 	    H5_bandwidth(s,
-			 (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+			 (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)total_nelmts,
@@ -261,7 +266,7 @@ ragged_write_all(hid_t ra, hsize_t rows_at_once)
 	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+	H5_bandwidth(s, (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 		     timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)total_nelmts,
@@ -375,8 +380,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	     * for the Win32 version 5.0 compiler.
 	     * 1998-11-06 ptl
 	     */
-	    H5_bandwidth(s,
-			 (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+	    H5_bandwidth(s, (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)total_nelmts,
@@ -403,7 +407,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+	H5_bandwidth(s, (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 		     timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)total_nelmts,
@@ -540,7 +544,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	     * 1998-11-06 ptl
 	     */
 	    H5_bandwidth(s,
-			 (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+			 (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 			 timer.etime);
 	    printf("   %8lu %8lu %7.3f%% %10s%s\n",
 		   (unsigned long)(row+i), (unsigned long)read_nelmts,
@@ -567,7 +571,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 	 * the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	H5_bandwidth(s, (double)((hssize_t)interval_nelmts)*sizeof(C_MTYPE),
+	H5_bandwidth(s, (double)(hssize_t)interval_nelmts*sizeof(C_MTYPE),
 		     timer.etime);
 	printf("   %8lu %8lu %7.3f%% %10s\n",
 	       (unsigned long)row, (unsigned long)read_nelmts,
@@ -579,7 +583,7 @@ ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
      * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
-    H5_bandwidth(s, (double)((hssize_t)read_nelmts)*sizeof(C_MTYPE),
+    H5_bandwidth(s, (double)(hssize_t)read_nelmts*sizeof(C_MTYPE),
 		 timer_total.etime);
     printf("   %27s%10s\n", "", s);
 

@@ -20,7 +20,7 @@
 #include <H5MMprivate.h>
 
 #define PABLO_MASK	H5F_sec2
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 static H5F_low_t *H5F_sec2_open(const char *name,

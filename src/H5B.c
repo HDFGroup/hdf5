@@ -139,7 +139,7 @@ static const H5AC_class_t H5AC_BT[1] = {{
 
 /* Interface initialization? */
 #define INTERFACE_INIT NULL
-static hbool_t interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5S_point_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = FALSE;
+static intn             interface_initialize_g = 0;
 
 static herr_t H5S_point_init (const struct H5O_layout_t *layout,
 			      const H5S_t *space, H5S_sel_iter_t *iter);

@@ -17,7 +17,7 @@
 #include <H5Oprivate.h>
 
 #define PABLO_MASK	H5G_stab_mask
-static hbool_t		interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /*-------------------------------------------------------------------------

@@ -91,7 +91,7 @@ H5B_class_t H5B_SNODE[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 

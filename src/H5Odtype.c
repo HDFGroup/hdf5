@@ -58,7 +58,7 @@ const H5O_class_t H5O_DTYPE[1] = {{
 #define H5O_DTYPE_VERSION	1
 
 /* Interface initialization */
-static hbool_t          interface_initialize_g = FALSE;
+static intn		interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /*-------------------------------------------------------------------------

@@ -46,7 +46,7 @@ const H5O_class_t H5O_STAB[1] = {{
 }};
 
 /* Interface initialization */
-static hbool_t interface_initialize_g = FALSE;
+static intn interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /*-------------------------------------------------------------------------
