@@ -12,7 +12,7 @@
 #   cc_version:   Version number: 5.0-2, 5.2-2
 #
 if test X = "X$cc_flags_set"; then
-    cc_version="`$CC $CFLAGS -V 2>&1 |grep '^pgcc'`"
+    cc_version="`$CC $CFLAGS -V 2>&1 |grep '^pgcc '`"
     if test X != "X$cc_version"; then
         cc_vendor=`echo $cc_version |sed 's/\([a-z]*\).*/\1/'`
         cc_version=`echo $cc_version |sed 's/pgcc \([-a-z0-9\.\-]*\).*/\1/'`
