@@ -38,10 +38,11 @@ h5dump.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h
-h5dumptst.lo: \
-   $(srcdir)/h5dumptst.c \
+h5dumpgentest.lo: \
+   $(srcdir)/h5dumpgentest.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -75,4 +76,5 @@ h5dumptst.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(top_srcdir)/src/H5private.h
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h

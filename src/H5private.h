@@ -686,6 +686,7 @@ typedef struct stat		h5_stat_t;
 #define HDqsort(M,N,Z,F)	qsort(M,N,Z,F)
 #define HDraise(N)		raise(N)
 #define HDrand()		rand()
+#define HDrandom()		random()
 #define HDread(F,M,Z)		read(F,M,Z)
 #define HDreaddir(D)		readdir(D)
 #define HDrealloc(M,Z)		realloc(M,Z)
@@ -728,6 +729,7 @@ typedef struct stat		h5_stat_t;
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
 #define HDsrand(N)		srand(N)
+#define HDsrandom(N)		srandom(N)
 /* sscanf() variable arguments */
 
 
@@ -924,6 +926,9 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8) RTYPE=R;                                               \
                                            CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
                                                              #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8)
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9) RTYPE=R;                                               \
+                                           CALLTIME=H5_trace(NULL,FUNC,T,#A0,A0,#A1,A1,#A2,A2,#A3,A3,   \
+                                                             #A4,A4,#A5,A5,#A6,A6,#A7,A7,#A8,A8,#A9,A9)
 #define H5TRACE_RETURN(V)		   if (RTYPE) {                                                 \
 					      H5_trace(&CALLTIME,FUNC,RTYPE,NULL,V);                    \
 					      RTYPE=NULL;                                               \
@@ -940,6 +945,7 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE7(R,T,A0,A1,A2,A3,A4,A5,A6)              /*void*/
 #define H5TRACE8(R,T,A0,A1,A2,A3,A4,A5,A6,A7)           /*void*/
 #define H5TRACE9(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8)        /*void*/
+#define H5TRACE10(R,T,A0,A1,A2,A3,A4,A5,A6,A7,A8,A9)    /*void*/
 #define H5TRACE_RETURN(V)		                /*void*/
 #endif
 

@@ -356,21 +356,21 @@ H5D_init_interface(void)
      * default dataset with them.
      */
     if (NULL == (def_dcpl = H5I_object(H5P_LST_DATASET_CREATE_g)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, NULL, "can't get default dataset creation property list");
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get default dataset creation property list");
 
     /* Set up the default allocation time information */
     if(H5P_get(def_dcpl, H5D_CRT_ALLOC_TIME_NAME, &H5D_def_dset.alloc_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
     if(H5D_def_dset.alloc_time==H5D_ALLOC_TIME_DEFAULT)
         H5D_def_dset.alloc_time=H5D_ALLOC_TIME_LATE;
 
     /* Get the default external file list information */
     if(H5P_get(def_dcpl, H5D_CRT_EXT_FILE_LIST_NAME, &H5D_def_dset.efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve external file list");
 
     /* Get the default data storage method */
     if(H5P_get(def_dcpl, H5D_CRT_LAYOUT_NAME, &H5D_def_dset.layout.type) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout");
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout");
 
     /* Get the default fill value time */
     if (H5P_get(def_dcpl, H5D_CRT_FILL_TIME_NAME, &H5D_def_dset.fill_time) < 0)
@@ -2056,7 +2056,7 @@ H5D_open(H5G_entry_t *ent)
 {
     hid_t	ret_value;              /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_open, NULL);
+    FUNC_ENTER_NOAPI(H5D_open, FAIL);
 
     /* check args */
     assert (ent);

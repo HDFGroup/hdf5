@@ -169,7 +169,7 @@ H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
 
     /* Allocate new opened object information structure */
     if((open_obj=H5FL_MALLOC(H5FO_open_obj_t))==NULL)
-        HGOTO_ERROR(H5E_CACHE,H5E_NOSPACE,NULL,"memory allocation failed");
+        HGOTO_ERROR(H5E_CACHE,H5E_NOSPACE,FAIL,"memory allocation failed");
 
     /* Assign information */
     open_obj->addr=addr;

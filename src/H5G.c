@@ -436,13 +436,14 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char* name/*out*/, size_t size)
+H5Gget_objname_by_idx(hid_t group_id, hsize_t idx, char *name, size_t size)
 {
     H5G_t		*group = NULL;
     hsize_t             num_objs;
     ssize_t		ret_value = FAIL;
     
     FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL);
+    H5TRACE4("Zs","ihsz",group_id,idx,name,size);
 
     /* Check args */
     if (NULL==(group = H5I_object_verify(group_id,H5I_GROUP)))

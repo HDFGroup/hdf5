@@ -33,6 +33,7 @@
  */
 
 #include <time.h>
+#include <stdlib.h>
 
 #include "testhdf5.h"
 #include "H5STprivate.h"
@@ -122,9 +123,9 @@ test_tst_init(void)
     for(u=0; u<num_uniq_words; u++)
         rand_uniq_words[u]=uniq_words[u];
     curr_time=time(NULL);
-    srandom((unsigned long)curr_time);
+    HDsrandom((unsigned long)curr_time);
     for(u=0; u<num_uniq_words; u++) {
-        v=u+(random()%(num_uniq_words-u));
+        v=u+(HDrandom()%(num_uniq_words-u));
         if(u!=v) {
             tmp_word=rand_uniq_words[u];
             rand_uniq_words[u]=rand_uniq_words[v];

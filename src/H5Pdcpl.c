@@ -1087,7 +1087,7 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Pfill_value_defined, FAIL);
-    H5TRACE2("e","i*Df",plist_id,status);
+    H5TRACE2("e","i*DF",plist_id,status);
 
     assert(status);
 
@@ -1128,7 +1128,7 @@ H5Pset_alloc_time(hid_t plist_id, H5D_alloc_time_t alloc_time)
     herr_t ret_value = SUCCEED; /* return value 	 */
 
     FUNC_ENTER_API(H5Pset_alloc_time, FAIL);
-    H5TRACE2("e","iDs",plist_id,alloc_time);
+    H5TRACE2("e","iDa",plist_id,alloc_time);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
@@ -1205,6 +1205,7 @@ H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(H5Pset_fill_time, FAIL);
+    H5TRACE2("e","iDf",plist_id,fill_time);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))

@@ -1160,7 +1160,7 @@ H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_fclose_degree, FAIL);
-    H5TRACE2("e","iFc",plist_id,degree);
+    H5TRACE2("e","iFd",plist_id,degree);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))

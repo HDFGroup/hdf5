@@ -1573,6 +1573,84 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 
 	case 'D':
 	    switch (type[1]) {
+            case 'a':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5D_alloc_time_t alloc_time = va_arg (ap, H5D_alloc_time_t);
+		    switch (alloc_time) {
+		    case H5D_ALLOC_TIME_ERROR:
+			fprintf (out, "H5D_ALLOC_TIME_ERROR");
+			break;
+		    case H5D_ALLOC_TIME_DEFAULT:
+			fprintf (out, "H5D_ALLOC_TIME_DEFAULT");
+			break;
+		    case H5D_ALLOC_TIME_EARLY:
+			fprintf (out, "H5D_ALLOC_TIME_EARLY");
+			break;
+		    case H5D_ALLOC_TIME_LATE:
+			fprintf (out, "H5D_ALLOC_TIME_LATE");
+			break;
+		    case H5D_ALLOC_TIME_INCR:
+			fprintf (out, "H5D_ALLOC_TIME_INCR");
+			break;
+		    }
+		}
+		break;
+
+            case 'f':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5D_fill_time_t fill_time = va_arg (ap, H5D_fill_time_t);
+		    switch (fill_time) {
+		    case H5D_FILL_TIME_ERROR:
+			fprintf (out, "H5D_FILL_TIME_ERROR");
+			break;
+		    case H5D_FILL_TIME_ALLOC:
+			fprintf (out, "H5D_FILL_TIME_ALLOC");
+			break;
+		    case H5D_FILL_TIME_NEVER:
+			fprintf (out, "H5D_FILL_TIME_NEVER");
+			break;
+		    }
+		}
+		break;
+
+            case 'F':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5D_fill_value_t fill_value = va_arg (ap, H5D_fill_value_t);
+		    switch (fill_value) {
+		    case H5D_FILL_VALUE_ERROR:
+			fprintf (out, "H5D_FILL_VALUE_ERROR");
+			break;
+		    case H5D_FILL_VALUE_UNDEFINED:
+			fprintf (out, "H5D_FILL_VALUE_UNDEFINED");
+			break;
+		    case H5D_FILL_VALUE_DEFAULT:
+			fprintf (out, "H5D_FILL_VALUE_DEFAULT");
+			break;
+		    case H5D_FILL_VALUE_USER_DEFINED:
+			fprintf (out, "H5D_FILL_VALUE_USER_DEFINED");
+			break;
+		    }
+		}
+		break;
+
 	    case 'l':
 		if (ptr) {
 		    if (vp) {
@@ -1718,6 +1796,32 @@ H5_trace (double *returning, const char *func, const char *type, ...)
 
 	case 'F':
 	    switch (type[1]) {
+	    case 'd':
+		if (ptr) {
+		    if (vp) {
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5F_close_degree_t degree = va_arg(ap, H5F_close_degree_t);
+		    switch (degree) {
+		    case H5F_CLOSE_DEFAULT:
+			fprintf(out, "H5F_CLOSE_DEFAULT");
+			break;
+		    case H5F_CLOSE_WEAK:
+			fprintf(out, "H5F_CLOSE_WEAK");
+			break;
+		    case H5F_CLOSE_SEMI:
+			fprintf(out, "H5F_CLOSE_SEMI");
+			break;
+		    case H5F_CLOSE_STRONG:
+			fprintf(out, "H5F_CLOSE_STRONG");
+			break;
+		    }
+		}
+		break;
+
 	    case 's':
 		if (ptr) {
 		    if (vp) {

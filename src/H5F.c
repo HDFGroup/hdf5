@@ -3472,7 +3472,6 @@ H5F_sizeof_addr(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-done:
     FUNC_LEAVE(f->shared->sizeof_addr);
 }
 
@@ -3505,7 +3504,6 @@ H5F_sizeof_size(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-done:
     FUNC_LEAVE(f->shared->sizeof_size);
 }
 
@@ -3539,7 +3537,6 @@ unsigned H5F_sym_leaf_k(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-done:
     FUNC_LEAVE(f->shared->sym_leaf_k);
 }
 
@@ -3575,7 +3572,6 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
     assert(f->shared);
     assert(type);
 
-done:
     FUNC_LEAVE(f->shared->btree_k[type->id]);
 } /* end H5F_Kvalue() */
 
@@ -3672,9 +3668,8 @@ H5F_get_base_addr(const H5F_t *f)
     assert(f);
     assert(f->shared);
 
-done:
     FUNC_LEAVE(f->shared->base_addr);
-} /* end H5F_get_bass_addr() */
+} /* end H5F_get_base_addr() */
 
 
 /*-------------------------------------------------------------------------

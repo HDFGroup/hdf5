@@ -39,13 +39,15 @@ h5tools.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(srcdir)/h5tools_str.h \
    $(srcdir)/h5tools_utils.h \
-   $(top_srcdir)/src/H5private.h
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h
 h5tools_str.lo: \
    $(srcdir)/h5tools_str.c \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
+   $(top_srcdir)/src/H5MPprivate.h \
    $(srcdir)/h5tools.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5Ipublic.h \
@@ -114,7 +116,8 @@ h5tools_utils.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(top_srcdir)/src/H5private.h
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h
 talign.lo: \
    $(srcdir)/talign.c \
    $(top_srcdir)/src/hdf5.h \
