@@ -233,12 +233,13 @@ int do_copy_objects(hid_t fidin,
 
 
 /*-------------------------------------------------------------------------
- * object references are a special case
+ * references are a special case
  * we cannot just copy the buffers, but instead we recreate the reference
  * in a second traversal of the output file
  *-------------------------------------------------------------------------
  */
-   if ( ! H5Tequal(mtype_id, H5T_STD_REF_OBJ) ) 
+
+   if ( H5Tget_class(mtype_id) != H5T_REFERENCE )
    {
 
     /* the information about the object to be filtered/"layouted" */

@@ -126,7 +126,7 @@ int make_all_objects(hid_t loc_id)
  */
 
  space_id = H5Screate_simple(1,dims,NULL);
- dset_id  = H5Dcreate(loc_id,"dset_ref",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
  H5Sclose(space_id);
 
 /*-------------------------------------------------------------------------
@@ -161,8 +161,8 @@ int make_all_objects(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 
- write_dset_in(root_id,"dset_ref",loc_id,0);
- write_dset_in(group_id,"dset_ref",loc_id,0);
+ write_dset_in(root_id,"dset_referenced",loc_id,0);
+ write_dset_in(group_id,"dset_referenced",loc_id,0);
 
 
  /* Close */

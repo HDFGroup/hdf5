@@ -65,6 +65,7 @@ int diff_attr(hid_t      loc1_id,
 	char       name1[255];
  char       name2[255];
 	int        n1, n2, i, j, nfound;
+ int        ret=0;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0) 
   goto error;
@@ -105,7 +106,8 @@ int diff_attr(hid_t      loc1_id,
    }
    H5Aclose(attr1_id);
    H5Aclose(attr2_id);
-   return 1;
+   ret=1;
+   continue;
   }
   
 		/* get the file datatype  */
@@ -218,7 +220,7 @@ int diff_attr(hid_t      loc1_id,
   HDfree(buf2);
  } /* i */
 	
- return 0;
+ return ret;
 
 error:
  H5E_BEGIN_TRY {

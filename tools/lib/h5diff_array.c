@@ -19,8 +19,7 @@
 #include <math.h>
 
 
-static 
-int diff_datum( void       *_mem1, 
+static int diff_datum(void  *_mem1, 
                 void       *_mem2, 
                 hid_t      m_type,
                 hsize_t    i, 
@@ -34,8 +33,7 @@ int diff_datum( void       *_mem1,
                 hid_t      container2_id,
                 int        *ph); 
 
-static
-int diff_native_uchar(unsigned char *mem1,
+static int diff_native_uchar(unsigned char *mem1,
                       unsigned char *mem2,
                       size_t        type_size,
                       hsize_t       i, 
@@ -47,8 +45,7 @@ int diff_native_uchar(unsigned char *mem1,
                       const char    *obj2,
                       int           *ph);
 
-static
-int diff_char(unsigned char *mem1,
+static int diff_char(unsigned char *mem1,
              unsigned char *mem2,
              size_t        type_size,
              hsize_t       i, 
@@ -60,10 +57,10 @@ int diff_char(unsigned char *mem1,
              const char    *obj2,
              int           *ph);
 
-static 
-hbool_t is_zero(const void *_mem, size_t size);
-static 
-void close_obj(H5G_obj_t obj_type, hid_t obj_id);
+static hbool_t is_zero(const void *_mem, size_t size);
+static void close_obj(H5G_obj_t obj_type, hid_t obj_id);
+static int diff_region(hid_t region1_id, hid_t region2_id);
+
 
 
 /*-------------------------------------------------------------------------
@@ -509,6 +506,9 @@ int diff_datum( void       *_mem1,
    
    if (H5Tequal(m_type, H5T_STD_REF_DSETREG)) 
    {
+    hid_t  region1_id;
+    hid_t  region2_id;
+
     if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
      return -1;
     if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
@@ -517,17 +517,21 @@ int diff_datum( void       *_mem1,
      return -1;
     if (H5Gget_objinfo(obj2_id, ".", FALSE, &sb2)<0)
      return -1;
+    if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
+     return -1;
+    if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2))<0)
+     return -1;
 
-    /* compare OID */
-    if (sb1.objno!=sb2.objno)
+    if (diff_region(region1_id,region2_id))
     {
-     HDfprintf(stdout,"Different OIDs in reference: <%s, %Hu> and <%s, %Hu>", 
-      obj1, sb1.objno, obj2, sb2.objno);
-     nfound = 1;
+     printf("Different region referenced\n");
     }
+   
     close_obj(H5G_DATASET,obj1_id);
     close_obj(H5G_DATASET,obj2_id);
-    
+    H5Sclose(region1_id);
+    H5Sclose(region2_id);
+ 
    }/*dataset reference*/
 
 
@@ -1699,3 +1703,124 @@ void close_obj(H5G_obj_t obj_type, hid_t obj_id)
  }
 }
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: diff_region
+ *
+ * Purpose: diff a dataspace region
+ *
+ * Return: 0, diff not found, 1 found
+ *
+ *-------------------------------------------------------------------------
+ */
+static int diff_region(hid_t region1_id, hid_t region2_id)
+{
+ hssize_t 	nblocks1, npoints1;
+ hssize_t 	nblocks2, npoints2;
+ hsize_t   alloc_size;
+ hsize_t   *ptdata1;
+ hsize_t   *ptdata2;
+ int		     ndims1 = H5Sget_simple_extent_ndims(region1_id);
+ int		     ndims2 = H5Sget_simple_extent_ndims(region2_id);
+ int       ret=0;
+
+#if defined (H5DIFF_DEBUG)
+ int i;
+#endif
+ 
+/*
+ * These two functions fail if the region does not have blocks or points,
+ * respectively. They do not currently know how to translate from one to
+ * the other.
+ */
+ H5E_BEGIN_TRY {
+  nblocks1 = H5Sget_select_hyper_nblocks(region1_id);
+  nblocks2 = H5Sget_select_hyper_nblocks(region2_id);
+
+  npoints1 = H5Sget_select_elem_npoints(region1_id);
+  npoints2 = H5Sget_select_elem_npoints(region2_id);
+ } H5E_END_TRY;
+
+ if (nblocks1!=nblocks2 || npoints1!=npoints2 || ndims1!=ndims2)
+  return 1;
+ 
+ /* compare block information */
+ if (nblocks1 > 0) 
+ {
+
+  alloc_size = nblocks1 * ndims1 * 2 * sizeof(ptdata1[0]);
+  assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+
+  ptdata1 = malloc((size_t)alloc_size);
+  H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
+  H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
+
+  ptdata2 = malloc((size_t)alloc_size);
+  H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
+  H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
+
+  ret=HDmemcmp(ptdata1,ptdata2,(size_t)alloc_size);
+
+#if defined (H5DIFF_DEBUG)
+  for (i = 0; i < nblocks1; i++) 
+  {
+   int j;
+   
+   /* start coordinates and opposite corner */
+   for (j = 0; j < ndims1; j++)
+    printf("%s%lu", j ? "," : "(",
+    (unsigned long)ptdata1[i * 2 * ndims1 + j]);
+   
+   for (j = 0; j < ndims1; j++)
+    printf("%s%lu", j ? "," : ")-(",
+    (unsigned long)ptdata1[i * 2 * ndims1 + j + ndims1]);
+   
+   printf(")\n");
+  }
+#endif 
+    
+   
+  HDfree(ptdata1);
+  HDfree(ptdata2);
+ }
+ 
+ /* Print point information */
+ if (npoints1 > 0) 
+ {
+  alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
+  assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+
+  ptdata1 = malloc((size_t)alloc_size);
+  H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
+  H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
+
+  ptdata2 = malloc((size_t)alloc_size);
+  H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
+  H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
+  
+  ret=HDmemcmp(ptdata1,ptdata2,(size_t)alloc_size);
+
+#if defined (H5DIFF_DEBUG)
+  for (i = 0; i < npoints1; i++) 
+  {
+   int j;
+   
+   printf("%sPt%lu: " ,
+    i ? "," : "",
+    (unsigned long)i);
+   
+   for (j = 0; j < ndims1; j++)
+    printf("%s%lu", j ? "," : "(",
+    (unsigned long)(ptdata1[i * ndims1 + j]));
+   
+   printf(")");
+  }
+#endif 
+  
+  HDfree(ptdata1);
+  HDfree(ptdata2);
+ }
+ 
+ return ret;
+}

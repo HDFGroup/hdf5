@@ -58,12 +58,12 @@ int  h5diff(const char *fname1,
  /* Open the files */
  if ((file1_id=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5diff: %s: No such file or directory\n", fname1 );
+  printf("h5diff: <%s>: unable to open file\n", fname1 );
   nfound = -1;
  }
  if ((file2_id=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5diff: %s: No such file or directory\n", fname2 );
+  printf("h5diff: <%s>: unable to open file\n", fname2 );
   nfound = -1;
  }
  /* enable error reporting */

@@ -19,7 +19,7 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
-#if 1
+#if 0
 #define H5_REPACK_DEBUG
 #endif
 
@@ -158,20 +158,12 @@ int copy_attr(hid_t loc_in,
               pack_opt_t *options
               );
 
-const char* MapIdToName(hid_t refobj_id, 
-                        trav_table_t *travt);
-
 int do_copy_refobjs(hid_t fidin, 
                     hid_t fidout, 
                     trav_table_t *travt,
                     pack_opt_t *options); /* repack options */
 
-int do_copy_refobjs_inattr(hid_t loc_in, 
-              hid_t loc_out, 
-              pack_opt_t *options,
-              trav_table_t *travt,
-              hid_t fidout         /* for saving references */
-              );
+
 
 void read_info(const char *filename,pack_opt_t *options);
 void close_obj(H5G_obj_t obj_type, hid_t obj_id);

@@ -213,13 +213,14 @@ void write_attr_in(hid_t loc_id,
  * H5T_REFERENCE
  *-------------------------------------------------------------------------
  */
- /* Create references to dataset */
+ /* object references ( H5R_OBJECT  */
  if (dset_name)
  {
   status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
   status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
-  write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+  write_attr(loc_id,1,dims,"reference to object",H5T_STD_REF_OBJ,buf4);
  }
+
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM

@@ -41,9 +41,16 @@ test_copy(void)
  diff_opt_t  diff_options;
  memset(&diff_options, 0, sizeof (diff_opt_t));
 
+
  TESTING("    copy with no filters");
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
+
+#if defined(H5_REPACK_DEBUG)
+ diff_options.verbose=1;
+ pack_options.verbose=1;
+#endif
+
  if (h5repack(FNAME1,FNAME1OUT,&pack_options)<0)
   TEST_ERROR;
  if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) == 1)
