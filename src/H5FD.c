@@ -38,6 +38,10 @@ static haddr_t H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size);
 /* Declare a PQ free list to manage the metadata accumulator buffer */
 H5FL_BLK_DEFINE_STATIC(meta_accum);
 
+/* Local macro definitions */
+#define H5FD_ACCUM_THROTTLE     8
+#define H5FD_ACCUM_THRESHOLD    2048
+
 /* Static local variables */
 
 /* Global count of the number of H5FD_t's handed out.  This is used as a
@@ -2230,15 +2234,29 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
             } /* end if */
 
             /* Cache the new piece of metadata */
-            /* Check if we need to reallocate the buffer */
+            /* Check if we need to resize the buffer */
             if(size>file->accum_buf_size) {
-                /* Reallocate the metadata accumulator buffer */
+                /* Grow the metadata accumulator buffer */
                 if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
                     HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                 /* Note the new buffer size */
                 file->accum_buf_size=size;
             } /* end if */
+            else {
+                /* Check if we should shrink the accumulator buffer */
+                if(size<(file->accum_buf_size/H5FD_ACCUM_THROTTLE) &&
+                        file->accum_buf_size>H5FD_ACCUM_THRESHOLD) {
+                    size_t new_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
+
+                    /* Shrink the accumulator buffer */
+                    if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
+                        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+
+                    /* Note the new buffer size */
+                    file->accum_buf_size=new_size;
+                } /* end if */
+            } /* end else */
 
             /* Update accumulator information */
             file->accum_loc=addr;
@@ -2484,15 +2502,29 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 } /* end if */
 
                 /* Cache the new piece of metadata */
-                /* Check if we need to reallocate the buffer */
+                /* Check if we need to resize the buffer */
                 if(size>file->accum_buf_size) {
-                    /* Reallocate the metadata accumulator buffer */
+                    /* Grow the metadata accumulator buffer */
                     if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
                         HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
 
                     /* Note the new buffer size */
                     file->accum_buf_size=size;
                 } /* end if */
+                else {
+                    /* Check if we should shrink the accumulator buffer */
+                    if(size<(file->accum_buf_size/H5FD_ACCUM_THROTTLE) &&
+                            file->accum_buf_size>H5FD_ACCUM_THRESHOLD) {
+                        size_t new_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
+
+                        /* Shrink the accumulator buffer */
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
+                            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+
+                        /* Note the new buffer size */
+                        file->accum_buf_size=new_size;
+                    } /* end if */
+                } /* end else */
 
                 /* Update the metadata accumulator information */
                 file->accum_loc=addr;
