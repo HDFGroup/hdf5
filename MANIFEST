@@ -456,6 +456,8 @@
 ./tools/testfiles/tattr-2.ddl
 ./tools/testfiles/tattr-3.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tbitfields-1.ddl
+./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
 ./tools/testfiles/tcomp-3.ddl
