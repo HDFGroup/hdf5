@@ -247,7 +247,7 @@ test_extend(hid_t f, const char *prefix,
 		(unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
     }
 
-    sprintf(s, "Testing istore extend: %s", dims);
+    sprintf(s, "istore extend: %s", dims);
     TESTING(s);
     buf = H5MM_malloc(nx * ny * nz);
     check = H5MM_malloc(nx * ny * nz);
@@ -461,7 +461,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
 		(unsigned long) nx, (unsigned long) ny, (unsigned long) nz);
     }
 
-    sprintf(s, "Testing istore sparse: %s", dims);
+    sprintf(s, "istore sparse: %s", dims);
     TESTING(s);
     buf = H5MM_malloc(nx * ny * nz);
     HDmemset(buf, 128, nx * ny * nz);
