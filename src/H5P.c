@@ -4789,7 +4789,7 @@ done:
     H5P_genclass_t *H5P_get_class(plist)
         H5P_genplist_t *plist;    IN: Property list to check
  RETURNS
-    Success: Pointer to a copy of the class for a property list
+    Success: Pointer to the class for a property list
     Failure: NULL
  DESCRIPTION
     This routine retrieves a pointer to the class for a property list.
@@ -4864,6 +4864,319 @@ done:
 
     FUNC_LEAVE (ret_value);
 }   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_cmp_prop
+ PURPOSE
+    Internal routine to compare two generic properties
+ USAGE
+    intn H5P_cmp_prop(prop1, prop2)
+        H5P_genprop_t *prop1;    IN: 1st property to compare
+        H5P_genprop_t *prop1;    IN: 2nd property to compare
+ RETURNS
+    Success: negative if prop1 "less" than prop2, positive if prop1 "greater"
+        than prop2, zero if prop1 is "equal" to prop2
+    Failure: can't fail
+ DESCRIPTION
+        This function compares two generic properties together to see if
+    they are the same property.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static intn H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
+{
+    intn cmp_value;             /* Value from comparison */
+    intn ret_value=0;         /* return value */
+
+    FUNC_ENTER (H5P_cmp_prop, FAIL);
+
+    assert(prop1);
+    assert(prop2);
+
+    /* Check the name */
+    if((cmp_value=HDstrcmp(prop1->name,prop2->name))!=0)
+        HGOTO_DONE(cmp_value);
+
+    /* Check the size of properties */
+    if(prop1->size < prop2->size) HGOTO_DONE(-1);
+    if(prop1->size > prop2->size) HGOTO_DONE(1);
+
+    /* Check if they both have values allocated (or not allocated) */
+    if(prop1->value==NULL && prop2->value!=NULL) HGOTO_DONE(-1);
+    if(prop1->value!=NULL && prop2->value==NULL) HGOTO_DONE(1);
+    if(prop1->value!=NULL)
+        if((cmp_value=HDmemcmp(prop1->value,prop2->value,prop1->size))!=0)
+            HGOTO_DONE(cmp_value);
+
+    /* Check if they both have default values allocated (or not allocated) */
+    if(prop1->def_value==NULL && prop2->def_value!=NULL) HGOTO_DONE(-1);
+    if(prop1->def_value!=NULL && prop2->def_value==NULL) HGOTO_DONE(1);
+    if(prop1->def_value!=NULL)
+        if((cmp_value=HDmemcmp(prop1->def_value,prop2->def_value,prop1->size))!=0)
+            HGOTO_DONE(cmp_value);
+
+    /* Check if they both have the same 'create' callback */
+    if(prop1->create==NULL && prop2->create!=NULL) HGOTO_DONE(-1);
+    if(prop1->create!=NULL && prop2->create==NULL) HGOTO_DONE(1);
+
+    /* Check if they both have the same 'set' callback */
+    if(prop1->set==NULL && prop2->set!=NULL) HGOTO_DONE(-1);
+    if(prop1->set!=NULL && prop2->set==NULL) HGOTO_DONE(1);
+
+    /* Check if they both have the same 'get' callback */
+    if(prop1->get==NULL && prop2->get!=NULL) HGOTO_DONE(-1);
+    if(prop1->get!=NULL && prop2->get==NULL) HGOTO_DONE(1);
+
+    /* Check if they both have the same 'close' callback */
+    if(prop1->close==NULL && prop2->close!=NULL) HGOTO_DONE(-1);
+    if(prop1->close!=NULL && prop2->close==NULL) HGOTO_DONE(1);
+
+    /* Don't check the 'next' field, they must be equal by now */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_cmp_prop() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_cmp_class
+ PURPOSE
+    Internal routine to compare two generic property classes 
+ USAGE
+    intn H5P_cmp_class(pclass1, pclass2)
+        H5P_genclass_t *pclass1;    IN: 1st property class to compare
+        H5P_genclass_t *pclass2;    IN: 2nd property class to compare
+ RETURNS
+    Success: negative if class1 "less" than class2, positive if class1 "greater"
+        than class2, zero if class1 is "equal" to class2
+    Failure: can't fail
+ DESCRIPTION
+        This function compares two generic property classes together to see if
+    they are the same class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static intn H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
+{
+    H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
+    uintn u;                    /* Local index variable */
+    intn cmp_value;             /* Value from comparison */
+    intn ret_value=0;         /* return value */
+
+    FUNC_ENTER (H5P_cmp_class, FAIL);
+
+    assert(pclass1);
+    assert(pclass2);
+
+    /* Check the name */
+    if((cmp_value=HDstrcmp(pclass1->name,pclass2->name))!=0)
+        HGOTO_DONE(cmp_value);
+
+    /* Check the number of properties */
+    if(pclass1->nprops < pclass2->nprops) HGOTO_DONE(-1);
+    if(pclass1->nprops > pclass2->nprops) HGOTO_DONE(1);
+
+    /* Check the hashsize */
+    if(pclass1->hashsize < pclass2->hashsize) HGOTO_DONE(-1);
+    if(pclass1->hashsize > pclass2->hashsize) HGOTO_DONE(1);
+
+    /* Check the number of property lists created from the class */
+    if(pclass1->plists < pclass2->plists) HGOTO_DONE(-1);
+    if(pclass1->plists > pclass2->plists) HGOTO_DONE(1);
+
+    /* Check the number of classes derived from the class */
+    if(pclass1->classes < pclass2->classes) HGOTO_DONE(-1);
+    if(pclass1->classes > pclass2->classes) HGOTO_DONE(1);
+
+    /* Check the number of ID references open on the class */
+    if(pclass1->ref_count < pclass2->ref_count) HGOTO_DONE(-1);
+    if(pclass1->ref_count > pclass2->ref_count) HGOTO_DONE(1);
+
+    /* Check whether they are internal or not */
+    if(pclass1->internal < pclass2->internal) HGOTO_DONE(-1);
+    if(pclass1->internal > pclass2->internal) HGOTO_DONE(1);
+
+    /* Check whether they are deleted or not */
+    if(pclass1->deleted < pclass2->deleted) HGOTO_DONE(-1);
+    if(pclass1->deleted > pclass2->deleted) HGOTO_DONE(1);
+
+    /* Check whether they have the same creation callback functions & data */
+    if(pclass1->create_func < pclass2->create_func) HGOTO_DONE(-1);
+    if(pclass1->create_func > pclass2->create_func) HGOTO_DONE(1);
+    if(pclass1->create_data < pclass2->create_data) HGOTO_DONE(-1);
+    if(pclass1->create_data > pclass2->create_data) HGOTO_DONE(1);
+
+    /* Check whether they have the same close callback functions & data */
+    if(pclass1->close_func < pclass2->close_func) HGOTO_DONE(-1);
+    if(pclass1->close_func > pclass2->close_func) HGOTO_DONE(1);
+    if(pclass1->close_data < pclass2->close_data) HGOTO_DONE(-1);
+    if(pclass1->close_data > pclass2->close_data) HGOTO_DONE(1);
+
+    /* Cycle through the properties and compare them also */
+    for(u=0; u<pclass1->hashsize; u++) {
+        tprop1=pclass1->props[u];
+        tprop2=pclass2->props[u];
+
+        /* Check if they both have properties in this hash location */
+        if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
+        if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
+
+        /* Check the actual properties */
+        while(tprop1!=NULL && tprop2!=NULL) {
+            /* Compare the two properties */
+            if((cmp_value=H5P_cmp_prop(tprop1,tprop2))!=0)
+                HGOTO_DONE(cmp_value);
+
+            /* Advance the pointers */
+            tprop1=tprop1->next;
+            tprop2=tprop2->next;
+
+            /* Check if they both have properties in this location */
+            if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
+            if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
+        } /* end while */
+    } /* end for */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_cmp_class() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_cmp_plist
+ PURPOSE
+    Internal routine to compare two generic property lists 
+ USAGE
+    intn H5P_cmp_plist(plist1, plist2)
+        H5P_genplist_t *plist1;    IN: 1st property list to compare
+        H5P_genplist_t *plist2;    IN: 2nd property list to compare
+ RETURNS
+    Success: negative if list1 "less" than list2, positive if list1 "greater"
+        than list2, zero if list1 is "equal" to list2
+    Failure: can't fail
+ DESCRIPTION
+        This function compares two generic property lists together to see if
+    they are the same list.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static intn H5P_cmp_plist(H5P_genplist_t *plist1, H5P_genplist_t *plist2)
+{
+    H5P_genprop_t *tprop1, *tprop2;/* Temporary pointer to properties */
+    uintn u;                    /* Local index variable */
+    intn cmp_value;             /* Value from comparison */
+    intn ret_value=0;         /* return value */
+
+    FUNC_ENTER (H5P_cmp_plist, FAIL);
+
+    assert(plist1);
+    assert(plist2);
+
+    /* Check the parent class */
+    if(plist1->pclass < plist2->pclass) HGOTO_DONE(-1);
+    if(plist1->pclass > plist2->pclass) HGOTO_DONE(1);
+
+    /* Check the number of properties */
+    if(plist1->nprops < plist2->nprops) HGOTO_DONE(-1);
+    if(plist1->nprops > plist2->nprops) HGOTO_DONE(1);
+
+    /* Check whether they've been initialized */
+    if(plist1->class_init < plist2->class_init) HGOTO_DONE(-1);
+    if(plist1->class_init > plist2->class_init) HGOTO_DONE(1);
+
+    /* Cycle through the properties and compare them also */
+    for(u=0; u<plist1->pclass->hashsize; u++) {
+        tprop1=plist1->props[u];
+        tprop2=plist2->props[u];
+
+        /* Check if they both have properties in this hash location */
+        if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
+        if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
+
+        /* Check the actual properties */
+        while(tprop1!=NULL && tprop2!=NULL) {
+            /* Compare the two properties */
+            if((cmp_value=H5P_cmp_prop(tprop1,tprop2))!=0)
+                HGOTO_DONE(cmp_value);
+
+            /* Advance the pointers */
+            tprop1=tprop1->next;
+            tprop2=tprop2->next;
+
+            /* Check if they both have properties in this location */
+            if(tprop1==NULL && tprop2!=NULL) HGOTO_DONE(-1);
+            if(tprop1!=NULL && tprop2==NULL) HGOTO_DONE(1);
+        } /* end while */
+    } /* end for */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_cmp_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pequal
+ PURPOSE
+    Routine to query whether two property lists or two property classes are equal
+ USAGE
+    htri_t H5Pequal(id1, id2)
+        hid_t id1;         IN: Property list or class ID to compare
+        hid_t id2;         IN: Property list or class ID to compare
+ RETURNS
+    Success: TRUE if equal, FALSE if unequal
+    Failure: negative
+ DESCRIPTION
+    Determines whether two property lists or two property classes are equal.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t H5Pequal(hid_t id1, hid_t id2)
+{
+    void *obj1, *obj2;          /* Property objects to compare */
+    htri_t ret_value=FALSE;     /* return value */
+
+    FUNC_ENTER (H5Pequal, FAIL);
+
+    /* Check arguments. */
+    if ((H5I_GENPROP_LST != H5I_get_type(id1) && H5I_GENPROP_CLS != H5I_get_type(id1))
+            || (H5I_GENPROP_CLS != H5I_get_type(id2) && H5I_GENPROP_CLS != H5I_get_type(id2)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property objects");
+    if (H5I_get_type(id1) != H5I_get_type(id2))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not the same kind of property objects");
+    if(NULL == (obj1 = H5I_object(id1)) || NULL == (obj2 = H5I_object(id2)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
+
+    /* Compare property lists */
+    if(H5I_GENPROP_LST == H5I_get_type(id1)) {
+        if(H5P_cmp_plist(obj1,obj2)==0)
+            ret_value=TRUE;
+    } /* end if */
+    /* Must be property classes */
+    else {
+        if(H5P_cmp_class(obj1,obj2)==0)
+            ret_value=TRUE;
+    } /* end else */
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Pequal() */
 
 
 /*--------------------------------------------------------------------------
@@ -5418,6 +5731,91 @@ char *H5Pget_class_name(hid_t pclass_id)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pget_class_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_get_class_parent
+ PURPOSE
+    Internal routine to query the parent class of a generic property class
+ USAGE
+    H5P_genclass_t *H5P_get_class_parent(pclass)
+        H5P_genpclass_t *pclass;    IN: Property class to check
+ RETURNS
+    Success: Pointer to the parent class of a property class
+    Failure: NULL
+ DESCRIPTION
+    This routine retrieves a pointer to the parent class for a property class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static H5P_genclass_t *H5P_get_class_parent(H5P_genclass_t *pclass)
+{
+    H5P_genclass_t *ret_value=NULL;      /* return value */
+
+    FUNC_ENTER (H5P_get_class_parent, NULL);
+
+    assert(pclass);
+
+    /* Get property size */
+    ret_value=pclass->parent;
+
+    FUNC_LEAVE (ret_value);
+}   /* H5P_get_class_parent() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pget_class_parent
+ PURPOSE
+    routine to query the parent class of a generic property class
+ USAGE
+    hid_t H5Pget_class_parent(pclass_id)
+        hid_t pclass_id;         IN: Property class to query
+ RETURNS
+    Success: ID of parent class object
+    Failure: NULL
+ DESCRIPTION
+    This routine retrieves an ID for the parent class of a property class.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t H5Pget_class_parent(hid_t pclass_id)
+{
+    H5P_genclass_t	*pclass;    /* Property class to query */
+    H5P_genclass_t	*parent=NULL;   /* Parent's property class */
+    hid_t ret_value=FAIL;       /* return value */
+
+    FUNC_ENTER (H5Pget_class_parent, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+
+    /* Retrieve the property class's parent */
+    if ((parent=H5P_get_class_parent(pclass))==NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to query class of property list");
+
+    /* Increment the outstanding references to the class object */
+    if(H5P_access_class(parent,H5P_MOD_INC_REF)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment class ID ref count");
+
+    /* Get an atom for the class */
+    if ((ret_value = H5I_register(H5I_GENPROP_CLS, parent))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+
+done:
+    if (ret_value<0 && parent)
+        H5P_close_class(parent);
+
+    FUNC_LEAVE (ret_value);
+}   /* H5Pget_class_parent() */
 
 
 /*--------------------------------------------------------------------------
