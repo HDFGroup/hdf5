@@ -1006,8 +1006,9 @@ H5_timer_begin (H5_timer_t *timer)
     timer->utime = 0.0;
     timer->stime = 0.0;
 #endif
-
+#ifdef HAVE_GETTIMEOFDAY
     gettimeofday (&etime, NULL);
+#endif
     timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
 }
 
