@@ -86,6 +86,8 @@ Platforms tested
                                 mpt.1.3
   FreeBSD 4.0                   gcc 2.95.2
   HP-UX B.10.20                 HP C  HP92453-01 A.10.32
+  HP-UX B.11.00                 HP92453-01 A.11.00.13 HP C Compiler 
+                                (static library only, h5toh4 tool is not available) 
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.3 (SGI MPI 3.2.0.0)
