@@ -6,6 +6,16 @@
 #
 # See BlankForm in this directory for details
 
+# Disable dependency tracking on IRIX unless the user specifically asks for
+# it.
+# IRIX's pmake confuses automake (as of version 1.9) if dependency tracking
+# is enabled and it is not an in-place build.  Simply disabling dependency
+# tracking on IRIX is simpler to implement than detecting pmake, detecting
+# when a build is not in-place, and then disabling dependency tracking.
+if test -z "${enable_dependency_tracking}"; then
+  enable_dependency_tracking="no"
+fi
+
 # The default compiler is `cc' and there is no ranlib.
 if test "X-" = "X-$CC"; then
   CC=cc

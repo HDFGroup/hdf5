@@ -9732,7 +9732,7 @@ rm maketest
 
  AM_MAKEFLAGS=""
 
-if test ${MAKE}; then
+if test -n "${MAKE-make}"; then
 
   echo "$as_me:$LINENO: checking whether make will build with undefined variables" >&5
 echo $ECHO_N "checking whether make will build with undefined variables... $ECHO_C" >&6

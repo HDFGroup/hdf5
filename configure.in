@@ -566,7 +566,7 @@ dnl
 AC_SUBST(AM_MAKEFLAGS) AM_MAKEFLAGS=""
 
 dnl Don't run test if MAKE is defined but is the empty string
-if test ${MAKE}; then 
+if test -n "${MAKE-make}"; then 
 
   AC_MSG_CHECKING([whether make will build with undefined variables])
 
