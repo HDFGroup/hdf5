@@ -346,6 +346,7 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
     return FAIL;
   }
 
+
   num_lab_anno   = ANnumann(an_id,AN_DATA_LABEL,obj_tag,obj_ref);
   num_des_anno   = ANnumann(an_id,AN_DATA_DESC,obj_tag,obj_ref); 
   
@@ -469,7 +470,6 @@ int Annoobj_h4_to_h5(int32 file_id,int32 obj_ref, int32 obj_tag,
   }
 
   if(num_des_anno > 0) {
-
 
     for (i = 0; i< num_des_anno;i++) {
     

@@ -396,6 +396,7 @@ int test_sdsdim() {
   int32 typ_array[TYP_DIMSIZE][TYP_DIMSIZE][TYP_DIMSIZE];
   int32 typ_dims[TYP_RANK];
   int32 dim_sca0[TYP_DIMSIZE];
+  int32 dim_sca1[TYP_DIMSIZE];
   int32 istat;
 
   char dim_name0[] = "dim0";
@@ -412,9 +413,10 @@ int test_sdsdim() {
       for (k=0;k<TYP_DIMSIZE;k++)
 	typ_array[i][j][k] = i+j+k;
 
-  for (i=0;i<TYP_DIMSIZE;i++)
+  for (i=0;i<TYP_DIMSIZE;i++){
     dim_sca0[i] = i;
-
+    dim_sca1[i] = 2*i;
+  }
 
   for(i=0;i<TYP_RANK;i++){
     typ_dims[i] = TYP_DIMSIZE;
@@ -462,7 +464,7 @@ int test_sdsdim() {
         printf("sds set dim.name failed. \n");
         return FAIL;
       }
-      istat =SDsetdimscale(dim_id,typ_dims[0],DFNT_INT32,(VOIDP)dim_sca0);
+     istat =SDsetdimscale(dim_id,typ_dims[0],DFNT_INT32,(VOIDP)dim_sca0);
       if(istat == FAIL) {
          printf("sds set dim. scale failed. \n");
          return FAIL;
@@ -474,7 +476,7 @@ int test_sdsdim() {
         printf("sds set dim.name failed. \n");
         return FAIL;
       }
-      istat = SDsetdimscale(dim_id,typ_dims[1],DFNT_INT32,(VOIDP)dim_sca0);
+      istat = SDsetdimscale(dim_id,typ_dims[1],DFNT_INT32,(VOIDP)dim_sca1);
       if(istat == FAIL) {
         printf("sds set dim. scale failed. \n");
         return FAIL;
@@ -2901,6 +2903,7 @@ int test_vgall() {
   int32   fill_value;
   int32   array_data[TYP_DIMSIZE][TYP_DIMSIZE][TYP_DIMSIZE];
   int32   dim_sca0[TYP_DIMSIZE],dim_sca1[TYP_DIMSIZE];
+  int32   dim_sca2[TYP_DIMSIZE];
   int32   dim_sizes[TYP_RANK];
   int32   start[TYP_RANK],edges[TYP_RANK],stride[TYP_RANK];
   float64 cal;
@@ -2967,6 +2970,7 @@ int test_vgall() {
   for (i=0;i<TYP_DIMSIZE;i++) {
     dim_sca0[i]= 2*i;
     dim_sca1[i]= i;
+    dim_sca2[i] =3*i;
   }
 
   for (i=0;i<TYP_RANK;i++){
@@ -3505,7 +3509,7 @@ int test_vgall() {
         printf("sds set dim.name failed. \n");
         return FAIL;
       }
-      istat = SDsetdimscale(dim_id,dim_sizes[2],DFNT_INT32,(VOIDP)dim_sca0);
+      istat = SDsetdimscale(dim_id,dim_sizes[2],DFNT_INT32,(VOIDP)dim_sca2);
       if(istat == FAIL) {
         printf("sds set dim. scale failed. \n");
         return FAIL;
@@ -3703,6 +3707,7 @@ int test_vgall() {
   }
 
   image_ref = GRidtoref(ri_id);
+
   if(image_ref == FAIL) {
     printf("fail to obtain image reference number.\n");
     return FAIL;
@@ -3799,6 +3804,7 @@ int test_vgall() {
   }
 
   image_ref = GRidtoref(ri_id);
+
   if(image_ref == FAIL) {
     printf("fail to generate image reference number.\n");
     return FAIL;
@@ -3844,6 +3850,7 @@ int test_anno() {
   static char file_desc[] =  "This is a file description.";
   static char data_labelvg[] = "This is a vgroup data label.";
   static char data_descvg[] =  "This is a vgroup data description.";
+  static char data_descvg2[]="This is another vgroup data description.";
 
   /* Create the HDF file. */
   file_id = Hopen(FILEANNO, DFACC_CREATE, 0);
@@ -3947,9 +3954,62 @@ int test_anno() {
     printf("fail to write annotation.\n");
     return FAIL;
   }
+ istat = ANendaccess(ann_id); 
   /* Terminate access to the annotation. */
+  /* Create a data description for the Vgroup just created.*/
+  ann_id = ANcreate(an_id, (uint16)obj_tag, (uint16)obj_ref, AN_DATA_DESC);
+  if(ann_id == FAIL) {
+    printf("fail to create annotation.\n");
+    return FAIL;
+  }
+
+  /* Write the data description to the file. */
+  istat = ANwriteann(ann_id, data_descvg2, (int)(strlen(data_descvg)));
+  if(istat == FAIL) {
+    printf("fail to write annotation.\n");
+    return FAIL;
+  }
   istat = ANendaccess(ann_id);
+
   istat = Vdetach(vgroup_id);
+
+  vgroup_id = Vattach(file_id, -1, "w");
+  if(vgroup_id == FAIL) {
+    printf("fail to attach vgroup \n");
+    return FAIL;
+  }
+
+  istat = Vsetname (vgroup_id,  "Vgroup2 w/Annotations");
+  if(istat == FAIL) {
+    printf("fail to set group name\n");
+    return FAIL;
+  }
+  /* Get reference number of vgroup just created. */
+  obj_ref = Vfind (file_id, "Vgroup2 w/Annotations");
+  if(obj_ref == 0) {
+    printf("fail to set object reference.\n");
+    return FAIL;
+  }
+
+  obj_tag = DFTAG_VG;
+
+  /* Create a data label for the Vgroup just created.  */
+  ann_id = ANcreate(an_id, (uint16)obj_tag, (uint16)obj_ref, AN_DATA_DESC);
+  if(ann_id == FAIL) {
+    printf("fail to create annotation.\n");
+    return FAIL;
+  }
+  /* Write the data label to the file. */
+  istat = ANwriteann(ann_id, data_descvg, (int)(strlen(data_descvg)));
+  if(istat == FAIL){
+    printf("fail to write annotation.\n");
+    return FAIL;
+  }
+  istat = ANendaccess(ann_id);
+
+  istat = Vdetach(vgroup_id);
+
+  
   istat = Vend(file_id);
   /* Close the file. */
 
