@@ -20,7 +20,7 @@ static char		RcsId[] = "$Revision$";
 *
 * Test program:	 tselect
 *
-* Test the dataspace selection functionality
+* Test the Dataspace selection functionality
 *
 *************************************************************/
 
