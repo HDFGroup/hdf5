@@ -1250,6 +1250,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
+
+    /* Initialize these before any errors can occur */
+    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
     if (!file_space) {
         if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
@@ -1555,9 +1561,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t	sconv_func= {NULL};	/*space conversion funcs*/
-    H5S_sel_iter_t mem_iter,        /* memory selection iteration information */
-        bkg_iter,                   /* background iteration information */
-        file_iter;                  /* file selection iteration information */
+    H5S_sel_iter_t mem_iter,            /* memory selection iteration information */
+        bkg_iter,                       /* background iteration information */
+        file_iter;                      /* file selection iteration information */
     H5T_cdata_t		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL, status;
     size_t		src_type_size;		/*size of source type	*/
@@ -1577,6 +1583,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(mem_type);
     assert(xfer_parms);
     assert(buf);
+
+    /* Initialize these before any errors can occur */
+    HDmemset(&mem_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&bkg_iter,0,sizeof(H5S_sel_iter_t));
+    HDmemset(&file_iter,0,sizeof(H5S_sel_iter_t));
+
     if (!file_space) {
 	if (NULL==(free_this_space=H5S_read (&(dataset->ent)))) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
