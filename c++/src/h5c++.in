@@ -194,33 +194,34 @@ for arg in $@ ; do
     *)
       allargs="$allargs $qarg"
 
-      if test -s "$arg"; then
-        ext=`expr "$arg" : '.*\(\..*\)'`
+	if [ -s "$arg" ] ; then
+	    ext=`expr "$arg" : '.*\(\..*\)'`
+	    if [ "$ext" = ".C" -o "$ext" = ".cxx" -o "$ext" = ".cpp" -o \
+		 "$ext" = ".cc" -o "$ext" = ".c" -o "$ext" = ".CC" ] ; then
 
-        if test "x$ext" = "x.c"; then
-          do_compile="yes"
-          compile_args="$compile_args $arg"
-          fname=`basename $arg .c`
-          link_objs="$link_objs $fname.o"
-        elif test "x$ext" = "x.o"; then
-          if test "x$dash_c" = "xyes"; then
-            compile_args="$compile_args $arg"
-          else
-            do_link="yes"
-            link_objs="$link_objs $arg"
-          fi
-        elif test "x$ext" = "x.a"; then
-          # This is an archive that we're linking in
-          libraries=" $libraries $arg "
-        else
-          compile_args="$compile_args $arg"
-          link_args="$link_args $arg"
-        fi
-      else
-        compile_args="$compile_args $arg"
-        link_args="$link_args $arg"
-      fi
-      ;;
+	        do_compile="yes"
+	        compile_args="$compile_args $arg"
+	        fname=`basename $arg $ext`
+	        link_objs="$link_objs $fname.o"
+	    elif [ "$ext" = ".o" ] ; then
+		if test "x$dash_c" = "xyes"  ; then
+	            compile_args="$compile_args $arg"
+                else
+	            do_link="yes"
+	            link_objs="$link_objs $arg"
+                fi
+            elif test "x$ext" = "x.a"; then
+              # This is an archive that we're linking in
+              libraries=" $libraries $arg "
+            else
+              compile_args="$compile_args $arg"
+              link_args="$link_args $arg"
+            fi
+	    else
+	        compile_args="$compile_args $arg"
+	        link_args="$link_args $arg"
+	    fi
+	;;
   esac
 done
 
