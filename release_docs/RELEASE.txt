@@ -113,6 +113,8 @@ Configuration
       HDF version 4.1r3 and newer meets this requirement.  The compress2
       uses a newer compression algorithm used by the HDF5 library.  Also,
       4.1r3 has an hdp tool that can handle "loops" in Vgroups.
+    * Can use just enable-threadsafe if the C compiler has builtin pthreads
+      support.
 
 
 Tools
