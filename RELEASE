@@ -1,4 +1,4 @@
-Release information for hdf5-1.0.0a
+Release information for hdf5-1.0.23a
 -----------------------------------
 
 		    CHANGES SINCE THE FIRST ALPHA
@@ -177,64 +177,66 @@ Datasets
    H5Dextend		- extend a dataset
 
 Attributes
-   H5Acreate		- create a new attribute
-   H5Aopen_name		- open an attribute by name
-   H5Aopen_idx		- open an attribute by number
+   H5Acreate	- create a new attribute
+   H5Aopen_name	- open an attribute by name
+   H5Aopen_idx	- open an attribute by number
    H5Awrite		- write values into an attribute
    H5Aread		- read values from an attribute
-   H5Aget_space		- get attribute data space
-   H5Aget_type		- get attribute data type
-   H5Aget_name		- get attribute name
-   H5Anum_attrs		- return the number of attributes for an object
-   H5Aiterate		- iterate over an object's attributes
-   H5Adelete		- delete an attribute
+   H5Aget_space	- get attribute data space
+   H5Aget_type	- get attribute data type
+   H5Aget_name	- get attribute name
+   H5Anum_attrs	- return the number of attributes for an object
+   H5Aiterate	- iterate over an object's attributes
+   H5Adelete	- delete an attribute
    H5Aclose		- close an attribute
 
 Errors
    H5Eclear		- clear the error stack
    H5Eprint		- print an error stack
-   H5Eget_auto		- get automatic error reporting settings
-   H5Eset_auto		- set automatic error reporting
+   H5Eget_auto	- get automatic error reporting settings
+   H5Eset_auto	- set automatic error reporting
    H5Ewalk		- iterate over the error stack
-   H5Ewalk_cb		- the default error stack iterator function
-   H5Eget_major		- get the message for the major error number
-   H5Eget_minor		- get the message for the minor error number
+   H5Ewalk_cb	- the default error stack iterator function
+   H5Eget_major	- get the message for the major error number
+   H5Eget_minor	- get the message for the minor error number
 
 Files
-   H5Fclose		- close a file and release resources
+   H5Fclose		    - close a file and release resources
    H5Fcreate		- create a new file
    H5Fget_create_template- get file creation property list
    H5Fget_access_template- get file access property list
    H5Fis_hdf5		- determine if a file is an hdf5 file
-   H5Fopen		- open an existing file
+   H5Fopen		    - open an existing file
 
 Groups
    H5Gclose		- close a group and release resources
-   H5Gcreate		- create a new group
+   H5Gcreate    - create a new group
    H5Gopen		- open an existing group
    H5Gpop		- pop a group from the cwg stack
    H5Gpush		- push a group onto the cwg stack
    H5Gset		- set the current working group (cwg)
-   H5Giterate		- iterate over the contents of a group
+   H5Giterate   - iterate over the contents of a group
    H5Gmove		- change the name of some object
    H5Glink		- create a hard or soft link to an object
-   H5Gunlink		- break the link between a name and an object
+   H5Gunlink    - break the link between a name and an object
    H5Gstat		- get information about a group entry
    H5Gget_linkval	- get the value of a soft link
 
-Data spaces
-   H5Sclose		- release data space resources
-   H5Screate_simple	- create a new simple data space
-   H5Sget_dims		- get data space size
-   H5Sget_hyperslab	- get data space selection
-   H5Sset_hyperslab	- select data points
-   H5Sget_ndims		- get data space dimensionality
-   H5Sget_npoints	- get number of selected points
-   H5Sis_simple		- determine if data space is simple
-   H5Sset_space		- reset data space dimensionality and size
-   H5Scopy		- copy a data space
+Dataspaces
+   H5Sclose		        - release dataspace
+   H5Screate	        - create a new dataspace
+   H5Screate_simple	    - create a new simple dataspace
+   H5Sextent_dims		- get dataspace size
+   H5Sselect_hyperslab	- set hyperslab dataspace selection
+   H5Sselect_elements   - set element sequence dataspace selection
+   H5Sextent_ndims		- get dataspace dimensionality
+   H5Sextent_npoints	- get number of points in extent of dataspace
+   H5Sselect_npoints	- get number of selected points in dataspace
+   H5Sis_simple		    - determine if dataspace is simple
+   H5Sset_extent_simple	- set simple dataspace dimensionality and size
+   H5Scopy		        - copy a dataspace
 
-Data types
+Datatypes
    H5Tclose		- release data type resources
    H5Topen		- open a named data type
    H5Tcommit		- name a data type

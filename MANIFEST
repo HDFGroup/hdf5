@@ -1,3 +1,4 @@
+./COPYING
 ./INSTALL
 ./INSTALL.ascired
 ./INSTALL.ibm.sp.parallel
@@ -36,6 +37,7 @@
 ./config/solaris2.5
 ./configure
 ./configure.in
+./doc/html/ddl.html
 ./doc/html/Attributes.html
 ./doc/html/Big.html
 ./doc/html/Caching.html
@@ -48,6 +50,7 @@
 ./doc/html/Errors.html
 ./doc/html/ExternalFiles.html
 ./doc/html/Files.html
+./doc/html/Glossary.html
 ./doc/html/Groups.html
 ./doc/html/H5.api.html
 ./doc/html/H5.api_map.html
@@ -59,6 +62,17 @@
 ./doc/html/MemoryManagement.html
 ./doc/html/ObjectHeader.txt
 ./doc/html/Properties.html
+./doc/html/RM_H5.html
+./doc/html/RM_H5A.html
+./doc/html/RM_H5D.html
+./doc/html/RM_H5E.html
+./doc/html/RM_H5F.html
+./doc/html/RM_H5Front.html
+./doc/html/RM_H5G.html
+./doc/html/RM_H5P.html
+./doc/html/RM_H5S.html
+./doc/html/RM_H5T.html
+./doc/html/RM_H5Z.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj
@@ -108,6 +122,8 @@
 ./doc/html/version.gif
 ./doc/html/version.obj
 ./doc/src/Glossary.html
+./doc/src/H5.intro.doc
+./doc/src/RM_H5.html
 ./doc/src/RM_H5A.html
 ./doc/src/RM_H5D.html
 ./doc/src/RM_H5E.html
@@ -252,6 +268,7 @@
 ./test/theap.c
 ./test/tmeta.c
 ./test/tohdr.c
+./test/tselect.c
 ./test/tstab.c
 ./testpar/Makefile.ascired
 ./testpar/Makefile.irix64

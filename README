@@ -1,4 +1,4 @@
-This is hdf5-1.0.13a released on 1998-06-10 18:18 UTC
+This is hdf5-1.0.23a released on 1998-06-15 05:41 UTC
 Please refer to the INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ library.
 Documentation for this release is in the html directory.  Start with the
 "index.html" in that dictectory.
 
-Three mailing lists are currently set up for use with the HDF5
+Four mailing lists are currently set up for use with the HDF5
 library.
 
    hdf5         - For general discussion of the HDF5 library with
@@ -24,10 +24,20 @@ library.
    hdf5announce - For announcements of HDF5 related developments,
 		  not a discussion list.
 
+   hdf5cvs      - For checkin notices of code development on the library,
+		  not a discussion list.
+
 To subscribe to a list, send mail to "<list>-request@ncsa.uiuc.edu",
-(e.g., hdf5-request@ncsa.uiuc.ed) with "subscribe <your e-mail
+(e.g., hdf5-request@ncsa.uiuc.edu) with "subscribe <your e-mail
 address> in the _body_ of the message.  Messages to be sent to
 the list should be sent to "<list>@ncsa.uiuc.edu".
 
-Bugs should be reported to hdf5dev@ncsa.uiuc.edu.
+Nearly daily code snapshots are now being provided at the following URL:
+    ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots
+Please read the readme file in that directory before working with a library
+snapshot.
+
+The HDF5 website is located at http://hdf.ncsa.uiuc.edu/HDF5/
+
+Bugs should be reported to hdfhelp@ncsa.uiuc.edu.
 
