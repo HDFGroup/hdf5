@@ -170,8 +170,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 24 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -248,20 +246,24 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const uint8_t *p,
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
-#elif defined (WIN32) && !defined (__MWERKS__)
+#elif defined (WIN32) 
+  #if !defined (__MWERKS__) /* MSVC */
     {
-        struct timeb timebuffer;
-        long  tz;
- 
-        ftime(&timebuffer);
-        tz = timebuffer.timezone;
-        /* daylight is not handled properly. Currently we just hard-code
-           the problem. */
-/*         the_time -= tz * 60;  */
-         the_time -= tz * 60 - 3600;
-/*        the_time -= tz * 60 - 3600 * _daylight;*/
+     struct timeb timebuffer;
+     long  tz;
+     
+     ftime(&timebuffer);
+     tz = timebuffer.timezone;
+     /* daylight is not handled properly. Currently we just hard-code
+     the problem. */
+     the_time -= tz * 60 - 3600;
     }
-#else
+  #else  /*__MWERKS__*/
+
+    ;
+
+  #endif /*__MWERKS__*/
+#else /* WIN32 */
     /*
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the
