@@ -560,6 +560,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
+    hssize_t    count;              /* Regular hyperslab count */
     hsize_t	size[H5S_MAX_RANK];
     hssize_t	file_offset[H5S_MAX_RANK];
     hssize_t	mem_offset[H5S_MAX_RANK];
@@ -569,51 +570,102 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     *must_convert = TRUE;
 
     /* Check whether we can handle this */
-    if (H5S_SIMPLE!=mem_space->extent.type) goto fall_through;
-    if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
-    if (mem_space->extent.u.simple.rank!=
-	file_space->extent.u.simple.rank) goto fall_through;
+    if (H5S_SIMPLE!=mem_space->extent.type)
+        goto fall_through;
+    if (H5S_SIMPLE!=file_space->extent.type)
+        goto fall_through;
+    if (mem_space->extent.u.simple.rank!=file_space->extent.u.simple.rank)
+        goto fall_through;
+
+    /* Check for a single hyperslab block defined in memory dataspace */
     if (mem_space->select.type==H5S_SEL_HYPERSLABS) {
-	if(mem_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
-	mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+        /* Check for a "regular" hyperslab selection */
+        if(mem_space->select.sel_info.hslab.diminfo != NULL) {
+            /* Check each dimension */
+            for(count=1,i=0; i<mem_space->extent.u.simple.rank; i++)
+                count*=mem_space->select.sel_info.hslab.diminfo[i].count;
+            /* If the regular hyperslab definition creates more than one hyperslab, fall through */
+            if(count>1)
+                goto fall_through;
+        } /* end if */
+        else {
+            if(mem_space->select.sel_info.hslab.hyper_lst->count>1)
+                goto fall_through;
+            mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+        } /* end else */
     } /* end if */
     else
-    	if(mem_space->select.type!=H5S_SEL_ALL) goto fall_through;
+    	if(mem_space->select.type!=H5S_SEL_ALL)
+            goto fall_through;
+
+    /* Check for a single hyperslab block defined in file dataspace */
     if (file_space->select.type==H5S_SEL_HYPERSLABS) {
-	if(file_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
-	file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+        /* Check for a "regular" hyperslab selection */
+        if(file_space->select.sel_info.hslab.diminfo != NULL) {
+            /* Check each dimension */
+            for(count=1,i=0; i<file_space->extent.u.simple.rank; i++)
+                count*=file_space->select.sel_info.hslab.diminfo[i].count;
+            /* If the regular hyperslab definition creates more than one hyperslab, fall through */
+            if(count>1)
+                goto fall_through;
+        } /* end if */
+        else {
+            if(file_space->select.sel_info.hslab.hyper_lst->count>1)
+                goto fall_through;
+            file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+        } /* end else */
     } /* end if */
     else
-    	if(file_space->select.type!=H5S_SEL_ALL) goto fall_through;
+        if(file_space->select.type!=H5S_SEL_ALL)
+            goto fall_through;
 
     /* Get information about memory and file */
     for (i=0; i<mem_space->extent.u.simple.rank; i++) {
-	if (mem_space->extent.u.simple.max &&
-	    mem_space->extent.u.simple.size[i]!=
-	    mem_space->extent.u.simple.max[i]) goto fall_through;
-	if (file_space->extent.u.simple.max &&
-	    file_space->extent.u.simple.size[i]!=
-	    file_space->extent.u.simple.max[i]) goto fall_through;
-	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
-	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
-        mem_off=mem_node->start[i];
-	} /* end if */
-	else {
-	    mem_size=mem_space->extent.u.simple.size[i];
-        mem_off=0;
-	} /* end else */
-	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
-	    file_size=(file_node->end[i]-file_node->start[i])+1;
-	    file_off=file_node->start[i];
-	} /* end if */
-	else {
-	    file_size=file_space->extent.u.simple.size[i];
-	    file_off=0;
-	} /* end else */
-	if (mem_size!=file_size) goto fall_through;
-	size[i] = file_size;
-	file_offset[i] = file_off;
-	mem_offset[i] = mem_off;
+        if (mem_space->extent.u.simple.max &&
+                mem_space->extent.u.simple.size[i]!=mem_space->extent.u.simple.max[i])
+            goto fall_through;
+        if (file_space->extent.u.simple.max &&
+                file_space->extent.u.simple.size[i]!=file_space->extent.u.simple.max[i])
+            goto fall_through;
+
+        if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
+            /* Check for a "regular" hyperslab selection */
+            if(mem_space->select.sel_info.hslab.diminfo != NULL) {
+                mem_size=mem_space->select.sel_info.hslab.diminfo[i].block;
+                mem_off=mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+                mem_off=mem_node->start[i];
+            } /* end else */
+        } /* end if */
+        else {
+            mem_size=mem_space->extent.u.simple.size[i];
+            mem_off=0;
+        } /* end else */
+
+        if(file_space->select.type==H5S_SEL_HYPERSLABS) {
+            /* Check for a "regular" hyperslab selection */
+            if(file_space->select.sel_info.hslab.diminfo != NULL) {
+                file_size=file_space->select.sel_info.hslab.diminfo[i].block;
+                file_off=file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                file_size=(file_node->end[i]-file_node->start[i])+1;
+                file_off=file_node->start[i];
+            } /* end else */
+        } /* end if */
+        else {
+            file_size=file_space->extent.u.simple.size[i];
+            file_off=0;
+        } /* end else */
+
+        if (mem_size!=file_size)
+            goto fall_through;
+
+        size[i] = file_size;
+        file_offset[i] = file_off;
+        mem_offset[i] = mem_off;
     }
     size[i] = elmt_size;
     file_offset[i] = 0;
@@ -622,12 +674,12 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     /* Read data from the file */
     if (H5F_arr_read(f, dxpl_id, layout, pline, NULL, efl, size,
 		     size, mem_offset, file_offset, buf/*out*/)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
 		      "unable to read data from the file");
     }
     *must_convert = FALSE;
 
- fall_through:
+fall_through:
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -666,6 +718,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
+    hssize_t    count;              /* Regular hyperslab count */
     hsize_t	size[H5S_MAX_RANK];
     hssize_t	file_offset[H5S_MAX_RANK];
     hssize_t	mem_offset[H5S_MAX_RANK];
@@ -675,51 +728,102 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     *must_convert = TRUE;
 
     /* Check whether we can handle this */
-    if (H5S_SIMPLE!=mem_space->extent.type) goto fall_through;
-    if (H5S_SIMPLE!=file_space->extent.type) goto fall_through;
-    if (mem_space->extent.u.simple.rank!=
-	file_space->extent.u.simple.rank) goto fall_through;
+    if (H5S_SIMPLE!=mem_space->extent.type)
+        goto fall_through;
+    if (H5S_SIMPLE!=file_space->extent.type)
+        goto fall_through;
+    if (mem_space->extent.u.simple.rank!=file_space->extent.u.simple.rank)
+        goto fall_through;
+
+    /* Check for a single hyperslab block defined in memory dataspace */
     if (mem_space->select.type==H5S_SEL_HYPERSLABS) {
-	if(mem_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
-	mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+        /* Check for a "regular" hyperslab selection */
+        if(mem_space->select.sel_info.hslab.diminfo != NULL) {
+            /* Check each dimension */
+            for(count=1,i=0; i<mem_space->extent.u.simple.rank; i++)
+                count*=mem_space->select.sel_info.hslab.diminfo[i].count;
+            /* If the regular hyperslab definition creates more than one hyperslab, fall through */
+            if(count>1)
+                goto fall_through;
+        } /* end if */
+        else {
+            if(mem_space->select.sel_info.hslab.hyper_lst->count>1)
+                goto fall_through;
+            mem_node=mem_space->select.sel_info.hslab.hyper_lst->head;
+        } /* end else */
     } /* end if */
     else
-    	if(mem_space->select.type!=H5S_SEL_ALL) goto fall_through;
+    	if(mem_space->select.type!=H5S_SEL_ALL)
+            goto fall_through;
+
+    /* Check for a single hyperslab block defined in file dataspace */
     if (file_space->select.type==H5S_SEL_HYPERSLABS) {
-	if(file_space->select.sel_info.hslab.hyper_lst->count>1) goto fall_through;
-	file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+        /* Check for a "regular" hyperslab selection */
+        if(file_space->select.sel_info.hslab.diminfo != NULL) {
+            /* Check each dimension */
+            for(count=1,i=0; i<file_space->extent.u.simple.rank; i++)
+                count*=file_space->select.sel_info.hslab.diminfo[i].count;
+            /* If the regular hyperslab definition creates more than one hyperslab, fall through */
+            if(count>1)
+                goto fall_through;
+        } /* end if */
+        else {
+            if(file_space->select.sel_info.hslab.hyper_lst->count>1)
+                goto fall_through;
+            file_node=file_space->select.sel_info.hslab.hyper_lst->head;
+        } /* end else */
     } /* end if */
     else
-    	if(file_space->select.type!=H5S_SEL_ALL) goto fall_through;
+    	if(file_space->select.type!=H5S_SEL_ALL)
+            goto fall_through;
 
     /* Get information about memory and file */
     for (i=0; i<mem_space->extent.u.simple.rank; i++) {
-	if (mem_space->extent.u.simple.max &&
-	    mem_space->extent.u.simple.size[i]!=
-	    mem_space->extent.u.simple.max[i]) goto fall_through;
-	if (file_space->extent.u.simple.max &&
-	    file_space->extent.u.simple.size[i]!=
-	    file_space->extent.u.simple.max[i]) goto fall_through;
-	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
-	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
-        mem_off=mem_node->start[i];
-	} /* end if */
-	else {
-	    mem_size=mem_space->extent.u.simple.size[i];
-        mem_off=0;
-	} /* end else */
-	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
-	    file_size=(file_node->end[i]-file_node->start[i])+1;
-	    file_off=file_node->start[i];
-	} /* end if */
-	else {
-	    file_size=file_space->extent.u.simple.size[i];
-	    file_off=0;
-	} /* end else */
-	if (mem_size!=file_size) goto fall_through;
-	size[i] = file_size;
-	file_offset[i] = file_off;
-	mem_offset[i] = mem_off;
+        if (mem_space->extent.u.simple.max &&
+                mem_space->extent.u.simple.size[i]!=mem_space->extent.u.simple.max[i])
+            goto fall_through;
+        if (file_space->extent.u.simple.max &&
+                file_space->extent.u.simple.size[i]!=file_space->extent.u.simple.max[i])
+            goto fall_through;
+
+        if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
+            /* Check for a "regular" hyperslab selection */
+            if(mem_space->select.sel_info.hslab.diminfo != NULL) {
+                mem_size=mem_space->select.sel_info.hslab.diminfo[i].block;
+                mem_off=mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+                mem_off=mem_node->start[i];
+            } /* end else */
+        } /* end if */
+        else {
+            mem_size=mem_space->extent.u.simple.size[i];
+            mem_off=0;
+        } /* end else */
+
+        if(file_space->select.type==H5S_SEL_HYPERSLABS) {
+            /* Check for a "regular" hyperslab selection */
+            if(file_space->select.sel_info.hslab.diminfo != NULL) {
+                file_size=file_space->select.sel_info.hslab.diminfo[i].block;
+                file_off=file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                file_size=(file_node->end[i]-file_node->start[i])+1;
+                file_off=file_node->start[i];
+            } /* end else */
+        } /* end if */
+        else {
+            file_size=file_space->extent.u.simple.size[i];
+            file_off=0;
+        } /* end else */
+
+        if (mem_size!=file_size)
+            goto fall_through;
+
+        size[i] = file_size;
+        file_offset[i] = file_off;
+        mem_offset[i] = mem_off;
     }
     size[i] = elmt_size;
     file_offset[i] = 0;
@@ -728,13 +832,13 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
     /* Write data to the file */
     if (H5F_arr_write(f, dxpl_id, layout, pline, NULL, efl, size,
 		      size, mem_offset, file_offset, buf)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
 		      "unable to write data to the file");
     }
     *must_convert = FALSE;
 
 
- fall_through:
+fall_through:
     FUNC_LEAVE(SUCCEED);
 }
 
