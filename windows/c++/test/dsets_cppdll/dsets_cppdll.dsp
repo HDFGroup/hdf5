@@ -45,7 +45,7 @@ RSC=rc.exe
 # ADD BASE F90 /include:"Release/"
 # ADD F90 /include:"Release/"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\..\src" /I "..\..\..\..\test" /I "..\..\..\..\c++\src" /D "HDF5CPP_USEDLL" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\..\..\src" /I "..\..\..\..\test" /I "..\..\..\..\c++\src" /D "_HDF5USEDLL_" /D "HDF5CPP_USEDLL" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
