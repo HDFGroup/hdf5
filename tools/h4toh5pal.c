@@ -144,7 +144,7 @@ int Palette_h4_to_h5(int32 file_id,int32 pal_id,hid_t h5g,char*pal_name) {
   strcpy(palette_label,PALABEL);
   strcpy(palette_class,PALETTE);
   strcpy(palette_type,PAL_TYPE);
-  strcpy(palette_colormodel,RGB);
+  strcpy(palette_colormodel,HDF5_RGB);
   /* convert palette annotation into attribute of palette dataset.
      Since there are no routines to find the exact tag of palette object,
      we will check three possible object tags of palette objects, that is:
