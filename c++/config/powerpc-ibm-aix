@@ -8,3 +8,7 @@
 
 # Use AIX supplied C++ compiler by default.
 CXX=${CXX=xlC}
+
+# Added -qweaksymbol to suppress linker messages warning of duplicate 
+# symbols; these warnings are harmless.
+CXXFLAGS="$CXXFLAGS -qweaksymbol"
