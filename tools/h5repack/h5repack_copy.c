@@ -245,6 +245,7 @@ int do_copy_objects(hid_t fidin,
 #endif /* LATER */
  int       i, j;
  int       wrote=0;
+ H5T_class_t type_class;        /* datatype class */
 
 /*-------------------------------------------------------------------------
  * copy the suppplied object list
@@ -307,8 +308,17 @@ int do_copy_objects(hid_t fidin,
    nelmts=1;
    for (j=0; j<rank; j++) 
     nelmts*=dims[j];
-   if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-    goto error;
+   
+   if((type_class = H5Tget_class(ftype_id))<0)
+       goto error;
+   if(type_class==H5T_BITFIELD) {
+       if((mtype_id=H5Tcopy(ftype_id))<0)
+           goto error;
+   } else {
+       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+            goto error;
+   }
+  
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
 
@@ -594,6 +604,7 @@ int copy_attr(hid_t loc_in,
  char       name[255];
  int        n, j;
  unsigned   u;
+ H5T_class_t type_class;
 
  if ((n = H5Aget_num_attrs(loc_in))<0) 
   goto error;
@@ -632,8 +643,17 @@ int copy_attr(hid_t loc_in,
   nelmts=1;
   for (j=0; j<rank; j++) 
    nelmts*=dims[j];
-  if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
-   goto error;
+  
+  if((type_class = H5Tget_class(ftype_id))<0)
+       goto error;
+  if(type_class==H5T_BITFIELD) {
+       if((mtype_id=H5Tcopy(ftype_id))<0)
+           goto error;
+  } else {
+       if ((mtype_id=H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+            goto error;
+  }
+ 
   if ((msize=H5Tget_size(mtype_id))==0)
    goto error;
 

@@ -68,6 +68,10 @@ Bug Fixes since HDF5-1.6.3 release
 
     Library
     -------
+        - Back up supporting bitfield and time types in H5Tget_native_type.  
+            Leave it to future support.  The function simply returns error 
+            message of "not support" for bitfield and time types.  
+            SLU - 2004/10/5
         - Fixed address check in Core VFL driver to avoid spurious address/size
             overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
         - Fixed problem where chunked datasets were not able to be deleted

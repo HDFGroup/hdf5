@@ -2306,7 +2306,7 @@ test_bitfield_dtype(hid_t file)
         wbuf[i] = (unsigned char)0xff ^ (unsigned char)i;
 
     if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf)<0)
- TEST_ERROR;
+        TEST_ERROR;
     if (H5Sclose(space)<0) TEST_ERROR;
     if (H5Dclose(dset)<0) TEST_ERROR;
 
@@ -2316,26 +2316,17 @@ test_bitfield_dtype(hid_t file)
 
     if((dtype=H5Dget_type(dataset))<0) TEST_ERROR;
     
-    if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
+    H5E_BEGIN_TRY {
+        native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
+    } H5E_END_TRY;
+    if(native_type>0) {
+        H5_FAILED();
+        puts("  Bit field isn't supported.  Should have failed.");
         TEST_ERROR;
-
-    if(!H5Tequal(native_type, type)) TEST_ERROR;
-
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf)<0)
-        TEST_ERROR;
-    
-    for(i=0; i<sizeof(rbuf); i++) {
- if (rbuf[i] != wbuf[i]) {
-     H5_FAILED();
-     printf("    Read different values than written.\n");
-            printf("    At index %u\n", (unsigned)i);
-     goto error;
-        }
     }
-    
+   
     if (H5Tclose(type)<0) TEST_ERROR;
     if (H5Tclose(dtype)<0) TEST_ERROR;
-    if (H5Tclose(native_type)<0) TEST_ERROR;
     if (H5Dclose(dataset)<0) TEST_ERROR;
 
     PASSED();                                                 
@@ -2343,7 +2334,7 @@ test_bitfield_dtype(hid_t file)
                                                                       
 error:                                                       
     return -1;
-} /* test_opaque_dtype */
+} /* test_bitfield_dtype */
 
 
 

@@ -1912,8 +1912,15 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
   H5Tclose(f_type);
     } else {
         /* need to call h5tools_dump_mem for the attribute data */    
+        H5T_class_t type_class;
+
         type = H5Aget_type(obj_id);
-        p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+        type_class = H5Tget_class(type);
+        if(type_class==H5T_BITFIELD)
+            p_type=H5Tcopy(type);
+        else
+            p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+
         space = H5Aget_space(obj_id);
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
 
@@ -2024,10 +2031,17 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  int               nelmts=1;
  h5dump_t          *outputformat = &dataformat;
  hid_t             n_type;
+ H5T_class_t       type_class;
 
  memset(&ctx, 0, sizeof(ctx));
  ctx.indent_level=2;
- n_type = H5Tget_native_type(type_id,H5T_DIR_DEFAULT);
+ 
+ type_class = H5Tget_class(type_id);
+ if(type_class==H5T_BITFIELD)
+        n_type=H5Tcopy(type_id);
+ else
+        n_type = H5Tget_native_type(type_id,H5T_DIR_DEFAULT);
+
  size = H5Tget_size(n_type);
 	buf = malloc(size);
 
@@ -4476,7 +4490,14 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
 	    status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
 	} else {
 	    /* all other data */
-	    p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+            H5T_class_t type_class;
+
+            type_class = H5Tget_class(type);
+            if(type_class==H5T_BITFIELD)
+                p_type=H5Tcopy(type);
+            else
+                p_type = H5Tget_native_type(type,H5T_DIR_DEFAULT);
+
 	    H5Tclose(type);
 
 	    space = H5Aget_space(obj_id);

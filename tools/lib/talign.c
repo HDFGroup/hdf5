@@ -29,6 +29,7 @@ int main(void)
 
 	hsize_t dim[2];
 	hsize_t cdim[4];
+        H5T_class_t  type_class;
 
 	char string5[5];
 	float fok[2] = {1234., 2341.};
@@ -72,7 +73,11 @@ int main(void)
 	H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
-	fix = H5Tget_native_type(cmp,H5T_DIR_DEFAULT);
+        type_class = H5Tget_class(cmp);
+        if(type_class==H5T_BITFIELD)
+               fix=H5Tcopy(cmp);
+        else
+               fix=H5Tget_native_type(cmp, H5T_DIR_DEFAULT);
 
 	cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 

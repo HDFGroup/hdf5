@@ -1087,8 +1087,15 @@ h5tools_dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
 
         if (info->raw)
             p_type = H5Tcopy(f_type);
-        else
-            p_type = H5Tget_native_type(f_type,H5T_DIR_DEFAULT);
+        else {
+            H5T_class_t type_class;
+
+            type_class = H5Tget_class(f_type);
+            if(type_class==H5T_BITFIELD)
+                p_type=H5Tcopy(f_type);
+            else
+                p_type = H5Tget_native_type(f_type,H5T_DIR_DEFAULT);
+        }
 
         H5Tclose(f_type);
 

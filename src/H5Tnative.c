@@ -212,13 +212,13 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
             }
             break;
 
-        /* These types need to be supported properly still... */
+        /* These 2 types will be supported in the future.  Simply return "not supported" 
+         * message for now.*/
         case H5T_TIME:
-        case H5T_BITFIELD:
-            if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "time type is not supported yet")
 
-            break;
+        case H5T_BITFIELD:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "bit field type is not supported yet")
 
         case H5T_OPAQUE:
             if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
