@@ -2523,6 +2523,11 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
  *		then convert one value at each memory location advancing
  *		BUF_STRIDE bytes each time; otherwise assume both source and
  *		destination values are packed.
+ *
+ *              Robb Matzke, 2001-02-02
+ *              Oops, forgot to increment the exponent when rounding the
+ *              significand resulted in a carry. Thanks to Guillaume Colin
+ *              de Verdiere for finding this one!
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2852,6 +2857,37 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    }
 		
 	    /* Write the exponent */
+            if (carry) {
+                expo++;
+                if (expo>=expo_max) {
+                    /*
+                     * The exponent is too large to fit in the available
+                     * region or it results in the maximum possible value.
+                     * Use positive or negative infinity instead unless the
+                     * application specifies something else.  Before
+                     * calling the overflow handler make sure the source
+                     * buffer we hand it is in the original byte order.
+                     */
+                    if (H5T_overflow_g) {
+                        uint8_t over_src[256];
+                        assert(src_p->size<=sizeof over_src);
+                        if (H5T_ORDER_BE==src.order) {
+                            for (i=0; i<src_p->size; i++) {
+                                over_src[src_p->size-(i+1)] = s[i];
+                            }
+                        } else {
+                            for (i=0; i<src_p->size; i++) {
+                                over_src[i] = s[i];
+                            }
+                        }
+                        if ((H5T_overflow_g)(src_id, dst_id, over_src, d)>=0) {
+                            goto next;
+                        }
+                    }
+                    expo = expo_max;
+                    H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                }
+            }
             H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
 	    H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
 
