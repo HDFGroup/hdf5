@@ -1,5 +1,5 @@
 #############################
-Expected output for './h5dump tall.h5'
+Expected output for '../h5dump tall.h5'
 #############################
 HDF5 "tall.h5" {
 GROUP "/" {

@@ -1,5 +1,5 @@
 #############################
-Expected output for './h5dump tslink.h5'
+Expected output for '../h5dump tslink.h5'
 #############################
 HDF5 "tslink.h5" {
 GROUP "/" {
