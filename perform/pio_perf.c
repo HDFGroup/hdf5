@@ -695,7 +695,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->max_num_procs = 1;
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
-    cl_opts->min_xfer_size = 1 * ONE_KB;
+    cl_opts->min_xfer_size = 128 * ONE_KB;
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -833,7 +833,7 @@ usage(const char *prog)
         fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
         fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
-        fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 1K]\n");
+        fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
         fprintf(stdout, "\n");
         fprintf(stdout, "  F - is a filename.\n");
         fprintf(stdout, "  N - is an integer >=0.\n");
