@@ -124,7 +124,7 @@ main (int argc, const char *argv[])
 {
   char *ifname;
   void *edata;
-  hid_t (*func) (void *);
+  H5E_auto_t func;
   hid_t ifile;
   hsize_t usize;
   htri_t testval;
@@ -132,8 +132,13 @@ main (int argc, const char *argv[])
   hid_t plist;
 
   /* Disable error reporting */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+  H5Eget_auto(&func, &edata);
+  H5Eset_auto(NULL, NULL);
+#else /* H5_WANT_H5_V1_6_COMPAT */
   H5Eget_auto (H5E_DEFAULT, &func, &edata);
   H5Eset_auto (H5E_DEFAULT, NULL, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
   parse_command_line (argc, argv);
 
