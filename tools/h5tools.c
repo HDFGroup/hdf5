@@ -884,7 +884,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    region = H5Rget_region(container, H5R_DATASET_REGION, vp);
 	    H5Gget_objinfo(obj, ".", FALSE, &sb);
 		if (programtype == H5DUMP) {
-	    h5dump_str_append(str, "%s-",DATASET);
+	    h5dump_str_append(str, "%s %lu:%lu ",DATASET,sb.objno[1], sb.objno[0]);
 		}
 		else {
 	    h5dump_str_append(str, "DSET-%lu:%lu:%lu:%lu-",
@@ -919,7 +919,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		H5Dclose(obj);
 		break;
 	    case H5G_TYPE:
-		h5dump_str_append(str, TYPE);
+		h5dump_str_append(str, DATATYPE);
 		H5Tclose(obj);
 		break;
 	    default:
@@ -934,9 +934,15 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    }
 
 	    /* Print OID */
+		if (programtype == H5DUMP) {
+		h5dump_str_append(str, " %lu:%lu",
+			      sb.objno[1], sb.objno[0]);
+		}
+		else {
 	    h5dump_str_append(str, "-%lu:%lu:%lu:%lu",
 			      sb.fileno[1], sb.fileno[0],
 			      sb.objno[1], sb.objno[0]);
+		}
 	}
 	
     } else {
