@@ -742,7 +742,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
     /* Add the filter */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-    if (H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &level)<0)
+    if(H5Z_append(&pline, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, 1, &level)<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline");
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
@@ -756,21 +756,15 @@ done:
  * Function:	H5Pset_shuffle
  *
  * Purpose:	Sets the shuffling method for a permanent 
- *		filter
- *	        to H5Z_FILTER_SHUFFLE
+ *		filter to H5Z_FILTER_SHUFFLE
  *		and bytes of the datatype of the array to be shuffled 
  *              
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ * Programmer:	Kent Yang
+ *              Wednesday, November 13, 2002
  *
  * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for 
- *              generic property list. 
  *
  *-------------------------------------------------------------------------
  */
@@ -797,7 +791,7 @@ H5Pset_shuffle(hid_t plist_id, unsigned bytes_of_type)
     /* Add the filter */
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
-    if (H5Z_append(&pline, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 1, &bytes_of_type)<0)
+    if(H5Z_append(&pline, H5Z_FILTER_SHUFFLE, H5Z_FLAG_OPTIONAL, 1, &bytes_of_type)<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to shuffle the data");
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");

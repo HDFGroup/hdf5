@@ -161,8 +161,8 @@ H5O_plist_decode(H5F_t UNUSED *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
      * Retrieve the name of the property class with its parent(s). It's a
      * regular NULL terminated string.
      */
-    pclass = H5P_open_class_path(p);
-    p += HDstrlen(p) + 1; /* + 1 for the NULL */
+    pclass = H5P_open_class_path((const char *)p);
+    p += HDstrlen((const char *)p) + 1; /* + 1 for the NULL */
 
     UINT_DECODE(p, nprops);
     UINT_DECODE(p, hashsize);

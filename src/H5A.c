@@ -1136,7 +1136,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Arename(hid_t loc_id, char *old_name, char *new_name)
+H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 {
     H5G_entry_t	*ent = NULL;	/*symtab ent of object to attribute */
     herr_t	ret_value;      /* Return value */
@@ -1177,7 +1177,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_rename(H5G_entry_t *ent, char *old_name, char *new_name)
+H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name)
 {
     int         seq, idx=FAIL;  /* Index of attribute being querried */
     H5A_t       *found_attr;    /* Attribute with OLD_NAME */

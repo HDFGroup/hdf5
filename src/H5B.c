@@ -1501,9 +1501,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
 	if (NULL==(child=H5FL_ARR_ALLOC(haddr_t,(size_t)(2*H5B_Kvalue(f,type)),0)) ||
                 NULL==(key=H5MM_malloc((2*H5B_Kvalue(f, type)+1)*type->sizeof_nkey)))
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-	for (cur_addr=addr, ret_value=0;
-                 H5F_addr_defined(cur_addr);
-                 cur_addr=next_addr) {
+	for (cur_addr=addr, ret_value=0; H5F_addr_defined(cur_addr); cur_addr=next_addr) {
 
 	    /*
 	     * Save all the child addresses and native keys since we can't
@@ -1526,16 +1524,16 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, H5B_operator_t op, haddr_t addr,
 
 	    /*
 	     * Perform the iteration operator, which might invoke an
-	     * application  callback.
+	     * application callback.
 	     */
 	    for (i=0; i<nchildren && !ret_value; i++) {
 		ret_value = (*op)(f, key+i*type->sizeof_nkey,
                          child[i], key+(i+1)*type->sizeof_nkey, udata);
 		if (ret_value<0)
 		    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iterator function failed");
-	    }
-	}
-    }
+	    } /* end for */
+	} /* end for */
+    } /* end else */
 
 done:
     if(child!=NULL)
