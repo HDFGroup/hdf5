@@ -66,10 +66,26 @@ Exception::Exception( const Exception& orig )
 //--------------------------------------------------------------------------
 string Exception::getMajorString( hid_t err_major ) const
 {
-   // calls the C API routine to get the major string
-   char msg[H5E_LEN];
-   H5Eget_msg(err_major, NULL, msg, H5E_LEN);
-   string major_str(msg);
+   // Preliminary call to H5Eget_msg() to get the length of the message
+   ssize_t mesg_size = H5Eget_msg(err_major, NULL, NULL, 0);
+
+   // If H5Eget_msg() returns a negative value, raise an exception,
+   if( mesg_size < 0 )
+      throw IdComponentException("Exception::getMajorString", 
+				"H5Eget_msg failed");
+
+   // Call H5Eget_msg again to get the actual message
+   char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
+   mesg_size = H5Eget_msg(err_major, NULL, mesg_C, mesg_size+1);
+
+   // Check for failure again
+   if( mesg_size < 0 )
+      throw IdComponentException("Exception::getMajorString", 
+				"H5Eget_msg failed");
+
+   // Convert the C error description and return
+   string major_str(mesg_C);
+   delete mesg_C;
    return( major_str );
 }
 
@@ -86,10 +102,26 @@ string Exception::getMajorString( hid_t err_major ) const
 //--------------------------------------------------------------------------
 string Exception::getMinorString( hid_t err_minor ) const
 {
-   // calls the C API routine to get the minor string
-   char msg[H5E_LEN];
-   H5Eget_msg(err_minor, NULL, msg, H5E_LEN);
-   string minor_str(msg);
+   // Preliminary call to H5Eget_msg() to get the length of the message
+   ssize_t mesg_size = H5Eget_msg(err_minor, NULL, NULL, 0);
+
+   // If H5Eget_msg() returns a negative value, raise an exception,
+   if( mesg_size < 0 )
+      throw IdComponentException("Exception::getMinorString", 
+				"H5Eget_msg failed");
+
+   // Call H5Eget_msg again to get the actual message
+   char* mesg_C = new char[mesg_size+1];  // temporary C-string for C API
+   mesg_size = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size+1);
+
+   // Check for failure again
+   if( mesg_size < 0 )
+      throw IdComponentException("Exception::getMinorString", 
+				"H5Eget_msg failed");
+
+   // Convert the C error description and return
+   string minor_str(mesg_C);
+   delete mesg_C;
    return( minor_str );
 }
 

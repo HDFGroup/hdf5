@@ -118,18 +118,22 @@ nh5eprint_c2()
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5eget_major_c(int_f* error_no, _fcd name)
+nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
   int ret_val = -1;
-  char c_name[H5E_LEN];
+  char *c_name;
+  size_t c_namelen;
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
+
+  c_namelen = (size_t)*namelen;
+  if(c_namelen) c_name = (char*) HDmalloc(c_namelen + 1);
 
   /*
    * Call H5Eget_major function.
    */
-  H5Eget_msg(c_error_no, NULL, c_name, H5E_LEN);
-  HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
+  H5Eget_msg(c_error_no, NULL, c_name, c_namelen);
+  HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen); 
   
   if(!strcmp(c_name, "Invalid major error number")) return ret_val;
   ret_val = 0;
@@ -148,18 +152,22 @@ nh5eget_major_c(int_f* error_no, _fcd name)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5eget_minor_c(int_f* error_no, _fcd name)
+nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 {
   int ret_val = -1;
-  char c_name[H5E_LEN];
+  char *c_name;
+  size_t c_namelen;
   hid_t c_error_no;
   c_error_no = (hid_t)*error_no;
+
+  c_namelen = (size_t)*namelen;
+  if(c_namelen) c_name = (char*) HDmalloc(c_namelen + 1);
 
   /*
    * Call H5Eget_minor function.
    */
-  H5Eget_msg(c_error_no, NULL, c_name, H5E_LEN);
-  HD5packFstring((char*)c_name, _fcdtocp(name), strlen(c_name)); 
+  H5Eget_msg(c_error_no, NULL, c_name, c_namelen);
+  HD5packFstring((char*)c_name, _fcdtocp(name), c_namelen); 
   
   if(!strcmp(c_name, "Invalid minor error number")) return ret_val;
   ret_val = 0;

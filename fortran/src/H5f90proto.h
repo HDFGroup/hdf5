@@ -948,8 +948,8 @@ H5_FCDLL int_f nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id);
 H5_FCDLL int_f nh5eclear_c(void);
 H5_FCDLL int_f nh5eprint_c1(_fcd name, int_f* namelen);
 H5_FCDLL int_f nh5eprint_c2(void);
-H5_FCDLL int_f nh5eget_major_c(int_f* error_no, _fcd name);
-H5_FCDLL int_f nh5eget_minor_c(int_f* error_no, _fcd name);
+H5_FCDLL int_f nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen);
+H5_FCDLL int_f nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5eset_auto_c(int_f* printflag);
 
 /*

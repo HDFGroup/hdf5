@@ -27,9 +27,6 @@
 /* Value for the default error stack */
 #define H5E_DEFAULT             0
 
-/* Limit of error strings recorded */
-#define H5E_LEN                 128
-
 /* Different kinds of error information */
 typedef enum H5E_type_t {
     H5E_MAJOR,
