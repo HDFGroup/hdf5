@@ -82,16 +82,12 @@ ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t=1}
 ac_cv_sizeof_uint8_t=${ac_cv_sizeof_uint8_t=1}
 ac_cv_sizeof_int_least8_t=${ac_cv_sizeof_int_least8_t=1}
 ac_cv_sizeof_uint_least8_t=${ac_cv_sizeof_uint_least8_t=1}
-ac_cv_sizeof_int_fast8_t=${ac_cv_sizeof_int_fast8_t=1}
-# removed to deal with wierdness on SDSC DataStar -- JRM 9/7/04
-#ac_cv_sizeof_uint_fast8_t=${ac_cv_sizeof_uint_fast8_t=4}
+# Do not cache int_fast8_t since the vendor changes often.
 ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t=2}
 ac_cv_sizeof_uint16_t=${ac_cv_sizeof_uint16_t=2}
 ac_cv_sizeof_int_least16_t=${ac_cv_sizeof_int_least16_t=2}
 ac_cv_sizeof_uint_least16_t=${ac_cv_sizeof_uint_least16_t=2}
-ac_cv_sizeof_int_fast16_t=${ac_cv_sizeof_int_fast16_t=4}
-# removed to deal with wierdness on SDSC DataStar -- JRM 9/7/04
-#ac_cv_sizeof_uint_fast16_t=${ac_cv_sizeof_uint_fast16_t=4}
+# Do not cache int_fast16_t since the vendor changes often.
 ac_cv_sizeof_int32_t=${ac_cv_sizeof_int32_t=4}
 ac_cv_sizeof_uint32_t=${ac_cv_sizeof_uint32_t=4}
 ac_cv_sizeof_int_least32_t=${ac_cv_sizeof_int_least32_t=4}
