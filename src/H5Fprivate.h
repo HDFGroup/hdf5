@@ -351,11 +351,25 @@ typedef struct H5F_search_t {
    ino_t	ino;		/* Unique file number on device		*/
 } H5F_search_t;
 
+/* For determining what the last file operation was */
+typedef enum
+  {
+      OP_UNKNOWN = 0,   /* Don't know what the last operation was (after fopen frex) */
+      OP_SEEK,          /* Last operation was a seek */
+      OP_WRITE,         /* Last operation was a write */
+      OP_READ           /* Last operation was a read */
+  }
+H5F_fileop_t;
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen().
  */
 typedef struct H5F_file_t {
+   /* Seek caching info */
+   haddr_t       f_cur_off; /* Current location in the file */
+   H5F_fileop_t  last_op;   /* the last file operation performed */
+
    H5F_search_t	key;		/* The key for looking up files		*/
    uintn	flags;         	/* Access Permissions for file		*/
    hdf_file_t 	file_handle; 	/* File handle for actual I/O 		*/

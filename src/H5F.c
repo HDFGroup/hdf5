@@ -1295,14 +1295,20 @@ H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf)
    if (0==size) return 0;
    addr += f->shared->file_create_parms.userblock_size;
    
-   if (H5F_SEEK (f->shared->file_handle, addr)<0) {
-      /* low-level seek failure */
-      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
-   }
+  /* Check for switching file access operations or mis-placed seek offset */
+  if(f->shared->last_op!=OP_READ || f->shared->f_cur_off!=addr)
+    {
+      f->shared->last_op=OP_READ;
+      if (H5F_SEEK (f->shared->file_handle, addr)<0) {
+          /* low-level seek failure */
+          HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
+        } /* end if */
+    } /* end if */
    if (H5F_READ (f->shared->file_handle, buf, size)<0) {
       /* low-level read failure */
       HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
    }
+   f->shared->f_cur_off=addr+size;
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -1343,14 +1349,22 @@ H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf)
       /* no write intent */
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
    }
-   if (H5F_SEEK (f->shared->file_handle, addr)<0) {
-      /* low-level seek failure */
-      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
-   }
+
+  /* Check for switching file access operations or mis-placed seek offset */
+  if(f->shared->last_op!=OP_WRITE || f->shared->f_cur_off!=addr)
+    {
+      f->shared->last_op=OP_WRITE;
+      if (H5F_SEEK (f->shared->file_handle, addr)<0) {
+         /* low-level seek failure */
+         HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
+      }
+    } /* end if */
+
    if (H5F_WRITE (f->shared->file_handle, buf, size)<0) {
       /* low-level write failure */
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
    }
+   f->shared->f_cur_off=addr+size;
 
    FUNC_LEAVE (SUCCEED);
 }
