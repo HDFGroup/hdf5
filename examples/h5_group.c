@@ -151,7 +151,7 @@ main(void)
 /*
  * Operator function.
  */
-herr_t file_info(hid_t loc_id, const char *name, void *opdata)
+herr_t file_info(hid_t UNUSED loc_id, const char *name, void UNUSED *opdata)
 {
     /*
      * Display group name. The name is passed to the function by 
@@ -168,7 +168,7 @@ herr_t file_info(hid_t loc_id, const char *name, void *opdata)
 /*
  * Operator function.
  */
-herr_t group_info(hid_t loc_id, const char *name, void *opdata)
+herr_t group_info(hid_t loc_id, const char *name, void UNUSED *opdata)
 {
   hid_t did;  /* dataset identifier  */
   hid_t tid;  /* datatype identifier */
