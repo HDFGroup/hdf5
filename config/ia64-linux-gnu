@@ -5,9 +5,9 @@
 # the various compile modes.
 
 # Use Intel C compiler by default (if it's available).
-if test "X$CC" = "X" && which ecc > /dev/null; then
-  CC=ecc
-  CC_BASENAME=ecc
+if test "X$CC" = "X" && which icc > /dev/null; then
+  CC=icc
+  CC_BASENAME=icc
 fi
 
 #----------------------------------------------------------------------------
@@ -62,11 +62,11 @@ R_INTEGER=9
 
 # Use Intel Fortran compiler by default.
 if test "X-$F9X" = "X-"; then
-  F9X="efc"
+  F9X="ifort"
 fi
 
 case $F9X in
-  *efc)
+  *efc|*ifort)
     # this is for efc v7.  Older efc do not work with these.
     # -Vaxlib is for non-standard fortran calls like exit().
     MORE_FFLAGS='-fpp -DDEC$=DEC_ -DMS$=MS_ -Vaxlib'
@@ -102,8 +102,8 @@ fi
 
 # The Default settings for C++
 if test -z "$CXX"; then
-    CXX=ecc
-    CXX_BASENAME=ecc
+    CXX=icc
+    CXX_BASENAME=icc
 fi
 
 # A patch to make g++ getting the default settings.
