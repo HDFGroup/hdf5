@@ -327,7 +327,9 @@ Known Problems:
 
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
-  correctly with the -O option.
+  correctly with the -O option.  The test program works fine if it is
+  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
+  program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
     - Solaris x86 2.5.1, Cray T3E and Cray J90 give errors during testing
