@@ -63,10 +63,33 @@ static herr_t H5P_init_interface(void)
     FUNC_ENTER (H5P_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_DATASPACE,H5A_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS);
+    if((ret_value=H5Ainit_group(H5_DATASPACE,H5A_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS))!=FAIL)
+        ret_value=H5_add_exit(&H5P_term_interface);
 
     FUNC_LEAVE(ret_value);
 }	/* H5P_init_interface */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_term_interface
+ PURPOSE
+    Terminate various H5P objects
+ USAGE
+    void H5P_term_interface()
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void H5P_term_interface (void)
+{
+    H5Adestroy_group(H5_DATASPACE);
+} /* end H5P_term_interface() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -94,7 +117,7 @@ hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name)
     H5ECLEAR;
 
     /* Allocate space for the new data-type */
-    if((new_dim=HDmalloc(sizeof(H5P_dim_t)))==NULL)
+    if((new_dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     
     /* Initialize the dimensionality object */
@@ -284,7 +307,7 @@ herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims)
 
         /* Set the rank and copy the dims */
         space->s->rank=rank;
-        if((space->s->size=HDmalloc(sizeof(uint32)*rank))==NULL)
+        if((space->s->size=HDcalloc(sizeof(uint32),rank))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
         HDmemcpy(space->s->size,dims,sizeof(uint32)*rank);
 
@@ -294,7 +317,7 @@ herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims)
               {
                 if(u>0) /* sanity check for unlimited dimensions not in the lowest dimensionality */
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL);
-                if((space->s->max=HDmalloc(sizeof(uint32)*rank))==NULL)
+                if((space->s->max=HDcalloc(sizeof(uint32),rank))==NULL)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
                 HDmemcpy(space->s->max,dims,sizeof(uint32)*rank);
                 space->s->dim_flags|=H5P_VALID_MAX;
@@ -449,7 +472,6 @@ herr_t H5P_release(hatom_t oid)
             if(dim->s->perm!=NULL)
                 HDfree(dim->s->perm);
             HDfree(dim->s);
-            dim->s=NULL;
           } /* end if */
       } /* end if */
     HDfree(dim);

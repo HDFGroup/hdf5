@@ -468,6 +468,8 @@ extern hbool_t thread_initialize_g; /*don't decl interface_initialize_g */
 /* Private functions, not part of the publicly documented API */
 herr_t H5_init_library(void);
 void H5_term_library(void);
+herr_t H5_add_exit (void (*func)(void));
 herr_t H5_init_thread(void);
+void H5_term_thread(void);
 
 #endif

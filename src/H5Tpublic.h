@@ -74,6 +74,7 @@ uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
 herr_t H5Tadd_field (hatom_t tid, const char *name, hatom_t base, uint8 len,
 		     uint8 arch, hatom_t space);
 herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list);
+void H5T_term_interface (void);
 
 #ifdef __cplusplus
 }

@@ -122,6 +122,7 @@ H5E_push_func_t H5Eset_push(H5E_push_func_t func);
 #endif
 herr_t H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 herr_t H5Eclear(int32 err_hand);
+void H5E_term_interface(void);
 
 #ifdef __cplusplus
 }

@@ -67,6 +67,9 @@ MODIFICATION HISTORY
 #define PABLO_MASK	H5A_mask
 
 
+/*-------------------- Locally scoped variables -----------------------------*/
+
+/* Is the interface initialized? */
 static int interface_initialize_g = FALSE;
 
 #ifdef ATOMS_ARE_CACHED
@@ -81,10 +84,32 @@ static atom_group_t *atom_group_list[MAXGROUP]={NULL};
 /* Pointer to the atom node free list */
 static atom_info_t *atom_free_list=NULL;
 
-/* PRIVATE PROTOTYPES */
+/*--------------------- Local function prototypes ---------------------------*/
 static atom_info_t *H5A_find_atom(hatom_t atm);
 static atom_info_t *H5A_get_atom_node(void);
 static herr_t H5A_release_atom_node(atom_info_t *atm);
+static herr_t H5A_init_interface(void);
+
+/*--------------------------------------------------------------------------
+NAME
+   H5A_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5A_init_interface()
+RETURNS
+   SUCCEED/FAIL
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+static herr_t H5A_init_interface(void)
+{
+    herr_t ret_value = SUCCEED;
+    FUNC_ENTER (H5A_init_interface, H5A_init_interface, FAIL);
+
+    /* Registers the cleanup routine with the exit chain */
+    ret_value=H5_add_exit(&H5A_term_interface);
+
+    FUNC_LEAVE(ret_value);
+}	/* H5E_init_interface */
 
 /******************************************************************************
  NAME
@@ -111,7 +136,7 @@ intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Ainit_group, NULL, FAIL);
+    FUNC_ENTER (H5Ainit_group, H5A_init_interface, FAIL);
 
     if((grp<=BADGROUP || grp>=MAXGROUP) && hash_size>0)
         HGOTO_DONE(FAIL);
@@ -192,7 +217,7 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Adestroy_group, NULL, FAIL);
+    FUNC_ENTER (H5Adestroy_group, H5A_init_interface, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -258,7 +283,7 @@ hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in
     uintn hash_loc;                 /* new item's hash table location */
     hatom_t ret_value=SUCCEED;
 
-    FUNC_ENTER (H5Aregister_atom, NULL, FAIL);
+    FUNC_ENTER (H5Aregister_atom, H5A_init_interface, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -352,7 +377,7 @@ VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Aatom_object, NULL, NULL);
+    FUNC_ENTER (H5Aatom_object, H5A_init_interface, NULL);
 
 #ifdef ATOMS_ARE_CACHED
     /* Look for the atom in the cache first */
@@ -408,7 +433,7 @@ group_t H5Aatom_group(hatom_t atm   /* IN: Atom to retrieve group for */
 {
     group_t ret_value=BADGROUP;
 
-    FUNC_ENTER (H5Aatom_group, NULL, FAIL);
+    FUNC_ENTER (H5Aatom_group, H5A_init_interface, FAIL);
 
     ret_value=ATOM_TO_GROUP(atm);
     if(ret_value<=BADGROUP || ret_value>=MAXGROUP)
@@ -448,7 +473,7 @@ VOIDP H5Aremove_atom(hatom_t atm   /* IN: Atom to remove */
 #endif /* ATOMS_ARE_CACHED */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Aremove_atom, NULL, NULL);
+    FUNC_ENTER (H5Aremove_atom, H5A_init_interface, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -533,7 +558,7 @@ VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object i
     intn i;                         /* local counting variable */
     VOIDP ret_value=NULL;
 
-    FUNC_ENTER (H5Asearch_atom, NULL, NULL);
+    FUNC_ENTER (H5Asearch_atom, H5A_init_interface, NULL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(NULL);
@@ -583,7 +608,7 @@ intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
     group_t grp;                    /* atom's atomic group */
     hbool_t ret_value=BFAIL;
 
-    FUNC_ENTER (H5Ais_reserved, NULL, FAIL);
+    FUNC_ENTER (H5Ais_reserved, H5A_init_interface, FAIL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -629,7 +654,7 @@ static atom_info_t *H5A_find_atom(hatom_t atm   /* IN: Atom to retrieve atom for
     uintn hash_loc;                 /* atom's hash table location */
     atom_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5A_find_atom, NULL, NULL);
+    FUNC_ENTER (H5A_find_atom, H5A_init_interface, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -685,7 +710,7 @@ static atom_info_t *H5A_get_atom_node(void)
 {
     atom_info_t *ret_value=NULL;
 
-    FUNC_ENTER (H5A_get_atom_node, NULL, NULL);
+    FUNC_ENTER (H5A_get_atom_node, H5A_init_interface, NULL);
 
     if(atom_free_list!=NULL)
       {
@@ -723,7 +748,7 @@ done:
 static herr_t
 H5A_release_atom_node(atom_info_t *atm)
 {
-    FUNC_ENTER (H5A_release_atom_node, NULL, FAIL);
+    FUNC_ENTER (H5A_release_atom_node, H5A_init_interface, FAIL);
 
     /* Insert the atom at the beginning of the free list */
     atm->next=atom_free_list;
@@ -734,11 +759,11 @@ H5A_release_atom_node(atom_info_t *atm)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Ashutdown
+    H5A_term_interface
  PURPOSE
     Terminate various static buffers.
  USAGE
-    intn H5Ashutdown()
+    intn H5A_term_interface()
  RETURNS
     Returns SUCCEED/FAIL
  DESCRIPTION
@@ -749,13 +774,10 @@ H5A_release_atom_node(atom_info_t *atm)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn 
-H5Ashutdown(void)
+void H5A_term_interface(void)
 {
     atom_info_t *curr;
     intn i;
-
-    FUNC_ENTER (H5Ashutdown, NULL, FAIL);
 
     /* Release the free-list if it exists */
     if(atom_free_list!=NULL)
@@ -775,6 +797,5 @@ H5Ashutdown(void)
             atom_group_list[i]=NULL;
           } /* end if */
 
-    FUNC_LEAVE (SUCCEED);
-}	/* end H5Ashutdown() */
+}	/* end H5A_term_interface() */
 

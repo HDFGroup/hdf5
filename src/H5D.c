@@ -69,10 +69,33 @@ static herr_t H5D_init_interface(void)
     FUNC_ENTER (H5D_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS);
+    if((ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS))!=FAIL)
+        ret_value=H5_add_exit(&H5D_term_interface);
 
     FUNC_LEAVE(ret_value);
 }	/* H5D_init_interface */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5D_term_interface
+ PURPOSE
+    Terminate various H5D objects
+ USAGE
+    void H5D_term_interface()
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void H5D_term_interface (void)
+{
+    H5Adestroy_group(H5_DATASET);
+} /* end H5D_term_interface() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -190,14 +213,14 @@ hatom_t H5D_find_name(hatom_t grp_id, hobjtype_t type, const char *name)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL);
 
     /* Get the dataset's type (currently only atomic types) */
-    if((dset->type=HDmalloc(sizeof(h5_datatype_t)))==NULL)
+    if((dset->type=HDcalloc(1,sizeof(h5_datatype_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     if (NULL==H5O_read (dset->file, dset->ent.header, &(dset->ent),
 				    H5O_SIM_DTYPE, 0, dset->type))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
     
     /* Get the dataset's dimensionality (currently only simple dataspaces) */
-    if((dset->dim=HDmalloc(sizeof(H5P_dim_t)))==NULL)
+    if((dset->dim=HDcalloc(1,sizeof(H5P_dim_t)))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
     dset->dim->type=H5P_TYPE_SIMPLE;    /* for now... */
     if (NULL==(dset->dim->s=H5O_read (dset->file, dset->ent.header,
@@ -630,6 +653,14 @@ herr_t H5D_flush(hatom_t oid)
 	      HGOTO_ERROR (H5E_SYM,  H5E_CANTINIT,  FAIL);
 	   }
 	}
+
+#ifdef ROBB
+       /* Flush dataset header to disk */
+       if (H5O_flush (dataset->file, FALSE, dataset->ent.header, NULL)<0) {
+          HRETURN_ERROR (H5E_OHDR, H5E_CANTFLUSH, FAIL);
+       }
+#endif /* ROBB */
+
 	dataset->modified = FALSE;	/*it's clean now*/
     }
        

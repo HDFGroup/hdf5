@@ -53,6 +53,13 @@ hbool_t library_initialize_g = FALSE;
 hbool_t	thread_initialize_g = FALSE;
 hbool_t install_atexit_g = TRUE;
 
+typedef struct H5_exit {
+    void (*func)(void);     /* Interface function to call during exit */
+    struct H5_exit *next;   /* Pointer to next node with exit function */
+  } H5_exit_t;
+
+H5_exit_t *lib_exit_head;   /* Pointer to the head of the list of 'atexit' functions */
+
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5_init_interface(void);
 
@@ -82,6 +89,46 @@ herr_t H5_init_library(void)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5_add_exit
+ PURPOSE
+    Add an exit routine to the list of routines to call during 'atexit'
+ USAGE
+    herr_t H5_add_exit(func)
+        void (*func)(void);     IN: Function pointer of routine to add to chain
+
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Pre-pend the new function to the list of function to call during the exit
+    process.  These routines are responsible for free'ing static buffers, etc.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Don't make assumptions about the environment during the exit procedure...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5_add_exit (void (*func)(void))
+{
+    herr_t ret_value = SUCCEED;
+    H5_exit_t *new;
+
+    FUNC_ENTER (H5_add_exit, NULL, FAIL);
+
+    assert(func);
+
+    if((new=HDcalloc(1,sizeof(H5_exit_t)))==NULL)
+       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
+
+    new->func=func;
+    new->next=lib_exit_head;
+    lib_exit_head=new;
+
+    FUNC_LEAVE(ret_value);
+} /* end H5_add_exit() */
+
+/*--------------------------------------------------------------------------
+ NAME
     H5_term_library
  PURPOSE
     Terminate various static buffers and shutdown the library.
@@ -101,6 +148,16 @@ herr_t H5_init_library(void)
 void
 H5_term_library (void)
 {
+    H5_exit_t *temp;
+
+    temp=lib_exit_head;
+    while(lib_exit_head!=NULL)
+      {
+          (*lib_exit_head->func)();
+          lib_exit_head=lib_exit_head->next;
+          HDfree(temp);
+          temp=lib_exit_head;
+      } /* end while */
 } /* end H5_term_library() */
 
 /*--------------------------------------------------------------------------
@@ -123,8 +180,36 @@ herr_t H5_init_thread(void)
     if((thrderrid=H5Enew_err_stack(16))==FAIL)
        HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
 
+    /* Add the "thread termination" routine to the exit chain */
+    if(H5_add_exit(&H5_term_thread)==FAIL)
+       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
+
     FUNC_LEAVE (SUCCEED);
 }	/* H5_init_thread */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5_term_thread
+ PURPOSE
+    Terminate various thread-specific objects
+ USAGE
+    void H5_term_thread()
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Release the error stack and any other thread-specific resources allocated
+    on a "per thread" basis.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void
+H5_term_thread (void)
+{
+    H5Edelete_err_stack(thrderrid);
+} /* end H5_term_thread() */
 
 /*--------------------------------------------------------------------------
 NAME

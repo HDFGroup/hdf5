@@ -190,7 +190,7 @@ intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
 
 /******************************************************************************
  NAME
-     H5Ashutdown - Terminate various static buffers.
+     H5A_term_interface - Terminate various static buffers.
 
  DESCRIPTION
     Free various buffers allocated in the H5A routines.
@@ -199,7 +199,7 @@ intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
     Returns SUCCEED/FAIL
 
 *******************************************************************************/
-intn H5Ashutdown(void);
+void H5A_term_interface(void);
 
 #ifdef __cplusplus
 }

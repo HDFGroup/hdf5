@@ -333,18 +333,21 @@ H5O_sim_dim_copy (const void *mesg, void *dest)
    HDmemcpy(dst,src,sizeof(H5O_sim_dim_t));
    if(src->rank>0)
      {
-       dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
+       if(dst->size==NULL)
+           dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
        HDmemcpy(dst->size,src->size,src->rank*sizeof(uint32));
        /* Check for maximum dimensions and copy those */
        if((src->dim_flags&0x01)>0)
          {
-           dst->max = H5MM_xcalloc (src->rank, sizeof(uint32));
+           if(dst->max==NULL)
+               dst->max = H5MM_xcalloc (src->rank, sizeof(uint32));
            HDmemcpy(dst->max,src->max,src->rank*sizeof(uint32));
          } /* end if */
        /* Check for dimension permutation and copy those */
        if((src->dim_flags&0x02)>0)
          {
-           dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
+           if(dst->max==NULL)
+               dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
            HDmemcpy(dst->perm,src->perm,src->rank*sizeof(uint32));
          } /* end if */
      } /* end if */

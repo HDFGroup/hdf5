@@ -74,10 +74,33 @@ static herr_t H5T_init_interface(void)
     FUNC_ENTER (H5T_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_DATATYPE,H5A_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS);
+    if((ret_value=H5Ainit_group(H5_DATATYPE,H5A_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS))!=FAIL)
+        ret_value=H5_add_exit(&H5T_term_interface);
 
     FUNC_LEAVE(ret_value);
 }	/* H5T_init_interface */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5T_term_interface
+ PURPOSE
+    Terminate various H5T objects
+ USAGE
+    void H5T_term_interface()
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void H5T_term_interface (void)
+{
+    H5Adestroy_group(H5_DATATYPE);
+} /* end H5T_term_interface() */
 
 /*--------------------------------------------------------------------------
  NAME

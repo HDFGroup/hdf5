@@ -133,10 +133,33 @@ static herr_t H5E_init_interface(void)
     FUNC_ENTER (H5E_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the error stacks */
-    ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0);
+    if((ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0))!=FAIL)
+        ret_value=H5_add_exit(&H5E_term_interface);
 
     FUNC_LEAVE(ret_value);
 }	/* H5E_init_interface */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5E_term_interface
+ PURPOSE
+    Terminate various H5E objects
+ USAGE
+    void H5E_term_interface()
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+void H5E_term_interface (void)
+{
+    H5Adestroy_group(H5_ERR);
+} /* end H5E_term_interface() */
 
 /*--------------------------------------------------------------------------
 NAME

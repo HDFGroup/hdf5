@@ -43,6 +43,7 @@ extern "C" {
 /* Functions in H5P.c */
 uintn H5Pnelem(hatom_t dim_id);
 herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims);
+void H5P_term_interface (void);
 
 #ifdef __cplusplus
 }
