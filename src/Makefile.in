@@ -50,11 +50,16 @@ PRIVATE_HDR=H5private.h H5Aprivate.h H5Apkg.h H5ACprivate.h H5Bprivate.h \
     H5Zprivate.h H5config.h
 
 ## Number format detection
+## The LD_LIBRARY_PATH setting is a klutch.
+## Things should have been all set during H5detect making.
 H5Tinit.c: H5detect
+	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) | \
+		sed -e 's/-L/:/g' -e 's/ //g'`" \
 	$(LT_RUN) ./H5detect >H5Tinit.c
 
 ## no $(LIB) in the action below since that's being made now.
-H5detect: H5detect.o
-	$(LT_LINK_EXE) $(CFLAGS) -o $@ H5detect.o $(LDFLAGS) $(LIBS)
+H5detect: H5detect.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ H5detect.lo $(LDFLAGS) $(LIBS)
+
 
 @CONCLUDE@

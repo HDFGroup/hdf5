@@ -495,8 +495,13 @@ if test -z "$show_help"; then
       -L*)
         dir=`$echo "X$arg" | $Xsed -e 's%^-L\(.*\)$%\1%'`
         case "$dir" in
-        /* | [A-Za-z]:\\*)
+        /*)
 	  # Add the corresponding hardcode_libdir_flag, if it is not identical.
+	  finalize_shlibpath="$finalize_shlibpath$dir:"
+	  ;;
+	[A-Za-z]:\\*)
+	  # Add the corresponding hardcode_libdir_flag, if it is not identical.
+	  finalize_shlibpath="$finalize_shlibpath$dir;"
           ;;
         *)
           $echo "$modename: \`-L$dir' cannot specify a relative directory" 1>&2
@@ -1496,10 +1501,11 @@ else
   if test -f \"\$progdir/\$program\"; then"
 
         # Export our shlibpath_var if we have one.
-        if test -n "$shlibpath_var" && test -n "$temp_rpath"; then
+        if test -n "$shlibpath_var" && 
+	  (test -n "$temp_rpath" || test -n "$finalize_shlibpath"); then
           $echo >> $output "\
     # Add our own library path to $shlibpath_var
-    $shlibpath_var=\"$temp_rpath\$$shlibpath_var\"
+    $shlibpath_var=\"$finalize_shlibpath$temp_rpath\$$shlibpath_var\"
 
     # Some systems cannot cope with colon-terminated $shlibpath_var
     $shlibpath_var=\`\$echo \"X\$$shlibpath_var\" | \$Xsed -e 's/:*\$//'\`

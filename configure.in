@@ -412,12 +412,6 @@ dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
 test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
 test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 
-AC_SUBST(NCSA_LT_LINK_EXE)
-NCSA_LT_LINK_EXE=
-if test -d /usr/ncsa/lib; then
-    NCSA_LT_LINK_EXE="$NCSA_LT_LINK_EXE -rpath /usr/ncsa/lib"
-fi
-
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case $withval in
     yes)
@@ -866,9 +860,14 @@ dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
 dnl and others use `%qd'.  There may be more!  The final `l' is a
 dnl default in case none of the others work.
+dnl Need to patch up LD_LIBRARY_PATH so that the execution can find all
+dnl the dynamic library.  The correct way to do it should be updating
+dnl LD_LIBRARY_PATH along with LDFLAGS or do it with the AC_TRY_RUN macro.
 dnl
 AC_MSG_CHECKING(how to print long long)
 AC_CACHE_VAL(hdf5_cv_printf_ll,
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo $LDFLAGS | sed -e 's/-L/:/g' -e 's/ //g'`"
+export LD_LIBRARY_PATH
              for hdf5_cv_printf_ll in l L q ll unknown; do
                 AC_TRY_RUN([
 #include <stdio.h>
