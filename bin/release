@@ -39,12 +39,67 @@
 #   Moved the MANIFEST checking to a separate command file so that
 #   it can be invoked individually.
 
+# Function definitions
+#
+# Print Usage page
+USAGE()
+{
+cat << EOF
+Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
+   -d DIR	The name of the directory where the releas(es) should be
+                placed.  By default, the directory is ./releases
+
+   --nocheck	Ignore errors in MANIFEST file.
+         
+   --private	Make a private release with today's date in version information.
+         
+The other command-line options are the names of the programs to use
+for compressing the resulting tar archive (if none are given then
+"tar" is assumed):
+
+    tar		-- use tar and don't do any compressing.
+    compress	-- use compress and append ".Z" to the output name.
+    gzip	-- use gzip with "-9" and append ".gz" to the output name.
+    bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
+
+Examples:
+
+    $ release
+    releases/hdf5-1.0.38.tar
+
+    $ release gzip
+    releases/hdf5-1.0.38.tar.gz
+
+    $ release -d /tmp tar compress gzip bzip2
+    /tmp/hdf5-1.0.38.tar
+    /tmp/hdf5-1.0.38.tar.Z
+    /tmp/hdf5-1.0.38.tar.gz
+    /tmp/hdf5-1.0.38.tar.bz2
+
+EOF
+
+}
+
 # Defaults
 DEST=releases
 VERS=`perl bin/h5vers`
+VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
 check=yes
+today=`date +%Y%m%d`
+pmode='no'
+
+# Restore previous Version information
+RESTORE_VERSION()
+{
+    if [ X-${VERS_OLD} != X- ]; then
+	echo restoring version information back to $VERS_OLD
+	bin/h5vers -s $VERS_OLD
+	VERS_OLD=
+    fi
+}
+
 
 # Command-line arguments
 while [ -n "$1" ]; do
@@ -58,8 +113,16 @@ while [ -n "$1" ]; do
 	--nocheck)
 	    check=no
 	    ;;
+	-h)
+	    USAGE
+	    exit 0
+	    ;;
+	--private)
+	    pmode=yes
+	    ;;
 	-*)
 	    echo "Unknown switch: $arg" 1>&2
+	    USAGE
 	    exit 1
 	    ;;
 	*)
@@ -73,12 +136,24 @@ if [ "X$methods" = "X" ]; then
     methods=tar
 fi
 
+# setup restoration in case of abort.
+trap RESTORE_VERSION 0
+
+if [ X$pmode = Xyes ]; then
+    VERS_OLD=$VERS
+    # Set version information to m.n.r-of$today.
+    # (h5vers does not correctly handle just m.n.r-$today.)
+    VERS=`echo $VERS | sed -e s/-.*//`-of$today
+    echo Private release of $VERS
+    bin/h5vers -s $VERS
+fi
 
 test "$verbose" && echo "Releasing hdf5-$VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
     echo "   Destination directory $DEST does not exist" 1>&2
     exit 1
 fi
+
 
 # Check the validity of the MANIFEST file.
 bin/chkmanifest || fail=yes
@@ -145,4 +220,11 @@ test -f ../Makefile.x && mv ../Makefile.x Makefile
 rm -f $MANIFEST
 rm -f ../hdf5-$VERS
 rm -f ../x.tar
+
+# Restore OLD version information, then no need for trap.
+if [ X$pmode = Xyes ]; then
+    RESTORE_VERSION
+    trap 0
+fi
+
 exit 0
