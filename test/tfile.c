@@ -87,13 +87,13 @@ static void test_file_create(void)
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F1_USERBLOCK_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
+    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_OFFSET_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F1_OFFSET_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
+    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F1_LENGTH_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F1_LENGTH_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
     CHECK(ret,FAIL,"H5Cgetparm");
@@ -199,13 +199,13 @@ static void test_file_create(void)
     CHECK(ret,FAIL,"H5Cgetparm");
     VERIFY(parm,F3_USERBLOCK_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm);
+    ret=H5Cgetparm(tmpl1,H5_OFFSET_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_LENGTH_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F3_LENGTH_SIZE,"H5Cgetparm");
 
-    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm);
+    ret=H5Cgetparm(tmpl1,H5_LENGTH_SIZE,&parm2);
     CHECK(ret,FAIL,"H5Cgetparm");
-    VERIFY(parm,F3_OFFSET_SIZE,"H5Cgetparm");
+    VERIFY(parm2,F3_OFFSET_SIZE,"H5Cgetparm");
 
     ret=H5Cgetparm(tmpl1,H5_SYM_LEAF_K,&parm);
     CHECK(ret,FAIL,"H5Cgetparm");
