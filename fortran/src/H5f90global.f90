@@ -104,46 +104,6 @@
       EQUIVALENCE (integer_types(17), H5T_STRING)
 
 
-!      COMMON /PREDEFINED_TYPES/ H5T_NATIVE_INTEGER, &
-!                                H5T_NATIVE_REAL, &
-!                                H5T_NATIVE_DOUBLE, &
-!                                H5T_NATIVE_CHARACTER, &
-!                                H5T_STD_REF_OBJ, &
-!                                H5T_STD_REF_DSETREG
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /PREDEFINED_TYPES/
-!DEC$endif
-      COMMON /PREDEFINED_TYPES/  predef_types
-
-!      COMMON /FLOATING_TYPES/ H5T_IEEE_F32BE,  &
-!                              H5T_IEEE_F32LE,  &
-!                              H5T_IEEE_F64BE,  &
-!                              H5T_IEEE_F64LE
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /FLOATING_TYPES/
-!DEC$endif
-      COMMON /FLOATING_TYPES/ floating_types 
-!
-!      COMMON /INTEGER_TYPES/ H5T_STD_I8BE,  &
-!                             H5T_STD_I8LE,    &
-!                             H5T_STD_I16BE,   &
-!                             H5T_STD_I16LE,   &
-!                             H5T_STD_I32BE,   &
-!                             H5T_STD_I32LE,   &
-!                             H5T_STD_I64BE,   &
-!                             H5T_STD_I64LE,   &
-!                             H5T_STD_U8BE,    &
-!                             H5T_STD_U8LE,    &
-!                             H5T_STD_U16BE,   &
-!                             H5T_STD_U16LE,   &
-!                             H5T_STD_U32BE,   &
-!                             H5T_STD_U32LE,   &
-!                             H5T_STD_U64BE,   &
-!                             H5T_STD_U64LE
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /INTEGER_TYPES/
-!DEC$endif
-      COMMON /INTEGER_TYPES/ integer_types
 !
 ! Fortran flags
 !
@@ -154,10 +114,6 @@
 !
       INTEGER, PARAMETER :: H5F_FLAGS_LEN = 16
       INTEGER H5F_flags(H5F_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5F_FLAGS/
-!DEC$endif
-      COMMON /H5F_FLAGS/ H5F_flags
 
       INTEGER :: H5F_ACC_RDWR_F 
       INTEGER :: H5F_ACC_RDONLY_F
@@ -197,10 +153,6 @@
 !
       INTEGER, PARAMETER :: H5G_FLAGS_LEN = 8 
       INTEGER H5G_flags(H5G_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5G_FLAGS/
-!DEC$endif
-      COMMON /H5G_FLAGS/ H5G_flags
 
       INTEGER :: H5G_UNKNOWN_F
       INTEGER :: H5G_LINK_F
@@ -225,10 +177,6 @@
 
       INTEGER, PARAMETER :: H5D_FLAGS_LEN = 19 
       INTEGER H5D_flags(H5D_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5D_FLAGS/
-!DEC$endif
-      COMMON /H5D_FLAGS/ H5D_flags
 
       INTEGER :: H5D_COMPACT_F  
       INTEGER :: H5D_CONTIGUOUS_F
@@ -283,10 +231,6 @@
 !
       INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 11
       INTEGER H5FD_flags(H5FD_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5FD_FLAGS/
-!DEC$endif
-      COMMON /H5FD_FLAGS/ H5FD_flags
       
       INTEGER :: H5FD_MPIO_INDEPENDENT_F 
       INTEGER :: H5FD_MPIO_COLLECTIVE_F
@@ -317,10 +261,6 @@
 !
       INTEGER, PARAMETER :: H5E_FLAGS_LEN = 24
       INTEGER H5E_flags(H5E_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5E_FLAGS/
-!DEC$endif
-      COMMON /H5E_FLAGS/ H5E_flags
 
       INTEGER ::  H5E_NONE_MAJOR_F 
       INTEGER ::  H5E_ARGS_F 
@@ -377,10 +317,6 @@
 !
       INTEGER, PARAMETER :: H5I_FLAGS_LEN = 7
       INTEGER H5I_flags(H5I_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5I_FLAGS/
-!DEC$endif
-      COMMON /H5I_FLAGS/ H5I_flags
 
       INTEGER ::  H5I_FILE_F
       INTEGER ::  H5I_GROUP_F
@@ -403,10 +339,6 @@
 !
       INTEGER, PARAMETER :: H5P_FLAGS_LEN = 7 
       INTEGER H5P_flags(H5P_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5P_FLAGS/
-!DEC$endif
-      COMMON /H5P_FLAGS/ H5P_flags
 
       INTEGER ::  H5P_FILE_CREATE_F 
       INTEGER ::  H5P_FILE_ACCESS_F 
@@ -429,10 +361,6 @@
 !
       INTEGER, PARAMETER :: H5R_FLAGS_LEN = 2
       INTEGER H5R_flags(H5R_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5R_FLAGS/
-!DEC$endif
-      COMMON /H5R_FLAGS/ H5R_flags
       
       INTEGER :: H5R_OBJECT_F
       INTEGER :: H5R_DATASET_REGION_F
@@ -445,10 +373,6 @@
 !
       INTEGER, PARAMETER :: H5S_FLAGS_LEN = 19
       INTEGER H5S_flags(H5S_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5S_FLAGS/
-!DEC$endif
-      COMMON /H5S_FLAGS/ H5S_flags
 
       INTEGER :: H5S_SCALAR_F 
       INTEGER :: H5S_SIMPLE_F 
@@ -503,10 +427,6 @@
 !
       INTEGER, PARAMETER :: H5T_FLAGS_LEN = 30
       INTEGER H5T_flags(H5T_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5T_FLAGS/
-!DEC$endif
-      COMMON /H5T_FLAGS/ H5T_flags
 
       INTEGER ::  H5T_NO_CLASS_F 
       INTEGER ::  H5T_INTEGER_F 
@@ -575,10 +495,6 @@
 !
       INTEGER, PARAMETER :: H5Z_FLAGS_LEN = 11 
       INTEGER H5Z_flags(H5Z_FLAGS_LEN)
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5Z_FLAGS/
-!DEC$endif
-      COMMON /H5Z_FLAGS/ H5Z_flags
 
       INTEGER :: H5Z_FILTER_ERROR_F 
       INTEGER :: H5Z_FILTER_NONE_F 
@@ -610,13 +526,10 @@
 !
      INTEGER, PARAMETER :: H5LIB_FLAGS_LEN = 3 
      INTEGER :: H5LIB_flags(H5LIB_FLAGS_LEN) 
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$ ATTRIBUTES DLLEXPORT :: /H5LIB_FLAGS/
-!DEC$endif
-     COMMON /H5LIB_FLAGS/ H5LIB_flags
-      INTEGER :: H5_SZIP_RAW_OM_F
-      INTEGER :: H5_SZIP_NN_OM_F
-      INTEGER :: H5_SZIP_RAWORNN_OM_F
+
+     INTEGER :: H5_SZIP_RAW_OM_F
+     INTEGER :: H5_SZIP_NN_OM_F
+     INTEGER :: H5_SZIP_RAWORNN_OM_F
 !
       EQUIVALENCE(H5LIB_flags(1), H5_SZIP_RAW_OM_F)
       EQUIVALENCE(H5LIB_flags(2), H5_SZIP_NN_OM_F)
