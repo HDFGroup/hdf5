@@ -90,6 +90,11 @@ Configuration
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
     * Added --enable-linux-lfs flag to allow more control over whether to enable
       or disable large file support on Linux.
+    * Require HDF (a.k.a. hdf4) software that consists of a newer version
+      of zlib library which consists of the compress2() function. Versions
+      HDF version 4.1r3 and newer meets this requirement.  The compress2
+      uses a newer compression algorithm used by the HDF5 library.  Also,
+      4.1r3 has an hdp tool that can handle "loops" in Vgroups.
 
 
 Tools
