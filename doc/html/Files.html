@@ -252,7 +252,7 @@
       referred to as an "HDF5 file" regardless of how the space is organized
       at the storage level.
 
-    <h3>6.1 Unbuffered Permanent Files</h3>
+    <h3>6.1. Unbuffered Permanent Files</h3>
 
     <p>The <em>sec2</em> driver uses functions from section 2 of the
       Posix manual to access files stored on a local file system.  These are
@@ -285,7 +285,7 @@
 	function to match those added to <code>H5Pset_sec2()</code>.
     </dl>
 
-    <h3>6.2 Buffered Permanent Files</h3>
+    <h3>6.2. Buffered Permanent Files</h3>
 
     <p>The <em>stdio</em> driver uses the functions declared in the
       <code>stdio.h</code> header file to access permanent files in a local
@@ -317,7 +317,7 @@
 	function to match those added to <code>H5Pset_stdio()</code>.
     </dl>
 
-    <h3>6.3 Buffered Temporary Files</h3>
+    <h3>6.3. Buffered Temporary Files</h3>
 
     <p>The <em>core</em> driver uses <code>malloc()</code> and
       <code>free()</code> to allocated space for a file in the heap. Reading
@@ -353,7 +353,7 @@
 	function to match those added to <code>H5Pset_core()</code>.
     </dl>
 
-    <h3>6.4 Parallel Files</h3>
+    <h3>6.4. Parallel Files</h3>
 
     <p>This driver uses MPI I/O to provide parallel access to a file.
 
@@ -383,7 +383,9 @@
 	added to <code>H5Pset_mpi()</code>.
     </dl>
 
-    <h3>6.4 File Families</h3>
+    <a name="Files_Families">
+    <h3>6.5. File Families</h3>
+    </a>
 
     <p>A single HDF5 address space may be split into multiple files which,
       together, form a file family.  Each member of the family must be the
@@ -465,7 +467,7 @@
 	match those added to <code>H5Pset_family()</code>.
     </dl>
 
-    <h3>6.5 Split Meta/Raw Files</h3>
+    <h3>6.6. Split Meta/Raw Files</h3>
 
     <p>On occasion, it might be useful to separate meta data from raw
       data. The <em>split</em> driver does this by creating two files: one for
