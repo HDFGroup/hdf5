@@ -2033,23 +2033,6 @@ if test -n "$PARALLEL"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
 
-dnl  ----------------------------------------------------------------------
-dnl  Check if they would like the "Flexible parallel" functions compiled in
-dnl 
-dnl   AC_MSG_CHECKING([if Flexible Parallel HDF5 interface enabled])
-dnl   AC_ARG_ENABLE([fphdf5],
-dnl                 [AC_HELP_STRING([--enable-fphdf5],
-dnl                                 [Enable the Flexible Parallel HDF5
-dnl                                  interface])],
-dnl                 [FPHDF5=$enableval])
-dnl   if test "X$FPHDF5" = "Xyes"; then
-dnl     AC_DEFINE(HAVE_FPHDF5, 1,
-dnl               [Define if we want flexible parallel HDF5 support])
-dnl     AC_MSG_RESULT(yes)
-dnl   else
-dnl     AC_MSG_RESULT(no)
-dnl   fi
-
   dnl ----------------------------------------------------------------------
   dnl Set the flag to indicate that the MPI_File_set_size() function
   dnl works with files over 2GB, unless it's already set in the cache.
@@ -2512,11 +2495,6 @@ PRINT "Features:"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
-
-dnl
-dnl PRINT_N "          Flexible Parallel HDF"
-dnl IF_YES_NO "$FPHDF5"
-dnl
 
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"

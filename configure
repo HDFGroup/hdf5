@@ -31714,7 +31714,6 @@ _ACEOF
 
   fi
 
-
               echo "$as_me:$LINENO: checking if MPI_File_set_size works for files over 2GB" >&5
 echo $ECHO_N "checking if MPI_File_set_size works for files over 2GB... $ECHO_C" >&6
   if test "${hdf5_cv_mpi_file_set_size_big+set}" = set; then
@@ -33414,7 +33413,6 @@ PRINT "Features:"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
-
 
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$FUNCSTACK"
