@@ -142,6 +142,9 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     hsize_t dims[H5O_LAYOUT_NDIMS];             /* Dataspace (i.e. chunk) dimensions */
     int ndims;                  /* Number of (chunk) dimensions */
     H5T_order_t dtype_order;    /* Datatype's endianness order */
+    int dtype_size;             /* Datatype's size (in bits) */
+    size_t dtype_precision;     /* Datatype's precision (in bits) */
+    size_t dtype_offset;        /* Datatype's precision (in bits) */
     hsize_t scanline;           /* Size of dataspace's fastest changing dimension */
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -151,9 +154,23 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
 
-    /* Set "local" parameter for this dataset's "bits-per-pixel" */
-    if((cd_values[H5Z_SZIP_PARM_BPP]=(8*sizeof(unsigned char)*H5Tget_size(type_id)))==0)
+    /* Get datatype's size, for checking the "bits-per-pixel" */
+    if((dtype_size=(8*H5Tget_size(type_id)))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
+
+    /* Get datatype's precision, in case is less than full bits  */
+    if((dtype_precision=H5Tget_precision(type_id))==0)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype precision");
+
+    if(dtype_precision<dtype_size) {
+        dtype_offset=H5Tget_offset(type_id);
+        if(dtype_offset != 0) {
+            dtype_precision=dtype_size;
+        }
+    }
+
+    /* Set "local" parameter for this dataset's "bits-per-pixel" */
+    cd_values[H5Z_SZIP_PARM_BPP]=dtype_precision;
 
     /* Get dimensions for dataspace */
     if ((ndims=H5Sget_simple_extent_dims(space_id, dims, NULL))<0)
