@@ -244,17 +244,13 @@ if test "x$do_link" = "xyes"; then
       shared_link="${flag}${libdir}"
     fi
 
-    libraries="-lhdf5 $libraries"
+    libraries=" -lhdf5 $libraries "
     link_args="$link_args -L${libdir}"
 
     for l in $libraries; do
-      case "$link_args" in
-        *$l*)
-          ;;
-        *)
-          link_args="$link_args $l"
-          ;;
-      esac
+      if ! echo $link_args | grep " $l " > /dev/null; then
+        link_args="$link_args $l "
+      fi
     done
   else
     link_args="$link_args ${libdir}/libhdf5.a"
