@@ -2540,6 +2540,10 @@ fi
       ;;
 esac
 
+if test -n "$PARALLEL"; then
+   TESTPARALLEL=testpar
+fi
+
 ADD_PARALLEL_FILES=""
 if test -n "$PARALLEL"; then
       cat >> confdefs.h <<\EOF
@@ -2548,23 +2552,23 @@ EOF
 
 
       echo $ac_n "checking prefix for running on one processor""... $ac_c" 1>&6
-echo "configure:2552: checking prefix for running on one processor" >&5
+echo "configure:2556: checking prefix for running on one processor" >&5
    echo "$ac_t""$RUNSERIAL" 1>&6
    echo $ac_n "checking prefix for running in parallel""... $ac_c" 1>&6
-echo "configure:2555: checking prefix for running in parallel" >&5
+echo "configure:2559: checking prefix for running in parallel" >&5
    echo "$ac_t""$RUNPARALLEL" 1>&6
 
       echo $ac_n "checking whether a simple MPI-IO program can be linked""... $ac_c" 1>&6
-echo "configure:2559: checking whether a simple MPI-IO program can be linked" >&5
+echo "configure:2563: checking whether a simple MPI-IO program can be linked" >&5
    cat > conftest.$ac_ext <<EOF
-#line 2561 "configure"
+#line 2565 "configure"
 #include "confdefs.h"
 
 int main() {
 MPI_Init();MPI_File_open();
 ; return 0; }
 EOF
-if { (eval echo configure:2568: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:2572: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   echo "$ac_t""yes" 1>&6
 else
@@ -2592,7 +2596,7 @@ fi
 
 
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:2596: checking make" >&5
+echo "configure:2600: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -2609,7 +2613,7 @@ fi
 
 if test -z "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:2613: checking how to include a makefile" >&5
+echo "configure:2617: checking how to include a makefile" >&5
 
       cat >makeinc <<EOF
 foo:
@@ -2792,7 +2796,7 @@ ac_given_INSTALL="$INSTALL"
 trap 'rm -fr `echo "config/depend1 config/depend2 config/depend3 config/depend4	\
 	  config/dependN config/commence config/conclude Makefile	\
 	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
-	  examples/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+	  testpar/Makefile examples/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2912,7 +2916,7 @@ cat >> $CONFIG_STATUS <<EOF
 CONFIG_FILES=\${CONFIG_FILES-"config/depend1 config/depend2 config/depend3 config/depend4	\
 	  config/dependN config/commence config/conclude Makefile	\
 	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
-	  examples/Makefile"}
+	  testpar/Makefile examples/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
