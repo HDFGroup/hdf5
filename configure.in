@@ -479,13 +479,11 @@ dnl NCSA keeps hdf4 in a funny place, but for most sites we don't want these.
 test -d /usr/ncsa/include && CPPFLAGS="$CPPFLAGS -I/usr/ncsa/include"
 test -d /usr/ncsa/lib && LDFLAGS="$LDFLAGS -L/usr/ncsa/lib"
 
-FOUND_ZLIB="no"
-
 AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
 case "$withval" in
    yes)
       AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-      AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+      AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
       AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
       AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
       AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
@@ -511,12 +509,12 @@ case "$withval" in
       if test -n "$hdf4_lib"; then
          saved_LDFLAGS="$LDFLAGS"
          LDFLAGS="$LDFLAGS -L$hdf4_lib"
-         AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
          AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
          AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
          AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
       else
-         AC_CHECK_LIB(z,compress,FOUND_ZLIB="yes",unset H5TOH4 TESTH5TOH4)
+         AC_CHECK_LIB(z,compress,,unset H5TOH4 TESTH5TOH4)
          AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
          AC_CHECK_LIB(df,Hstartaccess)
          AC_CHECK_LIB(mfhdf,SDstart)
@@ -530,6 +528,12 @@ dnl `-lz' and their locations might be specified with the `--enable-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
+FOUND_ZLIB="no"
+for d in $LIBS ; do
+   if test "$d" = "-lz"; then
+      FOUND_ZLIB="yes"
+   fi
+done
 AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
             ,withval=yes)
 if test "X$FOUND_ZLIB" = "Xno"; then
