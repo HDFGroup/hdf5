@@ -115,16 +115,6 @@ void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void
       throw Exception( "Exception::walkErrorStack", "H5Ewalk failed" );
 }
 
-// Default error stack traversal callback function that prints error
-// messages to the specified output stream.
-void Exception::walkDefErrorStack( int n, H5E_error_t& err_desc, void* client_data )
-{
-   // calls the C API routine H5Ewalk_cb to walk the error stack
-   herr_t ret_value = H5Ewalk_cb( n, &err_desc, client_data );
-   if( ret_value < 0 )
-      throw Exception( "Exception::walkDefErrorStack", "H5Ewalk_cb failed" );
-}
-
 // Returns the detailed message set at the time the exception is thrown
 string Exception::getDetailMsg() const
 {

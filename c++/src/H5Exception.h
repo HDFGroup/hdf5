@@ -53,11 +53,6 @@ class __DLLCPP__ Exception {
 	static void walkErrorStack( H5E_direction_t direction, 
 				H5E_walk_t func, void* client_data);
 
-	// Default error stack traversal callback function that prints 
-	// error messages to the specified output stream.
-	static void walkDefErrorStack( int n, H5E_error_t& err_desc,
-				void* client_data);
-
 	// Prints the error stack in a default manner.
 	virtual void printError( FILE* stream = NULL ) const;
 
