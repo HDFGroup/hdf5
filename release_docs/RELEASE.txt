@@ -66,6 +66,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Configuration
     -------------
+        - Fixed the error that caused "make install" to fail because of the
+	  macro definition syntax of "prefix?=..."  AKC - 2003/07/22
+
+
 
     Performance
     -------------
