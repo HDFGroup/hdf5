@@ -276,6 +276,9 @@ Known Problems
     * For 24-bit image conversion from H4->H5, the current conversion is
       not consistent with HDF5 image specification. 
 
+    * In some cases, and SDS with an UNLIMITED dimension that has not
+      been written (current size = 0) is not converted correctly.
+
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
 
