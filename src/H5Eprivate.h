@@ -39,6 +39,11 @@
    if (H5_IS_API(FUNC) && H5E_auto_g)  					      \
        (H5E_auto_g)(H5E_auto_data_g)
 
+/* Note: if this is still ifdef'ed out and its after the v1.6 release, then
+ * we should be completely free of the necessity for this macro and it can
+ * be removed.  -QAK, 9/25/2002
+ */
+#ifdef OLD_WAY
 /*
  * HRETURN_ERROR macro, used to facilitate error reporting between a
  * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
@@ -49,6 +54,7 @@
    HCOMMON_ERROR (maj, min, str);					      \
    HRETURN(ret_val);						              \
 }
+#endif /* OLD_WAY */
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
