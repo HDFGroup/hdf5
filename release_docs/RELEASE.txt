@@ -73,6 +73,14 @@ Bug Fixes since HDF5-1.6.2 release
     Documentation 
     ------------- 
 
+    C++ API
+    -------
+	- H5::Exception's and its subclasses' constructors that were 
+	  overloaded to take char pointers are removed and constructors
+	  that passed in reference of 'string' are changed to pass 
+	  by value.  In addition, the default value of the data member
+	  H5::Exception::detailMessage is changed from 0/NULL to 
+	  DEFAULT_MSG ("No detailed information provided".)
 
 Documentation
 =============
