@@ -285,7 +285,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
     int	ret_value;	/* return value			*/
     
     FUNC_ENTER_API(H5Tget_array_dims, FAIL);
-    H5TRACE3("e","i*h*Is",type_id,dims,perm);
+    H5TRACE3("Is","i*h*Is",type_id,dims,perm);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))

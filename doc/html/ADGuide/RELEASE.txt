@@ -1,4 +1,4 @@
-HDF5 version 1.6.0-post1 released on Sun Aug 10 20:54:35 CDT 2003
+HDF5 version 1.6.0-post2 released on Sun Aug 31 20:53:21 CDT 2003
 ================================================================================
 
 
@@ -56,6 +56,36 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Return rank of the array datatype on successful call to
+            H5Tget_array_dims().  QAK - 2003/08/30
+        - Corrected bug in H5Tdetect_class which was not correctly detecting
+            datatype classes of fields in nested compound datatypes in some
+            circumstances.  QAK - 2003/08/30
+        - Corrected bug in sieve buffer code which could cause loss of data
+            when a small dataset was created and deleted in quick succession.
+            QAK - 2003/08/27
+        - Corrected bug in H5Gget_objname_by_idx which was not allowing NULL
+            for the name when just querying for the object name's length.
+            QAK - 2003/08/25
+        - Corrected bug in variable-length string handling which could
+            generate a core dump on writing variable-length strings as part
+            of a compound datatype on certain architectures.  QAK - 2003/08/25
+        - Corrected bug in H5Tget_native_type which would incorrectly compute
+            the size of certain compound datatypes and also incorrectly
+            compute the offset of the last field for those compound datatypes.
+            QAK - 2003/08/25
+        - Corrected bug in H5Tget_native_type which would drop string datatype
+            metadata (padding, etc.)  QAK - 2003/08/25
+        - Corrected bugs in H5Gget_num_objs, H5Gget_objname_by_idx and
+            H5Gget_objtype_by_idx to allow them to accept location IDs, not just
+            group IDs.  QAK - 2003/08/21
+        - Corrected bug when using scalar dataspace for memory selection and
+            operating on chunked dataset.  QAK - 2003/08/18
+        - Corrected bugs with multiple '/' characters in names for H5Glink
+            and H5Gunlink.  QAK - 2003/08/16
+        - Corrected bug with user blocks that didn't allow a user block to
+            be inserted in front of a file after the file was created.
+            AK - 2003/08/13
         - Corrected errors with using point selections to access data in
             chunked datasets.  QAK - 2003/07/23
         - Corrected error with variable-length datatypes and chunked datasets
@@ -69,15 +99,17 @@ Bug Fixes since HDF5-1.6.0 release
     Configuration
     -------------
         - Fixed the error that caused "make install" to fail because of the
-	  macro definition syntax of "prefix?=..."  AKC - 2003/07/22
-
-
+            macro definition syntax of "prefix?=..."  AKC - 2003/07/22
 
     Performance
     -------------
 
     Tools
     -----
+	- Fixed a segmentation fault of h5diff when percentage option is used.
+            AKC - 2003/08/27
+        - Switched away from tools using internal "fixtype" function(s) to use
+            H5Tget_native_type() internally.  QAK - 2003/08/25
 
     Documentation 
     ------------- 
