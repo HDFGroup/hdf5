@@ -580,7 +580,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     hsize_t		eof;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
     H5P_genplist_t      *plist;      /* Property list pointer */
-    
+
     FUNC_ENTER_NOAPI(H5FD_family_open, NULL)
 
     /* Check arguments */
@@ -621,6 +621,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Check that names are unique */
     sprintf(memb_name, name, 0);
     sprintf(temp, name, 1);
+    
     if (!strcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
@@ -656,14 +657,18 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
         }
         file->nmembs++;
     }
-    
-    /*
-     * The size of the first member determines the size of all the members,
-     * but if the size of the first member is zero then use the member size
-     * from the file access property list.
+
+    /* 
+     * Check if user sets member size smaller than existing first member file size.
+     * Return failure if so.  If the member size coming from access property list is 
+     * 0, then set the member size to be the current first member file size.  
      */
-    if ((eof=H5FDget_eof(file->memb[0])))
+    if(HADDR_UNDEF==(eof = H5FD_get_eof(file->memb[0])))
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "file get eof request failed")
+    if(file->memb_size==0 && eof)
         file->memb_size = eof;
+    if(eof && file->memb_size<eof)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "trying to set member size smaller than existing member file size")
 
     ret_value=(H5FD_t *)file;
 
@@ -675,7 +680,7 @@ done:
 
         for (u=0; u<file->nmembs; u++)
             if (file->memb[u])
-                if (H5FDclose(file->memb[u])<0)
+                if (H5FD_close(file->memb[u])<0)
                     nerrors++;
         if (nerrors)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close member files")
@@ -812,7 +817,9 @@ H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        /**flags|=H5FD_FEAT_ACCUMULATE_METADATA;*/ /* OK to accumulate metadata for faster writes. 
+                                                    * - Turn it off temporarily because there's a bug
+                                                    * when trying to flush metadata during closing. */
         *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     }

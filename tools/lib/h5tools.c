@@ -180,6 +180,9 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum, int argc, const char *
     } else if (!strcmp(driver, drivernames[FAMILY_IDX])) {
         /* FAMILY Driver */
         if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
+            /* Set member size to be 0 to indicate the current first member size 
+             * is the member size. 
+             */ 
             H5Pset_fapl_family(fapl, (hsize_t)0, H5P_DEFAULT);
 
             if(drivernum)
