@@ -511,7 +511,9 @@ ssize_t
 H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
 {
     H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
+#ifdef OLD_WAY
     hsize_t             num_objs;
+#endif /* OLD_WAY */
     ssize_t		ret_value = FAIL;
     
     FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL);
@@ -523,10 +525,17 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
     if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a group");
         
+#ifdef OLD_WAY
+/* Don't check for the number of objects in the group currently, because this
+ * has to iterate through the group in order to find out the information.
+ * We might as well just iterate through all the group entries and error out
+ * if we didn't find the index we are looking for. -QAK
+ */
     if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+#endif /* OLD_WAY */
         
     /*call private function*/
     ret_value = H5G_get_objname_by_idx(loc, idx, name, size, H5AC_ind_dxpl_id);
@@ -557,7 +566,9 @@ H5G_obj_t
 H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
     H5G_entry_t		*loc = NULL;    /* Pointer to symbol table entry */
+#ifdef OLD_WAY
     hsize_t             num_objs;
+#endif /* OLD_WAY */
     H5G_obj_t		ret_value;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN);
@@ -569,10 +580,17 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     if(H5G_get_type(loc,H5AC_ind_dxpl_id)!=H5G_GROUP)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a group");
         
+#ifdef OLD_WAY
+/* Don't check for the number of objects in the group currently, because this
+ * has to iterate through the group in order to find out the information.
+ * We might as well just iterate through all the group entries and error out
+ * if we didn't find the index we are looking for. -QAK
+ */
     if (H5G_get_num_objs(loc, &num_objs, H5AC_ind_dxpl_id)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "unable to retrieve number of members");
     if(idx >= num_objs)    
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound");
+#endif /* OLD_WAY */
         
     /*call private function*/
     ret_value = H5G_get_objtype_by_idx(loc, idx, H5AC_ind_dxpl_id);
@@ -2699,6 +2717,10 @@ H5G_get_objname_by_idx(H5G_entry_t *loc, hsize_t idx, char* name, size_t size, h
               H5G_node_name, loc->cache.stab.btree_addr, &udata))<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed");
     
+    /* If we don't know the name now, we almost certainly went out of bounds */
+    if(udata.name==NULL)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "index out of bound");
+
     /* Get the length of the name */
     ret_value = (ssize_t)HDstrlen(udata.name);
 
@@ -2750,12 +2772,17 @@ H5G_get_objtype_by_idx(H5G_entry_t *loc, hsize_t idx, hid_t dxpl_id)
     udata.idx = idx;
     udata.num_objs = 0;
     udata.ent = loc;
+    udata.type = H5G_UNKNOWN;
     
     /* Iterate over the group members */
     if (H5B_iterate (loc->file, dxpl_id, H5B_SNODE,
               H5G_node_type, loc->cache.stab.btree_addr, &udata)<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed");
     
+    /* If we don't know the type now, we almost certainly went out of bounds */
+    if(udata.type==H5G_UNKNOWN)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "index out of bound");
+
     ret_value = udata.type;
 
 done:
