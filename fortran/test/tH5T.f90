@@ -88,6 +88,7 @@
      INTEGER :: elements = 24 ! number of elements in the array_dims array.
      INTEGER(SIZE_T) :: sizechar
      INTEGER, DIMENSION(7) :: data_dims
+     LOGICAL :: flag = .TRUE.
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.
@@ -111,7 +112,7 @@
      !
      CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
          CALL check("h5pcreate_f", error, total_error)
-     CALL h5pset_preserve_f(plist_id, 1, error)
+     CALL h5pset_preserve_f(plist_id, flag, error)
          CALL check("h5pset_preserve_f", error, total_error)
      !
      ! Create a new file using default properties.
