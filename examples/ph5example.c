@@ -1,6 +1,6 @@
 /*
  * Example of using the parallel HDF5 library to access datasets.
- * Last revised: March 22, 2001 for v1.4.0.
+ * Last revised: April 24, 2001.
  *
  * This program contains two parts.  In the first part, the mpi processes
  * collectively create a new parallel HDF5 file and create two fixed
