@@ -102,7 +102,7 @@ H5P_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Pcreate_simple(intn rank, size_t dims[])
+H5Pcreate_simple(int rank, size_t dims[])
 {
     H5P_t                  *ds = NULL;
     hid_t                   ret_value = FAIL;
@@ -301,7 +301,7 @@ H5P_close(H5P_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-H5P_t                  *
+H5P_t *
 H5P_copy(const H5P_t *src)
 {
     H5P_t                  *dst = NULL;
@@ -421,8 +421,18 @@ H5P_get_npoints(const H5P_t *ds)
         break;
 
     case H5P_SIMPLE:
-        for (ret_value = 1, i = 0; i < ds->u.simple.rank; i++) {
-            ret_value *= ds->u.simple.size[i];
+	/*
+	 * Count the elements selected by the hypeslab if there is one,
+	 * otherwise count all the elements.
+	 */
+	if (ds->hslab_def) {
+	    for (ret_value=1, i=0; i<ds->u.simple.rank; i++) {
+		ret_value *= ds->h.count[i];
+	    }
+	} else {
+	    for (ret_value=1, i=0; i<ds->u.simple.rank; i++) {
+		ret_value *= ds->u.simple.size[i];
+	    }
         }
         break;
 
@@ -455,7 +465,7 @@ H5P_get_npoints(const H5P_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5Pget_ndims(hid_t space_id)
 {
     H5P_t                  *ds = NULL;
@@ -541,8 +551,8 @@ H5P_get_ndims(const H5P_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-intn
-H5Pget_dims(hid_t space_id, size_t dims[] /*out */ )
+int
+H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
 {
 
     H5P_t                  *ds = NULL;
@@ -684,7 +694,7 @@ H5P_modify(H5F_t *f, H5G_entry_t *ent, const H5P_t *ds)
  *
  *-------------------------------------------------------------------------
  */
-H5P_t                  *
+H5P_t *
 H5P_read(H5F_t *f, H5G_entry_t *ent)
 {
     H5P_t                  *ds = NULL;
@@ -895,7 +905,7 @@ H5Pis_simple(hid_t sid)
     be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset_space(hid_t sid, intn rank, const size_t *dims)
+H5Pset_space(hid_t sid, int rank, const size_t *dims)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
     intn                    u;  /* local counting variable */
@@ -1087,7 +1097,7 @@ done:
  *		space.  If no hyperslab has been defined then the hyperslab
  *		is the same as the entire array.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	Hyperslab dimensionality.
  *
  *		Failure:	FAIL
  *
@@ -1098,11 +1108,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+int
 H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
 		  size_t stride[]/*out*/)
 {
-    H5P_t	*ds = NULL;
+    const H5P_t	*ds = NULL;
+    intn	ret_value = FAIL;
     
     FUNC_ENTER (H5Pget_hyperslab, FAIL);
     H5ECLEAR;
@@ -1113,12 +1124,12 @@ H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
     }
 
     /* Get hyperslab info */
-    if (H5P_get_hyperslab (ds, offset, size, stride)<0) {
+    if ((ret_value=H5P_get_hyperslab (ds, offset, size, stride))<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		       "unable to retrieve hyperslab information");
     }
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }
 
 /*-------------------------------------------------------------------------
@@ -1128,7 +1139,7 @@ H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
  *		space.  If no hyperslab has been defined then the hyperslab
  *		is the same as the entire array.
  *
- * Return:	Success:	SUCCEED
+ * Return:	Success:	Hyperslab dimensionality.
  *
  *		Failure:	FAIL
  *
@@ -1139,11 +1150,12 @@ H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5P_get_hyperslab (H5P_t *ds, size_t offset[]/*out*/, size_t size[]/*out*/,
-		   size_t stride[]/*out*/)
+intn
+H5P_get_hyperslab (const H5P_t *ds, size_t offset[]/*out*/,
+		   size_t size[]/*out*/, size_t stride[]/*out*/)
 {
     intn		i;
+    intn		ret_value = FAIL;
     
     FUNC_ENTER (H5P_get_hyperslab, FAIL);
 
@@ -1167,6 +1179,7 @@ H5P_get_hyperslab (H5P_t *ds, size_t offset[]/*out*/, size_t size[]/*out*/,
 		if (stride) stride[i] = 1;
 	    }
 	}
+	ret_value = ds->u.simple.rank;
 	break;
 
     case H5P_COMPLEX:	/*fall through*/
@@ -1175,7 +1188,7 @@ H5P_get_hyperslab (H5P_t *ds, size_t offset[]/*out*/, size_t size[]/*out*/,
 		       "hyperslabs not supported for this type of space");
     }
 
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }
 
 

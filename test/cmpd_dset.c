@@ -95,11 +95,24 @@ main (void)
     static s5_t		s5[NX*NY];
     hid_t		s5_tid;
 
+    /* Sixth dataset */
+
+    /* Seventh dataset */
+    hid_t		s7_sid;
+
+    /* Eighth dataset */
+    s1_t		*s8 = NULL;
+    hid_t		s8_f_sid;	/*file data space		*/
+    hid_t		s8_m_sid;	/*memory data space		*/
+
     /* Other variables */
     int			i;
     hid_t		file, dataset, space;
     herr_t		status;
     static size_t	dim[] = {NX, NY};
+    size_t		f_offset[2];	/*offset of hyperslab in file	*/
+    size_t		h_size[2];	/*size of hyperslab		*/
+    size_t		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
     file = H5Fcreate ("cmpd_dset.h5", H5ACC_OVERWRITE,
@@ -123,9 +136,9 @@ STEP 1: Initialize dataset `s1' and store it on disk in native order.\n");
     /* Initialize the dataset */
     for (i=0; i<NX*NY; i++) {
 	s1[i].a = 5*i+0;
-	s1[i].b = 5*i+1;
+	s1[i].b = 2000*2*i;
 	s1[i].c = 5*i+2;
-	s1[i].d = 5*i+3;
+	s1[i].d = 2001+2*i;
 	s1[i].e = 5*i+4;
     }
 
@@ -297,8 +310,8 @@ STEP 6: Update fields `b' and `d' on the file, leaving the other fields\n\
 
     /* Initialize `s4' with new values */
     for (i=0; i<NX*NY; i++) {
-	s4[i].b = 2000+2*i;
-	s4[i].d = 2001+2*i;
+	s4[i].b = 5*i+1;
+	s4[i].d = 5*i+3;
     }
 
     /* Write the data to file */
@@ -306,23 +319,75 @@ STEP 6: Update fields `b' and `d' on the file, leaving the other fields\n\
     assert (status>=0);
     
     /* Read the data back */
-    status = H5Dread (dataset, s2_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s2);
+    status = H5Dread (dataset, s1_tid, H5P_ALL, H5P_ALL, H5C_DEFAULT, s1);
+    assert (status>=0);
+
+    /* Compare */
+    for (i=0; i<NX*NY; i++) {
+	assert (s1[i].a == 5*i+0);
+	assert (s1[i].b == 5*i+1);
+	assert (s1[i].c == 5*i+2);
+	assert (s1[i].d == 5*i+3);
+	assert (s1[i].e == 5*i+4);
+    }
+    
+    /*
+     *######################################################################
+     * STEP 7. Read the original dataset with an explicit data space.  Even
+     * though these data spaces are equal it tests a different part of the
+     * library.
+     */
+    printf ("\
+STEP 7: Reading original dataset with explicit data space.\n");
+    fflush (stdout);
+
+    /* Create the data space */
+    s7_sid = H5Pcreate_simple (2, dim);
+    assert (s7_sid>=0);
+    
+    /* Read the dataset */
+    status = H5Dread (dataset, s2_tid, s7_sid, H5P_ALL, H5C_DEFAULT, s2);
     assert (status>=0);
 
     /* Compare */
     for (i=0; i<NX*NY; i++) {
 	assert (s2[i].a == s1[i].a);
-	assert (s2[i].b == s4[i].b);
+	assert (s2[i].b == s1[i].b);
 	assert (s2[i].c == s1[i].c);
-	assert (s2[i].d == s4[i].d);
+	assert (s2[i].d == s1[i].d);
 	assert (s2[i].e == s1[i].e);
     }
     
 
+    /*
+     *######################################################################
+     * STEP 8. Read a hyperslab of the file into a complete array in memory.
+     * The hyperslab is the middle third of the array.
+     */
+    printf ("\
+STEP 8: Read middle third hyperslab into memory array.\n");
+    fflush (stdout);
 
+    /* Create the file data space */
+    s8_f_sid = H5Dget_space (dataset);
+    assert (s8_f_sid>=0);
+    f_offset[0] = NX/3;
+    f_offset[1] = NY/3;
+    h_size[0] = 2*NX/3 - f_offset[0];
+    h_size[1] = 2*NY/3 - f_offset[0];
+    h_sample[0] = 1;
+    h_sample[1] = 1;
+    status = H5Pset_hyperslab (s8_f_sid, f_offset, h_size, h_sample);
+    assert (status>=0);
 
+    /* Create memory data space */
+    s8_m_sid = H5Pcreate_simple (2, h_size);
+    assert (s8_m_sid>=0);
 
-
+    /* Read the dataset */
+    s8 = calloc (h_size[0]*h_size[1], sizeof(s1_t));
+    status = H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5C_DEFAULT, s8);
+    assert (status>=0);
     
 
     /*

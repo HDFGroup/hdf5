@@ -10,6 +10,7 @@
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5Pprivate.h>
+#include <H5Vprivate.h>
 
 /* Interface initialization */
 #define PABLO_MASK      H5P_simp_mask
@@ -88,8 +89,11 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
 		const H5P_number_t *numbering, intn start, intn nelmts,
 		void *buf/*out*/)
 {
-    size_t	offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
-    size_t	size[H5O_LAYOUT_NDIMS];		/*size of hyperslab	*/
+    size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of slab in file*/
+    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    intn	space_ndims;			/*dimensionality of space*/
     intn	i;				/*counters		*/
 
     FUNC_ENTER (H5P_simp_fgath, 0);
@@ -108,23 +112,34 @@ H5P_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
      */
     assert (0==start);
     assert (nelmts==H5P_get_npoints (file_space));
-    
+
     /*
-     * Quincey, this is where we look at FILE_SPACE to decide what the
-     * hyperslab is to read from disk.  For now, since the H5P interface
-     * doesn't support hyperslabs, we'll assume the caller is asking for the
-     * entire array.  --RPM
+     * Get hyperslab information to determine what elements are being
+     * selected (there might eventually be other selection methods too).
+     * We only support hyperslabs with unit sample because there's no way to
+     * currently pass sample information into H5F_arr_read() much less
+     * H5F_istore_read().
      */
-    assert (nelmts == H5P_get_npoints (file_space));
-    for (i=0; i<layout->ndims; i++) offset[i] = 0;
-    i = H5P_get_dims (file_space, size);
-    assert (i+1 == layout->ndims);
-    size[i] = elmt_size;
+    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset, hsize,
+					sample))<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
+		       "unable to retrieve hyperslab parameters");
+    }
+    for (i=0; i<space_ndims; i++) {
+	if (sample[i]!=1) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, 0,
+			   "hyperslab sampling is not implemented yet");
+	}
+    }
+    file_offset[space_ndims] = 0;
+    hsize[space_ndims] = elmt_size;
+    HDmemset (zero, 0, layout->ndims*sizeof(size_t));
 
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, layout, size, size, offset, offset, buf/*out*/)<0) {
+    if (H5F_arr_read (f, layout, hsize, hsize, zero, file_offset,
+		      buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
 
@@ -157,6 +172,14 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
 		const H5P_t *mem_space, const H5P_number_t *numbering,
 		intn start, intn nelmts, void *buf/*out*/)
 {
+    size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
+    size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
+    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    intn	space_ndims;			/*dimensionality of space*/
+    intn	i;				/*counters		*/
+
     FUNC_ENTER (H5P_simp_mscat, FAIL);
 
     /* Check args */
@@ -174,12 +197,39 @@ H5P_simp_mscat (const void *tconv_buf, size_t elmt_size,
     assert (nelmts==H5P_get_npoints (mem_space));
 
     /*
-     * Quincey, this is where we look at the hyperslab spec of MEM_SPACE to
-     * figure out how to scatter.  You'll probably end up calling
-     * H5V_hyper_copy(), but for now we just assume that data points
-     * are copied directly from TCONV_BUF to BUF.
+     * Retrieve hyperslab information to determine what elements are being
+     * selected (there might be other selection methods in the future).  We
+     * only handle hyperslabs with unit sample because there's currently no
+     * way to pass sample information to H5V_hyper_copy().
      */
-    HDmemcpy (buf, tconv_buf, nelmts*elmt_size);
+    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset, hsize,
+					sample))<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to retrieve hyperslab parameters");
+    }
+    for (i=0; i<space_ndims; i++) {
+	if (sample[i]!=1) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			   "hyperslab sampling is not implemented yet");
+	}
+    }
+    if (H5P_get_dims (mem_space, mem_size)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to retrieve data space dimensions");
+    }
+    mem_offset[space_ndims] = 0;
+    mem_size[space_ndims] = elmt_size;
+    hsize[space_ndims] = elmt_size;
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(size_t));
+
+    /*
+     * Scatter from conversion buffer to application memory.
+     */
+    if (H5V_hyper_copy (space_ndims+1, hsize, mem_size, mem_offset, buf,
+			hsize, zero, tconv_buf)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to scatter data to memory");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -212,6 +262,14 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
 		const H5P_t *mem_space, const H5P_number_t *numbering,
 		intn start, intn nelmts, void *tconv_buf/*out*/)
 {
+    size_t	mem_offset[H5O_LAYOUT_NDIMS];	/*slab offset in app buf*/
+    size_t	mem_size[H5O_LAYOUT_NDIMS];	/*total size of app buf	*/
+    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero			*/
+    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    intn	space_ndims;			/*dimensionality of space*/
+    intn	i;				/*counters		*/
+
     FUNC_ENTER (H5P_simp_mgath, 0);
 
     /* Check args */
@@ -229,12 +287,39 @@ H5P_simp_mgath (const void *buf, size_t elmt_size,
     assert (nelmts==H5P_get_npoints (mem_space));
 
     /*
-     * Quincey, this is where we look at the hyperslab spec of MEM_SPACE to
-     * figure out how to gather.  You'll probably end up calling
-     * H5V_hyper_copy(), but for now we just assume that data points are
-     * copied directly from BUF to TCONV_BUF.
+     * Retrieve hyperslab information to determine what elements are being
+     * selected (there might be other selection methods in the future).  We
+     * only handle hyperslabs with unit sample because there's currently no
+     * way to pass sample information to H5V_hyper_copy().
      */
-    HDmemcpy (tconv_buf, buf, nelmts*elmt_size);
+    if ((space_ndims=H5P_get_hyperslab (mem_space, mem_offset, hsize,
+					sample))<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
+		       "unable to retrieve hyperslab parameters");
+    }
+    for (i=0; i<space_ndims; i++) {
+	if (sample[i]!=1) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, 0,
+			   "hyperslab sampling is not implemented yet");
+	}
+    }
+    if (H5P_get_dims (mem_space, mem_size)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
+		       "unable to retrieve data space dimensions");
+    }
+    mem_offset[space_ndims] = 0;
+    mem_size[space_ndims] = elmt_size;
+    hsize[space_ndims] = elmt_size;
+    HDmemset (zero, 0, (space_ndims+1)*sizeof(size_t));
+
+    /*
+     * Scatter from conversion buffer to application memory.
+     */
+    if (H5V_hyper_copy (space_ndims+1, hsize, hsize, zero, tconv_buf,
+			mem_size, mem_offset, buf)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, 0,
+		       "unable to scatter data to memory");
+    }
 
     FUNC_LEAVE (nelmts);
 }
@@ -267,8 +352,11 @@ H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
 		const H5P_number_t *numbering, intn start, intn nelmts,
 		const void *buf)
 {
-    size_t	offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
-    size_t	size[H5O_LAYOUT_NDIMS];		/*size of hyperslab	*/
+    size_t	file_offset[H5O_LAYOUT_NDIMS];	/*offset of hyperslab	*/
+    size_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    size_t	zero[H5O_LAYOUT_NDIMS];		/*zero vector		*/
+    size_t	sample[H5O_LAYOUT_NDIMS];	/*hyperslab sampling	*/
+    intn	space_ndims;			/*space dimensionality	*/
     intn	i;				/*counters		*/
 
     FUNC_ENTER (H5P_simp_fscat, FAIL);
@@ -289,22 +377,32 @@ H5P_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     assert (nelmts==H5P_get_npoints (file_space));
     
     /*
-     * Quincey, this is where we look at FILE_SPACE to decide what the
-     * hyperslab is to read from disk.  For now, since the H5P interface
-     * doesn't support hyperslabs, we'll assume the caller is asking for the
-     * entire array.  --RPM
+     * Get hyperslab information to determine what elements are being
+     * selected (there might eventually be other selection methods too).
+     * We only support hyperslabs with unit sample because there's no way to
+     * currently pass sample information into H5F_arr_read() much less
+     * H5F_istore_read().
      */
-    assert (nelmts == H5P_get_npoints (file_space));
-    for (i=0; i<layout->ndims; i++) offset[i] = 0;
-    i = H5P_get_dims (file_space, size);
-    assert (i+1 == layout->ndims);
-    size[i] = elmt_size;
+    if ((space_ndims=H5P_get_hyperslab (file_space, file_offset, hsize,
+					sample))<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to retrieve hyperslab parameters");
+    }
+    for (i=0; i<space_ndims; i++) {
+	if (sample[i]!=1) {
+	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+			   "hyperslab sampling is not implemented yet");
+	}
+    }
+    file_offset[space_ndims] = 0;
+    hsize[space_ndims] = elmt_size;
+    HDmemset (zero, 0, layout->ndims*sizeof(size_t));
 
     /*
      * Scatter to file.
      */
-    if (H5F_arr_write (f, layout, size, size, offset, offset, buf/*out*/)<0) {
-	HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+    if (H5F_arr_write (f, layout, hsize, hsize, zero, file_offset, buf)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
 
     FUNC_LEAVE (SUCCEED);

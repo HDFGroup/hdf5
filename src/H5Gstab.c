@@ -65,9 +65,11 @@ H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self /*out */ )
     if (H5H_create(f, H5H_LOCAL, init, &(stab.heap_addr) /*out */ ) < 0) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap");
     }
-    if ((name = H5H_insert(f, &(stab.heap_addr), 1, "") < 0)) {
+    name = H5H_insert(f, &(stab.heap_addr), 1, "");
+    if ((size_t)(-1)==name) {
         HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't initialize heap");
     }
+
     /*
      * B-tree's won't work if the first name isn't at the beginning
      * of the heap.

@@ -38,7 +38,7 @@ struct H5D_t {
     H5G_entry_t		    ent;	/*cached object header stuff	*/
     H5T_t		   *type;	/*datatype of this dataset	*/
     H5P_t		   *space;	/*dataspace of this dataset	*/
-    H5D_create_t	    create_parms;	/*creation parameters		*/
+    H5D_create_t	    create_parms; /*creation parameters		*/
     H5O_layout_t	    layout;	/*data layout			*/
 };
 
@@ -311,6 +311,54 @@ H5Dclose(hid_t dataset_id)
 	HRETURN_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free");
     }
     FUNC_LEAVE(SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dget_space
+ *
+ * Purpose:	Returns a copy of the file data space for a dataset.
+ *
+ * Return:	Success:	ID for a copy of the data space.  The data
+ *				space should be released by calling
+ *				H5Dclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dget_space (hid_t dataset_id)
+{
+    H5D_t	*dataset = NULL;
+    H5P_t	*copied_space = NULL;
+    hid_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5Dget_space, FAIL);
+
+    /* Check args */
+    if (H5_DATASET!=H5A_group (dataset_id) ||
+	NULL==(dataset=H5A_object (dataset_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    }
+
+    /* Copy the data space */
+    if (NULL==(copied_space=H5P_copy (dataset->space))) {
+	HRETURN_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		       "unable to copy the data space");
+    }
+
+    /* Create an atom */
+    if ((ret_value=H5A_register (H5_DATASPACE, copied_space))<0) {
+	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		       "unable to register data space");
+    }
+
+    FUNC_LEAVE (ret_value);
 }
 
 /*-------------------------------------------------------------------------

@@ -529,7 +529,7 @@ H5H_remove_free(H5H_t *heap, H5H_free_t *fl)
  *
  * Return:      Success:        Offset of new item within heap.
  *
- *              Failure:        FAIL
+ *              Failure:        (size_t)(-1)
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -551,18 +551,17 @@ H5H_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
     static                  nmessages = 0;
 #endif
 
-    FUNC_ENTER(H5H_insert, FAIL);
+    FUNC_ENTER(H5H_insert, (size_t)(-1));
 
     /* check arguments */
     assert(f);
-    if (!addr)
-        addr = &(f->shared->smallobj_addr);
+    if (!addr) addr = &(f->shared->smallobj_addr);
     assert(H5F_addr_defined(addr));
     assert(buf_size > 0);
     assert(buf);
 
     if (NULL == (heap = H5AC_find(f, H5AC_HEAP, addr, NULL, NULL))) {
-        HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
+        HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, (size_t)(-1),
                       "unable to load heap");
     }
     heap->dirty += 1;
@@ -579,7 +578,8 @@ H5H_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
      * leave zero or at least H5G_SIZEOF_FREE bytes left over.
      */
     for (fl = heap->freelist, found = FALSE; fl; fl = fl->next) {
-        if (fl->size > need_size && fl->size - need_size >= H5H_SIZEOF_FREE(f)) {
+        if (fl->size > need_size &&
+	    fl->size - need_size >= H5H_SIZEOF_FREE(f)) {
             /* a bigger free block was found */
             offset = fl->offset;
             fl->offset += need_size;
@@ -622,8 +622,8 @@ H5H_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
                     fprintf(stderr, "H5H_insert: lost %lu bytes at line %d\n",
                             (unsigned long) (max_fl->size), __LINE__);
                     if (0 == nmessages++) {
-                        fprintf(stderr, "Messages from H5H_insert() will go away "
-                                "when assertions are turned off.\n");
+                        fprintf(stderr, "Messages from H5H_insert() will go "
+				"away when assertions are turned off.\n");
                     }
                 }
 #endif
