@@ -48,7 +48,9 @@
             INTERFACE
               INTEGER FUNCTION h5eclear_c()
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5ECLEAR_C'::h5eclear_c
+              !DEC$ ENDIF
               END FUNCTION h5eclear_c
             END INTERFACE
             hdferr = h5eclear_c()
@@ -95,7 +97,9 @@
             INTERFACE
               INTEGER FUNCTION h5eprint_c1(name, namelen)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5EPRINT_C1'::h5eprint_c1
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER :: namelen
               CHARACTER(LEN=*),INTENT(IN) :: name
@@ -106,7 +110,9 @@
             INTERFACE
               INTEGER FUNCTION h5eprint_c2()
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5EPRINT_C2'::h5eprint_c2
+              !DEC$ ENDIF
               END FUNCTION h5eprint_c2
             END INTERFACE
             namelen = LEN(NAME)
@@ -160,7 +166,9 @@
             INTERFACE
               INTEGER FUNCTION h5eget_major_c(error_no, name)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5EGET_MAJOR_C'::h5eget_major_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER :: error_no
                CHARACTER(LEN=*) :: name 
@@ -216,7 +224,9 @@
             INTERFACE
               INTEGER FUNCTION h5eget_minor_c(error_no, name)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5EGET_MINOR_C'::h5eget_minor_c
+              !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER :: error_no
                CHARACTER(LEN=*) :: name 
@@ -274,7 +284,9 @@
             INTERFACE
               INTEGER FUNCTION h5eset_auto_c(printflag)
               USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5ESET_AUTO_C'::h5eset_auto_c
+              !DEC$ ENDIF
               INTEGER :: printflag
               END FUNCTION h5eset_auto_c
             END INTERFACE
