@@ -86,24 +86,24 @@ typedef H5AC_info_t *H5AC_info_ptr_t;   /* Typedef for free lists */
 
 #ifdef H5AC_DEBUG
 typedef struct H5AC_prot_t {
-    intn		nprots;		/*number of things protected	     */
-    intn		aprots;		/*nelmts of `prot' array	     */
+    int		nprots;		/*number of things protected	     */
+    int		aprots;		/*nelmts of `prot' array	     */
     H5AC_info_t	**slot;		/*array of pointers to protected things	     */
 } H5AC_prot_t;
 #endif /* H5AC_DEBUG */
 
 typedef struct H5AC_t {
-    uintn	nslots;			/*number of cache slots		     */
+    unsigned	nslots;			/*number of cache slots		     */
     H5AC_info_t **slot;		/*the cache slots, an array of pointers to the cached objects */
 #ifdef H5AC_DEBUG
     H5AC_prot_t *prot;		/*the protected slots		     */
 #endif /* H5AC_DEBUG */
-    intn	nprots;			/*number of protected objects	     */
+    int	nprots;			/*number of protected objects	     */
     struct {
-	uintn	nhits;			/*number of cache hits		     */
-	uintn	nmisses;		/*number of cache misses	     */
-	uintn	ninits;			/*number of cache inits		     */
-	uintn	nflushes;		/*number of flushes to disk	     */
+	unsigned	nhits;			/*number of cache hits		     */
+	unsigned	nmisses;		/*number of cache misses	     */
+	unsigned	ninits;			/*number of cache inits		     */
+	unsigned	nflushes;		/*number of flushes to disk	     */
     } diagnostics[H5AC_NTYPES];		/*diagnostics for each type of object*/
 } H5AC_t;
 
@@ -119,7 +119,7 @@ __DLL__ herr_t H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 			      void *thing);
 __DLL__ herr_t H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 			  hbool_t destroy);
-__DLL__ herr_t H5AC_create(H5F_t *f, intn size_hint);
+__DLL__ herr_t H5AC_create(H5F_t *f, int size_hint);
 __DLL__ herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 __DLL__ herr_t H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr,

@@ -42,12 +42,12 @@
  *
  *-------------------------------------------------------------------------
  */
-static uintn
+static unsigned
 init_full(uint8_t *array, size_t nx, size_t ny, size_t nz)
 {
     size_t		    i, j, k;
     uint8_t		    acc = 128;
-    uintn		    total = 0;
+    unsigned		    total = 0;
 
     for (i=0; i<nx; i++) {
 	for (j=0; j<ny; j++) {
@@ -152,13 +152,13 @@ test_fill(size_t nx, size_t ny, size_t nz,
     hsize_t	hs_size[3];	    	/*hyperslab size		*/
     hsize_t	dst_size[3];	    	/*destination total size	*/
     hssize_t	dst_offset[3];	    	/*offset of hyperslab in dest   */
-    uintn	ref_value;  		/*reference value		*/
-    uintn	acc;	    		/*accumulator		    	*/
+    unsigned	ref_value;  		/*reference value		*/
+    unsigned	acc;	    		/*accumulator		    	*/
     size_t	i, j, k, dx, dy, dz;	/*counters		   	*/
     size_t	u, v, w;
-    uintn		ndims;			/*hyperslab dimensionality	*/
+    unsigned		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];    	/*temp string		    	*/
-    uintn	fill_value;	    	/*fill value		    	*/
+    unsigned	fill_value;	    	/*fill value		    	*/
 
     /*
      * Dimensionality.
@@ -326,11 +326,11 @@ test_copy(int mode,
     hsize_t	src_size[3];		/*source total size		*/
     hssize_t	dst_offset[3];		/*offset of hyperslab in dest	*/
     hssize_t	src_offset[3];		/*offset of hyperslab in source */
-    uintn	ref_value;		/*reference value		*/
-    uintn	acc;			/*accumulator			*/
+    unsigned	ref_value;		/*reference value		*/
+    unsigned	acc;			/*accumulator			*/
     hsize_t	i, j, k, dx, dy, dz;	/*counters		     	*/
     hsize_t	u, v, w;
-    uintn		ndims;			/*hyperslab dimensionality	*/
+    unsigned		ndims;			/*hyperslab dimensionality	*/
     char	dim[64], s[256];	/*temp string			*/
     const char	*sub;
 
@@ -815,8 +815,8 @@ test_endian(size_t nx)
 static herr_t
 test_transpose(size_t nx, size_t ny)
 {
-    intn	*src = NULL;
-    intn	*dst = NULL;
+    int	*src = NULL;
+    int	*dst = NULL;
     hsize_t	i, j;
     hssize_t	src_stride[2], dst_stride[2];
     hsize_t	size[2];
@@ -831,7 +831,7 @@ test_transpose(size_t nx, size_t ny)
     src = H5MM_malloc(nx * ny * sizeof(*src));
     for (i = 0; i < nx; i++) {
 	for (j = 0; j < ny; j++) {
-	    src[i * ny + j] = (intn)(i * ny + j);
+	    src[i * ny + j] = (int)(i * ny + j);
 	}
     }
     dst = H5MM_calloc(nx*ny*sizeof(*dst));
@@ -1087,13 +1087,13 @@ main(int argc, char *argv[])
 {
     herr_t		    status;
     int			    nerrors = 0;
-    uintn		    size_of_test;
+    unsigned		    size_of_test;
 
     /* Parse arguments or assume `small' */
     if (1 == argc) {
 	size_of_test = TEST_SMALL;
     } else {
-	intn			i;
+	int			i;
 	for (i = 1, size_of_test = 0; i < argc; i++) {
 	    if (!strcmp(argv[i], "small")) {
 		size_of_test |= TEST_SMALL;

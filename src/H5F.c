@@ -86,7 +86,7 @@ const H5F_mprop_t	H5F_mount_dflt = {
 };
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5F_init_interface
 static herr_t H5F_init_interface(void);
 
@@ -96,7 +96,7 @@ static herr_t H5F_dest(H5F_t *f);
 static herr_t H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 			hbool_t alloc_only);
 static haddr_t H5F_locate_signature(H5FD_t *file);
-static intn H5F_flush_all_cb(H5F_t *f, const void *_invalidate);
+static int H5F_flush_all_cb(H5F_t *f, const void *_invalidate);
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE_STATIC(H5F_t);
@@ -264,10 +264,10 @@ H5F_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5F_term_interface(void)
 {
-    intn	n = 0;
+    int	n = 0;
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))) {
@@ -297,7 +297,7 @@ H5F_term_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5F_flush_all_cb(H5F_t *f, const void *_invalidate)
 {
     hbool_t	invalidate = *((const hbool_t*)_invalidate);
@@ -382,7 +382,7 @@ H5F_close_all(void)
 void 
 H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l)
 {
-    intn		    i = (intn)H5F_SIZEOF_SIZE(f)-1;
+    int		    i = (int)H5F_SIZEOF_SIZE(f)-1;
 
 #ifdef WORDS_BIGENDIAN
     /*
@@ -536,12 +536,12 @@ H5Fget_access_plist(hid_t file_id)
  *
  *-------------------------------------------------------------------------
  */
-static intn
+static int
 H5F_equal(void *_haystack, const void *_needle)
 {
     H5F_t		*haystack = (H5F_t*)_haystack;
     const H5FD_t	*needle = (const H5FD_t*)_needle;
-    intn		retval;
+    int		retval;
     
     FUNC_ENTER(H5F_equal, FAIL);
     retval = (0==H5FD_cmp(haystack->shared->lf, needle));
@@ -573,7 +573,7 @@ H5F_locate_signature(H5FD_t *file)
 {
     haddr_t	    addr, eoa;
     uint8_t	    buf[H5F_SIGNATURE_LEN];
-    uintn	    n, maxpow;
+    unsigned	    n, maxpow;
 
     FUNC_ENTER(H5F_locate_signature, HADDR_UNDEF);
 
@@ -696,7 +696,7 @@ static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t		*f=NULL, *ret_value=NULL;
-    intn		n;
+    int		n;
     const H5F_create_t	*fcpl=NULL;
     const H5F_access_t	*fapl=NULL;
     
@@ -948,7 +948,7 @@ H5F_dest(H5F_t *f)
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
+H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t		*file=NULL;	/*the success return value	*/
     H5F_t		*ret_value=NULL;/*actual return value		*/
@@ -962,7 +962,7 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
     H5G_entry_t		root_ent;	/*root symbol table entry	*/
     haddr_t		eof;		/*end of file address		*/
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
-    uintn		tent_flags;	/*tentative flags		*/
+    unsigned		tent_flags;	/*tentative flags		*/
     char		driver_name[9];	/*file driver name/version	*/
     hbool_t		driver_has_cmp;	/*`cmp' callback defined?	*/
     
@@ -1628,7 +1628,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 	  hbool_t alloc_only)
 {
     uint8_t		sbuf[2048], dbuf[2048], *p=NULL;
-    uintn		nerrors=0, i;
+    unsigned		nerrors=0, i;
     hsize_t		superblock_size, driver_size;
     char		driver_name[9];
     
@@ -1836,7 +1836,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 herr_t
 H5F_close(H5F_t *f)
 {
-    uintn	i;
+    unsigned	i;
 
     FUNC_ENTER(H5F_close, FAIL);
     assert(f->nrefs>0);
@@ -2016,7 +2016,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     H5G_entry_t	*mp_ent = NULL;		/*mount point symbol table entry*/
     H5F_t	*ancestor = NULL;	/*ancestor files		*/
     H5F_t	*parent = NULL;		/*file containing mount point	*/
-    intn	lt, rt, md, cmp;	/*binary search indices		*/
+    int	lt, rt, md, cmp;	/*binary search indices		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
     herr_t	ret_value = FAIL;	/*return value			*/
     
@@ -2071,7 +2071,7 @@ H5F_mount(H5G_entry_t *loc, const char *name, H5F_t *child,
     
     /* Make room in the table */
     if (parent->mtab.nmounts>=parent->mtab.nalloc) {
-	uintn n = MAX(16, 2*parent->mtab.nalloc);
+	unsigned n = MAX(16, 2*parent->mtab.nalloc);
 	H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
 				      n*sizeof(parent->mtab.child[0]));
 	if (!x) {
@@ -2133,8 +2133,8 @@ H5F_unmount(H5G_entry_t *loc, const char *name)
     H5F_t	*parent = NULL;		/*file where mounted		*/
     H5G_entry_t	*ent = NULL;		/*temporary symbol table entry	*/
     herr_t	ret_value = FAIL;	/*return value			*/
-    uintn	i;			/*coutners			*/
-    intn	lt, rt, md=(-1), cmp;	/*binary search indices		*/
+    unsigned	i;			/*coutners			*/
+    int	lt, rt, md=(-1), cmp;	/*binary search indices		*/
     
     FUNC_ENTER(H5F_unmount, FAIL);
     assert(loc);
@@ -2234,7 +2234,7 @@ herr_t
 H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 {
     H5F_t	*parent = find->file;
-    intn	lt, rt, md=(-1), cmp;
+    int	lt, rt, md=(-1), cmp;
     H5G_entry_t	*ent = NULL;
     
     FUNC_ENTER(H5F_mountpoint, FAIL);
@@ -2443,7 +2443,7 @@ H5Freopen(hid_t file_id)
  *
  *-------------------------------------------------------------------------
  */
-uintn
+unsigned
 H5F_get_intent(H5F_t *f)
 {
     FUNC_ENTER(H5F_get_intent, 0);
@@ -2661,7 +2661,7 @@ H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
 void
 H5F_addr_encode(H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 {
-    uintn		    i;
+    unsigned		    i;
     haddr_t		    tmp;
 
     assert(f);
@@ -2705,7 +2705,7 @@ H5F_addr_encode(H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 void
 H5F_addr_decode(H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
 {
-    uintn		    i;
+    unsigned		    i;
     haddr_t		    tmp;
     uint8_t		    c;
     hbool_t		    all_zero = TRUE;
@@ -2787,8 +2787,8 @@ H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, intn indent,
-	  intn fwidth)
+H5F_debug(H5F_t *f, haddr_t UNUSED addr, FILE * stream, int indent,
+	  int fwidth)
 {
     FUNC_ENTER(H5F_debug, FAIL);
 

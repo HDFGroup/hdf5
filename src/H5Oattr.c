@@ -33,7 +33,7 @@ static void *H5O_attr_copy (const void *_mesg, void *_dest);
 static size_t H5O_attr_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_reset (void *_mesg);
 static herr_t H5O_attr_debug (H5F_t *f, const void *_mesg,
-			      FILE * stream, intn indent, intn fwidth);
+			      FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_ATTR[1] = {{
@@ -54,7 +54,7 @@ const H5O_class_t H5O_ATTR[1] = {{
 #define H5O_ATTR_VERSION	1
 
 /* Interface initialization */
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
 /* Declare external the free list for H5S_t's */
@@ -94,7 +94,7 @@ H5O_attr_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     H5A_t		*attr = NULL;
     H5S_simple_t	*simple;	/*simple dimensionality information  */
     size_t		name_len;   	/*attribute name length */
-    intn		version;	/*message version number*/
+    int		version;	/*message version number*/
 
     FUNC_ENTER(H5O_attr_decode, NULL);
 
@@ -389,8 +389,8 @@ H5O_attr_reset(void *_mesg)
         H5F_t *f;               IN: pointer to the HDF5 file struct
         const void *mesg;       IN: Pointer to the source attribute struct
         FILE *stream;           IN: Pointer to the stream for output data
-        intn indent;            IN: Amount to indent information by
-        intn fwidth;            IN: Field width (?)
+        int indent;            IN: Amount to indent information by
+        int fwidth;            IN: Field width (?)
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -398,8 +398,8 @@ H5O_attr_reset(void *_mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, intn indent,
-	       intn fwidth)
+H5O_attr_debug(H5F_t *f, const void *_mesg, FILE * stream, int indent,
+	       int fwidth)
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
 

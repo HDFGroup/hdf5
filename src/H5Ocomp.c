@@ -15,7 +15,7 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5O_pline_mask
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 #define H5O_PLINE_VERSION	1
@@ -27,7 +27,7 @@ static size_t H5O_pline_size (H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset (void *_mesg);
 static herr_t H5O_pline_free (void *_mesg);
 static herr_t H5O_pline_debug (H5F_t *f, const void *_mesg,
-			       FILE * stream, intn indent, intn fwidth);
+			       FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_PLINE[1] = {{
@@ -72,7 +72,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
 {
     H5O_pline_t		*pline = NULL;
     void		*ret_value = NULL;
-    uintn		version;
+    unsigned		version;
     size_t		i, j, n, name_length;
 
     FUNC_ENTER(H5O_pline_decode, NULL);
@@ -126,7 +126,7 @@ H5O_pline_decode(H5F_t UNUSED *f, const uint8_t *p,
 	    /*
 	     * Read the client data values and the padding
 	     */
-	    pline->filter[i].cd_values = H5MM_malloc(n*sizeof(uintn));
+	    pline->filter[i].cd_values = H5MM_malloc(n*sizeof(unsigned));
 	    if (NULL==pline->filter[i].cd_values) {
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 			    "memory allocation failed for client data");
@@ -279,13 +279,13 @@ H5O_pline_copy (const void *_src, void *_dst/*out*/)
 	}
 	if (src->filter[i].cd_nelmts>0) {
 	    dst->filter[i].cd_values = H5MM_malloc(src->filter[i].cd_nelmts*
-						   sizeof(uintn));
+						   sizeof(unsigned));
 	    if (NULL==dst->filter[i].cd_values) {
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			       "memory allocation failed");
 	    }
 	    HDmemcpy (dst->filter[i].cd_values, src->filter[i].cd_values,
-		      src->filter[i].cd_nelmts * sizeof(uintn));
+		      src->filter[i].cd_nelmts * sizeof(unsigned));
 	}
     }
     ret_value = dst;
@@ -440,7 +440,7 @@ H5O_pline_free (void *mesg)
  */
 static herr_t
 H5O_pline_debug (H5F_t UNUSED *f, const void *mesg, FILE *stream,
-		intn indent, intn fwidth)
+		int indent, int fwidth)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;
     size_t		i, j;

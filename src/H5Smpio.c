@@ -35,7 +35,7 @@
 /* Interface initialization */
 #define PABLO_MASK      H5Sall_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 static herr_t
 H5S_mpio_all_type( const H5S_t *space, const size_t elmt_size,
@@ -156,7 +156,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     int			offset[H5S_MAX_RANK];
     int			max_xtent[H5S_MAX_RANK];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
-    intn		rank;
+    int		rank;
     int			block_length[2];
     MPI_Datatype	inner_type, outer_type, old_type[2];
     MPI_Aint            extent_len, displacement[2];

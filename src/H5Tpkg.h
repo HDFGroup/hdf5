@@ -71,8 +71,8 @@ typedef enum H5T_sort_t {
 
 /* A compound data type */
 typedef struct H5T_compnd_t {
-    intn		nalloc;		/*num entries allocated in MEMB array*/
-    intn		nmembs;		/*number of members defined in struct*/
+    int		nalloc;		/*num entries allocated in MEMB array*/
+    int		nmembs;		/*number of members defined in struct*/
     H5T_sort_t		sorted;		/*how are members sorted?	     */
     hbool_t     has_array;  /* Set if this type has an array datatype member */
                             /* and should be written with the new version of */
@@ -82,8 +82,8 @@ typedef struct H5T_compnd_t {
 
 /* An enumeration data type */
 typedef struct H5T_enum_t {
-    intn		nalloc;		/*num entries allocated		     */
-    intn		nmembs;		/*number of members defined in enum  */
+    int		nalloc;		/*num entries allocated		     */
+    int		nmembs;		/*number of members defined in enum  */
     H5T_sort_t		sorted;		/*how are members sorted?	     */
     uint8_t		*value;		/*array of values		     */
     char		**name;		/*array of symbol names		     */
@@ -112,9 +112,9 @@ typedef struct H5T_opaque_t {
 /* An array datatype */
 typedef struct H5T_array_t {
     size_t		nelem;		/* total number of elements in array */
-    intn		ndims;		/* member dimensionality        */
+    int		ndims;		/* member dimensionality        */
     size_t		dim[H5S_MAX_RANK];  /* size in each dimension       */
-    intn		perm[H5S_MAX_RANK]; /* index permutation            */
+    int		perm[H5S_MAX_RANK]; /* index permutation            */
 } H5T_array_t;
 
 typedef enum H5T_state_t {

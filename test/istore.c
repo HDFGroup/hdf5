@@ -92,10 +92,10 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
  *-------------------------------------------------------------------------
  */
 static int
-new_object(H5F_t *f, const char *name, uintn ndims, H5G_entry_t *ent/*out*/)
+new_object(H5F_t *f, const char *name, unsigned ndims, H5G_entry_t *ent/*out*/)
 {
     H5O_layout_t	    layout;
-    uintn		    u;
+    unsigned		    u;
 
     /* Create the object header */
     if (H5O_create(f, 64, ent)) {
@@ -158,7 +158,7 @@ static herr_t
 test_create(H5F_t *f, const char *prefix)
 {
     H5G_entry_t		    handle;
-    uintn		    u;
+    unsigned		    u;
     char		    name[256];
 
     TESTING("istore create");
@@ -198,7 +198,7 @@ test_extend(H5F_t *f, const char *prefix,
 {
     H5G_entry_t		handle;
     hsize_t		i, j, k, ctr;
-    uintn			ndims;
+    unsigned			ndims;
     uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
     char		dims[64], s[256], name[256];
     hssize_t		offset[3];
@@ -402,7 +402,7 @@ static herr_t
 test_sparse(H5F_t *f, const char *prefix, size_t nblocks,
 	    size_t nx, size_t ny, size_t nz)
 {
-    uintn		ndims;
+    unsigned		ndims;
     hsize_t		ctr;
     char		dims[64], s[256], name[256];
     hssize_t		offset[3];
@@ -510,14 +510,14 @@ main(int argc, char *argv[])
     H5F_t		*f;
     herr_t		status;
     int			nerrors = 0;
-    uintn		size_of_test;
+    unsigned		size_of_test;
     char		filename[1024];
 
     /* Parse arguments or assume `small' */
     if (1 == argc) {
 	size_of_test = TEST_SMALL;
     } else {
-	intn			i;
+	int			i;
 	for (i = 1, size_of_test = 0; i < argc; i++) {
 	    if (!strcmp(argv[i], "small")) {
 		size_of_test |= TEST_SMALL;

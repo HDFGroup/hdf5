@@ -24,7 +24,7 @@
 #define PABLO_MASK	H5Tvlen_mask
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Local functions */
@@ -487,7 +487,7 @@ herr_t H5T_vlen_disk_write(const H5D_xfer_t UNUSED *xfer_parms, H5F_t *f, void *
 static herr_t 
 H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *free_info)
 {
-    intn i;     /* local index variable */
+    int i;     /* local index variable */
     size_t j;   /* local index variable */
     herr_t ret_value = SUCCEED;
 
@@ -652,8 +652,8 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_loc_t loc)
 {
     htri_t vlen_changed;    /* Whether H5T_vlen_mark changed the type (even if the size didn't change) */
     htri_t ret_value = 0;   /* Indicate that success, but no location change */
-    intn i;                 /* Local index variable */
-    intn accum_change=0;    /* Amount of change in the offset of the fields */
+    int i;                 /* Local index variable */
+    int accum_change=0;    /* Amount of change in the offset of the fields */
     size_t old_size;        /* Previous size of a field */
 
     FUNC_ENTER(H5T_vlen_mark, FAIL);

@@ -621,7 +621,7 @@ int32 status;
 int32 h4_type;
 int32 recsize;
 int32 n_records, num_of_recs, record_pos;
-intn nmembers;
+int nmembers;
 char *buffer=NULL; /* read/write buffer*/
 char fieldname_list[4096] = "\0";
 char *fieldname=NULL;

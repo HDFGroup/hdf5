@@ -142,7 +142,7 @@ test_select_hyper(hid_t xfer_plist)
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     H5S_class_t ext_type;   /* Extent type */
 
@@ -246,7 +246,7 @@ test_select_hyper(hid_t xfer_plist)
 struct pnt_iter {
     hssize_t	coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
     uint8_t *buf;           /* Buffer the points are in */
-    intn offset;            /* Which point we are looking at */
+    int offset;            /* Which point we are looking at */
 };
 
 /****************************************************************
@@ -296,7 +296,7 @@ test_select_point(hid_t xfer_plist)
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     struct pnt_iter pi;     /* Custom Pointer iterator struct */
     herr_t		ret;		/* Generic return value		*/
 
@@ -572,7 +572,7 @@ test_select_all(hid_t xfer_plist)
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j,k;      /* Counters */
+    int        i,j,k;      /* Counters */
     herr_t		ret;		/* Generic return value		*/
     H5S_class_t ext_type;   /* Extent type */
 
@@ -656,7 +656,7 @@ test_select_all_hyper(hid_t xfer_plist)
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     H5S_class_t ext_type;   /* Extent type */
 
@@ -796,7 +796,7 @@ test_select_combo(void)
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -961,7 +961,7 @@ test_select_hyper_stride(void)
       216,217,218,242,243,244,    /* Block #11 */
       220,221,222,246,247,248,    /* Block #12 */
             };
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1088,7 +1088,7 @@ test_select_hyper_contig(void)
     uint16_t   *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1220,7 +1220,7 @@ test_select_hyper_copy(void)
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1371,7 +1371,7 @@ test_select_point_copy(void)
                *rbuf,       /* 1st buffer read from disk */
                *rbuf2,      /* 2nd buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1543,7 +1543,7 @@ test_select_hyper_offset(void)
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     htri_t	    valid;		/* Generic boolean return value		*/
     H5S_class_t ext_type;   /* Extent type */
@@ -1703,7 +1703,7 @@ test_select_point_offset(void)
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     htri_t	    valid;		/* Generic boolean return value		*/
 
@@ -1881,7 +1881,7 @@ test_select_hyper_union(void)
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
-    intn        i,j;        /* Counters */
+    int        i,j;        /* Counters */
     herr_t		ret;		/* Generic return value		*/
     hsize_t	    npoints;	/* Number of elements in selection */
 
@@ -2338,7 +2338,7 @@ test_select_hyper_union(void)
     /* Compare data read with data written out */
     for(i=0,tbuf2=rbuf; i<SPACE2_DIM1; i++) {
         tbuf=wbuf+(i*SPACE2_DIM2)+begin[i];
-        for(j=0; j<(intn)len[i]; j++, tbuf++, tbuf2++) {
+        for(j=0; j<(int)len[i]; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
             } /* end if */
@@ -2579,7 +2579,7 @@ test_select_hyper_union_3d(void)
                *rbuf,       /* buffer read from disk */
                *tbuf,       /* temporary buffer pointer */
                *tbuf2;      /* temporary buffer pointer */
-    intn        i,j,k;      /* Counters */
+    int        i,j,k;      /* Counters */
     herr_t		ret;		/* Generic return value		*/
     hsize_t	    npoints;	/* Number of elements in selection */
 
@@ -2664,9 +2664,9 @@ test_select_hyper_union_3d(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read with data written out */
-    for(i=0,tbuf2=rbuf; i<(intn)(sizeof(rows)/sizeof(struct row_list)); i++) {
+    for(i=0,tbuf2=rbuf; i<(int)(sizeof(rows)/sizeof(struct row_list)); i++) {
         tbuf=wbuf+(rows[i].z*SPACE4_DIM3*SPACE4_DIM2)+(rows[i].y*SPACE4_DIM3)+rows[i].x;
-        for(j=0; j<(intn)rows[i].l; j++, tbuf++, tbuf2++) {
+        for(j=0; j<(int)rows[i].l; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("%d: hyperslab values don't match!, i=%d, j=%d, *tbuf=%d, *tbuf2=%d\n",__LINE__,i,j,(int)*tbuf,(int)*tbuf2);
             } /* end if */
@@ -2744,7 +2744,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     int    *wbuf,          /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
-    intn        i,j,k,l,m;  /* Counters */
+    int        i,j,k,l,m;  /* Counters */
     herr_t		ret;		/* Generic return value		*/
     hssize_t	npoints,	/* Number of elements in file selection */
                 npoints2;	/* Number of elements in memory selection */
@@ -2835,7 +2835,7 @@ printf("random I/O, before H5Dread()\n");
 {
     hsize_t blocks[15][2][SPACE5_RANK];
     hssize_t nblocks;
-    intn k;
+    int k;
 
     nblocks=H5Sget_select_hyper_nblocks(sid1);
     printf("nblocks=%d\n",(int)nblocks);

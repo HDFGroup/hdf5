@@ -44,7 +44,7 @@
  */
 #define PABLO_MASK      H5AC_mask
 #define INTERFACE_INIT  NULL
-static intn             interface_initialize_g = 0;
+static int             interface_initialize_g = 0;
 
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t          *current_cache_g = NULL;         /*for sorting */
@@ -54,7 +54,7 @@ static H5AC_t          *current_cache_g = NULL;         /*for sorting */
 H5FL_DEFINE_STATIC(H5AC_t);
 
 /* Declare a PQ free list to manage the cache mapping array information */
-H5FL_ARR_DEFINE_STATIC(intn,-1);
+H5FL_ARR_DEFINE_STATIC(int,-1);
 
 /* Declare a PQ free list to manage the cache slot array information */
 H5FL_ARR_DEFINE_STATIC(H5AC_info_ptr_t,-1);
@@ -85,8 +85,8 @@ H5FL_ARR_DEFINE_STATIC(H5AC_prot_t,-1);
  *
  *-------------------------------------------------------------------------
  */
-intn
-H5AC_create(H5F_t *f, intn size_hint)
+int
+H5AC_create(H5F_t *f, int size_hint)
 {
     H5AC_t                 *cache = NULL;
     FUNC_ENTER(H5AC_create, FAIL);
@@ -149,7 +149,7 @@ H5AC_dest(H5F_t *f)
     }
 #ifdef H5AC_DEBUG
     {
-        uintn i;
+        unsigned i;
         for (i=0; i<cache->nslots; i++) {
             cache->prot[i].slot = H5MM_xfree(cache->prot[i].slot);
             cache->prot[i].aprots = 0;
@@ -258,7 +258,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      */
     {
         H5AC_prot_t            *prot = NULL;
-        intn                    i;
+        int                    i;
 
         prot = cache->prot + idx;
         for (i = 0; i < prot->nprots; i++) {
@@ -328,8 +328,8 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 static int
 H5AC_compare(const void *_a, const void *_b)
 {
-    intn                    a = *((const intn *) _a);
-    intn                    b = *((const intn *) _b);
+    int                    a = *((const int *) _a);
+    int                    b = *((const int *) _b);
 
     assert(current_cache_g);
 
@@ -391,14 +391,14 @@ H5AC_compare(const void *_a, const void *_b)
 herr_t
 H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
 {
-    uintn                   i;
+    unsigned                   i;
     herr_t                  status;
     H5AC_flush_func_t       flush=NULL;
     H5AC_info_t           **info;
 #ifdef H5AC_SORT_BY_ADDR
-    intn                   *map = NULL;
+    int                   *map = NULL;
 #endif /* H5AC_SORT_BY_ADDR */
-    uintn                   nslots;
+    unsigned                   nslots;
     H5AC_t                 *cache = NULL;
 
     FUNC_ENTER(H5AC_flush, FAIL);
@@ -414,7 +414,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
          * Sort the cache entries by address since flushing them in
          * ascending order by address may be much more efficient.
          */
-        if (NULL==(map=H5FL_ARR_ALLOC(intn,(hsize_t)cache->nslots,0))) {
+        if (NULL==(map=H5FL_ARR_ALLOC(int,(hsize_t)cache->nslots,0))) {
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
         }
@@ -424,7 +424,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
         }
         assert(NULL == current_cache_g);
         current_cache_g = cache;
-        HDqsort(map, nslots, sizeof(intn), H5AC_compare);
+        HDqsort(map, nslots, sizeof(int), H5AC_compare);
         current_cache_g = NULL;
 #ifdef NDEBUG
         for (i = 1; i < nslots; i++) {
@@ -455,7 +455,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
                 status = (flush)(f, destroy, (*info)->addr, (*info));
                 if (status < 0) {
 #ifdef H5AC_SORT_BY_ADDR
-                    map = H5FL_ARR_FREE(intn,map);
+                    map = H5FL_ARR_FREE(int,map);
 #endif /* H5AC_SORT_BY_ADDR */
                     HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                                   "unable to flush cache");
@@ -466,7 +466,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
             }
         }
 #ifdef H5AC_SORT_BY_ADDR
-        map = H5FL_ARR_FREE(intn,map);
+        map = H5FL_ARR_FREE(int,map);
 #endif /* H5AC_SORT_BY_ADDR */
 
         /*
@@ -528,7 +528,7 @@ herr_t
 H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
     herr_t                  status;
-    uintn                   idx;
+    unsigned                   idx;
     H5AC_flush_func_t       flush=NULL;
     H5AC_info_t           **info = NULL;
     H5AC_t                 *cache = NULL;
@@ -548,7 +548,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 #ifdef H5AC_DEBUG
     {
         H5AC_prot_t            *prot = NULL;
-        intn                    i;
+        int                    i;
 
         prot = cache->prot + idx;
         for (i = 0; i < prot->nprots; i++) {
@@ -602,7 +602,7 @@ herr_t
 H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
 	    haddr_t new_addr)
 {
-    uintn                   old_idx, new_idx;
+    unsigned                   old_idx, new_idx;
     H5AC_flush_func_t       flush=NULL;
     herr_t                  status;
     H5AC_t                 *cache = NULL;
@@ -757,7 +757,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
          * can only be modified through the pointer already handed out by the
          * H5AC_protect() function.
          */
-        intn                    i;
+        int                    i;
 
         for (i = 0; i < prot->nprots; i++) {
             assert(H5F_addr_ne(addr, prot->slot[i]->addr));
@@ -788,7 +788,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
                    "memory allocation failed");
         }
-        prot->aprots = (intn)na;
+        prot->aprots = (int)na;
         prot->slot = x;
     }
     prot->slot[prot->nprots]= thing;
@@ -828,7 +828,7 @@ herr_t
 H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
     herr_t                  status;
-    uintn                   idx;
+    unsigned                   idx;
     H5AC_flush_func_t       flush=NULL;
     H5AC_t                 *cache = NULL;
     H5AC_info_t           **info = NULL;

@@ -115,7 +115,7 @@ __DLL__ void       *H5TB_free (H5TB_NODE ** root, void(*fd) (void *), void(*fk) 
 __DLL__ long        H5TB_count (H5TB_TREE * tree);
 
 #ifdef H5TB_DEBUG
-__DLL__ herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), intn method);
+__DLL__ herr_t      H5TB_dump(H5TB_TREE *ptree, void (*key_dump)(void *,void *), int method);
 #endif /* H5TB_DEBUG */
 
 #if defined c_plusplus || defined __cplusplus

@@ -26,7 +26,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
 #define INTERFACE_INIT	H5S_init_interface
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 static herr_t		H5S_init_interface(void);
 
 /* Tables of file and memory conversion information */
@@ -126,11 +126,11 @@ H5S_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn
+int
 H5S_term_interface(void)
 {
     size_t	i;
-    intn	n=0;
+    int	n=0;
     
 #ifdef H5S_DEBUG
     int		j, nprints=0;
@@ -657,7 +657,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
 herr_t
 H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 {
-    uintn u;
+    unsigned u;
 
     FUNC_ENTER(H5S_extent_copy, FAIL);
 
@@ -758,7 +758,7 @@ hssize_t
 H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
     hssize_t    ret_value = -1;
-    uintn		u;
+    unsigned		u;
 
     FUNC_ENTER(H5S_get_simple_extent_npoints, -1);
 
@@ -850,7 +850,7 @@ hsize_t
 H5S_get_npoints_max(const H5S_t *ds)
 {
     hsize_t	    ret_value = 0;
-    uintn	    u;
+    unsigned	    u;
 
     FUNC_ENTER(H5S_get_npoints_max, 0);
 
@@ -913,7 +913,7 @@ int
 H5Sget_simple_extent_ndims(hid_t space_id)
 {
     H5S_t		   *ds = NULL;
-    intn		   ret_value = 0;
+    int		   ret_value = 0;
 
     FUNC_ENTER(H5Sget_simple_extent_ndims, FAIL);
     H5TRACE1("Is","i",space_id);
@@ -945,10 +945,10 @@ H5Sget_simple_extent_ndims(hid_t space_id)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
-    intn		    ret_value = FAIL;
+    int		    ret_value = FAIL;
 
     FUNC_ENTER(H5S_get_simple_extent_ndims, FAIL);
 
@@ -1004,7 +1004,7 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
 			  hsize_t maxdims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
-    intn		   ret_value = 0;
+    int		   ret_value = 0;
 
     FUNC_ENTER(H5Sget_simple_extent_dims, FAIL);
     H5TRACE3("Is","ixx",space_id,dims,maxdims);
@@ -1036,11 +1036,11 @@ H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[]/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
-    intn	ret_value = FAIL;
-    intn	i;
+    int	ret_value = FAIL;
+    int	i;
 
     FUNC_ENTER(H5S_get_simple_extent_dims, FAIL);
 
@@ -1193,10 +1193,10 @@ H5S_read(H5G_entry_t *ent)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
 {
-    uintn    u;
+    unsigned    u;
 
     FUNC_ENTER(H5S_cmp, 0);
 
@@ -1318,7 +1318,7 @@ H5Sis_simple(hid_t space_id)
  USAGE
     herr_t H5Sset_extent_simple(space_id, rank, dims, max)
         hid_t space_id;	      IN: Dataspace object to query
-        intn rank;	      IN: # of dimensions for the dataspace
+        int rank;	      IN: # of dimensions for the dataspace
         const size_t *dims;   IN: Size of each dimension for the dataspace
  	const size_t *max;    IN: Maximum size of each dimension for the
  				  dataspace
@@ -1340,7 +1340,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
 		      const hsize_t max[/*rank*/])
 {
     H5S_t	*space = NULL;	/* dataspace to modify */
-    intn	u;	/* local counting variable */
+    int	u;	/* local counting variable */
 
     FUNC_ENTER(H5Sset_extent_simple, FAIL);
     H5TRACE4("e","iIs*[a1]h*[a1]h",space_id,rank,dims,max);
@@ -1622,11 +1622,11 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5S_extend (H5S_t *space, const hsize_t *size)
 {
-    intn	ret_value=0;
-    uintn	u;
+    int	ret_value=0;
+    unsigned	u;
     
     FUNC_ENTER (H5S_extend, FAIL);
 
@@ -1918,7 +1918,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent, intn fwidth)
+H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5S_t	*mesg = (const H5S_t*)_mesg;
     

@@ -32,7 +32,7 @@ static size_t H5O_sdspace_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_reset(void *_mesg);
 static herr_t H5O_sdspace_free (void *_mesg);
 static herr_t H5O_sdspace_debug(H5F_t *f, const void *_mesg,
-				FILE * stream, intn indent, intn fwidth);
+				FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_SDSPACE[1] = {{
@@ -53,7 +53,7 @@ const H5O_class_t H5O_SDSPACE[1] = {{
 #define H5O_SDSPACE_VERSION	1
 
 /* Is the interface initialized? */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Declare external the free list for H5S_simple_t's */
@@ -93,8 +93,8 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5S_simple_t	*sdim = NULL;/* New simple dimensionality structure */
     void		*ret_value = NULL;
-    uintn		u;		/* local counting variable */
-    uintn		flags, version;
+    unsigned		u;		/* local counting variable */
+    unsigned		flags, version;
     
     FUNC_ENTER(H5O_sdspace_decode, NULL);
 
@@ -183,8 +183,8 @@ static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5S_simple_t	*sdim = (const H5S_simple_t *) mesg;
-    uintn		u;  /* Local counting variable */
-    uintn		flags = 0;
+    unsigned		u;  /* Local counting variable */
+    unsigned		flags = 0;
 
     FUNC_ENTER(H5O_sdspace_encode, FAIL);
 
@@ -400,8 +400,8 @@ H5O_sdspace_free (void *mesg)
 	H5F_t *f;	  IN: pointer to the HDF5 file struct
 	const void *mesg;	IN: Pointer to the source simple dimensionality struct
 	FILE *stream;		IN: Pointer to the stream for output data
-	intn indent;		IN: Amount to indent information by
-	intn fwidth;		IN: Field width (?)
+	int indent;		IN: Amount to indent information by
+	int fwidth;		IN: Field width (?)
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -410,10 +410,10 @@ H5O_sdspace_free (void *mesg)
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_sdspace_debug(H5F_t UNUSED *f, const void *mesg,
-		  FILE * stream, intn indent, intn fwidth)
+		  FILE * stream, int indent, int fwidth)
 {
     const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;
-    uintn		    u;	/* local counting variable */
+    unsigned		    u;	/* local counting variable */
 
     FUNC_ENTER(H5O_sdspace_debug, FAIL);
 

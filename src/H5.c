@@ -56,7 +56,7 @@ H5_debug_t		H5_debug_g;		/*debugging info	*/
 static void		H5_debug_mask(const char*);
 
 /* Interface initialization */
-static intn          	interface_initialize_g = 0;
+static int          	interface_initialize_g = 0;
 #define INTERFACE_INIT 	NULL
 
 /*--------------------------------------------------------------------------
@@ -162,8 +162,8 @@ H5_init_library(void)
 void
 H5_term_library(void)
 {
-    intn	pending, ntries=0, n;
-    uintn	at=0;
+    int	pending, ntries=0, n;
+    unsigned	at=0;
     char	loop[1024];
     H5E_auto_t func;
     
@@ -1373,7 +1373,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     va_list		ap;
     char		buf[64], *rest;
     const char		*argname;
-    intn		argno=0, ptr, asize_idx;
+    int		argno=0, ptr, asize_idx;
     hssize_t		asize[16];
     hssize_t		i;
     void		*vp = NULL;

@@ -1444,7 +1444,7 @@ static void test_objref(void)
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
-    intn        i;          /* counting variables */
+    int        i;          /* counting variables */
     const char *write_comment="Foo!"; /* Comments for group */
 
     /* Allocate write & read buffers */
@@ -1566,7 +1566,7 @@ static void test_datareg(void)
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
-    intn        i;          /* counting variables */
+    int        i;          /* counting variables */
 
     /* Allocate write & read buffers */
     wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
@@ -1932,7 +1932,7 @@ static void test_vldatatypes2(void)
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1, tid2; /* Datatype IDs         */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    uintn       i,j,k;      /* counting variables */
+    unsigned       i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     ret = ret;	/* so that compiler won't complain "is set but never used" */
@@ -2000,7 +2000,7 @@ static void test_vldatatypes3(void)
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1, tid2; /* Datatype IDs         */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    uintn       i,j;        /* counting variables */
+    unsigned       i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     ret = ret;	/* so that compiler won't complain "is set but never used" */
@@ -2061,7 +2061,7 @@ static void test_vldatatypes4(void)
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1, tid2; /* Datatype IDs         */
     hsize_t		dims1[] = {SPACE1_DIM1};
-    uintn       i,j;        /* counting variables */
+    unsigned       i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     ret = ret;	/* so that compiler won't complain "is set but never used" */
@@ -2118,7 +2118,7 @@ static void test_array1(void)
     hid_t		tid1;       /* Datatype ID			*/
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    intn        i,j;        /* counting variables */
+    int        i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Allocate and initialize array data to write */
@@ -2157,7 +2157,7 @@ static void test_array2(void)
     hid_t		tid;        /* Datatype ID			*/
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
-    intn        i,j,k,l;    /* counting variables */
+    int        i,j,k,l;    /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Allocate and initialize array data to write */
@@ -2200,7 +2200,7 @@ static void test_array3(void)
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
     hsize_t		tdims2[] = {ARRAY3_DIM1,ARRAY3_DIM2};
-    intn        i,j,k,l;    /* counting variables */
+    int        i,j,k,l;    /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Allocate and initialize array data to write */
@@ -2250,7 +2250,7 @@ static void test_array4(void)
     hid_t		tid2;       /* Compound Datatype ID			*/
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    intn        i,j;        /* counting variables */
+    int        i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Initialize array data to write */
@@ -2309,7 +2309,7 @@ static void test_array5(void)
     hid_t		tid3;       /* Nested Array Datatype ID	*/
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    intn        i,j,k;      /* counting variables */
+    int        i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Initialize array data to write */
@@ -2370,7 +2370,7 @@ static void test_array6(void)
     hid_t		tid2;       /* VL Datatype ID       */
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    intn        i,j,k;      /* counting variables */
+    int        i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Initialize array data to write */
@@ -2424,7 +2424,7 @@ static void test_array7(void)
     hid_t		tid3;       /* Nested Array Datatype ID   */
     hsize_t		sdims1[] = {SPACE1_DIM1};
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    intn        i,j,k,l;    /* Index variables */
+    int        i,j,k,l;    /* Index variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Initialize array data to write */

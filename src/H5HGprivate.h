@@ -91,7 +91,7 @@
 
 typedef struct H5HG_t {
     haddr_t		addr;		/*address of collection		*/
-    intn		idx;		/*object ID within collection	*/
+    int		idx;		/*object ID within collection	*/
 } H5HG_t;
 
 typedef struct H5HG_heap_t H5HG_heap_t;
@@ -101,9 +101,9 @@ __DLL__ herr_t H5HG_insert(H5F_t *f, size_t size, void *obj,
 			   H5HG_t *hobj/*out*/);
 __DLL__ void *H5HG_peek(H5F_t *f, H5HG_t *hobj);
 __DLL__ void *H5HG_read(H5F_t *f, H5HG_t *hobj, void *object);
-__DLL__ intn H5HG_link(H5F_t *f, H5HG_t *hobj, intn adjust);
+__DLL__ int H5HG_link(H5F_t *f, H5HG_t *hobj, int adjust);
 __DLL__ herr_t H5HG_remove(H5F_t *f, H5HG_t *hobj);
-__DLL__ herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent,
-			  intn fwidth);
+__DLL__ herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent,
+			  int fwidth);
 
 #endif

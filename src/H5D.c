@@ -99,7 +99,7 @@ H5D_xfer_t	H5D_xfer_dflt = {
 };
 
 /* Interface initialization? */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, const H5S_t *space);
@@ -196,7 +196,7 @@ H5D_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5D_term_interface(void)
 {
     int		n=0;
@@ -943,8 +943,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 {
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
-    intn		i, ndims;
-    uintn		u;
+    int		i, ndims;
+    unsigned		u;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
     H5O_efl_t		*efl = NULL;
     H5F_t		*f = NULL;
@@ -1342,7 +1342,7 @@ H5D_open_oid(H5G_entry_t *ent)
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
     H5S_t	*space = NULL;		/*data space			*/
-    uintn	u;
+    unsigned	u;
     
     FUNC_ENTER(H5D_open_oid, NULL);
 
@@ -1497,7 +1497,7 @@ done:
 herr_t
 H5D_close(H5D_t *dataset)
 {
-    uintn		    free_failed;
+    unsigned		    free_failed;
 
     FUNC_ENTER(H5D_close, FAIL);
 
@@ -2727,7 +2727,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
              */
             if (IS_H5FD_MPIO(dset->ent.file)) {
                 /* We only handle simple data spaces so far */
-                intn		ndims;
+                int		ndims;
                 hsize_t		dim[H5O_LAYOUT_NDIMS];
                 
                 if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0) {
@@ -2817,7 +2817,7 @@ hsize_t
 H5D_get_storage_size(H5D_t *dset)
 {
     hsize_t	size;
-    uintn		u;
+    unsigned		u;
     
     FUNC_ENTER(H5D_get_storage_size, 0);
 

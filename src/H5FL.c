@@ -23,7 +23,7 @@
 #include "H5FLprivate.h"	/*Priority queues	  */
 
 #define PABLO_MASK	H5FL_mask
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /*
@@ -275,7 +275,7 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_reg_alloc(H5FL_reg_head_t *head, uintn clear)
+H5FL_reg_alloc(H5FL_reg_head_t *head, unsigned clear)
 {
     H5FL_reg_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
@@ -450,7 +450,7 @@ H5FL_reg_gc(void)
  PURPOSE
     Terminate various H5FL object free lists
  USAGE
-    intn H5FL_term()
+    int H5FL_term()
  RETURNS
     Success:	Positive if any action might have caused a change in some
                 other interface; zero otherwise.
@@ -469,7 +469,7 @@ H5FL_reg_gc(void)
         it will return non-zero, which will cause this function to get called
         again to reclaim this layer's memory.
 --------------------------------------------------------------------------*/
-static intn
+static int
 H5FL_reg_term(void)
 {
     H5FL_reg_gc_node_t *left;   /* pointer to garbage collection lists with work left */
@@ -683,7 +683,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, uintn clear)
+H5FL_blk_alloc(H5FL_blk_head_t *head, hsize_t size, unsigned clear)
 {
     H5FL_blk_node_t *free_list;  /* The free list of nodes of correct size */
     H5FL_blk_list_t *temp;  /* Temp. ptr to the new native list allocated */
@@ -1007,7 +1007,7 @@ H5FL_blk_gc(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn
+static int
 H5FL_blk_term(void)
 {
     H5FL_blk_gc_node_t *left;   /* pointer to garbage collection lists with work left */
@@ -1086,7 +1086,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     if(head->maxelem>0) {
         if (NULL==(head->u.list_arr = H5MM_calloc(head->maxelem*sizeof(H5FL_arr_node_t *))))
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        if (NULL==(head->onlist = H5MM_calloc(head->maxelem*sizeof(uintn))))
+        if (NULL==(head->onlist = H5MM_calloc(head->maxelem*sizeof(unsigned))))
             HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     } /* end if */
     else {
@@ -1147,7 +1147,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
         temp=(H5FL_arr_node_t *)((unsigned char *)obj-sizeof(H5FL_arr_node_t));
 
         /* Double-check that there is enough room for arrays of this size */
-        assert((intn)temp->nelem<=head->maxelem);
+        assert((int)temp->nelem<=head->maxelem);
 
         /* Link into the free list */
         temp->next=head->u.list_arr[temp->nelem];
@@ -1201,7 +1201,7 @@ H5FL_arr_free(H5FL_arr_head_t *head, void *obj)
  *-------------------------------------------------------------------------
  */
 void *
-H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, uintn clear)
+H5FL_arr_alloc(H5FL_arr_head_t *head, hsize_t elem, unsigned clear)
 {
     H5FL_arr_node_t *new_obj;   /* Pointer to the new free list node allocated */
     void *ret_value;        /* Pointer to object to return */
@@ -1362,7 +1362,7 @@ H5FL_arr_gc_list(H5FL_arr_head_t *head)
 {
     H5FL_arr_node_t *arr_free_list; /* Pointer to nodes in free list being garbage collected */
     void *tmp;      /* Temporary node pointer */
-    intn i;         /* Counter for array of free lists */
+    int i;         /* Counter for array of free lists */
     size_t total_mem;   /* Total memory used on list */
     
     /* FUNC_ENTER_INIT() should not be called, it causes an infinite loop at library termination */
@@ -1458,7 +1458,7 @@ H5FL_arr_gc(void)
  PURPOSE
     Terminate various H5FL array object free lists
  USAGE
-    intn H5FL_arr_term()
+    int H5FL_arr_term()
  RETURNS
     Success:	Positive if any action might have caused a change in some
                 other interface; zero otherwise.
@@ -1471,7 +1471,7 @@ H5FL_arr_gc(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn
+static int
 H5FL_arr_term(void)
 {
     H5FL_gc_arr_node_t *left;   /* pointer to garbage collection lists with work left */
@@ -1646,10 +1646,10 @@ H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_l
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn
+int
 H5FL_term_interface(void)
 {
-    intn ret_value=0;
+    int ret_value=0;
     
     /* Garbage collect any nodes on the free lists */
     H5FL_garbage_coll();

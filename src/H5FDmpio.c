@@ -149,7 +149,7 @@ hbool_t	H5_mpi_1_metawrite_g = FALSE;
 /* Interface initialization */
 #define PABLO_MASK	H5FD_mpio_mask
 #define INTERFACE_INIT	H5FD_mpio_init
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------

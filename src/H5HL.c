@@ -45,7 +45,7 @@ typedef struct H5HL_free_t {
 typedef struct H5HL_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
-    intn		    dirty;
+    int		    dirty;
     haddr_t		    addr;	/*address of data		*/
     size_t		    disk_alloc;	/*data bytes allocated on disk	*/
     size_t		    mem_alloc;	/*data bytes allocated in mem	*/
@@ -68,7 +68,7 @@ static const H5AC_class_t H5AC_LHEAP[1] = {{
 }};
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Declare a free list to manage the H5HL_free_t struct */
@@ -939,7 +939,7 @@ H5HL_remove(H5F_t *f, haddr_t addr, size_t offset, size_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent, intn fwidth)
+H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, int indent, int fwidth)
 {
     H5HL_t		*h = NULL;
     int			i, j, overlap;
@@ -995,7 +995,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent, intn fwidth)
 	if (freelist->offset + freelist->size > h->mem_alloc) {
 	    fprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
 	} else {
-	    for (i=overlap=0; i<(intn)(freelist->size); i++) {
+	    for (i=overlap=0; i<(int)(freelist->size); i++) {
 		if (marker[freelist->offset + i])
 		    overlap++;
 		marker[freelist->offset + i] = 1;
@@ -1020,10 +1020,10 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent, intn fwidth)
      */
     fprintf(stream, "%*sData follows (`__' indicates free region)...\n",
 	    indent, "");
-    for (i=0; i<(intn)(h->disk_alloc); i+=16) {
+    for (i=0; i<(int)(h->disk_alloc); i+=16) {
 	fprintf(stream, "%*s %8d: ", indent, "", i);
 	for (j = 0; j < 16; j++) {
-	    if (i+j<(intn)(h->disk_alloc)) {
+	    if (i+j<(int)(h->disk_alloc)) {
 		if (marker[i + j]) {
 		    fprintf(stream, "__ ");
 		} else {
@@ -1038,7 +1038,7 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent, intn fwidth)
 	}
 
 	for (j = 0; j < 16; j++) {
-	    if (i+j < (intn)(h->disk_alloc)) {
+	    if (i+j < (int)(h->disk_alloc)) {
 		if (marker[i + j]) {
 		    HDfputc(' ', stream);
 		} else {

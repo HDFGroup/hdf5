@@ -42,7 +42,7 @@ static hid_t H5FD_LOG_g = 0;
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
     char *logfile;			/* Allocated log file name */
-    intn verbosity;                 /* Verbosity of logging information */
+    int verbosity;                 /* Verbosity of logging information */
 } H5FD_log_fapl_t;
 
 /* Define strings for the different file memory types */
@@ -220,7 +220,7 @@ static const H5FD_class_t H5FD_log_g = {
 /* Interface initialization */
 #define PABLO_MASK	H5FD_log_mask
 #define INTERFACE_INIT	H5FD_log_init
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------

@@ -64,15 +64,15 @@
 
 /* The raw data chunk cache */
 typedef struct H5F_rdcc_t {
-    uintn		ninits;	/* Number of chunk creations		*/
-    uintn		nhits;	/* Number of cache hits			*/
-    uintn		nmisses;/* Number of cache misses		*/
-    uintn		nflushes;/* Number of cache flushes		*/
+    unsigned		ninits;	/* Number of chunk creations		*/
+    unsigned		nhits;	/* Number of cache hits			*/
+    unsigned		nmisses;/* Number of cache misses		*/
+    unsigned		nflushes;/* Number of cache flushes		*/
     size_t		nbytes;	/* Current cached raw data in bytes	*/
-    intn		nslots;	/* Number of chunk slots allocated	*/
+    int		nslots;	/* Number of chunk slots allocated	*/
     struct H5F_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5F_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
-    intn		nused;	/* Number of chunk slots in use		*/
+    int		nused;	/* Number of chunk slots in use		*/
     struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5F_rdcc_t;
 
@@ -84,9 +84,9 @@ typedef struct H5F_rdcc_t {
  * pointing to this struct.
  */
 typedef struct H5F_file_t {
-    uintn	flags;		/* Access Permissions for file		*/
+    unsigned	flags;		/* Access Permissions for file		*/
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
-    uintn	nrefs;		/* Ref count for times file is opened	*/
+    unsigned	nrefs;		/* Ref count for times file is opened	*/
     uint32_t	consist_flags;	/* File Consistency Flags		*/
     haddr_t	boot_addr;	/* Absolute address of boot block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
@@ -99,15 +99,15 @@ typedef struct H5F_file_t {
                             /* But that's ok because we only access it like */
                             /* a H5F_create_t until we pass it back to */
                             /* H5P_close to release it - QAK */
-    intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
-    intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
+    int	mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    int	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
-    uintn	gc_ref;		/* Garbage-collect references?		*/
+    unsigned	gc_ref;		/* Garbage-collect references?		*/
     struct H5G_t *root_grp;	/* Open root group			*/
-    intn	ncwfs;		/* Num entries on cwfs list		*/
+    int	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
 
     /* Data Sieve Buffering fields */
@@ -132,8 +132,8 @@ typedef struct H5F_mount_t {
  */
 typedef struct H5F_mtab_t {
     struct H5F_t	*parent;/* Parent file				*/
-    uintn		nmounts;/* Number of children which are mounted	*/
-    uintn		nalloc;	/* Number of mount slots allocated	*/
+    unsigned		nmounts;/* Number of children which are mounted	*/
+    unsigned		nalloc;	/* Number of mount slots allocated	*/
     H5F_mount_t		*child;	/* An array of mount records		*/
 } H5F_mtab_t;
 
@@ -146,11 +146,11 @@ typedef struct H5F_mtab_t {
  * indicate that the file is mounted on some other file).
  */
 struct H5F_t {
-    uintn		nrefs;		/* Reference count		*/
-    uintn		intent;		/* The flags passed to H5F_open()*/
+    unsigned		nrefs;		/* Reference count		*/
+    unsigned		intent;		/* The flags passed to H5F_open()*/
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
-    uintn		nopen_objs;	/* Number of open object headers*/
+    unsigned		nopen_objs;	/* Number of open object headers*/
     hid_t		closing;	/* H5I_FILE_CLOSING ID or zero	*/
     H5F_mtab_t		mtab;		/* File mount table		*/
 };
@@ -162,15 +162,15 @@ __DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
 /* Private functions, not part of the publicly documented API */
 __DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
 				       uint8_t *l);
-__DLL__ H5F_t *H5F_open(const char *name, uintn flags, hid_t fcpl_id, 
+__DLL__ H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id, 
 			hid_t fapl_id);
 __DLL__ herr_t H5F_close(H5F_t *f);
 __DLL__ herr_t H5F_close_all(void);
 __DLL__ herr_t H5F_flush_all(hbool_t invalidate);
 __DLL__ herr_t H5F_debug(H5F_t *f, haddr_t addr, FILE * stream,
-			 intn indent, intn fwidth);
+			 int indent, int fwidth);
 __DLL__ herr_t H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream,
-				intn indent, intn fwidth, int ndims);
+				int indent, int fwidth, int ndims);
 __DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
 
 /* Functions that operate on indexed storage */

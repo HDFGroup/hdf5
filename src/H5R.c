@@ -29,7 +29,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5R_mask
 #define INTERFACE_INIT	H5R_init_interface
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 static herr_t		H5R_init_interface(void);
 
 /* Static functions */
@@ -37,7 +37,7 @@ static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space);
 static hid_t H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref);
 static H5S_t * H5R_get_region(H5F_t *file, H5R_type_t ref_type, void *_ref);
-static intn H5R_get_object_type(H5F_t *file, void *_ref);
+static int H5R_get_object_type(H5F_t *file, void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -85,10 +85,10 @@ H5R_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-intn
+int
 H5R_term_interface(void)
 {
-    intn	n=0;
+    int	n=0;
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
@@ -169,8 +169,8 @@ H5R_create(void *_ref, H5G_entry_t *loc, const char *name, H5R_type_t ref_type, 
             hssize_t buf_size;  /* Size of buffer needed to serialize selection */
             uint8_t *p;       /* Pointer to OID to store */
             uint8_t *buf;     /* Buffer to store serialized selection in */
-            uintn heapid_found;  /* Flag for non-zero heap ID found */
-            uintn u;        /* local index */
+            unsigned heapid_found;  /* Flag for non-zero heap ID found */
+            unsigned u;        /* local index */
 
             /* Set up information for dataset region */
 
@@ -342,7 +342,7 @@ H5R_dereference(H5F_t *file, H5R_type_t ref_type, void *_ref)
     H5T_t *datatype;            /* Pointer to datatype to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    intn oid_type;              /* type of object being dereferenced */
+    int oid_type;              /* type of object being dereferenced */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5R_dereference, FAIL);
@@ -665,7 +665,7 @@ done:
  PURPOSE
     Retrieves the type of object that an object reference points to
  USAGE
-    intn H5R_get_object_type(file, ref)
+    int H5R_get_object_type(file, ref)
         H5F_t *file;        IN: File the object being dereferenced is within
         void *ref;          IN: Reference to query.
         
@@ -680,13 +680,13 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static intn
+static int
 H5R_get_object_type(H5F_t *file, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     hobj_ref_t *ref=(hobj_ref_t *)_ref; /* Only object references currently supported */
     uint8_t *p;                 /* Pointer to OID to store */
-    intn ret_value = H5G_UNKNOWN;
+    int ret_value = H5G_UNKNOWN;
 
     FUNC_ENTER(H5R_get_object_type, H5G_UNKNOWN);
 
@@ -717,7 +717,7 @@ done:
  PURPOSE
     Retrieves the type of object that an object reference points to
  USAGE
-    intn H5Rget_object_type(id, ref)
+    int H5Rget_object_type(id, ref)
         hid_t id;       IN: Dataset reference object is in or location ID of
                             object that the dataset is located within.
         void *ref;          IN: Reference to query.

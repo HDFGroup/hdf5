@@ -39,7 +39,7 @@
 
 /* Interface initialialization? */
 #define PABLO_MASK	H5I_mask
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT H5I_init_interface
 static herr_t H5I_init_interface(void);
 
@@ -163,12 +163,12 @@ H5I_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5I_term_interface(void)
 {
     H5I_id_group_t	*grp_ptr;
     H5I_type_t		grp;
-    intn		n=0;
+    int		n=0;
 
     if (interface_initialize_g) {
         /* How many groups are still being used? */
@@ -227,12 +227,12 @@ H5I_term_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn 
-H5I_init_group(H5I_type_t grp, size_t hash_size, uintn reserved,
+int 
+H5I_init_group(H5I_type_t grp, size_t hash_size, unsigned reserved,
 	       H5I_free_t free_func)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the atomic group*/
-    intn		ret_value = SUCCEED;	/*return value		*/
+    int		ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER(H5I_init_group, FAIL);
 
@@ -305,13 +305,13 @@ H5I_init_group(H5I_type_t grp, size_t hash_size, uintn reserved,
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5I_nmembers(H5I_type_t grp)
 {
     H5I_id_group_t	*grp_ptr = NULL;
     H5I_id_info_t	*cur=NULL;
-    intn		n=0;
-    uintn		i;
+    int		n=0;
+    unsigned		i;
 
     FUNC_ENTER(H5I_nmembers, FAIL);
 
@@ -364,9 +364,9 @@ H5I_clear_group(H5I_type_t grp, hbool_t force)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
     H5I_id_info_t	*cur=NULL, *next=NULL, *prev=NULL;
-    intn		ret_value = SUCCEED;
-    uintn       deleted;                /* Flag to indicate objects have been removed from a linked list */
-    uintn		i;
+    int		ret_value = SUCCEED;
+    unsigned       deleted;                /* Flag to indicate objects have been removed from a linked list */
+    unsigned		i;
 
     FUNC_ENTER(H5I_clear_group, FAIL);
 
@@ -477,7 +477,7 @@ herr_t
 H5I_destroy_group(H5I_type_t grp)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the atomic group */
-    intn		ret_value = SUCCEED;
+    int		ret_value = SUCCEED;
 
     FUNC_ENTER(H5I_destroy_group, FAIL);
 
@@ -536,11 +536,11 @@ H5I_register(H5I_type_t grp, void *object)
     H5I_id_group_t	*grp_ptr=NULL;	/*ptr to the group		*/
     H5I_id_info_t	*id_ptr=NULL;	/*ptr to the new ID information */
     hid_t		new_id;		/*new ID			*/
-    uintn		hash_loc;	/*new item's hash table location*/
+    unsigned		hash_loc;	/*new item's hash table location*/
     hid_t		next_id;	/*next ID to check		*/
     hid_t		ret_value=SUCCEED; /*return value		*/
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
-    uintn		i;		/*counter			*/
+    unsigned		i;		/*counter			*/
     
     FUNC_ENTER(H5I_register, FAIL);
 
@@ -564,7 +564,7 @@ H5I_register(H5I_type_t grp, void *object)
     id_ptr->next = NULL;
 
     /* hash bucket already full, prepend to front of chain */
-    hash_loc = grp_ptr->nextid % (uintn) grp_ptr->hash_size;
+    hash_loc = grp_ptr->nextid % (unsigned) grp_ptr->hash_size;
     if (grp_ptr->id_list[hash_loc] != NULL) {
 	id_ptr->next = grp_ptr->id_list[hash_loc];
     }
@@ -579,7 +579,7 @@ H5I_register(H5I_type_t grp, void *object)
      * wrapping around, thus necessitating checking for duplicate IDs being
      * handed out.
      */
-    if (grp_ptr->nextid > (uintn)ID_MASK) {
+    if (grp_ptr->nextid > (unsigned)ID_MASK) {
 	grp_ptr->wrapped = 1;
 	grp_ptr->nextid = grp_ptr->reserved;
     }
@@ -597,7 +597,7 @@ H5I_register(H5I_type_t grp, void *object)
 	 */
 	for (i=grp_ptr->reserved; i<ID_MASK; i++) {
 	    /* Handle end of range by wrapping to beginning */
-	    if (grp_ptr->nextid>(uintn)ID_MASK) {
+	    if (grp_ptr->nextid>(unsigned)ID_MASK) {
 		grp_ptr->nextid = grp_ptr->reserved;
 	    }
 
@@ -615,7 +615,7 @@ H5I_register(H5I_type_t grp, void *object)
 	    grp_ptr->nextid++;
 	}
 
-	if (i>=(uintn)ID_MASK) {
+	if (i>=(unsigned)ID_MASK) {
 	    /* All the IDs are gone! */
 	    HGOTO_DONE(FAIL);
 	}
@@ -759,9 +759,9 @@ H5I_remove(hid_t id)
     H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
     H5I_id_info_t	*last_id;	/*ptr to the last atom		*/
     H5I_type_t		grp;		/*atom's atomic group		*/
-    uintn		hash_loc;	/*atom's hash table location	*/
+    unsigned		hash_loc;	/*atom's hash table location	*/
 #ifdef IDS_ARE_CACHED
-    uintn		i;		/*local counting variable	*/
+    unsigned		i;		/*local counting variable	*/
 #endif
     void *	      ret_value = NULL;	/*return value			*/
 
@@ -776,7 +776,7 @@ H5I_remove(hid_t id)
         HGOTO_DONE(NULL);
 
     /* Get the bucket in which the ID is located */
-    hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
+    hash_loc = (unsigned) H5I_LOC(id, grp_ptr->hash_size);
     curr_id = grp_ptr->id_list[hash_loc];
     if (curr_id == NULL)
         HGOTO_DONE(NULL);
@@ -853,13 +853,13 @@ H5I_remove(hid_t id)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5I_dec_ref(hid_t id)
 {
     H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
-    intn		ret_value = FAIL;	/*return value		*/
+    int		ret_value = FAIL;	/*return value		*/
 
     FUNC_ENTER(H5I_dec_ref, FAIL);
 
@@ -913,7 +913,7 @@ H5I_dec_ref(hid_t id)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5I_inc_ref(hid_t id)
 {
     H5I_type_t		grp = H5I_GROUP(id);	/*group the object is in*/
@@ -965,7 +965,7 @@ H5I_search(H5I_type_t grp, H5I_search_func_t func, const void *key)
 {
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
-    uintn		i;			/*counter		*/
+    unsigned		i;			/*counter		*/
     void		*ret_value = NULL;	/*return value		*/
 
     FUNC_ENTER(H5I_search, NULL);
@@ -1017,10 +1017,10 @@ H5I_find_id(hid_t id)
     H5I_id_group_t	*grp_ptr = NULL;	/*ptr to the group	*/
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new ID	*/
     H5I_type_t		grp;			/*ID's group		*/
-    uintn		hash_loc;		/*bucket pointer	*/
+    unsigned		hash_loc;		/*bucket pointer	*/
     H5I_id_info_t	*ret_value = NULL;	/*return value		*/
 #ifdef IDS_ARE_CACHED
-    intn		i;
+    int		i;
 #endif
 
     FUNC_ENTER(H5I_find_id, NULL);
@@ -1060,7 +1060,7 @@ H5I_find_id(hid_t id)
 #endif /* IDS_ARE_CACHED */
 
     /* Get the bucket in which the ID is located */
-    hash_loc = (uintn)H5I_LOC(id, grp_ptr->hash_size);
+    hash_loc = (unsigned)H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
     if (id_ptr == NULL) {
 	HGOTO_DONE(NULL);

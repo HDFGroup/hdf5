@@ -69,8 +69,8 @@ test_reference_obj(void)
     hobj_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
-    uintn      *tu32;      /* Temporary pointer to uint32 data */
-    intn        i;          /* counting variables */
+    unsigned      *tu32;      /* Temporary pointer to uint32 data */
+    int        i;          /* counting variables */
     const char *write_comment="Foo!"; /* Comments for group */
     char read_comment[10];
     herr_t		ret;		/* Generic return value		*/
@@ -79,9 +79,9 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
-    rbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
-    tbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
+    wbuf=malloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t))*SPACE1_DIM1);
+    rbuf=malloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t))*SPACE1_DIM1);
+    tbuf=malloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t))*SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -103,7 +103,7 @@ test_reference_obj(void)
     dataset=H5Dcreate(group,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    for(tu32=(uintn *)wbuf,i=0; i<SPACE1_DIM1; i++)
+    for(tu32=(unsigned *)wbuf,i=0; i<SPACE1_DIM1; i++)
         *tu32++=i*3;
 
     /* Write selection to disk */
@@ -219,7 +219,7 @@ test_reference_obj(void)
     ret=H5Dread(dset2,H5T_NATIVE_UINT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(tu32=(uintn *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
+    for(tu32=(unsigned *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
         VERIFY(*tu32, (uint32_t)(i*3), "Data");
 
     /* Close dereferenced Dataset */
@@ -306,7 +306,7 @@ test_reference_region(void)
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
-    intn        i;          /* counting variables */
+    int        i;          /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */

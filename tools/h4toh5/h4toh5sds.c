@@ -55,7 +55,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int32*  sds_stride;
   int32   count_sdsdata;
   int32   sds_ref;
-  intn   sds_empty;
+  int   sds_empty;
   int32   istat;
   int     i;
   int32   num_sdsattrs;

@@ -85,7 +85,7 @@ InitTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), co
 static void 
 usage(void)
 {
-    intn                    i;
+    int                    i;
 
     print_func("Usage: testhdf5 [-v[erbose] (l[ow]|m[edium]|h[igh]|0-10)] \n");
     print_func("               [-[e]x[clude] name+] \n");
@@ -138,7 +138,7 @@ main(int argc, char *argv[])
     int                     Summary = 0;
     int                     CleanUp = 1;
     int                     Cache = 1;
-    uintn                   major, minor, release;
+    unsigned                   major, minor, release;
 
 
 

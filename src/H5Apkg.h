@@ -28,8 +28,8 @@
 #include "H5Sprivate.h"
 
 struct H5A_t {
-    uintn       initialized;/* Indicate whether the attribute has been modified */
-    uintn       ent_opened; /* Object header entry opened? */
+    unsigned       initialized;/* Indicate whether the attribute has been modified */
+    unsigned       ent_opened; /* Object header entry opened? */
     H5G_entry_t ent;        /* Object Header entry (for both datasets & groups) */
     char        *name;      /* Attribute's name */
     H5T_t       *dt;        /* Attribute's datatype */

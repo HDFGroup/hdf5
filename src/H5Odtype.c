@@ -36,7 +36,7 @@ static herr_t H5O_dtype_get_share (H5F_t *f, const void *_mesg,
 static herr_t H5O_dtype_set_share (H5F_t *f, void *_mesg,
 				   const H5O_shared_t *sh);
 static herr_t H5O_dtype_debug (H5F_t *f, const void *_mesg,
-			       FILE * stream, intn indent, intn fwidth);
+			       FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O */
 const H5O_class_t H5O_DTYPE[1] = {{
@@ -64,7 +64,7 @@ const H5O_class_t H5O_DTYPE[1] = {{
 #define H5O_DTYPE_VERSION_UPDATED	2
 
 /* Interface initialization */
-static intn		interface_initialize_g = 0;
+static int		interface_initialize_g = 0;
 #define INTERFACE_INIT	NULL
 
 /* Declare external the free list for H5T_t's */
@@ -89,8 +89,8 @@ H5FL_EXTERN(H5T_t);
 static herr_t
 H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
-    uintn		flags, version;
-    intn		i, j;
+    unsigned		flags, version;
+    int		i, j;
     size_t		z;
 
     FUNC_ENTER(H5O_dtype_decode_helper, FAIL);
@@ -197,10 +197,10 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                        "memory allocation failed");
             }
             for (i = 0; i < dt->u.compnd.nmembs; i++) {
-                intn ndims=0;     /* Number of dimensions of the array field */
+                int ndims=0;     /* Number of dimensions of the array field */
                 hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
                 int perm[H5O_LAYOUT_NDIMS];     /* Dimension permutations */
-                uintn perm_word=0;    /* Dimension permutation information */
+                unsigned perm_word=0;    /* Dimension permutation information */
                 H5T_t *array_dt;    /* Temporary pointer to the array datatype */
                 H5T_t *temp_type;   /* Temporary pointer to the field's datatype */
 
@@ -436,9 +436,9 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 static herr_t
 H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 {
-    uintn		flags = 0;
+    unsigned		flags = 0;
     char		*hdr = (char *)*pp;
-    intn		i, j;
+    int		i, j;
     size_t		n, z, aligned;
 
     FUNC_ENTER(H5O_dtype_encode_helper, FAIL);
@@ -781,7 +781,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
     }
 
-    *hdr++ = ((uintn)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && dt->u.compnd.has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
+    *hdr++ = ((unsigned)(dt->type) & 0x0f) | (((dt->type==H5T_COMPOUND && dt->u.compnd.has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;
@@ -929,7 +929,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
 static size_t
 H5O_dtype_size(H5F_t *f, const void *mesg)
 {
-    intn		    i;
+    int		    i;
     size_t		    ret_value = 8;
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
@@ -1141,8 +1141,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 	const void *mesg;	IN: Pointer to the source simple datatype
 				    struct
 	FILE *stream;		IN: Pointer to the stream for output data
-	intn indent;		IN: Amount to indent information by
-	intn fwidth;		IN: Field width (?)
+	int indent;		IN: Amount to indent information by
+	int fwidth;		IN: Field width (?)
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -1151,12 +1151,12 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
-		intn indent, intn fwidth)
+		int indent, int fwidth)
 {
     const H5T_t		*dt = (const H5T_t*)mesg;
     const char		*s;
     char		buf[256];
-    intn		i;
+    int		i;
     size_t		k;
     
 

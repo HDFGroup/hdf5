@@ -119,7 +119,7 @@ static const H5FD_class_t H5FD_core_g = {
 /* Interface initialization */
 #define PABLO_MASK	H5FD_core_mask
 #define INTERFACE_INIT	H5FD_core_init
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 
 /*-------------------------------------------------------------------------

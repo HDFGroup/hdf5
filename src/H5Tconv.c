@@ -19,7 +19,7 @@
 
 /* Conversion data for H5T_conv_struct() */
 typedef struct H5T_conv_struct_t {
-    intn	*src2dst;		/*mapping from src to dst member num */
+    int	*src2dst;		/*mapping from src to dst member num */
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
@@ -27,9 +27,9 @@ typedef struct H5T_conv_struct_t {
 
 /* Conversion data for H5T_conv_enum() */
 typedef struct H5T_enum_struct_t {
-    intn	base;			/*lowest `in' value		     */
-    intn	length;			/*num elements in arrays	     */
-    intn	*src2dst;		/*map from src to dst index	     */
+    int	base;			/*lowest `in' value		     */
+    int	length;			/*num elements in arrays	     */
+    int	*src2dst;		/*map from src to dst index	     */
 } H5T_enum_struct_t;
 
 /* Conversion data for the hardware conversion functions */
@@ -39,7 +39,7 @@ typedef struct H5T_conv_hw_t {
 } H5T_conv_hw_t;
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 /* Declare a free list to manage pieces of vlen data */
@@ -581,7 +581,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     uint8_t	*buf = (uint8_t*)_buf;
     H5T_t	*src=NULL, *dst=NULL;	/*source and dest data types	*/
-    intn	direction;		/*direction of traversal	*/
+    int	direction;		/*direction of traversal	*/
     hsize_t	elmtno;			/*element number		*/
     hsize_t	olap;			/*num overlapping elements	*/
     size_t	half_size;		/*1/2 of total size for swapping*/
@@ -850,7 +850,7 @@ static herr_t
 H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv = (H5T_conv_struct_t*)(cdata->priv);
-    intn		i, j, *src2dst = NULL;
+    int		i, j, *src2dst = NULL;
     H5T_t		*type = NULL;
     hid_t		tid;
     
@@ -862,7 +862,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
          */
         if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(H5T_conv_struct_t))) ||
             NULL==(priv->src2dst=H5MM_malloc(src->u.compnd.nmembs *
-                             sizeof(intn))) ||
+                             sizeof(int))) ||
             NULL==(priv->src_memb_id=H5MM_malloc(src->u.compnd.nmembs *
                                 sizeof(hid_t))) ||
             NULL==(priv->dst_memb_id=H5MM_malloc(dst->u.compnd.nmembs *
@@ -995,13 +995,13 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t     *xbuf=buf, *xbkg=bkg;   /*temp pointers into buf and bkg*/
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
-    intn	*src2dst = NULL;	/*maps src member to dst member	*/
+    int	*src2dst = NULL;	/*maps src member to dst member	*/
     H5T_cmemb_t	*src_memb = NULL;	/*source struct member descript.*/
     H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     size_t	src_delta;	    /*source stride	*/
     hsize_t	elmtno;
-    intn	i;			/*counters			*/
+    int	i;			/*counters			*/
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
 
     FUNC_ENTER (H5T_conv_struct, FAIL);
@@ -1241,12 +1241,12 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     uint8_t	*xbkg = NULL;		/*temporary pointer into `bkg'	*/
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
-    intn	*src2dst = NULL;	/*maps src member to dst member	*/
+    int	*src2dst = NULL;	/*maps src member to dst member	*/
     H5T_cmemb_t	*src_memb = NULL;	/*source struct member descript.*/
     H5T_cmemb_t	*dst_memb = NULL;	/*destination struct memb desc.	*/
     size_t	offset;			/*byte offset wrt struct	*/
     hsize_t	elmtno;			/*element counter		*/
-    intn	i;			    /*counters			*/
+    int	i;			    /*counters			*/
     H5T_conv_struct_t *priv = NULL;	/*private data			*/
 
     FUNC_ENTER (H5T_conv_struct_opt, FAIL);
@@ -1480,12 +1480,12 @@ static herr_t
 H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_enum_struct_t	*priv=NULL;	/*private conversion data	*/
-    intn		n;		/*src value cast as native int	*/
-    intn		domain[2];	/*min and max source values	*/
-    intn		*map=NULL;	/*map from src value to dst idx	*/
-    intn		length;		/*nelmts in map array		*/
+    int		n;		/*src value cast as native int	*/
+    int		domain[2];	/*min and max source values	*/
+    int		*map=NULL;	/*map from src value to dst idx	*/
+    int		length;		/*nelmts in map array		*/
     herr_t		ret_value=FAIL;	/*return value			*/
-    intn		i, j;		/*counters			*/
+    int		i, j;		/*counters			*/
     
     FUNC_ENTER(H5T_conv_enum_init, FAIL);
 
@@ -1632,8 +1632,8 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t	*buf = (uint8_t*)_buf;	/*cast for pointer arithmetic	*/
     H5T_t	*src=NULL, *dst=NULL;	/*src and dst data types	*/
     uint8_t	*s=NULL, *d=NULL;	/*src and dst BUF pointers	*/
-    intn	src_delta, dst_delta;	/*conversion strides		*/
-    intn	n;			/*src value cast as native int	*/
+    int	src_delta, dst_delta;	/*conversion strides		*/
+    int	n;			/*src value cast as native int	*/
     hsize_t	i;			/*counters			*/
     H5T_enum_struct_t *priv = (H5T_enum_struct_t*)(cdata->priv);
     
@@ -1699,7 +1699,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	 * Direction of conversion.
 	 */
 	if (buf_stride) {
-	    src_delta = dst_delta = (intn)buf_stride;
+	    src_delta = dst_delta = (int)buf_stride;
 	    s = d = buf;
 	} else if (dst->size <= src->size) {
 	    src_delta = (int)src->size; /*overflow shouldn't be possible*/
@@ -1824,7 +1824,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
     hsize_t	conv_buf_size;  	/*size of conversion buffer in bytes */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
-    intn	direction;		/*direction of traversal	     */
+    int	direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
 
     FUNC_ENTER (H5T_conv_vlen, FAIL);
@@ -2040,9 +2040,9 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     H5T_t	*dst = NULL;	/*destination data type		     */
     uint8_t	*sp, *dp;	    /*source and dest traversal ptrs     */
     size_t	src_delta, dst_delta;	/*source & destination stride	     */
-    intn	direction;		/*direction of traversal	     */
+    int	direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
-    intn    i;              /* local index variable */
+    int    i;              /* local index variable */
 
     FUNC_ENTER (H5T_conv_array, FAIL);
 
@@ -2199,7 +2199,7 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     H5T_t	*src = NULL;		/*source data type		*/
     H5T_t	*dst = NULL;		/*destination data type		*/
-    intn	direction;		/*direction of traversal	*/
+    int	direction;		/*direction of traversal	*/
     hsize_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     hsize_t	olap;			/*num overlapping elements	*/
@@ -2540,7 +2540,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     H5T_t	*dst_p;			/*destination data type		*/
     H5T_atomic_t src;			/*atomic source info		*/
     H5T_atomic_t dst;			/*atomic destination info	*/
-    intn	direction;		/*forward or backward traversal	*/
+    int	direction;		/*forward or backward traversal	*/
     hsize_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     hsize_t	olap;			/*num overlapping elements	*/
@@ -2977,7 +2977,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 {
     H5T_t	*src=NULL;		/*source data type		*/
     H5T_t	*dst=NULL;		/*destination data type		*/
-    intn	direction;		/*direction of traversal	*/
+    int	direction;		/*direction of traversal	*/
     hsize_t	elmtno;			/*element number		*/
     hsize_t	olap;			/*num overlapping elements	*/
     size_t	nchars=0;		/*number of characters copied	*/
@@ -6111,17 +6111,17 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     uint8_t	tmp[8];			/*temporary destination buffer	*/
     H5T_t	*src = NULL;		/*source data type		*/
     hsize_t	elmtno;			/*element counter		*/
-    uintn	sign;			/*sign bit			*/
-    uintn	cin, cout;		/*carry in/out			*/
-    uintn	mbits=0;		/*mantissa bits			*/
-    uintn	exponent;		/*exponent			*/
-    intn	i;			/*counter			*/
+    unsigned	sign;			/*sign bit			*/
+    unsigned	cin, cout;		/*carry in/out			*/
+    unsigned	mbits=0;		/*mantissa bits			*/
+    unsigned	exponent;		/*exponent			*/
+    int	i;			/*counter			*/
 
     FUNC_ENTER (H5T_conv_i32le_f64le, FAIL);
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
-            assert (sizeof(intn)>=4);
+            assert (sizeof(int)>=4);
             cdata->need_bkg = H5T_BKG_NO;
             break;
 

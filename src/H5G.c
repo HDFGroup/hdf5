@@ -95,7 +95,7 @@
 #define PABLO_MASK		H5G_mask
 
 /* Interface initialization */
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT	H5G_init_interface
 static herr_t H5G_init_interface(void);
 static H5G_typeinfo_t *H5G_type_g = NULL;	/*object typing info	*/
@@ -643,7 +643,7 @@ int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
     H5G_entry_t	*loc = NULL;
-    intn	retval = FAIL;
+    int	retval = FAIL;
     
     FUNC_ENTER(H5Gget_comment, FAIL);
     H5TRACE4("Is","iszs",loc_id,name,bufsize,buf);
@@ -730,11 +730,11 @@ H5G_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5G_term_interface(void)
 {
     size_t	i;
-    intn	n=0;
+    int	n=0;
     
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
@@ -781,7 +781,7 @@ H5G_term_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_register_type(intn type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
+H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*), const char *_desc)
 {
     char	*desc = NULL;
     size_t	i;
@@ -991,7 +991,7 @@ H5G_basename(const char *name, size_t *size_p)
 static herr_t
 H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
-	  uintn target, intn *nlinks)
+	  unsigned target, int *nlinks)
 {
     H5G_entry_t		_grp_ent;	/*entry for current group	*/
     H5G_entry_t		_obj_ent;	/*entry found			*/
@@ -1122,7 +1122,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 herr_t
 H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 		    H5G_entry_t *obj_ent/*in,out*/,
-		    intn *nlinks/*in,out*/)
+		    int *nlinks/*in,out*/)
 {
     H5O_stab_t		stab_mesg;		/*info about local heap	*/
     const char		*clv = NULL;		/*cached link value	*/
@@ -1857,7 +1857,7 @@ H5G_loc (hid_t loc_id)
  */
 herr_t
 H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
-	  const char *new_name, uintn namei_flags)
+	  const char *new_name, unsigned namei_flags)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
     H5G_entry_t		grp_ent;	/*ent for grp containing link hd*/
@@ -1982,7 +1982,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5G_get_type(H5G_entry_t *ent)
 {
     htri_t	isa;
@@ -2041,7 +2041,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
     /* Find the object's symbol table entry */
     if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   (uintn)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0) {
+		   (unsigned)(follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK), NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
     }
 
@@ -2218,12 +2218,12 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 {
     H5O_name_t	comment;
     H5G_entry_t	obj_ent;
-    intn	retval = FAIL;
+    int	retval = FAIL;
     
     FUNC_ENTER(H5G_get_comment, FAIL);
 
@@ -2240,7 +2240,7 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 	retval = 0;
     } else {
 	HDstrncpy(buf, comment.s, bufsize);
-	retval = (intn)HDstrlen(comment.s);
+	retval = (int)HDstrlen(comment.s);
 	H5O_reset(H5O_NAME, &comment);
     }
 

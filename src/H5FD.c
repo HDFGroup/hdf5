@@ -27,7 +27,7 @@
 /* Interface initialization */
 #define PABLO_MASK	H5FD_mask
 #define INTERFACE_INIT	H5FD_init_interface
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 
 /* static prototypes */
 static herr_t H5FD_init_interface(void);
@@ -89,10 +89,10 @@ H5FD_init_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-intn
+int
 H5FD_term_interface(void)
 {
-    intn	n = 0;
+    int	n = 0;
 
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
@@ -866,7 +866,7 @@ H5FD_close(H5FD_t *file)
     H5FD_free_t		*cur, *next;
     H5FD_mem_t		i;
 #ifdef H5F_DEBUG
-    uintn		nblocks=0;
+    unsigned		nblocks=0;
     hsize_t		nbytes=0;
 #endif
     
@@ -950,7 +950,7 @@ H5FD_close(H5FD_t *file)
 int
 H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    intn	ret_value;
+    int	ret_value;
     
     FUNC_ENTER(H5FDcmp, -1); /*return value is arbitrary*/
     H5TRACE2("Is","xx",f1,f2);
@@ -979,7 +979,7 @@ H5FDcmp(const H5FD_t *f1, const H5FD_t *f2)
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    intn	ret_value;
+    int	ret_value;
 
     FUNC_ENTER(H5FD_cmp, -1); /*return value is arbitrary*/
 
@@ -1021,7 +1021,7 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 int
 H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
 {
-    intn	ret_value;
+    int	ret_value;
 
     FUNC_ENTER(H5FDquery, FAIL);
     H5TRACE2("Is","xx",f,flags);
@@ -1054,7 +1054,7 @@ H5FDquery(const H5FD_t *f, unsigned long *flags/*out*/)
 int
 H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 {
-    intn	ret_value=0;
+    int	ret_value=0;
 
     FUNC_ENTER(H5FD_query, FAIL);
 

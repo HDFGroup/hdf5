@@ -72,7 +72,7 @@ test_array_atomic_1d(void)
     hsize_t		tdims1[] = {ARRAY1_DIM1};
     int         ndims;      /* Array rank for reading */
     hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    intn        i,j;        /* counting variables */
+    int        i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -196,7 +196,7 @@ test_array_atomic_3d(void)
     hsize_t		tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
     int         ndims;      /* Array rank for reading */
     hsize_t		rdims2[H5S_MAX_RANK];    /* Array dimensions for reading */
-    intn        i,j,k,l;    /* counting variables */
+    int        i,j,k,l;    /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -330,7 +330,7 @@ test_array_array_atomic(void)
     int         ndims2;     /* Array rank for reading */
     hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
     hsize_t		rdims2[H5S_MAX_RANK];    /* Array dimensions for reading */
-    intn        i,j,k,l;    /* counting variables */
+    int        i,j,k,l;    /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -497,7 +497,7 @@ test_array_compound_atomic(void)
     char       *mname;      /* Name of compound field */
     size_t      off;        /* Offset of compound field */
     hid_t       mtid;       /* Datatype ID for field */
-    intn        i,j;        /* counting variables */
+    int        i,j;        /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -724,7 +724,7 @@ test_array_compound_array(void)
     size_t      off;        /* Offset of compound field */
     hid_t       mtid;       /* Datatype ID for field */
     H5T_class_t mclass;     /* Datatype class for field */
-    intn        i,j,k;      /* counting variables */
+    int        i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1119,7 +1119,7 @@ test_array_vlen_atomic(void)
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
     int         mem_used=0; /* Memory used during allocation */
-    intn        i,j,k;      /* counting variables */
+    int        i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1331,7 +1331,7 @@ test_array_vlen_array(void)
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
     int         mem_used=0; /* Memory used during allocation */
-    intn        i,j,k,l;    /* Index variables */
+    int        i,j,k,l;    /* Index variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1887,7 +1887,7 @@ test_compat(void)
     size_t      off;        /* Offset of compound field */
     hid_t       mtid;       /* Datatype ID for field */
 #ifndef WANT_H5_V1_2_COMPAT
-    intn        i;          /* Index variables */
+    int        i;          /* Index variables */
 #endif /* !WANT_H5_V1_2_COMPAT */
     herr_t		ret;		/* Generic return value		*/
 

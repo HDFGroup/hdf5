@@ -17,7 +17,7 @@
 
 /* Interface initialization */
 #define PABLO_MASK	H5Tbit_mask
-static intn interface_initialize_g = 0;
+static int interface_initialize_g = 0;
 #define INTERFACE_INIT NULL
 
 
@@ -39,16 +39,16 @@ void
 H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	      size_t src_offset, size_t size)
 {
-    intn	shift;
-    uintn	mask_lo, mask_hi;
-    intn	s_idx, d_idx;
+    int	shift;
+    unsigned	mask_lo, mask_hi;
+    int	s_idx, d_idx;
 
     /*
      * Normalize the offset to be a byte number and a bit offset within that
      * byte.
      */
-    s_idx = (intn)src_offset / 8;
-    d_idx = (intn)dst_offset / 8;
+    s_idx = (int)src_offset / 8;
+    d_idx = (int)dst_offset / 8;
     src_offset %= 8;
     dst_offset %= 8;
     
@@ -109,7 +109,7 @@ H5T_bit_copy (uint8_t *dst, size_t dst_offset, const uint8_t *src,
      * bits). SHIFT is three since the source must be shifted right three bits
      * to line up with the destination.
      */
-    shift = (intn)dst_offset;
+    shift = (int)dst_offset;
     mask_lo = (1<<(8-shift))-1;
     mask_hi = (~mask_lo) & 0xff;
     
@@ -253,10 +253,10 @@ H5T_bit_set_d (uint8_t *buf, size_t offset, size_t size, hsize_t val)
 void
 H5T_bit_set (uint8_t *buf, size_t offset, size_t size, hbool_t value)
 {
-    intn	idx;
+    int	idx;
 
     /* Normalize */
-    idx = (intn)offset / 8;
+    idx = (int)offset / 8;
     offset %= 8;
 
     /* The first partial byte */
