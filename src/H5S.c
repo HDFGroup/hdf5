@@ -167,6 +167,54 @@ done:
 } /* end H5Screate() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S_extent_release
+ *
+ * Purpose:	Releases all memory associated with a dataspace extent.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_extent_release(H5S_t *ds)
+{
+    FUNC_ENTER(H5S_extent_release, FAIL);
+
+    assert(ds);
+
+    /* release extent */
+    switch (ds->extent.type) {
+        case H5S_NO_CLASS:
+            /*nothing needed */
+            break;
+
+        case H5S_SCALAR:
+            /*nothing needed */
+            break;
+
+        case H5S_SIMPLE:
+            H5S_release_simple(&(ds->extent.u.simple));
+            break;
+
+        case H5S_COMPLEX:
+            /* nothing yet */
+            break;
+
+        default:
+            assert("unknown dataspace (extent) type" && 0);
+            break;
+    }
+    FUNC_LEAVE(SUCCEED);
+}   /* end H5S_extent_release() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_close
  *
  * Purpose:	Releases all memory associated with a data space.
@@ -192,28 +240,8 @@ H5S_close(H5S_t *ds)
     /* Release selection (this should come before the extent release) */
     H5S_select_release(ds);
 
-    /* release extent */
-    switch (ds->extent.type) {
-        case H5S_NO_CLASS:
-            /*nothing needed */
-            break;
-
-        case H5S_SCALAR:
-            /*nothing needed */
-            break;
-
-        case H5S_SIMPLE:
-            H5S_release_simple(&(ds->extent.u.simple));
-            break;
-
-        case H5S_COMPLEX:
-            /* nothing yet */
-            break;
-
-        default:
-            assert("unknown dataspace (extent) type" && 0);
-            break;
-    }
+    /* Release extent */
+    H5S_extent_release(ds);
 
     /* Release the main structure */
     H5MM_xfree(ds);
@@ -329,6 +357,46 @@ H5Scopy (hid_t space_id)
     if ((ret_value=H5I_register (H5_DATASPACE, dst))<0) {
         HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
     }
+
+    FUNC_LEAVE (ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Sextent_copy
+ *
+ * Purpose:	Copies a dataspace extent.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Sextent_copy (hid_t dst_id,hid_t src_id)
+{
+    H5S_t	*src = NULL;
+    H5S_t	*dst = NULL;
+    hid_t	ret_value = SUCCEED;
+    
+    FUNC_ENTER (H5Scopy, FAIL);
+    H5TRACE2("e","ii",dst_id,src_id);
+
+    /* Check args */
+    if (H5_DATASPACE!=H5I_group (src_id) || NULL==(src=H5I_object (src_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+    if (H5_DATASPACE!=H5I_group (dst_id) || NULL==(dst=H5I_object (dst_id))) {
+        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Copy */
+    if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
+        HRETURN_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent");
 
     FUNC_LEAVE (ret_value);
 }
@@ -1472,10 +1540,45 @@ H5Sextent_class (hid_t sid)
 
     ret_value=space->extent.type;
     
- done:
     FUNC_LEAVE(ret_value);
 }
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sset_extent_none
+ PURPOSE
+    Resets the extent of a dataspace back to "none"
+ USAGE
+    herr_t H5Sset_extent_none(space_id)
+        hid_t space_id;	      IN: Dataspace object to reset
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+	This function resets the type of a dataspace back to "none" with no
+    extent information stored for the dataspace.
+--------------------------------------------------------------------------*/
+herr_t
+H5Sset_extent_none (hid_t space_id)
+{
+    H5S_t		   *space = NULL;	/* dataspace to modify */
+
+    FUNC_ENTER(H5Sset_extent_none, FAIL);
+    H5TRACE1("e","i",space_id);
+
+    /* Check args */
+    if ((space = H5I_object(space_id)) == NULL) {
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
+    }
+
+    /* Clear the previous extent from the dataspace */
+    if(H5S_extent_release(space)<0)
+        HRETURN_ERROR(H5E_RESOURCE, H5E_CANTDELETE, FAIL, "can't release previous dataspace");
+
+    space->extent.type=H5S_NO_CLASS;
+
+    FUNC_LEAVE(SUCCEED);
+}   /* end H5Sset_extent_none() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_debug

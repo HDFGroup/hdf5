@@ -220,6 +220,7 @@ intn H5S_get_hyperslab (const H5S_t *ds, hssize_t offset[]/*out*/,
 herr_t H5S_release_simple(H5S_simple_t *simple);
 herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 herr_t H5S_select_copy (H5S_t *dst, const H5S_t *src);
+herr_t H5S_extent_release (H5S_t *space);
 herr_t H5S_select_release (H5S_t *space);
 herr_t H5S_sel_iter_release (const H5S_t *space,H5S_sel_iter_t *sel_iter);
 hsize_t H5S_select_npoints (const H5S_t *space);
