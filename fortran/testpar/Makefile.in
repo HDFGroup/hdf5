@@ -14,8 +14,6 @@ hdf5_builddir=$(top_builddir)/src
 ## Add the include directory to the C preprocessor flags the the hdf5 library
 ## to the library list.
 LT_LINK_LIB=$(LT) --mode=link $(F9X) -static -rpath $(libdir)
-MFLAG=@F9XMODFLAG@
-FFLAGS=$(MFLAG). $(MFLAG)../src @FFLAGS@
 LIBFORTRAN=../src/libhdf5_fortran.la
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
@@ -40,6 +38,10 @@ TEST_HDR=
 $(TEST_PROGS): $(LIBHDF5) $(LIBH5TEST)
 
 $(TEST_OBJ): $(TEST_HDR)
+
+## Put in dependencies to the THDF5 module so that things will be built
+## in the correct order.
+thyperslab_wr.lo:   thdf5.lo
 
 ptesthdf5_fortran: thdf5.lo thyperslab_wr.lo tcheck.lo ptesthdf5_fortran.lo
 	@$(LT_LINK_FEXE) $(FFLAGS) -o $@ ptesthdf5_fortran.lo thdf5.lo thyperslab_wr.lo tcheck.lo $(LIBFORTRAN) $(LIBHDF5) $(LIBS)
