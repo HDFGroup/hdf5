@@ -40,7 +40,7 @@ static hid_t H5FD_LOG_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
-    char *logfile;			/* Allocated log file name */
+    const char *logfile;			/* Allocated log file name */
     intn verbosity;                 /* Verbosity of logging information */
 } H5FD_log_fapl_t;
 

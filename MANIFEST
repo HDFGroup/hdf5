@@ -444,6 +444,7 @@
 ./src/H5Epublic.h
 ./src/H5F.c
 ./src/H5Farray.c
+./src/H5Fcontig.c
 ./src/H5Fistore.c
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h

@@ -503,6 +503,12 @@ __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
 				     haddr_t addr);
 
 /* Functions that operate on contiguous storage wrt boot block */
+__DLL__ herr_t H5F_contig_read(H5F_t *f, haddr_t addr, hsize_t size,
+                hid_t dxpl_id, void *_buf/*out*/);
+__DLL__ herr_t H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+                  hsize_t size, hid_t dxpl_id, const void *buf);
+
+/* Functions that operate on blocks of bytes wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
 			      hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
