@@ -193,6 +193,37 @@ typedef float             real_f;
 
 #endif /*WINDOWS */
 
+/* FreeBSD definitions */
+#if (defined(__FreeBSD) || defined(__FreeBSD__))
+
+/* Common definitions */
+typedef char              *_fcd;
+typedef int               int_f;
+typedef int               hid_t_f;
+typedef float             real_f;
+#define _fcdtocp(desc) (desc)
+
+/* IA32 specific definitions */
+#if (defined(i386) || defined(__i386) || defined(__i386__))
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+/* AMD64 specific definitions */
+#elif defined __x86_64__
+typedef long long         hsize_t_f;
+typedef long long         hssize_t_f;
+typedef int               size_t_f;
+/* IA64 specific definitions */
+#elif defined __ia64
+typedef long              hsize_t_f;
+typedef long              hssize_t_f;
+typedef long              size_t_f;
+#endif /* IA64 */
+
+#define FNAME_POST_UNDERSCORE
+
+#endif /* FreeBSD */
+
 /*----------------------------------------------------------------
 ** MACRO FNAME for any fortran callable routine name.
 **

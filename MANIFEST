@@ -56,6 +56,7 @@
 ./config/depend4.in
 ./config/dependN.in
 ./config/freebsd
+./config/gnu-fflags
 ./config/gnu-flags
 ./config/hpux10.20
 ./config/hpux11.00
