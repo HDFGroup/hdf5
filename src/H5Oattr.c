@@ -180,8 +180,16 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
         hsize_t nelem;  /* Number of elements in extent */
         unsigned u;     /* Local index variable */
 
-        attr->ds->extent.type = H5S_SIMPLE;
+        /* Set the dataspace type to be simple or scalar as appropriate */
+        if(simple->rank>0)
+            attr->ds->extent.type = H5S_SIMPLE;
+        else
+            attr->ds->extent.type = H5S_SCALAR;
+
+        /* Copy the extent information */
         HDmemcpy(&(attr->ds->extent.u.simple),simple, sizeof(H5S_simple_t));
+
+        /* Release temporary extent information */
         H5FL_FREE(H5S_simple_t,simple);
 
         /* Compute the number of elements in the extent */
