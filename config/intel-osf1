@@ -54,13 +54,47 @@ enable_shared="${enable_shared:-no}"
 # `ll' or if the format would be `%qd' set it to `q'.
 hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}
 
+# Cache the sizeof of the following types to save configure time.
+# These are verified in test/tconfig in case they change.
+ac_cv_type_char=${ac_cv_type_char=yes}
+ac_cv_sizeof_char=${ac_cv_sizeof_char='1'}
+ac_cv_type_short=${ac_cv_type_short=yes}
+ac_cv_sizeof_short=${ac_cv_sizeof_short='2'}
+ac_cv_type_int=${ac_cv_type_int=yes}
+ac_cv_sizeof_int=${ac_cv_sizeof_int='4'}
+ac_cv_type_long=${ac_cv_type_long=yes}
+ac_cv_sizeof_long=${ac_cv_sizeof_long='4'}
+ac_cv_type_float=${ac_cv_type_float=yes}
+ac_cv_sizeof_float=${ac_cv_sizeof_float='4'}
+ac_cv_type_double=${ac_cv_type_double=yes}
+ac_cv_sizeof_double=${ac_cv_sizeof_double='8'}
+ac_cv_type_long_double=${ac_cv_type_long_double=yes}
+ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double='8'}
+ac_cv_type_long_long=${ac_cv_type_long_long=yes}
+ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long='8'}
+ac_cv_type_size_t=${ac_cv_type_size_t=yes}
+ac_cv_sizeof_size_t=${ac_cv_sizeof_size_t='4'}
+ac_cv_type_ssize_t=${ac_cv_type_ssize_t=yes}
+ac_cv_sizeof_ssize_t=${ac_cv_sizeof_ssize_t='4'}
+ac_cv_type_off_t=${ac_cv_type_off_t=yes}
+ac_cv_sizeof_off_t=${ac_cv_sizeof_off_t='4'}
+
 # Hard set sizeof of the following types to 0 because they are not supported.
+ac_cv_type___int64=${ac_cv_type___int64=no}
 ac_cv_sizeof___int64=${ac_cv_sizeof___int64='0'}
 
 # Hard set malloc of zero bytes to no because it does not work.
 hdf5_cv_malloc_works=${hdf5_cv_malloc_works='no'}
 
 # Hard set sizeof_intN_t to 0 because they are not supported.
+ac_cv_type_int8_t=${ac_cv_type_int8_t=no}
+ac_cv_type_int16_t=${ac_cv_type_int16_t=no}
+ac_cv_type_int32_t=${ac_cv_type_int32_t=no}
+ac_cv_type_int64_t=${ac_cv_type_int64_t=no}
+ac_cv_type_uint8_t=${ac_cv_type_uint8_t=no}
+ac_cv_type_uint16_t=${ac_cv_type_uint16_t=no}
+ac_cv_type_uint32_t=${ac_cv_type_uint32_t=no}
+ac_cv_type_uint64_t=${ac_cv_type_uint64_t=no}
 ac_cv_sizeof_int8_t=${ac_cv_sizeof_int8_t='0'}
 ac_cv_sizeof_int16_t=${ac_cv_sizeof_int16_t='0'}
 ac_cv_sizeof_int32_t=${ac_cv_sizeof_int32_t='0'}
@@ -71,6 +105,14 @@ ac_cv_sizeof_uint32_t=${ac_cv_sizeof_uint32_t='0'}
 ac_cv_sizeof_uint64_t=${ac_cv_sizeof_uint64_t='0'}
 
 # Hard set sizeof_int_leastN_t to 0 because they are not supported.
+ac_cv_type_int_least8_t=${ac_cv_type_int_least8_t=no}
+ac_cv_type_int_least16_t=${ac_cv_type_int_least16_t=no}
+ac_cv_type_int_least32_t=${ac_cv_type_int_least32_t=no}
+ac_cv_type_int_least64_t=${ac_cv_type_int_least64_t=no}
+ac_cv_type_uint_least8_t=${ac_cv_type_uint_least8_t=no}
+ac_cv_type_uint_least16_t=${ac_cv_type_uint_least16_t=no}
+ac_cv_type_uint_least32_t=${ac_cv_type_uint_least32_t=no}
+ac_cv_type_uint_least64_t=${ac_cv_type_uint_least64_t=no}
 ac_cv_sizeof_int_least8_t=${ac_cv_sizeof_int_least8_t='0'}
 ac_cv_sizeof_int_least16_t=${ac_cv_sizeof_int_least16_t='0'}
 ac_cv_sizeof_int_least32_t=${ac_cv_sizeof_int_least32_t='0'}
@@ -81,6 +123,14 @@ ac_cv_sizeof_uint_least32_t=${ac_cv_sizeof_uint_least32_t='0'}
 ac_cv_sizeof_uint_least64_t=${ac_cv_sizeof_uint_least64_t='0'}
 
 # Hard set sizeof_int_fastN_t to 0 because they are not supported.
+ac_cv_type_int_fast8_t=${ac_cv_type_int_fast8_t=no}
+ac_cv_type_int_fast16_t=${ac_cv_type_int_fast16_t=no}
+ac_cv_type_int_fast32_t=${ac_cv_type_int_fast32_t=no}
+ac_cv_type_int_fast64_t=${ac_cv_type_int_fast64_t=no}
+ac_cv_type_uint_fast8_t=${ac_cv_type_uint_fast8_t=no}
+ac_cv_type_uint_fast16_t=${ac_cv_type_uint_fast16_t=no}
+ac_cv_type_uint_fast32_t=${ac_cv_type_uint_fast32_t=no}
+ac_cv_type_uint_fast64_t=${ac_cv_type_uint_fast64_t=no}
 ac_cv_sizeof_int_fast8_t=${ac_cv_sizeof_int_fast8_t='0'}
 ac_cv_sizeof_int_fast16_t=${ac_cv_sizeof_int_fast16_t='0'}
 ac_cv_sizeof_int_fast32_t=${ac_cv_sizeof_int_fast32_t='0'}
