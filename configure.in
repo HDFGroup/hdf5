@@ -494,33 +494,26 @@ dnl Checkpoint the cache
 AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
-dnl If the user specified the --with-zlib flag, then we want to place
-dnl the specified `include' and `lib' directories in the CPPFLAGS and
-dnl LDFLAGS respec. This will cause the subsequent checks to check this
-dnl place first for zlib
+dnl Is HDF4 present?  If so then we can compile the hdf4 related tools.
+dnl The HDF4 software has 4 component libraries (df, mfhdf, z, jpeg)
+dnl and many header files.  Will just verify the presence of mfhdf.h
+dnl because it includes many other HDF4 header files.
+dnl Their locations might be specified with the `--with-hdf4' command-line
+dnl switch.  The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
 dnl
-AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
-            ,withval=yes)
-case "$withval" in
-   yes | no)
-      ;;
-   *)
-      zlib_inc="`echo $withval |cut -f1 -d,`"
-      if test -n "$zlib_inc"; then
-         CPPFLAGS="$CPPFLAGS -I$zlib_inc"
-      fi
-
-      zlib_lib="`echo $withval |cut -f2 -d, -s`"
-      if test -n "$zlib_lib"; then
-         LDFLAGS="$LDFLAGS -L$zlib_lib"
-      fi
-      ;;
-esac
-
-dnl ----------------------------------------------------------------------
-dnl Is HDF4 present?  If so then we can compile the h5toh4 and h5toh4 converters.
-dnl We assume they can be compiled and then prove otherwise when we don't find
-dnl a header file or library.
+dnl To check, we first assume HDF4 is present and then prove otherwise
+dnl when we cannot find all its components.
+dnl Notice that HDF4 (when wanted) must be checked before checking for
+dnl the ZLIB components because:
+dnl    1. HDF4 components contain ZLIB components.
+dnl    2. ZLIB components are always checked while HDF4 components are optional.
+dnl If ZLIB is checked first and not found, the libz value is set to no.
+dnl That will cause the later checking of HDF4 components, which also
+dnl include libz, to always fail.
+dnl If HDF4 components are checked first and the libz is not found, it will
+dnl cause the later checking of ZLIB componenets to fail too.  But in this
+dnl case, one can configure again without the optional with-hdf4 option.
 dnl
 AC_SUBST(H5TOH4) H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
@@ -528,7 +521,7 @@ AC_SUBST(TESTH5TOH4) TESTH5TOH4='$(srcdir)/testh5toh4'
 AC_SUBST(H4TOH5) H4TOH5=h4toh5
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5'
 
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
+AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=no)
 case "$withval" in
    yes)
       AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4 H4TOH5 TESTH4TOH5)
@@ -573,31 +566,42 @@ esac
 
 dnl ----------------------------------------------------------------------
 dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
-dnl `-lz' and their locations might be specified with the `--enable-zlib'
+dnl `-lz' and their locations might be specified with the `--with-zlib'
 dnl command-line switch.  The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
-FOUND_ZLIB="no"
-for d in $LIBS ; do
-   if test "$d" = "-lz"; then
-      FOUND_ZLIB="yes"
-   fi
-done
+
 AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
             ,withval=yes)
-if test "X$FOUND_ZLIB" = "Xno"; then
-   dnl Only check for zlib if we haven't found it above in the HDF4 stuff.
-   case "$withval" in
-      no)
-         AC_MSG_CHECKING(for GNU zlib)
-         AC_MSG_RESULT(suppressed)
-         ;;
-      *)
-         dnl The INC,LIB stuff was already parsed above
-         AC_CHECK_HEADERS(zlib.h)
-         AC_CHECK_LIB(z, compress)
-   esac
-fi
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(zlib.h)
+	AC_CHECK_LIB(z, compress)
+	;;
+    no)
+	AC_MSG_CHECKING(for GNU zlib)
+	AC_MSG_RESULT(suppressed)
+	;;
+    *)
+	zlib_inc="`echo $withval |cut -f1 -d,`"
+	if test -n "$zlib_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+	    AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+        else
+	    AC_CHECK_HEADERS(zlib.h)
+	fi
+
+	zlib_lib="`echo $withval |cut -f2 -d, -s`"
+	if test -n "$zlib_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$zlib_lib"
+	    AC_CHECK_LIB(z, compress,,LDFLAGS="$saved_LDFLAGS")
+	else
+	    AC_CHECK_LIB(z, compress)
+	fi
+	;;
+esac
 
 dnl ----------------------------------------------------------------------
 dnl Is SSL library present?  It is needed by GLOBUS-GASS and Grid Storage 
