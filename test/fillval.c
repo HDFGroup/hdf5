@@ -708,9 +708,19 @@ test_compatible(void)
   int        rd_fill=0, fill_val1=4444, val_rd=0, fill_val2=5555;
   hsize_t    dims[2], one[2]={1,1};
   hssize_t   hs_offset[2]={3,4};
+  char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+  char       testfile[512]="";  /* test file name */
 
   TESTING("contiguous dataset compatibility with v. 1.5"); 
-  if((file=H5Fopen(FILE_COMPATIBLE, H5F_ACC_RDONLY, H5P_DEFAULT))<0) goto error;
+  /* Generate correct name for test file by prepending the source path */
+  if(srcdir && ((strlen(srcdir) + strlen(FILE_COMPATIBLE) + 1) <
+     sizeof(testfile))) {
+     strcpy(testfile, srcdir);
+     strcat(testfile, "/");
+  }
+  strcat(testfile, FILE_COMPATIBLE);
+
+  if((file=H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT))<0) goto error;
 
   if((dset1=H5Dopen(file, "dset1"))<0) goto error;
   if ((dcpl1=H5Dget_create_plist(dset1))<0) goto error;
