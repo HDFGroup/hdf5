@@ -75,6 +75,7 @@
         H5D.c
         H5Dio.c
 
+        H5V.c
         H5Z.c
         H5Zdeflate.c
         H5Zfletcher32.c
