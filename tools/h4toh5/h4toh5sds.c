@@ -63,7 +63,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int32   sds_ref;
   int   sds_empty;
   int32   istat;
-  int     i;
+  int     i,j;
   int32   num_sdsattrs;
   void*   sds_data;
 
@@ -84,21 +84,41 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   int16           special_code;
   int32           access_id;
   uint16          sd_ref;
- int             gzip_level;
-  /* define varibles for hdf5. */
+  int             gzip_level;
 
+  /* define variables for hdf5. */
   hid_t   h5dset;
   hid_t   h5d_sid;
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
-/*  hid_t   write_plist; */
+  hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-/*  hsize_t bufsize; */
+  hsize_t bufsize;
   char*   h5csds_name;
   herr_t  ret;
 
+  /* define variables to handle transformation when the maximum memory
+     buffer is set by users. */
+
+  int NUM_HSLAB_PERD;
+  int32* h4slab_start;
+  int32* h4slab_stride;
+  int32* h4slab_stop;
+  int32* h4slab_dims;
+  int32* h4slab_edges;
+  hsize_t* h5slab_offset;
+  hsize_t* h5slab_count;
+  int h4slab_count,h4slab_index;
+  int32 slabsize;
+  int32 count_slabdata;
+  hid_t  slabmemspace;
+
+  /* if(memsize <=0) slabsize = -1;*/
+  if(MEMOPT != 0) 
+    slabsize = SLABSIZE*1000000;
+  else slabsize = 0;
   special_code = -1;
   /* zeroing out the memory for sdsname and sdslabel.*/
 
@@ -112,7 +132,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   }
 
   /*check whether the sds is created with unlimited dimension. */
-  
 
   /*obtain name,rank,dimsizes,datatype and num of attributes of sds */
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
@@ -203,7 +222,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     }
   }
  
-  sds_data = malloc(h4memsize*count_sdsdata);
+  /*  sds_data = malloc(h4memsize*count_sdsdata);
 
   if(sds_data == NULL) {
     printf("error in allocating memory. \n");
@@ -222,6 +241,7 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     free(sds_data);
     return FAIL;
   }
+  */
 
   /* obtaining reference number and name of h5 dataset 
      corresponding to sds. */
@@ -442,10 +462,32 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     H5Pclose(create_plist);
     return FAIL;							      
   }									      
-  /* comment this out.
+
+  if(count_sdsdata*h4memsize <= slabsize || MEMOPT==0) {
+
+    sds_data = malloc(h4memsize*count_sdsdata);
+
+    if(sds_data == NULL) {
+      printf("error in allocating memory. \n");
+      free(sds_start);
+      free(sds_edge);
+      free(sds_stride);
+      return FAIL;
+    }
+  istat    = SDreaddata(sds_id, sds_start, sds_stride, sds_edge, 
+			(VOIDP)sds_data);
+  if (istat == FAIL)  { 
+    printf("unable to read data from h5dset. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    return FAIL;
+  }
+
   write_plist = H5Pcreate(H5P_DATASET_XFER);
   bufsize = h4memsize;
-  for(i=1;i<sds_rank;i++)
+  for(i=0;i<sds_rank;i++)
     bufsize *= h5dims[i];
   if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
     printf("fail to create data transfer property list.\n");
@@ -461,9 +503,6 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   }
   if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,write_plist,	    
   (void *)sds_data)<0) {	
-  */
-  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
-  (void *)sds_data)<0) {		      
     printf("failed to write data into hdf5 dataset");	
     printf(" converted from SDS.\n");
     H5Sclose(h5d_sid);
@@ -475,8 +514,134 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
     free(sds_data);	
     free(chunk_dims);
     return FAIL;							      
-  }							      
-									      
+  }		
+  free(sds_data);
+  }
+
+  else { 
+  NUM_HSLAB_PERD= get_numslab_perD(h4memsize*count_sdsdata,slabsize,sds_rank);
+  
+  h4slab_start  = calloc(sds_rank,sizeof(int32));
+  h4slab_stride = calloc(sds_rank,sizeof(int32));
+  h4slab_stop   = calloc(sds_rank,sizeof(int32));
+  h4slab_dims   = calloc(sds_rank,sizeof(int32));
+  h4slab_edges  = calloc(sds_rank,sizeof(int32));
+  h5slab_offset = calloc(sds_rank,sizeof(hsize_t));
+  h5slab_count  = calloc(sds_rank,sizeof(hsize_t));
+
+  for ( i =0;i<sds_rank;i++) {
+    h4slab_start[i] =0;
+    h4slab_stop[i] = 0;
+    h4slab_stride[i] =1;
+    h4slab_dims[i] = h5ceil(sds_dimsizes[i],NUM_HSLAB_PERD);
+    printf("h4slab_dims[%d]%d\n",i,h4slab_dims[i]);
+  }
+  h4slab_count = -1;
+  while(h4slab_count != pow(NUM_HSLAB_PERD,sds_rank)-1){
+    h4slab_count++;
+    h4slab_index = -1;
+    for (i=0;i<sds_rank;i++){
+      if((h4slab_count%pow(NUM_HSLAB_PERD,(i+1)))==0){
+        h4slab_index = i;
+      }
+    }
+    if(h4slab_index != -1 && h4slab_index != (sds_rank-1)) {
+      for(j=0;j<=h4slab_index;j++){
+	h4slab_start[j] =0;
+      }
+      h4slab_start[j] = h4slab_start[j]+h4slab_dims[j];
+    }
+
+    for(i=0;i<sds_rank;i++){
+      h4slab_stop[i] = h4slab_start[i]+h4slab_dims[i];
+      if(h4slab_stop[i]>sds_dimsizes[i])
+        h4slab_stop[i] = sds_dimsizes[i];
+      printf("h4slab_start[%d] %d\n",i,h4slab_start[i]);
+      printf("h4slab_stop[%d] %d\n",i,h4slab_stop[i]);
+    }
+    count_slabdata = 1;
+    for(i=0;i<sds_rank;i++){
+      count_slabdata = count_slabdata*(h4slab_stop[i]-h4slab_start[i]);
+      h4slab_edges[i] = h4slab_stop[i]-h4slab_start[i];
+    }
+    count_slabdata = count_slabdata*h4memsize;
+    printf("count_slabdata %d\n",count_slabdata);
+  sds_data = malloc(count_slabdata);
+  if(sds_data == NULL) {
+    printf("error in allocating memory. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    return FAIL;
+  }
+  istat    = SDreaddata(sds_id, h4slab_start, h4slab_stride, h4slab_edges, 
+			(VOIDP)sds_data);
+  if (istat == FAIL)  { 
+    printf("unable to read SDS data. \n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    return FAIL;
+  }
+  printf("after SDread data\n");
+  write_plist = H5Pcreate(H5P_DATASET_XFER);
+  /*  bufsize = h4memsize;
+  for(i=0;i<sds_rank;i++)
+  bufsize *= h5dims[i];*/
+  bufsize = slabsize;
+  if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
+    printf("fail to create data transfer property list.\n");
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);
+    free(chunk_dims);
+    H5Sclose(h5d_sid);
+    H5Pclose(create_plist);
+    H5Pclose(write_plist);
+    return FAIL;		
+  }
+
+  for (i=0;i<sds_rank;i++) {
+    h5slab_offset[i] = (hsize_t)(h4slab_start[i]);
+    h5slab_count[i] =(hsize_t)(h4slab_stop[i]-h4slab_start[i]);
+  }
+
+  slabmemspace = H5Screate_simple(sds_rank,h5slab_count,NULL);
+  H5Sselect_hyperslab(h5d_sid,H5S_SELECT_SET,h5slab_offset,NULL,h5slab_count,NULL);
+  if (H5Dwrite(h5dset,h5_memtype,slabmemspace,h5d_sid,write_plist,	    
+  (void *)sds_data)<0) {	
+  
+ /* printf("before writing \n");
+  if (H5Dwrite(h5dset,h5_memtype,h5d_sid,h5d_sid,H5P_DEFAULT,	    
+  (void *)sds_data)<0) {		      */
+    printf("failed to write data into hdf5 dataset");	
+    printf(" converted from SDS.\n");
+    H5Sclose(h5d_sid);
+
+    H5Dclose(h5dset);
+    H5Pclose(create_plist);
+    free(sds_start);
+    free(sds_edge);
+    free(sds_stride);
+    free(sds_data);	
+    free(chunk_dims);
+    return FAIL;							      
+  }			
+  printf("after writing hdf5 \n");
+  free(sds_data);				      
+							
+  h4slab_start[0] = h4slab_start[0]+h4slab_dims[0];
+  }
+
+  free(h4slab_start);
+  free(h4slab_stop);
+  free(h4slab_dims);
+  free(h4slab_edges);
+  free(h5slab_offset);
+  free(h5slab_count);
+  }
   /* convert sds annotation into attribute of sds dataset.
      Since there is no routines to find the exact tag of sds object,
      we will check three possible object tags of sds objects, that is:
@@ -603,11 +768,12 @@ int Sds_h4_to_h5(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimgroup,int
   ret   = H5Pclose(create_plist);
   ret   = H5Sclose(h5d_sid);
   ret   = H5Dclose(h5dset);
-  free(sds_data);
+  /*  free(sds_data);*/
   free(sds_start);
   free(sds_edge);
   free(sds_stride);
   free(chunk_dims);
+  
   return SUCCEED;
 }
 
@@ -856,7 +1022,7 @@ hid_t   h5dim_nameaid;
   hid_t   attribID;
   hid_t   create_plist;
 
-/*  int     dim_index; */
+  int     dim_index;
   hsize_t h5dimscas[1];
   hsize_t max_h5dimscas[1];
   hsize_t h5dim_dims[1];
@@ -1288,7 +1454,7 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   int32*  sds_stride;
   int32   count_sdsdata;
   int32   sds_ref;
-/*  int32   istat; */
+  int32   istat;
   int     i;
   int32   num_sdsattrs;
   void*   fill_value;
@@ -1300,7 +1466,9 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   char    sdslabel[MAX_NC_NAME];
   size_t  h4size;
   size_t  h4memsize;
+  HDF_CHUNK_DEF c_def_out;
   hsize_t*  chunk_dims;
+  int32   c_flags;
 
   /* define varibles for hdf5. */
 
@@ -1309,10 +1477,10 @@ int convert_sdsfillvalue(int32 file_id,int32 sds_id,hid_t h5_group,hid_t h5_dimg
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
-/*  hid_t   write_plist; */
+  hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
-/*  hsize_t bufsize; */
+  hsize_t bufsize;
   char*   h5csds_name;
 
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
@@ -1702,9 +1870,8 @@ uint16 get_SDref(int32 file_id,uint16 tag,int32 sds_ref){
   }
 
   sd_ref = di.ref;
-/*  if(!found)
-        printf("cannot find sd_ref\n");
-*/
+  if(!found) ;
+    /* printf("cannot find sd_ref\n");*/
 
   DFdifree(GroupID);
   return sd_ref;
@@ -1720,10 +1887,15 @@ static int convert_zerosdsunlimit(int32 file_id,
   int32   sds_dtype;
   int32   sds_rank;
   int32   sds_dimsizes[MAX_VAR_DIMS];
+  int32*  sds_start;
+  int32*  sds_edge;
+  int32*  sds_stride;
+  int32   count_sdsdata;
   int32   sds_ref;
   int32   istat;
   int     i;
   int32   num_sdsattrs;
+  void*   fill_value;
 
   int     check_sdsname;
   int     check_gloattr;
@@ -1750,8 +1922,10 @@ static int convert_zerosdsunlimit(int32 file_id,
   hid_t   h5ty_id;
   hid_t   h5_memtype;
   hid_t   create_plist;
+  hid_t   write_plist;
   hsize_t h5dims[MAX_VAR_DIMS];
   hsize_t max_h5dims[MAX_VAR_DIMS];
+  hsize_t bufsize;
   char*   h5csds_name;
 
   if (SDgetinfo(sds_id,sdsname,&sds_rank,sds_dimsizes,&sds_dtype,
@@ -2074,3 +2248,41 @@ static int convert_zerosdsunlimit(int32 file_id,
   return SUCCEED;
 }
 
+
+int get_numslab_perD(int32 totalsize,int slabsize,int rank) {
+
+  int i,flag;
+  int32 tempsize;
+  int   numslab_perD;
+  numslab_perD =1;
+  flag = 0;
+
+  while(!flag) {
+    tempsize =1;
+    for(i=0;i<rank;i++)
+      tempsize = tempsize*numslab_perD;
+    if((totalsize/tempsize)<=slabsize){
+      flag = 1;
+    }
+    else 
+      numslab_perD++;
+  }
+  printf("numslab_perD %d\n",numslab_perD);
+  return numslab_perD;
+}
+
+
+int h5ceil(int32 m,int32 n){
+  if(m/n * n < m) return m/n +1;
+  else return m/n;
+}
+
+
+int pow(int num,int h4index) {
+  int i;
+  int total;
+  total = 1;
+  for( i= 1; i<=h4index;i++)
+    total = total * num;
+  return total;
+}
