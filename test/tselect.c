@@ -210,7 +210,7 @@ test_select_hyper(void)
 }   /* test_select_hyper() */
 
 struct pnt_iter {
-    hssize_t	coord[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hssize_t	coord[POINT1_NPOINTS*2][SPACE2_RANK]; /* Coordinates for point selection */
     uint8_t *buf;           /* Buffer the points are in */
     intn offset;            /* Which point we are looking at */
 };
@@ -254,8 +254,11 @@ test_select_point(void)
     hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
     hssize_t	coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
+    hssize_t	temp_coord1[POINT1_NPOINTS][SPACE1_RANK]; /* Coordinates for point selection */
     hssize_t	coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hssize_t	temp_coord2[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hssize_t	coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
+    hssize_t	temp_coord3[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
     uint8_t    *wbuf,       /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temporary buffer pointer */
@@ -301,7 +304,43 @@ test_select_point(void)
     ret = H5Sselect_elements(sid1,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
-    /* Select sequence of ten points for write dataset */
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid1,0,POINT1_NPOINTS,(hsize_t *)temp_coord1);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord1[i][0],coord1[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord1[i][1],coord1[i][1],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord1[i][2],coord1[i][2],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    ret = H5Sget_select_npoints(sid1);
+    VERIFY(ret, 10, "H5Sget_select_npoints");
+
+    /* Append another sequence of ten points to disk dataset */
+    coord1[0][0]=0; coord1[0][1]= 2; coord1[0][2]= 0;
+    coord1[1][0]=1; coord1[1][1]=10; coord1[1][2]= 8;
+    coord1[2][0]=2; coord1[2][1]= 8; coord1[2][2]=10;
+    coord1[3][0]=0; coord1[3][1]= 7; coord1[3][2]=12;
+    coord1[4][0]=1; coord1[4][1]= 3; coord1[4][2]=11;
+    coord1[5][0]=2; coord1[5][1]= 1; coord1[5][2]= 1;
+    coord1[6][0]=0; coord1[6][1]=13; coord1[6][2]= 7;
+    coord1[7][0]=1; coord1[7][1]=14; coord1[7][2]= 6;
+    coord1[8][0]=2; coord1[8][1]= 2; coord1[8][2]= 5;
+    coord1[9][0]=0; coord1[9][1]= 6; coord1[9][2]=13;
+    ret = H5Sselect_elements(sid1,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hssize_t **)coord1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid1,POINT1_NPOINTS,POINT1_NPOINTS,(hsize_t *)temp_coord1);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord1[i][0],coord1[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord1[i][1],coord1[i][1],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord1[i][2],coord1[i][2],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    ret = H5Sget_select_npoints(sid1);
+    VERIFY(ret, 20, "H5Sget_select_npoints");
+
+    /* Select sequence of ten points for memory dataset */
     coord2[0][0]=12; coord2[0][1]= 3;
     coord2[1][0]=15; coord2[1][1]=13;
     coord2[2][0]= 7; coord2[2][1]=25;
@@ -314,6 +353,48 @@ test_select_point(void)
     coord2[9][0]=19; coord2[9][1]=17;
     ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord2);
     CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord2);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord2[i][0],coord2[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord2[i][1],coord2[i][1],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    /* Save points for later iteration */
+    /* (these are in the second half of the buffer, because we are prepending */
+    /*  the next list of points to the beginning of the point selection list) */
+    HDmemcpy(((char *)pi.coord)+sizeof(coord2),coord2,sizeof(coord2));
+
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 10, "H5Sget_select_npoints");
+
+    /* Append another sequence of ten points to memory dataset */
+    coord2[0][0]=24; coord2[0][1]= 0;
+    coord2[1][0]= 2; coord2[1][1]=25;
+    coord2[2][0]=13; coord2[2][1]=17;
+    coord2[3][0]= 8; coord2[3][1]= 3;
+    coord2[4][0]=29; coord2[4][1]= 4;
+    coord2[5][0]=11; coord2[5][1]=14;
+    coord2[6][0]= 5; coord2[6][1]=22;
+    coord2[7][0]=12; coord2[7][1]= 2;
+    coord2[8][0]=21; coord2[8][1]=12;
+    coord2[9][0]= 9; coord2[9][1]=18;
+    ret = H5Sselect_elements(sid2,H5S_SELECT_PREPEND,POINT1_NPOINTS,(const hssize_t **)coord2);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord2);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord2[i][0],coord2[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord2[i][1],coord2[i][1],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 20, "H5Sget_select_npoints");
+
+    /* Save points for later iteration */
+    HDmemcpy(pi.coord,coord2,sizeof(coord2));
 
     /* Create a dataset */
     dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
@@ -334,7 +415,7 @@ test_select_point(void)
     coord3[0][0]= 0; coord3[0][1]= 2;
     coord3[1][0]= 4; coord3[1][1]= 8;
     coord3[2][0]=13; coord3[2][1]=13;
-    coord3[3][0]=14; coord3[3][1]=25;
+    coord3[3][0]=14; coord3[3][1]=20;
     coord3[4][0]= 7; coord3[4][1]= 9;
     coord3[5][0]= 2; coord3[5][1]= 0;
     coord3[6][0]= 9; coord3[6][1]=19;
@@ -344,12 +425,45 @@ test_select_point(void)
     ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid2,0,POINT1_NPOINTS,(hsize_t *)temp_coord3);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord3[i][0],coord3[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 10, "H5Sget_select_npoints");
+
+    /* Append another sequence of ten points to disk dataset */
+    coord3[0][0]=14; coord3[0][1]=25;
+    coord3[1][0]= 0; coord3[1][1]= 0;
+    coord3[2][0]=11; coord3[2][1]=11;
+    coord3[3][0]= 5; coord3[3][1]=14;
+    coord3[4][0]= 3; coord3[4][1]= 5;
+    coord3[5][0]= 2; coord3[5][1]= 2;
+    coord3[6][0]= 7; coord3[6][1]=13;
+    coord3[7][0]= 9; coord3[7][1]=16;
+    coord3[8][0]=12; coord3[8][1]=22;
+    coord3[9][0]=13; coord3[9][1]= 9;
+    ret = H5Sselect_elements(sid2,H5S_SELECT_APPEND,POINT1_NPOINTS,(const hssize_t **)coord3);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+
+    /* Verify correct elements selected */
+    H5Sget_select_elem_pointlist(sid2,POINT1_NPOINTS,POINT1_NPOINTS,(hsize_t *)temp_coord3);
+    for(i=0; i<POINT1_NPOINTS; i++) {
+        VERIFY(temp_coord3[i][0],coord3[i][0],"H5Sget_select_elem_pointlist");
+        VERIFY(temp_coord3[i][1],coord3[i][1],"H5Sget_select_elem_pointlist");
+    } /* end for */
+
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 20, "H5Sget_select_npoints");
+
     /* Read selection from disk */
     ret=H5Dread(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check that the values match with a dataset iterator */
-    HDmemcpy(pi.coord,coord2,sizeof(coord2));
     pi.buf=wbuf;
     pi.offset=0;
     ret = H5Diterate(rbuf,H5T_NATIVE_UCHAR,sid2,test_select_point_iter1,&pi);
@@ -2217,7 +2331,7 @@ test_select(void)
 
     /* These next tests use the same file */
     test_select_hyper();        /* Test basic H5S hyperslab selection code */
-    test_select_point();        /* Test basic H5S element selection code */
+    test_select_point();        /* Test basic H5S element selection code, also tests appending to existing element selections */
     test_select_all();          /* Test basic all & none selection code */
     test_select_combo();        /* Test combined hyperslab & element selection code */
     test_select_hyper_stride(); /* Test strided hyperslab selection code */
