@@ -19,8 +19,7 @@ LIBH5TOOLS=../tools/lib/libh5tools.la
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
 ##Temporary disable the compiling of pio_perf codes while I fix it.
-##TEST_PROGS_PARA=mpi-perf perf pio_perf
-TEST_PROGS_PARA=mpi-perf perf
+TEST_PROGS_PARA=mpi-perf perf pio_perf
 TEST_PROGS=iopipe chunk overhead
 
 ## These are the files that `make clean' (and derivatives) will remove from
@@ -31,9 +30,11 @@ CLEAN=*.h5 *.raw *.dat x-gnuplot
 ## created by replacing the `.c' with a `.o'.  This list is necessary
 ## for building automatic dependencies.
 PIO_PERF_SRC=pio_perf.c pio_engine.c pio_timer.c
-TEST_SRC_PARA=mpi-perf.c perf.c $(PIO_PERF_SRC)
-TEST_SRC=iopipe.c chunk.c overhead.c $(TEST_SRC_PARA)
 PIO_PERF_OBJ=$(PIO_PERF_SRC:.c=.lo)
+
+TEST_SRC_PARA=mpi-perf.c perf.c $(PIO_PERF_SRC)
+
+TEST_SRC=iopipe.c chunk.c overhead.c $(TEST_SRC_PARA)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## How to build the programs... they all depend on the hdf5 library

@@ -4,10 +4,10 @@
  *     All rights reserved.
  *
  */
-#ifndef PERF_TIMER__
-#define PERF_TIMER__
+#ifndef PIO_TIMER__
+#define PIO_TIMER__
 
-#if 0
+#include "hdf5.h"
 
 #if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
@@ -17,13 +17,6 @@
 #else
 #   include <time.h>
 #endif
-
-#else
-
-#include <sys/time.h>
-#include <time.h>
-
-#endif  /* 0 */
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {
@@ -67,4 +60,4 @@ extern double       get_time(perf_time *pt, timer_type t);
 }
 #endif  /* __cplusplus */
 
-#endif  /* PERF_TIMER__ */
+#endif  /* PIO_TIMER__ */

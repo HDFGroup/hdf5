@@ -12,15 +12,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <mpi.h>
-
-#if 0
-
-#include "hdf5.h"
-
-#endif  /* 0 */
 
 #include "pio_timer.h"
+
+#ifdef H5_HAVE_PARALLEL
+
+#include <mpi.h>
 
 /*
  * The number to divide the tv_usec field with to get a nice decimal to add to
@@ -135,3 +132,5 @@ get_time(perf_time *pt, timer_type t)
 {
     return pt->total_time[t];
 }
+
+#endif /* H5_HAVE_PARALLEL */

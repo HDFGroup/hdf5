@@ -53,6 +53,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "hdf5.h"
+
+#ifdef H5_HAVE_PARALLEL
+
 /* library header files */
 #include <mpi.h>
 
@@ -235,7 +239,7 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
                         parms.num_files, parms.num_dsets, parms.num_elmts);
 
                 /* call Albert's testing here */
-		dopio(parms); 
+		do_pio(parms); 
                 /* get back ``result'' object and report */
             }
         }
@@ -284,7 +288,7 @@ usage(const char *prog)
  * Function:    parse_command_line
  * Purpose:     Parse the command line options and return a STRUCT OPTIONS
  *              structure which will need to be freed by the calling function.
- * Return:      Nothing
+ * Return:      Pointer to an OPTIONS structure
  * Programmer:  Bill Wendling, 31. October 2001
  * Modifications:
  */
@@ -322,3 +326,22 @@ parse_command_line(int argc, char *argv[])
 
     return cl_opts;
 }
+
+#else /* H5_HAVE_PARALLEL */
+
+/*
+ * Function:    main
+ * Purpose:     Dummy main() function for if HDF5 was configured without
+ *              parallel stuff.
+ * Return:      EXIT_SUCCESS
+ * Programmer:  Bill Wendling, 14. November 2001
+ * Modifications:
+ */
+int
+main(void)
+{
+    printf("No parallel IO performance because parallel is not configured\n");
+    return EXIT_SUCCESS;
+}
+
+#endif /* !H5_HAVE_PARALLEL */

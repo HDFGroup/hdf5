@@ -23,4 +23,12 @@ typedef struct parameters_ {
     unsigned int num_iters;         /* Number of times to loop doing the IO */
 } parameters;
 
+#ifndef SUCCESS
+#define SUCCESS     0
+#endif  /* !SUCCESS */
+
+#ifndef FAIL
+#define FAIL        -1
+#endif  /* !FAIL */
+
 #endif  /* PIO_PERF_H__ */
