@@ -24,6 +24,7 @@
      INTEGER :: external_total_error = 0
      INTEGER :: attribute_total_error = 0
      INTEGER :: identifier_total_error = 0
+     INTEGER :: group_total_error = 0
      CHARACTER*8 error_string
      CHARACTER*8 :: success = ' PASSED '
      CHARACTER*8 :: failure = '*FAILED*'
@@ -198,6 +199,19 @@
      IF (identifier_total_error == 0) error_string = success
      write(*, fmt = '(16a)', advance = 'no') ' Identifier test'     
      write(*, fmt = '(54x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + identifier_total_error 
+
+!     write(*,*)
+!     write(*,*) '========================================='
+!     write(*,*) 'Testing GROUP interface             '
+!     write(*,*) '========================================='
+
+     error_string = failure
+     CALL group_test(group_total_error)
+     IF (group_total_error == 0) error_string = success
+     write(*, fmt = '(11a)', advance = 'no') ' Group test'     
+     write(*, fmt = '(59x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
      total_error = total_error + identifier_total_error 
 
