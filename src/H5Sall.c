@@ -549,7 +549,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 {
     H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
-    hssize_t	file_off;
+    hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
     hssize_t	file_offset[H5S_MAX_RANK];
     hssize_t	mem_offset[H5S_MAX_RANK];
@@ -586,9 +586,11 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	    file_space->extent.u.simple.max[i]) goto fall_through;
 	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
 	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+        mem_off=mem_node->start[i];
 	} /* end if */
 	else {
 	    mem_size=mem_space->extent.u.simple.size[i];
+        mem_off=0;
 	} /* end else */
 	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
 	    file_size=(file_node->end[i]-file_node->start[i])+1;
@@ -601,7 +603,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	if (mem_size!=file_size) goto fall_through;
 	size[i] = file_size;
 	file_offset[i] = file_off;
-	mem_offset[i] = 0;
+	mem_offset[i] = mem_off;
     }
     size[i] = elmt_size;
     file_offset[i] = 0;
@@ -649,7 +651,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 {
     H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
-    hssize_t	file_off;
+    hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
     hssize_t	file_offset[H5S_MAX_RANK];
     hssize_t	mem_offset[H5S_MAX_RANK];
@@ -686,9 +688,11 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	    file_space->extent.u.simple.max[i]) goto fall_through;
 	if(mem_space->select.type==H5S_SEL_HYPERSLABS) {
 	    mem_size=(mem_node->end[i]-mem_node->start[i])+1;
+        mem_off=mem_node->start[i];
 	} /* end if */
 	else {
 	    mem_size=mem_space->extent.u.simple.size[i];
+        mem_off=0;
 	} /* end else */
 	if(file_space->select.type==H5S_SEL_HYPERSLABS) {
 	    file_size=(file_node->end[i]-file_node->start[i])+1;
@@ -701,7 +705,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	if (mem_size!=file_size) goto fall_through;
 	size[i] = file_size;
 	file_offset[i] = file_off;
-	mem_offset[i] = 0;
+	mem_offset[i] = mem_off;
     }
     size[i] = elmt_size;
     file_offset[i] = 0;
