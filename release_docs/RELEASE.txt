@@ -57,6 +57,10 @@ Bug Fixes since HDF5-1.4.2 Release
 ==================================
     * Fixed a bug when reading chunked datasets where the edge of the dataset
       would be incorrectly detected and generate an assertion failure.
+    * Fixed a bug where reading an entire dataset wasn't being handled
+      optimally when the dataset had unlimited dimensions.  Dataset is read
+      in a single low-level I/O now, instead of being broken into separate
+      pieces internally.
 
 
 Documentation
