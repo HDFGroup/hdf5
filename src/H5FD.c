@@ -1757,114 +1757,179 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
      * driver deallocate the memory.
      */
     if (mapped_type>=0) {
+        H5FD_free_t *last;          /* Last merged node */
+        H5FD_free_t *last_prev=NULL;/* Pointer to node before merged node */
         H5FD_free_t *curr;          /* Current free block being inspected */
         H5FD_free_t *prev;          /* Previous free block being inspected */
 
+        /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
+        if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA)
+                && H5F_addr_overlap(addr,size,file->accum_loc,file->accum_size)) {
+            size_t overlap_size;        /* Size of overlap with accumulator */
+
+            /* Check for overlapping the beginning of the accumulator */
+            if(H5F_addr_le(addr,file->accum_loc)) {
+                /* Check for completely overlapping the accumulator */
+                if(H5F_addr_ge(addr+size,file->accum_loc+file->accum_size)) {
+                    /* Reset the entire accumulator */
+                    file->accum_loc=HADDR_UNDEF;
+                    file->accum_size=FALSE;
+                    file->accum_dirty=FALSE;
+                } /* end if */
+                /* Block to free must end within the accumulator */
+                else {
+                    size_t new_accum_size;      /* Size of new accumulator buffer */
+
+                    /* Calculate the size of the overlap with the accumulator, etc. */
+                    overlap_size=(addr+size)-file->accum_loc;
+                    new_accum_size=file->accum_size-overlap_size;
+
+                    /* Move the accumulator buffer information to eliminate the freed block */
+                    HDmemmove(file->meta_accum,file->meta_accum+overlap_size,new_accum_size);
+
+                    /* Adjust the accumulator information */
+                    file->accum_loc+=overlap_size;
+                    file->accum_size=new_accum_size;
+                } /* end else */
+            } /* end if */
+            /* Block to free must start within the accumulator */
+            else {
+                /* Calculate the size of the overlap with the accumulator */
+                overlap_size=(file->accum_loc+file->accum_size)-addr;
+
+                /* Block to free is in the middle of the accumulator */
+                if(H5F_addr_lt(addr,file->accum_loc+file->accum_size)) {
+                    haddr_t tail_addr;
+                    hsize_t tail_size;
+
+                    /* Calculate the address & size of the tail to write */
+                    tail_addr=addr+size;
+                    tail_size=(file->accum_loc+file->accum_size)-tail_addr;
+
+                    /* Write out the part of the accumulator after the block to free */
+                    if (H5FD_write(file, H5FD_MEM_DEFAULT, H5P_DEFAULT, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)
+                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
+                } /* end if */
+
+                /* Adjust the accumulator information */
+                file->accum_size=file->accum_size-overlap_size;
+            } /* end else */
+        } /* end if */
+
         /* Scan through the existing blocks for the mapped type to see if we can extend one */
         curr=file->fl[mapped_type];
-        prev=NULL;
+        last=prev=NULL;
         while(curr!=NULL) {
             /* Check if the block to free adjoins the start of the current block */
             if((addr+size)==curr->addr) {
+                /* If we previously found & merged a node, eliminate it from the list & free it */
+                if(last!=NULL) {
+                    /* Check if there was a previous block in the list */
+                    if(last_prev!=NULL)
+                        /* Eliminate the merged block from the list */
+                        last_prev->next=last->next;
+                    /* No previous block, this must be the head of the list */
+                    else
+                        /* Eliminate the merged block from the list */
+                        file->fl[mapped_type] = last->next;
+
+                    /* Check for eliminating the block before the 'current' one */
+                    if(last==prev)
+                        prev=last_prev;
+
+                    /* Free the memory for the merged block */
+                    H5FL_FREE(H5FD_free_t,last);
+                } /* end if */
+
                 /* Adjust the address and size of the block found */
                 curr->addr=addr;
                 curr->size+=size;
 
-                /* Break out of loop */
-                break;
+                /* Adjust the information about to memory block to include the merged block */
+                addr=curr->addr;
+                size=curr->size;
+
+                /* Update the information about the merged node */
+                last=curr;
+                last_prev=prev;
             } /* end if */
             else {
                 /* Check if the block to free adjoins the end of the current block */
                 if((curr->addr+curr->size)==addr) {
+                    /* If we previously found & merged a node, eliminate it from the list & free it */
+                    if(last!=NULL) {
+                        /* Check if there was a previous block in the list */
+                        if(last_prev!=NULL)
+                            /* Eliminate the merged block from the list */
+                            last_prev->next=last->next;
+                        /* No previous block, this must be the head of the list */
+                        else
+                            /* Eliminate the merged block from the list */
+                            file->fl[mapped_type] = last->next;
+
+                        /* Check for eliminating the block before the 'current' one */
+                        if(last==prev)
+                            prev=last_prev;
+
+                        /* Free the memory for the merged block */
+                        H5FL_FREE(H5FD_free_t,last);
+                    } /* end if */
+
                     /* Adjust the size of the block found */
                     curr->size+=size;
 
-                    /* Break out of loop */
-                    break;
+                    /* Adjust the information about to memory block to include the merged block */
+                    size=curr->size;
+
+                    /* Update the information about the merged node */
+                    last=curr;
+                    last_prev=prev;
                 } /* end if */
-                else {
-                    /* Advance to next node in list */
-                    prev=curr;
-                    curr=curr->next;
-                } /* end else */
             } /* end else */
+
+            /* Advance to next node in list */
+            prev=curr;
+            curr=curr->next;
         } /* end while */
 
         /* Check if we adjusted an existing block */
-        if(curr!=NULL) {
-            H5FD_free_t *merge_curr;  /* Current free block for merging */
-            H5FD_free_t *merge_prev;  /* Previous free block for merging */
-
-
-            /* Scan through the existing blocks for the mapped type to see if we can merge the block we just found */
-            merge_curr=file->fl[mapped_type];
-            merge_prev=NULL;
-            while(merge_curr!=NULL) {
-                /* Check if the found block adjoins the start of the current block */
-                if((curr->addr+curr->size)==merge_curr->addr) {
-                    /* Adjust the size of the block found */
-                    curr->size+=merge_curr->size;
-
-                    /* Break out of loop */
-                    break;
-                } /* end if */
-                else {
-                    /* Check if the found block adjoins the end of the current block */
-                    if((merge_curr->addr+merge_curr->size)==curr->addr) {
-                        /* Adjust the address and size of the block found */
-                        curr->addr=merge_curr->addr;
-                        curr->size+=merge_curr->size;
-
-                        /* Break out of loop */
-                        break;
-                    } /* end if */
-                    else {
-                        /* Advance to next node in list */
-                        merge_prev=merge_curr;
-                        merge_curr=merge_curr->next;
-                    } /* end else */
-                } /* end else */
-            } /* end while */
-
-            /* Check if we merged a block out of existance */
-            if(merge_curr!=NULL) {
-                /* Check if there was a previous block in the list */
-                if(merge_prev!=NULL)
-                    /* Eliminate the merged block from the list */
-                    merge_prev->next=merge_curr->next;
-                /* No previous block, this must be the head of the list */
-                else
-                    /* Eliminate the merged block from the list */
-                    file->fl[mapped_type] = merge_curr->next;
-
-                /* Check for eliminating the block before the 'found' one */
-                if(merge_curr==prev)
-                    prev=merge_prev;
-
-                /* Free the memory for the merged block */
-                H5FL_FREE(H5FD_free_t,merge_curr);
-            } /* end if */
-
+        if(last!=NULL) {
             /* Move the node found to the front, if it wasn't already there */
-            if(prev!=NULL) {
-                prev->next=curr->next;
-                curr->next = file->fl[mapped_type];
-                file->fl[mapped_type] = curr;
+            if(last_prev!=NULL) {
+                last_prev->next=last->next;
+                last->next = file->fl[mapped_type];
+                file->fl[mapped_type] = last;
             } /* end if */
         } /* end if */
         else {
             /* Allocate a new node to hold the free block's information */
-            if(NULL==(curr = H5FL_ALLOC(H5FD_free_t,0)))
+            if(NULL==(last = H5FL_ALLOC(H5FD_free_t,0)))
                 HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate node for free space info");
 
-            curr->addr = addr;
-            curr->size = size;
-            curr->next = file->fl[mapped_type];
-            file->fl[mapped_type] = curr;
+            last->addr = addr;
+            last->size = size;
+            last->next = file->fl[mapped_type];
+            file->fl[mapped_type] = last;
         } /* end else */
 
         /* Check if we increased the size of the largest block on the list */
-        file->maxsize = MAX(file->maxsize, curr->size);
+        file->maxsize = MAX(file->maxsize, last->size);
+
+        /* Check if this free block is at the end of file allocated space.  
+         * Truncate it if this is true. */
+        if(file->cls->get_eoa) {
+            haddr_t     eoa;
+            eoa = file->cls->get_eoa(file);
+            if(eoa == (last->addr+last->size)) {
+                if(file->cls->set_eoa(file, last->addr) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "set end of space allocation request failed");
+                /* Remove this free block from the list */
+                file->fl[mapped_type] = last->next;
+                if(file->maxsize==last->size)
+                    file->maxsize=0; /*unknown*/
+                H5FL_FREE(H5FD_free_t, last);
+            }
+        }    
     } else if (file->cls->free) {
         if ((file->cls->free)(file, type, addr, size)<0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed");
@@ -2567,12 +2632,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 if((addr+size)==file->accum_loc) {
                     /* Check if we need more buffer space */
                     if((size+file->accum_size)>file->accum_buf_size) {
-                        /* Reallocate the metadata accumulator buffer */
-                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size+file->accum_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        /* Adjust the buffer size, by doubling it */
+                        file->accum_buf_size = MAX(file->accum_buf_size*2,size+file->accum_size);
 
-                        /* Note the new buffer size */
-                        file->accum_buf_size=size+file->accum_size;
+                        /* Reallocate the metadata accumulator buffer */
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
                     } /* end if */
 
                     /* Move the existing metadata to the proper location */
@@ -2592,12 +2657,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                 else if(addr==(file->accum_loc+file->accum_size)) {
                     /* Check if we need more buffer space */
                     if((size+file->accum_size)>file->accum_buf_size) {
-                        /* Reallocate the metadata accumulator buffer */
-                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size+file->accum_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        /* Adjust the buffer size, by doubling it */
+                        file->accum_buf_size = MAX(file->accum_buf_size*2,size+file->accum_size);
 
-                        /* Note the new buffer size */
-                        file->accum_buf_size=size+file->accum_size;
+                        /* Reallocate the metadata accumulator buffer */
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
                     } /* end if */
 
                     /* Copy the new metadata to the end */
@@ -2624,12 +2689,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 
                     /* Check if we need more buffer space */
                     if(new_size>file->accum_buf_size) {
-                        /* Reallocate the metadata accumulator buffer */
-                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        /* Adjust the buffer size, by doubling it */
+                        file->accum_buf_size = MAX(file->accum_buf_size*2,new_size);
 
-                        /* Note the new buffer size */
-                        file->accum_buf_size=new_size;
+                        /* Reallocate the metadata accumulator buffer */
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
                     } /* end if */
 
                     /* Calculate the proper offset of the existing metadata */
@@ -2655,12 +2720,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
 
                     /* Check if we need more buffer space */
                     if(new_size>file->accum_buf_size) {
-                        /* Reallocate the metadata accumulator buffer */
-                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
+                        /* Adjust the buffer size, by doubling it */
+                        file->accum_buf_size = MAX(file->accum_buf_size*2,new_size);
 
-                        /* Note the new buffer size */
-                        file->accum_buf_size=new_size;
+                        /* Reallocate the metadata accumulator buffer */
+                        if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer");
                     } /* end if */
 
                     /* Copy the new metadata to the end */

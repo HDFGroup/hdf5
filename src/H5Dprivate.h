@@ -39,7 +39,7 @@
 #define H5D_RESERVED_ATOMS  0
 
 /* Set the minimum object header size to create objects with */
-#define H5D_MINHDR_SIZE 512
+#define H5D_MINHDR_SIZE 256
 
 /* ========  Dataset creation properties ======== */
 /* Definitions for storage layout property */

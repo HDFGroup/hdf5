@@ -76,6 +76,7 @@ typedef struct H5FL_reg_head_t {
  */
 
 #else /* H5_NO_REG_FREE_LISTS */
+#include "H5MMprivate.h"
 #define H5FL_DEFINE(t)  int t##_reg_free_list_placeholder
 #define H5FL_EXTERN(t)  extern int t##_reg_free_list_placeholder
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE(t)

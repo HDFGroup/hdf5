@@ -1531,6 +1531,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     H5D_fill_value_t	fill_status;
     H5P_genplist_t 	*plist;      /* Property list */
     H5P_genplist_t 	*new_plist;  /* New Property list */
+    size_t              ohdr_size=H5D_MINHDR_SIZE;      /* Size of dataset's object header */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL);
 
@@ -1708,6 +1709,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) 
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
             /* remember to check if size is small enough to fit header message */
+            ohdr_size+=new_dset->layout.size;
+
             break;
             
         default:
@@ -1715,7 +1718,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     } /* end switch */
 
     /* Create (open for write access) an object header */
-    if (H5O_create(f, 256, &(new_dset->ent)) < 0)
+    if (H5O_create(f, ohdr_size, &(new_dset->ent)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset object header");
 
     /* Retrieve properties of fill value and others.  Copy them into new fill
