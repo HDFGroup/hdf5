@@ -12,8 +12,8 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TESTS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
-      external shtype links big mtime ragged
-TIMINGS=iopipe chunk
+      external shtype links big mtime
+TIMINGS=iopipe chunk ragged
 
 # Temporary files
 MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \

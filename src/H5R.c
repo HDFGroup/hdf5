@@ -40,6 +40,7 @@ typedef struct H5R_meta_t {
 } H5R_meta_t;
 
 struct H5R_t {
+    H5G_t	*group;		/*the group containing everything	*/
     H5D_t	*meta;		/*ragged meta data array		*/
     H5D_t	*raw;		/*fixed-width raw data			*/
     H5D_t	*over;		/*overflow data				*/
@@ -160,7 +161,7 @@ hid_t
 H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
 {
     H5R_t		*ra=NULL;
-    H5G_t		*loc=NULL;
+    H5G_entry_t		*loc=NULL;
     H5T_t		*type=NULL;
     const H5D_create_t	*plist=NULL;
     hid_t		ret_value=FAIL;
@@ -229,10 +230,10 @@ H5Rcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t plist_id)
  *-------------------------------------------------------------------------
  */
 H5R_t *
-H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
+H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
+	   const H5D_create_t *dcpl)
 {
     H5R_t		*ra = NULL;
-    H5G_t		*grp = NULL;
     H5S_t		*space = NULL;
     hsize_t		cur_dims[2];
     hsize_t		max_dims[2];
@@ -255,7 +256,7 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
     }
 
     /* Create the group to contain the arrays */
-    if (NULL==(grp=H5G_create(loc, name, 0))) {
+    if (NULL==(ra->group=H5G_create(loc, name, 0))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to create container group");
     }
@@ -269,7 +270,8 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to define raw dataset extents");
     }
-    if (NULL==(ra->raw=H5D_create(grp, "raw", type, space, dcpl))) {
+    if (NULL==(ra->raw=H5D_create(H5G_entof(ra->group), "raw", type, space,
+				  dcpl))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to create raw dataset");
     }
@@ -291,7 +293,8 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
     d1_dcpl = *dcpl;
     d1_dcpl.chunk_ndims = 1;
     d1_dcpl.chunk_size[0] = dcpl->chunk_size[0]*dcpl->chunk_size[1];
-    if (NULL==(ra->over=H5D_create(grp, "over", type, space, &d1_dcpl))) {
+    if (NULL==(ra->over=H5D_create(H5G_entof(ra->group), "over", type, space,
+				   &d1_dcpl))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to create overflow dataset");
     }
@@ -314,8 +317,8 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
 				(dcpl->chunk_size[0]*dcpl->chunk_size[1]*
 				 H5T_get_size(type))/
 				H5T_get_size(H5R_meta_type_g));
-    if (NULL==(ra->meta=H5D_create(grp, "meta", H5R_meta_type_g, space,
-				   &d1_dcpl))) {
+    if (NULL==(ra->meta=H5D_create(H5G_entof(ra->group), "meta",
+				   H5R_meta_type_g, space, &d1_dcpl))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
 		    "unable to create meta dataset");
     }
@@ -326,20 +329,13 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
     }
     space = NULL;
 
-    /* Close the group -- we no longer need it */
-    if (H5G_close(grp)<0) {
-	grp = NULL;
-	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
-		    "unable to close ragged array group");
-    }
-    grp = NULL;
     ret_value = ra;
 
  done:
     if (!ret_value) {
-	if (grp) H5G_close(grp);
 	if (space) H5S_close(space);
 	if (ra) {
+	    if (ra->group) H5G_close(ra->group);
 	    if (ra->raw) H5D_close(ra->raw);
 	    if (ra->over) H5D_close(ra->over);
 	    if (ra->meta) H5D_close(ra->meta);
@@ -371,7 +367,7 @@ H5R_create(H5G_t *loc, const char *name, H5T_t *type, const H5D_create_t *dcpl)
 hid_t
 H5Ropen(hid_t loc_id, const char *name)
 {
-    H5G_t	*loc=NULL;
+    H5G_entry_t	*loc=NULL;
     H5R_t	*ra=NULL;
     hid_t	ret_value=FAIL;
     
@@ -421,11 +417,10 @@ H5Ropen(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 H5R_t *
-H5R_open(H5G_t *loc, const char *name)
+H5R_open(H5G_entry_t *loc, const char *name)
 {
     H5R_t	*ra = NULL;
     H5R_t	*ret_value = NULL;
-    H5G_t	*grp=NULL;
     
     FUNC_ENTER(H5R_open, NULL);
 
@@ -440,32 +435,25 @@ H5R_open(H5G_t *loc, const char *name)
     }
 
     /* Open the containing group */
-    if (NULL==(grp=H5G_open(loc, name))) {
+    if (NULL==(ra->group=H5G_open(loc, name))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTOPENOBJ, NULL,
 		    "unable to open container group");
     }
 
     /* Open the datasets */
-    if (NULL==(ra->raw=H5D_open(grp, "raw")) ||
-	NULL==(ra->over=H5D_open(grp, "over")) ||
-	NULL==(ra->meta=H5D_open(grp, "meta"))) {
+    if (NULL==(ra->raw=H5D_open(H5G_entof(ra->group), "raw")) ||
+	NULL==(ra->over=H5D_open(H5G_entof(ra->group), "over")) ||
+	NULL==(ra->meta=H5D_open(H5G_entof(ra->group), "meta"))) {
 	HGOTO_ERROR(H5E_RAGGED, H5E_CANTOPENOBJ, NULL,
 		    "unable to open one or more component datasets");
     }
 
-    /* Close group */
-    if (H5G_close(grp)<0) {
-	grp = NULL;
-	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, NULL,
-		    "unable to close container group");
-    }
-    grp = NULL;
     ret_value = ra;
     
  done:
     if (!ret_value) {
-	if (grp) H5G_close(grp);
 	if (ra) {
+	    if (ra->group) H5G_close(ra->group);
 	    if (ra->raw) H5D_close(ra->raw);
 	    if (ra->over) H5D_close(ra->over);
 	    if (ra->meta) H5D_close(ra->meta);
@@ -540,7 +528,8 @@ H5R_close(H5R_t *ra)
     FUNC_ENTER(H5R_close, FAIL);
 
     assert(ra);
-    if ((ra->raw && H5D_close(ra->raw)<0) ||
+    if ((ra->group && H5G_close(ra->group)<0) ||
+	(ra->raw && H5D_close(ra->raw)<0) ||
 	(ra->over && H5D_close(ra->over)<0) ||
 	(ra->meta && H5D_close(ra->meta)<0)) {
 	HRETURN_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
@@ -1175,3 +1164,26 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     FUNC_LEAVE(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5R_entof
+ *
+ * Purpose:	Return a pointer to the ragged arrays symbol table entry.
+ *
+ * Return:	Success:	Ptr to symbol table entry
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_entry_t *
+H5R_entof(H5R_t *ra)
+{
+    assert(ra);
+    return H5G_entof(ra->group);
+}

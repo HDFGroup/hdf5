@@ -40,7 +40,7 @@
  * Function:	emit_diagnostics
  *
  * Purpose:	If debugging is turned on then this function will cause the
- *		library to emit it's diagnostic messages now instead of when
+ *		library to emit its diagnostic messages now instead of when
  *		we're trying to make the output look nice.
  *
  * Return:	void
@@ -55,9 +55,10 @@
 static void
 emit_diagnostics (void)
 {
-    H5F_t *f = H5F_open (TEST_FILE_NAME0, H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
+    H5F_t *f = H5F_open (TEST_FILE_NAME0,
+			 H5F_ACC_CREAT|H5F_ACC_RDWR|H5F_ACC_TRUNC,
 			 NULL, NULL);
-    H5G_t *g = H5G_create (f->shared->root_grp, "emit", 0);
+    H5G_t *g = H5G_create (H5G_entof(f->shared->root_grp), "emit", 0);
     H5G_close (g);
     H5F_close (f);
 }

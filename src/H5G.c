@@ -75,6 +75,7 @@
 
 /* Packages needed by this file... */
 #include <H5private.h>
+#include <H5Aprivate.h>
 #include <H5Bprivate.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
@@ -83,6 +84,7 @@
 #include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
+#include <H5Rprivate.h>
 
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
@@ -127,7 +129,7 @@ static void H5G_term_interface(void);
 hid_t
 H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
 {
-    H5G_t		   *loc = NULL;
+    H5G_entry_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
     hid_t		    ret_value = FAIL;
 
@@ -179,7 +181,7 @@ H5Gopen(hid_t loc_id, const char *name)
 {
     hid_t	ret_value = FAIL;
     H5G_t	*grp = NULL;
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
 
     FUNC_ENTER(H5Gopen, FAIL);
     H5TRACE2("i","is",loc_id,name);
@@ -278,7 +280,7 @@ herr_t
 H5Gset(hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
 
     FUNC_ENTER(H5Gset, FAIL);
     H5TRACE2("e","is",loc_id,name);
@@ -339,7 +341,7 @@ herr_t
 H5Gpush(hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
 
     FUNC_ENTER(H5Gpush, FAIL);
     H5TRACE2("e","is",loc_id,name);
@@ -403,7 +405,7 @@ H5Gpush(hid_t loc_id, const char *name)
 herr_t
 H5Gpop(hid_t loc_id)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
 
     FUNC_ENTER(H5Gpop, FAIL);
     H5TRACE1("e","i",loc_id);
@@ -414,7 +416,7 @@ H5Gpop(hid_t loc_id)
     }
 
     /* pop */
-    if (H5G_pop(H5G_fileof (loc))<0) {
+    if (H5G_pop(loc->file)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "stack is empty");
     }
     FUNC_LEAVE(SUCCEED);
@@ -455,7 +457,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx,
     int			_idx = 0;
     H5G_bt_ud2_t	udata;
     herr_t		ret_value = FAIL;
-    H5G_t		*loc = NULL;
+    H5G_entry_t		*loc = NULL;
     
     FUNC_ENTER (H5Giterate, FAIL);
     H5TRACE5("e","is*Isxx",loc_id,name,idx,op,op_data);
@@ -566,7 +568,7 @@ herr_t
 H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
 	 const char *new_name)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     
     FUNC_ENTER (H5Glink, FAIL);
     H5TRACE4("e","iGlss",loc_id,type,cur_name,new_name);
@@ -651,7 +653,7 @@ herr_t
 H5Gstat(hid_t loc_id, const char *name, hbool_t follow_link,
 	 H5G_stat_t *statbuf/*out*/)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     
     FUNC_ENTER (H5Gstat, FAIL);
     H5TRACE4("e","isbx",loc_id,name,follow_link,statbuf);
@@ -694,7 +696,7 @@ H5Gstat(hid_t loc_id, const char *name, hbool_t follow_link,
 herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     
     FUNC_ENTER (H5Gget_linkval, FAIL);
     H5TRACE4("e","iszx",loc_id,name,size,buf);
@@ -739,7 +741,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 herr_t
 H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     
     FUNC_ENTER(H5Gset_comment, FAIL);
     H5TRACE3("e","iss",loc_id,name,comment);
@@ -786,7 +788,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     intn	retval = FAIL;
     
     FUNC_ENTER(H5Gget_comment, FAIL);
@@ -1229,7 +1231,7 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 H5G_t *
-H5G_create(H5G_t *loc, const char *name, size_t size_hint)
+H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
 {
     const char	*rest = NULL;		/*the base name			*/
     H5G_entry_t	grp_ent;		/*group containing new group	*/
@@ -1244,8 +1246,7 @@ H5G_create(H5G_t *loc, const char *name, size_t size_hint)
     assert(name && *name);
 
     /* lookup name */
-    if (0 == H5G_namei(H5G_entof(loc), name, &rest, &grp_ent, NULL,
-		       TRUE, NULL)) {
+    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, TRUE, NULL)) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1308,7 +1309,7 @@ H5G_create(H5G_t *loc, const char *name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 H5G_t *
-H5G_open(H5G_t *loc, const char *name)
+H5G_open(H5G_entry_t *loc, const char *name)
 {
     H5G_t		*grp = NULL;
     H5G_t		*ret_value = NULL;
@@ -1621,7 +1622,7 @@ H5G_pop (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_insert(H5G_t *loc, const char *name, H5G_entry_t *ent)
+H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
 {
     const char	*rest = NULL;	/*part of name not existing yet */
     H5G_entry_t	grp;		/*entry for group to contain obj */
@@ -1638,7 +1639,7 @@ H5G_insert(H5G_t *loc, const char *name, H5G_entry_t *ent)
     /*
      * Look up the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(H5G_entof(loc), name, &rest, &grp, NULL, TRUE, NULL) >= 0) {
+    if (H5G_namei(loc, name, &rest, &grp, NULL, TRUE, NULL) >= 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1702,7 +1703,7 @@ H5G_insert(H5G_t *loc, const char *name, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_find(H5G_t *loc, const char *name,
+H5G_find(H5G_entry_t *loc, const char *name,
 	 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/)
 {
     FUNC_ENTER(H5G_find, FAIL);
@@ -1711,8 +1712,7 @@ H5G_find(H5G_t *loc, const char *name,
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(H5G_entof(loc), name, NULL, grp_ent, obj_ent,
-		  TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, TRUE, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1769,8 +1769,8 @@ H5G_fileof (H5G_t *grp)
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc
  *
- * Purpose:	Given a location ID return a group.  The group should not be
- *		closed.
+ * Purpose:	Given an object ID return a symbol table entry for the
+ *		object.
  *
  * Return:	Success:	Group pointer.
  *
@@ -1783,28 +1783,112 @@ H5G_fileof (H5G_t *grp)
  *
  *-------------------------------------------------------------------------
  */
-H5G_t *
+H5G_entry_t *
 H5G_loc (hid_t loc_id)
 {
     H5F_t	*f;
-    H5G_t	*ret_value = NULL;
+    H5G_entry_t	*ret_value = NULL;
+    H5G_t	*group=NULL;
+    H5T_t	*dt=NULL;
+    H5D_t	*dset=NULL;
+    H5A_t	*attr=NULL;
+    H5R_t	*ra=NULL;
 
     FUNC_ENTER (H5G_loc, NULL);
-    
-    if (H5_FILE==H5I_group (loc_id)) {
+
+    switch (H5I_group(loc_id)) {
+    case H5_FILE:
 	if (NULL==(f=H5I_object (loc_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid file ID");
 	}
-	if (NULL==(ret_value=H5G_getcwg (f))) {
+	if (NULL==(group=H5G_getcwg (f))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL,
-			   "unable to get current working directory");
+			   "unable to get current working group");
 	}
-    } else if (H5_GROUP==H5I_group (loc_id)) {
-	if (NULL==(ret_value=H5I_object (loc_id))) {
+	if (NULL==(ret_value=H5G_entof(group))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of c.w.g.");
+	}
+	break;
+
+    case H5_TEMPLATE_0:
+    case H5_TEMPLATE_1:
+    case H5_TEMPLATE_2:
+    case H5_TEMPLATE_3:
+    case H5_TEMPLATE_4:
+    case H5_TEMPLATE_5:
+    case H5_TEMPLATE_6:
+    case H5_TEMPLATE_7:
+#ifndef NDEBUG
+    case H5_TEMPLATE_MAX:
+#endif
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+		      "unable to get symbol table entry of property list");
+	break;
+
+    case H5_GROUP:
+	if (NULL==(group=H5I_object (loc_id))) {
 	    HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, NULL, "invalid group ID");
 	}
-    } else {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, NULL, "not a location");
+	if (NULL==(ret_value=H5G_entof(group))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of group");
+	}
+	break;
+
+    case H5_DATATYPE:
+	if (NULL==(dt=H5I_object(loc_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
+	}
+	if (NULL==(ret_value=H5T_entof(dt))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of data type");
+	}
+	break;
+
+    case H5_DATASPACE:
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+		      "unable to get symbol table entry of data space");
+
+    case H5_DATASET:
+	if (NULL==(dset=H5I_object(loc_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid data ID");
+	}
+	if (NULL==(ret_value=H5D_entof(dset))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of dataset");
+	}
+	break;
+
+    case H5_ATTR:
+	if (NULL==(attr=H5I_object(loc_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "invalid attribute ID");
+	}
+	if (NULL==(ret_value=H5A_entof(attr))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of attribute");
+	}
+	break;
+	    
+    case H5_TEMPBUF:
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+		      "unable to get symbol table entry of buffer");
+    
+    case H5_RAGGED:
+	if (NULL==(ra=H5I_object(loc_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "invalid ragged array ID");
+	}
+	if (NULL==(ret_value=H5R_entof(ra))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
+			  "unable to get symbol table entry of ragged array");
+	}
+	break;
+	
+    case MAXGROUP:
+    case BADGROUP:
+	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 
     FUNC_LEAVE (ret_value);
@@ -1829,7 +1913,7 @@ H5G_loc (hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
+H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	  const char *new_name)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
@@ -1853,8 +1937,7 @@ H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
 	 * Lookup the the new_name so we can get the group which will contain
 	 * the new entry.  The entry shouldn't exist yet.
 	 */
-	if (H5G_namei (H5G_entof(loc), new_name, &rest, &grp_ent, NULL,
-		       TRUE, NULL)>=0) {
+	if (H5G_namei (loc, new_name, &rest, &grp_ent, NULL, TRUE, NULL)>=0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 	}
 	H5E_clear (); /*it's okay that we didn't find it*/
@@ -1956,7 +2039,7 @@ H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
+H5G_stat (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	  H5G_stat_t *statbuf/*out*/)
 {
     H5O_stab_t		stab_mesg;
@@ -1973,8 +2056,8 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
     if (statbuf) HDmemset (statbuf, 0, sizeof *statbuf);
 
     /* Find the object's symbol table entry */
-    if (H5G_namei (H5G_entof(loc), name, NULL, &grp_ent/*out*/,
-		   &obj_ent/*out*/, follow_link, NULL)<0) {
+    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
+		   follow_link, NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
     }
 
@@ -2058,7 +2141,7 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_linkval (H5G_t *loc, const char *name, size_t size, char *buf/*out*/)
+H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
 {
     const char		*s = NULL;
     H5G_entry_t		grp_ent, obj_ent;
@@ -2070,8 +2153,8 @@ H5G_linkval (H5G_t *loc, const char *name, size_t size, char *buf/*out*/)
      * Get the symbol table entry for the link head and the symbol table
      * entry for the group in which the link head appears.
      */
-    if (H5G_namei (H5G_entof(loc), name, NULL, &grp_ent/*out*/,
-		   &obj_ent/*out*/, FALSE, NULL)<0) {
+    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/, FALSE,
+		   NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		       "symbolic link was not found");
     }
@@ -2120,7 +2203,7 @@ H5G_linkval (H5G_t *loc, const char *name, size_t size, char *buf/*out*/)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
+H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
 {
     H5G_entry_t	obj_ent;
     H5O_name_t	comment;
@@ -2128,8 +2211,7 @@ H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
     FUNC_ENTER(H5G_set_comment, FAIL);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(H5G_entof(loc), name, NULL, NULL, &obj_ent/*out*/,
-		  TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, TRUE, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
 
@@ -2169,7 +2251,7 @@ H5G_set_comment(H5G_t *loc, const char *name, const char *buf)
  *-------------------------------------------------------------------------
  */
 intn
-H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf)
+H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 {
     H5O_name_t	comment;
     H5G_entry_t	obj_ent;
@@ -2178,8 +2260,7 @@ H5G_get_comment(H5G_t *loc, const char *name, size_t bufsize, char *buf)
     FUNC_ENTER(H5G_get_comment, FAIL);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(H5G_entof(loc), name, NULL, NULL, &obj_ent/*out*/,
-		  TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, TRUE, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
 

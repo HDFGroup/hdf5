@@ -121,7 +121,7 @@ for comp in $methods; do
 	    gzip -9 <../x.tar >$DEST/hdf5-$VERS.tar.gz;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
-	    bzip2 -9 <../x.tar >$DEST/hdf5-$VERS.tar.gz;;
+	    bzip2 -9 <../x.tar >$DEST/hdf5-$VERS.tar.bz2;;
     esac
 done
 

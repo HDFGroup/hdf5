@@ -101,7 +101,7 @@ main(void)
     hsize_t	size[1] = {2};
     time_t	now;
     struct tm	*tm;
-    H5G_stat_t	sb;
+    H5G_stat_t	sb1, sb2;
     char	buf1[32], buf2[32];
 
     H5Eset_auto(display_error_cb, NULL);
@@ -118,21 +118,37 @@ main(void)
     if (H5Sclose(space)<0) return 1;
     if (H5Fclose(file)<0) return 1;
 
-    /* Open the file and get the modification time */
+    /*
+     * Open the file and get the modification time. We'll test the new
+     * H5Gstat() arguments too: being able to stat something without knowing
+     * its name.
+     */
     if ((file = H5Fopen(FILE_NAME_1, H5F_ACC_RDONLY, H5P_DEFAULT))<0) return 1;
-    if (H5Gstat(file, "dset", TRUE, &sb)<0) return 1;
+    if (H5Gstat(file, "dset", TRUE, &sb1)<0) return 1;
+    if ((dset=H5Dopen(file, "dset"))<0) return 1;
+    if (H5Gstat(dset, ".", TRUE, &sb2)<0) return 1;
+    if (H5Dclose(dset)<0) return 1;
     if (H5Fclose(file)<0) return 1;
 
+    /* Compare times from the two ways of calling H5Gstat() */
+    if (sb1.objno[0]!=sb2.objno[0] || sb1.objno[1]!=sb2.objno[1] ||
+	sb1.mtime!=sb2.mtime) {
+	puts("*FAILED*");
+	puts("   Calling H5Gstat() with the dataset ID returned different");
+	puts("   values than calling it with a file and dataset name.");
+	return 1;
+    }
+    
     /* Compare times -- they must be within 60 seconds of one another */
-    if (0==sb.mtime) {
+    if (0==sb1.mtime) {
 	puts("--SKIP--");
 	puts("   The modification time could not be decoded on this OS.");
 	puts("   Modification times will be mantained in the file bug cannot");
 	puts("   be queried on this system.  See H5O_mtime_decode().");
 	return 1;
-    } else if (fabs(HDdifftime(now, sb.mtime))>60.0) {
+    } else if (fabs(HDdifftime(now, sb1.mtime))>60.0) {
 	puts("*FAILED*");
-	tm = localtime(&(sb.mtime));
+	tm = localtime(&(sb1.mtime));
 	strftime(buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
 	tm = localtime(&now);
 	strftime(buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);

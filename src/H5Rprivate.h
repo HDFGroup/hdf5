@@ -16,12 +16,13 @@
 typedef struct H5R_t H5R_t;
 
 herr_t H5R_close(H5R_t *ra);
-H5R_t *H5R_create(H5G_t *loc, const char *name, H5T_t *type,
+H5R_t *H5R_create(H5G_entry_t *loc, const char *name, H5T_t *type,
 		  const H5D_create_t *dcpl);
-H5R_t *H5R_open(H5G_t *loc, const char *name);
+H5R_t *H5R_open(H5G_entry_t *loc, const char *name);
 herr_t H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		 hsize_t size[], void *buf[]);
 herr_t H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		hsize_t size[], void *buf[]);
+H5G_entry_t *H5R_entof(H5R_t *ra);
 
 #endif

@@ -138,7 +138,7 @@ rand_nelmts(int reset_counters)
 {
     double		p = (rand() % 1000000)/1000000.0;
     double		total = 0.0;
-    size_t		size, i;
+    size_t		size=0, i;
     static size_t	ncalls=0;
 
     if (reset_counters) {
@@ -174,9 +174,9 @@ rand_nelmts(int reset_counters)
 
 
 /*-------------------------------------------------------------------------
- * Function:	ragged_append
+ * Function:	ragged_write_all
  *
- * Purpose:	Writes rows to the end of ragged array RA.
+ * Purpose:	Writes rows to the ragged array RA.
  *
  * Return:	Success:	0
  *
@@ -190,7 +190,7 @@ rand_nelmts(int reset_counters)
  *-------------------------------------------------------------------------
  */
 static int
-ragged_append(hid_t ra, hsize_t rows_at_once)
+ragged_write_all(hid_t ra, hsize_t rows_at_once)
 {
     int			*dd, total_nelmts=0;
     hssize_t		row;			/*current row number	*/
@@ -203,7 +203,7 @@ ragged_append(hid_t ra, hsize_t rows_at_once)
     char		s[64];			/*tempory string buffer	*/
     char		testname[80];
 
-    sprintf(testname, "Testing append, units of %lu",
+    sprintf(testname, "Testing write all, units of %lu",
 	    (unsigned long)rows_at_once);
     printf("%s...\n", testname);
     fflush(stdout);
@@ -276,7 +276,7 @@ ragged_append(hid_t ra, hsize_t rows_at_once)
     
 
 /*-------------------------------------------------------------------------
- * Function:	ragged_readall
+ * Function:	ragged_read_all
  *
  * Purpose:	Reads all rows of a ragged array in row order a few rows at a
  *		time.
@@ -293,7 +293,7 @@ ragged_append(hid_t ra, hsize_t rows_at_once)
  *-------------------------------------------------------------------------
  */
 static int
-ragged_readall(hid_t ra, hsize_t rows_at_once)
+ragged_read_all(hid_t ra, hsize_t rows_at_once)
 {
     int			total_nelmts=0;
     hsize_t		i, j;			/*counters		*/
@@ -403,7 +403,7 @@ ragged_readall(hid_t ra, hsize_t rows_at_once)
 
 
 /*-------------------------------------------------------------------------
- * Function:	ragged_readshort
+ * Function:	ragged_read_short
  *
  * Purpose:	Reads all the data but only the part that is in the `raw'
  *		dataset.  We should see a nice speed increase because we
@@ -422,7 +422,7 @@ ragged_readall(hid_t ra, hsize_t rows_at_once)
  *-------------------------------------------------------------------------
  */
 static int
-ragged_readshort(hid_t ra, hsize_t rows_at_once, hsize_t width)
+ragged_read_short(hid_t ra, hsize_t rows_at_once, hsize_t width)
 {
     int			total_nelmts=0;
     hsize_t		i, j;
@@ -545,7 +545,7 @@ ragged_readshort(hid_t ra, hsize_t rows_at_once, hsize_t width)
     printf("%-70s*FAILED*\n\n", testname);
     return -1;
 }
-    
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -600,9 +600,14 @@ main(int argc, char *argv[])
     if (H5Pclose(dcpl)<0) goto error;
 
     /* The tests */
-    if (ragged_append(ra, rows_at_once)<0) goto error;
-    if (ragged_readall(ra, rows_at_once)<0) goto error;
-    if (ragged_readshort(ra, rows_at_once, ch_size[1])<0) goto error;
+    if (ragged_write_all(ra, rows_at_once)<0) goto error;
+    if (ragged_read_all(ra, rows_at_once)<0) goto error;
+    if (ragged_read_short(ra, rows_at_once, ch_size[1])<0) goto error;
+    
+    /* The tests again */
+    if (ragged_write_all(ra, rows_at_once)<0) goto error;
+    if (ragged_read_all(ra, rows_at_once)<0) goto error;
+    if (ragged_read_short(ra, rows_at_once, ch_size[1])<0) goto error;
     
     /* Conclusions */
     printf("\n\nDistribution of row lengths:\n");

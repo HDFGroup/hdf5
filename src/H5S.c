@@ -77,7 +77,7 @@ H5S_init_interface(void)
 	HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL,
 		      "unable to register one or more conversion functions");
     }
-    
+
 #ifdef HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */

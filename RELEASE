@@ -7,6 +7,24 @@ Release information for hdf5-1.0.23a
 * The compression API has been replaced with a more general filter
   API.  See doc/html/Filters.html for details.
 
+* Alpha-quality 2d ragged arrays, a layer built on top of other hdf5
+  objects.  The API and storage format will almost certainly change.
+
+* More debugging support including API tracing.  See Debugging.html.
+
+* C and Fortran style 8-bit fixed-length character string types are
+  supported with space or null padding or null termination and
+  translations between them.
+
+* Added function H5Fflush() to write all cached data immediately to
+  the file.
+
+* Datasets maintain a modification time which can be retrieved with
+  H5Gstat().
+
+* The h5ls tool can display much more information, including all the
+  values of a dataset.
+
 		    CHANGES SINCE THE FIRST ALPHA
 
 * Two of the packages have been renamed.  The data space API has been

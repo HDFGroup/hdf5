@@ -63,9 +63,9 @@ extern const H5D_create_t H5D_create_dflt;
 extern const H5D_xfer_t H5D_xfer_dflt;
 
 /* Functions defined in H5D.c */
-H5D_t *H5D_create (H5G_t *loc, const char *name, const H5T_t *type,
+H5D_t *H5D_create (H5G_entry_t *loc, const char *name, const H5T_t *type,
 		   const H5S_t *space, const H5D_create_t *create_parms);
-H5D_t *H5D_open (H5G_t *loc, const char *name);
+H5D_t *H5D_open (H5G_entry_t *loc, const char *name);
 herr_t H5D_close (H5D_t *dataset);
 herr_t H5D_read (H5D_t *dataset, const H5T_t *mem_type,
 		 const H5S_t *mem_space, const H5S_t *file_space,

@@ -153,7 +153,6 @@ hid_t
 H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
-    void           	*obj = NULL;
     H5G_entry_t    	*ent = NULL;
     H5T_t		*type = NULL;
     H5S_t		*space = NULL;
@@ -163,25 +162,13 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i","isiii",loc_id,name,type_id,space_id,plist_id);
 
     /* check arguments */
-    if (NULL==(obj=H5I_object (loc_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
-	ent = H5D_entof ((H5D_t*)obj);
-	break;
-    case H5_DATATYPE:
-	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			   "target data type is not committed");
-	}
-	break;
-    case H5_GROUP:
-	ent = H5G_entof ((H5G_t*)obj);
-	break;
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "inappropriate attribute target");
+    if (NULL==(ent=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
@@ -235,10 +222,10 @@ static hid_t
 H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 	   const H5S_t *space)
 {
-    H5A_t       *attr = NULL;
-    H5A_t       found_attr;
-    intn        seq=0;
-    hid_t	    ret_value = FAIL;
+    H5A_t	*attr = NULL;
+    H5A_t	found_attr;
+    intn	seq=0;
+    hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5A_create, FAIL);
 
@@ -400,7 +387,6 @@ hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
     H5G_entry_t    	*ent = NULL;   /*Symtab entry of object to attribute*/
-    void           	*obj = NULL;
     intn            	idx=0;
     hid_t		ret_value = FAIL;
 
@@ -408,25 +394,13 @@ H5Aopen_name(hid_t loc_id, const char *name)
     H5TRACE2("i","is",loc_id,name);
 
     /* check arguments */
-    if(NULL == (obj = H5I_object(loc_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
-	ent = H5D_entof ((H5D_t*)obj);
-	break;
-    case H5_DATATYPE:
-	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			   "target data type is not committed");
-	}
-	break;
-    case H5_GROUP:
-	ent = H5G_entof ((H5G_t*)obj);
-	break;
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "inappropriate attribute target");
+    if (NULL==(ent=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");
@@ -477,32 +451,19 @@ hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
     H5G_entry_t	*ent = NULL;	/*Symtab entry of object to attribute */
-    void        *obj = NULL;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Aopen_idx, FAIL);
     H5TRACE2("i","iIu",loc_id,idx);
 
     /* check arguments */
-    if(NULL == (obj = H5I_object(loc_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
-	ent = H5D_entof ((H5D_t*)obj);
-	break;
-    case H5_DATATYPE:
-	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			   "target data type is not committed");
-	}
-	break;
-    case H5_GROUP:
-	ent = H5G_entof ((H5G_t*)obj);
-	break;
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "inappropriate attribute target");
+    if (NULL==(ent=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
 
     /* Go do the real work for opening the attribute */
@@ -1109,6 +1070,11 @@ H5Anum_attrs(hid_t loc_id)
     H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
+    }
     if(NULL == (obj = H5I_object(loc_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
     }
@@ -1187,7 +1153,6 @@ int
 H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_entry_t		*ent = NULL;	/*symtab ent of object to attribute */
-    void           	*obj = NULL;
     H5A_t          	found_attr;
     intn	        ret_value = 0;
     intn		idx;
@@ -1196,30 +1161,14 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     H5TRACE4("Is","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
-    if(NULL == (obj = H5I_object(loc_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
-	ent = H5D_entof ((H5D_t*)obj);
-	break;
-    case H5_DATATYPE:
-	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			   "target data type is not committed");
-	}
-	break;
-    case H5_GROUP:
-	ent = H5G_entof ((H5G_t*)obj);
-	break;
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "inappropriate attribute target");
+    if (NULL==(ent=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
-    if (!op) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
-    }
-
 
     /*
      * Look up the attribute for the object. Make certain the start point is
@@ -1276,7 +1225,6 @@ H5Adelete(hid_t loc_id, const char *name)
 {
     H5A_t       found_attr;
     H5G_entry_t	*ent = NULL;		/*symtab ent of object to attribute */
-    void        *obj = NULL;
     intn        idx=0, found=-1;
     herr_t	ret_value = FAIL;
 
@@ -1284,25 +1232,13 @@ H5Adelete(hid_t loc_id, const char *name)
     H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */
-    if(NULL == (obj = H5I_object(loc_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "illegal object atom");
+    if (H5_FILE==H5I_group(loc_id) ||
+	H5_ATTR==H5I_group(loc_id)) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "location is not valid for an attribute");
     }
-    switch (H5I_group (loc_id)) {
-    case H5_DATASET:
-	ent = H5D_entof ((H5D_t*)obj);
-	break;
-    case H5_DATATYPE:
-	if (NULL==(ent=H5T_entof ((H5T_t*)obj))) {
-	    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-			   "target data type is not committed");
-	}
-	break;
-    case H5_GROUP:
-	ent = H5G_entof ((H5G_t*)obj);
-	break;
-    default:
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "inappropriate attribute target");
+    if (NULL==(ent=H5G_loc(loc_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
     if (!name || !*name) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name");

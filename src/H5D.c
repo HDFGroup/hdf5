@@ -181,7 +181,7 @@ hid_t
 H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
-    H5G_t		   *loc = NULL;
+    H5G_entry_t		   *loc = NULL;
     H5T_t		   *type = NULL;
     H5S_t		   *space = NULL;
     H5D_t		   *new_dset = NULL;
@@ -253,7 +253,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 hid_t
 H5Dopen(hid_t loc_id, const char *name)
 {
-    H5G_t	*loc = NULL;		/*location holding the dataset	*/
+    H5G_entry_t	*loc = NULL;		/*location holding the dataset	*/
     H5D_t	*dataset = NULL;	/*the dataset			*/
     hid_t	ret_value = FAIL;
 
@@ -813,15 +813,15 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
-	   const H5D_create_t *create_parms)
+H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
+	   const H5S_t *space, const H5D_create_t *create_parms)
 {
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
     intn		i, ndims;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS];
     H5O_efl_t		*efl = NULL;
-    H5F_t		*f = H5G_fileof (loc);
+    H5F_t		*f = loc->file;
 
     FUNC_ENTER(H5D_create, NULL);
 
@@ -1052,15 +1052,12 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_open(H5G_t *loc, const char *name)
+H5D_open(H5G_entry_t *loc, const char *name)
 {
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
     intn	i;
     H5S_t	*space = NULL;
-#ifdef HAVE_PARALLEL
-    H5F_t	*f = NULL;
-#endif
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -1102,9 +1099,8 @@ H5D_open(H5G_t *loc, const char *name)
     }
 
 #ifdef HAVE_PARALLEL
-    f = H5G_fileof (loc);
     /* If MPIO is used, no filter support yet. */
-    if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
+    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
 	dataset->create_parms->pline.nfilters>0){
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
@@ -1160,7 +1156,7 @@ H5D_open(H5G_t *loc, const char *name)
      */
     if (dataset->ent.file->shared->access_parms->driver==H5F_LOW_MPIO &&
 	dataset->layout.type == H5D_CHUNKED &&
-	(f->intent & H5F_ACC_RDWR)){
+	(dataset->ent.file->intent & H5F_ACC_RDWR)){
 	if (H5D_allocate(dataset)==FAIL){
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		"fail in file space allocation dataset");

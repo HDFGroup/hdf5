@@ -893,7 +893,7 @@ H5Tcreate(H5T_class_t type, size_t size)
 hid_t
 H5Topen(hid_t loc_id, const char *name)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     hid_t	ret_value = FAIL;
     
@@ -945,7 +945,7 @@ H5Topen(hid_t loc_id, const char *name)
 herr_t
 H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 {
-    H5G_t	*loc = NULL;
+    H5G_entry_t	*loc = NULL;
     H5T_t	*type = NULL;
     
     FUNC_ENTER (H5Tcommit, FAIL);
@@ -3505,7 +3505,7 @@ H5T_create(H5T_class_t type, size_t size)
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_open (H5G_t *loc, const char *name)
+H5T_open (H5G_entry_t *loc, const char *name)
 {
     H5T_t	*dt = NULL;
     H5G_entry_t	ent;
@@ -3668,7 +3668,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_commit (H5G_t *loc, const char *name, H5T_t *type)
+H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 {
     herr_t	ret_value = FAIL;
     
@@ -3695,7 +3695,7 @@ H5T_commit (H5G_t *loc, const char *name, H5T_t *type)
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if (H5O_create (H5G_fileof (loc), 64, &(type->ent))<0) {
+    if (H5O_create (loc->file, 64, &(type->ent))<0) {
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to create data type object header");
     }
