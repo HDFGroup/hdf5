@@ -2877,8 +2877,8 @@ PARALLEL=${PARALLEL:-no}
 dnl Compiler with version information. This consists of the full path
 dnl name of the compiler and the reported version number.
 AC_SUBST([CC_VERSION])
-if `echo $CC | grep / 2>&1 /dev/null`; then
-  CC_VERSION="$CC"	
+if `echo $CC | grep / >/dev/null 2>&1`; then
+  CC_VERSION="$CC"
 else
   CC_VERSION="$CC";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
