@@ -174,15 +174,22 @@ H5O_dtype_decode_helper(const uint8 **pp, H5T_t *dt)
             dt->u.compnd.memb[i].ndims = *(*pp)++;
             assert(dt->u.compnd.memb[i].ndims <= 4);
             *pp += 3;           /*reserved bytes */
-            for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-                UINT32DECODE(*pp, dt->u.compnd.memb[i].dim[j]);
-            }
+
+	    /* Dimension permutation */
             UINT32DECODE(*pp, perm_word);
             dt->u.compnd.memb[i].perm[0] = (perm_word >> 0) & 0xff;
             dt->u.compnd.memb[i].perm[1] = (perm_word >> 8) & 0xff;
             dt->u.compnd.memb[i].perm[2] = (perm_word >> 16) & 0xff;
             dt->u.compnd.memb[i].perm[3] = (perm_word >> 24) & 0xff;
 	    dt->u.compnd.memb[i].type = H5MM_calloc (sizeof(H5T_t));
+
+	    /* Reserved */
+	    *pp += 4;
+	    
+	    /* Dimension sizes */
+            for (j=0; j<4; j++) {
+                UINT32DECODE(*pp, dt->u.compnd.memb[i].dim[j]);
+            }
 	    if (NULL==dt->u.compnd.memb[i].type) {
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");
@@ -400,23 +407,42 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
          */
         flags = dt->u.compnd.nmembs & 0xffff;
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
+	    /* Name, multiple of eight bytes */
 	    HDstrcpy ((char*)(*pp), dt->u.compnd.memb[i].name);
             n = strlen(dt->u.compnd.memb[i].name);
 	    for (z=n+1; z%8; z++) (*pp)[z] = '\0';
 	    *pp += z;
+
+	    /* Member offset */
             UINT32ENCODE(*pp, dt->u.compnd.memb[i].offset);
+
+	    /* Dimensionality */
             *(*pp)++ = dt->u.compnd.memb[i].ndims;
             assert(dt->u.compnd.memb[i].ndims <= 4);
+
+	    /* Reserved */
             *(*pp)++ = '\0';
             *(*pp)++ = '\0';
             *(*pp)++ = '\0';
-            for (j = 0; j < dt->u.compnd.memb[i].ndims; j++) {
-                UINT32ENCODE(*pp, dt->u.compnd.memb[i].dim[j]);
-            }
+
+	    /* Dimension permutation */
             for (j = 0, perm_word = 0; j < dt->u.compnd.memb[i].ndims; j++) {
                 perm_word |= dt->u.compnd.memb[i].perm[j] << (8 * j);
             }
             UINT32ENCODE(*pp, perm_word);
+
+	    /* Reserved */
+	    UINT32ENCODE(*pp, 0);
+
+	    /* Dimensions */
+            for (j=0; j<dt->u.compnd.memb[i].ndims; j++) {
+                UINT32ENCODE(*pp, dt->u.compnd.memb[i].dim[j]);
+            }
+	    for (/*void*/; j<4; j++) {
+		UINT32ENCODE(*pp, 0);
+	    }
+
+	    /* Subtype */
             if (H5O_dtype_encode_helper(pp, dt->u.compnd.memb[i].type)<0) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL,
                               "can't encode member type");
@@ -597,7 +623,12 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     case H5T_COMPOUND:
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
             ret_value += ((HDstrlen(dt->u.compnd.memb[i].name) + 8) / 8) * 8;
-            ret_value += 12 + dt->u.compnd.memb[i].ndims * 4;
+	    ret_value += 4 +		/*member offset*/
+			 1 +		/*dimensionality*/
+			 3 +		/*reserved*/
+			 4 +		/*permutation*/
+			 4 +		/*reserved*/
+			 16;		/*dimensions*/
             ret_value += H5O_dtype_size(f, dt->u.compnd.memb[i].type);
         }
         break;

@@ -742,6 +742,7 @@ H5F_open(const char *name, uintn flags,
     haddr_t		addr1, addr2;	/*temporary address		*/
     H5G_entry_t		root_ent;	/*root symbol table entry	*/
     const H5F_low_class_t *type = NULL;	/*low-level file driver		*/
+    haddr_t		reserved_addr;	/*reserved address		*/
 
     FUNC_ENTER(H5F_open, NULL);
 
@@ -996,6 +997,7 @@ H5F_open(const char *name, uintn flags,
 	variable_size = H5F_SIZEOF_ADDR(f) +	/*base address */
 			H5F_SIZEOF_ADDR(f) +	/*global free list addr */
 			H5F_SIZEOF_ADDR(f) +	/*logical file size */
+			H5F_SIZEOF_ADDR(f) +	/*reserved address*/
 			H5G_SIZEOF_ENTRY(f);
 	assert(variable_size <= sizeof buf);
 	addr1 = f->shared->boot_addr;
@@ -1009,6 +1011,7 @@ H5F_open(const char *name, uintn flags,
 	H5F_addr_decode(f, &p, &(f->shared->base_addr));
 	H5F_addr_decode(f, &p, &(f->shared->freespace_addr));
 	H5F_addr_decode(f, &p, &(f->shared->hdf5_eof));
+	H5F_addr_decode(f, &p, &reserved_addr);
 	if (H5G_ent_decode(f, &p, &root_ent) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
 			"unable to read root symbol entry");
@@ -1311,8 +1314,9 @@ H5Fopen (const char *filename, unsigned flags, hid_t access_id)
 static herr_t
 H5F_flush(H5F_t *f, hbool_t invalidate)
 {
-    uint8		    buf[2048], *p = buf;
-
+    uint8		buf[2048], *p = buf;
+    haddr_t		reserved_addr;
+    
     FUNC_ENTER(H5F_flush, FAIL);
 
     /*
@@ -1357,6 +1361,8 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     H5F_addr_encode(f, &p, &(f->shared->base_addr));
     H5F_addr_encode(f, &p, &(f->shared->freespace_addr));
     H5F_addr_encode(f, &p, &(f->shared->hdf5_eof));
+    H5F_addr_undef(&reserved_addr);
+    H5F_addr_encode(f, &p, &reserved_addr);
     H5G_ent_encode(f, &p, H5G_entof(f->shared->root_grp));
 
     /* update file length if necessary */

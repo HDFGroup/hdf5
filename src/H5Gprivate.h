@@ -38,7 +38,7 @@
 /*
  * The disk size for a symbol table entry...
  */
-#define H5G_SIZEOF_SCRATCH      24
+#define H5G_SIZEOF_SCRATCH      16
 #define H5G_SIZEOF_ENTRY(F)                                                   \
    (H5F_SIZEOF_SIZE(F) +        /*offset of name into heap              */    \
     H5F_SIZEOF_ADDR(F) +        /*address of object header              */    \
