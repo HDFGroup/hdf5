@@ -12,27 +12,29 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Pedro Vicente, pvn@ncsa.uiuc.edu
- *              Monday, 4. November 2002
- */
 #ifndef H5TRAV_H__
 #define H5TRAV_H__
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "hdf5.h"
 
 
-/*struct to store name and type of an object */
+/*-------------------------------------------------------------------------
+ * struct to store name and type of an object
+ *-------------------------------------------------------------------------
+ */
+
 typedef struct info_t {
 	char *name;
 	int type;
 } info_t;
 
 
-/*struct to store basic info about an object */
+
+/*-------------------------------------------------------------------------
+ * struct to store basic info about an object
+ *-------------------------------------------------------------------------
+ */
+
 typedef struct obj_t {
     haddr_t objno;
     unsigned flags[2];
@@ -41,7 +43,12 @@ typedef struct obj_t {
     int type;
 } obj_t;
 
-/*struct that stores all objects, excluding shared objects */
+
+/*-------------------------------------------------------------------------
+ * struct that stores all objects, excluding shared objects
+ *-------------------------------------------------------------------------
+ */
+
 typedef struct table_t {
 	int size;
 	int nobjs;
@@ -49,23 +56,34 @@ typedef struct table_t {
 } table_t;
 
 
-/* public methods */
-int H5get_object_info( hid_t file_id, info_t *info );
+/*-------------------------------------------------------------------------
+ * "info" public functions
+ *-------------------------------------------------------------------------
+ */
 
-/* table methods */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int H5get_object_info( hid_t file_id, info_t *info );
+int info_getindex( const char *obj, int nobjs, info_t *info );
+void info_free(info_t *info, int nobjs);
+
+#ifdef __cplusplus
+}
+#endif
+
+/*-------------------------------------------------------------------------
+ * table private functions
+ *-------------------------------------------------------------------------
+ */
+
 void table_init(table_t **table);
 void table_free(table_t *table);
 int  table_search_obj(haddr_t objno, table_t *table );
 void table_add_obj(haddr_t objno, char *objname, int type, table_t *table);
 void table_add_flags(unsigned *flags, char *objname, int type, table_t *table);
-void info_free(info_t *info, int nobjs);
 
-
-
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif  /* H5TRAV_H__ */

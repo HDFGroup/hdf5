@@ -12,24 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "hdf5.h"
 #include "h5trav.h"
-#include "H5private.h"
+#include "H5private.h" 
 
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-#ifndef FAIL
-#define FAIL -1
-#endif
 
 /* functions for traversal */
 int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info, int *idx );
@@ -74,6 +61,71 @@ int H5get_object_info( hid_t file_id, info_t *info )
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function: info_getindex
+ *
+ * Purpose: get index of OBJ in list
+ *
+ * Return: index, -1 if not found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int info_getindex( const char *obj, int nobjs, info_t *info )
+{
+ char *pdest;
+ int  result;
+ int  i;
+
+ for ( i = 0; i < nobjs; i++) 
+ {
+  if ( strcmp(obj,info[i].name)==0 )
+   return i;
+
+  pdest  = strstr( info[i].name, obj );
+  result = (int)(pdest - info[i].name);
+
+  /* found at position 1, meaning without '/' */
+  if( pdest != NULL && result==1 )
+   return i;
+ }
+ return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: info_free
+ *
+ * Purpose: free info memory
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void info_free( info_t *info, int nobjs )
+{
+ int i;
+	if ( info )
+	{
+		for ( i = 0; i < nobjs; i++)
+		{
+			if (info[i].name)
+		 	HDfree( info[i].name );
+		}
+		HDfree(info);
+	}
+}
+
+
 /*-------------------------------------------------------------------------
  * Function: count_objects
  *
@@ -95,7 +147,7 @@ static herr_t count_objects( hid_t loc_id, const char *name, void *op_data)
 
  H5G_stat_t statbuf;
 
- if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
+ if (H5Gget_objinfo( loc_id, name, 0, &statbuf) < 0 )
   return 1;
 
  (*(int *)op_data)++;
@@ -158,7 +210,7 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
 
  H5G_stat_t statbuf;
 
- if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
+ if (H5Gget_objinfo( loc_id, name, 0, &statbuf) < 0 )
   return -1;
 
  ((info_t *)op_data)->type = statbuf.type;
@@ -244,7 +296,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    return -1;
  
   /* allocate path buffer */
-  path = (char*) malloc(strlen(group_name) + strlen(name) + 2);
+  path = (char*) HDmalloc(strlen(group_name) + strlen(name) + 2);
   
   /* initialize path */
   strcpy( path, group_name );
@@ -256,7 +308,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
   H5E_BEGIN_TRY {
 
   /* get info */
-  H5Gget_objinfo( loc_id, path, TRUE, &statbuf);
+  H5Gget_objinfo( loc_id, path, 1, &statbuf);
   } H5E_END_TRY;
 
   /* add to array */
@@ -282,7 +334,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == FAIL)
+   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
    {
     /* add object to table */
     table_add_obj(statbuf.objno, path, H5G_GROUP, table );
@@ -322,7 +374,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == FAIL)
+   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
    {
     /* add object to table */
     table_add_obj(statbuf.objno, path, H5G_DATASET, table );
@@ -360,7 +412,7 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == FAIL)
+   if (statbuf.nlink > 0  && table_search_obj(statbuf.objno, table ) == -1)
    {
     /* add object to table */
     table_add_obj(statbuf.objno, path, H5G_TYPE, table );
@@ -393,232 +445,15 @@ int traverse( hid_t loc_id, const char *group_name, table_t *table, info_t *info
    */
   
   if ( name )
-   free( name );
+   HDfree( name );
   
   if ( path )
-   free( path );
+   HDfree( path );
   
  } /* i */
  
  
  
  return inserted_objs;
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: table_search_obj
- *
- * Purpose: 
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-int table_search_obj(haddr_t objno, table_t *table )
-{
- int i;
- 
- for (i = 0; i < table->nobjs; i++)
-  if (table->objs[i].objno == objno)
-   return i;
-  
-  return FAIL;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: table_add_obj
- *
- * Purpose: 
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-void
-table_add_obj(haddr_t objno, char *objname, int type, table_t *table)
-{
- int i;
- 
- if (table->nobjs == table->size) {
-  table->size *= 2;
-  table->objs = (obj_t*)realloc(table->objs, table->size * sizeof(obj_t));
-  
-  for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno = 0;
-   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
-   table->objs[i].displayed = 0;
-   table->objs[i].type = H5G_UNKNOWN;
-   table->objs[i].objname = NULL;
-  }
- }
- 
- i = table->nobjs++;
- table->objs[i].objno = objno;
- table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
- free(table->objs[i].objname);
- table->objs[i].objname = (char *)HDstrdup(objname);
- table->objs[i].type = type;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: table_add_flags
- *
- * Purpose: 
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-void
-table_add_flags(unsigned *flags, char *objname, int type, table_t *table)
-{
- int i;
- 
- if (table->nobjs == table->size) {
-  table->size *= 2;
-  table->objs = (obj_t*)realloc(table->objs, table->size * sizeof(obj_t));
-  
-  for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno = 0;
-   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
-   table->objs[i].displayed = 0;
-   table->objs[i].type = H5G_UNKNOWN;
-   table->objs[i].objname = NULL;
-  }
- }
- 
- i = table->nobjs++;
- table->objs[i].objno = 0;
- table->objs[i].flags[0] = flags[0];
- table->objs[i].flags[1] = flags[1];
- free(table->objs[i].objname);
- table->objs[i].objname = (char *)HDstrdup(objname);
- table->objs[i].type = type;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: table_init
- *
- * Purpose: 
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-void table_init( table_t **tbl )
-{
- int i;
- table_t* table = (table_t*) malloc(sizeof(table_t));
- 
- table->size = 20;
- table->nobjs = 0;
- table->objs = (obj_t*) malloc(table->size * sizeof(obj_t));
- 
- for (i = 0; i < table->size; i++) {
-  table->objs[i].objno = 0;
-  table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
-  table->objs[i].displayed = 0;
-  table->objs[i].type = H5G_UNKNOWN;
-  table->objs[i].objname = NULL;
- }
- 
- *tbl = table;
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: table_free
- *
- * Purpose: free table memory
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-void table_free( table_t *table )
-{
- int i;
-
- for ( i = 0; i < table->nobjs; i++)
-  free( table->objs[i].objname );
-
- free(table->objs);
- free(table);
-
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: info_free
- *
- * Purpose: free info memory
- *
- *-------------------------------------------------------------------------
- */
-
-void info_free( info_t *info, int nobjs )
-{
- int i;
-	if ( info )
-	{
-		for ( i = 0; i < nobjs; i++)
-		{
-			if (info[i].name)
-		 	free( info[i].name );
-		}
-		free(info);
-	}
-
 }
 

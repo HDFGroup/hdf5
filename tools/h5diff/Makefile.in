@@ -48,10 +48,11 @@ MOSTLYCLEAN=*.h5
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5diff.c h5trav.c h5difftst.c
+PROG_SRC=h5diff.c h5diff_array.c h5diff_dset.c h5diff_main.c h5diff_util.c h5trav.c h5trav_table.c test_h5diff.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
+OBJS=h5diff.lo h5diff_array.lo h5diff_dset.lo h5diff_main.lo h5diff_util.lo h5trav.lo h5trav_table.lo	
 
-PRIVATE_HDR=h5trav.h
+PRIVATE_HDR=h5trav.h h5diff.h
 
 ## Source and object files for the tests
 ##
@@ -67,11 +68,11 @@ check test _test: $(PROGS)
 ##
 $(PROGS): $(LIBHDF5)
 
-h5diff: h5diff.lo h5trav.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5diff.lo h5trav.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5diff: $(OBJS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(OBJS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h5difftst: h5difftst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5difftst.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h5difftst: test_h5diff.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_h5diff.lo $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 
 @CONCLUDE@
