@@ -615,7 +615,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, void *driver_info)
+H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
     void *copied_driver_info;           /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -733,7 +733,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, void *driver_info)
+H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
 {
     void *copied_driver_info;           /* Temporary VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
