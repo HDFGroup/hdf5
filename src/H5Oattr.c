@@ -10,10 +10,6 @@
 *                                                                          *
 ****************************************************************************/
 
-#ifdef RCSID
-static char             RcsId[] = "@(#)$Revision$";
-#endif
-
 /* $Id$ */
 
 #define H5A_PACKAGE         /*prevent warning from including H5Tpkg.h */

@@ -10,10 +10,6 @@
 *									                                        *
 ****************************************************************************/
 
-#ifdef RCSID
-static char		RcsId[] = "@(#)$Revision$";
-#endif
-
 /* $Id$ */
 
 /* Private header files */

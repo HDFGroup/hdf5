@@ -5,9 +5,6 @@
  * Programmer:	Robb Matzke <matzke@llnl.gov>
  *		Tuesday, March 31, 1998
  */
-#ifdef RCSID
-static char		RcsId[] = "@(#)$Revision$";
-#endif
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
