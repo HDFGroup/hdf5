@@ -298,7 +298,9 @@ H5V_hyper_fill (size_t n, const size_t *_size,
    size_t	dst_start;		/*byte offset to start of stride*/
    size_t	elmt_size=1;		/*bytes per element		*/
    herr_t	status;			/*function return status	*/
+#ifndef NDEBUG
    int		i;
+#endif
 
    FUNC_ENTER (H5V_hyper_fill, NULL, FAIL);
 
@@ -382,7 +384,9 @@ H5V_hyper_copy (size_t n, const size_t *_size,
    size_t	dst_start, src_start;		/*offset to start at	*/
    size_t	elmt_size=1;			/*element size in bytes	*/
    herr_t	status;				/*return status		*/
+#ifndef NDEBUG
    intn		i;
+#endif
 
    FUNC_ENTER (H5V_hyper_copy, NULL, FAIL);
 

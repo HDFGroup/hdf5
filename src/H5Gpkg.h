@@ -176,7 +176,7 @@ herr_t H5G_shadow_close (H5F_t *f, H5G_entry_t *ent);
 hbool_t H5G_shadow_p (H5G_entry_t *ent);
 herr_t H5G_shadow_dissociate (H5G_entry_t *ent);
 herr_t H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym,
-			      H5G_ac_ud1_t *ac_udata);
+			      const H5G_ac_ud1_t *ac_udata);
 H5G_shadow_t *H5G_shadow_list (H5F_t *f, haddr_t stab_header_addr);
 herr_t H5G_shadow_move (H5F_t *f, H5G_shadow_t *shadow,
 			const char *new_name, H5G_entry_t *new_entry,

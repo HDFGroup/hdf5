@@ -267,7 +267,7 @@ H5G_stab_insert (H5F_t *f, H5G_entry_t *self, const char *name,
    if (H5AC_unprotect (f, H5AC_SNODE, udata.node_addr, udata.node_ptr)<0) {
       HRETURN_ERROR (H5E_SYM, H5E_PROTECT, NULL); /*can't unprotect*/
    }
-
+      
    /* update the name offset in the entry */
    ent->name_off = udata.entry.name_off;
    FUNC_LEAVE (udata.entry_ptr);

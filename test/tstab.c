@@ -238,6 +238,7 @@ test_2 (void)
    CHECK (fid, FAIL, "H5Fcreate");
    f = H5Aatom_object (fid);
    CHECK (f, NULL, "H5Aatom_object");
+   f->intent |= H5F_ACC_DEBUG;
 
    /*
     * Create a directory that has so many entries that the root

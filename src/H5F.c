@@ -1191,13 +1191,14 @@ H5F_close (H5F_t *f)
    herr_t	ret_value = FAIL;
 
    FUNC_ENTER (H5F_close, H5F_init_interface, FAIL);
-   
+
    if (-2==(ret_value=H5F_flush (f, TRUE))) {
       /*objects are still open, but don't fail yet*/
    } else if (ret_value<0) {
       /*can't flush cache*/
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
    }
+   if (f->intent & H5F_ACC_DEBUG) H5AC_debug (f);
    H5F_low_close (f->shared->file_handle);
    H5F_dest (f);
 

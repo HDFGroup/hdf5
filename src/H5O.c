@@ -26,7 +26,8 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh);
-static H5O_t *H5O_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2);
+static H5O_t *H5O_load (H5F_t *f, haddr_t addr, const void *_udata1,
+			void *_udata2);
 static intn H5O_find_in_ohdr (H5F_t *f, haddr_t addr,
 			      const H5O_class_t **type_p, intn sequence);
 static intn H5O_alloc (H5F_t *f, H5O_t *oh, const H5O_class_t *type,
@@ -36,7 +37,8 @@ static intn H5O_alloc_new_chunk (H5F_t *f, H5O_t *oh, size_t size);
 
 /* H5O inherits cache-like properties from H5AC */
 static const H5AC_class_t H5AC_OHDR[1] = {{
-   (void*(*)(H5F_t*,haddr_t,void*,void*))H5O_load,
+   H5AC_OHDR_ID,
+   (void*(*)(H5F_t*,haddr_t,const void*,void*))H5O_load,
    (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5O_flush,
 }};
 
@@ -165,7 +167,7 @@ H5O_new (H5F_t *f, intn nlink, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5O_t *
-H5O_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2)
+H5O_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
 {
    H5O_t	*oh = NULL;
    H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/

@@ -108,8 +108,11 @@ H5F_low_close (H5F_low_t *lf)
 {
    FUNC_ENTER (H5F_low_close, NULL, NULL);
 
-   if (lf && (lf->type->close)(lf)<0) {
-      HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, NULL); /*close failed*/
+   if (lf) {
+      if ((lf->type->close)(lf)<0) {
+	 H5MM_xfree (lf);
+	 HRETURN_ERROR (H5E_IO, H5E_CLOSEERROR, NULL); /*close failed*/
+      }
       H5MM_xfree (lf);
    }
 

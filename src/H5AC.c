@@ -36,7 +36,9 @@
  * accesses protected objects.  NDEBUG must not be defined in order for
  * this to have any effect.
  */
-/* #define H5AC_DEBUG_PROTECT */
+#ifdef NDEBUG
+#  undef H5AC_DEBUG
+#endif
 
 /*
  * Private file-scope variables.
@@ -120,7 +122,7 @@ H5AC_dest (H5F_t *f)
       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
    }
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    {
       intn	i;
       for (i=0; i<cache->nslots; i++) {
@@ -151,7 +153,7 @@ H5AC_dest (H5F_t *f)
  *		call to an H5AC function (if you want a pointer which is valid
  *		indefinately then see H5AC_protect()).
  *
- * 		If H5AC_DEBUG_PROTECT is defined then this function also
+ * 		If H5AC_DEBUG is defined then this function also
  *		checks that the requested object is not currently
  *		protected since it is illegal to modify a protected object
  *		except through the pointer returned by H5AC_protect().
@@ -174,11 +176,15 @@ H5AC_dest (H5F_t *f)
  *	what type of object is at the address and calls this function with
  *	various type identifiers until one succeeds (cf., the debugger).
  *
+ * 	Robb Matzke, 30 Oct 1997
+ *	Keeps track of hits, misses, and flushes per object type so we have
+ *	some cache performance diagnostics.
+ *
  *-------------------------------------------------------------------------
  */
 void *
 H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-	     void *udata1, void *udata2)
+	     const void *udata1, void *udata2)
 {
    unsigned	idx;
    herr_t	status;
@@ -202,8 +208,10 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     * Return right away if the item is in the cache.
     */
    if (slot->type==type && slot->addr==addr) {
+      cache->diagnostics[type->id].nhits++;
       HRETURN (slot->thing);
    }
+   cache->diagnostics[type->id].nmisses++;
 
    /*
     * Fail if the item in the cache is at the correct address but is
@@ -213,7 +221,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
       HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
    }
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    /*
     * Check that the requested thing isn't protected, for protected things
     * can only be modified through the pointer already handed out by the
@@ -251,6 +259,7 @@ H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 	 }
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL);
       }
+      cache->diagnostics[slot->type->id].nflushes++;
    }
 
    /*
@@ -396,6 +405,7 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
 	       map = H5MM_xfree (map);
 	       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
 	    }
+	    cache->diagnostics[slot->type->id].nflushes++;
 	    if (destroy) slot->type = NULL;
 	 }
       }
@@ -420,6 +430,7 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
       if (status<0) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
       }
+      cache->diagnostics[cache->slot[i].type->id].nflushes++;
       if (destroy) cache->slot[i].type = NULL;
 
    }
@@ -435,7 +446,7 @@ H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
  *		exist on disk yet, but it must have an address and disk
  *		space reserved.
  *
- * 		If H5AC_DEBUG_PROTECT is defined then this function checks
+ * 		If H5AC_DEBUG is defined then this function checks
  *		that the object being inserted isn't a protected object.
  *
  * Return:	Success:	SUCCEED
@@ -469,9 +480,9 @@ H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
    assert (thing);
    idx = H5AC_HASH (f, addr);
    cache = f->shared->cache;
-   slot =cache->slot + idx;
+   slot = cache->slot + idx;
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    {
       intn i;
       for (i=0; i<slot->nprots; i++) {
@@ -486,11 +497,13 @@ H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
       if (status<0) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
       }
+      cache->diagnostics[slot->type->id].nflushes++;
    }
 
    slot->type = type;
    slot->addr = addr;
    slot->thing = thing;
+   cache->diagnostics[type->id].ninits++;
 
    FUNC_LEAVE (SUCCEED);
 }
@@ -502,7 +515,7 @@ H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
  * Purpose:	Use this function to notify the cache that an object's
  *		file address changed.
  *
- * 		If H5AC_DEBUG_PROTECT is defined then this function checks
+ * 		If H5AC_DEBUG is defined then this function checks
  *		that the old and new addresses don't correspond to the
  *		address of a protected object.
  *
@@ -538,7 +551,7 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
    new_idx = H5AC_HASH (f, new_addr);
    cache = f->shared->cache;
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    {
       int i;
 
@@ -574,6 +587,7 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
       if (status<0) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
       }
+      cache->diagnostics[cache->slot[new_idx].type->id].nflushes++;
    }
 
    /*
@@ -599,7 +613,7 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
  * 		The caller must call H5AC_unprotect() when finished with
  *		the pointer.
  *
- * 		If H5AC_DEBUG_PROTECT is defined then we check that the
+ * 		If H5AC_DEBUG is defined then we check that the
  *		requested object isn't already protected.
  *
  * Return:	Success:	Ptr to the object.
@@ -616,12 +630,19 @@ H5AC_rename (H5F_t *f, const H5AC_class_t *type,
  */
 void *
 H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-	      void *udata1, void *udata2)
+	      const void *udata1, void *udata2)
 {
    int		idx;
    void		*thing = NULL;
    H5AC_t	*cache = NULL;
    H5AC_slot_t	*slot = NULL;
+
+#ifdef H5AC_DEBUG
+   static	ncalls = 0;
+   if (0==ncalls++) {
+      fprintf (stderr, "HDF5-DIAG: debugging cache (expensive)\n");
+   }
+#endif
    
    FUNC_ENTER (H5AC_protect, NULL, NULL);
 
@@ -639,6 +660,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
       /*
        * The object is already cached; simply remove it from the cache.
        */
+      cache->diagnostics[slot->type->id].nhits++;
       thing = slot->thing;
       slot->type = NULL;
       slot->addr = 0;
@@ -651,7 +673,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
       HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
 	      
    } else {
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
       /*
        * Check that the requested thing isn't protected, for protected things
        * can only be modified through the pointer already handed out by the
@@ -667,12 +689,13 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
        * Load a new thing.  If it can't be loaded, then return an error
        * without preempting anything.
        */
+      cache->diagnostics[type->id].nmisses++;
       if (NULL==(thing=(type->load)(f, addr, udata1, udata2))) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
       }
    }
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    /*
     * Add the protected object to the protect debugging fields of the
     * cache.
@@ -701,7 +724,7 @@ H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
  *		same as the corresponding call to H5AC_protect() and the
  *		THING argument should be the value returned by H5AC_protect().
  *
- * 		If H5AC_DEBUG_PROTECT is defined then this function fails
+ * 		If H5AC_DEBUG is defined then this function fails
  *		if the TYPE and ADDR arguments are not what was used when the
  *		object was protected or if the object was never protected.
  *
@@ -750,9 +773,10 @@ H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
       if (status<0) {
 	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
       }
+      cache->diagnostics[slot->type->id].nflushes++;
    }
 
-#if defined(H5AC_DEBUG_PROTECT) && !defined(NDEBUG)
+#ifdef H5AC_DEBUG
    /*
     * Remove the object's protect data to indicate that it is no longer
     * protected.
@@ -779,6 +803,75 @@ H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
    slot->addr = addr;
    slot->thing = thing;
    cache->nprots -= 1;
+
+   FUNC_LEAVE (SUCCEED);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5AC_debug
+ *
+ * Purpose:	Prints debugging info about the cache.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, October 30, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_debug (H5F_t *f)
+{
+   H5AC_subid_t	i;
+   char		s[32];
+   H5AC_t	*cache = f->shared->cache;
+   double	miss_rate;
+
+   FUNC_ENTER (H5AC_debug, NULL, FAIL);
+
+   fprintf (stderr, "HDF5-DIAG: cache diagnostics for %s\n", f->name);
+   fprintf (stderr, "   %18s  %8s %8s %8s %8s+%-8s\n",
+	    "", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+   
+   for (i=0; i<H5AC_NTYPES; i++) {
+
+      switch (i) {
+      case H5AC_BT_ID:
+	 strcpy (s, "B-tree nodes");
+	 break;
+      case H5AC_SNODE_ID:
+	 strcpy (s, "symbol table nodes");
+	 break;
+      case H5AC_HEAP_ID:
+	 strcpy (s, "heaps");
+	 break;
+      case H5AC_OHDR_ID:
+	 strcpy (s, "object headers");
+	 break;
+      default:
+	 sprintf (s, "unknown id %d", i);
+      }
+
+      if (cache->diagnostics[i].nhits) {
+	 miss_rate = 100.0 * cache->diagnostics[i].nmisses /
+		     cache->diagnostics[i].nhits;
+      } else {
+	 miss_rate = 0.0;
+      }
+
+      fprintf (stderr, "   %18s: %8d %8d %7.2f%% %8d%+-9d\n", s,
+	       cache->diagnostics[i].nhits,
+	       cache->diagnostics[i].nmisses,
+	       miss_rate,
+	       cache->diagnostics[i].ninits,
+	       cache->diagnostics[i].nflushes-cache->diagnostics[i].ninits);
+   }
 
    FUNC_LEAVE (SUCCEED);
 }

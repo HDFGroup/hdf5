@@ -1,17 +1,51 @@
+#!/bin/sh
 # Site configuration -- do not distribute this file.
 
-CFLAGS_WARN="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 
-CFLAGS_DEBUG="-g -DH5AC_DEBUG_PROTECT -DH5F_LOW_DFLT=H5F_LOW_STDIO -DH5F_OPT_SEEK=1 -fverbose-asm"
-CFLAGS_PROFILE="-pg"
-CFLAGS_PRODUCTION="-O3 -UH5AC_DEBUG_PROTECT -DNDEBUG -DH5F_LOW_DFLT=H5F_LOW_STDIO -DH5F_OPT_SEEK=1 -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
+# Based on the setting of environment variable `HDF5_MODE' we set the
+# compiler flags unless they're already set.  Its value can be one or
+# more of the following words:
+#
+#	$warn	    -- Generates compiler warnings.  You should always
+#	               include this since it has no effect on the speed of
+#	               the code produced.
+#
+#	$debug      -- Compiles in code to check for invariant conditions
+#	               and turns on the `-g' flag for interactive
+#	               debugging.  It also turns off seek optimizations in
+#                      the low-level file driver.  This version of the
+#                      library can be significantly slower than a production
+#                      version.
+#
+#       $production -- Compiles an optimized version of the library
+#       	       and disables code that checks for invariant
+#       	       conditions.  It also turns on various optimizations
+#                      such as seek optimizations in the low level file
+#                      driver.
+#
+#       $profile    -- Compiles code with the `-pg' flag which
+#       	       produces a `gmon.out' file when the library
+#       	       runs. The gprof(1) command can read that file
+#       	       and produce detailed run-time statistics.
+#
+# If HDF5_MODE is undefined then we use the value 
+#
+#	$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2
+#
 
-if test "x$CFLAGS" = "x"; then
 
-   # Uncomment the following line for a production version of the library.
-   #CFLAGS="-pipe $CFLAGS_PRODUCTION $CFLAGS_WARN"
+warn="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
 
-   # Uncomment the following line for normal development
-   CFLAGS="-pipe $CFLAGS_DEBUG $CFLAGS_WARN"
+profile="-pg"
+
+debug="-g -DH5AC_DEBUG -DH5B_DEBUG -DH5F_OPT_SEEK=0 -fverbose-asm"
+
+production="-O3 -DNDEBUG -DH5F_OPT_SEEK=1 -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
+
+default_mode='$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2'
+
+# Don't set CFLAGS if the user already did.
+if test -z "$CFLAGS"; then
+   CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
+   export CFLAGS
 fi
-

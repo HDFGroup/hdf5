@@ -38,8 +38,18 @@
  *		function is also responsible for freeing memory allocated
  *		by the LOAD method if the DEST argument is non-zero.
  */
+typedef enum H5AC_subid_t {
+   H5AC_BT_ID		=0,		/*B-tree nodes			*/
+   H5AC_SNODE_ID	=1,		/*symbol table nodes		*/
+   H5AC_HEAP_ID		=2,		/*object or name heap		*/
+   H5AC_OHDR_ID		=3,		/*object header			*/
+   H5AC_NTYPES		=4  /*THIS MUST BE LAST!*/
+} H5AC_subid_t;
+
 typedef struct H5AC_class_t {
-   void		*(*load)(H5F_t*, haddr_t addr, void *udata1, void *udata2);
+   H5AC_subid_t	id;
+   void		*(*load)(H5F_t*, haddr_t addr, const void *udata1,
+			 void *udata2);
    herr_t	(*flush)(H5F_t*, hbool_t dest, haddr_t addr, void *thing);
 } H5AC_class_t;
 
@@ -70,17 +80,22 @@ typedef struct H5AC_t {
    intn		nslots;		/*number of cache slots			*/
    H5AC_slot_t	*slot;		/*the cache slots			*/
    intn		nprots;		/*number of protected objects		*/
+   struct {
+      uintn	nhits;		/*number of cache hits			*/
+      uintn	nmisses;	/*number of cache misses		*/
+      uintn	ninits;		/*number of cache initializations	*/
+      uintn	nflushes;	/*number of flushes to disk		*/
+   } diagnostics[H5AC_NTYPES];	/*diagnostics for each type of object	*/
 } H5AC_t;
-
 
 /*
  * Library prototypes.
  */
 herr_t H5AC_dest (H5F_t *f);
 void *H5AC_find_f (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-		   void *udata1, void *udata2);
+		   const void *udata1, void *udata2);
 void * H5AC_protect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
-		     void *udata1, void *udata2);
+		     const void *udata1, void *udata2);
 herr_t H5AC_unprotect (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		       void *thing);
 herr_t H5AC_flush (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
@@ -90,11 +105,13 @@ herr_t H5AC_rename (H5F_t *f, const H5AC_class_t *type, haddr_t old,
 		    haddr_t new);
 herr_t H5AC_set (H5F_t *f, const H5AC_class_t *type, haddr_t addr,
 		 void *thing);
+herr_t H5AC_debug (H5F_t *f);
 
 #define H5AC_find(F,TYPE,ADDR,UDATA1,UDATA2)				      \
    (((F)->shared->cache->slot[H5AC_HASH(F,ADDR)].type==(TYPE) &&	      \
      (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].addr==(ADDR)) ?	      \
-    (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].thing :			      \
+    ((F)->shared->cache->diagnostics[(TYPE)->id].nhits++,		      \
+     (F)->shared->cache->slot[H5AC_HASH(F,ADDR)].thing) :		      \
     H5AC_find_f (F, TYPE, ADDR, UDATA1, UDATA2))
       
 

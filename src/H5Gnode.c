@@ -44,14 +44,16 @@ static herr_t H5G_node_decode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 static herr_t H5G_node_encode_key (H5F_t *f, H5B_t *bt, uint8 *raw,
 				   void *_key);
 static size_t H5G_node_size (H5F_t *f);
-static haddr_t H5G_node_new (H5F_t *f, void *_lt_key, void *_udata,
-			     void *_rt_key);
+static haddr_t H5G_node_new (H5F_t *f, H5B_ins_t op, void *_lt_key,
+			     void *_udata, void *_rt_key);
 static herr_t H5G_node_flush (H5F_t *f, hbool_t destroy, haddr_t addr,
 			      H5G_node_t *sym);
-static H5G_node_t *H5G_node_load (H5F_t *f, haddr_t addr, void *_udata1,
+static H5G_node_t *H5G_node_load (H5F_t *f, haddr_t addr, const void *_udata1,
 				  void *_udata2);
-static intn H5G_node_cmp (H5F_t *f, void *_lt_key, void *_udata,
-			  void *_rt_key);
+static intn H5G_node_cmp2 (H5F_t *f, void *_lt_key, void *_udata,
+			   void *_rt_key);
+static intn H5G_node_cmp3 (H5F_t *f, void *_lt_key, void *_udata,
+			   void *_rt_key);
 static herr_t H5G_node_found (H5F_t *f, haddr_t addr,
 			      const void *_lt_key, void *_udata,
 			      const void *_rt_key);
@@ -64,8 +66,9 @@ static size_t H5G_node_sizeof_rkey (H5F_t *f, const void *_udata);
 
 /* H5G inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SNODE[1] = {{
-      (void*(*)(H5F_t*,haddr_t,void*,void*))H5G_node_load,
-      (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5G_node_flush,
+   H5AC_SNODE_ID,
+   (void*(*)(H5F_t*,haddr_t,const void*,void*))H5G_node_load,
+   (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5G_node_flush,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -74,7 +77,8 @@ H5B_class_t H5B_SNODE[1] = {{
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
    H5G_node_new,				/*new			*/
-   H5G_node_cmp,				/*cmp			*/
+   H5G_node_cmp2,				/*cmp2			*/
+   H5G_node_cmp3,				/*cmp3			*/
    H5G_node_found,				/*found			*/
    H5G_node_insert,				/*insert		*/
    TRUE, 					/*follow min branch?	*/
@@ -227,7 +231,8 @@ H5G_node_size (H5F_t *f)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5G_node_new (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+H5G_node_new (H5F_t *f, H5B_ins_t op,
+	      void *_lt_key, void *_udata, void *_rt_key)
 {
    H5G_node_key_t	*lt_key = (H5G_node_key_t*)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t*)_rt_key;
@@ -241,6 +246,7 @@ H5G_node_new (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
     * Check arguments.
     */
    assert (f);
+   assert (H5B_INS_FIRST==op);
 
    sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
    size = H5G_node_size (f);
@@ -383,12 +389,12 @@ H5G_node_flush (H5F_t *f, hbool_t destroy, haddr_t addr, H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static H5G_node_t *
-H5G_node_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2)
+H5G_node_load (H5F_t *f, haddr_t addr, const void *_udata1, void *_udata2)
 {
    H5G_node_t	*sym = NULL;
    size_t	size = 0;
    uint8	*buf = NULL, *p = NULL;
-   H5G_ac_ud1_t	*ac_udata = (H5G_ac_ud1_t*)_udata1;
+   const H5G_ac_ud1_t *ac_udata = (const H5G_ac_ud1_t*)_udata1;
    H5G_node_t	*ret_value = NULL; /*for error handling*/
 
    FUNC_ENTER (H5G_node_load, NULL, NULL);
@@ -457,7 +463,58 @@ H5G_node_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_cmp
+ * Function:	H5G_node_cmp2
+ *
+ * Purpose:	Compares two keys from a B-tree node (LT_KEY and RT_KEY).
+ *		The UDATA pointer supplies extra data not contained in the
+ *		keys (in this case, the heap address).
+ *
+ * Return:	Success:	negative if LT_KEY is less than RT_KEY.
+ *
+ * 				positive if LT_KEY is greater than RT_KEY.
+ *
+ * 				zero if LT_KEY and RT_KEY are equal.
+ *
+ *		Failure:	FAIL (same as LT_KEY<RT_KEY)
+ *
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jun 23 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static intn
+H5G_node_cmp2 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+{
+   H5G_bt_ud1_t		*udata = (H5G_bt_ud1_t *)_udata;
+   H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
+   H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
+   const char		*s1, *s2;
+   intn			cmp;
+
+   FUNC_ENTER (H5G_node_cmp2, NULL, FAIL);
+
+   assert (udata);
+   assert (lt_key);
+   assert (rt_key);
+
+   if (NULL==(s1=H5H_peek (f, udata->heap_addr, lt_key->offset))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
+   if (NULL==(s2=H5H_peek (f, udata->heap_addr, rt_key->offset))) {
+      HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+   }
+
+   cmp = HDstrcmp (s1, s2);
+
+   FUNC_LEAVE (cmp);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_cmp3
  *
  * Purpose:	Compares two keys from a B-tree node (LT_KEY and RT_KEY)
  *		against another key (not necessarily the same type)
@@ -484,14 +541,14 @@ H5G_node_load (H5F_t *f, haddr_t addr, void *_udata1, void *_udata2)
  *-------------------------------------------------------------------------
  */
 static intn
-H5G_node_cmp (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
+H5G_node_cmp3 (H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 {
    H5G_bt_ud1_t		*udata = (H5G_bt_ud1_t *)_udata;
    H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
    H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
    const char		*s;
 
-   FUNC_ENTER (H5G_node_cmp, NULL, FAIL);
+   FUNC_ENTER (H5G_node_cmp3, NULL, FAIL);
 
    /* left side */
    if (NULL==(s=H5H_peek (f, udata->heap_addr, lt_key->offset))) {
@@ -747,7 +804,7 @@ H5G_node_insert (H5F_t *f, haddr_t addr, H5B_ins_t *anchor,
       *anchor = H5B_INS_RIGHT;
 
       /* The right node */
-      if ((new_node = H5G_node_new (f, NULL, NULL, NULL))<0) {
+      if ((new_node = H5G_node_new (f, H5B_INS_FIRST, NULL, NULL, NULL))<0) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
       if (NULL==(snrt=H5AC_find (f, H5AC_SNODE, new_node, &ac_udata, NULL))) {
@@ -841,7 +898,8 @@ done:
 				  NULL))) {
 	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
       }
-      assert (sn==bt_udata->node_ptr);
+      bt_udata->node_ptr = sn;
+      bt_udata->entry_ptr = sn->entry + idx;
    } else {
       /* keep the node protected until we get back to H5G_stab_insert() */
    }
@@ -991,7 +1049,7 @@ H5G_node_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
     * If we couldn't load the symbol table node, then try loading the
     * B-tree node.
     */
-   if (NULL==(sn=H5AC_find(f, H5AC_SNODE, addr, &ac_udata, NULL))) {
+   if (NULL==(sn=H5AC_protect(f, H5AC_SNODE, addr, &ac_udata, NULL))) {
       H5ECLEAR; /*discard that error*/
       status = H5B_debug (f, addr, stream, indent, fwidth, H5B_SNODE, NULL);
       if (status<0) HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
@@ -1028,6 +1086,7 @@ H5G_node_debug (H5F_t *f, haddr_t addr, FILE *stream, intn indent,
 	       sn->entry[i].shadow ? "Yes":"No");
    }
 
+   H5AC_unprotect (f, H5AC_SNODE, addr, sn);
    H5AC_flush (f, H5AC_SNODE, addr, TRUE); /*see note above*/
    FUNC_LEAVE (SUCCEED);
 }

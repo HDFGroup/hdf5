@@ -527,7 +527,8 @@ main (int argc, char *argv[])
    
    /* Create the test file */
    if (NULL==(f=H5F_open (H5F_LOW_DFLT, FILENAME,
-			  H5F_ACC_CREAT|H5F_ACC_WRITE|H5F_ACC_TRUNC,
+			  (H5F_ACC_CREAT|H5F_ACC_WRITE|H5F_ACC_TRUNC|
+			   H5F_ACC_DEBUG),
 			  NULL))) {
       printf ("Cannot create file %s; test aborted\n", FILENAME);
       exit (1);

@@ -299,7 +299,7 @@ H5G_shadow_list (H5F_t *f, haddr_t grp_addr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, H5G_ac_ud1_t *ac_udata)
+H5G_shadow_assoc_node (H5F_t *f, H5G_node_t *sym, const H5G_ac_ud1_t *ac_udata)
 {
    H5G_shadow_t *shadow = NULL;
    const char	*s = NULL;
@@ -395,7 +395,21 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *grp, H5G_entry_t *ent)
    }
 
    
+   /*
+    * Build the new shadow.
+    */
    shadow = H5MM_xcalloc (1, sizeof(H5G_shadow_t));
+   ent->shadow = shadow;
+   shadow->main = ent;
+   shadow->nrefs = 1;
+   shadow->entry = *ent;
+   shadow->entry.dirty = FALSE;
+   shadow->grp_addr = grp_addr;
+   
+   /*
+    * Give the shadow a name.  Obtaining the name might remove ENT from the
+    * cache, so we're careful not to reference it again.
+    */
    if (ent==f->shared->root_sym && 0==grp_addr) {
       /*
        * We're opening the root entry.
@@ -419,16 +433,8 @@ H5G_shadow_open (H5F_t *f, H5G_entry_t *grp, H5G_entry_t *ent)
       }
       shadow->name = H5MM_xstrdup (s);
    }
-
-   /*
-    * Build the new shadow.
-    */
-   ent->shadow = shadow;
-   shadow->main = ent;
-   shadow->nrefs = 1;
-   shadow->entry = *ent;
-   shadow->entry.dirty = FALSE;
-   shadow->grp_addr = grp_addr;
+   ent = NULL; /*previous ops might have invalidated it*/
+   
 
    /*
     * Link it into the shadow heap

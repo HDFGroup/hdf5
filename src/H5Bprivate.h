@@ -38,7 +38,8 @@ typedef enum H5B_ins_t {
    H5B_INS_NOOP		=0, 	/*insert made no changes		*/
    H5B_INS_LEFT		=1, 	/*insert new node to left of cur node	*/
    H5B_INS_RIGHT	=2, 	/*insert new node to right of cur node	*/
-   H5B_INS_CHANGE	=3	/*change child address for cur node	*/
+   H5B_INS_CHANGE	=3,	/*change child address for cur node	*/
+   H5B_INS_FIRST	=4	/*insert first node in (sub)tree	*/
 } H5B_ins_t;
 
 typedef enum H5B_subid_t {
@@ -59,8 +60,9 @@ typedef struct H5B_class_t {
    H5B_subid_t	id;		/*id as found in file			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
    size_t	(*get_sizeof_rkey)(H5F_t*,const void*);/*raw key size	*/
-   haddr_t	(*new)(H5F_t*,void*,void*,void*); /*create new leaf	*/
-   intn		(*cmp)(H5F_t*,void*,void*,void*); /*compare keys	*/
+   haddr_t	(*new)(H5F_t*,H5B_ins_t,void*,void*,void*); /*new leaf	*/
+   intn         (*cmp2)(H5F_t*,void*,void*,void*); /*compare 2 keys	*/
+   intn		(*cmp3)(H5F_t*,void*,void*,void*); /*compare 3 keys	*/
    herr_t	(*found)(H5F_t*,haddr_t,const void*,void*,const void*);
    haddr_t	(*insert)(H5F_t*,haddr_t,H5B_ins_t*,void*,hbool_t*,void*,void*,
 			  void*,hbool_t*); /*insert new data		*/

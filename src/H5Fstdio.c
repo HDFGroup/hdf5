@@ -182,7 +182,7 @@ H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
     * Seek to the correct file position.
     */
    if (!H5F_OPT_SEEK ||
-       lf->u.stdio.op==H5F_OP_UNKNOWN ||
+       lf->u.stdio.op!=H5F_OP_READ ||
        lf->u.stdio.cur!=addr) {
       if (fseek (lf->u.stdio.f, addr, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
@@ -237,13 +237,15 @@ H5F_stdio_read (H5F_low_t *lf, haddr_t addr, size_t size, uint8 *buf)
 static herr_t
 H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
 {
+   int	status;
+
    FUNC_ENTER (H5F_stdio_write, NULL, FAIL);
 
    /*
     * Seek to the correct file position.
     */
    if (!H5F_OPT_SEEK ||
-       lf->u.stdio.op==H5F_OP_UNKNOWN ||
+       lf->u.stdio.op!=H5F_OP_WRITE ||
        lf->u.stdio.cur!=addr) {
       if (fseek (lf->u.stdio.f, addr, SEEK_SET)<0) {
 	 HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL); /*fseek failed*/
@@ -256,7 +258,8 @@ H5F_stdio_write (H5F_low_t *lf, haddr_t addr, size_t size, const uint8 *buf)
     * advanced by the number of bytes read.  Otherwise nobody knows where it
     * is.
     */
-   if (size != fwrite (buf, 1, size, lf->u.stdio.f)) {
+   status = fwrite (buf, 1, size, lf->u.stdio.f);
+   if (size != status) {
       lf->u.stdio.op = H5F_OP_UNKNOWN;
       HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL); /*fwrite failed*/
    }

@@ -45,14 +45,16 @@ typedef struct H5H_t {
 } H5H_t;
 
 /* PRIVATE PROTOTYPES */
-static H5H_t *H5H_load (H5F_t *f, haddr_t addr, void *udata1, void *udata2);
+static H5H_t *H5H_load (H5F_t *f, haddr_t addr, const void *udata1,
+			void *udata2);
 static herr_t H5H_flush (H5F_t *f, hbool_t dest, haddr_t addr, H5H_t *heap);
 
 /*
  * H5H inherits cache-like properties from H5AC
  */
 static const H5AC_class_t H5AC_HEAP[1] = {{
-   (void*(*)(H5F_t*,haddr_t,void*,void*))H5H_load,
+   H5AC_HEAP_ID,
+   (void*(*)(H5F_t*,haddr_t,const void*,void*))H5H_load,
    (herr_t(*)(H5F_t*,hbool_t,haddr_t,void*))H5H_flush,
 }};
 
@@ -161,7 +163,7 @@ H5H_new (H5F_t *f, H5H_type_t heap_type, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 static H5H_t *
-H5H_load (H5F_t *f, haddr_t addr, void *udata1, void *udata2)
+H5H_load (H5F_t *f, haddr_t addr, const void *udata1, void *udata2)
 {
    uint8	hdr[20], *p;
    H5H_t	*heap=NULL;
