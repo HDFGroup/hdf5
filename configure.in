@@ -565,7 +565,10 @@ dnl These errors can be changed to warnings using the -V flag.
 dnl
 AC_SUBST(AM_MAKEFLAGS) AM_MAKEFLAGS=""
 
-AC_MSG_CHECKING([whether make will build with undefined variables])
+dnl Don't run test if MAKE is defined but is the empty string
+if test ${MAKE}; then 
+
+  AC_MSG_CHECKING([whether make will build with undefined variables])
 
   cat >maketest <<EOF
 foo: \$(UNDEFINED) \$(UNDEFINED2)
@@ -579,7 +582,8 @@ EOF
     AM_MAKEFLAGS="\-V"
   fi
 
-rm maketest
+  rm maketest
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Production flags?  Save the value in $CONFIG_MODE so we have it for

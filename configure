@@ -9732,7 +9732,9 @@ rm maketest
 
  AM_MAKEFLAGS=""
 
-echo "$as_me:$LINENO: checking whether make will build with undefined variables" >&5
+if test ${MAKE}; then
+
+  echo "$as_me:$LINENO: checking whether make will build with undefined variables" >&5
 echo $ECHO_N "checking whether make will build with undefined variables... $ECHO_C" >&6
 
   cat >maketest <<EOF
@@ -9749,7 +9751,8 @@ echo "${ECHO_T}no, setting -V flag" >&6
     AM_MAKEFLAGS="\-V"
   fi
 
-rm maketest
+  rm maketest
+fi
 
 echo "$as_me:$LINENO: checking for production mode" >&5
 echo $ECHO_N "checking for production mode... $ECHO_C" >&6
