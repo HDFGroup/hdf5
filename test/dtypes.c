@@ -67,6 +67,7 @@ const char *FILENAME[] = {
     "dtypes5",
     "dtypes6",
     "dtypes7",
+    "dtypes8",
     NULL
 };
 
@@ -2755,6 +2756,312 @@ test_derived_flt(void)
 
     if (buf) free(buf);
     if (saved_buf) free(saved_buf);
+
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if(H5Pclose(dxpl_id)<0) {
+        H5_FAILED();
+        printf("Can't close property list\n");
+        goto error;
+    }
+
+    if(H5Fclose(file)<0) {
+        H5_FAILED();
+        printf("Can't close file\n");
+        goto error;
+    } /* end if */
+
+    PASSED();
+    reset_hdf5();	/*print statistics*/
+    
+    return 0;
+
+ error:
+    if (buf) free(buf);
+    if (saved_buf) free(saved_buf);
+    if (aligned) free(aligned);
+    HDfflush(stdout);
+    H5E_BEGIN_TRY {
+        H5Tclose (tid1);
+        H5Tclose (tid2);
+        H5Pclose (dxpl_id);
+        H5Fclose (file);
+    } H5E_END_TRY;
+    reset_hdf5(); /*print statistics*/
+    return MAX((int)fails_this_test, 1);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_derived_integer
+ *
+ * Purpose:     Tests user-define and query functions of integer types.
+ *
+ * Return:      Success:        0
+ *      
+ *              Failure:        number of errors
+ *
+ * Programmer:  Raymond Lu
+ *              Saturday, Jan 29, 2005
+ *  
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int 
+test_derived_integer(void)
+{
+    hid_t       file=-1, tid1=-1, tid2=-1;
+    hid_t       dxpl_id=-1;
+    char        filename[1024];
+    size_t      precision, spos, epos, esize, mpos, msize, size, ebias;
+    int         offset;
+    H5T_order_t order;
+    H5T_sign_t  sign;
+    size_t      src_size, dst_size;
+    unsigned char        *buf=NULL, *saved_buf=NULL;
+    int         *aligned=NULL;
+    int		endian;			/*endianess	        */
+    size_t      nelmts = NTESTELEM;
+    unsigned int        fails_this_test = 0;
+    const size_t	max_fails=40;	/*max number of failures*/
+    char	str[256];		/*message string	*/
+    unsigned int         i, j;
+
+    TESTING("user-define and query functions of integer types");
+
+    /* Create File */
+    h5_fixname(FILENAME[7], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+        H5_FAILED();
+        printf("Can't create file\n");
+        goto error; 
+    }
+
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) {
+        H5_FAILED();
+        printf("Can't create data transfer property list\n");
+        goto error; 
+    }
+
+    if((tid1 = H5Tcopy(H5T_STD_I32LE))<0) {
+        H5_FAILED();
+        printf("Can't copy data type\n");
+        goto error; 
+    }
+
+    if((tid2 = H5Tcopy(H5T_STD_U64LE))<0) {
+        H5_FAILED();
+        printf("Can't copy data type\n");
+        goto error; 
+    }
+    
+    /*--------------------------------------------------------------------------
+     *                   1st integer type
+     * size=3 byte, precision=24 bits, offset=0 bits, order=big endian.
+     * It can be illustrated in big-endian order as
+     * 
+     *          0       1       2
+     *    SIIIIIII IIIIIIII IIIIIIII
+     *--------------------------------------------------------------------------*/
+    if(H5Tset_precision(tid1,24)<0) {
+        H5_FAILED();
+        printf("Can't set precision\n");
+        goto error; 
+    }
+
+    if(H5Tset_offset(tid1,0)<0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error; 
+    }
+    
+    if(H5Tset_size(tid1, 3)<0) {
+        H5_FAILED();
+        printf("Can't set size\n");
+        goto error;
+    }
+
+    if(H5Tset_order(tid1, H5T_ORDER_BE)<0) {
+        H5_FAILED();
+        printf("Can't set order\n");
+        goto error; 
+    }
+
+    if(H5Tcommit(file, "new integer type 1", tid1)<0) {
+        H5_FAILED();
+        printf("Can't commit data type\n");
+        goto error;
+    }
+    
+    if(H5Tclose(tid1)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if((tid1 = H5Topen(file, "new integer type 1"))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    }
+
+    if((precision = H5Tget_precision(tid1))!=24) {
+        H5_FAILED();
+        printf("Can't get precision or wrong precision\n");
+        goto error; 
+    }
+    if((offset = H5Tget_offset(tid1))!=0) {
+        H5_FAILED();
+        printf("Can't get offset or wrong offset\n");
+        goto error; 
+    }
+    if((size = H5Tget_size(tid1))!=3) {
+        H5_FAILED();
+        printf("Can't get size or wrong size\n");
+        goto error;
+    }
+    if((order = H5Tget_order(tid1))!=H5T_ORDER_BE) {
+        H5_FAILED();
+        printf("Can't get order or wrong order\n");
+        goto error;
+    }
+
+    /*--------------------------------------------------------------------------
+     *                   2nd integer type
+     * size=8 byte, precision=48 bits, offset=10 bits, order=little endian.
+     * It can be illustrated in little-endian order as
+     * 
+     *          7       6       5       4       3       2       1       0       
+     *   ??????SI IIIIIIII IIIIIIII IIIIIIII IIIIIIII IIIIIIII IIIIII?? ????????
+     *--------------------------------------------------------------------------*/
+    if(H5Tset_precision(tid2,48)<0) {
+        H5_FAILED();
+        printf("Can't set precision\n");
+        goto error; 
+    }
+
+    if(H5Tset_offset(tid2,10)<0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error; 
+    }
+    
+    if(H5Tset_sign(tid2,H5T_SGN_2)<0) {
+        H5_FAILED();
+        printf("Can't set offset\n");
+        goto error; 
+    }
+    
+    if(H5Tcommit(file, "new integer type 2", tid2)<0) {
+        H5_FAILED();
+        printf("Can't commit data type\n");
+        goto error;
+    }
+    
+    if(H5Tclose(tid2)<0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    }
+
+    if((tid2 = H5Topen(file, "new integer type 2"))<0) {
+        H5_FAILED();
+        printf("Can't open datatype\n");
+        goto error;
+    }
+  
+    if((precision = H5Tget_precision(tid2))!=48) {
+        H5_FAILED();
+        printf("Can't get precision or wrong precision\n");
+        goto error; 
+    }
+    if((offset = H5Tget_offset(tid2))!=10) {
+        H5_FAILED();
+        printf("Can't get offset or wrong offset\n");
+        goto error; 
+    }
+    if((size = H5Tget_size(tid2))!=8) {
+        H5_FAILED();
+        printf("Can't get size or wrong size\n");
+        goto error;
+    }
+    if((sign = H5Tget_sign(tid2))!=H5T_SGN_2) {
+        H5_FAILED();
+        printf("Can't get sign or wrong sign\n");
+        goto error;
+    }
+
+    /* Convert data from the 1st to the 2nd derived integer type.
+     * Then convert data from the 2nd type back to the 1st type.
+     * Compare the final data with the original data.
+     */
+    src_size = H5Tget_size(tid1);
+    dst_size = H5Tget_size(tid2);
+    endian = H5Tget_order(tid1);
+    buf = (unsigned char*)malloc(nelmts*(MAX(src_size, dst_size)));
+    saved_buf = (unsigned char*)malloc(nelmts*src_size);
+
+    for(i=0; i<nelmts*src_size; i++)
+        buf[i] = saved_buf[i] = HDrand();
+
+    /* Convert data from the 1st to the 2nd derived integer type.
+     * The precision of the 2nd type are big enough to retain 
+     * the 1st type's precision. */
+    if(H5Tconvert(tid1, tid2, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+    /* Convert data from the 2nd back to the 1st derived integer type. */
+    if(H5Tconvert(tid2, tid1, nelmts, buf, NULL, dxpl_id)<0) { 
+        H5_FAILED();
+        printf("Can't convert data\n");
+        goto error; 
+    }
+
+    /* Are the values still the same?*/
+    for(i=0; i<nelmts; i++) {
+        for(j=0; j<src_size; j++)
+            if(buf[i*src_size+j]!=saved_buf[i*src_size+j])
+               break;
+        if(j==src_size)
+           continue; /*no error*/ 
+
+        /* Print errors */
+        if (0==fails_this_test++) {
+	    sprintf(str, "\nTesting random sw derived integer -> derived integer conversions");
+	    printf("%-70s", str);
+	    HDfflush(stdout);
+            H5_FAILED();
+        }
+        printf("    test %u elmt %u: \n", 1, (unsigned)i);
+
+        printf("        src = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", saved_buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        printf("        dst = ");
+        for (j=0; j<src_size; j++)
+            printf(" %02x", buf[i*src_size+ENDIAN(src_size, j)]);
+        printf("\n");
+
+        if (fails_this_test>=max_fails) {
+            HDputs("    maximum failures reached, aborting test...");
+            goto error;
+        }
+    }
 
     if(H5Tclose(tid1)<0) {
         H5_FAILED();
@@ -7467,6 +7774,10 @@ main(void)
     /* Test user-define, query functions and software conversion 
      * for user-defined floating-point types */
     nerrors += test_derived_flt();
+    
+    /* Test user-define, query functions and software conversion 
+     * for user-defined integer types */
+    nerrors += test_derived_integer();
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
