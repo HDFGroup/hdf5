@@ -13,10 +13,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
-#include <unistd.h>
 
+#ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#include "H5private.h"
 #include "h5tools_utils.h"
 
 void parse_command_line (int argc, const char *argv[]);
@@ -134,7 +137,7 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  fd = open (filename, O_RDONLY);
+  fd = HDopen (filename, O_RDONLY, 0);
   if (fd < 0)
     {
       error_msg (progname, "can't open file %s\n", filename);
@@ -148,7 +151,7 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  res = read (fd, buf, (unsigned)size);
+  res = HDread (fd, buf, (unsigned)size);
 
   if (res < size)
     {
@@ -158,7 +161,7 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  write (1, buf, (unsigned)size);
+  HDwrite (1, buf, (unsigned)size);
 
   if (buf)
     free (buf);

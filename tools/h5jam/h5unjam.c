@@ -13,13 +13,16 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "hdf5.h"
+#include "H5private.h"
 #include "h5tools_utils.h"
 
 #define TRUE 1
@@ -221,7 +224,7 @@ main(int argc, const char *argv[])
 
     fsize = sbuf.st_size;
 
-    ifid = open(input_file,O_RDONLY);
+    ifid = HDopen(input_file,O_RDONLY,0);
 
     if (ifid < 0) {
         error_msg(progname, "unable to open input HDF5 file \"%s\"\n", input_file);
@@ -237,7 +240,7 @@ main(int argc, const char *argv[])
 	/* write to sdtout */
 	ufid = dup(1);
     } else {
-        ufid = open(ub_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
+        ufid = HDopen(ub_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
 
         if (ufid < 0) {
             error_msg(progname, "unable to open user block file for output\"%s\"\n", ub_file);
@@ -246,7 +249,7 @@ main(int argc, const char *argv[])
     }
 
     if (output_file == NULL) {
-        h5fid = open(input_file,O_WRONLY);
+        h5fid = HDopen(input_file,O_WRONLY, 0);
 
         if (h5fid < 0) {
             error_msg(progname, "unable to open output HDF5 file \"%s\"\n", input_file);
@@ -302,14 +305,14 @@ copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much ) {
 	to = 0;
 
 	while( how_much > 0) {
-		lseek(infid,from,SEEK_SET);
+		HDlseek(infid,from,SEEK_SET);
 		if (how_much > 512) {
-			nchars = read(infid,buf,(unsigned)512);
+			nchars = HDread(infid,buf,(unsigned)512);
 		} else {
-			nchars = read(infid,buf,(unsigned)how_much);
+			nchars = HDread(infid,buf,(unsigned)how_much);
 		}
-		lseek(ofid,to,SEEK_SET);
-		write(ofid,buf,(unsigned)nchars);
+		HDlseek(ofid,to,SEEK_SET);
+		HDwrite(ofid,buf,(unsigned)nchars);
 		how_much -= nchars;
 		from += nchars;
 		to += nchars;
