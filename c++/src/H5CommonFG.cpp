@@ -34,7 +34,7 @@
 
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
-// - getLocId is called by all functions, that call a C API, to get
+// - getLocId is called by all functions, which call a C API, to get
 //   the location id, which can be either a file id or a group id.
 //   This function is pure virtual and it's up to H5File and Group
 //   to call the right getId() - although, as the structure of the
@@ -53,8 +53,9 @@ namespace H5 {
 // Function:	CommonFG::createGroup
 ///\brief	Creates a new group at this location which can be a file 
 ///		or another group.
-///\param	name  - IN: Name of the group
-///\param	value - IN: Size to reserve
+///\param	name  - IN: Name of the group to create
+///\param	size_hint - IN: Indicates the number of bytes to reserve for 
+///		the names that will appear in the group
 ///\return	Group instance
 ///\exception	H5::FileIException or H5::GroupIException
 ///\par Description
@@ -135,9 +136,9 @@ Group CommonFG::openGroup( const string& name ) const
 // Function:	CommonFG::createDataSet
 ///\brief	Creates a new dataset at this location.
 ///\param	name  - IN: Name of the dataset to create
-///\param	data_type - IN: 
-///\param	data_space - IN: 
-///\param	create_plist - IN: 
+///\param	data_type - IN: Datatype of the dataset
+///\param	data_space - IN: Dataspace for the dataset
+///\param	create_plist - IN: Creation properly list for the dataset
 ///\return	DataSet instance
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -212,14 +213,16 @@ DataSet CommonFG::openDataSet( const string& name ) const
    return( openDataSet( name.c_str() ));
 }
 
-// Creates a link of the specified type from new_name to current_name;
 //--------------------------------------------------------------------------
 // Function:	CommonFG::link
 ///\brief	Creates a link of the specified type from \a new_name to 
 ///		\a curr_name;
-///\param	link_type  - IN: 
-///\param	curr_name - IN: 
-///\param	new_name - IN: 
+///\param	link_type  - IN: Link type; possible values are 
+///		\li \c H5G_LINK_HARD
+///		\li \c H5G_LINK_SOFT
+///\param	curr_name - IN: Name of the existing object if link is a hard 
+///		link; can be anything for the soft link
+///\param	new_name - IN: New name for the object
 ///\exception	H5::FileIException or H5::GroupIException
 ///\par Description
 ///		Note that both names are interpreted relative to the 
@@ -278,8 +281,8 @@ void CommonFG::unlink( const string& name ) const
 //--------------------------------------------------------------------------
 // Function:	CommonFG::move
 ///\brief	Renames an object at this location.
-///\param	src - IN: 
-///\param	dst - IN: 
+///\param	src - IN: Object's original name
+///\param	dst - IN: Object's new name
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -308,8 +311,8 @@ void CommonFG::move( const string& src, const string& dst ) const
 // Function:	CommonFG::getObjinfo
 ///\brief	Returns information about an object.
 ///\param	name  - IN: Name of the object
-///\param	follow_link - IN: 
-///\param	statbuf - IN: 
+///\param	follow_link - IN: Link flag
+///\param	statbuf - OUT: Buffer to return information about the object
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -337,8 +340,8 @@ void CommonFG::getObjinfo( const string& name, hbool_t follow_link, H5G_stat_t& 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getLinkval
 ///\brief	Returns the name of the object that the symbolic link points to.
-///\param	name  - IN: 
-///\param	size - IN: 
+///\param	name  - IN: Symbolic link to the object 
+///\param	size - IN: Maximum number of characters of value to be returned
 ///\return	Name of the object
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -373,8 +376,15 @@ string CommonFG::getLinkval( const string& name, size_t size ) const
 // Function:	CommonFG::setComment
 ///\brief	Sets the comment for an object specified by its name.
 ///\param	name  - IN: 
-///\param	comment - IN: 
+///\param	comment - IN: New comment; 
 ///\exception	H5::FileIException or H5::GroupIException
+///\par	Description
+///		If \a comment is an empty string or a null pointer, the comment 
+///		message is removed from the object. 
+///		Comments should be relatively short, null-terminated, ASCII 
+///		strings.  They can be attached to any object that has an 
+///		object header, e.g., data sets, groups, named data types, 
+///		and data spaces, but not symbolic links.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::setComment( const char* name, const char* comment ) const
@@ -402,7 +412,7 @@ void CommonFG::setComment( const string& name, const string& comment ) const
 // Function:	CommonFG::getComment
 ///\brief	Retrieves comment for the specified object.
 ///\param	name  - IN: Name of the object
-///\param	bufsize - IN: 
+///\param	bufsize - IN: Length of the comment to retrieve
 ///\return	Comment string
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -439,9 +449,9 @@ string CommonFG::getComment( const string& name, size_t bufsize ) const
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
 ///\brief	Mounts the file 'child' onto this group.
-///\param	name  - IN: 
-///\param	child - IN: 
-///\param	plist - IN: 
+///\param	name  - IN: Name of the group
+///\param	child - IN: File to mount
+///\param	plist - IN: Property list to use
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -475,8 +485,8 @@ void CommonFG::mount( const string& name, H5File& child, PropList& plist ) const
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::unmount
-///\brief	Unmounts the file named 'name' from this parent group.
-///\param	name  - IN: 
+///\brief	Unmounts the specified file.
+///\param	name  - IN: Name of the file to unmount
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -504,9 +514,17 @@ void CommonFG::unmount( const string& name ) const
    unmount( name.c_str() );
 }
 
-// This private member function calls the C API H5Topen to open the 
-// named datatype and returns the datatype's identifier.  The function 
-// is used by the functions openXxxType's below for opening the sub-types
+//--------------------------------------------------------------------------
+// Function:	CommonFG::p_openDataType (private)
+// Purpose	Opens the named datatype and returns the datatype's identifier.
+// Return	Id of the datatype
+// Exception	H5::FileIException or H5::GroupIException
+// Description
+//              This private function is used by the member functions
+//		CommonFG::openXxxType, where Xxx indicates the specific
+//		datatypes.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t CommonFG::p_openDataType( const char* name ) const
 { 
    // Call C function H5Topen to open the named datatype in this group,
@@ -687,10 +705,10 @@ StrType CommonFG::openStrType( const string& name ) const
 //--------------------------------------------------------------------------
 // Function:	CommonFG::iterateElems
 ///\brief	Iterates a user's function over the entries of a group.
-///\param	name  - IN: 
-///\param	idx - IN: 
-///\param	op - IN: 
-///\param	op_data - IN: 
+///\param	name  - IN: Name of group to iterate over
+///\param	idx - IN/OUT: Starting (IN) and ending (OUT) entry indices
+///\param	op - IN: User's function to operate on each entry
+///\param	op_data - IN/OUT: Data associated with the operation
 ///\return	The return value of the first operator that returns non-zero, 
 ///		or zero if all members were processed with no operator 
 ///		returning non-zero.
@@ -728,7 +746,7 @@ CommonFG::CommonFG() {}
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG destructor
-///\brief	Properly terminates access to this object.
+///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 CommonFG::~CommonFG() {}
