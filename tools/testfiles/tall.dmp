@@ -1,0 +1,654 @@
+File name: testfiles/tall.hdf 
+
+
+Vgroup:0
+     tag = 1965; reference = 2;
+     name = /; class = HDF5;
+     number of entries = 2;
+   number of attributes = 2 
+    attr0: name=attr1 type=20 count=10 size=10
+	97 98 99 100 101 102 103 104 105 0 
+    attr1: name=attr2 type=24 count=4 size=16
+	0 1 2 3 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 5;
+	number of entries = 2;
+	name = g1; class = HDF5
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 13;
+	number of entries = 0;
+	name = g2; class = HDF5
+   number of attributes = 0 
+
+
+Vgroup:1
+     tag = 1965; reference = 5;
+     name = g1; class = HDF5;
+     number of entries = 2;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 6;
+	number of entries = 0;
+	name = g1.1; class = HDF5
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 11;
+	number of entries = 1;
+	name = g1.2; class = HDF5
+   number of attributes = 0 
+
+
+Vgroup:2
+     tag = 1965; reference = 6;
+     name = g1.1; class = HDF5;
+     number of entries = 0;
+   number of attributes = 0 
+Entries:-
+     None.
+
+
+Vgroup:3
+     tag = 1965; reference = 11;
+     name = g1.2; class = HDF5;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 12;
+	number of entries = 0;
+	name = g1.2.1; class = HDF5
+   number of attributes = 0 
+
+
+Vgroup:4
+     tag = 1965; reference = 12;
+     name = g1.2.1; class = HDF5;
+     number of entries = 0;
+   number of attributes = 0 
+Entries:-
+     None.
+
+
+Vgroup:5
+     tag = 1965; reference = 13;
+     name = g2; class = HDF5;
+     number of entries = 0;
+   number of attributes = 0 
+Entries:-
+     None.
+
+
+Vgroup:6
+     tag = 1965; reference = 19;
+     name = fakeDim0; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 18; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim0; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:7
+     tag = 1965; reference = 21;
+     name = fakeDim1; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 20; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim1; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:8
+     tag = 1965; reference = 23;
+     name = fakeDim2; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 22; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim2; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:9
+     tag = 1965; reference = 25;
+     name = fakeDim3; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 24; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim3; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:10
+     tag = 1965; reference = 27;
+     name = fakeDim4; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 26; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim4; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:11
+     tag = 1965; reference = 29;
+     name = fakeDim5; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 28; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim5; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:12
+     tag = 1965; reference = 33;
+     name = dset1.1.1; class = Var0.0;
+     number of entries = 8;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 19;
+	number of entries = 1;
+	name = fakeDim0; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 21;
+	number of entries = 1;
+	name = fakeDim1; class = Dim0.0
+   number of attributes = 0 
+     #2 (Vdata)
+	tag = 1962; reference = 30; 
+	number of records = 27; interlace = 0;
+	fields = [VALUES];
+	record size (in bytes) = 1;
+	name = attr1; class = Attr0.0;
+	total number of attributes = 0.
+     #3 (Vdata)
+	tag = 1962; reference = 31; 
+	number of records = 27; interlace = 0;
+	fields = [VALUES];
+	record size (in bytes) = 1;
+	name = attr2; class = Attr0.0;
+	total number of attributes = 0.
+     #4 (Scientific Data)
+	tag = 702; reference = 8;
+     #5 (Number type)
+	tag = 106; reference = 32;
+     #6 (SciData dimension record)
+	tag = 701; reference = 32;
+     #7 (Numeric Data Group)
+	tag = 720; reference = 7;
+
+
+Vgroup:13
+     tag = 1965; reference = 35;
+     name = dset1.1.2; class = Var0.0;
+     number of entries = 5;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 23;
+	number of entries = 1;
+	name = fakeDim2; class = Dim0.0
+   number of attributes = 0 
+     #1 (Scientific Data)
+	tag = 702; reference = 10;
+     #2 (Number type)
+	tag = 106; reference = 34;
+     #3 (SciData dimension record)
+	tag = 701; reference = 34;
+     #4 (Numeric Data Group)
+	tag = 720; reference = 9;
+
+
+Vgroup:14
+     tag = 1965; reference = 37;
+     name = dset2.1; class = Var0.0;
+     number of entries = 5;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 25;
+	number of entries = 1;
+	name = fakeDim3; class = Dim0.0
+   number of attributes = 0 
+     #1 (Scientific Data)
+	tag = 702; reference = 15;
+     #2 (Number type)
+	tag = 106; reference = 36;
+     #3 (SciData dimension record)
+	tag = 701; reference = 36;
+     #4 (Numeric Data Group)
+	tag = 720; reference = 14;
+
+
+Vgroup:15
+     tag = 1965; reference = 39;
+     name = dset2.2; class = Var0.0;
+     number of entries = 6;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 27;
+	number of entries = 1;
+	name = fakeDim4; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 29;
+	number of entries = 1;
+	name = fakeDim5; class = Dim0.0
+   number of attributes = 0 
+     #2 (Scientific Data)
+	tag = 702; reference = 17;
+     #3 (Number type)
+	tag = 106; reference = 38;
+     #4 (SciData dimension record)
+	tag = 701; reference = 38;
+     #5 (Numeric Data Group)
+	tag = 720; reference = 16;
+
+
+Vgroup:16
+     tag = 1965; reference = 40;
+     name = tall.hdf; class = CDF0.0;
+     number of entries = 10;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 19;
+	number of entries = 1;
+	name = fakeDim0; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 21;
+	number of entries = 1;
+	name = fakeDim1; class = Dim0.0
+   number of attributes = 0 
+     #2 (Vgroup)
+	tag = 1965;reference = 23;
+	number of entries = 1;
+	name = fakeDim2; class = Dim0.0
+   number of attributes = 0 
+     #3 (Vgroup)
+	tag = 1965;reference = 25;
+	number of entries = 1;
+	name = fakeDim3; class = Dim0.0
+   number of attributes = 0 
+     #4 (Vgroup)
+	tag = 1965;reference = 27;
+	number of entries = 1;
+	name = fakeDim4; class = Dim0.0
+   number of attributes = 0 
+     #5 (Vgroup)
+	tag = 1965;reference = 29;
+	number of entries = 1;
+	name = fakeDim5; class = Dim0.0
+   number of attributes = 0 
+     #6 (Vgroup)
+	tag = 1965;reference = 33;
+	number of entries = 8;
+	name = dset1.1.1; class = Var0.0
+   number of attributes = 0 
+     #7 (Vgroup)
+	tag = 1965;reference = 35;
+	number of entries = 5;
+	name = dset1.1.2; class = Var0.0
+   number of attributes = 0 
+     #8 (Vgroup)
+	tag = 1965;reference = 37;
+	number of entries = 5;
+	name = dset2.1; class = Var0.0
+   number of attributes = 0 
+     #9 (Vgroup)
+	tag = 1965;reference = 39;
+	number of entries = 6;
+	name = dset2.2; class = Var0.0
+   number of attributes = 0 
+
+
+Graphical representation of the file:-
+(vg#: vgroup;   vd: vdata)
+
+   vg0 	-- vg1 	-- vg2 
+		-- vg3 	-- vg4 
+	-- vg5 
+
+   vg1 	-- vg2 
+	-- vg3 	-- vg4 
+
+   vg2 
+
+   vg3 	-- vg4 
+
+   vg4 
+
+   vg5 
+
+   vg6 	-- vd  
+
+   vg7 	-- vd  
+
+   vg8 	-- vd  
+
+   vg9 	-- vd  
+
+   vg10 	-- vd  
+
+   vg11 	-- vd  
+
+   vg12 	-- vg6 	-- vd  
+	-- vg7 	-- vd  
+	-- vd  
+	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg13 	-- vg8 	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg14 	-- vg9 	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg15 	-- vg10 	-- vd  
+	-- vg11 	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg16 	-- vg6 	-- vd  
+	-- vg7 	-- vd  
+	-- vg8 	-- vd  
+	-- vg9 	-- vd  
+	-- vg10 	-- vd  
+	-- vg11 	-- vd  
+	-- vg12 	-- vg6 	-- vd  
+		-- vg7 	-- vd  
+		-- vd  
+		-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+	-- vg13 	-- vg8 	-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+	-- vg14 	-- vg9 	-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+	-- vg15 	-- vg10 	-- vd  
+		-- vg11 	-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+
+File name: testfiles/tall.hdf 
+
+Vdata: 0
+   tag = 1962; reference = 3;
+   number of records = 1; interlace = 0;
+   fields = [VALUES];
+   record size (in bytes) = 10;
+   name = attr1; class = Attr0.0;
+   number of attributes = 0 
+- field index 0: [VALUES], type=20, order=10
+   number of attributes = 0 
+Loc.     Data
+0        97 98 99 100 101 102 103 104 105 0  ; 
+
+Vdata: 1
+   tag = 1962; reference = 4;
+   number of records = 1; interlace = 0;
+   fields = [VALUES];
+   record size (in bytes) = 16;
+   name = attr2; class = Attr0.0;
+   number of attributes = 0 
+- field index 0: [VALUES], type=24, order=4
+   number of attributes = 0 
+Loc.     Data
+0        0 1 2 3  ; 
+
+Vdata: 2
+   tag = 1962; reference = 18;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim0; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        10  ; 
+
+Vdata: 3
+   tag = 1962; reference = 20;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim1; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        10  ; 
+
+Vdata: 4
+   tag = 1962; reference = 22;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim2; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        20  ; 
+
+Vdata: 5
+   tag = 1962; reference = 24;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim3; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        10  ; 
+
+Vdata: 6
+   tag = 1962; reference = 26;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim4; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        3  ; 
+
+Vdata: 7
+   tag = 1962; reference = 28;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim5; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        5  ; 
+
+Vdata: 8
+   tag = 1962; reference = 30;
+   number of records = 27; interlace = 0;
+   fields = [VALUES];
+   record size (in bytes) = 1;
+   name = attr1; class = Attr0.0;
+   number of attributes = 0 
+- field index 0: [VALUES], type=20, order=1
+   number of attributes = 0 
+Loc.     Data
+00       49  ; 115  ; 116  ; 32  ; 
+04       97  ; 116  ; 116  ; 114  ; 
+08       105  ; 98  ; 117  ; 116  ; 
+12       101  ; 32  ; 111  ; 102  ; 
+16       32  ; 100  ; 115  ; 101  ; 
+20       116  ; 49  ; 46  ; 49  ; 
+24       46  ; 49  ; 0  ; 
+
+Vdata: 9
+   tag = 1962; reference = 31;
+   number of records = 27; interlace = 0;
+   fields = [VALUES];
+   record size (in bytes) = 1;
+   name = attr2; class = Attr0.0;
+   number of attributes = 0 
+- field index 0: [VALUES], type=20, order=1
+   number of attributes = 0 
+Loc.     Data
+00       50  ; 110  ; 100  ; 32  ; 
+04       97  ; 116  ; 116  ; 114  ; 
+08       105  ; 98  ; 117  ; 116  ; 
+12       101  ; 32  ; 111  ; 102  ; 
+16       32  ; 100  ; 115  ; 101  ; 
+20       116  ; 49  ; 46  ; 49  ; 
+24       46  ; 49  ; 0  ; 
+
+File name: testfiles/tall.hdf 
+
+Variable Name = dset1.1.1
+	 Index = 0
+	 Type= 32-bit signed integer
+	 Ref. = 7
+	 Rank = 2
+	 Number of attributes = 2
+	 Dim0: Name=fakeDim0
+		 Size = 10
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Dim1: Name=fakeDim1
+		 Size = 10
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Attr0: Name = attr1
+		 Type = 8-bit signed integer 
+		 Count= 27
+		 Value = 49 115 116 32 97 116 116 114 105 98 117 116 101 
+                    32 111 102 32 100 115 101 116 49 46 49 46 49 0 
+                    
+	 Attr1: Name = attr2
+		 Type = 8-bit signed integer 
+		 Count= 27
+		 Value = 50 110 100 32 97 116 116 114 105 98 117 116 101 
+                    32 111 102 32 100 115 101 116 49 46 49 46 49 0 
+                    
+	 Data : 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                0 1 2 3 4 5 6 7 8 9 
+                
+                
+
+Variable Name = dset1.1.2
+	 Index = 1
+	 Type= 32-bit signed integer
+	 Ref. = 9
+	 Rank = 1
+	 Number of attributes = 0
+	 Dim0: Name=fakeDim2
+		 Size = 20
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Data : 
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+
+
+Variable Name = dset2.1
+	 Index = 2
+	 Type= 32-bit floating point
+	 Ref. = 14
+	 Rank = 1
+	 Number of attributes = 0
+	 Dim0: Name=fakeDim3
+		 Size = 10
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Data : 
+                1.000000 1.100000 1.200000 1.300000 1.400000 1.500000 
+                1.600000 1.700000 1.800000 1.900000 
+
+
+Variable Name = dset2.2
+	 Index = 3
+	 Type= 32-bit floating point
+	 Ref. = 16
+	 Rank = 2
+	 Number of attributes = 0
+	 Dim0: Name=fakeDim4
+		 Size = 3
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Dim1: Name=fakeDim5
+		 Size = 5
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Data : 
+                0.000000 0.000000 0.000000 0.000000 0.000000 
+                0.100000 0.100000 0.100000 0.100000 0.100000 
+                0.200000 0.200000 0.200000 0.200000 0.200000 
+                
+                

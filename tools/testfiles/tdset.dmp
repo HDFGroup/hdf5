@@ -1,0 +1,373 @@
+File name: testfiles/tdset.hdf 
+
+
+Vgroup:0
+     tag = 1965; reference = 2;
+     name = /; class = HDF5;
+     number of entries = 0;
+   number of attributes = 0 
+Entries:-
+     None.
+
+
+Vgroup:1
+     tag = 1965; reference = 8;
+     name = fakeDim0; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 7; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim0; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:2
+     tag = 1965; reference = 10;
+     name = fakeDim1; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 9; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim1; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:3
+     tag = 1965; reference = 12;
+     name = fakeDim2; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 11; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim2; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:4
+     tag = 1965; reference = 14;
+     name = fakeDim3; class = Dim0.0;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vdata)
+	tag = 1962; reference = 13; 
+	number of records = 1; interlace = 0;
+	fields = [Values];
+	record size (in bytes) = 4;
+	name = fakeDim3; class = DimVal0.1;
+	total number of attributes = 0.
+
+
+Vgroup:5
+     tag = 1965; reference = 16;
+     name = dset1; class = Var0.0;
+     number of entries = 6;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 8;
+	number of entries = 1;
+	name = fakeDim0; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 10;
+	number of entries = 1;
+	name = fakeDim1; class = Dim0.0
+   number of attributes = 0 
+     #2 (Scientific Data)
+	tag = 702; reference = 4;
+     #3 (Number type)
+	tag = 106; reference = 15;
+     #4 (SciData dimension record)
+	tag = 701; reference = 15;
+     #5 (Numeric Data Group)
+	tag = 720; reference = 3;
+
+
+Vgroup:6
+     tag = 1965; reference = 18;
+     name = dset2; class = Var0.0;
+     number of entries = 6;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 12;
+	number of entries = 1;
+	name = fakeDim2; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 14;
+	number of entries = 1;
+	name = fakeDim3; class = Dim0.0
+   number of attributes = 0 
+     #2 (Scientific Data)
+	tag = 702; reference = 6;
+     #3 (Number type)
+	tag = 106; reference = 17;
+     #4 (SciData dimension record)
+	tag = 701; reference = 17;
+     #5 (Numeric Data Group)
+	tag = 720; reference = 5;
+
+
+Vgroup:7
+     tag = 1965; reference = 19;
+     name = tdset.hdf; class = CDF0.0;
+     number of entries = 6;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 8;
+	number of entries = 1;
+	name = fakeDim0; class = Dim0.0
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 10;
+	number of entries = 1;
+	name = fakeDim1; class = Dim0.0
+   number of attributes = 0 
+     #2 (Vgroup)
+	tag = 1965;reference = 12;
+	number of entries = 1;
+	name = fakeDim2; class = Dim0.0
+   number of attributes = 0 
+     #3 (Vgroup)
+	tag = 1965;reference = 14;
+	number of entries = 1;
+	name = fakeDim3; class = Dim0.0
+   number of attributes = 0 
+     #4 (Vgroup)
+	tag = 1965;reference = 16;
+	number of entries = 6;
+	name = dset1; class = Var0.0
+   number of attributes = 0 
+     #5 (Vgroup)
+	tag = 1965;reference = 18;
+	number of entries = 6;
+	name = dset2; class = Var0.0
+   number of attributes = 0 
+
+
+Graphical representation of the file:-
+(vg#: vgroup;   vd: vdata)
+
+   vg0 
+
+   vg1 	-- vd  
+
+   vg2 	-- vd  
+
+   vg3 	-- vd  
+
+   vg4 	-- vd  
+
+   vg5 	-- vg1 	-- vd  
+	-- vg2 	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg6 	-- vg3 	-- vd  
+	-- vg4 	-- vd  
+	-- Scientific Data  
+	-- Number type  
+	-- SciData dimension record  
+	-- Numeric Data Group  
+
+   vg7 	-- vg1 	-- vd  
+	-- vg2 	-- vd  
+	-- vg3 	-- vd  
+	-- vg4 	-- vd  
+	-- vg5 	-- vg1 	-- vd  
+		-- vg2 	-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+	-- vg6 	-- vg3 	-- vd  
+		-- vg4 	-- vd  
+		-- Scientific Data  
+		-- Number type  
+		-- SciData dimension record  
+		-- Numeric Data Group  
+
+File name: testfiles/tdset.hdf 
+
+Vdata: 0
+   tag = 1962; reference = 7;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim0; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        10  ; 
+
+Vdata: 1
+   tag = 1962; reference = 9;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim1; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        20  ; 
+
+Vdata: 2
+   tag = 1962; reference = 11;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim2; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        30  ; 
+
+Vdata: 3
+   tag = 1962; reference = 13;
+   number of records = 1; interlace = 0;
+   fields = [Values];
+   record size (in bytes) = 4;
+   name = fakeDim3; class = DimVal0.1;
+   number of attributes = 0 
+- field index 0: [Values], type=24, order=1
+   number of attributes = 0 
+Loc.     Data
+0        10  ; 
+
+File name: testfiles/tdset.hdf 
+
+Variable Name = dset1
+	 Index = 0
+	 Type= 32-bit signed integer
+	 Ref. = 3
+	 Rank = 2
+	 Number of attributes = 0
+	 Dim0: Name=fakeDim0
+		 Size = 10
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Dim1: Name=fakeDim1
+		 Size = 20
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Data : 
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
+                
+                
+                
+
+Variable Name = dset2
+	 Index = 1
+	 Type= 64-bit floating point
+	 Ref. = 5
+	 Rank = 2
+	 Number of attributes = 0
+	 Dim0: Name=fakeDim2
+		 Size = 30
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Dim1: Name=fakeDim3
+		 Size = 10
+		 Scale Type = number-type not set
+		 Number of attributes = 0
+	 Data : 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                0.000000 1.000000 2.000000 3.000000 4.000000 5.000000 
+                6.000000 7.000000 8.000000 9.000000 
+                
+                
