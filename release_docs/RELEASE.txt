@@ -392,6 +392,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Tools
     -----
+	- Fixed h5dump to print attributes data in ASCII if -r option is used.
+	    AKC - 2004/11/18
         - Fixed space utilization reported in h5ls to correct error in formula
             used.  QAK - 2004/10/22
         - Fixed h5redeploy which sometimes complain too many argument for the
