@@ -217,6 +217,10 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC19_ATTR_NAME        "Attribute"
 #define MISC19_GROUP_NAME       "Group"
 
+/* Definitions for misc. test #20 */
+#define MISC20_FILE             "tmisc20.h5"
+#define MISC20_DSET_NAME        "Dataset"
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -2772,11 +2776,11 @@ test_misc18(void)
 
     /* Create dataspace for attributes */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, FAIL, "H5Screate");
 
     /* Create first dataset */
     did1 = H5Dcreate(fid, MISC18_DSET1_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
-    CHECK(did1, FAIL, "H5Screate_simple");
+    CHECK(did1, FAIL, "H5Dcreate");
 
     /* Get object information */
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
@@ -3288,6 +3292,83 @@ test_misc19(void)
 
 /****************************************************************
 **
+**  test_misc20(): Test NULL data space
+**
+****************************************************************/
+static void
+test_misc20(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t sid, sid2;    /* Dataspace IDs */
+    hid_t did;          /* Dataset ID */
+    H5S_class_t class;  /* dataspace type */
+    herr_t ret;         /* Generic return value */
+    
+    /* Create the file */
+    fid = H5Fcreate(MISC20_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    sid = H5Screate(H5S_NULL);
+    CHECK(sid, FAIL, "H5Screate");
+    
+    /* Create first dataset */
+    did = H5Dcreate(fid, MISC20_DSET_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
+    
+    /* Close the dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+   
+    /* Reopen the file to check the data space */  
+    fid = H5Fopen(MISC20_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Reopen the dataset */
+    did = H5Dopen(fid, MISC20_DSET_NAME);
+    CHECK(did, FAIL, "H5Dopen");
+
+    /* Get the space of the dataset */
+    sid = H5Dget_space(did);
+    CHECK(sid, FAIL, "H5Dget_space");
+
+    /* Query the NULL dataspace */
+    sid2 = H5Scopy(sid);
+    CHECK(sid2, FAIL, "H5Scopy");
+
+    /* Verify the class type of dataspace */
+    class = H5Sget_simple_extent_type(sid2);
+    VERIFY(class, H5S_NULL, "H5Sget_simple_extent_type");
+
+    /* Verify there is zero element in the dataspace */
+    ret = H5Sget_simple_extent_npoints(sid2);
+    VERIFY(ret, 0, "H5Sget_simple_extent_npoints");
+
+    /* Close the dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+   
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc20() */
+    
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3316,6 +3397,7 @@ test_misc(void)
     test_misc17();      /* Test array of ASCII character */
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
+    test_misc20();      /* Test NULL data space */
 
 } /* test_misc() */
 
