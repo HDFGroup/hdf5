@@ -64,6 +64,9 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+	- Fixed dtypes "sw long double -> double" failure in QSC class
+	  machines.  AKC - 2004/4/16
+
 
     Configuration
     -------------
