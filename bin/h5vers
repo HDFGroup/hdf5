@@ -79,7 +79,7 @@ sub setvers {
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_RELEASE\s+)\d+/$1$vers[2]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_SUBRELEASE\s+\")[^\"]*/$1$vers[3]/m;
   $_[0] =~ s/^(\#\s*define\s+H5_VERS_INFO\s+\")[^\"]*/
-    sprintf("%shdf5 version: %d.%d.%d%s%s", $1, @vers[0,1,2],
+    sprintf("%sHDF5 library version: %d.%d.%d%s%s", $1, @vers[0,1,2],
 	    $vers[3]?"-":"", $vers[3])/me;
 }
 
@@ -93,7 +93,7 @@ Usage: $prog [OPTS] [FILE]
     -s VERSION
         Set the version as specified. The version number can be embedded in
         some other string such as \"hdf5-1.1.0-pre1.tar.bz2\" or even
-        \"this is hdf5 version 1.1 release 0 (pre1)\" for convenience.
+        \"this is HDF5 library version 1.1 release 0 (pre1)\" for convenience.
     -v
         Instead of displaying only a dotted triple version number a line such
         as \"version 1.1 release 0 (pre1)\" will be printed.
@@ -240,7 +240,7 @@ if ($RELEASE) {
   open FILE, $RELEASE or die "$RELEASE: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 library version %d.%d.%d%s %s",
 			 @newver[0,1,2],
 			 $newver[3] eq "" ? "" : "-".$newver[3],
 			 "currently under development\n");
