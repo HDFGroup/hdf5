@@ -156,6 +156,14 @@ typedef struct
 #define MISC11_SYM_IK           32
 #define MISC11_ISTORE_IK        64
 
+/* Definitions for misc. test #12 */
+#define MISC12_FILE             "tmisc12.h5"
+#define MISC12_DSET_NAME        "Dataset"
+#define MISC12_SPACE1_RANK	1
+#define MISC12_SPACE1_DIM1	4
+#define MISC12_CHUNK_SIZE       2
+#define MISC12_APPEND_SIZE      5
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -1821,6 +1829,132 @@ test_misc11(void)
 
 /****************************************************************
 **
+**  test_misc12(): Test that VL-types operate correctly in chunked
+**      datasets that are extended.
+**
+****************************************************************/
+static void
+test_misc12(void)
+{
+    const char *wdata [MISC12_SPACE1_DIM1]= {
+        "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
+        "conceived in liberty and dedicated to the proposition that all men are created equal.",
+        "Now we are engaged in a great civil war,",
+        "testing whether that nation or any nation so conceived and so dedicated can long endure."
+        };   
+    const char *wdata1 [MISC12_APPEND_SIZE]= {
+       "O Gloria inmarcesible! O Jubilo inmortal! En surcos de dolores, el",
+       "bien germina ya! Ceso la horrible noche, La libertad sublime",
+       "derrama las auroras de su invencible luz.",
+       "La humanidad entera, que entre cadenas gime, comprende", 
+       "las palabras del que murio en la cruz."
+        };
+    char        *rdata [MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE]; /* Information read in */
+    hid_t		fid1;		      
+    hid_t		dataset;	    
+    hid_t		sid1, space, memspace;
+    hid_t		tid1, cparms;  
+    hsize_t		dims1[] = {MISC12_SPACE1_DIM1};
+    hsize_t		dimsn[] = {MISC12_APPEND_SIZE};
+    hsize_t		maxdims1[1] = {H5S_UNLIMITED};
+    hsize_t		chkdims1[1] = {MISC12_CHUNK_SIZE};
+    hsize_t     	newsize[1] = {MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE};
+    hssize_t    	offset[1] = {MISC12_SPACE1_DIM1};
+    hsize_t     	count[1] = {MISC12_APPEND_SIZE};
+    int                 i;          /* counting variable */
+    herr_t		ret;		/* Generic return value  */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing VL-type in chunked dataset\n"));
+
+    /* This test requirese a relatively "fresh" library environment */
+    ret=H5garbage_collect();
+    CHECK(ret, FAIL, "H5garbage_collect");
+
+    /* Create file */
+    fid1 = H5Fcreate (MISC12_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple (MISC12_SPACE1_RANK, dims1, maxdims1);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tcopy (H5T_C_S1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+
+    ret = H5Tset_size (tid1,H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    cparms = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(cparms, FAIL, "H5Pcreate");
+
+    ret = H5Pset_chunk ( cparms, 1, chkdims1);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create a dataset */
+    dataset = H5Dcreate (fid1, MISC12_DSET_NAME, tid1, sid1, cparms);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret = H5Dwrite (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+    
+    /* Extend dataset */
+    ret = H5Dextend (dataset, newsize);
+    CHECK(ret, FAIL, "H5Dextend");
+
+    memspace = H5Screate_simple (MISC12_SPACE1_RANK, dimsn, NULL);
+    CHECK(memspace, FAIL, "H5Screate_simple");
+
+    space = H5Dget_space (dataset);
+    CHECK(space, FAIL, "H5Dget_space");
+
+    ret = H5Sselect_hyperslab (space, H5S_SELECT_SET, offset, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write data to new portion of dataset */
+    ret = H5Dwrite (dataset, tid1, memspace, space, H5P_DEFAULT, wdata1);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Read all data back */
+    ret= H5Dread (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    for(i=0; i<MISC12_SPACE1_DIM1; i++)
+        if(HDstrcmp(wdata[i],rdata[i])) {
+            num_errs++;
+            printf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n",__LINE__,i,wdata[i],i,rdata[i]);
+        } /* end if */
+    for(; i<(MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE); i++)
+        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i])) {
+            num_errs++;
+            printf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
+        } /* end if */
+
+    /* Reclaim VL data memory */
+    ret = H5Dvlen_reclaim (tid1, sid1, H5P_DEFAULT, rdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Close Everything */
+    ret = H5Dclose (dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Tclose (tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Sclose (space);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose (memspace);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose (sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose (cparms);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose (fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc12() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -1841,6 +1975,7 @@ test_misc(void)
     test_misc9();       /* Test for opening (not creating) core files */
     test_misc10();      /* Test for using dataset creation property lists from old files */
     test_misc11();      /* Test for all properties of a file creation property list being stored */
+    test_misc12();      /* Test VL-strings in chunked datasets operating correctly */
 
 } /* test_misc() */
 
@@ -1875,4 +2010,5 @@ cleanup_misc(void)
     HDremove(MISC9_FILE);
     HDremove(MISC10_FILE_NEW);
     HDremove(MISC11_FILE);
+    HDremove(MISC12_FILE);
 }

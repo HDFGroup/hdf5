@@ -48,7 +48,7 @@ static int interface_initialize_g = 0;
 /* Local functions */
 static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
-static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating);
+static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
            const H5S_t *space, hid_t dcpl_id, hid_t dxpl_id);
 static H5D_t * H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
@@ -1253,7 +1253,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5D_t *
-H5D_new(hid_t dcpl_id, hbool_t creating)
+H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 {
     H5P_genplist_t	*plist;    /* Property list created */
     H5D_t	*new_dset = NULL;  /* New dataset object */
@@ -1267,7 +1267,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating)
     /* If we are using the default dataset creation property list, during creation
      * don't bother to copy it, just increment the reference count
      */
-    if(creating && dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
+    if(!vl_type && creating && dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
         /* Copy the default dataset information */
         HDmemcpy(new_dset,&H5D_def_dset,sizeof(H5D_t));
 
@@ -1399,8 +1399,14 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
     /* Special case handling for variable-length types */
     if(H5T_detect_class(type, H5T_VLEN)) {
         /* If the default fill value is chosen for variable-length types, always write it */
-        if(fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_DEFAULT)
+        if(fill_time==H5D_FILL_TIME_IFSET && fill_status==H5D_FILL_VALUE_DEFAULT) {
             dset->fill_time=fill_time=H5D_FILL_TIME_ALLOC;
+
+            /* Update dataset creation property */
+            assert(dset->dcpl_id!=H5P_DATASET_CREATE_DEFAULT);
+            if (H5P_set(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill time")
+        } /* end if */
 
         /* Don't allow never writing fill values with variable-length types */
         if(fill_time==H5D_FILL_TIME_NEVER)
@@ -1447,6 +1453,7 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message");
 
         /* Update dataset creation property */
+        assert(dset->dcpl_id!=H5P_DATASET_CREATE_DEFAULT);
         if (H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value");  
     } /* end if */
@@ -1603,6 +1610,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     int                 chunk_ndims = 0;
     hsize_t             chunk_size[H5O_LAYOUT_NDIMS]={0};
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */
+    hbool_t             has_vl_type=FALSE;      /* Flag to indicate a VL-type for dataset */
     H5D_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL);
@@ -1627,8 +1635,12 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     if(H5T_is_sensible(type)!=TRUE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible");
 
+    /* Check if the datatype is/contains a VL-type */
+    if(H5T_detect_class(type, H5T_VLEN))
+        has_vl_type=TRUE;
+
     /* Initialize the dataset object */
-    if(NULL == (new_dset = H5D_new(dcpl_id,TRUE)))
+    if(NULL == (new_dset = H5D_new(dcpl_id,TRUE,has_vl_type)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Make the "set local" filter callbacks for this dataset */
@@ -2012,7 +2024,8 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     assert (ent);
     
     /* Allocate the dataset structure */
-    if(NULL==(dataset = H5D_new(H5P_DATASET_CREATE_DEFAULT,FALSE)))
+    /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
+    if(NULL==(dataset = H5D_new(H5P_DATASET_CREATE_DEFAULT,FALSE,FALSE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Shallow copy (take ownership) of the group entry object */
