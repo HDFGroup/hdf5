@@ -221,11 +221,11 @@ of the <cite>HDF5 User's Guide.</cite>.
         <code>maxdims</code> may be the null pointer, in which case the 
         upper limit is the same as <code>dims</code>.  
         <p>
-        No element of <code>maxdims</code> should be smaller than the 
-        corresponding element of <code>dims</code>.  
         If an element of <code>maxdims</code> is 
         <code>H5S_UNLIMITED</code>, (<code>-1</code>), 
-        the maximum size of corresponding dimension is unlimited.
+        the maximum size of the corresponding dimension is unlimited.
+        Otherwise, no element of <code>maxdims</code> should be 
+        smaller than the corresponding element of <code>dims</code>.  
         <p>
         The dataspace identifier returned from this function must be 
         released with <code>H5Sclose</code> or resource leaks will occur.
