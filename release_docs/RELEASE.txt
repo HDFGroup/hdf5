@@ -229,6 +229,8 @@ Supported Configuration Features Summary
 
 Known Problems
 ==============
+    * Datasets or attributes which have a variable-length string datatype are
+      not printing correctly with h5dump and h5ls.
 
     * When a dataset with the variable-legth datatype is overwritten, 
       the library can develop memory leaks that cause the file to become 
