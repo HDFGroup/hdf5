@@ -883,8 +883,8 @@ H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id)
 
         if (H5FP_read_metadata(&mdata, (int)sap_read.md_size,
                                (int)H5FP_sap_rank) != FAIL) {
-            if (H5FD_fphdf5_write_real(file, new_dxpl_id, sap_read.addr,
-                                       (int)sap_read.md_size, mdata) == FAIL) {
+            if (H5FD_fphdf5_write_real(file, H5FD_MEM_DEFAULT, plist,
+                        sap_read.addr, (int)sap_read.md_size, mdata) == FAIL) {
                 HDfree(mdata);
                 HGOTO_ERROR(H5E_FPHDF5, H5E_WRITEERROR, FAIL, "can't write metadata to file");
             }

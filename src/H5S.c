@@ -51,7 +51,6 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 #ifdef H5_HAVE_PARALLEL
 /* Global vars whose value can be set from environment variable also */
 hbool_t H5S_mpi_opt_types_g = TRUE;
-hbool_t H5S_mpi_prefer_derived_types_g = TRUE;
 #endif /* H5_HAVE_PARALLEL */
 
 /* Declare a free list to manage the H5S_simple_t struct */
@@ -97,12 +96,6 @@ H5S_init_interface(void)
         const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
         if (s && HDisdigit(*s))
             H5S_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
-    }
-    {
-        /* Prefer MPI derived types for collective data transfers? */
-        const char *s = HDgetenv ("HDF5_MPI_PREFER_DERIVED_TYPES");
-        if (s && HDisdigit(*s))
-            H5S_mpi_prefer_derived_types_g = (int)HDstrtol (s, NULL, 0);
     }
 #endif /* H5_HAVE_PARALLEL */
 

@@ -174,9 +174,6 @@ static int interface_initialize_g = 0;
 /* Definitions for file MPI type property */
 #define H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME       "H5FD_mpio_file_mpi_type"
 #define H5FD_MPIO_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
-/* Definitions for whether to use MPI types property */
-#define H5FD_MPIO_XFER_USE_VIEW_NAME            "H5FD_mpio_use_view"
-#define H5FD_MPIO_XFER_USE_VIEW_SIZE            sizeof(unsigned)
 
 
 /*-------------------------------------------------------------------------
@@ -641,7 +638,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype, unsigned use_view)
+H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -658,10 +655,6 @@ H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype, unsigned 
 
     /* Set file MPI type */
     if(H5P_insert(plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME,H5FD_MPIO_XFER_FILE_MPI_TYPE_SIZE,&ftype,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
-
-    /* Set 'use view' property */
-    if(H5P_insert(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,H5FD_MPIO_XFER_USE_VIEW_SIZE,&use_view,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
 
 done:
@@ -702,10 +695,6 @@ H5FD_mpio_teardown(hid_t dxpl_id)
 
     /* Remove file MPI type */
     if(H5P_remove(dxpl_id,plist,H5FD_MPIO_XFER_FILE_MPI_TYPE_NAME)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
-
-    /* Remove 'use view' property */
-    if(H5P_remove(dxpl_id,plist,H5FD_MPIO_XFER_USE_VIEW_NAME)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
 
 done:
@@ -1476,10 +1465,6 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     MPI_Datatype		buf_type=MPI_BYTE;      /* MPI description of the selection in memory */
     int         		size_i, bytes_read, n;
     unsigned			use_view_this_time=0;
-    H5P_genplist_t              *plist;      /* Property list pointer */
-#ifndef NDEBUG
-    H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
-#endif /* NDEBUG */
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_read, FAIL)
@@ -1511,30 +1496,27 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 		(long)mpi_off, size_i );
 #endif
 
-    /* Obtain the data transfer properties */
-    if(NULL == (plist = H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-#ifndef NDEBUG
-    xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
-#endif /* NDEBUG */
-    
     /* Only look for MPI views for raw data transfers */
     if(type==H5FD_MEM_DRAW) {
+        H5P_genplist_t              *plist;      /* Property list pointer */
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+
+        /* Obtain the data transfer properties */
+        if(NULL == (plist = H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+    
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
          * wouldn't need to rely on the use_view field if MPI semantics allowed
          * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
          * could mean "use MPI_BYTE" by convention).
          */
-        if(H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_VIEW_NAME)>0)
-            if(H5P_get(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,&use_view_this_time)<0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
-
-        if (use_view_this_time) {
+        if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
             MPI_Datatype		file_type;
 
-            /* Sanity check that views will only be used by collective I/O */
-            assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+            /* Remember that views are used */
+            use_view_this_time=TRUE;
 
             /* prepare for a full-blown xfer using btype, ftype, and disp */
             if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
@@ -1554,10 +1536,6 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
              */
             mpi_off=0;
         } /* end if */
-        else {
-            /* Sanity check that independent I/O must be occuring */
-            assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-        } /* end else */
     } /* end if */
 
     /* Read the data. */
@@ -1783,9 +1761,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     int         		size_i, bytes_written;
     unsigned			use_view_this_time=0;
     H5P_genplist_t              *plist;                 /* Property list pointer */
-#ifndef NDEBUG
-    H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
-#endif /* NDEBUG */
     herr_t              	ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_mpio_write, FAIL)
@@ -1820,26 +1795,24 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     /* Obtain the data transfer properties */
     if(NULL == (plist = H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-#ifndef NDEBUG
-    xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
-#endif /* NDEBUG */
     
     if(type==H5FD_MEM_DRAW) {
+        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+
+        /* Obtain the data transfer properties */
+        xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
          * wouldn't need to rely on the use_view field if MPI semantics allowed
          * us to test that btype=ftype=MPI_BYTE (or even MPI_TYPE_NULL, which
          * could mean "use MPI_BYTE" by convention).
          */
-        if(H5P_exist_plist(plist,H5FD_MPIO_XFER_USE_VIEW_NAME)>0)
-            if(H5P_get(plist,H5FD_MPIO_XFER_USE_VIEW_NAME,&use_view_this_time)<0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
-
-        if (use_view_this_time) {
+        if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
             MPI_Datatype		file_type;
 
-            /* Sanity check that views will only be used by collective I/O */
-            assert(xfer_mode==H5FD_MPIO_COLLECTIVE);
+            /* Remember that views are used */
+            use_view_this_time=TRUE;
 
             /* prepare for a full-blown xfer using btype, ftype, and disp */
             if(H5P_get(plist,H5FD_MPIO_XFER_MEM_MPI_TYPE_NAME,&buf_type)<0)
@@ -1859,10 +1832,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
              */
             mpi_off=0;
         } /* end if */
-        else {
-            /* Sanity check that independent I/O must occur */
-            assert(xfer_mode==H5FD_MPIO_INDEPENDENT);
-        } /* end else */
     } /* end if */
     else {
         unsigned		        block_before_meta_write=0;      /* Whether to block before a metadata write */

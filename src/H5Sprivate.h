@@ -255,7 +255,6 @@ H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 /* Global vars whose value comes from environment variable */
 /* (Defined in H5S.c) */
 H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
-H5_DLLVAR hbool_t		H5S_mpi_prefer_derived_types_g;
 #endif /* _H5S_IN_H5S_C */
 #endif /* H5_HAVE_PARALLEL */
 
