@@ -71,9 +71,9 @@ typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
  *
  */
 
-/* When this header is included from H5Pprivate.h, don't make calls to H5open() */
+/* When this header is included from a private header, don't make calls to H5open() */
 #undef H5OPEN
-#ifndef _H5Pprivate_H
+#ifndef _H5private_H
 #define H5OPEN        H5open(),
 #else   /* _H5Pprivate_H */
 #define H5OPEN

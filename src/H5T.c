@@ -3256,9 +3256,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
     } /* end switch */
 
-    /* Deep copy of the symbol table entry */
-    if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
+    /* Deep copy of the symbol table entry, if there was one */
+    if (H5F_addr_defined(old_dt->ent.header))
+        if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
 
     /* Set return value */
     ret_value=new_dt;
