@@ -27,6 +27,7 @@
 /* const hbool_t H5S_mpio_avail = FALSE; */
 #else /* HAVE_PARALLEL */
 /* Interface initialization */
+#include "MPIO_Trace.h"
 #define PABLO_MASK      H5S_all_mask
 #define INTERFACE_INIT  NULL
 static intn             interface_initialize_g = FALSE;
