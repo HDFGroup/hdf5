@@ -456,10 +456,10 @@ nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab,
      int ret_value = -1;
      hid_t c_prp_id;
      herr_t ret;
-     int c_boot;
-     int c_freelist;
-     int c_stab;
-     int c_shhdr;
+     unsigned c_boot;
+     unsigned c_freelist;
+     unsigned c_stab;
+     unsigned c_shhdr;
 
      /*
       * Call H5Pget_version function.

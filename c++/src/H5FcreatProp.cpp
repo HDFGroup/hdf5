@@ -34,7 +34,7 @@ FileCreatPropList::FileCreatPropList() : PropList( H5P_FILE_CREATE ) {}
 FileCreatPropList::FileCreatPropList( const FileCreatPropList& orig ) : PropList( orig ) {}
 
 void FileCreatPropList::getVersion( 
-			int& boot, int& freelist, int& stab, int& shhdr ) const
+			unsigned& boot, unsigned& freelist, unsigned& stab, unsigned& shhdr ) const
 {
    herr_t ret_value = H5Pget_version( id, &boot, &freelist, &stab, &shhdr );
    if( ret_value < 0 )

@@ -144,9 +144,15 @@ H5_DLL herr_t H5Punregister(hid_t pclass_id, const char *name);
 H5_DLL herr_t H5Pclose_class(hid_t plist_id);
 H5_DLL herr_t H5Pclose(hid_t plist_id);
 H5_DLL hid_t H5Pcopy(hid_t plist_id);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL herr_t H5Pget_version(hid_t plist_id, int *boot/*out*/,
          int *freelist/*out*/, int *stab/*out*/,
          int *shhdr/*out*/);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,
+         unsigned *freelist/*out*/, unsigned *stab/*out*/,
+         unsigned *shhdr/*out*/);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
 H5_DLL herr_t H5Pget_userblock(hid_t plist_id, hsize_t *size);
 H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,

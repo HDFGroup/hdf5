@@ -1712,10 +1712,17 @@ test_misc11(void)
     unsigned    istore_ik;      /* Indexed storage B-tree internal 'K' value */
 #endif /* H5_WANT_H5_V1_6_COMPAT */
     unsigned    sym_lk;         /* Symbol table B-tree leaf 'K' value */
+#ifdef H5_WANT_H5_V1_6_COMPAT
     int super;                  /* Superblock version # */
     int freelist;               /* Free list version # */
     int stab;                   /* Symbol table entry version # */
     int shhdr;                  /* Shared object header version # */
+#else /* H5_WANT_H5_V1_6_COMPAT */
+    unsigned super;             /* Superblock version # */
+    unsigned freelist;          /* Free list version # */
+    unsigned stab;              /* Symbol table entry version # */
+    unsigned shhdr;             /* Shared object header version # */
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     herr_t      ret;            /* Generic return value */
 
     /* Output message about test being performed */
