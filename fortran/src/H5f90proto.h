@@ -78,6 +78,7 @@ H5_DLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
 H5_DLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_count);
 
 H5_DLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, int_f *obj_ids);
+H5_DLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
 
 /*
  * Functions from H5Sf.c
@@ -1127,6 +1128,7 @@ H5_DLL int_f nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *mem_map, hid_t_f *m
 H5_DLL int_f nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag);
 H5_DLL int_f nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block);
 H5_DLL int_f nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status); 
+H5_DLL int_f nh5pfill_value_defined_c ( hid_t_f *prp_id , int_f *flag);
 
 /*
  * Functions frome H5Rf.c 
