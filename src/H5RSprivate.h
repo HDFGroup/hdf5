@@ -40,7 +40,7 @@ typedef struct {
 
 /* Private routines */
 H5_DLL H5RS_str_t *H5RS_create(const char *s);
-H5_DLL H5RS_str_t *H5RS_wrap(char *s);
+H5_DLL H5RS_str_t *H5RS_wrap(const char *s);
 H5_DLL H5RS_str_t *H5RS_own(char *s);
 H5_DLL herr_t H5RS_decr(H5RS_str_t *rs);
 H5_DLL herr_t H5RS_incr(H5RS_str_t *rs);

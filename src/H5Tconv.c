@@ -2274,7 +2274,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		    if(bg_seq_len>0) {
                         H5_CHECK_OVERFLOW( bg_seq_len*MAX(src_base_size,dst_base_size) ,hsize_t,size_t);
 			if(tmp_buf_size<(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size))) {
-			    tmp_buf_size=bg_seq_len*MAX(src_base_size, dst_base_size);
+			    tmp_buf_size=(size_t)(bg_seq_len*MAX(src_base_size, dst_base_size));
                     	    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf, tmp_buf_size))==NULL)
                         	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
                         }

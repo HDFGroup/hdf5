@@ -132,7 +132,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5RS_str_t *
-H5RS_wrap(char *s)
+H5RS_wrap(const char *s)
 {
     H5RS_str_t *ret_value=NULL;   /* Return value */
 

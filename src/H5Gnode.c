@@ -1106,7 +1106,7 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
                 s = buf;
             }
             HDstrcpy (s, name);
-            ret_value = (bt_udata->op)(bt_udata->group_id, s,
+            ret_value = (H5B_iterate_t)(bt_udata->op)(bt_udata->group_id, s,
                            bt_udata->op_data);
             if (s!=buf)
                 H5MM_xfree (s);

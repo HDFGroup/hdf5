@@ -5564,11 +5564,12 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
         size_t leftover;  /* The number of elements left over from the last sequence */
 
         /* Calculate the number of elements left in the sequence */
-        H5_CHECK_OVERFLOW( tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start) ,hsize_t,size_t);
-        if(tdiminfo[fast_dim].stride==1)
-            leftover=(size_t)(tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start));
-        else
-            leftover=(size_t)(tdiminfo[fast_dim].block-((iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride));
+        if(tdiminfo[fast_dim].stride==1) {
+            H5_ASSIGN_OVERFLOW(leftover, tdiminfo[fast_dim].block-(iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start) ,hsize_t,size_t);
+        } /* end if */
+        else {
+            H5_ASSIGN_OVERFLOW(leftover, tdiminfo[fast_dim].block-((iter->hyp.off[fast_dim]-tdiminfo[fast_dim].start)%tdiminfo[fast_dim].stride) ,hsize_t,size_t);
+        } /* end else */
 
         /* Make certain that we don't write too many */
         actual_elem=MIN(leftover,io_left);
