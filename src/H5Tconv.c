@@ -2459,7 +2459,6 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                      "memory allocation failed for type conversion");
 
             /* Set up conversion path for base elements */
-            tpath = H5T_path_find(src->parent, dst->parent, NULL, NULL);
             if (NULL==(tpath=H5T_path_find(src->parent, dst->parent, NULL, NULL))) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
                           "unable to convert between src and dest datatypes");
@@ -2650,7 +2649,6 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             dst_delta = direction * (buf_stride ? buf_stride : dst->size);
 
             /* Set up conversion path for base elements */
-            tpath = H5T_path_find(src->parent, dst->parent, NULL, NULL);
             if (NULL==(tpath=H5T_path_find(src->parent, dst->parent,
                                            NULL, NULL))) {
                 HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
