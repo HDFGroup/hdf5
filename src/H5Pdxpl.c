@@ -421,6 +421,131 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_edc_check
+ *
+ * Purpose:     Enable or disable error-detecting for a dataset reading 
+ *              process.  This error-detecting algorithm is whichever 
+ *              user chooses earlier.  This function cannot control 
+ *              writing process.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 3, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_edc_check(hid_t plist_id, H5Z_EDC_t check)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pset_edc_check, FAIL);
+
+    /* Check argument */
+    if (check != H5Z_ENABLE_EDC && check != H5Z_DISABLE_EDC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value");
+        
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    if (H5P_set(plist,H5D_XFER_EDC_NAME,&check)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+ 
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_edc_check
+ *
+ * Purpose:     Enable or disable error-detecting for a dataset reading 
+ *              process.  This error-detecting algorithm is whichever 
+ *              user chooses earlier.  This function cannot control 
+ *              writing process.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 3, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Z_EDC_t
+H5Pget_edc_check(hid_t plist_id)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5Z_EDC_t      ret_value;   /* return value */
+    
+    FUNC_ENTER_API(H5Pget_edc_check, FAIL);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    if (H5P_get(plist,H5D_XFER_EDC_NAME,&ret_value)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+    /* check valid value */
+    if (ret_value != H5Z_ENABLE_EDC && ret_value != H5Z_DISABLE_EDC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid value");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+ 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_filter_callback
+ *
+ * Purpose:     Sets user's callback function for dataset transfer property
+ *              list.  This callback function defines what user wants to do
+ *              if certain filter fails.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_filter_callback(hid_t plist_id, H5Z_filter_func_t func, void* op_data)
+{
+    H5P_genplist_t      *plist;      /* Property list pointer */
+    herr_t              ret_value=SUCCEED;   /* return value */
+    H5Z_cb_t            cb_struct;
+    
+    FUNC_ENTER_API(H5Pset_filter_callback, FAIL);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    cb_struct.func = func;
+    cb_struct.op_data = op_data;
+    
+    if (H5P_set(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pget_btree_ratios
  *
  * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().

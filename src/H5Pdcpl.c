@@ -800,6 +800,48 @@ done:
     FUNC_LEAVE_API(ret_value);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_adler32
+ *
+ * Purpose:	Sets Adler32 checksum of EDC for a dataset creation 
+ *              property list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Dec 19, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_adler32(hid_t plist_id)
+{
+    H5O_pline_t         pline;
+    H5P_genplist_t      *plist;      /* Property list pointer */
+    herr_t              ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pset_adler32, FAIL);
+    H5TRACE1("e","i",plist_id);
+   
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Add the Adler32 checksum as a filter */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline");
+    if(H5Z_append(&pline, H5Z_FILTER_ADLER32, H5Z_FLAG_MANDATORY, 0, NULL)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline");
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fill_value

@@ -42,9 +42,8 @@ static int interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 size_t
-H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
-                  const unsigned cd_values[], size_t nbytes,
-                  size_t *buf_size, void **buf)
+H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+                   size_t nbytes, size_t *buf_size, void **buf)
 {
     void *dest = NULL;          /* Buffer to deposit [un]shuffled bytes into */
     unsigned char *_src;        /* Alias for source buffer */
@@ -52,6 +51,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
     unsigned bytesoftype;       /* Number of bytes per element */
     size_t numofelements;       /* Number of elements in buffer */
     size_t i,j;                 /* Local index variables */
+    size_t leftover;            /* Extra bytes at end of buffer */
     size_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_filter_shuffle, 0);
@@ -67,6 +67,9 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
     if(bytesoftype>1) {
         /* Compute the number of elements in buffer */
         numofelements=nbytes/bytesoftype;
+
+        /* Compute the leftover bytes if there are any */
+        leftover = nbytes%bytesoftype;
 
         /* Allocate the destination buffer */
         if (NULL==(dest = H5MM_malloc(nbytes)))
@@ -84,6 +87,13 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
                     _dest+=bytesoftype;
                 } /* end for */
             } /* end for */
+
+            /* Add leftover to the end of data */ 
+            if(leftover>0) {
+                /* Adjust back to end of shuffled bytes */
+                _dest -= (bytesoftype - 1);
+                HDmemcpy((void*)_dest, (void*)_src, leftover);
+            }
         } /* end if */
         else {
             /* Get the pointer to the destination buffer */
@@ -97,6 +107,13 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
                     _src+=bytesoftype;
                 } /* end for */
             } /* end for */
+
+            /* Add leftover to the end of data */ 
+            if(leftover>0) {
+                /* Adjust back to end of shuffled bytes */
+                _src -= (bytesoftype - 1);
+                HDmemcpy((void*)_dest, (void*)_src, leftover);
+            }
         } /* end else */
 
         /* Set the buffer information to return */

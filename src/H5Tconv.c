@@ -2239,7 +2239,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
                 /* Get length of element sequences */
                 if((seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s))<0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "null pointer");
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect length");
                 H5_CHECK_OVERFLOW(seq_len,hssize_t,size_t);
                 src_size=(size_t)seq_len*src_base_size;
                 dst_size=(size_t)seq_len*dst_base_size;

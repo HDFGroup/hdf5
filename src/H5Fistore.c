@@ -898,12 +898,15 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
     void		*buf=NULL;	/*temporary buffer		*/
     size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
-    
+    H5Z_cb_t            cb_struct={NULL,NULL};
+    H5Z_EDC_t           edc=H5Z_ENABLE_EDC;
+   
     FUNC_ENTER_NOINIT(H5F_istore_flush_entry);
 
     assert(f);
     assert(ent);
     assert(!ent->locked);
+    HDmemset(&udata, 0, sizeof(H5F_istore_ud1_t));
 
     buf = ent->chunk;
     if (ent->dirty) {
@@ -941,8 +944,11 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             }
-            if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask),
-                     &(udata.key.nbytes), &alloc, &buf)<0) {
+            /* Don't know whether we should involve transfer property list.  So
+             * just pass in H5Z_ENABLE_EDC and default callback setting for data 
+             * read. */
+            if (H5Z_pipeline(f, ent->pline, 0, &(udata.key.filter_mask), edc, 
+                             cb_struct, &(udata.key.nbytes), &alloc, &buf)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL,
                     "output pipeline failed");
             }
@@ -1322,13 +1328,19 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
     size_t		chunk_size=0;		/*size of a chunk	*/
     hsize_t             tempchunk_size;
-    size_t		chunk_alloc=0;		/*allocated chunk size	*/
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
     void		*ret_value;	        /*return value		*/
     H5P_genplist_t *plist=NULL;                 /* Property list */
+    H5Z_EDC_t           edc;
+    H5Z_cb_t            cb_struct;
 
     FUNC_ENTER_NOINIT(H5F_istore_lock);
+    
+    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    plist=H5I_object(dxpl_id);
+    assert(plist!=NULL);
+    HDmemset(&udata, 0, sizeof(H5F_istore_ud1_t));
 
     if (rdcc->nslots>0) {
         for (u=0, temp_idx=0; u<layout->ndims; u++) {
@@ -1371,11 +1383,11 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         for (u=0, tempchunk_size=1; u<layout->ndims; u++)
             tempchunk_size *= layout->dim[u];
         H5_ASSIGN_OVERFLOW(chunk_size,tempchunk_size,hsize_t,size_t);
-        chunk_alloc = chunk_size;
-        if (NULL==(chunk=H5MM_malloc (chunk_alloc)))
+        if (NULL==(chunk=H5MM_malloc (chunk_size)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
         
     } else {
+
         /*
          * Not in the cache.  Read it from the file and count this as a miss
          * if it's in the file or an init if it isn't.
@@ -1385,40 +1397,54 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             tempchunk_size *= layout->dim[u];
         }
         H5_ASSIGN_OVERFLOW(chunk_size,tempchunk_size,hsize_t,size_t);
-        chunk_alloc = chunk_size;
         udata.mesg = *layout;
         udata.addr = HADDR_UNDEF;
         status = H5B_find (f, H5B_ISTORE, layout->addr, &udata);
         H5E_clear ();
-        if (NULL==(chunk = H5MM_malloc (chunk_alloc)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
+
         if (status>=0 && H5F_addr_defined(udata.addr)) {
+            size_t		chunk_alloc=0;		/*allocated chunk size	*/
+
             /*
              * The chunk exists on disk.
              */
+            /* Chunk size on disk isn't [likely] the same size as the final chunk
+             * size in memory, so allocate memory big enough. */
+            chunk_alloc = udata.key.nbytes;
+            if (NULL==(chunk = H5MM_malloc (chunk_alloc)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
             if (H5F_block_read(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DATASET_XFER_DEFAULT, chunk)<0)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk");
-            if (H5Z_pipeline(f, pline, H5Z_FLAG_REVERSE,
-                     &(udata.key.filter_mask), &(udata.key.nbytes),
-                     &chunk_alloc, &chunk)<0 || udata.key.nbytes!=chunk_size)
+            if(H5P_get(plist,H5D_XFER_EDC_NAME,&edc)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get edc information");
+            if(H5P_get(plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get filter callback struct");
+            if (H5Z_pipeline(f, pline, H5Z_FLAG_REVERSE, &(udata.key.filter_mask), edc, 
+                     cb_struct, &(udata.key.nbytes), &chunk_alloc, &chunk)<0) {
                 HGOTO_ERROR(H5E_PLINE, H5E_READERROR, NULL, "data pipeline read failed");
+            }
             rdcc->nmisses++;
-        } else if (fill && fill->buf) {
-            /*
-             * The chunk doesn't exist in the file.  Replicate the fill
-             * value throughout the chunk.
-             */
-            assert(0==chunk_size % fill->size);
-            H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
-            rdcc->ninits++;
         } else {
-            /*
-             * The chunk doesn't exist in the file and no fill value was
-             * specified.  Assume all zeros.
-             */
-            HDmemset (chunk, 0, chunk_size);
+            /* Chunk size on disk isn't [likely] the same size as the final chunk
+             * size in memory, so allocate memory big enough. */
+            if (NULL==(chunk = H5MM_malloc (chunk_size)))
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk");
+            if (fill && fill->buf) {
+                /*
+                 * The chunk doesn't exist in the file.  Replicate the fill
+                 * value throughout the chunk.
+                 */
+                assert(0==chunk_size % fill->size);
+                H5V_array_fill(chunk, fill->buf, fill->size, chunk_size/fill->size);
+            } else {
+                /*
+                 * The chunk doesn't exist in the file and no fill value was
+                 * specified.  Assume all zeros.
+                 */
+                HDmemset (chunk, 0, chunk_size);
+            }
             rdcc->ninits++;
-        }
+        } /* end else */
     }
     assert (found || chunk_size>0);
     
@@ -1436,6 +1462,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             if (H5F_istore_preempt(f, ent, TRUE)<0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache");
         }
+
         if (H5F_istore_prune(f, chunk_size)<0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache");
 
@@ -1453,9 +1480,6 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->wr_count = chunk_size;
         ent->chunk = chunk;
         
-        assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-        plist=H5I_object(dxpl_id);
-        assert(plist!=NULL);
         H5P_get(plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(ent->split_ratios));
         
         /* Add it to the cache */
@@ -1476,7 +1500,6 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             ent->prev = NULL;
         }
         found = TRUE;
-        
     } else if (!found) {
         /*
          * The chunk is larger than the entire cache so we don't cache it.
@@ -1523,7 +1546,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     
 done:
     if (!ret_value)
-        H5MM_xfree (chunk);
+        if(chunk)
+            H5MM_xfree (chunk);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -2337,6 +2361,8 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned	chunk_exists;   /* Flag to indicate whether a chunk exists already */
     int		i;              /* Local index variable */
     unsigned	u;              /* Local index variable */
+    H5Z_EDC_t   edc;            /* Decide whether to enable EDC for read */
+    H5Z_cb_t    cb_struct;
     herr_t	ret_value=SUCCEED;	/* Return value */
     
     FUNC_ENTER_NOAPI(H5F_istore_allocate, FAIL);
@@ -2363,6 +2389,10 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
     if(H5P_get(dx_plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,split_ratios)<0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get B-tree split ratios");
+    if(H5P_get(dx_plist,H5D_XFER_EDC_NAME,&edc)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get edc information");
+    if(H5P_get(dx_plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get filter callback struct");
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve up MPI parameters */
@@ -2435,7 +2465,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             size_t nbytes=(size_t)chunk_size;
 
             /* Push the chunk through the filters */
-            if (H5Z_pipeline(f, &pline, 0, &filter_mask, &nbytes, &buf_size, &chunk)<0)
+            if (H5Z_pipeline(f, &pline, 0, &filter_mask, edc, cb_struct, &nbytes, &buf_size, &chunk)<0)
                 HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed");
 
             /* Keep the number of bytes the chunk turned in to */

@@ -27,6 +27,9 @@
 /* Define if support for shuffle filter is enabled */
 #undef HAVE_FILTER_SHUFFLE
 
+/* Define if support for Adler32 checksum filter is enabled */
+#undef HAVE_FILTER_ADLER32
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 

@@ -140,6 +140,14 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME       "vec_size"
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
+/* Definitions for EDC property */
+#define H5D_XFER_EDC_NAME       "error-detecting"
+#define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
+#define H5D_XFER_EDC_DEF        H5Z_ENABLE_EDC
+/* Definitions for filter callback function property */
+#define H5D_XFER_FILTER_CB_NAME       "filter_cb"
+#define H5D_XFER_FILTER_CB_SIZE       sizeof(H5Z_cb_t)
+#define H5D_XFER_FILTER_CB_DEF        {NULL,NULL}
 
 /*
  * A dataset is the following struct.

@@ -291,7 +291,10 @@ H5T_vlen_str_mem_getlen(H5F_t UNUSED *f, void *vl_addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "null pointer");
             
     /* Set return value */
-    ret_value=(hssize_t)HDstrlen(s);
+    if(s)
+        ret_value=(hssize_t)HDstrlen(s);
+    else
+        ret_value = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -324,7 +327,10 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
     assert(s);
     assert(buf);
 
-    HDmemcpy(buf,s,len);
+    if(s && buf && len>0)
+        HDmemcpy(buf,s,len);
+    if(!s && len==-1)
+        buf = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

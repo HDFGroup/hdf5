@@ -52,6 +52,9 @@ H5Z_init_interface (void)
 #ifdef H5_HAVE_FILTER_SHUFFLE
     H5Z_register (H5Z_FILTER_SHUFFLE, "shuffle", H5Z_filter_shuffle);
 #endif /* H5_HAVE_FILTER_SHUFFLE */
+#ifdef H5_HAVE_FILTER_ADLER32
+    H5Z_register (H5Z_FILTER_ADLER32, "adler32", H5Z_filter_adler32);
+#endif /* H5_HAVE_FILTER_ADLER32 */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
@@ -492,12 +495,14 @@ done:
  */
 herr_t
 H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
-	     unsigned *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
-	     size_t *buf_size/*in,out*/, void **buf/*in,out*/)
+ 	     unsigned *filter_mask/*in,out*/, H5Z_EDC_t edc_read,
+             H5Z_cb_t cb_struct, size_t *nbytes/*in,out*/, 
+             size_t *buf_size/*in,out*/, void **buf/*in,out*/)
 {
     size_t	i, idx, new_nbytes;
     H5Z_class_t	*fclass=NULL;
     unsigned	failed = 0;
+    unsigned	tmp_flags;
 #ifdef H5Z_DEBUG
     H5_timer_t	timer;
 #endif
@@ -513,7 +518,7 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
     assert(buf && *buf);
     assert(!pline || pline->nfilters<32);
 
-    if (pline && (flags & H5Z_FLAG_REVERSE)) {
+    if (pline && (flags & H5Z_FLAG_REVERSE)) { /* Read */
 	for (i=pline->nfilters; i>0; --i) {
 	    idx = i-1;
 	    
@@ -528,22 +533,30 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 #ifdef H5Z_DEBUG
 	    H5_timer_begin(&timer);
 #endif
-	    new_nbytes = (fclass->func)(flags|(pline->filter[idx].flags),
-					pline->filter[idx].cd_nelmts,
-					pline->filter[idx].cd_values,
-					*nbytes, buf_size, buf);
+            tmp_flags=flags|(pline->filter[idx].flags);
+            tmp_flags|=(edc_read== H5Z_DISABLE_EDC) ? H5Z_FLAG_SKIP_EDC : 0;
+	    new_nbytes = (fclass->func)(tmp_flags, pline->filter[idx].cd_nelmts, 
+                                        pline->filter[idx].cd_values, *nbytes, buf_size, buf);
+
 #ifdef H5Z_DEBUG
 	    H5_timer_end(&(fclass->stats[1].timer), &timer);
 	    fclass->stats[1].total += MAX(*nbytes, new_nbytes);
 	    if (0==new_nbytes) fclass->stats[1].errors += *nbytes;
 #endif
-	    if (0==new_nbytes) {
-		failed |= (unsigned)1 << idx;
-		HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure");
-	    }
-	    *nbytes = new_nbytes;
+
+            if(0==new_nbytes) {
+                if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *buf_size, cb_struct.op_data)))
+                    || !cb_struct.func) {                  
+		      failed |= (unsigned)1 << idx;
+		      HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "filter returned failure during read");
+                } else {
+                    H5E_clear();
+                    *nbytes = *buf_size;
+                }
+            } else 
+                *nbytes = new_nbytes;
 	}
-    } else if (pline) {
+    } else if (pline) { /* Write */
 	for (idx=0; idx<pline->nfilters; idx++) {
 	    if (*filter_mask & ((unsigned)1<<idx)) {
 		failed |= (unsigned)1 << idx;
@@ -561,25 +574,29 @@ H5Z_pipeline(H5F_t UNUSED *f, const H5O_pline_t *pline, unsigned flags,
 #ifdef H5Z_DEBUG
 	    H5_timer_begin(&timer);
 #endif
-	    new_nbytes = (fclass->func)(flags|(pline->filter[idx].flags),
-					pline->filter[idx].cd_nelmts,
-					pline->filter[idx].cd_values,
-					*nbytes, buf_size, buf);
+	    new_nbytes = (fclass->func)(flags|(pline->filter[idx].flags), pline->filter[idx].cd_nelmts,
+					pline->filter[idx].cd_values, *nbytes, buf_size, buf);
 #ifdef H5Z_DEBUG
 	    H5_timer_end(&(fclass->stats[0].timer), &timer);
 	    fclass->stats[0].total += MAX(*nbytes, new_nbytes);
 	    if (0==new_nbytes) fclass->stats[0].errors += *nbytes;
 #endif
-	    if (0==new_nbytes) {
-		failed |= (unsigned)1 << idx;
-		if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
-		    HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
-		} else {
-		    H5E_clear();
-		}
-	    } else {
-		*nbytes = new_nbytes;
-	    }
+            if(0==new_nbytes) {
+                if (0==(pline->filter[idx].flags & H5Z_FLAG_OPTIONAL)) {
+                    if((cb_struct.func && (H5Z_CB_FAIL==cb_struct.func(pline->filter[idx].id, *buf, *nbytes, cb_struct.op_data)))
+                            || !cb_struct.func) {                  
+                        failed |= (unsigned)1 << idx;
+                        HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "filter returned failure");
+                    } else {
+                        H5E_clear();
+                        *nbytes = *buf_size;
+                    }
+                } else {
+                    H5E_clear();
+                }
+            } else {
+                *nbytes = new_nbytes;
+            }
 	}
     }
 

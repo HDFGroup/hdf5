@@ -19,17 +19,46 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_ERROR	(-1)	/*no filter			*/
 #define H5Z_FILTER_NONE		0	/*reserved indefinitely		*/
 #define H5Z_FILTER_DEFLATE	1 	/*deflation like gzip	     	*/
-#define H5Z_FILTER_SHUFFLE      2       /* shuffle the data             */
+#define H5Z_FILTER_SHUFFLE      2       /*shuffle the data              */
+#define H5Z_FILTER_ADLER32      3       /*adler32 checksum of EDC       */
 #define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved */
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 
 /* Flags for filter definition */
 #define H5Z_FLAG_DEFMASK	0x00ff	/*definition flag mask		*/
+#define H5Z_FLAG_MANDATORY      0x0000  /*filter is mandatory		*/
 #define H5Z_FLAG_OPTIONAL	0x0001	/*filter is optional		*/
 
 /* Additional flags for filter invocation */
 #define H5Z_FLAG_INVMASK	0xff00	/*invocation flag mask		*/
 #define H5Z_FLAG_REVERSE	0x0100	/*reverse direction; read	*/
+#define H5Z_FLAG_SKIP_EDC	0x0200	/*skip EDC filters for read	*/
+
+/* Values to decide if EDC is enabled for reading data */
+typedef enum H5Z_EDC_t {
+    H5Z_ERROR_EDC       = -1,   /* error value */
+    H5Z_DISABLE_EDC     = 0,
+    H5Z_ENABLE_EDC      = 1,
+    H5Z_NO_EDC          = 2     /* must be the last */
+} H5Z_EDC_t;    
+
+/* Return values for filter callback function */
+typedef enum H5Z_cb_return_t {
+    H5Z_CB_ERROR  = -1,
+    H5Z_CB_FAIL   = 0,    /* I/O should fail if filter fails. */
+    H5Z_CB_CONT   = 1,    /* I/O continues if filter fails.   */
+    H5Z_CB_NO     = 2
+} H5Z_cb_return_t;
+
+/* Filter callback function definition */
+typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void* buf,
+                                size_t buf_size, void* op_data);
+                                
+/* Structure for filter callback property */
+typedef struct H5Z_cb_t {
+    H5Z_filter_func_t func;
+    void*              op_data;
+} H5Z_cb_t;
 
 #ifdef __cplusplus
 extern "C" {

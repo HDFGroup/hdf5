@@ -28,13 +28,23 @@ const char *FILENAME[] = {
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_SHUFFLE_NAME	"shuffle"
-#define DSET_SHUFFLE_DEFLATE_NAME	"shuffle+deflate"
+#define DSET_ADLER32_NAME	"adler32"
+#define DSET_ADLER32_NAME_2	"adler32_2"
+#define DSET_ADLER32_NAME_3	"adler32_3"
+#define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+adler32"
+#define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+adler32_2"
 #define DSET_BOGUS_NAME		"bogus"
 #define DSET_MISSING_NAME	"missing"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 
 #define USER_BLOCK              512 
 #define H5Z_BOGUS		305
+#define H5Z_CORRUPT		306
+
+#define DISABLE_ADLER32         0
+#define ENABLE_ADLER32          1
+#define DATA_CORRUPTED          1
+#define DATA_NOT_CORRUPTED      0 
 
 /* Shared global arrays */
 int	points[100][200], check[100][200];
@@ -594,7 +604,7 @@ test_tconv(hid_t file)
  *-------------------------------------------------------------------------
  */
 static size_t
-bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts, 
       const unsigned int UNUSED *cd_values, size_t nbytes,
       size_t UNUSED *buf_size, void UNUSED **buf)
 {
@@ -603,7 +613,114 @@ bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_compression_internal
+ * Function:    corrupt_data	
+ *
+ * Purpose:     For testing Adler32 checksum.  modify data slightly during 
+ *              writing so that when data is read back, the checksum should 
+ *              fail. 
+ *
+ * Return:	Success:	Data chunk size
+ *
+ *		Failure:	0
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+corrupt_data(unsigned int flags, size_t cd_nelmts, 
+      const unsigned int *cd_values, size_t nbytes,
+      size_t *buf_size, void **buf)
+{
+    size_t         ret_value = 0;
+    unsigned char  *dst = (unsigned char*)(*buf);
+    unsigned int   offset;
+    unsigned int   length;
+    unsigned int   value;
+    unsigned char  *corrupt_data;
+    int      i; 
+    
+    if (cd_nelmts!=3 || !cd_values)
+        return 0;
+    offset = cd_values[0];
+    length = cd_values[1];
+    value  = cd_values[2];
+    if(offset>nbytes || (offset+length)>nbytes || length<sizeof(unsigned int))
+        return 0;
+
+    corrupt_data = (unsigned char*)HDmalloc(length);
+    HDmemset((void*)corrupt_data, value, length);
+
+    if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
+        dst += offset;
+        if(HDmemcmp(corrupt_data, dst, length)!=0) return 0; 
+        *buf_size = nbytes;
+        ret_value = nbytes;
+    } else { /* Write corrupted data */
+        dst += offset;
+        HDmemcpy(dst, corrupt_data, length);
+        *buf_size = nbytes;
+	ret_value = *buf_size; 
+    }
+
+    if(corrupt_data)
+        HDfree(corrupt_data);
+
+    return ret_value;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_cb_cont
+ *
+ * Purpose:     Callback function to handle checksum failure.  Let it continue. 
+ *
+ * Return:      continue	
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5Z_cb_return_t 
+filter_cb_cont(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
+           void* UNUSED op_data)
+{
+    if(H5Z_FILTER_ADLER32==filter)
+       return H5Z_CB_CONT; 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_cb_fail
+ *
+ * Purpose:     Callback function to handle checksum failure.  Let it fail. 
+ *
+ * Return:      fail	
+ *
+ * Programmer:	Raymond Lu
+ *              Jan 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5Z_cb_return_t 
+filter_cb_fail(H5Z_filter_t filter, void* UNUSED buf, size_t UNUSED buf_size, 
+           void* UNUSED op_data)
+{
+    if(H5Z_FILTER_ADLER32==filter)
+       return H5Z_CB_FAIL; 
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_filter_internal
  *
  * Purpose:	Tests dataset compression. If compression is requested when
  *		it hasn't been compiled into the library (such as when
@@ -623,7 +740,8 @@ bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size)
+test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_adler32, 
+                     int corrupted, hsize_t *dset_size)
 {
     hid_t		dataset;        /* Dataset ID */
     hid_t		dxpl;           /* Dataset xfer property list ID */
@@ -633,6 +751,7 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
     const hsize_t	hs_size[2] = {4, 50};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
     hsize_t		i, j, n;        /* Local index variables */
+    herr_t              status;         /* Error status */
 
     /* Create the data space */
     if ((sid = H5Screate_simple(2, size, NULL))<0) goto error;
@@ -644,8 +763,13 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
     if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
     tconv_buf = malloc (1000);
     if (H5Pset_buffer (dxpl, 1000, tconv_buf, NULL)<0) goto error;
-
-    TESTING("compression (setup)");
+    if (if_adler32==DISABLE_ADLER32) {
+        if(H5Pset_edc_check(dxpl, H5Z_DISABLE_EDC)<0)
+            goto error;
+        if(H5Z_DISABLE_EDC != H5Pget_edc_check(dxpl))
+        goto error;
+    }
+    TESTING("    filters (setup)");
     
     /* Create the dataset */
     if ((dataset = H5Dcreate(fid, name, H5T_NATIVE_INT, sid,
@@ -656,7 +780,7 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
      * STEP 1: Read uninitialized data.  It should be zero.
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (uninitialized read)");
+    TESTING("    filters (uninitialized read)");
 
     if (H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
@@ -675,11 +799,11 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
     PASSED();
 
     /*----------------------------------------------------------------------
-     * STEP 2: Test compression by setting up a chunked dataset and writing
+     * STEP 2: Test filters by setting up a chunked dataset and writing
      * to it.
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (write)");
+    TESTING("    filters (write)");
     
     for (i=n=0; i<size[0]; i++) {
 	for (j=0; j<size[1]; j++) {
@@ -689,30 +813,54 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
 
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
 	goto error;
+        
+    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
+
     PASSED();
 
     /*----------------------------------------------------------------------
      * STEP 3: Try to read the data we just wrote.
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (read)");
+    TESTING("    filters (read)");
 
     /* Read the dataset back */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	goto error;
+    if(corrupted) {
+        /* Default behavior is failure when data is corrupted. */
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
 
-    /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
-	    if (points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %lu,%lu\n",
-		       (unsigned long)i, (unsigned long)j);
-		goto error;
-	    }
-	}
+        /* Callback decides to continue inspite data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+            goto error;
+            
+        /* Callback decides to fail when data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
+    } else {
+        if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+	   goto error;
+
+        /* Check that the values read are the same as the values written */
+        for (i=0; i<size[0]; i++) {
+	   for (j=0; j<size[1]; j++) {
+	       if (points[i][j] != check[i][j]) {
+		  H5_FAILED();
+		  printf("    Read different values than written.\n");
+		  printf("    At index %lu,%lu\n",
+		           (unsigned long)i, (unsigned long)j);
+		  goto error;
+	       }
+	   }
+        }
     }
+    
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -722,7 +870,7 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
      * dataset although we rewrite the whole thing.
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (modify)");
+    TESTING("    filters (modify)");
     
     for (i=0; i<size[0]; i++) {
 	for (j=0; j<size[1]/2; j++) {
@@ -731,50 +879,95 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
     }
     if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, points)<0)
 	goto error;
+        
+    if(corrupted) {
+        /* Default behavior is failure when data is corrupted. */ 
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
 
-    /* Read the dataset back and check it */
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	goto error;
+        /* Callback decides to continue inspite data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+            goto error;
+            
+        /* Callback decides to fail when data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
+    } else {
+        /* Read the dataset back and check it */
+        if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+	   goto error;
 
-    /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
-	    if (points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %lu,%lu\n",
-		       (unsigned long)i, (unsigned long)j);
-		goto error;
-	    }
-	}
+        /* Check that the values read are the same as the values written */
+        for (i=0; i<size[0]; i++) {
+	   for (j=0; j<size[1]; j++) {
+	       if (points[i][j] != check[i][j]) {
+		  H5_FAILED();
+		  printf("    Read different values than written.\n");
+		  printf("    At index %lu,%lu\n",
+		           (unsigned long)i, (unsigned long)j);
+		  goto error;
+	       }
+	   }
+        }
     }
+    
+    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
+
     PASSED();
 
     /*----------------------------------------------------------------------
      * STEP 5: Close the dataset and then open it and read it again.  This
-     * insures that the compression message is picked up properly from the
+     * insures that the filters message is picked up properly from the
      * object header.
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (re-open)");
+    TESTING("    filters (re-open)");
     
     if (H5Dclose (dataset)<0) goto error;
     if ((dataset = H5Dopen (fid, name))<0) goto error;
-    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
-	goto error;
+    
+    if(corrupted) {
+        /* Default behavior is failure when data is corrupted. */ 
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
 
-    /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
-	    if (points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %lu,%lu\n",
-		       (unsigned long)i, (unsigned long)j);
-		goto error;
-	    }
-	}
+        /* Callback decides to continue inspite data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+            goto error;
+            
+        /* Callback decides to fail when data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
+    } else {
+        if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+	   goto error;
+
+        /* Check that the values read are the same as the values written */
+        for (i=0; i<size[0]; i++) {
+	   for (j=0; j<size[1]; j++) {
+	       if (points[i][j] != check[i][j]) {
+		  H5_FAILED();
+		  printf("    Read different values than written.\n");
+		  printf("    At index %lu,%lu\n",
+		        (unsigned long)i, (unsigned long)j);
+		  goto error;
+	       }
+	   }
+        }
     }
+    
     PASSED();
     
 
@@ -784,7 +977,7 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
      * boundaries (we know that case already works from above tests).
      *---------------------------------------------------------------------- 
      */
-    TESTING("compression (partial I/O)");
+    TESTING("    filters (partial I/O)");
 
     for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
@@ -795,32 +988,53 @@ test_compression_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset
 			    NULL)<0) goto error;
     if (H5Dwrite (dataset, H5T_NATIVE_INT, sid, sid, dxpl, points)<0)
 	goto error;
-    if (H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check)<0)
-	goto error;
+     
+    if(corrupted) {
+        /* Default behavior is failure when data is corrupted. */ 
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
+
+        /* Callback decides to continue inspite data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) goto error;
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+            goto error;
+            
+        /* Callback decides to fail when data is corrupted. */ 
+        if(H5Pset_filter_callback(dxpl, filter_cb_fail, NULL)<0) goto error;
+        H5E_BEGIN_TRY {
+            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check);
+        } H5E_END_TRY;
+        if(status>=0) goto error;
+    } else {
+        if (H5Dread (dataset, H5T_NATIVE_INT, sid, sid, dxpl, check)<0)
+	   goto error;
     
-    /* Check that the values read are the same as the values written */
-    for (i=0; i<hs_size[0]; i++) {
-	for (j=0; j<hs_size[1]; j++) {
-	    if (points[hs_offset[0]+i][hs_offset[1]+j] !=
-		check[hs_offset[0]+i][hs_offset[1]+j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %lu,%lu\n",
-		       (unsigned long)(hs_offset[0]+i),
-		       (unsigned long)(hs_offset[1]+j));
-		printf("    At original: %d\n",
-		       (int)points[hs_offset[0]+i][hs_offset[1]+j]);
-		printf("    At returned: %d\n",
-		       (int)check[hs_offset[0]+i][hs_offset[1]+j]);
-		goto error;
-	    }
-	}
+        /* Check that the values read are the same as the values written */
+        for (i=0; i<hs_size[0]; i++) {
+	   for (j=0; j<hs_size[1]; j++) {
+	       if (points[hs_offset[0]+i][hs_offset[1]+j] !=
+		  check[hs_offset[0]+i][hs_offset[1]+j]) {
+		  H5_FAILED();
+		  printf("    Read different values than written.\n");
+		  printf("    At index %lu,%lu\n",
+		         (unsigned long)(hs_offset[0]+i),
+		         (unsigned long)(hs_offset[1]+j));
+		  printf("    At original: %d\n",
+		         (int)points[hs_offset[0]+i][hs_offset[1]+j]);
+		  printf("    At returned: %d\n",
+		         (int)check[hs_offset[0]+i][hs_offset[1]+j]);
+		  goto error;
+	       }
+	   }
+        }
     }
+
     PASSED();
 
     /* Get the storage size of the dataset */
     if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
-
     /* Clean up objects used for this test */
     if (H5Dclose (dataset)<0) goto error;
     if (H5Sclose (sid)<0) goto error;
@@ -835,9 +1049,9 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_compression
+ * Function:	test_filters
  *
- * Purpose:	Tests dataset compression.
+ * Purpose:	Tests dataset filter.
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -846,27 +1060,34 @@ error:
  *              Wednesday, April 15, 1998
  *
  * Modifications:
- *              Moved guts of compression testing out of main routine.
- *              Also added tests for shuffle filter.
+ *              Moved guts of filter testing out of main routine.
+ *              Tests shuffle, deflate, adler32 checksum filters.
  *              Quincey Koziol, November 14, 2002
+ *
+ *              Added Adler32 filter testing
+ *              Raymond Lu, Jan 22, 2002
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_compression(hid_t file)
+test_filters(hid_t file)
 {
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {2, 25};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset with null filter */
+#ifdef H5_HAVE_FILTER_ADLER32
+    hsize_t     adler32_size;       /* Size of dataset with Adler32 checksum */
+    unsigned    data_corrupt[3];     /* position and length of data to be corrupted */
+#endif /* H5_HAVE_FILTER_ADLER32 */
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SHUFFLE
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 #endif /* H5_HAVE_FILTER_SHUFFLE */
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE
-    hsize_t     shuff_def_size;     /* Size of dataset with shuffle+deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_ADLER32
+    hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
     
     /* Test null I/O filter (by itself) */
     puts("Testing 'null' filter");
@@ -875,25 +1096,72 @@ test_compression(hid_t file)
     if (H5Zregister (H5Z_BOGUS, "bogus", bogus)<0) goto error;
     if (H5Pset_filter (dc, H5Z_BOGUS, 0, 0, NULL)<0) goto error;
 
-    if(test_compression_internal(file,DSET_BOGUS_NAME,dc,&null_size)<0) goto error;
+    if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&null_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 
+    /*----------------------------------------------------------
+     * STEP 1: Test Adler32 Checksum by itself.
+     *----------------------------------------------------------
+     */
+#ifdef H5_HAVE_FILTER_ADLER32
+    puts("Testing Adler32 checksum(enabled for read)");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_filter (dc,H5Z_FILTER_ADLER32,0,0,NULL)<0) goto error;
+
+    /* Enable checksum during read */
+    if(test_filter_internal(file,DSET_ADLER32_NAME,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&adler32_size)<0) goto error;
+    if(adler32_size<=null_size) {
+        H5_FAILED();
+        puts("    Size after checksumming is incorrect.");
+        goto error;
+    } /* end if */
+
+    /* Disable checksum during read */
+    puts("Testing Adler32 checksum(disabled for read)");
+    if(test_filter_internal(file,DSET_ADLER32_NAME_2,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&adler32_size)<0) goto error;
+    if(adler32_size<=null_size) {
+        H5_FAILED();
+        puts("    Size after checksumming is incorrect.");
+        goto error;
+    } /* end if */
+
+    /* Try to corrupt data and see if checksum fails */
+    puts("Testing Adler32 checksum(when data is corrupted)");
+    data_corrupt[0] = 52;
+    data_corrupt[1] = 33;
+    data_corrupt[2] = 27;
+
+    if (H5Zregister (H5Z_CORRUPT, "corrupt", corrupt_data)<0) goto error;
+    if (H5Pset_filter (dc, H5Z_CORRUPT, 0, 3, data_corrupt)<0) goto error;
+    if(test_filter_internal(file,DSET_ADLER32_NAME_3,dc,ENABLE_ADLER32,DATA_CORRUPTED,&adler32_size)<0) goto error;
+    if(adler32_size<=null_size) {
+        H5_FAILED();
+        puts("    Size after checksumming is incorrect.");
+        goto error;
+    } /* end if */
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_ADLER32 */
+    TESTING("adler32 checksum");
+    SKIPPED();
+    puts("adler32 checksum not enabled");
+#endif /* H5_HAVE_FILTER_ADLER32 */
+
+    /*----------------------------------------------------------
+     * STEP 2: Test deflation by itself.
+     *----------------------------------------------------------
+     */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    /* Test deflate I/O filter (by itself) */
     puts("Testing deflate filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
 
-    if(test_compression_internal(file,DSET_DEFLATE_NAME,dc,&deflate_size)<0) goto error;
-    if(deflate_size>=null_size) {
-        H5_FAILED();
-        puts("    Deflated size greater than uncompressed size.");
-        goto error;
-    } /* end if */
-
+    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&deflate_size)<0) goto error;
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
 #else /* H5_HAVE_FILTER_DEFLATE */
@@ -902,17 +1170,21 @@ test_compression(hid_t file)
     puts("Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    /*----------------------------------------------------------
+     * STEP 3: Test shuffling by itself.
+     *----------------------------------------------------------
+     */
 #ifdef H5_HAVE_FILTER_SHUFFLE
-    /* Test shuffle I/O filter (by itself) */
     puts("Testing shuffle filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
 
-    if(test_compression_internal(file,DSET_SHUFFLE_NAME,dc,&shuffle_size)<0) goto error;
+    if(test_filter_internal(file,DSET_SHUFFLE_NAME,dc,DISABLE_ADLER32,DATA_NOT_CORRUPTED,&shuffle_size)<0) goto error;
     if(shuffle_size!=null_size) {
         H5_FAILED();
         puts("    Shuffled size not the same as uncompressed size.");
+printf("shuffle_size=%ld, null_size=%ld\n", shuffle_size, null_size);
         goto error;
     } /* end if */
 
@@ -924,29 +1196,39 @@ test_compression(hid_t file)
     puts("Shuffle filter not enabled");
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE
-    /* Test combination of deflate & shuffle I/O filters */
-    puts("Testing shuffle+deflate filters");
+    /*----------------------------------------------------------
+     * STEP 4: Test shuffle + deflate + checksum in any order.
+     *----------------------------------------------------------
+     */
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_ADLER32 
+    puts("Testing shuffle+deflate+checksum filters(checksum first)");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_adler32 (dc)<0) goto error;
+    if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
+    if (H5Pset_deflate (dc, 6)<0) goto error;
+
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+
+    puts("Testing shuffle+deflate+checksum filters(checksum last)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_shuffle (dc, sizeof(int))<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
+    if (H5Pset_adler32 (dc)<0) goto error;
 
-    if(test_compression_internal(file,DSET_SHUFFLE_DEFLATE_NAME,dc,&shuff_def_size)<0) goto error;
-    if(shuff_def_size>=deflate_size) {
-        H5_FAILED();
-        puts("    Shuffle+deflate size greater than plain deflated size.");
-        goto error;
-    } /* end if */
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME_2,dc,ENABLE_ADLER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
-#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
-    TESTING("shuffle+deflate filters");
+#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
+    TESTING("shuffle+deflate+adler32 filters");
     SKIPPED();
-    puts("Deflate or shuffle filter not enabled");
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE */
-
+    puts("Deflate, shuffle, or Adler32 checksum filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_ADLER32 */
     return 0;
 
 error:
@@ -1532,13 +1814,13 @@ main(void)
     nerrors += test_simple_io(file, filename)<0	?1:0;
     nerrors += test_compact_io(fapl)<0  ?1:0;
     nerrors += test_tconv(file)<0	?1:0;
-    nerrors += test_compression(file)<0	?1:0;
-    nerrors += test_missing_filter(file)<0	?1:0;
+    nerrors += test_filters(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
-   
+    nerrors += test_missing_filter(file)<0	?1:0;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
     printf("All dataset tests passed.\n");

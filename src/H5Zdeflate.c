@@ -21,6 +21,8 @@
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
 
+#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil((double)((s)*1.001))+12)
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_deflate
@@ -103,10 +105,10 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 	 */
 	const Bytef	*z_src = (const Bytef*)(*buf);
 	Bytef		*z_dst;		/*destination buffer		*/
-	uLongf		z_dst_nbytes = (uLongf)nbytes;
+	uLongf		z_dst_nbytes = (uLongf)H5Z_DEFLATE_SIZE_ADJUST(nbytes);
 	uLong		z_src_nbytes = (uLong)nbytes;
-
-	if (NULL==(z_dst=outbuf=H5MM_malloc(nbytes)))
+    
+	if (NULL==(z_dst=outbuf=H5MM_malloc(z_dst_nbytes)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate deflate destination buffer");
 	status = compress2 (z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
 	if (Z_BUF_ERROR==status) {
@@ -114,7 +116,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 	} else if (Z_MEM_ERROR==status) {
 	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "deflate memory error");
 	} else if (Z_OK!=status) {
-	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "deflate error");
+	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, 0, "other deflate error");
 	} else {
 	    H5MM_xfree(*buf);
 	    *buf = outbuf;

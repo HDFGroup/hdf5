@@ -167,6 +167,8 @@ H5D_init_interface(void)
      * - Default value for file driver info
      * - Default value for 'gather reads' property
      * - Default value for vector size
+     * - Default value for EDC property
+     * - Default value for filter callback
      */
     H5P_genclass_t  *xfer_pclass;   
     size_t          def_max_temp_buf         = H5D_XFER_MAX_TEMP_BUF_DEF;
@@ -185,6 +187,8 @@ H5D_init_interface(void)
     hid_t           def_vfl_id               = H5D_XFER_VFL_ID_DEF;     
     void            *def_vfl_info            = H5D_XFER_VFL_INFO_DEF;    
     size_t          def_hyp_vec_size         = H5D_XFER_HYPER_VECTOR_SIZE_DEF; 
+    H5Z_EDC_t       enable_edc               = H5D_XFER_EDC_DEF;
+    H5Z_cb_t        filter_cb                = H5D_XFER_FILTER_CB_DEF;
 
     /* Dataset creation property class variables.  In sequence, they are,
      * - Creation property list class to modify
@@ -285,6 +289,14 @@ H5D_init_interface(void)
 
         /* Register the vector size property */
         if(H5P_register(xfer_pclass,H5D_XFER_HYPER_VECTOR_SIZE_NAME,H5D_XFER_HYPER_VECTOR_SIZE_SIZE,&def_hyp_vec_size,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+
+        /* Register the EDC property */
+        if(H5P_register(xfer_pclass,H5D_XFER_EDC_NAME,H5D_XFER_EDC_SIZE,&enable_edc,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
+             
+        /* Register the filter callback property */
+        if(H5P_register(xfer_pclass,H5D_XFER_FILTER_CB_NAME,H5D_XFER_FILTER_CB_SIZE,&filter_cb,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
     } /* end if */
 

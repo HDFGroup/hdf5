@@ -250,6 +250,8 @@ Documentation
 New Features
 ============
 
+    * Added Adler32 checksum as a filter in pipeline.  It only works in chunked
+      dataset.  SLU - 2003/2/4
     * MPICH/MPE instrumentation feature added.  Use --enable-mpe to configure
       it.  AKC - 2003/1/3
     * New functions H5Gget_num_objs, H5Gget_objname_by_idx and H5Gget_objtype_by_idx 
