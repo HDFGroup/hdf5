@@ -27,6 +27,8 @@
 #include "H5PropList.h"
 #include "H5DataSpace.h"
 #include "H5Object.h"
+#include "H5DcreatProp.h"
+#include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
@@ -169,9 +171,9 @@ bool DataType::operator==(const DataType& compared_type ) const
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 // Commits a transient datatype to a file, creating a new named datatype
-void DataType::commit( H5Object& loc, const char* name ) const
+void DataType::commit( CommonFG& loc, const char* name ) const
 {
-   hid_t loc_id = loc.getId(); // get location id for C API
+   hid_t loc_id = loc.getLocId(); // get location id for C API
 
    // Call C routine to commit the transient datatype 
    herr_t ret_value = H5Tcommit( loc_id, name, id );
@@ -187,7 +189,7 @@ void DataType::commit( H5Object& loc, const char* name ) const
 ///             argument \a name.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataType::commit( H5Object& loc, const string& name ) const
+void DataType::commit( CommonFG& loc, const string& name ) const
 {
    commit( loc, name.c_str() );
 }

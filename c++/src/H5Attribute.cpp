@@ -28,6 +28,8 @@
 #include "H5Object.h"
 #include "H5AbstractDs.h"
 #include "H5Attribute.h"
+#include "H5DcreatProp.h"
+#include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
 
@@ -203,7 +205,7 @@ ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
    {
       throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
-   // otherwise, convert the C string attribute name and return 
+   // otherwise, convert the C attribute name and return 
    attr_name = name_C;
    delete name_C;
    return( name_size );
@@ -241,12 +243,19 @@ string Attribute::getName() const
    // Try with 256 characters for the name first, if the name's length 
    // returned is more than that then, read the name again with the 
    // appropriate space allocation
+   char* name_C = new char[256];  // temporary C-string for C API
+   ssize_t name_size = H5Aget_name(id, 255, name_C);
+
    string attr_name;
-   ssize_t name_size = getName(255, attr_name);
    if (name_size >= 256)
       name_size = getName(name_size, attr_name);
+
+   // otherwise, convert the C attribute name and return 
+   else
+      attr_name = name_C;
+
+   delete name_C;
    return( attr_name ); 
-   // let caller catch exception if any
 }
 
 //--------------------------------------------------------------------------
