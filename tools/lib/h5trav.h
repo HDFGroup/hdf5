@@ -84,10 +84,21 @@ void h5trav_freeinfo( trav_info_t *info, int nobjs );
  */
 
 void trav_table_init(trav_table_t **table);
+
 void trav_table_free(trav_table_t *table);
-int  trav_table_search(haddr_t objno, trav_table_t *table );
-void trav_table_add(haddr_t objno, char *objname, int type, trav_table_t *table);
-void trav_table_addflags(unsigned *flags, char *objname, int type, trav_table_t *table);
+
+int  trav_table_search(haddr_t objno, 
+                       trav_table_t *table );
+
+void trav_table_add(haddr_t objno, 
+                    char *objname, 
+                    H5G_obj_t type, 
+                    trav_table_t *table);
+
+void trav_table_addflags(unsigned *flags, 
+                         char *objname, 
+                         H5G_obj_t type, 
+                         trav_table_t *table);
 
 
 

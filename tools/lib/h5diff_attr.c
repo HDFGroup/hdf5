@@ -156,9 +156,9 @@ int diff_attr(hid_t      loc1_id,
   goto error;
  if ((mtype2_id=H5Tget_native_type(ftype2_id,H5T_DIR_DEFAULT))<0)
   goto error;
- if ((msize1=H5Tget_size(mtype1_id))<0)
+ if ((msize1=H5Tget_size(mtype1_id))==0)
   goto error;
- if ((msize2=H5Tget_size(mtype2_id))<0)
+ if ((msize2=H5Tget_size(mtype2_id))==0)
   goto error;
  
  assert(msize1==msize2);

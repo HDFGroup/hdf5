@@ -1,6 +1,9 @@
 #############################
 Expected output for 'h5diff file1.h5 file2.h5 -n 2 -n 3 g1/dset3 g1/dset4'
 #############################
-Object <2> could not be found in <file1.h5>
-Object <2> could not be found in <file2.h5>
+position        dset3           dset4           difference          
+------------------------------------------------------------
+[ 0 0 ]          100.000000      110.000000      10.000000      
+[ 0 1 ]          110.000000      100.000000      10.000000      
+[ 1 0 ]          100.000000      90.000000       10.000000      
 

@@ -282,7 +282,7 @@ int traverse( hid_t loc_id,
 {
  
  char          *name=NULL;
- int           type;
+ H5G_obj_t     type;
  int           nobjs;
  int           i;
  char          *path=NULL;

@@ -414,9 +414,6 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  
  H5T_class_t  tclass1;
  H5T_class_t  tclass2;
- int          nfound=0;               /* number of differences found */
- const char   *name1=NULL;            /* relative names */
- const char   *name2=NULL;
  int          maxdim_diff=0;          /* maximum dimensions are different */
  int          dim_diff=0;             /* current dimensions are different */
  int          i;

@@ -118,6 +118,7 @@ int main(int argc, const char *argv[])
        usage();
       }
       options.delta = atof(argv[i+1]);
+      i++; /* go to next */
      }
      else
      {
@@ -135,6 +136,7 @@ int main(int argc, const char *argv[])
        usage();
       }
       options.percent = atof(argv[i+1]);
+      i++; /* go to next */
      }
      break;
     case 'n': 
@@ -147,6 +149,7 @@ int main(int argc, const char *argv[])
        usage();
       }
       options.count = atoi(argv[i+1]);
+      i++; /* go to next */
      }
      break;
     } /*switch*/
@@ -166,9 +169,11 @@ int main(int argc, const char *argv[])
     if ( objname2==NULL )
     {
      /* check if we have a second object name */
-     if ( i+1<argc && '-' !=argv[i+1][0] )
+     if ( i+1<argc && '-' !=argv[i+1][0] ) {
       /* yes */
       objname2 = argv[i+1];
+      i++; /* go to next */
+     }
      else
       /* no */
       objname2 = objname1;

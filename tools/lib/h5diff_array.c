@@ -521,7 +521,7 @@ int diff_datum( void       *_mem1,
     /* compare OID */
     if (sb1.objno!=sb2.objno)
     {
-     printf("Different OIDs in reference: <%s, %d> and <%s, %d>", 
+     HDfprintf(stdout,"Different OIDs in reference: <%s, %Hu> and <%s, %Hu>", 
       obj1, sb1.objno, obj2, sb2.objno);
      nfound = 1;
     }
