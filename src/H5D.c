@@ -1606,7 +1606,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     hsize_t 		comp_data_size;
     unsigned		u;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS]={0};
-    H5F_t		*file;
+    H5F_t		*file=NULL;
     int                 chunk_ndims = 0;
     hsize_t             chunk_size[H5O_LAYOUT_NDIMS]={0};
     H5P_genplist_t 	*dc_plist=NULL;         /* New Property list */

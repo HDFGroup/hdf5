@@ -123,7 +123,7 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
     H5F_t	*file = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5T_commit, FAIL);
+    FUNC_ENTER_NOINIT(H5T_commit);
 
     assert (loc);
     assert (name && *name);
@@ -203,9 +203,71 @@ H5Tcommitted(hid_t type_id)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Set return value */
-    ret_value= (H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+    ret_value= H5T_committed(type);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_committed
+ *
+ * Purpose:	Determines if a data type is committed or not.
+ *
+ * Return:	Success:	TRUE if committed, FALSE otherwise.
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, September 24, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_committed(H5T_t *type)
+{
+    /* Use no-init for efficiency */
+    FUNC_ENTER_NOINIT(H5T_committed);
+
+    assert (type);
+
+    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN==type->state || H5T_STATE_NAMED==type->state);
+} /* end H5T_committed() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_link
+ *
+ * Purpose:	Adjust the link count for an object header by adding
+ *		ADJUST to the link count.
+ *
+ * Return:	Success:	New link count
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, September 26, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
+{
+    int ret_value;      /* Return value */
+
+    /* Use no-init for efficiency */
+    FUNC_ENTER_NOAPI(H5T_link,FAIL);
+
+    assert (type);
+
+    /* Adjust the link count on the named datatype */
+    if((ret_value=H5O_link(&(type->ent),adjust,dxpl_id))<0)
+        HGOTO_ERROR (H5E_DATATYPE, H5E_LINK, FAIL, "unable to adjust named datatype link count");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5T_link() */
 

@@ -253,8 +253,22 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
     if (H5G_ent_copy(&(attr->ent),ent,H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry");
 
-    /* Compute the internal sizes */
-    attr->dt_size=H5O_raw_size(H5O_DTYPE_ID,attr->ent.file,type);
+    /* Compute the size of pieces on disk */
+    if(H5T_committed(attr->dt)) {
+        H5O_shared_t	sh_mesg;
+
+        /* Reset shared message information */
+        HDmemset(&sh_mesg,0,sizeof(H5O_shared_t));
+
+        /* Get shared message information for datatype */
+        if (H5O_get_share(H5O_DTYPE_ID,attr->ent.file, type, &sh_mesg/*out*/)<0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
+
+        /* Compute shared message size for datatype */
+        attr->dt_size=H5O_raw_size(H5O_SHARED_ID,attr->ent.file,&sh_mesg);
+    } /* end if */
+    else
+        attr->dt_size=H5O_raw_size(H5O_DTYPE_ID,attr->ent.file,type);
     assert(attr->dt_size>0);
     attr->ds_size=H5O_raw_size(H5O_SDSPACE_ID,attr->ent.file,&(space->extent.u.simple));
     assert(attr->ds_size>0);

@@ -911,7 +911,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5HG_link (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, int adjust)
+H5HG_link (H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 {
     H5HG_heap_t *heap = NULL;
     int ret_value;              /* Return value */

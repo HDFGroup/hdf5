@@ -67,6 +67,7 @@ typedef struct H5O_class_t {
     herr_t	(*reset)(void *);		 /*free nested data structs  */
     herr_t	(*free)(void *);		 /*free main data struct  */
     herr_t	(*del)(H5F_t *, hid_t, const void *); /* Delete space in file referenced by this message */
+    herr_t	(*link)(H5F_t *, hid_t, const void *); /* Increment any links in file reference by this message */
     herr_t	(*get_share)(H5F_t*, const void*, struct H5O_shared_t*);    /* Get shared information */
     herr_t	(*set_share)(H5F_t*, void*, const struct H5O_shared_t*);    /* Set shared information */
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
@@ -195,6 +196,13 @@ H5_DLLVAR const H5O_class_t H5O_MTIME_NEW[1];
 H5_DLLVAR const H5O_class_t H5O_PLIST[1];
 
 /* Package-local function prototypes */
+H5_DLL void * H5O_read_real(H5G_entry_t *ent, const H5O_class_t *type,
+        int sequence, void *mesg, hid_t dxpl_id);
+H5_DLL void * H5O_free_real(const H5O_class_t *type, void *mesg);
+
+/* Shared object operators */
+H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
+    const H5O_class_t *type, void *mesg);
 
 /* Symbol table operators */
 H5_DLL void *H5O_stab_fast(const H5G_cache_t *cache, const struct H5O_class_t *type,
