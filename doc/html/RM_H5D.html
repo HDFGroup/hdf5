@@ -319,9 +319,9 @@ END SUBROUTINE h5dclose_f
         For example, <code>H5Dcreate</code> will fail without a meaningful
         explanation if 
         <ul>
-          <li>SZIP compression is being used on the dataset 
-          <li>but the available SZIP library is configured as decode-only
-              (i.e., applications can read but not write SZIP-encoded data).
+          <li>SZIP compression is being used on the dataset and 
+          <li>the SZIP parameter <code>pixels_per_block</code> 
+              is set to an inappropriate value.
         </ul>
         <p>
         In such a case, one would refer to the description of 
