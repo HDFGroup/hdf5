@@ -330,7 +330,7 @@ in the <cite>HDF5 User's Guide</cite> for further information, including a compl
         <dt><em>hid_t</em> <code>dst_id</code>
             <dd>IN: Identifier for the destination datatype.
         <dt><em>H5T_cdata_t **</em><code>pcdata</code>
-            <dd>IN: Pointer to type conversion data.
+            <dd>OUT: Pointer to type conversion data.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a pointer to a suitable conversion function if successful.
@@ -678,8 +678,8 @@ H5Tget_overflow ()
             <li><code>H5T_BITFIELD</code> (<code>4</code>)
             <li><code>H5T_OPAQUE</code> (<code>5</code>)
             <li><code>H5T_COMPOUND</code> (<code>6</code>)
-            <li><code>H5T_ENUM</code> (<code>7</code>)
-            <li><code>H5T_REFERENCE</code> (<code>8</code>)
+            <li><code>H5T_REFERENCE</code> (<code>7</code>)
+            <li><code>H5T_ENUM</code> (<code>8</code>)
         </ul>
 <dt><strong>Parameters:</strong>
     <dl>
@@ -1766,16 +1766,18 @@ zero.
         for a datatype conversion path.  
         <p>
         The parameter <code>pers</code> indicates whether a conversion function 
-        is <code>HARD</code> or <code>SOFT</code>.
+        is <em>hard</em> (<code>H5T_PERS_HARD</code>) 
+        or <em>soft</em> (<code>H5T_PERS_SOFT</code>).
         <p>
         A conversion path can have only one hard function.
-        When <code>pers</code> is <code>HARD</code>, <code>func</code> replaces 
-        any previous hard function.
-        If  <code>pers</code> is <code>HARD</code> and <code>func</code> 
-        is the null pointer, then any hard function registered for this 
-        path is removed.  
+        When <code>pers</code> is <code>H5T_PERS_HARD</code>, 
+        <code>func</code> replaces any previous hard function.
+        If  <code>pers</code> is <code>H5T_PERS_HARD</code> 
+        and <code>func</code> is the null pointer, then any hard function 
+        registered for this path is removed.  
         <p>
-        When <code>pers</code> is <code>SOFT</code>, <code>H5Tregister</code> 
+        When <code>pers</code> is <code>H5T_PERS_SOFT</code>, 
+        <code>H5Tregister</code> 
         adds the function to the end of the master soft list and replaces 
         the soft function in all applicable existing conversion paths. 
         Soft functions are used when determining which conversion function 
@@ -1795,14 +1797,16 @@ zero.
                     <em>hid_t </em><code>dst_id</code>, 
                     <em>H5T_cdata_t *</em><code>cdata</code>,
                     <em>size_t </em><code>nelmts</code>, 
+                    <em>size_t </em><code>stride</code>, 
                     <em>void *</em><code>buf</code>, 
-                    <em>void *</em><code>bkg</code>);
+                    <em>void *</em><code>bkg</code>,
+                    <em>hid_t </em><code>dset_xfer_plist</code>);
         </dl>
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5T_pers_t</em> <code>pers</code>
-            <dd><code>HARD</code> for hard conversion functions;
-                <code>SOFT</code> for soft conversion functions.
+            <dd><code>H5T_PERS_HARD</code> for hard conversion functions;
+                <code>H5T_PERS_SOFT</code> for soft conversion functions.
         <dt><em>const char *</em> <code>name</code>
             <dd>Name displayed in diagnostic output.
         <dt><em>hid_t</em> <code>src_id</code>
@@ -2123,7 +2127,7 @@ H5T&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 September 1999
+Last modified:  7 April 2000
 
 </body>
 </html>
