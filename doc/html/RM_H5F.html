@@ -115,10 +115,25 @@ documented below.
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>unsigned</em> <code>flags</code>
-            <dd>File access flags.  See the <code>H5Fcreate</code>
-                parameters list for a list of possible values.
+            <dd>File access flags.  Allowable values include:
+                <ul><dl>
+                    <dt>H5F_ACC_RDWR
+                        <dd>Allow read and write access to file.
+                    <dt>H5F_ACC_RDONLY
+                        <dd>Allow read-only access to file.
+                    <dt>H5F_ACC_DEBUG
+                        <dd>Print debug information.
+                            (Used only by HDF5 library developers.
+                             Do not use this flag in applications.)
+                </dl></ul>
+                <code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
+                are mutually exclusive; use exactly one.
         <dt><em>hid_t</em> <code>access_id</code>
             <dd>Identifier for the file access properties list.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                <code>access_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
@@ -158,12 +173,8 @@ documented below.
         <dt><em>const char *</em><code>name</code>
             <dd>Name of the file to access.
         <dt><em>uintn</em> <code>flags</code>
-            <dd>File access flags.  Possible values include:
+            <dd>File access flags.  Allowable values include:
                 <ul><dl>
-                    <dt>H5F_ACC_RDWR
-                        <dd>Allow read and write access to file.
-                    <dt>H5F_ACC_RDONLY
-                        <dd>Allow read-only access to file.
                     <dt>H5F_ACC_TRUNC
                         <dd>Truncate file, if it already exists,  
                             erasing all data previously stored in the file.
@@ -171,18 +182,21 @@ documented below.
                         <dd>Fail if file already exists.
                     <dt>H5F_ACC_DEBUG
                         <dd>Print debug information.
-                    <dt>H5P_DEFAULT
-                        <dd>Apply default file access and creation properties.
+                            (Used only by HDF5 library developers.
+                             Do not use this flag in applications.)
                 </dl></ul>
+                <code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
+                are mutually exclusive; use exactly one.
         <dt><em>hid_t</em> <code>create_id</code>
             <dd>File creation property list identifier, used when modifying
                 default file meta-data.
+                Use <code>H5P_DEFAULT</code> for default file creation properties.
         <dt><em>hid_t</em> <code>access_id</code>
             <dd>File access property list identifier.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
                 <code>access_id</code>. 
-                Use <code>0</code> for default access properties.
+                Use <code>H5P_DEFAULT</code> for default file access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
@@ -222,7 +236,7 @@ documented below.
         </center>       
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>const char *</em><code>object_id</code>
+        <dt><em>hid_t </em><code>object_id</code>
             <dd>Identifier of object used to identify the file.
         <dt><em>H5F_scope_t</em> <code>scope</code>
             <dd>Specifies the scope of the flushing action.
@@ -358,8 +372,8 @@ documented below.
             <code>loc_id</code> and <code>name</code> using 
             the mount properties <code>plist_id</code>.
             <p>
-            Note that <code>loc_id</code> identifies a file or group.
-            <code>name</code> then specifies a group relative to <code>loc_id</code>.
+            Note that <code>loc_id</code> is either a file or group identifier
+            and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
@@ -395,19 +409,22 @@ documented below.
             from the file mounted there.  This function
             does  not close either file.
             <p> 
-            The mount point can either be the group in the
+            The mount point can be either the group in the
             parent or the root group of the mounted file 
             (both groups have the same name).  If the mount 
             point was opened before the mount then it is the 
             group in the parent; if it was opened after the 
             mount then it is the root group of the child.
+            <p>
+            Note that <code>loc_id</code> is either a file or group identifier
+            and <code>name</code> is relative to <code>loc_id</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
             <dd>The file or group identifier for the location at which
                 the specified file is to be unmounted.
         <dt><em>const char *</em><code>name</code>
-            <dd>The name of the file to be unmounted.
+            <dd>The name of the mount point.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
