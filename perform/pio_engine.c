@@ -145,7 +145,7 @@ static void do_cleanupfile(iotype iot, char *fname);
  * Modifications:
  */
 results
-do_pio(parameters param)
+do_pio(FILE *output, parameters param)
 {
     /* return codes */
     herr_t      ret_code = 0;   /*return code                           */
@@ -267,15 +267,43 @@ buf_size=MIN(1024*1024, buf_size);
 fprintf(stderr, "filename=%s\n", fname);
 #endif
 
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 3);
+            output_report(output, "Timer details:\n");
+        }
+
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Gross Write Start: %.2f\n",
+                          get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS));
+        }
 
         hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Fine Write Start: %.2f\n",
+                          get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS));
+        }
+
         hrc = do_write(&fd, iot, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Fine Write Stop: %.2f\n",
+                          get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS));
+        }
 
         VRFY((hrc == SUCCESS), "do_write failed");
 
@@ -283,6 +311,13 @@ fprintf(stderr, "filename=%s\n", fname);
         hrc = do_fclose(iot, &fd);
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, STOP);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Gross Write Stop: %.2f\n",
+                          get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS));
+        }
 
         VRFY((hrc == SUCCESS), "do_fclose failed");
 
@@ -294,13 +329,35 @@ fprintf(stderr, "filename=%s\n", fname);
         /* Open file for read */
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
 
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Gross Read Start: %.2f\n",
+                          get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS));
+        }
+
         hrc = do_fopen(iot, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Fine Read Start: %.2f\n",
+                          get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS));
+        }
+
         hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Fine Read Stop: %.2f\n",
+                          get_time(res.timers, HDF5_FINE_READ_FIXED_DIMS));
+        }
 
         VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -308,6 +365,13 @@ fprintf(stderr, "filename=%s\n", fname);
         hrc = do_fclose(iot, &fd);
 
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, STOP);
+
+        if (pio_debug_level == 4) {
+            /* output all of the times for all iterations */
+            print_indent(output, 4);
+            output_report(output, "Gross Read Stop: %.2f\n",
+                          get_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS));
+        }
 
         VRFY((hrc == SUCCESS), "do_fclose failed");
 

@@ -55,7 +55,11 @@ extern int      pio_debug_level;    /* The debug level:
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-extern results do_pio(parameters param);
+
+extern results do_pio(FILE * output, parameters param);
+extern void output_report(FILE *output, const char *fmt, ...);
+extern void print_indent(register FILE *output, register int indent);
+
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
