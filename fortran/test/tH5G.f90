@@ -36,7 +36,7 @@
      INTEGER(HSIZE_T), DIMENSION(1) :: dims = 1 ! Datasets dimensions
      INTEGER     ::   rank = 1 ! Datasets rank
      INTEGER     ::   error ! Error flag
-     INTEGER     ::   namesize = 100 !size for symbolic object
+     INTEGER(SIZE_T)   ::   namesize = 100 !size for symbolic object
      CHARACTER*100 :: name !name to put symbolic object
      CHARACTER*100 :: commentout !comment to the file
      INTEGER     ::   nmembers
