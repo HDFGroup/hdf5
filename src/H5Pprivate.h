@@ -33,6 +33,12 @@ __DLL__ hid_t H5P_create_id(H5P_genclass_t *pclass);
 __DLL__ hid_t H5P_copy_plist(H5P_genplist_t *old_plist);
 __DLL__ herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
 __DLL__ herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value);
+__DLL__ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
+    void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
+    H5P_prp_close_func_t prp_close);
+__DLL__ herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name);
+__DLL__ htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name);
 __DLL__ char *H5P_get_class_name(H5P_genclass_t *pclass);
 __DLL__ herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops);
 __DLL__ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,

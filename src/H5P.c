@@ -5847,7 +5847,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy, 
@@ -6185,7 +6185,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static htri_t
+htri_t
 H5P_exist_plist(H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value=FAIL;     /* return value */
@@ -7851,7 +7851,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
