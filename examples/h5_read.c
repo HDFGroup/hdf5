@@ -65,7 +65,7 @@ main (void)
     if (order == H5T_ORDER_LE) printf("Little endian order \n");
 
     size  = H5Tget_size(datatype);
-    printf(" Data size is %d \n", size);
+    printf(" Data size is %d \n", (int)size);
 
     dataspace = H5Dget_space(dataset);    /* dataspace handle */
     rank      = H5Sget_simple_extent_ndims(dataspace);
