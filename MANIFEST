@@ -1387,6 +1387,9 @@
 ./tools/testfiles/h5diff_14.txt
 ./tools/testfiles/h5diff_15.txt
 ./tools/testfiles/h5diff_16.txt
+./tools/testfiles/h5diff_17.txt
+./tools/testfiles/h5diff_18.txt
+./tools/testfiles/h5diff_19.txt
 ./tools/testfiles/h5diff_210.txt
 ./tools/testfiles/h5diff_211.txt
 ./tools/testfiles/h5diff_212.txt
