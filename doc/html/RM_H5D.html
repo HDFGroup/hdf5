@@ -61,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5D: Datasets Interface</h1>
 </center>
 
@@ -191,6 +190,7 @@ as the corresponding C function.
 </table>
 
 <!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Dclose" -->
 <hr>
@@ -1094,7 +1094,7 @@ END SUBROUTINE h5dopen_f
     
 	<dd>
 	<pre>
-SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &
+SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &amp; 
                      mem_space_id, file_space_id, xfer_prp)
 
   IMPLICIT NONE
@@ -1437,7 +1437,7 @@ SUBROUTINE
 	
 	<dd>
 	<pre>
-SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &
+SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp; 
                       mem_space_id, file_space_id, xfer_prp)
 
   IMPLICIT NONE
@@ -1453,7 +1453,9 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &
                                              ! buffer buf; values are 
                                              ! ignored if buf is a scalar
   INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-                                             ! 0 on success and -1 on failure
+                                             ! 0 on success and -1 on failure</pre>
+<!-- NEW PAGE -->
+<pre>
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
                                              ! Memory dataspace identfier 
                                              ! Default value is H5S_ALL_F
@@ -1510,8 +1512,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.2, February 2004

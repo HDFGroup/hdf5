@@ -60,8 +60,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>HDF5 Tools</h1>
 </center>
 
@@ -177,8 +176,8 @@ installed with HDF5.
 </table>
 -->
 
-
-
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT " " -->
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "h5dump" -->
 <hr>
@@ -270,6 +269,7 @@ installed with HDF5.
         in opening the file.
         </p>
 
+<!-- NEW PAGE -->
 <dt><strong>XML Output:</strong>
     <dd>With the <code>--xml</code> option, <code>h5dump</code> generates
         XML output.  This output contains a complete description of the file, 
@@ -349,6 +349,7 @@ installed with HDF5.
             <dd>Offset of start of subsetting selection.  
                 <br>
                 Default: the beginning of the dataset.</dd>
+<!-- NEW PAGE -->
         <dt><code>-S <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
               <code>--stride=<em>L</em></code></dt>
             <dd>Hyperslab stride.
@@ -428,6 +429,7 @@ installed with HDF5.
           <blockquote>
               <code>h5dump --xml bobo.h5 > bobo.h5.xml</code>
           </blockquote>
+<!-- NEW PAGE -->
        <li>Dumping a subset of the dataset <code>/GroupFoo/databar/</code> 
            in the file <code>quux.h5</code>
           <blockquote>
@@ -678,6 +680,7 @@ installed with HDF5.
         <dt><em>object2</em>
             <dd>Specific object(s) within the files to be compared.
     </dl>
+<!-- NEW PAGE -->
 <dt><strong>Examples:</strong>
     <dd>The following <code>h5diff</code> call compares
         the object <code>/a/b</code> in <code>file1</code> 
@@ -702,7 +705,7 @@ installed with HDF5.
 </dl>
 
 <!-- NEW PAGE -->
-<!-- HEADER RIGHT "h5repart" -->
+<!-- HEADER RIGHT "h5repack" -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong>  <a name="Tools-Repack">h5repack</a>  &nbsp;&nbsp;&nbsp;
@@ -786,6 +789,8 @@ installed with HDF5.
       objects 'dset1' and 'dset2'<br>
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5repart" -->
 <hr>
 <dl>
 <dt><strong>Tool Name:</strong> <a name="Tools-Repart">h5repart</a>
@@ -1113,6 +1118,7 @@ installed with HDF5.
                  Example: <code> &nbsp; 4 3 4 38 &nbsp; </code> for a 38x4x3x4 dataset.
             </td></tr> 
 
+<!-- NEW PAGE -->
           <tr valign=top align=left><td>
           <hr><code>PATH</code>
             </td><td><hr>Path of the output dataset.
@@ -1219,6 +1225,7 @@ installed with HDF5.
                   (Default: <code> 32</code>)
           </td></tr>
 
+<!-- NEW PAGE -->
           <tr valign=top align=left><td>
           <hr><code>OUTPUT-CLASS&nbsp;&nbsp;</code>
             </td><td><hr>A string denoting the type of output data.  
@@ -1307,6 +1314,7 @@ installed with HDF5.
             </td><td>Little-endian.
             </td></tr> 
 
+<!-- NEW PAGE -->
           <tr valign=top align=left><td colspan="2">
                 <hr>The following options are disabled by default, making
                 the default storage properties no chunking, no compression,
@@ -1390,6 +1398,7 @@ installed with HDF5.
         </table>
 
         <p>
+<!-- NEW PAGE -->
         <b>The <code>help</code> option:</b><br>
         The help option, expressed as one of 
         <table width=100% border=0>
@@ -1973,6 +1982,7 @@ installed with HDF5.
 		buffer in memory.  The data in that buffer is broken 
 	        into <em>block size</em> pieces and written to the 
 		file.<br><br>
+<!-- NEW PAGE -->
 		Transfer block size is set by the 
 		<code>-x</code> (or <code>--min-xfer-size</code>) and 
 		<code>-X</code> (or <code>--max-xfer-size</code>)
@@ -2480,14 +2490,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.2, February 2004
-</address><!-- #EndLibraryItem -->
-
-Last modified: 23 January 2004
+</address><!-- #EndLibraryItem --><dt><dt>&nbsp;<dt><dt>&nbsp;<dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 23 January 2004");
+-->
+</SCRIPT>
 
 </body>
 </html>

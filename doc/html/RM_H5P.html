@@ -61,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5P: Property List Interface</h1>
 </center>
 <h2>Property List API Functions</h2>
@@ -1736,7 +1735,7 @@ END SUBROUTINE h5pget_buffer_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_cache_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
+SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &amp; 
                           rdcc_w0, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
@@ -2703,7 +2702,7 @@ END SUBROUTINE h5pget_fapl_mpiposix_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &amp; 
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)   :: prp_id    ! Property list identifier
@@ -3125,7 +3124,8 @@ END SUBROUTINE h5pget_fill_value_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
+SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, 
+                           cd_values, namelen, name, filter_id, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
   INTEGER, INTENT(IN) :: filter_number    ! Sequence number within the filter
@@ -3223,10 +3223,11 @@ END SUBROUTINE h5pget_filter_f
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+<!-- NEW PAGE -->
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, &
+SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, &amp; 
                                  cd_values, namelen, name, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
@@ -4152,7 +4153,7 @@ END SUBROUTINE h5pget_userblock_f
   <dt><strong>Fortran90 Interface:</strong> h5pget_version_f
     <dd>
 	<pre>
-SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
+SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &amp; 
                             stab, shhdr, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
@@ -4751,7 +4752,7 @@ SUBROUTINE
     <dt><strong>Fortran90 Interface:</strong> h5pmodify_filter_f
     <dd>
 	<pre>
-SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, &
+SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, &amp; 
                               cd_values, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
@@ -4886,7 +4887,9 @@ END SUBROUTINE h5pmodify_filter_f
     to range check the value being set for the property 
     or may perform some tranformation or translation of the
     value set.  The <code>get</code> callback would then 
-    reverse the transformation or translation.  
+    reverse the 
+    <!-- NEW PAGE --> 
+    transformation or translation.  
     A single <code>get</code> or <code>set</code> callback 
     could handle multiple properties by 
     performing different actions based on the
@@ -5232,7 +5235,9 @@ SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
                                        !     H5Z_FILTER_SHUFFLE_F
                                        !     H5Z_FILTER_FLETCHER32_F
                                        !     H5Z_FILTER_SZIP_F
-                                       !
+                                       !</pre>
+<!-- NEW PAGE -->
+<pre>
   INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                        ! 0 on success, -1 on failure
 END SUBROUTINE h5premove_filter_f
@@ -5477,7 +5482,9 @@ SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
                                           !    H5D_ALLOC_TIME_DEFAULT_F
                                           !    H5D_ALLOC_TIME_EARLY_F
                                           !    H5D_ALLOC_TIME_LATE_F
-                                          !    H5D_ALLOC_TIME_INCR_F
+                                          !    H5D_ALLOC_TIME_INCR_F</pre>
+<!-- NEW PAGE -->
+<pre>
   INTEGER, INTENT(OUT)       :: hdferr    ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5pset_alloc_time_f
@@ -6865,6 +6872,7 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
                   <br>
                   <code>o</code> &nbsp;&nbsp; for <code>H5FD_MEM_OHDR</code>
               </dir>
+<!-- NEW PAGE -->
           <dt><code>memb_addr</code>
             <dd>The default value is <code>HADDR_UNDEF</code> for each element.
         </dl>
@@ -6923,7 +6931,7 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_multi_f
     <dd>
 	<pre>
-SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &
+SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, &amp; 
                                memb_addr, relax, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T),INTENT(IN)  :: prp_id     ! Property list identifier
@@ -7373,7 +7381,6 @@ END SUBROUTINE h5pset_fclose_degree_f
         -->
 </dl>
 
-<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fill_time" -->
 <hr>
 <dl>
@@ -9386,8 +9393,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.2, February 2004
