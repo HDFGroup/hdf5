@@ -132,11 +132,6 @@ typedef float         real_f;
 #ifdef IRIX64
 #define BIG_LONGS
 #endif
-
-
-#define HAVE_STDC
-#define INCLUDES_ARE_ANSI
-
 #endif /* IRIX */
 
 #if (defined(SUN) || defined(sun) || defined(__sun__) || defined(__SUNPRO_C)) & !defined(__i386)
@@ -241,10 +236,6 @@ Please check your Makefile.
 #endif
 #define GOT_MACHINE
 
-#ifndef HAVE_UNISTD_H
-#define HAVE_UNISTD_H  /* unistd.h - close, fork,..etc */
-#endif
-
 #   define BSD
 #ifndef __GNUC__
 #include <memory.h>
@@ -260,11 +251,6 @@ typedef int            int_f;
 typedef int            hid_t_f;
 typedef float          real_f;
 #define _fcdtocp(desc) (desc)
-#ifdef  HAVE_FMPOOL
-#define FILELIB PAGEBUFIO  /* enable page buffering */
-#else
-#define FILELIB UNIXBUFIO
-#endif
 
 #endif /* HP9000 */
 
@@ -300,12 +286,6 @@ typedef float             real_f;
 
 #define DF_CAPFNAMES
 #define _fcdtocp(desc) (desc)
-
-#ifdef  HAVE_FMPOOL
-#define FILELIB PAGEBUFIO  /* enable page buffering */
-#else
-#define FILELIB UNIXBUFIO
-#endif
 
 #endif /*WINDOWS */
 
