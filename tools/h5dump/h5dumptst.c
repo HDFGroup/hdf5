@@ -1,4 +1,11 @@
 /*
+ * Copyright (C) 2001, 2002
+ *     National Center for Supercomputing Applications
+ *     All rights reserved.
+ *
+ */
+
+/*
  * Generate the binary hdf5 files for the h5dump tests.
  * Usage: just execute the program without any arguments will
  * generate all the binary hdf5 files in the local directory.
@@ -47,6 +54,7 @@
 #define FILE33  "tgrp_comments.h5"
 #define FILE34  "tsplit_file"
 #define FILE35  "tfamily%05d.h5"
+#define FILE36  "tmulti"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2749,6 +2757,60 @@ void test_family(void)
     H5Pclose(fapl);
 }
 
+static const char *multi_letters = "msbrglo";
+
+static
+void test_multi(void)
+{
+    hid_t fapl, fid, space, dataset;
+    hsize_t dims[2];
+    int i, j, dset[10][15];
+
+    /* Multi-file driver, general case of the split driver */
+    H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
+    hid_t memb_fapl[H5FD_MEM_NTYPES];
+    const char *memb_name[H5FD_MEM_NTYPES];
+    char sv[H5FD_MEM_NTYPES][1024];
+    haddr_t memb_addr[H5FD_MEM_NTYPES];
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    HDmemset(memb_map, 0, sizeof memb_map);
+    HDmemset(memb_fapl, 0, sizeof memb_fapl);
+    HDmemset((void *)(&memb_name[0]), 0, sizeof memb_name);
+    HDmemset(memb_addr, 0, sizeof memb_addr);
+
+    assert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+
+    for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; ++mt) {
+        memb_fapl[mt] = H5P_DEFAULT;
+        sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+        memb_name[mt] = sv[mt];
+        memb_addr[mt] = MAX(mt - 1,0) * (HADDR_MAX / 10);
+    }
+
+    H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+                      memb_addr, FALSE);
+
+    fid = H5Fcreate(FILE36, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+    /* create dataset */
+    dims[0] = 10;
+    dims[1] = 15;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, H5P_DEFAULT);
+
+    for (i = 0; i < 10; i++)
+         for (j = 0; j < 15; j++)
+              dset[i][j] = i + j;
+
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Fclose(fid);
+    H5Pclose(fapl);
+}
+
 int main(void)
 {
     test_group();
@@ -2796,6 +2858,7 @@ int main(void)
     test_group_comments();
     test_split_file();
     test_family();
+    test_multi();
 
     return 0;
 }
