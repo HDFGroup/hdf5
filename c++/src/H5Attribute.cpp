@@ -24,7 +24,7 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 Attribute::Attribute( const hid_t attr_id ) : AbstractDs( attr_id ) {}
 
 // Writes data to this attribute.
-void Attribute::write( const DataType& mem_type, void *buf ) const
+void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
    herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
    if( ret_value < 0 )
@@ -76,23 +76,32 @@ hid_t Attribute::p_getType() const
    }
 }
 
-// Gets the name of this attribute.
-string Attribute::getName( size_t buf_size ) const
+// Gets the name of this attribute, returning its length.
+ssize_t Attribute::getName( size_t buf_size, string& attr_name ) const
 {
    char* name_C = new char[buf_size+1];  // temporary C-string for C API
 
    // Calls C routine H5Aget_name to get the name of the attribute
-   herr_t name_size = H5Aget_name( id, buf_size, name_C );
+   ssize_t name_size = H5Aget_name( id, buf_size, name_C );
 
    // If H5Aget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
       throw AttributeIException("Attribute::getName", "H5Aget_name failed");
    }
-   // otherwise, create the string to hold the attribute name and return it
-   string name = string( name_C );
+   // otherwise, convert the C string attribute name and return 
+   attr_name = string( name_C );
    delete name_C;
-   return( name );
+   return( name_size );
+}
+
+// Gets the name of this attribute, returning the name, not the length.
+string Attribute::getName( size_t buf_size ) const
+{
+   string attr_name;
+   ssize_t name_size = getName( buf_size, attr_name );
+   return( attr_name ); 
+   // let caller catch exception if any
 }
 
 // This private function calls the C API H5Aclose to close this attribute.

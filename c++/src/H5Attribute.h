@@ -9,7 +9,7 @@ namespace H5 {
 class Attribute : public AbstractDs {
    public:
 	// Writes data to this attribute.
-	void write(const DataType& mem_type, void *buf ) const;
+	void write(const DataType& mem_type, const void *buf ) const;
 
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
@@ -18,7 +18,8 @@ class Attribute : public AbstractDs {
 	virtual DataSpace getSpace() const;
 
 	// Gets the name of this attribute.
-	string getName( size_t buf_size ) const;
+	ssize_t getName( size_t buf_size, string& attr_name ) const;
+	string getName( size_t buf_size ) const; // returns name, not its length
 
 	// do not inherit iterateAttrs from H5Object
 	int iterateAttrs() { return 0; }
