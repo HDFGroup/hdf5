@@ -1,4 +1,4 @@
-HDF5 version 1.4.3-snap1 released on Sat Sep 22 05:05:07 CDT 2001
+HDF5 version 1.4.3-snap2 released on Sat Oct  6 06:23:08 CDT 2001
 ==============================================================================
 
 
@@ -46,13 +46,25 @@ New Features
         H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
       to:
         H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
+    * The H5Pset_fapl_split() accepts raw and meta file names similar to the
+      syntax of H5Pset_fapl_multi() in addition to what it used to accept.
+    * Added a new test to verify the information provided by the configure
+      command.
+    * Improved performance of single, contiguous hyperslabs when reading or
+      writing.
 
 
          
 Bug Fixes since HDF5-1.4.2 Release
 ==================================
-
-
+    * Fixed a bug when reading chunked datasets where the edge of the dataset
+      would be incorrectly detected and generate an assertion failure.
+    * Fixed a bug where reading an entire dataset wasn't being handled
+      optimally when the dataset had unlimited dimensions.  Dataset is read
+      in a single low-level I/O now, instead of being broken into separate
+      pieces internally.
+    * Fixed a bug where reading or writing chunked data which needed datatype
+      conversion could result in data values getting corrupted.
 
 
 Documentation
