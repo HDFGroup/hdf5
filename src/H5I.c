@@ -285,7 +285,7 @@ done:
 H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func)
 {
 	H5I_type_t ret_value;                   /* type ID to return */
-    H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
+        H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
 	int i;
 	int done;
 
