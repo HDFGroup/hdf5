@@ -1,6 +1,6 @@
 		hdf5/testpar/README
 		-------------------
-		(last update: Feb 16 1998)
+		(last update: Aug 3rd 1998)
 
 This directory holds tests for the parallel HDF5 library.  It is in
 its "infancy" and is not integrated with the rest of the HDF5 software
@@ -8,14 +8,35 @@ yet.  It will be smothed out in the next release.
 
 Steps to compile and test:
 
-1) Makefile.irix64 is one that works for IRIX64 -64 platform.
-   You may use it as a template to create Makefile for other platforms.
+1a) Makefile.irix64 is one that works for IRIX64 -64 platform.
+    You may use it as a template to create Makefile for other platforms.
 
-2) "make all" creates two tests.  testphdf5 uses parallel I/O access
-   while shdf5 does the same tests but uses the default sequential I/O
-   access.
+1b) Makefile.ascired is one that works for the ASCI Red platform.
 
-3) "make test" runs both tests.
+2) "make all -f Makefile.xxxxx >&! make.out1" creates testphdf5.
+
+3) "make test -f Makefile.xxxxx >&! make.out2" runs testphdf5.
+
+    When running "make test -f Makefile.xxxxx" the line that executes is:
+    $(RUN) testphdf5 $(TEST_FLAGS)
+    
+    For the ASCI Red users:
+      In the file Makefile.ascired, the variables RUN and TEST_FLAGS are:
+
+      RUN=yod -sz 8
+      TEST_FLAGS=-f "pfs:/pfs/multi/tmp_1/your_own"
+    
+      The TEST_FLAGS variable contains an optional file prefix which needs
+      to be changed to your own Intel PFS directory name.
+ 
+      /* change "your_own" to your own directory name */
+ 
+      RUN=yod -sz 8
+      TEST_FLAGS=-f "pfs:/pfs/multi/tmp_1/my_dir"
+
+      After the above change to Makefile.ascired, upon execution of
+      "make test -f Makefile.ascired >&! make.out2",
+      the prefix will be attached to filenames in testphdf5 at execution.
 
 
 ----
