@@ -201,7 +201,6 @@ locate_zlib()
 {
 # this default is the best guess of locating zlib software
 swpaths_defaults="/usr /usr/local /usr/ncsa /usr/sdt"
-swpaths_defaults=
 swpaths=
 
 
