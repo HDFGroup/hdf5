@@ -503,7 +503,7 @@
 		./src/hdf5.h
 
 	    The configuration information:
-		./src/H5config.h
+		./src/H5pubconf.h
 	
     	The support programs that are useful are:
 	    ./tools/h5ls	(list file contents)
