@@ -92,7 +92,6 @@ IntType::IntType( const DataSet& dataset ) : AtomType()
 //--------------------------------------------------------------------------
 // Function:	IntType::getSign
 ///\brief	Retrieves the sign type for an integer type.
-///\param	dataset - IN: Dataset that this integer datatype associates with
 ///\return	Valid sign type
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000

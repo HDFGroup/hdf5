@@ -42,23 +42,47 @@
 namespace H5 {
 #endif
 
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	Group default constructor
+///\brief	Default constructor: Creates a stub group
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group() : H5Object() {}
 
-// Copy constructor: makes a copy of the original Group object 
+//--------------------------------------------------------------------------
+// Function:	Group copy constructor
+///\brief	Copy constructor: makes a copy of the original Group object.
+///\param	original - IN: Original group to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group( const Group& original ) : H5Object( original ) {}
 
-// Get id of the location, which id the group id here; used by CommonFG
-// member functions
+//--------------------------------------------------------------------------
+// Function:	Group::getLocId
+///\brief	Returns the id of this group.
+///\return	Id of this group
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t Group::getLocId() const
 {
    return( getId() );
 }
 
-// Creates a copy of an existing Group using its id
+//--------------------------------------------------------------------------
+// Function:	Group overloaded constructor
+///\brief	Creates a Group object using the id of an existing group.
+///\param	group_id - IN: Id of an existing group
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 
-// Returns the number of objects in the group.
+//--------------------------------------------------------------------------
+// Function:	Group::getNumObjs
+///\brief	Returns the number of objects in this group.
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hsize_t Group::getNumObjs() const
 {
    hsize_t num_objs;
@@ -70,7 +94,14 @@ hsize_t Group::getNumObjs() const
    return (num_objs);
 }
 
-// Retrieves the name of an object in a given group by giving index
+//--------------------------------------------------------------------------
+// Function:	Group::getObjnameByIdx
+///\brief	Retrieves the name of an object in this group by giving the
+///		object's index.
+///\return	Object name
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 ssize_t Group::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
 {
    char* name_C = new char[size];
@@ -84,7 +115,14 @@ ssize_t Group::getObjnameByIdx(hsize_t idx, string& name, size_t size) const
    return (name_len);
 }
 
-// Returns the type of an object in a given group by giving index
+//--------------------------------------------------------------------------
+// Function:	Group::getObjTypeByIdx
+///\brief	Returns the type of an object in this group by giving the
+///		object's index.
+///\return	Object type
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int Group::getObjTypeByIdx(hsize_t idx) const
 {
    int obj_type = H5Gget_objtype_by_idx(id, idx);
@@ -94,6 +132,18 @@ int Group::getObjTypeByIdx(hsize_t idx) const
    }
    return (obj_type);
 }
+
+//--------------------------------------------------------------------------
+// Function:	Group::getObjTypeByIdx
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function because it also provides 
+///		the returned object type in text.
+///\param	idx - IN: Index of the object
+///\param	type_name - IN: Object type in text
+///\return	Object type
+///\exception	H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
 {
    int obj_type = H5Gget_objtype_by_idx(id, idx);
@@ -127,7 +177,15 @@ int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
    //}
 //}
 
-// Calls the C API H5Gclose to close this group.  Used by IdComponent::reset
+//--------------------------------------------------------------------------
+// Function:	Group::p_close (private)
+///\brief	Closes this group.
+///\exception   H5::GroupIException
+///\note
+///		This function will be obsolete because its functionality 
+///		is recently handled by the C library layer.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Group::p_close() const
 {
    herr_t ret_value = H5Gclose( id );
@@ -137,7 +195,20 @@ void Group::p_close() const
    }
 }
 
-// Throw file exception
+//--------------------------------------------------------------------------
+// Function:	Group::throwException
+///\brief	Throws group exception - initially implemented for CommonFG
+///\param	func_name - Name of the function where failure occurs
+///\param	msg       - Message describing the failure
+///\exception	H5::GroupIException
+// Description
+//		This function is used in CommonFG implementation so that
+//		proper exception can be thrown for file or group.  The
+//		argument func_name is a member of CommonFG and "Group::"
+//		will be inserted to indicate the function called is an
+//		implementation of Group.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void Group::throwException(const string func_name, const string msg) const
 {
    string full_name = func_name;
@@ -145,11 +216,11 @@ void Group::throwException(const string func_name, const string msg) const
    throw GroupIException(full_name, msg);
 }
 
-// The destructor of this instance calls IdComponent::reset to
-// reset its identifier - no longer true
-// Older compilers (baldric) don't support template member functions
-// and IdComponent::reset is one; so at this time, the resetId is not
-// a member function so it can be template to work around that problem.
+//--------------------------------------------------------------------------
+// Function:	Group destructor
+///\brief	Properly terminates access to this group.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Group::~Group()
 {  
    // The group id will be closed properly
@@ -158,7 +229,6 @@ Group::~Group()
     catch (Exception close_error) { // thrown by p_close
         cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
-
 }  
 
 #ifndef H5_NO_NAMESPACE
