@@ -93,6 +93,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Fixed H5Giterate to avoid re-using index parameter after iteration
+            callback has been called (allows iteration callback to modify the
+            index parameter itself).  QAK - 2003/12/06
         - Fixed various floating-point conversion problems, including a
             change which could corrupt data when converting from double->float.
             QAK - 2003/11/24
