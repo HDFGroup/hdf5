@@ -211,7 +211,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectElements">H5Sselect_elements</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
-        <em>H5S_selopt_t</em> <code>op</code>,
+        <em>H5S_seloper_t</em> <code>op</code>,
         <em>const size_t</em> <code>num_elements</code>,
         <em>const hssize_t *</em><code>coord</code>[ ]
     )
@@ -254,7 +254,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>Identifier of the dataspace.
-        <dt><em>H5S_selopt_t</em> <code>op</code>
+        <dt><em>H5S_seloper_t</em> <code>op</code>
             <dd>operator specifying how the new selection is to be 
                 combined with the existing selection for the dataspace.
         <dt><em>const size_t</em> <code>num_elements</code>
@@ -647,7 +647,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
-        <em>H5S_selopt_t</em><code>op</code>,
+        <em>H5S_seloper_t</em><code>op</code>,
         <em>const hssize_t *</em><code>start</code>,
         <em>const hsize_t *</em><code>stride</code>
         <em>const hsize_t *</em><code>count</code>,

@@ -1997,15 +1997,21 @@ parallel HDF5 library.</i>
     <dd> Given a dataset transfer property list, <code>H5Pset_buffer</code> 
          sets the maximum size
          for the type conversion buffer and background buffer and
-         optionally supply pointers to application-allocated buffers.
+         optionally supplies pointers to application-allocated buffers.
          If the buffer size is smaller than the entire amount of data
-         being transferred between application and file, and a type
-         conversion buffer or background buffer is required then
-         strip mining will be used.  However, certain restrictions
-         apply for the size of buffer which can be used for strip
-         mining.  For instance, when strip mining a 100x200x300
-         hyperslab of a simple data space the buffer must be large
-         enough to hold a 1x200x300 slab.  
+         being transferred between the application and the file, and a type
+         conversion buffer or background buffer is required, then
+         strip mining will be used.  
+         <p>
+         Note that there are minimum size requirements for the buffer.
+         Strip mining can only break the data up along the first dimension,
+         so the buffer must be large enough to accommodate a complete slice 
+         that encompasses all of the remaining dimensions.  
+         For example, when strip mining a 100x200x300 hyperslab 
+         of a simple data space, the buffer must be large enough to 
+         hold 1x200x300 data elements.  
+         When strip mining a 100x200x300x150 hyperslab of a simple data space, 
+         the buffer must be large enough to hold 1x200x300x150 data elements.  
          <p>
          If <code>tconv</code> and/or <code>bkg</code> are null pointers,
          then buffers will be allocated and freed during the data transfer.  
