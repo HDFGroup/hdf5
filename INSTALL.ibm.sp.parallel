@@ -49,7 +49,7 @@ setenv CC mpcc
 #  -bI:/usr/include/piofs/piofs.exp	this MPI-IO uses PIOFS file system
 #  -L/usr/local/mpio/lib/ibm -lmpio	link to this MPI-IO lib
 #
-setenv CFLAGS "-DHAVE_FUNCTION -I/usr/local/mpio/include/ibm -bI:/usr/include/piofs/piofs.exp -L/usr/local/mpio/lib/ibm -lmpio"
+setenv CFLAGS "-g -D_LARGE_FILES -DHAVE_FUNCTION -I/usr/local/mpio/include/ibm -bI:/usr/include/piofs/piofs.exp -L/usr/local/mpio/lib/ibm -lmpio"
 
 # The configure/make process needs to be able to run some programs,
 # need to specify a processor pool.
