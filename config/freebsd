@@ -19,3 +19,12 @@ NOFP=${NOFP:=-fomit-frame-pointer}
 
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
+
+# Special setup to use pthread support if enable-threadsafe is on.
+# Works with static executable only.
+if test "X-" != "X-$enable_threadsafe"; then
+    CFLAGS="$CFLAGS -pthread -D_THREAD_SAFE" 
+    LDFLAGS="$LDFLAGS -pthread"
+    LIBS="$LIBS -lcipher"
+    enable_static_exec=yes
+fi
