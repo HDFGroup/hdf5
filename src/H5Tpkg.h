@@ -26,6 +26,8 @@
 #include <H5HGprivate.h>
 #include <H5Tprivate.h>
 
+#define H5T_NAMELEN	10	/*length of debugging name buffer	     */
+
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */
     size_t		prec;	/*precision in bits			     */
@@ -84,6 +86,7 @@ typedef struct H5T_member_t {
 
 /* The data type conversion database */
 typedef struct H5T_path_t {
+    char	name[H5T_NAMELEN];	/*name for debugging only	     */
     H5T_t	*src;			/*source data type ID		     */
     H5T_t	*dst;			/*destination data type ID	     */
     H5T_conv_t	func;			/*data conversion function	     */
@@ -93,14 +96,24 @@ typedef struct H5T_path_t {
 
 /* The master list of soft conversion functions */
 typedef struct H5T_soft_t {
+    char	name[H5T_NAMELEN];	/*name for debugging only	     */
     H5T_class_t src;			/*source data type class	     */
     H5T_class_t dst;			/*destination data type class	     */
     H5T_conv_t	func;			/*the conversion function	     */
 } H5T_soft_t;
 
+/* Statistics about a conversion function */
+typedef struct H5T_stats_t {
+    uintn	ncalls;			/*num calls to conversion function   */
+#ifdef H5T_DEBUG
+    hsize_t	nelmts;			/*total data points converted	     */
+    H5_timer_t	timer;			/*total time for conversion	     */
+#endif
+} H5T_stats_t;
+
 /* Function prototypes for H5T package scope */
-H5T_path_t *H5T_path_find (const H5T_t *src, const H5T_t *dst, 
-			   hbool_t create, H5T_conv_t func);
+H5T_path_t *H5T_path_find (const char *name, const H5T_t *src,
+			   const H5T_t *dst, hbool_t create, H5T_conv_t func);
 
 /* Conversion functions */
 herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

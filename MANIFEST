@@ -42,6 +42,7 @@
 ./html/Big.html
 ./html/CodeReview.html
 ./html/Coding.html
+./html/Compression.html
 ./html/Datasets.html
 ./html/Dataspaces.html
 ./html/Datatypes.html
@@ -152,6 +153,7 @@
 ./src/H5MMprivate.h
 ./src/H5MMpublic.h
 ./src/H5O.c
+./src/H5Ocomp.c
 ./src/H5Ocont.c
 ./src/H5Odtype.c
 ./src/H5Oefl.c
@@ -177,6 +179,9 @@
 ./src/H5Tpublic.h
 ./src/H5V.c
 ./src/H5Vprivate.h
+./src/H5Z.c
+./src/H5Zprivate.h
+./src/H5Zpublic.h
 ./src/H5config.h.in
 ./src/H5detect.c
 ./src/H5private.h

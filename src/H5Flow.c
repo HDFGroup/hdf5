@@ -586,7 +586,7 @@ H5F_addr_cmp(const haddr_t *a1, const haddr_t *a2)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_undef(haddr_t *addr /*out */ )
+H5F_addr_undef(haddr_t *addr/*out*/)
 {
     assert(addr);
 

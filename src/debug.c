@@ -26,6 +26,7 @@
 
 #define INDENT  3
 #define VCOL    50
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -51,7 +52,7 @@ main(int argc, char *argv[])
     H5F_t                  *f;
     haddr_t                 addr;
     uint8                   sig[16];
-    intn                    i;
+    intn                    i, ndims;
     herr_t                  status = SUCCEED;
     haddr_t                 extra;
 
@@ -123,11 +124,17 @@ main(int argc, char *argv[])
          * subclass.  The subclass identifier is the byte immediately
          * after the B-tree signature.
          */
-        H5B_subid_t             subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
+        H5B_subid_t subtype = (H5B_subid_t)sig[H5B_SIZEOF_MAGIC];
+	
         switch (subtype) {
         case H5B_SNODE_ID:
             status = H5G_node_debug(f, &addr, stdout, 0, VCOL, &extra);
             break;
+
+	case H5B_ISTORE_ID:
+	    ndims = (int)extra.offset;
+	    status = H5F_istore_debug (f, &addr, stdout, 0, VCOL, ndims);
+	    break;
 
         default:
             fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned) (subtype));

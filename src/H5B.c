@@ -1022,7 +1022,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 		  uint8 *lt_key, hbool_t *lt_key_changed,
 		  uint8 *md_key, void *udata,
 		  uint8 *rt_key, hbool_t *rt_key_changed,
-		  haddr_t *new_node /*out */ )
+		  haddr_t *new_node/*out*/)
 {
     H5B_t		   *bt = NULL, *twin = NULL, *tmp_bt = NULL;
     intn		    lt = 0, idx = -1, rt, cmp = -1;
@@ -1097,10 +1097,9 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	idx = 0;
 
 	if (type->follow_min) {
-	    if ((my_ins = (type->insert) (f, bt->child + idx,
-					  bt->key[idx].nkey, lt_key_changed,
-					  md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
+	    if ((my_ins = (type->insert) (f, bt->child+idx, bt->key[idx].nkey,
+					  lt_key_changed, md_key, udata,
+					  bt->key[idx+1].nkey, rt_key_changed,
 					  &child_addr/*out*/)) < 0) {
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			    "unable to insert first leaf node");
@@ -1119,11 +1118,11 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = H5B_insert_helper(f, bt->child + idx, type,
+	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type,
 					bt->key[idx].nkey, lt_key_changed,
-					md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
-					&child_addr /*out */ )) < 0) {
+					md_key, udata, bt->key[idx+1].nkey,
+					rt_key_changed,
+					&child_addr/*out*/))<0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			"can't insert minimum subtree");
 	}
@@ -1138,11 +1137,10 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = (type->insert) (f, bt->child + idx,
-				      bt->key[idx].nkey, lt_key_changed,
-				      md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
-				      &child_addr /*out */ )) < 0) {
+	if ((my_ins = (type->insert) (f, bt->child+idx, bt->key[idx].nkey,
+				      lt_key_changed, md_key, udata,
+				      bt->key[idx+1].nkey, rt_key_changed,
+				      &child_addr/*out*/)) < 0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			"can't insert minimum leaf node");
 	}
@@ -1176,11 +1174,11 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = H5B_insert_helper(f, bt->child + idx, type,
+	if ((my_ins = H5B_insert_helper(f, bt->child+idx, type,
 					bt->key[idx].nkey, lt_key_changed,
-					md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
-					&child_addr /*out */ )) < 0) {
+					md_key, udata, bt->key[idx+1].nkey,
+					rt_key_changed,
+					&child_addr/*out*/)) < 0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			"can't insert maximum subtree");
 	}
@@ -1195,11 +1193,10 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR,
 			"unable to decode key");
 	}
-	if ((my_ins = (type->insert) (f, bt->child + idx,
-				      bt->key[idx].nkey, lt_key_changed,
-				      md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
-				      &child_addr /*out */ )) < 0) {
+	if ((my_ins = (type->insert) (f, bt->child+idx, bt->key[idx].nkey,
+				      lt_key_changed, md_key, udata,
+				      bt->key[idx+1].nkey, rt_key_changed,
+				      &child_addr/*out*/)) < 0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			"can't insert maximum leaf node");
 	}
@@ -1248,11 +1245,10 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	 * Follow a branch out of this node to a leaf node of some other type.
 	 */
 	assert(idx >= 0 && idx < bt->nchildren);
-	if ((my_ins = (type->insert) (f, bt->child + idx,
-				      bt->key[idx].nkey, lt_key_changed,
-				      md_key, udata,
-				      bt->key[idx + 1].nkey, rt_key_changed,
-				      &child_addr /*out */ )) < 0) {
+	if ((my_ins = (type->insert) (f, bt->child+idx, bt->key[idx].nkey,
+				      lt_key_changed, md_key, udata,
+				      bt->key[idx+1].nkey, rt_key_changed,
+				      &child_addr/*out*/)) < 0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
 			"can't insert leaf node");
 	}
@@ -1531,7 +1527,7 @@ H5B_nodesize(H5F_t *f, const H5B_class_t *type,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
+H5B_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 	  intn fwidth, const H5B_class_t *type, void *udata)
 {
     H5B_t		   *bt = NULL;
@@ -1599,6 +1595,12 @@ H5B_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		"Address:");
 	H5F_addr_print(stream, bt->child + i);
 	fprintf(stream, "\n");
+	
+	H5B_decode_key(f, bt, i);
+	if (type->debug_key) {
+	    (type->debug_key)(stream, indent+3, MAX (0, fwidth-3),
+			      bt->key[i].nkey, udata);
+	}
     }
 
     FUNC_LEAVE(SUCCEED);

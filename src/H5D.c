@@ -17,16 +17,17 @@ static char		RcsId[] = "@(#)$Revision$";
 /* $Id$ */
 
 #include <H5private.h>		/* Generic Functions			*/
-#include <H5Iprivate.h>		/* IDs			  	*/
+#include <H5Iprivate.h>		/* IDs			  		*/
 #include <H5ACprivate.h>	/* Cache			  	*/
 #include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5Gprivate.h>		/* Group headers		  	*/
-#include <H5HLprivate.h>		/* Name heap				*/
+#include <H5HLprivate.h>	/* Name heap				*/
 #include <H5MFprivate.h>	/* File space allocation header		*/
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Oprivate.h>		/* Object headers		  	*/
 #include <H5Pprivate.h>		/* Property lists			*/
+#include <H5Zprivate.h>		/* Data compression			*/
 
 #define PABLO_MASK	H5D_mask
 
@@ -55,10 +56,17 @@ const H5D_create_t	H5D_create_dflt = {
      1, 1, 1, 1, 1, 1, 1, 1,	/*...are quite useless.	 Larger chunks..*/
      1, 1, 1, 1, 1, 1, 1, 1,	/*...produce fewer, but larger I/O......*/
      1, 1, 1, 1, 1, 1, 1, 1},	/*...requests.				*/
+
+    /* External file list */
     {H5F_ADDR_UNDEF,		/* External file list heap address	*/
      0,				/*...slots allocated			*/
      0,				/*...slots used				*/
-     NULL}			/*...slot array				*/
+     NULL}, 			/*...slot array				*/
+
+    /* Compression */
+    {H5Z_NONE, 			/* No compression			*/
+     0,				/*...flags				*/
+     0, NULL}			/*...client data			*/
 };
 
 /* Default dataset transfer property list */
@@ -741,6 +749,11 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     assert (type);
     assert (space);
     assert (create_parms);
+    if (H5Z_NONE!=create_parms->compress.method &&
+	H5D_CHUNKED!=create_parms->layout) {
+	HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
+		     "compression can only be used with chunked layout");
+    }
 
     /* Initialize the dataset object */
     new_dset = H5MM_xcalloc(1, sizeof(H5D_t));
@@ -829,9 +842,17 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 		   new_dset->type) < 0 ||
 	H5S_modify(&(new_dset->ent), new_dset->space) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
-		    "can't update type or space header messages");
+		    "unable to update type or space header messages");
     }
 
+    /* Update the compression message */
+    if (H5Z_NONE!=new_dset->create_parms->compress.method &&
+	H5O_modify (&(new_dset->ent), H5O_COMPRESS, 0, H5O_FLAG_CONSTANT,
+		    &(new_dset->create_parms->compress))<0) {
+	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+		     "unable to update compression header message");
+    }
+    
     /*
      * Initialize storage.  We assume that external storage is already
      * initialized by the caller, or at least will be before I/O is
@@ -1111,6 +1132,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;
+#endif
 #ifdef HAVE_PARALLEL
     int	access_mode_saved = -1;
 #endif
@@ -1210,6 +1234,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	H5T_conv_noop==tconv_func &&
 	NULL!=sconv_func->read) {
 	status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
+				    &(dataset->create_parms->compress),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
 				    mem_space, buf/*out*/);
@@ -1296,6 +1321,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 * if necessary.
 	 */
 	if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+				&(dataset->create_parms->compress),
 				&(dataset->create_parms->efl), 
 				H5T_get_size (dataset->type), file_space,
 				&numbering, smine_start, smine_nelmts,
@@ -1314,14 +1340,19 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/*
 	 * Perform data type conversion.
 	 */
+#ifdef H5T_DEBUG
+	H5T_timer_begin (&timer, cdata);
+#endif
 	cdata->command = H5T_CONV_CONV;
-	cdata->ncalls++;
-	if ((tconv_func)(src_id, dst_id, cdata, smine_nelmts, tconv_buf,
-			 bkg_buf)<0) {
+	status = (tconv_func)(src_id, dst_id, cdata, smine_nelmts, tconv_buf,
+			      bkg_buf);
+#ifdef H5T_DEBUG
+	H5T_timer_end (&timer, cdata, smine_nelmts);
+#endif
+	if (status<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			"data type conversion failed");
 	}
-	cdata->nelmts += smine_nelmts;
 
 	/*
 	 * Scatter the data into memory.
@@ -1396,6 +1427,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     size_t		target_size;		/*desired buffer size	*/
     size_t		request_nelmts;		/*requested strip mine	*/
     H5T_bkg_t		need_bkg;		/*type of background buf*/
+#ifdef H5T_DEBUG
+    H5_timer_t		timer;
+#endif
 #ifdef HAVE_PARALLEL
     int	access_mode_saved = -1;
 #endif
@@ -1495,6 +1529,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	H5T_conv_noop==tconv_func &&
 	NULL!=sconv_func->write) {
 	status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
+				     &(dataset->create_parms->compress),
 				     &(dataset->create_parms->efl),
 				     H5T_get_size (dataset->type), file_space,
 				     mem_space, buf);
@@ -1588,6 +1623,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	if ((H5D_OPTIMIZE_PIPE && H5T_BKG_YES==need_bkg) ||
 	    (!H5D_OPTIMIZE_PIPE && need_bkg)) {
 	    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+				    &(dataset->create_parms->compress),
 				    &(dataset->create_parms->efl),
 				    H5T_get_size (dataset->type), file_space,
 				    &numbering, smine_start, smine_nelmts,
@@ -1600,19 +1636,25 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/*
 	 * Perform data type conversion.
 	 */
+#ifdef H5T_DEBUG
+	H5T_timer_begin (&timer, cdata);
+#endif
 	cdata->command = H5T_CONV_CONV;
-	cdata->ncalls++;
-	if ((tconv_func) (src_id, dst_id, cdata, smine_nelmts, tconv_buf,
-			  bkg_buf)<0) {
+	status = (tconv_func) (src_id, dst_id, cdata, smine_nelmts, tconv_buf,
+			       bkg_buf);
+#ifdef H5T_DEBUG
+	H5T_timer_end (&timer, cdata, smine_nelmts);
+#endif
+	if (status<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			"data type conversion failed");
 	}
-	cdata->nelmts += smine_nelmts;
 
 	/*
 	 * Scatter the data out to the file.
 	 */
 	if ((sconv_func->fscat)(dataset->ent.file, &(dataset->layout),
+				&(dataset->create_parms->compress),
 				&(dataset->create_parms->efl),
 				H5T_get_size (dataset->type), file_space,
 				&numbering, smine_start, smine_nelmts,

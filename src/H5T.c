@@ -231,15 +231,17 @@ H5T_init_interface(void)
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
-    if (H5Tregister_soft(H5T_INTEGER, H5T_INTEGER, H5T_conv_order) < 0) {
+    if (H5Tregister_soft("ibo", H5T_INTEGER, H5T_INTEGER,
+			 H5T_conv_order) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_soft(H5T_FLOAT, H5T_FLOAT, H5T_conv_order) < 0) {
+    if (H5Tregister_soft("fbo", H5T_FLOAT, H5T_FLOAT, H5T_conv_order) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_soft (H5T_COMPOUND, H5T_COMPOUND, H5T_conv_struct)<0) {
+    if (H5Tregister_soft ("struct", H5T_COMPOUND, H5T_COMPOUND,
+			  H5T_conv_struct)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
@@ -268,10 +270,14 @@ H5T_init_interface(void)
 static void
 H5T_term_interface(void)
 {
-    int		i;
+    intn	i;
     H5T_path_t	*path = NULL;
     H5T_cdata_t	*pcdata = NULL;
     H5T_conv_t	cfunc = NULL;
+#ifdef H5T_DEBUG
+    intn	nprint=0;
+    hsize_t	nbytes;
+#endif
     
     /* Unregister all conversion functions */
     for (i=0; i<H5T_npath_g; i++) {
@@ -286,6 +292,29 @@ H5T_term_interface(void)
 #endif
 		H5E_clear(); /*ignore the error*/
 	    }
+#ifdef H5T_DEBUG
+	    if (0==nprint++) {
+		HDfprintf (stderr, "H5T: type conversion statistics "
+			   "accumulated over life of library:\n");
+		HDfprintf (stderr, "   %-*s %8s/%-5s %8s %8s %8s %15s\n",
+			   H5T_NAMELEN-1, "Name", "Elmts", "Calls", "User",
+			   "System", "Elapsed", "Bandwidth");
+		HDfprintf (stderr, "   %-*s %8s-%-5s %8s %8s %8s %15s\n",
+			   H5T_NAMELEN-1, "----", "-----", "-----", "----",
+			   "------", "-------", "---------");
+	    }
+	    nbytes = MAX (H5T_get_size (path->src), H5T_get_size (path->dst));
+	    nbytes *= path->cdata.stats->nelmts;
+	    HDfprintf (stderr, "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f %15g\n",
+		       H5T_NAMELEN-1, path->name,
+		       path->cdata.stats->nelmts,
+		       path->cdata.stats->ncalls,
+		       path->cdata.stats->timer.utime, 
+		       path->cdata.stats->timer.stime, 
+		       path->cdata.stats->timer.etime,
+		       nbytes / path->cdata.stats->timer.etime);
+#endif
+	    H5MM_xfree (path->cdata.stats);
 	}
     }
 
@@ -2276,7 +2305,7 @@ H5Tis_shared (hid_t loc_id, hid_t type_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
+H5Tregister_hard(const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
 {
     H5T_t	*src = NULL;
     H5T_t	*dst = NULL;
@@ -2286,6 +2315,10 @@ H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
     FUNC_ENTER(H5Tregister_hard, FAIL);
 
     /* Check args */
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "conversion must have a name for debugging");
+    }
     if (H5_DATATYPE != H5I_group(src_id) ||
 	NULL == (src = H5I_object(src_id)) ||
 	H5_DATATYPE != H5I_group(dst_id) ||
@@ -2294,7 +2327,7 @@ H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
     }
 
     /* Locate or create a new conversion path */
-    if (NULL == (path = H5T_path_find(src, dst, TRUE, func))) {
+    if (NULL == (path = H5T_path_find(name, src, dst, TRUE, func))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to locate/allocate conversion path");
     }
@@ -2334,7 +2367,8 @@ H5Tregister_hard(hid_t src_id, hid_t dst_id, H5T_conv_t func)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
+H5Tregister_soft(const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
+		 H5T_conv_t func)
 {
     intn	i;
     hid_t	src_id, dst_id;
@@ -2343,6 +2377,10 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
     FUNC_ENTER(H5Tregister_soft, FAIL);
 
     /* Check args */
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "conversion must have a name for debugging");
+    }
     if (src_cls < 0 || src_cls >= H5T_NCLASSES ||
 	dst_cls < 0 || dst_cls >= H5T_NCLASSES) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -2359,6 +2397,8 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 	H5T_soft_g = H5MM_xrealloc(H5T_soft_g,
 				   H5T_asoft_g * sizeof(H5T_soft_t));
     }
+    HDstrncpy (H5T_soft_g[H5T_nsoft_g].name, name, H5T_NAMELEN);
+    H5T_soft_g[H5T_nsoft_g].name[H5T_NAMELEN-1] = '\0';
     H5T_soft_g[H5T_nsoft_g].src = src_cls;
     H5T_soft_g[H5T_nsoft_g].dst = dst_cls;
     H5T_soft_g[H5T_nsoft_g].func = func;
@@ -2387,6 +2427,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 
 	HDmemset (&cdata, 0, sizeof cdata);
 	cdata.command = H5T_CONV_INIT;
+	cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
 	if ((func) (src_id, dst_id, &cdata, 0, NULL, NULL) >= 0) {
 	    /*
 	     * Free resources used by the previous conversion function. We
@@ -2403,9 +2444,14 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 #endif
 		    H5E_clear();
 		}
+		H5MM_xfree (path->cdata.stats);
 	    }
+	    HDstrncpy (path->name, name, H5T_NAMELEN);
+	    path->name[H5T_NAMELEN-1] = '\0';
 	    path->func = func;
 	    path->cdata = cdata;
+	} else {
+	    H5MM_xfree (cdata.stats);
 	}
 
 	/* Release temporary atoms */
@@ -2475,6 +2521,7 @@ H5Tunregister(H5T_conv_t func)
 #endif
 		H5E_clear();
 	    }
+	    H5MM_xfree (path->cdata.stats);
 	    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 
 	    /*
@@ -2500,8 +2547,10 @@ H5Tunregister(H5T_conv_t func)
 		}
 
 		path->cdata.command = H5T_CONV_INIT;
+		path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
 		if ((H5T_soft_g[j].func)(src_id, dst_id, &(path->cdata),
 					 0, NULL, NULL) >= 0) {
+		    HDstrcpy (path->name, H5T_soft_g[j].name);
 		    path->func = H5T_soft_g[j].func;
 		} else {
 		    H5E_clear();
@@ -3348,6 +3397,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
  *		H5T_BKG_YES then a pointer to the H5T_conv_noop() function is
  *		returned.
  *
+ *		NAME is assigned to the conversion path if the path is
+ *		created.  The name is only for debugging.
+ *
  * Return:	Success:	A pointer to an appropriate conversion
  *				function.  The PCDATA argument is initialized
  *				to point to type conversion data which should
@@ -3378,9 +3430,8 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
 	HRETURN(H5T_conv_noop);
     }
     
-
     /* Find it */
-    if (NULL == (path = H5T_path_find(src, dst, TRUE, NULL))) {
+    if (NULL == (path = H5T_path_find(NULL, src, dst, TRUE, NULL))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL,
 		      "unable to create conversion path");
     }
@@ -3403,6 +3454,8 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
  *		is created.  If FUNC is non-null then it is registered as the
  *		hard function for that path.
  *
+ * 		If a path is created then NAME is used for debugging.
+ *
  * Return:	Success:	Pointer to the path, valid until the path
  *				database is modified.
  *
@@ -3416,8 +3469,8 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
  *-------------------------------------------------------------------------
  */
 H5T_path_t *
-H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
-	      H5T_conv_t func)
+H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
+	      hbool_t create, H5T_conv_t func)
 {
     intn	lt = 0;			/*left edge (inclusive)		*/
     intn	rt = H5T_npath_g;	/*right edge (exclusive)	*/
@@ -3471,9 +3524,12 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 
 	/* Associate a function with the path if possible */
 	if (func) {
+	    HDstrncpy (path->name, name, H5T_NAMELEN);
+	    path->name[H5T_NAMELEN-1] = '\0';
 	    path->func = func;
 	    path->is_hard = TRUE;
 	    path->cdata.command = H5T_CONV_INIT;
+	    path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
 	    if ((src_id=H5I_register(H5_DATATYPE, H5T_copy(path->src))) < 0 ||
 		(dst_id=H5I_register(H5_DATATYPE, H5T_copy(path->dst))) < 0) {
 		HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
@@ -3503,11 +3559,13 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 				  "unable to register conv types for query");
 		}
 		path->cdata.command = H5T_CONV_INIT;
+		path->cdata.stats = H5MM_xcalloc (1, sizeof(H5T_stats_t));
 		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
 					  H5T_CONV_INIT, NULL, NULL) < 0) {
 		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 		    H5E_clear(); /*ignore the error*/
 		} else {
+		    HDstrcpy (path->name, H5T_soft_g[i].name);
 		    path->func = H5T_soft_g[i].func;
 		}
 		H5I_dec_ref(src_id);
@@ -3517,6 +3575,59 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
     }
     FUNC_LEAVE(path);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_timer_begin
+ *
+ * Purpose:	Start a timer for a data type conversion.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_timer_begin (H5_timer_t *timer, H5T_cdata_t *cdata)
+{
+    assert (timer);
+    assert (cdata);
+    assert (cdata->stats);
+
+    H5_timer_begin (timer);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_timer_end
+ *
+ * Purpose:	Ends a timer for a data type conversion
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 17, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5T_timer_end (H5_timer_t *timer, H5T_cdata_t *cdata, size_t nelmts)
+{
+    assert (timer);
+    assert (cdata);
+    assert (cdata->stats);
+
+    H5_timer_end (&(cdata->stats->timer), timer);
+    cdata->stats->ncalls++;
+    cdata->stats->nelmts += nelmts;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_debug

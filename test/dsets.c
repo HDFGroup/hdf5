@@ -35,6 +35,7 @@
 #define DSET_CHUNKED_NAME	"chunked"
 #define DSET_SIMPLE_IO_NAME	"simple_io"
 #define DSET_TCONV_NAME		"tconv"
+#define DSET_COMPRESS_NAME	"compressed"
 
 
 /*-------------------------------------------------------------------------
@@ -89,6 +90,7 @@ test_create(hid_t file)
     void	*client_data = NULL;
 
     printf("%-70s", "Testing create/open/close");
+    fflush (stdout);
 
     /* Create the data space */
     dims[0] = 256;
@@ -202,6 +204,7 @@ test_simple_io(hid_t file)
     void		*tconv_buf = NULL;
 
     printf("%-70s", "Testing simple I/O");
+    fflush (stdout);
 
     /* Initialize the dataset */
     for (i = n = 0; i < 100; i++) {
@@ -290,7 +293,8 @@ test_tconv(hid_t file)
     assert (in);
 
     printf("%-70s", "Testing data type conversion");
-
+    fflush (stdout);
+    
     /* Initialize the dataset */
     for (i = 0; i < 1000000; i++) {
 	out[i*4+0] = 0x11;
@@ -346,6 +350,132 @@ test_tconv(hid_t file)
     puts(" PASSED");
     return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_compression
+ *
+ * Purpose:	Tests dataset compression.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compression(hid_t file)
+{
+    hid_t		dataset, space, xfer, dc;
+    herr_t		status;
+    int			points[100][200], check[100][200];
+    int			i, j, n;
+    hsize_t		dims[2], chunk_size[2];
+    void		*tconv_buf = NULL;
+
+    printf("%-70s", "Testing compression");
+    fflush (stdout);
+    
+    /* Initialize the dataset */
+    for (i = n = 0; i < 100; i++) {
+	for (j = 0; j < 100; j++) {
+	    points[i][j] = n++;
+	}
+    }
+
+    /* Create the data space */
+    dims[0] = 100;
+    dims[1] = 200;
+    space = H5Screate_simple(2, dims, NULL);
+    assert(space>=0);
+
+    /* Create a small conversion buffer to test strip mining */
+    tconv_buf = malloc (1000);
+    xfer = H5Pcreate (H5P_DATASET_XFER);
+    assert (xfer>=0);
+    status = H5Pset_buffer (xfer, 1000, tconv_buf, NULL);
+    assert (status>=0);
+
+    /* Use chunked storage with compression */
+    dc = H5Pcreate (H5P_DATASET_CREATE);
+    chunk_size[0] = 2;
+    chunk_size[1] = 25;
+    H5Pset_chunk (dc, 2, chunk_size);
+    H5Pset_deflate (dc, 6);
+
+    /* Create the dataset */
+    dataset = H5Dcreate(file, DSET_COMPRESS_NAME, H5T_NATIVE_INT, space, dc);
+    assert(dataset >= 0);
+
+    /* Write the data to the dataset */
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		      xfer, points);
+    if (status<0) goto error;
+
+    /* Read the dataset back */
+    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		     xfer, check);
+    if (status<0) goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    if (points[i][j] != check[i][j]) {
+		puts("*FAILED*");
+		printf("   Read different values than written.\n");
+		printf("   At index %d,%d\n", i, j);
+		goto error;
+	    }
+	}
+    }
+
+    /*
+     * Write some random data to the dataset, hopefully causing chunks to be
+     * reallocated as they grow.
+     */
+    for (i=0; i<100; i++) {
+	for (j=0; j<100; j++) {
+	    points[i][j] = rand ();
+	}
+    }
+    status = H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		       xfer, points);
+    if (status<0) goto error;
+
+
+    /* Read the dataset back and check it */
+    status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		     xfer, check);
+    if (status<0) goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i = 0; i < 100; i++) {
+	for (j = 0; j < 200; j++) {
+	    if (points[i][j] != check[i][j]) {
+		puts("*FAILED*");
+		printf("   Read different values than written.\n");
+		printf("   At index %d,%d\n", i, j);
+		goto error;
+	    }
+	}
+    }
+
+    
+    
+
+    H5Dclose(dataset);
+
+    puts(" PASSED");
+    return 0;
+
+  error:
+    return -1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -366,7 +496,7 @@ test_tconv(hid_t file)
 int
 main(void)
 {
-    hid_t		    file;
+    hid_t		    file, grp;
     herr_t		    status;
     int			    nerrors = 0;
 
@@ -377,8 +507,14 @@ main(void)
     H5Eset_auto (display_error_cb, NULL);
 
     unlink("dataset.h5");
-    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate("dataset.h5", H5F_ACC_TRUNC|H5F_ACC_DEBUG,
+		     H5P_DEFAULT, H5P_DEFAULT);
     assert(file >= 0);
+
+    /* Cause the library to emit initial messages */
+    grp = H5Gcreate (file, "emit diagnostics", 0);
+    H5Gclose (grp);
+    
 
     status = test_create(file);
     nerrors += status < 0 ? 1 : 0;
@@ -387,6 +523,9 @@ main(void)
     nerrors += status < 0 ? 1 : 0;
 
     status = test_tconv(file);
+    nerrors += status < 0 ? 1 : 0;
+    
+    status = test_compression(file);
     nerrors += status < 0 ? 1 : 0;
 
     status = H5Fclose(file);

@@ -14,17 +14,9 @@
 #include <H5Oprivate.h>
 #include <H5Vprivate.h>
 
-typedef enum H5F_isop_t {
-    H5F_ISTORE_READ,		/*read from file to memory	*/
-    H5F_ISTORE_WRITE		/*write from memory to file	*/
-} H5F_isop_t;
-
-/* Does the array domain include negative indices? */
-#undef H5F_ISTORE_NEGATIVE_DOMAIN
-
-#define PABLO_MASK	H5F_istore_mask
 
 /* Interface initialization */
+#define PABLO_MASK	H5F_istore_mask
 static hbool_t		interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
@@ -48,13 +40,8 @@ static herr_t H5F_istore_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
 				    void *_key);
 static herr_t H5F_istore_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
 				    void *_key);
-static herr_t H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout,
-					H5F_isop_t op,
-					const hssize_t offset_f[],
-					const hsize_t size[],
-					const hssize_t offset_m[],
-					const hsize_t size_m[],
-					void *buf);
+static herr_t H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
+				    const void *key, const void *udata);
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -68,12 +55,11 @@ static herr_t H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout,
  * Only the first few values of the OFFSET and SIZE fields are actually
  * stored on disk, depending on the dimensionality.
  *
- * The storage file address is part of the B-tree and not part of the key.
+ * The chunk's file address is part of the B-tree and not part of the key.
  */
 typedef struct H5F_istore_key_t {
-    uintn	file_number;			/*external file number	*/
+    hsize_t	nbytes;				/*size of stored data	*/
     hssize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    hsize_t	size[H5O_LAYOUT_NDIMS];		/*logical chunk size	*/
 } H5F_istore_key_t;
 
 typedef struct H5F_istore_ud1_t {
@@ -97,6 +83,7 @@ H5B_class_t H5B_ISTORE[1] = {{
     NULL,					/*list			*/
     H5F_istore_decode_key,			/*decode		*/
     H5F_istore_encode_key,			/*encode		*/
+    H5F_istore_debug_key,			/*debug			*/
 }};
 
 
@@ -128,9 +115,8 @@ H5F_istore_sizeof_rkey(H5F_t __unused__ *f, const void *_udata)
     assert(udata);
     assert(udata->mesg.ndims > 0 && udata->mesg.ndims <= H5O_LAYOUT_NDIMS);
 
-    nbytes = 4 +			/*external file number	*/
-	     udata->mesg.ndims * 4 + 	/*dimension indices	*/
-	     udata->mesg.ndims * 4;	/*dimension sizes	*/
+    nbytes = 4 +			/*storage size		*/
+	     udata->mesg.ndims * 4; 	/*dimension indices	*/
 
     return nbytes;
 }
@@ -157,7 +143,7 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     intn		i;
-    intn		ndims = (intn)(bt->sizeof_rkey/8);
+    intn		ndims = (intn)((bt->sizeof_rkey-4)/4);
 
     FUNC_ENTER(H5F_istore_decode_key, FAIL);
 
@@ -169,11 +155,9 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     assert(ndims > 0 && ndims <= H5O_LAYOUT_NDIMS);
 
     /* decode */
-    UINT32DECODE(raw, key->file_number);
-    assert(0 == key->file_number);
+    UINT32DECODE (raw, key->nbytes);
     for (i = 0; i < ndims; i++) {
 	UINT32DECODE(raw, key->offset[i]);
-	UINT32DECODE(raw, key->size[i]);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -200,7 +184,7 @@ static herr_t
 H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
-    intn		ndims = (intn)(bt->sizeof_rkey / 8);
+    intn		ndims = (intn)((bt->sizeof_rkey-4) / 4);
     intn		i;
 
     FUNC_ENTER(H5F_istore_encode_key, FAIL);
@@ -213,14 +197,52 @@ H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
     assert(ndims > 0 && ndims <= H5O_LAYOUT_NDIMS);
 
     /* encode */
-    UINT32ENCODE(raw, key->file_number);
-    assert(0 == key->file_number);
+    UINT32ENCODE (raw, key->nbytes);
     for (i = 0; i < ndims; i++) {
 	UINT32ENCODE(raw, key->offset[i]);
-	UINT32ENCODE(raw, key->size[i]);
     }
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_debug_key
+ *
+ * Purpose:	Prints a key.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
+		      const void *_key, const void *_udata)
+{
+    const H5F_istore_key_t	*key = (const H5F_istore_key_t *)_key;
+    const H5F_istore_ud1_t	*udata = (const H5F_istore_ud1_t *)_udata;
+    int				i;
+    
+    FUNC_ENTER (H5F_istore_debug_key, FAIL);
+    assert (key);
+
+    HDfprintf (stream, "%*s%-*s %Hd bytes\n", indent, "", fwidth,
+	       "Chunk size:", key->nbytes);
+    HDfprintf (stream, "%*s%-*s {", indent, "", fwidth,
+	       "Logical offset:");
+    for (i=0; i<udata->mesg.ndims; i++) {
+	HDfprintf (stream, "%s%Hd", i?", ":"", key->offset[i]);
+    }
+    fputs ("}\n", stream);
+
+    FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -352,7 +374,6 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *) _lt_key;
     H5F_istore_key_t	*rt_key = (H5F_istore_key_t *) _rt_key;
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
-    hsize_t		nbytes;
     intn		i;
 
     FUNC_ENTER(H5F_istore_new_node, FAIL);
@@ -366,37 +387,34 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     assert(addr);
 
     /* Allocate new storage */
-    nbytes = H5V_vector_reduce_product(udata->mesg.ndims, udata->key.size);
-    assert(nbytes > 0);
-    if (H5MF_alloc(f, H5MF_RAW, nbytes, addr /*out */ ) < 0) {
+    assert (udata->key.nbytes > 0);
+    if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, addr /*out */ ) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
 		      "couldn't allocate new file storage");
     }
     udata->addr = *addr;
-    udata->key.file_number = 0;
-    lt_key->file_number = udata->key.file_number;
-    if (H5B_INS_LEFT != op)
-	rt_key->file_number = 0;
 
-    /* Initialize the key(s) */
-    for (i = 0; i < udata->mesg.ndims; i++) {
-	/*
-	 * The left key describes the storage of the UDATA chunk being
-	 * inserted into the tree.
-	 */
-	assert(udata->key.size[i] > 0);
+    /*
+     * The left key describes the storage of the UDATA chunk being
+     * inserted into the tree.
+     */
+    lt_key->nbytes = udata->key.nbytes;
+    for (i=0; i<udata->mesg.ndims; i++) {
 	lt_key->offset[i] = udata->key.offset[i];
-	lt_key->size[i] = udata->key.size[i];
+    }
 
-	/*
-	 * The right key might already be present.  If not, then add
-	 * a zero-width chunk.
-	 */
-	if (H5B_INS_LEFT != op) {
-	    assert (udata->key.size[i] < MAX_HSSIZET);
+    /*
+     * The right key might already be present.  If not, then add a zero-width
+     * chunk.
+     */
+    if (H5B_INS_LEFT != op) {
+	rt_key->nbytes = 0;
+	for (i=0; i<udata->mesg.ndims; i++) {
+	    assert (udata->mesg.dim[i] < MAX_HSSIZET);
+	    assert (udata->key.offset[i]+(hssize_t)(udata->mesg.dim[i]) >
+		    udata->key.offset[i]);
 	    rt_key->offset[i] = udata->key.offset[i] +
-				(hssize_t)udata->key.size[i];
-	    rt_key->size[i] = 0;
+				(hssize_t)(udata->mesg.dim[i]);
 	}
     }
 
@@ -445,12 +463,10 @@ H5F_istore_found(H5F_t __unused__ *f, const haddr_t *addr,
 
     /* Initialize return values */
     udata->addr = *addr;
-    udata->key.file_number = lt_key->file_number;
-    assert(0 == lt_key->file_number);
+    udata->key.nbytes = lt_key->nbytes;
+    assert (lt_key->nbytes>0);
     for (i = 0; i < udata->mesg.ndims; i++) {
 	udata->key.offset[i] = lt_key->offset[i];
-	udata->key.size[i] = lt_key->size[i];
-	assert(lt_key->size[i] > 0);
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -500,7 +516,6 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     intn		i, cmp;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
-    hsize_t		nbytes;
 
     FUNC_ENTER(H5F_istore_insert, H5B_INS_ERROR);
 
@@ -523,46 +538,61 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 	assert("HDF5 INTERNAL ERROR -- see rpm" && 0);
 	HRETURN_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR,
 		      "internal error");
-
-    } else if (H5V_hyper_eq(udata->mesg.ndims,
-			    udata->key.offset, udata->key.size,
-			    lt_key->offset, lt_key->size)) {
+	
+    } else if (H5V_vector_eq_s (udata->mesg.ndims,
+				udata->key.offset, lt_key->offset) &&
+	       lt_key->nbytes>0) {
 	/*
-	 * Already exists.  Just return the info.
+	 * Already exists.  If the new size is not the same as the old size
+	 * then we should reallocate storage.
 	 */
+#if 1
+	if (lt_key->nbytes != udata->key.nbytes) {
+	    if (H5MF_realloc (f, H5MF_RAW, lt_key->nbytes, addr,
+			      udata->key.nbytes, new_node/*out*/)<0) {
+		HRETURN_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR,
+			       "unable to reallocate chunk storage");
+	    }
+	    lt_key->nbytes = udata->key.nbytes;
+	    *lt_key_changed = TRUE;
+	    udata->addr = *new_node;
+	    ret_value = H5B_INS_CHANGE;
+	} else {
+	    udata->addr = *addr;
+	    ret_value = H5B_INS_NOOP;
+	}
+#else
+	assert (lt_key->nbytes == udata->key.nbytes);
+	assert (!H5F_addr_defined (&(udata->addr)) ||
+		H5F_addr_eq (&(udata->addr), addr));
 	udata->addr = *addr;
-	udata->key.file_number = lt_key->file_number;
 	ret_value = H5B_INS_NOOP;
+#endif
 
     } else if (H5V_hyper_disjointp(udata->mesg.ndims,
-				   lt_key->offset, lt_key->size,
-				   udata->key.offset, udata->key.size)) {
+				   lt_key->offset, udata->mesg.dim,
+				   udata->key.offset, udata->mesg.dim)) {
 	assert(H5V_hyper_disjointp(udata->mesg.ndims,
-				   rt_key->offset, rt_key->size,
-				   udata->key.offset, udata->key.size));
-
+				   rt_key->offset, udata->mesg.dim,
+				   udata->key.offset, udata->mesg.dim));
 	/*
 	 * Split this node, inserting the new new node to the right of the
 	 * current node.  The MD_KEY is where the split occurs.
 	 */
-	md_key->file_number = udata->key.file_number;
-	for (i=0, nbytes=1; i<udata->mesg.ndims; i++) {
+	md_key->nbytes = udata->key.nbytes;
+	for (i=0; i<udata->mesg.ndims; i++) {
 	    assert(0 == udata->key.offset[i] % udata->mesg.dim[i]);
-	    assert(udata->key.size[i] == udata->mesg.dim[i]);
 	    md_key->offset[i] = udata->key.offset[i];
-	    md_key->size[i] = udata->key.size[i];
-	    nbytes *= udata->key.size[i];
 	}
 
 	/*
 	 * Allocate storage for the new chunk
 	 */
-	if (H5MF_alloc(f, H5MF_RAW, nbytes, new_node /*out */ ) < 0) {
+	if (H5MF_alloc(f, H5MF_RAW, udata->key.nbytes, new_node/*out*/)<0) {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR,
 			  "file allocation failed");
 	}
 	udata->addr = *new_node;
-	udata->key.file_number = 0;
 	ret_value = H5B_INS_RIGHT;
 
     } else {
@@ -571,223 +601,6 @@ H5F_istore_insert(H5F_t *f, const haddr_t *addr, void *_lt_key,
 		      "internal error");
     }
 
-    FUNC_LEAVE(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_istore_copy_hyperslab
- *
- * Purpose:	Reads or writes a hyperslab to disk depending on whether OP
- *		is H5F_ISTORE_READ or H5F_ISTORE_WRITE.	 The hyperslab
- *		storage is described with ISTORE and exists in file F. The
- *		file hyperslab begins at location OFFSET_F[] (an N-dimensional
- *		point in the domain in terms of elements) in the file and
- *		OFFSET_M[] in memory pointed to by BUF.	 Its size is SIZE[]
- *		elements.  The dimensionality of memory is assumed to be the
- *		same as the file and the total size of the multi-dimensional
- *		memory buffer is SIZE_M[].
- *
- *		The slowest varying dimension is always listed first in the
- *		various offset and size arrays.
- *
- *		A `chunk' is a hyperslab of the disk array which is stored
- *		contiguously. I/O occurs in units of chunks where the size of
- *		a chunk is determined by the alignment constraints specified
- *		in ISTORE.
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Friday, October 17, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
-			  const hssize_t offset_f[], const hsize_t size[],
-			  const hssize_t offset_m[], const hsize_t size_m[],
-			  void *buf/*in or out*/)
-{
-    intn		i, carry;
-    hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
-    hsize_t		idx_min[H5O_LAYOUT_NDIMS];
-    hsize_t		idx_max[H5O_LAYOUT_NDIMS];
-    hsize_t		sub_size[H5O_LAYOUT_NDIMS];
-    hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
-    hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
-    size_t		chunk_size;
-    hsize_t		acc;
-    uint8		*chunk = NULL;
-    H5F_istore_ud1_t	udata;
-    herr_t		status;
-    herr_t		ret_value = FAIL;
-
-    FUNC_ENTER(H5F_istore_copy_hyperslab, FAIL);
-
-    /* check args */
-    assert(f);
-    assert(layout && H5D_CHUNKED == layout->type);
-    assert(H5F_addr_defined(&(layout->addr)));
-    assert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
-    assert(H5F_ISTORE_READ == op || H5F_ISTORE_WRITE == op);
-    assert(size);
-    assert(size_m);
-    assert(buf);
-#ifndef NDEBUG
-    for (i=0; i<layout->ndims; i++) {
-	assert(size_m[i] > 0);	/*destination must exist		*/
-	/*hyperslab must fit in BUF */
-	assert((offset_m?offset_m[i]:0) + size[i] <= size_m[i]);
-	assert(layout->dim[i] > 0);
-    }
-#endif
-
-    /*
-     * As a special case of H5F_ISTORE_READ, if the source is aligned on
-     * a chunk boundary and is the same size as a chunk, and the destination
-     * is the same size as a chunk, then instead of reading into a temporary
-     * buffer and then into the destination, we read directly into the
-     * destination.
-     */
-    if (H5F_ISTORE_READ==op) {
-	for (i=0, acc=1; i<layout->ndims; i++) {
-	    if (offset_f[i] % layout->dim[i]) break; /*src not aligned*/
-	    if (size[i]!=layout->dim[i]) break; /*src not a chunk*/
-	    if (size_m[i]!=layout->dim[i]) break; /*dst not a chunk*/
-	    udata.key.offset[i] = offset_f[i];
-	    udata.key.size[i] = layout->dim[i];
-	    acc *= layout->dim[i];
-	}
-	chunk_size = acc;
-	assert ((hsize_t)chunk_size==acc);
-
-	if (i==layout->ndims) {
-	    udata.mesg = *layout;
-	    H5F_addr_undef (&(udata.addr));
-	    udata.key.file_number = 0;
-	    status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
-	    if (status>=0 && H5F_addr_defined (&(udata.addr))) {
-		assert (0==udata.key.file_number);
-		if (H5F_block_read (f, &(udata.addr), (hsize_t)chunk_size,
-				    buf)<0) {
-		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
-				 "unable to read raw storage chunk");
-		}
-	    } else {
-		HDmemset (buf, 0, chunk_size);
-	    }
-	    HRETURN (SUCCEED);
-	}
-    }
-
-    /*
-     * This is the general case.  We set up multi-dimensional counters
-     * (idx_min, idx_max, and idx_cur) and loop through the chunks copying
-     * each chunk into a temporary buffer, compressing or decompressing, and
-     * then copying it to it's destination.
-     */
-    for (i=0; i<layout->ndims; i++) {
-	idx_min[i] = (offset_f?offset_f[i]:0) / layout->dim[i];
-	idx_max[i] = ((offset_f?offset_f[i]:0) + size[i]-1) / layout->dim[i]+1;
-	idx_cur[i] = idx_min[i];
-    }
-
-    /* Allocate buffers */
-    for (i=0, chunk_size=1; i<layout->ndims; i++) {
-	chunk_size *= layout->dim[i];
-    }
-    chunk = H5MM_xmalloc(chunk_size);
-
-    /* Initialize non-changing part of udata */
-    udata.mesg = *layout;
-
-    /* Loop over all chunks */
-    while (1) {
-
-	/* Read/Write chunk  or create it if it doesn't exist */
-	udata.mesg.ndims = layout->ndims;
-	H5F_addr_undef(&(udata.addr));
-	udata.key.file_number = 0;
-
-	for (i=0; i<layout->ndims; i++) {
-
-	    /* The location and size of the chunk being accessed */
-	    assert (layout->dim[i] < MAX_HSSIZET);
-	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
-	    udata.key.size[i] = layout->dim[i];
-
-	    /* The offset and size wrt the chunk */
-	    offset_wrt_chunk[i] = MAX((offset_f?offset_f[i]:0),
-				      udata.key.offset[i]) -
-				  udata.key.offset[i];
-	    sub_size[i] = MIN((idx_cur[i] + 1) * layout->dim[i],
-			      (offset_f ? offset_f[i] : 0) + size[i]) -
-			  (udata.key.offset[i] + offset_wrt_chunk[i]);
-	    
-	    /* Offset into mem buffer */
-	    sub_offset_m[i] = udata.key.offset[i] + offset_wrt_chunk[i] +
-			      (offset_m ? offset_m[i] : 0) -
-			      (offset_f ? offset_f[i] : 0);
-	}
-
-	if (H5F_ISTORE_WRITE == op) {
-	    status = H5B_insert(f, H5B_ISTORE, &(layout->addr), &udata);
-	    assert(status >= 0);
-	} else {
-	    status = H5B_find(f, H5B_ISTORE, &(layout->addr), &udata);
-	}
-
-	/*
-	 * If the operation is reading from the disk or if we are writing a
-	 * partial chunk then load the chunk from disk. 
-	 */
-	if (H5F_ISTORE_READ == op ||
-	    !H5V_vector_zerop_s(layout->ndims, offset_wrt_chunk) ||
-	    !H5V_vector_eq_u(layout->ndims, sub_size, udata.key.size)) {
-	    if (status>=0 && H5F_addr_defined(&(udata.addr))) {
-		assert(0==udata.key.file_number);
-		if (H5F_block_read(f, &(udata.addr), (hsize_t)chunk_size,
-				   chunk) < 0) {
-		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
-				"unable to read raw storage chunk");
-		}
-	    } else {
-		HDmemset(chunk, 0, chunk_size);
-	    }
-	}
-	/* Transfer data to/from the chunk */
-	if (H5F_ISTORE_WRITE==op) {
-	    H5V_hyper_copy(layout->ndims, sub_size,
-			   udata.key.size, offset_wrt_chunk, chunk,
-			   size_m, sub_offset_m, buf);
-	    assert(0 == udata.key.file_number);
-	    if (H5F_block_write(f, &(udata.addr), (hsize_t)chunk_size,
-				chunk) < 0) {
-		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-			    "unable to write raw storage chunk");
-	    }
-	} else {
-	    H5V_hyper_copy(layout->ndims, sub_size,
-			   size_m, sub_offset_m, (void *)buf,
-			   udata.key.size, offset_wrt_chunk, chunk);
-	}
-
-	/* Increment indices */
-	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
-	    if (++idx_cur[i]>=idx_max[i]) idx_cur[i] = idx_min[i];
-	    else carry = 0;
-	}
-	if (carry) break;
-    }
-    ret_value = SUCCEED;
-
-  done:
-    chunk = H5MM_xfree(chunk);
     FUNC_LEAVE(ret_value);
 }
 
@@ -811,23 +624,183 @@ H5F_istore_copy_hyperslab(H5F_t *f, const H5O_layout_t *layout, H5F_isop_t op,
  */
 herr_t
 H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
-		const hssize_t offset[], const hsize_t size[], void *buf)
+		const H5O_compress_t *comp, const hssize_t offset_f[],
+		const hsize_t size[], void *buf)
 {
+    hssize_t		offset_m[H5O_LAYOUT_NDIMS];
+    hsize_t		size_m[H5O_LAYOUT_NDIMS];
+    intn		i, carry;
+    hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_min[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_max[H5O_LAYOUT_NDIMS];
+    hsize_t		sub_size[H5O_LAYOUT_NDIMS];
+    hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
+    hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
+    size_t		chunk_size;
+    uint8		*chunk=NULL, *compressed=NULL;
+    H5F_istore_ud1_t	udata;
+    herr_t		status;
+    herr_t		ret_value = FAIL;
+
     FUNC_ENTER(H5F_istore_read, FAIL);
 
     /* Check args */
-    assert(f);
-    assert(layout && H5D_CHUNKED == layout->type);
-    assert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
-    assert(size);
-    assert(buf);
+    assert (f);
+    assert (layout && H5D_CHUNKED==layout->type);
+    assert (layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert (H5F_addr_defined(&(layout->addr)));
+    assert (offset_f);
+    assert (size);
+    assert (buf);
 
-    if (H5F_istore_copy_hyperslab(f, layout, H5F_ISTORE_READ,
-				  offset, size, H5V_ZERO, size, buf) < 0) {
-	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-		      "hyperslab output failure");
+    /*
+     * For now, a hyperslab of the file must be read into an array in
+     * memory.We do not yet support reading into a hyperslab of memory.
+     */
+    for (i=0; i<layout->ndims; i++) {
+	offset_m[i] = 0;
+	size_m[i] = size[i];
     }
-    FUNC_LEAVE(SUCCEED);
+    
+#ifndef NDEBUG
+    for (i=0; i<layout->ndims; i++) {
+	assert (offset_f[i]>=0); /*negative offsets not supported*/
+	assert (offset_m[i]>=0); /*negative offsets not supported*/
+	assert (size[i]<MAX_SIZET);
+	assert(offset_m[i]+(hssize_t)size[i]<=(hssize_t)size_m[i]);
+	assert(layout->dim[i]>0);
+    }
+#endif
+
+    /* Determine the chunk size and allocate buffers */
+    for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	chunk_size *= layout->dim[i];
+    }
+    chunk = H5MM_xmalloc(chunk_size);
+    if (comp && H5Z_NONE!=comp->method) {
+	compressed = H5MM_xmalloc (chunk_size);
+    }
+    
+    /*
+     * As a special case if the source is aligned on a chunk boundary and is
+     * the same size as a chunk, and the destination is the same size as a
+     * chunk, then instead of reading into a temporary buffer and then into
+     * the destination, we read directly into the destination.
+     */
+    for (i=0; i<layout->ndims; i++) {
+	if (offset_f[i] % layout->dim[i]) break; /*src not aligned*/
+	if (size[i]!=layout->dim[i]) break; /*src not a chunk*/
+	if (size_m[i]!=layout->dim[i]) break; /*dst not a chunk*/
+	udata.key.offset[i] = offset_f[i];
+    }
+    if (i==layout->ndims) {
+	udata.mesg = *layout;
+	H5F_addr_undef (&(udata.addr));
+	status = H5B_find (f, H5B_ISTORE, &(layout->addr), &udata);
+	if (status>=0 && H5F_addr_defined (&(udata.addr))) {
+	    if (compressed && udata.key.nbytes<chunk_size) {
+		if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
+				    compressed)<0) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				 "unable to read raw storage chunk");
+		}
+		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
+						compressed, chunk_size, buf)) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				 "unable to uncompress raw storage chunk");
+		}
+	    } else {
+		assert (udata.key.nbytes==chunk_size);
+		if (H5F_block_read (f, &(udata.addr), chunk_size, buf)<0) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				 "unable to read raw storage chunk");
+		}
+	    }
+	} else {
+	    HDmemset (buf, 0, chunk_size);
+	}
+	HGOTO_DONE (SUCCEED);
+    }
+
+    /*
+     * This is the general case.  We set up multi-dimensional counters
+     * (idx_min, idx_max, and idx_cur) and loop through the chunks compressing
+     * or copying each chunk into a temporary buffer, and then copying it to
+     * it's destination.
+     */
+    for (i=0; i<layout->ndims; i++) {
+	idx_min[i] = offset_f[i] / layout->dim[i];
+	idx_max[i] = (offset_f[i]+size[i]-1) / layout->dim[i] + 1;
+	idx_cur[i] = idx_min[i];
+    }
+
+    /* Initialize non-changing part of udata */
+    udata.mesg = *layout;
+
+    /* Loop over all chunks */
+    while (1) {
+
+	for (i=0; i<layout->ndims; i++) {
+	    /* The location and size of the chunk being accessed */
+	    assert (layout->dim[i] < MAX_HSSIZET);
+	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
+
+	    /* The offset and size wrt the chunk */
+	    offset_wrt_chunk[i] = MAX(offset_f[i], udata.key.offset[i]) -
+				  udata.key.offset[i];
+	    sub_size[i] = MIN((idx_cur[i]+1)*layout->dim[i],
+			      offset_f[i]+size[i]) -
+			  (udata.key.offset[i] + offset_wrt_chunk[i]);
+	    
+	    /* Offset into mem buffer */
+	    sub_offset_m[i] = udata.key.offset[i] + offset_wrt_chunk[i] +
+			      offset_m[i] - offset_f[i];
+	}
+
+	/* Read chunk */
+	H5F_addr_undef(&(udata.addr));
+	status = H5B_find(f, H5B_ISTORE, &(layout->addr), &udata);
+	if (status>=0 && H5F_addr_defined(&(udata.addr))) {
+	    if (compressed && udata.key.nbytes<chunk_size) {
+		if (H5F_block_read (f, &(udata.addr), udata.key.nbytes,
+				    compressed)<0) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				 "unable to read raw storage chunk");
+		}
+		if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
+						compressed, chunk_size,
+						chunk)) {
+		    HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				 "unable to uncompress data");
+		}
+	    } else {
+		assert (udata.key.nbytes == chunk_size);
+		if (H5F_block_read(f, &(udata.addr), chunk_size, chunk) < 0) {
+		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
+				"unable to read raw storage chunk");
+		}
+	    }
+	} else {
+	    HDmemset(chunk, 0, chunk_size);
+	}
+	
+	/* Transfer data from the chunk buffer to the application */
+	H5V_hyper_copy(layout->ndims, sub_size, size_m, sub_offset_m,
+		       (void *)buf, layout->dim, offset_wrt_chunk, chunk);
+
+	/* Increment indices */
+	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
+	    if (++idx_cur[i]>=idx_max[i]) idx_cur[i] = idx_min[i];
+	    else carry = 0;
+	}
+	if (carry) break;
+    }
+    ret_value = SUCCEED;
+
+  done:
+    H5MM_xfree(chunk);
+    H5MM_xfree (compressed);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -850,25 +823,174 @@ H5F_istore_read(H5F_t *f, const H5O_layout_t *layout,
  */
 herr_t
 H5F_istore_write(H5F_t *f, const H5O_layout_t *layout,
-		 const hssize_t offset[], const hsize_t size[],
-		 const void *buf)
+		 const H5O_compress_t *comp, const hssize_t offset_f[],
+		 const hsize_t size[], const void *buf)
 {
+    hssize_t		offset_m[H5O_LAYOUT_NDIMS];
+    hsize_t		size_m[H5O_LAYOUT_NDIMS];
+    intn		i, carry;
+    hsize_t		idx_cur[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_min[H5O_LAYOUT_NDIMS];
+    hsize_t		idx_max[H5O_LAYOUT_NDIMS];
+    hsize_t		sub_size[H5O_LAYOUT_NDIMS];
+    hssize_t		offset_wrt_chunk[H5O_LAYOUT_NDIMS];
+    hssize_t		sub_offset_m[H5O_LAYOUT_NDIMS];
+    hsize_t		chunk_size, nbytes;
+    uint8		*chunk=NULL, *compressed=NULL, *outbuf;
+    H5F_istore_ud1_t	udata;
+    herr_t		ret_value = FAIL;
+    
     FUNC_ENTER(H5F_istore_write, FAIL);
 
     /* Check args */
     assert(f);
-    assert(layout && H5D_CHUNKED == layout->type);
-    assert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
+    assert(layout && H5D_CHUNKED==layout->type);
+    assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+    assert(H5F_addr_defined(&(layout->addr)));
+    assert (offset_f);
     assert(size);
     assert(buf);
 
-    if (H5F_istore_copy_hyperslab(f, layout, H5F_ISTORE_WRITE,
-				  offset, size, H5V_ZERO, size,
-				  (void*)buf) < 0) {
-	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-		      "hyperslab output failure");
+    /*
+     * For now the source must not be a hyperslab.  It must be an entire
+     * memory buffer.
+     */
+    for (i=0; i<layout->ndims; i++) {
+	offset_m[i] = 0;
+	size_m[i] = size[i];
     }
-    FUNC_LEAVE(SUCCEED);
+
+#ifndef NDEBUG
+    for (i=0; i<layout->ndims; i++) {
+	assert (offset_f[i]>=0); /*negative offsets not supported*/
+	assert (offset_m[i]>=0); /*negative offsets not supported*/
+	assert(size[i]<MAX_SIZET);
+	assert(offset_m[i]+(hssize_t)size[i]<=(hssize_t)size_m[i]);
+	assert(layout->dim[i]>0);
+    }
+#endif
+
+    /*
+     * This is the general case.  We set up multi-dimensional counters
+     * (idx_min, idx_max, and idx_cur) and loop through the chunks copying
+     * each chunk into a temporary buffer, compressing or decompressing, and
+     * then copying it to it's destination.
+     */
+    for (i=0; i<layout->ndims; i++) {
+	idx_min[i] = offset_f[i] / layout->dim[i];
+	idx_max[i] = (offset_f[i]+size[i]-1) / layout->dim[i] + 1;
+	idx_cur[i] = idx_min[i];
+    }
+
+    /* Allocate buffers */
+    for (i=0, chunk_size=1; i<layout->ndims; i++) {
+	chunk_size *= layout->dim[i];
+    }
+    chunk = H5MM_xmalloc(chunk_size);
+    if (comp && H5Z_NONE!=comp->method) {
+	compressed = H5MM_xmalloc (chunk_size);
+    }
+
+    /* Initialize non-changing part of udata */
+    udata.mesg = *layout;
+
+    /* Loop over all chunks */
+    while (1) {
+
+	for (i=0; i<layout->ndims; i++) {
+	    /* The location and size of the chunk being accessed */
+	    assert (layout->dim[i] < MAX_HSSIZET);
+	    udata.key.offset[i] = idx_cur[i] * (hssize_t)(layout->dim[i]);
+
+	    /* The offset and size wrt the chunk */
+	    offset_wrt_chunk[i] = MAX(offset_f[i], udata.key.offset[i]) -
+				  udata.key.offset[i];
+	    sub_size[i] = MIN((idx_cur[i]+1)*layout->dim[i],
+			      offset_f[i]+size[i]) -
+			  (udata.key.offset[i] + offset_wrt_chunk[i]);
+	    
+	    /* Offset into mem buffer */
+	    sub_offset_m[i] = udata.key.offset[i] + offset_wrt_chunk[i] +
+			      offset_m[i] - offset_f[i];
+	}
+	
+	/*
+	 * If we are writing a partial chunk then load the chunk from disk
+	 * and uncompress it if it exists.
+	 */
+	if (!H5V_vector_zerop_s(layout->ndims, offset_wrt_chunk) ||
+	    !H5V_vector_eq_u(layout->ndims, sub_size, layout->dim)) {
+	    if (H5B_find (f, H5B_ISTORE, &(layout->addr), &udata)>=0 &&
+		H5F_addr_defined (&(udata.addr))) {
+
+		if (compressed && udata.key.nbytes<chunk_size) {
+		    if (H5F_block_read(f, &(udata.addr), udata.key.nbytes,
+				       compressed)<0) {
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
+				    "unable to read raw storage chunk");
+		    }
+		    if (chunk_size!=H5Z_uncompress (comp, udata.key.nbytes,
+						    compressed, chunk_size,
+						    chunk)) {
+			HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL,
+				     "unable to uncompress data");
+		    }
+		} else {
+		    assert (chunk_size==udata.key.nbytes);
+		    if (H5F_block_read(f, &(udata.addr), udata.key.nbytes,
+				       chunk)<0) {
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
+				    "unable to read raw storage chunk");
+		    }
+		}
+	    } else {
+		HDmemset(chunk, 0, chunk_size);
+	    }
+	}
+	
+	/* Transfer data to the chunk */
+	H5V_hyper_copy(layout->ndims, sub_size,
+		       layout->dim, offset_wrt_chunk, chunk,
+		       size_m, sub_offset_m, buf);
+
+	/* Compress the chunk */
+	if (compressed &&
+	    (nbytes=H5Z_compress (comp, chunk_size, chunk, compressed)) &&
+	    nbytes<chunk_size) {
+	    outbuf = compressed;
+	} else {
+	    outbuf = chunk;
+	    nbytes = chunk_size;
+	}
+	
+	/*
+	 * Create the chunk it if it doesn't exist, or reallocate the chunk
+	 * if its size changed.  Then write the data into the file.
+	 */
+	H5F_addr_undef(&(udata.addr));
+	udata.key.nbytes = nbytes;
+	if (H5B_insert(f, H5B_ISTORE, &(layout->addr), &udata)<0) {
+	    HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			 "unable to allocate chunk");
+	}
+	if (H5F_block_write(f, &(udata.addr), nbytes, outbuf) < 0) {
+	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+			"unable to write raw storage chunk");
+	}
+
+	/* Increment indices */
+	for (i=layout->ndims-1, carry=1; i>=0 && carry; --i) {
+	    if (++idx_cur[i]>=idx_max[i]) idx_cur[i] = idx_min[i];
+	    else carry = 0;
+	}
+	if (carry) break;
+    }
+    ret_value = SUCCEED;
+
+  done:
+    H5MM_xfree(chunk);
+    H5MM_xfree (compressed);
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -920,4 +1042,37 @@ H5F_istore_create(H5F_t *f, H5O_layout_t *layout /*out */ )
     }
     
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_istore_debug
+ *
+ * Purpose:	Debugs a B-tree node for indexed raw data storage.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
+		 intn fwidth, int ndims)
+{
+    H5F_istore_ud1_t	udata;
+    
+    FUNC_ENTER (H5F_istore_debug, FAIL);
+
+    HDmemset (&udata, 0, sizeof udata);
+    udata.mesg.ndims = ndims;
+
+    H5B_debug (f, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
+
+    FUNC_LEAVE (SUCCEED);
 }

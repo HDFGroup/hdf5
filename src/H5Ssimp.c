@@ -124,7 +124,7 @@ H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
  */
 size_t
 H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-		const struct H5O_efl_t *efl,
+		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
 		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, void *buf/*out*/)
@@ -184,7 +184,7 @@ H5S_simp_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Gather from file.
      */
-    if (H5F_arr_read (f, layout, efl, hsize, hsize, zero, file_offset,
+    if (H5F_arr_read (f, layout, comp, efl, hsize, hsize, zero, file_offset,
 		      buf/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_READERROR, 0, "read error");
     }
@@ -408,7 +408,7 @@ H5S_simp_mgath (const void *buf, size_t elmt_size,
  */
 herr_t
 H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
-		const struct H5O_efl_t *efl,
+		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
 		size_t elmt_size, const H5S_t *file_space,
 		const H5S_number_t __unused__ *numbering,
 		size_t start, size_t nelmts, const void *buf)
@@ -468,7 +468,7 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
     /*
      * Scatter to file.
      */
-    if (H5F_arr_write (f, layout, efl, hsize, hsize, zero,
+    if (H5F_arr_write (f, layout, comp, efl, hsize, hsize, zero,
 		       file_offset, buf)<0) {
 	HRETURN_ERROR (H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
     }
@@ -499,9 +499,9 @@ H5S_simp_fscat (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
-	       const struct H5O_efl_t *efl, size_t elmt_size,
-	       const H5S_t *file_space, const H5S_t *mem_space,
-	       void *buf/*out*/)
+	       const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
+	       size_t elmt_size, const H5S_t *file_space,
+	       const H5S_t *mem_space, void *buf/*out*/)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];
@@ -573,7 +573,7 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
     mem_offset[file_space->u.simple.rank] = 0;
     
     /* Read the hyperslab */
-    if (H5F_arr_read (f, layout, efl, hslab_size,
+    if (H5F_arr_read (f, layout, comp, efl, hslab_size,
 		      mem_size, mem_offset, file_offset, buf)<0) {
 	HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL, "unable to read dataset");
     }
@@ -604,9 +604,9 @@ H5S_simp_read (H5F_t *f, const struct H5O_layout_t *layout,
  */
 herr_t
 H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
-		const struct H5O_efl_t *efl, size_t elmt_size,
-		const H5S_t *file_space, const H5S_t *mem_space,
-		const void *buf)
+		const struct H5O_compress_t *comp, const struct H5O_efl_t *efl,
+		size_t elmt_size, const H5S_t *file_space,
+		const H5S_t *mem_space, const void *buf)
 {
     hssize_t	file_offset[H5O_LAYOUT_NDIMS];
     hsize_t	hslab_size[H5O_LAYOUT_NDIMS];
@@ -678,7 +678,7 @@ H5S_simp_write (H5F_t *f, const struct H5O_layout_t *layout,
     mem_offset[file_space->u.simple.rank] = 0;
     
     /* Write the hyperslab */
-    if (H5F_arr_write (f, layout, efl, hslab_size,
+    if (H5F_arr_write (f, layout, comp, efl, hslab_size,
 		       mem_size, mem_offset, file_offset, buf)<0) {
 	HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 		       "unable to write dataset");

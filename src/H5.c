@@ -38,6 +38,8 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 /* private headers */
 #include <H5private.h>          /*library                 */
@@ -478,7 +480,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    if ('.'==*s) {
 		s++;
 		if (isdigit (*s)) {
-		    prec = (int)strtol (s+1, &rest, 10);
+		    prec = (int)strtol (s, &rest, 10);
 		    s = rest;
 		} else if ('*'==*s) {
 		    prec = va_arg (ap, int);
@@ -576,6 +578,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    long double x = va_arg (ap, long double);
 		    n = fprintf (stream, template, x);
 		}
+		break;
 
 	    case 'a':
 		if (1) {
@@ -738,3 +741,103 @@ HDstrtoll (const char *s, const char **rest, int base)
     if (rest) *rest = s;
     return acc;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_timer_reset
+ *
+ * Purpose:	Resets the timer struct to zero.  Use this to reset a timer
+ *		that's being used as an accumulator for summing times.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5_timer_reset (H5_timer_t *timer)
+{
+    assert (timer);
+    HDmemset (timer, 0, sizeof *timer);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_timer_begin
+ *
+ * Purpose:	Initialize a timer to time something.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5_timer_begin (H5_timer_t *timer)
+{
+#ifdef HAVE_GETRUSAGE
+    struct rusage	rusage;
+#endif
+    struct timeval	etime;
+
+    assert (timer);
+
+#ifdef HAVE_GETRUSAGE
+    getrusage (RUSAGE_SELF, &rusage);
+    timer->utime = rusage.ru_utime.tv_sec + rusage.ru_utime.tv_usec/1e6;
+    timer->stime = rusage.ru_stime.tv_sec + rusage.ru_stime.tv_usec/1e6;
+#else
+    timer->utime = 0.0;
+    timer->stime = 0.0;
+#endif
+
+    gettimeofday (&etime, NULL);
+    timer->etime = etime.tv_sec + etime.tv_usec/1e6;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_timer_end
+ *
+ * Purpose:	This function should be called at the end of a timed region.
+ *		The SUM is an optional pointer which will accumulate times.
+ *		TMS is the same struct that was passed to H5_timer_start().
+ *		On return, TMS will contain total times for the timed region.
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April 16, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
+{
+    H5_timer_t		now;
+    
+    assert (timer);
+    H5_timer_begin (&now);
+
+    timer->utime = now.utime - timer->utime;
+    timer->stime = now.stime - timer->stime;
+    timer->etime = now.etime - timer->etime;
+
+    if (sum) {
+	sum->utime += timer->utime;
+	sum->stime += timer->stime;
+	sum->etime += timer->etime;
+    }
+}
+    

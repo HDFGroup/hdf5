@@ -838,9 +838,11 @@ H5AC_debug(H5F_t *f)
 
     FUNC_ENTER(H5AC_debug, FAIL);
 
-    fprintf(stderr, "H5AC: cache diagnostics for %s\n", f->name);
-    fprintf(stderr, "   %18s  %8s %8s %8s %8s+%-8s\n",
-            "", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+    fprintf(stderr, "H5AC: cache statistics for file %s\n", f->name);
+    fprintf(stderr, "   %-18s %8s %8s %8s %8s+%-8s\n",
+            "Layer", "Hits", "Misses", "MissRate", "Inits", "Flushes");
+    fprintf(stderr, "   %-18s %8s %8s %8s %8s-%-8s\n",
+            "-----", "----", "------", "--------", "-----", "-------");
 
     for (i = H5AC_BT_ID; i < H5AC_NTYPES; i++) {
 
@@ -876,7 +878,7 @@ H5AC_debug(H5F_t *f)
         } else {
             sprintf(ascii, "%7.2f%%", miss_rate);
         }
-        fprintf(stderr, "   %18s: %8u %8u %7s %8u%+-9ld\n", s,
+        fprintf(stderr, "   %-18s %8u %8u %7s %8u%+-9ld\n", s,
                 cache->diagnostics[i].nhits,
                 cache->diagnostics[i].nmisses,
                 ascii,

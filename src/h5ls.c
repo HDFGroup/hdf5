@@ -44,7 +44,7 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     hid_t	(*func)(void*);
     void	*edata;
     int		i;
-    char	linkval[512];
+    char	buf[512];
     H5G_stat_t	statbuf;
     
     /* Disable error reporting */
@@ -52,19 +52,20 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     H5Eset_auto (NULL, NULL);
 
     /* Print info about each name */
-    printf ("%-30s", name);
+    printf ("%-25s ", name);
 
     if (H5Gstat (group, name, TRUE, &statbuf)>=0) {
-	printf ("FILE={%lu,%lu}, OID={%lu,%lu} ",
-		statbuf.fileno[0], statbuf.fileno[1],
-		statbuf.objno[0], statbuf.objno[1]);
+	sprintf (buf, "%lu:%lu:%lu:%lu",
+		 statbuf.fileno[1], statbuf.fileno[0],
+		 statbuf.objno[1], statbuf.objno[0]);
+	printf ("%-20s ", buf);
     }
 
     if ((obj=H5Dopen (group, name))>=0) {
 	hsize_t size[64];
 	hid_t space = H5Dget_space (obj);
 	int ndims = H5Sget_dims (space, size);
-	printf (" Dataset {");
+	printf ("Dataset {");
 	for (i=0; i<ndims; i++) {
 	    HDfprintf (stdout, "%s%Hu", i?", ":"", size[i]);
 	}
@@ -72,15 +73,15 @@ list (hid_t group, const char *name, void __unused__ *op_data)
 	H5Dclose (space);
 	H5Dclose (obj);
     } else if ((obj=H5Gopen (group, name))>=0) {
-	printf (" Group\n");
+	printf ("Group\n");
 	H5Gclose (obj);
-    } else if (H5Gget_linkval (group, name, sizeof(linkval), linkval)>=0) {
-	if (NULL==HDmemchr (linkval, 0, sizeof(linkval))) {
-	    strcpy (linkval+sizeof(linkval)-4, "...");
+    } else if (H5Gget_linkval (group, name, sizeof(buf), buf)>=0) {
+	if (NULL==HDmemchr (buf, 0, sizeof(buf))) {
+	    strcpy (buf+sizeof(buf)-4, "...");
 	}
-	printf (" -> %s\n", linkval);
+	printf (" -> %s\n", buf);
     } else {
-	printf (" Unknown Type\n");
+	printf ("Unknown Type\n");
     }
 
     /* Restore error reporting */

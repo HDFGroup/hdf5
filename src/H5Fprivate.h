@@ -462,6 +462,7 @@ typedef struct H5F_t {
 
 struct H5O_layout_t;		/*forward decl for prototype arguments */
 struct H5O_efl_t;		/*forward decl for prototype arguments */
+struct H5O_compress_t;		/*forward decl for prototype arguments */
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
@@ -476,14 +477,18 @@ H5F_t *H5F_open(const char *name, uintn flags,
 herr_t H5F_close(H5F_t *f);
 herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		 intn fwidth);
+herr_t H5F_istore_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+			intn indent, intn fwidth, int ndims);
 
 /* Functions that operate on array storage */
 herr_t H5F_arr_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_arr_read (H5F_t *f, const struct H5O_layout_t *layout,
+		     const struct H5O_compress_t *comp,
 		     const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		     const hsize_t mem_size[], const hssize_t mem_offset[],
 		     const hssize_t file_offset[], void *_buf/*out*/);
 herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
+		      const struct H5O_compress_t *comp,
 		      const struct H5O_efl_t *efl, const hsize_t _hslab_size[],
 		      const hsize_t mem_size[], const hssize_t mem_offset[],
 		      const hssize_t file_offset[], const void *_buf);
@@ -491,9 +496,11 @@ herr_t H5F_arr_write (H5F_t *f, const struct H5O_layout_t *layout,
 /* Functions that operate on indexed storage */
 herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
 herr_t H5F_istore_read(H5F_t *f, const struct H5O_layout_t *layout,
+		       const struct H5O_compress_t *comp,
 		       const hssize_t offset[], const hsize_t size[],
 		       void *buf /*out */ );
 herr_t H5F_istore_write(H5F_t *f, const struct H5O_layout_t *layout,
+			const struct H5O_compress_t *comp,
 			const hssize_t offset[], const hsize_t size[],
 			const void *buf);
 

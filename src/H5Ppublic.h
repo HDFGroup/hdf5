@@ -25,6 +25,7 @@
 #include <H5Ipublic.h>
 #include <H5Dpublic.h>
 #include <H5Fpublic.h>
+#include <H5Zpublic.h>
 
 /* Template classes */
 typedef enum H5P_class_t {
@@ -87,6 +88,10 @@ herr_t H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg);
 size_t H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/);
 herr_t H5Pset_preserve (hid_t plist_id, hbool_t status);
 int H5Pget_preserve (hid_t plist_id);
+herr_t H5Pset_compression (hid_t plist_id, H5Z_method_t method);
+H5Z_method_t H5Pget_compression (hid_t plist_id);
+herr_t H5Pset_deflate (hid_t plist_id, int level);
+int H5Pget_deflate (hid_t plist_id);
 
 #ifdef HAVE_PARALLEL
 herr_t H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info);

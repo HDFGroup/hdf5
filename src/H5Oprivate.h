@@ -26,6 +26,7 @@
 #include <H5HGprivate.h>
 #include <H5Tprivate.h>
 #include <H5Sprivate.h>
+#include <H5Zprivate.h>
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -164,6 +165,19 @@ typedef struct H5O_layout_t {
     intn	ndims;			/*num dimensions in stored data	     */
     hsize_t	dim[H5O_LAYOUT_NDIMS];	/*size of data or chunk		     */
 } H5O_layout_t;
+
+/*
+ * Compression message.
+ */
+#define H5O_COMPRESS_ID	0x000b
+extern const H5O_class_t H5O_COMPRESS[1];
+
+typedef struct H5O_compress_t {
+    H5Z_method_t method;		/*algorithm ID			     */
+    uintn	flags;			/*flags				     */
+    size_t	cd_size;		/*client data size		     */
+    uint8	*client_data;		/*client data passed to algorithm    */
+} H5O_compress_t;
 
 /*
  * Object name message.

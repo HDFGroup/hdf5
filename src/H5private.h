@@ -206,6 +206,19 @@ typedef struct {
 #endif
 
 /*
+ * Data types and functions for timing certain parts of the library.
+ */
+typedef struct {
+    double	utime;		/*user time			*/
+    double	stime;		/*system time			*/
+    double	etime;		/*elapsed wall-clock time	*/
+} H5_timer_t;
+
+void H5_timer_reset (H5_timer_t *timer);
+void H5_timer_begin (H5_timer_t *timer);
+void H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/);
+
+/*
  * Redefine all the POSIX functions.  We should never see a POSIX
  * function (or any other non-HDF5 function) in the source!
  */

@@ -111,9 +111,8 @@ typedef struct H5T_cdata_t {
     H5T_cmd_t		command;/*what should the conversion function do?    */
     H5T_bkg_t		need_bkg;/*is the background buffer needed?	     */
     hbool_t		recalc;	/*recalculate private data		     */
-    unsigned long	ncalls;	/*number of calls to conversion function     */
-    unsigned long	nelmts; /*total number of data points converted	     */
     void		*priv;	/*private data				     */
+    struct H5T_stats_t	*stats;	/*statistics for the conversion		     */
 } H5T_cdata_t;
 
 /* All data type conversion functions are... */
@@ -232,8 +231,10 @@ herr_t H5Tset_cset (hid_t type_id, H5T_cset_t cset);
 herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
-herr_t H5Tregister_hard (hid_t src_id, hid_t dst_id, H5T_conv_t func);
-herr_t H5Tregister_soft (H5T_class_t src, H5T_class_t dst, H5T_conv_t func);
+herr_t H5Tregister_hard (const char *name, hid_t src_id, hid_t dst_id,
+			 H5T_conv_t func);
+herr_t H5Tregister_soft (const char *name, H5T_class_t src, H5T_class_t dst,
+			 H5T_conv_t func);
 herr_t H5Tunregister (H5T_conv_t func);
 H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 

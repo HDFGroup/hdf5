@@ -18,10 +18,10 @@ PARALLEL_SRC=H5Fmpio.c
 
 LIB_SRC=H5.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c H5Ffamily.c  \
 	H5Fistore.c H5Flow.c H5Fsec2.c H5Fsplit.c H5Fstdio.c H5G.c H5Gent.c   \
-	H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c H5MM.c H5O.c H5Ocont.c \
-	H5Odtype.c H5Oefl.c H5Olayout.c H5Oname.c H5Onull.c H5Osdspace.c      \
-	H5Oshared.c H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c H5Tconv.c H5Tinit.c \
-	H5V.c @PARALLEL_SRC@
+	H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c H5MM.c H5O.c H5Ocomp.c \
+	H5Ocont.c H5Odtype.c H5Oefl.c H5Olayout.c H5Oname.c H5Onull.c         \
+	H5Osdspace.c H5Oshared.c H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c        \
+	H5Tconv.c H5Tinit.c H5V.c H5Z.c @PARALLEL_SRC@
 
 LIB_OBJ=$(LIB_SRC:.c=.o)
 
@@ -36,13 +36,13 @@ PROG_OBJ=$(PROG_SRC:.c=.o)
 PUB_HDR=H5public.h H5ACpublic.h H5Bpublic.h H5Ppublic.h H5Dpublic.h           \
 	H5Epublic.h H5Fpublic.h H5Gpublic.h H5HGpublic.h H5HLpublic.h         \
 	H5Ipublic.h H5MFpublic.h H5MMpublic.h H5Opublic.h H5Spublic.h 	      \
-	H5Tpublic.h H5config.h hdf5.h
+	H5Tpublic.h H5Zpublic.h H5config.h hdf5.h
 
 # Other header files (not to be installed)...
 PRIVATE_HDR=H5private.h H5ACprivate.h H5Bprivate.h H5Pprivate.h H5Dprivate.h  \
 	H5Eprivate.h H5Fprivate.h H5Gprivate.h H5Gpkg.h H5HGprivate.h         \
 	H5HLprivate.h H5Iprivate.h H5MFprivate.h H5MMprivate.h H5Oprivate.h   \
-	H5Sprivate.h H5Tprivate.h H5Tpkg.h H5Vprivate.h
+	H5Sprivate.h H5Tprivate.h H5Tpkg.h H5Vprivate.h H5Zprivate.h
 
 # Number format detection
 H5Tinit.c: H5detect

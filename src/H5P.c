@@ -942,7 +942,7 @@ H5Pget_chunk(hid_t tid, int max_ndims, hsize_t dim[]/*out*/)
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
 	NULL == (tmpl = H5I_object(tid))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation template");
+		      "not a dataset creation property list");
     }
     if (H5D_CHUNKED != tmpl->layout) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1847,7 +1847,178 @@ H5Pget_preserve (hid_t plist_id)
 
     FUNC_LEAVE (plist->need_bkg?TRUE:FALSE);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_compression
+ *
+ * Purpose:	Sets the compression method in a dataset creation property
+ *		list.  This sets default values for the compression
+ *		attributes by setting the flags to zero and supplying no
+ *		compression client data.  It's probably better to use
+ *		specific compression initialization functions like
+ *		H5Pset_deflate().
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_compression (hid_t plist_id, H5Z_method_t method)
+{
+    H5D_create_t	*plist = NULL;
     
+    FUNC_ENTER (H5Pset_compression, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
+	NULL==(plist=H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset creation property list");
+    }
+    if (method<0 || method>H5Z_MAXVAL) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid compression method");
+    }
+
+    /* Clear any previous compression method info, then set new value */
+    H5O_reset (H5O_COMPRESS, &(plist->compress));
+    plist->compress.method = method;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_compression
+ *
+ * Purpose:	Gets the compression method information from a dataset
+ *		creation property list.
+ *
+ * Return:	Success:	Compression method.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Z_method_t
+H5Pget_compression (hid_t plist_id)
+{
+    H5D_create_t	*plist = NULL;
+    
+    FUNC_ENTER (H5Pget_compression, FAIL);
+    
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
+	NULL==(plist=H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset creation property list");
+    }
+
+    FUNC_LEAVE (plist->compress.method);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_deflate
+ *
+ * Purpose:	Sets the compression method for a dataset creation property
+ *		list to H5D_COMPRESS_DEFLATE and the compression level to
+ *		LEVEL which should be a value between zero and nine,
+ *		inclusive.  Lower compression levels are faster but result in
+ *		less compression.  This is the same algorithm as used by the
+ *		GNU gzip program.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_deflate (hid_t plist_id, int level)
+{
+    H5D_create_t	*plist = NULL;
+    
+    FUNC_ENTER (H5Pset_deflate, FAIL);
+
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
+	NULL==(plist=H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset creation property list");
+    }
+    if (level<0 || level>9) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "invalid deflate level");
+    }
+
+    /* Clear previous compression parameters */
+    H5O_reset (H5O_COMPRESS, &(plist->compress));
+    plist->compress.method = H5Z_DEFLATE;
+    plist->compress.flags = level;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_deflate
+ *
+ * Purpose:	Returns the deflate compression level from a dataset creation
+ *		property list that uses that method.
+ *
+ * Return:	Success:	A value between zero and nine, inclusive.
+ *				Smaller values indicate faster compression
+ *				while higher values indicate better
+ *				compression ratios.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5Pget_deflate (hid_t plist_id)
+{
+    H5D_create_t	*plist = NULL;
+    
+    FUNC_ENTER (H5Pget_deflate, FAIL);
+    
+    /* Check arguments */
+    if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
+	NULL==(plist=H5I_object (plist_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
+		       "not a dataset creation property list");
+    }
+    if (H5Z_DEFLATE!=plist->compress.method) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
+		       "deflate method is not being used");
+    }
+
+    FUNC_LEAVE (plist->compress.flags % 10);
+}
 
 
 #ifdef HAVE_PARALLEL

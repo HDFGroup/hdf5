@@ -169,19 +169,8 @@ H5MM_xstrdup(const char *s)
  *-------------------------------------------------------------------------
  */
 void *
-H5MM_xfree(const void *mem)
+H5MM_xfree(void *mem)
 {
-    /*
-     * free(3) takes a non-const pointer as an argument even though
-     * conceptually the argument could be a constant because by time
-     * free() mucks with it's contents, it should already be free :-)
-     * Instead of passing a const arg to free, which generates a
-     * compiler warning, we cast it to a non-const arg first.  With
-     * gcc, this results in a warning only if -Wcast-qual is turned on.
-     */
-    void                   *non_const_mem = (void *) mem;
-
-    if (mem)
-        HDfree(non_const_mem);
+    if (mem) HDfree(mem);
     return NULL;
 }

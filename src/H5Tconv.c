@@ -62,14 +62,8 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 
     case H5T_CONV_FREE:
 	/* Nothing to free */
-#ifdef H5T_DEBUG
-	if (cdata->ncalls>0) {
-	    fprintf (stderr, "H5T: H5T_conv_noop statistics...\n");
-	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
-	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
-	}
-#endif
-
+	break;
+	
     default:
 	HRETURN_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
 		       "unknown conversion command");
@@ -173,13 +167,6 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     case H5T_CONV_FREE:
 	/* Free private data */
-#ifdef H5T_DEBUG
-	if (cdata->ncalls>0) {
-	    fprintf (stderr, "H5T: H5T_conv_order statistics...\n");
-	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
-	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
-	}
-#endif
 	break;
 
     default:
@@ -396,13 +383,6 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/*
 	 * Free the private conversion data.
 	 */
-#ifdef H5T_DEBUG
-	if (cdata->ncalls>0) {
-	    fprintf (stderr, "H5T: H5T_conv_struct statistics...\n");
-	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
-	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
-	}
-#endif
 	H5MM_xfree (priv->src2dst);
 	H5MM_xfree (priv->src_memb_id);
 	H5MM_xfree (priv->dst_memb_id);
