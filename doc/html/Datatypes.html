@@ -1150,7 +1150,21 @@ H5Tinsert (surf_id, "y", HOFFSET(surf_t,y), complex_id);
 	</table>
       </center>
 
-    <h2>7. Sharing Data Types among Datasets</h2>
+    <a name="Datatypes_Enum">&nbsp;</a>
+    <h2>7. <a href="DatatypesEnum.html">Enumeration Data Types</a></h2>
+
+      An HDF5 enumeration data type is a 1:1 mapping between a set of
+      symbols and a set of integer values, and an order is imposed on
+      the symbols by their integer values.  The symbols are passed
+      between the application and library as character strings and all
+      the values for a particular enumeration type are of the same
+      integer type, which is not necessarily a native type.
+      <p>
+      Details of enumeration data types and the related functions
+      are discussed on a separate 
+      <a href="DatatypesEnum.html">Enumeration Data Types</a> page.
+
+    <h2>8. Sharing Data Types among Datasets</h2>
 
     <p>If a file has lots of datasets which have a common data type
       then the file could be made smaller by having all the datasets
@@ -1196,7 +1210,7 @@ hid_t dset4 = H5Dcreate (file, "dset4", t2, space, H5P_DEFAULT);
       </center>
 
     <a name="Datatypes-DataConversion">
-    <h2>8. Data Conversion</h2>
+    <h2>9. Data Conversion</h2>
     </a>
 
     <p>The library is capable of converting data from one type to
@@ -1553,7 +1567,6 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
       conversion path whether that conversion path was actually used
       or not.
 
-<<<<<<< Datatypes.html
 
 
 <hr>
@@ -1621,7 +1634,7 @@ And in this document, the
 </address>
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: Wed Dec 16 13:04:58 EST 1998
+Last modified: 30 April 1999
 <!-- hhmts end -->
 
 

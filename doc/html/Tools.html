@@ -326,10 +326,9 @@ These tools enable the user to examine HDF5 files interactively.
         <p>
         The <code>-h</code> option causes the following
         syntax summary to be displayed:<br>
-              <dir><code>
-              h5toh4 file.h5 file.hdf<br>
-              h5toh4 file.h5<br>
-              h5toh4 -m file1.h5 file2.h5 ...<br></code></dir>
+        <pre>              h5toh4 file.h5 file.hdf
+              h5toh4 file.h5
+              h5toh4 -m file1.h5 file2.h5 ...</pre>
         
         <p>
 
@@ -358,6 +357,11 @@ These tools enable the user to examine HDF5 files interactively.
               be fixed or extendable.  The members of the 
               compound datatype are constrained to be no more 
               than rank 4.
+          <li>HDF5 dataset objects of single dimension and fixed length string
+              datatype are converted into HDF4 Vdata objects. The HDF4 Vdata is a
+              single field whose order is the length of the HDF5 string type. The
+              number of records of the Vdata is the length of the single dimension
+              which may be fixed or extendable.
         </ul>
 
         Other objects are not converted and are not recorded
@@ -365,7 +369,7 @@ These tools enable the user to examine HDF5 files interactively.
         <p>
         Attributes associated with any of the supported HDF5 
         objects are carried over to the HDF4 objects.  
-        Attributes may be of integer or floating point datatype 
+        Attributes may be of integer, floating point, or fixed length string datatype 
         and they may have up to 32 fixed dimensions.
         <p>
         All datatypes are converted to big-endian.  
@@ -432,7 +436,7 @@ Tools&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 
 <br>
-Last modified:  30 October 1998
+Last modified:  29 April 1999
 
 </body>
 </html>

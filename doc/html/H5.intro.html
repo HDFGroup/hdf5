@@ -696,7 +696,7 @@ the data is stored in another union of hyperslabs in the memory dataspace.
 <FONT FACE="Times"><P>Four parameters are required to describe a completely general hyperslab.  Each parameter is an array whose rank is the same as that of the dataspace: 
 
 <UL>
-</FONT><CODE><LI>start</CODE>: a starting location for the hyperslab.  In the example <CODE>start</CODE> is (1,0). 
+</FONT><CODE><LI>start</CODE>: a starting location for the hyperslab.  In the example <CODE>start</CODE> is (0,1). 
 <CODE><LI>stride</CODE>: the number of elements to separate each element or block to be selected.  In the example <CODE>stride</CODE><I> </I> is (4,3).  If the stride parameter is set to NULL, the stride size defaults to 1 in each dimension.
 <CODE><LI>count</CODE>: the number of elements or blocks to select along each dimension.  In the example, <CODE>count</CODE> is (2,4).
 <CODE><LI>block</CODE>: the size of the block selected from the dataspace.  In the example, <CODE>block</CODE> is (3,2).  If the block parameter is set to NULL, the block size defaults to a single element in each dimension, as if the block array was set to all 1s.</UL>
