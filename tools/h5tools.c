@@ -1159,7 +1159,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
  * Modifications:
  *
  *-------------------------------------------------------------------------
- */
+ */ 
 static int
 h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		   hid_t p_type, int obj_data)
@@ -1908,7 +1908,7 @@ static void display_string
                      printf("%s\"", out_buf);
                      strncpy(out_buf, tempstr.s, x);
                      out_buf[x] = '\0';
-                     printf("%s\" //\n", out_buf);
+                     printf("%s\" CONCATENATOR\n", out_buf);
                      first_row = 0;
                      out_buf[0] = '\0';
                  } else {
@@ -1917,7 +1917,7 @@ static void display_string
 					 memset(out_buf, '\0', nCols); 
 					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
-					 printf("%s\" //\n", out_buf);
+					 printf("%s\" CONCATENATOR\n", out_buf);
 					 x = temp;
                  }
              }
@@ -1933,7 +1933,7 @@ static void display_string
                   indentation(indent+COL);
                   strncpy(out_buf, tempstr.s+x+j*y, y);
                   out_buf[y] = '\0';
-                  printf("\"%s\" //\n", out_buf);
+                  printf("\"%s\" CONCATENATOR\n", out_buf);
              }
 
              if ((elmtno+i+1) == p_nelmts) { /* last element */
@@ -1941,7 +1941,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
+                     printf("\"%s\" CONCATENATOR\n", out_buf);
                      indentation(indent+COL);
                      printf("\"%s\"", tempstr.s+x+m*y);
                      if (compound_data) {
@@ -1970,7 +1970,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
+                     printf("\"%s\" CONCATENATOR\n", out_buf);
                      indentation(indent+COL);
                      printf("\"%s\",\n", tempstr.s+x+m*y);
                   } else {
@@ -1986,7 +1986,7 @@ static void display_string
                      indentation(indent+COL);
                      strncpy(out_buf, tempstr.s+x+j*y, y);
                      out_buf[y] = '\0';
-                     printf("\"%s\" //\n", out_buf);
+                     printf("\"%s\" CONCATENATOR\n", out_buf);
                      strcpy(out_buf, "\"");
                      strcat(out_buf, tempstr.s+x+m*y);
                      strcat(out_buf, "\",");

@@ -25,7 +25,7 @@
 #define STRPAD		"STRPAD"
 #define CSET		"CSET"
 #define CTYPE		"CTYPE"
-
+#define CONCATENATOR "//"
 #define BEGIN		"{"
 #define END		"}"
 
