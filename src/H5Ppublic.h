@@ -140,7 +140,7 @@ __DLL__ herr_t H5Pget_xfer(hid_t plist_id,
 #endif
 
 __DLL__ herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
-__DLL__ herr_t H5Pget_gc_reference(hid_t fapl_id, unsigned *gc_ref/*out*/);
+__DLL__ herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
 __DLL__ herr_t H5Pset_vlen_mem_manager(hid_t plist_id,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,
         void *free_info);
