@@ -285,18 +285,13 @@ HDmemset(heap->chunk,0,size);
     ret_value = addr;
 
 done:
-
-    if ( ( ! ( H5F_addr_defined(addr) ) ) && ( heap ) ) {
-
-        if ( H5HG_dest(f,heap) < 0 ) {
-
+    if ( ! ( H5F_addr_defined(addr) ) && heap) {
+        if ( H5HG_dest(f,heap) < 0 )
 	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, HADDR_UNDEF, \
                         "unable to destroy global heap collection");
-        }
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5HG_create() */
 
 
@@ -948,7 +943,6 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
 
     for (cwfsno=0; cwfsno<f->shared->ncwfs; cwfsno++) {
 	if (f->shared->cwfs[cwfsno]->obj[0].size>=need) {
-
 	    addr = f->shared->cwfs[cwfsno]->addr;
             found=1;
 	    break;
@@ -981,16 +975,13 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
      * If we didn't find any collection with enough free space then allocate a
      * new collection large enough for the message plus the collection header.
      */
-
     if (!found) {
 
         addr = H5HG_create(f, dxpl_id, need+H5HG_SIZEOF_HDR (f));
 
-        if ( ! ( H5F_addr_defined(addr) ) ) {
-
+        if ( ! H5F_addr_defined(addr) )
 	    HGOTO_ERROR (H5E_HEAP, H5E_CANTINIT, FAIL, \
                          "unable to allocate a global heap collection");
-        }
 	cwfsno = 0;
     } /* end if */
     else {
@@ -1008,11 +999,8 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
 
     HDassert(H5F_addr_defined(addr));
     
-    if ( NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, 
-                                      addr, NULL, NULL, H5AC_WRITE)) ) {
-
+    if ( NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_WRITE)) )
         HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
-    }
 
     /* Split the free space to make room for the new object */
     idx = H5HG_alloc (f, heap, size);
@@ -1034,85 +1022,11 @@ H5HG_insert (H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*
     hobj->idx = idx;
 
 done:
-
-    if ( heap && 
-         H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, FALSE) 
-         != SUCCEED ) {
-
+    if ( heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, heap->addr, heap, FALSE) < 0 )
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to unprotect heap.");
-    }
 
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5HG_insert() */
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function:	H5HG_peek
- *
- * Purpose:	Given an ID for a global heap object return a pointer to the
- *		beginning of that object.  This is intended for quick and
- *		dirty access to the object; otherwise use H5HG_read().
- *
- * Return:	Success:	Ptr directly into the H5AC layer for the
- *				specified object of the global heap.  The
- *				pointer is guaranteed to be valid only until
- *				some other hdf5 library function is called.
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Monday, March 30, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5HG_peek (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
-{
-    H5HG_heap_t	*heap = NULL;
-    void	*ret_value;
-    int	i;
-    
-    FUNC_ENTER_NOAPI(H5HG_peek, NULL);
-
-    /* Check args */
-    assert (f);
-    assert (hobj);
-
-    /* Load the heap and return a pointer to the object */
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_GHEAP, hobj->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
-
-    assert (hobj->idx>0 && hobj->idx<heap->nused);
-    ret_value = heap->obj[hobj->idx].begin + H5HG_SIZEOF_OBJHDR (f);
-    assert (ret_value);
-
-    /*
-     * Advance the heap in the CWFS list. We might have done this already
-     * with the H5AC_protect(), but it won't hurt to do it twice.
-     */
-    if (heap->obj[0].begin) {
-	for (i=0; i<f->shared->ncwfs; i++) {
-	    if (f->shared->cwfs[i]==heap) {
-		if (i) {
-		    f->shared->cwfs[i] = f->shared->cwfs[i-1];
-		    f->shared->cwfs[i-1] = heap;
-		}
-		break;
-	    }
-	}
-    }
-
-done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, FALSE)<0)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
