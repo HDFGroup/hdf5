@@ -1389,7 +1389,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
 ac_aux_dir=
 for ac_dir in ../bin $srcdir/../bin; do
   if test -f $ac_dir/install-sh; then
@@ -1545,20 +1544,20 @@ for f in $host_cpu-$host_vendor-$host_os \
          $host_os_novers \
          $host_vendor \
          $host_cpu ; do
-  echo "$as_me:$LINENO: checking for config $f" >&5
+ echo "$as_me:$LINENO: checking for config $f" >&5
 echo $ECHO_N "checking for config $f... $ECHO_C" >&6
-  if test -f $srcdir/config/$f; then
-    host_config=$srcdir/config/$f
-    echo "$as_me:$LINENO: result: found" >&5
+ if test -f $srcdir/config/$f; then
+   host_config=$srcdir/config/$f
+   echo "$as_me:$LINENO: result: found" >&5
 echo "${ECHO_T}found" >&6
-    break
-  fi
-  echo "$as_me:$LINENO: result: no" >&5
+   break
+ fi
+ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 done
 if test "X$host_config" != "Xnone"; then
-  CXX_BASENAME="`echo $CXX |cut -f1 -d' ' |xargs basename 2>/dev/null`"
-  . $host_config
+ CXX_BASENAME="`echo $CXX |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+ . $host_config
 fi
 
 ac_ext=cc
@@ -4400,7 +4399,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4403 "configure"' > conftest.$ac_ext
+  echo '#line 4402 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4941,7 +4940,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:4944: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:4943: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -6752,7 +6751,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6755 "configure"
+#line 6754 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -6850,7 +6849,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 6853 "configure"
+#line 6852 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7620,7 +7619,7 @@ done
 fi
 
 if test -z "$AR"; then
-   for ac_prog in ar xar
+  for ac_prog in ar xar
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7830,6 +7829,7 @@ echo $ECHO_N "checking for large file support mode on Linux... $ECHO_C" >&6
     if test "X$LINUX_LFS" = "Xyes"; then
       echo "$as_me:$LINENO: result: enabled" >&5
 echo "${ECHO_T}enabled" >&6
+
       CPPFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $CPPFLAGS"
     else
       echo "$as_me:$LINENO: result: disabled" >&5
@@ -7904,14 +7904,6 @@ else
 #line $LINENO "configure"
 #include "confdefs.h"
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
-#include <iostream>
-#endif
-
-using namespace std;
-
 namespace H5 {
 int fnord;
 }
@@ -7935,7 +7927,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
-  echo yes
+   echo yes
 
 else
   echo "$as_me: program exited with status $ac_status" >&5
@@ -7943,8 +7935,56 @@ echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
 ( exit $ac_status )
 
-  echo no
-  CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+
+echo "$as_me:$LINENO: checking if $CXX supports std" >&5
+echo $ECHO_N "checking if $CXX supports std... $ECHO_C" >&6
+if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <string>
+
+using namespace std;
+
+int main(void) {
+   string myString("testing namespace std");
+   return 0;
+}
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+
+   echo yes
+
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
 
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
@@ -7979,7 +8019,7 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
 
-  echo yes
+   echo yes
 
 else
   echo "$as_me: program exited with status $ac_status" >&5
@@ -7987,8 +8027,8 @@ echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
 ( exit $ac_status )
 
-  echo no
-  CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
+   echo no
+   CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
 
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
