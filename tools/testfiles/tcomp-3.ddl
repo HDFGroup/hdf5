@@ -5,13 +5,13 @@ HDF5 "tcompound.h5" {
 DATATYPE "/#5992:0" {
    H5T_STD_I32BE "int";
    H5T_IEEE_F32BE "float";
-}
+} 
 GROUP "/group2" {
    DATASET "dset5" {
       DATATYPE {
          "/#5992:0"
-      }
-      DATASPACE { SIMPLE ( 5 ) / ( 5 ) }
+      } 
+      DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
       DATA {
          {
             0,
@@ -33,7 +33,7 @@ GROUP "/group2" {
             4,
             0.4
          }
-      }
-   }
-}
-}
+      } 
+   } 
+} 
+} 

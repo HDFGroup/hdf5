@@ -11,8 +11,8 @@ GROUP "/" {
            CSET H5T_CSET_ASCII;
            CTYPE H5T_C_S1;
          } "string"[3][4];
-      }
-      DATASPACE { SIMPLE ( 3, 6 ) / ( 3, 6 ) }
+      } 
+      DATASPACE { SIMPLE ( 3, 6 ) / ( 3, 6 ) } 
       DATA {
          {
             [ 0, 1, 4, 9, 16, 25, 36, 49, 64, 81, 
@@ -248,8 +248,8 @@ GROUP "/" {
             "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", 
             "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678", "abcdefgh12345678abcdefgh12345678" ]
          }
-      }
-   }
+      } 
+   } 
    DATASET "string1" {
       DATATYPE {
          { STRSIZE 5;
@@ -257,14 +257,14 @@ GROUP "/" {
            CSET H5T_CSET_ASCII;
            CTYPE H5T_C_S1;
          }
-      }
-      DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) }
+      } 
+      DATASPACE { SIMPLE ( 3, 4 ) / ( 3, 4 ) } 
       DATA {
          "s1", "s2", "s3", "s4",
          "s5", "s6", "s7", "s8",
          "s9", "s0", "s1", "s2"
-      }
-   }
+      } 
+   } 
    DATASET "string2" {
       DATATYPE {
          { STRSIZE 11;
@@ -272,16 +272,16 @@ GROUP "/" {
            CSET H5T_CSET_ASCII;
            CTYPE H5T_C_S1;
          }
-      }
-      DATASPACE { SIMPLE ( 20 ) / ( 20 ) }
+      } 
+      DATASPACE { SIMPLE ( 20 ) / ( 20 ) } 
       DATA {
          "ab cd ef1  ", "ab cd ef2  ", "ab cd ef3  ", "ab cd ef4  ",
          "ab cd ef5  ", "ab cd ef6  ", "ab cd ef7  ", "ab cd ef8  ",
          "ab cd ef9  ", "ab cd ef0  ", "ab cd ef1  ", "ab cd ef2  ",
          "ab cd ef3  ", "ab cd ef4  ", "ab cd ef5  ", "ab cd ef6  ",
          "ab cd ef7  ", "ab cd ef8  ", "ab cd ef9  ", "ab cd ef0  "
-      }
-   }
+      } 
+   } 
    DATASET "string3" {
       DATATYPE {
          { STRSIZE 8;
@@ -289,8 +289,8 @@ GROUP "/" {
            CSET H5T_CSET_ASCII;
            CTYPE H5T_C_S1;
          }
-      }
-      DATASPACE { SIMPLE ( 27 ) / ( 27 ) }
+      } 
+      DATASPACE { SIMPLE ( 27 ) / ( 27 ) } 
       DATA {
          "abcd0\000\000\000", "abcd1\000\000\000", "abcd2\000\000\000",
          "abcd3\000\000\000", "abcd4\000\000\000", "abcd5\000\000\000",
@@ -301,8 +301,8 @@ GROUP "/" {
          "abcd8\000\000\000", "abcd9\000\000\000", "abcd0\000\000\000",
          "abcd1\000\000\000", "abcd2\000\000\000", "abcd3\000\000\000",
          "abcd4\000\000\000", "abcd5\000\000\000", "abcd6\000\000\000"
-      }
-   }
+      } 
+   } 
    DATASET "string4" {
       DATATYPE {
          { STRSIZE 168;
@@ -310,13 +310,13 @@ GROUP "/" {
            CSET H5T_CSET_ASCII;
            CTYPE H5T_C_S1;
          }
-      }
-      DATASPACE { SIMPLE ( 3 ) / ( 3 ) }
+      } 
+      DATASPACE { SIMPLE ( 3 ) / ( 3 ) } 
       DATA {
          "s1234567890123456789                                                                                                                                                    ",
          "s1234567890123456789                                                                                                                                                    ",
          "s1234567890123456789                                                                                                                                                    "
-      }
-   }
-}
-}
+      } 
+   } 
+} 
+} 
