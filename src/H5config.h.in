@@ -77,13 +77,13 @@
 /* Define if the ioctl TIOCGWINSZ is defined */
 #undef HAVE_TIOCGWINSZ
 
-/* Define if we have Globus GASS support */
+/* Define if the Globus GASS is defined */
 #undef HAVE_GASS
 
-/* Define if we have SRB support */ 
+/* Define if the SRB is defined */
 #undef HAVE_SRB
 
-/* Define if we have Globus Grid Storage support */ 
+/* Define if the Grid Storage is defined */
 #undef HAVE_GRIDSTORAGE
 
 /* The number of bytes in a __int64.  */
