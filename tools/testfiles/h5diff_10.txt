@@ -15,6 +15,7 @@ file2             File name of the second HDF5 file
 [-n count]        Print difference up to count number
 [-d delta]        Print difference when it is greater than limit delta
 [-p relative]     Print difference when it is greater than a relative limit
+[-a]              Compare attributes
 
 Items in [] are optional
 [obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)

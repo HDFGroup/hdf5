@@ -57,6 +57,7 @@ typedef struct {
  int    n;       /* count */
  int    count;   /* count value */
  int    verbose; /* print information */
+ int    attr;    /* compare attributes */
 } diff_opt_t;
 
 
@@ -131,6 +132,26 @@ int diff_array( void *buf1,
                 const char *obj1, 
                 const char *obj2,
                 hid_t m_type );
+
+
+int diff_can_type( hid_t       f_type1, /* file data type */ 
+                   hid_t       f_type2, /* file data type */
+                   int         rank1, 
+                   int         rank2,
+                   hsize_t     *dims1, 
+                   hsize_t     *dims2,
+                   hsize_t     *maxdim1, 
+                   hsize_t     *maxdim2,
+                   const char  *obj1_name, 
+                   const char  *obj2_name, 
+                   diff_opt_t  *options );
+
+
+int diff_attr(hid_t loc1_id, 
+              hid_t loc2_id, 
+              diff_opt_t *options
+              );
+
 
 /*-------------------------------------------------------------------------
  * utility functions

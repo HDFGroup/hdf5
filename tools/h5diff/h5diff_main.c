@@ -19,7 +19,7 @@
 /* Due to alignment issue in Alpha clusters, options must be declared here
  * not as a local variable in main().
  */
-diff_opt_t  options = {0,0,0,0,0,0,0,0};
+diff_opt_t  options = {0,0,0,0,0,0,0,0,0};
 
 static void usage(void);
 static int check_n_input( const char* );
@@ -115,6 +115,9 @@ int main(int argc, const char *argv[])
      break;
     case 'v': 
      options.verbose = 1;
+     break;
+    case 'a': 
+     options.attr = 1;
      break;
     case 'r': 
      options.r = 1;
@@ -304,6 +307,7 @@ void usage(void)
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
  printf("[-p relative]     Print difference when it is greater than a relative limit\n");
+ printf("[-a]              Compare attributes\n");
  printf("\n");
  printf("Items in [] are optional\n");
  printf("[obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)\n");

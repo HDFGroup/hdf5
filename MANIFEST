@@ -1148,6 +1148,7 @@
 ./tools/lib/talign.c
 ./tools/lib/h5diff.c
 ./tools/lib/h5diff_array.c
+./tools/lib/h5diff_attr.c
 ./tools/lib/h5diff_dset.c
 ./tools/lib/h5diff_util.c
 ./tools/lib/h5trav.c
