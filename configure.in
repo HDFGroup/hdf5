@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce configure.
 dnl
-dnl Copyright (C) 1997 National Center for Supercomputing Applications.
-dnl                    All rights reserved.
+dnl Copyright (C) 1997-2001 National Center for Supercomputing Applications
+dnl                         All rights reserved.
 
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
@@ -239,7 +239,7 @@ dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in
    *install-sh*)
-      INSTALL='\${top_srcdir}'/bin/install-sh
+      INSTALL='\${top_srcdir}/bin/install-sh -c'
       ;;
 esac
 
