@@ -191,6 +191,9 @@ Parallel Library:
 
 Tools:
 ------
+    * When the "-S" option for "simple" output is chosen, h5ls now displays
+        modification times of datasets in UTC instead of local time.
+        QAK - 2003/06/06
     * h5diff to compare two HDF5 files was added
     * h5import to import ascii and binary data to an HDF5 file was added.
       Old h5import tool in the tools/misc directory was renamed to 
