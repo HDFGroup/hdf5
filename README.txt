@@ -41,4 +41,3 @@ snapshot.
 The HDF5 website is located at http://hdf.ncsa.uiuc.edu/HDF5/
 
 Bugs should be reported to hdfhelp@ncsa.uiuc.edu.
-
