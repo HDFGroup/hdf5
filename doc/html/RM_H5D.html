@@ -309,6 +309,13 @@ END SUBROUTINE h5dclose_f
 	&ldquo;HDF5 Datasets&rdquo; chapter of 
 	the new <cite>HDF5 User's Guide</cite>, 
 	which is being prepared for release.
+<dt><strong>Note:</strong>
+    <dd>If <code>H5Dcreate</code> presents an unexplained failure
+        and SZIP compression is to be used on the dataset, 
+        see the description of 
+        <a href="RM_H5P.html#Property-SetSzip"><code>H5Pset_szip</code></a>.
+        There are circumstances in which an SZIP setup error will cause
+        <code>H5Dcreate</code> to fail.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>loc_id</code>
@@ -1573,7 +1580,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 16 October 2003");
+document.writeln("Last modified: 26 July 2004");
 -->
 </SCRIPT>
  

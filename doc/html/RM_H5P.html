@@ -8529,9 +8529,37 @@ END SUBROUTINE h5pset_sym_k_f
   <dt><strong>Purpose:</strong>
     <dd>Sets up use of the SZIP compression filter.
   <dt><strong>Description:</strong>
-    <dd><code>H5Pset_szip</code> sets a filter for the dataset 
-        to SZIP compression, <code>H5Z_FILTER_SZIP</code>,
-	a compression method designed for use with scientific data.
+    <dd><code>H5Pset_szip</code> sets an SZIP compression filter, 
+        <code>H5Z_FILTER_SZIP</code>, for a dataset. 
+        SZIP is a compression method designed for use with scientific data.
+	<p>
+        Before proceeding, be aware that there are factors that affect
+        your rights and ability to use SZIP compression.
+        See the documents at
+	<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html" 
+        target="External">SZIP Compression in HDF5</a>
+	for <em>important information regarding terms of use and 
+	the SZIP copyright notice</em>,
+	for further discussion of SZIP compression in HDF5, 
+	and for a list of SZIP-related references.
+
+	<p>
+        In the text below, the term <em>pixel</em> refers to
+        an HDF5 data element of an atomic type 
+        that may have size of 8, 16, 32, or 64 bits.
+        Specifically, 
+            8-, 16-, 32-, and 64-bit signed and unsigned integers, 
+            chars, 
+            32- and 64-bit floats.
+        SZIP compression cannot be applied to 
+            compound datatypes, 
+            variable-length datatypes, or 
+            any other user-defined datatypes.
+        If an SZIP filter is set up for a dataset containing a non-allowed 
+        datatype, the subsequent call to <code>H5Dcreate</code> will fail.
+        (The <em>pixel</em> terminology derives from SZIP compression's 
+        use with image data, where pixel referred to an image pixel.)
+
 	<p>
 	SZIP options are passed in an options mask, <code>options_mask</code>,
 	as follows.
@@ -8544,62 +8572,20 @@ END SUBROUTINE h5pset_sym_k_f
             <hr>
             <b>Description</b>
             <br>
-            <font size=-1>(Paired options are mutually exclusive.)</font>
-        </td></tr>
-	
-        <tr valign=top align=left><td>
-            <hr>
-            <code>H5_SZIP_CHIP_OPTION_MASK&nbsp;&nbsp;</code> 
-            </td><td>
-            <hr>
-            Compresses exactly as in hardware. 
+            <font size=-1>(Mutually exclusive; select one.)</font>
         </td></tr>
         <tr valign=top align=left><td>
-	    <code>H5_SZIP_ALLOW_K13_OPTION_MASK&nbsp;&nbsp;</code>
-            </td><td>
-            Allows k split = 13 compression mode.  (Default)
-        </td></tr>
-	
-        <tr valign=top align=left><td>
             <hr>
-	    <code>H5_SZIP_EC_OPTION_MASK</code> 
+	    <code>H5_SZIP_EC_OPTION_MASK&nbsp;&nbsp;</code> 
             </td><td>
             <hr>
-            Selects entropy coding method.  (Default)
+            Selects entropy coding method. 
         </td></tr>
         <tr valign=top align=left><td>
             <code>H5_SZIP_NN_OPTION_MASK</code> 
             </td><td>
             Selects nearest neighbor coding method. 
         </td></tr>
-	
-<!--  THESE OPTIONS ARE SET DIRECTLY BY THE LIBRARY AND 
-      ARE NOT AVAILABLE FOR USER CONTROL
-
-        <tr valign=top align=left><td>
-            <hr>
-	    <code>LSB_OPTION_MASK</code> 
-            </td><td>
-            <hr>
-            Data format is least significant byte first.  (Default)
-        </td></tr>
-        <tr valign=top align=left><td>
-	    <code>MSB_OPTION_MASK</code> 
-            </td><td>
-            Data format is most significant byte first.
-        </td></tr>
-	
-        <tr valign=top align=left><td>
-            <hr>
-            <code>RAW_OPTION_MASK</code> 
-            </td><td>
-            <hr>
-            Do not output SZIP header.<br>
-            Not a default setting, but should always be set in HDF5.
-        </td></tr>
-
-END LIBRARY-SET OPTION TAGS -->
-
         <tr valign=top align=left><td>
             <hr>
             </td><td>
@@ -8607,49 +8593,37 @@ END LIBRARY-SET OPTION TAGS -->
         </td></tr>
 	</table>
 	</center>
-	Some typical usages are as follows:
+	The following guidelines can be used in dermining 
+        which option to select:
 	<ul>
-	  <li>One of the compression methods, 
-	      <code>H5_SZIP_EC_OPTION_MASK</code> or
-	      <code>H5_SZIP_NN_OPTION_MASK</code>, is specified.
-	  <li>The <code>H5_SZIP_ALLOW_K13_OPTION_MASK</code> is used.
+	  <li>The entropy coding method, the EC option specified by
+	      <code>H5_SZIP_EC_OPTION_MASK</code>, is best-suited for 
+              data lacking good correleations, such as random data.
+	  <li>The nearest neighbor coding method, the NN option 
+              specified by <code>H5_SZIP_NN_OPTION_MASK</code>,
+              is best-suited for data with strong correlations 
+              between adjacent data elements.
 	</ul>
-	<p>
-	Options are combined to create the options mask by means of
-	a logical <code>OR</code> operation.  For example, the 
-        option mask can be set as follows:
-	<br><br><code>&nbsp;&nbsp;&nbsp;&nbsp;
-    options_mask = H5_SZIP_NN_OPTION_MASK | H5_SZIP_ALLOW_K13_OPTION_MASK;
-	</code>
+        Other factors may affect results, but the above criteria 
+        provides a good starting point for optimizing data storage.
+
 	<p>
         SZIP compresses data block by block, with a user-tunable block size.  
 	This block size is passed in the parameter 
-        <code>pixels_per_block</code> and must be even, 
+        <code>pixels_per_block</code> and must be even and not greater than 32, 
         with typical values being <code>8</code>, <code>10</code>, 
-        <code>16</code>, and <code>32</code>.
-	The more pixel values vary, the smaller this number should be.
-        For optimal performance, the number of pixels per scan line 
-        (i.e., the size of the fastest-changing dimension in the chunk)
-        should be an even multiple of the number of pixels per block.
+        <code>16</code>, or <code>32</code>.
+        This parameter affects compression ratio;
+	the more pixel values vary, the smaller this number should be to
+        achieve better performance.
 	<p>
-  <dt><strong>Notes:</strong>
-    <dd>SZIP works only with datasets with 1 through 24 bits/pixel, 
-	32 pits/pixel, or 64 bits/pixel.
-	<p>
-	SZIP typically requires that the user application also supply 
-        the number of pixels in the object to be compressed, 
-        the number of bits per pixel, and the number of pixels per scan line.  
-        These values need not be independently supplied in the HDF5 
-        environment as they are derived from the datatype and dataspace, 
-        which are already known.
-	<p>
-        Also see 
-	<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html" 
-        target="External">SZIP Compression in HDF5</a>
-	for further discussion of SZIP compression in HDF5, 
-	for <em>important information regarding terms of use and 
-	the SZIP copyright notice</em>,
-	and for a list of SZIP-related references.
+        In HDF5, compression can be applied only to chunked datasets.
+        The subsequent call to <code>H5Dcreate</code> will fail if 
+        <code>pixels_per_block</code> is bigger than 
+        the total number of elements in a dataset chunk.
+        To achieve optimal performance for SZIP compression, 
+        it is recommended that a chunk's fastest-changing dimension 
+        be equal to 128 times <code>pixels_per_block</code>.  
 
   <dt><strong>Parameters:</strong>
     <dl>
@@ -8657,12 +8631,63 @@ END LIBRARY-SET OPTION TAGS -->
             <dd>IN: Dataset creation property list identifier.
         <dt><em>unsigned int</em> <code>options_mask</code>
             <dd>IN: A bit-mask conveying the desired SZIP options.
+                Valid values are <code>H5_SZIP_EC_OPTION_MASK</code>
+                and <code>H5_SZIP_NN_OPTION_MASK</code>.
         <dt><em>unsigned int</em> <code>pixels_per_block</code>
-            <dd>IN: The number of pixels or data elements in each data block.
+            <dd>IN: The number of pixels, or data elements, 
+                in each data block.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+
+  <dt><strong>Notes:</strong>
+    <dd>The following notes are of interest primarily to those who have 
+        used SZIP compression outside of the HDF5 context.
+	<p>
+	In non-HDF5 applications, SZIP typically requires that the 
+        user application supply additional paramaters:
+        <ul>
+          <li><code>pixels_in_object</code>, 
+              the number of pixels in the object to be compressed 
+          <li><code>bits_per_pixel</code>, 
+              the number of bits per pixel
+          <li><code>pixels_per_scanline</code>, 
+              the number of pixels per scan line  
+        </ul>
+        <p>
+        These values need not be independently supplied in the HDF5 
+        environment as they are derived from the datatype and dataspace, 
+        which are already known.
+        In particular, HDF5 sets 
+        <code>pixels_in_object</code> to the number of elements in a chunk 
+        and <code>bits_per_pixel</code> to the size of the element or 
+        pixel datatype.  
+        The following algorithm is used to set 
+        <code>pixels_per_scanline</code>:
+        <ul>
+          <li>If the size of a chunk's fastest-changing dimension, 
+              <em>size</em>, is greater than 4K, 
+              set <code>pixels_per_scanline</code> to 
+              128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than 4K 
+              but greater than <code>pixels_per_block</code>, 
+              set <code>pixels_per_scanline</code> to the minimum of
+              <em>size</em> and 128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than <code>pixels_per_block</code> 
+              but greater than the number elements in the chunk, 
+              set <code>pixels_per_scanline</code> to the minimum of 
+              the number elements in the chunk and 
+              128 times <code>pixels_per_block</code>.
+        </ul>
+
+	<p>
+	HDF5 always modifies the options mask provided by the user
+        to set up usage of <code>RAW_OPTION_MASK</code>, 
+        <code>ALLOW_K13_OPTION_MASK</code>, and one of
+        <code>LSB_OPTION_MASK</code> or <code>MSB_OPTION_MASK</code>, 
+        depending on endianness of the datatype.
+ 
   <dt><strong>Fortran90 Interface:</strong> h5pset_szip_f
     <dd>
 	<pre>
@@ -9201,7 +9226,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 2 July 2004");
+document.writeln("Last modified: 26 July 2004");
 -->
 </SCRIPT>
  
