@@ -691,7 +691,11 @@ typedef struct stat		h5_stat_t;
 #define HDqsort(M,N,Z,F)	qsort(M,N,Z,F)
 #define HDraise(N)		raise(N)
 #define HDrand()		rand()
-#define HDrandom()		random()
+#ifdef  WIN32
+#define HDrandom()		rand()
+#else
+#define HDrandom()              random()
+#endif
 #define HDread(F,M,Z)		read(F,M,Z)
 #define HDreaddir(D)		readdir(D)
 #define HDrealloc(M,Z)		realloc(M,Z)
@@ -734,7 +738,11 @@ typedef struct stat		h5_stat_t;
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
 #define HDsrand(N)		srand(N)
+#ifdef WIN32
+#define HDsrandom(N)            srand(N)
+#else
 #define HDsrandom(N)		srandom(N)
+#endif
 /* sscanf() variable arguments */
 
 
