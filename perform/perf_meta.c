@@ -31,11 +31,17 @@
 #define FACC_MPIO	0x1	/* MPIO */
 #define FACC_MPIPOSIX   0x8	/* MPIPOSIX */
 
+/* Which test to run */
+int RUN_TEST = 0x0;     /* all tests as default */
+int TEST_1   = 0x1;     /* Test 1 */
+int TEST_2   = 0x2;     /* Test 2 */
+int TEST_3   = 0x4;     /* Test 3 */
+
+
 const char *FILENAME[] = {
-    "meta_perf_1.h5",
-    "meta_perf_2.h5",
-    "meta_perf_3.h5",
-    "meta_perf_4.h5",
+    "meta_perf_1",
+    "meta_perf_2",
+    "meta_perf_3",
     NULL
 };
 
@@ -43,6 +49,8 @@ const char *FILENAME[] = {
 int 	NUM_DSETS = 16;
 int 	NUM_ATTRS = 8;
 int 	BATCH_ATTRS = 2;
+hbool_t flush_dset = FALSE;
+hbool_t flush_attr = FALSE;
 int 	nerrors = 0;			/* errors count */
 hid_t	fapl;
 
@@ -83,6 +91,8 @@ void    print_perf(p_time, p_time, p_time);
 static int 
 parse_options(int argc, char **argv)
 {
+    int t;
+
     /* Use default values */
     if(argc==1)
 	return(0);
@@ -127,6 +137,32 @@ parse_options(int argc, char **argv)
 			    facc_type = FACC_MPIO;
 			    break;
 
+                case 'f':   /* Call H5Fflush for each dataset or attribute */
+                            if(!strcmp("a", (*argv+2)))
+                                flush_attr = TRUE;
+                            else if(!strcmp("d", (*argv+2)))
+                                flush_dset = TRUE;
+                            else {
+                                nerrors++;
+                                return(1);
+                            }
+                            break;
+
+		case 't':   /* Which test to run */
+                            t = atoi((*argv+1)+1);
+			    if (t < 1 || t > 3){
+				nerrors++;
+				return(1);
+			    }
+                            if(t == 1)
+                                RUN_TEST |= TEST_1; 
+                            else if(t == 2)
+                                RUN_TEST |= TEST_2; 
+                            else
+                                RUN_TEST |= TEST_3; 
+
+			    break;
+
  		default:    nerrors++;
 			    return(1);
 	    }
@@ -144,17 +180,17 @@ parse_options(int argc, char **argv)
     }
 #endif /*H5_HAVE_PARALLEL*/
 
+    if(NUM_ATTRS && !BATCH_ATTRS) 
+        NUM_ATTRS = 0;
+    
+    if(!NUM_ATTRS && BATCH_ATTRS) 
+        BATCH_ATTRS = 0;    
         
     if(!NUM_DSETS) {
         nerrors++;
         return(1);
     }
 
-    if((NUM_ATTRS && !BATCH_ATTRS) || (!NUM_ATTRS && BATCH_ATTRS)) {
-        nerrors++;
-        return(1);
-    }
-    
     if(NUM_ATTRS && BATCH_ATTRS) {
         if(BATCH_ATTRS > NUM_ATTRS || NUM_ATTRS % BATCH_ATTRS) {
 	    nerrors++;
@@ -181,22 +217,44 @@ parse_options(int argc, char **argv)
 static void
 usage(void)
 {
-    printf("Usage: perf_meta [-h] [-m] [-p] [-d<num_datasets>] [-a<num_attributes>] [-n<batch_attributes>\n");
+    printf("Usage: perf_meta [-h] [-m] [-p] [-d<num_datasets>]"
+           "[-a<num_attributes>]\n"
+           "\t[-n<batch_attributes>] [-f<option>] [-t<test>]\n");
     printf("\t-h"
 	"\t\t\thelp page.\n");
     printf("\t-m"
-	"\t\t\tset MPIO as the file driver when parallel HDF5 is enabled."
-	"  either -m or -p has be to specified when running parallel program\n");
+	"\t\t\tset MPIO as the file driver when parallel HDF5\n"
+        "\t\t\t\tis enabled.  Either -m or -p has be to \n"
+        "\t\t\t\tspecified when running parallel program.\n");
     printf("\t-p"
-	"\t\t\tset MPI POSIX as the file driver when parallel HDF5 is enabled."
-	"  either -m or -p has be to specified when running parallel program\n");
+	"\t\t\tset MPI POSIX as the file driver when parallel \n"
+	"\t\t\t\tHDF5 is enabled.  Either -m or -p has be to \n"
+        "\t\t\t\tspecified when running parallel program.\n");
     printf("\t-d<num_datasets>"
-	"\tset number of datasets for meta data performance test\n");
+	"\tset number of datasets for meta data \n"
+        "\t\t\t\tperformance test\n");
     printf("\t-a<num_attributes>"
-        "\tset number of attributes per dataset for meta data performance test\n");  
+        "\tset number of attributes per dataset for meta \n"
+        "\t\t\t\tdata performance test.\n");
     printf("\t-n<batch_attributes>"
-	"\tset batch of attributes for dataset for meta data performance test\n");
-    printf("\n");
+	"\tset batch number of attributes for dataset \n"
+        "\t\t\t\tfor meta data performance test.\n");
+    printf("\t-f<option>"
+	"\t\tflush data to disk after closing a dataset \n"
+        "\t\t\t\tor attribute.  Valid options are \"d\" for \n"
+        "\t\t\t\tdataset, \"a\" for attribute.  Disabled is \n"
+        "\t\t\t\tthe default.\n");
+    printf("\t-t<tests>"
+	"\t\trun specific test.  Give only one number each \n"
+        "\t\t\t\ttime. i.e. \"-t1 -t3\" will run test 1 and 3. \n"
+        "\t\t\t\tDefault is all three tests.  The 3 tests are: \n\n"
+        "\t\t\t\t1. Create <num_attributes> attributes for each \n"
+        "\t\t\t\t   of <num_datasets> existing datasets.\n"
+        "\t\t\t\t2. Create <num_attributes> attributes for each \n"
+        "\t\t\t\t   of <num_datasets> new datasets.\n"
+        "\t\t\t\t3. Create <batch_attributes> attributes for \n"
+        "\t\t\t\t   each of <num_dataset> new datasets for \n"
+        "\t\t\t\t   <num_attributes>/<batch_attributes> times.\n");
 }
 
 
@@ -304,6 +362,7 @@ static herr_t
 create_attrs_1(void)
 {
     hid_t	file, dataset, attr;
+    char	filename[128];
     char	dset_name[64];
     char	attr_name[128];
     int		i, j;
@@ -318,7 +377,9 @@ create_attrs_1(void)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
-    if ((file=H5Fcreate(FILENAME[0], H5F_ACC_TRUNC, H5P_DEFAULT, 
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
 	fapl))<0)
 	goto error;
    
@@ -343,11 +404,13 @@ create_attrs_1(void)
     			goto error;
     		if (H5Aclose(attr) < 0) goto error;
 	 	perf(&attr_t, attr_t.start, retrieve_time());	
+                if(flush_attr && H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
     	}
 
 	close_t.start = retrieve_time();
     	if(H5Dclose(dataset)<0) goto error;
 	perf(&close_t, close_t.start, retrieve_time());
+        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
     }
     
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
@@ -401,6 +464,7 @@ static herr_t
 create_attrs_2(void)
 {
     hid_t	file, dataset, attr;
+    char	filename[128];
     char	dset_name[64];
     char	attr_name[128];
     int		i, j;
@@ -415,8 +479,9 @@ create_attrs_2(void)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
-    if ((file=H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, 
-	fapl))<0)
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
    
     /*
@@ -438,11 +503,13 @@ create_attrs_2(void)
     			goto error;
     		if (H5Aclose(attr) < 0) goto error;
 	 	perf(&attr_t, attr_t.start, retrieve_time());	
+                if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
 	}
 
 	close_t.start = retrieve_time();
     	if(H5Dclose(dataset)<0) goto error;
 	perf(&close_t, close_t.start, retrieve_time());
+        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
     }
 
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
@@ -480,7 +547,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	create_attrs_3
  *
- * Purpose:	Attempts to create one attribute for each dataset in a loop.
+ * Purpose:	Attempts to create some attributes for each dataset in a
+ * 		loop.
  *
  * Return:	Success:	0
  *
@@ -497,104 +565,7 @@ static herr_t
 create_attrs_3(void)
 {
     hid_t	file, dataset, attr;
-    char	dset_name[64];
-    char	attr_name[128];
-    int		i, j;
-    p_time      attr_t  = {0, 0, 0, 1000000, 0, ""};
-    p_time      open_t  = {0, 0, 0, 1000000, 0, "H5Dopen"};
-    p_time      close_t = {0, 0, 0, 1000000, 0, ""};
-
-#ifdef H5_HAVE_PARALLEL
-    /* need the rank for printing data */
-    int         mpi_rank;
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX)
-        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-#endif /*H5_HAVE_PARALLEL*/
-
-    if ((file=H5Fcreate(FILENAME[2], H5F_ACC_TRUNC, H5P_DEFAULT, 
-	fapl))<0)
-	goto error;
-
-    if(create_dsets(file)<0)
-	goto error;
-  
-    /*
-     * Create one attribute for each existing dataset in a loop 
-     */
-    for(i=0; i<NUM_ATTRS; i++) {
-	sprintf(attr_name, "one attrs for each dset %d", i);    
-    	for(j=0; j<NUM_DSETS; j++) {
-		sprintf(dset_name, "dataset %d", j);	    
-        	open_t.start = retrieve_time();	
-   		if((dataset = H5Dopen(file, dset_name)) < 0)
-    			goto error;
-		perf(&open_t, open_t.start, retrieve_time());
-
-	        attr_t.start = retrieve_time();	
-	    	if((attr = H5Acreate(dataset, attr_name, H5T_NATIVE_DOUBLE, 
-			small_space, H5P_DEFAULT)) < 0)
-    			goto error;
-    		if (H5Aclose(attr) < 0) goto error;
-	 	perf(&attr_t, attr_t.start, retrieve_time());
-
-		close_t.start = retrieve_time();
-    		if(H5Dclose(dataset)<0) goto error;
-		perf(&close_t, close_t.start, retrieve_time());
-	}
-    }
-    
-    if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
-#ifdef H5_HAVE_PARALLEL
-        MPI_Barrier(MPI_COMM_WORLD);
-#endif /*H5_HAVE_PARALLEL*/
-    }
-    
-#ifdef H5_HAVE_PARALLEL
-    /* only process 0 reports if parallel */
-    if (facc_type == FACC_DEFAULT || (facc_type != FACC_DEFAULT && MAINPROCESS))
-#endif /*H5_HAVE_PARALLEL*/
-    {
-        /* Calculate the average time */ 
-        open_t.avg = open_t.total / (NUM_ATTRS*NUM_DSETS);
-        close_t.avg = close_t.total / (NUM_ATTRS*NUM_DSETS);
-        attr_t.avg = attr_t.total / (NUM_ATTRS*NUM_DSETS);
-    
-        /* Print out the performance result */
-        fprintf(stderr, "3.  Create one attribute for each of %d existing datasets for %d times\n",
-            NUM_DSETS, NUM_ATTRS);
-        print_perf(open_t, close_t, attr_t);    
-    }
-
-    if (H5Fclose(file)<0) goto error;
-
-    return 0;
-
-error:
-    return -1;
-} 
-
-
-/*-------------------------------------------------------------------------
- * Function:	create_attrs_4
- *
- * Purpose:	Attempts to create some attributes for each dataset in a
- * 		loop.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Raymond Lu
- *		Friday, Oct 3, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-create_attrs_4(void)
-{
-    hid_t	file, dataset, attr;
+    char	filename[128];
     char	dset_name[64];
     char	attr_name[128];
     int		loop_num;
@@ -610,7 +581,9 @@ create_attrs_4(void)
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 #endif /*H5_HAVE_PARALLEL*/
 
-    if ((file=H5Fcreate(FILENAME[3], H5F_ACC_TRUNC, H5P_DEFAULT, 
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
 	fapl))<0)
 	goto error;
 
@@ -640,12 +613,13 @@ create_attrs_4(void)
 					< 0) goto error;
     			if (H5Aclose(attr) < 0) goto error;
 	 		perf(&attr_t, attr_t.start, retrieve_time());
-
+                        if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
     		}
 
 		close_t.start = retrieve_time();
     		if(H5Dclose(dataset)<0) goto error;
 		perf(&close_t, close_t.start, retrieve_time());
+                if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
     	}
     }
 
@@ -666,7 +640,7 @@ create_attrs_4(void)
         attr_t.avg = attr_t.total / (NUM_ATTRS*NUM_DSETS);
 
         /* Print out the performance result */
-        fprintf(stderr, "4.  Create %d attributes for each of %d existing datasets for %d times\n",
+        fprintf(stderr, "3.  Create %d attributes for each of %d existing datasets for %d times\n",
             BATCH_ATTRS, NUM_DSETS, loop_num);
         print_perf(open_t, close_t, attr_t);    
     }
@@ -838,12 +812,13 @@ main(int argc, char **argv)
     }
     
     nerrors += create_dspace()<0 	?1:0;
-    nerrors += create_attrs_1()<0 	?1:0;
-    nerrors += create_attrs_2()<0 	?1:0;
-    if(NUM_ATTRS)
+
+    if((RUN_TEST & TEST_1) || !RUN_TEST)
+        nerrors += create_attrs_1()<0 	?1:0;
+    if((RUN_TEST & TEST_2) || !RUN_TEST)
+        nerrors += create_attrs_2()<0 	?1:0;
+    if(((RUN_TEST & TEST_3) || !RUN_TEST) && BATCH_ATTRS && NUM_ATTRS)
         nerrors += create_attrs_3()<0 	?1:0;
-    if(BATCH_ATTRS)
-        nerrors += create_attrs_4()<0 	?1:0;
 
     if (H5Sclose(space)<0) goto error;
     if (H5Sclose(small_space)<0) goto error;
