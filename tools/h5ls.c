@@ -1237,7 +1237,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 	       (unsigned long)total, 1==total?"":"s");
 	if (total>0) {
 #ifdef WIN32
-	    hsize_t mask = (hsize_1)1 << (8*sizeof(hsize_t)-1);
+	    hsize_t mask = (hsize_t)1 << (8*sizeof(hsize_t)-1);
 	    if ((used & mask) || (total & mask)) {
 		total = 0; /*prevent utilization printing*/
 	    } else {
@@ -1246,7 +1246,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
 #else
 	    utilization = (used*100.0)/total;
 #endif
-	    printf(", %1.2f%% utilization", (used*100.0)/total);
+	    if (total) printf(", %1.2f%% utilization", utilization);
 	}
 	putchar('\n');
 	
