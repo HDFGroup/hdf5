@@ -53,36 +53,38 @@ Configuration
 Library
 -------
 
-    * Error was fixed which was not allowing dataset region references to have
-      their regions retrieved correctly.
-    * Added internal free-lists to reduce memory required by the library and
-      H5garbage_collect API function
-    * Fixed error in H5Giterate which was not updating the "index" parameter
-      correctly.
-    * Fixed error in hyperslab iteration which was not walking through the
-      correct sequence of array elements if hyperslabs were staggered in a
-      certain pattern
+   * Error was fixed which was not allowing dataset region references to have
+     their regions retrieved correctly.
+   * Added internal free-lists to reduce memory required by the library and
+     H5garbage_collect API function
+   * Fixed error in H5Giterate which was not updating the "index" parameter
+     correctly.
+   * Fixed error in hyperslab iteration which was not walking through the
+     correct sequence of array elements if hyperslabs were staggered in a
+     certain pattern
+   * Fixed several other problems in hyperslab iteration code.
 
 Tests
 ------
-    * Added additional tests for group and attribute iteration.
-    * Added additional test for staggered hyperslab iteration.
+   * Added additional tests for group and attribute iteration.
+   * Added additional test for staggered hyperslab iteration.
+   * Added additional test for random 5-D hyperslab selection.
 
 Tools
 ------
 
-    * Added an option, -V, to show the version information of h5dump.
-    * Fixed a core dumping bug of h5toh4 when executed on platforms like 
-      TFLOPS.
-    * The test script for h5toh4 used to not able to detect the hdp
-      dumper command was not valid.  It now detects and reports the
-      failure of hdp execution.
+   * Added an option, -V, to show the version information of h5dump.
+   * Fixed a core dumping bug of h5toh4 when executed on platforms like 
+     TFLOPS.
+   * The test script for h5toh4 used to not able to detect the hdp
+     dumper command was not valid.  It now detects and reports the
+     failure of hdp execution.
 
 Documentation
 -------------
 
-    * User's Guide and Reference Manual were updated. 
-      See doc/html/PSandPDF/index.html for more details. 
+   * User's Guide and Reference Manual were updated. 
+     See doc/html/PSandPDF/index.html for more details. 
 
    
 Platforms Tested:

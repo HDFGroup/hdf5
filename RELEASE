@@ -58,6 +58,7 @@ Library
    * Fixed error in hyperslab iteration which was not walking through the
      correct sequence of array elements if hyperslabs were staggered in a
      certain pattern
+   * Fixed several other problems in hyperslab iteration code.
 
 Configuration
 -------------
