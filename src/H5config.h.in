@@ -9,9 +9,6 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
-/* Define if we have zlib compression support */
-#undef HAVE_COMPRESSION
-
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
@@ -24,8 +21,8 @@
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
-/* Define if support for gzip filter is enabled */
-#undef HAVE_FILTER_GZIP
+/* Define if support for deflate filter is enabled */
+#undef HAVE_FILTER_DEFLATE
 
 /* Define if support for shuffle filter is enabled */
 #undef HAVE_FILTER_SHUFFLE

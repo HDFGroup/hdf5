@@ -19,10 +19,12 @@
 static int interface_initialize_g = 0;
 static herr_t H5Z_init_interface (void);
 
+/* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
 static H5Z_class_t	*H5Z_table_g = NULL;
 
+/* Local functions */
 
 
 /*-------------------------------------------------------------------------
@@ -44,9 +46,12 @@ H5Z_init_interface (void)
 {
     FUNC_ENTER_NOINIT(H5Z_init_interface);
 
-#ifdef H5_HAVE_FILTER_GZIP
+#ifdef H5_HAVE_FILTER_DEFLATE
     H5Z_register (H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate);
-#endif /* H5_HAVE_FILTER_GZIP */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+#ifdef H5_HAVE_FILTER_SHUFFLE
+    H5Z_register (H5Z_FILTER_SHUFFLE, "shuffle", H5Z_filter_shuffle);
+#endif /* H5_HAVE_FILTER_SHUFFLE */
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -162,7 +167,7 @@ H5Zregister(H5Z_filter_t id, const char *comment, H5Z_func_t func)
     /* Check args */
     if (id<0 || id>H5Z_FILTER_MAX)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
-    if (id<256)
+    if (id<H5Z_FILTER_RESERVED)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
     if (!func)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no function specified");
@@ -180,7 +185,7 @@ done:
  * Function:	H5Z_register
  *
  * Purpose:	Same as the public version except this one allows filters
- *		to be set for predefined method numbers <256
+ *		to be set for predefined method numbers <H5Z_FILTER_RESERVED
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -232,6 +237,126 @@ H5Z_register (H5Z_filter_t id, const char *comment, H5Z_func_t func)
 done:
     FUNC_LEAVE (ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Zunregister
+ *
+ * Purpose:	This function unregisters a filter.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 14, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Zunregister(H5Z_filter_t id)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5Zunregister, FAIL);
+    H5TRACE1("e","Zf",id);
+
+    /* Check args */
+    if (id<0 || id>H5Z_FILTER_MAX)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
+    if (id<H5Z_FILTER_RESERVED)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters");
+
+    /* Do it */
+    if (H5Z_unregister (id)<0)
+	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to unregister filter");
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5Zunregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_unregister
+ *
+ * Purpose:	Same as the public version except this one allows filters
+ *		to be unset for predefined method numbers <H5Z_FILTER_RESERVED
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 14, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_unregister (H5Z_filter_t id)
+{
+    size_t i;                   /* Local index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5Z_unregister);
+
+    assert (id>=0 && id<=H5Z_FILTER_MAX);
+
+    /* Is the filter already registered? */
+    for (i=0; i<H5Z_table_used_g; i++)
+	if (H5Z_table_g[i].id==id)
+            break;
+    
+    /* Fail if filter not found */
+    if (i>=H5Z_table_used_g)
+        HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter is not registered");
+
+    /* Remove filter from table */
+    /* Don't worry about shrinking table size (for now) */
+    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class_t)*((H5Z_table_used_g-1)-i));
+    H5Z_table_used_g--;
+
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5Z_unregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Zfilter_avail
+ *
+ * Purpose:	Check if a filter is available
+ *
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 14, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Zfilter_avail(H5Z_filter_t id)
+{
+    size_t i;                   /* Local index variable */
+    htri_t ret_value=FALSE;     /* Return value */
+
+    FUNC_ENTER_API(H5Zfilter_avail, FAIL);
+    H5TRACE1("b","Zf",id);
+
+    /* Check args */
+    if(id<0 || id>H5Z_FILTER_MAX)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number");
+
+    /* Is the filter already registered? */
+    for(i=0; i<H5Z_table_used_g; i++)
+	if(H5Z_table_g[i].id==id) {
+            ret_value=TRUE;
+            break;
+        } /* end if */
+    
+done:
+    FUNC_LEAVE (ret_value);
+} /* end H5Zfilter_avail() */
 
 
 /*-------------------------------------------------------------------------

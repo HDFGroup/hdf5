@@ -33,6 +33,7 @@ struct H5O_pline_t; /*forward decl*/
 
 H5_DLL herr_t H5Z_register(H5Z_filter_t id, const char *comment,
 			    H5Z_func_t filter);
+H5_DLL herr_t H5Z_unregister (H5Z_filter_t id);
 H5_DLL herr_t H5Z_append(struct H5O_pline_t *pline, H5Z_filter_t filter,
 			  unsigned flags, size_t cd_nelmts,
 			  const unsigned int cd_values[]);
@@ -43,4 +44,12 @@ H5_DLL herr_t H5Z_pipeline(H5F_t *f, const struct H5O_pline_t *pline,
 H5_DLL H5Z_class_t *H5Z_find(H5Z_filter_t id);
 
 
+/* Filter routines */
+size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts,
+			  const unsigned cd_values[], size_t nbytes,
+			  size_t *buf_size, void **buf);
+
+size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
+			  const unsigned cd_values[], size_t nbytes,
+			  size_t *buf_size, void **buf);
 #endif

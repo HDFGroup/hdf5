@@ -20,6 +20,7 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_NONE		0	/*reserved indefinitely		*/
 #define H5Z_FILTER_DEFLATE	1 	/*deflation like gzip	     	*/
 #define H5Z_FILTER_SHUFFLE      2       /* shuffle the data             */
+#define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved */
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 
 /* Flags for filter definition */
@@ -56,13 +57,11 @@ extern "C" {
 H5_DLL herr_t H5Zregister(H5Z_filter_t id, const char *comment,
 			   H5Z_func_t filter);
 
-size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts,
-			  const unsigned cd_values[], size_t nbytes,
-			  size_t *buf_size, void **buf);
+H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
 
-size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
-			  const unsigned cd_values[], size_t nbytes,
-			  size_t *buf_size, void **buf);
+H5_DLL htri_t H5Zfilter_avail(H5Z_filter_t id);
+
+
 #ifdef __cplusplus
 }
 #endif
