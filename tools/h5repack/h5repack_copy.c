@@ -239,10 +239,8 @@ int do_copy_objects(hid_t fidin,
  * in a second traversal of the output file
  *-------------------------------------------------------------------------
  */
-
-   if ( H5Tget_class(mtype_id) != H5T_REFERENCE )
+   if ( (H5T_REFERENCE!=H5Tget_class(mtype_id)))
    {
-
     /* the information about the object to be filtered/"layouted" */
     pack_info_t obj;
     init_packobject(&obj);
@@ -254,64 +252,64 @@ int do_copy_objects(hid_t fidin,
    * read to memory
    *-------------------------------------------------------------------------
    */
-    
-    buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-    if ( buf==NULL){
-     printf( "cannot read into memory\n" );
-     goto error;
-    }
-    if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-     goto error;
-
-    /*-------------------------------------------------------------------------
-     * apply the layout; check first if the object is to be modified.
-     * if the layout could not be applied, continue
-     *-------------------------------------------------------------------------
-     */
-    if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
+    if (nelmts)
     {
-     if (apply_layout(dcpl_id,&obj)<0)
-      continue;
-    }
-    
+     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+     if ( buf==NULL){
+      printf( "cannot read into memory\n" );
+      goto error;
+     }
+     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+      goto error;
+     
+     /*-------------------------------------------------------------------------
+      * apply the layout; check first if the object is to be modified.
+      * if the layout could not be applied, continue
+      *-------------------------------------------------------------------------
+      */
+     if (layout_this(dcpl_id,travt->objs[i].name,options,&obj))
+     {
+      if (apply_layout(dcpl_id,&obj)<0)
+       continue;
+     }
     /*-------------------------------------------------------------------------
      * apply the filter; check first if the object is to be filtered.
      * if the filter could not be applied, continue
      *-------------------------------------------------------------------------
      */
-    if (filter_this(travt->objs[i].name,options,&obj))
-    {
-     if (rank)
+     if (filter_this(travt->objs[i].name,options,&obj))
      {
-      /* filters require CHUNK layout; if we do not have one define a default */
-      if (obj.chunk.rank<=0)
+      if (rank)
       {
-       obj.chunk.rank=rank;
-       for (j=0; j<rank; j++) 
-        obj.chunk.chunk_lengths[j] = dims[j];
+       /* filters require CHUNK layout; if we do not have one define a default */
+       if (obj.chunk.rank<=0)
+       {
+        obj.chunk.rank=rank;
+        for (j=0; j<rank; j++) 
+         obj.chunk.chunk_lengths[j] = dims[j];
+       }
+       if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
+        continue;
       }
-      if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
-       continue;
-     }
-     else
-     {
-      if (options->verbose)
-       printf("Warning: Filter could not be applied to <%s>\n",
+      else
+      {
+       if (options->verbose)
+        printf("Warning: Filter could not be applied to <%s>\n",
         travt->objs[i].name);
+      }
      }
-    }
+    }/*nelmts*/
     
     /*-------------------------------------------------------------------------
      * create/write dataset/close
      *-------------------------------------------------------------------------
      */
-    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,ftype_id,space_id,dcpl_id))<0) 
+    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0) 
      goto error;
-    if (dsize_in) {
+    if (dsize_in && nelmts) {
      if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
     }
-    
     /*-------------------------------------------------------------------------
      * copy attrs
      *-------------------------------------------------------------------------
@@ -332,16 +330,13 @@ int do_copy_objects(hid_t fidin,
     
     if (buf)
      free(buf);
-
     
    }/*H5T_STD_REF_OBJ*/
-  
 
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
-
    if (H5Tclose(ftype_id)<0) 
     goto error;
    if (H5Tclose(mtype_id)<0) 
