@@ -59,22 +59,26 @@ of objects in an HDF5 file.
     <li><a href="#Group-Create">H5Gcreate</a>
     <li><a href="#Group-Open">H5Gopen</a>
     <li><a href="#Group-Close">H5Gclose</a>
-    <li><a href="#Group-Iterate">H5Giterate</a> 
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-    <td valign=top> <ul>
-        <li><a href="#Group-Link">H5Glink</a> 
-        <li><a href="#Group-Link2">H5Glink2</a> 
-        <li><a href="#Group-Unlink">H5Gunlink</a> 
-        <li><a href="#Group-Move">H5Gmove</a>
-        <li><a href="#Group-Move2">H5Gmove2</a> 
-      </ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Group-GetObjinfo">H5Gget_objinfo</a>
-    <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
     <li><a href="#Group-SetComment">H5Gset_comment</a>
     <li><a href="#Group-GetComment">H5Gget_comment</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td valign=top> 
+<ul>
+    <li><a href="#Group-Link">H5Glink</a> 
+    <li><a href="#Group-Link2">H5Glink2</a> 
+    <li><a href="#Group-Unlink">H5Gunlink</a> 
+    <li><a href="#Group-Move">H5Gmove</a>
+    <li><a href="#Group-Move2">H5Gmove2</a> 
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Group-Iterate">H5Giterate</a> 
+    <li><a href="#Group-GetObjinfo">H5Gget_objinfo</a>
+    <li><a href="#Group-GetNumObjs">H5Gget_num_objs</a>
+    <li><a href="#Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
+    <li><a href="#Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
+    <li><a href="#Group-GetLinkval">H5Gget_linkval</a>
 </ul>
 </td></tr>
 </table>
@@ -100,8 +104,8 @@ facilitate moving easily between them.</i>
     <li><a href="#Group-Create">h5gcreate_f</a>
     <li><a href="#Group-Open">h5gopen_f</a>
     <li><a href="#Group-Close">h5gclose_f</a>
-    <li><a href="#Group-Iterate">h5gget_obj_info_idx_f</a>
-    <li><a href="#Group-Iterate">h5gn_members_f</a>
+    <li><a href="#Group-SetComment">h5gset_comment_f</a>
+    <li><a href="#Group-GetComment">h5gget_comment_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -113,11 +117,13 @@ facilitate moving easily between them.</i>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-<!--<li><a href="#Group-GetObjinfo">h5gget_objinfo_f</a>
-             -->
+    <li><a href="#Group-Iterate">h5gget_obj_info_idx_f</a>
+    <li><a href="#Group-Iterate">h5gn_members_f</a>
+<!--<li><a href="#Group-GetObjinfo">h5gget_objinfo_f</a>          -->
+<!--<li><a href="#Group-GetNumObjs">h5gget_num_objs_f</a>         -->
+<!--<li><a href="#Group-GetObjNameByIdx">h5gget_objname_by_idx_f</a>   -->
+<!--<li><a href="#Group-GetObjTypeByIdx">h5gget_objtype_by_idx_f</a>   -->
     <li><a href="#Group-GetLinkval">h5gget_linkval_f</a>
-    <li><a href="#Group-SetComment">h5gset_comment_f</a>
-    <li><a href="#Group-GetComment">h5gget_comment_f</a>
 </ul>
 </td></tr>
 </table>
@@ -754,6 +760,185 @@ create or access function.
 </dl>
 
 
+
+
+
+
+
+
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetNumObjs">H5Gget_num_objs</a>
+<dt><strong>Signature:</strong>
+  <dd><em>herr_t</em> <code>H5Gget_num_objs</code>(<em>hid_t</em> <code>loc_id</code>,
+      <em>hsize_t* </em> <code>num_obj</code>)
+<dt><strong>Purpose:</strong>
+  <dd>Returns number of objects in the group specified by its identifier
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_num_objs</code> returns number of objects in a group.
+      Group is specified by its identifier <code>loc_id</code>. 
+      If file identifier is passed in, then  number of objects in the 
+      root group is returned.
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>loc_id</code>
+      <dd>IN: Identifier of the group or the file
+    <dt><em>hsize_t*</em> <code>num_obj</code>
+      <dd>OUT: Number of objects in the group.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns positive value if successful;
+      otherwise returns a negative value.
+</dl>
+
+
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>group_id</code>, 
+                      <em>hsize_t</em> <code>idx</code>, 
+                      <em>char *</em><code>name</code>, 
+                      <em>size_t*</em> <code>size</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns a name of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objname_by_idx</code> returns a name of the object 
+      specified by the index <code>idx</code> in the group <code>group_id</code>.
+      <p>
+      The group is specified by a group identifier <code>group_id</code>. 
+      If preferred, a file identifier may be passed in <code>group_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      The value of <code>idx</code> is any nonnegative number less than 
+      the total number of objects in the group, which is returned by the
+      functioin <code>H5Gget_num_objects</code>. 
+      Note that this is a transient index; an object may have a 
+      different index each time a group is opened.
+      <p>
+      The object name is returned in the user-specified buffer <code>name</code>.
+      <p>
+      If the size of the provided buffer <code>name</code> is 
+      less or equal the actual object name length, 
+      the object name is truncated to <code>max_size - 1</code> characters.
+      <p>
+      Note that if the size of the object's name is unkown, a 
+      preliminary call to <code>H5Gget_objname_by_idx</code> will return
+      that value.  A second call to <code>H5Gget_objname_by_idx</code> 
+      can then be used to retrieve the actual name.
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>group_id</code>
+        <dd>IN: Group or file identifier.
+    <dt><em>hsize_t</em> <code>idx</code>
+        <dd>IN: Transient index identifying object.
+    <dt><em>char *</em><code>name</code>
+        <dd>IN/OUT: Pointer to user-provided buffer the object name.
+    <dt><em>size_t</em> <code>size</code>
+        <dd>IN: Name length.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns the size of the object name if successful, 
+      or <code>0</code> if no name is associated with the group identifier.
+      Otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>group_id</code>, 
+                      <em>hsize_t</em> <code>idx</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns the type of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objtype_by_idx</code> returns the type of the object 
+      specified by the index <code>idx</code> in the group <code>group_id</code>.
+      <p>
+      The group is specified by a group identifier <code>group_id</code>. 
+      If preferred, a file identifier may be passed in <code>group_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      This parameter is described in more detail in the discussion of 
+      <a href="#Group-GetObjNameByIdx"><code>H5Gget_objname_by_idx</code></a>.
+      <p>
+      The object type is returned as the function return value:
+        <table>	
+        <tr valign=top align=left><td>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>
+            <code>H5G_LINK</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>0</code>
+            </td><td>
+            Object is a symbolic link. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_GROUP</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>1</code>
+            </td><td>
+            Object is a group. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_DATASET</code>  &nbsp;&nbsp;
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>2</code> &nbsp;&nbsp;
+            </td><td>
+            Object is a dataset. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_TYPE</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>3</code>
+            </td><td>
+            Object is a named datatype. 
+        </td></tr>
+	</table>
+
+<dt><strong>Parameters:</strong>
+  <dl>
+    <dt><em>hid_t</em> <code>group_id</code>
+        <dd>IN: Group or file identifier.
+    <dt><em>hsize_t</em> <code>idx</code>
+        <dd>IN: Transient index identifying object.
+  </dl>
+<dt><strong>Returns:</strong>
+  <dd>Returns the type of the object if successful.
+      Otherwise returns a negative value.
+</dl>
+
+
+
+
+
+
+
+
+
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Group-GetLinkval">H5Gget_linkval</a>
@@ -948,7 +1133,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 12 August 2002
+Last modified: 22 April 2003
  
 </body>
 </html>
