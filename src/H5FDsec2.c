@@ -271,12 +271,14 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 {
     int	o_flags;
     int		fd;
-    struct stat	sb;
     H5FD_sec2_t	*file=NULL;
 #ifdef WIN32
 	HFILE filehandle;
 	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 	int results;   
+        struct _stati64 sb;
+#else
+        struct stat sb;
 #endif
 
     FUNC_ENTER(H5FD_sec2_open, NULL);
@@ -298,7 +300,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     /* Open the file */
     if ((fd=HDopen(name, o_flags, 0666))<0)
         HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file");
-    if (fstat(fd, &sb)<0) {
+    if (HDfstat(fd, &sb)<0) {
         close(fd);
         HRETURN_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
     }

@@ -469,13 +469,15 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 {
     int	    o_flags;
     int		fd;
-    struct stat	sb;
     H5FD_log_t	*file=NULL;
     H5FD_log_fapl_t	*fa;     /* File access property list information */
 #ifdef WIN32
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
     int results;   
+    struct _stati64 sb;
+#else
+    struct stat sb;
 #endif
     H5P_genplist_t *plist;      /* Property list */
 

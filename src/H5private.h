@@ -562,7 +562,11 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 /* fscanf() variable arguments */
 #define HDfseek(F,O,W)		fseek(F,O,W)
 #define HDfsetpos(F,P)		fsetpos(F,P)
-#define HDfstat(F,B)		fstat(F,B)
+#ifdef WIN32
+#define HDfstat(F,B)		_fstati64(F,B)
+#else
+#define HDfstat(F,B)            fstat(F,B)
+#endif
 #define HDftell(F)		ftell(F)
 #define HDfwrite(M,Z,N,F)	fwrite(M,Z,N,F)
 #define HDgetc(F)		getc(F)

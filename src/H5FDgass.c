@@ -327,12 +327,16 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
 	       haddr_t maxaddr)
 {
     int		fd;
-    struct stat	sb;
     H5FD_gass_t	*file=NULL;
     const H5FD_gass_fapl_t	*fa=NULL;
     H5FD_gass_fapl_t		_fa;
     char *filename = (char *) H5MM_malloc(80 * sizeof(char));
     H5P_genplist_t *plist;      /* Property list pointer */
+#ifdef WIN32
+    struct _stati64 sb;
+#else
+   struct stat sb;
+#endif
     
     FUNC_ENTER(H5FD_gass_open, NULL);
 
@@ -408,7 +412,7 @@ H5FD_gass_open(const char *name, unsigned flags, hid_t fapl_id,
       
     }
    
-     if (fstat(fd, &sb)<0) {
+     if (HDfstat(fd, &sb)<0) {
         close(fd);
         HRETURN_ERROR(H5E_IO, H5E_BADFILE, NULL, "fstat failed");
     }
