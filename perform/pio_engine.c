@@ -129,7 +129,6 @@ static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
-#ifdef H5_HAVE_GPFS
 /* GPFS-specific functions */
 #ifdef H5_HAVE_GPFS
 static void access_range(int handle, off_t start, off_t length, int is_write);
