@@ -64,7 +64,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   char*    h5cimage_name;
   void*    image_data;
   HDF_CHUNK_DEF c_def_out;
-  int32    chunk_dims[2];
+  hsize_t    chunk_dims[2];
   int32    c_flags;
 
   /* for checking compression */
@@ -294,10 +294,10 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 
     if(c_def_out.comp.comp_type == COMP_CODE_RLE || c_def_out.comp.comp_type == COMP_CODE_NBIT || c_def_out.comp.comp_type == COMP_CODE_SKPHUFF || c_def_out.comp.comp_type == COMP_CODE_DEFLATE || c_def_out.comp.comp_type == COMP_CODE_JPEG) {
    
-     chunk_dims[0] = c_def_out.chunk_lengths[0]; 
-     chunk_dims[1] = c_def_out.chunk_lengths[1];
+     chunk_dims[0] = (hsize_t)c_def_out.chunk_lengths[0]; 
+     chunk_dims[1] = (hsize_t)c_def_out.chunk_lengths[1];
        
-     if(H5Pset_chunk(create_plist, 2, (hsize_t *)chunk_dims)<0) {
+     if(H5Pset_chunk(create_plist, 2, chunk_dims)<0) {
        printf("failed to set up chunking information for ");
        printf("property list.\n");
        free(image_data);
