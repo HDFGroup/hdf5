@@ -1565,17 +1565,23 @@ H5S_select_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *buf)
+H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *buf)
 {
-    herr_t ret_value=FAIL;  /* return value */
+    const void *fill=_fill;     /* Alias for fill-value buffer */
+    herr_t ret_value=FAIL;      /* return value */
 
     FUNC_ENTER (H5S_select_fill, FAIL);
 
     /* Check args */
-    assert(fill);
     assert(fill_size>0);
     assert(space);
     assert(buf);
+
+    /* Check if we need a temporary fill value buffer */
+    if(fill==NULL) {
+        if (NULL==(fill = H5MM_calloc(fill_size)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "fill value buffer allocation failed");
+    } /* end if */
 
     /* Fill the selection in the memory buffer */
     /* [Defer (mostly) to the selection routines] */
@@ -1601,6 +1607,10 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *bu
             assert(0 && "Invalid selection type!");
             break;
     } /* end switch */
+
+done:
+    if(_fill==NULL && fill)
+        H5MM_xfree(fill);
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_fill() */
