@@ -247,7 +247,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     bt->left = HADDR_UNDEF;
     bt->right = HADDR_UNDEF;
     bt->nchildren = 0;
-    if (NULL==(bt->page=H5FL_BLK_CALLOC(page,size)) ||
+    if (NULL==(bt->page=H5FL_BLK_MALLOC(page,size)) ||
             NULL==(bt->native=H5FL_BLK_MALLOC(native_block,total_native_keysize)) ||
             NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)(2*H5F_KVALUE(f,type)))) ||
             NULL==(bt->key=H5FL_SEQ_MALLOC(H5B_key_t,(size_t)(2*H5F_KVALUE(f,type)+1))))
