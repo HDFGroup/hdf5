@@ -1990,7 +1990,7 @@ recheck:
             hid_t tmp_type = base_type;
     
             if (been_here) {
-                bad_type = "variable length of";
+                bad_type = "H5T_VLEN";
                 goto bad;
             } else {
                 been_here++;
@@ -2150,21 +2150,11 @@ h5dump_mem(FILE *stream, const h5dump_t *info, hid_t type, hid_t space,
     return h5dump_simple_mem(stream, info, type, space, mem, indentlevel);
 }
 
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-
-/*from h5dumputil.c*/
-
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
-/*************************************************************************/
+/*************************************************************************
+ *
+ * from h5dumputil.c
+ *
+ *************************************************************************/
 
 /*-------------------------------------------------------------------------
  * Function:    indentation
@@ -2210,11 +2200,11 @@ print_version(const char *program_name)
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
-/*
+/*************************************************************************
  *
- * THE FUNCTIONS BELOW ARE FROM THE H5FINSHD.C FILE
+ * from h5finshd.c
  *
- */
+ *************************************************************************/
 
 /*-------------------------------------------------------------------------
  * Function:    init_table
@@ -2307,7 +2297,8 @@ search_obj(table_t *table, unsigned long *objno)
     int i;
 
     for (i = 0; i < table->nobjs; i++)
-        if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
+        if (table->objs[i].objno[0] == *objno &&
+			table->objs[i].objno[1] == *(objno + 1))
 	    return i;
   
     return -1;
@@ -2350,7 +2341,7 @@ add_obj (table_t *table, unsigned long *objno, char *objname)
 }
 
 /*-------------------------------------------------------------------------
- * Function:   Find_objs 
+ * Function:   find_objs 
  *
  * Purpose:    Find objects, committed types and store them in tables
  *
@@ -2485,7 +2476,7 @@ dump_table(char* tablename, table_t *table)
 {
     int i;
 
-    printf("%s: # of entries = %d\n", tablename,table->nobjs);
+    printf("%s: # of entries = %d\n", tablename, table->nobjs);
 
     for ( i = 0; i < table->nobjs; i++)
         printf("%lu %lu %s %d\n", table->objs[i].objno[0],
@@ -2510,7 +2501,6 @@ int
 get_table_idx(table_t *table, unsigned long *objno)
 {
     return search_obj(table, objno);
-
 }
 
 /*-------------------------------------------------------------------------
