@@ -1094,7 +1094,7 @@ H5Tget_overflow ()
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetOffset">H5Tget_offset</a>
 <dt><strong>Signature:</strong>
-    <dd><em>size_t </em><code>H5Tget_offset</code>(<em>hid_t </em><code>type_id</code>
+    <dd><em>int </em><code>H5Tget_offset</code>(<em>hid_t </em><code>type_id</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves the bit offset of the first significant bit.
@@ -1152,8 +1152,8 @@ H5Tget_overflow ()
             <dd>Identifier of datatype to query.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns a positive offset value if successful;
-        otherwise 0.
+    <dd>Returns an offset value if successful;
+        otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_offset_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
