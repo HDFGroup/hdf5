@@ -1,12 +1,12 @@
  /* 
-  *       This program illustrates how references to the objects can be used.
-  *       Program creates two datasets in the file. It also creates the third
-  *       dataset, and references to the first two datasets are stored in it.
+  *       This program illustrates how references to objects can be used.
+  *       Program creates a dataset and a group in a file. It also creates  
+  *       second dataset, and references to the first dataset and the group 
+  *       are stored in it.
   *       Program reopens the file and reads dataset with the references.
-  *       References are used to open first two datasets and read datatspace
-  *       and datatype information about them. 
-  *         
- */
+  *       References are used to open the objects. Information about the
+  *       objects is displayed.
+  */        
 
 #include <stdlib.h>
 #include<hdf5.h>
@@ -15,9 +15,9 @@
 
 int
 main(void) {
-   hid_t fid;                         /* File, datasets, datatypes and    */
-   hid_t did_a, sid_a;                /* dataspaces identifiers for three */ 
-   hid_t did_b, tid_b, sid_b;         /* datasets.                        */ 
+   hid_t fid;                         /* File, group, datasets, datatypes */ 
+   hid_t gid_a;                       /* and  dataspaces identifiers   */
+   hid_t did_b, sid_b, tid_b;      
    hid_t did_r, tid_r, sid_r;
    herr_t status;
 
@@ -26,10 +26,7 @@ main(void) {
  
 
    hsize_t dim_r[1]; 
-   hsize_t dim_a[1];
    hsize_t dim_b[2];
-
-   herr_t ret; /* return values */
    
    /* 
     *  Create a file using default properties.
@@ -37,11 +34,9 @@ main(void) {
    fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
    /* 
-    *  Create  dataset "A" in the file.
+    *  Create  group "A" in the file.
     */
-   dim_a[0] = 5;
-   sid_a = H5Screate_simple(1, dim_a, NULL);
-   did_a = H5Dcreate(fid, "A", H5T_NATIVE_INT, sid_a, H5P_DEFAULT);
+   gid_a = H5Gcreate(fid, "A", -1);
    
   /* 
    *  Create dataset "B" in the file.
@@ -52,7 +47,7 @@ main(void) {
    did_b = H5Dcreate(fid, "B", H5T_NATIVE_FLOAT, sid_b, H5P_DEFAULT);
    
    /* 
-    *  Create dataset "R" to store references to the datasets "A" and "B".
+    *  Create dataset "R" to store references to the objects "A" and "B".
     */
    dim_r[0] = 2;
    sid_r = H5Screate_simple(1, dim_r, NULL);
@@ -62,11 +57,11 @@ main(void) {
    /* 
     *  Allocate write and read buffers.
     */
-   wbuf = malloc(sizeof(hobj_ref_t)*2);
-   rbuf = malloc(sizeof(hobj_ref_t)*2);
+   wbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t)*2);
+   rbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t)*2);
   
    /*
-    *  Create references to the datasets "A" and "B"
+    *  Create references to the group "A" and dataset "B"
     *  and store them in the wbuf.
     */
    H5Rcreate(&wbuf[0], fid, "A", H5R_OBJECT, -1); 
@@ -81,8 +76,7 @@ main(void) {
    /* 
     *  Close all objects. 
     */
-   H5Sclose(sid_a);
-   H5Dclose(did_a);
+   H5Gclose(gid_a);
    
    H5Sclose(sid_b);
    H5Dclose(did_b);
@@ -101,44 +95,38 @@ main(void) {
    /* 
     *  Open and read dataset "R".
     */
-   did_r = H5Dopen(fid, "R");
+   did_r  = H5Dopen(fid, "R");
    status = H5Dread(did_r, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
 		    H5P_DEFAULT, rbuf);
 
    /* 
-    *  Open dataset A using reference to it.
+    * Find the type of referenced objects.
     */
-   did_a = H5Rdereference(did_r, H5R_OBJECT, &rbuf[0]);
+    status = H5Rget_object_type(did_r, &rbuf[0]);
+    if ( status == H5G_GROUP ) 
+    printf("First dereferenced object is a group. \n");
 
-   /* 
-    *  Get rank of the dataset "A"
-    */
-
-   printf("\n");
-   sid_a = H5Dget_space(did_a);
-   ret = H5Sget_simple_extent_ndims(sid_a);
-   
-   if(ret == 1) printf("Rank of A is %d.\n", ret);
-   printf("\n");
-
+    status = H5Rget_object_type(did_r, &rbuf[1]);
+    if ( status == H5G_DATASET ) 
+    printf("Second dereferenced object is a dataset. \n");
    /* 
     *  Get datatype of the dataset "B"
     */
    did_b = H5Rdereference(did_r, H5R_OBJECT, &rbuf[1]);
    tid_b = H5Dget_type(did_b);
    if(H5Tequal(tid_b, H5T_NATIVE_FLOAT))
-     printf("Datatype of B is H5T_NATIVE_FLOAT.\n");
+     printf("Datatype of the dataset is H5T_NATIVE_FLOAT.\n");
    printf("\n");
 
    /* 
-    * Close all objects.
+    * Close all objects and free memory buffers.
     */
-   H5Dclose(did_a);
-   H5Sclose(sid_a);
+   H5Dclose(did_r);
    H5Dclose(did_b);
    H5Tclose(tid_b);
    H5Fclose(fid);
-
+   free(rbuf);
+   free(wbuf);
    return 0;
 
  }
