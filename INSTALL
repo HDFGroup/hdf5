@@ -393,6 +393,18 @@ INSTALL.ascired for instructions.
 	    ./tools/h5debug	(low-level file debugging)
 	    ./tools/h5import	(a demo)
 
+* Using the Library
+	Please see the User Manual in the doc/html directory.
+
+	Most programs will include <hdf5.h> and link with
+	-lhdf5. Additional libraries may also be necessary depending
+	on whether support for compression, etc. was compiled into the 
+	hdf5 library.
+
+	A summary of the hdf5 installation can be found in the
+	libhdf5.settings file in the same directory as the static
+	and/or shared hdf5 libraries.
+
 * Support
 	Support is described in the README file.
 

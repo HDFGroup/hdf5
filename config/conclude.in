@@ -62,6 +62,9 @@ install: $(PUB_LIB) $(PUB_HDR) $(PROGS) $(libdir) $(includedir) $(bindir)
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
+	@if test -f libhdf5.settings; then				      \
+	   (set -x; $(INSTALL_DATA) libhdf5.settings $(libdir)/. || exit 1);  \
+	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \

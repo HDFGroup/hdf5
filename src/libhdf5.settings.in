@@ -1,0 +1,20 @@
+SUMMARY OF THE HDF5 CONFIGURATION
+=================================
+
+HDF5 Version:		@H5_VERSION@
+Configured on:		@CONFIG_DATE@
+Configured by:		@CONFIG_USER@
+Configure mode:		@CONFIG_MODE@
+Host system:		@host_cpu@-@host_vendor@-@host_os@
+Byte sex:		@BYTESEX@
+Libraries:		@STATIC_SHARED@
+Parallel support:	@PARALLEL@
+Installation point:	@prefix@
+Compiler:		@CC_VERSION@
+Compiler switches:	@CFLAGS@
+Extra libraries:	@LIBS@
+Archiver:		@AR@
+Ranlib:			@RANLIB@
+Debugged Packages:	@DEBUG_PKG@
+API Tracing:		@TRACE_API@
+File addresses:		@HSIZET@
