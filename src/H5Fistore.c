@@ -170,25 +170,22 @@ typedef struct H5F_istore_ud1_t {
 
 /* inherits B-tree like properties from H5B */
 H5B_class_t H5B_ISTORE[1] = {{
-    H5B_ISTORE_ID,				/*id			*/
-    sizeof(H5F_istore_key_t),			/*sizeof_nkey		*/
-    H5F_istore_sizeof_rkey, 			/*get_sizeof_rkey	*/
-    H5F_istore_new_node,			/*new			*/
-    H5F_istore_cmp2,				/*cmp2			*/
-    H5F_istore_cmp3,				/*cmp3			*/
-    H5F_istore_found,				/*found			*/
-    H5F_istore_insert,				/*insert		*/
-    FALSE,					/*follow min branch?	*/
-    FALSE,					/*follow max branch?	*/
-   	/*pvn*/
-    /*NULL,*/					/*remove		*/
-				H5F_istore_remove,     /*remove		*/
-    H5F_istore_iterate,				/*iterator		*/
-    H5F_istore_decode_key,			/*decode		*/
-    H5F_istore_encode_key,			/*encode		*/
-    H5F_istore_debug_key,			/*debug			*/
-				/*pvn*/
-				H5F_istore_prune_extent,	  	  /*remove chunks, upon H5Dset_extend call			*/
+    H5B_ISTORE_ID,		/*id			*/
+    sizeof(H5F_istore_key_t),	/*sizeof_nkey		*/
+    H5F_istore_sizeof_rkey, 	/*get_sizeof_rkey	*/
+    H5F_istore_new_node,	/*new			*/
+    H5F_istore_cmp2,		/*cmp2			*/
+    H5F_istore_cmp3,		/*cmp3			*/
+    H5F_istore_found,		/*found			*/
+    H5F_istore_insert,		/*insert		*/
+    FALSE,			/*follow min branch?	*/
+    FALSE,			/*follow max branch?	*/
+    H5F_istore_remove,          /*remove		*/
+    H5F_istore_iterate,		/*iterator		*/
+    H5F_istore_decode_key,	/*decode		*/
+    H5F_istore_encode_key,	/*encode		*/
+    H5F_istore_debug_key,	/*debug			*/
+    H5F_istore_prune_extent,	/*remove chunks, upon H5Dset_extend call */
 }};
 
 #define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
@@ -2790,7 +2787,7 @@ static H5B_ins_t H5F_istore_remove( H5F_t *f,
                                    hbool_t *rt_key_changed  /*out*/)
 {
  H5F_istore_key_t *lt_key = (H5F_istore_key_t*)_lt_key;
- H5FD_free(f->shared->lf, H5FD_MEM_DRAW, addr, lt_key->nbytes);
+ H5FD_free(f->shared->lf, H5FD_MEM_DRAW, addr, (hsize_t)lt_key->nbytes);
  *lt_key_changed = FALSE;
  *rt_key_changed = FALSE;
  return H5B_INS_REMOVE;

@@ -109,6 +109,6 @@ extern char    *get_objectname(table_t*, int);
 extern herr_t   find_objs(hid_t group, const char *name, void *op_data);
 extern int      search_obj(table_t *temp, unsigned long *);
 extern void     init_table(table_t **tbl);
-extern void     init_prefix(char **temp, int);
+extern void     init_prefix(char **temp, size_t);
 
 #endif	/* H5TOOLS_UTILS_H__ */

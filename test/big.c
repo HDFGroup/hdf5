@@ -355,7 +355,7 @@ reader (hid_t fapl)
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 usage(void)
 {
     HDfprintf(stdout,

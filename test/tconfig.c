@@ -202,7 +202,6 @@ void
 test_config_malloc(void)
 {
     char	*pt;
-    size_t	n;
 
     /* verify H5_MALLOC_WORKS (malloc zero byte) macros */
     pt = malloc(0);

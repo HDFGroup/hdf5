@@ -1112,7 +1112,7 @@ test_query(void)
     hid_t       file=-1, tid1=-1, tid2=-1;
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
-    int         nmembs, index;
+    int         nmembs, indx;
     short       enum_val;
 
     TESTING("query functions of compound and enumeration types");
@@ -1187,7 +1187,7 @@ test_query(void)
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((index=H5Tget_member_index(tid1, "c"))!=2) {
+    if((indx=H5Tget_member_index(tid1, "c"))!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -1199,7 +1199,7 @@ test_query(void)
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((index=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+    if((indx=H5Tget_member_index(tid2, "ORANGE"))!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -1247,7 +1247,7 @@ test_query(void)
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((index=H5Tget_member_index(tid1, "c"))!=2) {
+    if((indx=H5Tget_member_index(tid1, "c"))!=2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -1259,7 +1259,7 @@ test_query(void)
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if((index=H5Tget_member_index(tid2, "ORANGE"))!=3) {
+    if((indx=H5Tget_member_index(tid2, "ORANGE"))!=3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;

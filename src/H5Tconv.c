@@ -2175,9 +2175,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;     /*source & destination total size in bytes*/
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
-    hsize_t	conv_buf_size=0;  	/*size of conversion buffer in bytes */
+    size_t	conv_buf_size=0;  	/*size of conversion buffer in bytes */
     void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
-    hsize_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
+    size_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
     int	        direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
@@ -2409,7 +2409,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     hsize_t	elmtno;			/*element number counter	     */
     int         i;                      /* local index variable */
     void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
-    hsize_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
+    size_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
 
     FUNC_ENTER (H5T_conv_array, FAIL);
 

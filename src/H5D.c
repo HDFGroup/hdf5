@@ -4113,7 +4113,7 @@ herr_t H5D_set_extent( H5D_t *dset, const hsize_t *size )
  H5P_genplist_t *plist;
 	H5O_fill_t fill;
  H5O_pline_t pline;
- unsigned u;
+ int u;
  int shrink = 0;
  
  FUNC_ENTER( H5D_set_extent, FAIL );

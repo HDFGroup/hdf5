@@ -17,7 +17,7 @@ static const char  *progname = "h5dump";
 
 static int          d_status = EXIT_SUCCESS;
 static int          unamedtype = 0;     /* shared data type with no name */
-static int          prefix_len = 1024;
+static size_t       prefix_len = 1024;
 static table_t     *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 static char        *prefix;
 static const char  *driver = NULL;      /* The driver to open the file with. */
@@ -1377,7 +1377,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    d_status = EXIT_FAILURE;
             ret = FAIL;
 	} else {
-            int new_len = strlen(prefix) + strlen(name) + 2;
+            size_t new_len = strlen(prefix) + strlen(name) + 2;
 
             if (prefix_len <= new_len) {
                 prefix_len = new_len + 1;
@@ -2247,7 +2247,7 @@ handle_groups(hid_t fid, char *group, void * UNUSED data)
                 dump_header_format->groupblockend);
         d_status = EXIT_FAILURE;
     } else {
-        int new_len = strlen(group) + 1;
+        size_t new_len = strlen(group) + 1;
 
         if (prefix_len <= new_len) {
             prefix_len = new_len;

@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2002 NCSA
+ *                    All rights reserved.
+ *
+ * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ *              April 12, 2002
+ *
+ * Purpose:     Tests the H5Dset_extent call
+ */
+
 
 #include "hdf5.h"
 #include "h5test.h"
@@ -100,9 +110,9 @@ int main( void )
  
  
  /* Compare the read array with the original array */
- for( i = 0; i < dims_out[0]; i++ )
+ for( i = 0; i < (int)dims_out[0]; i++ )
  {
-  for( j = 0; j < dims_out[1]; j++ )
+  for( j = 0; j < (int)dims_out[1]; j++ )
   {
    if (  buf1[i][j] != data[i][j] ) {
     goto out;
@@ -138,9 +148,9 @@ int main( void )
  if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 )<0) goto out;
  
  /* Compare the read array with the original array */
- for( i = 0; i < dims_out[0]; i++ )
+ for( i = 0; i < (int)dims_out[0]; i++ )
  {
-  for( j = 0; j < dims_out[1]; j++ )
+  for( j = 0; j < (int)dims_out[1]; j++ )
   {
    if ( i >= 70 || j >= 70 )
    {
@@ -229,9 +239,9 @@ int main( void )
  if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1 )<0) goto out;
  
  /* Compare the read array with the original array */
- for( i = 0; i < dims_out[0]; i++ )
+ for( i = 0; i < (int)dims_out[0]; i++ )
  {
-  for( j = 0; j < dims_out[1]; j++ )
+  for( j = 0; j < (int)dims_out[1]; j++ )
   {
    if (  buf1[i][j] != data[i][j] ) {
     goto out;
@@ -260,9 +270,9 @@ int main( void )
  if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 )<0) goto out;
  
  /* Compare the read array with the original array */
- for( i = 0; i < dims_out[0]; i++ )
+ for( i = 0; i < (int)dims_out[0]; i++ )
  {
-  for( j = 0; j < dims_out[1]; j++ )
+  for( j = 0; j < (int)dims_out[1]; j++ )
   {
    if ( i >= 70 || j >= 70 )
    {

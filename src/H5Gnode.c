@@ -94,6 +94,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/
     NULL,			/*debug key		*/
+    NULL,	  	        /*remove chunks, upon H5Dset_extend call */
 }};
 
 /* Interface initialization */
