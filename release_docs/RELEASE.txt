@@ -43,6 +43,8 @@ New Features
             adjustment.  The size can be increased and decreased(without
             cutting the last member).  No API change is involved.  SLU - 
             2004/10/1
+        - Removed PABLO support 
+                                2005/01/20 EIP 
 
     Parallel Library:
     -----------------

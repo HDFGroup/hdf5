@@ -19,9 +19,6 @@
  */
 #define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK      H5HLdbg_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/

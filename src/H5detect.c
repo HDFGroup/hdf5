@@ -499,7 +499,6 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
     /* Include files */
     printf("\
 #define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
-#define PABLO_MASK	H5T_init_mask\n\
 \n\
 #include \"H5private.h\"\n\
 #include \"H5Iprivate.h\"\n\

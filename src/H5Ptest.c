@@ -21,9 +21,6 @@
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 #define H5P_TESTING		/*suppress warning about H5P testing funcs*/
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5P_test_mask
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/

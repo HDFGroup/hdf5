@@ -19,9 +19,6 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Z_fletcher32_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/

@@ -27,8 +27,6 @@
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                  */
 
-/* Pablo mask */
-#define PABLO_MASK	H5O_pline_mask
 
 #define H5O_PLINE_VERSION	1
 

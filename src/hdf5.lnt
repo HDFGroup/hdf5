@@ -36,8 +36,6 @@
 -esym(534, H5RC_decr)
 -esym(534, H5V_array_fill)
 
-// Turn off warnings about not using PABLO_MASK macro
--esym(750, PABLO_MASK)
 
 // Turn off warnings about "Expression-like macro not parenthesized" for
 // enumerated type increment & decrement macros:

@@ -159,16 +159,6 @@
 #endif
 
 /*
- * Pablo support files.
- */
-#ifdef H5_HAVE_PABLO
-#   define IOTRACE
-#   define HDFIOTRACE
-#   include "HDFIOTrace.h"
-#   include "ProcIDs.h"
-#endif
-
-/*
  * MPE Instrumentation support
  * Do not #if the following header file because it contains
  * the needed null definitions for the H5-MPE macros when MPE
@@ -1141,8 +1131,6 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 
 #define FUNC_ENTER_COMMON_NOFUNC(func_name,asrt)                              \
-   PABLO_SAVE (ID_ ## func_name)  					      \
-									      \
    /* Check API status */               				      \
    assert(asrt);				                              \
 									      \
@@ -1150,7 +1138,6 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
    H5_CHECK_FUNCNAME(func_name);					      \
 									      \
    /* Start tracing */                  				      \
-   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id)
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \
@@ -1301,12 +1288,12 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *	The pablo mask comes from the constant PABLO_MASK defined on a
  *	per-file basis.	 The pablo_func_id comes from an auto variable
  *	defined by FUNC_ENTER.
+ *      PABLO was removed on January 20, 2005 EIP
  *
  *-------------------------------------------------------------------------
  */
 #define FUNC_LEAVE_API(ret_value)                                             \
         FINISH_MPE_LOG;                                                       \
-        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
         H5TRACE_RETURN(ret_value);					      \
         H5_POP_FUNC;                                                          \
         FUNC_LEAVE_API_THREADSAFE                                             \
@@ -1315,14 +1302,12 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 }} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
-        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
         H5_POP_FUNC;                                                          \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI_VOID                                                 \
-        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
         H5_POP_FUNC;                                                          \
         return;						                      \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -1334,24 +1319,10 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *              (so far, just the H5FS routines themselves)
  */
 #define FUNC_LEAVE_NOAPI_NOFS(ret_value)                                      \
-        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
-/*
- * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions
- * through one of these two sets of macros.
- */
-#ifdef H5_HAVE_PABLO
-#  define PABLO_SAVE(func_id)	const int pablo_func_id = func_id;
-#  define PABLO_TRACE_ON(m, f)	TRACE_ON(m,f)
-#  define PABLO_TRACE_OFF(m, f) TRACE_OFF(m,f)
-#else
-#  define PABLO_SAVE(func_id)	/*void */
-#  define PABLO_TRACE_ON(m, f)	/*void */
-#  define PABLO_TRACE_OFF(m, f) /*void */
-#endif
 
 /* Macro for "glueing" together items, for re-scanning macros */
 #define H5_GLUE(x,y)       x##y

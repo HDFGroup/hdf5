@@ -25,9 +25,6 @@
  *-------------------------------------------------------------------------
  */
 
-/* Pablo information */
-/* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5MM_mask
 
 #include "H5private.h"
 #include "H5Eprivate.h"

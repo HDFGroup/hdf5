@@ -85,7 +85,6 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5C_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Cprivate.h"		/* Cache				*/

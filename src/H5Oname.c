@@ -32,8 +32,6 @@
 #include "H5MMprivate.h"
 #include "H5Opkg.h"             /* Object header functions                  */
 
-#define PABLO_MASK      H5O_name_mask
-
 /* PRIVATE PROTOTYPES */
 static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t *sh);
 static herr_t H5O_name_encode(H5F_t *f, uint8_t *p, const void *_mesg);

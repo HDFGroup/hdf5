@@ -19,7 +19,6 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5D_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
