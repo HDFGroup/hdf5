@@ -416,3 +416,5 @@
 ./tools/testfiles/tslink-2.ddl
 ./tools/testfiles/tslink.dmp
 ./tools/testfiles/tslink.h5
+./tools/testfiles/tstr-1.ddl
+./tools/testfiles/tstr.h5
