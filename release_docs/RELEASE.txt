@@ -65,6 +65,11 @@ New Features
 Support for new platforms, languages and compilers.
 =======================================
 
+    Configuration
+    -------------
+	- Upgraded from GNU autoconf 2.53 to autoconf 2.59.  JML - 2005/01/31
+
+
 Bug Fixes since HDF5-1.6.3 release
 ==================================
 
