@@ -50,16 +50,6 @@
 
 /* Local typedefs */
 
-/*
- * A dataset is the following struct.
- */
-struct H5D_t {
-    H5G_entry_t		ent;		/* cached object header stuff	*/
-    H5T_t		*type;		/* datatype of this dataset	*/
-    hid_t               dcpl_id;        /* dataset creation property id */
-    H5O_layout_t	layout;		/* data layout			*/
-};
-
 /* Enumerated type for allocating dataset's storage */
 typedef enum {
     H5D_ALLOC_CREATE,           /* Dataset is being created */
@@ -3711,7 +3701,7 @@ H5Dget_offset(hid_t dset_id)
     haddr_t	ret_value;      /* Return value */
     
     FUNC_ENTER_API(H5Dget_offset, HADDR_UNDEF);
-    H5TRACE1("h","i",dset_id);
+    H5TRACE1("a","i",dset_id);
 
     /* Check args */
     if (NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))

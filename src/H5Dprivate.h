@@ -141,7 +141,15 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        1024
 
-typedef struct H5D_t H5D_t;
+/*
+ * A dataset is the following struct.
+ */
+typedef struct H5D_t {
+    H5G_entry_t         ent;            /* cached object header stuff   */
+    H5T_t              *type;           /* datatype of this dataset     */
+    hid_t               dcpl_id;        /* dataset creation property id */
+    H5O_layout_t        layout;         /* data layout                  */
+} H5D_t;
   
 /* Functions defined in H5D.c */
 H5_DLL herr_t H5D_init(void);
