@@ -99,6 +99,7 @@ typedef struct h5dump_context_t {
                                          *row */
     int			indent_level;   /*the number of times we need some
                                           extra indentation */
+	int			default_indent_level; /*this is used when the indent level gets changed*/
 } h5dump_context_t;
 
 typedef herr_t (*H5G_operator_t)(hid_t, const char*, void*);
@@ -1118,19 +1119,36 @@ h5dump_simple_prefix(FILE *stream, const h5dump_t *info,
         }
         templength = h5dump_str_len(&prefix);
         indentlevel = ctx->indent_level;
+		for (i = 0; i < indentlevel; i++){
+			fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
+			templength += h5dump_str_len(&prefix);
+		}
     } else {
         /* this is because sometimes we dont print out all the header
          * info for the data(like the tattr-2.ddl example. if that happens
          * the ctx->indent_level a negative so we need to skip the above
          * and just print out 2 indent levels. maybe the 2 should be a value
          * of the ctx struct?? */
-        indentlevel = 2;
+        if (0==elmtno && 0==secnum && info->line_1st) {
+            fputs(h5dump_str_fmt(&prefix, 0, info->line_1st), stream);
+        } else if (secnum && info->line_cont) {
+            fputs(h5dump_str_fmt(&prefix, 0, info->line_cont),
+                  stream);
+        } else {
+            fputs(h5dump_str_fmt(&prefix, 0, info->line_pre), stream);
+        }
+        templength = h5dump_str_len(&prefix);      
+		indentlevel = ctx->default_indent_level;
+		for (i = 0; i < indentlevel; i++){
+			fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
+			templength += h5dump_str_len(&prefix);
+		}
     }	
-    for (i = 0; i < indentlevel; i++){
+ /*   for (i = 0; i < indentlevel; i++){
         fputs(h5dump_str_fmt(&prefix, 0, info->line_indent), stream);
         templength += h5dump_str_len(&prefix);
     }
-
+*/
     ctx->cur_column = ctx->prev_prefix_len = templength;
 
     ctx->cur_elmt = 0;
@@ -1370,6 +1388,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      * match the dimensionality of the dataset.
      */
     memset(&ctx, 0, sizeof ctx);
+	ctx.indent_level = indentlevel;
 	ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     f_space = H5Dget_space(dset);

@@ -70,9 +70,9 @@ static h5dump_t dataformat = {
 
 	80, /*line_ncols*//*standard default columns*/
 	0, /*line_per_line*/
-	"         ",/*line_pre*/
-	"        %s ",/*line_1st*/
-	"        %s",/*line_cont*/
+	"",/*line_pre*/
+	"%s",/*line_1st*/
+	"%s",/*line_cont*/
 	"",/*line_suf*/
 	"",/*line_sep*/
 	1,/*line_multi_new*/
@@ -1231,8 +1231,7 @@ dump_data (hid_t obj_id, int obj_data) {
 	use indent but with the merging of the tools lib we have to do something different
 	for the lib funtions... the normal indentation is 6 so when we dont need any extra
 	indentation, depth will be 0.*/
-	depth = indent/stdindent - 2;
-
+depth = indent/stdindent+1;
     indentation (indent);
   /*  printf("%s %s\n", dump_header_format->databegin, BEGIN);*/
 	begin_obj(dump_header_format->databegin, NULL, dump_header_format->datablockbegin);
