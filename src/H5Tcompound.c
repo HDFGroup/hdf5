@@ -253,8 +253,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
     
 done:
-    if(ret_value<0)
-{
+    if(ret_value<0) {
         if(memb_dt!=NULL)
             if(H5T_close(memb_dt)<0)
 	        HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "can't close datatype")
