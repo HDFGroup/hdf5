@@ -43,6 +43,8 @@ Library
      because when it was included multiple times, C++ did not like multiple
      definitions of the same static variable.  All occurance of RCSID
      definition are removed since we have not used it consistently before.
+   * Fixed bug with non-zero userblock sizes causing raw data to not write
+     correctly. 
 
 Configuration
 -------------
