@@ -59,14 +59,11 @@ to compile and execute a single process mpi applications for the SP
 machine. Unfortunately, the setting varies from machine to machine.
 E.g., the following works for the Blue machine of LLNL.
 
-    setenv CC           mpcc_r
-    setenv F9X		mpxlf_r		# if parallel Fortran API is wanted
     setenv MP_PROCS     1
     setenv MP_NODES     1
     setenv MP_LABELIO   no
     setenv MP_RMPOOL    0
-    setenv RUNPARALLEL  "MP_PROCS=2 MP_TASKS_PER_NODE=2 poe"
-    setenv LLNL_COMPILE_SINGLE_THREADED TRUE
+    setenv LLNL_COMPILE_SINGLE_THREADED TRUE    # for LLNL site only
 
 The shared library configuration for this version is broken. So, only
 static library is supported.
@@ -221,7 +218,7 @@ with non-zero code.  Failure to support file size greater than 2GB is
 not a fatal error for HDF5 becuase HDF5 can use other file-drivers such
 as families of files to by pass the file size limit.
 
-By default, the parallel tests use /tmp/$LOGIN as the test directory.
+By default, the parallel tests use the current directory as the test directory.
 This can be changed by the environment variable $HDF5_PARAPREFIX.
 For example, if the tests should use directory /PFS/user/me, do
     HDF5_PARAPREFIX=/PFS/user/me
