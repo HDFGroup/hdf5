@@ -1,13 +1,13 @@
 
  
-                       HDF5 Release 1.4-Beta3
+                       HDF5 Release 1.4.0
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.2.0 and
-HDF5-1.4-Beta3, and contains information on the platforms tested and
-known problems in HDF5-1.4-Beta3. For more details check the HISTORY.txt
+HDF5-1.4.0, and contains information on the platforms tested and
+known problems in HDF5-1.4.0. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -84,7 +84,7 @@ h4toh5 Utility
       incorrectly described.)  For more information, please see:
         http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
  
-    Known Limitations of the h4toh5 beta release
+    Known Limitations of the h4toh5 release
     ---------------------------------------------
 
     1. Error Handling
@@ -124,7 +124,7 @@ h4toh5 Utility
 
     4. Memory Use
 
-    The beta version of the h4toh5 utility copies data from HDF4 objects
+    This version of the h4toh5 utility copies data from HDF4 objects
     in a single read followed by a single write to the HDF5 object. For
     large objects, this requires a very large amount of memory, which may
     be extremely slow or fail on some platforms.
@@ -137,7 +137,7 @@ h4toh5 Utility
 
     The h4toh5 utility requires HDF5.1.4 and HDF4r1.4
 
-    The beta h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
+    h4toh5 utility has been tested on Solaris 2.6, Solaris 2.5,
     Irix 6.5, HPUX 11.0, DEC Unix, FreeBSD, Windows 2000(NT5.0),Windows NT 
     and Windows 98.
 
@@ -447,15 +447,15 @@ Known Problems
         differences due to the difference in sizes of the objects created on
         those platforms.  h5ls appears to be dumping object references
         correctly.
-    - Cray J90 (and Cray T3E?) give errors during testing when displaying
+    - Cray J90 give errors during testing when displaying
         some floating-point values.  These are benign differences due to the
         different precision in the values displayed and h5ls appears to be
         dumping floating-point numbers correctly.
 
-* Before building HDF5 F90 Library from source on Crays (T3E and J90) 
+* Before building HDF5 F90 Library from source on Crays (T3E and SV1) 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src subdirectory 
   in the top level directory with the Cray-specific files from the 
-  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0-beta/F90_source_for_Crays
+  ftp://hdf.ncsa.uiuc.edu/pub/ougoing/hdf5/hdf5-1.4.0/F90_source_for_Crays
   directory.
 
 * The h4toh5 utility produces images that do not correctly conform
