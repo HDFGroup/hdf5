@@ -4,7 +4,7 @@
 ##                    All rights reserved.
 ##
 ##
-top_srcdir=@top_srcdir@
+top_srcdir=@top_srcdir@/..
 top_builddir=../..
 srcdir=@srcdir@
 @COMMENCE@
@@ -15,7 +15,7 @@ hdf5_builddir=$(top_builddir)/src
 ## libraries to the library list.
 LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
 LIB=../src/libhdf5_cpp.la
-CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/../src @CPPFLAGS@
+CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 HDF5LIB=$(hdf5_builddir)/libhdf5.la
 
 TEST_PROGS_SRC=
