@@ -10,12 +10,17 @@ if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
     CC='mpcc_r -qlanglvl=ansi -D_LARGE_FILES'
     CC_BASENAME=mpcc_r
-    RUNPARALLEL=${RUNPARALLEL="MP_PROCS=3 MP_TASKS_PER_NODE=3 poe"}
   else
     CC='xlc -qlanglvl=ansi -D_LARGE_FILES'
     CC_BASENAME=xlc
   fi
 fi
+
+# Define RUNPARALLEL if parallel mode is enabled or a parallel compiler used.
+if test "X-$enable_parallel" = "X-yes" -o X-$CC_BASENAME = X-mpcc_r; then
+    RUNPARALLEL=${RUNPARALLEL="MP_PROCS=\$\${NPROCS:=3} MP_TASKS_PER_NODE=\$\${NPROCS:=3} poe"}
+fi
+
 
 #----------------------------------------------------------------------------
 # Compiler flags. The CPPFLAGS values should not include package debug
