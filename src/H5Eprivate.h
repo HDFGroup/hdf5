@@ -15,11 +15,12 @@
 /*
  *  Header file for error values, etc.
  */
+#ifndef _H5Eprivate_H
+#define _H5Eprivate_H
+#include <H5Epublic.h>
 
-#ifndef HDF5ERR_H
-#define HDF5ERR_H
-
-#include "H5Eproto.h"
+/* Private headers needed by this file */
+#include <H5private.h>
 
 /*
    ======================================================================
@@ -29,17 +30,61 @@
    whenever errors are added/deleted from this list.
    ======================================================================
  */
-/* 
- * This section of code is designed to be only accessible to the actual
- * error-management code.
- */
-#ifdef HDF5_ERR_MASTER
+
+/* HERROR macro, used to facilitate error reporting.  Assumes that
+   there's a variable called FUNC which holds the function name.
+   Assume that func and file are both stored in static space, or at
+   least be not corrupted in the meanwhile. */
+
+#define HERROR(maj, min) H5Epush(maj, min, FUNC, __FILE__, __LINE__)
+
+/* HRETURN_ERROR macro, used to facilitate error reporting.  Makes
+   same assumptions as HERROR.  IN ADDITION, this macro causes
+   a return from the calling routine */
+
+#define HRETURN_ERROR(maj, min, ret_val) {				      \
+   HERROR (maj, min);							      \
+   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   return (ret_val);							      \
+}
+
+/* HRETURN macro, similar to HRETURN_ERROR() except for success */
+
+#define HRETURN(ret_val) {						      \
+   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   return (ret_val);							      \
+}
+
+/* HGOTO_ERROR macro, used to facilitate error reporting.  Makes
+   same assumptions as HERROR.  IN ADDITION, this macro causes
+   a jump to the label 'done' which should be in every fucntion
+   Also there is an assumption of a variable 'ret_value' */
+
+#define HGOTO_ERROR(maj, min, ret_val) {				      \
+   HERROR (maj, min);							      \
+   ret_value = ret_val;							      \
+   goto done;								      \
+}
+
+/* HGOTO_DONE macro, used to facilitate the new error reporting model.  
+   This macro is just a wrapper to set the return value and jump to the 'done'
+   label.  Also assumption of a variable 'ret_value' */
+
+#define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
+
+/* H5ECLEAR macro, used to facilitate the new error reporting model.  
+   This macro is just a wrapper to clear the error stack with the thread
+   error ID */
+
+#define H5ECLEAR H5Eclear(thrderrid)
+
+/* Maximum length of function name to push onto error stack */
+#define MAX_FUNC_NAME_LEN   32
 
 /* 
  * error_messages is the list of error messages in the system, kept as
  * error_code-message pairs.  
  */
- 
 typedef struct 
   {
       hdf_maj_err_code_t error_code;
@@ -47,23 +92,6 @@ typedef struct
   }
 hdf_maj_error_messages_t;
 
-static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
-{
-    {H5E_NONE_MAJOR,    "No error"},
-    {H5E_ARGS,          "Invalid arguments to routine"},
-    {H5E_RESOURCE,      "Resource unavailable"},
-    {H5E_INTERNAL,      "Internal HDF5 error (too specific to document in detail)"},
-    {H5E_FILE,          "File Accessability"},
-    {H5E_IO,            "Low-level I/O"},
-    {H5E_FUNC,          "Function Entry/Exit"},
-    {H5E_ATOM,          "Object Atom"},
-    {H5E_CACHE,		"Object Cache"},
-    {H5E_BTREE,		"B-Tree Node"},
-    {H5E_SYM,		"Symbol Table"},
-    {H5E_HEAP,		"Heap"},
-    {H5E_OHDR,		"Object Header"},
-    {H5E_DIRECTORY,	"Directory"},
-};
 
 typedef struct 
   {
@@ -72,44 +100,6 @@ typedef struct
   }
 hdf_min_error_messages_t;
 
-static const hdf_min_error_messages_t hdf_min_error_messages[] =
-{
-    {H5E_NONE_MINOR,    "No error"},
-    {H5E_UNINITIALIZED, "Information is uninitialized"},
-    {H5E_UNSUPPORTED,   "Feature is unsupported"},
-    {H5E_BADTYPE,       "Incorrect type found"},
-    {H5E_BADRANGE,      "Argument out of range"},
-    {H5E_BADVALUE,      "Bad value for argument"},
-    {H5E_NOSPACE,       "No space available for allocation"},
-    {H5E_FILEEXISTS,    "File already exists"},
-    {H5E_FILEOPEN,      "File already open"},
-    {H5E_CANTCREATE,    "Can't create file"},
-    {H5E_CANTOPEN,      "Can't open file"},
-    {H5E_NOTHDF5,       "Not an HDF5 format file"},
-    {H5E_BADFILE,       "Bad file ID accessed"},
-    {H5E_SEEKERROR,     "Seek failed"},
-    {H5E_READERROR,     "Read failed"},
-    {H5E_WRITEERROR,    "Write failed"},
-    {H5E_CANTINIT,      "Can't initialize interface"},
-    {H5E_ALREADYINIT,   "Object already initialized"},
-    {H5E_BADATOM,       "Can't find atom information"},
-    {H5E_CANTREGISTER,  "Can't register new atom"},
-    {H5E_CANTFLUSH,	"Can't flush object from cache"},
-    {H5E_CANTLOAD,	"Can't load object into cache"},
-    {H5E_NOTFOUND,	"Object not found"},
-    {H5E_EXISTS,	"Object already exists"},
-    {H5E_CANTENCODE,	"Can't encode value"},
-    {H5E_CANTDECODE,	"Can't decode value"},
-    {H5E_CANTSPLIT,	"Can't split node"},
-    {H5E_CANTINSERT,	"Can't insert object"},
-    {H5E_CANTLIST,	"Can't list node"},
-    {H5E_LINKCOUNT,	"Bad object header link count"},
-    {H5E_VERSION,	"Wrong version number"},
-    {H5E_ALIGNMENT,	"Alignment error"},
-    {H5E_BADMESG,	"Unrecognized message"},
-    {H5E_COMPLEN,	"Name component is too long"},
-    {H5E_LINK,		"Link count failure"},
-};
 
 /* We use a stack to hold the errors plus we keep track of the function,
    file and line where the error occurs. */
@@ -135,19 +125,13 @@ typedef struct errstack_t
       H5E_push_func_t push;     /* Function to call when an error is to be reported */
   } H5E_errstack_t;
 
-#endif /* HDF5_ERR_MASTER */
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+
+/* Private global variables in H5E.c */
+extern int32 thrderrid;     	/* Thread-specific "global" error-handler ID */
+extern hbool_t install_atexit;	/* Whether to install the atexit routine */
 
 /* Private functions in H5E.c */
 herr_t H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 
-#if defined c_plusplus || defined __cplusplus
-}
-#endif                          /* c_plusplus || __cplusplus */
-
-#endif /* HDF5ERR_H */
-
+#endif

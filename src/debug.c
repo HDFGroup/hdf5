@@ -14,14 +14,12 @@
  *
  *-------------------------------------------------------------------------
  */
-#include "hdf5.h"
-
-#include "H5private.h"
-#include "H5Bprivate.h"
-#include "H5Fprivate.h"
-#include "H5Gprivate.h"
-#include "H5Hprivate.h"
-#include "H5Oprivate.h"
+#include <H5private.h>
+#include <H5Bprivate.h>
+#include <H5Fprivate.h>
+#include <H5Gprivate.h>
+#include <H5Hprivate.h>
+#include <H5Oprivate.h>
 
 #define INDENT	3
 #define VCOL	50
@@ -87,7 +85,7 @@ main (int argc, char *argv[])
       exit (3);
    }
 
-   if (!memcmp (sig, HDF5_FILE_SIGNATURE, HDF5_FILE_SIGNATURE_LEN)) {
+   if (!memcmp (sig, H5F_SIGNATURE, H5F_SIGNATURE_LEN)) {
       /*
        * Debug the boot block.
        */

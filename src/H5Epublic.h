@@ -13,58 +13,14 @@
 /* $Id$ */
 
 /*
- * This file contains function prototypes for each exported function in the H5E module
+ * This file contains public declarations for the H5E module.
  */
 
-#ifndef H5EPROTO_H
-#define H5EPROTO_H
+#ifndef _H5Epublic_H
+#define _H5Epublic_H
 
-/* HERROR macro, used to facilitate error reporting.  Assumes that
-   there's a variable called FUNC which holds the function name.
-   Assume that func and file are both stored in static space, or at
-   least be not corrupted in the meanwhile. */
-
-#define HERROR(maj, min) H5Epush(maj, min, FUNC, __FILE__, __LINE__)
-
-/* HRETURN_ERROR macro, used to facilitate error reporting.  Makes
-   same assumptions as HERROR.  IN ADDITION, this macro causes
-   a return from the calling routine */
-
-#define HRETURN_ERROR(maj, min, ret_val) {				      \
-   HERROR (maj, min);							      \
-   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
-   return (ret_val);							      \
-}
-
-/* HRETURN macro, similar to HRETURN_ERROR() except for success */
-
-#define HRETURN(ret_val) {						      \
-   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
-   return (ret_val);							      \
-}
-
-/* HGOTO_ERROR macro, used to facilitate error reporting.  Makes
-   same assumptions as HERROR.  IN ADDITION, this macro causes
-   a jump to the label 'done' which should be in every fucntion
-   Also there is an assumption of a variable 'ret_value' */
-
-#define HGOTO_ERROR(maj, min, ret_val) {				      \
-   HERROR (maj, min);							      \
-   ret_value = ret_val;							      \
-   goto done;								      \
-}
-
-/* HGOTO_DONE macro, used to facilitate the new error reporting model.  
-   This macro is just a wrapper to set the return value and jump to the 'done'
-   label.  Also assumption of a variable 'ret_value' */
-
-#define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
-
-/* H5ECLEAR macro, used to facilitate the new error reporting model.  
-   This macro is just a wrapper to clear the error stack with the thread
-   error ID */
-
-#define H5ECLEAR H5Eclear(thrderrid)
+/* Public headers needed by this file */
+#include <H5public.h>
 
 /* Declare an enumerated type which holds all the valid major HDF error codes */
 typedef enum
@@ -150,23 +106,21 @@ hdf_min_err_code_t;
 /* Function pointer to report errors through */
 typedef herr_t (*H5E_push_func_t)(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5E.c */
 int32 H5Enew_err_stack(uintn initial_stack_size);
 intn H5Edelete_err_stack(int32 err_hand);
 #ifdef H5_ERROR_DEBUG
 H5E_push_func_t H5Eset_push(H5E_push_func_t func);
-#endif /* H5_ERROR_DEBUG */
+#endif
 herr_t H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 herr_t H5Eclear(int32 err_hand);
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif
 
-#endif /* H5EPROTO_H */
-
+#endif

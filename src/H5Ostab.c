@@ -14,14 +14,11 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <assert.h>
-
-#include "hdf5.h"
-
-#include "H5private.h"
-#include "H5Gprivate.h"
-#include "H5MMprivate.h"
-#include "H5Oprivate.h"
+#include <H5private.h>
+#include <H5Eprivate.h>
+#include <H5Gprivate.h>
+#include <H5MMprivate.h>
+#include <H5Oprivate.h>
 
 #define PABLO_MASK	H5O_stab_mask
 

@@ -16,16 +16,17 @@
  * This file contains macros & information for meta-objects
  */
 
-#ifndef H5MPRIVATE_H
-#define H5MPRIVATE_H
+#ifndef _H5Mprivate_H
+#define _H5Mprivate_H
+#include <H5Mpublic.h>   /* Include Public Definitions */
 
-#include "H5Mproto.h"   /* Include Public Definitions */
+/* Private headers needed by this file */
+#include <H5private.h>
 
 /*
  * A function table record for accessing interfaces which use the "meta"
  *  interface to create/access/release objects.
  */
-
 typedef struct meta_func_t
   {
     hobjtype_t type;            /* Object type this interface is for */
@@ -46,78 +47,7 @@ typedef struct meta_func_t
   }
 meta_func_t;
 
-meta_func_t meta_func_arr[]={
-    {   /* Template object meta-functions (defined in H5C.c) */
-        H5_TEMPLATE,            /* File-Creation Template Type ID */
-        H5C_create,             /* File-Creation Template Create */
-        NULL,                   /* File-Creation Template Access */
-        H5C_copy,               /* File-Creation Template Copy */
-        NULL,                   /* File-Creation Template FindName */
-        NULL,                   /* File-Creation Template NameLen */
-        NULL,                   /* File-Creation Template GetName */
-        NULL,                   /* File-Creation Template SetName */
-        NULL,                   /* File-Creation Template Search */
-        NULL,                   /* File-Creation Template Index */
-        NULL,                   /* File-Creation Template Flush */
-        NULL,                   /* File-Creation Template Delete */
-        NULL,                   /* File-Creation Template GetParent */
-        NULL,                   /* File-Creation Template GetFile */
-        H5C_release             /* File-Creation Template Release */
-    },
-    {   /* Datatype object meta-functions (defined in H5T.c) */
-        H5_DATATYPE,            /* Datatype Type ID */
-        H5T_create,             /* Datatype Create */
-        NULL,                   /* Datatype Access */
-        NULL,                   /* Dataspace Copy */
-        NULL,                   /* Datatype FindName */
-        NULL,                   /* Datatype NameLen */
-        NULL,                   /* Datatype GetName */
-        NULL,                   /* Datatype SetName */
-        NULL,                   /* Datatype Search */
-        NULL,                   /* Datatype Index */
-        NULL,                   /* Datatype Flush */
-        NULL,                   /* Datatype Delete */
-        NULL,                   /* Datatype GetParent */
-        NULL,                   /* Datatype GetFile */
-        H5T_release             /* Datatype Release */
-    },
-    {   /* Dimensionality object meta-functions (defined in H5P.c) */
-        H5_DATASPACE,           /* Dimensionality Type ID */
-        H5P_create,             /* Dimensionality Create */
-        NULL,                   /* Dimensionality Access */
-        NULL,                   /* Dimensionality Copy */
-        NULL,                   /* Dimensionality FindName */
-        NULL,                   /* Dimensionality NameLen */
-        NULL,                   /* Dimensionality GetName */
-        NULL,                   /* Dimensionality SetName */
-        NULL,                   /* Dimensionality Search */
-        NULL,                   /* Dimensionality Index */
-        NULL,                   /* Dimensionality Flush */
-        NULL,                   /* Dimensionality Delete */
-        NULL,                   /* Dimensionality GetParent */
-        NULL,                   /* Dimensionality GetFile */
-        H5P_release             /* Dimensionality Release */
-    },
-    {   /* Dataset object meta-functions (defined in H5D.c) */
-        H5_DATASPACE,           /* Dataset Type ID */
-        H5D_create,             /* Dataset Create */
-        NULL,                   /* Dataset Access */
-        NULL,                   /* Dataset Copy */
-        NULL,                   /* Dataset FindName */
-        NULL,                   /* Dataset NameLen */
-        NULL,                   /* Dataset GetName */
-        NULL,                   /* Dataset SetName */
-        NULL,                   /* Dataset Search */
-        NULL,                   /* Dataset Index */
-        H5D_flush,              /* Dataset Flush */
-        NULL,                   /* Dataset Delete */
-        NULL,                   /* Dataset GetParent */
-        NULL,                   /* Dataset GetFile */
-        H5D_release             /* Dataset Release */
-    }
-  };
 
 /* Private functions, not part of the publicly documented API */
 
-#endif /* H5MPRIVATE_H */
-
+#endif

@@ -32,9 +32,10 @@ static char RcsId[] = "@(#)$Revision$";
        H5P_init_interface    -- initialize the interface
    + */
 
-#include "hdf5.h"
-#include "H5private.h"  /* Generic Functions */
-#include "H5Dprivate.h" /* Dataset functions */
+#include <H5private.h>  /* Generic Functions */
+#include <H5Aprivate.h> /* Atoms */
+#include <H5Dprivate.h> /* Dataset functions */
+#include <H5Eprivate.h> /* Error handling */
 
 #define PABLO_MASK	H5D_mask
 
@@ -42,6 +43,7 @@ static char RcsId[] = "@(#)$Revision$";
 
 /* Whether we've installed the library termination function yet for this interface */
 static intn interface_initialize_g = FALSE;
+static herr_t H5D_init_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -61,7 +63,7 @@ static herr_t H5D_init_interface(void)
     FUNC_ENTER (H5D_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_DATASET,HDF5_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS);
+    ret_value=H5Ainit_group(H5_DATASET,H5A_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS);
 
     FUNC_LEAVE(ret_value);
 }	/* H5D_init_interface */
@@ -254,7 +256,9 @@ done:
 herr_t H5D_flush(hatom_t oid)
 {
     H5D_dataset_t *dataset;         /* dataset object to release */
+#ifdef QUINCEY
     H5F_
+#endif
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5D_flush, H5D_init_interface, FAIL);
@@ -281,7 +285,9 @@ herr_t H5D_flush(hatom_t oid)
               } /* end if */
             else
               {
+#ifdef QUINCEY
                 if(root_type
+#endif
               } /* end if */
           } /* end if */
       } /* end if */

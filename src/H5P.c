@@ -32,9 +32,10 @@ static char RcsId[] = "@(#)$Revision$";
        H5P_init_interface    -- initialize the interface
    + */
 
-#include "hdf5.h"
-#include "H5private.h"  /* Generic Functions */
-#include "H5Pprivate.h" /* Data-space functions */
+#include <H5private.h>  /* Generic Functions */
+#include <H5Aprivate.h> /* Atom Functions */
+#include <H5Eprivate.h> /* Error handling */
+#include <H5Pprivate.h> /* Data-space functions */
 
 #define PABLO_MASK	H5P_mask
 
@@ -61,7 +62,7 @@ static herr_t H5P_init_interface(void)
     FUNC_ENTER (H5P_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_DATASPACE,HDF5_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS);
+    ret_value=H5Ainit_group(H5_DATASPACE,H5A_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS);
 
     FUNC_LEAVE(ret_value);
 }	/* H5P_init_interface */

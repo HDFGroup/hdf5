@@ -18,14 +18,12 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <assert.h>
-#include "hdf5.h"
-
-#include "H5private.h"			/*library			*/
-#include "H5ACprivate.h"		/*cache				*/
-#include "H5Hprivate.h"			/*self				*/
-#include "H5MFprivate.h"		/*file memory management	*/
-#include "H5MMprivate.h"		/*core memory management	*/
+#include <H5private.h>			/*library			*/
+#include <H5ACprivate.h>		/*cache				*/
+#include <H5Eprivate.h>			/*error handling		*/
+#include <H5Hprivate.h>			/*self				*/
+#include <H5MFprivate.h>		/*file memory management	*/
+#include <H5MMprivate.h>		/*core memory management	*/
 
 #define H5H_FREE_NULL	1		/*end of free list on disk	*/
 #define PABLO_MASK	H5H_mask

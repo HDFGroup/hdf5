@@ -17,9 +17,11 @@
  */
 #ifndef _H5ACprivate_H
 #define _H5ACprivate_H
+#include <H5ACpublic.h>		/*public prototypes			*/
 
-#include "H5ACproto.h"		/*public prototypes			*/
-#include "H5Fprivate.h"		/*for private hdf5_file_t definition 	*/
+/* Pivate headers needed by this header */
+#include <H5private.h>
+#include <H5Fprivate.h>
 
 /*
  * Class methods pertaining to caching.  Each type of cached object will

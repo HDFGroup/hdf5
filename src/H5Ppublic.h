@@ -13,22 +13,33 @@
 /* $Id$ */
 
 /*
- *  Header file for Pablo compatibility
+ * This file contains public declarations for the H5P module.
  */
 
-#ifndef HDF5PABL_H
-#define HDF5PABL_H
+#ifndef _H5pproto_H
+#define _H5Pproto_H
 
-#ifdef HAVE_PABLO
-#define PABLO_SAVE(func_id) intn pablo_func_id = func_id
-#define PABLO_TRACE_ON(m, f) TRACE_ON(m,f)
-#define PABLO_TRACE_OFF(m, f) TRACE_OFF(m,f)
-#else /* no Pablo tracing enabled */
-#define PABLO_SAVE(func_id) /*void*/
-#define PABLO_TRACE_ON(m, f) /*void*/
-#define PABLO_TRACE_OFF(m, f) /*void*/
-#endif /* HAVE_PABLO */
+/* Public headers needed by this file */
+#include <H5public.h>
+#include <H5Apublic.h>
 
-#endif /* HDF5PABL_H */
+/* Define atomic datatypes */
+#define H5P_SCALAR  MAKE_ATOM(H5_DATASPACE,0)
 
+typedef struct {
+    uintn rank;
+    uint32 *dims;
+  } H5P_dim_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Functions in H5P.c */
+uintn H5Pnelem(hatom_t dim_id);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

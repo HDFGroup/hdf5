@@ -13,21 +13,25 @@
 /* $Id$ */
 
 /*
- * This file contains function prototypes for each exported function in the H5A module
+ * This file contains function prototypes for each exported function in
+ * the H5A module.
  */
+#ifndef _H5Apublic_H
+#define _H5Apublic_H
 
-#ifndef H5APROTO_H
-#define H5APROTO_H
+/* Public headers needed by this file */
+#include <H5public.h>
 
 /* Group values allowed */
-typedef enum {BADGROUP=(-1),    /* Invalid Group */
-H5_ERR=0,                       /* Group ID for Error stack objects */
-H5_FILE,                        /* Group ID for File objects */
-H5_TEMPLATE,                    /* Group ID for Template objects */
-H5_DATATYPE,                    /* Group ID for Datatype objects */
-H5_DATASPACE,                   /* Group ID for Dataspace objects */
-H5_DATASET,                     /* Group ID for Dataset objects */
-MAXGROUP                    /* Highest group in group_t (Invalid as true group) */
+typedef enum {
+   BADGROUP=(-1),   		/* Invalid Group */
+   H5_ERR=0,                    /* Group ID for Error stack objects */
+   H5_FILE,                     /* Group ID for File objects */
+   H5_TEMPLATE,                 /* Group ID for Template objects */
+   H5_DATATYPE,                 /* Group ID for Datatype objects */
+   H5_DATASPACE,                /* Group ID for Dataspace objects */
+   H5_DATASET,                  /* Group ID for Dataset objects */
+   MAXGROUP                     /* Highest group in group_t (Invalid as true group) */
 } group_t;
 
 /* Type of atoms to return to users */
@@ -47,10 +51,9 @@ typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
 /* Combine a Group number and an atom index into an atom */
 #define MAKE_ATOM(g,i)      ((((hatom_t)(g)&GROUP_MASK)<<((sizeof(hatom_t)*8)-GROUP_BITS))|((hatom_t)(i)&ATOM_MASK))
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5A.c */
 /******************************************************************************
@@ -197,9 +200,9 @@ intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
 *******************************************************************************/
 intn H5Ashutdown(void);
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif
 
-#endif /* H5APROTO_H */
+#endif
 

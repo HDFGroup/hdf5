@@ -4,25 +4,28 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5Gproto.h
- * 			Jul 11 1997
+ * Created:		H5Oproto.h
+ * 			Aug  5 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Prototypes for the H5G package (symbol tables).
+ * Purpose:		Public declarations for the H5O (object header)
+ *			package.
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Gproto_H
-#define _H5Gproto_H
+#ifndef _H5Opublic_H
+#define _H5Opublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
+/* Public headers needed by this file */
+#include <H5public.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

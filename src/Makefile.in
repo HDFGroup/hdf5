@@ -1,0 +1,42 @@
+# HDF5 Library Makefile(.in)				       -*- makefile -*-
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+@COMMENCE@
+
+# Add `-I.' to the C preprocessor flags.
+CPPFLAGS=-I. @CPPFLAGS@
+
+# These are our main targets:
+LIB=libhdf5.a
+PROGS=debug
+
+# Source and object files for the library (lexicographically)...
+LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5C.c H5D.c H5E.c H5F.c H5G.c H5Gnode.c	      \
+	H5H.c H5M.c H5MF.c H5MM.c H5O.c H5Ocont.c H5Oname.c H5Onull.c	      \
+	H5Ostab.c H5P.c H5T.c
+LIB_OBJ=$(LIB_SRC:.c=.o)
+
+# Source and object files for programs...
+PROG_SRC=debug.c
+PROG_OBJ=$(PROG_SRC:.c=.o)
+
+# Public header files (to be installed)...
+PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Cpublic.h	      \
+        H5Dpublic.h H5Epublic.h H5Fpublic.h H5Gpublic.h H5Hpublic.h	      \
+        H5Mpublic.h H5MFpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h	      \
+	H5Tpublic.h H5config.h hdf5.h
+
+# Other header files (not to be installed)...
+PRIVATE_HDR=H5private.h H5Aprivate.h H5ACprivate.h H5Bprivate.h		      \
+	H5Cprivate.h H5Dprivate.h H5Eprivate.h H5Fprivate.h H5Gprivate.h      \
+	H5Hprivate.h H5Mprivate.h H5MFprivate.h H5MMprivate.h		      \
+	H5Oprivate.h H5Pprivate.h H5Tprivate.h
+
+# How to build the programs...
+debug: debug.o $(LIB)
+	$(CC) $(CFLAGS) -o $@ debug.o $(LIB)
+
+@CONCLUDE@

@@ -17,12 +17,10 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <assert.h>
-#include "hdf5.h"
-
-#include "H5private.h"
-#include "H5Fprivate.h"
-#include "H5MFprivate.h"
+#include <H5private.h>
+#include <H5Eprivate.h>
+#include <H5Fprivate.h>
+#include <H5MFprivate.h>
 
 #define PABLO_MASK	H5MF_mask
 

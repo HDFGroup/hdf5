@@ -20,20 +20,16 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-
-#include "hdf5.h"
 
 /* Packages needed by this file... */
-#include "H5private.h"			/*library			*/
-#include "H5ACprivate.h"		/*cache				*/
-#include "H5Bprivate.h"			/*B-link trees			*/
-#include "H5Gprivate.h"			/*me				*/
-#include "H5Hprivate.h"			/*heap				*/
-#include "H5MFprivate.h"		/*file memory management	*/
-#include "H5MMprivate.h"		/*core memory management	*/
+#include <H5private.h>			/*library			*/
+#include <H5ACprivate.h>		/*cache				*/
+#include <H5Bprivate.h>			/*B-link trees			*/
+#include <H5Eprivate.h>			/*error handling		*/
+#include <H5Gprivate.h>			/*me				*/
+#include <H5Hprivate.h>			/*heap				*/
+#include <H5MFprivate.h>		/*file memory management	*/
+#include <H5MMprivate.h>		/*core memory management	*/
 
 #define PABLO_MASK	H5G_node_mask
 

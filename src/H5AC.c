@@ -20,12 +20,10 @@
  *
  *-------------------------------------------------------------------------
  */
-#include <assert.h>
-#include "hdf5.h"
-
-#include "H5private.h"
-#include "H5ACprivate.h"
-#include "H5MMprivate.h"
+#include <H5private.h>
+#include <H5ACprivate.h>
+#include <H5Eprivate.h>
+#include <H5MMprivate.h>
 
 /*
  * Sorting the cache by address before flushing is sometimes faster
@@ -36,7 +34,10 @@
 #define PABLO_MASK	H5AC_mask
 
 static int	interface_initialize_g = FALSE;		/*initialized?*/
+
+#ifdef SORT_BY_ADDR
 static H5AC_cache_t *current_cache_g = NULL;		/*for sorting */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -224,6 +225,7 @@ H5AC_find_f (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
  *
  *-------------------------------------------------------------------------
  */
+#ifdef SORT_BY_ADDR
 static int
 H5AC_compare (const void *_a, const void *_b)
 {
@@ -239,6 +241,7 @@ H5AC_compare (const void *_a, const void *_b)
    if (current_cache_g[a].addr > current_cache_g[b].addr) return 1;
    return 0;
 }
+#endif
 
 
 /*-------------------------------------------------------------------------

@@ -86,36 +86,17 @@
  *
  *-------------------------------------------------------------------------
  */
-
-/*
- * Define this if the root address of a B-link tree should never change.
- * 
- * If this isn't defined and the root node of a tree splits, then the
- * new root (which points to the old root plus the new node from the
- * split) will be at a new file address.
- *
- * But if this is defined, then the old root will be copied to a new
- * location and the new root will occupy the file memory vacated by the
- * old root.
- */
-#define H5B_ANCHOR_ROOT
-
-/* system headers */
-#include <assert.h>
-#include "hdf5.h"
-
 /* private headers */
-#include "H5private.h"			/*library			*/
-#include "H5ACprivate.h"		/*cache				*/
-#include "H5Bprivate.h"			/*B-link trees			*/
-#include "H5MFprivate.h"		/*File memory management	*/
-#include "H5MMprivate.h"		/*Core memory management       	*/
+#include <H5private.h>			/*library			*/
+#include <H5ACprivate.h>		/*cache				*/
+#include <H5Bprivate.h>			/*B-link trees			*/
+#include <H5Eprivate.h>			/*error handling		*/
+#include <H5MFprivate.h>		/*File memory management	*/
+#include <H5MMprivate.h>		/*Core memory management       	*/
 
 #define PABLO_MASK	H5B_mask
 
 #define BOUND(MIN,X,MAX) ((X)<(MIN)?(MIN):((X)>(MAX)?(MAX):(X)))
-#define false 0
-#define true 1
 
 /* PRIVATE PROTOTYPES */
 static haddr_t H5B_insert_helper (hdf5_file_t *f, haddr_t addr,
@@ -784,10 +765,13 @@ haddr_t
 H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
    uint8	lt_key[256], md_key[256], rt_key[256];
-   intn		lt_key_changed=false, rt_key_changed=false;
+   intn		lt_key_changed=FALSE, rt_key_changed=FALSE;
    haddr_t	child, new_root;
    intn		level;
    H5B_t	*bt;
+   size_t 	size;
+   uint8 	*buf;
+   haddr_t	tmp_addr;
 
    FUNC_ENTER (H5B_insert, NULL, FAIL);
 
@@ -829,62 +813,52 @@ H5B_insert (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
       memcpy (rt_key, bt->key[bt->nchildren].nkey, type->sizeof_nkey);
    }
 
-#ifdef H5B_ANCHOR_ROOT
-   {
-      /*
-       * Copy the old root node to some other file location and make the new
-       * root at the old root's previous address.  This prevents the B-tree
-       * from "moving".
-       */
-      size_t size = H5B_nodesize (f, type, NULL, bt->sizeof_rkey);
-      uint8 *buf = H5MM_xmalloc (size);
-      haddr_t tmp_addr = H5MF_alloc (f, size);
-
-      if (tmp_addr<0) {
-	 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
-      }
-      if (H5AC_flush (f, H5AC_BT, addr, FALSE)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTFLUSH, FAIL);
-      }
-      if (H5F_block_read (f, addr, size, buf)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_READERROR, FAIL);
-      }
-      if (H5F_block_write (f, tmp_addr, size, buf)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_WRITEERROR, FAIL);
-      }
-      if (H5AC_rename (f, H5AC_BT, addr, tmp_addr)<0) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTSPLIT, FAIL);
-      }
-
-      buf = H5MM_xfree (buf);
-      new_root = addr;
-      addr = tmp_addr;
-
-      /* update the new child's left pointer */
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, child, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-      }
-      bt->dirty += 1;
-      bt->left = addr;
-
-      /* clear the old root at the old address */
-      if (NULL==(bt=H5AC_find (f, H5AC_BT, new_root, type))) {
-	 HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
-      }
-      bt->dirty += 1;
-      bt->ndirty = 0;
-      bt->left = 0;
-      bt->right = 0;
-      bt->nchildren = 0;
-   }
-#else
    /*
-    * The new root is created at a new file location.
+    * Copy the old root node to some other file location and make the new
+    * root at the old root's previous address.  This prevents the B-tree
+    * from "moving".
     */
-   if ((new_root = H5B_new (f, type, bt->sizeof_rkey))<0) {
-      HRETURN_ERROR (H5E_BTREE, H5E_CANTINIT, FAIL);
+   size = H5B_nodesize (f, type, NULL, bt->sizeof_rkey);
+   buf = H5MM_xmalloc (size);
+   tmp_addr = H5MF_alloc (f, size);
+
+   if (tmp_addr<0) {
+      HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);
    }
-#endif
+   if (H5AC_flush (f, H5AC_BT, addr, FALSE)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_CANTFLUSH, FAIL);
+   }
+   if (H5F_block_read (f, addr, size, buf)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_READERROR, FAIL);
+   }
+   if (H5F_block_write (f, tmp_addr, size, buf)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_WRITEERROR, FAIL);
+   }
+   if (H5AC_rename (f, H5AC_BT, addr, tmp_addr)<0) {
+      HRETURN_ERROR (H5E_BTREE, H5E_CANTSPLIT, FAIL);
+   }
+
+   buf = H5MM_xfree (buf);
+   new_root = addr;
+   addr = tmp_addr;
+
+   /* update the new child's left pointer */
+   if (NULL==(bt=H5AC_find (f, H5AC_BT, child, type))) {
+      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+   }
+   bt->dirty += 1;
+   bt->left = addr;
+
+   /* clear the old root at the old address */
+   if (NULL==(bt=H5AC_find (f, H5AC_BT, new_root, type))) {
+      HRETURN_ERROR (H5E_BTREE, H5E_CANTLOAD, FAIL);
+   }
+   bt->dirty += 1;
+   bt->ndirty = 0;
+   bt->left = 0;
+   bt->right = 0;
+   bt->nchildren = 0;
+
 
    /* the new root */
    if (NULL==(bt = H5AC_find (f, H5AC_BT, new_root, type))) {
@@ -1200,7 +1174,7 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
       memcpy (bt->key[idx].nkey, lt_key, type->sizeof_nkey);
       bt->dirty += 1;
       bt->key[idx].dirty = 1;
-      if (idx>0) *lt_key_changed = false;
+      if (idx>0) *lt_key_changed = FALSE;
    }
    if (*rt_key_changed) {
       bt->key[idx+1].nkey = bt->native +
@@ -1208,7 +1182,7 @@ H5B_insert_helper (hdf5_file_t *f, haddr_t addr, const H5B_class_t *type,
       memcpy (bt->key[idx+1].nkey, rt_key, type->sizeof_nkey);
       bt->dirty += 1;
       bt->key[idx+1].dirty = 1;
-      if (idx+1<bt->nchildren) *rt_key_changed = false;
+      if (idx+1<bt->nchildren) *rt_key_changed = FALSE;
    }
 
    /*

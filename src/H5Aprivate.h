@@ -18,34 +18,51 @@
  *---------------------------------------------------------------------------*/
 
 /* avoid re-inclusion */
-#ifndef __ATOM_H
-#define __ATOM_H
+#ifndef _H5Aprivate_H
+#define _H5Aprivate_H
+#include <H5Apublic.h>   /* Include Public Definitions */
 
-#include "H5Aproto.h"   /* Include Public Definitions */
+/* Private headers needed by this file */
+#include <H5private.h>
 
 /* Atom Features control */
-/* Define the following macro for fast hash calculations (but limited hash sizes) */
+
+/*
+ * Define the following macro for fast hash calculations (but limited
+ * hash sizes)
+ */
 #define HASH_SIZE_POWER_2
 
 /* Define the following macro for atom caching over all the atoms */
 #define ATOMS_ARE_CACHED
 
-#if defined HDF5_ATOM_MASTER | defined HDF5_ATOM_TESTER
 #ifdef ATOMS_ARE_CACHED
-/* # of previous atoms cached */
-#define ATOM_CACHE_SIZE 4
-#endif /* ATOMS_ARE_CACHED */
+#  define ATOM_CACHE_SIZE 4	/* # of previous atoms cached */
+#endif
 
 /* Map an atom to a Group number */
 #define ATOM_TO_GROUP(a)    ((group_t)((((hatom_t)(a))>>((sizeof(hatom_t)*8)-GROUP_BITS))&GROUP_MASK))
 
 #ifdef HASH_SIZE_POWER_2
-/* Map an atom to a hash location (assumes s is a power of 2 and smaller than the ATOM_MASK constant) */
-#define ATOM_TO_LOC(a,s)    ((hatom_t)(a)&((s)-1))
-#else /* HASH_SIZE_POWER_2 */
-/* Map an atom to a hash location */
-#define ATOM_TO_LOC(a,s)    (((hatom_t)(a)&ATOM_MASK)%(s))
-#endif /* HASH_SIZE_POWER_2 */
+/*
+ * Map an atom to a hash location (assumes s is a power of 2 and smaller
+ * than the ATOM_MASK constant).
+ */
+#  define ATOM_TO_LOC(a,s)    ((hatom_t)(a)&((s)-1))
+#else
+/*
+ * Map an atom to a hash location.
+ */
+#  define ATOM_TO_LOC(a,s)    (((hatom_t)(a)&ATOM_MASK)%(s))
+#endif
+
+/* Default sizes of the hash-tables for various atom groups */
+#define H5A_ERRSTACK_HASHSIZE  	64
+#define H5A_FILEID_HASHSIZE    	64
+#define H5A_TEMPID_HASHSIZE    	64
+#define H5A_DATATYPEID_HASHSIZE	64
+#define H5A_DATASPACEID_HASHSIZE 64
+#define H5A_DATASETID_HASHSIZE	64
 
 /* Atom information structure used */
 typedef struct atom_info_struct_tag {
@@ -65,26 +82,6 @@ typedef struct atom_group_struct_tag {
     atom_info_t **atom_list;/* pointer to an array of ptrs to atoms */
   }atom_group_t;
 
-/* Define this in only one place */
-#ifdef HDF5_ATOM_MASTER
 
-/* Array of pointers to atomic groups */
-static atom_group_t *atom_group_list[MAXGROUP]={NULL};
-
-/* Pointer to the atom node free list */
-static atom_info_t *atom_free_list=NULL;
-
-#ifdef ATOMS_ARE_CACHED
-/* Array of pointers to atomic groups */
-static hatom_t atom_id_cache[ATOM_CACHE_SIZE]={-1,-1,-1,-1};
-static VOIDP atom_obj_cache[ATOM_CACHE_SIZE]={NULL};
-#endif /* ATOMS_ARE_CACHED */
-
-#endif /* HDF5_ATOM_MASTER */
-
-/* Useful routines for generally private use */
-
-#endif /* HDF5_ATOM_MASTER | HDF5_ATOM_TESTER */
-
-#endif /* __ATOM_H */
+#endif
 

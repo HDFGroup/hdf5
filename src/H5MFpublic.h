@@ -4,25 +4,28 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5ACproto.h
- * 			Jul 10 1997
+ * Created:		H5MFproto.h
+ * 			Jul 11 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Function prototypes for the H5AC package.
+ * Purpose:		Public declarations for the H5MF (file memory
+ *			management) package.
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5ACproto_H
-#define _H5ACproto_H
+#ifndef _H5MFpublic_H
+#define _H5MFpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
+/* Public headers needed by this file */
+#include <H5public.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

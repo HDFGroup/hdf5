@@ -13,25 +13,30 @@
 /* $Id$ */
 
 /*
- * This file contains function prototypes for each exported function in the H5M module
+ * This file contains public declarations for the H5M module.
  */
 
-#ifndef H5MPROTO_H
-#define H5MPROTO_H
+#ifndef _H5Mpublic_H
+#define _H5Mpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+/* Public headers needed by this file */
+#include <H5public.h>
+#include <H5Cpublic.h>		/*for hobjtype_t defn*/
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5M.c */
 hatom_t H5Mcreate(hatom_t owner_id, hobjtype_t type, const char *name);
 hatom_t H5Mcopy(hatom_t oid);
+hatom_t H5Mflush(hatom_t oid);
+hatom_t H5Mget_file(hatom_t oid);
 herr_t H5Mrelease(hatom_t oid);
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif
 
-#endif /* H5MPROTO_H */
-
+#endif

@@ -16,13 +16,12 @@
  */
 #ifndef _H5Gprivate_H
 #define _H5Gprivate_H
+#include <H5Gpublic.h>
 
-/*include public declarations		*/
-#include "H5Gproto.h"
-
-/*include packages needed by this header*/
-#include "H5Bprivate.h"
-#include "H5Fprivate.h"
+/* Private headers needed by this file */
+#include <H5private.h>
+#include <H5Bprivate.h>
+#include <H5Fprivate.h>
 
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
@@ -165,7 +164,6 @@ herr_t H5G_decode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_decode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
 herr_t H5G_encode (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_encode_vec (hdf5_file_t *f, uint8 **pp, H5G_entry_t *ent, intn n);
-
 
 #endif
 

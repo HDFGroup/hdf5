@@ -4,25 +4,27 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5MFproto.h
- * 			Jul 11 1997
+ * Created:		H5Bproto.h
+ * 			Jul 10 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Prototypes for file memory management.
+ * Purpose:		Public declarations for the H5B package.
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5MFproto_H
-#define _H5MFproto_H
+#ifndef _H5Bpublic_H
+#define _H5Bpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
+/* Public headers needed by this file */
+#include <H5public.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

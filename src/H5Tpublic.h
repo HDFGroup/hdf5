@@ -13,11 +13,15 @@
 /* $Id$ */
 
 /*
- * This file contains function prototypes for each exported function in the H5T module
+ * This file contains public declarations for the H5T module.
  */
 
-#ifndef H5TPROTO_H
-#define H5TPROTO_H
+#ifndef _H5Tpublic_H
+#define _H5Tpublic_H
+
+/* Public headers needed by this file */
+#include <H5public.h>
+#include <H5Apublic.h>
 
 /* Define atomic datatypes */
 #define H5T_CHAR    MAKE_ATOM(H5_DATATYPE,0)
@@ -35,14 +39,11 @@ typedef struct {
     uint8 arch;             /* Architecture of the base-type */
  } h5_atomic_type_t;
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5T.c */
-hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name);
-herr_t H5T_release(hatom_t oid);
 uint32 H5Tget_num_fields(hatom_t tid);
 hbool_t H5Tis_field_atomic(hatom_t tid,uintn fidx);
 hbool_t H5Tis_atomic(hatom_t tid);
@@ -52,9 +53,8 @@ herr_t H5Tadd_field (hatom_t tid, const char *name, hatom_t base, uint8 len,
 		     uint8 arch, hatom_t space);
 herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list);
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif
 
-#endif /* H5TPROTO_H */
-
+#endif

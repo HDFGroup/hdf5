@@ -16,9 +16,11 @@
  */
 #ifndef _H5Hprivate_H
 #define _H5Hprivate_H
+#include <H5Hpublic.h>
 
-#include "H5Hproto.h"
-#include "H5Fprivate.h"
+/* Private headers needed by this file. */
+#include <H5private.h>
+#include <H5Fprivate.h>
 
 #define H5H_MAGIC	"HEAP"		/*heap magic number		*/
 #define H5H_SIZEOF_MAGIC 4
@@ -53,6 +55,5 @@ herr_t H5H_write (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size,
 herr_t H5H_remove (hdf5_file_t *f, haddr_t addr, off_t offset, size_t size);
 herr_t H5H_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 		  intn fwidth);
-
 
 #endif

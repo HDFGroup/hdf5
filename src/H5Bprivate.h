@@ -16,10 +16,11 @@
  */
 #ifndef _H5Bprivate_H
 #define _H5Bprivate_H
+#include <H5Bpublic.h>		/*API prototypes			*/
 
-#include "H5Bproto.h"		/*API prototypes			*/
-
-#include "H5Fprivate.h"
+/* Private headers needed by this file */
+#include <H5private.h>
+#include <H5Fprivate.h>
 
 #define H5B_MAGIC	"TREE"	/*tree node magic number		*/
 #define H5B_SIZEOF_MAGIC 4	/*size of magic number			*/
@@ -100,4 +101,4 @@ herr_t H5B_list (hdf5_file_t *f, const H5B_class_t *type, haddr_t addr,
 		 void *udata);
 
 
-#endif /* !_H5Bprivate_H */
+#endif

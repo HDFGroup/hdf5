@@ -32,21 +32,79 @@ static char RcsId[] = "@(#)$Revision$";
        H5E_init_interface    -- initialize the H5E interface
    + */
 
-#define HDF5_ERR_MASTER
-#include "hdf5.h"
-#include "H5Eprivate.h"     /* Private error routines */
-#undef HDF5_ERR_MASTER
+#include <H5private.h>      	/* Generic Functions */
+#include <H5Aprivate.h>		/* Atoms		*/
+#include <H5Eprivate.h>     	/* Private error routines */
 
-#include "H5private.h"      /* Generic Functions */
 
 #define PABLO_MASK	H5E_mask
 
-/*--------------------- Locally scoped variables -----------------------------*/
+/*-------------------- Locally scoped variables -----------------------------*/
 
-/* Whether we've installed the library termination function yet for this interface */
+/* Is the interface initialized? */
 static intn interface_initialize_g = FALSE;
 
-/*------------------_-- Local function prototypes ----------------------------*/
+static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
+{
+    {H5E_NONE_MAJOR,    "No error"},
+    {H5E_ARGS,          "Invalid arguments to routine"},
+    {H5E_RESOURCE,      "Resource unavailable"},
+    {H5E_INTERNAL,      "Internal HDF5 error (too specific to document in detail)"},
+    {H5E_FILE,          "File Accessability"},
+    {H5E_IO,            "Low-level I/O"},
+    {H5E_FUNC,          "Function Entry/Exit"},
+    {H5E_ATOM,          "Object Atom"},
+    {H5E_CACHE,		"Object Cache"},
+    {H5E_BTREE,		"B-Tree Node"},
+    {H5E_SYM,		"Symbol Table"},
+    {H5E_HEAP,		"Heap"},
+    {H5E_OHDR,		"Object Header"},
+    {H5E_DIRECTORY,	"Directory"},
+};
+
+static const hdf_min_error_messages_t hdf_min_error_messages[] =
+{
+    {H5E_NONE_MINOR,    "No error"},
+    {H5E_UNINITIALIZED, "Information is uninitialized"},
+    {H5E_UNSUPPORTED,   "Feature is unsupported"},
+    {H5E_BADTYPE,       "Incorrect type found"},
+    {H5E_BADRANGE,      "Argument out of range"},
+    {H5E_BADVALUE,      "Bad value for argument"},
+    {H5E_NOSPACE,       "No space available for allocation"},
+    {H5E_FILEEXISTS,    "File already exists"},
+    {H5E_FILEOPEN,      "File already open"},
+    {H5E_CANTCREATE,    "Can't create file"},
+    {H5E_CANTOPEN,      "Can't open file"},
+    {H5E_NOTHDF5,       "Not an HDF5 format file"},
+    {H5E_BADFILE,       "Bad file ID accessed"},
+    {H5E_SEEKERROR,     "Seek failed"},
+    {H5E_READERROR,     "Read failed"},
+    {H5E_WRITEERROR,    "Write failed"},
+    {H5E_CANTINIT,      "Can't initialize interface"},
+    {H5E_ALREADYINIT,   "Object already initialized"},
+    {H5E_BADATOM,       "Can't find atom information"},
+    {H5E_CANTREGISTER,  "Can't register new atom"},
+    {H5E_CANTFLUSH,	"Can't flush object from cache"},
+    {H5E_CANTLOAD,	"Can't load object into cache"},
+    {H5E_NOTFOUND,	"Object not found"},
+    {H5E_EXISTS,	"Object already exists"},
+    {H5E_CANTENCODE,	"Can't encode value"},
+    {H5E_CANTDECODE,	"Can't decode value"},
+    {H5E_CANTSPLIT,	"Can't split node"},
+    {H5E_CANTINSERT,	"Can't insert object"},
+    {H5E_CANTLIST,	"Can't list node"},
+    {H5E_LINKCOUNT,	"Bad object header link count"},
+    {H5E_VERSION,	"Wrong version number"},
+    {H5E_ALIGNMENT,	"Alignment error"},
+    {H5E_BADMESG,	"Unrecognized message"},
+    {H5E_COMPLEN,	"Name component is too long"},
+    {H5E_LINK,		"Link count failure"},
+};
+
+/*--------------------- Globally scoped variables ---------------------------*/
+int32 thrderrid;     	/* Thread-specific "global" error-handler ID */
+
+/*------------------_-- Local function prototypes ---------------------------*/
 static herr_t H5E_init_interface(void);
 
 /*--------------------------------------------------------------------------
@@ -71,7 +129,7 @@ static herr_t H5E_init_interface(void)
     FUNC_ENTER (H5E_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the error stacks */
-    ret_value=H5Ainit_group(H5_ERR,HDF5_ERRSTACK_HASHSIZE,0);
+    ret_value=H5Ainit_group(H5_ERR,H5A_ERRSTACK_HASHSIZE,0);
 
     FUNC_LEAVE(ret_value);
 }	/* H5E_init_interface */

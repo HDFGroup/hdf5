@@ -32,12 +32,12 @@ static char RcsId[] = "@(#)$Revision$";
        H5C_init_interface    -- initialize the interface
    + */
 
-#include "hdf5.h"
-
-/* private header files */
-#include "H5private.h"      /* Generic Functions */
-#include "H5Bprivate.h"	    /* B-tree subclass names */
-#include "H5Cprivate.h"     /* Template information */
+/* Private header files */
+#include <H5private.h>      	/* Generic Functions 			*/
+#include <H5Aprivate.h>		/* Atoms				*/
+#include <H5Bprivate.h>	    	/* B-tree subclass names 		*/
+#include <H5Cprivate.h>     	/* Template information 		*/
+#include <H5Eprivate.h>		/* Error handling			*/
 
 #define PABLO_MASK	H5C_mask
 
@@ -48,16 +48,16 @@ static intn interface_initialize_g = FALSE;
 
 /* Define the library's default file creation template (constants in hdf5lims.h) */
 const file_create_temp_t default_file_create={
-    HDF5_USERBLOCK_DEFAULT,         /* Default user-block size */
-    HDF5_SYM_LEAF_K_DEFAULT,	    /* Default 1/2 rank for symtab leaf nodes */
-    HDF5_BTREE_K_DEFAULT,	    /* Default 1/2 rank for btree internal nodes */
-    HDF5_OFFSETSIZE_DEFAULT,        /* Default offset size */
-    HDF5_LENGTHSIZE_DEFAULT,        /* Default length size */
-    HDF5_BOOTBLOCK_VERSION,         /* Current Boot-Block version # */
-    HDF5_SMALLOBJECT_VERSION,       /* Current Small-Object heap version # */
-    HDF5_FREESPACE_VERSION,         /* Current Free-Space info version # */
-    HDF5_OBJECTDIR_VERSION,         /* Current Object Directory info version # */
-    HDF5_SHAREDHEADER_VERSION       /* Current Shared-Header format version # */
+    H5C_USERBLOCK_DEFAULT,      /* Default user-block size */
+    H5C_SYM_LEAF_K_DEFAULT,	/* Default 1/2 rank for symtab leaf nodes */
+    H5C_BTREE_K_DEFAULT,	/* Default 1/2 rank for btree internal nodes */
+    H5C_OFFSETSIZE_DEFAULT,     /* Default offset size */
+    H5C_LENGTHSIZE_DEFAULT,     /* Default length size */
+    HDF5_BOOTBLOCK_VERSION,     /* Current Boot-Block version # */
+    HDF5_SMALLOBJECT_VERSION,   /* Current Small-Object heap version # */
+    HDF5_FREESPACE_VERSION,     /* Current Free-Space info version # */
+    HDF5_OBJECTDIR_VERSION,     /* Current Object Directory info version # */
+    HDF5_SHAREDHEADER_VERSION   /* Current Shared-Header format version # */
 };
 static hatom_t default_file_id=FAIL;   /* Atom for the default file-creation template */
 
@@ -83,7 +83,7 @@ static herr_t H5C_init_interface(void)
     FUNC_ENTER (H5C_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_TEMPLATE,HDF5_TEMPID_HASHSIZE,0);
+    ret_value=H5Ainit_group(H5_TEMPLATE,H5A_TEMPID_HASHSIZE,0);
 
     FUNC_LEAVE(ret_value);
 }	/* H5C_init_interface */

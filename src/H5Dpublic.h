@@ -13,29 +13,26 @@
 /* $Id$ */
 
 /*
- * This file contains function prototypes for each exported function in the H5C module
+ * This file contains public declarations for the H5D module.
  */
 
-#ifndef H5CPROTO_H
-#define H5CPROTO_H
+#ifndef _H5Dpublic_H
+#define _H5Dpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
-#endif                          /* c_plusplus || __cplusplus */
+/* Public headers needed by this file */
+#include <H5public.h>
+#include <H5Apublic.h>
 
-/* Functions in H5C.c */
-hatom_t H5C_create(hatom_t owner_id, hobjtype_t type, const char *name);
-hatom_t H5C_copy(hatom_t tid);
-herr_t H5C_release(hatom_t oid);
-hatom_t H5C_get_default_atom(hobjtype_t type);
-herr_t H5C_init(hatom_t dst_atm, const file_create_temp_t *src);
-herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf);
-herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#if defined c_plusplus || defined __cplusplus
+/* Functions in H5D.c */
+herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did);
+herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf);
+
+#ifdef __cplusplus
 }
-#endif                          /* c_plusplus || __cplusplus */
+#endif
 
-#endif /* H5CPROTO_H */
-
+#endif

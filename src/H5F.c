@@ -32,17 +32,15 @@ static char RcsId[] = "@(#)$Revision$";
        H5F_init_interface    -- initialize the H5F interface
  */
 
-#include <assert.h>
-
-#define HDF5_FILE_MASTER
-#include "hdf5.h"
-#undef HDF5_FILE_MASTER
-
 /* Packages needed by this file... */
-#include "H5private.h"      	/*library functions			*/
-#include "H5ACprivate.h"	/*cache					*/
-#include "H5Gprivate.h"		/*symbol tables				*/
-#include "H5MMprivate.h"	/*core memory management		*/
+#include <H5private.h>      	/*library functions			*/
+#include <H5Aprivate.h>		/*atoms					*/
+#include <H5ACprivate.h>	/*cache					*/
+#include <H5Cprivate.h>		/*templates				*/
+#include <H5Eprivate.h>		/*error handling			*/
+#include <H5Gprivate.h>		/*symbol tables				*/
+#include <H5Mprivate.h>		/*meta data				*/
+#include <H5MMprivate.h>	/*core memory management		*/
 
 #define PABLO_MASK	H5F_mask
 
@@ -79,7 +77,7 @@ static herr_t H5F_init_interface(void)
     FUNC_ENTER (H5F_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
-    ret_value=H5Ainit_group(H5_FILE,HDF5_FILEID_HASHSIZE,0);
+    ret_value=H5Ainit_group(H5_FILE,H5A_FILEID_HASHSIZE,0);
 
     FUNC_LEAVE(ret_value);
 }	/* H5F_init_interface */
@@ -251,7 +249,7 @@ done:
 hbool_t H5Fis_hdf5(const char *filename)
 {
     hdf_file_t f_handle=H5F_INVALID_FILE;      /* file handle */
-    uint8 temp_buf[HDF5_FILE_SIGNATURE_LEN];    /* temporary buffer for checking file signature */
+    uint8 temp_buf[H5F_SIGNATURE_LEN];    /* temporary buffer for checking file signature */
     haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
     hbool_t ret_value = BFALSE;
@@ -278,9 +276,9 @@ hbool_t H5Fis_hdf5(const char *filename)
       {
         if(H5F_SEEK(f_handle,curr_off)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(H5F_READ(f_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
+        if(H5F_READ(f_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(HDmemcmp(temp_buf,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==0)
+        if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0)
           {
             ret_value=BTRUE;
             break;
@@ -496,7 +494,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL);
     
     /* Write out the file-signature */
-    if(H5F_WRITE(new_file->file_handle,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==FAIL)
+    if(H5F_WRITE(new_file->file_handle,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
 
     /* Encode the boot block */
@@ -659,9 +657,9 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
       {
         if(H5F_SEEK(new_file->file_handle,curr_off)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(H5F_READ(new_file->file_handle,temp_buf, HDF5_FILE_SIGNATURE_LEN)==FAIL)
+        if(H5F_READ(new_file->file_handle,temp_buf, H5F_SIGNATURE_LEN)==FAIL)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, BFAIL);
-        if(HDmemcmp(temp_buf,HDF5_FILE_SIGNATURE,HDF5_FILE_SIGNATURE_LEN)==0)
+        if(HDmemcmp(temp_buf,H5F_SIGNATURE,H5F_SIGNATURE_LEN)==0)
           {
             new_file->file_create_parms.userblock_size=curr_off;
             break;
@@ -711,7 +709,9 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
        HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL);
     }
     /* Set the initial type of the root symbol-entry */
-    new_file->root_type= (new_file->root_sym->addr>=0) ? H5F_ROOT_UNKNOWN : H5F_NONE;
+#ifdef QUINCEY
+    new_file->root_type= (new_file->root_sym->header>=0) ? H5F_ROOT_UNKNOWN : H5F_NONE;
+#endif
 
     /* Get an atom for the file */
     if((ret_value=H5Aregister_atom(H5_FILE, new_file))==FAIL)

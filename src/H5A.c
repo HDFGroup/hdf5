@@ -60,21 +60,30 @@ MODIFICATION HISTORY
    6/10/97 - Moved into HDF5 library
 */
 
-#define HDF5_ATOM_MASTER
-#include "hdf5.h"
-#include "H5private.h"
-#include "H5Aprivate.h"
+#include <H5private.h>
+#include <H5Aprivate.h>
+#include <H5Eprivate.h>
 
 #define PABLO_MASK	H5A_mask
 
 
 static int interface_initialize_g = FALSE;
 
-/* Private function prototypes */
+#ifdef ATOMS_ARE_CACHED
+/* Array of pointers to atomic groups */
+static hatom_t atom_id_cache[ATOM_CACHE_SIZE]={-1,-1,-1,-1};
+static VOIDP atom_obj_cache[ATOM_CACHE_SIZE]={NULL};
+#endif
+
+/* Array of pointers to atomic groups */
+static atom_group_t *atom_group_list[MAXGROUP]={NULL};
+
+/* Pointer to the atom node free list */
+static atom_info_t *atom_free_list=NULL;
+
+/* PRIVATE PROTOTYPES */
 static atom_info_t *H5A_find_atom(hatom_t atm);
-
 static atom_info_t *H5A_get_atom_node(void);
-
 static herr_t H5A_release_atom_node(atom_info_t *atm);
 
 /******************************************************************************

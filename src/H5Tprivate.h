@@ -16,10 +16,14 @@
  * This file contains private information about the H5T module
  */
 
-#ifndef H5TPRIVATE_H
-#define H5TPRIVATE_H
+#ifndef _H5Tprivate_H
+#define _H5Tprivate_H
+#include <H5Tpublic.h>
 
-#include "H5Tproto.h"
+/* Private headers needed by this file */
+#include <H5private.h>
+#include <H5Cprivate.h>		/*for hobjtype_t defn*/
+
 #define H5T_RESERVED_ATOMS  8
 
 /* Structure for storing information about a field in a compound datatype */
@@ -46,5 +50,8 @@ typedef struct {
     h5_compound_info_t *ci;   /* Information for compound datatypes */
   } h5_datatype_t;
 
-#endif /* H5TPRIVATE_H */
+/* Private functions */
+hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name);
+herr_t H5T_release(hatom_t oid);
 
+#endif

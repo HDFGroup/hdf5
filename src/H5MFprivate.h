@@ -16,8 +16,11 @@
  */
 #ifndef _H5MFprivate_H
 #define _H5MFprivate_H
+#include <H5MFpublic.h>
 
-#include "H5MFproto.h"
+/* Private headers needed by this file */
+#include <H5private.h>
+#include <H5Fprivate.h>
 
 /*
  * Library prototypes...

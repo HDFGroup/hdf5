@@ -16,10 +16,12 @@
  */
 #ifndef _H5Oprivate_H
 #define _H5Oprivate_H
-#include "H5Oproto.h"
+#include <H5Opublic.h>
 
-#include "H5Fprivate.h"
-#include "H5Gprivate.h"
+/* Private headers neede by this file */
+#include <H5private.h>
+#include <H5Fprivate.h>
+#include <H5Gprivate.h>
 
 #define H5O_MIN_SIZE	16		/*min obj header data size	*/
 #define H5O_NMESGS	32		/*initial number of messages	*/

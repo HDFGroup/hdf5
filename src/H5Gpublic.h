@@ -4,25 +4,28 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5Bproto.h
- * 			Jul 10 1997
+ * Created:		H5Gproto.h
+ * 			Jul 11 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Non-API function prototypes for B-link trees.
+ * Purpose:		Public declarations for the H5G package (symbol
+ *			tables).
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Bproto_H
-#define _H5Bproto_H
+#ifndef _H5Gpublic_H
+#define _H5Gpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
+/* Public headers needed by this file */
+#include <H5public.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

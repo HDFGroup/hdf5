@@ -35,21 +35,23 @@ static char RcsId[] = "@(#)$Revision$";
        H5_init_interface    -- initialize the H5 interface
    + */
 
-#define HDF5_MASTER
-#include "hdf5.h"
-#undef HDF5_MASTER
 
 /* private headers */
-#include "H5ACprivate.h"		/*cache				*/
-#include "H5Bprivate.h"			/*B-link trees			*/
-#include "H5private.h"			/* Generic info */
+#include <H5private.h>			/*library			*/
+#include <H5ACprivate.h>		/*cache				*/
+#include <H5Bprivate.h>			/*B-link trees			*/
+#include <H5Eprivate.h>			/*error handling		*/
 
 #define PABLO_MASK	H5_mask
 
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize_g = FALSE;
+static hbool_t interface_initialize_g = FALSE;
+
+hbool_t library_initialize_g = FALSE;
+hbool_t	thread_initialize_g = FALSE;
+hbool_t install_atexit_g = TRUE;
 
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5_init_interface(void);
@@ -71,8 +73,8 @@ herr_t H5_init_library(void)
     FUNC_ENTER (H5_init_library, NULL, FAIL);
 
     /* Install atexit() library cleanup routine */
-    if(install_atexit==TRUE)
-        if (HDatexit(&H5_term_library) != 0)
+    if(install_atexit_g==TRUE)
+        if (atexit(&H5_term_library) != 0)
           HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
 
     FUNC_LEAVE (SUCCEED);
@@ -173,8 +175,8 @@ herr_t H5dont_atexit(void)
 {
     FUNC_ENTER (H5dont_atexit, NULL, FAIL);
 
-    if(install_atexit == TRUE)
-        install_atexit=FALSE;
+    if(install_atexit_g == TRUE)
+        install_atexit_g=FALSE;
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5dont_atexit() */

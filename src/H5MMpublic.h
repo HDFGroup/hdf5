@@ -4,25 +4,28 @@
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5Hproto.h
- * 			Jul 16 1997
+ * Created:		H5MMproto.h
+ * 			Jul 10 1997
  * 			Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		
+ * Purpose:		Public declarations for the H5MM (memory management)
+ *			package.
  *
  * Modifications:	
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Hproto_H
-#define _H5Hproto_H
+#ifndef _H5MMpublic_H
+#define _H5MMpublic_H
 
-#if defined c_plusplus || defined __cplusplus
-extern      "C"
-{
+/* Public headers needed by this file */
+#include <H5public.h>
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#if defined c_plusplus || defined __cplusplus
+#ifdef __cplusplus
 }
 #endif
 
