@@ -114,7 +114,7 @@ typedef float             real_f;
 #endif /*LINUX*/
 
 /* IA64 LINUX definitions */
-#if defined IA64
+#if defined __ia64
 typedef char              *_fcd;
 typedef long              hsize_t_f;
 typedef long              hssize_t_f;
