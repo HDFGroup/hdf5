@@ -256,6 +256,9 @@ Platforms Tested
 
 Known Problems
 ==============
+* Datasets or attributes which have a variable-length string datatype are not
+  printing correctly with h5dump and h5ls.
+
 * DLLs do not work on Windows 98 
 
 * RELEASE DLLs will fail on some tests on Windows 2000 with Microsoft visual 
