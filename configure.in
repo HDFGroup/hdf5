@@ -316,7 +316,7 @@ H5TOH4=h5toh4
 AC_SUBST(TESTH5TOH4)
 TESTH5TOH4='$(srcdir)/testh5toh4'
 
-AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
+AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=[/usr/ncsa/include,/usr/ncsa/lib])
 case $withval in
     yes)
 	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
