@@ -1091,4 +1091,3 @@ H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t *vl_alloc_info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_vlen_get_alloc_info() */
-
