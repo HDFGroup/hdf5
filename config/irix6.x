@@ -80,8 +80,5 @@ case "X-$CC_BASENAME" in
 	# Extra profiling flags
 	PROFILE_CFLAGS=-pg
 	PROFILE_CPPFLAGS=
-
-	# Turn off shared lib option.  It does not work for IRIX64 yet.
-	test `uname -s` = IRIX64 && enable_shared="${enable_shared:-no}"
 	;;
 esac
