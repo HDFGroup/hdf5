@@ -1,5 +1,5 @@
 HDF5 version 1.4.2 currently under development
-================================================================================
+==============================================================================
 
 
 INTRODUCTION
@@ -45,19 +45,28 @@ New Features
       and other version information in the source code.
     * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
     * F90 API:
-        - Added aditional parameter "dims" to the h5dread/h5dwrite and
-          h5aread/h5awrite subroutines. This parameter is 1D array of size
-          7 and contains the sizes of the data buffer dimensions. 
-    * F90 static library is available on Windows platforms. See
-      INSTALL_Windows.txt for details.
-    * F90 APIs are available on HPUX 11.00 and IBM SP platforms.
+        - Added aditional parameter "dims" to the h5dread_f/h5dwrite_f and
+          h5aread_f/h5awrite_f subroutines.  This parameter is a 1-D array 
+          of size 7 and contains the sizes of the data buffer dimensions. 
+          This change enables portability between Windows and UNIX platforms.
+          In previous versions of the F90 APIs, the data buffer parameters of 
+          the above functions were declared as assumed-shape arrays, which 
+          were passed to the C functions by a descriptor.  There is no 
+          portable means, however, of passing descriptors from F90 to C, 
+          causing portability problems between Windows and UNIX and among
+          UNIX platforms.  With this change, the data buffers are assumed-
+          size arrays, which can be portably passed to the C functions.
+    * F90 static library is available on Windows platforms. 
+      See INSTALL_Windows_withF90.txt for details.
+    * F90 APIs are available on HPUX 11.00 and 10.20 and IBM SP platforms.
     * H5 <-> GIF convertor has been added. This is available under 
       tools/gifconv. The convertor supports the ability to create animated
       gifs as well.
     * Verified correct operation of library on Solaris 2.8 in both 64-bit and
       32-bit compilation modes.  See INSTALL document for instructions on
       compiling the distribution with 64-bit support.
-    * Added support for the Metrowerks Code Warrior compiler for Windows.       
+    * Added support for the Metrowerks Code Warrior compiler for Windows.  
+
          
 Bug Fixes since HDF5-1.4.1 Release
 ==================================
@@ -67,28 +76,37 @@ Bug Fixes since HDF5-1.4.1 Release
     * Fixed problems with Pablo build and linking with non-standard MPI I/O.
     * Fixed build on Linux systems with --enable-static-exec flag. It now
       works correctly.
-    * IMPORTANT: Fixed file metadata corruption bug which could cause metadata
-      data loss in certain situations.
+    * IMPORTANT: Fixed file metadata corruption bug which could cause 
+      metadata data loss in certain situations.
     * The allocation by alignment (H5Pset_alignment) feature code somehow
       got dropped in some 1.3.x version. Re-implemented it with "new and
       improved" algorithm.  It keeps track of "wasted" file-fragment in
       the free-list too.
     * Removed limitation that the data transfer buffer size needed to be
-      set for datasets whose dimensions were too large for the 'all' selection
-      code to handle.  Any size dimensioned datasets should be handled
-      correctly now.
+      set for datasets whose dimensions were too large for the 'all' 
+      selection code to handle.  Any size dimensioned datasets should be 
+      handled correctly now.
     * Changed behavior of H5Tget_member_type to correctly emulate HDF5 v1.2.x
       when --enable-hdf5v1_2 configure flag is enabled.
-    * Added --enable-linux-lfs flag to allow more control over whether to enable
-      or disable large file support on Linux.
+    * Added --enable-linux-lfs flag to allow more control over whether to 
+      enable or disable large file support on Linux.
+
 
 Documentation
 =============
 
+    * The H5T_conv_t and H5T_cdata_t structures are now properly defined
+      in the Reference Manual (H5T) and descriped in detail in the User's 
+      Guide (Datatypes).
+    * The new tools h52gif and gif2h5 have been added to the Tools section
+      of the Reference Manual.
+    * A "Freespace Management" section has been added to the Performance 
+      chapter of the User's Guide.
+    * Several user-reported bugs have been fixed since Release 1.4.1.
+
 
 Platforms Tested
 ================
-
 
     AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6.0
                                   mpcc_r 3.6.6.0
@@ -135,7 +153,9 @@ Platforms Tested
                                   Sun WorkShop 6 update 1 C++ 5.2 2000/09/11
     TFLOPS r1.0.4 v4.0.7 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
                                           local modifications
-    Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
+    Windows 2000 (NT5.0)          MSVC++ 6.0
+    Windows NT4.0                 MSVC++ 6.0
+                                  DEC Visual Fortran 6.0
     Windows NT4.0                 Code Warrior 6.0
     Windows 98                    MSVC++ 6.0
                                   DEC Visual Fortran 6.0
@@ -143,6 +163,7 @@ Platforms Tested
 
 Supported Configuration Features Summary
 ========================================
+
     In the tables below
           y  = tested and supported
           n  = not supported or not tested in this release
@@ -216,6 +237,13 @@ Supported Configuration Features Summary
 Known Problems
 ==============
 
+    * When a dataset with the variable-legth datatype is overwritten, 
+      the library can develop memory leaks that cause the file to become 
+      unnecessarily large.  This is planned to be fixed in the next release.
+
+    * On the SV1, the h5ls test fails due to a difference between the 
+      SV1 printf precision and the printf precision on other platforms.
+
     * The h5dump tests may fail to match the expected output in some
       platforms (e.g. SP2 parallel, Windows) where the error messages
       directed to "stderr" do not appear in the "right order" with output
@@ -230,5 +258,3 @@ Known Problems
     * After "make install" or "make install-doc" one may need to reload
       the source from the tar file before doing another build.
 
-    * See "Known problems" section for the HDF5 1.4.0 release in the
-      HISTORY.txt file.
