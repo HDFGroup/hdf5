@@ -74,6 +74,12 @@
 #define SPACE6_RANK	1
 #define SPACE6_DIM1	(SPACE5_DIM1*SPACE5_DIM2*SPACE5_DIM3*SPACE5_DIM4*SPACE5_DIM5)
 
+/* 2-D dataset with easy dimension sizes */
+#define SPACE7_NAME  "Space7"
+#define SPACE7_RANK	2
+#define SPACE7_DIM1	10
+#define SPACE7_DIM2	10
+
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
@@ -2745,6 +2751,7 @@ test_select_hyper_union_3d(void)
     free(wbuf);
     free(rbuf);
 }   /* test_select_hyper_union_3d() */
+#endif /* NEW_HYPERSLAB_API */
 
 /****************************************************************
 **
@@ -3253,7 +3260,6 @@ test_select_hyper_nota_2d(void)
     free(wbuf);
     free(rbuf);
 }   /* test_select_hyper_nota_2d() */
-#endif /* NEW_HYPERSLAB_API */
 
 /****************************************************************
 **
@@ -3794,7 +3800,363 @@ test_select_valid(void)
     CHECK(error, FAIL, "H5Sclose");
     error=H5Sclose(main_space);
     CHECK(error, FAIL, "H5Sclose");
-}   /* test_select_hyper_chunk() */
+}   /* test_select_valid() */
+
+/****************************************************************
+**
+**  test_select_combine(): Test basic H5S (dataspace) selection code.
+**      Tests combining "all" and "none" selections with hyperslab
+**      operations.
+** 
+****************************************************************/
+static void 
+test_select_combine(void)
+{
+    hid_t base_id;      /* Base dataspace for test */
+    hid_t all_id;       /* Dataspace for "all" selection */
+    hid_t none_id;      /* Dataspace for "none" selection */
+    hid_t space1;       /* Temporary dataspace #1 */
+    hssize_t start[SPACE7_RANK];        /* Hyperslab start */
+    hsize_t stride[SPACE7_RANK];        /* Hyperslab stride */
+    hsize_t count[SPACE7_RANK];         /* Hyperslab count */
+    hsize_t block[SPACE7_RANK];         /* Hyperslab block */
+    hsize_t dims[SPACE7_RANK]={SPACE7_DIM1,SPACE7_DIM2};        /* Dimensions of dataspace */
+    H5S_sel_type sel_type;      /* Selection type */
+    hssize_t nblocks;   /* Number of hyperslab blocks */
+    hsize_t blocks[128][2][SPACE7_RANK];    /* List of blocks */
+    herr_t error;
+
+    /* Create dataspace for dataset on disk */
+    base_id = H5Screate_simple(SPACE7_RANK, dims, NULL);
+    CHECK(base_id, FAIL, "H5Screate_simple");
+
+    /* Copy base dataspace and set selection to "all" */
+    all_id=H5Scopy(base_id);
+    CHECK(all_id, FAIL, "H5Scopy");
+    error=H5Sselect_all(all_id);
+    CHECK(error, FAIL, "H5Sselect_all");
+    sel_type=H5Sget_select_type(all_id);
+    VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
+
+    /* Copy base dataspace and set selection to "none" */
+    none_id=H5Scopy(base_id);
+    CHECK(none_id, FAIL, "H5Scopy");
+    error=H5Sselect_none(none_id);
+    CHECK(error, FAIL, "H5Sselect_all");
+    sel_type=H5Sget_select_type(none_id);
+    VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
+
+
+    /* Copy "all" selection & space */
+    space1=H5Scopy(all_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'OR' "all" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that it's still "all" selection */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_ALL, "H5Sget_select_type");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "all" selection & space */
+    space1=H5Scopy(all_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'AND' "all" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the same at the original block */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there is only one block */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], (hsize_t)start[0], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], (hsize_t)start[1], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], (block[0]-1), "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], (block[1]-1), "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "all" selection & space */
+    space1=H5Scopy(all_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'XOR' "all" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_XOR,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is an inversion of the original block */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there are two blocks */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 2, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], 0, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], 5, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], 4, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], 9, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][0][0], 5, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][0][1], 0, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][1][0], 9, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][1][1], 9, "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "all" selection & space */
+    space1=H5Scopy(all_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'NOTB' "all" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTB,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is an inversion of the original block */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there are two blocks */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 2, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], 0, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], 5, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], 4, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], 9, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][0][0], 5, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][0][1], 0, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][1][0], 9, "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[1][1][1], 9, "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "all" selection & space */
+    space1=H5Scopy(all_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'NOTA' "all" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTA,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the "none" selection */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+
+    /* Copy "none" selection & space */
+    space1=H5Scopy(none_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'OR' "none" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_OR,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the same as the original hyperslab */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there is only one block */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], (hsize_t)start[0], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], (hsize_t)start[1], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], (block[0]-1), "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], (block[1]-1), "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "none" selection & space */
+    space1=H5Scopy(none_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'AND' "none" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_AND,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the "none" selection */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "none" selection & space */
+    space1=H5Scopy(none_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'XOR' "none" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_XOR,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the same as the original hyperslab */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there is only one block */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], (hsize_t)start[0], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], (hsize_t)start[1], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], (block[0]-1), "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], (block[1]-1), "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "none" selection & space */
+    space1=H5Scopy(none_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'NOTB' "none" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTB,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the "none" selection */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+    /* Copy "none" selection & space */
+    space1=H5Scopy(none_id);
+    CHECK(space1, FAIL, "H5Scopy");
+
+    /* 'NOTA' "none" selection with another hyperslab */
+    start[0]=start[1]=0;
+    stride[0]=stride[1]=1;
+    count[0]=count[1]=1;
+    block[0]=block[1]=5;
+    error=H5Sselect_hyperslab(space1,H5S_SELECT_NOTA,start,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Verify that the new selection is the same as the original hyperslab */
+    sel_type=H5Sget_select_type(space1);
+    VERIFY(sel_type, H5S_SEL_HYPERSLABS, "H5Sget_select_type");
+
+    /* Verify that there is only one block */
+    nblocks=H5Sget_select_hyper_nblocks(space1);
+    VERIFY(nblocks, 1, "H5Sget_select_hyper_nblocks");
+
+    /* Retrieve the block defined */
+    HDmemset(blocks,-1,sizeof(blocks));  /* Reset block list */
+    error=H5Sget_select_hyper_blocklist(space1,(hsize_t)0,(hsize_t)nblocks,(hsize_t *)blocks);
+    CHECK(error, FAIL, "H5Sget_select_hyper_blocklist");
+
+    /* Verify that the correct block is defined */
+    VERIFY(blocks[0][0][0], (hsize_t)start[0], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][0][1], (hsize_t)start[1], "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][0], (block[0]-1), "H5Sget_select_hyper_blocklist");
+    VERIFY(blocks[0][1][1], (block[1]-1), "H5Sget_select_hyper_blocklist");
+
+    /* Close temporary dataspace */
+    error=H5Sclose(space1);
+    CHECK(error, FAIL, "H5Sclose");
+
+
+    /* Close dataspaces */
+    error=H5Sclose(base_id);
+    CHECK(error, FAIL, "H5Sclose");
+
+    error=H5Sclose(all_id);
+    CHECK(error, FAIL, "H5Sclose");
+
+    error=H5Sclose(none_id);
+    CHECK(error, FAIL, "H5Sclose");
+}   /* test_select_combine() */
 
 /****************************************************************
 **
@@ -3849,11 +4211,11 @@ test_select(void)
 #ifdef NEW_HYPERSLAB_API
     test_select_hyper_union_stagger();  /* Test hyperslab union code for staggered slabs */
     test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
+#endif /* NEW_HYPERSLAB_API */
     test_select_hyper_and_2d(); /* Test hyperslab intersection (AND) code for 2-D dataset */
     test_select_hyper_xor_2d(); /* Test hyperslab XOR code for 2-D dataset */
     test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */
     test_select_hyper_nota_2d(); /* Test hyperslab NOTA code for 2-D dataset */
-#endif /* NEW_HYPERSLAB_API */
 
     /* test the random hyperslab I/O with the default property list for reading */
     test_select_hyper_union_random_5d(H5P_DEFAULT);  /* Test hyperslab union code for random 5-D hyperslabs */
@@ -3892,6 +4254,9 @@ test_select(void)
 
     /* More tests for checking validity of selections */
     test_select_valid();
+
+    /* Tests for combining "all" and "none" selections with hyperslabs */
+    test_select_combine();
 }   /* test_select() */
 
 
