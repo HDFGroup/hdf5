@@ -44,7 +44,7 @@ static int id_test(void)
 		testObj = H5Iobject_verify(100, (H5I_type_t) 0);
 	H5E_END_TRY
 
-	VERIFY(arrayID, NULL, "H5Iobject_verify");
+	VERIFY(testObj, NULL, "H5Iobject_verify");
 	if(testObj != NULL)
 		goto out;
 
@@ -52,7 +52,7 @@ static int id_test(void)
 		testObj = H5Iobject_verify(700, (H5I_type_t) 700);
 	H5E_END_TRY
 
-	VERIFY(arrayID, NULL, "H5Iobject_verify");
+	VERIFY(testObj, NULL, "H5Iobject_verify");
 	if(testObj != NULL)
 		goto out;
        
