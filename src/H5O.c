@@ -779,6 +779,11 @@ H5O_copy (const H5O_class_t *type, const void *mesg, void *dst)
  *
  * Modifications:
  *
+ * 	Robb Matzke, 1998-08-27
+ *	This function can also be used to obtain the current number of links
+ *	if zero is passed for ADJUST.  If that's the case then we don't check
+ *	for write access on the file.
+ *
  *-------------------------------------------------------------------------
  */
 intn
@@ -793,7 +798,7 @@ H5O_link(H5G_entry_t *ent, intn adjust)
     assert(ent);
     assert(ent->file);
     assert(H5F_addr_defined(&(ent->header)));
-    if (0==(ent->file->intent & H5F_ACC_RDWR)) {
+    if (adjust!=0 && 0==(ent->file->intent & H5F_ACC_RDWR)) {
 	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
 		     "no write intent on file");
     }
@@ -806,19 +811,19 @@ H5O_link(H5G_entry_t *ent, intn adjust)
     }
 
     /* adjust link count */
-    if (adjust < 0) {
+    if (adjust<0) {
 	if (oh->nlink + adjust < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL,
 			"link count would be negative");
 	}
 	oh->nlink += adjust;
-    } else {
+	oh->dirty = TRUE;
+    } else if (adjust>0) {
 	oh->nlink += adjust;
+	oh->dirty = TRUE;
     }
 
-    oh->dirty = TRUE;
     ret_value = oh->nlink;
-
   done:
     if (oh && H5AC_unprotect(ent->file, H5AC_OHDR, &(ent->header), oh) < 0) {
 	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, FAIL,

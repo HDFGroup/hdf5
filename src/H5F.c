@@ -1562,10 +1562,8 @@ H5F_close(H5F_t *f)
 	}
 
 	/* Dump debugging info */
-	if (f->intent & H5F_ACC_DEBUG) {
-	    H5AC_debug(f);
-	    H5F_istore_stats (f, FALSE);
-	}
+	H5AC_debug(f);
+	H5F_istore_stats (f, FALSE);
 
 	/* Close files and release resources */
 	H5F_low_close(f->shared->lf, f->shared->access_parms);

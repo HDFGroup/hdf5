@@ -738,7 +738,7 @@ H5R_write(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     for (i=0; i<nrows; i++) {
 	if (size[i]>raw_cur_size[1]) {
 	    H5R_fix_overflow(ra, type, meta+i, size[i]-raw_cur_size[1],
-			     (uint8*)(buf[i])+raw_cur_size[1]);
+			     (uint8*)(buf[i])+raw_cur_size[1]*type_size);
 	}
 	meta[i].nelmts = size[i];
     }
@@ -997,15 +997,18 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     H5S_t	*mm_space=NULL;		/*meta memory data space	*/
     H5S_t	*rf_space=NULL;		/*raw data file space		*/
     H5S_t	*rm_space=NULL;		/*raw data memory space		*/
+    H5S_t	*of_space=NULL;		/*overflow data file space	*/
+    H5S_t	*om_space=NULL;		/*overflow data memory space	*/
     hsize_t	meta_cur_size;		/*current meta data nelmts	*/
     hsize_t	meta_read_size;		/*amount of meta data to read	*/
     hsize_t	raw_cur_size[2];	/*raw data current size		*/
-    hsize_t	raw_read_size;		/*amount of raw data to read	*/
+    hsize_t	raw_read_size[2];	/*amount of raw data to read	*/
     hssize_t	hs_offset[2];		/*hyperslab offset		*/
     hsize_t	hs_size[2];		/*hyperslab size		*/
     uint8	*raw_buf=NULL;		/*raw buffer			*/
     size_t	type_size;		/*size of the TYPE argument	*/
-    hsize_t	i;
+    void	**buf_out=NULL;		/*output BUF values		*/
+    hsize_t	i;			/*counter			*/
 
     FUNC_ENTER(H5R_read, FAIL);
 
@@ -1017,6 +1020,16 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     if (0==nrows) HRETURN(SUCCEED);
     type_size = H5T_get_size(type);
 
+    /*
+     * Malloc `buf_out' to hold the output values for `buf'.  We have to do
+     * this because if we return failure we want `buf' to have the original
+     * values.
+     */
+    if (NULL==(buf_out=H5MM_calloc(nrows*sizeof(void*)))) {
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		    "memory allocation failed for BUF output values");
+    }
+    
     /* Read from the raw dataset */
     if (NULL==(rf_space=H5D_get_space(ra->raw)) ||
 	H5S_extent_dims(rf_space, raw_cur_size, NULL)<0) {
@@ -1024,17 +1037,33 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
 		    "unable to determine current raw data extents");
     }
     if ((hsize_t)start_row>=raw_cur_size[0]) {
-	raw_read_size = 0;
+	raw_read_size[0] = 0;
+	raw_read_size[1] = raw_cur_size[1];
     } else {
-	raw_read_size = MIN(nrows, raw_cur_size[0]-(hsize_t)start_row);
+	raw_read_size[0] = MIN(nrows, raw_cur_size[0]-(hsize_t)start_row);
+	raw_read_size[1] = raw_cur_size[1];
     }
-    
+    hs_offset[0] = start_row;
+    hs_offset[1] = 0;
+    if (NULL==(rm_space=H5S_create(H5S_SIMPLE)) ||
+	H5S_set_extent_simple(rm_space, 2, raw_read_size, NULL)<0 ||
+	H5S_select_hyperslab(rf_space, H5S_SELECT_SET, hs_offset, NULL,
+			     raw_read_size, NULL)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+		    "unable to set raw dataset selection");
+    }
+    if (NULL==(raw_buf=H5MM_malloc(nrows*raw_read_size[1]*type_size))) {
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+		    "memory allocation failed for raw dataset");
+    }
+    if (H5D_read(ra->raw, type, rm_space, rf_space, &H5D_xfer_dflt,
+		 raw_buf)<0) {
+	HGOTO_ERROR(H5E_RAGGED, H5E_READERROR, FAIL,
+		    "unable to read raw dataset");
+    }
+    HDmemset(raw_buf+raw_read_size[0]*raw_read_size[1]*type_size, 0,
+	     (nrows-raw_read_size[0])*raw_read_size[1]*type_size);
 	
-	       
-
-
-
-
     /* Get the meta data */
     if (NULL==(meta=H5MM_malloc(nrows*sizeof(H5R_meta_t)))) {
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1065,11 +1094,84 @@ H5R_read(H5R_t *ra, hssize_t start_row, hsize_t nrows, H5T_t *type,
     HDmemset(meta+meta_read_size, 0,
 	     (nrows-meta_read_size)*sizeof(H5R_meta_t));
 
+    /* Copy data into output buffers */
+    for (i=0; i<nrows; i++) {
+	/*
+	 * If the caller didn't supply a buffer then allocate a buffer large
+	 * enough to hold the entire row.  Ignore the input value for the
+	 * size and request the entire row.
+	 */
+	if (NULL==(buf_out[i]=buf[i])) {
+	    if (meta[i].nelmts>0 &&
+		NULL==(buf_out[i]=H5MM_malloc(meta[i].nelmts*type_size))) {
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			    "memory allocation failed for result");
+	    }
+	    size[i] = meta[i].nelmts;
+	} else {
+	    size[i] = MIN(size[i], meta[i].nelmts);
+	}
+	if (0==size[i]) continue;
 
-    HGOTO_ERROR(H5E_RAGGED, H5E_UNSUPPORTED, FAIL,
-		"not implemented yet");
+	/* Copy the part of the row from the raw dataset */
+	HDmemcpy(buf_out[i], raw_buf+i*raw_read_size[1]*type_size,
+		 MIN(size[i], raw_read_size[1])*type_size);
+
+	/* Copy the part of the row from the overflow dataset */
+	if (size[i]>raw_read_size[1]) {
+	    if (!of_space && NULL==(of_space=H5D_get_space(ra->over))) {
+		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+			    "unable to get overflow extents");
+	    }
+	    hs_size[0] = size[i]-raw_read_size[1];
+	    if (NULL==(om_space=H5S_create(H5S_SIMPLE)) ||
+		H5S_set_extent_simple(om_space, 1, size+i, NULL)<0 ||
+		H5S_select_hyperslab(om_space, H5S_SELECT_SET,
+				     (hssize_t*)(raw_read_size+1), NULL,
+				     hs_size, NULL)<0 ||
+		H5S_select_hyperslab(of_space, H5S_SELECT_SET,
+				     &(meta[i].offset), NULL, hs_size,
+				     NULL)<0) {
+		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+			    "unable to set overflow selection");
+	    }
+	    if (H5D_read(ra->over, type, om_space, of_space, &H5D_xfer_dflt,
+			 buf_out[i])<0) {
+		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+			    "unable to read overflow dataset");
+	    }
+	    if (H5S_close(om_space)<0) {
+		om_space = NULL;
+		HGOTO_ERROR(H5E_RAGGED, H5E_CANTINIT, FAIL,
+			    "unable to close overflow memory space");
+	    }
+	    om_space = NULL;
+	}
+
+	/* Actual row size */
+	size[i] = meta[i].nelmts;
+    }
+
+    /* Copy output buffers into BUF argument */
+    for (i=0; i<nrows; i++) buf[i] = buf_out[i];
+    ret_value = SUCCEED;
     
  done:
+    if (rf_space) H5S_close(rf_space);
+    if (rm_space) H5S_close(rm_space);
+    if (mf_space) H5S_close(mf_space);
+    if (mm_space) H5S_close(mm_space);
+    if (of_space) H5S_close(of_space);
+    if (om_space) H5S_close(om_space);
+    H5MM_xfree(meta);
+    H5MM_xfree(raw_buf);
+    if (buf_out) {
+	for (i=0; i<nrows; i++) {
+	    if (!buf[i]) H5MM_xfree(buf_out[i]);
+	}
+	H5MM_xfree(buf_out);
+    }
+    
     FUNC_LEAVE(ret_value);
 }
 

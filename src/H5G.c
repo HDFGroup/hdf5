@@ -1278,6 +1278,9 @@ H5G_create(H5G_t *loc, const char *name, size_t size_hint)
     }
     
     /* insert child name into parent */
+    if (1!=H5O_link(&(grp->ent), 1)) {
+	HRETURN_ERROR(H5E_SYM, H5E_LINK, NULL, "link inc failure");
+    }
     if (H5G_stab_insert(&grp_ent, rest, &(grp->ent)) < 0) {
 	H5O_close(&(grp->ent));
 	grp = H5MM_xfree(grp);
