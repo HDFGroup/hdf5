@@ -557,36 +557,43 @@ static H5FL_blk_node_t *
 H5FL_blk_find_list(H5FL_blk_node_t **head, size_t size)
 {
     H5FL_blk_node_t *temp;  /* Temp. pointer to node in the native list */
-    H5FL_blk_node_t *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_blk_find_list)
 
     /* Find the correct free list */
     temp=*head;
-    while(temp!=NULL && temp->size!=size)
+
+    /* Check if the node is at the head of the list */
+    if(temp && temp->size!=size) {
         temp=temp->next;
 
-    /* If the free list exists, move it to the front of the queue, if it's not there already */
-    if(temp!=NULL && temp!=*head) {
-        /* Take the node found out of it's current position */
-        if(temp->next==NULL) {
-            temp->prev->next=NULL;
-        } /* end if */
-        else {
-            temp->prev->next=temp->next;
-            temp->next->prev=temp->prev;
-        } /* end else */
+        while(temp!=NULL) {
+            /* Check if we found the correct node */
+            if(temp->size==size) {
+                /* Take the node found out of it's current position */
+                if(temp->next==NULL) {
+                    temp->prev->next=NULL;
+                } /* end if */
+                else {
+                    temp->prev->next=temp->next;
+                    temp->next->prev=temp->prev;
+                } /* end else */
 
-        /* Move the found node to the head of the list */
-        temp->prev=NULL;
-        temp->next=*head;
-        (*head)->prev=temp;
-        *head=temp;
+                /* Move the found node to the head of the list */
+                temp->prev=NULL;
+                temp->next=*head;
+                (*head)->prev=temp;
+                *head=temp;
+
+                /* Get out */
+                break;
+            } /* end if */
+
+            temp=temp->next;
+        } /* end while */
     } /* end if */
     
-    ret_value=temp;
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(temp)
 } /* end H5FL_blk_find_list() */
 
 
