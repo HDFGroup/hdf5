@@ -74,6 +74,9 @@ const H5O_class_t H5O_ATTR[1] = {{
 /* Declare extern the free list for H5A_t's */
 H5FL_EXTERN(H5A_t);
 
+/* Declare extern the free list for attribute data buffers */
+H5FL_BLK_EXTERN(attr_buf);
+
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
 
@@ -206,7 +209,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
 
     /* Go get the data */
     if(attr->data_size) {
-        if (NULL==(attr->data = H5MM_malloc(attr->data_size)))
+        if (NULL==(attr->data = H5FL_BLK_MALLOC(attr_buf, attr->data_size)))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
         HDmemcpy(attr->data,p,attr->data_size);
     }
