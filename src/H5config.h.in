@@ -302,6 +302,9 @@
 /* Define if you have the <zlib.h> header file.  */
 #undef HAVE_ZLIB_H
 
+/* Define if you have the <pthread.h> header file.  */
+#undef HAVE_PTHREAD_H
+
 /* Define if you have the df library (-ldf).  */
 #undef HAVE_LIBDF
 
@@ -352,3 +355,6 @@
 
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
+
+/* Define if you have the pthread library (-lpthread).  */
+#undef HAVE_LIBPTHREAD
