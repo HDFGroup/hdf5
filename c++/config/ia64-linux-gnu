@@ -17,7 +17,7 @@ case $CXX_BASENAME in
 	;;
 
     *)
-	CXXFLAGS="$CXXFLAGS -tlocal"
+	CXXFLAGS="$CXXFLAGS"
 	DEBUG_CXXFLAGS="-g"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS=""     #Default optimization O2 is used
