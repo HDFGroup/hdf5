@@ -43,6 +43,13 @@ static htri_t H5S_is_simple(const H5S_t *sdim);
 static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
 
+#ifdef H5_HAVE_PARALLEL
+htri_t H5S_get_collective_io_consensus(const H5F_t *file,
+                                       const htri_t local_opinion,
+                                       const unsigned flags);
+#endif /* H5_HAVE_PARALLEL */
+
+
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
 static const char *H5S_sel_names[]={
@@ -1396,6 +1403,103 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5S_get_collective_io_consensus
+ *
+ * Purpose:     Compare notes with all other processes involved in this I/O
+ *              and see if all are go for collective I/O.
+ *
+ *              If all are, return TRUE.
+ *
+ *              If any process can't manage collective I/O, then collective
+ *              I/O is impossible, and we return FALSE.
+ *
+ *              If the flags indicate that collective I/O is impossible,
+ *              skip the interprocess communication and just return FALSE.
+ *
+ *              In any error is detected, return FAIL.
+ *
+ * Return:      Success:        TRUE or FALSE
+ *
+ *              Failure:        FAIL
+ *
+ * Programmer:  JRM -- 8/30/04
+ *
+ * Modifications:
+ *
+ *      None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#ifdef H5_HAVE_PARALLEL
+htri_t
+H5S_get_collective_io_consensus(const H5F_t *file,
+                                const htri_t local_opinion,
+                                const unsigned flags)
+{
+    htri_t      ret_value = FAIL;       /* will update if successful */
+    MPI_Comm    comm;
+    int         int_local_opinion;
+    int         consensus;
+    int         mpi_result;
+
+    FUNC_ENTER_NOAPI(H5S_get_collective_io_consensus, NULL);
+
+    HDassert ( ( local_opinion == TRUE ) || ( local_opinion == FALSE ) );
+
+    /* Don't do the interprocess communication unless the Parallel I/O
+     * conversion flag is set -- there may not be other processes to
+     * talk to.
+     */
+    if ( ! ( flags & flags&H5S_CONV_PAR_IO_POSSIBLE ) ) {
+
+        HGOTO_DONE(FALSE);
+    }
+
+    comm = H5F_mpi_get_comm(file);
+
+    if ( comm == MPI_COMM_NULL )
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, \
+                    "can't retrieve MPI communicator")
+
+    if ( local_opinion == TRUE ) {
+
+        int_local_opinion = 1;
+
+    } else {
+
+        int_local_opinion = 0;
+    }
+
+    mpi_result = MPI_Allreduce((void *)(&int_local_opinion),
+                               (void *)(&consensus),
+                               1,
+                               MPI_INT,
+                               MPI_LAND,
+                               comm);
+
+    if ( mpi_result != MPI_SUCCESS )
+        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_result)
+
+    if ( consensus ) {
+
+        ret_value = TRUE;
+
+    } else {
+
+        ret_value = FALSE;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5S_get_collective_io_consensus() */
+
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_find
  *
  * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
@@ -1422,6 +1526,10 @@ done:
  *	pointers registered in the H5S_fconv_g[] and H5S_mconv_g[] tables)
  *	along with other data whose scope is the conversion path (like path
  *	statistics).
+ *
+ *      John Mainzer, 8/30/04
+ *      Modified code to check with all other processes that have the
+ *      file open before OKing collective I/O.
  *
  *-------------------------------------------------------------------------
  */
@@ -1481,6 +1589,12 @@ const H5O_layout_t *layout
             if(opt==FAIL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
 
+            opt = H5S_get_collective_io_consensus(file, opt, flags);
+
+            if ( opt == FAIL )
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
+                            "check for collective I/O consensus failed.");
+
             /* Check if we can use the optimized parallel I/O routines */
             if(opt==TRUE) {
                 /* Set the pointers to the MPI-specific routines */
@@ -1522,6 +1636,12 @@ const H5O_layout_t *layout
     opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
     if(opt==FAIL)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
+
+    opt = H5S_get_collective_io_consensus(file, opt, flags);
+
+    if ( opt == FAIL )
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
+                    "check for collective I/O consensus failed.");
 
     /* Check if we can use the optimized parallel I/O routines */
     if(opt==TRUE) {
