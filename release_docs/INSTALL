@@ -533,9 +533,9 @@
 	    $ make install prefix=NEW_DIR
 
 	where NEW_DIR is the new directory you wish to install HDF5. If
-	you do this, you should also modify the installed "bin/h5cc"
-	script. Change the "prefix=..." line to reflect the value of
-	NEW_DIR.
+	you do this, you should run h5redeploy in NEW_DIR/bin directory.
+        This utility will fix h5cc, h5fc and h5c++ scripts to reflect new
+        NEW_DIR location.
 
 	The library can be used without installing it by pointing the
 	compiler at the `src' and 'src/.libs' directory for include files and
