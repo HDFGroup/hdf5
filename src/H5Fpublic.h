@@ -43,17 +43,6 @@
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
 #endif
 
-#ifdef LATER
-/*
- * These are here temporarily for backward compatibility with version
- * 5.1.0.0a and should eventually be removed since they violate the naming
- * scheme.
- */
-#define H5ACC_DEFAULT	H5F_ACC_RDONLY
-#define H5ACC_WRITE	H5F_ACC_RDWR
-#define H5ACC_OVERWRITE	H5F_ACC_TRUNC
-#endif
-
 /*
  * Low-level file drivers.  These values are returned by H5Pget_file_driver()
  * and are set by the various H5Pset_...() functions that set file driver
