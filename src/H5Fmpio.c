@@ -498,6 +498,9 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
  * 	rky, 10 Apr 1998
  *	Call independent or collective MPI write, based on ACCESS_PARMS.
  *
+ * 	rky, 24 April
+ *	Removed redundant write from H5F_Mpio_write.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -541,8 +544,6 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     default:
 	HRETURN_ERROR(H5E_IO, H5E_BADVALUE, NULL, "invalid file access mode");
     }
-    mpierr = MPI_File_write_at( lf->u.mpio.f, mpi_off, (void*) buf,
-				size_i, MPI_BYTE, &mpi_stat );
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
