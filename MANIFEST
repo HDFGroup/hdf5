@@ -933,34 +933,49 @@
 
 ./tools/Dependencies
 ./tools/Makefile.in
-./tools/h5debug.c
-./tools/h5dump.c
-./tools/h5dump.h
-./tools/h5dumptst.c
-./tools/h4toh5test.c
-./tools/h5import.c
-./tools/h5ls.c
-./tools/h5repart.c
-./tools/h5toh4.c
-./tools/h5toh4.h
-./tools/h5tools.c
-./tools/h5tools.h
-./tools/h4toh5main.c
-./tools/h4toh5main.h
-./tools/h4toh5pal.c
-./tools/h4toh5sds.c
-./tools/h4toh5util.c
-./tools/h4toh5util.h
-./tools/h4toh5image.c
-./tools/h4toh5vgroup.c
-./tools/h4toh5vdata.c
-./tools/h4toh5anno.c
-./tools/pdb2hdf.c
-./tools/talign.c
-./tools/testh5dump.sh
-./tools/testh5ls.sh
-./tools/testh5toh4.sh
-./tools/testh4toh5.sh
+
+./tools/h4toh5/Dependencies
+./tools/h4toh5/Makefile.in
+./tools/h4toh5/h4toh5anno.c
+./tools/h4toh5/h4toh5image.c
+./tools/h4toh5/h4toh5main.c
+./tools/h4toh5/h4toh5main.h
+./tools/h4toh5/h4toh5pal.c
+./tools/h4toh5/h4toh5sds.c
+./tools/h4toh5/h4toh5test.c
+./tools/h4toh5/h4toh5util.c
+./tools/h4toh5/h4toh5util.h
+./tools/h4toh5/h4toh5vdata.c
+./tools/h4toh5/h4toh5vgroup.c
+./tools/h4toh5/testh4toh5.sh
+
+./tools/h5ls/Dependencies
+./tools/h5ls/Makefile.in
+./tools/h5ls/h5ls.c
+./tools/h5ls/testh5ls.sh
+
+./tools/h5toh4/Dependencies
+./tools/h5toh4/Makefile.in
+./tools/h5toh4/h5toh4.c
+./tools/h5toh4/h5toh4.h
+./tools/h5toh4/testh5toh4.sh
+
+./tools/lib/Dependencies
+./tools/lib/Makefile.in
+./tools/lib/h5tools.c
+./tools/lib/h5tools.h
+./tools/lib/h5tools_str.c
+./tools/lib/h5tools_str.h
+./tools/lib/h5tools_utils.c
+./tools/lib/h5tools_utils.h
+./tools/lib/talign.c
+
+./tools/misc/Dependencies
+./tools/misc/Makefile.in
+./tools/misc/h5debug.c
+./tools/misc/h5import.c
+./tools/misc/h5repart.c
+./tools/misc/pdb2hdf.c
 
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
@@ -1042,23 +1057,22 @@
 ./tools/testfiles/tvldtypes4.h5
 
 # new hdf4 files for testing h4toh5 converter
-./tools/testfiles/anno_test.hdf                                                                       
+./tools/testfiles/anno_test.hdf
 ./tools/testfiles/gr_typ_test.hdf
 ./tools/testfiles/grnameclash_test.hdf
 ./tools/testfiles/image_attr_test.hdf
 ./tools/testfiles/ras_24_test.hdf
-./tools/testfiles/ras_8_test.hdf                                                                      
-./tools/testfiles/sds_attr_test.hdf                                                                   
-./tools/testfiles/sds_dim_test.hdf                                                                    
-./tools/testfiles/sds_typ_test.hdf                                                                    
-./tools/testfiles/sdsnameclash_test.hdf                                                               
-./tools/testfiles/vdata_test.hdf                                                                      
+./tools/testfiles/ras_8_test.hdf
+./tools/testfiles/sds_attr_test.hdf
+./tools/testfiles/sds_dim_test.hdf
+./tools/testfiles/sds_typ_test.hdf
+./tools/testfiles/sdsnameclash_test.hdf
+./tools/testfiles/vdata_test.hdf
 ./tools/testfiles/vdnameclash_test.hdf
 ./tools/testfiles/vg_all_test.hdf
 ./tools/testfiles/vg_hl_test.hdf
 ./tools/testfiles/vg_loop_test.hdf
 ./tools/testfiles/vgnameclash_test.hdf
-
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1091,10 +1105,10 @@
 ./tools/testfiles/Expected/tstr.hdf
 ./tools/testfiles/Expected/tstr2.hdf
 
-#new expected hdf5 files from converter,2/15/01                                                       
-./tools/testfiles/Expected/anno_test.h5                                                               
-./tools/testfiles/Expected/gr_typ_test.h5                                                             
-./tools/testfiles/Expected/grnameclash_test.h5                                                        
+#new expected hdf5 files from converter,2/15/01
+./tools/testfiles/Expected/anno_test.h5
+./tools/testfiles/Expected/gr_typ_test.h5
+./tools/testfiles/Expected/grnameclash_test.h5
 ./tools/testfiles/Expected/image_attr_test.h5
 ./tools/testfiles/Expected/ras_24_test.h5
 ./tools/testfiles/Expected/ras_8_test.h5
