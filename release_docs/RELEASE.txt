@@ -595,9 +595,11 @@ Known Problems
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a mean to run poe without the debug socket.
 
-* PGI C++ compiler fails when compiling the C++ library's tests.
-  Therefore, we cannot verify that the C++ library built with the PGI C++
-  compiler is correct.
+* The C++ library's tests fails when compiling with PGI C++ compiler.  The
+  workaround until the problem is correctly handled is to use the 
+  flag "--instantiate=local" prior to the configure and build steps, as:
+        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
+        setenv CXX "pgCC -tlocal" for others
 
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
