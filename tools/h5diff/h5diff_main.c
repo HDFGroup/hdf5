@@ -29,7 +29,7 @@ static int check_f_input( const char* );
 /*-------------------------------------------------------------------------
  * Function: main
  *
- * Purpose: H5diff main program
+ * Purpose: h5diff main program
  *
  * Return: An  exit status of 0 means no differences were found, 1 means some 
  *   differences were found.
@@ -73,14 +73,11 @@ int main(int argc, const char *argv[])
  * file names are first
  *-------------------------------------------------------------------------
  */
- 
  if ( argc>=3 )
  {
   fname1 = argv[1];
   fname2 = argv[2];
  }
-
- 
 /*-------------------------------------------------------------------------
  * parse command line options
  *-------------------------------------------------------------------------
@@ -121,7 +118,7 @@ int main(int argc, const char *argv[])
      }
      else
      {
-      printf("<-d %s> is not a valid option\n", argv[i+1] );
+      printf("Not a valid -d option\n");
       usage();
      }
      break;
@@ -137,6 +134,11 @@ int main(int argc, const char *argv[])
       options.percent = atof(argv[i+1]);
       i++; /* go to next */
      }
+     else
+     {
+      printf("Not a valid -p option\n");
+      usage();
+     }
      break;
     case 'n': 
      if ( i<argc-1 && '-' !=argv[i+1][0] )
@@ -149,6 +151,11 @@ int main(int argc, const char *argv[])
       }
       options.count = atoi(argv[i+1]);
       i++; /* go to next */
+     }
+     else
+     {
+      printf("Not a valid -n option\n");
+      usage();
      }
      break;
     } /*switch*/
@@ -182,7 +189,6 @@ int main(int argc, const char *argv[])
   
  }/*for*/
 
-
 /*-------------------------------------------------------------------------
  * print the command line options
  *-------------------------------------------------------------------------
@@ -198,15 +204,12 @@ int main(int argc, const char *argv[])
   printf("\n");
  }
 
- 
-
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
  if (options.verbose) printf("\n");
  ret= (nfound==0 ? 0 : 1 );
  return ret;
  
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: check_n_input
@@ -266,25 +269,14 @@ int check_n_input( const char *str )
 static 
 int check_f_input( const char *str )
 {
- unsigned i;
- char c;
-
- /* '0' values not allowed */
- if ( strlen(str)==1 && str[0]=='0' )
+ double x;
+ 
+ x=atof(str);
+ if (x==0)
   return -1;
 
- for ( i = 0; i < strlen(str); i++)
- {
-  c = str[i];
-  if ( c < 48 || c > 57  ) /* ascii values between 0 and 9 */
-   if  ( c!= 46) /* . */
-   return -1;
- }
  return 1;
 }
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function: usage
