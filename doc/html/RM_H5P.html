@@ -1957,7 +1957,7 @@ parallel HDF5 library.</i>
         <em>double</em> *<code>right</code>
     )
   <dt><strong>Purpose:</strong>
-    <dd>Sets B-tree split ratios for a dataset transfer property list.
+    <dd>Gets B-tree split ratios for a dataset transfer property list.
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_btree_ratios</code> returns the B-tree split ratios 
         for a dataset transfer property list.
@@ -2280,28 +2280,46 @@ parallel HDF5 library.</i>
     )
   <dt><strong>Purpose:</strong>
     <dd>Sets the memory manager for variable-length datatype allocation in 
-        <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+        <code>H5Dread</code> and <code>H5Dvlen_reclaim</code>.
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_vlen_mem_manager</code> sets the memory manager for 
-        variable-length datatype allocation in <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+        variable-length datatype allocation in <code>H5Dread</code> 
+        and free in <code>H5Dvlen_reclaim</code>.
         <p>
-        Setting the <code>alloc</code> and <code>free</code> parameters to 
-        non-<code>NULL</code> values invokes the user's custom memory management routines.  
-        Setting the <code>alloc</code> and <code>free</code> parameters 
-        to &nbsp; <code> NULL</code> invokes the system's &nbsp; <code> malloc</code> and 
-        <code>free</code> memory management routines.
+        The <code>alloc</code> and <code>free</code> parameters 
+        identify the memory management routines to be used.
+        If the user has defined custom memory management routines,
+        <code>alloc</code> and/or <code>free</code> should be set to make 
+        those routine calls (i.e., the name of the routine is used as 
+        the value of the parameter);  
+        if the user prefers to use the system's <code> malloc</code>
+        and/or <code>free</code>, the <code>alloc</code> and 
+        <code>free</code> parameters, respectively, should be set to 
+        <code> NULL</code>
         <p>
         The prototypes for these user-defined functions would appear as follows:
-        <dir>
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
             <em>typedef void</em> *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
                 <em>void</em> *<code>alloc_info</code>) ;
-            <br>
+           
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
             <em>typedef void</em> (*<code>H5MM_free_t</code>)(<em>void</em> *<code>mem</code>, 
                 <em>void</em> *<code>free_info</code>) ;
-        </dir>
+        <br>
         The <code>alloc_info</code> and <code>free_info</code> parameters 
         can be used to pass along any required information to 
         the user's memory management routines.
+        <p>
+        In summary, if the user has defined custom memory management 
+        routines, the name(s) of the routines are passed in the 
+        <code>alloc</code> and <code>free</code> parameters and the 
+        custom routines' parameters are passed in the 
+        <code>alloc_info</code> and <code>free_info</code> parameters.
+        If the user wishes to use the system <code> malloc</code> and 
+        <code>free</code> functions, the <code>alloc</code> and/or 
+        <code>free</code> parameters are set to <code> NULL</code> 
+        and the  <code>alloc_info</code> and <code>free_info</code> 
+        parameters are ignored.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -2403,7 +2421,7 @@ H5P&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  30 October 1998
+Last modified:  6 October 1999
 
 </body>
 </html>

@@ -2090,19 +2090,25 @@ passed into the <code>H5Dread</code> and <code>H5Dwrite</code> functions
 with the dataset transfer property list.  
 
 <p>
-Either the system <code>malloc</code> and <code>free</code> calls  or
-user-defined substitutes can be used via the 
-<code>H5Pset_vlen_mem_manage_type()</code> call, as follows:
-<dl>
-    <dd><em>herr_t</em> 
-        <code>H5Pset_vlen_mem_manage_type</code>(<em>hid_t</em> <code>plist_id</code>, 
-        <em>H5T_vlen_mem_t</em> <code>type</code>)
-</dl>
+Default memory management is set by using <code>H5P_DEFAULT</code> 
+for the dataset transfer property list identifier.
+If <code>H5P_DEFAULT</code> is used with <code>H5Dread</code>,
+the system <code>malloc</code> and <code>free</code> calls
+will be used for allocating and freeing memory.
+In such a case,  <code>H5P_DEFAULT</code> should also be passed
+as the property list identifier to <code>H5Dvlen_reclaim</code>.
 
 <p>
-When user-defined memory management is chosen, allocation and free routines
-must also be provided with the <code>H5Pset_vlen_mem_manage_routines()</code>
-API call, as follows:
+The rest of this subsection is relevant only to those who choose 
+<i>not</i> to use default memory management.
+
+<p>
+The user can choose whether to use the 
+system <code>malloc</code> and <code>free</code> calls  or
+user-defined, or custom, memory management functions.
+If user-defined memory management functions are to be used, 
+the memory allocation and free routines must be defined via 
+<code>H5Pset_vlen_mem_manager()</code>, as follows:
 <dl>
     <dd><em>herr_t</em> 
         <code>H5Pset_vlen_mem_manager</code>(<em>hid_t</em> <code>plist_id</code>,
@@ -2112,8 +2118,20 @@ API call, as follows:
         <em>void</em> *<code>free_info</code>)
 </dl>
 
+
 <p>
-The prototypes for these functions look like the following:
+The <code>alloc</code> and <code>free</code> parameters 
+identify the memory management routines to be used.
+If the user has defined custom memory management routines,
+<code>alloc</code> and/or <code>free</code> should be set to make 
+those routine calls (i.e., the name of the routine is used as 
+the value of the parameter);  
+if the user prefers to use the system's <code> malloc</code>
+and/or <code>free</code>, the <code>alloc</code> and 
+<code>free</code> parameters, respectively, should be set to 
+<code> NULL</code>
+<p>
+The prototypes for the user-defined functions would appear as follows:
 <dl>
     <dd><code>typedef</code> <em>void</em> 
         *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
@@ -2128,6 +2146,17 @@ The <code>alloc_info</code> and <code>free_info</code> parameters can be
 used to pass along any required information to the user's memory management 
 routines.
 
+<p>
+In summary, if the user has defined custom memory management 
+routines, the name(s) of the routines are passed in the 
+<code>alloc</code> and <code>free</code> parameters and the 
+custom routines' parameters are passed in the 
+<code>alloc_info</code> and <code>free_info</code> parameters.
+If the user wishes to use the system <code> malloc</code> and 
+<code>free</code> functions, the <code>alloc</code> and/or 
+<code>free</code> parameters are set to <code> NULL</code> 
+and the  <code>alloc_info</code> and <code>free_info</code> 
+parameters are ignored.
 
 <h4>Recovering memory from VL buffers read in</h4>
 
@@ -2159,7 +2188,240 @@ releasing all the memory without creating memory leaks.
 
 <h3>9.4. Code Examples</h3>
 
-For sample VL datatype code, see the tests in <code>test/tvltypes.c</code> 
+The following example creates the following one-dimensional array 
+of size 4 of variable-length datatype.
+<pre>
+          0 10 20 30
+            11 21 31
+               22 32
+                  33
+</pre>
+Each element of the VL datatype is of H5T_NATIVE_UINT type.
+<p>
+The array is stored in the dataset and then read back into memory. 
+Default memory management routines are used for writing the VL data.
+Custom memory management routines are used for reading the VL data and
+reclaiming memory space.
+
+<center>
+<table border align=center width="100%">
+  <caption align=bottom><h4>Example: Variable-length Datatypes</h4></caption>
+  <tr>
+    <td>
+      <pre>
+#include <hdf5.h>
+
+#define FILE   "tvltypes.h5"
+#define MAX(X,Y)        ((X)&gt;(Y)?(X):(Y))
+
+/* 1-D dataset with fixed dimensions */
+#define SPACE1_NAME  "Space1"
+#define SPACE1_RANK	1
+#define SPACE1_DIM1	4
+
+void *vltypes_alloc_custom(size_t size, void *info);
+void vltypes_free_custom(void *mem, void *info);
+
+/****************************************************************
+**
+**  vltypes_alloc_custom():  VL datatype custom memory
+**      allocation routine.  This routine just uses malloc to
+**      allocate the memory and increments the amount of memory
+**      allocated.
+** 
+****************************************************************/
+void *vltypes_alloc_custom(size_t size, void *info)
+{
+    void *ret_value=NULL;       /* Pointer to return */
+    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */
+
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct.
+     */
+    extra=MAX(sizeof(void *),sizeof(int));
+
+    if((ret_value=malloc(extra+size))!=NULL) {
+        *(int *)ret_value=size;
+        *mem_used+=size;
+    } /* end if */
+    ret_value=((unsigned char *)ret_value)+extra;
+    return(ret_value);
+}
+
+/****************************************************************
+**
+**  vltypes_free_custom(): VL datatype custom memory
+**      allocation routine.  This routine just uses free to
+**      release the memory and decrements the amount of memory
+**      allocated.
+** 
+****************************************************************/
+void vltypes_free_custom(void *_mem, void *info)
+{
+    unsigned char *mem;
+    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t extra;               /* Extra space needed */
+
+    /*
+     *  This weird contortion is required on the DEC Alpha to keep the
+     *  alignment correct. 
+     */
+    extra=MAX(sizeof(void *),sizeof(int));
+
+    if(_mem!=NULL) {
+        mem=((unsigned char *)_mem)-extra;
+        *mem_used-=*(int *)mem;
+        free(mem);
+    } /* end if */
+}
+
+int main(void)
+{
+    hvl_t wdata[SPACE1_DIM1];   /* Information to write */
+    hvl_t rdata[SPACE1_DIM1];   /* Information read in */
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1;       /* Dataspace ID			*/
+    hid_t		tid1;       /* Datatype ID			*/
+    hid_t       xfer_pid;   /* Dataset transfer property list ID */
+    hsize_t		dims1[] = {SPACE1_DIM1};
+    uint       i,j;        /* counting variables */
+    int         mem_used=0; /* Memory used during allocation */
+    herr_t		ret;		/* Generic return value		*/
+
+
+    /*
+     * Allocate and initialize VL data to write 
+     */
+    for(i=0; i&lt;SPACE1_DIM1; i++) {
+
+        wdata[i].p=malloc((i+1)*sizeof(unsigned int));
+        wdata[i].len=i+1;
+        for(j=0; j&lt;(i+1); j++)
+            ((unsigned int *)wdata[i].p)[j]=i*10+j;
+    } /* end for */
+
+    /* 
+     * Create file. 
+     */
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* 
+     * Create dataspace for datasets. 
+     */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+
+    /* 
+     * Create a datatype to refer to. 
+     */
+    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+
+    /* 
+     * Create a dataset. 
+     */
+    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
+
+    /* 
+     * Write dataset to disk. 
+     */
+    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+
+    /* 
+     * Change to the custom memory allocation routines for reading VL data 
+     */
+    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+
+    ret=H5Pset_vlen_mem_manager(xfer_pid,vltypes_alloc_custom,
+                                &mem_used,vltypes_free_custom,&mem_used);
+
+    /* 
+     * Read dataset from disk. vltypes_alloc_custom and
+     * will be used to manage memory. 
+     */
+    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+
+    /* 
+     * Display data read in 
+     */
+    for(i=0; i&lt;SPACE1_DIM1; i++) {
+        printf("%d-th element length is %d \n", i, (unsigned) rdata[i].len);
+        for(j=0; j&lt;rdata[i].len; j++) {
+            printf(" %d ",((unsigned int *)rdata[i].p)[j] ); 
+            } 
+        printf("\n");
+    } /* end for */
+
+    /* 
+     * Reclaim the read VL data. vltypes_free_custom will be used 
+     * to reclaim the space. 
+     */
+    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
+
+
+    /* 
+     * Reclaim the write VL data.  C language free function will be used 
+     * to reclaim space. 
+     */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+
+    /* 
+     * Close Dataset 
+     */
+    ret = H5Dclose(dataset);
+
+    /* 
+     * Close datatype 
+     */
+    ret = H5Tclose(tid1);
+
+    /* 
+     * Close disk dataspace 
+     */
+    ret = H5Sclose(sid1);
+    
+    /* 
+     * Close dataset transfer property list 
+     */
+    ret = H5Pclose(xfer_pid);
+    
+    /* 
+     * Close file 
+     */
+    ret = H5Fclose(fid1);
+
+} 
+      </pre>
+    </td>
+  </tr>
+</table>
+</center>
+
+And the output from this sample code would be as follows:
+
+<center>
+<table border align=center width="100%">
+  <caption align=bottom><h4>Example: Variable-length Datatypes, Sample Output</h4></caption>
+  <tr>
+    <td>
+      <pre>
+0-th element length is 1 
+0 
+1-th element length is 2 
+10  11 
+2-th element length is 3 
+20  21  22 
+3-th element length is 4 
+30  31  32  33 
+      </pre>
+    </td>
+  </tr>
+</table>
+</center>
+
+<p>
+For further samples of VL datatype code, see the tests in <code>test/tvltypes.c</code> 
 in the HDF5 distribution.
 
 
@@ -2445,7 +2707,7 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 13     unsigned char *dst = src;
 14     cray_ushort2be_t *priv = NULL;
 15 
-16     switch (cdata->command) {
+16     switch (cdata-&gt;command) {
 17     case H5T_CONV_INIT:
 18         /*
 19          * We are being queried to see if we handle this
@@ -2465,12 +2727,12 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 33          * is larger than the source size, then we must
 34          * process the elements from right to left.
 35          */
-36         cdata->priv = priv = malloc (sizeof(cray_ushort2be_t));
-37         priv->dst_size = H5Tget_size (dst);
-38         if (priv->dst_size&gt;8) {
-39             priv->direction = -1;
+36         cdata-&gt;priv = priv = malloc (sizeof(cray_ushort2be_t));
+37         priv-&gt;dst_size = H5Tget_size (dst);
+38         if (priv-&gt;dst_size&gt;8) {
+39             priv-&gt;direction = -1;
 40         } else {
-41             priv->direction = 1;
+41             priv-&gt;direction = 1;
 42         }
 43         break;
 44 
@@ -2478,8 +2740,8 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 46         /*
 47          * Free private data.
 48          */
-49         free (cdata->priv);
-50         cdata->priv = NULL;
+49         free (cdata-&gt;priv);
+50         cdata-&gt;priv = NULL;
 51         break;
 52 
 53     case H5T_CONV_CONV:
@@ -2487,8 +2749,8 @@ typedef herr_t (*H5T_conv_t)(hid_t <em>src_type</em>,
 55          * Convert each element, watch out for overlap src
 56          * with dst on the left-most element of the buffer.
 57          */
-58         priv = (cray_ushort2be_t *)(cdata->priv);
-59         if (priv->direction&lt;0) {
+58         priv = (cray_ushort2be_t *)(cdata-&gt;priv);
+59         if (priv-&gt;direction&lt;0) {
 60             src += (nelmts - 1) * 8;
 61             dst += (nelmts - 1) * dst_size;
 62         }
@@ -2618,7 +2880,7 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: 2 September 1999
+Last modified: 6 October 1999
 <!-- hhmts end -->
 
 
