@@ -221,6 +221,8 @@ generates_sigfpe(void)
     } else if (WIFSIGNALED(status) && SIGFPE==WTERMSIG(status)) {
 	puts("Floating-point overflow cases cannot be safely tested.");
 	skip_overflow_tests_g = TRUE;
+	/* delete the core dump file that SIGFPE may have created */
+	unlink("core");
     }
 #else
     puts("Cannot determine if floating-point overflows generate a SIGFPE;");
