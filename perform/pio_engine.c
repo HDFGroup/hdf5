@@ -228,8 +228,8 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-#if AKCDEBUG
-/* DEBUG*/
+#if akcdebug
+/* debug*/
 fprintf(stderr, "nfiles=%d\n", nfiles);
 fprintf(stderr, "ndsets=%ld\n", ndsets);
 fprintf(stderr, "nelmts=%ld\n", nelmts);
@@ -1105,4 +1105,55 @@ do_cleanupfile(iotype iot, char *fname)
         }
     }
 }
+
+
+#ifndef TIME_MPI
+#define TIME_MPI
+#endif
+#ifdef TIME_MPI
+/* instrument the MPI_File_wrirte_xxx and read_xxx calls to measure
+ * pure time spent in MPI_File code.
+ */
+int MPI_File_read_at(MPI_File fh, MPI_Offset offset, void *buf,
+	  int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_READ, START);
+    err=PMPI_File_read_at(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_READ, STOP);
+    return err;
+}
+
+
+int MPI_File_read_at_all(MPI_File fh, MPI_Offset offset, void *buf,
+	int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_READ, START);
+    err=PMPI_File_read_at_all(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_READ, STOP);
+    return err;
+}
+
+int MPI_File_write_at(MPI_File fh, MPI_Offset offset, void *buf,
+      int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_WRITE, START);
+    err=PMPI_File_write_at(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    return err;
+}
+
+int MPI_File_write_at_all(MPI_File fh, MPI_Offset offset, void *buf,
+    int count, MPI_Datatype datatype, MPI_Status *status)
+{
+    int err;
+    set_time(timer_g, HDF5_MPI_WRITE, START);
+    err=PMPI_File_write_at_all(fh, offset, buf, count, datatype, status);
+    set_time(timer_g, HDF5_MPI_WRITE, STOP);
+    return err;
+}
+
+#endif	/* TIME_MPI */
 #endif /* H5_HAVE_PARALLEL */

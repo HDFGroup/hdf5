@@ -27,6 +27,9 @@
  */
 #define MILLISECOND     1000000.0
 
+/* global variables */
+pio_time   *timer_g;            /* timer: global for stub functions     */
+
 /*
  * Function:    pio_time_new
  * Purpose:     Build us a brand, spankin', new performance time object.
@@ -43,6 +46,8 @@ pio_time_new(unsigned int type)
     pio_time *pt = (pio_time *)calloc(1, sizeof(struct pio_time_));
     register int i;
 
+    /* set global timer variable */
+    timer_g = pt;
     for (i = 0; i < NUM_TIMERS; ++i)
         pt->total_time[i] = 0.0;
 
@@ -63,6 +68,8 @@ void
 pio_time_destroy(pio_time *pt)
 {
     free(pt);
+    /* reset the global timer pointer too. */
+    timer_g = NULL;
 }
 
 /*

@@ -41,7 +41,7 @@ typedef struct results_ {
 #endif  /* !FAIL */
 
 extern FILE     *output;            /* output file                          */
-extern pio_time *timer;             /* timer: global for stub functions     */
+extern pio_time *timer_g;           /* timer: global for stub functions     */
 extern int      comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 extern int      comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
 extern MPI_Comm pio_comm_g;         /* Communicator to run the PIO          */

@@ -80,7 +80,6 @@
 
 /* global variables */
 FILE       *output;             /* output file                          */
-pio_time   *timer;              /* timer: global for stub functions     */
 int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
@@ -475,7 +474,6 @@ run_test(iotype iot, parameters parms)
 
         MPI_Barrier(pio_comm_g);
         res = do_pio(parms);
-        timer = res.timers;
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
