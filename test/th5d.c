@@ -189,7 +189,7 @@ static void test_h5d_basic_read(void)
     CHECK(oid1,FAIL,"H5Mfind_name");
 
     did1=H5Maccess(oid1);
-    CHECK(sid1,FAIL,"H5Maccess");
+    CHECK(did1,FAIL,"H5Maccess");
 
     ret=H5Dget_info(did1,&tid1,&sid1);
     CHECK(ret,FAIL,"H5Pset_space");
