@@ -1,4 +1,4 @@
-HDF5 version 1.4.2 released on Tue Jul 31 17:37:23 CDT 2001
+HDF5 version 1.4.2-post0 currently under development
 Please refer to the INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
