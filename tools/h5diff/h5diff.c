@@ -51,6 +51,11 @@ typedef struct options_t
  int    count;   /* count value */
 } options_t;
 
+/* Due to alignment issue in Alpha clusters, options must be declared here
+ * not as a local variable in main().
+ */
+options_t  options = {0,0,0,0,0,0,0};
+
 /*-------------------------------------------------------------------------
  * prototypes
  *-------------------------------------------------------------------------
@@ -181,7 +186,6 @@ int main(int argc, const char *argv[])
  int        nobjects1, nobjects2;
  info_t     *info1=NULL;
  info_t     *info2=NULL;
- options_t  options = {0,0,0,0,0,0,0};
  const char *file1_name = NULL;
  const char *file2_name = NULL;
  const char *obj1_name  = NULL;
