@@ -97,8 +97,9 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_OVERFLOW, 	"Address overflowed"},
 
     /* Function entry/exit interface errors */
-    {H5E_CANTINIT, 	"Unable to initialize"},
+    {H5E_CANTINIT, 	"Unable to initialize object"},
     {H5E_ALREADYINIT, 	"Object already initialized"},
+    {H5E_CANTRELEASE, 	"Unable to release object"},
 
     /* Object atom related errors */
     {H5E_BADATOM, 	"Unable to find atom information (already closed?)"},
@@ -137,6 +138,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Datatype conversion errors */
     {H5E_CANTCONVERT,		"Can't convert datatypes"},
+    {H5E_BADSIZE,		"Bad size for object"},
 
     /* Dataspace errors */
     {H5E_CANTCLIP,		"Can't clip hyperslab region"},

@@ -137,8 +137,9 @@ typedef enum H5E_minor_t {
     H5E_OVERFLOW,		/*address overflowed			     */
 
     /* Function entry/exit interface errors */
-    H5E_CANTINIT,               /*Can't initialize                           */
+    H5E_CANTINIT,               /*Can't initialize object                    */
     H5E_ALREADYINIT,            /*object already initialized                 */
+    H5E_CANTRELEASE,            /*Can't release object                       */
 
     /* Object atom related errors */
     H5E_BADATOM,                /*Can't find atom information                */
@@ -177,6 +178,7 @@ typedef enum H5E_minor_t {
 
     /* Datatype conversion errors */
     H5E_CANTCONVERT,            /*Can't convert datatypes */
+    H5E_BADSIZE,                /*Bad size for object */
 
     /* Dataspace errors */
     H5E_CANTCLIP,               /*Can't clip hyperslab region */
