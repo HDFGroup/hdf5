@@ -689,14 +689,17 @@ AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],,
             withval=yes)
 case $withval in
   yes)
+    HAVE_ZLIB="yes"
     AC_CHECK_HEADERS(zlib.h)
-    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes")
+    AC_CHECK_LIB(z, compress,, unset HAVE_ZLIB)
     ;;
   no)
+    HAVE_ZLIB="no"
     AC_MSG_CHECKING(for GNU zlib)
     AC_MSG_RESULT(suppressed)
     ;;
   *)
+    HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
         zlib_inc="`echo $withval |cut -f1 -d,`"
@@ -723,7 +726,7 @@ case $withval in
       LDFLAGS="$LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB(z, compress, HAVE_ZLIB="yes", LDFLAGS="$saved_LDFLAGS")
+    AC_CHECK_LIB(z, compress,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_ZLIB)
     ;;
 esac
 
