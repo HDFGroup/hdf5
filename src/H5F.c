@@ -77,7 +77,7 @@ static herr_t H5F_close_all(void);
 
 #ifdef NOT_YET
 static herr_t H5F_flush_all(hbool_t invalidate);
-static int H5F_flush_all_cb(H5F_t *f, hid_t fid, const void *_invalidate);
+static int H5F_flush_all_cb(void *f, hid_t fid, void *_invalidate);
 #endif /* NOT_YET */
 
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id);
@@ -85,7 +85,7 @@ static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
 static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 static int H5F_get_objects(H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
-static herr_t H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(H5F_t *file, hid_t fapl, void** file_handle);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -672,9 +672,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_flush_all_cb(H5F_t *f, hid_t UNUSED fid, const void *_invalidate)
+H5F_flush_all_cb(void *_f, hid_t UNUSED fid, void *_invalidate)
 {
-    unsigned    invalidate = (*((const hbool_t*)_invalidate);
+    H5F_t *f=(H5F_t *)_f;
+    unsigned    invalidate = (*((hbool_t*)_invalidate);
 
     FUNC_ENTER_NOINIT(H5F_flush_all_cb);
 
@@ -708,7 +709,7 @@ H5F_flush_all(hbool_t invalidate)
 
     FUNC_ENTER_NOAPI(H5F_flush_all, FAIL);
 
-    H5I_search(H5I_FILE,(H5I_search_func_t)H5F_flush_all_cb,(void*)&invalidate);
+    H5I_search(H5I_FILE,H5F_flush_all_cb,&invalidate);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1112,35 +1113,35 @@ H5F_get_objects(H5F_t *f, unsigned types, int max_index, hid_t *obj_id_list)
      * IDs on the object list */
     if( (types & H5F_OBJ_FILE) && H5I_nmembers(H5I_FILE) > 0 ) {
         olist.obj_type = H5I_FILE;
-        H5I_search(H5I_FILE, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+        H5I_search(H5I_FILE, H5F_get_objects_cb, &olist);
     }
 
     /* Search through dataset IDs to count number of datasets, and put their 
      * IDs on the object list */
     if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_DATASET) && H5I_nmembers(H5I_DATASET) > 0 ) {
         olist.obj_type = H5I_DATASET;
-        H5I_search(H5I_DATASET, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+        H5I_search(H5I_DATASET, H5F_get_objects_cb, &olist);
     }
 
     /* Search through group IDs to count number of groups, and put their 
      * IDs on the object list */
     if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_GROUP) && H5I_nmembers(H5I_GROUP) > 0 ) {
         olist.obj_type = H5I_GROUP;
-        H5I_search(H5I_GROUP, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+        H5I_search(H5I_GROUP, H5F_get_objects_cb, &olist);
     }
 
     /* Search through datatype IDs to count number of named datatypes, and put their 
      * IDs on the object list */
     if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_DATATYPE) && H5I_nmembers(H5I_DATATYPE) > 0 ) {
         olist.obj_type = H5I_DATATYPE;
-        H5I_search(H5I_DATATYPE, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+        H5I_search(H5I_DATATYPE, H5F_get_objects_cb, &olist);
     }
 
     /* Search through attribute IDs to count number of attributes, and put their 
      * IDs on the object list */
     if( (max_index<0 || (int)olist.list_index< max_index) && (types & H5F_OBJ_ATTR) && H5I_nmembers(H5I_ATTR) > 0 ) {
         olist.obj_type = H5I_ATTR;
-        H5I_search(H5I_ATTR, (H5I_search_func_t)H5F_get_objects_cb, &olist);
+        H5I_search(H5I_ATTR, H5F_get_objects_cb, &olist);
     }
 
     /* Set the number of objects currently open */
@@ -1167,11 +1168,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static int
 H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    int      ret_value = FALSE;    /* Return value */
  
     FUNC_ENTER_NOINIT(H5F_get_objects_cb);
 
@@ -1193,7 +1194,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
             /* Check if we've filled up the array */
             if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
-                HGOTO_DONE(SUCCEED);
+                HGOTO_DONE(TRUE);  /* Indicate that the iterator should stop */
 	}
     } else { /* either count opened object IDs or put the IDs on the list */
         H5G_entry_t *ent;        /* Group entry info for object */
@@ -1233,7 +1234,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 
             /* Check if we've filled up the array */
             if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
-                HGOTO_DONE(SUCCEED);
+                HGOTO_DONE(TRUE);  /* Indicate that the iterator should stop */
     	}
     }
 
@@ -1330,7 +1331,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_equal(void *_haystack, hid_t UNUSED id, const void *_needle)
+H5F_equal(void *_haystack, hid_t UNUSED id, void *_needle)
 {
     H5F_t		*haystack = (H5F_t*)_haystack;
     const H5FD_t	*needle = (const H5FD_t*)_needle;
