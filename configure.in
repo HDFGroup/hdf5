@@ -134,8 +134,11 @@ dnl Check for system header files.
 dnl
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(io.h sys/resource.h sys/time.h unistd.h winsock.h)
-AC_CHECK_HEADERS(sys/ioctl.h sys/stat.h)
+dnl Unix
+AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
+dnl Windows
+AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
+
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.
@@ -144,6 +147,7 @@ AC_TYPE_OFF_T
 AC_CHECK_TYPE(size_t, unsigned long)
 AC_CHECK_TYPE(ssize_t, long)
 AC_C_BIGENDIAN
+AC_CHECK_SIZEOF(char, 1)
 AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)

@@ -130,6 +130,26 @@ extern H5T_overflow_t H5T_overflow_g;
 H5T_path_t *H5T_path_find (const char *name, const H5T_t *src,
 			   const H5T_t *dst, hbool_t create, H5T_conv_t func);
 
+/*
+ * Alignment information for native types. A value of N indicates that the
+ * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
+ * N=1 no alignment is required; N=0 implies that alignment constraints were
+ * not calculated.
+ */
+extern size_t	H5T_NATIVE_SCHAR_ALIGN_g;
+extern size_t	H5T_NATIVE_UCHAR_ALIGN_g;
+extern size_t	H5T_NATIVE_SHORT_ALIGN_g;
+extern size_t	H5T_NATIVE_USHORT_ALIGN_g;
+extern size_t	H5T_NATIVE_INT_ALIGN_g;
+extern size_t	H5T_NATIVE_UINT_ALIGN_g;
+extern size_t	H5T_NATIVE_LONG_ALIGN_g;
+extern size_t	H5T_NATIVE_ULONG_ALIGN_g;
+extern size_t	H5T_NATIVE_LLONG_ALIGN_g;
+extern size_t	H5T_NATIVE_ULLONG_ALIGN_g;
+extern size_t	H5T_NATIVE_FLOAT_ALIGN_g;
+extern size_t	H5T_NATIVE_DOUBLE_ALIGN_g;
+extern size_t	H5T_NATIVE_LDOUBLE_ALIGN_g;
+
 /* Conversion functions */
 herr_t H5T_conv_order (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *_buf, void *bkg);

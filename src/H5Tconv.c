@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 1998 Spizella Software
- *                    All rights reserved.
+ *		      All rights reserved.
  *
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
- *              Tuesday, January 13, 1998
+ * Programmer:	Robb Matzke <robb@arborea.spizella.com>
+ *		Tuesday, January 13, 1998
  *
- * Purpose:     Data type conversions.
+ * Purpose:	Data type conversions.
  */
-#define H5T_PACKAGE             /*suppress error about including H5Tpkg      */
+#define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
 #define PABLO_MASK    H5T_conv_mask
 #include <H5Iprivate.h>
@@ -41,17 +41,17 @@ static intn interface_initialize_g = 0;
  * magnitude that cannot be represented by the destination type.
  *
  * Suffix	Description
- * ------       -----------
+ * ------	-----------
  * sS:		Signed integers to signed integers where the destination is
- *		at least as wide as the source.  This case cannot generate
+ *		at least as wide as the source.	 This case cannot generate
  *		overflows.
  *
  * sU:		Signed integers to unsigned integers where the destination is
- *		at least as wide as the source.  This case experiences
+ *		at least as wide as the source.	 This case experiences
  *		overflows when the source value is negative.
  *
  * uS:		Unsigned integers to signed integers where the destination is
- *		at least as wide as the source.  This case can experience
+ *		at least as wide as the source.	 This case can experience
  *		overflows when the source and destination are the same size.
  *
  * uU:		Unsigned integers to unsigned integers where the destination
@@ -101,8 +101,8 @@ static intn interface_initialize_g = 0;
  *
  * DT:		The C name for the destination data type (e.g., signed char)
  *
- * D_MIN:	The minimum possible destination value.  For unsigned
- *		destination types this should be zero.  For signed
+ * D_MIN:	The minimum possible destination value.	 For unsigned
+ *		destination types this should be zero.	For signed
  *		destination types it's a negative value with a magnitude that
  *		is usually one greater than D_MAX.  Source values which are
  *		smaller than D_MIN generate overflows.
@@ -111,374 +111,217 @@ static intn interface_initialize_g = 0;
  *		are larger than D_MAX generate overflows.
  * 
  */
-
-#define H5T_CONV_sS(CDATA,BUF,NELMTS,ST,DT) {				      \
-    size_t		elmtno;		/*element number		*/    \
-    ST			*s;		/*source buffer			*/    \
-    DT			*d;		/*destination buffer		*/    \
-									      \
+#define H5T_CONV_sS(S_ALIGN,D_ALIGN,ST,DT) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF)+(NELMTS);					      \
-	d = (DT*)(BUF)+(NELMTS);					      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++) {			      \
-	    *--d = *--s;						      \
-	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    CI_BEGIN(S_ALIGN, D_ALIGN, ST, DT, nelmts-1, --) {			      \
+	*d = *s;							      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_sU(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT) {			      \
-    size_t		elmtno;		/*element number		*/    \
-    ST			*s;		/*source buffer			*/    \
-    DT			*d;		/*destination buffer		*/    \
-									      \
+#define H5T_CONV_sU(STYPE,DTYPE,ST,DT) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF)+(NELMTS)-1;					      \
-	d = (DT*)(BUF)+(NELMTS)-1;					      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, --s, --d) {		      \
-	    if (*s<0) {							      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = 0;						      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1, --) {			      \
+	if (*s<0) {							      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = 0;							      \
 	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_uS(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
-    size_t		elmtno;		/*element number		*/    \
-    ST			*s;		/*source buffer			*/    \
-    DT			*d;		/*destination buffer		*/    \
-									      \
+#define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MAX) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF)+(NELMTS)-1;					      \
-	d = (DT*)(BUF)+(NELMTS)-1;					      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, --s, --d) {		      \
-	    if (*s > (D_MAX)) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1, --) {			      \
+	if (*s > (D_MAX)) {						      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
 	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_uU(CDATA,BUF,NELMTS,ST,DT) {				      \
-    size_t		elmtno;		/*element number		*/    \
-    ST			*s;		/*source buffer			*/    \
-    DT			*d;		/*destination buffer		*/    \
-									      \
+#define H5T_CONV_uU(STYPE,DTYPE,ST,DT) {				      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF)+(NELMTS);					      \
-	d = (DT*)(BUF)+(NELMTS);					      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++) {			      \
-	    *--d = *--s;						      \
-	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, nelmts-1, --) {			      \
+	*d = *s;							      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_Ss(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MIN,D_MAX) {	      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
+#define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s > (DT)(D_MAX)) {					      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else if (*s < (D_MIN)) {					      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MIN);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s > (DT)(D_MAX)) {						      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
 	    }								      \
+	} else if (*s < (D_MIN)) {					      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MIN);						      \
+	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_Su(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
+#define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MAX) {				      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s < 0) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = 0;						      \
-		}							      \
-	    } else if (sizeof(ST)>sizeof(DT) && *s>(D_MAX)) {		      \
-                /*sign vs. unsign ok in previous line*/  		      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s < 0) {							      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = 0;							      \
 	    }								      \
+	} else if (sizeof(ST)>sizeof(DT) && *s>(D_MAX)) {		      \
+	    /*sign vs. unsign ok in previous line*/			      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
+	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_Us(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
+#define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MAX) {				      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s > (D_MAX)) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s > (D_MAX)) {						      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
 	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_Uu(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
+#define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MAX) {				      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s > (D_MAX)) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s > (D_MAX)) {						      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
 	    }								      \
+	} else {							      \
+	    *d = *s;							      \
 	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
-    }									      \
+    } CI_END;								      \
 }
 
-#define H5T_CONV_su(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT) {			      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
+#define H5T_CONV_su(STYPE,DTYPE,ST,DT) {				      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s < 0) {							      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = 0;							      \
+	    }								      \
+	} else {							      \
+	    *d = *s;							      \
+	}								      \
+    } CI_END;								      \
+}
+
+#define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MAX) {				      \
+    assert(sizeof(ST)==sizeof(DT));					      \
+    CI_BEGIN(STYPE, DTYPE, ST, DT, 0, ++) {				      \
+	if (*s > (D_MAX)) {						      \
+	    if (!H5T_overflow_g ||					      \
+		(H5T_overflow_g)(src_id, dst_id, s, d)<0) {		      \
+		*d = (D_MAX);						      \
+	    }								      \
+	} else {							      \
+	    *d = *s;							      \
+	}								      \
+    } CI_END;								      \
+}
+
+/* The first part of every integer hardware conversion macro */
+#define CI_BEGIN(STYPE,DTYPE,ST,DT,STRT,DIR) {				      \
+    size_t	elmtno;			/*element number		*/    \
+    ST		*src, *s;		/*source buffer			*/    \
+    DT		*dst, *d;		/*destination buffer		*/    \
+    H5T_t	*st, *dt;		/*src and dest data types	*/    \
+    long_long	aligned;		/*largest integer type, aligned	*/    \
+    hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
 									      \
+    switch (cdata->command) {						      \
+    case H5T_CONV_INIT:							      \
+	cdata->need_bkg = H5T_BKG_NO;					      \
+	break;								      \
     case H5T_CONV_FREE:							      \
 	break;								      \
-									      \
     case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s < 0) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = 0;						      \
-		}							      \
+	src = (ST*)buf+(STRT);						      \
+	dst = (DT*)buf+(STRT);						      \
+	st = H5I_object(src_id);					      \
+	dt = H5I_object(dst_id);					      \
+	assert(st && dt);						      \
+	s_mv = H5T_NATIVE_##STYPE##_ALIGN_g>1 &&			      \
+               ((size_t)buf%H5T_NATIVE_##STYPE##_ALIGN_g ||		      \
+		st->size%H5T_NATIVE_##STYPE##_ALIGN_g);			      \
+	d_mv = H5T_NATIVE_##DTYPE##_ALIGN_g>1 &&			      \
+               ((size_t)buf%H5T_NATIVE_##DTYPE##_ALIGN_g ||		      \
+                dt->size%H5T_NATIVE_##DTYPE##_ALIGN_g);			      \
+        CI_DEBUG(s_mv, STYPE, ST);					      \
+        CI_DEBUG(d_mv, DTYPE, DT);					      \
+	for (elmtno=0; elmtno<nelmts; elmtno++, DIR src,  DIR dst) {	      \
+	    if (s_mv) {							      \
+		memcpy(&aligned, src, st->size);			      \
+		s = (ST*)&aligned;					      \
 	    } else {							      \
-		*d = *s;						      \
+		s = src;						      \
 	    }								      \
-	}								      \
-	break;								      \
-									      \
+	    if (d_mv) {							      \
+		d = (DT*)&aligned;					      \
+	    } else {							      \
+		d = dst;						      \
+	    }
+	    /* ... user-defined stuff here ... */
+#define CI_END								      \
+            if (d_mv) memcpy(dst, &aligned, dt->size);			      \
+        }								      \
+        break;								      \
     default:								      \
 	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
 		      "unknown conversion command");			      \
     }									      \
 }
 
-#define H5T_CONV_us(CDATA,S_ID,D_ID,BUF,NELMTS,ST,DT,D_MAX) {		      \
-    size_t	elmtno;			/*element number		*/    \
-    ST		*s;			/*source buffer			*/    \
-    DT		*d;			/*destination buffer		*/    \
-									      \
-    assert(sizeof(ST)==sizeof(DT));					      \
-    switch ((CDATA)->command) {						      \
-    case H5T_CONV_INIT:							      \
-	(CDATA)->need_bkg = H5T_BKG_NO;					      \
-	break;								      \
-									      \
-    case H5T_CONV_FREE:							      \
-	break;								      \
-									      \
-    case H5T_CONV_CONV:							      \
-	s = (ST*)(BUF);							      \
-	d = (DT*)(BUF);							      \
-									      \
-	for (elmtno=0; elmtno<(NELMTS); elmtno++, d++, s++) {		      \
-	    if (*s > (D_MAX)) {						      \
-		if (!H5T_overflow_g ||					      \
-		    (H5T_overflow_g)((S_ID), (D_ID), s, d)<0) {		      \
-		    *d = (D_MAX);					      \
-		}							      \
-	    } else {							      \
-		*d = *s;						      \
-	    }								      \
-	}								      \
-	break;								      \
-									      \
-    default:								      \
-	HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,		      \
-		      "unknown conversion command");			      \
+/* Print alignment information */
+#ifdef H5T_DEBUG
+#   define CI_DEBUG(MV,HDF_TYPE,C_TYPE) {				      \
+    if (MV && H5DEBUG(T)) {						      \
+	fprintf(H5DEBUG(T), "<%d-byte alignment for %s>",		      \
+		H5T_NATIVE_##HDF_TYPE##_ALIGN_g, #C_TYPE);		      \
     }									      \
 }
+#else
+#   define CI_DEBUG(MV,HDF_TYPE,C_TYPE) /*void*/
+#endif
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_conv_noop
+ * Function:	H5T_conv_noop
  *
- * Purpose:     The no-op conversion.  The library knows about this
- *              conversion without it being registered.
+ * Purpose:	The no-op conversion.  The library knows about this
+ *		conversion without it being registered.
  *
  * Return: Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Wednesday, January 14, 1998
+ * Programmer:	Robb Matzke
+ *		Wednesday, January 14, 1998
  *
  * Modifications:
  *
@@ -487,7 +330,7 @@ static intn interface_initialize_g = 0;
 herr_t
 H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	      H5T_cdata_t *cdata, size_t __unused__ nelmts,
-              void __unused__ *buf, void __unused__ *background)
+	      void __unused__ *buf, void __unused__ *background)
 {
     FUNC_ENTER(H5T_conv_noop, FAIL);
 
@@ -513,17 +356,17 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_conv_order
+ * Function:	H5T_conv_order
  *
- * Purpose:     Convert one type to another when byte order is the only
- *              difference.
+ * Purpose:	Convert one type to another when byte order is the only
+ *		difference.
  *
- * Note:        This is a soft conversion function.
+ * Note:	This is a soft conversion function.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Tuesday, January 13, 1998
+ * Programmer:	Robb Matzke
+ *		Tuesday, January 13, 1998
  *
  * Modifications:
  *
@@ -531,58 +374,58 @@ H5T_conv_noop(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  */
 herr_t
 H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-               void *_buf, void __unused__ *background)
+	       void *_buf, void __unused__ *background)
 {
-    uint8_t     *buf = (uint8_t*)_buf;
+    uint8_t	*buf = (uint8_t*)_buf;
     uint8_t	tmp;
-    H5T_t       *src = NULL;
-    H5T_t       *dst = NULL;
+    H5T_t	*src = NULL;
+    H5T_t	*dst = NULL;
     size_t	i, j, md;
 
     FUNC_ENTER(H5T_conv_order, FAIL);
 
     switch (cdata->command) {
     case H5T_CONV_INIT:
-        /* Capability query */
+	/* Capability query */
 	if (H5I_DATATYPE != H5I_get_type(src_id) ||
 	    NULL == (src = H5I_object(src_id)) ||
 	    H5I_DATATYPE != H5I_get_type(dst_id) ||
 	    NULL == (dst = H5I_object(dst_id))) {
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
-        if (src->size != dst->size ||
-            0 != src->u.atomic.offset ||
-            0 != dst->u.atomic.offset ||
-            !((H5T_ORDER_BE == src->u.atomic.order &&
-               H5T_ORDER_LE == dst->u.atomic.order) ||
-              (H5T_ORDER_LE == src->u.atomic.order &&
-               H5T_ORDER_BE == dst->u.atomic.order))) {
-            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                          "conversion not supported");
-        }
-        switch (src->type) {
-        case H5T_INTEGER:
-            /* nothing to check */
-            break;
+	if (src->size != dst->size ||
+	    0 != src->u.atomic.offset ||
+	    0 != dst->u.atomic.offset ||
+	    !((H5T_ORDER_BE == src->u.atomic.order &&
+	       H5T_ORDER_LE == dst->u.atomic.order) ||
+	      (H5T_ORDER_LE == src->u.atomic.order &&
+	       H5T_ORDER_BE == dst->u.atomic.order))) {
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "conversion not supported");
+	}
+	switch (src->type) {
+	case H5T_INTEGER:
+	    /* nothing to check */
+	    break;
 
-        case H5T_FLOAT:
-            if (src->u.atomic.u.f.sign != dst->u.atomic.u.f.sign ||
-                src->u.atomic.u.f.epos != dst->u.atomic.u.f.epos ||
-                src->u.atomic.u.f.esize != dst->u.atomic.u.f.esize ||
-                src->u.atomic.u.f.ebias != dst->u.atomic.u.f.ebias ||
-                src->u.atomic.u.f.mpos != dst->u.atomic.u.f.mpos ||
-                src->u.atomic.u.f.msize != dst->u.atomic.u.f.msize ||
-                src->u.atomic.u.f.norm != dst->u.atomic.u.f.norm ||
-                src->u.atomic.u.f.pad != dst->u.atomic.u.f.pad) {
-                HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                              "conversion not supported");
-            }
-            break;
+	case H5T_FLOAT:
+	    if (src->u.atomic.u.f.sign != dst->u.atomic.u.f.sign ||
+		src->u.atomic.u.f.epos != dst->u.atomic.u.f.epos ||
+		src->u.atomic.u.f.esize != dst->u.atomic.u.f.esize ||
+		src->u.atomic.u.f.ebias != dst->u.atomic.u.f.ebias ||
+		src->u.atomic.u.f.mpos != dst->u.atomic.u.f.mpos ||
+		src->u.atomic.u.f.msize != dst->u.atomic.u.f.msize ||
+		src->u.atomic.u.f.norm != dst->u.atomic.u.f.norm ||
+		src->u.atomic.u.f.pad != dst->u.atomic.u.f.pad) {
+		HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			      "conversion not supported");
+	    }
+	    break;
 
-        default:
-            HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
-                          "conversion not supported");
-        }
+	default:
+	    HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			  "conversion not supported");
+	}
 	cdata->need_bkg = H5T_BKG_NO;
 	break;
 
@@ -627,7 +470,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Monday, January 26, 1998
+ *		Monday, January 26, 1998
  *
  * Modifications:
  *
@@ -647,7 +490,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 	/*
 	 * Notice: the thing marked with `!' below really is `dst' and not
 	 *	   `src' because we're only interested in the members of the
-	 * 	   source type that are also in the destination type.
+	 *	   source type that are also in the destination type.
 	 */
 	cdata->priv = priv = H5MM_calloc (sizeof(H5T_conv_struct_t));
 	if (NULL==priv) {
@@ -788,7 +631,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
  * Purpose:	Converts between compound data types.  This is a soft
  *		conversion function.  The algorithm is basically:
  *
- * 		For I=1..NUM_MEMBERS do
+ *		For I=1..NUM_MEMBERS do
  *		  If sizeof detination type <= sizeof source type then
  *		    Convert member to destination type;
  *		  Move member as far left as possible;
@@ -798,12 +641,12 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
  *		    Convert member to destination type;
  *		  Move member to correct position in BACKGROUND
  *
- * 		Copy BACKGROUND to BUF
+ *		Copy BACKGROUND to BUF
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Thursday, January 22, 1998
+ *		Thursday, January 22, 1998
  *
  * Modifications:
  *
@@ -999,11 +842,11 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Wednesday, June 10, 1998
+ *		Wednesday, June 10, 1998
  *
  * Modifications:
  *
- * 	Robb Matzke, 7 Jul 1998
+ *	Robb Matzke, 7 Jul 1998
  *	Added overflow handling.
  *
  *-------------------------------------------------------------------------
@@ -1355,11 +1198,11 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Tuesday, June 23, 1998
+ *		Tuesday, June 23, 1998
  *
  * Modifications:
  *
- * 	Robb Matzke, 7 Jul 1998
+ *	Robb Matzke, 7 Jul 1998
  *	Added overflow handling.
  *
  *-------------------------------------------------------------------------
@@ -1371,7 +1214,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     /* Traversal-related variables */
     H5T_t	*src_p;			/*source data type		*/
     H5T_t	*dst_p;			/*destination data type		*/
-    H5T_atomic_t src;			/*atomic source info 		*/
+    H5T_atomic_t src;			/*atomic source info		*/
     H5T_atomic_t dst;			/*atomic destination info	*/
     intn	direction;		/*forward or backward traversal	*/
     size_t	elmtno;			/*element number		*/
@@ -1534,7 +1377,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 	    /*
 	     * Get the exponent as an unsigned quantity from the section of
-	     * the source bit field where it's located.  Don't worry about
+	     * the source bit field where it's located.	 Don't worry about
 	     * the exponent bias yet.
 	     */
 	    expo = H5T_bit_get_d(s, src.u.f.epos, src.u.f.esize);
@@ -1616,7 +1459,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    } else if (expo>=expo_max) {
 		/*
 		 * The exponent is too large to fit in the available region
-		 * or it results in the maximum possible value.  Use positive
+		 * or it results in the maximum possible value.	 Use positive
 		 * or negative infinity instead unless the application
 		 * specifies something else.  Before calling the overflow
 		 * handler make sure the source buffer we hand it is in the
@@ -1645,7 +1488,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 	    /*
 	     * If the destination mantissa is smaller than the source
-	     * mantissa then round the source mantissa.  Rounding may cause a
+	     * mantissa then round the source mantissa.	 Rounding may cause a
 	     * carry in which case the exponent has to be re-evaluated for
 	     * overflow.  That is, if `carry' is clear then the implied
 	     * mantissa bit is `1', else it is `10' binary.
@@ -1714,7 +1557,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     H5T_PAD_ONE==dst.msb_pad);
 	    }
 
- 	    /*
+	    /*
 	     * Put the destination in the correct byte order.  See note at
 	     * beginning of loop.
 	     */
@@ -1756,7 +1599,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Friday, August  7, 1998
+ *		Friday, August	7, 1998
  *
  * Modifications:
  *
@@ -1984,7 +1827,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -1995,7 +1838,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_uchar, FAIL);
-    H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_su(SCHAR, UCHAR,
 		signed char, unsigned char);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2011,7 +1854,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -2022,8 +1865,9 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_schar, FAIL);
-    H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, signed char, SCHAR_MAX);
+    H5T_CONV_us(UCHAR, SCHAR,
+		unsigned char, signed char,
+		SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2038,19 +1882,19 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_short, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, signed char, short);
+    H5T_CONV_sS(SCHAR, SHORT,
+		signed char, short);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2065,7 +1909,7 @@ H5T_conv_schar_short(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2076,7 +1920,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ushort, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(SCHAR, USHORT,
 		signed char, unsigned short);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2092,7 +1936,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2103,8 +1947,9 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_short, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, short, SHRT_MAX);
+    H5T_CONV_uS(UCHAR, SHORT,
+		unsigned char, short,
+		SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2119,19 +1964,19 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ushort(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		      void __unused__ *bkg)
+H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ushort, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned short);
+    H5T_CONV_uU(UCHAR, USHORT,
+		unsigned char, unsigned short);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2146,19 +1991,19 @@ H5T_conv_uchar_ushort(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		   void __unused__ *bkg)
+H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_int, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, signed char, int);
+    H5T_CONV_sS(SCHAR, INT,
+		signed char, int);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2173,7 +2018,7 @@ H5T_conv_schar_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2184,7 +2029,8 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_uint, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, signed char, unsigned);
+    H5T_CONV_sU(SCHAR, UINT,
+		signed char, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2199,7 +2045,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2210,8 +2056,9 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_int, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, int, INT_MAX);
+    H5T_CONV_uS(UCHAR, INT,
+		unsigned char, int,
+		INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2226,19 +2073,19 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_uint, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned);
+    H5T_CONV_uU(UCHAR, UINT,
+		unsigned char, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2253,19 +2100,19 @@ H5T_conv_uchar_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_long, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, signed char, long);
+    H5T_CONV_sS(SCHAR, LONG,
+		signed char, long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2280,7 +2127,7 @@ H5T_conv_schar_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2291,7 +2138,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ulong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(SCHAR, ULONG,
 		signed char, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2307,7 +2154,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2318,8 +2165,9 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_long, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, long, LONG_MAX);
+    H5T_CONV_uS(UCHAR, LONG,
+		unsigned char, long,
+		LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2334,19 +2182,19 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ulong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned long);
+    H5T_CONV_uU(UCHAR, ULONG,
+		unsigned char, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2361,19 +2209,19 @@ H5T_conv_uchar_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, signed char, long_long);
+    H5T_CONV_sS(SCHAR, LLONG,
+		signed char, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2388,7 +2236,7 @@ H5T_conv_schar_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2399,7 +2247,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_schar_ullong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(SCHAR, ULLONG,
 		signed char, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2415,7 +2263,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2426,8 +2274,9 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_llong, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned char, long_long, LLONG_MAX);
+    H5T_CONV_uS(UCHAR, LLONG,
+		unsigned char, long_long,
+		LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2442,19 +2291,19 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		      void __unused__ *bkg)
+H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uchar_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned char, unsigned long_long);
+    H5T_CONV_uU(UCHAR, ULLONG,
+		unsigned char, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2469,7 +2318,7 @@ H5T_conv_uchar_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2480,8 +2329,9 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_schar, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		short, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(SHORT, SCHAR,
+		short, signed char,
+		SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2496,7 +2346,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2507,8 +2357,9 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_uchar, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		short, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(SHORT, UCHAR,
+		short, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2523,7 +2374,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2534,8 +2385,9 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_schar, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, signed char, SCHAR_MAX);
+    H5T_CONV_Us(USHORT, SCHAR,
+		unsigned short, signed char,
+		SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2550,7 +2402,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2561,8 +2413,9 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_uchar, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(USHORT, UCHAR,
+		unsigned short, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2577,7 +2430,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -2588,7 +2441,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ushort, FAIL);
-    H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_su(SHORT, USHORT,
 		short, unsigned short);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2604,7 +2457,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -2615,8 +2468,9 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_short, FAIL);
-    H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, short, SHRT_MAX);
+    H5T_CONV_us(USHORT, SHORT,
+		unsigned short, short,
+		SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2631,19 +2485,19 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		   void __unused__ *bkg)
+H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_int, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, short, int);
+    H5T_CONV_sS(SHORT, INT,
+		short, int);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2658,7 +2512,7 @@ H5T_conv_short_int(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2669,7 +2523,8 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_uint, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, short, unsigned);
+    H5T_CONV_sU(SHORT, UINT,
+		short, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2684,7 +2539,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2695,8 +2550,9 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_int, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, int, INT_MAX);
+    H5T_CONV_uS(USHORT, INT,
+		unsigned short, int,
+		INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2711,19 +2567,19 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_uint, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned);
+    H5T_CONV_uU(USHORT, UINT,
+		unsigned short, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2738,19 +2594,19 @@ H5T_conv_ushort_uint(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_long, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, short, long);
+    H5T_CONV_sS(SHORT, LONG,
+		short, long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2765,7 +2621,7 @@ H5T_conv_short_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2776,7 +2632,8 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ulong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, short, unsigned long);
+    H5T_CONV_sU(SHORT, ULONG,
+		short, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2791,7 +2648,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2802,8 +2659,9 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_long, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, long, LONG_MAX);
+    H5T_CONV_uS(USHORT, LONG,
+		unsigned short, long,
+		LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2818,19 +2676,19 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		      void __unused__ *bkg)
+H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_ulong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned long);
+    H5T_CONV_uU(USHORT, ULONG,
+		unsigned short, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2845,19 +2703,19 @@ H5T_conv_ushort_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, short, long_long);
+    H5T_CONV_sS(SHORT, LLONG,
+		short, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2872,7 +2730,7 @@ H5T_conv_short_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2883,7 +2741,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_short_ullong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(SHORT, ULLONG,
 		short, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -2899,7 +2757,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2910,8 +2768,9 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_llong, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned short, long_long, LLONG_MAX);
+    H5T_CONV_uS(USHORT, LLONG,
+		unsigned short, long_long,
+		LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2926,19 +2785,19 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		       H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		       void __unused__ *bkg)
+H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ushort_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned short, unsigned long_long);
+    H5T_CONV_uU(USHORT, ULLONG,
+		unsigned short, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2953,7 +2812,7 @@ H5T_conv_ushort_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2964,8 +2823,9 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_schar, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		int, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(INT, SCHAR,
+		int, signed char,
+		SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -2980,7 +2840,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -2991,8 +2851,9 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_uchar, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		int, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(INT, UCHAR,
+		int, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3007,7 +2868,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3018,8 +2879,9 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_schar, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, signed char, SCHAR_MAX);
+    H5T_CONV_Us(UINT, SCHAR,
+		unsigned, signed char,
+		SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3034,7 +2896,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3045,8 +2907,9 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_uchar, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(UINT, UCHAR,
+		unsigned, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3061,7 +2924,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3072,8 +2935,9 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_short, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		int, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(INT, SHORT,
+		int, short,
+		SHRT_MIN, SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3088,7 +2952,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3099,8 +2963,9 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ushort, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		int, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(INT, USHORT,
+		int, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3115,7 +2980,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3126,8 +2991,9 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_short, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, short, SHRT_MAX);
+    H5T_CONV_Us(UINT, SHORT,
+		unsigned, short,
+		SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3142,7 +3008,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3153,8 +3019,9 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ushort, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(UINT, USHORT,
+		unsigned, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3169,7 +3036,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -3180,7 +3047,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_uint, FAIL);
-    H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_su(INT, UINT,
 		int, unsigned);
     FUNC_LEAVE(SUCCEED);
 }
@@ -3196,7 +3063,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -3207,8 +3074,9 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_int, FAIL);
-    H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, int, INT_MAX);
+    H5T_CONV_us(UINT, INT,
+		unsigned, int,
+		INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3223,19 +3091,19 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		  H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		  void __unused__ *bkg)
+H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		  size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_long, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, int, long);
+    H5T_CONV_sS(INT, LONG,
+		int, long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3250,7 +3118,7 @@ H5T_conv_int_long(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3261,7 +3129,8 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ulong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts, int, unsigned long);
+    H5T_CONV_sU(INT, LONG,
+		int, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3276,7 +3145,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3287,8 +3156,9 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_long, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, long, LONG_MAX);
+    H5T_CONV_uS(UINT, LONG,
+		unsigned, long,
+		LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3303,19 +3173,19 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ulong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned, unsigned long);
+    H5T_CONV_uU(UINT, ULONG,
+		unsigned, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3330,19 +3200,19 @@ H5T_conv_uint_ulong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		   H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		   void __unused__ *bkg)
+H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, int, long_long);
+    H5T_CONV_sS(INT, LLONG,
+		int, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3357,7 +3227,7 @@ H5T_conv_int_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3368,7 +3238,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_int_ullong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(INT, ULLONG,
 		int, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -3384,7 +3254,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3395,8 +3265,9 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_llong, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned, long_long, LLONG_MAX);
+    H5T_CONV_uS(UINT, LLONG,
+		unsigned, long_long,
+		LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3411,19 +3282,19 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		     H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		     void __unused__ *bkg)
+H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_uint_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned, unsigned long_long);
+    H5T_CONV_uU(UINT, ULLONG,
+		unsigned, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3438,7 +3309,7 @@ H5T_conv_uint_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3449,8 +3320,9 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_schar, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(LONG, SCHAR,
+		long, signed char,
+		SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3465,7 +3337,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3476,8 +3348,9 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_uchar, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(LONG, UCHAR,
+		long, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3492,7 +3365,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3503,8 +3376,9 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_schar, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, signed char, SCHAR_MAX);
+    H5T_CONV_Us(ULONG, SCHAR,
+		unsigned long, signed char,
+		SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3519,7 +3393,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3530,8 +3404,9 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_uchar, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(ULONG, UCHAR,
+		unsigned long, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3546,7 +3421,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3557,8 +3432,9 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_short, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(LONG, SHORT,
+		long, short,
+		SHRT_MIN, SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3573,7 +3449,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3584,8 +3460,9 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ushort, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(LONG, USHORT,
+		long, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3600,7 +3477,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3611,8 +3488,9 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_short, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, short, SHRT_MAX);
+    H5T_CONV_Us(ULONG, SHORT,
+		unsigned long, short,
+		SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3627,7 +3505,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3638,8 +3516,9 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_ushort, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(ULONG, USHORT,
+		unsigned long, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3654,7 +3533,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3665,8 +3544,9 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_int, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long, int, INT_MIN, INT_MAX);
+    H5T_CONV_Ss(LONG, INT,
+		long, int,
+		INT_MIN, INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3681,7 +3561,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3692,8 +3572,9 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_uint, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long, unsigned, UINT_MAX);
+    H5T_CONV_Su(LONG, UINT,
+		long, unsigned,
+		UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3708,7 +3589,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3719,8 +3600,9 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_int, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, int, INT_MAX);
+    H5T_CONV_Us(ULONG, INT,
+		unsigned long, int,
+		INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3735,7 +3617,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3746,8 +3628,9 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_uint, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, unsigned, UINT_MAX);
+    H5T_CONV_Uu(ULONG, UINT,
+		unsigned long, unsigned,
+		UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3762,7 +3645,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -3773,7 +3656,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ulong, FAIL);
-    H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_su(LONG, ULONG,
 		long, unsigned long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -3789,7 +3672,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -3800,8 +3683,9 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_long, FAIL);
-    H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, long, LONG_MAX);
+    H5T_CONV_us(ULONG, LONG,
+		unsigned long, long,
+		LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3816,19 +3700,19 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		    H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		    void __unused__ *bkg)
+H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
-    H5T_CONV_sS(cdata, buf, nelmts, long, long_long);
+    H5T_CONV_sS(LONG, LLONG,
+		long, long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3843,7 +3727,7 @@ H5T_conv_long_llong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3854,7 +3738,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_ullong, FAIL);
-    H5T_CONV_sU(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_sU(LONG, ULLONG,
 		long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -3870,7 +3754,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3881,8 +3765,9 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_long_llong, FAIL);
-    H5T_CONV_uS(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long, long_long, LLONG_MAX);
+    H5T_CONV_uS(ULONG, LLONG,
+		unsigned long, long_long,
+		LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3897,19 +3782,19 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		      H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		      void __unused__ *bkg)
+H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ulong_ullong, FAIL);
-    H5T_CONV_uU(cdata, buf, nelmts, unsigned long, unsigned long_long);
+    H5T_CONV_uU(ULONG, ULLONG,
+		unsigned long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3924,7 +3809,7 @@ H5T_conv_ulong_ullong(hid_t __unused__ src_id, hid_t __unused__ dst_id,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3935,8 +3820,9 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_schar, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long_long, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(LLONG, SCHAR,
+		long_long, signed char,
+		SCHAR_MIN, SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3951,7 +3837,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3962,8 +3848,9 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_uchar, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long_long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Su(LLONG, UCHAR,
+		long_long, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -3978,7 +3865,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -3989,8 +3876,9 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_schar, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, signed char, SCHAR_MAX);
+    H5T_CONV_Us(ULLONG, SCHAR,
+		unsigned long_long, signed char,
+		SCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4005,7 +3893,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4016,8 +3904,9 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_uchar, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, unsigned char, UCHAR_MAX);
+    H5T_CONV_Uu(ULLONG, UCHAR,
+		unsigned long_long, unsigned char,
+		UCHAR_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4032,7 +3921,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4043,8 +3932,9 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_short, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long_long, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(LLONG, SHORT,
+		long_long, short,
+		SHRT_MIN, SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4059,7 +3949,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4070,8 +3960,9 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ushort, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long_long, unsigned short, USHRT_MAX);
+    H5T_CONV_Su(LLONG, USHORT,
+		long_long, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4086,7 +3977,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4097,8 +3988,9 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_short, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, short, SHRT_MAX);
+    H5T_CONV_Us(ULLONG, SHORT,
+		unsigned long_long, short,
+		SHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4113,7 +4005,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4124,8 +4016,9 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_ushort, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, unsigned short, USHRT_MAX);
+    H5T_CONV_Uu(ULLONG, USHORT,
+		unsigned long_long, unsigned short,
+		USHRT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4140,7 +4033,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4151,8 +4044,9 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_int, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long_long, int, INT_MIN, INT_MAX);
+    H5T_CONV_Ss(LLONG, INT,
+		long_long, int,
+		INT_MIN, INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4167,7 +4061,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4178,8 +4072,9 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_uint, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long_long, unsigned, UINT_MAX);
+    H5T_CONV_Su(LLONG, UINT,
+		long_long, unsigned,
+		UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4194,7 +4089,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4205,8 +4100,9 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_int, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, int, INT_MAX);
+    H5T_CONV_Us(ULLONG, INT,
+		unsigned long_long, int,
+		INT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4221,7 +4117,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4232,8 +4128,9 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_uint, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, unsigned, UINT_MAX);
+    H5T_CONV_Uu(ULLONG, UINT,
+		unsigned long_long, unsigned,
+		UINT_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4248,7 +4145,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4259,8 +4156,9 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_long, FAIL);
-    H5T_CONV_Ss(cdata, src_id, dst_id, buf, nelmts,
-		long_long, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Ss(LLONG, LONG,
+		long_long, long,
+		LONG_MIN, LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4275,7 +4173,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4286,8 +4184,9 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ulong, FAIL);
-    H5T_CONV_Su(cdata, src_id, dst_id, buf, nelmts,
-		long_long, unsigned long, ULONG_MAX);
+    H5T_CONV_Su(LLONG, ULONG,
+		long_long, unsigned long,
+		ULONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4302,7 +4201,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4313,8 +4212,9 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_long, FAIL);
-    H5T_CONV_Us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, long, LONG_MAX);
+    H5T_CONV_Us(ULLONG, LONG,
+		unsigned long_long, long,
+		LONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4329,7 +4229,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
- *              Friday, November 13, 1998
+ *		Friday, November 13, 1998
  *
  * Modifications:
  *
@@ -4340,8 +4240,9 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_ulong, FAIL);
-    H5T_CONV_Uu(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, unsigned long, ULONG_MAX);
+    H5T_CONV_Uu(ULLONG, ULONG,
+		unsigned long_long, unsigned long,
+		ULONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4356,7 +4257,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -4367,7 +4268,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_llong_ullong, FAIL);
-    H5T_CONV_su(cdata, src_id, dst_id, buf, nelmts,
+    H5T_CONV_su(LLONG, ULLONG,
 		long_long, unsigned long_long);
     FUNC_LEAVE(SUCCEED);
 }
@@ -4383,7 +4284,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		Failure:	negative
  *
  * Programmer:	Robb Matzke
- *              Monday, November 16, 1998
+ *		Monday, November 16, 1998
  *
  * Modifications:
  *
@@ -4394,8 +4295,9 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, void *buf, void __unused__ *bkg)
 {
     FUNC_ENTER(H5T_conv_ullong_llong, FAIL);
-    H5T_CONV_us(cdata, src_id, dst_id, buf, nelmts,
-		unsigned long_long, long_long, LLONG_MAX);
+    H5T_CONV_us(ULLONG, LLONG,
+		unsigned long_long, long_long,
+		LLONG_MAX);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -4409,20 +4311,22 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Tuesday, June 23, 1998
+ *		Tuesday, June 23, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_double (hid_t __unused__ src_id, hid_t __unused__ dst_id,
-		       H5T_cdata_t *cdata, size_t nelmts, void *buf,
-		       void __unused__ *bkg)
+H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		       size_t nelmts, void *buf, void __unused__ *bkg)
 {
     size_t	elmtno;			/*element number		*/
-    float	*s;			/*source buffer			*/
-    double	*d;			/*destination buffer		*/
+    float	*src, *s;		/*source buffer			*/
+    double	*dst, *d;		/*destination buffer		*/
+    H5T_t	*st, *dt;		/*type descriptors		*/
+    hbool_t	src_mv, dst_mv;		/*align data?			*/
+    double	aligned;		/*aligned data			*/
     
     FUNC_ENTER (H5T_conv_float_double, FAIL);
 
@@ -4435,11 +4339,44 @@ H5T_conv_float_double (hid_t __unused__ src_id, hid_t __unused__ dst_id,
 	break;
 
     case H5T_CONV_CONV:
-	s = (float*)buf + nelmts;
-	d = (double*)buf + nelmts;
+	src = (float*)buf + nelmts-1;
+	dst = (double*)buf + nelmts-1;
+	st = H5I_object(src_id);
+	dt = H5I_object(dst_id);
+	assert(st && dt);
 
-	for (elmtno=0; elmtno<nelmts; elmtno++) {
-	    *--d = *--s;
+	/* Need alignment? */
+	if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
+	    src_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
+		     (st->size % H5T_NATIVE_FLOAT_ALIGN_g);
+	} else {
+	    src_mv = FALSE;
+	}
+	if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
+	    dst_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
+		     (dt->size % H5T_NATIVE_DOUBLE_ALIGN_g);
+	} else {
+	    dst_mv = FALSE;
+	}
+	CI_DEBUG(src_mv, FLOAT, float);
+	CI_DEBUG(dst_mv, DOUBLE, double);
+	
+	for (elmtno=0; elmtno<nelmts; elmtno++, --src, --dst) {
+	    /* Align source and/or destination */
+	    if (src_mv) {
+		memcpy(&aligned, src, st->size);
+		s = (float*)&aligned;
+	    } else {
+		s = src;
+	    }
+	    if (dst_mv) d = (double*)&aligned;
+	    else d = dst;
+
+	    /* Conversion */
+	    *d = *s;
+
+	    /* Unalign destination */
+	    if (dst_mv) memcpy(dst, &aligned, dt->size);
 	}
 	break;
 	    
@@ -4461,11 +4398,11 @@ H5T_conv_float_double (hid_t __unused__ src_id, hid_t __unused__ dst_id,
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *              Tuesday, June 23, 1998
+ *		Tuesday, June 23, 1998
  *
  * Modifications:
  *
- * 	Robb Matzke, 7 Jul 1998
+ *	Robb Matzke, 7 Jul 1998
  *	Added overflow handling.
  *
  *-------------------------------------------------------------------------
@@ -4475,8 +4412,11 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, void *buf, void __unused__ *bkg)
 {
     size_t	elmtno;			/*element number		*/
-    double	*s;			/*source buffer			*/
-    float	*d;			/*destination buffer		*/
+    double	*src, *s;		/*source buffer			*/
+    float	*dst, *d;		/*destination buffer		*/
+    H5T_t	*st, *dt;		/*type descriptors		*/
+    hbool_t	src_mv, dst_mv;		/*align data?			*/
+    double	aligned;		/*aligned data			*/
     
     FUNC_ENTER (H5T_conv_double_float, FAIL);
 
@@ -4489,10 +4429,40 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	break;
 
     case H5T_CONV_CONV:
-	s = (double*)buf;
-	d = (float*)buf;
+	src = (double*)buf;
+	dst = (float*)buf;
+	st = H5I_object(src_id);
+	dt = H5I_object(dst_id);
+	assert(st && dt);
 
-	for (elmtno=0; elmtno<nelmts; elmtno++, d++, s++) {
+	/* Need alignment? */
+	if (H5T_NATIVE_DOUBLE_ALIGN_g>1) {
+	    src_mv = ((size_t)buf % H5T_NATIVE_DOUBLE_ALIGN_g) ||
+		     (st->size % H5T_NATIVE_DOUBLE_ALIGN_g);
+	} else {
+	    src_mv = FALSE;
+	}
+	if (H5T_NATIVE_FLOAT_ALIGN_g>1) {
+	    dst_mv = ((size_t)buf % H5T_NATIVE_FLOAT_ALIGN_g) ||
+		     (dt->size % H5T_NATIVE_FLOAT_ALIGN_g);
+	} else {
+	    dst_mv = FALSE;
+	}
+	CI_DEBUG(src_mv, DOUBLE, double);
+	CI_DEBUG(dst_mv, FLOAT, float);
+	
+	for (elmtno=0; elmtno<nelmts; elmtno++, src++, dst++) {
+	    /* Align source and/or destination */
+	    if (src_mv) {
+		memcpy(&aligned, src, st->size);
+		s = (double*)&aligned;
+	    } else {
+		s = src;
+	    }
+	    if (dst_mv) d = (float*)&aligned;
+	    else d = dst;
+
+	    /* Conversion */
 	    if (*s > FLT_MAX) {
 		if (!H5T_overflow_g ||
 		    (H5T_overflow_g)(src_id, dst_id, s, d)<0) {
@@ -4506,6 +4476,9 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	    } else {
 		*d = *s;
 	    }
+
+	    /* Unalign destination */
+	    if (dst_mv) memcpy(dst, &aligned, dt->size);
 	}
 	break;
 	    
@@ -4663,7 +4636,7 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		d[5] = d[4] = d[3] = d[1] = d[0] = 0 ;
 		break ;
 	    case 31:
-		d[6] |=  0x0f    & (s[3]>>2) ;
+		d[6] |=	 0x0f	 & (s[3]>>2) ;
 		d[5] = (s[3]<<6) | (s[2]>>2) ;
 		d[4] = (s[2]<<6) | (s[1]>>2) ;
 		d[3] = (s[1]<<6) | (s[0]>>2) ;
@@ -4671,7 +4644,7 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		d[1] = d[0] = 0 ;
 		break ;
 	    case 30:
-		d[6] |=  0x0f    & (s[3]>>1) ;
+		d[6] |=	 0x0f	 & (s[3]>>1) ;
 		d[5] = (s[3]<<7) | (s[2]>>1) ;
 		d[4] = (s[2]<<7) | (s[1]>>1) ;
 		d[3] = (s[1]<<7) | (s[0]>>1) ;
@@ -4679,7 +4652,7 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		d[1] = d[0] = 0 ;
 		break ;
 	    case 29:
-		d[6] |=  0x0f    & s[3] ;
+		d[6] |=	 0x0f	 & s[3] ;
 		d[5] = s[2] ;
 		d[4] = s[1] ;
 		d[3] = s[0] ;
@@ -4687,48 +4660,48 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		break ;
 	    case 28:
 		d[6] |= ((s[3]<<1) | (s[2]>>7)) & 0x0f ;
-		d[5] =   (s[2]<<1) | (s[1]>>7) ;
-		d[4] =   (s[1]<<1) | (s[0]>>7) ;
-		d[3] =   (s[0]<<1) ;
+		d[5] =	 (s[2]<<1) | (s[1]>>7) ;
+		d[4] =	 (s[1]<<1) | (s[0]>>7) ;
+		d[3] =	 (s[0]<<1) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 27:
 		d[6] |= ((s[3]<<2) | (s[2]>>6)) & 0x0f ;
-		d[5] =   (s[2]<<2) | (s[1]>>6) ;
-		d[4] =   (s[1]<<2) | (s[0]>>6) ;
-		d[3] =   (s[0]<<2) ;
+		d[5] =	 (s[2]<<2) | (s[1]>>6) ;
+		d[4] =	 (s[1]<<2) | (s[0]>>6) ;
+		d[3] =	 (s[0]<<2) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 26:
 		d[6] |= ((s[3]<<3) | (s[2]>>5)) & 0x0f ;
-		d[5] =   (s[2]<<3) | (s[1]>>5) ;
-		d[4] =   (s[1]<<3) | (s[0]>>5) ;
-		d[3] =   (s[0]<<3) ;
+		d[5] =	 (s[2]<<3) | (s[1]>>5) ;
+		d[4] =	 (s[1]<<3) | (s[0]>>5) ;
+		d[3] =	 (s[0]<<3) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 25:
-		d[6] |=   0x0f   & (s[2]>>4) ;
+		d[6] |=	  0x0f	 & (s[2]>>4) ;
 		d[5] = (s[2]<<4) | (s[1]>>4) ;
 		d[4] = (s[1]<<4) | (s[0]>>4) ;
 		d[3] = (s[0]<<4) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 24:
-		d[6] |=   0x0f   & (s[2]>>3) ;
+		d[6] |=	  0x0f	 & (s[2]>>3) ;
 		d[5] = (s[2]<<5) | (s[1]>>3) ;
 		d[4] = (s[1]<<5) | (s[0]>>3) ;
 		d[3] = (s[0]<<5) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 23:
-		d[6] |=   0x0f   & (s[2]>>2) ;
+		d[6] |=	  0x0f	 & (s[2]>>2) ;
 		d[5] = (s[2]<<6) | (s[1]>>2) ;
 		d[4] = (s[1]<<6) | (s[0]>>2) ;
 		d[3] = (s[0]<<6) ;
 		d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 22:
-		d[6] |=   0x0f   & (s[2]>>1) ;
+		d[6] |=	  0x0f	 & (s[2]>>1) ;
 		d[5] = (s[2]<<7) | (s[1]>>1) ;
 		d[4] = (s[1]<<7) | (s[0]>>1) ;
 		d[3] = (s[0]<<7) ;
@@ -4742,42 +4715,42 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		break ;
 	    case 20:
 		d[6] |= ((s[2]<<1) | (s[1]>>7)) & 0x0f ;
-		d[5] =   (s[1]<<1) | (s[0]>>7) ;
-		d[4] =   (s[0]<<1) ;
+		d[5] =	 (s[1]<<1) | (s[0]>>7) ;
+		d[4] =	 (s[0]<<1) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 19:
 		d[6] |= ((s[2]<<2) | (s[1]>>6)) & 0x0f ;
-		d[5] =   (s[1]<<2) | (s[0]>>6) ;
-		d[4] =   (s[0]<<2) ;
+		d[5] =	 (s[1]<<2) | (s[0]>>6) ;
+		d[4] =	 (s[0]<<2) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 18:
 		d[6] |= ((s[2]<<3) | (s[1]>>5)) & 0x0f ;
-		d[5] =   (s[1]<<3) | (s[0]>>5) ;
-		d[4] =   (s[0]<<3) ;
+		d[5] =	 (s[1]<<3) | (s[0]>>5) ;
+		d[4] =	 (s[0]<<3) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 17:
-		d[6] |=   0x0f   & (s[1]>>4) ;
+		d[6] |=	  0x0f	 & (s[1]>>4) ;
 		d[5] = (s[1]<<4) | (s[0]>>4) ;
 		d[4] = (s[0]<<4) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 16:
-		d[6] |=   0x0f   & (s[1]>>3) ;
+		d[6] |=	  0x0f	 & (s[1]>>3) ;
 		d[5] = (s[1]<<5) | (s[0]>>3) ;
 		d[4] = (s[0]<<5) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 15:
-		d[6] |=   0x0f   & (s[1]>>2) ;
+		d[6] |=	  0x0f	 & (s[1]>>2) ;
 		d[5] = (s[1]<<6) | (s[0]>>2) ;
 		d[4] = (s[0]<<6) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 14:
-		d[6] |=   0x0f   & (s[1]>>1) ;
+		d[6] |=	  0x0f	 & (s[1]>>1) ;
 		d[5] = (s[1]<<7) | (s[0]>>1) ;
 		d[4] = (s[0]<<7) ;
 		d[3] = d[2] = d[1] = d[0] = 0 ;
@@ -4789,36 +4762,36 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		break ;
 	    case 12:
 		d[6] |= ((s[1]<<1) | (s[0]>>7)) & 0x0f ;
-		d[5] =   (s[0]<<1) ;
+		d[5] =	 (s[0]<<1) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 11:
 		d[6] |= ((s[1]<<2) | (s[0]>>6)) & 0x0f ;
-		d[5] =   (s[0]<<2) ;
+		d[5] =	 (s[0]<<2) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 10:
 		d[6] |= ((s[1]<<3) | (s[0]>>5)) & 0x0f ;
-		d[5] =   (s[0]<<3) ;
+		d[5] =	 (s[0]<<3) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 9:
-		d[6] |=   0x0f   & (s[0]>>4) ;
+		d[6] |=	  0x0f	 & (s[0]>>4) ;
 		d[5] = (s[0]<<4) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 8:
-		d[6] |=   0x0f   & (s[0]>>3) ;
+		d[6] |=	  0x0f	 & (s[0]>>3) ;
 		d[5] = (s[0]<<5) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 7:
-		d[6] |=   0x0f   & (s[0]>>2) ;
+		d[6] |=	  0x0f	 & (s[0]>>2) ;
 		d[5] = (s[0]<<6) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;
 	    case 6:
-		d[6] |=   0x0f   & (s[0]>>1) ;
+		d[6] |=	  0x0f	 & (s[0]>>1) ;
 		d[5] = (s[0]<<7) ;
 		d[4] = d[3] = d[2] = d[1] = d[0] = 0 ;
 		break ;

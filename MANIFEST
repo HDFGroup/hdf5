@@ -386,12 +386,16 @@
 ./tools/testfiles/tcomp-4.ddl
 ./tools/testfiles/tcompound.dmp
 ./tools/testfiles/tcompound.h5
+./tools/testfiles/tcompound2.dmp
+./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3.ddl
 ./tools/testfiles/tdset-4.ddl
 ./tools/testfiles/tdset.dmp
 ./tools/testfiles/tdset.h5
+./tools/testfiles/tdset2.dmp
+./tools/testfiles/tdset2.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
 ./tools/testfiles/tgroup-3.ddl
