@@ -45,17 +45,54 @@ extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_
    return 0;
 }
 
-// Default constructor - set id to 0 by default here but may be set
-// to a valid HDF5 id, if any, by a subclass constructor.
+//--------------------------------------------------------------------------
+// Function:	H5Object default constructor (protected)
+// Description
+//		The id is set to 0 here but subclass constructor will set
+//		it to a valid HDF5 id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Object::H5Object() : IdComponent() {}
 
-// Constructs an object from an existing HDF5 id
+//--------------------------------------------------------------------------
+// Function:	H5Object overloaded constructor (protected)
+// Purpose	Creates an H5Object object using the id of an existing H5 
+// 		object.
+// Parameters	object_id - IN: Id of an existing H5 object
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Object::H5Object( const hid_t object_id ) : IdComponent( object_id ) {}
 
-// Copy constructor: makes a copy of the original H5Object instance
+//--------------------------------------------------------------------------
+// Function:	H5Object copy constructor
+///\brief	Copy constructor: makes a copy of the original H5Object 
+///		instance.
+///\param	original - IN: H5Object instance to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Object::H5Object( const H5Object& original ) : IdComponent( original ) {}
 
-// Creates an attribute for a group, dataset, or named datatype.
+//--------------------------------------------------------------------------
+// Function:	H5Object::createAttribute
+///\brief	Creates an attribute for a group, dataset, or named datatype.
+///\param	name - IN: Name of the attribute
+///\param	data_type - IN: Datatype for the attribute
+///\param	data_space - IN: Dataspace for the attribute - only simple 
+///		dataspaces are allowed at this time
+///\param	create_plist - IN: Creation property list - default to 
+///		PropList::DEFAULT
+///\return	Attribute instance
+///\exception	H5::AttributeIException
+///\par Description
+///		The attribute name specified in \a name must be unique. 
+///		Attempting to create an attribute with the same name as an 
+///		existing attribute will raise an exception, leaving the 
+///		pre-existing attribute intact. To overwrite an existing 
+///		attribute with a new attribute of the same name, first 
+///		delete the existing one with \c H5Object::removeAttr, then
+///		recreate it with this function.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute H5Object::createAttribute( const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
 {
    hid_t type_id = data_type.getId();
@@ -75,13 +112,26 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
    }
 }
 
-// Creates an attribute for a group, dataset, or named datatype.
+//--------------------------------------------------------------------------
+// Function:	H5Object::createAttribute
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes 
+///		a reference to an \c std::string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute H5Object::createAttribute( const string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
 {
    return( createAttribute( name.c_str(), data_type, data_space, create_plist ));
 }
 
-// Opens an attribute given its name; name is given as char*
+//--------------------------------------------------------------------------
+// Function:	H5Object::openAttribute
+///\brief	Opens an attribute given its name.
+///\param	name - IN: Name of the attribute
+///\return	Attribute instance
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const char* name ) const
 {
    hid_t attr_id = H5Aopen_name( id, name );
@@ -96,13 +146,26 @@ Attribute H5Object::openAttribute( const char* name ) const
    }
 }
 
-// Opens an attribute given its name; name is given as string
+//--------------------------------------------------------------------------
+// Function:	H5Object::openAttribute
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes 
+///		a reference to an \c std::string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const string& name ) const
 {
    return( openAttribute( name.c_str()) );
 }
 
-// Opens an attribute given its index.
+//--------------------------------------------------------------------------
+// Function:	H5Object::openAttribute
+///\brief	Opens an attribute given its index.
+///\param	idx - IN: Index of the attribute, a 0-based, non-negative integer
+///\return	Attribute instance
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const unsigned int idx ) const
 {
    hid_t attr_id = H5Aopen_idx( id, idx );
@@ -117,7 +180,18 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
    }
 }
 
-// Iterates a user's function over all the attributes of the dataset
+//--------------------------------------------------------------------------
+// Function:	H5Object::iterateAttrs
+///\brief	Iterates a user's function over all the attributes of an H5
+///		object, which may be a group, dataset or named datatype.
+///\param	user_op - IN: User's function to operate on each attribute
+///\param	idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
+///\param	op_data - IN: User's data to pass to user's operator function 
+///\return	<need fix>
+///\exception	H5::AttributeIException
+///\par Description
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
 {
    // store the user's function and data
@@ -140,7 +214,13 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
    }
 }
 
-// Determines the number of attributes attached to 
+//--------------------------------------------------------------------------
+// Function:	H5Object::getNumAttrs
+///\brief	Returns the number of attributes attached to this H5 object.
+///\return	Number of attributes
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
    int num_attrs = H5Aget_num_attrs( id );
@@ -153,7 +233,13 @@ int H5Object::getNumAttrs() const
       return( num_attrs );
 }
 
-// Removes the named attribute from this object.
+//--------------------------------------------------------------------------
+// Function:	H5Object::removeAttr
+///\brief	Removes the named attribute from this object.
+///\param	name - IN: Name of the attribute to be removed
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void H5Object::removeAttr( const char* name ) const
 {
    herr_t ret_value = H5Adelete( id, name );
@@ -162,12 +248,31 @@ void H5Object::removeAttr( const char* name ) const
       throw AttributeIException("H5Object::removeAttr", "H5Adelete failed");
    }
 }
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::removeAttr
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes 
+///		a reference to an \c std::string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void H5Object::removeAttr( const string& name ) const
 {
    removeAttr( name.c_str() );
 }
 
-// Flushes all buffers associated with a file to disk.
+//--------------------------------------------------------------------------
+// Function:	H5Object::getNumAttrs
+///\brief	Flushes all buffers associated with a file to disk.
+///\param	scope - IN: Specifies the scope of the flushing action,
+///		which can be either of these values:
+///		\li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
+///		\li \c H5F_SCOPE_LOCAL - Flushes only the specified file
+///\exception	H5::AttributeIException
+///\par Description
+///		This object is used to identify the file to be flushed.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void H5Object::flush(H5F_scope_t scope ) const
 {
    herr_t ret_value = H5Fflush( id, scope );
@@ -177,9 +282,12 @@ void H5Object::flush(H5F_scope_t scope ) const
    }
 }
 
-// each subclass' destructor calls the template function resetIdComponent()
-// to reset the corresponding IdComponent object and close the HDF5 object
-// where appropriate.
+//--------------------------------------------------------------------------
+// Function:	H5Object destructor
+///\brief	Subclasses destructors will properly terminate access to 
+///		this H5 object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Object::~H5Object() {}
 
 #ifndef H5_NO_NAMESPACE
