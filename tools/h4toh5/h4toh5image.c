@@ -65,7 +65,9 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   void*    image_data;
   HDF_CHUNK_DEF c_def_out;
   int32    chunk_dims[2];
+  int32    chunk_dims24[3];
   int32    c_flags;
+  int32    interlace_mode;
 
   /* for checking compression */
 
@@ -92,6 +94,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   size_t   h4memsize;
   hsize_t   fielddim[1];
   hsize_t  h5dims[2];
+  hsize_t  h5dims24[3];
   hsize_t bufsize;
   herr_t   ret;
   hid_t    create_plist;
@@ -162,14 +165,41 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 
   /* change the order of image dimension:
      due to the difference of hdf4 image specification and
-     hdf5 image specification. */
+     hdf5 image specification. Here we should separate 8-bit from
+     24-bit according to H4TOH5 mapping specification.*/
   
+  if(ncomp == 1) {
+    h5dims[0] = edges[1]-start[1];
+    h5dims[1] = edges[0]-start[0];
+  }
+  
+  else {
+    if(interlace_mode == MFGR_INTERLACE_PIXEL){
+      h5dims24[0] = edges[1]-start[1];
+      h5dims24[1] = edges[0]-start[0];
+      h5dims24[2] = 3;
+    }
+    /* currently scan-line is not supported.
+    else if (interlace_mode == MFGR_INTERLACE_LINE){
+      h5dims24[0] = 3;
+      h5dims24[1] = edges[1]-start[1];
+      h5dims24[2] = edges[0]-start[0];
+    }
+    */
+    else if (interlace_mode == MFGR_INTERLACE_COMPONENT){
+      h5dims24[0] = 3;
+      h5dims24[1] = edges[1]-start[1];
+      h5dims24[2] = edges[0]-start[0];
+    }
 
-  h5dims[0] = edges[1]-start[1];
-  h5dims[1] = edges[0]-start[0];
+    else {/* treat as pixel */
+      h5dims24[0] = edges[1]-start[1];
+      h5dims24[1] = edges[0]-start[0];
+      h5dims24[2] = 3;
+    }
+  }
 
   gr_ref = GRidtoref(ri_id);
-
   if(gr_ref == 0) {
     printf("error in obtaining gr reference number. \n");
     free(image_data);
@@ -177,7 +207,6 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   }
   
   /* obtaining absolute path of image name.*/
-
   check_imagename = -10;
   h5cimage_name = get_name(gr_ref,2*num_images,gr_hashtab,&check_imagename);
 
@@ -215,6 +244,8 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   /* wait until the compression information can be obtained for image,
      4/28/2001, Kent Yang.*/
 
+  /* the following code deals with compression. Has to use 
+     some middle-level APIs. */
   ri_ref = 0;
   /*
    ri_ref = get_RIref(file_id,DFTAG_VG,gr_ref,ptag_out);
@@ -252,7 +283,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	H5Pclose(create_plist);
 	return FAIL;	
       }
-      /* free(info_block.cdims);*/
+
       if(info_block.key == SPECIAL_COMP) {
    
 	if(c_flags == HDF_NONE){
@@ -260,20 +291,54 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	     in order that the converted HDF5 is compressed, we have to
 	     provide a chunking size. currently it is set to h5dim[i].*/
 
-	  printf("okay to sds compress.\n");
-	  
+	  if(ncomp == 1) {
 	    chunk_dims[0] = (hsize_t)(h5dims[0]);
             chunk_dims[1] =(hsize_t)(h5dims[1]);
 	  
-	  if(H5Pset_chunk(create_plist, 2, chunk_dims)<0) {
-	    printf("failed to set up chunking information for ");
-	    printf("property list.\n");
-	    free(image_data);
-	    free(h5cimage_name);
-	    H5Pclose(create_plist);
-	    return FAIL;	
+	    if(H5Pset_chunk(create_plist, 2, chunk_dims)<0) {
+	      printf("failed to set up chunking information for ");
+	      printf("property list.\n");
+	      free(image_data);
+	      free(h5cimage_name);
+	      H5Pclose(create_plist);
+	      return FAIL;	
+	    }
 	  }
-       
+
+	  else if(ncomp ==3) {/*24-bit chunk dimension is set to the current
+				HDF5 dimension.*/
+	    if(interlace_mode == MFGR_INTERLACE_PIXEL){
+	      chunk_dims24[0] = edges[1]-start[1]; 
+	      chunk_dims24[1] = edges[0]-start[0];
+	      chunk_dims24[2] = 3;
+	    }
+	    /* currently scan-line is not supported.
+	       else if (interlace_mode == MFGR_INTERLACE_LINE){
+	       chunk_dims24[0] = 3; 
+	       chunk_dims24[1] = edges[1]-start[1];
+	       chunk_dims24[2] = edges[0]-start[0];
+	       }
+	    */
+	    else if (interlace_mode == MFGR_INTERLACE_COMPONENT){
+	      chunk_dims24[1] = edges[1]-start[1]; 
+	      chunk_dims24[2] = edges[0]-start[0];
+	      chunk_dims24[0] = 3;
+	    }
+
+	    else {/* treat as pixel */
+	      chunk_dims24[0] = edges[1]-start[1]; 
+	      chunk_dims24[1] = edges[0]-start[0];
+	      chunk_dims24[2] = 3;
+	    }
+	    if(H5Pset_chunk(create_plist, 3, chunk_dims24)<0) {
+	      printf("failed to set up chunking information for ");
+	      printf("property list.\n");
+	      free(image_data);
+	      free(h5cimage_name);
+	      H5Pclose(create_plist);
+	      return FAIL;	
+	    }
+	  }
 	  if(H5Pset_deflate(create_plist,GZIP_COMLEVEL)<0){
 	    /*    if(H5Pset_deflate(create_plist,2)<0){*/
 	    printf("fail to set compression method for HDF5 file.\n"); 
@@ -285,7 +350,6 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	}
 
       }
-      /* free(info_block.cdims);*/
     }
 
   }
@@ -293,22 +357,48 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
      || c_flags == (HDF_CHUNK | HDF_NBIT)  ){
 
     if(c_def_out.comp.comp_type == COMP_CODE_RLE || c_def_out.comp.comp_type == COMP_CODE_NBIT || c_def_out.comp.comp_type == COMP_CODE_SKPHUFF || c_def_out.comp.comp_type == COMP_CODE_DEFLATE || c_def_out.comp.comp_type == COMP_CODE_JPEG) {
-   
-     chunk_dims[0] = c_def_out.chunk_lengths[0]; 
-     chunk_dims[1] = c_def_out.chunk_lengths[1];
+      if(ncomp ==1) {   
+	chunk_dims[0] = c_def_out.chunk_lengths[0]; 
+	chunk_dims[1] = c_def_out.chunk_lengths[1];
        
-     if(H5Pset_chunk(create_plist, 2, (hsize_t *)chunk_dims)<0) {
-       printf("failed to set up chunking information for ");
-       printf("property list.\n");
-       free(image_data);
-       free(h5cimage_name);
-       H5Pclose(create_plist);
-       return FAIL;	
-     }
+	if(H5Pset_chunk(create_plist, 2, (hsize_t *)chunk_dims)<0) {
+	  printf("failed to set up chunking information for ");
+	  printf("property list.\n");
+	  free(image_data);
+	  free(h5cimage_name);
+	  H5Pclose(create_plist);
+	  return FAIL;	
+	}
+      }
 
-     if(c_def_out.comp.comp_type == COMP_CODE_DEFLATE)
-	gzip_level = c_def_out.comp.cinfo.deflate.level;
-      else gzip_level = GZIP_COMLEVEL;
+      else if(ncomp ==3) {
+	if(interlace_mode == MFGR_INTERLACE_PIXEL){
+      chunk_dims24[0] = c_def_out.chunk_lengths[1]; 
+      chunk_dims24[1] = c_def_out.chunk_lengths[0];
+      chunk_dims24[2] = 3;
+    }
+    /* currently scan-line is not supported.
+    else if (interlace_mode == MFGR_INTERLACE_LINE){
+      chunk_dims24[0] = c_def_out.chunk_lengths[1]; 
+      chunk_dims24[2] = c_def_out.chunk_lengths[0];
+      chunk_dims24[1] = 3;
+    }
+    */
+    else if (interlace_mode == MFGR_INTERLACE_COMPONENT){
+      chunk_dims24[1] = c_def_out.chunk_lengths[1]; 
+      chunk_dims24[2] = c_def_out.chunk_lengths[0];
+      chunk_dims24[0] = 3;
+    }
+
+    else {/* treat as pixel */
+      chunk_dims24[0] = c_def_out.chunk_lengths[1]; 
+      chunk_dims24[1] = c_def_out.chunk_lengths[0];
+      chunk_dims24[2] = 3;
+    }
+      }
+	if(c_def_out.comp.comp_type == COMP_CODE_DEFLATE)
+	  gzip_level = c_def_out.comp.cinfo.deflate.level;
+	else gzip_level = GZIP_COMLEVEL;
 	if(H5Pset_deflate(create_plist,gzip_level)<0){
 	  printf("fail to set compression method for HDF5 file.\n"); 
 	   free(image_data);
@@ -321,6 +411,8 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   /* HDF4 can support various compression methods including simple RLE, NBIT, Skip Huffman, gzip,Jpeg , HDF5 currently only supports gzip compression. 
  By default, we will compress HDF5 dataset by using gzip compression if HDF5 file is compressed. */
 
+<<<<<<< h4toh5image.c
+=======
   
  write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
  bufsize = h4memsize *h5dims[1]*ncomp;
@@ -334,6 +426,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     return FAIL;		
   }
 
+>>>>>>> 1.3
  if (ncomp == 1) {
 
      h5d_sid = H5Screate_simple(2,h5dims,NULL);
@@ -343,7 +436,10 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
         H5Pclose_list(write_plist);
+>>>>>>> 1.3
        return FAIL;
      }
 
@@ -354,21 +450,29 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
         H5Pclose_list(write_plist);
+>>>>>>> 1.3
        return FAIL;
      }
 
-     if (H5Dwrite(h5dset,h5memtype,h5d_sid,h5d_sid,write_plist,
+     if (H5Dwrite(h5dset,h5memtype,h5d_sid,h5d_sid,H5P_DEFAULT,
 		  image_data)<0) {
         printf("error writing data for hdf5 dataset converted from images.\n");
 	free(image_data);
 	free(h5cimage_name);
         H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
 	 H5Pclose_list(write_plist);
+>>>>>>> 1.3
         return FAIL;
      }
 	
   }
+<<<<<<< h4toh5image.c
+=======
 
   else { /* compound datatype. */
 
@@ -392,9 +496,13 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        return FAIL;
      }
     
+>>>>>>> 1.3
 
-     fielddim[0] = ncomp;
+  else { /* 24-bit image */
 
+<<<<<<< h4toh5image.c
+     h5d_sid     = H5Screate_simple(3,h5dims24,NULL);
+=======
      {
      hid_t arr_type;    /* Array datatype for inserting fields */
 
@@ -460,45 +568,48 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
      }
 
      h5d_sid     = H5Screate_simple(2,h5dims,NULL);
+>>>>>>> 1.3
      if(h5d_sid < 0) {
        printf("error in creating space. \n");
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
         H5Pclose_list(write_plist);
+>>>>>>> 1.3
        return FAIL;
      }
 
-     h5dset      = H5Dcreate(h5_group,h5cimage_name,h5_ctype,h5d_sid,
+     h5dset      = H5Dcreate(h5_group,h5cimage_name,h5ty_id,h5d_sid,
 			     create_plist);
      if(h5dset < 0) {
        printf("error in creating dataset. \n");
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
         H5Pclose_list(write_plist);
+>>>>>>> 1.3
        return FAIL;
      }
 
-     if (H5Dwrite(h5dset,h5_cmemtype,h5d_sid,h5d_sid,write_plist,
+     if (H5Dwrite(h5dset,h5memtype,h5d_sid,h5d_sid,H5P_DEFAULT,
 		  (void *)image_data)<0) {
         printf("error writing data\n");
 	free(image_data);
 	free(h5cimage_name);
         H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
 	 H5Pclose_list(write_plist);
+>>>>>>> 1.3
 	return FAIL;
      } 
-     ret   = H5Tclose(h5_ctype);
-     if(ret < 0) {
-       printf("error in closing h5_ctype. \n");
-     }
-     ret   = H5Tclose(h5_cmemtype);
-     if(ret <0) {
-       printf("error in closing h5_cmemtype. \n");
-     }
   }
-
+ 
+ free(image_data);
 /* convert image annotation into attribute of image dataset.
      Since there is no routines to find the exact tag of image object,
      we will check three possible object tags of image objects, that is:
@@ -509,10 +620,12 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 
   if(Annoobj_h4_to_h5(file_id,gr_ref,DFTAG_RIG,h5dset)== FAIL){
     printf("failed to convert image annotation into hdf5 attribute.\n");
-    free(image_data);
     free(h5cimage_name);
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -521,9 +634,11 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(Annoobj_h4_to_h5(file_id,gr_ref,DFTAG_RI,h5dset)== FAIL){
     printf("failed to convert image annotation into hdf5 attribute.\n");
     free(h5cimage_name);
-    free(image_data);
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -532,9 +647,11 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(Annoobj_h4_to_h5(file_id,gr_ref,DFTAG_RI8,h5dset)== FAIL){
     printf("failed to convert image annotation into hdf5 attribute.\n");
     free(h5cimage_name);
-    free(image_data);
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -547,9 +664,11 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   check_gloattr = 0;
   if(gr_tranattrs(ri_id,h5dset,ngrattrs,check_gloattr)==FAIL){ 
     printf(" cannot obtain attributes. \n");
-     free(image_data);
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -573,11 +692,13 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,grlabel)==FAIL){
     printf("error in getting hdf4 image type attribute \n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
 
@@ -585,25 +706,75 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,image_name)==FAIL){
     printf("error in getting hdf4 image name attribute. \n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
   }
   if(h4_transpredattrs(h5dset,HDF4_IMAGE_CLASS,image_class)==FAIL){
     printf("error in getting hdf4 image class attribute. \n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
 
+  if(ncomp >1) {
+    if(interlace_mode == MFGR_INTERLACE_PIXEL){
+      if(h4_transpredattrs(h5dset,INTERLACE_MODE,PIXEL_INTERLACE)==FAIL){
+	printf("unable to generate image pixel attribute.\n");
+      H5Pclose(create_plist);
+      H5Sclose(h5d_sid); 
+      H5Dclose(h5dset);
+      free(h5cimage_name);
+      return FAIL;
+      }
+    }
+    /* currently scan-line is not supported.
+    else if (interlace_mode == MFGR_INTERLACE_LINE){
+     if(h4_transpredattrs(h5dset,INTERLACE_MODE,LINE_INTERLACE)==FAIL){
+      printf("unable to generate image line attribute.\n");
+      H5Pclose(create_plist);
+      H5Sclose(h5d_sid); 
+      H5Dclose(h5dset);
+      free(h5cimage_name);
+      return FAIL;
+      }
+      }*/
+    else if (interlace_mode == MFGR_INTERLACE_COMPONENT){
+      if(h4_transpredattrs(h5dset,INTERLACE_MODE,PLANE_INTERLACE)==FAIL){
+       printf("unable to generate image component attribute.\n");
+      H5Pclose(create_plist);
+      H5Sclose(h5d_sid); 
+      H5Dclose(h5dset);
+      free(h5cimage_name);
+      return FAIL;
+      }
+    }
+   
+    else {/* treat as pixel interlace mode. */
+     if(h4_transpredattrs(h5dset,INTERLACE_MODE,PIXEL_INTERLACE)==FAIL){
+      printf("unable to generate image pixel attribute.\n");
+      H5Pclose(create_plist);
+      H5Sclose(h5d_sid); 
+      H5Dclose(h5dset);
+      free(h5cimage_name);
+      return FAIL;
+      }
+    } 
+      
+  }
+  
   if(h4_attr !=0){
  
   gr_ref = GRidtoref(ri_id);
@@ -611,22 +782,26 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(gr_ref == 0) {
     printf("error in obtaining reference number of GR.\n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
 
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,gr_ref)==FAIL) {
     printf("error in getting hdf4 image number attribute.\n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
   }
@@ -635,20 +810,24 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(gr_palette(file_id,ri_id,h5dset,h5_palgroup,h4_attr)== FAIL) {
     printf("error in translating palette into h5 dataset.\n");
     H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
      H5Pclose_list(write_plist);
+>>>>>>> 1.3
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
-    free(image_data);
     return FAIL;
   }
  
   ret   = H5Pclose(create_plist);
+<<<<<<< h4toh5image.c
+=======
    ret  = H5Pclose_list(write_plist);
+>>>>>>> 1.3
   ret   = H5Sclose(h5d_sid); 
   ret   = H5Dclose(h5dset);
   istat = GRendaccess(ri_id);
-  free(image_data);
   free(h5cimage_name);
   return SUCCEED;
 }

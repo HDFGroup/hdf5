@@ -89,7 +89,7 @@ int sds_transattrs(int32, hid_t,int,int);
 int sdsdim_to_h5dataset(int32,int32,hid_t,hid_t,int32);
 int convert_sdsfillvalue(int32,int32,hid_t,hid_t,int);
 uint16 get_SDref(int32,uint16,int32);
-
+int convert_zerosdsdsunlimit(int32,int32,hid_t,hid_t,int);
 /*subroutines for h4toh5image.c*/
 int Image_h4_to_h5(int32,int32,hid_t,hid_t,int); 
 int gr_tranattrs(int32, hid_t,int,int);
