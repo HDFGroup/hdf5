@@ -6,6 +6,7 @@ usage: h5dump [OPTIONS] file
      -h, --help           Print a usage message and exit
      -B, --bootblock      Print the content of the boot block
      -H, --header         Print the header only; no data is displayed
+     -A                   Print the header and value of attributes; data of datasets is not displayed
      -i, --object-ids     Print the object ids
      -r, --string         Print 1-byte integer datasets as ASCII
      -V, --version        Print version number and exit
@@ -17,9 +18,11 @@ usage: h5dump [OPTIONS] file
      -o F, --output=F     Output raw data into file F
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
-     -x, --xml            Output in XML
-     -D U, --xml-dtd=U    Use the DTD at U
-     --                   Indicate that all following arguments are non-options.
+     -x, --xml            Output in XML using Schema (default)
+     -u, --use-dtd            Output in XML using DTD
+     -D U, --xml-dtd=U    Use the DTD or schema at U
+     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML
+                          ":": no namespace, default: "hdf5:"
                           E.g., to dump a file called `-f', use h5dump -- -f
 
  Subsetting is available by using the following options with a dataset

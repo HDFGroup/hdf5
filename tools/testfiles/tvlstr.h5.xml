@@ -2,50 +2,60 @@
 Expected output for 'h5dump --xml tvlstr.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Attribute Name="test_scalar">
-      <Dataspace>
-         <ScalarDataspace />
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_928-0" H5Path="/">
+   <hdf5:Attribute Name="test_scalar">
+      <hdf5:Dataspace>
+         <hdf5:ScalarDataspace />
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          "This is the string for the attribute"
-         </DataFromFile>
-      </Data>
-   </Attribute>
-   <NamedDataType Name="vl_string_type" OBJ-XID="/vl_string_type" Parents="root">
-      <DataType>
-         <AtomicType>
-            <StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
-         </AtomicType>
-      </DataType>
-   </NamedDataType>
-   <Dataset Name="Dataset1" OBJ-XID="/Dataset1" Parents="root">
-      <Dataspace>
-         <SimpleDataspace Ndims="1">
-            <Dimension  DimSize="4" MaxDimSize="4"/>
-         </SimpleDataspace>
-      </Dataspace>
-      <DataType> 
-         <AtomicType>
-            <StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLTERM"/>
-         </AtomicType>
-      </DataType>
-      <Data>
-         <DataFromFile>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Attribute>
+   <hdf5:NamedDataType Name="vl_string_type" OBJ-XID="xid_1576-0" H5Path="/vl_string_type" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+   </hdf5:NamedDataType>
+   <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_976-0" H5Path= "/Dataset1" Parents="xid_928-0" H5ParentPaths="/">
+      <hdf5:StorageLayout>
+         <hdf5:ContiguousLayout/>
+      </hdf5:StorageLayout>
+         <hdf5:FillValueInfo FillTime="FillOnAlloc" AllocationTime="Late">
+         <hdf5:FillValue>
+               <hdf5:Data>
+                  <!-- String fill values not yet implemented. -->
+                  <hdf5:NoData />
+               </hdf5:Data>
+         </hdf5:FillValue>
+      </hdf5:FillValueInfo>
+      <hdf5:Dataspace>
+         <hdf5:SimpleDataspace Ndims="1">
+            <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+         </hdf5:SimpleDataspace>
+      </hdf5:Dataspace>
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLTERM"/>
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+      <hdf5:Data>
+         <hdf5:DataFromFile>
          "Four score and seven years ago our forefathers brought forth on this continent a new nation,"
          "conceived in liberty and dedicated to the proposition that all men are created equal."
          "Now we are engaged in a great civil war,"
          "testing whether that nation or any nation so conceived and so dedicated can long endure."
-         </DataFromFile>
-      </Data>
-   </Dataset>
-</RootGroup>
-</HDF5-File>
+         </hdf5:DataFromFile>
+      </hdf5:Data>
+   </hdf5:Dataset>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>

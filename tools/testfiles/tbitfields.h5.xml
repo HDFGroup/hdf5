@@ -2,47 +2,62 @@
 Expected output for 'h5dump --xml tbitfields.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Group Name="typetests" OBJ-XID="/typetests" Parents="/" >
-      <Dataset Name="bitfield_1" OBJ-XID="/typetests/bitfield_1" Parents="/typetests">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="32" MaxDimSize="32"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <BitfieldType ByteOrder="LE" Size="1"/>
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+   <hdf5:Group Name="typetests" OBJ-XID="xid_1344-0" H5Path="/typetests" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="bitfield_1" OBJ-XID="xid_1720-0" H5Path= "/typetests/bitfield_1" Parents="xid_1344-0" H5ParentPaths="/typetests">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="32" MaxDimSize="32"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:BitfieldType ByteOrder="LE" Size="1"/>
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0xff 0xfe 0xfd 0xfc 0xfb 0xfa 0xf9 0xf8 0xf7 0xf6 0xf5 0xf4 0xf3 
             0xf2 0xf1 0xf0 0xef 0xee 0xed 0xec 0xeb 0xea 0xe9 0xe8 0xe7 0xe6 
             0xe5 0xe4 0xe3 0xe2 0xe1 0xe0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="bitfield_2" OBJ-XID="/typetests/bitfield_2" Parents="/typetests">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="16" MaxDimSize="16"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <BitfieldType ByteOrder="LE" Size="2"/>
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="bitfield_2" OBJ-XID="xid_2352-0" H5Path= "/typetests/bitfield_2" Parents="xid_1344-0" H5ParentPaths="/typetests">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="16" MaxDimSize="16"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:BitfieldType ByteOrder="LE" Size="2"/>
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             ff:fe fd:fc fb:fa f9:f8 f7:f6 f5:f4 f3:f2 f1:f0 ef:ee ed:ec eb:ea 
             e9:e8 e7:e6 e5:e4 e3:e2 e1:e0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-   </Group>
-</RootGroup>
-</HDF5-File>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+   </hdf5:Group>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>

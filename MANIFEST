@@ -1069,6 +1069,7 @@
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh
+./tools/h5dump/testh5dumpxml.sh
 
 ./tools/h5import/Dependencies
 ./tools/h5import/Makefile.in
@@ -1254,6 +1255,7 @@
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tattr2.h5
+./tools/testfiles/tall-2A.ddl
 
 # Expected output from h5ls tests
 ./tools/testfiles/help-1.ls
@@ -1329,6 +1331,27 @@
 ./tools/testfiles/tvldtypes2.h5.xml
 ./tools/testfiles/tvldtypes3.h5.xml
 ./tools/testfiles/tvlstr.h5.xml
+./tools/testfiles/tname-amp.h5
+./tools/testfiles/tname-apos.h5
+./tools/testfiles/tname-gt.h5
+./tools/testfiles/tname-lt.h5
+./tools/testfiles/tname-quot.h5
+./tools/testfiles/tname-sp.h5
+./tools/testfiles/tnodata.h5
+./tools/testfiles/tref-escapes-at.h5
+./tools/testfiles/tref-escapes.h5
+./tools/testfiles/tref.h5
+./tools/testfiles/tstring-at.h5
+./tools/testfiles/tstring.h5
+./tools/testfiles/tempty-dtd.h5.xml
+./tools/testfiles/tempty-dtd-uri.h5.xml
+./tools/testfiles/tempty-nons.h5.xml
+./tools/testfiles/tempty-nons-uri.h5.xml
+./tools/testfiles/tempty-ns.h5.xml
+./tools/testfiles/tempty-dtd-2.h5.xml
+./tools/testfiles/tempty-nons-2.h5.xml
+./tools/testfiles/tempty-ns-2.h5.xml
+./tools/testfiles/tall-2A.h5.xml
 
 #test files for h5diff
 ./tools/testfiles/file1.h5

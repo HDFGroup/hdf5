@@ -18,6 +18,7 @@
 #include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
+#include <strings.h>
 
 /* module-scoped variables */
 static const char  *progname = "h5dump";
@@ -36,6 +37,7 @@ static int          display_all = TRUE;
 static int          display_bb = FALSE;
 static int          display_oid = FALSE;
 static int          display_data = TRUE;
+static int          display_attr_data = TRUE;
 static int          display_char = FALSE;   /*print 1-byte numbers as ASCII? */
 static int          usingdasho = FALSE;
 
@@ -47,11 +49,21 @@ static int          usingdasho = FALSE;
 static herr_t    fill_ref_path_table(hid_t, const char *, void *);
 
 /* module-scoped variables for XML option */
+#define DEFAULT_XSD     "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd"
 #define DEFAULT_DTD     "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd"
 
 static int              doxml = 0;
+static int              useschema = 1;
 static const char      *xml_dtd_uri = NULL;
+static const char      *xmlnsprefix="hdf5:";
 static hid_t            thefile = -1;
+struct ref_path_table_entry_t {
+    hid_t                 obj;
+    hobj_ref_t             *obj_ref;
+    char                   *apath;
+    H5G_stat_t  statbuf;
+    struct ref_path_table_entry_t *next;
+};
 /** end XML **/
 
 /* internal functions */
@@ -61,6 +73,9 @@ static herr_t    dump_all(hid_t group, const char *name, void *op_data);
 static char     *lookup_ref_path(hobj_ref_t *);
 static void      check_compression(hid_t);
 static struct ref_path_table_entry_t *ref_path_table_lookup(const char *);
+static int xml_name_to_XID(const char *, char *, int , int );
+static int get_next_xid(void);
+static haddr_t get_fake_xid (void);
 
 /* external functions */
 extern int       print_data(hid_t, hid_t, int);
@@ -293,96 +308,13 @@ static const dump_header standardformat = {
 /** 
  ** Added for XML **
  **/
-/* The 'header' formats for XML -- mostly null
- *
- * XML output has values embedded in the 'headers', so
- * all the XML headers are done on a case by case basis.
- */
-static const dump_header xmlformat = {
-    "xml",			/*name */
-    "",				/*filebegin */
-    "</HDF5-File>",		/*fileend */
-    "",				/*bootblockbegin */
-    "",				/*bootblockend */
-    "",				/*groupbegin */
-    "</Group>",			/*groupend */
-    "",				/*datasetbegin */
-    "</Dataset>",		/*datasetend */
-    "",				/*attributebegin */
-    "</Attribute>",		/*attributeend */
-    "<DataType>",		/*datatypeend */
-    "</DataType>",		/*datatypeend */
-    "<Dataspace>",		/*dataspacebegin */
-    "</Dataspace>",		/*dataspaceend */
-    "<Data>",			/*databegin */
-    "</Data>",			/*dataend */
-    "",				/*softlinkbegin */
-    "",				/*softlinkend */
-    "", 			/*subsettingbegin */
-    "",				/*subsettingend */
-    "", 			/*startbegin */
-    "",				/*startend */
-    "", 			/*stridebegin */
-    "",				/*strideend */
-    "", 			/*countbegin */
-    "",				/*countend */
-    "", 			/*blockbegin */
-    "",				/*blockend */
-
-    "",				/*fileblockbegin */
-    "",				/*fileblockend */
-    "",				/*bootblockblockbegin */
-    "",				/*bootblockblockend */
-    "",				/*groupblockbegin */
-    "",				/*groupblockend */
-    "",				/*datasetblockbegin */
-    "",				/*datasetblockend */
-    "",				/*attributeblockbegin */
-    "",				/*attributeblockend */
-    "",				/*datatypeblockbegin */
-    "",				/*datatypeblockend */
-    "",				/*dataspaceblockbegin */
-    "",				/*dataspaceblockend */
-    "",				/*datablockbegin */
-    "",				/*datablockend */
-    "",				/*softlinkblockbegin */
-    "",				/*softlinkblockend */
-    "",				/*strblockbegin */
-    "",				/*strblockend */
-    "",				/*enumblockbegin */
-    "",				/*enumblockend */
-    "",				/*structblockbegin */
-    "",				/*structblockend */
-    "",				/*vlenblockbegin */
-    "",				/*vlenblockend */
-    "",                         /*subsettingblockbegin */
-    "",                         /*subsettingblockend */
-    "",                         /*startblockbegin */
-    "",                         /*startblockend */
-    "",                         /*strideblockbegin */
-    "",                         /*strideblockend */
-    "",                         /*countblockbegin */
-    "",                         /*countblockend */
-    "",                         /*blockblockbegin */
-    "",                         /*blockblockend */
-
-    "",				/*dataspacedescriptionbegin */
-    "",				/*dataspacedescriptionend */
-    "",				/*dataspacedimbegin */
-    "",				/*dataspacedimend */
-};
-
-/** XML **/
-
-/** 
- ** Added for XML **
- **/
 /* internal functions used by XML option */
 static void             xml_print_datatype(hid_t);
 static void             xml_print_enum(hid_t);
 static int              xml_print_refs(hid_t, int);
 static int              xml_print_strs(hid_t, int);
 static hobj_ref_t      *ref_path_table_put(hid_t, const char *);
+static struct ref_path_table_entry_t *ref_path_table_gen_fake(const char *);
 static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
 
@@ -400,9 +332,9 @@ struct handler_t {
  */
 #if 0
     /* binary: not implemented yet */
-static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:o:s:S:";
+static const char *s_opts = "hbBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #else
-static const char *s_opts = "hBHirVa:c:d:f:g:k:l:t:w:xD:o:s:S:";
+static const char *s_opts = "hBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -496,15 +428,24 @@ static struct long_options l_opts[] = {
     { "strid", require_arg, 'S' },
     { "string", no_arg, 'r' },
     { "strin", no_arg, 'r' },
+    { "use-dtd", no_arg, 'u' },
+    { "use-dt", no_arg, 'u' },
+    { "use-d", no_arg, 'u' },
+    { "use-", no_arg, 'u' },
+    { "use", no_arg, 'u' },
+    { "us", no_arg, 'u' },
+    { "u", no_arg, 'u' },
     { "width", require_arg, 'w' },
     { "widt", require_arg, 'w' },
     { "wid", require_arg, 'w' },
     { "wi", require_arg, 'w' },
-    { "xml", no_arg, 'x' },
-    { "xm", no_arg, 'x' },
     { "xml-dtd", require_arg, 'D' },
     { "xml-dt", require_arg, 'D' },
     { "xml-d", require_arg, 'D' },
+    { "xml-ns", require_arg, 'X' },
+    { "xml-n", require_arg, 'X' },
+    { "xml", no_arg, 'x' },
+    { "xm", no_arg, 'x' },
     { NULL, 0, '\0' }
 };
 
@@ -607,6 +548,7 @@ usage(const char *prog)
     fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
+    fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
@@ -618,9 +560,11 @@ usage(const char *prog)
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
-    fprintf(stdout, "     -x, --xml            Output in XML\n");
-    fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD at U\n");
-    fprintf(stdout, "     --                   Indicate that all following arguments are non-options.\n");
+    fprintf(stdout, "     -x, --xml            Output in XML using Schema (default)\n");
+    fprintf(stdout, "     -u, --use-dtd            Output in XML using DTD\n");
+    fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
+    fprintf(stdout, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
+    fprintf(stdout, "                          \":\": no namespace, default: \"hdf5:\"\n");
     fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
@@ -1145,7 +1089,7 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	if (display_oid)
 	    dump_oid(attr_id);
 
-	if (display_data)
+	if (display_data || display_attr_data)
 	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
 
 	H5Tclose(type);
@@ -1255,7 +1199,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
 	if (display_oid)
 	    dump_oid(attr_id);
 
-	if (display_data)
+	if (display_data || display_attr_data)
 	    dump_data(attr_id, ATTRIBUTE_DATA, NULL);
 
 	H5Tclose(type);
@@ -1323,7 +1267,7 @@ static herr_t
 dump_all(hid_t group, const char *name, void * op_data)
 {
     hid_t       obj;
-    char       *buf, *tmp = NULL;
+    char       *targbuf, *tmp = NULL;
     H5G_stat_t  statbuf;
     int         i;
     herr_t      ret = SUCCEED;
@@ -1339,7 +1283,7 @@ dump_all(hid_t group, const char *name, void * op_data)
     switch (statbuf.type) {
     case H5G_LINK:
 	indentation(indent);
-	buf = malloc(statbuf.linklen);
+	targbuf = malloc(statbuf.linklen);
 
 	if (!doxml) {
 	    begin_obj(dump_header_format->softlinkbegin, name,
@@ -1347,7 +1291,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    indentation(indent + COL);
 	}
 
-	if (H5Gget_linkval(group, name, statbuf.linklen, buf) < 0) {
+	if (H5Gget_linkval(group, name, statbuf.linklen, targbuf) < 0) {
             error_msg(progname, "unable to get link value\n");
 	    d_status = EXIT_FAILURE;
             ret = FAIL;
@@ -1355,36 +1299,67 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    /* print the value of a soft link */
 	    if (!doxml) {
 		/* Standard DDL: no modification */
-		printf("LINKTARGET \"%s\"\n", buf);
+		printf("LINKTARGET \"%s\"\n", targbuf);
 	    } else {
 		/* XML */
+		char *linkxid = malloc(100);
+		char *parentxid = malloc(100);
+		char *targetxid = malloc(100);
+                char *t_prefix = xml_escape_the_name(strcmp(prefix,"") ? prefix : "/");
                 char *t_name = xml_escape_the_name(name);
-                char *t_buf = xml_escape_the_name(buf);
-                char *t_prefix = xml_escape_the_name(prefix);
-                char *tmp2, *t_tmp2, *t_tmp;
+                char *t_targbuf = xml_escape_the_name(targbuf);
+                char *tmp2, *t_tmp;
+		int res;
 
                 tmp2 = malloc(strlen(prefix) + statbuf.linklen + 1);
                 strcpy(tmp2, prefix);
 
-                if (buf && buf[0] == '/')
-                    strcat(tmp2, buf);
+                if (targbuf && targbuf[0] == '/')
+                    strcpy(tmp2, targbuf);
                 else
-                    strcat(strcat(tmp2, "/"), buf);
+                    strcat(strcat(tmp2, "/"), targbuf);
 
                 t_tmp = xml_escape_the_name(strcat(strcat(tmp, "/"), name));
-                t_tmp2 = xml_escape_the_name(tmp2);
+		res = xml_name_to_XID(t_tmp,linkxid,100,1);
+		res = xml_name_to_XID(prefix,parentxid,100,1);
 
-		printf("<SoftLink LinkName=\"%s\" Target=\"%s\" "
-                       "TargetObj=\"%s\" OBJ-XID=\"%s\" Source=\"%s\"/>\n",
-		       t_name, t_buf, t_tmp2, t_tmp,
-		       (strcmp(prefix, "") ? t_prefix : "root"));
+		res = xml_name_to_XID(tmp2,targetxid,100,0);
+
+		if (res == 0) {
+			/* target obj found */
+			printf("<%sSoftLink LinkName=\"%s\" "
+			       "OBJ-XID=\"%s\" "
+			       "H5SourcePath=\"%s\" "
+                               "TargetPath=\"%s\" TargetObj=\"%s\" "
+			       "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+				xmlnsprefix,
+				t_name, 
+				linkxid, 
+				t_tmp, 
+				t_targbuf, targetxid,
+				parentxid, t_prefix);
+			free(targetxid);
+		} else {
+			/* dangling link -- omit from xml attributes */
+			printf("<%sSoftLink LinkName=\"%s\" "
+			       "OBJ-XID=\"%s\" "
+			       "H5SourcePath=\"%s\" "
+                               "TargetPath=\"%s\"  "
+			       "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+				xmlnsprefix,
+				t_name, 
+				linkxid,
+				t_tmp, 
+				t_targbuf, 
+				parentxid, t_prefix);
+		}
 
                 free(t_name);
-                free(t_buf);
-                free(t_prefix);
+                free(t_targbuf);
                 free(t_tmp);
-                free(t_tmp2);
                 free(tmp2);
+                free(linkxid);
+                free(parentxid);
 	    }
 	}
 
@@ -1394,7 +1369,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 		    dump_header_format->softlinkblockend);
 	}
 
-	free(buf);
+	free(targbuf);
 	break;
 
     case H5G_GROUP:
@@ -1455,24 +1430,44 @@ dump_all(hid_t group, const char *name, void * op_data)
 				dump_header_format->datasetblockend);
 		    } else {
 			/* the XML version */
-                        char *t_name = xml_escape_the_name(name);
-                        char *t_tmp = xml_escape_the_name(strcat(strcat(tmp, "/"), name));
-                        char *t_prefix = xml_escape_the_name(prefix);
-                        char *t_objname = xml_escape_the_name(dset_table->objs[i].objname);
+			int res;
+                        char *t_tmp;
+                        char *t_prefix;
+                        char *t_name;
+			char *dsetxid = malloc(100);
+			char *parentxid = malloc(100);
+			char *pointerxid = malloc(100);
+                        char *tx_tmp = malloc(strlen(tmp)+strlen(name)+1);
+				strcpy(tx_tmp,tmp);
+                        t_tmp = xml_escape_the_name(strcat(strcat(tx_tmp, "/"), name));
+                        t_prefix = xml_escape_the_name(prefix);
+                        t_name = xml_escape_the_name(name);
+			res = xml_name_to_XID( strcat(strcat(tmp,"/"),name), dsetxid,100,1);
+			res = xml_name_to_XID( prefix ,parentxid,100,1);
 
-			printf("<Dataset Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
-			       t_name, t_tmp,
-			       (strcmp(prefix, "") ? t_prefix : "root"));
+			printf("<%sDataset Name=\"%s\" OBJ-XID=\"%s-%d\" "
+                               "H5Path=\"%s\" Parents=\"%s\" "
+                               "H5ParentPaths=\"%s\">\n",
+				xmlnsprefix,
+			       t_name, dsetxid, get_next_xid(), 
+				t_tmp, parentxid,
+			       (strcmp(prefix, "") ? t_prefix : "/"));
 
 			indentation(indent + COL);
-			printf("<DatasetPtr OBJ-XID=\"%s\"/>\n", t_objname);
+			res = xml_name_to_XID(dset_table->objs[i].objname,pointerxid,100,1);
+			printf("<%sDatasetPtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n", 
+				xmlnsprefix,
+				pointerxid,t_tmp);
 			indentation(indent);
-			printf("%s\n", dump_header_format->datasetend);
+			printf("</%sDataset>\n", xmlnsprefix);
 
                         free(t_name);
+                        free(dsetxid);
+                        free(parentxid);
+                        free(pointerxid);
                         free(t_tmp);
+                        free(tx_tmp);
                         free(t_prefix);
-                        free(t_objname);
 		    }
 
 		    H5Dclose(obj);
@@ -2489,6 +2484,12 @@ parse_start:
             break;
         case 'H':
             display_data = FALSE;
+            display_attr_data = FALSE;
+            last_was_dset = FALSE;
+            break;
+        case 'A':
+            display_data = FALSE;
+            display_attr_data = TRUE;
             last_was_dset = FALSE;
             break;
         case 'i':
@@ -2586,12 +2587,34 @@ parse_start:
         case 'x':
             /* select XML output */
             doxml = TRUE;
-            dump_header_format = &xmlformat;
+            useschema = TRUE;
+            dump_header_format = NULL;
+            dump_function_table = &xml_function_table;
+            break;
+        case 'u':
+            doxml = TRUE;
+            useschema = FALSE;
+            xmlnsprefix = "";
+            dump_header_format = NULL;
             dump_function_table = &xml_function_table;
             break;
         case 'D':
-            /* specify alternative XML DTD */
+            /* specify alternative XML DTD or schema */
+            /* To Do: check format of this value?  */
             xml_dtd_uri = opt_arg;
+            break;
+        case 'X':
+            /* specify XML namespace (default="hdf5:"), or none */
+            /* To Do: check format of this value?  */
+	    if (!useschema) {
+                usage(progname);
+                exit(EXIT_FAILURE);
+	    }
+	    if (strcmp(opt_arg,":") == 0) {
+                xmlnsprefix = "";
+	    } else {
+                xmlnsprefix = opt_arg;
+	    }
             break;
         /** end XML parameters **/
 
@@ -2736,6 +2759,10 @@ free_handler(struct handler_t *hand, int len)
  *        Moved command line parsing to separate function. Made various
  *        "display_*" flags global.
  *
+ *        REMcG
+ *        August 2003
+ *        Major upgrade to XML support.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -2769,10 +2796,6 @@ main(int argc, const char *argv[])
 	} else if (display_bb) {
             error_msg(progname, "option \"%s\" not available for XML\n",
 		      "--boot-block");
-	    exit(EXIT_FAILURE);
-	} else if (!display_data) {
-            error_msg(progname, "option \"%s\" not available for XML\n",
-		      "--header");
 	    exit(EXIT_FAILURE);
 	} else if (display_oid == 1) {
             error_msg(progname, "option \"%s\" not available for XML\n",
@@ -2842,8 +2865,19 @@ main(int argc, const char *argv[])
 	strcpy(prefix, "");
 
 	/* make sure the URI is initialized to something */
-	if (xml_dtd_uri == NULL)
-	    xml_dtd_uri = DEFAULT_DTD;
+	if (xml_dtd_uri == NULL) {
+	    if (useschema) {
+		    xml_dtd_uri = DEFAULT_XSD;
+	    } else {
+		    xml_dtd_uri = DEFAULT_DTD;
+		    xmlnsprefix = "";
+	    }
+	} else {
+		if (useschema && strcmp(xmlnsprefix,"")) {
+        error_msg(progname, "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
+			exit(EXIT_FAILURE);
+		}
+	}
     }
 
     /* find all shared objects */
@@ -2869,9 +2903,29 @@ main(int argc, const char *argv[])
 		  dump_header_format->fileblockbegin);
     } else {
 	printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-	printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
-	       xml_dtd_uri);
-	printf("<HDF5-File>\n");
+	/* alternative first element, depending on schema or DTD. */
+        if (useschema) {
+		if (strcmp(xmlnsprefix,"") == 0) {
+		printf("<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
+		       xml_dtd_uri);
+		} else {
+/*  TO DO: make -url option work in this case (may need new option) */
+			char * ns;
+			char *indx;
+			ns = strdup(xmlnsprefix);
+			indx = rindex(ns,(int)':');
+			if (indx) *indx = '\0';
+			
+		printf("<%sHDF5-File xmlns:%s=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File\" "
+		"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+		"xsi:schemaLocation=\"http://hdf.ncsa.uiuc.edu/DTDs/HDF5File "
+		"http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+		}
+	} else {
+		printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
+		       xml_dtd_uri);
+		printf("<HDF5-File>\n");
+	}
     }
 
     if (display_bb)
@@ -2907,7 +2961,7 @@ main(int argc, const char *argv[])
 	end_obj(dump_header_format->fileend,
 		dump_header_format->fileblockend);
     } else {
-	printf("%s\n", dump_header_format->fileend);
+	printf("</%sHDF5-File>\n", xmlnsprefix);
     }
 
 done:
@@ -3065,12 +3119,6 @@ print_enum(hid_t type)
  *  method of selecting which one.
  */
 
-struct ref_path_table_entry_t {
-    hsize_t                 obj;
-    hobj_ref_t             *obj_ref;
-    char                   *apath;
-    struct ref_path_table_entry_t *next;
-};
 
 struct ref_path_table_entry_t *ref_path_table = NULL;	/* the table */
 int                     npte = 0;	/* number of entries in the table */
@@ -3146,6 +3194,7 @@ static hobj_ref_t *
 ref_path_table_put(hid_t obj, const char *path)
 {
     hobj_ref_t             *ref;
+    H5G_stat_t             *sb;
     herr_t                  status;
     struct ref_path_table_entry_t *pte;
 
@@ -3183,12 +3232,111 @@ ref_path_table_put(hid_t obj, const char *path)
 
     pte->apath = HDstrdup(path);
 
+    sb = (H5G_stat_t *) malloc(sizeof(H5G_stat_t));
+    if (sb == NULL) {
+	/* fatal error? */
+	free(pte);
+	return NULL;
+    }
+    H5Gget_objinfo(thefile, path, TRUE, sb);
+
+    memcpy((char *)&(pte->statbuf),(char *)sb,sizeof(H5G_stat_t));
+
     pte->next = ref_path_table;
     ref_path_table = pte;
 
     npte++;
 
     return ref;
+}
+
+/*
+ *  counter used to disambiguate multiple instances of same object.
+ */
+static int xid = 1;
+
+static int get_next_xid() {
+	return xid++;
+}
+
+/*
+ *  This counter is used to create fake object ID's
+ *  The idea is to set it to the largest possible offest, which
+ *  minimizes the chance of collision with a real object id.
+ *
+ */
+haddr_t fake_xid = HADDR_MAX;
+static haddr_t
+get_fake_xid () {
+	return (fake_xid--);
+}
+
+/*
+ * for an object that does not have an object id (e.g., soft link),
+ * create a table entry with a fake object id as the key.
+ */
+
+static struct ref_path_table_entry_t *
+ref_path_table_gen_fake(const char *path)
+{
+	union {
+		hobj_ref_t             rr;
+		char cc[16];
+		unsigned long ll[2];
+	} uu;
+	hobj_ref_t             *ref;
+	H5G_stat_t             *sb;
+	struct ref_path_table_entry_t *pte;
+
+    /* look up 'obj'.  If already in table, return */
+    pte = ref_path_table_lookup(path);
+    if (pte != NULL) {
+	return pte;
+	}
+
+    /* if not found, then make new entry */
+
+    pte = (struct ref_path_table_entry_t *)
+	malloc(sizeof(struct ref_path_table_entry_t));
+    if (pte == NULL) {
+	/* fatal error? */
+	return NULL;
+    }
+
+    pte->obj = (hid_t)-1;
+
+    sb = (H5G_stat_t *) malloc(sizeof(H5G_stat_t));
+    if (sb == NULL) {
+	/* fatal error? */
+	free(pte);
+	return NULL;
+    }
+    sb->objno[0] = (unsigned long)get_fake_xid();
+    sb->objno[1] = (unsigned long)get_fake_xid();
+
+    memcpy((char *)&(pte->statbuf),(char *)sb,sizeof(H5G_stat_t));
+
+    ref = (hobj_ref_t *) malloc(sizeof(hobj_ref_t));
+    if (ref == NULL) {
+	free(pte);
+	return NULL;
+    }
+
+    uu.ll[0] = sb->objno[0];
+    uu.ll[1] = sb->objno[1];
+
+    memcpy((char *)ref,(char *)&uu.rr,sizeof(ref));
+
+    pte->obj_ref = ref;
+
+    pte->apath = HDstrdup(path);
+
+    pte->next = ref_path_table;
+    ref_path_table = pte;
+
+    npte++;
+
+    return pte;
 }
 
 /*-------------------------------------------------------------------------
@@ -3316,6 +3464,55 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
     free(tmp);
     free(thepath);
     return 0;
+}
+
+/*
+ * create a string suitable for and XML NCNAME.  Uses the 
+ * object reference to create the string.
+ *
+ *  'gen'; 0 - return null if not found
+ *         1 - generate a fake entry and return fake id.
+ */
+
+int
+xml_name_to_XID(const char *str , char *outstr, int outlen, int gen)
+{
+	struct ref_path_table_entry_t *r;
+	char *os;
+
+	if (outlen < 22) return 1;
+
+	os = outstr;
+
+	r = ref_path_table_lookup(str);
+	if (r == NULL) {
+		if (strlen(str) == 0) {
+		    r = ref_path_table_lookup("/");
+		    if (r == NULL) {
+			if (gen) {
+				sprintf(os," "); /* ?? */
+				r = ref_path_table_gen_fake(str);
+				sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+				return 0;
+			} else {
+				return 1;
+			}
+		    }
+		} else {
+			if (gen) {
+				sprintf(os," "); /* ?? */
+				r = ref_path_table_gen_fake(str);
+				sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
+
+	sprintf(os,"xid_%lu-%lu",r->statbuf.objno[0],r->statbuf.objno[1]);
+
+	return(0);
 }
 
 static const char      *quote = "&quot;";
@@ -3546,13 +3743,13 @@ xml_print_datatype(hid_t type)
     switch (H5Tget_class(type)) {
     case H5T_INTEGER:
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
-	/* <IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
+	/* <hdf5:IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
 	ord = H5Tget_order(type);
 	sgn = H5Tget_sign(type);
 	indentation(indent);
-	printf("<IntegerType ByteOrder=\"");
+	printf("<%sIntegerType ByteOrder=\"",xmlnsprefix);
 	switch (ord) {
 	case H5T_ORDER_LE:
 	    printf("LE");
@@ -3581,20 +3778,20 @@ xml_print_datatype(hid_t type)
 	printf("\" />\n");
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_FLOAT:
-	/* <FloatType ByteOrder="bo" Size="bytes" 
+	/* <hdf5:FloatType ByteOrder="bo" Size="bytes" 
 	   SignBitLocation="bytes"
 	   ExponentBits="eb" ExponentLocation="el" 
 	   MantissaBits="mb" MantissaLocation="ml" /> */
 	ord = H5Tget_order(type);
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<FloatType ByteOrder=\"");
+	printf("<%sFloatType ByteOrder=\"",xmlnsprefix);
 	switch (ord) {
 	case H5T_ORDER_LE:
 	    printf("LE");
@@ -3616,33 +3813,33 @@ xml_print_datatype(hid_t type)
 	       (unsigned long)msize, (unsigned long)mpos);
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_TIME:
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<TimeType />\n");
+	printf("<%sTimeType />\n",xmlnsprefix);
 	printf("<!-- H5T_TIME: not yet implemented -->");
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_STRING:
-	/* <StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
+	/* <hdf5:StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
 	size = H5Tget_size(type);
 	str_pad = H5Tget_strpad(type);
 	cset = H5Tget_cset(type);
         is_vlstr = H5Tis_variable_str(type);
         
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<StringType Cset=\"");
+	printf("<%sStringType Cset=\"",xmlnsprefix);
 	if (cset == H5T_CSET_ASCII) {
 	    printf("H5T_CSET_ASCII\" ");
 	} else {
@@ -3663,17 +3860,17 @@ xml_print_datatype(hid_t type)
 	}
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_BITFIELD:
-	/* <BitfieldType ByteOrder="bo" Size="bytes"/> */
+	/* <hdf5:BitfieldType ByteOrder="bo" Size="bytes"/> */
 	ord = H5Tget_order(type);
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<BitfieldType ByteOrder=\"");
+	printf("<%sBitfieldType ByteOrder=\"",xmlnsprefix);
 	switch (ord) {
 	case H5T_ORDER_LE:
 	    printf("LE");
@@ -3689,22 +3886,21 @@ xml_print_datatype(hid_t type)
 	printf("\" Size=\"%lu\"/>\n", (unsigned long)size);
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_OPAQUE:
-	/* <OpaqueType Tag="tag" Size="bytes" /> */
-
+	/* <hdf5:OpaqueType Tag="tag" Size="bytes" /> */
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<OpaqueType Tag=\"%s\" ", H5Tget_tag(type));
+	printf("<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, H5Tget_tag(type));
 	size = H5Tget_size(type);
 	printf("Size=\"%lu\"/>\n", (unsigned long)size);
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_COMPOUND:
@@ -3716,19 +3912,26 @@ xml_print_datatype(hid_t type)
 
 	    if (i >= 0) {
 		/* This should be defined somewhere else */
+		/* These 2 cases are handled the same right now, but
+                   probably will have something different eventually */
+		int res;
+		char * dtxid = malloc(100);
+		res = xml_name_to_XID(type_table->objs[i].objname,dtxid,100,1);
 		if (!type_table->objs[i].recorded) {
 		    /* 'anonymous' NDT.  Use it's object num.
 		       as it's name.  */
-		    printf("<NamedDataTypePtr OBJ-XID=\"/#%lu:%lu\"/>\n",
-			   type_table->objs[i].objno[0],
-			   type_table->objs[i].objno[1]);
+		    printf("<%sNamedDataTypePtr OBJ-XID=\"/%s\"/>\n",
+			xmlnsprefix,
+			dtxid);
 		} else {
 		    /* point to the NDT by name */
                     char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
-
-		    printf("<NamedDataTypePtr OBJ-XID=\"%s\"/>\n", t_objname);
-                    free(t_objname);
+		    printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n",
+			xmlnsprefix,
+			dtxid,t_objname);
+		    free(t_objname);
 		}
+		free(dtxid);
 	    } else {
 		printf("<!-- h5dump error: unknown committed type. -->\n");
 		d_status = EXIT_FAILURE;
@@ -3739,11 +3942,11 @@ xml_print_datatype(hid_t type)
 	    nmembers = H5Tget_nmembers(type);
 
 	    indentation(indent);
-	    printf("<CompoundType>\n");
+	    printf("<%sCompoundType>\n",xmlnsprefix);
 
 	    /* List each member Field of the type */
-	    /*   <Field FieldName="name" > */
-	    /*   <DataType > */
+	    /*   <hdf5:Field FieldName="name" > */
+	    /*   <hdf5:DataType > */
 	    indent += COL;
 	    for (i = 0; i < nmembers; i++) {
                 char *t_fname;
@@ -3752,78 +3955,78 @@ xml_print_datatype(hid_t type)
 		mtype = H5Tget_member_type(type, i);
 		indentation(indent);
                 t_fname = xml_escape_the_name(fname);
-		printf("<Field FieldName=\"%s\">\n", t_fname);
+		printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
 
 		free(fname);
 		free(t_fname);
 		indent += COL;
 		indentation(indent);
-		printf("<DataType>\n");
+		printf("<%sDataType>\n",xmlnsprefix);
 		indent += COL;
 		xml_print_datatype(mtype);
 		indent -= COL;
 		indentation(indent);
-		printf("%s\n", dump_header_format->datatypeend);
+		printf("</%sDataType>\n",xmlnsprefix);
 		indent -= COL;
 
 		indentation(indent);
-		printf("</Field>\n");
+		printf("</%sField>\n",xmlnsprefix);
 	    }
 	    indent -= COL;
 	    indentation(indent);
-	    printf("</CompoundType>\n");
+	    printf("</%sCompoundType>\n",xmlnsprefix);
 	}
 	break;
 
     case H5T_REFERENCE:
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
 	/*  Only Object references supported at this time */
-	printf("<ReferenceType>\n");
+	printf("<%sReferenceType>\n",xmlnsprefix);
 	indentation(indent + COL);
-	printf("<ObjectReferenceType />\n");
+	printf("<%sObjectReferenceType />\n",xmlnsprefix);
 	indentation(indent);
-	printf("</ReferenceType>\n");
+	printf("</%sReferenceType>\n",xmlnsprefix);
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_ENUM:
-	/*  <EnumType Nelems="ne" >
+	/*  <hdf5:EnumType Nelems="ne" >
 	   list Name, values of enum
 	 */
 	nmembs = H5Tget_nmembers(type);
 	indentation(indent);
-	printf("<AtomicType>\n");
+	printf("<%sAtomicType>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<EnumType Nelems=\"%d\">\n", nmembs);
+	printf("<%sEnumType Nelems=\"%d\">\n",xmlnsprefix, nmembs);
 	xml_print_enum(type);
 	indentation(indent);
-	printf("</EnumType>\n");
+	printf("</%sEnumType>\n",xmlnsprefix);
 	indent -= COL;
 	indentation(indent);
-	printf("</AtomicType>\n");
+	printf("</%sAtomicType>\n",xmlnsprefix);
 	break;
 
     case H5T_VLEN:
 	indentation(indent);
-	printf("<VLType>\n");
+	printf("<%sVLType>\n",xmlnsprefix);
 	super = H5Tget_super(type);
 	indent += COL;
 	indentation(indent);
-	printf("<DataType>\n");
+	printf("<%sDataType>\n",xmlnsprefix);
 	indent += COL;
 	xml_print_datatype(super);
 	indent -= COL;
 	indentation(indent);
-	printf("%s\n", dump_header_format->datatypeend);
+	printf("</%sDataType>\n",xmlnsprefix);
 	indent -= COL;
 	indentation(indent);
-	printf("</VLType>\n");
+	printf("</%sVLType>\n",xmlnsprefix);
 	H5Tclose(super);
 
 	break;
@@ -3834,7 +4037,7 @@ xml_print_datatype(hid_t type)
 
 	/* Print lead-in */
 	indentation(indent);
-	printf("<ArrayType Ndims=\"");
+	printf("<%sArrayType Ndims=\"",xmlnsprefix);
 	ndims = H5Tget_array_ndims(type);
 	printf("%d\">\n", ndims);
 
@@ -3847,13 +4050,14 @@ xml_print_datatype(hid_t type)
 	    /* for each dimension, list */
 	    for (j = 0; j < ndims; j++) {
 		indentation(indent);
-		printf("<ArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
-		       (int) dims[j], (int) perm[j]);
+		printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
+		       xmlnsprefix,(int) dims[j], (int) perm[j]);
 	    }
 	} else {
 	    for (j = 0; j < ndims; j++) {
 		indentation(indent);
-		printf("<ArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
+		printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
+		       xmlnsprefix,
 		       (int) dims[j]);
 	    }
 	}
@@ -3861,15 +4065,15 @@ xml_print_datatype(hid_t type)
 
 	indent += COL;
 	indentation(indent);
-	printf("<DataType>\n");
+	printf("<%sDataType>\n",xmlnsprefix);
 	indent += COL;
 	xml_print_datatype(super);
 	indent -= COL;
 	indentation(indent);
-	printf("%s\n", dump_header_format->datatypeend);
+	printf("</%sDataType>\n",xmlnsprefix);
 	indent -= COL;
 	indentation(indent);
-	printf("</ArrayType>\n");
+	printf("</%sArrayType>\n",xmlnsprefix);
 	/* Close array base type */
 	H5Tclose(super);
 	break;
@@ -3910,35 +4114,41 @@ xml_dump_datatype(hid_t type)
 
 	if (i >= 0) {
 	    /* Shared data type, must be entered as an object  */
+		/* These 2 cases are the same now, but may change */
+	    int res;
+	    char * dtxid = malloc(100);
+	    res = xml_name_to_XID(type_table->objs[i].objname,dtxid,100,1);
 	    if (!type_table->objs[i].recorded) {
 		/* anonymous stored data type:
 		   following the dumper's current
 		   practice:
 		   use it's object ref as its name
 		 */
-		printf("<NamedDataTypePtr OBJ-XID=\"/#%lu:%lu\"/>\n",
-		       type_table->objs[i].objno[0],
-		       type_table->objs[i].objno[1]);
+		printf("<%sNamedDataTypePtr OBJ-XID=\"%s\"/>\n",
+			xmlnsprefix,
+			dtxid);
+
 	    } else {
 		/* pointer to a named data type already in XML */
                 char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
-
-		printf("<NamedDataTypePtr OBJ-XID=\"%s\"/>\n", t_objname);
-                free(t_objname);
+		printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\" />\n",
+			xmlnsprefix,
+			dtxid,t_objname);
+		free(t_objname);
 	    }
+	    free(dtxid);
 	} else {
 	    printf("<!-- h5dump error: unknown committed type. -->\n");
 	}
 	indent -= COL;
 	return;
     }
-    printf("%s %s\n", dump_header_format->datatypebegin,
-	   dump_header_format->datatypeblockbegin);
+    printf("<%sDataType>\n",xmlnsprefix);
     indent += COL;
     xml_print_datatype(type);
     indent -= COL;
     indentation(indent);
-    printf("%s\n", dump_header_format->datatypeend);
+    printf("</%sDataType>\n",xmlnsprefix);
     indent -= COL;
 }
 
@@ -3965,44 +4175,44 @@ xml_dump_dataspace(hid_t space)
     int                     i;
 
     indentation(indent + COL);
-    printf("%s\n", dump_header_format->dataspacebegin);
+    printf("<%sDataspace>\n", xmlnsprefix);
     if (H5Sis_simple(space)) {
 	indentation(indent + COL + COL);
 
 	if (ndims == 0) {
 	    /* scalar dataspace (just a tag, no XML attrs. defined */
-	    printf("<ScalarDataspace />\n");
+	    printf("<%sScalarDataspace />\n",xmlnsprefix);
 	} else {
 	    /* simple dataspace */
-	    /* <SimpleDataspace Ndims="nd"> */
-	    printf("<SimpleDataspace Ndims=\"%d\">\n", ndims);
+	    /* <hdf5:SimpleDataspace Ndims="nd"> */
+	    printf("<%sSimpleDataspace Ndims=\"%d\">\n",xmlnsprefix, ndims);
 
-	    /* print the <Dimension> elements */
+	    /* print the <hdf5:Dimension> elements */
 	    for (i = 0; i < ndims; i++) {
 		indentation(indent + COL + COL + COL);
 		if (maxsize[i] == H5S_UNLIMITED) {
 		    HDfprintf(stdout,
-			      "<Dimension  DimSize=\"%Hu\" MaxDimSize=\"UNLIMITED\"/>\n",
-			      size[i]);
+			      "<%sDimension  DimSize=\"%Hu\" MaxDimSize=\"UNLIMITED\"/>\n",
+			      xmlnsprefix,size[i]);
 		} else if (maxsize[i] == (hsize_t) 0) {
 		    HDfprintf(stdout,
-			      "<Dimension  DimSize=\"%Hu\" MaxDimSize=\"%Hu\"/>\n",
-			      size[i], size[i]);
+			      "<%sDimension  DimSize=\"%Hu\" MaxDimSize=\"%Hu\"/>\n",
+			      xmlnsprefix,size[i], size[i]);
 		} else {
 		    HDfprintf(stdout,
-			      "<Dimension  DimSize=\"%Hu\" MaxDimSize=\"%Hu\"/>\n",
-			      size[i], maxsize[i]);
+			      "<%sDimension  DimSize=\"%Hu\" MaxDimSize=\"%Hu\"/>\n",
+			      xmlnsprefix, size[i], maxsize[i]);
 		}
 	    }
 	    indentation(indent + COL + COL);
-	    printf("</SimpleDataspace>\n");
+	    printf("</%sSimpleDataspace>\n", xmlnsprefix );
 	}
     } else {
 	printf("<!-- not yet implemented -->\n");
     }
 
     indentation(indent + COL);
-    printf("%s\n", dump_header_format->dataspaceend);
+    printf("</%sDataspace>\n", xmlnsprefix);
 
 }
 
@@ -4046,9 +4256,9 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
 
     /* Print all the values. */
     indentation(indent);
-    printf("%s\n", dump_header_format->databegin);
+    printf("<%sData>\n", xmlnsprefix);
     indentation(indent + COL);
-    printf("<DataFromFile>\n");
+    printf("<%sDataFromFile>\n",xmlnsprefix);
     if (obj_data == DATASET_DATA) {
 	type = H5Dget_type(obj_id);
 	if (H5Tget_class(type) == H5T_REFERENCE) {
@@ -4106,9 +4316,9 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset)
     }
 
     indentation(indent + COL);
-    printf("</DataFromFile>\n");
+    printf("</%sDataFromFile>\n",xmlnsprefix);
     indentation(indent);
-    printf("%s\n", dump_header_format->dataend);
+    printf("</%sData>\n", xmlnsprefix);
     indent -= COL;
 }
 
@@ -4132,7 +4342,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
     char   *t_aname = xml_escape_the_name(attr_name);
 
     indentation(indent);
-    printf("<Attribute Name=\"%s\">\n", t_aname);
+    printf("<%sAttribute Name=\"%s\">\n",xmlnsprefix, t_aname);
     free(t_aname);
 
     if ((attr_id = H5Aopen_name(attr, attr_name)) >= 0) {
@@ -4142,7 +4352,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	dump_function_table->dump_dataspace_function(space);
 	dump_function_table->dump_datatype_function(type);
 
-	if (display_data) {
+	if (display_attr_data) {
 	    switch (H5Tget_class(type)) {
 	    case H5T_INTEGER:
 	    case H5T_FLOAT:
@@ -4157,13 +4367,14 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    case H5T_TIME:
 		indent += COL;
 		indentation(indent);
-		printf("<Data>\n");
+		printf("<%sData>\n",xmlnsprefix);
 		indentation(indent);
 		printf("<!-- Time data not yet implemented. -->\n");
 		indentation(indent);
-		printf("<NoData />\n");
+		printf("<%sNoData/>\n",xmlnsprefix);
 		indentation(indent);
-		printf("<Data>\n");
+		printf("<hdf5:Data>\n");
+		printf("</%sData>\n",xmlnsprefix);
 		indent -= COL;
 		break;
 
@@ -4175,20 +4386,20 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 
 	    case H5T_REFERENCE:
 		indentation(indent);
-		printf("<Data>\n");
+		printf("<%sData>\n",xmlnsprefix);
 		indentation(indent);
                 if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
                    printf("<!-- Note: Region references not supported -->\n");
                    indentation(indent);
-                   printf("<NoData />\n");
+                   printf("<%sNoData />\n",xmlnsprefix);
                 } else {
-		    printf("<DataFromFile>\n");
+		    printf("<%sDataFromFile>\n",xmlnsprefix);
 		    xml_print_refs(attr_id, ATTRIBUTE_DATA);
 		    indentation(indent);
-		    printf("</DataFromFile>\n");
+		    printf("</%sDataFromFile>\n",xmlnsprefix);
                 }
 		indentation(indent);
-		printf("</Data>\n");
+		printf("</%sData>\n",xmlnsprefix);
 		break;
 
 	    case H5T_VLEN:
@@ -4197,30 +4408,30 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 		break;
 	    default:
 		indentation(indent);
-		printf("<Data>\n");
+		printf("<%sData>\n",xmlnsprefix);
 		indentation(indent);
 		printf("<!-- Unknown datatype: %d -->\n", H5Tget_class(type));
 		indentation(indent);
-		printf("<NoData/>\n");
+		printf("<%sNoData/>\n",xmlnsprefix);
 		indentation(indent);
-		printf("</Data>\n");
+		printf("</%sData>\n",xmlnsprefix);
 		break;
 	    }
 	} else {
 	    /* The case of an attribute never yet written ?? */
 	    indentation(indent);
-	    printf("<Data>\n");
+	    printf("<%sData>\n",xmlnsprefix);
 	    indentation(indent + COL);
-	    printf("<NoData/>\n");
+	    printf("<%sNoData/>\n",xmlnsprefix);
 	    indentation(indent);
-	    printf("</Data>\n");
+	    printf("</%sData>\n",xmlnsprefix);
 	}
 
 	H5Tclose(type);
 	H5Sclose(space);
 	H5Aclose(attr_id);
 	indentation(indent);
-	printf("%s\n", dump_header_format->attributeend);
+	printf("</%sAttribute>\n", xmlnsprefix );
 	return SUCCEED;
 
     } else {
@@ -4228,7 +4439,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	indentation(indent + COL);
 	printf("<!-- h5dump error: unable to open attribute. -->\n");
 	indentation(indent);
-	printf("%s\n", dump_header_format->attributeend);
+	printf("</%sAttribute>\n", xmlnsprefix );
 	d_status = EXIT_FAILURE;
 	return FAIL;
     }
@@ -4251,9 +4462,15 @@ static void
 xml_dump_named_datatype(hid_t type, const char *name)
 {
     int                     nmembers = 1, x;
+    int res;
     hid_t                   mtype;
     char                   *fname;
     char                   *tmp;
+    char * dtxid;
+    char * parentxid;
+    char *t_tmp;
+    char *t_prefix;
+    char   *t_name;
 
     tmp = malloc(strlen(prefix) + strlen(name) + 2);
     strcpy(tmp, prefix);
@@ -4261,6 +4478,13 @@ xml_dump_named_datatype(hid_t type, const char *name)
     strcat(tmp, name);
 
     indentation(indent);
+    /*char **/ dtxid = malloc(100);
+    /*char **/ parentxid = malloc(100);
+    /*char **/t_tmp = xml_escape_the_name(tmp);
+    /*char **/t_prefix = xml_escape_the_name(prefix);
+    /*char   **/t_name = xml_escape_the_name(name);
+    res = xml_name_to_XID(tmp,dtxid,100,1);
+    res = xml_name_to_XID(prefix,parentxid,100,1);
     if (strncmp(name, "#", 1) == 0) {
 	/*  Special:  this is an 'anonymous' NDT, deleted but 
 	   still in use.
@@ -4270,25 +4494,23 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	   in the event we want to do something else in
 	   the future.
 	 */
-        char *t_tmp = xml_escape_the_name(tmp);
-        char *t_prefix = xml_escape_the_name(prefix);
-
-	printf("<NamedDataType Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
-	       name, t_tmp, (strcmp(prefix, "") ? t_prefix : "root"));
-        free(t_tmp);
-        free(t_prefix);
+	printf("<%sNamedDataType Name=\"%s\" OBJ-XID=\"%s\" "
+		"Parents=\"%s\" H5ParentPaths=\"%s\">\n",
+		xmlnsprefix,
+		name, dtxid, 
+		parentxid,(strcmp(prefix, "") ? t_prefix : "/"));
     } else {
-        char *t_name = xml_escape_the_name(name);
-        char *t_prefix = xml_escape_the_name(prefix);
-        char *t_tmp = xml_escape_the_name(tmp);
-
-	printf("<NamedDataType Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
-	       t_name, t_tmp, (strcmp(prefix, "") ? t_prefix : "root"));
-
-        free(t_name);
-        free(t_prefix);
-        free(t_tmp);
+	printf("<%sNamedDataType Name=\"%s\" OBJ-XID=\"%s\" "
+		"H5Path=\"%s\" Parents=\"%s\" H5ParentPaths=\"%s\">\n",
+		xmlnsprefix,
+		t_name, dtxid, 
+		t_tmp, parentxid, (strcmp(prefix, "") ? t_prefix : "/"));
     }
+    free(dtxid);
+    free(parentxid);
+    free(t_tmp);
+    free(t_prefix);
+    free(t_name);
 
     indent += COL;
 
@@ -4297,9 +4519,9 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	nmembers = H5Tget_nmembers(type);
 
 	indentation(indent);
-	printf("<DataType>\n");
+	printf("<%sDataType>\n",xmlnsprefix);
 	indentation(indent);
-	printf("<CompoundType>\n");
+	printf("<%sCompoundType>\n",xmlnsprefix);
 
 	indent += COL;
 	for (x = 0; x < nmembers; x++) {
@@ -4309,7 +4531,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
 	    mtype = H5Tget_member_type(type, x);
 	    indentation(indent);
             t_fname = xml_escape_the_name(fname);
-	    printf("<Field FieldName=\"%s\">\n", t_fname);
+	    printf("<%sField FieldName=\"%s\">\n",xmlnsprefix, t_fname);
 	    free(fname);
 	    free(t_fname);
 
@@ -4320,50 +4542,48 @@ xml_dump_named_datatype(hid_t type, const char *name)
 
 		/*  Nested compound type:  recur */
 		indentation(indent);
-		printf("%s %s\n", dump_header_format->datatypebegin,
-		       dump_header_format->datatypeblockbegin);
+		printf("<%sDataType>\n",xmlnsprefix);
 		indent += COL;
 		xml_print_datatype(mtype);
 		indent -= COL;
 		indentation(indent);
-		printf("%s\n", dump_header_format->datatypeend);
+		printf("</%sDataType>\n",xmlnsprefix);
 		indent -= COL;
 	    } else {
 		indent += COL;
 		indentation(indent);
-		printf("%s %s\n", dump_header_format->datatypebegin,
-		       dump_header_format->datatypeblockbegin);
+		printf("<%sDataType>\n",xmlnsprefix);
 		indent += COL;
 		xml_print_datatype(mtype);
 		indent -= COL;
 		indentation(indent);
-		printf("%s\n", dump_header_format->datatypeend);
+		printf("</%sDataType>\n",xmlnsprefix);
 		indent -= COL;
 	    }
 
 	    indentation(indent);
-	    printf("</Field>\n");
+	    printf("</%sField>\n",xmlnsprefix);
 	}
 
 	indent -= COL;
 	indentation(indent);
-	printf("</CompoundType>\n");
+	printf("</%sCompoundType>\n",xmlnsprefix);
 	indentation(indent);
-	printf("</DataType>\n");
+	printf("</%sDataType>\n",xmlnsprefix);
     } else {
 	/* Other data types: call print_datatype */
         indentation(indent);
-        printf("<DataType>\n");
+	printf("<%sDataType>\n",xmlnsprefix);
 	indent += COL;
 	xml_print_datatype(type);
 	indent -= COL;
         indentation(indent);
-        printf("</DataType>\n");
+	printf("</%sDataType>\n",xmlnsprefix);
     }
 
     indent -= COL;
     indentation(indent);
-    printf("</NamedDataType>\n");
+    printf("</%sNamedDataType>\n",xmlnsprefix);
 }
 
 /*-------------------------------------------------------------------------
@@ -4390,9 +4610,14 @@ xml_dump_group(hid_t gid, const char *name)
     int                     i;
     int                     isRoot = 0;
     int                     xtype;
+    char *ptrstr;
+    char *t_objname;
+    char *par_name;
 
     if (strcmp(name, "/") == 0) {
 	isRoot = 1;
+	tmp = malloc(2);
+	strcpy(tmp, "/");
     } else {
 	tmp = malloc(strlen(prefix) + strlen(name) + 2);
 	strcpy(tmp, prefix);
@@ -4409,20 +4634,6 @@ xml_dump_group(hid_t gid, const char *name)
 
     indentation(indent);
 
-    if (isRoot) {
-	printf("<RootGroup OBJ-XID=\"root\">\n");
-    } else {
-        char *t_name = xml_escape_the_name(name);
-        char *t_tmp = xml_escape_the_name(tmp);
-        char *t_par = xml_escape_the_name(par);
-
-	printf("<Group Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\" >\n",
-               t_name, t_tmp, (strcmp(prefix, "") ? t_par : "root"));
-        free(t_name);
-        free(t_tmp);
-        free(t_par);
-    }
-
     indent += COL;
     H5Gget_objinfo(gid, ".", TRUE, &statbuf);
 
@@ -4437,14 +4648,68 @@ xml_dump_group(hid_t gid, const char *name)
 	    d_status = EXIT_FAILURE;
 	} else if (group_table->objs[i].displayed) {
 	    /* already seen: enter a groupptr */
-            char *t_objname = xml_escape_the_name(group_table->objs[i].objname);
+	    int res;
+	    char *t_name = xml_escape_the_name(name);
+	    char *grpxid = malloc(100);
+	    char *parentxid = malloc(100);
+	    if (isRoot) {
+		/* probably can't happen! */
+		res = xml_name_to_XID("/",grpxid,100,1);
+		printf("<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n",
+			xmlnsprefix,grpxid,"/");
+	    } else {
+		t_objname = xml_escape_the_name(group_table->objs[i].objname);
+		par_name = xml_escape_the_name(par);
+		res = xml_name_to_XID(tmp,grpxid,100,1);
+		res = xml_name_to_XID(par,parentxid,100,1);
+		printf("<%sGroup Name=\"%s\" OBJ-XID=\"%s-%d\" H5Path=\"%s\" "
+			"Parents=\"%s\" H5ParentPaths=\"%s\">\n",
+		        xmlnsprefix,t_name, grpxid, get_next_xid(), 
+			t_objname, parentxid, par_name);
+                free(t_objname);
+                free(par_name);
+	    }
+            free(t_name);
+            free(grpxid);
 
 	    indentation(indent + COL);
-	    printf("<GroupPtr OBJ-XID=\"%s\"/>\n", t_objname);
+	    ptrstr = malloc(100);
+            t_objname = xml_escape_the_name(group_table->objs[i].objname);
+	    par_name = xml_escape_the_name(par);
+	    res = xml_name_to_XID(par,parentxid,100,1);
+	    res = xml_name_to_XID(group_table->objs[i].objname,ptrstr,100,1);
+	    printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
+			"Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+			xmlnsprefix,
+			ptrstr, t_objname, parentxid, par_name);
             free(t_objname);
+            free(parentxid);
+
 	} else {
+
 	    /* first time this group has been seen -- describe it  */
-	    free(group_table->objs[i].objname);
+	    int res;
+	    char *t_name = xml_escape_the_name(name);
+	    char *grpxid = malloc(100);
+	    char *parentxid = malloc(100);
+	    if (isRoot) {
+		res = xml_name_to_XID("/",grpxid,100,1);
+		printf("<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n",
+			xmlnsprefix,grpxid,"/");
+	    } else {
+		char *t_tmp = xml_escape_the_name(tmp);
+		par_name = xml_escape_the_name(par);
+		res = xml_name_to_XID(tmp,grpxid,100,1);
+		res = xml_name_to_XID(par,parentxid,100,1);
+		printf("<%sGroup Name=\"%s\" OBJ-XID=\"%s\" H5Path=\"%s\" "
+			"Parents=\"%s\" H5ParentPaths=\"%s\" >\n",
+		       xmlnsprefix,t_name, grpxid, t_tmp, parentxid, par_name);
+		free(t_tmp);
+		free(par_name);
+	    }
+	    free(t_name);
+	    free(grpxid);
+	    free(parentxid);
 	    group_table->objs[i].objname = HDstrdup(prefix);
 	    group_table->objs[i].displayed = 1;
 
@@ -4477,8 +4742,34 @@ xml_dump_group(hid_t gid, const char *name)
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	    xtype = H5G_LINK;
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+
 	}
     } else {
+
+	/* only link -- must be first time! */
+	int res;
+        char *t_name = xml_escape_the_name(name);
+	char *grpxid = malloc(100);
+	char *parentxid = malloc(100);
+	if (isRoot) {
+		res = xml_name_to_XID("/",grpxid,100,1);
+		printf("<%sRootGroup OBJ-XID=\"%s\" H5Path=\"%s\">\n",
+			xmlnsprefix,grpxid,"/");
+	} else {
+		char *t_tmp = xml_escape_the_name(tmp);
+		par_name = xml_escape_the_name(par);
+		res = xml_name_to_XID(tmp,grpxid,100,1);
+		res = xml_name_to_XID(par,parentxid,100,1);
+		printf("<%sGroup Name=\"%s\" OBJ-XID=\"%s\" H5Path=\"%s\" "
+			"Parents=\"%s\" H5ParentPaths=\"%s\" >\n",
+		        xmlnsprefix,t_name, grpxid, t_tmp, 
+			parentxid, par_name);
+		free(t_tmp);
+		free(par_name);
+	}
+        free(t_name);
+	free(grpxid);
+	free(parentxid);
 	/* 1.  do all the attributes of the group */
 	H5Aiterate(gid, NULL, dump_function_table->dump_attribute_function, NULL);
 
@@ -4507,18 +4798,17 @@ xml_dump_group(hid_t gid, const char *name)
   	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	xtype = H5G_LINK;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+
     }
 
     indent -= COL;
     indentation(indent);
     if (isRoot) {
-	printf("</RootGroup>\n");
+	printf("</%sRootGroup>\n",xmlnsprefix);
     } else {
-	printf("%s\n", dump_header_format->groupend);
+	printf("</%sGroup>\n" ,xmlnsprefix);
     }
-/*  don't free this!!!
     free(tmp);
-*/
 }
 
 /*-------------------------------------------------------------------------
@@ -4765,13 +5055,229 @@ check_compression(hid_t dcpl)
 			       &cd_values, 20, namebuf);
 	if (filter == H5Z_FILTER_DEFLATE) {
 	    indentation(indent + COL);
-	    printf("<Compression />\n");
+	    printf("<%sCompression />\n",xmlnsprefix);
 	    indentation(indent + COL);
 	    printf("<!-- Compression parameter %d -->\n", cd_values);
 	}
     }
 }
+/*-------------------------------------------------------------------------
+ * Function:    check_filters
+ *
+ * Purpose:     private function to check for the filters and
+ *              put tags in the XML.  
+ *
+ * Return:      void
+ *
+ * Programmer:  REMcG
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+check_filters(hid_t dcpl)
+{
+    int                     nfilt;
+    int                     i;
+    H5Z_filter_t            filter;
+    char                    namebuf[120];
+    size_t                  cd_nelmts = 20;
+    unsigned int            cd_values[20];
+    unsigned int            flags;
 
+    nfilt = H5Pget_nfilters(dcpl);
+    if (nfilt <= 0)
+	return;
+    for (i = 0; i < nfilt; i++) {
+	filter = H5Pget_filter(dcpl, i, &flags,
+			       (size_t *) &cd_nelmts,
+			       cd_values, 120, namebuf);
+	if (filter == H5Z_FILTER_DEFLATE) {
+	    indentation(indent + COL);
+	    printf("<%sDeflate Level=\"",xmlnsprefix);
+            if (cd_nelmts < 1) {
+		/* not sure what this means? */
+	        printf("6");
+            } else {
+	        printf("%d",cd_values[0]);
+            }
+	    printf("\"/>\n");
+	} else if (filter == H5Z_FILTER_FLETCHER32) {
+	    indentation(indent + COL);
+	    printf("<%sFletcher32 />",xmlnsprefix);
+	} else if (filter == H5Z_FILTER_SHUFFLE) {
+	    indentation(indent + COL);
+	    printf("<%sShuffle />",xmlnsprefix);
+	} else if (filter == H5Z_FILTER_SZIP) {
+/* 3 private values: can't be set, but can be read.
+   Note: these are defined in H5Zprivate, they are
+   duplicated here.
+ */
+#define H5_SZIP_LSB_OPTION_MASK         8
+#define H5_SZIP_MSB_OPTION_MASK         16
+#define H5_SZIP_RAW_OPTION_MASK         128
+	    indentation(indent + COL);
+	    printf("<%sSZIP ",xmlnsprefix);
+            if (cd_nelmts < 2) {
+		/* no pixels ? */
+	        printf("Pixels_per_block=\"-1\" ");
+            } else {
+	        printf("Pixels_per_block=\"%d\" ",cd_values[1]);
+            }
+		/* analyse the options mask */
+		if (cd_values[0] & H5_SZIP_CHIP_OPTION_MASK) {
+                    printf("Mode =\"Hardware\" ");
+                } else if (cd_values[0] & H5_SZIP_ALLOW_K13_OPTION_MASK) {
+                    printf("Mode =\"K13\" ");
+                } 
+                printf("Coding=\"");
+		if (cd_values[0] & H5_SZIP_EC_OPTION_MASK) {
+                    printf("Entropy");
+                } else if (cd_values[0] & H5_SZIP_NN_OPTION_MASK) {
+                    printf("NN");
+                } 
+                printf("\" ");
+
+                printf("ByteOrder=\"");
+		if (cd_values[0] & H5_SZIP_LSB_OPTION_MASK) {
+                    printf("LSB");
+                } else if (cd_values[0] & H5_SZIP_MSB_OPTION_MASK) {
+                    printf("MSB");
+                } 
+                printf("\" ");
+
+		if (cd_values[0] & H5_SZIP_RAW_OPTION_MASK) {
+                    printf("Header=\"Raw\"");
+                } 
+	        printf("/>\n");
+	} else {
+		/* unknown option */
+	}
+    }
+}
+
+static void xml_dump_fill_value(hid_t dcpl, hid_t type)
+{
+int sz;
+int i;
+hsize_t space;
+hid_t p_type;
+void * buf;
+char * path;
+char * name;
+	indent += COL;
+	indentation(indent);
+	printf("<%sData>\n",xmlnsprefix);
+	indent += COL;
+
+	space = H5Tget_size(type);
+	buf = malloc((size_t)space);
+
+	H5Pget_fill_value(dcpl, type, buf);
+
+	if (H5Tget_class(type) == H5T_REFERENCE) {
+	    path = lookup_ref_path(buf);
+
+	    indentation(indent);
+	    printf("<%sDataFromFile>\n",xmlnsprefix);
+	    if (!path) {
+	        printf("\"%s\"\n", "NULL");
+	    } else {
+                char *t_path = xml_escape_the_string(path, -1);
+
+	        printf("\"%s\"\n", t_path);
+                free(t_path);
+	    }
+	    indentation(indent);
+	    printf("</%sDataFromFile>\n",xmlnsprefix);
+	} else if (H5Tget_class(type) == H5T_STRING) {
+		/* ????? */
+		indentation(indent);
+	        printf("<!-- String fill values not yet implemented. -->\n");
+		indentation(indent);
+		printf("<%sNoData />\n",xmlnsprefix);
+	} else {
+	    /* all other data */
+	    switch (H5Tget_class(type)) {
+		case H5T_INTEGER:
+			indentation(indent);
+			printf("<%sDataFromFile>\n",xmlnsprefix);
+			indentation(indent);
+			printf("\"%d\"\n",*(int *)buf);
+			indentation(indent);
+			printf("</%sDataFromFile>\n",xmlnsprefix);
+			break;
+		case H5T_FLOAT:
+			indentation(indent);
+			printf("<%sDataFromFile>\n",xmlnsprefix);
+			indentation(indent);
+			printf("\"%f\"\n",*(float *)buf);
+			indentation(indent);
+			printf("</%sDataFromFile>\n",xmlnsprefix);
+			break;
+		case H5T_BITFIELD:
+		case H5T_OPAQUE:
+			indentation(indent);
+			printf("<%sDataFromFile>\n",xmlnsprefix);
+			sz = H5Tget_size(type);
+			indentation(indent);
+			printf("\"");
+			for (i = 0; i < sz; i++) {
+				printf("%x ",*(unsigned int *)buf);
+			}
+			printf("\"\n");
+			indentation(indent);
+			printf("</%sDataFromFile>\n",xmlnsprefix);
+			break;
+		case H5T_ENUM:
+			indentation(indent);
+			printf("<%sDataFromFile>\n",xmlnsprefix);
+			name = H5Tget_member_name(type, *(int *)buf);
+			indentation(indent);
+			printf("\"%s\"\n",name);
+			indentation(indent);
+			printf("</%sDataFromFile>\n",xmlnsprefix);
+			break;
+		case H5T_ARRAY:
+			indentation(indent);
+		    printf("<!-- Array fill values not yet implemented. -->\n");
+		    indentation(indent);
+		    printf("<%sNoData />\n",xmlnsprefix);
+		    break;
+		case H5T_TIME:
+			indentation(indent);
+		    printf("<!-- Time fill not yet implemented. -->\n");
+		    indentation(indent);
+		    printf("<%sNoData />\n",xmlnsprefix);
+		    break;
+		case H5T_COMPOUND:
+			indentation(indent);
+		    printf("<!-- Compound fill not yet implemented. -->\n");
+		    indentation(indent);
+		    printf("<%sNoData />\n",xmlnsprefix);
+		    break;
+	case H5T_VLEN:
+		indentation(indent);
+		    printf("<!-- VL fill not yet implemented. -->\n");
+		    indentation(indent);
+		    printf("<%sNoData />\n",xmlnsprefix);
+		    break;
+	default:
+		indentation(indent);
+	    printf("<!-- Unknown fill datatype: %d -->\n", H5Tget_class(type));
+	    indentation(indent);
+	    printf("<%sNoData/>\n",xmlnsprefix);
+	    break;
+	}
+	    free(buf);
+	    H5Tclose(p_type);
+	}
+	indent -= COL;
+	indentation(indent);
+	printf("</%sData>\n",xmlnsprefix);
+	indent -= COL;
+}
 /*-------------------------------------------------------------------------
  * Function:    xml_dump_group
  *
@@ -4790,13 +5296,20 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 {
     hid_t                   type, space;
     hid_t                   dcpl;
+    herr_t                  err;
+    H5D_fill_value_t        fvstatus;
     int                     maxdims;
     hsize_t                *chsize;
     int                     ndims;
     int                     i;
-	hsize_t                 tempi;
+    H5D_alloc_time_t        at;
+    H5D_fill_time_t        ft;
+    int res;
+    hsize_t                 tempi;
     char                   *tmp;
     char                   *t_name, *t_tmp, *t_prefix;
+    char *rstr = malloc(100);
+    char *pstr = malloc(100);
 
     tmp = malloc(strlen(prefix) + strlen(name) + 2);
     strcpy(tmp, prefix);
@@ -4808,51 +5321,149 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     t_tmp = xml_escape_the_name(tmp);
     t_prefix = xml_escape_the_name(prefix);
 
-    printf("<Dataset Name=\"%s\" OBJ-XID=\"%s\" Parents=\"%s\">\n",
-	   t_name, t_tmp, (strcmp(prefix, "") ? t_prefix : "root"));
+    res = xml_name_to_XID(tmp, rstr, 100, 1);
+    res = xml_name_to_XID(prefix, pstr, 100, 1);
+    printf("<%sDataset Name=\"%s\" OBJ-XID=\"%s\" H5Path= \"%s\" Parents=\"%s\" H5ParentPaths=\"%s\">\n",xmlnsprefix,
+	   t_name, rstr, t_tmp, pstr, strcmp(prefix, "") ? t_prefix : "/");
 
     free(t_name);
     free(t_tmp);
     free(t_prefix);
+    free(rstr);
+    free(pstr);
+    free(tmp);
 
     dcpl = H5Dget_create_plist(did);
     type = H5Dget_type(did);
     space = H5Dget_space(did);
 
-    /* Print information about chunked storage */
+    /* Print information about storage layout */
     if (H5D_CHUNKED == H5Pget_layout(dcpl)) {
 	maxdims = H5Sget_simple_extent_ndims(space);
 	chsize = (hsize_t *) malloc(maxdims * sizeof(hsize_t));
 	indent += COL;
 	indentation(indent);
-	printf("<StorageLayout>\n");
+	printf("<%sStorageLayout>\n",xmlnsprefix);
 	indent += COL;
 	indentation(indent);
-	printf("<ChunkedLayout ");
+	printf("<%sChunkedLayout ",xmlnsprefix);
 	ndims = H5Pget_chunk(dcpl, maxdims, chsize);
 	printf("Ndims=\"%d\">\n", ndims);
-	/* check for compression and tell about it... */
-
-	check_compression(dcpl);
 
 	indent += COL;
 
 	for (i = 0; i < ndims; i++) {
 	    indentation(indent);
-	    HDfprintf(stdout, "<ChunkDimension DimSize=\"%Hu\" />\n", chsize[i]);
+	    HDfprintf(stdout, "<%sChunkDimension DimSize=\"%Hu\" />\n",
+               xmlnsprefix, chsize[i]);
 	}
 
+	indentation(indent);
+	printf("<%sRequiredFilter>\n",xmlnsprefix);
+	indent += COL;
+	check_filters(dcpl);
+	indent -= COL;
+	indentation(indent);
+	printf("</%sRequiredFilter>\n",xmlnsprefix);
+
 	indent -= COL;
 
 	indentation(indent);
-	printf("</ChunkedLayout>\n");
+	printf("</%sChunkedLayout>\n",xmlnsprefix);
 	indent -= COL;
 	indentation(indent);
-	printf("</StorageLayout>\n");
+	printf("</%sStorageLayout>\n",xmlnsprefix);
 	indent -= COL;
 	free(chsize);
+    } else if (H5D_CONTIGUOUS == H5Pget_layout(dcpl)) {
+	indent += COL;
+	indentation(indent);
+	printf("<%sStorageLayout>\n",xmlnsprefix);
+	indent += COL;
+	indentation(indent);
+	printf("<%sContiguousLayout/>\n",xmlnsprefix);
+	indent -= COL;
+	indentation(indent);
+	printf("</%sStorageLayout>\n",xmlnsprefix);
+	indent -= COL;
+	indentation(indent);
+    } else if (H5D_COMPACT == H5Pget_layout(dcpl)) {
+	indent += COL;
+	indentation(indent);
+	printf("<%sStorageLayout>\n",xmlnsprefix);
+	indent += COL;
+	indentation(indent);
+	printf("<%sCompactLayout/>\n",xmlnsprefix);
+	indent -= COL;
+	indentation(indent);
+	printf("</%sStorageLayout>\n",xmlnsprefix);
+	indent -= COL;
+	indentation(indent);
     }
-    /* and check for external.... */
+    /* and check for external.... ?? */
+
+    /* fill value */
+
+    indent += COL;
+    indentation(indent);
+    printf("<%sFillValueInfo ",xmlnsprefix);
+    err = H5Pget_fill_time(dcpl, &ft);
+    printf("FillTime=\"");
+    switch ( ft ) {
+	case H5D_FILL_TIME_ALLOC: 
+                printf("FillOnAlloc");
+		break;
+	case H5D_FILL_TIME_NEVER: 
+                printf("FillNever");
+		break;
+	case H5D_FILL_TIME_IFSET: 
+                printf("FillIfSet");
+		break;
+	default:
+                printf("?");
+		break;
+    }
+    printf("\" ");
+    err = H5Pget_alloc_time(dcpl, &at);
+    printf("AllocationTime=\"");
+    switch ( at ) {
+	case H5D_ALLOC_TIME_EARLY: 
+                printf("Early");
+		break;
+	case H5D_ALLOC_TIME_INCR:
+                printf("Incremental");
+		break;
+	case H5D_ALLOC_TIME_LATE: 
+                printf("Late");
+		break;
+	case H5D_ALLOC_TIME_DEFAULT: 
+	default:
+                printf("?");
+		break;
+    }
+    printf("\"");
+    printf(">\n");
+
+    indent += COL;
+    indentation(indent);
+    printf("<%sFillValue>\n",xmlnsprefix);
+    indent += COL;
+    err = H5Pfill_value_defined(dcpl, &fvstatus);
+    if (fvstatus == H5D_FILL_VALUE_UNDEFINED) {
+        indentation(indent + COL);
+        printf("<%sNoFill/>\n",xmlnsprefix);
+    } else {
+        xml_dump_fill_value(did,type);
+    }
+
+    indent -= COL;
+    indentation(indent);
+    printf("</%sFillValue>\n",xmlnsprefix);
+
+    indent -= COL;
+    indentation(indent);
+    printf("</%sFillValueInfo>\n",xmlnsprefix);
+    indent -= COL;
 
     dump_function_table->dump_dataspace_function(space);
     dump_function_table->dump_datatype_function(type);
@@ -4860,7 +5471,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     indent += COL;
     H5Aiterate(did, NULL, dump_function_table->dump_attribute_function, NULL);
     indent -= COL;
-	tempi = H5Dget_storage_size(did);
+    tempi = H5Dget_storage_size(did);
     
     if (display_data && (tempi > 0)) {
 	switch (H5Tget_class(type)) {
@@ -4877,13 +5488,13 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	case H5T_TIME:
 	    indent += COL;
 	    indentation(indent);
-	    printf("<Data>\n");
+	    printf("<%sData>\n",xmlnsprefix);
 	    indentation(indent);
 	    printf("<!-- Time data not yet implemented. -->\n");
 	    indentation(indent);
-	    printf("<NoData />\n");
+	    printf("<%sNoData />\n",xmlnsprefix);
 	    indentation(indent);
-	    printf("<Data>\n");
+	    printf("<%sData>\n",xmlnsprefix);
 	    indent -= COL;
 	    break;
 
@@ -4895,20 +5506,20 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 
 	case H5T_REFERENCE:
 	    indentation(indent);
-	    printf("<Data>\n");
+	    printf("<%sData>\n",xmlnsprefix);
 	    indentation(indent);
             if (!H5Tequal(type, H5T_STD_REF_OBJ)) {
                 printf("<!-- Note: Region references not supported -->\n");
                 indentation(indent);
-                printf("<NoData />\n");
+                printf("<%sNoData />\n",xmlnsprefix);
             } else {
-	        printf("<DataFromFile>\n");
+	        printf("<%sDataFromFile>\n",xmlnsprefix);
 	        xml_print_refs(did, DATASET_DATA);
 	        indentation(indent);
-	        printf("</DataFromFile>\n");
+	        printf("</%sDataFromFile>\n",xmlnsprefix);
             }
 	    indentation(indent);
-	    printf("</Data>\n");
+	    printf("</%sData>\n",xmlnsprefix);
 	    break;
 
 	case H5T_VLEN:
@@ -4917,32 +5528,29 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
 	    break;
 	default:
 	    indentation(indent);
-	    printf("<Data>\n");
+	    printf("<%sData>\n",xmlnsprefix);
 	    indentation(indent);
 	    printf("<!-- Unknown datatype: %d -->\n", H5Tget_class(type));
 	    indentation(indent);
-	    printf("<NoData/>\n");
+	    printf("<%sNoData/>\n",xmlnsprefix);
 	    indentation(indent);
-	    printf("</Data>\n");
+	    printf("</%sData>\n",xmlnsprefix);
 	    break;
 	}
     } else {
 	/* no data written */
 	indentation(indent);
-	printf("<Data>\n");
+	printf("<%sData>\n",xmlnsprefix);
 	indentation(indent);
-	printf("<NoData/>\n");
+	printf("<%sNoData/>\n",xmlnsprefix);
 	indentation(indent);
-	printf("</Data>\n");
+	printf("</%sData>\n",xmlnsprefix);
     }
 
-/*
-    free(tmp);
-*/
     H5Tclose(type);
     H5Sclose(space);
     indentation(indent);
-    printf("%s\n", dump_header_format->datasetend);
+    printf("</%sDataset>\n", xmlnsprefix);
 }
 
 /*-------------------------------------------------------------------------
@@ -4973,6 +5581,12 @@ xml_print_enum(hid_t type)
 
     nmembs = H5Tget_nmembers(type);
     super = H5Tget_super(type);
+
+    indentation(indent);
+    printf("<%sDataType>\n",xmlnsprefix);
+    xml_print_datatype(super);
+    indentation(indent);
+    printf("</%sDataType>\n",xmlnsprefix);
 
     /*
      * Determine what data type to use for the native values.  To simplify
@@ -5015,14 +5629,14 @@ xml_print_enum(hid_t type)
         char *t_name = xml_escape_the_name(name[i]);
 
 	indentation(indent);
-	printf("<EnumElement>\n");
+	printf("<%sEnumElement>\n",xmlnsprefix);
 	indentation(indent + COL);
 	printf("%s\n", t_name);
         free(t_name);
 	indentation(indent);
-	printf("</EnumElement>\n");
+	printf("</%sEnumElement>\n",xmlnsprefix);
 	indentation(indent);
-	printf("<EnumValue>\n");
+	printf("<%sEnumValue>\n",xmlnsprefix);
 	indentation(indent + COL);
 	if (native < 0) {
 	    printf("0x");
@@ -5038,7 +5652,7 @@ xml_print_enum(hid_t type)
 	}
 	printf("\n");
 	indentation(indent);
-	printf("</EnumValue>\n");
+	printf("</%sEnumValue>\n",xmlnsprefix);
 
     }
     indent -= COL;

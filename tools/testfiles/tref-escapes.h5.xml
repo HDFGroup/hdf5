@@ -2,145 +2,208 @@
 Expected output for 'h5dump --xml tref-escapes.h5'
 #############################
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-<HDF5-File>
-<RootGroup OBJ-XID="root">
-   <Group Name="Group1" OBJ-XID="/Group1" Parents="/" >
-      <Dataset Name="Dataset space" OBJ-XID="/Group1/Dataset space" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+<hdf5:HDF5-File xmlns:hdf5="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hdf.ncsa.uiuc.edu/DTDs/HDF5File http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">
+<hdf5:RootGroup OBJ-XID="xid_696-0" H5Path="/">
+   <hdf5:Group Name="Group1" OBJ-XID="xid_1344-0" H5Path="/Group1" Parents="xid_696-0" H5ParentPaths="/" >
+      <hdf5:Dataset Name="Dataset space" OBJ-XID="xid_1720-0" H5Path= "/Group1/Dataset space" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&quot;quote" OBJ-XID="/Group1/Dataset&quot;quote" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="4" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset&quot;quote" OBJ-XID="xid_2324-0" H5Path= "/Group1/Dataset&quot;quote" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="4" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 3 6 9
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&amp;amp" OBJ-XID="/Group1/Dataset&amp;amp" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset&amp;amp" OBJ-XID="xid_2612-0" H5Path= "/Group1/Dataset&amp;amp" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&apos;apos" OBJ-XID="/Group1/Dataset&apos;apos" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset&apos;apos" OBJ-XID="xid_2888-0" H5Path= "/Group1/Dataset&apos;apos" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&lt;lt" OBJ-XID="/Group1/Dataset&lt;lt" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset&lt;lt" OBJ-XID="xid_3164-0" H5Path= "/Group1/Dataset&lt;lt" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset&gt;gt" OBJ-XID="/Group1/Dataset&gt;gt" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset&gt;gt" OBJ-XID="xid_3440-0" H5Path= "/Group1/Dataset&gt;gt" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Dataset Name="Dataset\slash" OBJ-XID="/Group1/Dataset\slash" Parents="/Group1">
-         <Dataspace>
-            <SimpleDataspace Ndims="1">
-               <Dimension  DimSize="4" MaxDimSize="4"/>
-            </SimpleDataspace>
-         </Dataspace>
-         <DataType> 
-            <AtomicType>
-               <IntegerType ByteOrder="BE" Sign="false" Size="1" />
-            </AtomicType>
-         </DataType>
-         <Data>
-            <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Dataset Name="Dataset\slash" OBJ-XID="xid_3716-0" H5Path= "/Group1/Dataset\slash" Parents="xid_1344-0" H5ParentPaths="/Group1">
+         <hdf5:StorageLayout>
+            <hdf5:ContiguousLayout/>
+         </hdf5:StorageLayout>
+               <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+            <hdf5:FillValue>
+                  <hdf5:NoFill/>
+            </hdf5:FillValue>
+         </hdf5:FillValueInfo>
+         <hdf5:Dataspace>
+            <hdf5:SimpleDataspace Ndims="1">
+               <hdf5:Dimension  DimSize="4" MaxDimSize="4"/>
+            </hdf5:SimpleDataspace>
+         </hdf5:Dataspace>
+         <hdf5:DataType>
+            <hdf5:AtomicType>
+               <hdf5:IntegerType ByteOrder="BE" Sign="false" Size="1" />
+            </hdf5:AtomicType>
+         </hdf5:DataType>
+         <hdf5:Data>
+            <hdf5:DataFromFile>
             0 0 0 0
-            </DataFromFile>
-         </Data>
-      </Dataset>
-      <Group Name="Group1.1" OBJ-XID="/Group1/Group1.1" Parents="/Group1" >
-         <Dataset Name="Datasetrefs" OBJ-XID="/Group1/Group1.1/Datasetrefs" Parents="/Group1/Group1.1">
-            <Dataspace>
-               <SimpleDataspace Ndims="1">
-                  <Dimension  DimSize="7" MaxDimSize="7"/>
-               </SimpleDataspace>
-            </Dataspace>
-            <DataType> 
-               <AtomicType>
-                  <ReferenceType>
-                     <ObjectReferenceType />
-                  </ReferenceType>
-               </AtomicType>
-            </DataType>
-         <Data>
-         <DataFromFile>
+            </hdf5:DataFromFile>
+         </hdf5:Data>
+      </hdf5:Dataset>
+      <hdf5:Group Name="Group1.1" OBJ-XID="xid_4592-0" H5Path="/Group1/Group1.1" Parents="xid_1344-0" H5ParentPaths="/Group1" >
+         <hdf5:Dataset Name="Datasetrefs" OBJ-XID="xid_4640-0" H5Path= "/Group1/Group1.1/Datasetrefs" Parents="xid_4592-0" H5ParentPaths="/Group1/Group1.1">
+            <hdf5:StorageLayout>
+               <hdf5:ContiguousLayout/>
+            </hdf5:StorageLayout>
+                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+               <hdf5:FillValue>
+                     <hdf5:NoFill/>
+               </hdf5:FillValue>
+            </hdf5:FillValueInfo>
+            <hdf5:Dataspace>
+               <hdf5:SimpleDataspace Ndims="1">
+                  <hdf5:Dimension  DimSize="7" MaxDimSize="7"/>
+               </hdf5:SimpleDataspace>
+            </hdf5:Dataspace>
+            <hdf5:DataType>
+               <hdf5:AtomicType>
+                  <hdf5:ReferenceType>
+                     <hdf5:ObjectReferenceType />
+                  </hdf5:ReferenceType>
+               </hdf5:AtomicType>
+            </hdf5:DataType>
+         <hdf5:Data>
+         <hdf5:DataFromFile>
             "/Group1/Dataset\"quote"
             "/Group1/Dataset\\slash"
             "/Group1/Dataset&amp;amp"
@@ -148,10 +211,10 @@ Expected output for 'h5dump --xml tref-escapes.h5'
             "/Group1/Dataset space"
             "/Group1/Dataset&apos;apos"
             "/Group1/Dataset&gt;gt"
-         </DataFromFile>
-         </Data>
-         </Dataset>
-      </Group>
-   </Group>
-</RootGroup>
-</HDF5-File>
+         </hdf5:DataFromFile>
+         </hdf5:Data>
+         </hdf5:Dataset>
+      </hdf5:Group>
+   </hdf5:Group>
+</hdf5:RootGroup>
+</hdf5:HDF5-File>
