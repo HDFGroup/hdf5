@@ -1,5 +1,5 @@
 ===============================================================================
-     HDF5 C++ Library Build and Testing Instructions for Windows NT/98
+     HDF5 C++ Library Build and Testing Instructions for Windows 2000/NT
      with Microsoft Visual C++ V 6.0
 ===============================================================================
 
@@ -24,8 +24,7 @@ Preconditions
        directory called 'hdf5xxx' under MyHDFstuff which contains 
        several files and directories.  Rename "hdf5xxx" to "hdf5". 
 
-    5. HDF5 uses the zlib library, which is distributed with the HDF5 
-       Windows source code.  
+    5. HDF5 uses the zlib library. 
 
 
 Building the HDF5 C and C++ libraries (both static and shared)
