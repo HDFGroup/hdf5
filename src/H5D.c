@@ -34,10 +34,11 @@
 /*#define H5D_DEBUG*/
 
 /*
- * The MPIO & MPIPOSIX drivers are needed because there are kludges in this
- * file and places where we check for things that aren't handled by these
- * drivers.
+ * The MPIO, MPIPOSIX, & FPHDF5 drivers are needed because there are
+ * kludges in this file and places where we check for things that aren't
+ * handled by these drivers.
  */
+#include "H5FDfphdf5.h"
 #include "H5FDmpio.h"
 #include "H5FDmpiposix.h"
 
@@ -1867,8 +1868,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         /* Set the alloc_time for the dataset, in case the default was used */
         new_dset->alloc_time=alloc_time;
 
-        /* If MPIO or MPIPOSIX is used, no filter support yet. */
-        if((IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file)) && dcpl_pline.nfilters > 0) 
+        /* If MPIO, MPIPOSIX, or FPHDF5 is used, no filter support yet. */
+        if((IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file) || IS_H5FD_FPHDF5(file)) && dcpl_pline.nfilters > 0) 
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet");
 
         /* Chunked datasets are non-default, so retrieve their info here */
@@ -1885,7 +1886,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     } /* end if */
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
-    if(IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file))
+    if(IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file) || IS_H5FD_FPHDF5(file))
         new_dset->alloc_time=H5D_ALLOC_TIME_EARLY;
    
     /* Set up layout information */
@@ -2203,8 +2204,8 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set pipeline");
 
-    /* If MPIO or MPIPOSIX is used, no filter support yet. */
-    if((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)) && pline.nfilters > 0)
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no filter support yet. */
+    if((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) && pline.nfilters > 0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel IO does not support filters yet");
     
     /*
@@ -2320,7 +2321,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
      */
     if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR)
             && (dataset->layout.type!=H5D_COMPACT && dataset->layout.addr==HADDR_UNDEF)
-            && (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file))) {
+            && (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file))) {
         if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset,H5D_ALLOC_OPEN, TRUE, FALSE)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize file storage");
     }
@@ -2530,7 +2531,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end if */
     /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)))
+            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO & MPIPOSIX drivers only");
 
     /* Set the "parallel I/O possible" flag, for H5S_find() */
@@ -2930,15 +2931,15 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         mem_space = file_space;                                                                                                          
     nelmts = (*mem_space->select.get_npoints)(mem_space);            
 
-    /* If MPIO or MPIPOSIX is used, no VL datatype support yet. */
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)) && H5T_get_class(mem_type)==H5T_VLEN)
+    if ( (IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) && H5T_get_class(mem_type)==H5T_VLEN)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
-    /* If MPIO or MPIPOSIX is used, no dataset region reference datatype support yet. */
+    /* If MPIO, MPIPOSIX, or FPHDF5 is used, no dataset region reference datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if ((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)) &&
+    if ((IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)) &&
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
@@ -2955,7 +2956,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     
     /* Collective access is not permissible without the MPIO or MPIPOSIX driver */
     if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
-            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file)))
+            !(IS_H5FD_MPIO(dataset->ent.file) || IS_H5FD_MPIPOSIX(dataset->ent.file) || IS_H5FD_FPHDF5(dataset->ent.file)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPIO driver only");
 
     /* If dataset is compact, collective access is only allowed when file space
@@ -3458,8 +3459,8 @@ H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_allo
                     space_allocated=1;
                 } /* end if */
 
-                /* If MPIO or MPIPOSIX is used, indicate that space was allocated, so the B-tree gets expanded */
-                if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f))
+                /* If MPIO, MPIPOSIX, or FPHDF5 is used, indicate that space was allocated, so the B-tree gets expanded */
+                if(IS_H5FD_MPIO(f) || IS_H5FD_MPIPOSIX(f) || IS_H5FD_FPHDF5(f))
                     space_allocated=1;
 
                 break;
