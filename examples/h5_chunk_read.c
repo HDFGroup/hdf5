@@ -24,7 +24,7 @@ main (void)
     hsize_t     chunk_dims[2];
     hsize_t     col_dims[1];
     hsize_t     count[2];
-    hsize_t     offset[2];
+    hssize_t    offset[2];
 
     herr_t      status, status_n;                             
 

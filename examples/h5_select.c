@@ -31,7 +31,8 @@
 
 #define NPOINTS          4          /* Number of points that will be selected 
                                        and overwritten */ 
-int main (void)
+int 
+main (void)
 {
 
    hid_t   file, dataset;           /* File and dataset identifiers */
@@ -200,5 +201,6 @@ for (i=0; i < MSPACE_DIM1; i++) {
     for(j=0; j < MSPACE_DIM2; j++) printf("%3d  ", matrix[i][j]);
     printf("\n");
 }
+
 return 0;
 }

@@ -36,9 +36,9 @@ main (void)
     int         data_out[NX][NY][NZ ]; /* output buffer */
    
     hsize_t      count[2];              /* size of the hyperslab in the file */
-    hsize_t      offset[2];             /* hyperslab offset in the file */
+    hssize_t     offset[2];             /* hyperslab offset in the file */
     hsize_t      count_out[3];          /* size of the hyperslab in memory */
-    hsize_t      offset_out[3];         /* hyperslab offset in memory */
+    hssize_t     offset_out[3];         /* hyperslab offset in memory */
     int          i, j, k, status_n, rank;
 
     for (j = 0; j < NX; j++) {

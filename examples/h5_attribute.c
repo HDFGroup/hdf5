@@ -27,7 +27,8 @@
 herr_t attr_info(hid_t loc_id, const char *name, void *opdata); 
                                      /* Operator function */
 
-int main (void)
+int 
+main (void)
 {
 
    hid_t   file, dataset;       /* File and dataset identifiers */
@@ -189,6 +190,7 @@ idx = H5Aiterate(dataset, NULL, attr_info, NULL);
  */
 H5Dclose(dataset);
 H5Fclose(file);
+
 return 0;  
 }
 
@@ -256,5 +258,6 @@ herr_t attr_info(hid_t loc_id, const char *name, void *opdata)
     H5Tclose(atype);
     H5Sclose(aspace);
     H5Aclose(attr);
+
     return 0;
 }
