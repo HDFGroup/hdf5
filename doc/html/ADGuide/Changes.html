@@ -227,14 +227,160 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 -->
 
 
-<!--
     <h3>Functions with Changed Syntax</h3>
 
         The following functions have changed as noted.
 	<p>
+        In the following functions, one or more parameters 
+        have changed from a signed to an unsigned datatype.
+        In each case, the changed parameters are indicated in
+        <font color="red">red</font>. 
         <dl>
-        <dt>C functions:
+        <dt><u>C functions:</u>
+        <dt><code>H5Pget_version</code>
+          <dd><code>
+              herr_t H5Pget_version(hid_t plist_id, 
+              <font color="red">unsigned *boot/*out*/</font>,
+              <br>
+              <font color="red">unsigned *freelist/*out*/</font>, 
+              <font color="red">unsigned *stab/*out*/</font>,
+              <font color="red">unsigned *shhdr/*out*/</font>)
+              </code>
+
+        <dt><code>H5Pset_sym_k</code>
+          <dd><code>
+              H5Pset_sym_k(hid_t plist_id, 
+              <font color="red">unsigned ik</font>, unsigned lk)
+              </code>
+
+        <dt><code>H5Pget_sym_k</code>
+          <dd><code>
+              H5Pget_sym_k(hid_t plist_id, 
+              <font color="red">unsigned *ik/*out*/</font>, 
+              unsigned *lk/*out*/)
+              </code>
+
+        <dt><code>H5Pset_istore_k</code>
+          <dd><code>
+              herr_t H5Pset_istore_k(hid_t plist_id, 
+              <font color="red">unsigned ik</font>)
+              </code>
+
+        <dt><code>H5Pget_istore_k</code>
+          <dd><code>
+              herr_t H5Pget_istore_k(hid_t plist_id, 
+              <font color="red">unsigned *ik/*out*/</font>)
+              </code>
+
+        <dt><code>H5Pget_external</code>
+          <dd><code>
+              herr_t H5Pget_external(hid_t plist_id, 
+              <font color="red">unsigned idx</font>, size_t name_size,
+              <br>
+              char *name/*out*/, off_t *offset/*out*/,
+              hsize_t *size/*out*/)
+              </code>
+
+        <dt><code>H5Pget_filter</code>
+          <dd><code>
+              H5Z_filter_t H5Pget_filter(hid_t plist_id, 
+              <font color="red">unsigned filter</font>,
+              <br>
+              unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/, 
+              <br>
+              unsigned cd_values[]/*out*/, unsigned int *flags/*out*/, 
+              <br>
+              size_t namelen, char name[])
+              </code>
+
+        <dt><code>H5Sselect_hyperslab</code>
+          <dd><code>
+              herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
+              <br>
+              <font color="red">const hsize_t start[]</font>, 
+              const hsize_t _stride[], const hsize_t count[],
+              <br>
+              const hsize_t _block[])
+              </code>
+
+        <dt><code>H5Sselect_elements</code>
+          <dd><code>
+              herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
+              <br>
+              size_t num_elemn, <font color="red">const hsize_t **coord</font>)
+              </code>
+
+        <dt><code>H5Tget_member_name</code>
+          <dd><code>
+              char *H5Tget_member_name(hid_t type_id, 
+              <font color="red">unsigned membno</font>)
+              </code>
+
+        <dt><code>H5Tget_member_offset</code>
+          <dd><code>
+              size_t H5Tget_member_offset(hid_t type_id, 
+              <font color="red">unsigned membno</font>)
+              </code>
+
+        <dt><code>H5Tget_member_class</code>
+          <dd><code>
+              H5T_class_t H5Tget_member_class(hid_t type_id, 
+              <font color="red">unsigned membno</font>)
+              </code>
+
+        <dt><code>H5Tget_member_type</code>
+          <dd><code>
+              hid_t H5Tget_member_type(hid_t type_id, 
+              <font color="red">unsigned membno</font>)
+              </code>
+
+        <dt><code>H5Tget_member_value</code>
+          <dd><code>
+              herr_t H5Tget_member_value(hid_t type_id, 
+              <font color="red">unsigned membno</font>, 
+              <br>
+              void *value/*out*/)
+              </code>
+
+        <p>
+        <dt><code>H5Diterate</code> is affected by a similar change
+          in the syntax of <code>H5D_operator_t</code>. 
+          <dd><code>
+              herr_t (*H5D_operator_t)(void *elem, hid_t type_id, 
+              <font color="red">unsigned ndim</font>,
+              <br>
+              <font color="red">const hsize_t *point</font>, 
+              void *operator_data)
+              </code>
+
+
+        <p>
+        <dt><u>Fortran functions:</u>
         <dt><code>function</code>
+          <dd><code>
+              syntax
+              </code>
+
+        <dt><code>function</code>
+          <dd><code>
+              syntax
+              </code>
+
+
+        <p>
+        <dt><u>C++ functions:</u>
+        <dt><code>function</code>
+          <dd><code>
+              syntax
+              </code>
+
+        <dt><code>function</code>
+          <dd><code>
+              syntax
+              </code>
+
+
+<!--
           <dd>The prototype for this function was changed from:
                 <ul>
                 <li>old sytax<br>
@@ -261,8 +407,11 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
         <dt><code>h5subroutine_f?</code>
           <dd>Change...
 	  
-        </dl>
 -->
+        </dl>
+        <p>
+        <cite>(This list of functions with changed syntax was added 
+          on 30 March 2005, shortly after Release 1.6.4.)</cite>
 
 
     <h3>Deleted Constants</h3>
@@ -1958,7 +2107,7 @@ Describes HDF5 Release 1.6.4, March 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 21 March 2005 
+Last modified: 30 March 2005 
 <!-- hhmts end -->
 
 </body>
