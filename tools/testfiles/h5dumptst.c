@@ -1,6 +1,7 @@
 /*
  * Generate the binary hdf5 files for the h5dump tests.
  */
+#include <limits.h>
 #include "hdf5.h"
 
 #define FILE1 "tgroup.h5"
@@ -10,6 +11,8 @@
 #define FILE5 "thlink.h5"
 #define FILE6 "tcompound.h5"
 #define FILE7 "tall.h5"
+#define FILE8 "tdset2.h5"
+#define FILE9 "tcompound2.h5"
 #define FILE10 "tloop.h5"
 
 static void test_group(void) {
@@ -83,6 +86,50 @@ int i, j;
   for (i = 0; i < 30; i++)
        for (j = 0; j < 20; j++)
             dset2[i][j] = 0.0001*j;
+  H5Dwrite(dataset, H5T_IEEE_F64BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+
+  H5Fclose(fid);
+}
+
+static void test_dataset2(void) {
+hid_t fid, dataset, space, create_plist;
+hsize_t dims[2];
+hsize_t maxdims[2];
+int dset1[10][20];
+double dset2[30][10];
+int i, j;
+
+
+  fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+
+  dims[0] = 5; dims[1] = 5;
+  H5Pset_chunk(create_plist, 2, dims);
+
+  /* dset1 */
+  dims[0] = 10; dims[1] = 20;
+  maxdims[0] = H5S_UNLIMITED; maxdims[1] = 20;
+  space = H5Screate_simple(2, dims,  maxdims);
+  dataset = H5Dcreate(fid, "/dset1", H5T_STD_I32BE, space, create_plist);
+  for (i = 0; i < 10; i++)
+       for (j = 0; j < 20; j++)
+            dset1[i][j] = j;
+  H5Dwrite(dataset, H5T_STD_I32BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  /* dset2 */
+  dims[0] = 30; dims[1] = 10;
+  maxdims[0] = 30; maxdims[1] = H5S_UNLIMITED;
+  space = H5Screate_simple(2, dims, maxdims);
+  dataset = H5Dcreate(fid, "/dset2", H5T_IEEE_F64BE, space, create_plist);
+  for (i = 0; i < 30; i++)
+       for (j = 0; j < 10; j++)
+            dset2[i][j] = j;
   H5Dwrite(dataset, H5T_IEEE_F64BE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -400,6 +447,157 @@ hsize_t dset3_dim[2];
 
 }
 
+/*
+               /
+     /     |       \     \
+   dset1  group1  type1 type2
+           |
+          dset2
+
+*/
+static void test_compound_dt2(void) {       /* test compound data type */
+hid_t fid, group, dataset, space, type, create_plist;
+typedef struct {
+  int a;
+  float b;
+  double c;
+} dset1_t;
+dset1_t dset1[10];
+
+typedef struct {
+  int a;
+  float b;
+} dset2_t;
+dset2_t dset2[10];
+
+typedef struct {
+  int a[4];
+  float b[5][6];
+} dset3_t;
+
+typedef struct {
+  int a;
+  float b;
+} dset4_t;
+dset4_t dset4[10];
+
+typedef struct {
+  int a;
+  float b;
+} dset5_t;
+dset5_t dset5[10];
+
+int i, ndims;
+const int perm[2];
+size_t dim[2];
+
+hsize_t sdim, maxdim;
+
+  sdim = 10;
+  for (i = 0; i < (int)sdim; i++) {
+       dset1[i].a = i; 
+       dset1[i].b = i*i;
+       dset1[i].c = 1./(i+1);
+       
+       dset2[i].a = i;
+       dset2[i].b = i+ i*0.1;
+
+       dset4[i].a = i;
+       dset4[i].b = i*1.0;
+
+       dset5[i].a = i;
+       dset5[i].b = i*1.0;
+  }
+
+  fid = H5Fcreate(FILE9, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+  create_plist = H5Pcreate(H5P_DATASET_CREATE);
+
+  sdim = 2;
+  H5Pset_chunk(create_plist, 1, &sdim);
+
+  sdim = 6;
+  maxdim = H5S_UNLIMITED;
+
+  space = H5Screate_simple(1, &sdim, &maxdim);
+
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+  
+  H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_F64BE);
+
+  dataset = H5Dcreate(fid, "/dset1", type, space, create_plist);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+
+  H5Tclose(type);
+  H5Sclose(space);
+  H5Dclose(dataset);
+
+  sdim = 6;
+  maxdim = 10;
+
+  space = H5Screate_simple(1, &sdim, &maxdim);
+
+  /* shared data type 1 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
+  H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(fid, "type1", type);
+
+  group = H5Gcreate (fid, "/group1", 0);
+
+  dataset = H5Dcreate(group, "dset2", type, space, create_plist);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+
+
+  /* shared data type 2 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
+  ndims = 1; dim[0] = 4;
+  H5Tinsert_array(type, "int_array", HOFFSET(dset3_t, a), ndims, dim, perm, H5T_STD_I32BE);
+  ndims = 2; dim[0] = 5; dim[1] = 6;
+  H5Tinsert_array(type, "float_array", HOFFSET(dset3_t, b), ndims, dim, perm, H5T_STD_I32BE);
+  H5Tcommit(fid, "type2", type);
+  H5Tclose(type);
+
+  /* shared data type 3 */
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
+  H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(group, "type3", type);
+
+  dataset = H5Dcreate(group, "dset4", type, space, create_plist);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+  H5Gclose(group);
+
+
+  /* unamed data type */
+  group = H5Gcreate (fid, "/group2", 0);
+
+  type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+  H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
+  H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
+  H5Tcommit(group, "type4", type);
+  dataset = H5Dcreate(group, "dset5", type, space, create_plist);
+  H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+
+  H5Gunlink(group,"type4");
+
+  H5Tclose(type);
+  H5Dclose(dataset);
+  H5Sclose(space);
+  H5Gclose(group);
+
+  H5Fclose(fid);
+
+}
+
 
 /*
 
@@ -559,8 +757,10 @@ test_group();
 test_attribute();
 test_softlink();
 test_dataset();
+test_dataset2();
 test_hardlink();
 test_compound_dt();
+test_compound_dt2();
 test_loop();
 test_all();
 return 0;
