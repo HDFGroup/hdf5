@@ -1040,8 +1040,8 @@ extend_readInd(char *filename)
 
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace != FAIL), "H5Dget_space succeeded");
-    ret=H5Sextent_dims(file_dataspace, dims, NULL);
-    VRFY((ret > 0), "H5Sextent_dims succeeded");
+    ret=H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
+    VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
     ret=H5Dextend(dataset1, dims);
     VRFY((ret == FAIL), "H5Dextend failed as expected");
