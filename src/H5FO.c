@@ -26,6 +26,7 @@
 #include "H5Fpkg.h"             /* File access                          */
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 #define PABLO_MASK	H5FO_mask
 
@@ -40,6 +41,7 @@ typedef struct H5FO_open_obj_t {
     haddr_t addr;                       /* Address of object header for object */
                                         /* THIS MUST BE FIRST FOR TBBT ROUTINES */
     hid_t id;                           /* Current ID for object            */
+    hbool_t deleted;                    /* Flag to indicate that the object was deleted from the file */
 } H5FO_open_obj_t;
 
 /* Declare a free list to manage the H5FO_open_obj_t struct */
@@ -144,6 +146,7 @@ done:
         H5F_t *f;               IN/OUT: File's opened object info set
         haddr_t addr;           IN: Address of object to insert
         hid_t id;               IN: ID of object to insert
+        int type;               IN: Type of object being inserted
 
  RETURNS
     Returns a non-negative on success, negative on failure
@@ -176,6 +179,7 @@ H5FO_insert(H5F_t *f, haddr_t addr, hid_t id)
     /* Assign information */
     open_obj->addr=addr;
     open_obj->id=id;
+    open_obj->deleted=0;
 
     /* Insert into TBBT */
     if(H5TB_dins(f->shared->open_objs,open_obj,open_obj)==NULL)
@@ -206,7 +210,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5FO_delete(H5F_t *f, haddr_t addr)
+H5FO_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
     H5TB_NODE *obj_node;        /* TBBT node holding open object */
     H5FO_open_obj_t *open_obj;  /* Information about open object */
@@ -228,12 +232,68 @@ H5FO_delete(H5F_t *f, haddr_t addr)
     if((open_obj=H5TB_rem(&f->shared->open_objs->root,obj_node,NULL))==NULL)
         HGOTO_ERROR(H5E_CACHE,H5E_CANTRELEASE,FAIL,"can't remove object from TBBT");
 
+    /* Check if the object was deleted from the file */
+    if(open_obj->deleted) {
+        if(H5O_delete(f, dxpl_id, addr)<0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file");
+    } /* end if */
+
     /* Release the object information */
     H5FL_FREE(H5FO_open_obj_t,open_obj);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FO_delete() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5FO_mark
+ PURPOSE
+    Mark an object to be deleted when it is closed
+ USAGE
+    herr_t H5FO_mark(f,addr)
+        const H5F_t *f;         IN: File opened object is in
+        haddr_t addr;           IN: Address of object to delete
+
+ RETURNS
+    Returns a non-negative ID for the object on success, negative on failure
+ DESCRIPTION
+    Mark an opened object for deletion from the file when it is closed.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    There is currently no way to "undelete" an opened object that is marked
+    for deletion.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5FO_mark(const H5F_t *f, haddr_t addr)
+{
+    H5TB_NODE *obj_node;        /* TBBT node holding open object */
+    H5FO_open_obj_t *open_obj;  /* Information about open object */
+    herr_t ret_value=SUCCEED;            /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FO_mark,FAIL);
+
+    /* Sanity check */
+    assert(f);
+    assert(f->shared);
+    assert(f->shared->open_objs);
+    assert(H5F_addr_defined(addr));
+
+    /* Get the object node from the TBBT */
+    if((obj_node=H5TB_dfind(f->shared->open_objs,&addr,NULL))!=NULL) {
+        open_obj=H5TB_NODE_DATA(obj_node);
+        assert(open_obj);
+        open_obj->deleted=1;
+    } /* end if */
+    else
+        ret_value=FAIL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FO_mark() */
 
 
 /*--------------------------------------------------------------------------
