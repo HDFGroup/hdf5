@@ -563,7 +563,7 @@ main(int argc, char *argv[])
      * allocated a whole bunch of data.
      */
 #ifdef H5_WANT_H5_V1_2_COMPAT
-    if (H5F_LOW_FAMILY!=H5Pget_driver(fapl)) {
+    if (H5F_LOW_FAMILY==H5Pget_driver(fapl)) {
 #else /* H5_WANT_H5_V1_2_COMPAT */
     if (H5FD_FAMILY==H5Pget_driver(fapl)) {
 #endif /* H5_WANT_H5_V1_2_COMPAT */
