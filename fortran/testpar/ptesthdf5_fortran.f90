@@ -35,7 +35,7 @@
      !
      ! Initialize FORTRAN predefined datatypes
      !
-     CALL h5init_types_f(error) 
+     CALL h5open_f(error) 
      if (mpi_rank .eq. 0) then
          write(*,*) '==========================================='
          write(*,*) '         Parallel Fortran Tests            ' 
@@ -56,7 +56,7 @@
      !
      ! Close FORTRAN predefined datatypes.
      !
-     CALL h5close_types_f(error)
+     CALL h5close_f(error)
 
 1000 continue
 
