@@ -26,8 +26,6 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define TEST_ERROR      {H5_FAILED(); printf("    Error on line %d\n",__LINE__); goto error;}
-
 #define DSET_ATOMIC_NAME_1	"atomic_type_1"
 #define DSET_ATOMIC_NAME_2	"atomic_type_2"
 #define DSET_ATOMIC_NAME_3	"atomic_type_3"
@@ -230,7 +228,7 @@ test_atomic_dtype(hid_t file)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
 
 
@@ -409,7 +407,7 @@ error:
         free(points);
     if(check!=NULL)
         free(check);
-    return -1;
+    return 1;
 }
 
 
@@ -543,7 +541,7 @@ test_compound_dtype(hid_t file)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
 
 
@@ -694,8 +692,9 @@ test_compound_dtype3(hid_t file)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_enum_dtype
@@ -812,7 +811,7 @@ test_enum_dtype(hid_t file)
     return 0;
 
   error:
-    return -1;
+    return 1;
 }
 
 
@@ -956,7 +955,7 @@ error:
         free(points);
     if(check!=NULL)
         free(check);
-    return -1;
+    return 1;
 }
 
 
@@ -1064,7 +1063,7 @@ error:
         free(points);
     if(check!=NULL)
         free(check);
-    return -1;
+    return 1;
 }
 
 
@@ -1209,7 +1208,7 @@ test_vl_dtype(hid_t file)
     return 0;
 
  error:
-    return -1;
+    return 1;
 } /* end test_vl_type() */
 
 
@@ -1319,7 +1318,7 @@ test_vlstr_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return -1;         
+    return 1;
 } /* end test_vlstr_dtype() */
 
 
@@ -1470,11 +1469,11 @@ test_refer_dtype(hid_t file)
     free(wbuf);
     free(rbuf);
 
-    PASSED();                                                 
-    return 0;                                                 
-                                                                      
-error:                                                       
-    return -1;         
+    PASSED();
+    return 0;
+
+error:
+    return 1;
 }   /* test_refer_dtype() */
 
 
@@ -1665,7 +1664,7 @@ test_refer_dtype2(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return -1;         
+    return 1;
 }   /* test_refer_dtype2() */
 
 
@@ -1744,7 +1743,7 @@ test_opaque_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return -1;         
+    return 1;
 } /* test_opaque_dtype */
 
 
@@ -1822,7 +1821,7 @@ test_bitfield_dtype(hid_t file)
     return 0;                                                 
                                                                       
 error:                                                       
-    return -1;         
+    return 1;
 } /* test_opaque_dtype */
 
 
