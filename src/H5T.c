@@ -4197,6 +4197,7 @@ H5T_isa(H5G_entry_t *ent)
  *              Monday, June  1, 1998
  *
  * Modifications:
+ *      Changed to use H5T_open_oid - QAK - 3/17/99
  *
  *-------------------------------------------------------------------------
  */
@@ -4217,22 +4218,56 @@ H5T_open (H5G_entry_t *loc, const char *name)
     if (H5G_find (loc, name, NULL, &ent/*out*/)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
     }
-    if (H5O_open (&ent)<0) {
+    /* Open the datatype object */
+    if ((dt=H5T_open_oid(&ent)) ==NULL) {
+        HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found");
+    }
+
+    FUNC_LEAVE (dt);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_open_oid
+ *
+ * Purpose:	Open a named data type.
+ *
+ * Return:	Success:	Ptr to a new data type.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, March 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_t *
+H5T_open_oid (H5G_entry_t *ent)
+{
+    H5T_t	*dt = NULL;
+    
+    FUNC_ENTER (H5T_open_oid, NULL);
+    assert (ent);
+
+    if (H5O_open (ent)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL,
 		       "unable to open named data type");
     }
-    if (NULL==(dt=H5O_read (&ent, H5O_DTYPE, 0, NULL))) {
-	H5O_close(&ent);
+    if (NULL==(dt=H5O_read (ent, H5O_DTYPE, 0, NULL))) {
+	H5O_close(ent);
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL,
 		       "unable to load type message from object header");
     }
 
     /* Mark the type as named and open */
     dt->state = H5T_STATE_OPEN;
-    dt->ent = ent;
+    dt->ent = *ent;
 
     FUNC_LEAVE (dt);
 }
+
 
 
 /*-------------------------------------------------------------------------

@@ -65,6 +65,7 @@ __DLL__ herr_t H5T_native_open(void);
 __DLL__ herr_t H5T_init(void);
 __DLL__ htri_t H5T_isa(H5G_entry_t *ent);
 __DLL__ H5T_t *H5T_open(H5G_entry_t *loc, const char *name);
+__DLL__ H5T_t *H5T_open_oid(H5G_entry_t *ent);
 __DLL__ H5T_t *H5T_create(H5T_class_t type, size_t size);
 __DLL__ H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 __DLL__ herr_t H5T_commit(H5G_entry_t *loc, const char *name, H5T_t *type);

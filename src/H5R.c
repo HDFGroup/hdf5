@@ -26,6 +26,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>    /* Memory Management */
 #include <H5Rprivate.h>		/* References */
 #include <H5Sprivate.h>		/* Dataspaces */
+#include <H5Tprivate.h>		/* Datatypes */
 
 /* Interface initialization */
 #define PABLO_MASK	H5R_mask
@@ -331,6 +332,7 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
 {
     H5D_t *dataset;             /* Pointer to dataset to open */
     H5G_t *group;               /* Pointer to group to open */
+    H5T_t *datatype;            /* Pointer to datatype to open */
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
     intn oid_type;              /* type of object being dereferenced */
@@ -415,6 +417,16 @@ H5R_dereference(H5D_t *dset, H5R_type_t ref_type, void *_ref)
             break;
 
         case H5G_TYPE:
+            if ((datatype=H5T_open_oid(&ent)) == NULL) {
+                HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
+            }
+
+            /* Create an atom for the dataset */
+            if ((ret_value = H5I_register(H5I_DATATYPE, datatype)) < 0) {
+                H5T_close(datatype);
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
+                      "can't register group");
+            }
             break;
 
         case H5G_DATASET:
