@@ -279,9 +279,8 @@ done:
  *
  * Purpose:	Creates a new empty B-tree in the file.
  *
- * Return:	Success:	Pointer to a new B-tree.
- *
- *		Failure:	NULL
+ * Return:	Non-negative on success (with address of new B-tree
+ *              filled in), negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
