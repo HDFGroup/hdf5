@@ -1,0 +1,371 @@
+dnl ----------------------------------------------------------------------
+dnl Process this file with autoconf to produce configure.
+dnl
+dnl Copyright (C) 2000 National Center for Supercomputing Applications.
+dnl                    All rights reserved.
+dnl ----------------------------------------------------------------------
+
+dnl ----------------------------------------------------------------------
+dnl Initialize configure.
+dnl
+AC_REVISION($Id$)
+AC_INIT(src/H5library.C)
+dnl AC_CONFIG_HEADER(config.h)
+AC_CONFIG_AUX_DIR(bin)
+AC_CANONICAL_HOST
+AC_SUBST(CPPFLAGS)
+
+dnl ----------------------------------------------------------------------
+dnl Dump all shell variables values.
+dnl
+AC_MSG_CHECKING(shell variables initial values)
+set >&5
+AC_MSG_RESULT(done)
+
+dnl ----------------------------------------------------------------------
+dnl Where is the root of the source tree.  Give an absolute address so
+dnl we can find it no matter which directory of the distribution is our
+dnl current directory.  The built-in pwd fails on some systems, but the
+dnl /bin/pwd version works OK.
+dnl
+if test -x "/bin/pwd"; then
+   pwd=/bin/pwd
+else
+   pwd=pwd
+fi
+AC_SUBST(ROOT) ROOT=`$pwd`
+
+dnl ----------------------------------------------------------------------
+dnl Check that the cache file was build on the same host as what we're
+dnl running on now.
+dnl
+AC_CACHE_CHECK(for cached host,hdf5_cv_host,hdf5_cv_host="none");
+if test "X$hdf5_cv_host" = "Xnone"; then
+   hdf5_cv_host=$host
+elif test "$hdf5_cv_host" != "$host"; then
+   echo "The config.cache file was generated on $hdf5_cv_host but"
+   echo "this is $host. Please remove that file and try again."
+   AC_MSG_ERROR(config.cache file is invalid)
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Source any special files that we need.  These files normally aren't
+dnl present but can be used by the maintainers to fine tune things like
+dnl turning on debug or profiling flags for the compiler.  The search order
+dnl is:
+dnl
+dnl	CPU-VENDOR-OS
+dnl	VENDOR-OS
+dnl	CPU-OS
+dnl	CPU-VENDOR
+dnl	OS
+dnl	VENDOR
+dnl	CPU
+dnl
+dnl If the `OS' ends with a version number then remove it. For instance,
+dnl `freebsd3.1' would become `freebsd'
+case "$host_os" in
+   aix4.*)
+      host_os_novers=aix4.x
+      ;;
+   freebsd*)
+      host_os_novers=freebsd
+      ;;
+   irix5.*)
+      host_os_novers=irix5.x
+      ;;
+   irix6.*)
+      host_os_novers=irix6.x
+      ;;
+   osf4.*)
+      host_os_novers=osf4.x
+      ;;
+   solaris2.*)
+      host_os_novers=solaris2.x
+      ;;
+   *)
+      host_os_novers=$host_os
+      ;;
+esac
+
+host_config="none"
+for f in $host_cpu-$host_vendor-$host_os \
+	 $host_cpu-$host_vendor-$host_os_novers \
+	 $host_vendor-$host_os \
+         $host_vendor-$host_os_novers \
+	 $host_cpu-$host_os \
+         $host_cpu-$host_os_novers \
+         $host_cpu-$host_vendor \
+	 $host_os \
+	 $host_os_novers \
+	 $host_vendor \
+	 $host_cpu ; do
+   AC_MSG_CHECKING(for config $f)
+   if test -f $srcdir/config/$f; then
+      host_config=$srcdir/config/$f
+      AC_MSG_RESULT(found)
+      break
+   fi
+   AC_MSG_RESULT(no)
+done
+if test "X$host_config" != "Xnone"; then
+   CXX_BASENAME="`echo $CXX |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+   . $host_config
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Check for programs.
+dnl
+AC_PROG_CXX
+AC_PROG_CXXCPP	dnl this is checked for when AC_HEADER_STDC is done
+CXX_BASENAME="`echo $CXX |cut -f1 -d' ' |xargs basename 2>/dev/null`"
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AM_PROG_LIBTOOL
+
+if test -z "$AR"; then
+   AC_CHECK_PROGS(AR,ar xar,:,$PATH)
+fi
+AC_SUBST(AR)
+
+dnl ----------------------------------------------------------------------
+dnl Sometimes makes think the `.PATH:' appearing before the first rule
+dnl with an action should override the `all' default target. So we have
+dnl to decide what the proper syntax is.
+dnl
+if test -z "$SEARCH"; then
+   AC_MSG_CHECKING(how make searches directories)
+   while true; do #for break
+      dnl The most common method is `VPATH=DIR1 DIR2 ...'
+      cat >maketest <<EOF
+VPATH=$srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+ 	cp $< H5.o
+   
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+   
+      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         SEARCH_RULE='VPATH='
+         SEARCH_SEP=' '
+         AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
+         break
+      fi
+   
+      dnl The second most common method is like above except with the
+      dnl directories separated by colons.
+      cat >maketest <<EOF
+VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
+.c.o:
+	cp $< H5.o
+   
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+   
+      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         SEARCH_RULE='VPATH='
+         SEARCH_SEP=':'
+         AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
+         break
+      fi
+   
+      dnl pmake uses the construct `.PATH: DIR1 DIR2
+      cat >maketest <<EOF
+.PATH: $srcdir/config $srcdir/src $srcdir/bin
+.c.o:
+	cp $< H5.o
+   
+foo: H5.o
+	/bin/rm -f H5.o
+	@echo works
+EOF
+      if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         SEARCH_RULE='.PATH: '
+         SEARCH_SEP=' '
+         AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
+         break
+      fi
+   
+      dnl No way for make to search directories
+      SEARCH_RULE='## SEARCH DISABLED: '
+      SEARCH_SEP=' '
+      AC_MSG_RESULT([it doesn't])
+      if test ! -f configure; then
+         AC_MSG_ERROR(${MAKE-make} requires the build and source directories to be the same)
+      fi
+      break
+   done
+   rm maketest
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Checks for compiler characteristics.
+dnl
+AC_LANG_CPLUSPLUS
+
+AC_MSG_CHECKING(if $CXX can handle namespaces)
+AC_TRY_RUN([
+using namespace std;
+
+namespace H5 {
+
+int main(void) { return 0; } 
+
+}
+], [
+echo yes
+], [
+echo no
+CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
+])
+
+AC_MSG_CHECKING(if $CXX needs old style header files in includes)
+AC_TRY_RUN([
+#include <iostream>
+
+int main(void) { return 0; }
+], [
+echo no
+], [
+echo yes
+CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
+])
+
+dnl ----------------------------------------------------------------------
+dnl Checks for header files.
+dnl
+
+dnl Checkpoint the cache
+AC_CACHE_SAVE
+
+AC_MSG_CHECKING(make)
+AC_SUBST_FILE(DEPEND)
+if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
+	sed -n 1p|cut -c1-8`" = "GNU Make"; then
+   AC_MSG_RESULT(GNU make)
+   GMAKE=yes
+   if test "X$GCC" = "Xyes"; then
+      DEPEND=config/depend1
+   else
+      DEPEND=config/depend2
+   fi
+else
+   AC_MSG_RESULT(generic)
+fi
+
+dnl How do we include another file into a Makefile?
+if test -z "$DEPEND"; then
+   AC_MSG_CHECKING(how to include a makefile)
+
+   dnl The include file contains the target for `foo'
+   cat >makeinc <<EOF
+foo:
+	@:
+EOF
+
+   while true; do dnl for break
+      dnl pmake. We have to be careful because some pmake think that the
+      dnl contents of the MAKE environment variable is a target.
+      echo '.include <makeinc>' >maketest
+      if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT([.include <FILE>])
+         DEPEND=config/depend3
+         break
+      fi
+ 
+      dnl Most make's use `include FILE'
+      echo 'include makeinc' >maketest
+      if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
+         AC_MSG_RESULT(include FILE)
+         DEPEND=config/depend4
+         break;
+      fi
+
+      dnl default
+      AC_MSG_RESULT(you have a deficient make command)
+      DEPEND=config/dependN
+      break
+   done
+   rm makeinc maketest
+fi
+
+dnl Some cleanup stuff
+rm -f conftest core core.* *.core conftest.o conftest.c dummy.o $ac_clean_files
+
+dnl ----------------------------------------------------------------------
+dnl Determine the runtime libraries we may need to include in the
+dnl libtools command so that executables will find the correct dynamic
+dnl libraries.
+dnl 
+DYNAMIC_DIRS=""
+if test -n "$LDFLAGS"; then
+   for d in $LDFLAGS ; do
+      case "$d" in
+         -L*)
+            d=`echo $d | sed -e 's/-L//g'`
+            case "$d" in
+               .*)
+	          dnl If the path isn't absolute, make it so by prepending the
+                  dnl ROOT directory to it.
+                  d=${ROOT}/$d
+                  ;;
+            esac
+            DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
+	    ;;
+      esac
+   done
+fi
+AC_SUBST(DYNAMIC_DIRS)
+
+dnl ----------------------------------------------------------------------
+dnl Build the Makefiles.  Almost every Makefile.in will begin with the line
+dnl `@COMMENCE@' and end with the line `@CONCLUDE@'.  These lines insert
+dnl various files from the config directory into the Makefile.
+dnl
+AC_SUBST_FILE(COMMENCE) COMMENCE=config/commence
+AC_SUBST_FILE(CONCLUDE) CONCLUDE=config/conclude
+
+dnl The directory search list
+if test -z "$SEARCH"; then
+   AC_SUBST(SEARCH) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
+   cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
+   SEARCH="$SEARCH_RULE`eval $cmd`"
+fi
+
+dnl We don't need to say when we're entering directories if we're using
+dnl GNU make becuase make does it for us.
+if test "X$GMAKE" = "Xyes"; then
+   AC_SUBST(SETX) SETX=":"
+else
+   AC_SUBST(SETX) SETX="set -x"
+fi
+
+dnl Some cleanup stuff
+rm -rf conftest* confdefs* core core.* *.core dummy.o
+
+dnl Build config.status, touch the stamp files, and build all the Makefiles.
+dnl The order is such that the first `make' does not need to update any
+dnl configuration information. See config/commence.in for the order in which
+dnl things need to be done.
+
+dnl First the stamp1 file for H5config.h.in
+mkdir ./config >/dev/null 2>&1
+touch ./config/stamp1
+
+dnl Then the config.status file (but not makefiles)
+saved_no_create=$no_create
+no_create=yes
+AC_OUTPUT(config/depend1 config/depend2 config/depend3 config/depend4	\
+	  config/dependN config/commence config/conclude Makefile	\
+	  src/Makefile test/Makefile examples/Makefile)
+no_create=$saved_no_create
+
+dnl Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+dnl Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
