@@ -269,7 +269,7 @@ if ($RELEASE) {
 }
 
 sub gen_configure {
-  my ($conf) = @_;
+  my ($name, $conf) = @_;
 
   open FILE, $conf or die "$conf: $!\n";
   my @contents = <FILE>;
@@ -277,7 +277,7 @@ sub gen_configure {
 
   for (my $i = 0; $i < $#contents; ++$i) {
     if ($contents[$i] =~ /^AC_INIT/) {
-      $contents[$i] = sprintf("AC_INIT([HDF5], [%d.%d.%d%s], [hdfhelp\@ncsa.uiuc.edu])\n",
+      $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [hdfhelp\@ncsa.uiuc.edu])\n",
                               @newver[0,1,2],
                               $newver[3] eq "" ? "" : "-".$newver[3]);
       last;
@@ -298,9 +298,9 @@ sub gen_configure {
 }
 
 # Update the configure.in files and regenerate them
-gen_configure $CONFIGURE if $CONFIGURE;
-gen_configure $FORTRAN_CONFIGURE if $FORTRAN_CONFIGURE;
-gen_configure $CXX_CONFIGURE if $CXX_CONFIGURE;
+gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
+gen_configure("HDF5 Fortran", $FORTRAN_CONFIGURE) if $FORTRAN_CONFIGURE;
+gen_configure("HDF5 C++", $CXX_CONFIGURE) if $CXX_CONFIGURE;
 
 # Print the new version number
 if ($verbose) {
