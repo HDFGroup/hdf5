@@ -42,10 +42,13 @@ New Features
 
     Library:
     --------
+        - A new type of dataspace, null dataspace(dataspace without any 
+            element) was added.  SLU - 2004/3/24
         - Data type conversion(software) from integer to float was added.
-          SLU - 2004/3/13 
+            SLU - 2004/3/13 
         - Data type conversion(software) from float to integer was added.
-          Conversion from integer to float will be added later.  SLU -2004/2/4
+            Conversion from integer to float will be added later.  
+            SLU -2004/2/4
         - Added new H5Premove_filter routine to remove I/O pipeline filters
             from dataset creation property lists.  PVN - 2004/01/26
         - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
