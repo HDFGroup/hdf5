@@ -28,6 +28,7 @@ LIBFORTRAN=../src/libhdf5_fortran.la
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 FTLIB = ../test/libh5test_fortran.la
 CTLIB = ../../test/.libs/libh5test.a
+FSEARCH_DIRS =@F9XMODFLAG@../src @FSEARCH_DIRS@
 
 ## These tests are parallel
 RUNTEST=$(RUNPARALLEL)
