@@ -66,6 +66,9 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then      \
+	   ($(LT_INSTALL_LIB) *.$(F9XMODEXT) $(libdir)/. || exit 1);	      \
+	fi
 	@if test -f libhdf5.settings; then				      \
 	   (set -x; $(INSTALL_DATA) libhdf5.settings $(libdir)/. || exit 1);  \
 	fi

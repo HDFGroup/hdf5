@@ -197,9 +197,18 @@ EOF
 
 eval $ac_compile
 modfiles=""
+F9XMODEXT=""
 
-for f in conftest.o module.mod MODULE.mod; do
-  test -f $f && modfiles="$f"
+for f in conftest.o module.mod MODULE.mod module.M MODULE.M; do
+  if test -f "$f" ; then
+    modfiles="$f"
+
+    case "$f" in
+      *.o)   F9XMODEXT="o" ;;
+      *.mod) F9XMODEXT="mod" ;;
+      *.M)   F9XMODEXT="M" ;;
+    esac
+  fi
 done
 
 echo $modfiles 6>&1
@@ -209,10 +218,10 @@ if test "$modfiles" = file.o; then
   FFLAGS="$FFLAGS -em"
   eval $ac_compile
   modfiles=""
-  for f in file.o module.mod MODULE.mod; do
+  for f in file.o module.mod MODULE.mod module.M MODULE.M; do
     test -f $f && modfiles="$f"
   done
-  if test "$modfiles" = file.o;then
+  if test "$modfiles" = "file.o"; then
     FFLAGS=$OLD_FFLAGS
     echo no 6>&1
   else
@@ -244,6 +253,7 @@ else
   echo unknown 1>&6
 fi
 AC_SUBST(F9XMODFLAG)
+AC_SUBST(F9XMODEXT)
 rm -rf conftest*])
 
 dnl -------------------------------------------------------------------------
