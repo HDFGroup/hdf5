@@ -271,13 +271,16 @@ indentation(int x)
  * Function:    print_version
  *
  * Purpose:     Print the program name and the version information which is
- *		defined the same as the HDF5 library version.
+ *		defined the same as the HDF5 library version. If name is not
+ *              given (set as NULL), the library name is used.
  *
  * Return:      void
  *
  * Programmer:  unknown
  *
  * Modifications:
+ *		Albert Cheng, 2002/05/24
+ *		print library name if progname is not given, 
  *
  *-------------------------------------------------------------------------
  */
@@ -285,7 +288,8 @@ void
 print_version(const char *progname)
 {
     printf("%s: Version %u.%u.%u%s%s\n",
-           progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+           (progname ? progname : "HDF5 Library"),
+	   H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
            H5_VERS_SUBRELEASE[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
