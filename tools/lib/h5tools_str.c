@@ -7,7 +7,6 @@
  *
  * Purpose: These are string functions for us to use and abuse.
  */
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
