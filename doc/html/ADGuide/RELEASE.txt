@@ -1,4 +1,4 @@
-HDF5 version 1.5.24 released on Sat Apr  6 11:34:52 CST 2002
+HDF5 version 1.5.25 released on Thu Apr 18 08:52:28 CDT 2002
 ================================================================================
 
 
@@ -35,6 +35,9 @@ Bug Fixes since HDF5-1.4.2
 Library
 -------
 
+    * Fixed bug where the data for several level deep nested compound &
+      variable-length datatypes used for datasets were getting corrupted when
+      written to the file.  QAK - 2002/04/17
     * Fixed bug where selection offset was being ignored for certain hyperslab
       selections when optimized I/O was being performed.  QAK - 2002/04/02
     * Added serial multi-gigabyte file size test.  "test/big -h" shows
@@ -156,6 +159,12 @@ Documentation
 New Features
 ============
 
+    * Fill-value's behaviors for contiguous dataset have been redefined.  
+      Basicly, dataset won't allocate space until it's necessary.  Full details
+      are available at http://hdf.ncsa.uiuc.edu/RFC/Fill_Value, at this moment.
+      SLU - 2002/04/11
+    * Added new routine "H5Dfill" to fill a selection with a particular value
+      in memory.  QAK - 2002/04/09
     * A new query function H5Tget_member_index has been added for compound
       and enumeration data types, to retrieve member's index by name.
       SLU - 2002/04/05
@@ -252,6 +261,9 @@ New Features
     * A helper script called ``h5cc'', which helps compilation of HDF5
       programs, is now distributed with HDF5. See the reference manual
       for information on how to use this feature.
+    * New API function H5Dset_extent. Modifies the dimensions of a dataset, 
+      allows change to a lower dimension. The unused space in the file is freed.
+      PVN - 2002/03/31
 
 
 Platforms Tested
