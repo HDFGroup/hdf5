@@ -89,6 +89,9 @@ New Features
             same within a file.  QAK - 2003/08/08
         - Switched over to new error API. SLU - 2003/07/25
         - Added support for user defined identifier types.  NF/JL - 2004/06/29
+        - Added support for SZIP without encoder.  Added H5Zget_filter_info
+          and changed H5Pget_filter and H5Pget_filter_by_id to support this
+          change.
 
     Parallel Library:
     -----------------

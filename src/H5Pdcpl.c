@@ -501,6 +501,8 @@ done:
  *		failed; the filter will not participate in the pipeline
  *		during an H5Dread() of the chunk.  If this bit is clear and
  *		the filter fails then the entire I/O operation fails.
+ *      If this bit is set but encoding is disabled for a filter,
+ *      attempting to write will generate an error.
  *
  * Note:	This function currently supports only the permanent filter
  *		pipeline.  That is, PLIST_ID must be a dataset creation
@@ -577,6 +579,8 @@ done:
  *		failed; the filter will not participate in the pipeline
  *		during an H5Dread() of the chunk.  If this bit is clear and
  *		the filter fails then the entire I/O operation fails.
+ *      If this bit is set but encoding is disabled for a filter,
+ *      attempting to write will generate an error.
  *
  * Note:	This function currently supports only the permanent filter
  *		pipeline.  That is, PLIST_ID must be a dataset creation
@@ -695,10 +699,11 @@ done:
  *		dataset creation or transfer property list.  On input,
  *		CD_NELMTS indicates the number of entries in the CD_VALUES
  *		array allocated by the caller while on exit it contains the
- *		number of values defined by the filter.  The IDX should be a
- *		value between zero and N-1 as described for H5Pget_nfilters()
- *		and the function will return failure if the filter number is
- *		out or range.
+ *		number of values defined by the filter.  FILTER_CONFIG is a bit
+ *      field contaning encode/decode flags from H5Zpublic.h.  The IDX
+ *      should be a value between zero and N-1 as described for
+ *      H5Pget_nfilters() and the function will return failure if the
+ *      filter number is out of range.
  * 
  * Return:	Success:	Filter identification number.
  *
@@ -712,7 +717,11 @@ done:
  *              Raymond Lu
  *              Tuesday, October 2, 2001
  *              Changed the way to check paramter and set property for 
- *              generic property list. 
+ *              generic property list.
+ *
+ *              James Laird and Nat Furrer
+ *              Tuesday, June 15, 2004
+ *              Function now retrieves filter_config flags.
  *
  *-------------------------------------------------------------------------
  */
@@ -725,7 +734,8 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 H5Z_filter_t
 H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
-	       size_t namelen, char name[]/*out*/)
+	       size_t namelen, char name[]/*out*/,
+           unsigned int *filter_config /*out*/)
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5O_pline_t         pline;  /* Filter pipeline */
@@ -808,7 +818,13 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
         else
             name[0] = '\0';
     }
-    
+
+#ifndef H5_WANT_H5_V1_6_COMPAT
+    /* Get filter configuration, assume filter ID has already been checked */
+    if(filter_config != NULL)
+        H5Zget_filter_info(filter->id, filter_config);
+#endif
+
     /* Set return value */
     ret_value=filter->id;
 
@@ -821,14 +837,15 @@ done:
  * Function:	H5Pget_filter_by_id
  *
  * Purpose:	This is an additional query counterpart of H5Pset_filter() and
- *              returns information about a particular filter in a permanent
+ *      returns information about a particular filter in a permanent
  *		or transient pipeline depending on whether PLIST_ID is a
  *		dataset creation or transfer property list.  On input,
  *		CD_NELMTS indicates the number of entries in the CD_VALUES
  *		array allocated by the caller while on exit it contains the
- *		number of values defined by the filter.  The ID should be the
- *              filter ID to retrieve the parameters for.  If the filter is not
- *              set for the property list, an error will be returned.
+ *		number of values defined by the filter.  FILTER_CONFIG is a bit
+ *      field contaning encode/decode flags from H5Zpublic.h.  The ID
+ *      should be the filter ID to retrieve the parameters for.  If the
+ *      filter is not set for the property list, an error will be returned.
  * 
  * Return:	Success:	Non-negative
  *		Failure:	Negative
@@ -837,13 +854,23 @@ done:
  *              Friday, April  5, 2003
  *
  * Modifications:
+ *              James Laird and Nat Furrer
+ *              Tuesday, June 15, 2004
+ *              Function now retrieves filter_config flags.
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 herr_t
 H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
 	       size_t namelen, char name[]/*out*/)
+#else
+herr_t
+H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
+	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
+	       size_t namelen, char name[]/*out*/, unsigned int *filter_config)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5O_pline_t         pline;  /* Filter pipeline */
     H5Z_filter_info_t *filter;  /* Pointer to filter information */
@@ -911,7 +938,13 @@ H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/,
         else
             name[0] = '\0';
     }
-    
+
+#ifndef H5_WANT_H5_V1_6_COMPAT
+    /* Get filter configuration, assume filter ID has already been checked */
+    if(filter_config != NULL)
+        H5Zget_filter_info(id, filter_config);
+#endif
+
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_filter_by_id() */
@@ -1032,6 +1065,10 @@ done:
  *              Tuesday, April 1, 2003
  *
  * Modifications:
+ *          Nat Furrer and James Laird
+ *          June 30, 2004
+ *          Now ensures that SZIP encoding is enabled
+ *          SZIP defaults to k13 compression
  *
  *-------------------------------------------------------------------------
  */
@@ -1041,11 +1078,18 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5O_pline_t         pline;
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned cd_values[2];      /* Filter parameters */
+    unsigned int config_flags;
     herr_t ret_value=SUCCEED;   /* return value */
     
     FUNC_ENTER_API(H5Pset_szip, FAIL);
     H5TRACE3("e","iIuIu",plist_id,options_mask,pixels_per_block);
-    
+
+    if(H5Zget_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get filter info")
+
+    if(! (config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
+        HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.");
+
     /* Check arguments */
     if ((pixels_per_block%2)==1)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even");
@@ -1055,6 +1099,10 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Always set K13 compression (and un-set CHIP compression) */
+    options_mask &= (~H5_SZIP_CHIP_OPTION_MASK);
+    options_mask |= H5_SZIP_ALLOW_K13_OPTION_MASK;
 
     /* Always set "raw" (no szip header) flag for data */
     options_mask |= H5_SZIP_RAW_OPTION_MASK;

@@ -320,6 +320,16 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'set local' callback
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_SETLOCAL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_NOENCODER_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'no encoder' callback"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_NOENCODER_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_NODECODER_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Error from filter 'no decoder' callback"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_NODECODER_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Datatype conversion errors */
 assert(H5E_CANTCONVERT_g==(-1));

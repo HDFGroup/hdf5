@@ -181,16 +181,36 @@
           INTEGER     ::   num_errors = 0 ! Number of data errors
 
           INTEGER     :: i, j    !general purpose integers
+          INTEGER     :: config_flags   ! for h5zget_filter_info_f
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims
           INTEGER(HID_T) ::  crp_list
           INTEGER :: options_mask, pix_per_block 
           LOGICAL :: flag
           CHARACTER(LEN=4) filter_name 
-          
+
           INTEGER :: filter_flag = -1
           INTEGER(SIZE_T) :: cd_nelemnts = 4
           INTEGER(SIZE_T) :: filter_name_len = 4
           INTEGER, DIMENSION(4) :: cd_values 
+
+          !
+          ! Verify that SZIP exists and has an encoder
+          !
+          CALL h5zfilter_avail_f(H5Z_FILTER_SZIP_F, flag, error)
+                   CALL check("h5zfilter_avail_f", error, total_error)
+          if(.NOT. flag) then
+              szip_flag = .FALSE.
+              total_error = -1
+              return
+          endif
+
+          CALL h5zget_filter_info_f(H5Z_FILTER_SZIP_F, config_flags, error) 
+                   CALL check("h5zget_filter_info_f", error, total_error)
+          if(.NOT. (IAND(config_flags, H5Z_FILTER_ENCODE_ENABLED_F) .eq. 1) ) then
+              szip_flag = .FALSE.
+              total_error = -1
+              return
+          endif
 
           options_mask = H5_SZIP_NN_OM_F + H5_SZIP_CHIP_OM_F
           pix_per_block = 32
@@ -235,8 +255,6 @@
              CALL h5pclose_f(crp_list, error)
              CALL h5sclose_f(dspace_id, error)
              CALL h5fclose_f(file_id, error)
-             szip_flag = .FALSE.
-             total_error = -1
              return
           endif
  

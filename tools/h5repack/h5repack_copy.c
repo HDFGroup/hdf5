@@ -299,10 +299,12 @@ int do_copy_objects(hid_t fidin,
      */
     if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0) 
      goto error;
+
     if (dsize_in && nelmts) {
      if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
       goto error;
     }
+
     /*-------------------------------------------------------------------------
      * copy attrs
      *-------------------------------------------------------------------------

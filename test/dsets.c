@@ -1,4 +1,4 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -24,7 +24,6 @@
 
 #include "h5test.h"
 #include "H5private.h"
-
 
 /*
  * This file needs to access private datatypes from the H5Z package.
@@ -109,6 +108,11 @@ const char *FILENAME[] = {
 #define FILTER_HS_SIZE1         4
 #define FILTER_HS_SIZE2         50
 
+/* Names for noencoder test */
+#define NOENCODER_FILENAME "noencoder.h5"
+#define NOENCODER_TEST_DATASET "noencoder_tdset.h5"
+#define NOENCODER_SZIP_DATASET "noencoder_szip_dset.h5"
+#define NOENCODER_SZIP_SHUFF_FLETCH_DATASET "noencoder_szip_shuffle_fletcher_dset.h5"
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -955,7 +959,9 @@ test_tconv(hid_t file)
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
+    1, 1,               /* Encoding and decoding enabled */
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
@@ -1044,8 +1050,13 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
         add_on=(unsigned)H5Tget_size(type_id);
 
     /* Get the filter's current parameters */
+#ifdef H5_WANT_H5_V1_6_COMPAT
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_BOGUS2,&flags,&cd_nelmts,
             cd_values,0,NULL)<0)
+#else
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_BOGUS2,&flags,&cd_nelmts,
+            cd_values,0,NULL,NULL)<0)
+#endif
         return(FAIL);
 
     /* Check that the parameter values were passed along correctly */
@@ -1128,7 +1139,9 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_CORRUPT[1] = {{
+    H5Z_CLASS_T_VERS,            /* H5Z_class_t version */
     H5Z_FILTER_CORRUPT,		/* Filter id number		*/
+    1, 1,               /* Encoding and decoding enabled */
     "corrupt",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
@@ -1301,7 +1314,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     }
 
     TESTING("    filters (setup)");
-    
+ 
     /* Check if all the filters are available */
     if(H5Pall_filters_avail(dcpl)!=TRUE) {
         H5_FAILED();
@@ -1596,7 +1609,134 @@ error:
     return -1;
 }
 
-
+/*-------------------------------------------------------------------------
+ * Function:	test_filter_noencoder
+ *
+ * Purpose:	Tests filters with no encoder present.  Ensures that data
+ *			can still be decoded correctly and that errors are thrown
+ *			when the application tries to write.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Nat Furrer and James Laird
+ *              Monday, June 7, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_noencoder(const char *dset_name)
+{
+	hid_t file_id = -1;
+	hid_t dset_id = -1;
+	hid_t test_dset_id = -1;
+	hid_t dcpl_id = -1;
+	hid_t space_id = -1;
+	hsize_t dims = 10;
+	herr_t err;
+	int test_ints[10] = { 12 };
+	int read_buf[10];
+	int i;
+        char * srcdir = HDgetenv("srcdir"); /* Source directory */
+        char testfile[512]=""; /* Buffer to hold name of test file */
+
+        /*
+         * Create the name of the file to open (in case we are using the --srcdir
+         * option and the file is in a different directory from this test).
+         */
+        if (srcdir && ((HDstrlen(srcdir) + HDstrlen(NOENCODER_FILENAME) + 1) < sizeof(testfile)) )
+        {
+            HDstrcpy(testfile, srcdir);
+            HDstrcat(testfile, "/");
+        }
+        HDstrcat(testfile, NOENCODER_FILENAME);
+
+	file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
+	if (file_id < 0) goto error;
+
+	dset_id = H5Dopen(file_id, dset_name);
+	if (dset_id < 0) goto error;
+
+        space_id = H5Screate_simple(1, &dims, NULL);
+	if (space_id < 0) goto error;
+
+    TESTING("    decoding without encoder");
+
+    /* Read the dataset and make sure the decoder is working correctly */
+	err = H5Dread(dset_id, H5T_NATIVE_INT, space_id, space_id, H5P_DEFAULT, read_buf);
+	if (err < 0) goto error;
+
+	for(i = 0; i < 10; i++)
+		if ( read_buf[i] != i ) goto error;
+
+	H5Sclose(space_id);
+
+	PASSED();
+
+	/* Attempt to copy the DCPL and use it to create a new dataset.
+	 * Since the filter does not have an encoder, the creation
+	 * should fail.
+	 */
+    TESTING("    trying to write without encoder");
+
+	dcpl_id = H5Dget_create_plist(dset_id);
+	if (dcpl_id < 0) goto error;
+
+	space_id = H5Screate_simple(1, &dims, NULL);
+	if (space_id < 0) goto error;
+
+	H5E_BEGIN_TRY{
+	test_dset_id = H5Dcreate(file_id, NOENCODER_TEST_DATASET, H5T_NATIVE_INT, space_id , dcpl_id);
+	}H5E_END_TRY
+
+	if (test_dset_id >= 0) goto error;
+
+	/* Attempt to extend the dataset.  This should fail because
+	 * the dataset has a fill value and is instructed to fill on
+	 * allocation.
+	 */
+	dims = 20; /* Dataset is originally of size 10 */
+	H5E_BEGIN_TRY{
+	err = H5Dextend(dset_id, &dims);
+	}H5E_END_TRY
+
+	if (err >= 0) goto error;
+
+	/* Attempt to write to the dataset.  This should fail because
+	 * the filter does not have an encoder.
+	 */
+	H5E_BEGIN_TRY{
+	err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, test_ints);
+	}H5E_END_TRY
+
+	if (err >= 0) goto error;
+
+	H5Fclose(file_id);
+	H5Dclose(dset_id);
+	H5Sclose(space_id);
+	H5Pclose(dcpl_id);
+
+	PASSED();
+
+	return 0;
+
+error:
+	H5_FAILED();
+	if (dset_id != -1)
+		H5Dclose(dset_id);
+	if (test_dset_id != -1)
+		H5Dclose(test_dset_id);
+	if (space_id != -1)
+		H5Sclose(space_id);
+	if (dcpl_id != -1)
+		H5Pclose(dcpl_id);
+	if (file_id != -1)
+		H5Fclose(file_id);
+	return -1;
+}
+
 /*-------------------------------------------------------------------------
  * Function:	test_filters
  *
@@ -1634,7 +1774,7 @@ test_filters(hid_t file)
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
-#ifdef H5_HAVE_FILTER_SZIP
+#if (defined H5_HAVE_FILTER_SZIP) && (defined H5_SZIP_CAN_ENCODE)
     hsize_t     szip_size;       /* Size of dataset with szip filter */
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
@@ -1737,13 +1877,26 @@ test_filters(hid_t file)
      *----------------------------------------------------------
      */
 #ifdef H5_HAVE_FILTER_SZIP
-    puts("Testing szip filter");
+    TESTING("szip filter (with encoder)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
  
-    if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+#ifdef H5_SZIP_CAN_ENCODE
+	puts("");
+	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+	if(test_filter_internal(file,DSET_SZIP_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&szip_size)<0) goto error;
+#else
+	SKIPPED();
+#endif
 
-    if(test_filter_internal(file,DSET_SZIP_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&szip_size)<0) goto error;
+	TESTING("szip filter (without encoder)");
+#ifndef H5_SZIP_CAN_ENCODE
+	puts("");
+	if(test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0) goto error;
+#else
+	SKIPPED();
+#endif
+
     if (H5Pclose (dc)<0) goto error;
 #else /* H5_HAVE_FILTER_SZIP */
     TESTING("szip filter");
@@ -1755,7 +1908,9 @@ test_filters(hid_t file)
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
+
 #ifdef H5_HAVE_FILTER_SHUFFLE
+
     puts("Testing shuffle filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
@@ -1781,6 +1936,7 @@ test_filters(hid_t file)
      *----------------------------------------------------------
      */
 #if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 
+
     puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
@@ -1816,29 +1972,52 @@ test_filters(hid_t file)
      */
 #if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 
 
-    puts("Testing shuffle+szip+checksum filters(checksum first)");
+    TESTING("shuffle+szip+checksum filters(checksum first, with encoder)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
     if (H5Pset_fletcher32 (dc)<0) goto error;
     if (H5Pset_shuffle (dc)<0) goto error;
-    if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+	/* Make sure encoding is enabled */
+#ifdef H5_SZIP_CAN_ENCODE
+	puts("");
+	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+#else
+		SKIPPED();
+#endif
+
+	TESTING("shuffle+szip+checksum filters(checksum first, without encoder)");
+#ifndef H5_SZIP_CAN_ENCODE
+	puts("");
+	if (test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0) goto error;
+#else
+		SKIPPED();
+#endif
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
+	
+	TESTING("shuffle+szip+checksum filters(checksum last, with encoder)");
+	/* Make sure encoding is enabled */
+#ifdef H5_SZIP_CAN_ENCODE
 
-    puts("Testing shuffle+szip+checksum filters(checksum last)");
-    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
-    if (H5Pset_shuffle (dc)<0) goto error;
-    if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
-    if (H5Pset_fletcher32 (dc)<0) goto error;
+	puts("");
+	if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+	if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+	if (H5Pset_shuffle (dc)<0) goto error;
+	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+	if (H5Pset_fletcher32 (dc)<0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size)<0) goto error;
+	
+	/* Clean up objects used for this test */
+	if (H5Pclose (dc)<0) goto error;
 
-    /* Clean up objects used for this test */
-    if (H5Pclose (dc)<0) goto error;
+#else
+	SKIPPED();
+#endif /* H5_SZIP_CAN_ENCODE */
+
 #else /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
     TESTING("shuffle+szip+fletcher32 filters");
     SKIPPED();
@@ -2388,7 +2567,9 @@ test_types(hid_t file)
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_CAN_APPLY[1] = {{
+	H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
+	1, 1,
     "bogus",			/* Filter name for debugging	*/
     can_apply_bogus,            /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
@@ -2453,7 +2634,7 @@ test_can_apply(hid_t file)
     } /* end if */
 
     /* Create new dataset */
-    /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
+   /* (Should fail because the 'can apply' filter should indicate inappropriate combination) */
     H5E_BEGIN_TRY {
         dsid = H5Dcreate(file, DSET_CAN_APPLY_NAME, H5T_NATIVE_DOUBLE, sid, dcpl);
     } H5E_END_TRY;
@@ -2572,7 +2753,7 @@ UNUSED
 #endif /* H5_HAVE_FILTER_SSZIP */
 file)
 {
-#ifdef H5_HAVE_FILTER_SZIP
+#if (defined H5_HAVE_FILTER_SZIP) & (defined H5_SZIP_CAN_ENCODE)
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
     hid_t       dcpl;           /* Dataspace creation property list ID */
@@ -2583,13 +2764,18 @@ file)
     const hsize_t chunk_dims[2] = {250, 2048};  /* Chunk dimensions */
     const hsize_t chunk_dims2[2] = {2, 1};      /* Chunk dimensions */
     herr_t      ret;            /* Status value */
-#else /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP & H5_SZIP_CAN_ENCODE */
+ #ifdef H5_HAVE_FILTER_SZIP
+    const char          *not_supported= "    Szip encoding is not enabled.";
+ #else /* H5_HAVE_FILTER_SZIP */
     const char		*not_supported= "    Szip filter is not enabled.";
-#endif /* H5_HAVE_FILTER_SSZIP */
+ #endif /* H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SSZIP & H5_SZIP_CAN_ENCODE */
 
     TESTING("dataset szip filter 'can apply' callback");
 
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+
     /* Create the data space */
     if ((sid = H5Screate_simple(2, dims, NULL))<0) {
         H5_FAILED();
@@ -2720,7 +2906,7 @@ file)
 
 
     PASSED();
-#else /* H5_HAVE_FILTER_SZIP */
+#else /* H5_HAVE_FILTER_SZIP and H5_SZIP_CAN_ENCODE */
     SKIPPED();
     puts(not_supported);
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -2735,7 +2921,9 @@ error:
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_SET_LOCAL[1] = {{
+	H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS2,		/* Filter id number		*/
+	1, 1,
     "bogus2",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     set_local_bogus2,           /* The "set local" callback     */
@@ -3151,7 +3339,11 @@ test_filter_delete(hid_t file)
 
     /* check if filter was deleted */
     for (i=0; i<nfilters; i++) {
+#ifdef H5_WANT_H5_V1_6_COMPAT
         filtn = H5Pget_filter(dcpl1,(unsigned)i,0,0,0,0,0);
+#else
+        filtn = H5Pget_filter(dcpl1,(unsigned)i,0,0,0,0,0,NULL);
+#endif
         if (H5Z_FILTER_DEFLATE==filtn)
             goto error; 
     } 

@@ -298,16 +298,19 @@ int DSetCreatPropList::getNfilters() const
 ///\param	cd_values - OUT: Array to hold the data; allocated by the user
 ///\param	namelen   - OUT: Length of \a name
 ///\param	name      - OUT: Name of the filter
+///\param   filter_config - OUT: Flags indicating whether filter can encode/decode
 ///\return	Filter id
 ///\exception	H5::PropListIException
 ///\par Description
 ///		Failure occurs when \a filter_number is out of range.
 //--------------------------------------------------------------------------
-H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[]) const
+H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags, size_t &cd_nelmts,
+                                          unsigned int* cd_values, size_t namelen, char name[],
+                                          unsigned int& filter_config) const
 {
    H5Z_filter_t filter_id;
    filter_id = H5Pget_filter( id, filter_number, &flags, &cd_nelmts, 
-				cd_values, namelen, name );
+				cd_values, namelen, name, &filter_config);
    if( filter_id == H5Z_FILTER_ERROR )
    {
       throw PropListIException("DSetCreatPropList::getFilter",
@@ -328,12 +331,15 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags
 ///\param	cd_values - OUT: Array to hold the data; allocated by the user
 ///\param	namelen   -  IN: Length of \a name
 ///\param	name      - OUT: Name of the filter
+///\param   filter_config - OUT: Flags indicating whether filter can encode/decode
 ///\exception	H5::PropListIException
 //--------------------------------------------------------------------------
-void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[]) const
+void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts,
+                                      unsigned int* cd_values, size_t namelen, char name[],
+                                      unsigned int &filter_config) const
 {
    herr_t ret_value = H5Pget_filter_by_id(id, filter_id, &flags, &cd_nelmts, 
-				cd_values, namelen, name );
+				cd_values, namelen, name, &filter_config );
    if (ret_value < 0)
    {
       throw PropListIException("DSetCreatPropList::getFilterById",

@@ -92,6 +92,8 @@ H5E_NOFILTER_g=
 H5E_CALLBACK_g=    
 H5E_CANAPPLY_g=    
 H5E_SETLOCAL_g=
+H5E_NOENCODER_g=
+H5E_NODECODER_g=
 
 /* Datatype conversion errors */    
 H5E_CANTCONVERT_g=    

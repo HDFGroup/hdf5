@@ -5735,4 +5735,3 @@ H5Pclose_class(hid_t cls_id)
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Pclose_class() */
-

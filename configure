@@ -24694,6 +24694,7 @@ fi
 
 
  USE_FILTER_SZIP="no"
+ USE_FILTER_SZIP_ENCODER="no"
 
 # Check whether --with-szlib or --without-szlib was given.
 if test "${with_szlib+set}" = set; then
@@ -25134,6 +25135,71 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
     USE_FILTER_SZIP="yes"
+
+        echo "$as_me:$LINENO: checking for szlib encoder" >&5
+echo $ECHO_N "checking for szlib encoder... $ECHO_C" >&6
+
+    if test "${hdf5_cv_szlib_can_encode+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+        #include <szlib.h>
+
+        int main(void)
+        {
+                /* SZ_encoder_enabled returns 1 if encoder is present */
+            if(SZ_encoder_enabled() == 1)
+                exit(0);
+            else
+                exit(1);
+        }
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  hdf5_cv_szlib_can_encode=yes
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+hdf5_cv_szlib_can_encode=no
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+fi
+
+
+    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SZIP_CAN_ENCODE 1
+_ACEOF
+
+        echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+        USE_FILTER_SZIP_ENCODER="yes"
+    else
+        echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+    fi
 
         if test "X$EXTERNAL_FILTERS" != "X"; then
         EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
@@ -33727,7 +33793,7 @@ if test "X$HDF_CXX" = "Xyes"; then
              c++/examples/Makefile"
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5repack/Makefile tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES"
+ac_config_files="$ac_config_files src/libhdf5.settings config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/Makefile $PABLO_MAKE test/Makefile $PARALLEL_MAKE perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/gifconv/Makefile examples/Makefile doc/Makefile doc/html/Makefile doc/html/ed_libs/Makefile doc/html/ed_styles/Makefile doc/html/ADGuide/Makefile doc/html/Graphics/Makefile doc/html/Intro/Makefile doc/html/PSandPDF/Makefile doc/html/TechNotes/Makefile doc/html/Tutor/Makefile doc/html/Tutor/Graphics/Makefile doc/html/Tutor/examples/Makefile doc/html/cpplus/Makefile doc/html/fortran/Makefile $FORTRAN_FILES $CXX_FILES"
 
 
 cat >confcache <<\_ACEOF
@@ -34231,6 +34297,7 @@ do
   "tools/h5import/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5import/Makefile" ;;
   "tools/h5diff/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5diff/Makefile" ;;
   "tools/h5repack/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5repack/Makefile" ;;
+  "tools/h5repack/h5repack.sh" ) CONFIG_FILES="$CONFIG_FILES tools/h5repack/h5repack.sh" ;;
   "tools/h5ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/h5ls/Makefile" ;;
   "tools/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/lib/Makefile" ;;
   "tools/misc/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/misc/Makefile" ;;
@@ -34391,6 +34458,7 @@ s,@AR@,$AR,;t t
 s,@DEPEND@,,;t t
 s,@USE_FILTER_DEFLATE@,$USE_FILTER_DEFLATE,;t t
 s,@USE_FILTER_SZIP@,$USE_FILTER_SZIP,;t t
+s,@USE_FILTER_SZIP_ENCODER@,$USE_FILTER_SZIP_ENCODER,;t t
 s,@PABLO@,$PABLO,;t t
 s,@HAVE_PABLO@,$HAVE_PABLO,;t t
 s,@SSL@,$SSL,;t t

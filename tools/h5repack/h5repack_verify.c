@@ -60,6 +60,7 @@ int has_filter(hid_t dcpl_id,
  for (i=0; i<nfilters; i++) 
  {
   cd_nelmts = NELMTS(cd_values);
+#ifdef H5_WANT_H5_V1_6_COMPAT
   filtn = H5Pget_filter(dcpl_id, 
    (unsigned)i, 
    &filt_flags, 
@@ -67,6 +68,16 @@ int has_filter(hid_t dcpl_id,
    cd_values, 
    sizeof(f_name), 
    f_name);
+#else
+  filtn = H5Pget_filter(dcpl_id, 
+   (unsigned)i, 
+   &filt_flags, 
+   &cd_nelmts,
+   cd_values, 
+   sizeof(f_name), 
+   f_name,
+   NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
   if (filtnin==filtn)
    have=1;

@@ -34,7 +34,10 @@ static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_SHUFFLE[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_SHUFFLE,		/* Filter id number		*/
+    1,              /* encoder_present flag (set to true) */
+    1,              /* decoder_present flag (set to true) */
     "shuffle",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     H5Z_set_local_shuffle,      /* The "set local" callback     */
@@ -75,7 +78,11 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     FUNC_ENTER_NOAPI(H5Z_set_local_shuffle, FAIL)
 
     /* Get the filter's current parameters */
+#ifdef H5_WANT_H5_V1_6_COMPAT
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+#else
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL,NULL)<0)
+#endif
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters")
 
     /* Set "local" parameter for this dataset */

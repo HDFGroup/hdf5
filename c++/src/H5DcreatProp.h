@@ -67,10 +67,10 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	int getNfilters() const;
 
 	// Returns information about a filter in a pipeline
-	H5Z_filter_t getFilter( int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[] ) const;
+	H5Z_filter_t getFilter( int filter_number, unsigned int& flags, size_t& cd_nelmts, unsigned int* cd_values, size_t namelen, char name[], unsigned int &filter_config ) const;
 
 	// Returns information about a filter in a pipeline given the filter id
-	void getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[]) const;
+	void getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, size_t namelen, char name[], unsigned int &filter_config) const;
 
 	// Modifies the specified filter
 	void modifyFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;

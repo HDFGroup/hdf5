@@ -369,6 +369,9 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5z_flags[8] = H5Z_NO_EDC;
       h5z_flags[9] = H5Z_FILTER_SZIP;
       h5z_flags[10] = H5Z_FLAG_OPTIONAL;
+      h5z_flags[11] = H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+      h5z_flags[12] = H5Z_FILTER_CONFIG_DECODE_ENABLED;
+
 
     ret_value = 0; 
     return ret_value;

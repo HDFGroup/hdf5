@@ -68,7 +68,7 @@ int h5repack(const char* infile,
  /* check input */
  if (check_options(options)<0)
   return -1;
- 
+
  /* check for objects in input that are in the file */
  if (check_objects(infile,options)<0)
   return -1;
@@ -76,7 +76,6 @@ int h5repack(const char* infile,
  /* copy the objects  */
  if (copy_objects(infile,outfile,options)<0)
   return -1;
-
  
  return 0;
 }

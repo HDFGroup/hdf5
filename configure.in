@@ -1029,6 +1029,7 @@ dnl command-line switch. The value is an include path and/or a library path.
 dnl If the library path is specified then it must be preceded by a comma.
 dnl
 AC_SUBST(USE_FILTER_SZIP) USE_FILTER_SZIP="no"
+AC_SUBST(USE_FILTER_SZIP_ENCODER) USE_FILTER_SZIP_ENCODER="no"
 AC_ARG_WITH([szlib],
             [AC_HELP_STRING([--with-szlib=DIR],
                             [Use szlib library for external szlib I/O
@@ -1103,9 +1104,35 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
             [Define if support for szip filter is enabled])
     USE_FILTER_SZIP="yes"
 
+    dnl SZLIB library is available.  Check if it can encode
+    AC_MSG_CHECKING([for szlib encoder])
+
+    AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
+        [AC_TRY_RUN([
+        #include <szlib.h>
+
+        int main(void)
+        {
+                /* SZ_encoder_enabled returns 1 if encoder is present */
+            if(SZ_encoder_enabled() == 1)
+                exit(0);
+            else
+                exit(1);
+        }
+        ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
+
+    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+        AC_DEFINE([SZIP_CAN_ENCODE], [1],
+                  [Define if szip encoder is present])
+        AC_MSG_RESULT([yes])
+        USE_FILTER_SZIP_ENCODER="yes"
+    else
+        AC_MSG_RESULT([no])
+    fi
+
     dnl Add "szip" to external filter list
     if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}," 
     fi
     EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
 fi
@@ -2804,6 +2831,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
                  tools/h5repack/Makefile
+                 tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
                  tools/lib/Makefile
                  tools/misc/Makefile

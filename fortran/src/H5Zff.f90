@@ -130,6 +130,68 @@
  
           END SUBROUTINE h5zfilter_avail_f
 
+!----------------------------------------------------------------------
+! Name:		h5zfilter_avail_f
+!
+! Purpose:      Queries if filter has its encoder and/or decoder 
+!               available	
+!
+! Inputs:  
+!		filter		- filter
+! Outputs:  
+!		config_flags	- Bit vector possibly containing the
+!                         following values:
+!                            H5Z_FILTER_ENCODE_ENABLED_F
+!                            H5Z_FILTER_DECODE_ENABLED_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	Nat Furrer and James Laird
+!		June 16, 2004
+!
+! Modifications: 	
+!
+!----------------------------------------------------------------------
+          SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5zget_filter_info_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER, INTENT(IN)  :: filter      ! Filter; may be one of the following:
+                                                ! H5Z_FILTER_DEFLATE_F                  
+                                                ! H5Z_FILTER_SHUFFLE_F                  
+                                                ! H5Z_FILTER_FLETCHER32_F
+                                                ! H5Z_FILTER_SZIP_F                  
+            INTEGER, INTENT(OUT) :: config_flags! Flag, indicates if filter
+                                                ! has its encoder and/or decoder
+                                                ! available  
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
+
+!            INTEGER, EXTERNAL :: h5zget_filter_info_c
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5ZGET_FILTER_INFO_C'::h5zget_filter_info_c
+              !DEC$ ENDIF
+              INTEGER, INTENT(IN) :: filter
+              INTEGER, INTENT(OUT) :: config_flags
+              END FUNCTION h5zget_filter_info_c
+            END INTERFACE
+
+            hdferr = h5zget_filter_info_c(filter, config_flags)
+ 
+          END SUBROUTINE h5zget_filter_info_f
+
       END MODULE H5Z
             
 

@@ -960,6 +960,7 @@
 ./test/big.c
 ./test/bittests.c
 ./test/cmpd_dset.c
+./test/createnoenc.c
 ./test/dangle.c
 ./test/deflate.h5
 ./test/dsets.c
@@ -989,6 +990,7 @@
 ./test/links.c
 ./test/mount.c
 ./test/mtime.c
+./test/noencoder.h5
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
@@ -1137,7 +1139,7 @@
 
 ./tools/h5repack/Dependencies
 ./tools/h5repack/Makefile.in
-./tools/h5repack/h5repack.sh
+./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack.c
 ./tools/h5repack/h5repack_layout.c

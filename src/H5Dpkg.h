@@ -83,6 +83,7 @@ struct H5D_t {
     hid_t               dcpl_id;        /* dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* data layout                  */
+    hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
 
     /* Cache some frequently accessed values from the DCPL */
     H5O_efl_t           efl;            /* External file list information */

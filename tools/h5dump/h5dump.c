@@ -2241,6 +2241,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
   for (i=0; i<nfilters; i++) 
   {
    cd_nelmts = NELMTS(cd_values);
+#ifdef H5_WANT_H5_V1_6_COMPAT
    filtn = H5Pget_filter(dcpl_id, 
     (unsigned)i, 
     &filt_flags, 
@@ -2248,6 +2249,16 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     cd_values, 
     sizeof(f_name), 
     f_name);
+#else
+   filtn = H5Pget_filter(dcpl_id, 
+    (unsigned)i, 
+    &filt_flags, 
+    &cd_nelmts,
+    cd_values, 
+    sizeof(f_name), 
+    f_name,
+    NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
    
    switch (filtn)
    {
@@ -5572,9 +5583,15 @@ check_compression(hid_t dcpl)
     if (nfilt <= 0)
 	return;
     for (i = 0; i < nfilt; i++) {
+#ifdef H5_WANT_H5_V1_6_COMPAT
 	filter = H5Pget_filter(dcpl, i, &flags,
 			       (size_t *) &cd_nelmts,
 			       &cd_values, 20, namebuf);
+#else
+	filter = H5Pget_filter(dcpl, i, &flags,
+			       (size_t *) &cd_nelmts,
+			       &cd_values, 20, namebuf, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	if (filter == H5Z_FILTER_DEFLATE) {
 	    indentation(indent + COL);
 	    printf("<%sCompression />\n",xmlnsprefix);
@@ -5614,9 +5631,15 @@ check_filters(hid_t dcpl)
     if (nfilt <= 0)
 	return;
     for (i = 0; i < nfilt; i++) {
+#ifdef H5_WANT_H5_V1_6_COMPAT
 	filter = H5Pget_filter(dcpl, (unsigned)i, &flags,
 			       (size_t *) &cd_nelmts,
 			       cd_values, 120, namebuf);
+#else
+	filter = H5Pget_filter(dcpl, (unsigned)i, &flags,
+			       (size_t *) &cd_nelmts,
+			       cd_values, 120, namebuf, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 	if (filter == H5Z_FILTER_DEFLATE) {
 	    indentation(indent + COL);
 	    printf("<%sDeflate Level=\"",xmlnsprefix);

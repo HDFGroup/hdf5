@@ -216,6 +216,13 @@ H5Zregister(const H5Z_class_t *cls)
     /* Check args */
     if (cls==NULL)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter class")
+
+    /* Check H5Z_class_t version number; this is where a function to convert
+     * from an outdated version should be called.
+     */
+    if(cls->version != H5Z_CLASS_T_VERS)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
+
     if (cls->id<0 || cls->id>H5Z_FILTER_MAX)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
     if (cls->id<H5Z_FILTER_RESERVED)
@@ -519,6 +526,11 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                         /* Make correct callback */
                         switch(prelude_type) {
                             case H5Z_PRELUDE_CAN_APPLY:
+                                /* Check if filter is configured to be able to encode */
+                                if(! fclass->encoder_present)
+                                    HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.");
+
+
                                 /* Check if there is a "can apply" callback */
                                 if(fclass->can_apply) {
                                     /* Make callback to filter's "can apply" function */
@@ -600,7 +612,7 @@ herr_t
 H5Z_can_apply (hid_t dcpl_id, hid_t type_id)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5Z_can_apply,FAIL)
 
     assert (H5I_GENPROP_LST==H5I_get_type(dcpl_id));
@@ -608,7 +620,7 @@ H5Z_can_apply (hid_t dcpl_id, hid_t type_id)
 
     /* Make "can apply" callbacks for filters in pipeline */
     if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY)<0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "filter parameters not appropriate")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1157,3 +1169,49 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } 
+
+/*-------------------------------------------------------------------------
+ * Function: H5Zget_filter_info
+ *
+ * Purpose: Gets information about a pipeline data filter and stores it
+ *          in filter_config_flags.
+ *
+ * Return: zero on success / negative on failure
+ *
+ * Programmer: James Laird and Nat Furrer
+ *              Monday, June 7, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
+{
+    herr_t ret_value=SUCCEED;
+    H5Z_class_t * fclass;
+
+    FUNC_ENTER_API(H5Zget_filter_info, FAIL)
+
+    fclass = H5Z_find(filter);
+
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    if(fclass == NULL && filter_config_flags != NULL)
+        *filter_config_flags = 0;
+#else
+    if(fclass == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Filter not defined")
+#endif /* H5_WANT_H5_V1_6_COMPAT */
+
+    if(filter_config_flags != NULL)
+    {
+        *filter_config_flags = 0;
+
+        if(fclass->encoder_present)
+            *filter_config_flags |= H5Z_FILTER_CONFIG_ENCODE_ENABLED;
+        if(fclass->decoder_present)
+            *filter_config_flags |= H5Z_FILTER_CONFIG_DECODE_ENABLED;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}

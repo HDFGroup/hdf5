@@ -836,6 +836,8 @@ done:
  *      Removed the must_convert parameter and move preconditions to
  *      H5S_<foo>_opt_possible() routine
  *
+ *      Nat Furrer and James Laird, 2004/6/7
+ *      Added check for filter encode capability
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -862,6 +864,27 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     assert(dataset && dataset->ent.file);
     assert(mem_type);
     assert(buf);
+
+    /* All filters in the DCPL must have encoding enabled. */
+    if(! dataset->checked_filters)
+    {
+        hid_t type_id;
+
+        type_id = H5I_register(H5I_DATATYPE, dataset->type);
+        if(type_id < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data type")
+
+        if(H5Z_can_apply(dataset->dcpl_id, type_id) <0)
+        {
+            H5I_remove(type_id);
+            HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
+        }
+
+        if(H5I_remove(type_id) == NULL)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to release data type id")
+
+        dataset->checked_filters = TRUE;
+    }
 
     /* If MPI based VFD is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */

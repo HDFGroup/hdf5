@@ -26,6 +26,10 @@
 #include "hdf5.h"
 #include "H5private.h"
 
+#ifdef H5_HAVE_FILTER_SZIP
+#include "szlib.h"
+#endif
+
 #define FILE1 "tgroup.h5"
 #define FILE2 "tdset.h5"
 #define FILE3 "tattr.h5"
@@ -103,8 +107,10 @@ set_local_myfilter(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id);
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_MYFILTER[1] = {{
-    MYFILTER_ID,         /* Filter id number  */
-    "myfilter",          /* Filter name for debugging */
+    H5Z_CLASS_T_VERS,
+    MYFILTER_ID,		       /* Filter id number		*/
+    1, 1,
+    "myfilter",			       /* Filter name for debugging	*/
     NULL,                /* The "can apply" callback     */
     set_local_myfilter,  /* The "set local" callback     */
     myfilter,            /* The actual filter function */
@@ -4543,17 +4549,17 @@ static void gent_filters(void)
  * SZIP
  *-------------------------------------------------------------------------
  */
-#if defined (H5_HAVE_FILTER_SZIP)
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+  /* remove the filters from the dcpl */
+  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
+  assert(ret>=0);
 
- /* set szip data */
- ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
- assert(ret>=0);
+  /* set szip data */
+  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
+  assert(ret>=0);
 
- ret=make_dset(fid,"szip",sid,dcpl,buf1);
- assert(ret>=0);
+  ret=make_dset(fid,"szip",sid,dcpl,buf1);
+  assert(ret>=0);
 #endif
 
 /*-------------------------------------------------------------------------
@@ -4623,11 +4629,11 @@ static void gent_filters(void)
  assert(ret>=0);
 #endif
 
-#if defined (H5_HAVE_FILTER_SZIP)
- szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
- /* set szip data */
- ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
- assert(ret>=0);
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
+  szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
+  /* set szip data */
+  ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
+  assert(ret>=0);
 #endif
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
@@ -4917,7 +4923,11 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
  unsigned cd_values[2]={5,6};   /* Filter parameters */
  
  /* Get the filter's current parameters */
+#ifdef H5_WANT_H5_V1_6_COMPAT
  if(H5Pget_filter_by_id(dcpl_id,MYFILTER_ID,&flags,&cd_nelmts,cd_values,0,NULL)<0)
+#else
+ if(H5Pget_filter_by_id(dcpl_id,MYFILTER_ID,&flags,&cd_nelmts,cd_values,0,NULL,NULL)<0)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
   return(FAIL);
 
  cd_nelmts=2; 

@@ -147,10 +147,14 @@ H5_DLLVAR hid_t H5E_CANTALLOC_g;    /* Can't allocate from file */
 #define H5E_CALLBACK        (H5OPEN H5E_CALLBACK_g)
 #define H5E_CANAPPLY        (H5OPEN H5E_CANAPPLY_g)
 #define H5E_SETLOCAL        (H5OPEN H5E_SETLOCAL_g)
+#define H5E_NOENCODER        (H5OPEN H5E_NOENCODER_g)
+#define H5E_NODECODER        (H5OPEN H5E_NODECODER_g)
 H5_DLLVAR hid_t H5E_NOFILTER_g;     /* Requested filter is not available */
 H5_DLLVAR hid_t H5E_CALLBACK_g;     /* Callback failed */
 H5_DLLVAR hid_t H5E_CANAPPLY_g;     /* Error from filter 'can apply' callback */
 H5_DLLVAR hid_t H5E_SETLOCAL_g;     /* Error from filter 'set local' callback */
+H5_DLLVAR hid_t H5E_NOENCODER_g;    /* Filter present, but encoding disabled */
+H5_DLLVAR hid_t H5E_NODECODER_g;    /* Filter present, but decoding disabled */
 
 /* Datatype conversion errors */
 #define H5E_CANTCONVERT     (H5OPEN H5E_CANTCONVERT_g)

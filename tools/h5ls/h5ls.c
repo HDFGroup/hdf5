@@ -1602,8 +1602,13 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  if ((nf = H5Pget_nfilters(dcpl))>0) {
      for (i=0; i<nf; i++) {
   cd_nelmts = NELMTS(cd_values);
+#ifdef H5_WANT_H5_V1_6_COMPAT
   filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
      cd_values, sizeof(f_name), f_name);
+#else
+  filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
+     cd_values, sizeof(f_name), f_name, NULL);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
   f_name[sizeof(f_name)-1] = '\0';
   sprintf(s, "Filter-%d:", i);
   printf("    %-10s %s-%u %s {", s,

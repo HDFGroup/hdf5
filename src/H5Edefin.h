@@ -90,6 +90,8 @@ hid_t H5E_NOFILTER_g       = FAIL;      /* Requested filter is not available */
 hid_t H5E_CALLBACK_g       = FAIL;      /* Callback failed */
 hid_t H5E_CANAPPLY_g       = FAIL;      /* Error from filter 'can apply' callback */
 hid_t H5E_SETLOCAL_g       = FAIL;      /* Error from filter 'set local' callback */
+hid_t H5E_NOENCODER_g      = FAIL;      /* Filter present but encoder not enabled */
+hid_t H5E_NODECODER_g      = FAIL;      /* Filter present but decoder not enabled */
 
 /* Datatype conversion errors */
 hid_t H5E_CANTCONVERT_g    = FAIL;      /* Can't convert datatypes */

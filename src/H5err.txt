@@ -204,3 +204,4 @@ MINOR, PIPELINE, H5E_NOFILTER, Requested filter is not available
 MINOR, PIPELINE, H5E_CALLBACK, Callback failed
 MINOR, PIPELINE, H5E_CANAPPLY, Error from filter 'can apply' callback
 MINOR, PIPELINE, H5E_SETLOCAL, Error from filter 'set local' callback
+MINOR, PIPELINE, H5E_NOENCODER, Filter present but encoding disabled

@@ -40,9 +40,16 @@ static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_SZIP[1] = {{
+H5Z_class_t H5Z_SZIP[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_SZIP,		/* Filter id number		*/
-    "szip",			/* Filter name for debugging	*/
+#ifdef H5_SZIP_CAN_ENCODE
+    1,              /* Encoder present */
+#else
+    0,              /* Encoder disabled */
+#endif
+    1,                  /* decoder_present flag (set to true) */
+    "szip",			    /* Filter name for debugging	*/
     H5Z_can_apply_szip,		/* The "can apply" callback     */
     H5Z_set_local_szip,         /* The "set local" callback     */
     H5Z_filter_szip,		/* The actual filter function	*/
@@ -96,8 +103,12 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     FUNC_ENTER_NOAPI(H5Z_can_apply_szip, FAIL)
 
     /* Get the filter's current parameters */
+#ifdef H5_WANT_H5_V1_6_COMPAT
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
-	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters")
+#else
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL,NULL)<0)
+#endif
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters")
 
     /* Get datatype's size, for checking the "bits-per-pixel" */
     if((dtype_size=(sizeof(unsigned char)*H5Tget_size(type_id)))==0)
@@ -171,7 +182,11 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     FUNC_ENTER_NOAPI(H5Z_set_local_szip, FAIL)
 
     /* Get the filter's current parameters */
+#ifdef H5_WANT_H5_V1_6_COMPAT
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+#else
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL,NULL)<0)
+#endif
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters")
 
     /* Get dimensions for dataspace */
@@ -328,5 +343,6 @@ done:
         H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
 #endif /* H5_HAVE_FILTER_SZIP */
 

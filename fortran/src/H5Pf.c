@@ -1516,7 +1516,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
       */
      c_prp_id = (hid_t)*prp_id;
      c_filter_number = (int)*filter_number;
-     c_filter = H5Pget_filter(c_prp_id, c_filter_number, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name);
+     c_filter = H5Pget_filter(c_prp_id, c_filter_number, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name, NULL);
 
      if (c_filter < 0) goto DONE;
 
@@ -3171,7 +3171,7 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
       */
      c_prp_id = (hid_t)*prp_id;
      c_filter_id = (H5Z_filter_t)*filter_id;
-     status = H5Pget_filter_by_id(c_prp_id, c_filter_id, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name);
+     status = H5Pget_filter_by_id(c_prp_id, c_filter_id, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name, NULL);
      if (status < 0) goto DONE;
 
      *cd_nelmts = (size_t_f)c_cd_nelmts;
