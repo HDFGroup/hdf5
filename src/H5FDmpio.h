@@ -61,7 +61,7 @@ H5_DLL herr_t H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode);
 H5_DLL herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/);
 H5_DLL MPI_Comm H5FD_mpio_communicator(H5FD_t *_file);
 H5_DLL herr_t H5FD_mpio_setup(hid_t dxpl_id, MPI_Datatype btype,
-    MPI_Datatype ftype, unsigned use_view);
+    MPI_Datatype ftype);
 H5_DLL herr_t H5FD_mpio_teardown(hid_t dxpl_id);
 H5_DLL herr_t H5FD_mpio_wait_for_left_neighbor(H5FD_t *file);
 H5_DLL herr_t H5FD_mpio_signal_right_neighbor(H5FD_t *file);
