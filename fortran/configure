@@ -2713,6 +2713,12 @@ rm -f conftest conftest.o conftest.c core core.* *.core dummy.o
 mkdir ./config >/dev/null 2>&1
 touch ./config/stamp1
 
+PARALLEL_MAKE=
+
+if test -n "$TESTPARALLEL"; then
+   PARALLEL_MAKE=$TESTPARALLEL/Makefile
+fi
+
 saved_no_create=$no_create
 no_create=yes
 trap '' 1 2 15
@@ -2816,10 +2822,19 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "config/depend1 config/depend2 config/depend3 config/depend4	\
-	  config/dependN config/commence config/conclude Makefile	\
-	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
-	  testpar/Makefile examples/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "config/depend1    
+          config/depend2
+          config/depend3
+          config/depend4
+	  config/dependN
+          config/commence
+          config/conclude
+          Makefile
+	  src/H5fortran_types.f90
+          src/Makefile
+          test/Makefile
+          $PARALLEL_MAKE
+          examples/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2938,10 +2953,19 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"config/depend1 config/depend2 config/depend3 config/depend4	\
-	  config/dependN config/commence config/conclude Makefile	\
-	  src/H5fortran_types.f90 src/Makefile test/Makefile		\
-	  testpar/Makefile examples/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"config/depend1    
+          config/depend2
+          config/depend3
+          config/depend4
+	  config/dependN
+          config/commence
+          config/conclude
+          Makefile
+	  src/H5fortran_types.f90
+          src/Makefile
+          test/Makefile
+          $PARALLEL_MAKE
+          examples/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
