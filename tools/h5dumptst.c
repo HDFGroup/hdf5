@@ -53,6 +53,12 @@ typedef struct s1_t {
 } s1_t;
 
 
+void test_enum(void);
+void test_objref(void);
+void test_datareg(void);
+
+
+
 static void test_group(void) {
 hid_t fid, group;
 
@@ -1152,16 +1158,15 @@ size_t mdims[2];
 */
 
 static void test_str2(void) {
-hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space, type;
+hid_t fid, group, attr, dataset, space, space2, mem_space, hyper_space;
 hid_t fxdlenstr, fxdlenstr2, memtype;
 hsize_t dims[1], size[1], start[1], stride[1], count[1], block[1];
 
 
-int i, j;
-int i0, i1, i2, i3;
+hsize_t i;
 char buf[LENSTR+10];
 char buf2[3*LENSTR2];
-hsize_t sdim, maxdim;
+hsize_t sdim;
 
   fid = H5Fcreate(FILE14, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -1310,11 +1315,10 @@ hsize_t sdim, maxdim;
 }
 
 
-void test_enum(){
+void test_enum(void){
 /*some code is taken from enum.c in the test dir */
 	hid_t file, type, space, dset;
 	int val;
-	signed char val8;
 	enumtype data[] = {RED,   GREEN, BLUE,  GREEN, WHITE,
 			 WHITE, BLACK, GREEN, BLUE,  RED,
 			 RED,   BLUE,  GREEN, BLACK, WHITE,
@@ -1343,11 +1347,11 @@ void test_enum(){
 
 
 
-void test_objref(){
+void test_objref(void){
 /*some code is taken from enum.c in the test dir */
 	hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset,	/* Dataset ID			*/
-                dset2;      /* Dereferenced dataset ID */
+    hid_t		dataset;	/* Dataset ID			*/
+
     hid_t		group;      /* Group ID             */
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1;       /* Datatype ID			*/
@@ -1358,7 +1362,6 @@ void test_objref(){
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     intn        i;          /* counting variables */
     const char *write_comment="Foo!"; /* Comments for group */
-    char read_comment[10];
     herr_t		ret;		/* Generic return value		*/
 
 
@@ -1461,7 +1464,7 @@ void test_objref(){
 }
 
 
-void test_datareg(){
+void test_datareg(void){
 
 /*some code is taken from enum.c in the test dir */
 
@@ -1477,9 +1480,6 @@ void test_datareg(){
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
     hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t *   coords;             /* Coordinate buffer */
-    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
-    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
