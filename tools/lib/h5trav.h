@@ -17,6 +17,10 @@
 
 #include "hdf5.h"
 
+#if 0
+#define H5_TRAV_DEBUG
+#endif
+
 
 /*-------------------------------------------------------------------------
  * public struct to store name and type of an object
@@ -73,6 +77,9 @@ extern "C" {
 int  h5trav_getinfo( hid_t file_id, trav_info_t *info );
 int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
 void h5trav_freeinfo( trav_info_t *info, int nobjs );
+void h5trav_printinfo(int nobjs, trav_info_t *info);
+
+
 
 #ifdef __cplusplus
 }

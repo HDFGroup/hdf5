@@ -57,6 +57,7 @@ int h5repack(const char* infile,
  /* copy the file  */
  if (copy_file(infile,outfile,options)<0)
   return -1;
+
  
  return 0;
 }

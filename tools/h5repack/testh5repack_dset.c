@@ -168,6 +168,10 @@ void write_dset_in(hid_t loc_id,
  write_dset(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
 
+
+ /* create hard link */
+ status = H5Glink(loc_id, H5G_LINK_HARD, "string", "string_link");
+
 /*-------------------------------------------------------------------------
  * H5T_BITFIELD
  *-------------------------------------------------------------------------

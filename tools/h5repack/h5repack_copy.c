@@ -109,6 +109,11 @@ int copy_file(const char* fnamein,
   return -1;
  }
 
+#if defined (H5_REPACK_DEBUG)
+ h5trav_printinfo(nobjects,travi);
+#endif
+
+
 /*-------------------------------------------------------------------------
  * free
  *-------------------------------------------------------------------------

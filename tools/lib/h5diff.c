@@ -536,55 +536,6 @@ int diff( hid_t      file1_id,
 }
 
 
-/*-------------------------------------------------------------------------
- * Function: diff_list
- *
- * Purpose: print list of objects in file
- *
- * Return: void
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-#ifdef NOT_YET
-void diff_list( const char *filename, int nobjects, trav_info_t *info )
-{
- int i;
-
- printf("File <%s>: # of entries = %d\n", filename, nobjects );
- for ( i = 0; i < nobjects; i++)
- {
-  switch ( info[i].type )
-  {
-  case H5G_GROUP:
-   printf(" %-10s %s\n", "group", info[i].name  );
-   break;
-  case H5G_DATASET:
-   printf(" %-10s %s\n", "dataset", info[i].name );
-   break;
-  case H5G_TYPE:
-   printf(" %-10s %s\n", "datatype", info[i].name );
-   break;
-  case H5G_LINK:
-   printf(" %-10s %s\n", "link", info[i].name );
-   break;
-  default:
-   printf(" %-10s %s\n", "User defined object", info[i].name );
-   break;
-  }
- }
-
-}
-#endif 
-
-
 
 
 

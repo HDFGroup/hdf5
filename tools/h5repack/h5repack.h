@@ -19,16 +19,16 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
+#if 0
+#define H5_REPACK_DEBUG
+#endif
+
 
 #define PFORMAT  "%-7s %-7s %-7s\n" /*chunk info, compression info, name*/
 #define PFORMAT1 "%-7s %-7s %-7s"     /*chunk info, compression info, name*/
 
 #define MAX_NC_NAME 256 /* max length of a name */
 #define MAX_VAR_DIMS 32 /* max per variable dimensions */
-
-#if 1
-#define H5_REPACK_DEBUG
-#endif
 
 
 /*-------------------------------------------------------------------------

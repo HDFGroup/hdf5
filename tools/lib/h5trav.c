@@ -467,3 +467,51 @@ int traverse( hid_t loc_id,
  return inserted_objs;
 }
 
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: diff_list
+ *
+ * Purpose: print list of objects in file
+ *
+ * Return: void
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5trav_printinfo(int nobjs, trav_info_t *travi)
+{
+ int i;
+ for ( i = 0; i < nobjs; i++)
+ {
+  switch ( travi[i].type )
+  {
+  case H5G_GROUP:
+   printf(" %-10s %s\n", "group", travi[i].name  );
+   break;
+  case H5G_DATASET:
+   printf(" %-10s %s\n", "dataset", travi[i].name );
+   break;
+  case H5G_TYPE:
+   printf(" %-10s %s\n", "datatype", travi[i].name );
+   break;
+  case H5G_LINK:
+   printf(" %-10s %s\n", "link", travi[i].name );
+   break;
+  default:
+   printf(" %-10s %s\n", "User defined object", travi[i].name );
+   break;
+  }
+ }
+}
+
+
+
