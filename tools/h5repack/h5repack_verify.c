@@ -96,17 +96,29 @@ int has_layout(hid_t dcpl_id,
 {
  hsize_t      chsize[64];     /* chunk size in elements */
  H5D_layout_t layout;         /* layout */
+ int          nfilters;       /* number of filters */
  int          rank;           /* rank */
  int          i;              /* index */
  
  /* if no information about the input layout is requested return exit */
  if (obj==NULL)
   return 1;
-
- layout = H5Pget_layout(dcpl_id);
+ 
+ /* check if we have filters in the input object */
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
+  return -1;
+ 
+ /* a non chunked layout was requested on a filtered object; avoid the test */
+ if (nfilters && obj->layout!=H5D_CHUNKED)
+  return 1;
+ 
+ /* get layout */
+ if ((layout = H5Pget_layout(dcpl_id))<0) 
+  return -1;
+ 
  if (obj->layout != layout)
   return 0;
-
+ 
  if (layout==H5D_CHUNKED)
  {
   if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
@@ -118,8 +130,6 @@ int has_layout(hid_t dcpl_id,
     return 0;
  }
  
-
-
  return 1;
 }
 

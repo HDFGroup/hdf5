@@ -557,7 +557,6 @@ test_layout_contiguous(void)
  * test an individual object option
  *-------------------------------------------------------------------------
  */
-
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
  if (h5repack_addlayout("dset1:CONTI",&pack_options)<0)
@@ -724,10 +723,14 @@ int main (void)
 
 #endif
 
-#if 0
+#if 1
 
  /* test a copy with layout CONTI options */
  nerrors += test_layout_contiguous();
+
+#endif
+
+#if 1
 
  /* test a copy with layout COMPA options */
  nerrors += test_layout_compact();

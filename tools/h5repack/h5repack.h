@@ -205,9 +205,10 @@ int check_szip(int rank,        /* chunk rank */
 int has_layout(hid_t dcpl_id,
                pack_info_t *obj);
 
-int layout_this(const char* name,    /* object name from traverse list */
-                pack_opt_t *options, /* repack options */
-                pack_info_t *pack);  /* info about object to apply layout */
+int layout_this(hid_t dcpl_id,             /* DCPL from input object */
+                const char* name,          /* object name from traverse list */
+                pack_opt_t *options,       /* repack options */
+                pack_info_t *pack /*OUT*/) /* object to apply layout */;
 
 int apply_layout(hid_t dcpl_id,
                  pack_opt_t *options, /* repack options */

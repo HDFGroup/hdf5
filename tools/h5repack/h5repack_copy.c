@@ -265,7 +265,7 @@ int do_copy_file(hid_t fidin,
      * if the layout could not be applied, continue
      *-------------------------------------------------------------------------
      */
-    if (layout_this(travt->objs[i].name,options,&pack))
+    if (layout_this(dcpl_id,travt->objs[i].name,options,&pack))
     {
      if (apply_layout(dcpl_id,options,&pack)<0)
       continue;

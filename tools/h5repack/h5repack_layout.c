@@ -17,13 +17,23 @@
 #include "h5repack.h"
 
 
+static void CANNOT_LAYOUT(pack_opt_t *options)
+{  
+ if (options->verbose)
+  printf("Warning: This layout cannot be applied, this object\
+   requires chunked layout\n");
+}
+
+
+
 /*-------------------------------------------------------------------------
  * Function: layout_this
  *
- * Purpose: find the object name NAME (got from the traverse list)
+ * Purpose: check if the layout can be applied;
+ *  find the object name NAME (got from the traverse list)
  *  in the repack options list; assign the layout information OBJ
  *
- * Return: 0 not found, 1 found
+ * Return: 0 cannot apply, 1 can, -1 error
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -32,35 +42,69 @@
  *-------------------------------------------------------------------------
  */
 
-int layout_this(const char* name,          /* object name from traverse list */
+int layout_this(hid_t dcpl_id,             /* DCPL from input object */
+                const char* name,          /* object name from traverse list */
                 pack_opt_t *options,       /* repack options */
                 pack_info_t *pack /*OUT*/) /* object to apply layout */
 {
- char *pdest;
- int  result;
- int  i;
+ int          nfilters; /* number of filters in the input object  */
+ H5D_layout_t layout;   /* layout */
+ char         *pdest;
+ int          result;
+ int          i, ret=1;
 
- /* if we are applying to all objects just return true */
+ /* check if we have filters in the input object */
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
+  return -1;
+ 
+ /* applying to all objects */
  if (options->all_layout)
  {
   /* assign the global layout info to the OBJ info */
   pack->layout=options->layout_g;
-  if (H5D_CHUNKED==options->layout_g) { /* set up chunk */
+  
+  switch (options->layout_g)
+  {
+  case H5D_CHUNKED:
    pack->chunk.rank=options->chunk_g.rank;
    for ( i=0; i<pack->chunk.rank; i++) 
     pack->chunk.chunk_lengths[i]=options->chunk_g.chunk_lengths[i];
-  }
-  return 1;
+   break;
+   
+  case H5D_CONTIGUOUS:
+  case H5D_COMPACT:
+   if (nfilters)
+   {
+    CANNOT_LAYOUT(options);
+    ret=0;
+   }
+   break;
+   
+  default:
+   ret=0;
+   break;
+  }/*switch*/
+  return ret;
  }
 
+ /* find the object */
  for ( i=0; i<options->op_tbl->nelems; i++) 
  {
-  if (options->op_tbl->objs[i].layout != -1 )
+  layout=options->op_tbl->objs[i].layout;
+  if ( layout != -1 )
   {
    if (strcmp(options->op_tbl->objs[i].path,name)==0)
    {
-    *pack=options->op_tbl->objs[i];
-    return 1;
+    if (nfilters && layout!=H5D_CHUNKED)
+    {
+     CANNOT_LAYOUT(options);
+     return 0;
+    }
+    else
+    {
+     *pack=options->op_tbl->objs[i];
+     return 1;
+    }
    }
    
    pdest  = strstr(name,options->op_tbl->objs[i].path);
@@ -69,8 +113,16 @@ int layout_this(const char* name,          /* object name from traverse list */
    /* found at position 1, meaning without '/' */
    if( pdest != NULL && result==1 )
    {
-    *pack=options->op_tbl->objs[i];
-    return 1;
+    if (nfilters && layout!=H5D_CHUNKED)
+    {
+     CANNOT_LAYOUT(options);
+     return 0;
+    }
+    else
+    {
+     *pack=options->op_tbl->objs[i];
+     return 1;
+    }
    }
   }
  }
@@ -114,7 +166,10 @@ int apply_layout(hid_t dcpl_id,
   if(H5Pset_chunk(dcpl_id, obj->chunk.rank, obj->chunk.chunk_lengths)<0)
    return -1;
  }
- 
+ else if (H5D_COMPACT==obj->layout) {
+  if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0) 
+   return -1;
+ }
  
  return 0;
 }

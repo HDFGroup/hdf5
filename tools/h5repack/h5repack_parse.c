@@ -391,7 +391,7 @@ obj_list_t* parse_layout(const char *str,
  } /* j */
  
 
- if ( pack->layout=H5D_CHUNKED )
+ if ( pack->layout==H5D_CHUNKED )
  {
 
 /*-------------------------------------------------------------------------
