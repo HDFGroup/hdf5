@@ -18,10 +18,8 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 
 ## Test programs and scripts.
 ##
-#TEST_PROGS= h5importtest
-#TEST_SCRIPTS=$(srcdir)/h5importtestutil.sh
-TEST_PROGS= 
-TEST_SCRIPTS=
+TEST_PROGS= h5importtest
+TEST_SCRIPTS=$(srcdir)/h5importtestutil.sh
 
 ## These are our main targets: library and tools.
 ##

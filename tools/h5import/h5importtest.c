@@ -15,6 +15,10 @@
  *      used to test the h5import program.  
  *
  */
+/*
+ * Define names for test files
+ */
+
 int
 main(void)
 {
@@ -53,6 +57,7 @@ main(void)
     double     row8[3], col8[4], pln8[5];
     double     rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
 	double     rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
+
     
     /*
      * initialize the row, column, and plane vectors
@@ -175,7 +180,8 @@ main(void)
 
 #ifndef UNICOS
     
-    	sp = fopen("testfiles/txtin16", "w");
+
+    	sp = fopen("txtin16", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         {
@@ -185,7 +191,7 @@ main(void)
         }
     (void) fclose(sp);
 
-      sp = fopen("testfiles/txtin32", "w");
+      sp = fopen("txtin32", "w");
       for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         {
@@ -195,14 +201,15 @@ main(void)
         }
       (void) fclose(sp);
 
-    sp = fopen("testfiles/bin32", "w");
+    sp = fopen("bin32", "w");
     for (k = 0; k < npln; k++) 
     for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
             (void) fwrite((char *) &b32i3[k][i][j], sizeof(int), 1, sp);
     (void) fclose(sp);
 
-  sp = fopen("testfiles/buin32", "w");
+
+    sp = fopen("buin32", "w");
     for (k = 0; k < npln; k++) 
     for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
@@ -210,14 +217,15 @@ main(void)
     (void) fclose(sp);
 
 #ifndef WIN32
-   sp = fopen("testfiles/bin64-2", "w");
+
+    sp = fopen("bin64-2", "w");
     for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
             (void) fwrite((char *) &b64i2[i][j], sizeof(long_long), 1, sp);
     (void) fclose(sp);
 #endif
 
-    sp = fopen("testfiles/bfp32", "w");
+    sp = fopen("bfp32", "w");
     for (k = 0; k < npln; k++)
         for (i = 0; i < nrow; i++)
             for (j = 0; j < ncol; j++)
@@ -225,7 +233,7 @@ main(void)
                               sizeof(float), 1, sp);
     (void) fclose(sp);
  
-    sp = fopen("testfiles/bin16", "w");
+        sp = fopen("bin16", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
@@ -233,7 +241,7 @@ main(void)
                           sp);
     (void) fclose(sp);
 
-    sp = fopen("testfiles/buin16", "w");
+        sp = fopen("buin16", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
@@ -242,7 +250,8 @@ main(void)
     (void) fclose(sp);
 
 #ifndef WIN32
-   sp = fopen("testfiles/bin64-3", "w");
+
+        sp = fopen("bin64-3", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
@@ -251,7 +260,7 @@ main(void)
     (void) fclose(sp);
 #endif
     
-    sp = fopen("testfiles/bin8", "w");
+    sp = fopen("bin8", "w");
     for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         for (j = 0; j < ncol; j++)
@@ -265,7 +274,7 @@ main(void)
      * binary 64-bit file - rank 2 & 3
      */
     
-    sp = fopen("testfiles/bfp64", "w");
+    sp = fopen("bfp64", "w");
     for (k = 0; k < npln; k++)
         for (i = 0; i < nrow; i++)
             for (j = 0; j < ncol; j++)
