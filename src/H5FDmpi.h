@@ -61,7 +61,7 @@ typedef struct H5FD_class_mpi_t {
 /*
  * The view is set to this value
  */
-extern char H5FD_mpi_native_g[];
+H5_DLLVAR char H5FD_mpi_native_g[];
 
 /* Function prototypes */
 #ifdef __cplusplus

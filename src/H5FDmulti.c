@@ -244,6 +244,29 @@ H5FD_multi_init(void)
 }
 
 
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_multi_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_multi_term(void)
+{
+    /* Reset VFL ID */
+    H5FD_MULTI_g=0;
+
+} /* end H5FD_multi_term() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_split
  *

@@ -249,6 +249,32 @@ done:
 }
 
 
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_stream_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_stream_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_stream_term)
+
+    /* Reset VFL ID */
+    H5FD_STREAM_g=0;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD_stream_term() */
+
+
 /*-------------------------------------------------------------------------
  * Function:      H5Pset_fapl_stream
  *

@@ -55,6 +55,7 @@ extern "C" {
 #endif
 
 hid_t H5FD_gass_init(void);
+void H5FD_gass_term(void);
 herr_t H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info);
 herr_t H5Pget_fapl_gass(hid_t fapl_id, GASS_Info *info/*out*/);
 

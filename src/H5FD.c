@@ -156,6 +156,32 @@ H5FD_term_interface(void)
     if (interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
 	    H5I_clear_group(H5I_VFL, FALSE);
+
+            /* Reset the VFL drivers, if they've been closed */
+            if(H5I_nmembers(H5I_VFL)==0) {
+                H5FD_sec2_term();
+                H5FD_log_term();
+                H5FD_stdio_term();
+                H5FD_family_term();
+#ifdef H5_HAVE_GASS
+                H5FD_gass_term();
+#endif
+#ifdef H5_HAVE_SRB
+                H5FD_srb_term();
+#endif
+                H5FD_core_term();
+                H5FD_multi_term();
+#ifdef H5_HAVE_PARALLEL
+                H5FD_mpio_term();
+                H5FD_mpiposix_term();
+#ifdef H5_HAVE_FPHDF5
+                H5FD_fphdf5_term();
+#endif /* H5_HAVE_FPHDF5 */
+#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_HAVE_STREAM
+                H5FD_stream_term();
+#endif
+            } /* end if */
 	} else {
 	    H5I_destroy_group(H5I_VFL);
 	    interface_initialize_g = 0;

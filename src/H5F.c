@@ -299,6 +299,7 @@ H5F_init_interface(void)
     /* Register predefined file drivers */
     H5E_BEGIN_TRY {
 	if ((status=H5FD_SEC2)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
+	if ((status=H5FD_LOG)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
 	if ((status=H5FD_STDIO)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
 	if ((status=H5FD_FAMILY)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
 #ifdef H5_HAVE_GASS

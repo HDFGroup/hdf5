@@ -220,7 +220,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 hid_t
 H5FD_sec2_init(void)
 {
-    hid_t ret_value=H5FD_SEC2_g;        /* Return value */
+    hid_t ret_value;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_init, FAIL)
 
@@ -233,6 +233,32 @@ H5FD_sec2_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_sec2_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_sec2_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_sec2_term)
+
+    /* Reset VFL ID */
+    H5FD_SEC2_g=0;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD_sec2_term() */
 
 
 /*-------------------------------------------------------------------------

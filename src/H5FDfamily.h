@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 H5_DLL hid_t H5FD_family_init(void);
+H5_DLL void H5FD_family_term(void);
 H5_DLL herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size,
 			  hid_t memb_fapl_id);
 H5_DLL herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,

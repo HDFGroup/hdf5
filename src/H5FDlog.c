@@ -261,7 +261,7 @@ static int interface_initialize_g = 0;
 hid_t
 H5FD_log_init(void)
 {
-    hid_t ret_value=H5FD_LOG_g;         /* Return value */
+    hid_t ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_log_init, FAIL)
 
@@ -274,6 +274,32 @@ H5FD_log_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5FD_log_term
+ *
+ * Purpose:	Shut down the VFD
+ *
+ * Return:	<none>
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, Jan 30, 2004
+ *
+ * Modification:
+ *
+ *---------------------------------------------------------------------------
+ */
+void
+H5FD_log_term(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_log_term)
+
+    /* Reset VFL ID */
+    H5FD_LOG_g=0;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5FD_log_term() */
 
 
 /*-------------------------------------------------------------------------
