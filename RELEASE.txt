@@ -54,6 +54,9 @@ New Features
     * H5 <-> GIF convertor has been added. This is available under 
       tools/gifconv. The convertor supports the ability to create animated
       gifs as well.
+    * Verified correct operation of library on Solaris 2.8 in both 64-bit and
+      32-bit compilation modes.  See INSTALL document for instructions on
+      compiling the distribution with 64-bit support.
 
 
 Bug Fixes since HDF5-1.4.1 Release
