@@ -170,6 +170,20 @@ test_h5s_basic(void)
     VERIFY(dset1, FAIL, "H5Dopen");
     ret = H5Fclose(fid1);
     CHECK_I(ret, "H5Fclose");
+
+    /* Verify that incorrect dimensions don't work */
+    dims1[0]=0;
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    VERIFY(sid1, FAIL, "H5Screate_simple");
+
+    sid1 = H5Screate(H5S_SIMPLE);
+    CHECK(sid1, FAIL, "H5Screate");
+
+    ret = H5Sset_extent_simple(sid1,SPACE1_RANK,dims1,NULL);
+    VERIFY(ret, FAIL, "H5Sset_extent_simple");
+
+    ret = H5Sclose(sid1);
+    CHECK_I(ret, "H5Sclose");
 }				/* test_h5s_basic() */
 
 /****************************************************************
