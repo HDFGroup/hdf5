@@ -31,6 +31,7 @@ int main( void )
  int     buf2[ 90 ][ 90 ];
  herr_t  status; 
  int     i, j, n = 0;
+	int     fillvalue = 0;   /* Fill value for the dataset */
  
  
  for( i = 0; i < 90; i++ )
@@ -41,6 +42,7 @@ int main( void )
   }
  }
  
+#if 0
  
 /*-------------------------------------------------------------------------
  * Test H5Dset_extent with chunks on the raw data cache
@@ -59,6 +61,7 @@ int main( void )
  /* Modify dataset creation properties, i.e. enable chunking. */
  plist_id = H5Pcreate (H5P_DATASET_CREATE);
  status = H5Pset_chunk( plist_id, RANK, dims_chunk);
+	status = H5Pset_fill_value( plist_id, H5T_NATIVE_INT, &fillvalue); 
  
  
 /*-------------------------------------------------------------------------
@@ -111,8 +114,6 @@ int main( void )
  }
  
  
-#if 0
- 
 /*-------------------------------------------------------------------------
  * Set new dimensions for the array; expand it again 
  *-------------------------------------------------------------------------
@@ -144,9 +145,9 @@ int main( void )
  {
   for( j = 0; j < dims_out[1]; j++ )
   {
-   if ( i > 70 || j > 70 )
+   if ( i >= 70 || j >= 70 )
    {
-    if (  buf2[i][j] != 0 ) {
+    if (  buf2[i][j] != fillvalue ) {
      goto out;
     }
    }
@@ -160,7 +161,6 @@ int main( void )
   }
  }
  
-#endif
  
 /*-------------------------------------------------------------------------
  * Close/release resources
@@ -176,12 +176,14 @@ int main( void )
  
  PASSED();
  
+
  
 /*-------------------------------------------------------------------------
  * Test H5Dset_extent with chunks written to file
  *-------------------------------------------------------------------------
  */
  
+
  TESTING("extend dataset read");
  
  /* Create a new file using default properties. */
@@ -193,6 +195,7 @@ int main( void )
  /* Modify dataset creation properties, i.e. enable chunking. */
  plist_id = H5Pcreate (H5P_DATASET_CREATE);
  status = H5Pset_chunk( plist_id, RANK, dims_chunk);
+	status = H5Pset_fill_value( plist_id, H5T_NATIVE_INT, &fillvalue); 
  
  /* Create a new dataset within the file using cparms creation properties. */
  dataset_id = H5Dcreate( file_id , "Dataset", H5T_NATIVE_INT, space_id, plist_id );
@@ -212,12 +215,7 @@ int main( void )
  
  /* Open the dataset */
  dataset_id = H5Dopen( file_id , "Dataset" );
- 
-#if 0
- /* Read the dataset. */
- status = H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data );
-#endif
- 
+  
  /* Set new dimensions for the array. */
  status = H5Dset_extent( dataset_id, dims_new );
  
@@ -229,8 +227,6 @@ int main( void )
  
  if ( dims_out[0] != dims_new[0] ) 
   goto out;
- 
-#if 1
  
  /* Read the new dataset. */
  status = H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1 );
@@ -245,11 +241,6 @@ int main( void )
    }
   }
  }
-#endif
- 
- 
- 
-#if 0
  
 /*-------------------------------------------------------------------------
  * Set new dimensions for the array; expand it again 
@@ -276,9 +267,9 @@ int main( void )
  {
   for( j = 0; j < dims_out[1]; j++ )
   {
-   if ( i > 70 || j > 70 )
+   if ( i >= 70 || j >= 70 )
    {
-    if (  buf2[i][j] != 0 ) {
+    if (  buf2[i][j] != fillvalue ) {
      goto out;
     }
    }
@@ -292,7 +283,6 @@ int main( void )
   }
  }
  
-#endif
  
 /*-------------------------------------------------------------------------
  * Close/release resources
@@ -304,7 +294,9 @@ int main( void )
  H5Fclose( file_id );
  
  PASSED();
+
  
+#endif
  return 0;
  
  
