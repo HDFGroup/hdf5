@@ -779,7 +779,7 @@ int gen_h5comptype(int32 vdata_id,int32 nfields,
        return FAIL;
      }
 
-     if(H5Tinsert(h5_cmemtype,fieldname,fil_offset,arr_type)<0) {
+     if(H5Tinsert(h5_cmemtype,fieldname,mem_offset,arr_type)<0) {
        printf("error inserting array into hdf5 compound datatype for memory. \n");
        return FAIL;
      }
