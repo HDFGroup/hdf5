@@ -462,14 +462,13 @@ print_datatype(hid_t type)
             if (H5Tcommitted(type) > 0) {
                 H5Gget_objinfo(type, ".", TRUE, &statbuf);
                 i = search_obj (type_table, statbuf.objno);
-                indentation(indent + COL);
 
                 if (i >= 0) {
                     if (!type_table->objs[i].recorded) 
                         printf("\"/#%lu:%lu\"\n", type_table->objs[i].objno[0],
                                type_table->objs[i].objno[1]);
                     else
-                        printf("\"%s\"\n", type_table->objs[i].objname);
+                        printf("\"%s\"", type_table->objs[i].objname);
                 } else {
                     printf("h5dump error: unknown committed type.\n");
                     d_status = 1;
@@ -1020,27 +1019,15 @@ done:
 static void
 dump_named_datatype(hid_t type, const char *name)
 {
-    int nmembers = 1, x;
-    hid_t comptype;
-    char *compname;
-
     indentation(indent);
-    begin_obj(dump_header_format->datatypebegin, name,
+    printf("%s \"%s\" %s",dump_header_format->datatypebegin, name,
               dump_header_format->datatypeblockbegin);
 
     if (H5Tget_class(type) == H5T_COMPOUND) {
-        nmembers = H5Tget_nmembers(type);
+        hid_t temp_type=H5Tcopy(type);
 
-        for (x = 0; x < nmembers; x++) {
-            comptype = H5Tget_member_type(type,x);
-            compname = H5Tget_member_name(type,x);
-
-            indentation(indent + COL);
-            print_datatype(comptype);
-            printf(" \"%s\"", compname);
-
-            printf(";\n");           
-        }
+        print_datatype(temp_type);
+        H5Tclose(temp_type);
     } else {
         indentation(indent + COL);    
         print_datatype(type);
