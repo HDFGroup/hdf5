@@ -91,9 +91,11 @@ distclean:
 	@@SETX@; for d in $(SUBDIRS) examples pablo; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) config/commence config/conclude config/depend
-	-$(RM) config.cache config.log config.status src/H5config.h
-	-$(RM) config/stamp1 config/stamp2 libtool Makefile
+	-$(RM) config/commence config/conclude
+	-$(RM) config/stamp1 config/stamp2 config/depend?
+	-$(RM) config.cache config.log config.status
+	-$(RM) src/H5config.h src/H5pubconf.h
+	-$(RM) libtool Makefile
 	-$(CP) Makefile.dist Makefile
 
 maintainer-clean:
