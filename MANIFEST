@@ -14,7 +14,7 @@
 ./bin/errors
 ./bin/install-sh
 ./bin/release
-./config/alpha-dec-osf4.0
+./config/alpha-dec
 ./config/commence.in
 ./config/conclude.in
 ./config/depend.in
