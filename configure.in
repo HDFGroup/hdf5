@@ -2211,18 +2211,22 @@ case "X-$enable_parallel" in
 
       dnl Try link a simple MPI program.  If fail, try again with -lmpi.
       AC_TRY_FLINK(mpif.h, [
+          integer:: ierr
           call mpi_file_open( ierr )],,
           AC_CHECK_FLIB(mpi, [
             include 'mpif.h'
+            integer:: ierr
             call mpi_file_open( ierr )],, PARALLEL=no))
 
       dnl Then try link a simple MPI-IO program.  If fail, try again with
       dnl -lmpio.
       if test "X$PARALLEL" = "Xyes"; then
         AC_TRY_FLINK(mpif.h, [
+            integer:: ierr
             call mpi_file_open( ierr )],,
             AC_CHECK_FLIB(mpio, [
               include 'mpif.h'
+              integer:: ierr
               call mpi_file_open( ierr )],, PARALLEL=no))
       fi
 
