@@ -223,7 +223,8 @@ h5dump [-h] [-bb] [-header] [-v] [-V] [-a <names>] [-d <names>] [-g <names>]\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
-  -l <names>    Displays the value(s) of the specified soft link(s).\n\
+  -l <names>    Display the value(s) of the specified soft link(s).\n\
+  -o <fname>    Display the raw data of datasets to a separate Output file <fname>.\n\
   -t <names>    Display the specified named data type(s).\n\
   -w <number>   Display the information with the specified maximum number of columns.\n\
 \n\
@@ -1315,6 +1316,34 @@ dump_data(hid_t obj_id, int obj_data)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    set_output_file
+ *
+ * Purpose:     Open fname as the output file for dataset raw data.
+ *		Set rawdatastream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *		negative -- failed
+ *
+ * Programmer:  Albert Cheng, 2000/09/30
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------
+ */
+int
+set_output_file(char *fname)
+{
+    FILE *f;	/* temporary holding place for the stream pointer */
+		/* so that rawdatastream is changed only when succeeded */
+
+    if (f = fopen(fname, "w")){
+	rawdatastream = f;
+	return 0;
+    }else
+	return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     HDF5 dumper
@@ -1325,6 +1354,8 @@ dump_data(hid_t obj_id, int obj_data)
  * Programmer:  Ruey-Hsia Li
  *
  * Modifications:
+ *		Albert Cheng, 2000/09/30
+ *		Add the -o option--output file for datasets raw data
  *
  *-----------------------------------------------------------------------*/
 int
@@ -1379,6 +1410,20 @@ main(int argc, char *argv[])
 		     * since curr_arg starts at 1
 		     */
 		    newwidth = curr_arg;
+	    } else if (!strcmp(argv[curr_arg], "-o")) {
+		    /* a separate output file for dataset raw data */
+		    if (argc == curr_arg){
+			/* missing <fname> */
+			usage();
+			free(opts);
+			exit(1);
+		    }
+		    if (set_output_file(argv[curr_arg+1]) < 0){
+			/* failed to set output file */
+			usage();
+			free(opts);
+			exit(1);
+		    }
 	    } else if (!strcmp(argv[curr_arg], "-xml")) {
 			dump_header_format = &xmlformat;
 	    } else if (strcmp(argv[curr_arg],"-a") &&
@@ -1697,6 +1742,11 @@ done:
 
     if (H5Fclose(fid) < 0)
 	d_status = 1;
+
+    if (rawdatastream != stdout)
+	if (fclose(rawdatastream))
+	    perror("fclose");
+
 
     free(group_table->objs);
     free(dset_table->objs);

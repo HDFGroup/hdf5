@@ -23,6 +23,7 @@
 int indent = 0;
 int compound_data=0;
 int nCols = 80;
+FILE *rawdatastream = NULL;	/* should be stdout but linux gcc moans about it*/
 
 int print_data(hid_t oid, hid_t _p_type, int obj_data);
 
@@ -1734,7 +1735,10 @@ h5dump_dset(FILE *stream, const h5dump_t *info, hid_t dset, hid_t _p_type,
     H5Sclose(f_space);
 
     /* Print the data */
-    status = h5dump_simple_dset(stream, info, dset, p_type, indentlevel);
+    /* a kludge because linux gcc does not accept the initialization with sdtout */
+    if (!rawdatastream)
+	rawdatastream=stdout;
+    status = h5dump_simple_dset(rawdatastream, info, dset, p_type, indentlevel);
     if (p_type!=_p_type) H5Tclose(p_type);
     return status;
 }

@@ -399,6 +399,7 @@ void init_prefix(char **temp, int);
 extern int indent;
 extern void indentation(int);
 extern int nCols;
+extern FILE *rawdatastream;		/* output stream for raw data */
 
 
 /* taken from h5dump.h*/
