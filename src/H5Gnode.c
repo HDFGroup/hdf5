@@ -24,7 +24,7 @@
 #include <H5ACprivate.h>	/*cache				  */
 #include <H5Bprivate.h>		/*B-link trees			  */
 #include <H5Eprivate.h>		/*error handling	  */
-#include <H5Fmpioprivate.h>	/*mpi low-level i/o	  */
+#include <H5Fprivate.h>		/*file access */
 #include <H5Gpkg.h>		/*me				  */
 #include <H5HLprivate.h>		/*heap				  */
 #include <H5MFprivate.h>	/*file memory management  */

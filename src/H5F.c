@@ -43,11 +43,11 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Iprivate.h>		/*object IDs				  */
 #include <H5ACprivate.h>	/*cache					  */
 #include <H5Eprivate.h>		/*error handling			  */
+#include <H5Fprivate.h>         /*file access                             */
 #include <H5Gprivate.h>		/*symbol tables				  */
 #include <H5MMprivate.h>	/*core memory management		  */
 #include <H5Pprivate.h>		/*property lists			  */
 #include <H5Tprivate.h>		/*data types				  */
-#include <H5Fmpioprivate.h>     /*MPI-IO parallel stuff                   */
 
 #include <ctype.h>
 #include <sys/types.h>

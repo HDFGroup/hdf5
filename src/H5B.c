@@ -91,7 +91,7 @@
 #include <H5ACprivate.h>	/*cache				  */
 #include <H5Bprivate.h>		/*B-link trees			  */
 #include <H5Eprivate.h>		/*error handling	  */
-#include <H5Fmpioprivate.h>	/*mpi low-level i/o	  */
+#include <H5Fprivate.h>		/*file access */
 #include <H5MFprivate.h>	/*File memory management  */
 #include <H5MMprivate.h>	/*Core memory management	  */
 
