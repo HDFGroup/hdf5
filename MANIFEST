@@ -861,6 +861,10 @@
 ./src/H5Oshared.c
 ./src/H5Ostab.c
 ./src/H5P.c
+./src/H5Pdcpl.c
+./src/H5Pdxpl.c
+./src/H5Pfapl.c
+./src/H5Pfcpl.c
 ./src/H5Ppkg.h
 ./src/H5Pprivate.h
 ./src/H5Ppublic.h
