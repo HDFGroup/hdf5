@@ -2,7 +2,7 @@
 ## Only temporary changes may be made here.
 
 iopipe.lo: \
-   $(srcdir)/iopipe.c \
+   $(top_srcdir)/perform/iopipe.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -41,7 +41,7 @@ iopipe.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h
 chunk.lo: \
-   $(srcdir)/chunk.c \
+   $(top_srcdir)/perform/chunk.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -77,7 +77,7 @@ chunk.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 overhead.lo: \
-   $(srcdir)/overhead.c \
+   $(top_srcdir)/perform/overhead.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -116,7 +116,7 @@ overhead.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h
 zip_perf.lo: \
-   $(srcdir)/zip_perf.c \
+   $(top_srcdir)/perform/zip_perf.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -153,7 +153,7 @@ zip_perf.lo: \
    $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h
 pio_perf.lo: \
-   $(srcdir)/pio_perf.c \
+   $(top_srcdir)/perform/pio_perf.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -189,7 +189,7 @@ pio_perf.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 pio_engine.lo: \
-   $(srcdir)/pio_engine.c \
+   $(top_srcdir)/perform/pio_engine.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -225,8 +225,8 @@ pio_engine.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 pio_timer.lo: \
-   $(srcdir)/pio_timer.c \
-   $(srcdir)/pio_timer.h \
+   $(top_srcdir)/perform/pio_timer.c \
+   $(top_srcdir)/perform/pio_timer.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
