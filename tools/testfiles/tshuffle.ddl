@@ -14,7 +14,7 @@ DATASET "shuffle" {
    FILLVALUE {
       FILL_TIME IFSET
       ALLOC_TIME INCR
-      VALUE  0   
+      VALUE  -99   
    }
 }
 }

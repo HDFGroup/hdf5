@@ -12,7 +12,7 @@ COMMENT "This is a dataset with compact storage"
    FILLVALUE {
       FILL_TIME IFSET
       ALLOC_TIME EARLY
-      VALUE  0   
+      VALUE  -99   
    }
 }
 }

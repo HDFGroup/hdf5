@@ -6,17 +6,18 @@ FILE_CONTENTS {
  dataset    /all
  dataset    /bitfield
  dataset    /char
+ dataset    /chunked
  dataset    /compact
  dataset    /contiguous
  dataset    /deflate
  dataset    /enum
  dataset    /external
- dataset    /fill early
- dataset    /fill ifset
- dataset    /fill never
+ dataset    /fill_early
+ dataset    /fill_ifset
+ dataset    /fill_never
  dataset    /fletcher32
- datatype   /my type
  dataset    /myfilter
+ datatype   /mytype
  datatype   /myvlen
  dataset    /reference
  dataset    /shuffle

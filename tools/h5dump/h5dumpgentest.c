@@ -99,11 +99,11 @@ set_local_myfilter(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id);
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_MYFILTER[1] = {{
-    MYFILTER_ID,		       /* Filter id number		*/
-    "myfilter",			       /* Filter name for debugging	*/
+    MYFILTER_ID,         /* Filter id number  */
+    "myfilter",          /* Filter name for debugging */
     NULL,                /* The "can apply" callback     */
     set_local_myfilter,  /* The "set local" callback     */
-    myfilter,			         /* The actual filter function	*/
+    myfilter,            /* The actual filter function */
 }};
 
 
@@ -2257,13 +2257,13 @@ static void gent_vldatatypes4(void)
 static void gent_vldatatypes5(void)
 {
     hvl_t wdata [SPACE1_DIM1];
-    hid_t		fid1;		      
-    hid_t		dataset;	    
-    hid_t		sid1;
-    hid_t		tid1;
-    hsize_t		dims1[] = {SPACE1_DIM1};
+    hid_t  fid1;        
+    hid_t  dataset;     
+    hid_t  sid1;
+    hid_t  tid1;
+    hsize_t  dims1[] = {SPACE1_DIM1};
     int                 i,j;          /* counting variable */
-    herr_t		ret;		/* Generic return value  */
+    herr_t  ret;  /* Generic return value  */
 
     /* initialize data for dataset */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -3095,13 +3095,13 @@ static void gent_char(void)
  */
 
 static void write_attr_in(hid_t loc_id, 
-																										const char* dset_name, /* for saving reference to dataset*/
-																										hid_t file_id)
+                          const char* dset_name, /* for saving reference to dataset*/
+                          hid_t file_id)
 {
  /* Compound datatype */
  typedef struct s_t 
  {
-		char   a;
+  char   a;
   double b;
  } s_t;
 
@@ -3116,55 +3116,55 @@ static void write_attr_in(hid_t loc_id,
  hid_t   type_id;  
  herr_t  status;
  int     val, i, j, k, n;
-	float   f;
+ float   f;
 
-	/* create 1D attributes with dimension [2], 2 elements */
+ /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
-	char       buf1[2][2]= {"ab","de"};        /* string */
+ char       buf1[2][2]= {"ab","de"};        /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
  hvl_t      buf5[2];                        /* vlen */
  hsize_t    dimarray[1]={3};                /* array dimension */
  int        buf6[2][3]= {{1,2,3},{4,5,6}};  /* array */
-	int        buf7[2]= {1,2};                 /* integer */
-	float      buf8[2]= {1,2};                 /* float */
+ int        buf7[2]= {1,2};                 /* integer */
+ float      buf8[2]= {1,2};                 /* float */
 
-	/* create 2D attributes with dimension [3][2], 6 elements */
+ /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
-	char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+ char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
  hvl_t      buf52[3][2];                                          /* vlen */
  int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
-	int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
-	float      buf82[3][2]= {{1,2},{3,4},{5,6}};                     /* float */
+ int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
+ float      buf82[3][2]= {{1,2},{3,4},{5,6}};                     /* float */
 
-	/* create 3D attributes with dimension [4][3][2], 24 elements */
+ /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
-	char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
-	"rs","tu","vw","xz","AB","CD","EF","GH",
-	"IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
+ char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+ "rs","tu","vw","xz","AB","CD","EF","GH",
+ "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
  hvl_t      buf53[4][3][2];    /* vlen */
  int        buf63[24][3];      /* array */
-	int        buf73[4][3][2];    /* integer */
-	float      buf83[4][3][2];    /* float */
+ int        buf73[4][3][2];    /* integer */
+ float      buf83[4][3][2];    /* float */
 
 
 /*-------------------------------------------------------------------------
  * 1D attributes
  *-------------------------------------------------------------------------
  */
-	
+ 
 /*-------------------------------------------------------------------------
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_attr(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
@@ -3192,7 +3192,7 @@ static void write_attr_in(hid_t loc_id,
  */
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_attr(loc_id,1,dims,"compound",type_id,buf3);
  status = H5Tclose(type_id);
  
@@ -3201,12 +3201,12 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
-		status=H5Rcreate(&buf4[1],file_id,dset_name,H5R_OBJECT,-1);
-		write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
-	}
+ if (dset_name)
+ {
+  status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
+  status=H5Rcreate(&buf4[1],file_id,dset_name,H5R_OBJECT,-1);
+  write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3225,13 +3225,13 @@ static void write_attr_in(hid_t loc_id,
  
  /* Allocate and initialize VL dataset to write */
 
-	buf5[0].len = 1;
-	buf5[0].p = malloc( 1 * sizeof(int));
-	((int *)buf5[0].p)[0]=1;
-	buf5[1].len = 2;
-	buf5[1].p = malloc( 2 * sizeof(int));
-	((int *)buf5[1].p)[0]=2;
-	((int *)buf5[1].p)[1]=3;
+ buf5[0].len = 1;
+ buf5[0].p = malloc( 1 * sizeof(int));
+ ((int *)buf5[0].p)[0]=1;
+ buf5[1].len = 2;
+ buf5[1].p = malloc( 2 * sizeof(int));
+ ((int *)buf5[1].p)[0]=2;
+ ((int *)buf5[1].p)[1]=3;
 
  space_id = H5Screate_simple(1,dims,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3269,7 +3269,7 @@ static void write_attr_in(hid_t loc_id,
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_attr(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
@@ -3297,7 +3297,7 @@ static void write_attr_in(hid_t loc_id,
  */
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_attr(loc_id,2,dims2,"compound2D",type_id,buf32);
  status = H5Tclose(type_id);
  
@@ -3306,15 +3306,15 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		for (i = 0; i < 3; i++) {
+ if (dset_name)
+ {
+  for (i = 0; i < 3; i++) {
    for (j = 0; j < 2; j++) {
     status=H5Rcreate(&buf42[i][j],file_id,dset_name,H5R_OBJECT,-1);
-			}
-		}
-		write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
-	}
+   }
+  }
+  write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3331,17 +3331,17 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	/* Allocate and initialize VL dataset to write */
-	n=0;
-	for (i = 0; i < 3; i++) {
-		for (j = 0; j < 2; j++) {
-		  int l;
-		  buf52[i][j].p = malloc((i + 1) * sizeof(int));
-		  buf52[i][j].len = i + 1;
-		  for (l = 0; l < i + 1; l++)
-			 ((int *)buf52[i][j].p)[l] = n++;
-		}
-	}
+ /* Allocate and initialize VL dataset to write */
+ n=0;
+ for (i = 0; i < 3; i++) {
+  for (j = 0; j < 2; j++) {
+    int l;
+    buf52[i][j].p = malloc((i + 1) * sizeof(int));
+    buf52[i][j].len = i + 1;
+    for (l = 0; l < i + 1; l++)
+    ((int *)buf52[i][j].p)[l] = n++;
+  }
+ }
  
  space_id = H5Screate_simple(2,dims2,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3369,7 +3369,7 @@ static void write_attr_in(hid_t loc_id,
  write_attr(loc_id,2,dims2,"integer2D",H5T_NATIVE_INT,buf72);
  write_attr(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
 
-	
+ 
 /*-------------------------------------------------------------------------
  * 3D attributes
  *-------------------------------------------------------------------------
@@ -3379,7 +3379,7 @@ static void write_attr_in(hid_t loc_id,
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_attr(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
@@ -3389,14 +3389,14 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	n=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf23[i][j][k]=n++;
-			}
-		}
-	}
+ n=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf23[i][j][k]=n++;
+   }
+  }
+ }
  type_id = H5Tcopy(H5T_STD_B8LE);
  write_attr(loc_id,3,dims3,"bitfield3D",type_id,buf23);
  status = H5Tclose(type_id);
@@ -3415,18 +3415,18 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	n=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf33[i][j][k].a=n++;
-				buf33[i][j][k].b=n++;
-			}
-		}
-	}
+ n=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf33[i][j][k].a=n++;
+    buf33[i][j][k].b=n++;
+   }
+  }
+ }
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_attr(loc_id,3,dims3,"compound3D",type_id,buf33);
  status = H5Tclose(type_id);
  
@@ -3435,16 +3435,16 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		for (i = 0; i < 4; i++) {
+ if (dset_name)
+ {
+  for (i = 0; i < 4; i++) {
    for (j = 0; j < 3; j++) {
     for (k = 0; k < 2; k++)
      status=H5Rcreate(&buf43[i][j][k],file_id,dset_name,H5R_OBJECT,-1);
-			}
-		}
-	write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
-	}
+   }
+  }
+ write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3461,19 +3461,19 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  
-	/* Allocate and initialize VL dataset to write */
-	n=0;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-		  int l;
-		  buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-		  buf53[i][j][k].len = i + 1;
-		  for (l = 0; l < i + 1; l++)
-			 ((int *)buf53[i][j][k].p)[l] = n++;
-			}
-		}
-	}
+ /* Allocate and initialize VL dataset to write */
+ n=0;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    int l;
+    buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+    buf53[i][j][k].len = i + 1;
+    for (l = 0; l < i + 1; l++)
+    ((int *)buf53[i][j][k].p)[l] = n++;
+   }
+  }
+ }
  
  space_id = H5Screate_simple(3,dims3,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3491,11 +3491,11 @@ static void write_attr_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  n=1;
-	for (i = 0; i < 24; i++) {
-		for (j = 0; j < (int)dimarray[0]; j++) {
-				buf63[i][j]=n++;
-		}
-	}
+ for (i = 0; i < 24; i++) {
+  for (j = 0; j < (int)dimarray[0]; j++) {
+    buf63[i][j]=n++;
+  }
+ }
 
  type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
  write_attr(loc_id,3,dims3,"array3D",type_id,buf63);
@@ -3505,15 +3505,15 @@ static void write_attr_in(hid_t loc_id,
  * H5T_INTEGER and H5T_FLOAT
  *-------------------------------------------------------------------------
  */
-	n=1; f=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf73[i][j][k]=n++;
-				buf83[i][j][k]=f++;
-			}
-		}
-	}
+ n=1; f=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf73[i][j][k]=n++;
+    buf83[i][j][k]=f++;
+   }
+  }
+ }
  write_attr(loc_id,3,dims3,"integer3D",H5T_NATIVE_INT,buf73);
  write_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
@@ -3535,13 +3535,13 @@ static void write_attr_in(hid_t loc_id,
  */
 
 static void write_dset_in(hid_t loc_id, 
-																										const char* dset_name, /* for saving reference to dataset*/
-																										hid_t file_id)
+                          const char* dset_name, /* for saving reference to dataset*/
+                          hid_t file_id)
 {
  /* Compound datatype */
  typedef struct s_t 
  {
-		char   a;
+  char   a;
   double b;
  } s_t;
 
@@ -3554,59 +3554,59 @@ static void write_dset_in(hid_t loc_id,
  hid_t   dset_id;
  hid_t   space_id;  
  hid_t   type_id;  
-	hid_t   plist_id;
+ hid_t   plist_id;
  herr_t  status;
  int     val, i, j, k, n;
-	float   f;
-	int     fillvalue=2;
+ float   f;
+ int     fillvalue=2;
 
-	/* create 1D attributes with dimension [2], 2 elements */
+ /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
-	char       buf1[2][2]= {"ab","de"};        /* string */
+ char       buf1[2][2]= {"ab","de"};        /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
  hvl_t      buf5[2];                        /* vlen */
  hsize_t    dimarray[1]={3};                /* array dimension */
  int        buf6[2][3]= {{1,2,3},{4,5,6}};  /* array */
-	int        buf7[2]= {1,2};                 /* integer */
-	float      buf8[2]= {1,2};                 /* float */
+ int        buf7[2]= {1,2};                 /* integer */
+ float      buf8[2]= {1,2};                 /* float */
 
-	/* create 2D attributes with dimension [3][2], 6 elements */
+ /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
-	char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+ char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
  hvl_t      buf52[3][2];                                          /* vlen */
  int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
-	int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
-	float      buf82[3][2]= {{1,2},{3,4},{5,6}};                     /* float */
+ int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
+ float      buf82[3][2]= {{1,2},{3,4},{5,6}};                     /* float */
 
-	/* create 3D attributes with dimension [4][3][2], 24 elements */
+ /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
-	char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
-	"rs","tu","vw","xz","AB","CD","EF","GH",
-	"IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
+ char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+ "rs","tu","vw","xz","AB","CD","EF","GH",
+ "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
  hvl_t      buf53[4][3][2];    /* vlen */
  int        buf63[24][3];      /* array */
-	int        buf73[4][3][2];    /* integer */
-	float      buf83[4][3][2];    /* float */
+ int        buf73[4][3][2];    /* integer */
+ float      buf83[4][3][2];    /* float */
 
 
 /*-------------------------------------------------------------------------
  * 1D 
  *-------------------------------------------------------------------------
  */
-	
+ 
 /*-------------------------------------------------------------------------
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_dset(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
@@ -3634,7 +3634,7 @@ static void write_dset_in(hid_t loc_id,
  */
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,1,dims,"compound",type_id,buf3);
  status = H5Tclose(type_id);
  
@@ -3643,12 +3643,12 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
-		status=H5Rcreate(&buf4[1],file_id,dset_name,H5R_OBJECT,-1);
-		write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
-	}
+ if (dset_name)
+ {
+  status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
+  status=H5Rcreate(&buf4[1],file_id,dset_name,H5R_OBJECT,-1);
+  write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3667,13 +3667,13 @@ static void write_dset_in(hid_t loc_id,
  
  /* Allocate and initialize VL dataset to write */
 
-	buf5[0].len = 1;
-	buf5[0].p = malloc( 1 * sizeof(int));
-	((int *)buf5[0].p)[0]=1;
-	buf5[1].len = 2;
-	buf5[1].p = malloc( 2 * sizeof(int));
-	((int *)buf5[1].p)[0]=2;
-	((int *)buf5[1].p)[1]=3;
+ buf5[0].len = 1;
+ buf5[0].p = malloc( 1 * sizeof(int));
+ ((int *)buf5[0].p)[0]=1;
+ buf5[1].len = 2;
+ buf5[1].p = malloc( 2 * sizeof(int));
+ ((int *)buf5[1].p)[0]=2;
+ ((int *)buf5[1].p)[1]=3;
 
  space_id = H5Screate_simple(1,dims,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3711,7 +3711,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_dset(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
@@ -3739,7 +3739,7 @@ static void write_dset_in(hid_t loc_id,
  */
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,2,dims2,"compound2D",type_id,buf32);
  status = H5Tclose(type_id);
  
@@ -3748,15 +3748,15 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		for (i = 0; i < 3; i++) {
+ if (dset_name)
+ {
+  for (i = 0; i < 3; i++) {
    for (j = 0; j < 2; j++) {
     status=H5Rcreate(&buf42[i][j],file_id,dset_name,H5R_OBJECT,-1);
-			}
-		}
-		write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
-	}
+   }
+  }
+  write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3773,17 +3773,17 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	/* Allocate and initialize VL dataset to write */
-	n=0;
-	for (i = 0; i < 3; i++) {
-		for (j = 0; j < 2; j++) {
-		  int l;
-		  buf52[i][j].p = malloc((i + 1) * sizeof(int));
-		  buf52[i][j].len = i + 1;
-		  for (l = 0; l < i + 1; l++)
-			 ((int *)buf52[i][j].p)[l] = n++;
-		}
-	}
+ /* Allocate and initialize VL dataset to write */
+ n=0;
+ for (i = 0; i < 3; i++) {
+  for (j = 0; j < 2; j++) {
+    int l;
+    buf52[i][j].p = malloc((i + 1) * sizeof(int));
+    buf52[i][j].len = i + 1;
+    for (l = 0; l < i + 1; l++)
+    ((int *)buf52[i][j].p)[l] = n++;
+  }
+ }
  
  space_id = H5Screate_simple(2,dims2,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3808,13 +3808,13 @@ static void write_dset_in(hid_t loc_id,
  * H5T_INTEGER, write a fill value
  *-------------------------------------------------------------------------
  */
-	plist_id = H5Pcreate(H5P_DATASET_CREATE);
-	status = H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
-	space_id = H5Screate_simple(2,dims2,NULL);
-	dset_id = H5Dcreate(loc_id,"integer2D",H5T_NATIVE_INT,space_id,plist_id);
-	status = H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf72);
-	status = H5Pclose(plist_id);
-	status = H5Dclose(dset_id);
+ plist_id = H5Pcreate(H5P_DATASET_CREATE);
+ status = H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
+ space_id = H5Screate_simple(2,dims2,NULL);
+ dset_id = H5Dcreate(loc_id,"integer2D",H5T_NATIVE_INT,space_id,plist_id);
+ status = H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf72);
+ status = H5Pclose(plist_id);
+ status = H5Dclose(dset_id);
  status = H5Sclose(space_id);
 
 /*-------------------------------------------------------------------------
@@ -3824,7 +3824,7 @@ static void write_dset_in(hid_t loc_id,
 
  write_dset(loc_id,2,dims2,"float2D",H5T_NATIVE_FLOAT,buf82);
 
-	
+ 
 /*-------------------------------------------------------------------------
  * 3D 
  *-------------------------------------------------------------------------
@@ -3834,7 +3834,7 @@ static void write_dset_in(hid_t loc_id,
  * H5T_STRING
  *-------------------------------------------------------------------------
  */
-	type_id = H5Tcopy(H5T_C_S1);
+ type_id = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(type_id, 2);
  write_dset(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
@@ -3844,14 +3844,14 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	n=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf23[i][j][k]=n++;
-			}
-		}
-	}
+ n=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf23[i][j][k]=n++;
+   }
+  }
+ }
  type_id = H5Tcopy(H5T_STD_B8LE);
  write_dset(loc_id,3,dims3,"bitfield3D",type_id,buf23);
  status = H5Tclose(type_id);
@@ -3870,18 +3870,18 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-	n=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf33[i][j][k].a=n++;
-				buf33[i][j][k].b=n++;
-			}
-		}
-	}
+ n=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf33[i][j][k].a=n++;
+    buf33[i][j][k].b=n++;
+   }
+  }
+ }
  type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
  H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_CHAR);
-	H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
+ H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_DOUBLE);
  write_dset(loc_id,3,dims3,"compound3D",type_id,buf33);
  status = H5Tclose(type_id);
  
@@ -3890,16 +3890,16 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* Create references to dataset */
-	if (dset_name)
-	{
-		for (i = 0; i < 4; i++) {
+ if (dset_name)
+ {
+  for (i = 0; i < 4; i++) {
    for (j = 0; j < 3; j++) {
     for (k = 0; k < 2; k++)
      status=H5Rcreate(&buf43[i][j][k],file_id,dset_name,H5R_OBJECT,-1);
-			}
-		}
-	write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
-	}
+   }
+  }
+ write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+ }
 
 /*-------------------------------------------------------------------------
  * H5T_ENUM
@@ -3916,19 +3916,19 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  
-	/* Allocate and initialize VL dataset to write */
-	n=0;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-		  int l;
-		  buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
-		  buf53[i][j][k].len = i + 1;
-		  for (l = 0; l < i + 1; l++)
-			 ((int *)buf53[i][j][k].p)[l] = n++;
-			}
-		}
-	}
+ /* Allocate and initialize VL dataset to write */
+ n=0;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    int l;
+    buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
+    buf53[i][j][k].len = i + 1;
+    for (l = 0; l < i + 1; l++)
+    ((int *)buf53[i][j][k].p)[l] = n++;
+   }
+  }
+ }
  
  space_id = H5Screate_simple(3,dims3,NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
@@ -3946,11 +3946,11 @@ static void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  n=1;
-	for (i = 0; i < 24; i++) {
-		for (j = 0; j < (int)dimarray[0]; j++) {
-				buf63[i][j]=n++;
-		}
-	}
+ for (i = 0; i < 24; i++) {
+  for (j = 0; j < (int)dimarray[0]; j++) {
+    buf63[i][j]=n++;
+  }
+ }
 
  type_id = H5Tarray_create(H5T_NATIVE_INT,1,dimarray,NULL);
  write_dset(loc_id,3,dims3,"array3D",type_id,buf63);
@@ -3960,15 +3960,15 @@ static void write_dset_in(hid_t loc_id,
  * H5T_INTEGER and H5T_FLOAT
  *-------------------------------------------------------------------------
  */
-	n=1; f=1;
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 3; j++) {
-			for (k = 0; k < 2; k++) {
-				buf73[i][j][k]=n++;
-				buf83[i][j][k]=f++;
-			}
-		}
-	}
+ n=1; f=1;
+ for (i = 0; i < 4; i++) {
+  for (j = 0; j < 3; j++) {
+   for (k = 0; k < 2; k++) {
+    buf73[i][j][k]=n++;
+    buf83[i][j][k]=f++;
+   }
+  }
+ }
  write_dset(loc_id,3,dims3,"integer3D",H5T_NATIVE_INT,buf73);
  write_dset(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
@@ -3994,25 +3994,25 @@ static void gent_attr_all(void)
 {
     hid_t   file_id; 
     hid_t   dset_id;
-	hid_t   group_id;
-	hid_t   group2_id;
-	hid_t   root_id;
-	hid_t   space_id;
-	hsize_t dims[1]={2};
+ hid_t   group_id;
+ hid_t   group2_id;
+ hid_t   root_id;
+ hid_t   space_id;
+ hsize_t dims[1]={2};
  herr_t  status;
 
  /* Create a file and a dataset */
  file_id  = H5Fcreate(FILE40, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
 
-	/* Create a 1D dataset */
+ /* Create a 1D dataset */
  space_id = H5Screate_simple(1,dims,NULL);
  dset_id  = H5Dcreate(file_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
  status   = H5Sclose(space_id);
  assert(status>=0);
 
-	/* Create groups */
+ /* Create groups */
  group_id  = H5Gcreate(file_id,"g1",0);
-	group2_id = H5Gcreate(file_id,"g2",0);
+ group2_id = H5Gcreate(file_id,"g2",0);
  root_id   = H5Gopen(file_id, "/");
 
 /*-------------------------------------------------------------------------
@@ -4020,28 +4020,28 @@ static void gent_attr_all(void)
  *-------------------------------------------------------------------------
  */
 
-	write_attr_in(dset_id,"dset",file_id);
-	write_attr_in(group_id,NULL,0);
-	write_attr_in(root_id,NULL,0);
+ write_attr_in(dset_id,"dset",file_id);
+ write_attr_in(group_id,NULL,0);
+ write_attr_in(root_id,NULL,0);
 
 /*-------------------------------------------------------------------------
  * write a series of datasets on group 2
  *-------------------------------------------------------------------------
  */
 
-	write_dset_in(group2_id,"/dset",file_id);
+ write_dset_in(group2_id,"/dset",file_id);
 
  /* Close */
  status = H5Dclose(dset_id);
  assert(status>=0);
-	status = H5Gclose(group_id);
+ status = H5Gclose(group_id);
  assert(status>=0);
-	status = H5Gclose(group2_id);
+ status = H5Gclose(group2_id);
  assert(status>=0);
-	status = H5Gclose(root_id);
+ status = H5Gclose(root_id);
  assert(status>=0);
 
-	/* Close file */
+ /* Close file */
  status = H5Fclose(file_id);
  assert(status>=0);
 }
@@ -4129,12 +4129,12 @@ static void gent_compound_complex(void)
     /* Structure and array for compound types                             */
     typedef struct Array1Struct {
         int                a;
-	const char         *b[F41_DIMb];
-	char               c[F41_ARRAY_DIMc];
-	short              d[F41_ARRAY_DIMd1][F41_ARRAY_DIMd2];
-	float              e;
-	double             f[F41_ARRAY_DIMf];
-	char               g;
+ const char         *b[F41_DIMb];
+ char               c[F41_ARRAY_DIMc];
+ short              d[F41_ARRAY_DIMd1][F41_ARRAY_DIMd2];
+ float              e;
+ double             f[F41_ARRAY_DIMf];
+ char               g;
     } Array1Struct;
     Array1Struct       Array1[F41_LENGTH];
 
@@ -4171,24 +4171,24 @@ static void gent_compound_complex(void)
         Array1[m].a = m;
 
         for (n = 0; n < F41_DIMb; n++) {
-	    Array1[m].b[n] = quote[n];
-	}
+     Array1[m].b[n] = quote[n];
+ }
 
-	for (n = 0; n < F41_ARRAY_DIMc; n++) {
+ for (n = 0; n < F41_ARRAY_DIMc; n++) {
             Array1[m].c[n] = chararray[n];
-	}
+ }
 
-	for (n = 0; n < F41_ARRAY_DIMd1; n++) {
-	        for (o = 0; o < F41_ARRAY_DIMd2; o++){
-	            Array1[m].d[n][o] = m + n + o;
+ for (n = 0; n < F41_ARRAY_DIMd1; n++) {
+         for (o = 0; o < F41_ARRAY_DIMd2; o++){
+             Array1[m].d[n][o] = m + n + o;
             }
         }
 
         Array1[m].e = ( m * .96 );
 
-	for (n = 0; n < F41_ARRAY_DIMf; n++) {
+ for (n = 0; n < F41_ARRAY_DIMf; n++) {
             Array1[m].f[n] = ( m * 1024.9637 );
-	}
+ }
 
         Array1[m].g = 'm';
     }
@@ -4199,7 +4199,7 @@ static void gent_compound_complex(void)
 
     /* Create the file                                                */
     datafile = H5Fcreate(FILE41, H5F_ACC_TRUNC, H5P_DEFAULT,
-		    H5P_DEFAULT);
+      H5P_DEFAULT);
     assert (datafile >= 0);
 
     /* Copy the array data type for the string array                  */
@@ -4212,7 +4212,7 @@ static void gent_compound_complex(void)
 
     /* Create the array data type for the string array                */
     str_array_id = H5Tarray_create(array_tid, F41_ARRAY_RANK,
-		    array_dimb, NULL);
+      array_dimb, NULL);
     assert (str_array_id >= 0);
 
     /* Copy the array data type for the character array               */
@@ -4225,12 +4225,12 @@ static void gent_compound_complex(void)
 
     /* Create the array data type for the character array             */
     array2_tid = H5Tarray_create(H5T_NATIVE_SHORT, F41_ARRAY_RANKd,
-		    array_dimd, NULL);
+      array_dimd, NULL);
     assert (array2_tid >= 0);
 
     /* Create the array data type for the character array             */
     array4_tid = H5Tarray_create(H5T_NATIVE_DOUBLE, F41_ARRAY_RANK,
-		    array_dimf, NULL);
+      array_dimf, NULL);
     assert (array4_tid >= 0);
 
     /* Create the memory data type                                    */
@@ -4239,40 +4239,40 @@ static void gent_compound_complex(void)
 
     /* Insert the arrays and variables into the structure             */
     status = H5Tinsert(Array1Structid, "a_name",
-		    HOFFSET(Array1Struct, a), H5T_NATIVE_INT);
+      HOFFSET(Array1Struct, a), H5T_NATIVE_INT);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "b_name",
-		    HOFFSET(Array1Struct, b), str_array_id);
+      HOFFSET(Array1Struct, b), str_array_id);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "c_name",
-		    HOFFSET(Array1Struct, c), array1_tid);
+      HOFFSET(Array1Struct, c), array1_tid);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "d_name",
-		    HOFFSET(Array1Struct, d), array2_tid);
+      HOFFSET(Array1Struct, d), array2_tid);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "e_name",
-		    HOFFSET(Array1Struct, e), H5T_NATIVE_FLOAT);
+      HOFFSET(Array1Struct, e), H5T_NATIVE_FLOAT);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "f_name",
-		    HOFFSET(Array1Struct, f), array4_tid);
+      HOFFSET(Array1Struct, f), array4_tid);
     assert (status >= 0);
 
     status = H5Tinsert(Array1Structid, "g_name",
-		    HOFFSET(Array1Struct, g), H5T_NATIVE_CHAR);
+      HOFFSET(Array1Struct, g), H5T_NATIVE_CHAR);
     assert (status >= 0);
 
     /* Create the dataset                                             */
     dataset = H5Dcreate(datafile, F41_DATASETNAME, Array1Structid,
-		    dataspace, H5P_DEFAULT);
+      dataspace, H5P_DEFAULT);
 
     /* Write data to the dataset                                      */
     status = H5Dwrite(dataset, Array1Structid, H5S_ALL, H5S_ALL,
-		    H5P_DEFAULT, Array1);
+      H5P_DEFAULT, Array1);
     assert (status >= 0);
 
     /* Release resources                                              */
@@ -4415,9 +4415,9 @@ make_external(hid_t fid)
 {
  hid_t   dcpl;         /*dataset creation property list */
  hid_t   sid;          /*dataspace ID */
- hid_t	  dsid;	 	      /*dataset ID			*/
- hsize_t	cur_size[1];		/*data space current size	*/
- hsize_t	max_size[1];		/*data space maximum size	*/
+ hid_t   dsid;         /*dataset ID   */
+ hsize_t cur_size[1];  /*data space current size */
+ hsize_t max_size[1];  /*data space maximum size */
  hsize_t size;         /*bytes reserved for data in the external file*/
  int     ret;
  
@@ -4447,382 +4447,6 @@ make_external(hid_t fid)
  assert(ret>=0);
 }
 
-
-#if 0
-/*-------------------------------------------------------------------------
- * Function: gent_filters
- *
- * Purpose: make several datasets with filters, external dataset
- *  fill value
- *
- *-------------------------------------------------------------------------
- */
-static void gent_filters(void)
-{
- hid_t    fid;  /* file id */
- hid_t    dcpl; /* dataset creation property list */
- hid_t    sid;  /* dataspace ID */
- hid_t    sid1; /* dataspace ID */
- hid_t    tid;  /* datatype ID */
- hid_t    did;  /* dataset ID */
-#if defined (H5_HAVE_FILTER_SZIP)
- unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
- unsigned szip_pixels_per_block=4;
-#endif
- hsize_t  dims1[RANK]={DIM1,DIM2};
- hsize_t  chunk_dims[RANK]={CDIM1,CDIM2};
- int      buf1[DIM1][DIM2];
- hsize_t  dims2[1]={2};
- hvl_t    buf2[2];
- hsize_t  dims3[1]={1};
- char     buf3[]={"this is\n a string with three\n newline\n escape characters"};
- hsize_t  dims4[1]={6};
- char     buf4[6]={"abcdef"};
- hobj_ref_t buf5[5]; 
- hsize_t  dims5[1]={5};
- int      i, j, n, ret, fillval, val;
-
- typedef enum 
- {
-  E_RED,
-  E_GREEN
- } e_t;
-
-
- for (i=n=0; i<DIM1; i++){
-  for (j=0; j<DIM2; j++){
-   buf1[i][j]=n++;
-  }
- }
- 
- /* create a file */
- fid  = H5Fcreate(FILE44, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
- assert(fid>=0);
- 
- /* create a space */
- sid = H5Screate_simple(SPACE2_RANK, dims1, NULL);
-
- /* create a dataset creation property list; the same DCPL is used for all dsets */
- dcpl = H5Pcreate(H5P_DATASET_CREATE);
-
-/*-------------------------------------------------------------------------
- * create a compact and contiguous storage layout dataset
- * add a comment to the datasets
- *-------------------------------------------------------------------------
- */
- ret=H5Pset_layout(dcpl, H5D_COMPACT);
- assert(ret>=0);
-
- ret=make_dset(fid,"compact",sid,dcpl,buf1);
- assert(ret>=0);
-
- ret=H5Gset_comment(fid,"compact", "This is a dataset with compact storage");
- assert(ret>=0);
-
- ret=H5Pset_layout(dcpl, H5D_CONTIGUOUS);
- assert(ret>=0);
-
- ret=make_dset(fid,"contiguous",sid,dcpl,buf1);
- assert(ret>=0);
-
- ret=H5Gset_comment(fid,"contiguous", "This is a dataset with contiguous storage");
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * make several dataset with filters
- *-------------------------------------------------------------------------
- */
-
- /* set up chunk */
- ret=H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * SZIP
- *-------------------------------------------------------------------------
- */
-#if defined (H5_HAVE_FILTER_SZIP)
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
- /* set szip data */
- ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
- assert(ret>=0);
-
- ret=make_dset(fid,"szip",sid,dcpl,buf1);
- assert(ret>=0);
-#endif
-
-/*-------------------------------------------------------------------------
- * GZIP
- *-------------------------------------------------------------------------
- */
-#if defined (H5_HAVE_FILTER_DEFLATE)
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
- /* set deflate data */
- ret=H5Pset_deflate(dcpl, 9);
- assert(ret>=0);
-
- ret=make_dset(fid,"deflate",sid,dcpl,buf1);
- assert(ret>=0);
-#endif
-
-
-/*-------------------------------------------------------------------------
- * shuffle
- *-------------------------------------------------------------------------
- */
-#if defined (H5_HAVE_FILTER_SHUFFLE)
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
- /* set the shuffle filter */
- ret=H5Pset_shuffle(dcpl);
- assert(ret>=0);
-
- ret=make_dset(fid,"shuffle",sid,dcpl,buf1);
- assert(ret>=0);
-#endif
-
-
-/*-------------------------------------------------------------------------
- * checksum
- *-------------------------------------------------------------------------
- */
-#if defined (H5_HAVE_FILTER_FLETCHER32)
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
- /* set the checksum filter */
- ret=H5Pset_fletcher32(dcpl);
- assert(ret>=0);
-
- ret=make_dset(fid,"fletcher32",sid,dcpl,buf1);
- assert(ret>=0);
-#endif
-
-/*-------------------------------------------------------------------------
- * all filters
- *-------------------------------------------------------------------------
- */
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
-#if defined (H5_HAVE_FILTER_SHUFFLE)
- /* set the shuffle filter */
- ret=H5Pset_shuffle(dcpl);
- assert(ret>=0);
-#endif
-
-#if defined (H5_HAVE_FILTER_SZIP)
- szip_options_mask=H5_SZIP_CHIP_OPTION_MASK | H5_SZIP_EC_OPTION_MASK;
- /* set szip data */
- ret=H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block);
- assert(ret>=0);
-#endif
-
-#if defined (H5_HAVE_FILTER_DEFLATE)
- /* set deflate data */
- ret=H5Pset_deflate(dcpl, 5);
- assert(ret>=0);
-#endif
-
-#if defined (H5_HAVE_FILTER_FLETCHER32)
- /* set the checksum filter */
- ret=H5Pset_fletcher32(dcpl);
- assert(ret>=0);
-#endif
-
- ret=make_dset(fid,"all",sid,dcpl,buf1);
- assert(ret>=0);
-
- 
-/*-------------------------------------------------------------------------
- * user defined filter
- *-------------------------------------------------------------------------
- */
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
-#ifdef H5_WANT_H5_V1_4_COMPAT
- ret=H5Zregister (MYFILTER_ID, "myfilter", myfilter);
-#else 
- ret=H5Zregister (H5Z_MYFILTER);
-#endif 
- assert(ret>=0);
-
- H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
- assert(ret>=0);
-
- ret=make_dset(fid,"myfilter",sid,dcpl,buf1);
- assert(ret>=0);
-
- /* remove the filters from the dcpl */
- ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * make an external dataset
- *-------------------------------------------------------------------------
- */
- make_external(fid);
-
-/*-------------------------------------------------------------------------
- * make datasets with fill value combinations
- *-------------------------------------------------------------------------
- */
-
- fillval = -99;
- 
- ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
- assert(ret>=0);
-
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
- assert(ret>=0);
-
- ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
- assert(ret>=0);
-
- ret=make_dset(fid,"fill early",sid,dcpl,buf1);
- assert(ret>=0);
-
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
- assert(ret>=0);
-
- ret=make_dset(fid,"fill never",sid,dcpl,buf1);
- assert(ret>=0);
-
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
- assert(ret>=0);
-
- ret=make_dset(fid,"fill ifset",sid,dcpl,buf1);
- assert(ret>=0);
-
-
-/*-------------------------------------------------------------------------
- * commit a H5G_TYPE type with a comment
- *-------------------------------------------------------------------------
- */
- tid=H5Tcopy(H5T_STD_B8LE);
- ret=H5Tcommit(fid, "my type", tid);
- assert(ret>=0);
-
- ret=H5Gset_comment(fid,"my type", "This is a commited datatype");
- assert(ret>=0);
-
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * enum type with nonprintable characters in the name
- *-------------------------------------------------------------------------
- */
- tid = H5Tcreate(H5T_ENUM, sizeof(e_t));
- H5Tenum_insert(tid, "RED 3 \\n",   (val = 0, &val));
- write_dset(fid,2,dims1,"enum",tid,0);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * vlen 
- *-------------------------------------------------------------------------
- */
-
-	buf2[0].len = 1;
-	buf2[0].p = malloc( 1 * sizeof(int));
-	((int *)buf2[0].p)[0]=1;
-	buf2[1].len = 2;
-	buf2[1].p = malloc( 2 * sizeof(int));
-	((int *)buf2[1].p)[0]=2;
-	((int *)buf2[1].p)[1]=3;
-
- sid1=H5Screate_simple(1,dims2,NULL);
- tid=H5Tvlen_create(H5T_NATIVE_INT);
- did=H5Dcreate(fid,"vlen",tid,sid1,H5P_DEFAULT);
- ret=H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2);
- assert(ret>=0);
- ret=H5Tcommit(fid,"myvlen",tid);
- assert(ret>=0);
- ret=H5Dvlen_reclaim(tid,sid1,H5P_DEFAULT,buf2);
- assert(ret>=0);
- ret=H5Dclose(did);
- assert(ret>=0);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * bitfield
- *-------------------------------------------------------------------------
- */
- tid = H5Tcopy(H5T_STD_B8LE);
- write_dset(fid,1,dims3,"bitfield",tid,buf3);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * string
- *-------------------------------------------------------------------------
- */
-
- tid=H5Tcopy(H5T_C_S1);
- ret=H5Tset_size(tid, sizeof(buf3));
- assert(ret>=0);
- write_dset(fid,1,dims3,"string",tid,buf3);
- ret=H5Tclose(tid);
- assert(ret>=0);
-
-/*-------------------------------------------------------------------------
- * char array
- *-------------------------------------------------------------------------
- */
- write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
-
-
-/*-------------------------------------------------------------------------
- * reference
- *-------------------------------------------------------------------------
- */
- ret=H5Rcreate(&buf5[0],fid,"compact",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[1],fid,"myvlen",H5R_OBJECT,-1);
- assert(ret>=0);
-  ret=H5Rcreate(&buf5[2],fid,"compact",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[3],fid,"myvlen",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[4],fid,"contiguous",H5R_OBJECT,-1);
- assert(ret>=0);
- write_dset(fid,1,dims5,"reference",H5T_STD_REF_OBJ,buf5);
-
-
-
-/*-------------------------------------------------------------------------
- * close
- *-------------------------------------------------------------------------
- */
-
- ret=H5Sclose(sid1);
- assert(ret>=0);
-
- ret=H5Sclose(sid);
- assert(ret>=0);
- 
- ret=H5Pclose(dcpl);
- assert(ret>=0);
-
- ret=H5Fclose(fid);
- assert(ret>=0);
-}
-
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -5130,13 +4754,13 @@ static void gent_filters()
  *-------------------------------------------------------------------------
  */
 
-	buf2[0].len = 1;
-	buf2[0].p = malloc( 1 * sizeof(int));
-	((int *)buf2[0].p)[0]=1;
-	buf2[1].len = 2;
-	buf2[1].p = malloc( 2 * sizeof(int));
-	((int *)buf2[1].p)[0]=2;
-	((int *)buf2[1].p)[1]=3;
+ buf2[0].len = 1;
+ buf2[0].p = malloc( 1 * sizeof(int));
+ ((int *)buf2[0].p)[0]=1;
+ buf2[1].len = 2;
+ buf2[1].p = malloc( 2 * sizeof(int));
+ ((int *)buf2[1].p)[0]=2;
+ ((int *)buf2[1].p)[1]=3;
 
  sid1=H5Screate_simple(1,dims2,NULL);
  tid=H5Tvlen_create(H5T_NATIVE_INT);
