@@ -10,9 +10,6 @@
  *		The configuration constants like H5_HAVE_UNISTD_H etc. are
  *		defined in H5config.h which is included by H5public.h.
  *
- * Modifications: 
- * Pedro Vicente <pvn@ncsa.uiuc.edu>, June 2001
- *  WIN32 modifications
  */
 #ifndef _H5private_H
 #define _H5private_H
@@ -160,7 +157,7 @@
 #endif
 
 /*
-sintax:
+syntax:
 
 inline function_declarator;   // C++ Specific
 __inline function_declarator; // Microsoft Specific
@@ -174,56 +171,16 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline   inline
 # else
 # define H5_inline 
-#endif
-/*__MWERKS__*/
- 
-
+#endif /*__MWERKS__*/
 
 /* Metroworks <sys/types.h> doesn't define off_t. */
 #ifdef __MWERKS__
 typedef long off_t;
 /* Metroworks does not define EINTR in <errno.h> */
 # define EINTR 4
-#endif
-/*__MWERKS__*/
+#endif /*__MWERKS__*/
 
-
-#endif
-/*WIN32*/
-
-
-
-/*
- * This driver supports systems that have the lseek64() function by defining
- * some macros here so we don't have to have conditional compilations later
- * throughout the code.
- *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *			the lseek() or lseek64() call.
- *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
- */
-/* adding for windows NT file system support. */
-/* pvn: added __MWERKS__ support. */
-
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#elif defined (WIN32)
-# ifdef __MWERKS__
-# define file_offset_t off_t
-# define file_seek lseek
-# else /*MSVC*/
-# define file_offset_t __int64
-# define file_seek _lseeki64
-# endif
-#else
-#   define file_offset_t	off_t
-#   define file_seek		lseek
-#endif
-
-
+#endif /*WIN32*/
 
 #ifndef F_OK
 #   define F_OK	00
@@ -452,6 +409,23 @@ typedef long off_t;
 #   define SIZEOF_INT64_T SIZEOF_LONG_LONG
 #else
 #   error "nothing appropriate for int64_t"
+#endif
+
+#if SIZEOF_UINT64_T>=8
+#elif SIZEOF_INT>=8
+    typedef unsigned uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_INT
+#elif SIZEOF_LONG>=8
+    typedef unsigned long uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_LONG
+#elif SIZEOF_LONG_LONG>=8
+    typedef unsigned long_long uint64_t;
+#   undef SIZEOF_UINT64_T
+#   define SIZEOF_UINT64_T SIZEOF_LONG_LONG
+#else
+#   error "nothing appropriate for uint64_t"
 #endif
 
 /*
