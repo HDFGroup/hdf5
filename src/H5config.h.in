@@ -519,9 +519,13 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define if your system can accurately convert between long double and
-   integer values. */
-#undef SW_LDOUBLE_TO_INT_WORKS
+/* Define if your system can accurately convert from integers to long double
+   values. */
+#undef SW_INTEGER_TO_LDOUBLE_WORKS
+
+/* Define if your system can accurately convert from long double to integer
+   values. */
+#undef SW_LDOUBLE_TO_INTEGER_WORKS
 
 /* Define if your system can accurately convert unsigned long long values to
    floating-point values. */

@@ -2507,17 +2507,36 @@ else
 fi
 
 dnl -----------------------------------------------------------------------
-dnl Set flag to indicate that the machine can handle conversion between 
-dnl long double and integers.  (This flag should be set "yes" for all 
-dnl machines except all SGIs, where some conversions are incorrect and its
-dnl cache value is set "no" in its config/irix6.x file.) 
+dnl Set flag to indicate that the machine can handle conversion from 
+dnl long double to integers.  (This flag should be set "yes" for all 
+dnl machines except all SGIs and HP-UX 11.00, where some conversions are
+dnl incorrect and its cache value is set "no" in its config/irix6.x and 
+dnl irix5.x and config/hpux11.00 files.) 
 dnl
-AC_MSG_CHECKING([if accurately converting between long double and integers works])
-AC_CACHE_VAL([hdf5_cv_sw_ldouble_to_int_works], [hdf5_cv_sw_ldouble_to_int_works=yes])
+AC_MSG_CHECKING([if accurately converting from long double to integers works])
+AC_CACHE_VAL([hdf5_cv_sw_ldouble_to_integer_works], [hdf5_cv_sw_ldouble_to_integer_works=yes])
 
-if test ${hdf5_cv_sw_ldouble_to_int_works} = "yes"; then
-  AC_DEFINE([SW_LDOUBLE_TO_INT_WORKS], [1],
-            [Define if your system can accurately convert between long double and integer values.])
+if test ${hdf5_cv_sw_ldouble_to_integer_works} = "yes"; then
+  AC_DEFINE([SW_LDOUBLE_TO_INTEGER_WORKS], [1],
+            [Define if your system can accurately convert from long double to integer values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+dnl -----------------------------------------------------------------------
+dnl Set flag to indicate that the machine can handle conversion from 
+dnl integers to long double.  (This flag should be set "yes" for all 
+dnl machines except all SGIs, where some conversions are
+dnl incorrect and its cache value is set "no" in its config/irix6.x and 
+dnl irix5.x) 
+dnl
+AC_MSG_CHECKING([if accurately converting from integers to long double works])
+AC_CACHE_VAL([hdf5_cv_sw_integer_to_ldouble_works], [hdf5_cv_sw_integer_to_ldouble_works=yes])
+
+if test ${hdf5_cv_sw_integer_to_ldouble_works} = "yes"; then
+  AC_DEFINE([SW_INTEGER_TO_LDOUBLE_WORKS], [1],
+            [Define if your system can accurately convert from integers to long double values.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])

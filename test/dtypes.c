@@ -6368,7 +6368,7 @@ run_int_float_conv(const char *name)
 #endif
 
     if(!strcmp(name, "sw")) {
-#if H5_SW_LDOUBLE_TO_INT_WORKS
+#if H5_SW_INTEGER_TO_LDOUBLE_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
         nerrors += test_conv_int_float(name, H5T_NATIVE_SCHAR, H5T_NATIVE_LDOUBLE);
         nerrors += test_conv_int_float(name, H5T_NATIVE_UCHAR, H5T_NATIVE_LDOUBLE);
@@ -6397,7 +6397,7 @@ run_int_float_conv(const char *name)
 #endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 #endif
 #endif
-#else /*H5_SW_LDOUBLE_TO_INT_WORKS*/
+#else /*H5_SW_INTEGER_TO_LDOUBLE_WORKS*/
     {
         char		str[256];		/*string		*/
 
@@ -6407,7 +6407,7 @@ run_int_float_conv(const char *name)
         SKIPPED();
         HDputs("    Test skipped due to hardware conversion error.");
     }
-#endif /*H5_SW_LDOUBLE_TO_INT_WORKS*/
+#endif /*H5_SW_INTEGER_TO_LDOUBLE_WORKS*/
     }
 
     return nerrors;
@@ -6432,7 +6432,7 @@ static int
 run_float_int_conv(const char *name)
 {
     int		nerrors = 0;
-
+#ifndef TMP
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
     
@@ -6493,8 +6493,9 @@ run_float_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
 
+#endif /*TMP*/
     if(!strcmp(name, "sw")) {
-#if H5_SW_LDOUBLE_TO_INT_WORKS
+#if H5_SW_LDOUBLE_TO_INTEGER_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
         nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
         nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
@@ -6524,7 +6525,7 @@ run_float_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
 #endif
-#else /*H5_SW_LDOUBLE_TO_INT_WORKS*/
+#else /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
         {
             char		str[256];		/*hello string		*/
 
@@ -6534,7 +6535,7 @@ run_float_int_conv(const char *name)
             SKIPPED();
             HDputs("    Test skipped due to hardware conversion error.");
         }
-#endif /*H5_SW_LDOUBLE_TO_INT_WORKS*/
+#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
     }
 
     return nerrors;
@@ -6969,7 +6970,7 @@ main(void)
 
     if (ALIGNMENT)
 	printf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
-
+#ifndef TMP
     /* Do the tests */
     nerrors += test_classes();
     nerrors += test_copy();
@@ -7045,6 +7046,7 @@ main(void)
     /* Test software float-integer conversion functions */
     nerrors += run_float_int_conv("sw");
     
+#endif /*TMP*/
     /* Test software integer-float conversion functions */
     nerrors += run_int_float_conv("sw");
 
