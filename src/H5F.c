@@ -49,6 +49,13 @@ static char RcsId[] = "@(#)$Revision$";
 #include <sys/types.h>
 #include <sys/stat.h>
 
+/*
+ * Define the following if you want H5F_block_read() and H5F_block_write() to
+ * keep track of the file position and attempt to minimize calls to the file
+ * seek method.
+ */
+#define H5F_OPT_SEEK
+
 
 #define PABLO_MASK	H5F_mask
 
@@ -807,12 +814,24 @@ H5F_open (const char *name, uintn flags,
    }
 
    /* What is the current size of the file? */
-   if (H5F_SEEKEND (f->shared->file_handle)<0) {
-      /* Cannot determine file size */
-      HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
+#ifndef LATER
+   /*
+    * Remember the current position so we can reset it.  If not, the seek()
+    * optimization stuff gets confused.  Eventually we should have a
+    * get_filesize() method for the various file types we'll have.
+    */
+   {
+      size_t curpos = H5F_TELL (f->shared->file_handle);
+#endif
+      if (H5F_SEEKEND (f->shared->file_handle)<0) {
+	 /* Cannot determine file size */
+	 HGOTO_ERROR (H5E_FILE, H5E_CANTINIT, NULL);
+      }
+      f->shared->logical_len = H5F_TELL (f->shared->file_handle);
+#ifndef LATER
+      H5F_SEEK (f->shared->file_handle, curpos);
    }
-   f->shared->logical_len = H5F_TELL (f->shared->file_handle);
-   
+#endif
    
 
    /* Success! */
@@ -1041,7 +1060,7 @@ hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
  * 				INVALIDATE was non-zero.
  *
  * Programmer:	Robb Matzke
- *		robb@maya.nuance.com
+ *		matzke@llnl.gov
  *		Aug 29 1997
  *
  * Modifications:
@@ -1296,14 +1315,18 @@ H5F_block_read (H5F_t *f, haddr_t addr, size_t size, void *buf)
    addr += f->shared->file_create_parms.userblock_size;
    
   /* Check for switching file access operations or mis-placed seek offset */
+#ifdef H5F_OPT_SEEK
   if(f->shared->last_op!=OP_READ || f->shared->f_cur_off!=addr)
     {
+#endif
       f->shared->last_op=OP_READ;
       if (H5F_SEEK (f->shared->file_handle, addr)<0) {
           /* low-level seek failure */
           HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
         } /* end if */
+#ifdef H5F_OPT_SEEK
     } /* end if */
+#endif
    if (H5F_READ (f->shared->file_handle, buf, size)<0) {
       /* low-level read failure */
       HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
@@ -1351,14 +1374,18 @@ H5F_block_write (H5F_t *f, haddr_t addr, size_t size, void *buf)
    }
 
   /* Check for switching file access operations or mis-placed seek offset */
+#ifdef H5F_OPT_SEEK
   if(f->shared->last_op!=OP_WRITE || f->shared->f_cur_off!=addr)
     {
+#endif
       f->shared->last_op=OP_WRITE;
       if (H5F_SEEK (f->shared->file_handle, addr)<0) {
          /* low-level seek failure */
          HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
       }
+#ifdef H5F_OPT_SEEK
     } /* end if */
+#endif
 
    if (H5F_WRITE (f->shared->file_handle, buf, size)<0) {
       /* low-level write failure */
