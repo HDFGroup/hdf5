@@ -198,7 +198,7 @@ done:
  *-------------------------------------------------------------------------
  */
 char *
-H5T_get_member_name(H5T_t *dt, int membno)
+H5T_get_member_name(H5T_t const *dt, int membno)
 {
     char	*ret_value;
 

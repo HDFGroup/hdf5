@@ -21,13 +21,13 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tcommit_mask
+#define PABLO_MASK	H5T_commit_mask
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5FOprivate.h"    /* File objects               */
-#include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling			*/
+#include "H5FOprivate.h"	/* File objects				*/
+#include "H5Iprivate.h"		/* IDs					*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -184,6 +184,7 @@ done:
 	    type->ent.header = HADDR_UNDEF;
 	}
     }
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

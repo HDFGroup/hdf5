@@ -109,11 +109,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_sign_t
-H5T_get_sign(H5T_t *dt)
+H5T_get_sign(H5T_t const *dt)
 {
     H5T_sign_t		ret_value;
 
-    FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR);
+    FUNC_ENTER_NOAPI(H5T_get_sign, H5T_SGN_ERROR)
 
     assert(dt);
 
@@ -123,13 +123,13 @@ H5T_get_sign(H5T_t *dt)
 
     /* Check args */
     if (H5T_INTEGER!=dt->shared->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class");
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_SGN_ERROR, "operation not defined for data type class")
     
     /* Sign */
     ret_value = dt->shared->u.atomic.u.i.sign;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

@@ -29,7 +29,7 @@
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
 #include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5FOprivate.h"    /* File objects                 */
+#include "H5FOprivate.h"	/* File objects				*/
 #include "H5Gprivate.h"		/*groups				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
@@ -434,8 +434,8 @@ static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5FL_FREE(H5T_t, dt);                                 \
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
     }                                                         \
-    dt->shared->fo_count=1;                                   \
 }
+
 
 #define H5T_INIT_TYPE(GUTS,GLOBAL,CRT_TMPL,BASE,SIZE_TMPL,SIZE) {	      \
     /* Get new datatype struct */					      \
@@ -1831,45 +1831,12 @@ H5Tis_variable_str(hid_t dtype_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 
     /* Set return value */
-    ret_value=H5T_is_variable_str(dt);
+    ret_value=H5T_IS_VL_STRING(dt->shared);
 
 done:
     FUNC_LEAVE_API(ret_value);   
 }
  
-
-/*-------------------------------------------------------------------------
- * Function:	H5T_is_variable_str
- *
- * Purpose:	Private function of H5Tis_variable_str.
- *              Check whether a datatype is a variable-length string
- *		
- *
- * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		November 4, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_is_variable_str(H5T_t *dt)
-{
-    htri_t      ret_value=FALSE;        /* Return value */
-
-    FUNC_ENTER_NOAPI(H5T_is_variable_str, FAIL);
-    
-    assert(dt);
-
-    if(H5T_VLEN == dt->shared->type && H5T_VLEN_STRING == dt->shared->u.vlen.type)
-        ret_value = TRUE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);   
-}
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_size
@@ -2646,6 +2613,7 @@ H5T_create(H5T_class_t type, size_t size)
             if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
+
             if(type==H5T_COMPOUND)
                 dt->shared->u.compnd.packed=TRUE;       /* Start out packed */
             else if(type==H5T_OPAQUE)
@@ -2688,7 +2656,6 @@ H5T_create(H5T_class_t type, size_t size)
     }
 
     dt->ent.header = HADDR_UNDEF;
-    dt->shared->fo_count = 1;
     dt->shared->size = size;
 
     /* Set return value */
@@ -2807,9 +2774,8 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
 done:
     if(ret_value==NULL) {
         if(dt) {
-            if(shared_fo==NULL) {   /* Need to free shared fo */
+            if(shared_fo==NULL)   /* Need to free shared fo */
                 H5FL_FREE(H5T_shared_t, dt->shared);
-            }
             H5FL_FREE(H5T_t, dt);
         }
         if(shared_fo)
@@ -2929,7 +2895,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     /* Copy actual information */
     new_dt->ent = old_dt->ent;
     *(new_dt->shared) = *(old_dt->shared);
-    new_dt->shared->fo_count = 1;
 
     /* Copy parent information */
     if (new_dt->shared->parent)
@@ -3298,41 +3263,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_atomic
- *
- * Purpose:	Determines if a data type is an atomic type.
- *
- * Return:	Success:	TRUE, FALSE
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5T_is_atomic(const H5T_t *dt)
-{
-    htri_t	ret_value;
-    
-    FUNC_ENTER_NOAPI(H5T_is_atomic, FAIL);
-
-    assert(dt);
-
-    if (!H5T_IS_COMPLEX(dt->shared->type) && H5T_OPAQUE!=dt->shared->type)
-	ret_value = TRUE;
-    else
-	ret_value = FALSE;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_set_size
  *
  * Purpose:	Sets the total size in bytes for a data type (this operation
@@ -3386,7 +3316,7 @@ H5T_set_size(H5T_t *dt, size_t size)
         else if(dt->shared->type!=H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     } else {
-        if (H5T_is_atomic(dt)) {
+        if (H5T_IS_ATOMIC(dt->shared)) {
             offset = dt->shared->u.atomic.offset;
             prec = dt->shared->u.atomic.prec;
 
@@ -3504,7 +3434,7 @@ H5T_set_size(H5T_t *dt, size_t size)
         /* Commit (if we didn't convert this type to a VL string) */
         if(dt->shared->type!=H5T_VLEN) {
             dt->shared->size = size;
-            if (H5T_is_atomic(dt)) {
+            if (H5T_IS_ATOMIC(dt->shared)) {
                 dt->shared->u.atomic.offset = offset;
                 dt->shared->u.atomic.prec = prec;
             }
@@ -4703,7 +4633,7 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
     fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));
 
-    if (H5T_is_atomic(dt)) {
+    if (H5T_IS_ATOMIC(dt->shared)) {
 	switch (dt->shared->u.atomic.order) {
             case H5T_ORDER_BE:
                 s1 = "BE";

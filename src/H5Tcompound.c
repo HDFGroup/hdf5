@@ -128,7 +128,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5T_get_member_offset(H5T_t *dt, int membno)
+H5T_get_member_offset(const H5T_t *dt, int membno)
 {
     size_t	ret_value;
 
@@ -258,7 +258,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_get_member_type(H5T_t *dt, int membno)
+H5T_get_member_type(const H5T_t *dt, int membno)
 {
     H5T_t	*ret_value = NULL;
 
@@ -293,14 +293,14 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5T_get_member_size(H5T_t *dt, int membno)
+H5T_get_member_size(H5T_t *dt, unsigned membno)
 {
     size_t	ret_value = 0;
 
     FUNC_ENTER_NOAPI(H5T_get_member_size, 0);
 
     assert(dt);
-    assert(membno >=0 && membno < dt->shared->u.compnd.nmembs);
+    assert(membno < dt->shared->u.compnd.nmembs);
     
     /* Value */
     ret_value = dt->shared->u.compnd.memb[membno].type->shared->size;
@@ -600,7 +600,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T_is_packed(H5T_t *dt)
+H5T_is_packed(const H5T_t *dt)
 {
     htri_t      ret_value=TRUE;       /* Return value */
 

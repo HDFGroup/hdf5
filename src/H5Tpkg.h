@@ -51,8 +51,17 @@
 /* Macro to ease detecting "complex" datatypes (i.e. those with base types or fields) */
 #define H5T_IS_COMPLEX(t)       ((t)==H5T_COMPOUND || (t)==H5T_ENUM || (t)==H5T_VLEN || (t)==H5T_ARRAY)
 
+/* Macro to ease detecting fixed "string" datatypes */
+#define H5T_IS_FIXED_STRING(dt)   (H5T_STRING == (dt)->type)
+
+/* Macro to ease detecting variable-length "string" datatypes */
+#define H5T_IS_VL_STRING(dt)    (H5T_VLEN == (dt)->type && H5T_VLEN_STRING == (dt)->u.vlen.type)
+
 /* Macro to ease detecting fixed or variable-length "string" datatypes */
-#define H5T_IS_STRING(dt)      (H5T_STRING == (dt)->type || (H5T_VLEN == (dt)->type && H5T_VLEN_STRING == (dt)->u.vlen.type))
+#define H5T_IS_STRING(dt)       (H5T_IS_FIXED_STRING(dt) || H5T_IS_VL_STRING(dt))
+
+/* Macro to ease detecting atomic datatypes */
+#define H5T_IS_ATOMIC(dt)       (!(H5T_IS_COMPLEX((dt)->type) || (dt)->type==H5T_OPAQUE))
 
 /* Statistics about a conversion function */
 struct H5T_stats_t {
@@ -186,7 +195,7 @@ typedef enum H5T_state_t {
 
     /* This struct is shared between all occurances of an open named type */
 typedef struct H5T_shared_t {
-    hsize_t         fo_count; /* number of references to this file object */
+    hsize_t		fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */
     H5F_t		*sh_file;/*file pointer if this is a shared type     */
     H5T_class_t		type;	/*which class of type is this?		     */
@@ -314,18 +323,15 @@ H5_DLLVAR double H5T_NATIVE_DOUBLE_NEG_INF_g;
 H5_DLL herr_t H5T_init_interface(void);
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
 H5_DLL herr_t H5T_free(H5T_t *dt);
-H5_DLL H5T_sign_t H5T_get_sign(H5T_t *dt);
+H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
-H5_DLL char  *H5T_get_member_name(H5T_t *dt, int membno);
-H5_DLL herr_t H5T_get_member_value(H5T_t *dt, int membno, void *value);
-H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, int membno);
+H5_DLL char  *H5T_get_member_name(H5T_t const *dt, int membno);
+H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, int membno, void *value);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
-H5_DLL htri_t H5T_is_variable_str(H5T_t *dt);
-H5_DLL htri_t H5T_is_atomic(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
-H5_DLL H5T_t *H5T_enum_create(H5T_t *parent);
-H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, void *value);
+H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
+H5_DLL herr_t H5T_enum_insert(H5T_t *dt, const char *name, const void *value);
 H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
 H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[]);
 H5_DLL herr_t H5T_sort_value(H5T_t *dt, int *map);
@@ -876,8 +882,9 @@ H5_DLL H5T_t * H5T_array_create(H5T_t *base, int ndims,
         const hsize_t dim[/* ndims */], const int perm[/* ndims */]);
 
 /* Compound functions */
-H5_DLL size_t H5T_get_member_offset(H5T_t *dt, int membno);
-H5_DLL size_t H5T_get_member_size(H5T_t *dt, int membno);
-H5_DLL htri_t H5T_is_packed(H5T_t *dt);
+H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, int membno);
+H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, int membno);
+H5_DLL size_t H5T_get_member_size(H5T_t *dt, unsigned membno);
+H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
 #endif

@@ -21,13 +21,13 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tarray_mask
+#define PABLO_MASK	H5T_array_mask
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling			*/
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Iprivate.h"		/* IDs					*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 /* Interface initialization */
 static int interface_initialize_g = 0;
@@ -163,7 +163,6 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
     ret_value->ent.header = HADDR_UNDEF;
-    ret_value->shared->fo_count=1;
     ret_value->shared->type = H5T_ARRAY;
 
     /* Copy the base type of the array */

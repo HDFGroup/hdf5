@@ -90,7 +90,7 @@ H5Tget_order(hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Order */
-    assert(H5T_is_atomic(dt));
+    assert(H5T_IS_ATOMIC(dt->shared));
     ret_value = dt->shared->u.atomic.order;
 
 done:
@@ -138,7 +138,7 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Commit */
-    assert(H5T_is_atomic(dt));
+    assert(H5T_IS_ATOMIC(dt->shared));
     dt->shared->u.atomic.order = order;
 
 done:

@@ -318,10 +318,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             assert(dt->shared->u.enumer.nmembs>=0);
             if (NULL==(dt->shared->parent=H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL==(dt->shared->parent->shared=H5FL_CALLOC(H5T_shared_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            if(NULL== (dt->shared->parent->shared= H5FL_CALLOC (H5T_shared_t))) {
+                H5FL_FREE(H5T_t, dt->shared->parent);
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            }
             dt->shared->parent->ent.header = HADDR_UNDEF;
-            dt->shared->parent->shared->fo_count=1;
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent data type");
             if (NULL==(dt->shared->u.enumer.name=H5MM_calloc(dt->shared->u.enumer.nalloc * sizeof(char*))) ||
@@ -347,6 +348,8 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             dt->shared->u.atomic.offset = 0;
             dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
             dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
+
+            /* Set reference type */
             dt->shared->u.atomic.u.r.rtype = (H5R_type_t)(flags & 0x0f);
             break;
 
@@ -375,10 +378,12 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             /* Decode base type of VL information */
             if (NULL==(dt->shared->parent = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL==(dt->shared->parent->shared=H5FL_CALLOC(H5T_shared_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            if (NULL==(dt->shared->parent->shared = H5FL_CALLOC(H5T_shared_t)))
+            {
+                H5FL_FREE(H5T_t, dt->shared->parent);
+                HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            }
             dt->shared->parent->ent.header = HADDR_UNDEF;
-            dt->shared->parent->shared->fo_count=1;
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
 
@@ -416,10 +421,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             /* Decode base type of array */
             if (NULL==(dt->shared->parent = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            if (NULL==(dt->shared->parent->shared=H5FL_CALLOC(H5T_shared_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            if(NULL== (dt->shared->parent->shared = H5FL_CALLOC (H5T_shared_t))) {
+                H5FL_FREE(H5T_t, dt->shared->parent);
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            }
             dt->shared->parent->ent.header = HADDR_UNDEF;
-            dt->shared->parent->shared->fo_count=1;
             if (H5O_dtype_decode_helper(f, pp, dt->shared->parent)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type");
 
@@ -684,9 +690,9 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                     *(*pp)++ = 0;
 
                     /* Reserved */
-                    *(*pp)++ = '\0';
-                    *(*pp)++ = '\0';
-                    *(*pp)++ = '\0';
+                    *(*pp)++ = 0;
+                    *(*pp)++ = 0;
+                    *(*pp)++ = 0;
 
                     /* Dimension permutation */
                     UINT32ENCODE(*pp, 0);
@@ -802,6 +808,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             break;
     }
 
+    /* Encode the type's class, version and bit field */
     *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | (((dt->shared->type==H5T_COMPOUND && has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
@@ -837,7 +844,7 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     H5T_t		   *dt = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode);
 
     /* check args */
     assert(p);
@@ -847,7 +854,6 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     if (NULL==(dt->shared=H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     dt->ent.header = HADDR_UNDEF;
-    dt->shared->fo_count=1;
 
     if (H5O_dtype_decode_helper(f, &p, dt) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode type");
@@ -890,7 +896,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     const H5T_t		   *dt = (const H5T_t *) mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode);
 
     /* check args */
     assert(f);
@@ -930,7 +936,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     H5T_t		   *dst = NULL;
     void 		   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy);
 
     /* check args */
     assert(src);
@@ -980,7 +986,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     size_t		    ret_value = 8;
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
-    FUNC_ENTER_NOAPI(H5O_dtype_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_size);
 
     assert(mesg);
 
@@ -1042,7 +1048,6 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
             break;
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1066,15 +1071,13 @@ static herr_t
 H5O_dtype_reset(void *_mesg)
 {
     H5T_t		   *dt = (H5T_t *) _mesg;
-    herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_reset);
 
     if (dt)
         H5T_free(dt);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1095,17 +1098,14 @@ done:
 static herr_t
 H5O_dtype_free (void *mesg)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5O_dtype_free, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_free);
 
     assert (mesg);
 
     H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
     H5FL_FREE(H5T_t,mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1131,7 +1131,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
     const H5T_t	*dt = (const H5T_t *)_mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_get_share, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share);
 
     assert (dt);
     assert (sh);
@@ -1172,9 +1172,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_set_share, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share);
 
     assert (dt);
     assert (sh);
@@ -1190,8 +1189,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     /* Note that the datatype is a named datatype */
     dt->shared->state = H5T_STATE_NAMED;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1223,9 +1221,8 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     char		buf[256];
     int		i;
     size_t		k;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug);
 
     /* check args */
     assert(f);
@@ -1509,6 +1506,5 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 	}
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

@@ -201,7 +201,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
             if((ret_value=H5T_copy(dtype, H5T_COPY_TRANSIENT))==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type");
 
-            if(H5T_is_variable_str(dtype)) {
+            if(H5T_IS_VL_STRING(dtype->shared)) {
                 /* Update size, offset and compound alignment for parent. */
                 if(H5T_cmp_offset(comp_size, offset, sizeof(char *), 1, H5T_POINTER_COMP_ALIGN_g, struct_align)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset");

@@ -90,7 +90,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
     
     /* Get values */
-    assert(H5T_is_atomic(dt));
+    assert(H5T_IS_ATOMIC(dt->shared));
     if (lsb)
         *lsb = dt->shared->u.atomic.lsb_pad;
     if (msb)
@@ -141,7 +141,7 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified data type");
 
     /* Commit */
-    assert(H5T_is_atomic(dt));
+    assert(H5T_IS_ATOMIC(dt->shared));
     dt->shared->u.atomic.lsb_pad = lsb;
     dt->shared->u.atomic.msb_pad = msb;
 

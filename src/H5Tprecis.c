@@ -97,7 +97,7 @@ H5Tget_precision(hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified data type");
     
     /* Precision */
-    assert(H5T_is_atomic(dt));
+    assert(H5T_IS_ATOMIC(dt->shared));
     ret_value = dt->shared->u.atomic.prec;
 
 done:
@@ -221,7 +221,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
         else if(dt->shared->type!=H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     } else {
-	if (H5T_is_atomic(dt)) {
+	if (H5T_IS_ATOMIC(dt->shared)) {
 	    /* Adjust the offset and size */
 	    offset = dt->shared->u.atomic.offset;
 	    size = dt->shared->size;
@@ -259,7 +259,7 @@ H5T_set_precision(H5T_t *dt, size_t prec)
 
 	    /* Commit */
 	    dt->shared->size = size;
-	    if (H5T_is_atomic(dt)) {
+	    if (H5T_IS_ATOMIC(dt->shared)) {
 		dt->shared->u.atomic.offset = offset;
 		dt->shared->u.atomic.prec = prec;
 	    }
