@@ -149,8 +149,8 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * which allows the core conversion macro to be invoked as necessary.
  * 
  */
-#define H5T_CONV_sS_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)d) = (DT)(*((ST*)s));					      \
+#define H5T_CONV_sS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -158,14 +158,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_sS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
-#define H5T_CONV_sU_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s)<0) {							      \
+#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S)<0) {							      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = 0;						      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = 0;						      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -174,14 +174,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_sU, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
-#define H5T_CONV_uS_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) > (D_MAX)) {						      \
+#define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = (D_MAX);					      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = (D_MAX);					      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -190,8 +190,8 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_uS, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
-#define H5T_CONV_uU_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    *((DT*)d) = (DT)(*((ST*)s));					      \
+#define H5T_CONV_uU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
+    *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -199,19 +199,19 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_uU, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
-#define H5T_CONV_Ss_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) > (DT)(D_MAX)) {					      \
+#define H5T_CONV_Ss_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
         if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-    	*((DT*)d) = (D_MAX);						      \
+    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+    	*((DT*)D) = (D_MAX);						      \
         }								      \
-    } else if (*((ST*)s) < (D_MIN)) {					      \
+    } else if (*((ST*)S) < (D_MIN)) {					      \
         if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-    	*((DT*)d) = (D_MIN);						      \
+    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+    	*((DT*)D) = (D_MIN);						      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -220,20 +220,20 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Ss, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Su_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) < 0) {						      \
+#define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) < 0) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = 0;						      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = 0;						      \
         }								      \
-    } else if (sizeof(ST)>sizeof(DT) && *((ST*)s)>(ST)(D_MAX)) {	      \
+    } else if (sizeof(ST)>sizeof(DT) && *((ST*)S)>(ST)(D_MAX)) {	      \
         /*sign vs. unsign ok in previous line*/				      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = (D_MAX);					      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = (D_MAX);					      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -242,14 +242,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Su, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Us_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) > (D_MAX)) {						      \
+#define H5T_CONV_Us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = (D_MAX);					      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = (D_MAX);					      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -258,14 +258,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Us, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Uu_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) > (D_MAX)) {						      \
+#define H5T_CONV_Uu_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = (D_MAX);					      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = (D_MAX);					      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -274,14 +274,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Uu, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_su_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) < 0) {						      \
+#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) < 0) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = 0;						      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = 0;						      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -290,14 +290,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_su, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_us_CORE(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)s) > (D_MAX)) {						      \
+#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
         if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, s, d)<0) {			      \
-            *((DT*)d) = (D_MAX);					      \
+            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+            *((DT*)D) = (D_MAX);					      \
         }								      \
     } else {								      \
-        *((DT*)d) = (DT)(*((ST*)s));					      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
     }									      \
 }
 
@@ -314,7 +314,6 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
     long_long	aligned;		/*largest integer type, aligned	*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
-    size_t      dt_size=sizeof(DT);	/*needed by CI_END macro	*/    \
     size_t	s_stride, d_stride;	/*src and dst strides		*/    \
     int		direction;		/*1=left-to-right, -1=rt-to-lt	*/    \
 									      \
@@ -371,30 +370,21 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 	CI_INC_SRC(s_mv)						      \
 	CI_INC_DST(d_mv)						      \
 									      \
-	for (elmtno=0; elmtno<nelmts; elmtno++) {			      \
-	    /* Alignment */						      \
-	    if (s_mv) {							      \
-		HDmemcpy(&aligned, src, sizeof(ST));			      \
-		s = (uint8_t*)&aligned;					      \
-	    } else {							      \
-		s = src;						      \
-	    }								      \
-	    if (d_mv) {							      \
-		d = (uint8_t*)&aligned;					      \
-	    } else {							      \
-		d = dst;						      \
-	    }								      \
-									      \
-	    /* ... user-defined stuff here -- the conversion ... */	      \
-            H5_GLUE(GUTS,_CORE)(STYPE,DTYPE,ST,DT,D_MIN,D_MAX)		      \
-									      \
-	    /* Copy destination to final location */			      \
-            if (d_mv) HDmemcpy(dst, &aligned, dt_size);			      \
-									      \
-	    /* Advance pointers */					      \
-	    src = (char *)src + direction * s_stride;			      \
-	    dst = (char *)dst + direction * d_stride;			      \
-        }								      \
+        if (s_mv && d_mv) {						      \
+            /* Alignment is required for both source and dest */	      \
+            s = (uint8_t*)&aligned;					      \
+            H5T_CONV_LOOP(PRE_SALIGN,PRE_DALIGN,POST_SALIGN,POST_DALIGN,GUTS,s,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else if(s_mv) {						      \
+            /* Alignment is required only for source */			      \
+            s = (uint8_t*)&aligned;					      \
+            H5T_CONV_LOOP(PRE_SALIGN,PRE_DNOALIGN,POST_SALIGN,POST_DNOALIGN,GUTS,s,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else if(d_mv) {						      \
+            /* Alignment is required only for destination */		      \
+            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DALIGN,POST_SNOALIGN,POST_DALIGN,GUTS,src,d,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        } else {							      \
+            /* Alignment is not required for both source and destination */   \
+            H5T_CONV_LOOP(PRE_SNOALIGN,PRE_DNOALIGN,POST_SNOALIGN,POST_DNOALIGN,GUTS,src,dst,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+        }	 	 	 	 	 	 	 	      \
         break;								      \
 									      \
     default:								      \
@@ -402,6 +392,65 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 		      "unknown conversion command");			      \
     }									      \
 }
+
+/* Macro defining action on source data which needs to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_SALIGN(ST) {					      \
+    HDmemcpy(&aligned, src, sizeof(ST));				      \
+}
+
+/* Macro defining action on source data which doesn't need to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_SNOALIGN(ST) {				      \
+}
+
+/* Macro defining action on destination data which needs to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_DALIGN(DT) {					      \
+    d = (uint8_t*)&aligned;						      \
+}
+
+/* Macro defining action on destination data which doesn't need to be aligned (before main action) */
+#define H5T_CONV_LOOP_PRE_DNOALIGN(DT) {				      \
+}
+
+/* Macro defining action on source data which needs to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_SALIGN(ST) {					      \
+}
+
+/* Macro defining action on source data which doesn't need to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_SNOALIGN(ST) {				      \
+}
+
+/* Macro defining action on destination data which needs to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_DALIGN(DT) {					      \
+    HDmemcpy(dst, &aligned, sizeof(DT));				      \
+}
+
+/* Macro defining action on destination data which doesn't need to be aligned (after main action) */
+#define H5T_CONV_LOOP_POST_DNOALIGN(DT) {				      \
+}
+
+/* The inner loop of the type conversion macro */
+#define H5T_CONV_LOOP(PRE_SALIGN_GUTS,PRE_DALIGN_GUTS,POST_SALIGN_GUTS,POST_DALIGN_GUTS,GUTS,S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) \
+    for (elmtno=0; elmtno<nelmts; elmtno++) {				      \
+        /* Handle source pre-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,PRE_SALIGN_GUTS)(ST)			      \
+									      \
+        /* Handle destination pre-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,PRE_DALIGN_GUTS)(DT)			      \
+									      \
+        /* ... user-defined stuff here -- the conversion ... */		      \
+        H5_GLUE(GUTS,_CORE)(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX)		      \
+									      \
+        /* Handle source post-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,POST_SALIGN_GUTS)(ST)			      \
+									      \
+        /* Handle destination post-alignment */				      \
+        H5_GLUE(H5T_CONV_LOOP_,POST_DALIGN_GUTS)(DT)			      \
+									      \
+        /* Advance pointers */						      \
+        src = (char *)src + direction * s_stride;			      \
+        dst = (char *)dst + direction * d_stride;			      \
+    }
+
 
 #ifdef H5T_DEBUG
 
