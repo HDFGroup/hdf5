@@ -238,7 +238,7 @@ AM_PROG_LIBTOOL
 dnl Fix up the INSTALL macro if it's a relative path. We want the
 dnl full-path to the binary instead.
 case "$INSTALL" in
-   ..*install-sh)
+   *install-sh*)
       INSTALL='\${top_srcdir}'/bin/install-sh
       ;;
 esac
