@@ -38,9 +38,6 @@
  *		  that the number of bytes read is always equal to the number
  *		  requested.  This kluge is activated by #ifdef MPI_KLUGE0202.
  *
- *	H5F_MPIOff_to_haddr and H5F_haddr_to_MPIOff
- *		- For now, we assume that MPI_Offset and haddr_t
- *		  are the same size.  Needs to be generalized.
  */
 #include <mpi.h>
 #include <mpio.h>
@@ -70,8 +67,8 @@ static herr_t           H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr,
 static herr_t           H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr,
 				       size_t size, const uint8 *buf);
 static herr_t           H5F_mpio_flush(H5F_low_t *lf);
-static haddr_t          H5F_MPIOff_to_haddr( MPI_Offset mpi_off );
-static MPI_Offset       H5F_haddr_to_MPIOff( haddr_t addr );
+static herr_t		H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr);
+static herr_t		H5F_haddr_to_MPIOff( haddr_t addr, MPI_Offset *mpi_off);
 
 const H5F_low_class_t   H5F_LOW_MPIO[1] =
 {
@@ -261,7 +258,12 @@ H5F_mpio_open(const char *name, uintn flags, H5F_search_t *key /*out */ )
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, mpierrmsg );
     } else {
-        haddr_t	new_eof = H5F_MPIOff_to_haddr( size );
+        haddr_t	new_eof;
+        if (SUCCEED != H5F_MPIOff_to_haddr( size, &new_eof )) {
+	    MPI_File_close( &(lf->u.mpio.f) );
+	    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
+			  "couldn't convert size to haddr_t" );
+	}
         H5F_low_seteof( lf, &new_eof );
     }
 
@@ -370,9 +372,18 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
     if (0 == size)
         HRETURN(SUCCEED);
 
-    /* Read the data.  */
-    mpi_off = H5F_haddr_to_MPIOff( *addr );
+    /* numeric conversion of offset and size  */
+    if (SUCCEED != H5F_haddr_to_MPIOff( *addr, &mpi_off )) {
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			"couldn't convert addr to MPIOffset" );
+    }
     size_i = (int)size;
+    if (size_i != size) {	/* check type conversion */
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			"couldn't convert size to int" );
+    }
+
+    /* Read the data.  */
     mpierr = MPI_File_read_at( lf->u.mpio.f, mpi_off, (void*) buf,
 				size_i, MPI_BYTE, &mpi_stat );
     if (mpierr != MPI_SUCCESS) {
@@ -446,9 +457,8 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
 {
     MPI_Offset              mpi_off;
     MPI_Status              mpi_stat;
-    int                     mpierr;
+    int                     mpierr, msglen, size_i;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
-    int                     msglen;
 
     FUNC_ENTER(H5F_mpio_write, FAIL);
 #ifdef H5F_MPIO_DEBUG
@@ -459,10 +469,20 @@ H5F_mpio_write(H5F_low_t *lf, const haddr_t *addr, size_t size,
     if (0 == size)
         HRETURN(SUCCEED);
 
+    /* numeric conversion of offset and size  */
+    if (SUCCEED != H5F_haddr_to_MPIOff( *addr, &mpi_off )) {
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			"couldn't convert addr to MPIOffset" );
+    }
+    size_i = (int)size;
+    if (size_i != size) {	/* check type conversion */
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			"couldn't convert size to int" );
+    }
+
     /* Write the data.  */
-    mpi_off = H5F_haddr_to_MPIOff( *addr );
     mpierr = MPI_File_write_at( lf->u.mpio.f, mpi_off, (void*) buf,
-				(int) size, MPI_BYTE, &mpi_stat );
+				size_i, MPI_BYTE, &mpi_stat );
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
@@ -517,17 +537,16 @@ H5F_mpio_flush(H5F_low_t *lf)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_MPIOff_to_haddr(size) );
+ * Function:    H5F_MPIOff_to_haddr
  *
  * Purpose:     Convert an MPI_Offset value to haddr_t.
  *
  * Problems and limitations:
- *		For now, we assume that MPI_Offset and haddr_t
- *		are the same size.  Needs to be generalized.
  *
- * Return:      Success:        the offset value, as an hddr_t.
+ * Return:      Success:        return value is SUCCEED
+ *				and the haddr_t contains the converted value
  *
- *              Failure:        0
+ *              Failure:        return value is FAIL, the haddr_t is undefined
  *
  * Programmer:  
  *              January 30, 1998
@@ -536,28 +555,29 @@ H5F_mpio_flush(H5F_low_t *lf)
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t
-H5F_MPIOff_to_haddr( MPI_Offset mpi_off )
+static herr_t
+H5F_MPIOff_to_haddr( MPI_Offset mpi_off, haddr_t *addr )
 {
-    haddr_t                 addr;
+    herr_t ret_val = FAIL;
 
-    addr.offset = (uint64) mpi_off;
+    addr->offset = (uint64) mpi_off;
+    if (addr->offset == mpi_off)
+	ret_val = SUCCEED;
 
-    return(addr);
+    return (ret_val);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_haddr_to_MPIOff(size) );
+ * Function:    H5F_haddr_to_MPIOff
  *
  * Purpose:     Convert an haddr_t value to MPI_Offset.
  *
  * Problems and limitations:
- *		For now, we assume that MPI_Offset and haddr_t
- *		are the same size.  Needs to be generalized.
  *
- * Return:      Success:        the offset value, as an MPI_Offset.
+ * Return:      Success:        return value is SUCCEED
+ *				and the MPIOffset contains the converted value
  *
- *              Failure:        0
+ *              Failure:        return value is FAIL, the MPIOffset is undefined
  *
  * Programmer:  
  *              January 30, 1998
@@ -566,14 +586,14 @@ H5F_MPIOff_to_haddr( MPI_Offset mpi_off )
  *
  *-------------------------------------------------------------------------
  */
-static MPI_Offset
-H5F_haddr_to_MPIOff( haddr_t addr )
+static herr_t
+H5F_haddr_to_MPIOff( haddr_t addr, MPI_Offset *mpi_off )
 {
-    MPI_Offset              mpi_off;
+    herr_t ret_val = FAIL;
 
-    FUNC_ENTER(H5F_haddr_to_MPIOff, (MPI_Offset)0);
+    *mpi_off = (MPI_Offset) addr.offset;
+    if (*mpi_off ==  addr.offset)
+	ret_val = SUCCEED;
 
-    mpi_off = (MPI_Offset) addr.offset;
-
-    FUNC_LEAVE(mpi_off);
+    return (ret_val);
 }
