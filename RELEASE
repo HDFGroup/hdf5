@@ -72,6 +72,11 @@ Library
    * QAK - 4/19/00 - Improved metadata hashing & caching algorithms to avoid
      many hash flushes and also remove some redundant I/O when moving metadata
      blocks in the file.
+   * The "struct(opt)" type conversion function which gets invoked for
+     certain compound datatype conversions was fixed for nested compound
+     types. This required a small change in the datatype conversion
+     function API.
+
 
 Configuration
 -------------
