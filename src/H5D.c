@@ -3274,83 +3274,81 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     if(H5P_get(plist, H5D_CRT_SPACE_TIME_NAME, &space_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
 
-    switch (dset->layout.type) {
-        case H5D_COMPACT:
-            /*
-             * zero set data buf.  If fill value is defined, fall through 
-             * the H5D_CONTIGUOUS case and initialize with fill value.
-             */
-            if(!fill.buf)
-                HDmemset(dset->layout.buf, 0, dset->layout.size);
-            
-        case H5D_CONTIGUOUS:
-            /*
-             * If the fill value is set then write it to the entire extent
-             * of the dataset.  Note: library default(fill.buf is NULL) is
-             * not handled here.  How to do it?
-             */
-            snpoints = H5S_get_simple_extent_npoints(space);
-            assert(snpoints>=0);
-            H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
-
-            if (fill.buf) {
-                /*
-                 * Fill the entire current extent with the fill value.  We can do
-                 * this quite efficiently by making sure we copy the fill value
-                 * in relatively large pieces.
-                 */
-			
-                ptsperbuf = MAX(1, bufsize/fill.size);
-                bufsize = ptsperbuf*fill.size;
-
-                /* Allocate temporary buffer */
-                if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
-
-                /* Fill the buffer with the fill value */
-                H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
-                
-                /* Start at the beginning of the dataset */
-                addr = 0;
-
-                /* Loop through writing the fill value to the dataset */
-                while (npoints>0) {
-                    size = MIN(ptsperbuf, npoints) * fill.size;
-                    if (H5F_seq_write(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
-                            &(dset->layout), plist, space, fill.size, size, addr, buf)<0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
-                    npoints -= MIN(ptsperbuf, npoints);
-                    addr += size;
-                } /* end while */
-            } /* end if */
-            break;
-
-        case H5D_CHUNKED:
-            /*
-             * If the dataset is accessed via parallel I/O, allocate file space
-             * for all chunks now and initialize each chunk with the fill value.
-             */
-            if (space_time==H5D_SPACE_ALLOC_EARLY
+    if(dset->layout.type==H5D_CHUNKED) {
+        /*        
+         * If the dataset is accessed via parallel I/O, allocate file space                    
+         * for all chunks now and initialize each chunk with the fill value.                                 
+         */
+        if (space_time==H5D_SPACE_ALLOC_EARLY
 #ifdef H5_HAVE_PARALLEL
-                || (IS_H5FD_MPIO(dset->ent.file) || IS_H5FD_MPIPOSIX(dset->ent.file))
+            || (IS_H5FD_MPIO(dset->ent.file) || IS_H5FD_MPIPOSIX(dset->ent.file))
 #endif /*H5_HAVE_PARALLEL*/
-                ) {
-                /* We only handle simple data spaces so far */
-                int		ndims;
-                hsize_t		dim[H5O_LAYOUT_NDIMS];
-                
-                if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple data space info");
-                dim[ndims] = dset->layout.dim[ndims];
-                ndims++;
+        ) {
+            /* We only handle simple data spaces so far */
+            int             ndims;
+            hsize_t         dim[H5O_LAYOUT_NDIMS];
 
-                if (H5F_istore_allocate(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
-                        &(dset->layout), dim, plist)<0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset");
-            } /* end if */
-            break;
-    } /* end switch */
+            if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0)
+                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple data space info");
+            dim[ndims] = dset->layout.dim[ndims];
+            ndims++;
 
+            if (H5F_istore_allocate(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
+                 &(dset->layout), dim, plist)<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset");
+        } /* end if */
+    } else { /* case for compact and contiguous dataset. */
+        /*
+         * If the fill value is default and dataset is compact, zero set data buf.
+         */
+        if(!fill.buf && dset->layout.type==H5D_COMPACT) {
+            HDmemset(dset->layout.buf, 0, dset->layout.size);
+            goto done;
+        }
+
+        snpoints = H5S_get_simple_extent_npoints(space);
+        assert(snpoints>=0);
+        H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
+
+        /* If fill value is library default, simply define it as one-byte 0-value
+         * buffer */
+        if(!fill.buf) {
+            fill.size=1;
+            fill.buf=H5MM_calloc(fill.size);
+        }
+        
+        /* write fill value to the entire extent of the dataset.*/ 
+        if (fill.buf) {
+            /*
+             * Fill the entire current extent with the fill value.  We can do
+             * this quite efficiently by making sure we copy the fill value
+             * in relatively large pieces.
+             */
+             ptsperbuf = MAX(1, bufsize/fill.size);
+             bufsize = ptsperbuf*fill.size;
+
+             /* Allocate temporary buffer */
+             if ((buf=H5FL_BLK_ALLOC(type_conv,bufsize,0))==NULL)
+                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for fill buffer");
+
+             /* Fill the buffer with the fill value */
+             H5V_array_fill(buf, fill.buf, fill.size, ptsperbuf);
+             
+             /* Start at the beginning of the dataset */
+             addr = 0;
+
+             /* Loop through writing the fill value to the dataset */
+             while (npoints>0) {
+                  size = MIN(ptsperbuf, npoints) * fill.size;
+                  if (H5F_seq_write(dset->ent.file, H5P_DATASET_XFER_DEFAULT,
+                      &(dset->layout), plist, space, fill.size, size, addr, buf)<0)
+                      HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
+                  npoints -= MIN(ptsperbuf, npoints);
+                  addr += size;
+              } /* end while */
+         } /* end if */
+    }
+    
 done:
     if (buf)
         H5FL_BLK_FREE(type_conv,buf);
