@@ -53,7 +53,7 @@ nh5rcreate_object_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 
      HDfree(c_name);
      if (ret_value_c >= 0)  {
-         HDmemcpy(ref, ref_c.oid, H5R_OBJ_REF_BUF_SIZE);
+         HDmemcpy(ref, &ref_c, H5R_OBJ_REF_BUF_SIZE);
          ret_value = 0;
      }
        
@@ -102,7 +102,7 @@ nh5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid
 
      HDfree(c_name);
      if (ret_value_c >= 0) {
-         HDmemcpy (ref, ref_c.heapid, H5R_DSET_REG_REF_BUF_SIZE);
+         HDmemcpy (ref, &ref_c, H5R_DSET_REG_REF_BUF_SIZE);
          ret_value = 0;
      }
      return ret_value;
@@ -127,7 +127,7 @@ nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
      hdset_reg_ref_t ref_c;
      hid_t c_obj_id;
 
-     HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
+     HDmemcpy (&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
      /*
       * Call H5Rdereference function.
@@ -160,7 +160,7 @@ nh5rdereference_object_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
      hid_t c_obj_id;
      hobj_ref_t ref_c;
 
-     HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
+     HDmemcpy (&ref_c, ref, H5R_OBJ_REF_BUF_SIZE);
 
      /*
       * Call H5Rdereference function.
@@ -192,7 +192,7 @@ nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
      hid_t c_space_id;
      hdset_reg_ref_t ref_c;
 
-     HDmemcpy (ref_c.heapid, ref, H5R_DSET_REG_REF_BUF_SIZE);
+     HDmemcpy (&ref_c, ref, H5R_DSET_REG_REF_BUF_SIZE);
 
      /*
       * Call H5Rget_region function.
@@ -225,7 +225,7 @@ nh5rget_object_type_obj_c (hid_t_f *dset_id, int_f *ref, int_f *obj_type)
      int c_obj_type;
      hobj_ref_t ref_c;
 
-     HDmemcpy (ref_c.oid, ref, H5R_OBJ_REF_BUF_SIZE);
+     HDmemcpy (&ref_c, ref, H5R_OBJ_REF_BUF_SIZE);
 
      /*
       * Call H5Rget_object_type function.
