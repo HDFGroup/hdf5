@@ -42,10 +42,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5Gprivate.h"		/*symbol tables				*/
 #include "H5MMprivate.h"	/*core memory management		*/
 
+#define PABLO_MASK	H5F_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*--------------------- Local function prototypes ----------------------------*/
 static herr_t H5F_init_interface(void);
@@ -63,24 +65,21 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
+Modifications:
+    Robb Matzke, 4 Aug 1997
+    Changed pablo mask from H5_mask to H5F_mask for the FUNC_LEAVE call.
+    It was already H5F_mask for the PABLO_TRACE_ON call.
+
 --------------------------------------------------------------------------*/
 static herr_t H5F_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5F_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5F_mask, ID_H5F_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5F_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
     ret_value=H5Ainit_group(H5_FILE,HDF5_FILEID_HASHSIZE,0);
 
-    FUNC_LEAVE(H5_mask, ID_H5F_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5F_init_interface */
 
 #ifdef LATER
@@ -99,9 +98,6 @@ static herr_t H5F_init_interface(void)
 --------------------------------------------------------------------------*/
 void H5F_encode_length_unusual(const hdf5_file_t *f, uint8 **p, uint8 *l)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5F_encode_length_unusual");
-#endif /* LATER */
     intn i = H5F_SIZEOF_SIZE (f);
 
 /* For non-little-endian platforms, encode each byte in memory backwards */
@@ -140,9 +136,6 @@ done:
 --------------------------------------------------------------------------*/
 void H5F_encode_offset_unusual(const hdf5_file_t *f, uint8 **p, uint8 *o)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5F_encode_offset_unusual");
-#endif /* LATER */
     intn i = H5F_SIZEOF_OFFSET(f);
 
 /* For non-little-endian platforms, encode each byte in memory backwards */
@@ -180,24 +173,18 @@ done:
        Look inside the file record for the atom API and compare the the
        filenames.
 --------------------------------------------------------------------------*/
-intn H5F_compare_filename(const VOIDP obj, const VOIDP key)
+intn
+H5F_compare_filename (const VOIDP _obj, const VOIDP _key)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5F_compare_filename");
-#endif /* LATER */
+   const hdf5_file_t	*obj = (const hdf5_file_t *)_obj;
+   const char		*key = (const char *)_key;
+   int			ret_value = FALSE;
+   
+   FUNC_ENTER (H5F_compare_filename, NULL, FALSE);
 
+   ret_value = !HDstrcmp (obj->filename, key);
 
-#ifdef LATER
-done:
-    if(ret_value == FALSE)   
-      { /* Error condition cleanup */
-
-      } /* end if */
-#endif /* LATER */
-
-    /* Normal function cleanup */
-
-    return(!HDstrcmp(((const hdf5_file_t *)obj)->filename,(const char *)key));
+   FUNC_LEAVE (ret_value);
 }	/* H5F_compare_filename */
 
 /*--------------------------------------------------------------------------
@@ -216,11 +203,10 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Fget_create_template(hatom_t fid)
 {
-    CONSTR(FUNC, "H5Fget_create_template");      /* for HERROR */
     hdf5_file_t *file=NULL;         /* file struct for file to close */
     hatom_t ret_value = FAIL;
 
-    FUNC_ENTER(H5F_mask, ID_H5Fget_create_template, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fget_create_template, H5F_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -244,7 +230,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5F_mask, ID_H5Fget_create_template, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Fget_create_template() */
 
 /*--------------------------------------------------------------------------
@@ -262,14 +248,13 @@ done:
 --------------------------------------------------------------------------*/
 hbool_t H5Fis_hdf5(const char *filename)
 {
-    CONSTR(FUNC, "H5Fis_hdf5");        /* for HERROR */
     hdf_file_t f_handle=H5F_INVALID_FILE;      /* file handle */
     uint8 temp_buf[HDF5_FILE_SIGNATURE_LEN];    /* temporary buffer for checking file signature */
     haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
     hbool_t ret_value = BFALSE;
 
-    FUNC_ENTER(H5F_mask, ID_H5Fis_hdf5, H5F_init_interface, BFAIL);
+    FUNC_ENTER(H5Fis_hdf5, H5F_init_interface, BFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -317,7 +302,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5F_mask, ID_H5Fis_hdf5, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Fis_hdf5() */
 
 
@@ -419,7 +404,6 @@ H5F_dest (hdf5_file_t *f)
 --------------------------------------------------------------------------*/
 hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_t access_temp)
 {
-    CONSTR(FUNC, "H5Fcreate");      /* for HERROR */
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
@@ -427,7 +411,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     intn file_exists=0;             /* flag to indicate that file exists already */
     hatom_t ret_value = FAIL;
 
-    FUNC_ENTER(H5F_mask, ID_H5Fcreate, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fcreate, H5F_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -542,7 +526,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5F_mask, ID_H5Fcreate, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Fcreate() */
 
 
@@ -575,7 +559,6 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
 {
-    CONSTR(FUNC, "H5Fopen");        /* for HERROR */
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     hatom_t create_temp;            /* file-creation template ID */
@@ -586,7 +569,7 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     hatom_t ret_value = FAIL;
     size_t	variable_size;	/*size of the variable part of the bb */
 
-    FUNC_ENTER(H5F_mask, ID_H5Fopen, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fopen, H5F_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -723,7 +706,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5F_mask, ID_H5Fopen, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Fopen() */
 
 /*--------------------------------------------------------------------------
@@ -747,11 +730,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Fclose(hatom_t fid)
 {
-    CONSTR(FUNC, "H5Fclose");       /* for HERROR */
     hdf5_file_t *file=NULL;         /* file struct for file to close */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5F_mask, ID_H5Fclose, H5F_init_interface, FAIL);
+    FUNC_ENTER(H5Fclose, H5F_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -782,7 +764,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5F_mask, ID_H5Fclose, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Fclose() */
 
 
@@ -792,9 +774,9 @@ done:
  * Purpose:	Reads some data from a file/server/etc into a buffer.
  *		The data is contiguous.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -807,19 +789,19 @@ done:
 herr_t
 H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
-    CONSTR(FUNC, "H5F_block_read");       /* for HERROR */
+   FUNC_ENTER (H5F_block_read, NULL, FAIL);
 
-    PABLO_TRACE_ON(H5F_mask, ID_H5F_block_read);
-
-    if (0==size) return 0;
-    addr += f->file_create_parms.userblock_size;
+   if (0==size) return 0;
+   addr += f->file_create_parms.userblock_size;
    
-    if (H5F_SEEK (f->file_handle, addr)<0)
-        HRETURN_ERROR(H5F_mask, ID_H5F_block_read, H5E_IO, H5E_SEEKERROR, FAIL);
-    if (H5F_READ (f->file_handle, buf, size)<0)
-        HRETURN_ERROR(H5F_mask, ID_H5F_block_read, H5E_IO, H5E_READERROR, FAIL);
-    PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_read);
-    return SUCCEED;
+   if (H5F_SEEK (f->file_handle, addr)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
+   }
+   if (H5F_READ (f->file_handle, buf, size)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -829,9 +811,9 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
  * Purpose:	Writes some data from memory to a file/server/etc.  The
  *		data is contiguous.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -844,19 +826,19 @@ H5F_block_read (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 herr_t
 H5F_block_write (hdf5_file_t *f, haddr_t addr, size_t size, void *buf)
 {
-    CONSTR(FUNC, "H5F_block_write");       /* for HERROR */
-     
-    PABLO_TRACE_ON(H5F_mask, ID_H5F_block_read);
+   FUNC_ENTER (H5F_block_write, NULL, FAIL);
 
-    if (0==size) return 0;
-    addr += f->file_create_parms.userblock_size;
+   if (0==size) return 0;
+   addr += f->file_create_parms.userblock_size;
 
-    if (H5F_SEEK (f->file_handle, addr)<0)
-        HRETURN_ERROR(H5F_mask, ID_H5F_block_write, H5E_IO, H5E_SEEKERROR, FAIL);
-    if (H5F_WRITE (f->file_handle, buf, size)<0)
-        HRETURN_ERROR(H5F_mask, ID_H5F_block_write, H5E_IO, H5E_WRITEERROR, FAIL);
-    PABLO_TRACE_OFF(H5F_mask, ID_H5F_block_write);
-    return SUCCEED;
+   if (H5F_SEEK (f->file_handle, addr)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL);
+   }
+   if (H5F_WRITE (f->file_handle, buf, size)<0) {
+      HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
+   }
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 

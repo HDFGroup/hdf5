@@ -25,7 +25,7 @@
 #ifndef HDF5_MASTER
 extern
 #endif /* HDF5_MASTER */
-intn library_initialize     /* Whether we've initialized library global information yet */
+intn library_initialize_g     /* Whether we've initialized library global information yet */
 #ifdef HDF5_MASTER
 = FALSE
 #endif /* HDF5_MASTER */
@@ -43,7 +43,7 @@ intn install_atexit         /* Whether to install the atexit routine */
 #ifndef HDF5_MASTER
 extern
 #endif /* HDF5_MASTER */
-intn thread_initialize      /* Whether we've initialized thread global information yet */
+intn thread_initialize_g      /* Whether we've initialized thread global information yet */
 #ifdef HDF5_MASTER
 = FALSE
 #endif /* HDF5_MASTER */

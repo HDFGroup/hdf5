@@ -30,15 +30,29 @@
    same assumptions as HERROR.  IN ADDITION, this macro causes
    a return from the calling routine */
 
-#define HRETURN_ERROR(pablo_mask, pablo_func_id, maj, min, ret_val) {HERROR(maj, min); PABLO_TRACE_OFF(pablo_mask,pablo_func_id); return(ret_val);}
+#define HRETURN_ERROR(maj, min, ret_val) {				      \
+   HERROR (maj, min);							      \
+   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   return (ret_val);							      \
+}
+
+/* HRETURN macro, similar to HRETURN_ERROR() except for success */
+
+#define HRETURN(ret_val) {						      \
+   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   return (ret_val);							      \
+}
 
 /* HGOTO_ERROR macro, used to facilitate error reporting.  Makes
    same assumptions as HERROR.  IN ADDITION, this macro causes
    a jump to the label 'done' which should be in every fucntion
    Also there is an assumption of a variable 'ret_value' */
 
-#define HGOTO_ERROR(maj, min, ret_val) { HERROR(maj, min); \
-        ret_value = ret_val; goto done; }
+#define HGOTO_ERROR(maj, min, ret_val) {				      \
+   HERROR (maj, min);							      \
+   ret_value = ret_val;							      \
+   goto done;								      \
+}
 
 /* HGOTO_DONE macro, used to facilitate the new error reporting model.  
    This macro is just a wrapper to set the return value and jump to the 'done'
@@ -62,7 +76,8 @@ typedef enum
       H5E_FILE,                /* File Accessability */
       H5E_IO,                  /* Low-level I/O */
       H5E_FUNC,                /* Function Entry/Exit */
-      H5E_ATOM                 /* Object Atom */
+      H5E_ATOM,                /* Object Atom */
+      H5E_CACHE		       /* Object Cache */
   }
 hdf_maj_err_code_t;
 
@@ -99,12 +114,16 @@ typedef enum
 
     /* Object atom related errors */
       H5E_BADATOM,             /* Can't find atom information */
-      H5E_CANTREGISTER         /* Can't register new atom */
+      H5E_CANTREGISTER,        /* Can't register new atom */
+
+    /* Cache related errors */
+      H5E_CANTFLUSH,	       /* Can't flush object from cache */
+      H5E_CANTLOAD	       /* Can't load object into cache */
   }
 hdf_min_err_code_t;
 
 /* Function pointer to report errors through */
-typedef void (*H5E_push_func_t)(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
+typedef herr_t (*H5E_push_func_t)(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 
 #if defined c_plusplus || defined __cplusplus
 extern      "C"
@@ -117,8 +136,8 @@ intn H5Edelete_err_stack(int32 err_hand);
 #ifdef H5_ERROR_DEBUG
 H5E_push_func_t H5Eset_push(H5E_push_func_t func);
 #endif /* H5_ERROR_DEBUG */
-void H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
-void H5Eclear(int32 err_hand);
+herr_t H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
+herr_t H5Eclear(int32 err_hand);
 
 #if defined c_plusplus || defined __cplusplus
 }

@@ -39,10 +39,12 @@ static char RcsId[] = "@(#)$Revision$";
 
 #include "H5private.h"      /* Generic Functions */
 
+#define PABLO_MASK	H5E_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5E_init_interface(void);
@@ -58,24 +60,20 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
+Modifications:
+    Robb Matzke, 4 Aug 1997
+    Changed the pablo mask from H5_mask to H5E_mask
+
 --------------------------------------------------------------------------*/
 static herr_t H5E_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5E_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5_mask, ID_H5Iinit_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5E_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the error stacks */
     ret_value=H5Ainit_group(H5_ERR,HDF5_ERRSTACK_HASHSIZE,0);
 
-    FUNC_LEAVE(H5_mask, ID_H5E_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5E_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -94,11 +92,10 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 int32 H5Enew_err_stack(uintn initial_stack_size)
 {
-    CONSTR(FUNC, "H5Enew_err_stack");	/* For HERROR */
     H5E_errstack_t *new_stack=NULL;     /* Pointer to the new error stack */
     int32 ret_value = FAIL;
 
-    FUNC_ENTER(H5E_mask, ID_H5Enew_err_stack, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Enew_err_stack, H5E_init_interface,FAIL);
 
     /* Allocate the stack header */
     if((new_stack=HDmalloc(sizeof(H5E_errstack_t)))==NULL)
@@ -125,7 +122,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5E_mask, ID_H5Enew_err_stack, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5Enew_err_stack */
 
 /*--------------------------------------------------------------------------
@@ -144,11 +141,10 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 intn H5Edelete_err_stack(int32 err_stack)
 {
-    CONSTR(FUNC, "H5Edelete_err_stack");	/* For HERROR */
     H5E_errstack_t *old_stack=NULL;         /* Pointer to the new error stack */
     intn ret_value = SUCCEED;
 
-    FUNC_ENTER(H5E_mask, ID_H5Edelete_err_stack, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Edelete_err_stack, H5E_init_interface,FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     if (H5Aatom_group(err_stack)!=H5_ERR)
@@ -179,7 +175,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5E_mask, ID_H5Edelete_err_stack, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5Edelete_err_stack */
 
 /*--------------------------------------------------------------------------
@@ -190,18 +186,18 @@ USAGE
     int32 err_hand;         IN: The ID of the error stack to push the error onto.
    
 RETURNS
-   none
+   SUCCEED/FAIL
 DESCRIPTION
     Clear an error stack to allow errors to be pushed onto it.
 
 --------------------------------------------------------------------------*/
-void H5Eclear(int32 err_hand)
+herr_t
+H5Eclear (int32 err_hand)
 {
-    CONSTR(FUNC, "H5Eclear");	/* For HERROR */
     H5E_errstack_t *err_stack=NULL; /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5E_mask, ID_H5Eclear, H5E_init_interface,FAIL);
+    FUNC_ENTER (H5Eclear, H5E_init_interface, FAIL);
 
     /* Get the error stack for this error handler, initialized earlier in H5Enew_err_stack */
     if (H5Aatom_group(err_hand)!=H5_ERR)
@@ -229,7 +225,7 @@ done:
 
     /* Normal function cleanup */
 
-    PABLO_TRACE_OFF(H5E_mask, ID_H5Eclear);  /* ignore ret_value set */
+    FUNC_LEAVE (ret_value);
 }	/* H5Eclear */
 
 /*--------------------------------------------------------------------------
@@ -243,19 +239,19 @@ USAGE
     intn line;              IN: Line # in the file the error occurred on.
    
 RETURNS
-   none
+   SUCCESS/FAIL
 DESCRIPTION
     Pushes an error onto an error stack for this thread.  (This is the default
     action when errors occur, but can be overridden by user's code)
 
 --------------------------------------------------------------------------*/
-void H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
+herr_t
+H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
 {
-    CONSTR(FUNC, "H5E_store");	/* For HERROR */
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5E_mask, ID_H5E_store, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5E_store, H5E_init_interface,FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5Eclear(errid);
@@ -296,7 +292,7 @@ done:
 
     /* Normal function cleanup */
 
-    PABLO_TRACE_OFF(H5E_mask, ID_H5E_store);  /* ignore ret_value set */
+    FUNC_LEAVE (ret_value);
 }	/* H5E_store */
 
 /*--------------------------------------------------------------------------
@@ -310,18 +306,18 @@ USAGE
     intn line;              IN: Line # in the file the error occurred on.
    
 RETURNS
-   none
+   SUCCEED/FAIL
 DESCRIPTION
     Pushes an error onto an error stack for this thread.
 
 --------------------------------------------------------------------------*/
-void H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
+herr_t
+H5Epush(hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line)
 {
-    CONSTR(FUNC, "H5Epush");	/* For HERROR */
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5E_mask, ID_H5Epush, H5E_init_interface,FAIL);
+    FUNC_ENTER(H5Epush, H5E_init_interface,FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -342,7 +338,7 @@ done:
 
     /* Normal function cleanup */
 
-    PABLO_TRACE_OFF(H5E_mask, ID_H5Epush);  /* ignore ret_value set */
+    FUNC_LEAVE (ret_value);
 }	/* H5Epush */
 
 #ifdef H5_ERROR_DEBUG
@@ -368,7 +364,7 @@ H5E_push_func_t H5Eset_push(H5E_push_func_t func)
     H5E_errstack_t *err_stack=NULL;     /* Pointer to the error stack to put value on */
     H5E_push_func_t ret_value = NULL;
 
-    FUNC_ENTER(H5E_mask, ID_H5Eset_push, H5E_init_interface,NULL);
+    FUNC_ENTER(H5Eset_push, H5E_init_interface,NULL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -390,7 +386,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5E_mask, ID_H5Eset_push, ret_value);
+    FUNC_LEAVE(ID_H5Eset_push, ret_value);
 }	/* H5Eset_push */
 #endif /* H5_ERROR_DEBUG */
 

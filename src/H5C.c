@@ -38,10 +38,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5private.h"      /* Generic Functions */
 #include "H5Cprivate.h"     /* Template information */
 
+#define PABLO_MASK	H5C_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /* Define the library's default file creation template (constants in hdf5lims.h) */
 const file_create_temp_t default_file_create={
@@ -74,21 +76,14 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 static herr_t H5C_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5C_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
 
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5C_mask, ID_H5C_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5C_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
     ret_value=H5Ainit_group(H5_TEMPLATE,HDF5_TEMPID_HASHSIZE,0);
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5C_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -104,14 +99,18 @@ static herr_t H5C_init_interface(void)
     success, FAIL on failure
  DESCRIPTION
         This is function retrieves atoms for the default templates for the
-    different types of HDF5 templates.  
+    different types of HDF5 templates.
+
+ MODIFICATIONS
+    Robb Matzke, 4 Aug 1997
+    The `FUNC' auto variable was changed from `H5C_create' to
+    `H5C_get_default_atom'.
 --------------------------------------------------------------------------*/
 hatom_t H5C_get_default_atom(hobjtype_t type)
 {
-    CONSTR(FUNC, "H5C_create");      /* for HERROR */
     hatom_t        ret_value = FAIL;
 
-    FUNC_ENTER(H5C_mask, ID_H5C_get_default_atom, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5C_get_default_atom, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -139,7 +138,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_get_default_atom, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5C_get_default_atom() */
 
 /*--------------------------------------------------------------------------
@@ -159,11 +158,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5C_init(hatom_t dst_atm, const file_create_temp_t *src)
 {
-    CONSTR(FUNC, "H5C_init"); /* for HERROR */
     file_create_temp_t *dst;    /* destination template */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER(H5C_mask, ID_H5C_init, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5C_init, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -185,7 +183,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_init, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5C_init() */
 
 /*--------------------------------------------------------------------------
@@ -206,10 +204,9 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5C_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5C_create"); /* for HERROR */
     hatom_t ret_value = FAIL;   /* atom for template object to return */
 
-    FUNC_ENTER(H5C_mask, ID_H5C_create, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5C_create, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -239,7 +236,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_create, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5C_create() */
 
 /*--------------------------------------------------------------------------
@@ -257,11 +254,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5C_release(hatom_t oid)
 {
-    CONSTR(FUNC, "H5C_release");      /* for HERROR */
     file_create_temp_t *template;     /* template to destroy */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5C_mask, ID_H5C_release, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5C_release, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -279,7 +275,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_release, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5C_release() */
 
 /*--------------------------------------------------------------------------
@@ -300,11 +296,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
 {
-    CONSTR(FUNC, "H5Cgetparm");      /* for HERROR */
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5C_mask, ID_H5Cgetparm, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5Cgetparm, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -365,7 +360,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5Cgetparm, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Cgetparm() */
 
 /*--------------------------------------------------------------------------
@@ -385,11 +380,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 {
-    CONSTR(FUNC, "H5Csetparm");      /* for HERROR */
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5C_mask, ID_H5Csetparm, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5Csetparm, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -450,7 +444,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5Csetparm, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Csetparm() */
 
 /*--------------------------------------------------------------------------
@@ -469,11 +463,10 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5C_copy(hatom_t tid)
 {
-    CONSTR(FUNC, "H5C_copy");      /* for HERROR */
     file_create_temp_t *template, *new_template;    /* template to query */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5C_mask, ID_H5C_copy, H5C_init_interface, FAIL);
+    FUNC_ENTER(H5C_copy, H5C_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -501,6 +494,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5C_mask, ID_H5C_copy, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5C_copy() */
 

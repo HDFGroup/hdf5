@@ -42,10 +42,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5private.h"  /* Generic Functions */
 #include "H5Tprivate.h" /* Data-type functions */
 
+#define PABLO_MASK	H5T_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5T_init_interface(void);
@@ -64,21 +66,13 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 static herr_t H5T_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5T_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5T_mask, ID_H5T_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5T_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
     ret_value=H5Ainit_group(H5_DATATYPE,HDF5_DATATYPEID_HASHSIZE,H5T_RESERVED_ATOMS);
 
-    FUNC_LEAVE(H5T_mask, ID_H5T_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5T_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -98,11 +92,10 @@ static herr_t H5T_init_interface(void)
 --------------------------------------------------------------------------*/
 hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5T_create");     /* for HERROR */
     h5_datatype_t *new_dt;            /* new data-type object to create */
     hatom_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5T_create, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5T_create, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -128,7 +121,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5T_create, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5T_create() */
 
 /*--------------------------------------------------------------------------
@@ -148,11 +141,10 @@ done:
 --------------------------------------------------------------------------*/
 uint32 H5Tget_num_fields(hatom_t tid)
 {
-    CONSTR(FUNC, "H5Tget_num_fields");    /* for HERROR */
     h5_datatype_t *dt;         /* new data-type object to create */
     uint32        ret_value = UFAIL;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tget_num_fields, H5T_init_interface, UFAIL);
+    FUNC_ENTER(H5Tget_num_fields, H5T_init_interface, UFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -180,7 +172,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tget_num_fields, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tget_num_fields() */
 
 /*--------------------------------------------------------------------------
@@ -201,11 +193,10 @@ done:
 --------------------------------------------------------------------------*/
 hbool_t H5Tis_field_atomic(hatom_t tid, uintn fidx)
 {
-    CONSTR(FUNC, "H5Tis_field_atomic");    /* for HERROR */
     h5_datatype_t *dt;         /* new data-type object to create */
     hbool_t        ret_value = BTRUE;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tis_field_atomic, H5T_init_interface, BFAIL);
+    FUNC_ENTER(H5Tis_field_atomic, H5T_init_interface, BFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -238,7 +229,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tis_field_atomic, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tis_field_atomic() */
 
 /*--------------------------------------------------------------------------
@@ -258,11 +249,10 @@ done:
 --------------------------------------------------------------------------*/
 hbool_t H5Tis_atomic(hatom_t tid)
 {
-    CONSTR(FUNC, "H5Tis_atomic");    /* for HERROR */
     h5_datatype_t *dt;         /* new data-type object to create */
     hbool_t        ret_value = BTRUE;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tis_atomic, H5T_init_interface, BFAIL);
+    FUNC_ENTER(H5Tis_atomic, H5T_init_interface, BFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -283,7 +273,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tis_atomic, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tis_atomic() */
 
 /*--------------------------------------------------------------------------
@@ -307,11 +297,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Tset_type(hatom_t tid,hatom_t base,uint8 len,uint8 arch)
 {
-    CONSTR(FUNC, "H5Tset_type");    /* for HERROR */
     h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tset_type, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5Tset_type, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -337,7 +326,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tset_type, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tset_type() */
 
 /*--------------------------------------------------------------------------
@@ -366,12 +355,11 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Tadd_field(hatom_t tid, const char *name, hatom_t base, uint8 len, uint8 arch, hatom_t space)
 {
-    CONSTR(FUNC, "H5Tadd_field");    /* for HERROR */
     h5_field_info_t *new_field; /* pointer to new field to add */
     h5_datatype_t *dt;          /* data-type object to manipulate */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tadd_field, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5Tadd_field, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -426,7 +414,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tadd_field, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tadd_field() */
 
 /*--------------------------------------------------------------------------
@@ -447,10 +435,9 @@ done:
 --------------------------------------------------------------------------*/
 uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
 {
-    CONSTR(FUNC, "H5Tsize");    /* for HERROR */
     uintn ret_value = UFAIL;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tsize, H5T_init_interface, UFAIL);
+    FUNC_ENTER(H5Tsize, H5T_init_interface, UFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -519,7 +506,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tsize, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tsize() */
 
 /*--------------------------------------------------------------------------
@@ -540,10 +527,9 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list)
 {
-    CONSTR(FUNC, "H5Tget_fields");    /* for HERROR */
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER(H5T_mask, ID_H5Tget_fields, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5Tget_fields, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -560,7 +546,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5Tget_fields, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Tget_fields() */
 
 /*--------------------------------------------------------------------------
@@ -578,11 +564,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5T_release(hatom_t oid)
 {
-    CONSTR(FUNC, "H5T_release");    /* for HERROR */
     h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5T_mask, ID_H5T_release, H5T_init_interface, FAIL);
+    FUNC_ENTER(H5T_release, H5T_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -605,6 +590,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5T_mask, ID_H5T_release, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5T_release() */
 

@@ -40,10 +40,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5Mprivate.h" /* Meta-object interface */
 #include "H5Cprivate.h"   /* Template interface */
 
+#define PABLO_MASK	H5M_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5M_init_interface(void);
@@ -59,21 +61,17 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
+MODIFICATIONS
+    Robb Matzke, 4 Aug 1997
+    Changed the FUNC variable value to H5M_init_interface.
+
 --------------------------------------------------------------------------*/
 static herr_t H5M_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5CIinit_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
+    FUNC_ENTER (H5M_init_interface, NULL, FAIL);
 
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5M_mask, ID_H5M_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
-
-    FUNC_LEAVE(H5M_mask, ID_H5M_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5M_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -93,11 +91,10 @@ static herr_t H5M_init_interface(void)
 --------------------------------------------------------------------------*/
 static intn H5M_find_type(hobjtype_t type)
 {
-    CONSTR(FUNC, "H5M_find_type");      /* for HERROR */
     intn i;         /* local counting variable */
     intn ret_value = FAIL;
 
-    FUNC_ENTER(H5M_mask, ID_H5M_find_type, H5M_init_interface, FAIL);
+    FUNC_ENTER(H5M_find_type, H5M_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -118,7 +115,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5M_mask, ID_H5M_find_type, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5M_find_type() */
 
 /*--------------------------------------------------------------------------
@@ -139,11 +136,10 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Mcreate(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5Mcreate");      /* for HERROR */
     intn i;         /* local counting variable */
     hatom_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5M_mask, ID_H5Mcreate, H5M_init_interface, FAIL);
+    FUNC_ENTER(H5Mcreate, H5M_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -163,7 +159,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5M_mask, ID_H5Mcreate, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Mcreate() */
 
 
@@ -183,12 +179,11 @@ done:
 --------------------------------------------------------------------------*/
 hatom_t H5Mcopy(hatom_t oid)
 {
-    CONSTR(FUNC, "H5Mcopy");      /* for HERROR */
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5M_mask, ID_H5Mcopy, H5M_init_interface, FAIL);
+    FUNC_ENTER(H5Mcopy, H5M_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -208,7 +203,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5M_mask, ID_H5Mcopy, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Mcopy() */
 
 /*--------------------------------------------------------------------------
@@ -227,12 +222,11 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5Mrelease(hatom_t oid)
 {
-    CONSTR(FUNC, "H5Mrelease");      /* for HERROR */
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5M_mask, ID_H5Mrelease, H5M_init_interface, FAIL);
+    FUNC_ENTER(H5Mrelease, H5M_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -252,6 +246,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5M_mask, ID_H5Mrelease, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Mrelease() */
 

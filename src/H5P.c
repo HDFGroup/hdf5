@@ -36,10 +36,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5private.h"  /* Generic Functions */
 #include "H5Pprivate.h" /* Data-space functions */
 
+#define PABLO_MASK	H5P_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*--------------------------------------------------------------------------
 NAME
@@ -55,21 +57,13 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 static herr_t H5P_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5P_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5P_mask, ID_H5P_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5P_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
     ret_value=H5Ainit_group(H5_DATASPACE,HDF5_DATASPACEID_HASHSIZE,H5P_RESERVED_ATOMS);
 
-    FUNC_LEAVE(H5P_mask, ID_H5P_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5P_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -89,11 +83,10 @@ static herr_t H5P_init_interface(void)
 --------------------------------------------------------------------------*/
 hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5P_create");     /* for HERROR */
     H5P_dim_t *new_dim;               /* new dimensionality object to create */
     hatom_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5P_mask, ID_H5P_create, H5P_init_interface, FAIL);
+    FUNC_ENTER(H5P_create, H5P_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -118,7 +111,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5P_mask, ID_H5P_create, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5P_create() */
 
 /*--------------------------------------------------------------------------
@@ -139,10 +132,9 @@ done:
 --------------------------------------------------------------------------*/
 uintn H5Pnelem(hatom_t sid)
 {
-    CONSTR(FUNC, "H5Pnelem");    /* for HERROR */
     uintn        ret_value = UFAIL;
 
-    FUNC_ENTER(H5P_mask, ID_H5Pnelem, H5P_init_interface, UFAIL);
+    FUNC_ENTER(H5Pnelem, H5P_init_interface, UFAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -161,7 +153,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5P_mask, ID_H5Pnelem, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5Pnelem() */
 
 /*--------------------------------------------------------------------------
@@ -179,11 +171,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5P_release(hatom_t oid)
 {
-    CONSTR(FUNC, "H5P_release");    /* for HERROR */
     H5P_dim_t *dim;         /* dimensionality object to release */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5P_mask, ID_H5Prelease, H5P_init_interface, FAIL);
+    FUNC_ENTER(H5Prelease, H5P_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -203,6 +194,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5P_mask, ID_H5P_release, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5P_release() */
 

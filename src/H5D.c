@@ -36,10 +36,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5private.h"  /* Generic Functions */
 #include "H5Dprivate.h" /* Dataset functions */
 
+#define PABLO_MASK	H5D_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*--------------------------------------------------------------------------
 NAME
@@ -55,21 +57,13 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 static herr_t H5D_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5D_init_interface");	/* For HERROR */
-#endif /* LATER */
     herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5D_mask, ID_H5D_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
+    FUNC_ENTER (H5D_init_interface, NULL, FAIL);
 
     /* Initialize the atom group for the file IDs */
     ret_value=H5Ainit_group(H5_DATASET,HDF5_DATASETID_HASHSIZE,H5D_RESERVED_ATOMS);
 
-    FUNC_LEAVE(H5D_mask, ID_H5D_init_interface, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5D_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -89,11 +83,10 @@ static herr_t H5D_init_interface(void)
 --------------------------------------------------------------------------*/
 hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
 {
-    CONSTR(FUNC, "H5D_create");     /* for HERROR */
     H5D_dataset_t *new_dataset;     /* new dataset object to create */
     hatom_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5D_mask, ID_H5D_create, H5D_init_interface, FAIL);
+    FUNC_ENTER(H5D_create, H5D_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -116,7 +109,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5D_mask, ID_H5D_create, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5D_create() */
 
 /*--------------------------------------------------------------------------
@@ -134,11 +127,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t H5D_release(hatom_t oid)
 {
-    CONSTR(FUNC, "H5D_release");    /* for HERROR */
     H5D_dataset_t *dataset;         /* dataset object to release */
     herr_t        ret_value = SUCCEED;
 
-    FUNC_ENTER(H5D_mask, ID_H5Drelease, H5D_init_interface, FAIL);
+    FUNC_ENTER(H5Drelease, H5D_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -156,7 +148,7 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5D_mask, ID_H5D_release, ret_value);
+    FUNC_LEAVE(ret_value);
 } /* end H5D_release() */
 
 

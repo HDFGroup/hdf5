@@ -57,6 +57,7 @@ static const hdf_maj_error_messages_t hdf_maj_error_messages[] =
     {H5E_IO,            "Low-level I/O"},
     {H5E_FUNC,          "Function Entry/Exit"},
     {H5E_ATOM,          "Object Atom"},
+    {H5E_CACHE,		"Object Cache"},
 };
 
 typedef struct 
@@ -86,7 +87,9 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_CANTINIT,      "Can't initialize interface"},
     {H5E_ALREADYINIT,   "Object already initialized"},
     {H5E_BADATOM,       "Can't find atom information"},
-    {H5E_CANTREGISTER,  "Can't register new atom"}
+    {H5E_CANTREGISTER,  "Can't register new atom"},
+    {H5E_CANTFLUSH,	"Can't flush object from cache"},
+    {H5E_CANTLOAD,	"Can't load object into cache"},
 };
 
 /* We use a stack to hold the errors plus we keep track of the function,
@@ -121,7 +124,7 @@ extern      "C"
 #endif                          /* c_plusplus || __cplusplus */
 
 /* Private functions in H5E.c */
-void H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
+herr_t H5E_store(int32 errid, hdf_maj_err_code_t maj, hdf_min_err_code_t min, const char *function_name, const char *file_name, intn line);
 
 #if defined c_plusplus || defined __cplusplus
 }

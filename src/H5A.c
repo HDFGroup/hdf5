@@ -62,15 +62,20 @@ MODIFICATION HISTORY
 
 #define HDF5_ATOM_MASTER
 #include "hdf5.h"
+#include "H5private.h"
 #include "H5Aprivate.h"
 
+#define PABLO_MASK	H5A_mask
+
+
+static int interface_initialize_g = FALSE;
 
 /* Private function prototypes */
 static atom_info_t *H5A_find_atom(hatom_t atm);
 
 static atom_info_t *H5A_get_atom_node(void);
 
-static void H5A_release_atom_node(atom_info_t *atm);
+static herr_t H5A_release_atom_node(atom_info_t *atm);
 
 /******************************************************************************
  NAME
@@ -94,13 +99,10 @@ intn H5Ainit_group(group_t grp,      /* IN: Group to initialize */
     uintn reserved                  /* IN: Number of hash table entries to reserve */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Ainit_group");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Ainit_group);
+    FUNC_ENTER (H5Ainit_group, NULL, FAIL);
 
     if((grp<=BADGROUP || grp>=MAXGROUP) && hash_size>0)
         HGOTO_DONE(FAIL);
@@ -158,7 +160,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Ainit_group, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Ainit_group() */
 
 /******************************************************************************
@@ -178,13 +180,10 @@ done:
 intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Adestroy_group");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     intn ret_value=SUCCEED;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Adestroy_group);
+    FUNC_ENTER (H5Adestroy_group, NULL, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -221,7 +220,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Adestroy_group, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Adestroy_group() */
 
 /******************************************************************************
@@ -244,16 +243,13 @@ hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in
     const VOIDP object                    /* IN: Object to attach to atom */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Aregister_atom");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     hatom_t atm_id;                  /* new atom ID */
     uintn hash_loc;                 /* new item's hash table location */
     hatom_t ret_value=SUCCEED;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Aregister_atom);
+    FUNC_ENTER (H5Aregister_atom, NULL, FAIL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(FAIL);
@@ -324,7 +320,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Aregister_atom, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Aregister_atom() */
 
 /******************************************************************************
@@ -341,16 +337,13 @@ done:
 VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Aatom_object");	/* for HERROR */
-#endif /* LATER */
 #ifdef ATOMS_ARE_CACHED
     uintn i;                        /* local counter */
 #endif /* ATOMS_ARE_CACHED */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     VOIDP ret_value=NULL;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Aatom_object);
+    FUNC_ENTER (H5Aatom_object, NULL, NULL);
 
 #ifdef ATOMS_ARE_CACHED
     /* Look for the atom in the cache first */
@@ -387,7 +380,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Aatom_object, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Aatom_object() */
 
 /******************************************************************************
@@ -404,12 +397,9 @@ done:
 group_t H5Aatom_group(hatom_t atm   /* IN: Atom to retrieve group for */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Aatom_group");	/* for HERROR */
-#endif /* LATER */
     group_t ret_value=BADGROUP;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Aatom_group);
+    FUNC_ENTER (H5Aatom_group, NULL, FAIL);
 
     ret_value=ATOM_TO_GROUP(atm);
     if(ret_value<=BADGROUP || ret_value>=MAXGROUP)
@@ -422,7 +412,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Aatom_group, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Aatom_group() */
 
 /******************************************************************************
@@ -439,9 +429,6 @@ done:
 VOIDP H5Aremove_atom(hatom_t atm   /* IN: Atom to remove */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Aremove_atom");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     atom_info_t *curr_atm,          /* ptr to the current atom */
         *last_atm;                  /* ptr to the last atom */
@@ -452,7 +439,7 @@ VOIDP H5Aremove_atom(hatom_t atm   /* IN: Atom to remove */
 #endif /* ATOMS_ARE_CACHED */
     VOIDP ret_value=NULL;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Aremove_atom);
+    FUNC_ENTER (H5Aremove_atom, NULL, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -510,7 +497,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Aremove_atom, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Aremove_atom() */
 
 /******************************************************************************
@@ -532,15 +519,12 @@ VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object i
     const VOIDP key                     /* IN: pointer to key to compare against */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Asearch_atom");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     intn i;                         /* local counting variable */
     VOIDP ret_value=NULL;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Asearch_atom);
+    FUNC_ENTER (H5Asearch_atom, NULL, NULL);
 
     if(grp<=BADGROUP || grp>=MAXGROUP)
         HGOTO_DONE(NULL);
@@ -568,7 +552,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Asearch_atom, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Asearch_atom() */
 
 /******************************************************************************
@@ -586,14 +570,11 @@ done:
 intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5Ais_reserved");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     group_t grp;                    /* atom's atomic group */
     hbool_t ret_value=BFAIL;
 
-    PABLO_TRACE_ON(H5A_mask, ID_H5Ais_reserved);
+    FUNC_ENTER (H5Ais_reserved, NULL, FAIL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -616,7 +597,7 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
-    FUNC_LEAVE(H5A_mask, ID_H5Ais_reserved, ret_value);
+    FUNC_LEAVE(ret_value);
 }   /* end H5Ais_reserved() */
 
 /******************************************************************************
@@ -633,15 +614,13 @@ done:
 static atom_info_t *H5A_find_atom(hatom_t atm   /* IN: Atom to retrieve atom for */
 )
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5A_find_atom");	/* for HERROR */
-#endif /* LATER */
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
     group_t grp;                    /* atom's atomic group */
     uintn hash_loc;                 /* atom's hash table location */
     atom_info_t *ret_value=NULL;
 
+    FUNC_ENTER (H5A_find_atom, NULL, NULL);
 
     grp=ATOM_TO_GROUP(atm);
     if(grp<=BADGROUP || grp>=MAXGROUP)
@@ -678,7 +657,7 @@ done:
 
   /* Normal function cleanup */
 
-  return ret_value;
+  FUNC_LEAVE (ret_value);
 }   /* end H5A_find_atom() */
 
 /******************************************************************************
@@ -695,10 +674,9 @@ done:
 *******************************************************************************/
 static atom_info_t *H5A_get_atom_node(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5A_get_atom_node");	/* for HERROR */
-#endif /* LATER */
     atom_info_t *ret_value=NULL;
+
+    FUNC_ENTER (H5A_get_atom_node, NULL, NULL);
 
     if(atom_free_list!=NULL)
       {
@@ -719,7 +697,7 @@ done:
 
   /* Normal function cleanup */
 
-  return ret_value;
+  FUNC_LEAVE (ret_value);
 }   /* end H5A_get_atom_node() */
 
 /******************************************************************************
@@ -730,18 +708,19 @@ done:
     Puts an atom node into the free list
 
  RETURNS
-    No return value
+    SUCCEED
 
 *******************************************************************************/
-static void H5A_release_atom_node(atom_info_t *atm)
+static herr_t
+H5A_release_atom_node(atom_info_t *atm)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5A_release_atom_node");	/* for HERROR */
-#endif /* LATER */
+    FUNC_ENTER (H5A_release_atom_node, NULL, FAIL);
 
     /* Insert the atom at the beginning of the free list */
     atm->next=atom_free_list;
     atom_free_list=atm;
+
+    FUNC_LEAVE (SUCCEED);
 }   /* end H5A_release_atom_node() */
 
 /*--------------------------------------------------------------------------
@@ -767,6 +746,8 @@ H5Ashutdown(void)
     atom_info_t *curr;
     intn i;
 
+    FUNC_ENTER (H5Ashutdown, NULL, FAIL);
+
     /* Release the free-list if it exists */
     if(atom_free_list!=NULL)
       {
@@ -784,6 +765,7 @@ H5Ashutdown(void)
             HDfree(atom_group_list[i]);
             atom_group_list[i]=NULL;
           } /* end if */
-  return (SUCCEED);
+
+    FUNC_LEAVE (SUCCEED);
 }	/* end H5Ashutdown() */
 

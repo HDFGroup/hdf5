@@ -13,16 +13,24 @@
  *			with a particular HDF file share the same cache; each
  *			HDF file has it's own cache.
  *
- * Modifications:	
+ * Modifications:
+ *
+ * 	Robb Matzke, 4 Aug 1997
+ *	Added calls to H5E.
  *
  *-------------------------------------------------------------------------
  */
 #include <assert.h>
 #include "hdf5.h"
 
+#include "H5private.h"
 #include "H5ACprivate.h"
+#include "H5MMprivate.h"
 
+#define PABLO_MASK	H5AC_mask
 #define HASH(addr)	((unsigned)(addr) % H5AC_NSLOTS)
+
+static int	interface_initialize_g = FALSE;		/*initialized?*/
 
 
 /*-------------------------------------------------------------------------
@@ -30,9 +38,9 @@
  *
  * Purpose:	Initialize the cache just after a file is opened.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -45,8 +53,14 @@
 herr_t
 H5AC_new (hdf5_file_t *f)
 {
-   f->cache = HDcalloc (H5AC_NSLOTS, sizeof (H5AC_cache_t));
-   return 0;
+   FUNC_ENTER (H5AC_new, NULL, FAIL);
+
+   assert (f);
+   assert (NULL==f->cache);
+
+   f->cache = H5MM_xcalloc (H5AC_NSLOTS, sizeof (H5AC_cache_t));
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -55,9 +69,9 @@ H5AC_new (hdf5_file_t *f)
  *
  * Purpose:	Flushes all data to disk and destroys the cache.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -70,9 +84,17 @@ H5AC_new (hdf5_file_t *f)
 herr_t
 H5AC_dest (hdf5_file_t *f)
 {
-   if (H5AC_flush (f, NULL, 0, TRUE)<0) return -1;
-   HDfree (f->cache);
-   return 0;
+   FUNC_ENTER (H5AC_dest, NULL, FAIL);
+
+   assert (f);
+   assert (f->cache);
+   
+   if (H5AC_flush (f, NULL, 0, TRUE)<0) {
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+   }
+
+   f->cache = H5MM_xfree (f->cache);
+   FUNC_LEAVE (SUCCEED);
 }
    
 
@@ -113,6 +135,10 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    void		*thing = NULL;
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
+   FUNC_ENTER (H5AC_find, NULL, NULL);
+
+   assert (f);
+   assert (f->cache);
    assert (type);
    assert (type->load);
    assert (type->flush);
@@ -130,7 +156,7 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
     */
    if (f->cache[idx].type && f->cache[idx].addr==addr &&
        f->cache[idx].type!=type) {
-      return NULL;
+      HRETURN_ERROR (H5E_CACHE, H5E_BADTYPE, NULL);
    }
 
    /*
@@ -138,7 +164,7 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
     * without preempting anything.
     */
    if (NULL==(thing=(type->load)(f, addr, udata))) {
-      return NULL;
+      HRETURN_ERROR (H5E_CACHE, H5E_CANTLOAD, NULL);
    }
 
    /*
@@ -152,9 +178,10 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	  * The old thing could not be removed from the stack.
 	  * Release the new thing and fail.
 	  */
-	 status = (type->flush)(f, TRUE, addr, thing);
-	 assert (status>=0);
-	 return NULL;
+	 if ((type->flush)(f, TRUE, addr, thing)<0) {
+	    HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL);
+	 }
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, NULL);
       }
    }
 
@@ -165,7 +192,7 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    f->cache[idx].addr = addr;
    f->cache[idx].thing = thing;
 
-   return thing;
+   FUNC_LEAVE (thing);
 }
 
 
@@ -177,9 +204,9 @@ H5AC_find (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
  *		all types of entries are flushed.  If the ADDR is zero then
  *		all entries of the specified type are flushed.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -197,6 +224,11 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
    herr_t	status;
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
+   FUNC_ENTER (H5AC_flush, NULL, FAIL);
+
+   assert (f);
+   assert (f->cache);
+
    if (!type || 0==addr) {
       /*
        * Look at all cache entries.
@@ -208,7 +240,9 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
 	    flush = f->cache[i].type->flush;
 	    status = (flush)(f, destroy, f->cache[i].addr,
 			     f->cache[i].thing);
-	    if (status<0) return -1;
+	    if (status<0) {
+	       HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+	    }
 	    if (destroy) f->cache[i].type = NULL;
 	 }
       }
@@ -219,11 +253,14 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
        */
       flush = f->cache[i].type->flush;
       status =  (flush) (f, destroy, f->cache[i].addr, f->cache[i].thing);
-      if (status<0) return -1;
+      if (status<0) {
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+      }
       if (destroy) f->cache[i].type = NULL;
 
    }
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -234,9 +271,9 @@ H5AC_flush (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr,
  *		exist on disk yet, but it must have an address and disk
  *		space reserved.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -253,19 +290,28 @@ H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
    uintn	idx = HASH (addr);
    herr_t	(*flush)(hdf5_file_t*,hbool_t,haddr_t,void*)=NULL;
 
+   FUNC_ENTER (H5AC_set, NULL, FAIL);
+
+   assert (f);
+   assert (f->cache);
    assert (type);
    assert (type->flush);
+   assert (addr>=0);
+   assert (thing);
 
    if (f->cache[idx].type) {
       flush = f->cache[idx].type->flush;
       status = (flush)(f, TRUE, f->cache[idx].addr, f->cache[idx].thing);
-      if (status<0) return -1;
+      if (status<0) {
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+      }
    }
 
    f->cache[idx].type = type;
    f->cache[idx].addr = addr;
    f->cache[idx].thing = thing;
-   return 0;
+
+   FUNC_LEAVE (SUCCEED);
 }
 
 
@@ -275,9 +321,9 @@ H5AC_set (hdf5_file_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
  * Purpose:	Use this function to notify the cache that an object's
  *		file address changed.
  *
- * Return:	Success:	0
+ * Return:	Success:	SUCCEED
  *
- *		Failure:	-1
+ *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
  *		robb@maya.nuance.com
@@ -296,15 +342,21 @@ H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
    herr_t	(*flush)(hdf5_file_t*, hbool_t, haddr_t, void*);
    herr_t	status;
 
+   FUNC_ENTER (H5AC_rename, NULL, FAIL);
+
+   assert (f);
+   assert (f->cache);
    assert (type);
+   assert (old_addr>=0);
+   assert (new_addr>=0);
 
    if (f->cache[old_idx].type!=type || f->cache[old_idx].addr!=old_addr) {
-      return 0; /*item not in cache*/
+      HRETURN (SUCCEED);
    }
 
    if (old_idx==new_idx) {
       f->cache[old_idx].addr = new_addr;
-      return 0;
+      HRETURN (SUCCEED);
    }
       
    /*
@@ -314,7 +366,9 @@ H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
       flush = f->cache[new_idx].type->flush;
       status = (flush)(f, TRUE, f->cache[new_idx].addr,
 		       f->cache[new_idx].thing);
-      if (status<0) return -1;
+      if (status<0) {
+	 HRETURN_ERROR (H5E_CACHE, H5E_CANTFLUSH, FAIL);
+      }
    }
 
    /*
@@ -325,6 +379,6 @@ H5AC_rename (hdf5_file_t *f, const H5AC_class_t *type,
    f->cache[new_idx].thing = f->cache[old_idx].thing;
    f->cache[old_idx].type = NULL;
 
-   return 0;
+   FUNC_LEAVE (SUCCEED);
 }
 

@@ -44,10 +44,12 @@ static char RcsId[] = "@(#)$Revision$";
 #include "H5Bprivate.h"			/*B-link trees			*/
 #include "H5private.h"			/* Generic info */
 
+#define PABLO_MASK	H5_mask
+
 /*--------------------- Locally scoped variables -----------------------------*/
 
 /* Whether we've installed the library termination function yet for this interface */
-static intn interface_initialize = FALSE;
+static intn interface_initialize_g = FALSE;
 
 /*------------------_-- Local function prototypes ----------------------------*/
 static herr_t H5_init_interface(void);
@@ -66,27 +68,14 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 herr_t H5_init_library(void)
 {
-    CONSTR(FUNC, "H5_init_library");	/* For HERROR */
-    herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5_mask, ID_H5_init_library);
-
-    /* Don't call this routine again... */
-    library_initialize = TRUE;
+    FUNC_ENTER (H5_init_library, NULL, FAIL);
 
     /* Install atexit() library cleanup routine */
     if(install_atexit==TRUE)
         if (HDatexit(&H5_term_library) != 0)
-          HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
+          HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL);
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-
-    FUNC_LEAVE(H5_mask, ID_H5_init_library,ret_value);
+    FUNC_LEAVE (SUCCEED);
 }	/* H5_init_library */
 
 /*--------------------------------------------------------------------------
@@ -97,7 +86,7 @@ done:
  USAGE
     void HPend()
  RETURNS
-    none
+    SUCCEED/FAIL
  DESCRIPTION
     Walk through the shutdown routines for the various interfaces and 
     terminate them all.
@@ -107,12 +96,9 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void H5_term_library(void)
+void
+H5_term_library (void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5_term_library");    /* for HERROR */
-#endif /* LATER */
-
 } /* end H5_term_library() */
 
 /*--------------------------------------------------------------------------
@@ -129,23 +115,13 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 herr_t H5_init_thread(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5_init_thread");	/* For HERROR */
-#endif /* LATER */
-    herr_t ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5_mask, ID_H5_init_thread);
-
-    /* Don't call this routine again... */
-    thread_initialize = TRUE;
-
+    FUNC_ENTER (H5_init_thread, NULL, FAIL);
 
     /* Create/initialize this thread's error stack */
     if((thrderrid=H5Enew_err_stack(16))==FAIL)
-        ret_value=FAIL;
+       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL);
 
-    FUNC_LEAVE(H5_mask, ID_H5_init_thread, ret_value);
+    FUNC_LEAVE (SUCCEED);
 }	/* H5_init_thread */
 
 /*--------------------------------------------------------------------------
@@ -162,18 +138,9 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 static herr_t H5_init_interface(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5_init_interface");	/* For HERROR */
-#endif /* LATER */
-    herr_t ret_value = SUCCEED;
+    FUNC_ENTER (H5_init_interface, NULL, FAIL);
 
-    /* Don't use "FUNC_ENTER" macro, to avoid potential infinite recursion */
-    PABLO_TRACE_ON(H5_mask, ID_H5_init_interface);
-
-    /* Don't call this routine again... */
-    interface_initialize = TRUE;
-
-    FUNC_LEAVE(H5_mask, ID_H5_init_interface, ret_value);
+    FUNC_LEAVE (SUCCEED);
 }	/* H5_init_interface */
 
 /*--------------------------------------------------------------------------
@@ -204,28 +171,12 @@ static herr_t H5_init_interface(void)
 --------------------------------------------------------------------------*/
 herr_t H5dont_atexit(void)
 {
-#ifdef LATER
-    CONSTR(FUNC, "H5dont_atexit");    /* for HERROR */
-#endif /* LATER */
-    intn        ret_value = SUCCEED;
-
-    /* Don't use "FUNC_ENTER" macro, we are trying to avoid certain initialization code */
-    PABLO_TRACE_ON(H5_mask, ID_H5dont_atexit);
+    FUNC_ENTER (H5dont_atexit, NULL, FAIL);
 
     if(install_atexit == TRUE)
         install_atexit=FALSE;
 
-#ifdef LATER
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
-
-    } /* end if */
-#endif /* LATER */
-
-    /* Normal function cleanup */
-
-    FUNC_LEAVE(H5_mask, ID_H5dont_atexit,ret_value);
+    FUNC_LEAVE (SUCCEED);
 } /* end H5dont_atexit() */
 
 /*--------------------------------------------------------------------------
@@ -246,10 +197,9 @@ DESCRIPTION
 --------------------------------------------------------------------------*/
 herr_t H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
 {
-    CONSTR(FUNC, "H5version");	/* For HERROR */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER(H5_mask, ID_H5version, H5_init_interface,FAIL);
+    FUNC_ENTER(H5version, H5_init_interface, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -270,6 +220,6 @@ done:
 
     /* Normal function cleanup */
 
-    FUNC_LEAVE(H5_mask, ID_H5version, ret_value);
+    FUNC_LEAVE(ret_value);
 }	/* H5version */
 
