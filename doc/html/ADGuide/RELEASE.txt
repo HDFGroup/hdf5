@@ -1,4 +1,4 @@
-HDF5 version 1.7.15 released on Sun Jan 11 03:18:04 CST 2004
+HDF5 version 1.7.16 released on Sun Jan 18 03:22:35 CST 2004
 ================================================================================
 
 
@@ -101,8 +101,11 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
-        - Fixed small internal memory leak of fill-value information.
-            QAK - 2004/01/06
+        - Fixed small internal memory leaks of fill-value information.
+            QAK - 2004/01/13
+        - Fixed bug that caused variable-length datatypes (strings or sequences)
+            used for datasets in files with objects that were unlinked to
+            fail to be read/written to a file.  QAK - 2004/01/13
         - Detect situation where szip 'pixels per block' is larger than the
             fastest changing dimension of a dataset's chunk size and disallow
             this (due to limits in szip library).  QAK - 2003/12/31
