@@ -26,10 +26,11 @@
      !
      if ( (mod(DIM1, mpi_size) .ne. 0) .or. (mod(DIM2, mpi_size) .ne. 0)) then
          if (mpi_rank .eq. 0) then
-             write(*,*) "Dimensions must be mupltiples of # of processors"
+             write(*,*) "Number of processors is", mpi_size
+             write(*,*)  "It must be a factor of ", DIM1, " and ", DIM2
              write(*,*) "Exiting..."
-         goto 1000
          endif
+         goto 1000
      endif
      !
      ! Initialize FORTRAN predefined datatypes
