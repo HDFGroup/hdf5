@@ -33,12 +33,13 @@ endif
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests     \
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache btree2 blocktrack sheap \
+           hyperslab istore bittests \
            dtypes dsets cmpd_dset extend external links unlink big mtime     \
            fillval mount flush1 flush2 enum \
-           set_extent ttsafe stream_test       \
+           set_extent ttsafe stream_test \
            getname file_handle ntypes dangle dtransform filename reserved    \
-           btree2 blocktrack $(SRB_TESTS)
+           $(SRB_TESTS)
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -93,7 +94,7 @@ MOSTLYCLEANFILES=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5\
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 blocktrack.h5
+            unlink_chunked.h5 btree2.h5 blocktrack.h5 sheap.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tconfig.c tfile.c tgenprop.c \

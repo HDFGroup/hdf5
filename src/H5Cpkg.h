@@ -574,7 +574,7 @@
  ****************************************************************************/
 
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	9
+#define H5C__MAX_NUM_TYPE_IDS	10
 #define H5C__MAX_EPOCH_MARKERS  10
 
 struct H5C_t

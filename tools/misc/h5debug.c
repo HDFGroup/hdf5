@@ -29,6 +29,7 @@
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 #define H5BT_PACKAGE		/*suppress error about including H5BTpkg  */
+#define H5SH_PACKAGE		/*suppress error about including H5SHpkg  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"
@@ -42,6 +43,7 @@
 #include "H5Iprivate.h"
 #include "H5Opkg.h"
 #include "H5Pprivate.h"
+#include "H5SHpkg.h"		/* Segmented heap			*/
 
 /* File drivers */
 #include "H5FDfamily.h"
@@ -252,6 +254,12 @@ main(int argc, char *argv[])
          * Debug a block tracker info
          */
         status = H5BT_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+
+    } else if (!HDmemcmp(sig, H5SH_MAGIC, H5SH_SIZEOF_MAGIC)) {
+        /*
+         * Debug a segmented heap info
+         */
+        status = H5SH_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
 
     } else if (sig[0] == H5O_VERSION) {
         /*

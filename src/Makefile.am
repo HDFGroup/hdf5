@@ -58,7 +58,8 @@ libhdf5_la_SOURCES= H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c     \
         H5P.c H5Pdcpl.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Ptest.c H5R.c H5RC.c  \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
-        H5Sselect.c H5Stest.c H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
+        H5Sselect.c H5Stest.c H5SH.c H5SHcache.c H5SHdbg.c \
+        H5SL.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
         H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c   \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \
@@ -73,7 +74,8 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
         H5FDfphdf5.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h $(SRB_HEADER) H5FDstdio.h H5FDstream.h H5FPpublic.h             \
         H5Gpublic.h H5HGpublic.h H5HLpublic.h H5Ipublic.h                     \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h          \
+        H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
+        H5SHpublic.h \
         H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
 
 # Private headers
@@ -84,7 +86,8 @@ include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5B2public.h \
 #        H5FOprivate.h H5FSprivate.h H5Gprivate.h H5Gpkg.h                     \
 #        H5HGprivate.h H5HLprivate.h H5HPprivate.h H5Iprivate.h H5MFprivate.h  \
 #        H5MMprivate.h H5Oprivate.h H5Opkg.h H5Pprivate.h H5Ppkg.h             \
-#        H5Rprivate.h H5RCprivate.h H5RSprivate.h H5Sprivate.h H5STprivate.h   \
+#        H5Rprivate.h H5RCprivate.h H5RSprivate.h H5Sprivate.h H5SHprivate.h \
+#        H5STprivate.h \
 #        H5Tprivate.h H5Tpkg.h H5TSprivate.h H5Vprivate.h        \
 #        H5Zprivate.h H5Zpkg.h H5config.h
 

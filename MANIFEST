@@ -934,6 +934,12 @@
 ./src/H5Spublic.h
 ./src/H5Sselect.c
 ./src/H5Stest.c
+./src/H5SH.c
+./src/H5SHcache.c
+./src/H5SHdbg.c
+./src/H5SHpkg.h
+./src/H5SHpublic.h
+./src/H5SHprivate.h
 ./src/H5SL.c
 ./src/H5SLprivate.h
 ./src/H5ST.c
@@ -1033,6 +1039,7 @@
 ./test/srb_append.c
 ./test/srb_read.c
 ./test/srb_write.c
+./test/sheap.c
 ./test/stab.c
 ./test/stream_test.c
 ./test/tarray.c
@@ -1683,8 +1690,8 @@
 ./windows/examples/grouptestdll/grouptestdll.dsp
 ./windows/examples/readtest/readtest.dsp
 ./windows/examples/readtestdll/readtestdll.dsp
-./windows/examples/selectest/selecttest.dsp
-./windows/examples/selectestdll/selecttestdll.dsp
+./windows/examples/selectest/selectest.dsp
+./windows/examples/selectestdll/selectestdll.dsp
 ./windows/examples/writetest/writetest.dsp
 ./windows/examples/writetestdll/writetestdll.dsp
 ./windows/examples/testExamples.bat
