@@ -22,7 +22,7 @@ MOSTLYCLEAN=ParaEg[123].h5f
 DISTCLEAN=go
 
 # Test source files
-TEST_SRC=testphdf5.c t_dset.c t_file.c
+TEST_SRC=testphdf5.c t_dset.c t_file.c t_mpi.c
 TEST_OBJ=$(TEST_SRC:.c=.o)
 PRIVATE_HDR=testphdf5.h
 
