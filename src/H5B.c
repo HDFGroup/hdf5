@@ -1549,7 +1549,7 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 			 "memory allocation failed");
 	}
 	for (cur_addr=addr, ret_value=0;
-	     H5F_addr_defined(cur_addr);
+	     H5F_addr_defined(cur_addr) && !ret_value;
 	     cur_addr=&next_addr) {
 
 	    /*
