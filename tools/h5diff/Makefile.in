@@ -26,7 +26,7 @@ TEST_SCRIPTS=
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 
 PUB_PROGS=h5diff
-PROGS=
+PROGS=$(PUB_PROGS) $(TEST_PROGS) 
 
 ## Source and object files for the library; do not install
 ##
@@ -57,6 +57,5 @@ $(PROGS): $(LIBTOOLS) $(LIBHDF5)
 
 h5diff: h5diff.lo h5trav.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5diff.lo h5trav.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
 
 @CONCLUDE@
