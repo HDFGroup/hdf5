@@ -100,6 +100,10 @@ static void detect_C89_integers(void);
 static void detect_C89_floats(void);
 static void detect_C99_integers(void);
 static void detect_C99_floats(void);
+static void detect_C99_integers8(void);
+static void detect_C99_integers16(void);
+static void detect_C99_integers32(void);
+static void detect_C99_integers64(void);
 static void detect_alignments(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
 static jmp_buf jbuf_g;
@@ -1153,9 +1157,9 @@ detect_C89_floats(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	detect_C99_integers
+ * Function:	detect_C99_integers8
  *
- * Purpose:	Detect C99 integer types
+ * Purpose:	Detect C99 8 bit integer types
  *
  * Return:	void
  *
@@ -1167,7 +1171,7 @@ detect_C89_floats(void)
  *-------------------------------------------------------------------------
  */
 static void
-detect_C99_integers(void)
+detect_C99_integers8(void)
 {
 #if H5_SIZEOF_INT8_T>0
     DETECT_I(int8_t, 		  INT8,         d[nd]); nd++;
@@ -1187,6 +1191,26 @@ detect_C99_integers(void)
 #if H5_SIZEOF_UINT_FAST8_T>0
     DETECT_I(uint_fast8_t, 	  UINT_FAST8,   d[nd]); nd++;
 #endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_integers16
+ *
+ * Purpose:	Detect C99 16 bit integer types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_integers16(void)
+{
 #if H5_SIZEOF_INT16_T>0
     DETECT_I(int16_t, 		  INT16,        d[nd]); nd++;
 #endif
@@ -1205,6 +1229,26 @@ detect_C99_integers(void)
 #if H5_SIZEOF_UINT_FAST16_T>0
     DETECT_I(uint_fast16_t, 	  UINT_FAST16,  d[nd]); nd++;
 #endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_integers32
+ *
+ * Purpose:	Detect C99 32 bit integer types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_integers32(void)
+{
 #if H5_SIZEOF_INT32_T>0
     DETECT_I(int32_t, 		  INT32,        d[nd]); nd++;
 #endif
@@ -1223,6 +1267,26 @@ detect_C99_integers(void)
 #if H5_SIZEOF_UINT_FAST32_T>0
     DETECT_I(uint_fast32_t, 	  UINT_FAST32,  d[nd]); nd++;
 #endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_integers64
+ *
+ * Purpose:	Detect C99 64 bit integer types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_integers64(void)
+{
 #if H5_SIZEOF_INT64_T>0
     DETECT_I(int64_t, 		  INT64,        d[nd]); nd++;
 #endif
@@ -1254,6 +1318,32 @@ detect_C99_integers(void)
     DETECT_I(long,		  LLONG,        d[nd]); nd++;
     DETECT_I(unsigned long,	  ULLONG,       d[nd]); nd++;
 #endif
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	detect_C99_integers
+ *
+ * Purpose:	Detect C99 integer types
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		2004/05/20
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+detect_C99_integers(void)
+{
+    /* break it down to more subroutines so that each module subroutine */
+    /* is smaller and takes less time to compile with optimization on.  */
+    detect_C99_integers8();
+    detect_C99_integers16();
+    detect_C99_integers32();
+    detect_C99_integers64();
 }
 
 
