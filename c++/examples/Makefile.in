@@ -32,8 +32,8 @@ hdf5_builddir=$(top_builddir)/src
 ## List all source files here. The list of object files will be
 ## created by replacing the `.cpp' with a `.lo'. This list is necessary
 ## for building automatic dependencies.
-TEST_SRC=compound.cpp h5group.cpp create.cpp readdata.cpp chunks.cpp	\
-         extend_ds.cpp writedata.cpp
+TEST_SRC=create.cpp readdata.cpp writedata.cpp compound.cpp extend_ds.cpp \
+	 chunks.cpp h5group.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
 H5_FILES=Attributes.h5 SDScompound.h5 Select.h5 SDSextendible.h5 Group.h5 SDS.h5
