@@ -144,6 +144,7 @@ typedef struct H5T_enum_t {
 
 /* VL function pointers */
 typedef hssize_t (*H5T_vlen_getlenfunc_t)(void *vl_addr);
+typedef void * (*H5T_vlen_getptrfunc_t)(void *vl_addr);
 typedef htri_t (*H5T_vlen_isnullfunc_t)(H5F_t *f, void *vl_addr);
 typedef herr_t (*H5T_vlen_readfunc_t)(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t len);
 typedef herr_t (*H5T_vlen_writefunc_t)(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void *_bg, hsize_t seq_len, hsize_t base_size);
@@ -165,6 +166,7 @@ typedef struct H5T_vlen_t {
     H5T_str_t           pad;    /* For VL string.  space or null padding of 
                                  * extra bytes */                          
     H5F_t *f;                   /* File ID (if VL data is on disk) */
+    H5T_vlen_getptrfunc_t getptr;   /* Function to get VL sequence pointer */
     H5T_vlen_getlenfunc_t getlen;   /* Function to get VL sequence size (in element units, not bytes) */
     H5T_vlen_isnullfunc_t isnull;   /* Function to check if VL value is NIL */
     H5T_vlen_readfunc_t read;   /* Function to read VL sequence into buffer */
