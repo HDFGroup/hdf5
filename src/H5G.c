@@ -954,9 +954,9 @@ H5G_init_interface(void)
     /*
      * Initialize the type info table.  Begin with the most general types and
      * end with the most specific. For instance, any object that has a data
-     * type message is a data type but only some of them are datasets.
+     * type message is a datatype but only some of them are datasets.
      */
-    H5G_register_type(H5G_TYPE,    H5T_isa,  "data type");
+    H5G_register_type(H5G_TYPE,    H5T_isa,  "datatype");
     H5G_register_type(H5G_GROUP,   H5G_isa,  "group");
     H5G_register_type(H5G_DATASET, H5D_isa,  "dataset");
 
@@ -1023,8 +1023,8 @@ H5G_term_interface(void)
  *
  * Purpose:	Register a new object type so H5G_get_type() can detect it.
  *		One should always register a general type before a more
- *		specific type.  For instance, any object that has a data type
- *		message is a data type, but only some of those objects are
+ *		specific type.  For instance, any object that has a datatype
+ *		message is a datatype, but only some of those objects are
  *		datasets.
  *
  * Return:	Success:	Non-negative
@@ -2161,7 +2161,7 @@ H5G_loc (hid_t loc_id)
         case H5I_ERROR_CLASS:
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of error class, massage or stack");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of error class, message or stack");
 
         case H5I_GROUP:
             if (NULL==(group=H5I_object (loc_id)))
@@ -2174,11 +2174,11 @@ H5G_loc (hid_t loc_id)
             if (NULL==(dt=H5I_object(loc_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid type ID");
             if (NULL==(ret_value=H5T_entof(dt)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data type");
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of datatype");
             break;
 
         case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of data space");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of dataspace");
 
         case H5I_DATASET:
             if (NULL==(dset=H5I_object(loc_id)))
@@ -2194,13 +2194,12 @@ H5G_loc (hid_t loc_id)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of attribute");
             break;
                 
-        case H5I_TEMPBUF:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of buffer");
-        
+        case H5I_REFERENCE:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of reference");
+
         case H5I_NGROUPS:
         case H5I_BADID:
         case H5I_FILE_CLOSING:
-        case H5I_REFERENCE:
         case H5I_VFL:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
@@ -2258,7 +2257,7 @@ H5G_link (H5G_entry_t *cur_loc, const char *cur_name, H5G_entry_t *new_loc,
             if (H5G_namei(new_loc, new_name, &rest, &grp_ent, NULL, 
                             H5G_TARGET_NORMAL, NULL, H5G_NAMEI_TRAVERSE, NULL, dxpl_id)>=0)
                 HGOTO_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
-            H5E_clear (H5E_get_my_stack()); /*it's okay that we didn't find it*/
+            H5E_clear (NULL); /*it's okay that we didn't find it*/
             rest = H5G_component (rest, &nchars);
 
             /*
@@ -2427,35 +2426,29 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 				    obj_ent.cache.slink.lval_offset)))
 		HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to read symbolic link value");
 	    statbuf->linklen = HDstrlen(s)+1; /*count the null terminator*/
-	    statbuf->objno[0] = statbuf->objno[1] = 0;
+	    statbuf->objno = 0;
 	    statbuf->nlink = 0;
 	    statbuf->type = H5G_LINK;
 	    statbuf->mtime = 0;
 	    
 	} else {
 	    /* Some other type of object */
-	    statbuf->objno[0] = (unsigned long)(obj_ent.header);
-#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
-	    statbuf->objno[1] = (unsigned long)(obj_ent.header >>
-						8*sizeof(long));
-#else
-	    statbuf->objno[1] = 0;
-#endif
+	    statbuf->objno = obj_ent.header;
 	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
 	    statbuf->type = H5G_LINK;
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
-                H5E_clear(H5E_get_my_stack());
+                H5E_clear(NULL);
                 if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
-                    H5E_clear(H5E_get_my_stack());
+                    H5E_clear(NULL);
                     statbuf->mtime = 0;
                 }
 	    }
 	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
-	    H5E_clear(H5E_get_my_stack()); /*clear errors resulting from checking type*/
+	    H5E_clear(NULL); /*clear errors resulting from checking type*/
 	}
 
         /* Common code to retrieve the file's fileno */
-        if(H5F_get_fileno(obj_ent.file,statbuf->fileno)<0)
+        if(H5F_get_fileno(obj_ent.file,&statbuf->fileno)<0)
             HGOTO_ERROR (H5E_FILE, H5E_BADVALUE, FAIL, "unable to read fileno");
     }
 
@@ -2694,7 +2687,7 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf, hid_t dxpl_
 
     /* Remove the previous comment message if any */
     if (H5O_remove(&obj_ent, H5O_NAME_ID, 0, dxpl_id)<0)
-        H5E_clear(H5E_get_my_stack());
+        H5E_clear(NULL);
 
     /* Add the new message */
     if (buf && *buf) {
@@ -2976,7 +2969,7 @@ H5G_insertion_file(H5G_entry_t *loc, const char *name, hid_t dxpl_id)
             H5G_free_ent_name(&grp_ent);
             HGOTO_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
         } /* end if */
-        H5E_clear(H5E_get_my_stack());
+        H5E_clear(NULL);
 
         /* Make sure only the last component wasn't resolved */
         rest = H5G_component(rest, &size);
@@ -3141,7 +3134,7 @@ H5G_replace_name(int type, H5G_entry_t *loc,
             search_dataset=1;
             break;
 
-        /* Object is a named data type */
+        /* Object is a named datatype */
         case H5G_TYPE:
             /* Search and replace names through datatype IDs */
             search_datatype=1;
