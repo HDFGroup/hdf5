@@ -553,7 +553,7 @@ H5F_dest(H5F_t *f)
  *		following flags which are similar in nature to the Posix
  *		open(2) flags.
  *
- *		H5F_ACC_WRITE:	Open with read/write access. If the file is
+ *		H5F_ACC_RDWR:	Open with read/write access. If the file is
  *				currently open for read-only access then it
  *				will be reopened. Absence of this flag
  *				implies read-only access.
@@ -968,7 +968,7 @@ H5F_open(const char *name, uintn flags,
 	 * hdf5 data.
 	 */
 #ifdef H5F_DEBUG
-	fprintf(stderr, "HDF5-DIAG: resetting EOF from ");
+	fprintf(stderr, "H5F: resetting EOF from ");
 	H5F_addr_print(stderr, &addr1);
 	fprintf(stderr, " to ");
 	H5F_addr_print(stderr, &addr2);
@@ -1323,7 +1323,7 @@ H5F_close(H5F_t *f)
      */
     if (f->nopen>0) {
 #ifndef NDEBUG
-	fprintf(stderr, "HDF5-DIAG: H5F_close: %u object header%s still "
+	fprintf(stderr, "H5F: H5F_close: %u object header%s still "
 		"open (file close will complete when %s closed)\n",
 		f->nopen,
 		1 == f->nopen ? " is" : "s are",
@@ -1333,7 +1333,7 @@ H5F_close(H5F_t *f)
 	HRETURN(SUCCEED);
     } else if (f->close_pending) {
 #ifndef NDEBUG
-	fprintf(stderr, "HDF5-DIAG: H5F_close: operation completed\n");
+	fprintf(stderr, "H5F: H5F_close: operation completed\n");
 #endif
     }
     

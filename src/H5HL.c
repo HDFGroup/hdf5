@@ -529,9 +529,6 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
     size_t	offset = 0;
     size_t	need_size, old_size, need_more;
     hbool_t	found;
-#ifndef NDEBUG
-    static int	nmessages = 0;
-#endif
 
     FUNC_ENTER(H5HL_insert, (size_t)(-1));
 
@@ -601,14 +598,10 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 	    assert (max_fl->size==H5HL_ALIGN (max_fl->size));
 
 	    if (max_fl->size < H5HL_SIZEOF_FREE(f)) {
-#ifndef NDEBUG
+#ifdef H5HL_DEBUG
 		if (max_fl->size) {
-		    fprintf(stderr, "H5HL_insert: lost %lu bytes at line %d\n",
-			    (unsigned long) (max_fl->size), __LINE__);
-		    if (0 == nmessages++) {
-			fprintf(stderr, "Messages from H5HL_insert() will go "
-				"away when assertions are turned off.\n");
-		    }
+		    fprintf(stderr, "H5HL: lost %lu bytes at line %d\n",
+			    (unsigned long)(max_fl->size), __LINE__);
 		}
 #endif
 		max_fl = H5HL_remove_free(heap, max_fl);
@@ -629,26 +622,18 @@ H5HL_insert(H5F_t *f, const haddr_t *addr, size_t buf_size, const void *buf)
 		fl->next = heap->freelist;
 		if (heap->freelist) heap->freelist->prev = fl;
 		heap->freelist = fl;
-#ifndef NDEBUG
+#ifdef H5HL_DEBUG
 	    } else if (need_more > need_size) {
 		fprintf(stderr, "H5HL_insert: lost %lu bytes at line %d\n",
-			(unsigned long) (need_more - need_size), __LINE__);
-		if (0 == nmessages++) {
-		    fprintf(stderr, "Messages from H5HL_insert() will go away "
-			    "when assertions are turned off.\n");
-		}
+			(unsigned long)(need_more - need_size), __LINE__);
 #endif
 	    }
 	}
 
-#ifndef NDEBUG
-	fprintf(stderr, "H5HL_insert: resize mem buf from %lu to %lu bytes\n",
-		(unsigned long) (heap->mem_alloc),
-		(unsigned long) (heap->mem_alloc + need_more));
-	if (0 == nmessages++) {
-	    fprintf(stderr, "Messages from H5HL_insert() will go away "
-		    "when assertions are turned off.\n");
-	}
+#ifdef H5HL_DEBUG
+	fprintf(stderr, "H5HL: resize mem buf from %lu to %lu bytes\n",
+		(unsigned long)(heap->mem_alloc),
+		(unsigned long)(heap->mem_alloc + need_more));
 #endif
 	old_size = heap->mem_alloc;
 	heap->mem_alloc += need_more;
@@ -748,9 +733,6 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
 {
     H5HL_t		*heap = NULL;
     H5HL_free_t		*fl = heap->freelist, *fl2 = NULL;
-#ifndef NDEBUG
-    static int		nmessages = 0;
-#endif
 
     FUNC_ENTER(H5HL_remove, FAIL);
 
@@ -817,12 +799,8 @@ H5HL_remove(H5F_t *f, const haddr_t *addr, size_t offset, size_t size)
      * lost.
      */
     if (size < H5HL_SIZEOF_FREE(f)) {
-#ifndef NDEBUG
-	fprintf(stderr, "H5HL_remove: lost %lu bytes\n", (unsigned long) size);
-	if (0 == nmessages++) {
-	    fprintf(stderr, "Messages from H5HL_remove() will go away "
-		    "when assertions are turned off.\n");
-	}
+#ifdef H5HL_DEBUG
+	fprintf(stderr, "H5HL: lost %lu bytes\n", (unsigned long) size);
 #endif
 	HRETURN(SUCCEED);
     }

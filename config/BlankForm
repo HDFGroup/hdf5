@@ -10,8 +10,13 @@
 # flags like `-DH5G_DEBUG' since these are added with the
 # `--enable-debug' switch of configure.
 
+# Sometimes a particular compiler must be used.  If that's the case
+# then uncomment the following line.  Otherwise the main configure
+# script will try to detect the compiler automatically.
+#CC=gcc
+
 # What must *always* be present for things to compile correctly?
-CFLAGS="$CFLAGS -ansi -n32"
+#CFLAGS="$CFLAGS -ansi"
 #CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?

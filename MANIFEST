@@ -15,6 +15,7 @@
 ./bin/errors
 ./bin/install-sh
 ./bin/release
+./config/BlankForm
 ./config/alpha-dec
 ./config/commence.in
 ./config/conclude.in
@@ -158,6 +159,7 @@
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
 ./src/H5Osdspace.c
+./src/H5Oshared.c
 ./src/H5Ostab.c
 ./src/H5P.c
 ./src/H5Pprivate.h
@@ -189,6 +191,7 @@
 ./test/dtypes.c
 ./test/extend.c
 ./test/external.c
+./test/gheap.c
 ./test/hyperslab.c
 ./test/iopipe.c
 ./test/istore.c

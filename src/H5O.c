@@ -107,6 +107,7 @@ H5O_init_interface(void)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_create
@@ -281,6 +282,7 @@ H5O_close(H5G_entry_t *obj_ent)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_load
@@ -317,7 +319,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
     haddr_t	chunk_addr;
     size_t	chunk_size;
     H5O_cont_t	*cont = NULL;
-    hbool_t	constant;	/*is message a constant mesg?	*/
+    uint8	flags;
 
     FUNC_ENTER(H5O_load, NULL);
 
@@ -392,14 +394,8 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	    UINT16DECODE(p, id);
 	    UINT16DECODE(p, mesg_size);
 	    assert (mesg_size==H5O_ALIGN (mesg_size));
-	    p += 4; /*reserved*/
-
-	    /*
-	     * The message ID field actually contains some bits near the
-	     * high-order end that are not part of the ID.
-	     */
-	    constant = (id & H5O_FLAG_CONSTANT) ? TRUE : FALSE;
-	    id &= ~H5O_FLAG_BITS;
+	    flags = *p++;
+	    p += 3; /*reserved*/
 
 	    if (id >= NELMTS(message_type_g) || NULL == message_type_g[id]) {
 		HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL,
@@ -424,7 +420,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 		mesgno = oh->nmesgs++;
 		oh->mesg[mesgno].type = message_type_g[id];
 		oh->mesg[mesgno].dirty = FALSE;
-		oh->mesg[mesgno].constant = constant;
+		oh->mesg[mesgno].flags = flags;
 		oh->mesg[mesgno].native = NULL;
 		oh->mesg[mesgno].raw = p;
 		oh->mesg[mesgno].raw_size = mesg_size;
@@ -439,7 +435,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
 	     curmesg++) {
 	    if (H5O_CONT_ID == oh->mesg[curmesg].type->id) {
 		uint8 *p2 = oh->mesg[curmesg].raw;
-		cont = (H5O_CONT->decode) (f, oh->mesg[curmesg].raw_size, p2);
+		cont = (H5O_CONT->decode) (f, p2, NULL);
 		oh->mesg[curmesg].native = cont;
 		chunk_addr = cont->addr;
 		chunk_size = cont->size;
@@ -464,6 +460,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void *_udata1, void *_udata2)
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_flush
@@ -491,6 +488,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
     uint8	buf[16], *p;
     intn	i, id;
     H5O_cont_t	*cont = NULL;
+    herr_t	(*encode)(H5F_t*, uint8*, const void*) = NULL;
 
     FUNC_ENTER(H5O_flush, FAIL);
 
@@ -532,12 +530,10 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	    if (oh->mesg[i].dirty) {
 		p = oh->mesg[i].raw - H5O_SIZEOF_MSGHDR(f);
 
-		/* The message id has some flags in the high-order bits. */
 		id = oh->mesg[i].type->id;
-		id |= oh->mesg[i].constant ? H5O_FLAG_CONSTANT : 0;
 		UINT16ENCODE(p, id);
 		UINT16ENCODE(p, oh->mesg[i].raw_size);
-		*p++ = 0; /*reserved*/
+		*p++ = oh->mesg[i].flags;
 		*p++ = 0; /*reserved*/
 		*p++ = 0; /*reserved*/
 		*p++ = 0; /*reserved*/
@@ -563,7 +559,11 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 			oh->chunk[cont->chunkno].addr = cont->addr;
 		    }
 		    
-		    /* encode the message */
+		    /*
+		     * Encode the message.  If the message is shared then we
+		     * encode a Shared Object message instead of the object
+		     * which is being shared.
+		     */
 		    assert(oh->mesg[i].raw >=
 			   oh->chunk[oh->mesg[i].chunkno].image);
 		    assert (oh->mesg[i].raw_size ==
@@ -571,9 +571,12 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 		    assert(oh->mesg[i].raw + oh->mesg[i].raw_size <=
 			   oh->chunk[oh->mesg[i].chunkno].image +
 			   oh->chunk[oh->mesg[i].chunkno].size);
-		    if ((oh->mesg[i].type->encode) (f, oh->mesg[i].raw_size,
-						    oh->mesg[i].raw,
-						    oh->mesg[i].native) < 0) {
+		    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+			encode = H5O_SHARED->encode;
+		    } else {
+			encode = oh->mesg[i].type->encode;
+		    }
+		    if ((encode)(f, oh->mesg[i].raw, oh->mesg[i].native)<0) {
 			HRETURN_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL,
 				  "unable to encode object header message");
 		    }
@@ -607,7 +610,11 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 
 	/* destroy messages */
 	for (i = 0; i < oh->nmesgs; i++) {
-	    H5O_reset(oh->mesg[i].type, oh->mesg[i].native);
+	    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+		H5O_reset (H5O_SHARED, oh->mesg[i].native);
+	    } else {
+		H5O_reset(oh->mesg[i].type, oh->mesg[i].native);
+	    }
 	    oh->mesg[i].native = H5MM_xfree(oh->mesg[i].native);
 	}
 	oh->mesg = H5MM_xfree(oh->mesg);
@@ -617,6 +624,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_reset
@@ -654,6 +662,7 @@ H5O_reset(const H5O_class_t *type, void *native)
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_link
@@ -676,8 +685,8 @@ H5O_reset(const H5O_class_t *type, void *native)
 intn
 H5O_link(H5G_entry_t *ent, intn adjust)
 {
-    H5O_t		   *oh = NULL;
-    intn		    ret_value = FAIL;
+    H5O_t	*oh = NULL;
+    intn	ret_value = FAIL;
 
     FUNC_ENTER(H5O_link, FAIL);
 
@@ -714,6 +723,7 @@ H5O_link(H5G_entry_t *ent, intn adjust)
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_read
@@ -739,11 +749,11 @@ H5O_link(H5G_entry_t *ent, intn adjust)
 void *
 H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 {
-    H5O_t		   *oh = NULL;
-    void		   *retval = NULL;
-    intn		    idx;
-    H5G_cache_t		   *cache = NULL;
-    H5G_type_t		    cache_type;
+    H5O_t		*oh = NULL;
+    void		*ret_value = NULL;
+    intn		idx;
+    H5G_cache_t		*cache = NULL;
+    H5G_type_t		cache_type;
 
     FUNC_ENTER(H5O_read, NULL);
 
@@ -757,9 +767,9 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
     /* can we get it from the symbol table entry? */
     cache = H5G_ent_cache(ent, &cache_type);
     if (H5O_fast_g[cache_type]) {
-	retval = (H5O_fast_g[cache_type]) (cache, type, mesg);
-	if (retval)
-	    HRETURN(retval);
+	ret_value = (H5O_fast_g[cache_type]) (cache, type, mesg);
+	if (ret_value)
+	    HRETURN(ret_value);
 	H5E_clear(); /*don't care, try reading from header */
     }
 
@@ -776,19 +786,54 @@ H5O_read(H5G_entry_t *ent, const H5O_class_t *type, intn sequence, void *mesg)
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL,
 		      "unable to load object header");
     }
-    retval = (type->copy) (oh->mesg[idx].native, mesg);
+    if (oh->mesg[idx].flags & H5O_FLAG_SHARED) {
+	/*
+	 * If the message is shared then then the native pointer points to an
+	 * H5O_SHARED message.  We use that information to look up the real
+	 * message in the global heap.
+	 */
+	H5O_shared_t *shared;
+	void *tmp_buf, *tmp_mesg;
+
+	shared = (H5O_shared_t *)(oh->mesg[idx].native);
+	if (NULL==(tmp_buf = H5HG_read (ent->file, shared, NULL))) {
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+			 "unable to read shared message from global heap");
+	}
+	tmp_mesg = (type->decode)(ent->file, tmp_buf, shared);
+	if (!tmp_mesg) {
+	    H5MM_xfree (tmp_buf);
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTLOAD, NULL,
+			 "unable to decode object header shared message");
+	}
+	if (mesg) {
+	    HDmemcpy (mesg, tmp_mesg, type->native_size);
+	    H5MM_xfree (tmp_mesg);
+	} else {
+	    ret_value = tmp_mesg;
+	}
+    } else {
+	/*
+	 * The message is not shared, but rather exists in the object
+	 * header.  The object header caches the native message (along with
+	 * the raw message) so we must copy the native message before
+	 * returning.
+	 */
+	if (NULL==(ret_value = (type->copy) (oh->mesg[idx].native, mesg))) {
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL,
+			 "unable to copy message to user space");
+	}
+    }
+
+ done:
     if (H5AC_unprotect(ent->file, H5AC_OHDR, &(ent->header), oh) < 0) {
 	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, NULL,
 		      "unable to release object header");
     }
     oh = NULL;
-
-    if (!retval) {
-	HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
-		      "unable to copy object header message to user space");
-    }
-    FUNC_LEAVE(retval);
+    FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_find_in_ohdr
@@ -812,23 +857,24 @@ static intn
 H5O_find_in_ohdr(H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 		 intn sequence)
 {
-    H5O_t		   *oh = NULL;
-    int			    i;
+    H5O_t		*oh = NULL;
+    int			i;
+    const H5O_class_t	*type = NULL;
 
     FUNC_ENTER(H5O_find_in_ohdr, FAIL);
 
-    /* check args */
+    /* Check args */
     assert(f);
     assert(addr && H5F_addr_defined(addr));
     assert(type_p);
 
-    /* load the object header */
+    /* Load the object header */
     if (NULL == (oh = H5AC_find(f, H5AC_OHDR, addr, NULL, NULL))) {
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
 		      "unable to load object header");
     }
 
-    /* scan through the messages looking for the right one */
+    /* Scan through the messages looking for the right one */
     for (i = 0; i < oh->nmesgs; i++) {
 	if (*type_p && (*type_p)->id != oh->mesg[i].type->id) continue;
 	if (--sequence < 0) break;
@@ -838,24 +884,32 @@ H5O_find_in_ohdr(H5F_t *f, const haddr_t *addr, const H5O_class_t **type_p,
 		      "unable to find object header message");
     }
 
-    /* decode the message if necessary */
+    /*
+     * Decode the message if necessary.  If the message is shared then decode
+     * a shared message, ignoring the message type.
+     */
+    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+	type = H5O_SHARED;
+    } else {
+	type = oh->mesg[i].type;
+    }
     if (NULL == oh->mesg[i].native) {
-	assert(oh->mesg[i].type->decode);
-	assert (oh->mesg[i].raw_size==H5O_ALIGN (oh->mesg[i].raw_size));
-	oh->mesg[i].native = (oh->mesg[i].type->decode) (f,
-							 oh->mesg[i].raw_size,
-							 oh->mesg[i].raw);
+	assert(type->decode);
+	oh->mesg[i].native = (type->decode) (f, oh->mesg[i].raw, NULL);
 	if (NULL == oh->mesg[i].native) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL,
 			  "unable to decode message");
 	}
     }
 
-    /*return the message type */
+    /*
+     * Return the message type. If this is a shared message then return the
+     * pointed-to type.
+     */
     *type_p = oh->mesg[i].type;
-
     FUNC_LEAVE(i);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_modify
@@ -898,10 +952,11 @@ intn
 H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 	   uintn flags, const void *mesg)
 {
-    H5O_t		   *oh = NULL;
-    intn		    idx, sequence;
-    intn		    ret_value = FAIL;
-    size_t		    size;
+    H5O_t		*oh = NULL;
+    intn		idx, sequence;
+    intn		ret_value = FAIL;
+    size_t		size = 0;
+    H5O_shared_t	*sh_mesg = NULL;
 
     FUNC_ENTER(H5O_modify, FAIL);
 
@@ -911,6 +966,7 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     assert(H5F_addr_defined(&(ent->header)));
     assert(type);
     assert(mesg);
+    assert (0==(flags & ~H5O_FLAG_BITS));
 
     if (NULL == (oh = H5AC_protect(ent->file, H5AC_OHDR, &(ent->header),
 				   NULL, NULL))) {
@@ -937,27 +993,59 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
     }
     if (overwrite < 0) {
 	/* Allocate space for the new message */
-	size = (type->raw_size) (ent->file, mesg);
+	if (flags & H5O_FLAG_SHARED) {
+	    if (NULL==type->share) {
+		HGOTO_ERROR (H5E_OHDR, H5E_UNSUPPORTED, FAIL,
+			     "message class is not sharable");
+	    }
+	    sh_mesg = H5MM_xcalloc (1, sizeof *sh_mesg);
+	    if ((type->share)(ent->file, mesg, sh_mesg/*out*/)<0) {
+		/*
+		 * If the message isn't shared then turn of the shared bit
+		 * and treat it as an unshared message.
+		 */
+		H5E_clear ();
+		flags &= ~H5O_FLAG_SHARED;
+	    } else {
+		if (H5HG_link (ent->file, sh_mesg, 1)<0) {
+		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
+				 "unable to adjust shared object link count");
+		}
+		size = (H5O_SHARED->raw_size)(ent->file, sh_mesg);
+	    }
+	}
+	if (0==(flags & H5O_FLAG_SHARED)) {
+	    size = (type->raw_size) (ent->file, mesg);
+	}
 	size = H5O_ALIGN(size);
 	idx = H5O_alloc(ent->file, oh, type, size);
 	if (idx < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-		      "unable to allocate object header space for message");
+			"unable to allocate space for message");
 	}
 	sequence++;
-
-    } else if (oh->mesg[idx].constant) {
+	    
+    } else if (oh->mesg[idx].flags & H5O_FLAG_CONSTANT) {
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
 		    "unable to modify constant message");
+    } else if (oh->mesg[idx].flags & H5O_FLAG_SHARED) {
+	HGOTO_ERROR (H5E_OHDR, H5E_WRITEERROR, FAIL,
+		     "unable to modify shared (constant) message");
     }
+    
 
     /* Copy the native value into the object header */
-    oh->mesg[idx].native = (type->copy) (mesg, oh->mesg[idx].native);
-    if (NULL == oh->mesg[idx].native) {
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
-		    "unable to copy message to object header");
+    if (flags & H5O_FLAG_SHARED) {
+	oh->mesg[idx].native = sh_mesg;
+    } else {
+	oh->mesg[idx].native = (type->copy) (mesg, oh->mesg[idx].native);
+	if (NULL == oh->mesg[idx].native) {
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL,
+			"unable to copy message to object header");
+	}
     }
-    oh->mesg[idx].constant = (flags & H5O_FLAG_CONSTANT) ? TRUE : FALSE;
+    
+    oh->mesg[idx].flags = flags;
     oh->mesg[idx].dirty = TRUE;
     oh->dirty = TRUE;
     ret_value = sequence;
@@ -967,8 +1055,10 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 	HRETURN_ERROR(H5E_OHDR, H5E_PROTECT, FAIL,
 		      "unable to release object header");
     }
+    
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_remove
@@ -1000,9 +1090,10 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 herr_t
 H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 {
-    H5O_t		   *oh = NULL;
-    intn		    i, seq, nfailed = 0;
-    herr_t		    ret_value = FAIL;
+    H5O_t		*oh = NULL;
+    intn		i, seq, nfailed = 0;
+    herr_t		ret_value = FAIL;
+    H5O_shared_t	*sh_mesg = NULL;
 
     FUNC_ENTER(H5O_remove, FAIL);
 
@@ -1018,6 +1109,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL,
 		    "unable to load object header");
     }
+    
     for (i = seq = 0; i < oh->nmesgs; i++) {
 	if (type->id != oh->mesg[i].type->id) continue;
 	if (seq++ == sequence || H5O_ALL == sequence) {
@@ -1025,9 +1117,25 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 	     * Keep track of how many times we failed trying to remove constant
 	     * messages.
 	     */
-	    if (oh->mesg[i].constant) {
+	    if (oh->mesg[i].flags & H5O_FLAG_CONSTANT) {
 		nfailed++;
 		continue;
+	    }
+
+	    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+		if (NULL==oh->mesg[i].native) {
+		    sh_mesg = (H5O_SHARED->decode)(ent->file, oh->mesg[i].raw,
+						   NULL);
+		    if (NULL==(oh->mesg[i].native = sh_mesg)) {
+			HGOTO_ERROR (H5E_OHDR, H5E_CANTDECODE, FAIL,
+				     "unable to decode shared message info");
+		    }
+		}
+		if (H5HG_link (ent->file, sh_mesg, -1)<0) {
+		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
+				 "unable to decrement link count on shared "
+				 "message");
+		}
 	    }
 
 	    /* change message type to nil and zero it */
@@ -1055,6 +1163,7 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_alloc_extend_chunk
@@ -1083,9 +1192,9 @@ H5O_remove(H5G_entry_t *ent, const H5O_class_t *type, intn sequence)
 static intn
 H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 {
-    intn		    idx, i;
-    size_t		    delta;
-    uint8		   *old_addr;
+    intn	idx, i;
+    size_t	delta;
+    uint8	*old_addr;
 
     FUNC_ENTER(H5O_alloc_extend_chunk, FAIL);
 
@@ -1167,6 +1276,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
     }
     FUNC_LEAVE(idx);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_alloc_new_chunk
@@ -1339,6 +1449,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 
     FUNC_LEAVE(idx);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_alloc
@@ -1360,9 +1471,9 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 static intn
 H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 {
-    intn		    chunkno;
-    intn		    idx;
-    intn		    null_idx;
+    intn	chunkno;
+    intn	idx;
+    intn	null_idx;
 
     FUNC_ENTER(H5O_alloc, FAIL);
 
@@ -1441,6 +1552,60 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
     oh->dirty = TRUE;
     FUNC_LEAVE(idx);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_share
+ *
+ * Purpose:	Writes a message to the global heap.
+ *
+ * Return:	Success:	SUCCEED, and HOBJ describes the global heap
+ *				object.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
+	   H5HG_t *hobj/*out*/)
+{
+    size_t	size;
+    void	*buf = NULL;
+    herr_t	ret_value = FAIL;
+    
+    FUNC_ENTER (H5O_share, FAIL);
+
+    /* Check args */
+    assert (f);
+    assert (type);
+    assert (mesg);
+    assert (hobj);
+
+    /* Encode the message put it in the global heap */
+    if ((size = (type->raw_size)(f, mesg))>0) {
+	buf = H5MM_xmalloc (size);
+	if ((type->encode)(f, buf, mesg)<0) {
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL,
+			 "unable to encode message");
+	}
+	if (H5HG_insert (f, size, buf, hobj)<0) {
+	    HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, FAIL,
+			 "unable to store message in global heap");
+	}
+    }
+    ret_value = SUCCEED;
+
+ done:
+    H5MM_xfree (buf);
+    FUNC_LEAVE (ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_debug
@@ -1463,12 +1628,14 @@ herr_t
 H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	  intn fwidth)
 {
-    H5O_t		   *oh = NULL;
-    intn		    i, chunkno;
-    size_t		    mesg_total = 0, chunk_total = 0;
-    int			   *sequence;
-    haddr_t		    tmp_addr;
-    herr_t		    ret_value = FAIL;
+    H5O_t	*oh = NULL;
+    intn	i, chunkno;
+    size_t	mesg_total = 0, chunk_total = 0;
+    int		*sequence;
+    haddr_t	tmp_addr;
+    herr_t	ret_value = FAIL;
+    void	*(*decode)(H5F_t*, const uint8*, H5HG_t*);
+    herr_t      (*debug)(H5F_t*, const void*, FILE*, intn, intn)=NULL;
 
     FUNC_ENTER(H5O_debug, FAIL);
 
@@ -1540,6 +1707,7 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		    oh->mesg[i].type->id);
 	    continue;
 	}
+
 	/* message name and size */
 	fprintf(stream, "%*s%-*s 0x%04x %s(%d)\n",
 		indent + 3, "", MAX(0, fwidth - 3),
@@ -1547,12 +1715,20 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		(unsigned) (oh->mesg[i].type->id),
 		oh->mesg[i].type->name,
 		sequence[oh->mesg[i].type->id]++);
-	fprintf(stream, "%*s%-*s %lu\n", indent + 3, "", MAX(0, fwidth - 3),
-		"Raw size in bytes:",
-		(unsigned long) (oh->mesg[i].raw_size));
+	fprintf (stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
+		 "Shared message:",
+		 (oh->mesg[i].flags & H5O_FLAG_SHARED) ? "Yes" : "No");
 	fprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
 		"Constant:",
-		oh->mesg[i].constant ? "Yes" : "No");
+		(oh->mesg[i].flags & H5O_FLAG_CONSTANT) ? "Yes" : "No");
+	if (oh->mesg[i].flags & ~H5O_FLAG_BITS) {
+	    fprintf (stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3), 
+		     "*** ADDITIONAL UNKNOWN FLAGS --->",
+		     oh->mesg[i].flags & ~H5O_FLAG_BITS);
+	}
+	fprintf(stream, "%*s%-*s %lu bytes\n", indent+3, "", MAX(0,fwidth-3),
+		"Raw size in obj header:",
+		(unsigned long) (oh->mesg[i].raw_size));
 	fprintf(stream, "%*s%-*s %d\n", indent + 3, "", MAX(0, fwidth - 3),
 		"Chunk number:",
 		(int) (oh->mesg[i].chunkno));
@@ -1560,24 +1736,46 @@ H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 	if (chunkno < 0 || chunkno >= oh->nchunks) {
 	    fprintf(stream, "*** BAD CHUNK NUMBER\n");
 	}
+	
 	/* check the size */
 	if ((oh->mesg[i].raw + oh->mesg[i].raw_size >
 	     oh->chunk[chunkno].image + oh->chunk[chunkno].size) ||
 	    (oh->mesg[i].raw < oh->chunk[chunkno].image)) {
 	    fprintf(stream, "*** BAD MESSAGE RAW ADDRESS\n");
 	}
+	
 	/* decode the message */
 	if (NULL == oh->mesg[i].native && oh->mesg[i].type->decode) {
-	    oh->mesg[i].native = (oh->mesg[i].type->decode) (f,
-						       oh->mesg[i].raw_size,
-							   oh->mesg[i].raw);
+	    if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+		decode = H5O_SHARED->decode;
+		debug = H5O_SHARED->debug;
+	    } else {
+		decode = oh->mesg[i].type->decode;
+		debug = oh->mesg[i].type->debug;
+	    }
+	    oh->mesg[i].native = (decode)(f, oh->mesg[i].raw, NULL);
+	} else {
+	    debug = NULL;
 	}
+	
 	/* print the message */
-	if (oh->mesg[i].type->debug) {
-	    (oh->mesg[i].type->debug)(f, oh->mesg[i].native, stream, indent+3,
-				       MAX(0, fwidth-3));
+	if (debug) {
+	    (debug)(f, oh->mesg[i].native, stream, indent+3, MAX(0, fwidth-3));
 	} else {
 	    fprintf(stream, "%*sNo info for this message.\n", indent + 3, "");
+	}
+
+	/* If the message is shared then also print the pointed-to message */
+	if (oh->mesg[i].flags & H5O_FLAG_SHARED) {
+	    void *p = H5HG_read (f, oh->mesg[i].native, NULL);
+	    void *mesg = (oh->mesg[i].type->decode)(f, p, oh->mesg[i].native);
+	    if (oh->mesg[i].type->debug) {
+		(oh->mesg[i].type->debug)(f, mesg, stream, indent+3,
+					  MAX (0, fwidth-3));
+	    }
+	    H5O_reset (oh->mesg[i].type, mesg);
+	    H5MM_xfree (mesg);
+	    H5MM_xfree (p);
 	}
     }
     sequence = H5MM_xfree(sequence);

@@ -28,29 +28,28 @@ static char             RcsId[] = "@(#)$Revision$";
 #define PABLO_MASK      H5O_dtype_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t           H5O_dtype_encode(H5F_t *f, size_t raw_size, uint8 *p,
-                                         const void *mesg);
-static void            *H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static void            *H5O_dtype_copy(const void *_mesg, void *_dest);
-static size_t           H5O_dtype_size(H5F_t *f, const void *_mesg);
-static herr_t           H5O_dtype_reset(void *_mesg);
-static herr_t           H5O_dtype_debug(H5F_t *f, const void *_mesg,
-                                   FILE * stream, intn indent, intn fwidth);
+static herr_t H5O_dtype_encode (H5F_t *f, uint8 *p, const void *mesg);
+static void *H5O_dtype_decode (H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static void *H5O_dtype_copy (const void *_mesg, void *_dest);
+static size_t H5O_dtype_size (H5F_t *f, const void *_mesg);
+static herr_t H5O_dtype_reset (void *_mesg);
+static herr_t H5O_dtype_debug (H5F_t *f, const void *_mesg,
+			       FILE * stream, intn indent, intn fwidth);
+static herr_t H5O_dtype_share (H5F_t *f, const void *_mesg, H5HG_t *hobj);
 
 /* This message derives from H5O */
-const H5O_class_t       H5O_DTYPE[1] =
-{
-    {
-        H5O_DTYPE_ID,           /* message id number            */
-        "data_type",            /* message name for debugging   */
-        sizeof(H5T_t),          /* native message size          */
-        H5O_dtype_decode,       /* decode message               */
-        H5O_dtype_encode,       /* encode message               */
-        H5O_dtype_copy,         /* copy the native value        */
-        H5O_dtype_size,         /* size of raw message          */
-        H5O_dtype_reset,        /* reset method                 */
-        H5O_dtype_debug,        /* debug the message            */
-    }};
+const H5O_class_t H5O_DTYPE[1] = {{
+    H5O_DTYPE_ID,		/* message id number            */
+    "data_type",		/* message name for debugging   */
+    sizeof(H5T_t),		/* native message size          */
+    H5O_dtype_decode,		/* decode message               */
+    H5O_dtype_encode,		/* encode message               */
+    H5O_dtype_copy,		/* copy the native value        */
+    H5O_dtype_size,		/* size of raw message          */
+    H5O_dtype_reset,		/* reset method                 */
+    H5O_dtype_share,		/* share method			*/
+    H5O_dtype_debug,		/* debug the message            */
+}};
 
 /* Interface initialization */
 static hbool_t          interface_initialize_g = FALSE;
@@ -436,8 +435,8 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
     into a struct in memory native format.  The struct is allocated within this
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
-static void            *
-H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p)
+static void *
+H5O_dtype_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
 {
     H5T_t                  *dt = NULL;
 
@@ -445,7 +444,6 @@ H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 
     /* check args */
     assert(f);
-    assert(raw_size > 0);
     assert(p);
 
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
@@ -455,7 +453,10 @@ H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL,
                       "can't decode type");
     }
-    assert(raw_size == H5O_ALIGN (H5O_dtype_size(f, (void *) dt)));
+    if (hobj) {
+	dt->sh_heap = *hobj;
+	dt->sh_file = f;
+    }
 
     FUNC_LEAVE(dt);
 }
@@ -478,7 +479,7 @@ H5O_dtype_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_dtype_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
+H5O_dtype_encode(H5F_t *f, uint8 *p, const void *mesg)
 {
     const H5T_t            *dt = (const H5T_t *) mesg;
 
@@ -486,7 +487,6 @@ H5O_dtype_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 
     /* check args */
     assert(f);
-    assert(raw_size == H5O_ALIGN (H5O_dtype_size(f, mesg)));
     assert(p);
     assert(dt);
 
@@ -625,6 +625,45 @@ H5O_dtype_reset(void *_mesg)
     FUNC_LEAVE(SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dtype_share
+ *
+ * Purpose:	Returns, through argument HOBJ, whether a data type is shared
+ *		in the specified file.
+ *
+ * Return:	Success:	SUCCEED if the data type is shared in file F,
+ *				and HOBJ is set to the global heap address.
+ *
+ *		Failure:	FAIL if the data type is not shared, or
+ *				shared but not in file F.  The value of HOBJ
+ *				is undefined.
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, April  2, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_share (H5F_t *f, const void *_mesg, H5HG_t *hobj/*out*/)
+{
+    const H5T_t		*dt = (const H5T_t *)_mesg;
+    
+    FUNC_ENTER (H5O_dtype_share, FAIL);
+    
+    if (!H5HG_defined (&(dt->sh_heap)) ||
+	NULL==dt->sh_file ||
+	dt->sh_file->shared != f->shared) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "data type is not shared");
+    }
+    
+    *hobj = dt->sh_heap;
+    FUNC_LEAVE (SUCCEED);
+}
+	
 /*--------------------------------------------------------------------------
  NAME
     H5O_dtype_debug

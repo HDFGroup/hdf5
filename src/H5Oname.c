@@ -22,9 +22,8 @@
 #define PABLO_MASK      H5O_name_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_name_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_name_encode(H5F_t *f, size_t raw_size, uint8 *p,
-			      const void *_mesg);
+static void *H5O_name_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static herr_t H5O_name_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_name_reset(void *_mesg);
@@ -41,6 +40,7 @@ const H5O_class_t H5O_NAME[1] = {{
     H5O_name_copy,          /*copy the native value         */
     H5O_name_size,          /*raw message size              */
     H5O_name_reset,         /*free internal memory          */
+    NULL,		    /*no share method		    */
     H5O_name_debug,         /*debug the message             */
 }};
 
@@ -67,23 +67,22 @@ static hbool_t interface_initialize_g = FALSE;
  *
  *-------------------------------------------------------------------------
  */
-static void            *
-H5O_name_decode(H5F_t *f, size_t raw_size, const uint8 *p)
+static void *
+H5O_name_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
 {
     H5O_name_t             *mesg;
-    char                   *s;
 
     FUNC_ENTER(H5O_name_decode, NULL);
 
     /* check args */
     assert(f);
     assert(p);
+    assert (!hobj || !H5HG_defined (hobj));
 
     /* decode */
     mesg = H5MM_xcalloc(1, sizeof(H5O_name_t));
-    s = H5MM_xmalloc(raw_size);
-    HDmemcpy(s, p, raw_size);
-    mesg->s = s;
+    mesg->s = H5MM_xmalloc (strlen ((const char*)p)+1);
+    strcpy (mesg->s, (const char*)p);
 
     FUNC_LEAVE(mesg);
 }
@@ -106,10 +105,9 @@ H5O_name_decode(H5F_t *f, size_t raw_size, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_name_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
+H5O_name_encode(H5F_t *f, uint8 *p, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
-    size_t                  size;
 
     FUNC_ENTER(H5O_name_encode, FAIL);
 
@@ -118,14 +116,8 @@ H5O_name_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
     assert(p);
     assert(mesg && mesg->s);
 
-    /* message size */
-    size = HDstrlen(mesg->s) + 1;
-    assert(size <= raw_size);
-
     /* encode */
-    HDmemcpy(p, mesg->s, size);
-    HDmemset(p + size, 0, raw_size - size);
-
+    strcpy ((char*)p, mesg->s);
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -255,10 +247,10 @@ H5O_name_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_name_debug(H5F_t *f, const void *_mesg, FILE * stream,
-               intn indent, intn fwidth)
+H5O_name_debug(H5F_t *f, const void *_mesg, FILE *stream, intn indent,
+	       intn fwidth)
 {
-    const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
+    const H5O_name_t	*mesg = (const H5O_name_t *)_mesg;
 
     FUNC_ENTER(H5O_name_debug, FAIL);
 

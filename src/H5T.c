@@ -1,16 +1,10 @@
 /*
- * 
-* NCSA HDF								   *
-* Software Development Group						   *
-* National Center for Supercomputing Applications			   *
-* University of Illinois at Urbana-Champaign				   *
-* 605 E. Springfield, Champaign IL 61820				   *
-*									   *
-* For conditions of distribution and use, see the accompanying		   *
-* hdf/COPYING file.							   *
-*									   *
-****************************************************************************/
-
+ * Copyright (C) 1998 NCSA
+ *		      All rights reserved.
+ *
+ * Programmer:	Robb Matzke <matzke@llnl.gov>
+ *		Tuesday, March 31, 1998
+ */
 #ifdef RCSID
 static char		RcsId[] = "@(#)$Revision$";
 #endif
@@ -19,7 +13,8 @@ static char		RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>		/*generic functions			  */
 #include <H5Iprivate.h>		/*ID functions		  */
-#include <H5Eprivate.h>		/*error handling		  */
+#include <H5Eprivate.h>		/*error handling			 */
+#include <H5HGprivate.h>	/*global heap				  */
 #include <H5MMprivate.h>	/*memory management			  */
 #include <H5Sprivate.h>		/*data space				  */
 #include <H5Tpkg.h>		/*data-type functions			  */
@@ -29,47 +24,47 @@ static char		RcsId[] = "@(#)$Revision$";
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Interface initialization */
-static intn		interface_initialize_g = FALSE;
+static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5T_init_interface
-static void		H5T_term_interface(void);
+static void H5T_term_interface(void);
 
 /* Predefined types */
-hid_t			H5T_NATIVE_CHAR_g = FAIL;
-hid_t			H5T_NATIVE_UCHAR_g = FAIL;
-hid_t			H5T_NATIVE_SHORT_g = FAIL;
-hid_t			H5T_NATIVE_USHORT_g = FAIL;
-hid_t			H5T_NATIVE_INT_g = FAIL;
-hid_t			H5T_NATIVE_UINT_g = FAIL;
-hid_t			H5T_NATIVE_LONG_g = FAIL;
-hid_t			H5T_NATIVE_LLONG_g = FAIL;
-hid_t			H5T_NATIVE_ULLONG_g = FAIL;
-hid_t			H5T_NATIVE_HYPER_g = FAIL;
-hid_t			H5T_NATIVE_UHYPER_g = FAIL;
-hid_t			H5T_NATIVE_INT8_g = FAIL;
-hid_t			H5T_NATIVE_UINT8_g = FAIL;
-hid_t			H5T_NATIVE_INT16_g = FAIL;
-hid_t			H5T_NATIVE_UINT16_g = FAIL;
-hid_t			H5T_NATIVE_INT32_g = FAIL;
-hid_t			H5T_NATIVE_UINT32_g = FAIL;
-hid_t			H5T_NATIVE_INT64_g = FAIL;
-hid_t			H5T_NATIVE_UINT64_g = FAIL;
-hid_t			H5T_NATIVE_ULONG_g = FAIL;
-hid_t			H5T_NATIVE_FLOAT_g = FAIL;
-hid_t			H5T_NATIVE_DOUBLE_g = FAIL;
-hid_t			H5T_NATIVE_TIME_g = FAIL;
-hid_t			H5T_NATIVE_STRING_g = FAIL;
-hid_t			H5T_NATIVE_BITFIELD_g = FAIL;
-hid_t			H5T_NATIVE_OPAQUE_g = FAIL;
+hid_t H5T_NATIVE_CHAR_g = FAIL;
+hid_t H5T_NATIVE_UCHAR_g = FAIL;
+hid_t H5T_NATIVE_SHORT_g = FAIL;
+hid_t H5T_NATIVE_USHORT_g = FAIL;
+hid_t H5T_NATIVE_INT_g = FAIL;
+hid_t H5T_NATIVE_UINT_g = FAIL;
+hid_t H5T_NATIVE_LONG_g = FAIL;
+hid_t H5T_NATIVE_LLONG_g = FAIL;
+hid_t H5T_NATIVE_ULLONG_g = FAIL;
+hid_t H5T_NATIVE_HYPER_g = FAIL;
+hid_t H5T_NATIVE_UHYPER_g = FAIL;
+hid_t H5T_NATIVE_INT8_g = FAIL;
+hid_t H5T_NATIVE_UINT8_g = FAIL;
+hid_t H5T_NATIVE_INT16_g = FAIL;
+hid_t H5T_NATIVE_UINT16_g = FAIL;
+hid_t H5T_NATIVE_INT32_g = FAIL;
+hid_t H5T_NATIVE_UINT32_g = FAIL;
+hid_t H5T_NATIVE_INT64_g = FAIL;
+hid_t H5T_NATIVE_UINT64_g = FAIL;
+hid_t H5T_NATIVE_ULONG_g = FAIL;
+hid_t H5T_NATIVE_FLOAT_g = FAIL;
+hid_t H5T_NATIVE_DOUBLE_g = FAIL;
+hid_t H5T_NATIVE_TIME_g = FAIL;
+hid_t H5T_NATIVE_STRING_g = FAIL;
+hid_t H5T_NATIVE_BITFIELD_g = FAIL;
+hid_t H5T_NATIVE_OPAQUE_g = FAIL;
 
 /* The path database */
-static intn		H5T_npath_g = 0;	/*num paths defined	*/
-static intn		H5T_apath_g = 0;	/*num slots allocated	*/
-static H5T_path_t      *H5T_path_g = NULL;	/*path array		*/
+static intn H5T_npath_g = 0;			/*num paths defined	*/
+static intn H5T_apath_g = 0;			/*num slots allocated	*/
+static H5T_path_t *H5T_path_g = NULL;		/*path array		*/
 
 /* The soft conversion function master list */
-static intn		H5T_nsoft_g = 0;	/*num soft funcs defined */
-static intn		H5T_asoft_g = 0;	/*num slots allocated	*/
-static H5T_soft_t      *H5T_soft_g = NULL;	/*master soft list	*/
+static intn H5T_nsoft_g = 0;			/*num soft funcs defined */
+static intn H5T_asoft_g = 0;			/*num slots allocated	*/
+static H5T_soft_t *H5T_soft_g = NULL;		/*master soft list	*/
 
 /*--------------------------------------------------------------------------
 NAME
@@ -86,8 +81,8 @@ DESCRIPTION
 herr_t
 H5T_init_interface(void)
 {
-    H5T_t		   *dt = NULL;
-    herr_t		    ret_value = SUCCEED;
+    H5T_t	*dt = NULL;
+    herr_t	ret_value = SUCCEED;
 
     interface_initialize_g = TRUE;
     FUNC_ENTER(H5T_init_interface, FAIL);
@@ -285,7 +280,7 @@ H5T_term_interface(void)
 	    path->cdata.command = H5T_CONV_FREE;
 	    if ((path->func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "HDF5-DIAG: conversion function failed "
+		fprintf (stderr, "H5T: conversion function failed "
 			 "to free private data\n");
 #endif
 		H5E_clear(); /*ignore the error*/
@@ -336,6 +331,7 @@ H5T_term_interface(void)
     H5T_NATIVE_BITFIELD_g = FAIL;
     H5T_NATIVE_OPAQUE_g = FAIL;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tcreate
@@ -362,8 +358,8 @@ H5T_term_interface(void)
 hid_t
 H5Tcreate(H5T_class_t type, size_t size)
 {
-    H5T_t		   *dt = NULL;
-    hid_t		    ret_value = FAIL;
+    H5T_t	*dt = NULL;
+    hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Tcreate, FAIL);
 
@@ -371,17 +367,21 @@ H5Tcreate(H5T_class_t type, size_t size)
     if (size <= 0) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid size");
     }
+
     /* create the type */
     if (NULL == (dt = H5T_create(type, size))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't create type");
     }
+
     /* Make it an atom */
     if ((ret_value = H5I_register(H5_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
 		      "can't register data type atom");
     }
+
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tcopy
@@ -404,9 +404,9 @@ H5Tcreate(H5T_class_t type, size_t size)
 hid_t
 H5Tcopy(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_t		   *new_dt = NULL;
-    hid_t		    ret_value = FAIL;
+    H5T_t	*dt = NULL;
+    H5T_t	*new_dt = NULL;
+    hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Tcopy, FAIL);
 
@@ -420,14 +420,17 @@ H5Tcopy(hid_t type_id)
     if (NULL == (new_dt = H5T_copy(dt))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
     }
-    /* atomize result */
+
+    /* Atomize result */
     if ((ret_value = H5I_register(H5_DATATYPE, new_dt)) < 0) {
 	H5T_close(new_dt);
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
 		      "can't register data type atom");
     }
+    
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tclose
@@ -448,7 +451,7 @@ H5Tcopy(hid_t type_id)
 herr_t
 H5Tclose(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tclose, FAIL);
 
@@ -460,12 +463,15 @@ H5Tclose(hid_t type_id)
     if (dt->locked) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "predefined data type");
     }
+
     /* When the reference count reaches zero the resources are freed */
     if (H5I_dec_ref(type_id) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tequal
@@ -488,9 +494,9 @@ H5Tclose(hid_t type_id)
 hbool_t
 H5Tequal(hid_t type1_id, hid_t type2_id)
 {
-    const H5T_t		   *dt1 = NULL;
-    const H5T_t		   *dt2 = NULL;
-    hbool_t		    ret_value = FAIL;
+    const H5T_t		*dt1 = NULL;
+    const H5T_t		*dt2 = NULL;
+    hbool_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Tequal, FAIL);
 
@@ -505,6 +511,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
 
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tlock
@@ -530,7 +537,7 @@ H5Tequal(hid_t type1_id, hid_t type2_id)
 herr_t
 H5Tlock(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tlock, FAIL);
 
@@ -540,8 +547,10 @@ H5Tlock(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
     dt->locked = TRUE;
+    
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_class
@@ -563,7 +572,7 @@ H5Tlock(hid_t type_id)
 H5T_class_t
 H5Tget_class(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_class, H5T_NO_CLASS);
 
@@ -572,8 +581,10 @@ H5Tget_class(hid_t type_id)
 	NULL == (dt = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a data type");
     }
+    
     FUNC_LEAVE(dt->type);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_size
@@ -596,8 +607,8 @@ H5Tget_class(hid_t type_id)
 size_t
 H5Tget_size(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    size;
+    H5T_t	*dt = NULL;
+    size_t	size;
 
     FUNC_ENTER(H5Tget_size, 0);
 
@@ -606,11 +617,13 @@ H5Tget_size(hid_t type_id)
 	NULL == (dt = H5I_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data type");
     }
+    
     /* size */
     size = H5T_get_size(dt);
 
     FUNC_LEAVE(size);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_size
@@ -643,8 +656,8 @@ H5Tget_size(hid_t type_id)
 herr_t
 H5Tset_size(hid_t type_id, size_t size)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    prec, offset;
+    H5T_t	*dt = NULL;
+    size_t	prec, offset;
 
     FUNC_ENTER(H5Tset_size, FAIL);
 
@@ -713,12 +726,14 @@ H5Tset_size(hid_t type_id, size_t size)
     }
 
     /* Commit */
+    H5T_unshare (dt);
     dt->size = size;
     dt->u.atomic.offset = offset;
     dt->u.atomic.prec = prec;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_order
@@ -739,8 +754,8 @@ H5Tset_size(hid_t type_id, size_t size)
 H5T_order_t
 H5Tget_order(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_order_t		    order;
+    H5T_t		*dt = NULL;
+    H5T_order_t		order;
 
     FUNC_ENTER(H5Tget_order, H5T_ORDER_ERROR);
 
@@ -751,11 +766,13 @@ H5Tget_order(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR,
 		      "not an atomic data type");
     }
-    /* order */
+
+    /* Order */
     order = dt->u.atomic.order;
 
     FUNC_LEAVE(order);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_order
@@ -776,7 +793,7 @@ H5Tget_order(hid_t type_id)
 herr_t
 H5Tset_order(hid_t type_id, H5T_order_t order)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_order, FAIL);
 
@@ -792,10 +809,13 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     if (order < 0 || order > H5T_ORDER_NONE) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
     }
-    /* order */
+
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.order = order;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_precision
@@ -820,8 +840,8 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 size_t
 H5Tget_precision(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    prec;
+    H5T_t	*dt = NULL;
+    size_t	prec;
 
     FUNC_ENTER(H5Tget_precision, 0);
 
@@ -831,11 +851,13 @@ H5Tget_precision(hid_t type_id)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
     }
-    /* precision */
+    
+    /* Precision */
     prec = dt->u.atomic.prec;
 
     FUNC_LEAVE(prec);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_precision
@@ -870,8 +892,8 @@ H5Tget_precision(hid_t type_id)
 herr_t
 H5Tset_precision(hid_t type_id, size_t prec)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    offset, size;
+    H5T_t	*dt = NULL;
+    size_t	offset, size;
 
     FUNC_ENTER(H5Tset_prec, FAIL);
 
@@ -888,6 +910,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "precision must be positive");
     }
+    
     /* Adjust the offset and size */
     offset = dt->u.atomic.offset;
     size = dt->size;
@@ -934,12 +957,14 @@ H5Tset_precision(hid_t type_id, size_t prec)
     }
 
     /* Commit */
+    H5T_unshare (dt);
     dt->size = size;
     dt->u.atomic.offset = offset;
     dt->u.atomic.prec = prec;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_offset
@@ -976,8 +1001,8 @@ H5Tset_precision(hid_t type_id, size_t prec)
 size_t
 H5Tget_offset(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    offset;
+    H5T_t	*dt = NULL;
+    size_t	offset;
 
     FUNC_ENTER(H5Tget_offset, 0);
 
@@ -987,11 +1012,13 @@ H5Tget_offset(hid_t type_id)
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an atomic data type");
     }
-    /* offset */
+    
+    /* Offset */
     offset = dt->u.atomic.offset;
 
     FUNC_LEAVE(offset);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_offset
@@ -1035,7 +1062,7 @@ H5Tget_offset(hid_t type_id)
 herr_t
 H5Tset_offset(hid_t type_id, size_t offset)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_offset, FAIL);
 
@@ -1052,15 +1079,19 @@ H5Tset_offset(hid_t type_id, size_t offset)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "offset must be zero for this type");
     }
+    
     /* Adjust the size */
     if (offset + dt->u.atomic.prec > 8 * dt->size) {
 	dt->size = (offset + dt->u.atomic.prec + 7) / 8;
     }
+    
     /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.offset = offset;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_pad
@@ -1081,9 +1112,9 @@ H5Tset_offset(hid_t type_id, size_t offset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
+H5Tget_pad(hid_t type_id, H5T_pad_t *lsb/*out*/, H5T_pad_t *msb/*out*/)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_pad, FAIL);
 
@@ -1093,14 +1124,14 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
 	!H5T_is_atomic(dt)) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type");
     }
+    
     /* Get values */
-    if (lsb)
-	*lsb = dt->u.atomic.lsb_pad;
-    if (msb)
-	*msb = dt->u.atomic.msb_pad;
+    if (lsb) *lsb = dt->u.atomic.lsb_pad;
+    if (msb) *msb = dt->u.atomic.msb_pad;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_pad
@@ -1121,7 +1152,7 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
 herr_t
 H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t *dt = NULL;
 
     FUNC_ENTER(H5Tset_pad, FAIL);
 
@@ -1137,11 +1168,15 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     if (lsb < 0 || lsb >= H5T_NPAD || msb < 0 || msb >= H5T_NPAD) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pad type");
     }
+
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.lsb_pad = lsb;
     dt->u.atomic.msb_pad = msb;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_sign
@@ -1162,8 +1197,8 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
 H5T_sign_t
 H5Tget_sign(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_sign_t		    sign;
+    H5T_t		*dt = NULL;
+    H5T_sign_t		sign;
 
     FUNC_ENTER(H5Tget_sign, H5T_SGN_ERROR);
 
@@ -1174,11 +1209,13 @@ H5Tget_sign(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_SGN_ERROR,
 		      "not an integer data type");
     }
-    /* sign */
+    
+    /* Sign */
     sign = dt->u.atomic.u.i.sign;
 
     FUNC_LEAVE(sign);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_sign
@@ -1199,7 +1236,7 @@ H5Tget_sign(hid_t type_id)
 herr_t
 H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_sign, FAIL);
 
@@ -1215,10 +1252,13 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     if (sign < 0 || sign >= H5T_NSGN) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type");
     }
-    /* sign */
+    
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.i.sign = sign;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_fields
@@ -1243,11 +1283,11 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tget_fields(hid_t type_id, size_t *spos /*out */ ,
-	      size_t *epos /*out */ , size_t *esize /*out */ ,
-	      size_t *mpos /*out */ , size_t *msize /*out */ )
+H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
+	      size_t *epos/*out*/, size_t *esize/*out*/,
+	      size_t *mpos/*out*/, size_t *msize/*out*/)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_fields, FAIL);
 
@@ -1258,20 +1298,17 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out */ ,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "not a floating-point data type");
     }
+    
     /* Get values */
-    if (spos)
-	*spos = dt->u.atomic.u.f.sign;
-    if (epos)
-	*epos = dt->u.atomic.u.f.epos;
-    if (esize)
-	*esize = dt->u.atomic.u.f.esize;
-    if (mpos)
-	*mpos = dt->u.atomic.u.f.mpos;
-    if (msize)
-	*msize = dt->u.atomic.u.f.msize;
+    if (spos) *spos = dt->u.atomic.u.f.sign;
+    if (epos) *epos = dt->u.atomic.u.f.epos;
+    if (esize) *esize = dt->u.atomic.u.f.esize;
+    if (mpos) *mpos = dt->u.atomic.u.f.mpos;
+    if (msize) *msize = dt->u.atomic.u.f.msize;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_fields
@@ -1299,7 +1336,7 @@ herr_t
 H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	      size_t mpos, size_t msize)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_fields, FAIL);
 
@@ -1325,6 +1362,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "sign location is not valid");
     }
+    
     /* Check for overlap */
     if (spos >= epos && spos < epos + esize) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -1339,7 +1377,9 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "exponent and mantissa fields overlap");
     }
+    
     /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.f.sign = spos;
     dt->u.atomic.u.f.epos = epos;
     dt->u.atomic.u.f.mpos = mpos;
@@ -1348,6 +1388,7 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_ebias
@@ -1368,8 +1409,8 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
 size_t
 H5Tget_ebias(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    ebias;
+    H5T_t	*dt = NULL;
+    size_t	ebias;
 
     FUNC_ENTER(H5Tget_ebias, 0);
 
@@ -1380,11 +1421,13 @@ H5Tget_ebias(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0,
 		      "not a floating-point data type");
     }
+    
     /* bias */
     ebias = dt->u.atomic.u.f.ebias;
 
     FUNC_LEAVE(ebias);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_ebias
@@ -1405,7 +1448,7 @@ H5Tget_ebias(hid_t type_id)
 herr_t
 H5Tset_ebias(hid_t type_id, size_t ebias)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_ebias, FAIL);
 
@@ -1419,10 +1462,14 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     if (dt->locked) {
 	HRETURN_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     }
+
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.f.ebias = ebias;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_norm
@@ -1444,8 +1491,8 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
 H5T_norm_t
 H5Tget_norm(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_norm_t		    norm;
+    H5T_t	*dt = NULL;
+    H5T_norm_t	norm;
 
     FUNC_ENTER(H5Tget_norm, H5T_NORM_ERROR);
 
@@ -1456,11 +1503,13 @@ H5Tget_norm(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NORM_ERROR,
 		      "not a floating-point data type");
     }
+    
     /* norm */
     norm = dt->u.atomic.u.f.norm;
 
     FUNC_LEAVE(norm);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_norm
@@ -1482,7 +1531,7 @@ H5Tget_norm(hid_t type_id)
 herr_t
 H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_norm, FAIL);
 
@@ -1499,10 +1548,13 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     if (norm < 0 || norm > H5T_NORM_NONE) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal normalization");
     }
-    /* norm */
+    
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.f.norm = norm;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_inpad
@@ -1526,8 +1578,8 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
 H5T_pad_t
 H5Tget_inpad(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_pad_t		    pad;
+    H5T_t	*dt = NULL;
+    H5T_pad_t	pad;
 
     FUNC_ENTER(H5Tget_inpad, H5T_PAD_ERROR);
 
@@ -1538,11 +1590,13 @@ H5Tget_inpad(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_PAD_ERROR,
 		      "not a floating-point data type");
     }
+    
     /* pad */
     pad = dt->u.atomic.u.f.pad;
 
     FUNC_LEAVE(pad);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_inpad
@@ -1566,7 +1620,7 @@ H5Tget_inpad(hid_t type_id)
 herr_t
 H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_inpad, FAIL);
 
@@ -1584,10 +1638,13 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "illegal internal pad type");
     }
-    /* pad */
+    
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.f.pad = pad;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_cset
@@ -1610,8 +1667,8 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
 H5T_cset_t
 H5Tget_cset(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_cset_t		    cset;
+    H5T_t	*dt = NULL;
+    H5T_cset_t	cset;
 
     FUNC_ENTER(H5Tget_cset, H5T_CSET_ERROR);
 
@@ -1622,11 +1679,13 @@ H5Tget_cset(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR,
 		      "not a string data type");
     }
+    
     /* result */
     cset = dt->u.atomic.u.s.cset;
 
     FUNC_LEAVE(cset);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_cset
@@ -1649,7 +1708,7 @@ H5Tget_cset(hid_t type_id)
 herr_t
 H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_cset, FAIL);
 
@@ -1666,10 +1725,13 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "illegal character set type");
     }
-    /* set */
+    
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.s.cset = cset;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_strpad
@@ -1693,8 +1755,8 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 H5T_str_t
 H5Tget_strpad(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
-    H5T_str_t		    strpad;
+    H5T_t	*dt = NULL;
+    H5T_str_t	strpad;
 
     FUNC_ENTER(H5Tget_strpad, H5T_STR_ERROR);
 
@@ -1705,11 +1767,13 @@ H5Tget_strpad(hid_t type_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_STR_ERROR,
 		      "not a string data type");
     }
+    
     /* result */
     strpad = dt->u.atomic.u.s.pad;
 
     FUNC_LEAVE(strpad);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tset_strpad
@@ -1733,7 +1797,7 @@ H5Tget_strpad(hid_t type_id)
 herr_t
 H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tset_strpad, FAIL);
 
@@ -1749,10 +1813,13 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     if (strpad < 0 || strpad >= H5T_NSTR) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal string pad type");
     }
-    /* set */
+    
+    /* Commit */
+    H5T_unshare (dt);
     dt->u.atomic.u.s.pad = strpad;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_nmembers
@@ -1777,7 +1844,7 @@ int
 H5Tget_nmembers(hid_t type_id)
 {
 
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tget_num_members, FAIL);
 
@@ -1787,8 +1854,10 @@ H5Tget_nmembers(hid_t type_id)
 	H5T_COMPOUND != dt->type) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound data type");
     }
+    
     FUNC_LEAVE(dt->u.compnd.nmembs);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_name
@@ -1813,8 +1882,8 @@ H5Tget_nmembers(hid_t type_id)
 char *
 H5Tget_member_name(hid_t type_id, int membno)
 {
-    H5T_t		   *dt = NULL;
-    char		   *s = NULL;
+    H5T_t	*dt = NULL;
+    char	*s = NULL;
 
     FUNC_ENTER(H5Tget_member_name, NULL);
 
@@ -1827,9 +1896,12 @@ H5Tget_member_name(hid_t type_id, int membno)
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid member number");
     }
+
+    /* Value */
     s = H5MM_xstrdup(dt->u.compnd.memb[membno].name);
     FUNC_LEAVE(s);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_offset
@@ -1854,8 +1926,8 @@ H5Tget_member_name(hid_t type_id, int membno)
 size_t
 H5Tget_member_offset(hid_t type_id, int membno)
 {
-    H5T_t		   *dt = NULL;
-    size_t		    offset = 0;
+    H5T_t	*dt = NULL;
+    size_t	offset = 0;
 
     FUNC_ENTER(H5Tget_member_offset, 0);
 
@@ -1868,9 +1940,13 @@ H5Tget_member_offset(hid_t type_id, int membno)
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
     }
+
+    /* Value */
     offset = dt->u.compnd.memb[membno].offset;
+
     FUNC_LEAVE(offset);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_dims
@@ -1895,8 +1971,8 @@ int
 H5Tget_member_dims(hid_t type_id, int membno,
 		   size_t dims[]/*out*/, int perm[]/*out*/)
 {
-    H5T_t		   *dt = NULL;
-    intn		    ndims, i;
+    H5T_t	*dt = NULL;
+    intn	ndims, i;
 
     FUNC_ENTER(H5Tget_member_dims, FAIL);
 
@@ -1909,16 +1985,17 @@ H5Tget_member_dims(hid_t type_id, int membno,
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     }
+
+    /* Value */
     ndims = dt->u.compnd.memb[membno].ndims;
     for (i = 0; i < ndims; i++) {
-	if (dims[i])
-	    dims[i] = dt->u.compnd.memb[membno].dim[i];
-	if (perm[i])
-	    perm[i] = dt->u.compnd.memb[membno].perm[i];
+	if (dims[i]) dims[i] = dt->u.compnd.memb[membno].dim[i];
+	if (perm[i]) perm[i] = dt->u.compnd.memb[membno].perm[i];
     }
 
     FUNC_LEAVE(ndims);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_member_type
@@ -1943,8 +2020,8 @@ H5Tget_member_dims(hid_t type_id, int membno,
 hid_t
 H5Tget_member_type(hid_t type_id, int membno)
 {
-    H5T_t		   *dt = NULL, *memb_dt = NULL;
-    hid_t		    memb_type_id;
+    H5T_t	*dt = NULL, *memb_dt = NULL;
+    hid_t	memb_type_id;
 
     FUNC_ENTER(H5Tget_member_type, FAIL);
 
@@ -1957,6 +2034,7 @@ H5Tget_member_type(hid_t type_id, int membno)
     if (membno < 0 || membno >= dt->u.compnd.nmembs) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     }
+    
     /* Copy data type into an atom */
     if (NULL == (memb_dt = H5T_copy(dt->u.compnd.memb[membno].type))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -1967,8 +2045,10 @@ H5Tget_member_type(hid_t type_id, int membno)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
 		      "can't register data type atom");
     }
+    
     FUNC_LEAVE(memb_type_id);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tinsert
@@ -2001,8 +2081,8 @@ H5Tget_member_type(hid_t type_id, int membno)
 herr_t
 H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
 {
-    H5T_t		   *parent = NULL;	/*the compound parent data type */
-    H5T_t		   *member = NULL;	/*the atomic member type	*/
+    H5T_t	*parent = NULL;		/*the compound parent data type */
+    H5T_t	*member = NULL;		/*the atomic member type	*/
 
     FUNC_ENTER(H5Tinsert, FAIL);
 
@@ -2022,12 +2102,16 @@ H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
 	NULL == (member = H5I_object(member_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
+
+    /* Insert */
     if (H5T_insert(parent, name, offset, member) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL,
 		      "can't insert member");
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tpack
@@ -2049,7 +2133,7 @@ H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
 herr_t
 H5Tpack(hid_t type_id)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tpack, FAIL);
 
@@ -2062,12 +2146,64 @@ H5Tpack(hid_t type_id)
     if (dt->locked) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data type is read-only");
     }
+
+    /* Pack */
     if (H5T_pack(dt) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to pack compound data type");
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tshare
+ *
+ * Purpose:	Marks a data type as sharable.  Using the type during the
+ *		creation of a dataset will cause the dataset object header to
+ *		point to the type in the global heap instead of containing
+ *		the type directly in its object header.  Subsequent
+ *		modifications to a shared type cause the type to become
+ *		unshared.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, March 31, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tshare (hid_t loc_id, hid_t type_id)
+{
+    H5G_t	*loc = NULL;
+    H5T_t	*dt = NULL;
+    
+    FUNC_ENTER (H5Tshare, FAIL);
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (H5_DATATYPE!=H5I_group (type_id) ||
+	NULL==(dt=H5I_object (type_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+    }
+
+    /* Make it sharable */
+    if (H5T_share (H5G_fileof (loc), dt)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to make data type sharable");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tregister_hard
@@ -2217,7 +2353,7 @@ H5Tregister_soft(H5T_class_t src_cls, H5T_class_t dst_cls, H5T_conv_t func)
 		if ((path->func)(src_id, dst_id, &(path->cdata),
 				 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		    fprintf (stderr, "HDF5-DIAG: conversion function failed "
+		    fprintf (stderr, "H5T: conversion function failed "
 			     "to free private data.\n");
 #endif
 		    H5E_clear();
@@ -2289,7 +2425,7 @@ H5Tunregister(H5T_conv_t func)
 	    path->cdata.command = H5T_CONV_FREE;
 	    if ((func)(FAIL, FAIL, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "HDF5-DIAG: conversion function failed to "
+		fprintf (stderr, "H5T: conversion function failed to "
 			 "free private data.\n");
 #endif
 		H5E_clear();
@@ -2364,8 +2500,8 @@ H5Tunregister(H5T_conv_t func)
 H5T_conv_t
 H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 {
-    H5T_conv_t		    ret_value = NULL;
-    H5T_t		   *src = NULL, *dst = NULL;
+    H5T_conv_t	ret_value = NULL;
+    H5T_t	*src = NULL, *dst = NULL;
 
     FUNC_ENTER(H5Tfind, NULL);
 
@@ -2387,6 +2523,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 	HRETURN_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL,
 		      "conversion function not found");
     }
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -2413,10 +2550,10 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
  *
  *-------------------------------------------------------------------------
  */
-H5T_t		       *
+H5T_t *
 H5T_create(H5T_class_t type, size_t size)
 {
-    H5T_t		   *dt = NULL;
+    H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5T_create, NULL);
 
@@ -2445,6 +2582,7 @@ H5T_create(H5T_class_t type, size_t size)
     dt->size = size;
     FUNC_LEAVE(dt);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_copy
@@ -2466,9 +2604,9 @@ H5T_create(H5T_class_t type, size_t size)
 H5T_t *
 H5T_copy(const H5T_t *old_dt)
 {
-    H5T_t		   *new_dt=NULL, *tmp=NULL;
-    intn		    i;
-    char		   *s;
+    H5T_t	*new_dt=NULL, *tmp=NULL;
+    intn	i;
+    char	*s;
 
     FUNC_ENTER(H5T_copy, NULL);
 
@@ -2498,8 +2636,10 @@ H5T_copy(const H5T_t *old_dt)
 	    new_dt->u.compnd.memb[i].type = tmp;
 	}
     }
+    
     FUNC_LEAVE(new_dt);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_close
@@ -2542,6 +2682,93 @@ H5T_close(H5T_t *dt)
     
     FUNC_LEAVE(SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_share
+ *
+ * Purpose:	Causes a data type to be marked as sharable.  If the data
+ *		type isn't already marked sharable in the specified file then
+ *		it is written to the global heap of that file and the heap
+ *		location information is added to the sh_file and sh_heap
+ *		fields of the data type.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, March 31, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_share (H5F_t *f, H5T_t *dt)
+{
+    FUNC_ENTER (H5T_share, FAIL);
+    
+    /* Check args */
+    assert (f);
+    assert (dt);
+
+    /*
+     * If the type is sharable in some other file then unshare it first. A
+     * type can only be sharable in one file at a time.
+     */
+    if (H5HG_defined (&(dt->sh_heap)) && f->shared!=dt->sh_file->shared) {
+	H5T_unshare (dt);
+	H5E_clear (); /*don't really care if it fails*/
+    }
+
+    /*
+     * Write the message to the global heap if it isn't already shared in
+     * this file.
+     */
+    if (!H5HG_defined (&(dt->sh_heap))) {
+	if (H5O_share (f, H5O_DTYPE, dt, &(dt->sh_heap))<0) {
+	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+			   "unable to store data type message in global heap");
+	}
+	dt->sh_file = f;
+    }
+    
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_unshare
+ *
+ * Purpose:	If a data type is in the global heap then this function
+ *		removes that information from the H5T_t struct.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, March 31, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_unshare (H5T_t *dt)
+{
+    FUNC_ENTER (H5T_unshare, FAIL);
+
+    /* Check args */
+    assert (dt);
+
+    H5HG_undef (&(dt->sh_heap));
+    dt->sh_file = NULL;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_is_atomic
@@ -2568,6 +2795,7 @@ H5T_is_atomic(const H5T_t *dt)
 
     FUNC_LEAVE(H5T_COMPOUND == dt->type ? FALSE : TRUE);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_get_size
@@ -2597,6 +2825,7 @@ H5T_get_size(const H5T_t *dt)
 
     FUNC_LEAVE(dt->size);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_insert
@@ -2659,6 +2888,7 @@ H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
     }
 
     /* Add member to end of member array */
+    H5T_unshare (parent);
     i = parent->u.compnd.nmembs;
     parent->u.compnd.memb[i].name = H5MM_xstrdup(name);
     parent->u.compnd.memb[i].offset = offset;
@@ -2668,6 +2898,7 @@ H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
     parent->u.compnd.nmembs++;
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_pack
@@ -2689,14 +2920,15 @@ H5T_insert(H5T_t *parent, const char *name, off_t offset, const H5T_t *member)
 herr_t
 H5T_pack(H5T_t *dt)
 {
-    int			    i;
-    size_t		    offset;
+    int		i;
+    size_t	offset;
 
     FUNC_ENTER(H5T_pack, FAIL);
 
     assert(dt);
     assert(!dt->locked);
 
+    H5T_unshare (dt);
     if (H5T_COMPOUND == dt->type) {
 	/* Recursively pack the members */
 	for (i = 0; i < dt->u.compnd.nmembs; i++) {
@@ -2716,8 +2948,10 @@ H5T_pack(H5T_t *dt)
 	/* Change total size */
 	dt->size = MAX(1, offset);
     }
+    
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_sort_by_offset
@@ -2740,8 +2974,8 @@ H5T_pack(H5T_t *dt)
 herr_t
 H5T_sort_by_offset(H5T_t *dt)
 {
-    int			    i, j, nmembs;
-    hbool_t		    swapped;
+    int		i, j, nmembs;
+    hbool_t	swapped;
 
     FUNC_ENTER(H5T_sort_by_offset, FAIL);
 
@@ -2771,6 +3005,7 @@ H5T_sort_by_offset(H5T_t *dt)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_cmp
@@ -2793,10 +3028,10 @@ H5T_sort_by_offset(H5T_t *dt)
 intn
 H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 {
-    intn		   *idx1 = NULL, *idx2 = NULL;
-    intn		    ret_value = 0;
-    intn		    i, j, tmp;
-    hbool_t		    swapped;
+    intn	*idx1 = NULL, *idx2 = NULL;
+    intn	ret_value = 0;
+    intn	i, j, tmp;
+    hbool_t	swapped;
 
     FUNC_ENTER(H5T_equal, 0);
 
@@ -3016,6 +3251,7 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
     FUNC_LEAVE(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5T_find
  *
@@ -3157,7 +3393,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 	    }
 	    if ((func)(src_id, dst_id, &(path->cdata), 0, NULL, NULL)<0) {
 #ifdef H5T_DEBUG
-		fprintf (stderr, "HDF5-DIAG: conversion function init "
+		fprintf (stderr, "H5T: conversion function init "
 			 "failed\n");
 #endif
 		H5E_clear(); /*ignore the failure*/
@@ -3213,9 +3449,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, hbool_t create,
 herr_t
 H5T_debug(H5T_t *dt, FILE * stream)
 {
-    const char		   *s = "";
-    int			    i, j;
-    uint64		    tmp;
+    const char	*s = "";
+    int		i, j;
+    uint64	tmp;
 
     FUNC_ENTER(H5T_debug, FAIL);
 

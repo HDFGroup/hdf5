@@ -283,7 +283,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     tmp_addr = *addr;
     H5F_addr_inc(&tmp_addr, size);
     if (H5F_addr_gt(&tmp_addr, &(lf->eof))) {
-        fprintf(stderr, "HDF5-DIAG: extending file w/o allocation\n");
+        fprintf(stderr, "H5F: extending file w/o allocation\n");
         lf->eof = tmp_addr;
     }
     /* Write the data */
@@ -718,7 +718,7 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr /*out */ )
+H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
 {
     int                     i;
     haddr_t                 tmp;
@@ -763,9 +763,9 @@ H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr /*out */ )
  *-------------------------------------------------------------------------
  */
 void
-H5F_addr_print(FILE * stream, const haddr_t *addr)
+H5F_addr_print(FILE *stream, const haddr_t *addr)
 {
-    haddr_t                 tmp;
+    haddr_t		tmp;
 
     assert(stream);
     assert(addr);

@@ -14,9 +14,8 @@
 #define PABLO_MASK	H5O_efl_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_efl_encode(H5F_t *f, size_t size, uint8 *p,
-			     const void *_mesg);
+static void *H5O_efl_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static herr_t H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_efl_copy(const void *_mesg, void *_dest);
 static size_t H5O_efl_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
@@ -33,6 +32,7 @@ const H5O_class_t H5O_EFL[1] = {{
     H5O_efl_copy,	    /*copy native value		    */
     H5O_efl_size,	    /*size of message on disk	    */
     H5O_efl_reset,	    /*reset method		    */
+    NULL,	  	    /*no share method		    */
     H5O_efl_debug,	    /*debug the message		    */
 }};
 
@@ -59,7 +59,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
+H5O_efl_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
 {
     H5O_efl_t		*mesg = NULL;
     int			i;
@@ -70,6 +70,7 @@ H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
     /* Check args */
     assert(f);
     assert(p);
+    assert (!hobj || !H5HG_defined (hobj));
 
     /* Decode the header */
     mesg = H5MM_xcalloc(1, sizeof(H5O_efl_t));
@@ -122,7 +123,7 @@ H5O_efl_decode(H5F_t *f, size_t raw_size, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
+H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     int			i;
@@ -134,7 +135,6 @@ H5O_efl_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
     /* check args */
     assert(f);
     assert(mesg);
-    assert(raw_size == H5O_ALIGN (H5O_efl_size(f, _mesg)));
     assert(p);
 
     /* Encode header */

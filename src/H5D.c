@@ -820,7 +820,8 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
     }
 
     /* Update the type and space header messages */
-    if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0, H5O_FLAG_CONSTANT,
+    if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
+		   (H5O_FLAG_CONSTANT|H5O_FLAG_SHARED),
 		   new_dset->type) < 0 ||
 	H5S_modify(&(new_dset->ent), new_dset->space) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
@@ -1162,7 +1163,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				    mem_space, buf/*out*/);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
-	fprintf (stderr, "HDF5-DIAG: input pipe optimization failed "
+	fprintf (stderr, "H5D: input pipe optimization failed "
 		 "(falling through)\n");
 #endif
 	H5E_clear ();
@@ -1217,7 +1218,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* Strip mine diagnostics.... */
 	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
 	if (smine_nelmts<nelmts) {
-	    fprintf (stderr, "HDF5-DIAG: strip mine");
+	    fprintf (stderr, "H5D: strip mine");
 	    if (smine_nelmts!=request_nelmts) {
 		fprintf (stderr, " got %lu of %lu",
 			 (unsigned long)smine_nelmts,
@@ -1225,10 +1226,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    }
 	    if (buffer_size!=target_size) {
 		fprintf (stderr, " (%1.1f%% of buffer)",
-			 100.0*buffer_size/target_size);
+			 100.0*(double)buffer_size/(double)target_size);
 	    }
 	    fprintf (stderr, " %1.1f iterations\n",
-		     (double)nelmts/smine_nelmts);
+		     (double)nelmts/(double)smine_nelmts);
 	}
     }
 #endif
@@ -1388,7 +1389,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 				     mem_space, buf);
 	if (status>=0) goto succeed;
 #ifdef H5D_DEBUG
-	fprintf (stderr, "HDF5-DIAG: output pipe optimization failed "
+	fprintf (stderr, "H5D: output pipe optimization failed "
 		 "(falling through)\n");
 #endif
 	H5E_clear ();
@@ -1443,7 +1444,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* Strip mine diagnostics.... */
 	size_t buffer_size = smine_nelmts * MAX (src_type_size, dst_type_size);
 	if (smine_nelmts<nelmts) {
-	    fprintf (stderr, "HDF5-DIAG: strip mine");
+	    fprintf (stderr, "H5D: strip mine");
 	    if (smine_nelmts!=request_nelmts) {
 		fprintf (stderr, " got %lu of %lu",
 			 (unsigned long)smine_nelmts,
@@ -1451,10 +1452,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    }
 	    if (buffer_size!=target_size) {
 		fprintf (stderr, " (%1.1f%% of buffer)",
-			 100.0*buffer_size/target_size);
+			 100.0*(double)buffer_size/(double)target_size);
 	    }
 	    fprintf (stderr, " %1.1f iterations\n",
-		     (double)nelmts/smine_nelmts);
+		     (double)nelmts/(double)smine_nelmts);
 	}
     }
 #endif

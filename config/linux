@@ -1,63 +1,38 @@
-#!/bin/sh
-# Site configuration -- do not distribute this file.
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
 
 
-# Based on the setting of environment variable `HDF5_MODE' we set the
-# compiler flags unless they're already set.  Its value can be one or
-# more of the following words (be sure to use single quotes when
-# setting its value or the dollar signs will be expanded as variables
-# too soon):
-#
-#	$warn	    -- Generates compiler warnings.  You should always
-#	               include this since it has no effect on the speed of
-#	               the code produced.
-#
-#	$debug      -- Compiles in code to check for invariant conditions
-#	               and turns on the `-g' flag for interactive
-#	               debugging.  It also turns off seek optimizations in
-#                      the low-level file driver.  This version of the
-#                      library can be significantly slower than a production
-#                      version.
-#
-#       $production -- Compiles an optimized version of the library
-#       	       and disables code that checks for invariant
-#       	       conditions.
-#
-#       $profile    -- Compiles code with the `-pg' flag which
-#       	       produces a `gmon.out' file when the library
-#       	       runs. The gprof(1) command can read that file
-#       	       and produce detailed run-time statistics.
-#
-# If HDF5_MODE is undefined then we use the value 
-#
-#	$debug $warn -DH5F_LOW_DFLT=H5F_LOW_SEC2
-#
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
 
-if [ arborea = `hostname` -a -z "$enable_parallel" ]; then
-    enable_parallel=mpio
-fi
+# What must *always* be present for things to compile correctly?
+CFLAGS="$CFLAGS -ansi"
+#CPPFLAGS="$CPPFLAGS -I."
 
-# The following flags only apply to the gcc compiler.
-CC=${CC:-gcc}
+# What compiler flags should be used for code development?
+DEBUG_CFLAGS="-g -fverbose-asm"
+DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
-# First set up the CFLAGS arguments.
-if test "X" = "X$CFLAGS"; then
-    warn="-Wall -Wshadow -Wpointer-arith -Wcast-qual -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs"
-    profile="-pg"
-    debug="-g -fverbose-asm"
-    production="-O3 -finline-functions -funroll-loops -malign-double -fomit-frame-pointer"
-    parallel=""
-    default_mode='-ansi $debug $warn $parallel'
-    CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
-fi
+# What compiler flags should be used for building a production
+# library?
+PROD_CFLAGS="-O3 -finline-functions -malign-double -fomit-frame-pointer"
+PROD_CPPFLAGS=
 
-# Then set up the CPPFLAGS arguments.
-if test "X" = "X$CPPFLAGS"; then
-    warn=
-    profile=
-    debug="-DH5AC_DEBUG -DH5B_DEBUG -DH5D_DEBUG -DH5F_DEBUG -DH5G_DEBUG -UH5O_DEBUG -DH5T_DEBUG -DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-    production="-DNDEBUG"
-    parallel=""
-    default_mode='$debug $warn $parallel'
-    CPPFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
-fi
+# What compiler flags enable code profiling?
+PROFILE_CFLAGS=-pg
+PROFILE_CPPFLAGS=
+
+
+#----------------------------------------------------------------------------
+# Values for overriding configuration tests when cross compiling.
+# This includes compiling on some machines where the serial front end
+# compiles for a parallel back end.
+
+# Set this to `yes' or `no' depending on whether the target is big
+# endian or little endian.
+#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}

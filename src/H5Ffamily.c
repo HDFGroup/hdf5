@@ -187,7 +187,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 		if (size != mask) {
 		    size++;
 #ifdef H5F_DEBUG
-		    fprintf(stderr, "HDF5-DIAG: family member size was "
+		    fprintf(stderr, "H5F: family member size was "
 			    "rounded up to a power of 2");
 #endif
 		}
@@ -199,16 +199,16 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 
 #ifdef H5F_DEBUG
     if (nbits >= 30) {
-	fprintf(stderr, "HDF5-DIAG: family members are %dGB\n",
+	fprintf(stderr, "H5F: family members are %dGB\n",
 		1 << (nbits-30));
     } else if (nbits >= 20) {
-	fprintf(stderr, "HDF5-DIAG: family members are %dMB\n",
+	fprintf(stderr, "H5F: family members are %dMB\n",
 		1 << (nbits-20));
     } else if (nbits >= 10) {
-	fprintf(stderr, "HDF5-DIAG: family members are %dkB\n",
+	fprintf(stderr, "H5F: family members are %dkB\n",
 		1 << (nbits-10));
     } else {
-	fprintf(stderr, "HDF5-DIAG: family members are %d bytes\n",
+	fprintf(stderr, "H5F: family members are %d bytes\n",
 		1 << nbits);
     }
 #endif

@@ -641,7 +641,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 #ifdef H5AC_DEBUG
     static int		    ncalls = 0;
     if (0 == ncalls++) {
-        fprintf(stderr, "HDF5-DIAG: debugging cache (expensive)\n");
+        fprintf(stderr, "H5AC: debugging cache (expensive)\n");
     }
 #endif
 
@@ -838,7 +838,7 @@ H5AC_debug(H5F_t *f)
 
     FUNC_ENTER(H5AC_debug, FAIL);
 
-    fprintf(stderr, "HDF5-DIAG: cache diagnostics for %s\n", f->name);
+    fprintf(stderr, "H5AC: cache diagnostics for %s\n", f->name);
     fprintf(stderr, "   %18s  %8s %8s %8s %8s+%-8s\n",
             "", "Hits", "Misses", "MissRate", "Inits", "Flushes");
 

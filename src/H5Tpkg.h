@@ -23,6 +23,7 @@
 #  undef H5T_DEBUG
 #endif
 
+#include <H5HGprivate.h>
 #include <H5Tprivate.h>
 
 typedef struct H5T_atomic_t {
@@ -62,6 +63,8 @@ typedef struct H5T_compnd_t {
 
 struct H5T_t {
     hbool_t             locked; /*if locked, then can't be modified          */
+    H5HG_t		sh_heap; /*if defined, type is in global heap	     */
+    H5F_t		*sh_file; /*file pointer if this is a shared type    */
     H5T_class_t         type;   /*which class of type is this?               */
     size_t              size;   /*total size of an instance of this type     */
     union {

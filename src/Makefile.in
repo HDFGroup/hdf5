@@ -20,7 +20,7 @@ LIB_SRC=H5.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c H5Ffamily.c  \
 	H5Fistore.c H5Flow.c H5Fsec2.c H5Fsplit.c H5Fstdio.c H5G.c H5Gent.c   \
 	H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c H5MF.c H5MM.c H5O.c H5Ocont.c \
 	H5Odtype.c H5Oefl.c H5Olayout.c H5Oname.c H5Onull.c H5Osdspace.c      \
-	H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c H5Tconv.c H5Tinit.c             \
+	H5Oshared.c H5Ostab.c H5P.c H5S.c H5Ssimp.c H5T.c H5Tconv.c H5Tinit.c \
 	H5V.c @PARALLEL_SRC@
 
 LIB_OBJ=$(LIB_SRC:.c=.o)

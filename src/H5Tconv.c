@@ -63,7 +63,7 @@ H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/* Nothing to free */
 #ifdef H5T_DEBUG
 	if (cdata->ncalls>0) {
-	    fprintf (stderr, "HDF5-DIAG: H5T_conv_noop statistics...\n");
+	    fprintf (stderr, "H5T: H5T_conv_noop statistics...\n");
 	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
 	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
 	}
@@ -174,7 +174,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	/* Free private data */
 #ifdef H5T_DEBUG
 	if (cdata->ncalls>0) {
-	    fprintf (stderr, "HDF5-DIAG: H5T_conv_order statistics...\n");
+	    fprintf (stderr, "H5T: H5T_conv_order statistics...\n");
 	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
 	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
 	}
@@ -396,7 +396,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	 */
 #ifdef H5T_DEBUG
 	if (cdata->ncalls>0) {
-	    fprintf (stderr, "HDF5-DIAG: H5T_conv_struct statistics...\n");
+	    fprintf (stderr, "H5T: H5T_conv_struct statistics...\n");
 	    fprintf (stderr, "   Number of calls:       %lu\n", cdata->ncalls);
 	    fprintf (stderr, "   Data points converted: %lu\n", cdata->nelmts);
 	}

@@ -23,9 +23,8 @@
 #define PABLO_MASK      H5O_stab_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_stab_decode(H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_stab_encode(H5F_t *f, size_t size, uint8 *p,
-			      const void *_mesg);
+static void *H5O_stab_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj);
+static herr_t H5O_stab_encode(H5F_t *f, uint8 *p, const void *_mesg);
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(H5F_t *f, const void *_mesg);
 static herr_t H5O_stab_debug(H5F_t *f, const void *_mesg,
@@ -41,6 +40,7 @@ const H5O_class_t H5O_STAB[1] = {{
     H5O_stab_copy,          /*copy the native value         */
     H5O_stab_size,          /*size of symbol table entry    */
     NULL,                   /*default reset method          */
+    NULL,		    /*no share method		    */
     H5O_stab_debug,         /*debug the message             */
 }};
 
@@ -67,7 +67,7 @@ static hbool_t interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_stab_decode(H5F_t *f, size_t raw_size, const uint8 *p)
+H5O_stab_decode(H5F_t *f, const uint8 *p, H5HG_t *hobj)
 {
     H5O_stab_t             *stab;
 
@@ -75,8 +75,8 @@ H5O_stab_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 
     /* check args */
     assert(f);
-    assert(raw_size == H5O_ALIGN (2 * H5F_SIZEOF_ADDR(f)));
     assert(p);
+    assert (!hobj || !H5HG_defined (hobj));
 
     /* decode */
     stab = H5MM_xcalloc(1, sizeof(H5O_stab_t));
@@ -104,7 +104,7 @@ H5O_stab_decode(H5F_t *f, size_t raw_size, const uint8 *p)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
+H5O_stab_encode(H5F_t *f, uint8 *p, const void *_mesg)
 {
     const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
 
@@ -112,7 +112,6 @@ H5O_stab_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *_mesg)
 
     /* check args */
     assert(f);
-    assert(raw_size == H5O_ALIGN (2 * H5F_SIZEOF_ADDR(f)));
     assert(p);
     assert(stab);
 

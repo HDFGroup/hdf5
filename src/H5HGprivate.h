@@ -10,6 +10,8 @@
 
 #include <H5HGpublic.h>
 
+#include <H5Fprivate.h>
+
 /*
  * Each collection has a magic number for some redundancy.
  */
@@ -59,14 +61,27 @@
  * The initial guess for the number of messages in a collection.  We assume
  * that all objects in that collection are zero length, giving the maximum
  * possible number of objects in the collection.  The collection itself has
- * some overhead and each message has some overhead.
+ * some overhead and each message has some overhead.  The `+2' accounts for
+ * rounding and for the free space object.
  */
 #define H5HG_NOBJS(f,z) (int)((((z)-H5HG_SIZEOF_HDR(f))/		      \
-			       H5HG_SIZEOF_OBJHDR(f)+1))
+			       H5HG_SIZEOF_OBJHDR(f)+2))
 
-typedef struct H5HG_t H5HG_t;
+/*
+ * Makes a global heap object pointer undefined, or checks whether one is
+ * defined.
+ */
+#define H5HG_undef(HGP)	((HGP)->idx=0)
+#define H5HG_defined(HGP) ((HGP)->idx!=0)
 
-herr_t H5HG_create (H5F_t *f, size_t size);
+typedef struct H5HG_t {
+    haddr_t		addr;		/*address of collection		*/
+    intn		idx;		/*object ID within collection	*/
+} H5HG_t;
+
+typedef struct H5HG_heap_t H5HG_heap_t;
+
+H5HG_heap_t *H5HG_create (H5F_t *f, size_t size);
 herr_t H5HG_insert (H5F_t *f, size_t size, void *obj, H5HG_t *hobj/*out*/);
 void *H5HG_peek (H5F_t *f, H5HG_t *hobj);
 void *H5HG_read (H5F_t *f, H5HG_t *hobj, void *object);

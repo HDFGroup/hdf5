@@ -11,9 +11,9 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-PROGS=testhdf5 hyperslab istore dtypes dsets cmpd_dset extend external	     \
+PROGS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external \
       iopipe
-TESTS=testhdf5 hyperslab istore dtypes dsets cmpd_dset extend external
+TESTS=testhdf5 gheap hyperslab istore dtypes dsets cmpd_dset extend external
 TIMINGS=iopipe
 
 # Temporary files
@@ -21,7 +21,8 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    tfile3.h5 th5s1.h5 theap.h5 tohdr.h5 tstab1.h5 tstab2.h5         \
 	    extern_1.h5 extern_2.h5 extern_3.h5 extern_1.raw extern_1b.raw   \
 	    extern_2.raw extern_2b.raw extern_3.raw extern_3b.raw            \
-	    extern_4.raw extern_4b.raw iopipe.raw iopipe.h5
+	    extern_4.raw extern_4b.raw iopipe.raw iopipe.h5 gheap0.h5        \
+	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5
 
 # Source and object files for programs...  The PROG_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
@@ -29,11 +30,14 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 # overlap with other tests.
 PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c dtypes.c  \
          hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c \
-	 iopipe.c
+	 iopipe.c gheap.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
 TESTHDF5_OBJ=$(TESTHDF5_SRC:.c=.o)
+
+GHEAP_SRC=gheap.c
+GHEAP_OBJ=$(GHEAP_SRC:.c=.o)
 
 DSETS_SRC=dsets.c
 DSETS_OBJ=$(DSETS_SRC:.c=.o)
@@ -78,6 +82,9 @@ timings _timings: $(TIMINGS)
 # How to build the programs...
 testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
+
+gheap: $(GHEAP_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(GHEAP_OBJ) ../src/libhdf5.a $(LIBS)
 
 dsets: $(DSETS_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(DSETS_OBJ) ../src/libhdf5.a $(LIBS)

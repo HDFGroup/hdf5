@@ -23,6 +23,14 @@
 #include <H5private.h>
 #include <H5Fprivate.h>
 
+/*
+ * Feature: Define H5MF_DEBUG on the compiler command line if you want to
+ *	    see diagnostics from this layer.
+ */
+#ifdef NDEBUG
+#  undef H5MF_DEBUG
+#endif
+
 #define H5MF_META       0               /*request storage for meta data      */
 #define H5MF_RAW        1               /*request storage for raw data       */
 

@@ -1,27 +1,46 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+
+
+#----------------------------------------------------------------------------
+# Compiler flags. The CPPFLAGS values should not include package debug
+# flags like `-DH5G_DEBUG' since these are added with the
+# `--enable-debug' switch of configure.
+
+# What must *always* be present for things to compile correctly?
+# Always turn off these warnings:
+#    1174:  function declared but not used
+#    1429:  the `long long' type is not standard
+#    1209:  constant expressions
+#    1196:  __vfork() (this is an SGI config problem)
+#
+CFLAGS="$CFLAGS -fullwarn -ansi -64 -woff 1174,1429,1209,1196"
+#CPPFLAGS="$CPPFLAGS -I."
+
+# What compiler flags should be used for code development?
+DEBUG_CFLAGS=-g
+DEBUG_CPPFLAGS=
+
+# What compiler flags should be used for building a production
+# library?
+PROD_CFLAGS=-O
+PROD_CPPFLAGS=
+
+# What compiler flags enable code profiling?
+PROFILE_CFLAGS=-pg
+PROFILE_CPPFLAGS=
+
+
+#----------------------------------------------------------------------------
+# Values for overriding configuration tests when cross compiling.
+# This includes compiling on some machines where the serial front end
+# compiles for a parallel back end.
+
+# Set this to `yes' or `no' depending on whether the target is big
+# endian or little endian.
+#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
 #!/bin/sh
-# Site configuration -- do not distribute this file.
 
-CC="cc -ansi -64"
-
-# -woff 1174	about function declared but not used
-# -woff 1429	about long long type non-standard
-# -woff 1209    about constant expressions
-# -woff 1196    about __vfork() being implicitly declared, config prob.
-warn="-fullwarn -woff 1174,1429,1209,1196"
-#warn="-woff 1174,1429,1209,1196"
-
-profile="-pg"
-
-debug="-g"
-
-#production="-O -DNDEBUG"
-
-default_mode='$debug $warn'
-
-RANLIB=:		# SGI needs not ranlib
-
-# Don't set CFLAGS if the user already did.
-if test -z "$CFLAGS"; then
-   CFLAGS="`eval echo ${HDF5_MODE:-$default_mode}`"
-   export CFLAGS
-fi

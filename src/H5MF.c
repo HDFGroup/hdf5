@@ -116,7 +116,7 @@ H5MF_free(H5F_t *f, const haddr_t *addr, size_t size)
         HRETURN(SUCCEED);
     assert(!H5F_addr_zerop(addr));
 
-#ifndef NDEBUG
+#ifdef H5MF_DEBUG
     fprintf(stderr, "H5MF_free: lost %lu bytes of file storage\n",
             (unsigned long) size);
 #endif

@@ -19,10 +19,11 @@
 
 #include <H5Opublic.h>
 
-/* Private headers neede by this file */
+/* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>
 #include <H5Gprivate.h>
+#include <H5HGprivate.h>
 #include <H5Tprivate.h>
 #include <H5Sprivate.h>
 
@@ -40,9 +41,10 @@
 #define H5O_NEW_MESG	(-1)		/*new message			     */
 #define H5O_ALL		(-1)		/*delete all messages of type	     */
 
-/* Flags which are part of the message id */
-#define H5O_FLAG_CONSTANT	0x8000
-#define H5O_FLAG_BITS		0x8000
+/* Flags which are part of a message */
+#define H5O_FLAG_CONSTANT	0x01
+#define H5O_FLAG_SHARED		0x02
+#define H5O_FLAG_BITS		0x03
 #define H5O_VERSION		1
 
 /*
@@ -64,21 +66,22 @@
 	       4)	/*reserved		*/
 
 typedef struct H5O_class_t {
-    intn	id;				    /*message type ID on disk*/
-    const char	*name;				 /*message name for debugging*/
-    size_t	native_size;			     /*size of native message*/
-    void	*(*decode) (H5F_t *, size_t, const uint8 *);
-    herr_t	(*encode) (H5F_t *, size_t, uint8 *, const void *);
-    void	*(*copy) (const void *, void *);     /*copy native value     */
-    size_t	(*raw_size) (H5F_t *, const void *); /*sizeof raw val	     */
-    herr_t	(*reset) (void *);		/*free nested data structures*/
-    herr_t	(*debug) (H5F_t *, const void *, FILE *, intn, intn);
+    intn	id;				 /*message type ID on disk   */
+    const char	*name;				 /*for debugging             */
+    size_t	native_size;			 /*size of native message    */
+    void	*(*decode)(H5F_t*, const uint8*, H5HG_t*);
+    herr_t	(*encode)(H5F_t*, uint8*, const void*);
+    void	*(*copy)(const void*, void*);    /*copy native value         */
+    size_t	(*raw_size)(H5F_t*, const void*);/*sizeof raw val	     */
+    herr_t	(*reset)(void *);		 /*free nested data structs  */
+    herr_t	(*share)(H5F_t*, const void*, H5HG_t*);
+    herr_t	(*debug)(H5F_t*, const void*, FILE*, intn, intn);
 } H5O_class_t;
 
 typedef struct H5O_mesg_t {
     const H5O_class_t	*type;		/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
-    hbool_t		constant;	/*is message constant?		     */
+    uint8		flags;		/*message flags			     */
     void		*native;	/*native format message		     */
     uint8		*raw;		/*ptr to raw data		     */
     size_t		raw_size;	/*size with alignment		     */
@@ -169,8 +172,18 @@ typedef struct H5O_layout_t {
 extern const H5O_class_t H5O_NAME[1];
 
 typedef struct H5O_name_t {
-    const char	*s;			/*ptr to malloc'd memory	     */
+    char	*s;			/*ptr to malloc'd memory	     */
 } H5O_name_t;
+
+/*
+ * Shared object message.  This message ID never really appears in an object
+ * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
+ * will be the ID of the pointed-to message.
+ */
+#define H5O_SHARED_ID	0x000f
+extern const H5O_class_t H5O_SHARED[1];
+
+typedef H5HG_t H5O_shared_t;
 
 /*
  * Object header continuation message.
@@ -211,6 +224,8 @@ intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 		 uintn flags, const void *mesg);
 herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
 herr_t H5O_reset (const H5O_class_t *type, void *native);
+herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
+		  H5HG_t *hobj/*out*/);
 herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		  intn fwidth);
 

@@ -1640,7 +1640,7 @@ H5B_assert(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 
     FUNC_ENTER(H5B_assert, FAIL);
     if (0 == ncalls++) {
-	fprintf(stderr, "HDF5-DIAG: debugging B-trees (expensive)\n");
+	fprintf(stderr, "H5B: debugging B-trees (expensive)\n");
     }
     /* Initialize the queue */
     bt = H5AC_find(f, H5AC_BT, addr, type, udata);
