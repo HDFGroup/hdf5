@@ -70,6 +70,9 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug where selection offsets were not being used when iterating
+        through point and hyperslab selections with
+        H5Diterate().  QAK - 2002/04/29
     * Fixed bug where the data for several level deep nested compound &
         variable-length datatypes used for datasets were getting corrupted when
         written to the file.  QAK - 2002/04/17

@@ -5286,12 +5286,12 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
     for(u=0; u<ndims; u++) {
         tmp_count[u]=diminfo[u].count;
         tmp_block[u]=diminfo[u].block;
-        offset[u]=diminfo[u].start;
+        offset[u]=(diminfo[u].start+space->select.offset[u]);
     } /* end for */
 
     /* Initialize the starting location */
     for(loc=buf,u=0; u<ndims; u++)
-        loc+=diminfo[u].start*slab[u];
+        loc+=offset[u]*slab[u];
 
     /* Go iterate over the hyperslabs */
     while(user_ret==0) {
@@ -5369,7 +5369,7 @@ H5S_hyper_select_iterate_mem_opt(H5S_sel_iter_t UNUSED *iter, void *buf, hid_t t
 
         /* Re-compute buffer location & offset array */
         for(loc=buf,u=0; u<ndims; u++) {
-            temp_off=diminfo[u].start
+            temp_off=(diminfo[u].start+space->select.offset[u])
                 +diminfo[u].stride*(diminfo[u].count-tmp_count[u])
                     +(diminfo[u].block-tmp_block[u]);
             loc+=temp_off*slab[u];

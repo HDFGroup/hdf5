@@ -1319,6 +1319,7 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
     void *tmp_buf;              /* temporary location of the element in the buffer */
     H5S_pnt_node_t *node;   /* Point node */
     unsigned rank;             /* Dataspace rank */
+    unsigned u;                 /* Local index variable */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_point_select_iterate, 0);
@@ -1342,11 +1343,15 @@ H5S_point_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
         HDmemcpy(mem_offset, node->pnt, rank*sizeof(hssize_t));
         mem_offset[rank]=0;
 
+        /* Add in the selection offset */
+        for(u=0; u<rank; u++)
+            mem_offset[u]+=space->select.offset[u];
+
         /* Get the offset in the memory buffer */
         offset=H5V_array_offset(rank+1,mem_size,(const hssize_t *)mem_offset);
         tmp_buf=((char *)buf+offset);
 
-        ret_value=(*op)(tmp_buf,type_id,(hsize_t)rank,node->pnt,operator_data);
+        ret_value=(*op)(tmp_buf,type_id,(hsize_t)rank,mem_offset,operator_data);
 
         node=node->next;
       } /* end while */
