@@ -216,7 +216,6 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
 {
     H5O_stab_t		stab;		/*symbol table message		*/
     H5G_bt_ud1_t	udata;		/*data to pass through B-tree	*/
-    static double	split_ratios[3] = {0.1, 0.5, 0.9};
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_insert, FAIL);
@@ -235,13 +234,14 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent, hi
     /* initialize data to pass through B-tree */
     if (NULL == H5O_read(grp_ent, H5O_STAB_ID, 0, &stab, dxpl_id))
 	HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
+
     udata.operation = H5G_OPER_INSERT;
     udata.name = name;
     udata.heap_addr = stab.heap_addr;
     H5G_ent_copy(&(udata.ent),obj_ent,H5G_COPY_NULL); /* NULL copy here, no copies happens in H5G_node_insert() callback() */
 
     /* insert */
-    if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, split_ratios, &udata) < 0)
+    if (H5B_insert(grp_ent->file, dxpl_id, H5B_SNODE, stab.btree_addr, &udata) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert entry");
     
     /* update the name offset in the entry */

@@ -93,6 +93,9 @@
 #define H5D_XFER_BKGR_BUF_TYPE_SIZE       sizeof(H5T_bkg_t)
 #define H5D_XFER_BKGR_BUF_TYPE_DEF      H5T_BKG_NO
 /* Definitions for B-tree node splitting ratio property */
+/* (These default B-tree node splitting ratios are also used for splitting
+ * group's B-trees as well as chunked dataset's B-trees - QAK)
+ */
 #define H5D_XFER_BTREE_SPLIT_RATIO_NAME       "btree_split_ratio"
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE       sizeof(double[3])
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF      {0.1, 0.5, 0.9}
@@ -146,7 +149,7 @@
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
 /* Definitions for EDC property */
-#define H5D_XFER_EDC_NAME       "error-detecting"
+#define H5D_XFER_EDC_NAME       "err_detect"
 #define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
 #define H5D_XFER_EDC_DEF        H5Z_ENABLE_EDC
 /* Definitions for filter callback function property */
