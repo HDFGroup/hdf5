@@ -226,7 +226,7 @@ test(fill_t fill_style, const double splits[],
 
 	/* Determine overhead */
 	if (verbose) {
-	    if (H5Fflush(file)<0) goto error;
+	    if (H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
 	    if (fstat(fd, &sb)<0) goto error;
 	    printf("%4lu %8.3f\n",
 		   (unsigned long)i,

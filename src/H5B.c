@@ -1116,7 +1116,10 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  * Return:	Success:	A B-tree operation.  The address of the new
  *				node, if the node splits, is returned through
  *				the NEW_NODE argument.	The new node is always
- *				to the right of the previous node.
+ *				to the right of the previous node.  This
+ *				function is called recursively and the return
+ *				value influences the behavior of the caller.
+ *				See also, declaration of H5B_ins_t.
  *
  *		Failure:	H5B_INS_ERROR
  *
@@ -1583,11 +1586,17 @@ H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
  *		sub B-tree that is being considered is located at ADDR and
  *		the item to remove is described by UDATA.  If the removed
  *		item falls at the left or right end of the current level then
- *		it might be necessary to adjust the left and/or right keys.
+ *		it might be necessary to adjust the left and/or right keys
+ *		(LT_KEY and/or RT_KEY) to to indicate that they changed by
+ * 		setting LT_KEY_CHANGED and/or RT_KEY_CHANGED.
  *
- * Return:	Success:	A B-tree operation.
+ * Return:	Success:	A B-tree operation, see comments for
+ *				H5B_ins_t declaration.  This function is
+ *				called recursively and the return value
+ *				influences the actions of the caller. It is
+ *				also called by H5B_remove().
  *
- *		Failure:	H5B_INS_ERROR
+ *		Failure:	H5B_INS_ERROR, a negative value.
  *
  * Programmer:	Robb Matzke
  *              Wednesday, September 16, 1998
@@ -1641,7 +1650,8 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 	}
     }
     if (cmp) {
-	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR, "B-tree key not found");
+	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR,
+		    "B-tree key not found");
     }
 
     /*
@@ -1659,7 +1669,7 @@ H5B_remove_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
 					 lt_key_changed/*out*/,
 					 udata,
 					 bt->key[idx+1].nkey/*out*/,
-					 rt_key_changed/*out*/))==H5B_INS_ERROR) {
+					 rt_key_changed/*out*/))<0) {
 	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, H5B_INS_ERROR,
 			"key not found in subtree");
 	}

@@ -4333,17 +4333,21 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    break;
 
 	case H5T_POINTER:
-        if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype) HGOTO_DONE(-1);
-        if (dt1->u.atomic.u.r.rtype > dt2->u.atomic.u.r.rtype) HGOTO_DONE(1);
+	    if (dt1->u.atomic.u.r.rtype < dt2->u.atomic.u.r.rtype) {
+		HGOTO_DONE(-1);
+	    }	    
+	    if (dt1->u.atomic.u.r.rtype > dt2->u.atomic.u.r.rtype) {
+		HGOTO_DONE(1);
+	    }
 
-        switch(dt1->u.atomic.u.r.rtype) {
+	    switch(dt1->u.atomic.u.r.rtype) {
             case H5R_OBJECT:
                 /*void */
                 break;
 
             default:
                 assert("not implemented yet" && 0);
-        } /* end switch */
+	    }
 	    break;
 
 	default:
@@ -4395,7 +4399,7 @@ H5T_find(const H5T_t *src, const H5T_t *dst, H5T_bkg_t need_bkg,
     FUNC_ENTER(H5T_find, NULL);
 
 #ifdef QAK
-printf("%s: check 1.0\n",FUNC);
+    printf("%s: check 1.0\n",FUNC);
 #endif /* QAK */
     if (!noop_cdata.stats &&
 	NULL==(noop_cdata.stats = H5MM_calloc (sizeof(H5T_stats_t)))) {
@@ -4404,7 +4408,8 @@ printf("%s: check 1.0\n",FUNC);
     }
 
 #ifdef QAK
-printf("%s: check 2.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
+    printf("%s: check 2.0, src->type=%d, dst->type=%d\n",
+	   FUNC, (int)src->type, (int)dst->type);
 #endif /* QAK */
     /* No-op case */
     if (need_bkg<H5T_BKG_YES && 0==H5T_cmp(src, dst)) {
@@ -4413,7 +4418,7 @@ printf("%s: check 2.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)ds
     }
     
 #ifdef QAK
-printf("%s: check 3.0\n",FUNC);
+    printf("%s: check 3.0\n", FUNC);
 #endif /* QAK */
     /* Find it */
     if (NULL == (path = H5T_path_find(NULL, src, dst, TRUE, NULL))) {
@@ -4421,7 +4426,7 @@ printf("%s: check 3.0\n",FUNC);
 		      "unable to create conversion path");
     }
 #ifdef QAK
-printf("%s: path=%p\n",FUNC,path);
+    printf("%s: path=%p\n", FUNC, path);
 #endif /* QAK */
 
     if ((ret_value=path->func)) {
@@ -4491,7 +4496,7 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
         }
     }
 #ifdef QAK
-printf("%s: check 2.0, create=%d, md=%d\n",FUNC,(int)create,md);
+    printf("%s: check 2.0, create=%d, md=%d\n", FUNC, (int)create, md);
 #endif /* QAK */
 
     /* Insert */
@@ -4520,14 +4525,16 @@ printf("%s: check 2.0, create=%d, md=%d\n",FUNC,(int)create,md);
                    "memory allocation failed");
         }
 #ifdef QAK
-printf("%s: check 3.0, src=%p, dst=%p\n",FUNC,src,dst);
-printf("%s: check 3.0, src->type=%d, dst->type=%d\n",FUNC,(int)src->type,(int)dst->type);
+	printf("%s: check 3.0, src=%p, dst=%p\n", FUNC, src, dst);
+	printf("%s: check 3.0, src->type=%d, dst->type=%d\n",
+	       FUNC, (int)src->type, (int)dst->type);
 #endif /* QAK */
         path->src = H5T_copy(src, H5T_COPY_ALL);
         path->dst = H5T_copy(dst, H5T_COPY_ALL);
 
 #ifdef QAK
-printf("%s: check 3.5, func=%p, name=%s\n",FUNC,func,(name!=NULL ? name : "NULL"));
+	printf("%s: check 3.5, func=%p, name=%s\n",
+	       FUNC, func, (name!=NULL ? name : "NULL"));
 #endif /* QAK */
         /* Associate a function with the path if possible */
         if (func) {
@@ -4595,7 +4602,7 @@ printf("%s: check 3.5, func=%p, name=%s\n",FUNC,func,(name!=NULL ? name : "NULL"
         }
     }
 #ifdef QAK
-printf("%s: leaving path=%p\n",FUNC,path);
+    printf("%s: leaving path=%p\n", FUNC, path);
 #endif /* QAK */
     FUNC_LEAVE(path);
 }

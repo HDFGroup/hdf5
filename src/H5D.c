@@ -1866,7 +1866,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	}
     }
 #ifdef QAK
-printf("%s: after H5T_find, tconv_func=%p\n",FUNC,tconv_func);
+    printf("%s: after H5T_find, tconv_func=%p\n",FUNC,tconv_func);
 #endif /* QAK */
     if (NULL==(sconv=H5S_find(mem_space, file_space))) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,

@@ -164,6 +164,18 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5F_istore_debug_key,			/*debug			*/
 }};
 
+#define H5F_MIXUP(X)	{						      \
+    (X) += (X)<<12;							      \
+    (X) ^= (X)>>22;							      \
+    (X) += (X)<<4;							      \
+    (X) ^= (X)>>9;							      \
+    (X) += (X)<<10;							      \
+    (X) ^= (X)>>2;							      \
+    (X) += (X)<<7;							      \
+    (X) ^= (X)>>12;							      \
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_istore_sizeof_rkey
@@ -1187,10 +1199,14 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 
     FUNC_ENTER (H5F_istore_lock, NULL);
     assert(split_ratios);
-    
+
     if (rdcc->nslots>0) {
 	idx = layout->addr.offset;
-	for (i=0; i<layout->ndims; i++) idx = (idx<<1) ^ offset[i];
+	H5F_MIXUP(idx);
+	for (i=0; i<layout->ndims; i++) {
+	    idx += offset[i];
+	    H5F_MIXUP(idx);
+	}
 	idx %= rdcc->nslots;
 	ent = rdcc->slot[idx];
     

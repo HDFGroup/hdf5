@@ -42,7 +42,9 @@
 #define RM_CACHE_DELT	5
 #define RM_START	0.50
 #define RM_END	        5.00
-#define RM_DELTA	0.50
+#define RM_DELTA	0.5
+#define RM_W0		1.0
+#define RM_NRDCC	5210
 
 /* Diagonal test */
 #define DIAG_CACHE_STRT	25
@@ -50,7 +52,9 @@
 #define DIAG_CACHE_DELT	5
 #define DIAG_START	0.50
 #define DIAG_END	5.00
-#define DIAG_DELTA	0.50
+#define DIAG_DELTA	0.5
+/* #define DIAG_W0		0.65 */
+/* #define DIAG_NRDCC		521 */
 
 static size_t	nio_g;
 static hid_t	fapl_g = -1;
@@ -163,6 +167,12 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
     double	w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
+#ifdef RM_W0
+    w0 = RM_W0;
+#endif
+#ifdef RM_NRDCC
+    rdcc_nelmts = RM_NRDCC;
+#endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
 		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
@@ -232,6 +242,12 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     double	w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
+#ifdef DIAG_W0
+    w0 = DIAG_W0;
+#endif
+#ifdef DIAG_NRDCC
+    rdcc_nelmts = DIAG_NRDCC;
+#endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
 		  cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);

@@ -35,11 +35,11 @@
 #define H5B_MAGIC	"TREE"		/*tree node magic number	     */
 #define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
 #define H5B_SIZEOF_HDR(F)						      \
-   (H5B_SIZEOF_MAGIC +		/*magic number				*/    \
-    4 +				/*type, level, num entries		*/    \
+   (H5B_SIZEOF_MAGIC +		/*magic number				  */  \
+    4 +				/*type, level, num entries		  */  \
     2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	  */
      
-#define H5B_K(F,TYPE)		/*K value given file and Btree subclass */    \
+#define H5B_K(F,TYPE)		/*K value given file and Btree subclass   */  \
    ((F)->shared->create_parms->btree_k[(TYPE)->id])
 
 typedef enum H5B_ins_t {
