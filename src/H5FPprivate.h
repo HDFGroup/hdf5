@@ -111,6 +111,7 @@ enum {
     H5FP_TAG_READ,
     H5FP_TAG_METADATA,
     H5FP_TAG_ALLOC,
+    H5FP_TAG_DUMP,
     H5FP_TAG_FILE_ID
 };
 
@@ -173,12 +174,12 @@ typedef struct {
     H5FP_lock_t     rw_lock;    /* Indicates read or write lock             */
     H5FD_mem_t      mem_type;   /* Type of memory updated, if req'd         */
     unsigned        md_size;    /* Size of the metadata sent in next msg    */
-    MPI_Offset      addr;       /* Address of the metadata                  */
     unsigned long   feature_flags; /* Feature flags for the file driver     */
     hsize_t         meta_block_size; /* Metadata block size                 */
     hsize_t         sdata_block_size; /* Small data block size              */
     hsize_t         threshold;  /* Alignment threshold                      */
     hsize_t         alignment;  /* Alignment (really!)                      */
+    haddr_t         addr;       /* Address of the metadata                  */
     unsigned char   oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
 } H5FP_request;
 
@@ -241,6 +242,7 @@ extern MPI_Comm H5FP_SAP_BARRIER_COMM; /* Comm if you want to do a barrier  */
 
 extern unsigned H5FP_sap_rank;  /* The rank of the SAP: Supplied by user    */
 extern unsigned H5FP_capt_rank; /* The rank which tells SAP of opens        */
+extern unsigned H5FP_capt_barrier_rank;/* Rank of captain in barrier comm   */
 
 #ifdef __cplusplus
 extern "C" {
@@ -250,11 +252,15 @@ extern "C" {
 extern herr_t H5FP_sap_receive_loop(void);
 
 /* Use these functions to communicate with the SAP */
-extern herr_t H5FP_request_open(H5FP_obj_t obj_type, MPI_Offset maxaddr,
-                                unsigned long feature_flags, hsize_t
-                                meta_block_size, hsize_t sdata_block_size,
-                                hsize_t threshold, hsize_t alignment,
-                                unsigned *file_id, unsigned *req_id);
+extern herr_t H5FP_request_open(H5FP_obj_t obj_type,
+                                haddr_t maxaddr,
+                                unsigned long feature_flags,
+                                hsize_t meta_block_size,
+                                hsize_t sdata_block_size,
+                                hsize_t threshold,
+                                hsize_t alignment,
+                                unsigned *file_id,
+                                unsigned *req_id);
 extern herr_t H5FP_request_lock(unsigned sap_file_id, unsigned char *mdata,
                                 H5FP_lock_t rw_lock, int last, unsigned *req_id,
                                 H5FP_status_t *status);

@@ -82,15 +82,15 @@ typedef struct {
  *===----------------------------------------------------------------------===
  *
  * This has all the information the SAP cares about for a given file: a
- * copy of the H5FD_t structure for keeping track of metadata allocations
- * in the file, the file ID assigned by the SAP, whether the file is in
- * the process of being closed (and, therefore, can't accept anymore
- * modifications), a count of the number of modifications not written to
- * the file, a list of modifications (writes) made by clients to the
- * metadata, and a list of current locks on objects in the file.
+ * copy of the H5FD_fphdf5_t structure for keeping track of metadata
+ * allocations in the file, the file ID assigned by the SAP, whether the
+ * file is in the process of being closed (and, therefore, can't accept
+ * anymore modifications), a count of the number of modifications not
+ * written to the file, a list of modifications (writes) made by clients
+ * to the metadata, and a list of current locks on objects in the file.
  */
 typedef struct {
-    H5FD_t          file;       /* file driver structure                    */
+    H5FD_fphdf5_t   file;       /* file driver structure                    */
     unsigned        file_id;    /* the file id the SAP keeps per file       */
     int             closing;    /* we're closing the file - no more changes */
     unsigned        num_mods;   /* number of mdata writes outstanding       */
@@ -127,37 +127,40 @@ static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *info,
                                                 H5FP_object_lock *ol);
 
     /* local file information handling functions */
-static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
-                                             unsigned long feature_flags,
-                                             hsize_t meta_block_size,
-                                             hsize_t sdata_block_size,
-                                             hsize_t threshold,
-                                             hsize_t alignment);
-static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
-static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id);
-static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
-static herr_t H5FP_remove_file_id_from_list(unsigned file_id);
-static herr_t H5FP_free_file_info_node(H5FP_file_info *info);
+static herr_t   H5FP_add_new_file_info_to_list(unsigned file_id,
+                                               haddr_t maxaddr,
+                                               unsigned long feature_flags,
+                                               hsize_t meta_block_size,
+                                               hsize_t sdata_block_size,
+                                               hsize_t threshold,
+                                               hsize_t alignment);
+static int      H5FP_file_info_cmp(H5FP_file_info *k1,
+                                   H5FP_file_info *k2,
+                                   int cmparg);
+static herr_t   H5FP_remove_file_id_from_list(unsigned file_id);
+static herr_t   H5FP_free_file_info_node(H5FP_file_info *info);
+static H5FP_file_info  *H5FP_new_file_info_node(unsigned file_id);
+static H5FP_file_info  *H5FP_find_file_info(unsigned file_id);
 
     /* local file modification structure handling functions */
-static H5FP_mdata_mod *H5FP_new_file_mod_node(unsigned rank,
+static H5FP_mdata_mod  *H5FP_new_file_mod_node(unsigned rank,
                                               H5FD_mem_t mem_type,
-                                              MPI_Offset addr,
+                                              haddr_t addr,
                                               unsigned md_size,
                                               char *metadata);
-static herr_t H5FP_free_mod_node(H5FP_mdata_mod *info);
+static herr_t   H5FP_free_mod_node(H5FP_mdata_mod *info);
 
     /* local request handling functions */
-static herr_t H5FP_sap_handle_open_request(H5FP_request req, unsigned md_size);
-static herr_t H5FP_sap_handle_lock_request(H5FP_request req);
-static herr_t H5FP_sap_handle_release_lock_request(H5FP_request req);
-static herr_t H5FP_sap_handle_read_request(H5FP_request req);
-static herr_t H5FP_sap_handle_write_request(H5FP_request req,
-                                            char *mdata,
-                                            unsigned md_size);
-static herr_t H5FP_sap_handle_flush_request(H5FP_request req);
-static herr_t H5FP_sap_handle_close_request(H5FP_request req);
-static herr_t H5FP_sap_handle_alloc_request(H5FP_request req);
+static herr_t   H5FP_sap_handle_open_request(H5FP_request *req, unsigned md_size);
+static herr_t   H5FP_sap_handle_lock_request(H5FP_request *req);
+static herr_t   H5FP_sap_handle_release_lock_request(H5FP_request *req);
+static herr_t   H5FP_sap_handle_read_request(H5FP_request *req);
+static herr_t   H5FP_sap_handle_write_request(H5FP_request *req,
+                                              char *mdata,
+                                              unsigned md_size);
+static herr_t   H5FP_sap_handle_flush_request(H5FP_request *req);
+static herr_t   H5FP_sap_handle_close_request(H5FP_request *req);
+static herr_t   H5FP_sap_handle_alloc_request(H5FP_request *req);
 
 /*
  *===----------------------------------------------------------------------===
@@ -182,6 +185,7 @@ H5FP_sap_receive_loop(void)
     herr_t ret_value = SUCCEED;
     int comm_size;
     int stop = 0;
+    H5FP_request req; 
 
     FUNC_ENTER_NOAPI(H5FP_sap_receive_loop, FAIL);
 
@@ -195,7 +199,6 @@ H5FP_sap_receive_loop(void)
         HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, FAIL, "cannot make TBBT tree");
 
     for (;;) {
-        H5FP_request req; 
         char *buf = NULL;
         herr_t hrc;
 
@@ -204,33 +207,34 @@ H5FP_sap_receive_loop(void)
 
         switch (req.req_type) {
         case H5FP_REQ_OPEN:
-            if ((hrc = H5FP_sap_handle_open_request(req, req.md_size)) != SUCCEED)
+            if ((hrc = H5FP_sap_handle_open_request(&req, req.md_size)) != SUCCEED)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENOBJ, FAIL, "cannot open file");
             break;
         case H5FP_REQ_LOCK:
         case H5FP_REQ_LOCK_END:
-            hrc = H5FP_sap_handle_lock_request(req);
+            hrc = H5FP_sap_handle_lock_request(&req);
             break;
         case H5FP_REQ_RELEASE:
         case H5FP_REQ_RELEASE_END:
-            hrc = H5FP_sap_handle_release_lock_request(req);
-            break;
-        case H5FP_REQ_WRITE:
-            hrc = H5FP_sap_handle_write_request(req, buf, req.md_size);
+            hrc = H5FP_sap_handle_release_lock_request(&req);
             break;
         case H5FP_REQ_READ:
-            hrc = H5FP_sap_handle_read_request(req);
+            hrc = H5FP_sap_handle_read_request(&req);
+            break;
+        case H5FP_REQ_WRITE:
+            hrc = H5FP_sap_handle_write_request(&req, buf, req.md_size);
             break;
         case H5FP_REQ_FLUSH:
-            hrc = H5FP_sap_handle_flush_request(req);
+            hrc = H5FP_sap_handle_flush_request(&req);
             break;
         case H5FP_REQ_CLOSE:
-            hrc = H5FP_sap_handle_close_request(req);
+            hrc = H5FP_sap_handle_close_request(&req);
             break;
         case H5FP_REQ_ALLOC:
-            hrc = H5FP_sap_handle_alloc_request(req);
+            hrc = H5FP_sap_handle_alloc_request(&req);
             break;
         case H5FP_REQ_STOP:
+            hrc = SUCCEED;
             if (++stop == comm_size - 1)
                 goto done;
             break;
@@ -241,8 +245,9 @@ H5FP_sap_receive_loop(void)
         /*
          * If the above calls didn't succeed, free the buffer
          */
-        if (hrc != SUCCEED)
+        if (hrc != SUCCEED) {
             HDfree(buf);
+        }
     }
 
 done:
@@ -463,7 +468,7 @@ H5FP_free_mod_node(H5FP_mdata_mod *info)
  */
 static H5FP_mdata_mod *
 H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
-                       MPI_Offset addr, unsigned md_size, char *metadata)
+                       haddr_t addr, unsigned md_size, char *metadata)
 {
     H5FP_mdata_mod *ret_value = NULL;
 
@@ -494,7 +499,7 @@ done:
  */
 static herr_t
 H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type, 
-                          MPI_Offset addr, unsigned rank, unsigned md_size,
+                          haddr_t addr, unsigned rank, unsigned md_size,
                           char *metadata)
 {
     H5FP_mdata_mod *fm, mod;
@@ -503,6 +508,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
 
     FUNC_ENTER_NOINIT(H5FP_add_file_mod_to_list);
 
+    /* check args */
     assert(info);
 
     mod.addr = addr;    /* This is the key field for the TBBT */
@@ -517,14 +523,16 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
         HDfree(fm->metadata);
         fm->metadata = metadata;
         fm->md_size = md_size;
-        ret_value = SUCCEED;
-    } else if ((fm = H5FP_new_file_mod_node(rank, mem_type, addr,
-                                            md_size, metadata)) != NULL) {
+        HGOTO_DONE(SUCCEED);
+    }
+    
+    if ((fm = H5FP_new_file_mod_node(rank, mem_type, addr, md_size, metadata)) != NULL) {
         if (!H5TB_dins(info->mod_tree, (void *)fm, NULL))
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert modification into tree");
 
-        ret_value = SUCCEED;
+        ++info->num_mods;
+        HGOTO_DONE(SUCCEED);
     }
 
 done:
@@ -547,7 +555,7 @@ H5FP_free_file_info_node(H5FP_file_info *info)
     if (info) {
         H5TB_dfree(info->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
         H5TB_dfree(info->locks, (void (*)(void*))H5FP_free_object_lock, NULL);
-        H5FD_free_freelist(&info->file);
+        H5FD_free_freelist(&info->file.pub);
         HDfree(info);
     }
 
@@ -646,7 +654,7 @@ H5FP_find_file_info(unsigned file_id)
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
+H5FP_add_new_file_info_to_list(unsigned file_id, haddr_t maxaddr,
                                unsigned long feature_flags,
                                hsize_t meta_block_size,
                                hsize_t sdata_block_size,
@@ -659,6 +667,8 @@ H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
     FUNC_ENTER_NOINIT(H5FP_add_new_file_info_to_list);
 
     if ((info = H5FP_new_file_info_node(file_id)) != NULL) {
+        int mrc;
+
         if (!H5TB_dins(file_info_tree, (void *)info, NULL)) {
             H5FP_free_file_info_node(info);
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
@@ -669,15 +679,23 @@ H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr,
          * Initialize some of the information needed for metadata
          * allocation requests
          */
-        HDmemset(info->file.fl, 0, sizeof(info->file.fl));
-        info->file.cls = &H5FD_fphdf5_g;
-        info->file.maxaddr = maxaddr;
-        info->file.accum_loc = HADDR_UNDEF;
-        info->file.feature_flags = feature_flags;
-        info->file.def_meta_block_size = meta_block_size;
-        info->file.def_sdata_block_size = sdata_block_size;
-        info->file.threshold = threshold;
-        info->file.alignment = alignment;
+        HDmemset(&info->file, 0, sizeof(info->file));
+        info->file.pub.driver_id = H5FD_FPHDF5;
+        info->file.pub.cls = &H5FD_fphdf5_g;
+        info->file.pub.maxaddr = maxaddr;
+        info->file.pub.accum_loc = HADDR_UNDEF;
+        info->file.pub.feature_flags = feature_flags;
+        info->file.pub.def_meta_block_size = meta_block_size;
+        info->file.pub.def_sdata_block_size = sdata_block_size;
+        info->file.pub.threshold = threshold;
+        info->file.pub.alignment = alignment;
+
+        if ((mrc = MPI_Comm_rank(H5FP_SAP_COMM, &info->file.mpi_rank)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
+        if ((mrc = MPI_Comm_size(H5FP_SAP_COMM, &info->file.mpi_size)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mrc);
+
         ret_value = SUCCEED;
     }
 
@@ -791,7 +809,7 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
         r.addr = m->addr;
         r.md_size = m->md_size;
 
-        if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)to, H5FP_TAG_REPLY,
+        if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)to, H5FP_TAG_DUMP,
                             H5FP_SAP_COMM)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
@@ -808,12 +826,17 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
     r.md_size = 0;
     r.status = H5FP_STATUS_DUMPING_FINISHED;
 
-    if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)to, H5FP_TAG_REPLY,
+    if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)to, H5FP_TAG_DUMP,
                         H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     /* Free up the modification tree */
     H5TB_dfree(info->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
+
+    if ((info->mod_tree = H5TB_dmake((H5TB_cmp_t)H5FP_file_mod_cmp,
+                                     sizeof(H5FP_mdata_mod), FALSE)) == NULL)
+        HGOTO_ERROR(H5E_FPHDF5, H5E_CANTMAKETREE, NULL, "cannot make TBBT tree");
+
     info->mod_tree = NULL;
     info->num_mods = 0;
 
@@ -852,25 +875,25 @@ H5FP_gen_sap_file_id()
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_open_request(H5FP_request req, unsigned UNUSED md_size)
+H5FP_sap_handle_open_request(H5FP_request *req, unsigned UNUSED md_size)
 {
     herr_t ret_value = SUCCEED;
     int mrc;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_open_request);
 
-    if (req.obj_type == H5FP_OBJ_FILE) {
+    if (req->obj_type == H5FP_OBJ_FILE) {
         unsigned new_file_id = H5FP_gen_sap_file_id();
 
-        /* N.B. At this point, req.addr is equiv. to maxaddr in H5FD_open() */
-        if (H5FP_add_new_file_info_to_list(new_file_id, req.addr, req.feature_flags,
-                                           req.meta_block_size, req.sdata_block_size,
-                                           req.threshold, req.alignment) != SUCCEED)
+        /* N.B. At this point, req->addr is equiv. to maxaddr in H5FD_open() */
+        if (H5FP_add_new_file_info_to_list(new_file_id, req->addr, req->feature_flags,
+                                           req->meta_block_size, req->sdata_block_size,
+                                           req->threshold, req->alignment) != SUCCEED)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert new file structure to list");
 
         /* file ID gets broadcast via the captain process */
-        if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, (int)H5FP_capt_rank,
+        if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, (int)req->proc_rank,
                             H5FP_TAG_FILE_ID, H5FP_SAP_COMM)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
     }
@@ -895,10 +918,10 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_lock_request(H5FP_request req)
+H5FP_sap_handle_lock_request(H5FP_request *req)
 {
     struct lock_group {
-        unsigned char       oid[sizeof(req.oid)];
+        unsigned char       oid[sizeof(req->oid)];
         unsigned            file_id;
         unsigned            locked;
         H5FP_lock_t         rw_lock;
@@ -923,7 +946,7 @@ H5FP_sap_handle_lock_request(H5FP_request req)
      * at one time.
      */
     for (i = 0;; ++i) {
-        if (req.oid[0]) {
+        if (req->oid[0]) {
             if (i == list_size) {
                 list_size <<= 1;    /* equiv to list_size *= 2; */
                 oids = HDrealloc(oids, list_size * sizeof(struct lock_group));
@@ -934,17 +957,17 @@ H5FP_sap_handle_lock_request(H5FP_request req)
                 }
             }
 
-            H5FP_COPY_OID(oids[i].oid, req.oid);
-            oids[i].file_id = req.file_id;
-            oids[i].rw_lock = req.rw_lock;
+            H5FP_COPY_OID(oids[i].oid, req->oid);
+            oids[i].file_id = req->file_id;
+            oids[i].rw_lock = req->rw_lock;
             oids[i].locked = FALSE;
         }
 
-        if (req.req_type == H5FP_REQ_LOCK_END)
+        if (req->req_type == H5FP_REQ_LOCK_END)
             /* this was the last lock request */
             break;
 
-        if (H5FP_sap_receive(&req, (int)req.proc_rank,
+        if (H5FP_sap_receive(req, (int)req->proc_rank,
                              H5FP_TAG_REQUEST, NULL) != SUCCEED) {
             exit_state = H5FP_STATUS_LOCK_FAILED;
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTRECV, FAIL, "cannot receive messages");
@@ -980,7 +1003,7 @@ H5FP_sap_handle_lock_request(H5FP_request req)
                         oids[j].lock->rw_lock == H5FP_LOCK_READ) ||
                  (oids[j].rw_lock == H5FP_LOCK_WRITE &&
                         oids[j].lock->rw_lock == H5FP_LOCK_WRITE &&
-                        oids[j].lock->owned_rank == req.proc_rank))) {
+                        oids[j].lock->owned_rank == req->proc_rank))) {
             /* FAILURE */
             exit_state = H5FP_STATUS_LOCK_FAILED;
             HGOTO_DONE(FAIL);
@@ -1010,7 +1033,7 @@ H5FP_sap_handle_lock_request(H5FP_request req)
                     oids[j].lock->rw_lock == H5FP_LOCK_READ) ||
                 (oids[j].rw_lock == H5FP_LOCK_WRITE &&
                     oids[j].lock->rw_lock == H5FP_LOCK_WRITE &&
-                    oids[j].lock->owned_rank == req.proc_rank)) {
+                    oids[j].lock->owned_rank == req->proc_rank)) {
                 /*
                  * The requesting process may already have this lock. Might
                  * be a request from some call-back function of some sort.
@@ -1026,8 +1049,8 @@ H5FP_sap_handle_lock_request(H5FP_request req)
                 goto rollback;
             }
         } else {
-            H5FP_object_lock *lock = H5FP_new_object_lock(oids[j].oid, req.proc_rank,
-                                                          req.obj_type, req.rw_lock);
+            H5FP_object_lock *lock = H5FP_new_object_lock(oids[j].oid, req->proc_rank,
+                                                          req->obj_type, req->rw_lock);
 
             if (lock) {
                 if (!H5TB_dins(oids[j].info->locks, (void *)lock, NULL)) {
@@ -1064,7 +1087,7 @@ rollback:
     for (j = 0; j <= i; ++j) {
         if (oids[j].locked) {
             if (oids[j].lock) {
-                if (oids[j].lock->owned_rank == req.proc_rank) {
+                if (oids[j].lock->owned_rank == req->proc_rank) {
                     if (--oids[j].lock->ref_count == 0) {
                         H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
                     }
@@ -1088,7 +1111,7 @@ HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
     }
 
     HDfree(oids);
-    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 } 
 
@@ -1100,10 +1123,10 @@ HDfprintf(stderr, "%s: locking failure (%d)!!\n", FUNC, ret_value);
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_release_lock_request(H5FP_request req)
+H5FP_sap_handle_release_lock_request(H5FP_request *req)
 {
     struct release_group {
-        unsigned char       oid[sizeof(req.oid)];
+        unsigned char       oid[sizeof(req->oid)];
         unsigned            file_id;
         H5FP_file_info     *info;
         H5FP_object_lock   *lock;
@@ -1126,7 +1149,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request req)
      * release locks at one time.
      */
     for (i = 0;; ++i) {
-        if (req.oid[0]) {
+        if (req->oid[0]) {
             if (i == list_size) {
                 list_size <<= 1;    /* equiv to list_size *= 2; */
                 oids = HDrealloc(oids, list_size * sizeof(struct release_group));
@@ -1137,15 +1160,15 @@ H5FP_sap_handle_release_lock_request(H5FP_request req)
                 }
             }
 
-            H5FP_COPY_OID(oids[i].oid, req.oid);
-            oids[i].file_id = req.file_id;
+            H5FP_COPY_OID(oids[i].oid, req->oid);
+            oids[i].file_id = req->file_id;
         }
 
-        if (req.req_type == H5FP_REQ_RELEASE_END)
+        if (req->req_type == H5FP_REQ_RELEASE_END)
             /* this was the last lock request */
             break;
 
-        if (H5FP_sap_receive(&req, (int)req.proc_rank, H5FP_TAG_REQUEST, NULL) != SUCCEED) {
+        if (H5FP_sap_receive(req, (int)req->proc_rank, H5FP_TAG_REQUEST, NULL) != SUCCEED) {
             exit_state = H5FP_STATUS_LOCK_RELEASE_FAILED;
             HGOTO_DONE(FAIL);
         }
@@ -1163,7 +1186,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request req)
 
         oids[j].lock = H5FP_find_object_lock(oids[j].info, oids[j].oid);
 
-        if (!oids[j].lock || oids[j].lock->owned_rank != req.proc_rank) {
+        if (!oids[j].lock || oids[j].lock->owned_rank != req->proc_rank) {
             exit_state = H5FP_STATUS_BAD_LOCK;
             HGOTO_DONE(FAIL);
         }
@@ -1176,7 +1199,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request req)
      */
     for (j = 0; j <= i; ++j) {
         if (oids[j].lock) {
-            if (oids[j].lock->owned_rank == req.proc_rank) {
+            if (oids[j].lock->owned_rank == req->proc_rank) {
                 if (--oids[j].lock->ref_count == 0)
                     H5FP_remove_object_lock_from_list(oids[j].info, oids[j].lock);
             } else {
@@ -1193,7 +1216,7 @@ H5FP_sap_handle_release_lock_request(H5FP_request req)
 
 done:
     HDfree(oids);
-    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1209,7 +1232,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_read_request(H5FP_request req)
+H5FP_sap_handle_read_request(H5FP_request *req)
 {
     H5FP_file_info *info;
     H5FP_read r;
@@ -1219,18 +1242,18 @@ H5FP_sap_handle_read_request(H5FP_request req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_read_request);
 
-    r.req_id = req.req_id;
-    r.file_id = req.file_id;
+    r.req_id = req->req_id;
+    r.file_id = req->file_id;
     r.md_size = 0;
     r.addr = 0;
     r.status = H5FP_STATUS_MDATA_NOT_CACHED;
 
-    if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         H5FP_mdata_mod mod;     /* Used to find the correct modification */
         H5TB_NODE *node;
 
         if (info->num_mods >= H5FP_MDATA_CACHE_HIGHWATER_MARK) {
-            if (H5FP_dump(info, req.proc_rank, req.req_id, req.file_id) == FAIL)
+            if (H5FP_dump(info, req->proc_rank, req->req_id, req->file_id) == FAIL)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                             "can't dump metadata to client");
 
@@ -1241,7 +1264,7 @@ H5FP_sap_handle_read_request(H5FP_request req)
             HGOTO_DONE(SUCCEED);
         }
 
-        mod.addr = req.addr;    /* This is the key field for the TBBT */
+        mod.addr = req->addr;   /* This is the key field for the TBBT */
 
         if ((node = H5TB_dfind(info->mod_tree, (void *)&mod, NULL)) != NULL) {
             H5FP_mdata_mod *fm = (H5FP_mdata_mod *)node->data;
@@ -1253,12 +1276,12 @@ H5FP_sap_handle_read_request(H5FP_request req)
         }
     }
 
-    if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)req.proc_rank,
+    if ((mrc = MPI_Send(&r, 1, H5FP_read_t, (int)req->proc_rank,
                         H5FP_TAG_READ, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
 
     if (r.md_size)
-        if (H5FP_send_metadata(metadata, (int)r.md_size, (int)req.proc_rank) != SUCCEED)
+        if (H5FP_send_metadata(metadata, (int)r.md_size, (int)req->proc_rank) != SUCCEED)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                         "can't send metadata to client");
 
@@ -1281,7 +1304,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
+H5FP_sap_handle_write_request(H5FP_request *req, char *mdata, unsigned md_size)
 {
     H5FP_file_info *info;
     H5FP_status_t exit_state = H5FP_STATUS_OK;
@@ -1289,7 +1312,7 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
 
-    if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
 #if 0
         H5FP_object_lock *lock;
 #endif  /* 0 */
@@ -1299,14 +1322,14 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
              * If there are any modifications not written out yet, dump
              * them to this process
              */
-            if (H5FP_send_reply(req.proc_rank, req.req_id, req.file_id,
+            if (H5FP_send_reply(req->proc_rank, req->req_id, req->file_id,
                                 H5FP_STATUS_DUMPING) == FAIL) {
                 exit_state = H5FP_STATUS_DUMPING_FAILED;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                             "can't send message to client");
             }
 
-            if (H5FP_dump(info, req.proc_rank, req.req_id, req.file_id) == FAIL) {
+            if (H5FP_dump(info, req->proc_rank, req->req_id, req->file_id) == FAIL) {
                 exit_state = H5FP_STATUS_DUMPING_FAILED;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                             "metadata dump failed");
@@ -1326,9 +1349,9 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
          */
 
         /* handle the change request */
-        lock = H5FP_find_object_lock(info, req.oid);
+        lock = H5FP_find_object_lock(info, req->oid);
 
-        if (!lock || lock->owned_rank != req.proc_rank
+        if (!lock || lock->owned_rank != req->proc_rank
                 || lock->rw_lock != H5FP_LOCK_WRITE) {
             /*
              * There isn't a write lock or we don't own the write
@@ -1339,8 +1362,8 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
         }
 #endif  /* 0 */
 
-        if (H5FP_add_file_mod_to_list(info, req.mem_type, req.addr,
-                                      req.proc_rank, md_size, mdata) != SUCCEED) {
+        if (H5FP_add_file_mod_to_list(info, req->mem_type, (haddr_t)req->addr,
+                                      req->proc_rank, md_size, mdata) != SUCCEED) {
             exit_state = H5FP_STATUS_OOM;
             HGOTO_DONE(FAIL);
         }
@@ -1351,7 +1374,7 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
     }
 
 done:
-    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1365,7 +1388,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_flush_request(H5FP_request req)
+H5FP_sap_handle_flush_request(H5FP_request *req)
 {
     H5FP_file_info *info;
     H5FP_status_t exit_state = H5FP_STATUS_OK;
@@ -1373,20 +1396,20 @@ H5FP_sap_handle_flush_request(H5FP_request req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_flush_request);
 
-    if ((info = H5FP_find_file_info(req.file_id)) != NULL)
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL)
         if (info->num_mods) {
             /*
              * If there are any modifications not written out yet, dump
              * them to this process
              */
-            if (H5FP_send_reply(req.proc_rank, req.req_id, req.file_id,
+            if (H5FP_send_reply(req->proc_rank, req->req_id, req->file_id,
                                 H5FP_STATUS_DUMPING) == FAIL) {
                 exit_state = H5FP_STATUS_DUMPING_FAILED;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                             "can't send message to client");
             }
 
-            if (H5FP_dump(info, req.proc_rank, req.req_id, req.file_id) == FAIL) {
+            if (H5FP_dump(info, req->proc_rank, req->req_id, req->file_id) == FAIL) {
                 exit_state = H5FP_STATUS_DUMPING_FAILED;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
                             "can't dump metadata to client");
@@ -1394,7 +1417,7 @@ H5FP_sap_handle_flush_request(H5FP_request req)
         }
 
 done:
-    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1407,7 +1430,7 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_close_request(H5FP_request req)
+H5FP_sap_handle_close_request(H5FP_request *req)
 {
     H5FP_file_info *info;
     H5FP_status_t exit_state = H5FP_STATUS_OK;
@@ -1415,7 +1438,7 @@ H5FP_sap_handle_close_request(H5FP_request req)
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_close_request);
 
-    if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         int comm_size;
 
         /* Get the size of the SAP communicator */
@@ -1424,7 +1447,7 @@ H5FP_sap_handle_close_request(H5FP_request req)
 
         if (++info->closing == comm_size - 1)
             /* all processes have closed the file - remove it from list */
-            if (H5FP_remove_file_id_from_list(req.file_id) != SUCCEED) {
+            if (H5FP_remove_file_id_from_list(req->file_id) != SUCCEED) {
                 exit_state = H5FP_STATUS_BAD_FILE_ID;
                 HGOTO_ERROR(H5E_FPHDF5, H5E_NOTFOUND, FAIL,
                             "cannot remove file ID from list");
@@ -1432,7 +1455,7 @@ H5FP_sap_handle_close_request(H5FP_request req)
     }
 
 done:
-    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    H5FP_send_reply(req->proc_rank, req->req_id, req->file_id, exit_state);
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1445,20 +1468,20 @@ done:
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_alloc_request(H5FP_request req)
+H5FP_sap_handle_alloc_request(H5FP_request *req)
 {
-    H5FP_alloc      alloc;
+    H5FP_alloc      sap_alloc;
     H5FP_file_info *info;
     int             mrc;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5FP_sap_handle_alloc_request);
 
-    if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
-        alloc.req_id = req.req_id;
-        alloc.file_id = info->file_id;
-        alloc.status = H5FP_STATUS_OK;
-        alloc.mem_type = req.mem_type;
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
+        sap_alloc.req_id = req->req_id;
+        sap_alloc.file_id = info->file_id;
+        sap_alloc.status = H5FP_STATUS_OK;
+        sap_alloc.mem_type = req->mem_type;
 
         /*
          * Try allocating from the free-list that is kept on the server
@@ -1474,12 +1497,12 @@ H5FP_sap_handle_alloc_request(H5FP_request req)
          *
          * Whatta pain.
          */
-        if ((alloc.addr = H5FD_alloc(&info->file, req.mem_type,
-                                     H5P_DEFAULT, req.meta_block_size)) == HADDR_UNDEF)
+        if ((sap_alloc.addr = H5FD_alloc((H5FD_t*)&info->file, req->mem_type, H5P_DEFAULT,
+                                     req->meta_block_size)) == HADDR_UNDEF)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                         "SAP unable to allocate file memory");
 
-        if ((mrc = MPI_Send(&alloc, 1, H5FP_alloc_t, (int)req.proc_rank,
+        if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc_t, (int)req->proc_rank,
                             H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
     }
