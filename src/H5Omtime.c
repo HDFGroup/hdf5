@@ -154,7 +154,10 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 
    tz = timebuffer.timezone;
   
-   the_time -=tz*60-3600*_daylight;
+   /*daylight is not handled properly. Currently we just hard-code                        the problem. */ 
+   the_time -=tz*60;
+
+   /*the_time -=tz*60-3600*_daylight;*/
 
    
 }
