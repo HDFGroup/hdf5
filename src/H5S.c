@@ -40,7 +40,7 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Global var whose value comes from environment variable */
-hbool_t         H5_mpi_opt_types_g = TRUE;
+hbool_t         H5_mpi_opt_types_g = FALSE;
 #endif
 
 /* Declare a free list to manage the H5S_simple_t struct */
@@ -92,9 +92,16 @@ H5S_init_interface(void)
     {
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
+#ifdef H5FDmpio_DEBUG
+	hbool_t         oldtmp = H5_mpi_opt_types_g ;
+#endif
         if (s && HDisdigit(*s)) {
             H5_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
         }
+#ifdef H5FDmpio_DEBUG
+    	fprintf(stdout, "H5_mpi_opt_types_g was %ld became %ld\n",
+		    oldtmp, H5_mpi_opt_types_g);
+#endif
     }
 #endif
 
