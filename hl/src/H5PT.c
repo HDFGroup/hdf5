@@ -236,7 +236,7 @@ hid_t H5PTopen( hid_t loc_id,
   table = (htbl_t *) malloc(sizeof(htbl_t));
 
   /* Open the dataset */
-  table->dset_id = H5Dopen(loc_id, dset_name);
+  if(( table->dset_id = H5Dopen(loc_id, dset_name)) <0);
   if (table->dset_id < 0)
     goto out;
 
@@ -261,8 +261,8 @@ hid_t H5PTopen( hid_t loc_id,
   if((H5PT_create_index(table)) <0)
     goto out;
 
-  /* Get the dataset size from disk */
-  if (H5PTget_num_records( table->dset_id, &(table->set_size)) < 0)
+  /* Get number of records in table */
+  if ( H5Sget_simple_extent_dims( table->dspace_id, dims, NULL) < 0 )
     goto out;
 
   /* Get an ID for this table */
@@ -432,7 +432,7 @@ herr_t H5PTappend( hid_t table_id,
   htbl_t * table;
 
   /* Find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
   /* If we are asked to write 0 records, just do nothing */
@@ -486,7 +486,7 @@ herr_t H5PTget_next( hid_t table_id,
   htbl_t * table;
 
   /* Find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
   /* If nrecords == 0, do nothing */
@@ -532,7 +532,7 @@ herr_t H5PTread_packets( hid_t table_id,
   htbl_t * table;
 
   /* find the table struct from its ID */
-  table = H5Iobject_verify(table_id, H5PT_ptable_id_type);
+  table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type);
   if (table == NULL)
     goto out;
 
@@ -622,7 +622,7 @@ herr_t H5PTcreate_index(hid_t table_id)
   htbl_t * table;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     return -1;
 
   return H5PT_create_index(table);
@@ -633,7 +633,7 @@ herr_t H5PTset_index(hid_t table_id, hsize_t pt_index)
   htbl_t * table;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     return -1;
 
   return H5PT_set_index(table, pt_index);
@@ -644,55 +644,6 @@ herr_t H5PTset_index(hid_t table_id, hsize_t pt_index)
  *
  *-------------------------------------------------------------------------
  */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5PTget_num_records 
- *
- * Purpose: Returns by reference the number of records in the dataset
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Nat Furrer, nfurrer@ncsa.uiuc.edu
- *             James Laird, jlaird@ncsa.uiuc.edu
- *
- * Date: March 8, 2004
- *
- * Comments:  Called by H5PTget_field_info
- *
- * Modifications: 
- *
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5PTget_num_records( hid_t dataset_id, hsize_t *nrecords)
-{   
-  hid_t      space_id = H5I_BADID;
-  hsize_t    dims[1];
-
-  /* Get the dataspace handle */
-  if ( (space_id = H5Dget_space( dataset_id )) < 0 )
-    goto out;
-    
-  /* Get records */
-  if ( H5Sget_simple_extent_dims( space_id, dims, NULL) < 0 )
-    goto out;
-
-  /* Terminate access to the dataspace */
-  if ( H5Sclose( space_id ) < 0 )
-    goto out;
-    
-  *nrecords = dims[0];
-
-  return 0;
-
-out:
-  H5E_BEGIN_TRY
-  H5Sclose(space_id);
-  H5E_END_TRY
-  return -1;
-}
 
 /*-------------------------------------------------------------------------
  * Function: H5PTget_num_packets 
@@ -718,7 +669,7 @@ herr_t H5PTget_num_packets( hid_t table_id, hsize_t *nrecords)
   htbl_t * table;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
   *nrecords = table->set_size;
@@ -753,7 +704,7 @@ herr_t H5PTis_valid(hid_t table_id)
   htbl_t * table;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) ==NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) ==NULL)
     return -1;
 
   return 0;
@@ -785,7 +736,7 @@ herr_t H5PTis_varlen(hid_t table_id)
   htbl_t * table;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
   if((type = H5Tget_class( table->mem_type_id )) == H5T_NO_CLASS)
@@ -837,7 +788,7 @@ herr_t H5PTfree_vlen_readbuff( hid_t table_id,
   herr_t ret_value;
 
   /* find the table struct from its ID */
-  if((table = H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
+  if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
   if ((space_id = H5Screate_simple(1, &bufflen, NULL)) < 0)
