@@ -28,7 +28,7 @@
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/distdep
-./bin/errors				_DO_NOT_DISTRIBUTE_
+./bin/error_test			_DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -973,7 +973,8 @@
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
-./test/errors.c
+./test/error_test.c
+./test/err_compat.c
 ./test/file_handle.c
 ./test/fill_old.h5
 ./test/fillval.c
@@ -1015,6 +1016,7 @@
 ./test/tconfig.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/testerror.sh
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
@@ -1041,6 +1043,11 @@
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
+
+./test/testfiles/err_compat_1
+./test/testfiles/err_compat_2
+./test/testfiles/error_test_1
+./test/testfiles/error_test_2
 
 ./testpar/Dependencies
 ./testpar/Makefile.in
