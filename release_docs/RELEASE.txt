@@ -56,9 +56,11 @@ Library:
                      internal shuffling and checksum filters
     4. Compact storage layout for datasets
     5. Redesigned I/O pipeline for better performance.
-    Check http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/Changes.html and 
-    http://hdf.ncsa.uiuc.edu/HDF5/doc/TechNotes.html files for more
-    information.
+
+    For more information see
+    http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html
+    http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide.html
+    http://hdf.ncsa.uiuc.edu/HDF5/doc/ADGuide/Changes.html 
     
     Complete list of changes:
 
@@ -504,12 +506,12 @@ Known Problems
   program to fail.
 
 * Certain platforms give false negatives when testing h5ls:
-    - Cray J90 (and Cray T3E?) give errors during testing when displaying
+    - Cray J90 and Cray T90IEEE give errors during testing when displaying
       some floating-point values. These are benign differences due to
       the different precision in the values displayed and h5ls appears to
       be dumping floating-point numbers correctly.
 
-* Before building HDF5 F90 Library from source on Crays (T3E and J90) 
+* Before building HDF5 F90 Library from source on Crays 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
@@ -538,3 +540,5 @@ Known Problems
   you still experience a problem, you may want to check this line in the
   libtool file and make sure that it has the correct value.
 
+* Information about building with PGI and Intel compilers is available in
+  INSTALL file sections 5.7 and 5.8
