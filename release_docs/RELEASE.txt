@@ -50,6 +50,8 @@ New Features
       syntax of H5Pset_fapl_multi() in addition to what it used to accept.
     * Added a new test to verify the information provided by the configure
       command.
+    * Improved performance of single, contiguous hyperslabs when reading or
+      writing.
 
 
          
