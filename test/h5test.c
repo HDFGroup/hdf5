@@ -17,6 +17,7 @@
 #ifdef WIN32
 #include <process.h>
 #include <direct.h>
+#include <winsock.h>
 #endif  /* WIN32 */
 
 /*
@@ -523,6 +524,10 @@ void
 h5_show_hostname(void)
 {
     char	hostname[80];
+#ifdef WIN32
+     WSADATA wsaData;
+     int err;
+#endif
 
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
@@ -541,9 +546,35 @@ h5_show_hostname(void)
 #else
     printf("thread 0.");
 #endif
+#ifdef WIN32
+
+   err = WSAStartup( MAKEWORD(2,2), &wsaData );
+   if ( err != 0 ) {
+    /* could not find a usable WinSock DLL */
+    return;
+   }
+ 
+/* Confirm that the WinSock DLL supports 2.2.*/
+/* Note that if the DLL supports versions greater    */
+/* than 2.2 in addition to 2.2, it will still return */
+/* 2.2 in wVersion since that is the version we      */
+/* requested.                                        */
+ 
+   if ( LOBYTE( wsaData.wVersion ) != 2 ||
+        HIBYTE( wsaData.wVersion ) != 2 ) {
+    /* could not find a usable WinSock DLL */
+     WSACleanup( );
+     return; 
+   }
+
+#endif
+
     if (gethostname(hostname, 80) < 0){
 	printf(" gethostname failed\n");
     }
     else
 	printf(" hostname=%s\n", hostname);
+#ifdef WIN32
+    WSACleanup();
+#endif
 }
