@@ -2305,9 +2305,6 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 }
 #endif /* QAK */
 
-    /* Initialize fm_map structure */
-    HDmemset(fm, 0, sizeof(fm_map));
-     
     /* Get layout for dataset */
     fm->layout = &(dataset->layout);
     
@@ -2432,6 +2429,9 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 
     /* Build the memory selection for each chunk */
     if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
+        /* Reset chunk template information */
+        fm->mchunk_tmpl=NULL;
+
         /* If the selections are the same shape, use the file chunk information
          * to generate the memory chunk information quickly.
          */
