@@ -67,8 +67,6 @@
  * ITM **H5TB_dins( ITM ***tree, ITM *item, void *key );
  * ITM **H5TB_ins( ITM ***root, ITM *item, void *key, int (*cmp)(), int arg );
  * ITM *H5TB_rem( ITM ***root, ITM **node, void **kp );
- * ITM **H5TB_first( ITM **root ), **H5TB_last( ITM **root );
- * ITM **H5TB_next( ITM **node ), **H5TB_prev( ITM **node );
  * ITM ***H5TB_dfree( ITM ***tree, void (*df)(ITM *), void (*kf)(void *) );
  * void H5TB_free( ITM ***root, void (*df)(ITM *), void (*kf)(void *) );
  */
@@ -89,12 +87,10 @@
 #define   Max(a,b)  ( (a) > (b) ? (a) : (b) )
 
 /* Local Function Prototypes */
-static H5TB_NODE * H5TB_end(H5TB_NODE * root, int side);
 static H5TB_NODE *H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare,
     H5TB_NODE ** pp);
 static herr_t H5TB_balance(H5TB_NODE ** root, H5TB_NODE * ptr, int side, int added);
 static H5TB_NODE *H5TB_swapkid(H5TB_NODE ** root, H5TB_NODE * ptr, int side);
-static H5TB_NODE *H5TB_nbr(H5TB_NODE * ptr, int side);
 
 #ifdef H5TB_DEBUG
 static herr_t H5TB_printNode(H5TB_NODE * node, void(*key_dump)(void *,void *));
@@ -945,144 +941,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5TB_first
- *
- * Purpose: Retrieves a pointer to node from the tree with the lowest(first)
- * key value.  If the tree is empy NULL is returned.  Examples:
- *     node= H5TB_first(*tree);
- *     node= H5TB_first(root);
- *
- * Return:	Success:	Pointer to a valid H5TB node
- * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 6, 2000
- *
- * Modifications:
- * 
- * Notes:
- * 	
- *-------------------------------------------------------------------------
- */
-H5TB_NODE  *
-H5TB_first(H5TB_NODE * root)
-{
-    H5TB_NODE *ret_value;               /* Return value */
-
-    FUNC_ENTER_NOAPI(H5TB_first,NULL);
-
-    /* Set return value */
-    ret_value=H5TB_end(root, LEFT);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5TB_first() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5TB_last
- *
- * Purpose: Retrieves a pointer to node from the tree with the highest(last)
- * key value.  If the tree is empy NULL is returned.  Examples:
- *     node= H5TB_last(tree->root);
- *     node= H5TB_last(node);        (* Last node in a sub-tree *)
- *
- * Return:	Success:	Pointer to a valid H5TB node
- * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 6, 2000
- *
- * Modifications:
- * 
- * Notes:
- * 	
- *-------------------------------------------------------------------------
- */
-H5TB_NODE  *
-H5TB_last(H5TB_NODE * root)
-{
-    H5TB_NODE *ret_value;               /* Return value */
-
-    FUNC_ENTER_NOAPI(H5TB_last,NULL);
-
-    /* Set return value */
-    ret_value=H5TB_end(root, RIGHT);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5TB_last() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5TB_next
- *
- * Purpose: Returns a pointer the node from the tree with the next highest
- * key value relative to the node pointed to by `node'.  If `node' points the
- * last node of the tree, NULL is returned.
- *
- * Return:	Success:	Pointer to a valid H5TB node
- * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 6, 2000
- *
- * Modifications:
- * 
- * Notes:
- * 	
- *-------------------------------------------------------------------------
- */
-H5TB_NODE  *
-H5TB_next(H5TB_NODE * node)
-{
-    H5TB_NODE *ret_value;               /* Return value */
-
-    FUNC_ENTER_NOAPI(H5TB_next,NULL);
-
-    /* Set return value */
-    ret_value=H5TB_nbr(node, RIGHT);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5TB_next() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5TB_prev
- *
- * Purpose: Returns a pointer the node from the tree with the previous lowest
- * key value relative to the node pointed to by `node'.  If `node' points the
- * first node of the tree, NULL is returned.
- *
- * Return:	Success:	Pointer to a valid H5TB node
- * 		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Friday, May 6, 2000
- *
- * Modifications:
- * 
- * Notes:
- * 	
- *-------------------------------------------------------------------------
- */
-H5TB_NODE  *
-H5TB_prev(H5TB_NODE * node)
-{
-    H5TB_NODE *ret_value;               /* Return value */
-
-    FUNC_ENTER_NOAPI(H5TB_prev,NULL);
-
-    /* Set return value */
-    ret_value=H5TB_nbr(node, LEFT);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* end H5TB_prev() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5TB_dfree
  *
  * Purpose: Frees up an entire tree.  `fd' is a pointer to a function that
@@ -1387,7 +1245,7 @@ done:
  * 	
  *-------------------------------------------------------------------------
  */
-static H5TB_NODE *
+H5TB_NODE *
 H5TB_end(H5TB_NODE * root, int side)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_end);
@@ -1402,7 +1260,7 @@ H5TB_end(H5TB_NODE * root, int side)
 }   /* end H5TB_end() */
 
 /* Returns pointer to neighboring node (to LEFT or RIGHT): */
-static H5TB_NODE *
+H5TB_NODE *
 H5TB_nbr(H5TB_NODE * ptr, int side)
 {
     H5TB_NODE *ret_value;       /* Return value */
