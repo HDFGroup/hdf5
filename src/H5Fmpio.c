@@ -328,6 +328,17 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
 #ifdef H5Fmpio_DEBUG
+    {
+	/* set debug mask */
+	/* Should this be done in H5F global initialization instead of here? */
+        const char *s = HDgetenv ("H5F_mpio_Debug");
+        if (s) {
+	    while (*s){
+		H5F_mpio_Debug[(int)*s]++;
+		s++;
+	    }
+        }
+    }
     /* Check for debug commands in the info parameter */
     {   char debug_str[128];
         int infoerr, flag, i;

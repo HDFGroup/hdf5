@@ -381,6 +381,7 @@ typedef struct H5F_low_class_t {
 typedef struct H5F_low_t {
     const H5F_low_class_t *type;/* What type of file is this?		*/
     haddr_t		eof;	/* Address of logical end-of-file	*/
+    uint 		eof_written; /* whether the last byte is written */
     union {
 
 	/* File families */

@@ -284,39 +284,14 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
     assert(buf);
 
     /* check for writing past the end of file marker */
-#ifdef HAVE_PARALLEL
-    if (H5F_LOW_MPIO==access_parms->driver &&
-	access_parms->u.mpio.use_types) {
-	/* rky 090902 KLUGE
-	 * In the case of fancy use of MPI datatypes, the addr and size
-	 * parameters have a very peculiar interpretation.
-	 * It is logically possible, but quite complex, to calculate
-	 * the physical offset that the last byte to be written will have
-	 * (assuming the write doesn't fail partway thru, which it may).
-	 * I don't yet fully understand the relationship between
-	 * the lf->eof processor-local variable and the file's true eof.
-	 * But presumably lf->eof has the correct value at this point,
-	 * and we should _not_ change it,
-	 * even if the file's true eof differs from the value of lf->eof.
-	 * So for now we DO NOTHING!
-	 * (Eventually, perhaps we should at least calculate the address
-	 * of the last byte of this write, and compare it to lf->eof.) */
-    } else {
-#endif /* HAVE_PARALLEL */
-	/* writing a simple block of bytes; can check for writing beyond eof */
-	tmp_addr = *addr;
-	H5F_addr_inc(&tmp_addr, (hsize_t)size);
-	if (H5F_addr_gt(&tmp_addr, &(lf->eof))) {
-#ifdef H5F_DEBUG
-	    if (H5DEBUG(F)) {
-		fprintf(H5DEBUG(F), "H5F: extending file w/o allocation\n");
-	    }
-#endif
-	    lf->eof = tmp_addr;
-	}
-#ifdef HAVE_PARALLEL
-    } /* end else */
-#endif /* HAVE_PARALLEL */
+    tmp_addr = *addr;
+    H5F_addr_inc(&tmp_addr, (hsize_t)size);
+    if (H5F_addr_gt(&tmp_addr, &(lf->eof)))
+        HRETURN_ERROR(H5E_IO, H5E_OVERFLOW, ret_value, "write past end of logical file");
+
+    /* Check if the last byte of the logical file has been written */
+    if (!lf->eof_written && H5F_addr_eq(&tmp_addr, &(lf->eof)))
+        lf->eof_written=1;
     
     /* Write the data */
     if (lf->type->write) {
@@ -366,10 +341,8 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     assert(lf && lf->type);
 
     /* Make sure the last block of the file has been allocated on disk */
-    /* rky 980828 NOTE
-     * Is this really necessary? Could this be eliminated for MPI-IO files? */
     H5F_addr_reset(&last_byte);
-    if (addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
+    if (!lf->eof_written && addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
 	last_byte = lf->eof;
 	last_byte.offset -= 1;
 	if (H5F_low_read(lf, access_parms, &H5F_xfer_dflt, &last_byte,
@@ -380,6 +353,9 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
 	    H5F_low_write(lf, access_parms, &H5F_xfer_dflt, &last_byte,
 			  1, buf);
 	}
+        else 
+	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			  "low level flush failed");
     }
     /* Invoke the subclass the flush method */
     if (lf->type->flush) {
@@ -562,6 +538,9 @@ H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
     assert(lf);
     assert(size > 0);
     assert(addr);
+
+    /* Reset the EOF written flag */
+    lf->eof_written=0;
 
     if (lf->type->extend) {
 	if ((lf->type->extend) (lf, access_parms, op, size, addr/*out*/) < 0) {

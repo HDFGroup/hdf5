@@ -1609,6 +1609,7 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 {
     uint8_t		buf[2048], *p = buf;
     haddr_t		reserved_addr;
+    uintn               firsttime_bootblock=0;
     uintn		nerrors=0, i;
     
     FUNC_ENTER(H5F_flush, FAIL);
@@ -1677,20 +1678,23 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate)
 	H5F_addr_reset(&(f->shared->hdf5_eof));
 	H5F_addr_inc(&(f->shared->hdf5_eof), (hsize_t)(p-buf));
 	H5F_low_seteof(f->shared->lf, &(f->shared->hdf5_eof));
+        firsttime_bootblock=1;
     }
     
     /* write the boot block to disk */
+    if(!firsttime_bootblock) {
 #ifdef HAVE_PARALLEL
-    H5F_mpio_tas_allsame(f->shared->lf, TRUE);	/* only p0 will write */
+        H5F_mpio_tas_allsame(f->shared->lf, TRUE);	/* only p0 will write */
 #endif
-    if (H5F_low_write(f->shared->lf, f->shared->access_parms, &H5F_xfer_dflt,
-		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write header");
-    }
+	if (H5F_low_write(f->shared->lf, f->shared->access_parms, &H5F_xfer_dflt,
+			  &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
+	    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write header");
+	}
     
-    /* Flush file buffers to disk */
-    if (H5F_low_flush(f->shared->lf, f->shared->access_parms) < 0) {
-	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
+        /* Flush file buffers to disk */
+        if (H5F_low_flush(f->shared->lf, f->shared->access_parms) < 0) {
+        	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed");
+        }
     }
 
     /* Check flush errors for children - errors are already on the stack */
