@@ -62,13 +62,13 @@ Bug Fixes since HDF5-1.4.0 Release
      Earlier releases of the h4toh5 utility produced images that did not
      correctly conform to the HDF5 Image and Palette Specification.
 
-     http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
+       http://hdf.ncsa.uiuc.edu/HDF5/doc/ImageSpec.html
 
      Several required HDF5 attributes are omitted, and the dataspace
      is reversed (i.e., the ht. and width of the image dataset is
      incorrectly described.)  For more information, please see:
 
-     http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.html
+       http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
 
    * Fixed bug with contiguous hyperslabs not being detected, causing
      slower I/O than necessary.
@@ -84,44 +84,50 @@ Bug Fixes since HDF5-1.4.0 Release
 Documentation
 =============
 
-   
+    PDF and Postscript versions of the following documents are available 
+    for this release:
+        Document                                 Filename
+        --------                                 --------
+        Introduction to HDF5                     H5-R141-Introduction.pdf
+        HDF5 Reference Manual                    H5-R141-RefManual.pdf 
+        C++ APIs to HDF5 documents               H5-R141-Cplusplus.pdf
+        Fortran90 APIs to HDF5 documents         H5-R141-Fortran90.pdf
+
+        PDF and Postscript files containing      H5-R141-DocSet.pdf
+            all of the above                     H5-R141-DocSet.ps
+
+    These files are not included in this distribution, but are available 
+    via the Web or FTP at the following locations:
+        http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/
+        ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/docs/
+
+    While these documents are labeled Release 1.4.1, they describe 
+    Release 1.4.0 as well.  
+
+
 Platforms Tested
 ================
 
-Due to the nature of this release only C library and tools were tested.
+Due to the nature of this release only C, C++ libraries and tools were tested.
 
     AIX 4.3.3.0 (IBM SP powerpc)  xlc 3.6.6
                                   mpcc_r 3.6.6
-    Cray T3E sn6711 2.0.5.45      Cray Standard C Version 6.4.0.0
-                                  Cray Fortran Version 3.4.0.2
-    Cray SV1 sn9605 10.0.0.7      Cray Standard C Version 6.4.0.0
-                                  Cray Fortran Version 3.4.0.2
-    FreeBSD 4.2                   gcc 2.95.2
-                                  g++ 2.95.2
+    Cray T3E sn6711 2.0.5.47      Cray Standard C Version 6.5.0.0
+    Cray SV1 10.0.0.8             Cray Standard C Version 6.5.0.0
+    FreeBSD 4.3                   gcc 2.95.2
     HP-UX B.10.20                 HP C  HP92453-01 A.10.32.30
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.00.13
+    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20
     IRIX 6.5                      MIPSpro cc 7.30
-                                  mpich-1.2.1
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
-                                  mpt.1.4.0.2
-                                  mpich-1.2.1
-    Linux 2.2.16-3smp             gcc-2.95.2
+    Linux 2.2.18smp               gcc-2.95.2
                                   g++ 2.95.2
-                                  pgf90 3.1-3
-                                  mpich-1.2.1
     OSF1 V4.0                     DEC-V5.2-040
                                   Digital Fortran 90 V4.1-270
     SunOS 5.6                     WorkShop Compilers 5.0 98/12/15 C 5.0 
-     (Solaris 2.6)                WorkShop Compilers 5.0 99/10/25 Fortran 90
-                                         2.0 Patch 107356-04
-                                  Workshop Compilers 5.0 98/12/15 C++ 5.0
+     (Solaris 2.6)                
+
     SunOS 5.7                     WorkShop Compilers 5.0 98/12/15 C 5.0
-     (Solaris 2.7)                WorkShop Compilers 5.0 99/10/25 Fortran 90
-                                         2.0 Patch 107356-04
-                                  Workshop Compilers 5.0 98/12/15 C++ 5.0
-                                  mpich-1.2.1
-    SunOS 5.5.1                   gcc-2.7.2 
-     (Solaris 2.5.1 (x86))
+     (Solaris 2.7)                Workshop Compilers 5.0 98/12/15 C++ 5.0
     TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
     Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
     Windows 98                    MSVC++ 6.0
@@ -136,6 +142,22 @@ Supported Configuration Features Summary
 Known Problems
 ==============
 
+    * The h5dump tests may fail to match the expected output in some
+      platforms (e.g. SP2 parallel, Windows) where the error messages
+      directed to "stderr" do not appear in the "right order" with output
+      from stdout.  This is not an error.
+
+    * The --enable-static-exec configure flag fails to compile for HP-UX
+      11.00 platforms.
+
+    * The executable are always dynamic on IRIX64 6.5(64 and n32) and 
+      IRIX 6.5 even if they are configured with --enable-static-exec.
+
+    * The shared library failed compilation on IRIX 6.5.
+    
+    * After "make install" or "make install-doc" one may need to reload the source
+      from the tar file before doing another build.
+
     * See "Known problems" section for the HDF5 1.4.0 release in the
       HISTORY.txt file.
-      
+
