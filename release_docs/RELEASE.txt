@@ -101,6 +101,10 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed bug where chunked datasets which have filters defined,
+          allocation time set to "late" and whose chunks don't align with
+          the dataspace bounds could have incorrect data stored when
+          overwriting the entire dataset on the first write.  QAK - 2004/07/27
         - Fixed bug in H5Sset_extent_simple where setting maximum size to
           non-zero, then to zero would cause an error.  JML - 2004/07/20
         - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite

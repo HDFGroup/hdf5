@@ -234,6 +234,15 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_SPACE2_DIM0      8
 #define MISC20_SPACE2_DIM1      4
 
+/* Definitions for misc. test #21 */
+#define MISC21_FILE             "tmisc21.h5"
+#define MISC21_DSET_NAME        "Dataset"
+#define MISC21_SPACE_RANK       2
+#define MISC21_SPACE_DIM0       7639
+#define MISC21_SPACE_DIM1       6308
+#define MISC21_CHUNK_DIM0       1024
+#define MISC21_CHUNK_DIM1       1024
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -589,12 +598,10 @@ test_misc4(void)
     VERIFY(stat1.fileno[1],stat2.fileno[1],"H5Gget_objinfo");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
-    if(stat1.fileno[0]==stat3.fileno[0] && stat1.fileno[1]==stat3.fileno[1]) {
+    if(stat1.fileno[0]==stat3.fileno[0] && stat1.fileno[1]==stat3.fileno[1])
         TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    } /* end if */
-    if(stat2.fileno[0]==stat3.fileno[0] && stat2.fileno[1]==stat3.fileno[1]) {
+    if(stat2.fileno[0]==stat3.fileno[0] && stat2.fileno[1]==stat3.fileno[1])
         TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    } /* end if */
 
     /* Close the objects */
     ret = H5Gclose(group1);
@@ -1458,13 +1465,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
 #else /* Compression is not configured */
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Close dataset ID */
@@ -1492,13 +1497,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
 #else /* Compression is not configured */
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
@@ -1515,22 +1518,19 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
+            if(*tdata!=*tdata2)
                 TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
 #else
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
@@ -1557,13 +1557,11 @@ test_misc8(void)
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size>=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
 #else /* Compression is not configured */
-    if(storage_size!=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size!=(4*MISC8_CHUNK_DIM0*MISC8_CHUNK_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Write entire dataset */
@@ -1580,22 +1578,19 @@ test_misc8(void)
     tdata2=rdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++,tdata++,tdata2++)
-            if(*tdata!=*tdata2) {
+            if(*tdata!=*tdata2)
                 TestErrPrintf("Error on line %d: u=%u, v=%d, *tdata=%d, *tdata2=%d\n",__LINE__,(unsigned)u,(unsigned)v,(int)*tdata,(int)*tdata2);
-            } 
 #endif /* VERIFY_DATA */
 
     /* Check the storage size after data is written */
     storage_size=H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size>=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: data wasn't compressed! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    } 
 #else
-    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT))) {
+    if(storage_size!=(MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT)))
         TestErrPrintf("Error on line %d: wrong storage size! storage_size=%u\n",__LINE__,(unsigned)storage_size);
-    }
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     /* Close dataset ID */
@@ -1977,13 +1972,11 @@ test_misc12(void)
     CHECK(ret, FAIL, "H5Dread");
 
     for(i=0; i<MISC12_SPACE1_DIM1; i++)
-        if(HDstrcmp(wdata[i],rdata[i])) {
+        if(HDstrcmp(wdata[i],rdata[i]))
             TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n",__LINE__,i,wdata[i],i,rdata[i]);
-        } /* end if */
     for(; i<(MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE); i++)
-        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i])) {
+        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i]))
             TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
-        } /* end if */
 
     ret = H5Sselect_all (space);
     CHECK(ret, FAIL, "H5Sselect_all");
@@ -2424,9 +2417,8 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
+    if(rdata!=data1)
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Unlink second dataset */
     ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
@@ -2439,9 +2431,8 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
+    if(rdata!=data1)
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Close first dataset */
     ret = H5Dclose(Dataset1);
@@ -2474,9 +2465,8 @@ test_misc14(void)
     /* Check data from second dataset */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data2) {
+    if(rdata!=data2)
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Unlink first dataset */
     ret = H5Gunlink(file_id, MISC14_DSET1_NAME);
@@ -2489,9 +2479,8 @@ test_misc14(void)
     /* Verify the data from dataset #2 */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data2) {
+    if(rdata!=data2)
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Close second dataset */
     ret = H5Dclose(Dataset2);
@@ -2531,16 +2520,14 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
+    if(rdata!=data1)
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Check data from third dataset */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data3) {
+    if(rdata!=data3)
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Unlink second dataset */
     ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
@@ -2553,16 +2540,14 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data1) {
+    if(rdata!=data1)
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Verify the data from dataset #3 */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(rdata!=data3) {
+    if(rdata!=data3)
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
-    } /* end if */
 
     /* Close first dataset */
     ret = H5Dclose(Dataset1);
@@ -2688,11 +2673,11 @@ test_misc16(void)
 
     /* Compare data read in */
     for(i=0; i<MISC16_SPACE_DIM; i++) {
-        if(strlen(wdata[i])!=strlen(rdata[i])) {
+        if(HDstrlen(wdata[i])!=strlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if( strcmp(wdata[i],rdata[i]) != 0 ) {
+        if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
             TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
@@ -2764,11 +2749,11 @@ test_misc17(void)
 
     /* Compare data in the way of strings. */
     for(i=0; i<MISC17_SPACE_DIM1; i++) {
-        if(strlen(wdata[i])!=strlen(rdata[i])) {
+        if(HDstrlen(wdata[i])!=strlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if( strcmp(wdata[i],rdata[i]) != 0 ) {
+        if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
             TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
@@ -2814,11 +2799,11 @@ test_misc18(void)
 
     /* Create dataspace for attributes */
     sid = H5Screate(H5S_SCALAR);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(sid, FAIL, "H5Screate");
 
     /* Create first dataset */
     did1 = H5Dcreate(fid, MISC18_DSET1_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
-    CHECK(did1, FAIL, "H5Screate_simple");
+    CHECK(did1, FAIL, "H5Dcreate");
 
     /* Get object information */
     ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
@@ -3393,6 +3378,71 @@ test_misc20(void)
     
 /****************************************************************
 **
+**  test_misc21(): Test that late allocation time is treated the same
+**                      as incremental allocation time, for chunked datasets
+**                      when overwriting entire dataset where the chunks
+**                      don't exactly match the dataspace.
+**
+****************************************************************/
+static void
+test_misc21(void)
+{
+    hid_t fid, sid, dcpl, dsid;
+    char *buf;
+    hsize_t dims[2]={MISC21_SPACE_DIM0,MISC21_SPACE_DIM1},
+        chunk_size[2]={MISC21_CHUNK_DIM0,MISC21_CHUNK_DIM1};
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing late allocation time w/chunks & filters\n"));
+
+    /* Allocate space for the buffer */
+    buf = (char *)HDcalloc(MISC21_SPACE_DIM0*MISC21_SPACE_DIM1,1);
+    CHECK(buf, NULL, "HDcalloc");
+
+    /* Create the file */
+    fid = H5Fcreate (MISC21_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create the DCPL */
+    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Set custom DCPL properties */
+    ret = H5Pset_chunk (dcpl, MISC21_SPACE_RANK, chunk_size);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+    ret = H5Pset_deflate (dcpl, 6); 
+    CHECK(ret, FAIL, "H5Pset_deflate");
+    ret = H5Pset_alloc_time (dcpl, H5D_ALLOC_TIME_LATE); 
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+    /* Create the dataspace for the dataset */
+    sid = H5Screate_simple (MISC21_SPACE_RANK, dims, NULL);
+    CHECK(ret, FAIL, "H5Screate_simple");
+
+    /* Create the dataset */
+    dsid = H5Dcreate (fid, MISC21_DSET_NAME, H5T_NATIVE_UINT8, sid, dcpl);
+    CHECK(dsid, FAIL, "H5Dwrite");
+
+    /* Write out the whole dataset */
+    ret = H5Dwrite (dsid, H5T_NATIVE_UINT8, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close everything */
+    ret = H5Dclose (dsid);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose (sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose (dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose (fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    HDfree(buf);
+} /* end test_misc21() */
+    
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -3422,6 +3472,9 @@ test_misc(void)
     test_misc18();      /* Test new object header information in H5G_stat_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    test_misc21();      /* Test that "late" allocation time is treated the same as "incremental", for chunked datasets w/a filters */
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 } /* test_misc() */
 
