@@ -972,6 +972,18 @@
 ./tools/Dependencies
 ./tools/Makefile.in
 
+./tools/gifconv/Dependencies
+./tools/gifconv/Makefile.in
+./tools/gifconv/decompress.c
+./tools/gifconv/gif.h
+./tools/gifconv/gif2hdf.c
+./tools/gifconv/gif2mem.c
+./tools/gifconv/gifread.c
+./tools/gifconv/hdf2gif.c
+./tools/gifconv/hdfgifwr.c
+./tools/gifconv/readhdf.c
+./tools/gifconv/writehdf.c
+
 ./tools/h4toh5/Dependencies
 ./tools/h4toh5/Makefile.in
 ./tools/h4toh5/h4toh5anno.c

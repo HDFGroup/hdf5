@@ -59,7 +59,9 @@ Bug Fixes since HDF5-1.4.1 Release
       got dropped in some 1.3.x version. Re-implemented it with "new and
       improved" algorithm.  It keeps track of "wasted" file-fragment in
       the free-list too.
-
+    * H5 <-> GIF convertor has been added. This is available under
+      tools/gifconv. The convertor supports the ability to create animated
+      gifs as well.
 
 Documentation
 =============

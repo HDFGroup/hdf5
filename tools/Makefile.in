@@ -9,7 +9,7 @@ srcdir=@srcdir@
 
 ## All subdirectories except for the ``lib'' subdirectory.
 ##
-SUBDIRS=h5dump h5ls misc @H5TOH4@ @H4TOH5@
+SUBDIRS=h5dump h5ls misc gifconv @H5TOH4@ @H4TOH5@
 
 @COMMENCE@
 
