@@ -20,12 +20,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
-#include <windows.h>
-#include <io.h>
-#endif /*kent yang 6/21/2001, must be added for defination of open,write....
-       also the defination of longlong is valid, will investigate this to
-       make sure int64 can replace longlong. Otherwise, keep windows.h*/
+
 
 #ifdef MAX
 #undef MAX

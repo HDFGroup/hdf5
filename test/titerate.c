@@ -133,7 +133,7 @@ static void test_iter_group(void)
         CHECK(dataset, FAIL, "H5Dcreate");
 
         /* Keep a copy of the dataset names around for later */
-        dnames[i]=strdup(name);
+        dnames[i]=HDstrdup(name);
         CHECK(dnames[i], NULL, "strdup");
 
         ret=H5Dclose(dataset);
@@ -280,7 +280,7 @@ static void test_iter_attr(void)
         CHECK(attribute, FAIL, "H5Acreate");
 
         /* Keep a copy of the attribute names around for later */
-        anames[i]=strdup(name);
+        anames[i]=HDstrdup(name);
         CHECK(anames[i], NULL, "strdup");
 
         ret=H5Aclose(attribute);

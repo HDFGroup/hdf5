@@ -139,7 +139,6 @@
  * HDF5 is currently supported on _X86_ 
  * including <windows.h> has the side effect of introducing thousands of Windows GUI
  * macros and type declarations to the compilation environment, so we don't include it
- * pvn
  */
 
 #if !defined(_68K_) && !defined(_MPPC_) && !defined(_PPC_) && !defined(_ALPHA_) && !defined(_MIPS_) && !defined(_X86_) && defined(_M_IX86)
@@ -148,7 +147,7 @@
 
 #include <windef.h>
 #include <winbase.h>
-#include <IO.h> /* kent yang 6/18/2001*/
+#include <io.h>
 
 /* H5_inline */
 
@@ -158,13 +157,8 @@
 #endif
 
 /*
-syntax:
-
-inline function_declarator;   // C++ Specific
-__inline function_declarator; // Microsoft Specific
-The inline and __inline keywords allow the compiler to insert a copy of 
+The inline keywords allows the compiler to insert a copy of 
 the function body into each place the function is called
-
 inline is now in C but in the C99 standard and not the old C89 version so
 MS doesn't recognize it yet (as of April 2001)
 */
@@ -172,22 +166,57 @@ MS doesn't recognize it yet (as of April 2001)
 # define H5_inline   inline
 # else
 # define H5_inline 
-#endif /*__MWERKS__*/
+#endif
 
 /* Metroworks <sys/types.h> doesn't define off_t. */
 #ifdef __MWERKS__
 typedef long off_t;
 /* Metroworks does not define EINTR in <errno.h> */
 # define EINTR 4
-#endif /*__MWERKS__*/
+#endif
+/*__MWERKS__*/
 
-#endif /*WIN32*/
+#endif
+/*WIN32*/
+
+/*
+ * This driver supports systems that have the lseek64() function by defining
+ * some macros here so we don't have to have conditional compilations later
+ * throughout the code.
+ *
+ * file_offset_t:	The datatype for file offsets, the second argument of
+ *			the lseek() or lseek64() call.
+ *
+ * file_seek:		The function which adjusts the current file position,
+ *			either lseek() or lseek64().
+ *
+ * adding for windows NT file system support. 
+ */
+
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_seek		lseek64
+#elif defined (WIN32)
+# ifdef __MWERKS__
+# define file_offset_t off_t
+# define file_seek lseek
+# else /*MSVC*/
+# define file_offset_t __int64
+# define file_seek _lseeki64
+# endif
+#else
+#   define file_offset_t	off_t
+#   define file_seek		lseek
+#endif
 
 #ifndef F_OK
 #   define F_OK	00
 #   define W_OK 02
 #   define R_OK 04
 #endif
+
+
+
 
 /*
  * Pablo support files.
@@ -767,9 +796,9 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifdef WIN32
+#if defined (__MWERKS__)
 #define HDstrdup(S)    _strdup(S)
-#else /* WIN32 */
+#else
 
 #if !defined strdup && !defined H5_HAVE_STRDUP 
 extern char *strdup(const char *s);

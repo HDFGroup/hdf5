@@ -2414,7 +2414,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_attributes;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2426,7 +2426,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_datasets;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     hand[i].subset_info = parse_subset_params(hand[i].obj);
                     last_dset = hand;
                     break;
@@ -2440,7 +2440,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_groups;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2452,7 +2452,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_links;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -2464,7 +2464,7 @@ parse_start:
             for (i = 0; i < argc; i++)
                 if (!hand[i].func) {
                     hand[i].func = handle_datatypes;
-                    hand[i].obj = strdup(opt_arg);
+                    hand[i].obj = HDstrdup(opt_arg);
                     break;
                 }
 
@@ -3058,7 +3058,7 @@ ref_path_table_put(hid_t obj, const char *path)
 
     pte->obj_ref = ref;
 
-    pte->apath = strdup(path);
+    pte->apath = HDstrdup(path);
 
     pte->next = ref_path_table;
     ref_path_table = pte;
@@ -3249,7 +3249,7 @@ xml_escape_the_name(const char *str)
     }
 
     if (extra == 0)
-	return strdup(str);
+	return HDstrdup(str);
 
     cp = str;
     rcp = ncp = calloc((size_t)(len + extra + 1), sizeof(char));
@@ -4254,7 +4254,7 @@ xml_dump_group(hid_t gid, const char *name)
     } else {
 	tmp = malloc(strlen(prefix) + strlen(name) + 2);
 	strcpy(tmp, prefix);
-	par = strdup(tmp);
+	par = HDstrdup(tmp);
 	cp = strrchr(par, '/');
 	if (cp != NULL) {
 	    if ((cp == par) && strlen(par) > 1) {
