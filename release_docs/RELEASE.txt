@@ -42,6 +42,7 @@ New Features
 
     Library:
     --------
+	- New Feature of Data transformation is added.  AKC - 2004/05/03.
         - New exception handler for datatype conversion is put in to 
             replace the old overflow callback function.  This exception
             handler is set through H5Pset_type_conv_cb function.
