@@ -2639,6 +2639,84 @@ FORTRAN Property List API -- h5p
           END SUBROUTINE h5pget_nfilters_f
 </pre>
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pmodify_filter_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pmodify_filter_f</strong>
+<pre>
+
+          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+            INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
+            INTEGER, INTENT(IN)        :: flags       ! Bit vector specifying certain general  
+                                                      ! properties of the filter
+            INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts  ! Number of elements in cd_values
+            INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  ! Auxiliary data for the filter
+            INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pmodify_filter_f
+</pre>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pget_filter_by_id_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pget_filter_by_id_f</strong>
+<pre>
+
+          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, &
+                                           name, hdferr)
+            IMPLICIT NONE
+ 
+            INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+            INTEGER, INTENT(IN)        :: filter_id   ! Filter identifier
+            INTEGER(SIZE_T), INTENT(INOUT)     :: cd_nelmts  ! Number of elements in cd_values
+            INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  ! Auxiliary data for the filter
+            INTEGER, INTENT(OUT)          :: flags    ! Bit vector specifying certain general
+                                                      ! properties of the filter
+            INTEGER(SIZE_T), INTENT(IN)   :: namelen  ! Anticipated number of characters in name
+            CHARACTER(LEN=*), INTENT(OUT) :: name     ! Name of the filter
+            INTEGER, INTENT(OUT)          :: hdferr   ! Error code
+                                                      ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pget_filter_by_id_f
+</pre>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5pset_family_offset_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong> &nbsp <strong>h5pset_family_offset_f</strong>
+<pre>
+
+          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)   :: prp_id   ! Property list identifier
+            INTEGER(HSIZE_T), INTENT(IN) :: offset   ! Offset in bytes
+            INTEGER, INTENT(OUT)         :: hdferr   ! Error code
+                                                     ! 0 on success and -1 on failure
+ 
+          END SUBROUTINE h5pset_family_offset_f
+</pre>
+
 
 <p>&nbsp;
 <p>&nbsp;
@@ -2652,7 +2730,7 @@ FORTRAN Property List API -- h5p
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  4 June 2003
+Last modified:  6 June 2003
 
 </body>
 </html>
