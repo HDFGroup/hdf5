@@ -14,7 +14,6 @@
      INTEGER(HSIZE_T)  :: ch_dims(2)
      INTEGER           :: RANK = 2
      INTEGER           :: dlevel = 6
-     INTEGER           :: tsize = 4
      INTEGER           :: edc_flag
 
      ch_dims(1) = 10
@@ -45,7 +44,7 @@
               CALL check("h5pcreate_f", error, total_error)
         CALL h5pset_chunk_f(crtpr_id, RANK, ch_dims, error)
               CALL check("h5pset_chunk_f",error, total_error)
-        CALL h5pset_shuffle_f(crtpr_id, tsize, error)
+        CALL h5pset_shuffle_f(crtpr_id, error)
               CALL check("h5pset_shuffle_f", error, total_error) 
         CALL h5pclose_f(crtpr_id,error)
               CALL check("h5pclose_f", error, total_error)

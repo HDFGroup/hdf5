@@ -5691,7 +5691,6 @@
 !
 ! Inputs:  
 !		prp_id		- dataset creation property list identifier
-!		type_size	- size of the datatype
 ! Outputs:  
 !		hdferr:		- error code		
 !				 	Success:  0
@@ -5708,7 +5707,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_shuffle_f(prp_id, type_size, hdferr) 
+          SUBROUTINE h5pset_shuffle_f(prp_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -5717,23 +5716,21 @@
 !
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER, INTENT(IN) :: type_size     ! iSize in bytes of the datatype
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
 
 !            INTEGER, EXTERNAL :: h5pset_shuffle_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5pset_shuffle_c(prp_id, type_size)
+              INTEGER FUNCTION h5pset_shuffle_c(prp_id)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5PSET_SHUFFLE_C'::h5pset_shuffle_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER, INTENT(IN) :: type_size
               END FUNCTION h5pset_shuffle_c
             END INTERFACE
-            hdferr = h5pset_shuffle_c(prp_id, type_size)
+            hdferr = h5pset_shuffle_c(prp_id)
 
           END SUBROUTINE h5pset_shuffle_f
 

@@ -1054,7 +1054,7 @@ H5_DLL int_f nh5premove_c(hid_t_f *plid, _fcd name, int_f *name_len);
 H5_DLL int_f nh5punregister_c(hid_t_f *class, _fcd name, int_f *name_len);
 H5_DLL int_f nh5pclose_class_c(hid_t_f * class);   
 H5_DLL int_f nh5pget_class_name_c(hid_t_f *prp_id, _fcd name, int_f *name_len);
-H5_DLL int_f nh5pset_shuffle_c ( hid_t_f *prp_id , int_f *type_size);
+H5_DLL int_f nh5pset_shuffle_c ( hid_t_f *prp_id);
 H5_DLL int_f nh5pset_fletcher32_c ( hid_t_f *prp_id );
 H5_DLL int_f nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag );
 H5_DLL int_f nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag );

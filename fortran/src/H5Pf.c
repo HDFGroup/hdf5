@@ -2819,16 +2819,14 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f 
-nh5pset_shuffle_c ( hid_t_f *prp_id , int_f *type_size)
+nh5pset_shuffle_c ( hid_t_f *prp_id )
 {
   int ret_value = 0;
   hid_t c_prp_id;
-  int c_type_size;
   herr_t status;
 
   c_prp_id = (hid_t)*prp_id;
-  c_type_size = (int)*type_size ;
-  status = H5Pset_shuffle(c_prp_id, c_type_size);
+  status = H5Pset_shuffle(c_prp_id);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
 }
