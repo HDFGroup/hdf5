@@ -972,7 +972,6 @@ H5D_open(H5G_t *loc, const char *name)
     H5D_t	*dataset = NULL;	/*the dataset which was found	*/
     H5D_t	*ret_value = NULL;	/*return value			*/
     intn	i;
-    H5F_t	*f = NULL;
     
     FUNC_ENTER(H5D_open, NULL);
 
@@ -980,7 +979,6 @@ H5D_open(H5G_t *loc, const char *name)
     assert (loc);
     assert (name && *name);
     
-    f = H5G_fileof (loc);
     if (NULL==(dataset = H5MM_calloc(sizeof(H5D_t)))) {
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");

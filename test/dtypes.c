@@ -7,10 +7,16 @@
  *
  * Purpose:     Tests the data type interface (H5T)
  */
+#include <assert.h>
 #include <hdf5.h>
+#include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#define H5T_PACKAGE
+#include <H5Tpkg.h>		/*to turn off hardware conversions*/
 
 #include <H5config.h>
 #ifndef HAVE_ATTRIBUTE
@@ -21,6 +27,11 @@
 #   define __unused__ __attribute__((unused))
 #endif
 
+#ifndef MAX
+#   define MAX(X,Y)	((X)>(Y)?(X):(Y))
+#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
+#endif
+
 #define FILE_NAME_1	"dtypes1.h5"
 #define FILE_NAME_2	"dtypes2.h5"
 
@@ -28,6 +39,17 @@ typedef struct complex_t {
     double                  re;
     double                  im;
 } complex_t;
+
+/*
+ * Count up or down depending on whether the machine is big endian or little
+ * endian.  If `E' is H5T_ORDER_BE then the result will be I, otherwise the
+ * result will be Z-(I+1).
+ */
+#define ENDIAN(E,Z,I)	(H5T_ORDER_BE==(E)?(I):(Z)-((I)+1))
+
+typedef enum flt_t {
+    FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER
+} flt_t;
 
 
 /*-------------------------------------------------------------------------
@@ -499,7 +521,7 @@ test_named (void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_conv_num
+ * Function:	test_conv_int
  *
  * Purpose:	Test atomic number conversions.
  *
@@ -515,7 +537,7 @@ test_named (void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_conv_num (void)
+test_conv_int (void)
 {
     const size_t	ntests=100;
     const size_t	nelmts=2000;
@@ -528,7 +550,7 @@ test_conv_num (void)
      * Test some specific overflow/underflow cases.
      *--------------------------------------------------------------------- 
      */
-    printf ("%-70s", "Testing atomic number overflow conversions");
+    printf ("%-70s", "Testing integer overflow conversions");
     fflush (stdout);
 
     /* (unsigned)0x80000000 -> (unsigned)0xffff */
@@ -608,7 +630,7 @@ test_conv_num (void)
      * Test random cases.
      *----------------------------------------------------------------------- 
      */
-    printf ("%-70s", "Testing atomic number random conversions");
+    printf ("%-70s", "Testing random integer conversions");
     fflush (stdout);
     
     /* Allocate buffers */
@@ -650,7 +672,289 @@ test_conv_num (void)
     return -1;
 }
 
-	
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_flt_1
+ *
+ * Purpose:	Test conversion of random floating point values from SRC to
+ *		DST.  These types should be H5T_NATIVE_FLOAT,
+ *		H5T_NATIVE_DOUBLE, or H5T_NATIVE_LDOUBLE.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, June 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
+{
+    flt_t		src_type, dst_type;	/*data types		*/
+    const size_t	ntests=10;		/*number of tests	*/
+    const size_t	nelmts=200000;		/*num values per test	*/
+    const size_t	max_fails=8;		/*max number of failures*/
+    size_t		fails_all_tests=0;	/*number of failures	*/
+    size_t		fails_this_test;	/*fails for this test	*/
+    const char		*src_type_name = NULL;	/*source type name	*/
+    const char		*dst_type_name = NULL;	/*destination type name	*/
+    size_t		src_size, dst_size;	/*type sizes		*/
+    unsigned char	*buf = NULL;		/*buffer for conversion	*/
+    unsigned char	*saved = NULL;		/*original values	*/
+    char		str[256];		/*hello string		*/
+    float		hw_f;			/*hardware-converted 	*/
+    double		hw_d;			/*hardware-converted	*/
+    long double		hw_ld;			/*hardware-converted	*/
+    unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
+    size_t		i, j, k;		/*counters		*/
+    int			endian;			/*machine endianess	*/
+
+    /* What are the names of the source and destination types */
+    if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
+	src_type_name = "float";
+	src_type = FLT_FLOAT;
+    } else if (H5Tequal(src, H5T_NATIVE_DOUBLE)) {
+	src_type_name = "double";
+	src_type = FLT_DOUBLE;
+    } else if (H5Tequal(src, H5T_NATIVE_LDOUBLE)) {
+	src_type_name = "long double";
+	src_type = FLT_LDOUBLE;
+    } else {
+	src_type_name = "UNKNOWN";
+	src_type = FLT_OTHER;
+    }
+    
+    if (H5Tequal(dst, H5T_NATIVE_FLOAT)) {
+	dst_type_name = "float";
+	dst_type = FLT_FLOAT;
+    } else if (H5Tequal(dst, H5T_NATIVE_DOUBLE)) {
+	dst_type_name = "double";
+	dst_type = FLT_DOUBLE;
+    } else if (H5Tequal(dst, H5T_NATIVE_LDOUBLE)) {
+	dst_type_name = "long double";
+	dst_type = FLT_LDOUBLE;
+    } else {
+	dst_type_name = "UNKNOWN";
+	dst_type = FLT_OTHER;
+    }
+
+    /* Sanity checks */
+    assert(sizeof(float)!=sizeof(double));
+    if (FLT_OTHER==src_type || FLT_OTHER==dst_type) {
+	sprintf(str, "Testing random %s %s -> %s conversions",
+		name, src_type_name, dst_type_name);
+	printf ("%-70s", str);
+	puts("*FAILED*");
+	puts("   Unknown data type.");
+	goto error;
+    }
+    
+    /* Allocate buffers */
+    endian = H5Tget_order(H5T_NATIVE_FLOAT);
+    src_size = H5Tget_size(src);
+    dst_size = H5Tget_size(dst);
+    buf   = malloc(nelmts*MAX(src_size, dst_size));
+    saved = malloc(nelmts*MAX(src_size, dst_size));
+
+    for (i=0; i<ntests; i++) {
+
+	/*
+	 * If it looks like it might take a long time then print a progress
+	 * report between each test.
+	 */
+	sprintf(str, "Testing random %s %s -> %s conversions (test %d/%d)",
+		name, src_type_name, dst_type_name, (int)i+1, (int)ntests);
+	printf ("%-70s", str);
+	fflush(stdout);
+	fails_this_test = 0;
+
+	/*
+	 * Initialize the source buffers to random bits.  The `buf' buffer
+	 * will be used for the conversion while the `saved' buffer will be
+	 * used for the comparison later.
+	 */
+	for (j=0; j<nelmts*src_size; j++) buf[j] = saved[j] = rand();
+
+	/* Perform the conversion in software */
+	if (H5Tconvert(src, dst, nelmts, buf, NULL)<0) goto error;
+
+	/* Check the software results against the hardware */
+	for (j=0; j<nelmts; j++) {
+
+	    /* The hardware conversion */
+	    if (FLT_FLOAT==src_type) {
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = ((float*)saved)[j];
+		    hw = (unsigned char*)&hw_f;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = ((float*)saved)[j];
+		    hw = (unsigned char*)&hw_d;
+		} else {
+		    hw_ld = ((float*)saved)[j];
+		    hw = (unsigned char*)&hw_ld;
+		}
+	    } else if (FLT_DOUBLE==src_type) {
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = ((double*)saved)[j];
+		    hw = (unsigned char*)&hw_f;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = ((double*)saved)[j];
+		    hw = (unsigned char*)&hw_d;
+		} else {
+		    hw_ld = ((double*)saved)[j];
+		    hw = (unsigned char*)&hw_ld;
+		}
+	    } else {
+		if (FLT_FLOAT==dst_type) {
+		    hw_f = ((long double*)saved)[j];
+		    hw = (unsigned char*)&hw_f;
+		} else if (FLT_DOUBLE==dst_type) {
+		    hw_d = ((long double*)saved)[j];
+		    hw = (unsigned char*)&hw_d;
+		} else {
+		    hw_ld = ((long double*)saved)[j];
+		    hw = (unsigned char*)&hw_ld;
+		}
+	    }
+
+	    /* Are the two results the same? */
+	    for (k=0; k<dst_size; k++) {
+		if (buf[j*dst_size+k]!=hw[k]) break;
+	    }
+	    if (k==dst_size) continue; /*no error*/
+
+#if 1
+	    /*
+	     * Assume same if both results are NaN.  There are many NaN bit
+	     * patterns and the software doesn't attemt to emulate the
+	     * hardware in this regard.  Instead, software uses a single bit
+	     * pattern for NaN by setting the significand to all ones.
+	     */
+	    if (FLT_FLOAT==dst_type &&
+		((float*)buf)[j]!=((float*)buf)[j] &&
+		((float*)hw)[0]!=((float*)hw)[0]) {
+		continue;
+	    } else if (FLT_DOUBLE==dst_type &&
+		       ((double*)buf)[j]!=((double*)buf)[j] &&
+		       ((double*)hw)[0]!=((double*)hw)[0]) {
+		continue;
+	    } else if (FLT_LDOUBLE==dst_type &&
+		       ((long double*)buf)[j]!=((long double*)buf)[j] &&
+		       ((long double*)hw)[0]!=((long double*)hw)[0]) {
+		continue;
+	    }
+#endif
+
+#if 1
+	    /*
+	     * Assume same if hardware result is NaN.  This is because the
+	     * hardware conversions on some machines return NaN instead of
+	     * overflowing to +Inf or -Inf or underflowing to +0 or -0.
+	     */
+	    if (FLT_FLOAT==dst_type &&
+		*((float*)hw)!=*((float*)hw)) {
+		continue;
+	    } else if (FLT_DOUBLE==dst_type &&
+		       *((double*)hw)!=*((double*)hw)) {
+		continue;
+	    } else if (FLT_LDOUBLE==dst_type &&
+		       *((long double*)hw)!=*((long double*)hw)) {
+		continue;
+	    }
+#endif
+
+#if 1
+	    /*
+	     * Instead of matching down to the bit, just make sure the
+	     * exponents are the same and the mantissa is the same to a
+	     * certain precision.  This is needed on machines that don't
+	     * round as expected.
+	     */
+	    {
+		double	check_mant[2];
+		int	check_expo[2];
+		
+		if (FLT_FLOAT==dst_type) {
+		    check_mant[0] = frexp(((float*)buf)[j], check_expo+0);
+		    check_mant[1] = frexp(((float*)hw)[0], check_expo+1);
+		} else if (FLT_DOUBLE==dst_type) {
+		    check_mant[0] = frexp(((double*)buf)[j], check_expo+0);
+		    check_mant[1] = frexp(((double*)hw)[0], check_expo+1);
+		} else {
+		    check_mant[0] = frexp(((long double*)buf)[j],check_expo+0);
+		    check_mant[1] = frexp(((long double*)hw)[0],check_expo+1);
+		}
+		if (check_expo[0]==check_expo[1] &&
+		    fabs(check_mant[0]-check_mant[1])<0.000001) {
+		    continue;
+		}
+	    }
+#endif
+
+	    if (0==fails_this_test++) puts("*FAILED*");
+	    printf("   test %u, elmt %u\n", (unsigned)i+1, (unsigned)j);
+	    
+	    printf("      src =");
+	    for (k=0; k<src_size; k++) {
+		printf(" %02x", saved[j*src_size+ENDIAN(endian,src_size,k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
+	    if (FLT_FLOAT==src_type) {
+		printf(" %29.20e\n", ((float*)saved)[j]);
+	    } else if (FLT_DOUBLE==src_type) {
+		printf(" %29.20e\n", ((double*)saved)[j]);
+	    } else {
+		printf(" %29.20Le\n", ((long double*)saved)[j]);
+	    }
+
+	    printf("      dst =");
+	    for (k=0; k<dst_size; k++) {
+		printf(" %02x", buf[j*dst_size+ENDIAN(endian,dst_size,k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    if (FLT_FLOAT==dst_type) {
+		printf(" %29.20e\n", ((float*)buf)[j]);
+	    } else if (FLT_DOUBLE==dst_type) {
+		printf(" %29.20e\n", ((double*)buf)[j]);
+	    } else {
+		printf(" %29.20Le\n", ((long double*)buf)[j]);
+	    }
+
+	    printf("      ans =");
+	    for (k=0; k<dst_size; k++) {
+		printf(" %02x", hw[ENDIAN(endian,dst_size,k)]);
+	    }
+	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    if (FLT_FLOAT==dst_type) {
+		printf(" %29.20e\n", hw_f);
+	    } else if (FLT_DOUBLE==dst_type) {
+		printf(" %29.20e\n", hw_d);
+	    } else {
+		printf(" %29.20Le\n", hw_ld);
+	    }
+
+	    if (++fails_all_tests>=max_fails) {
+		puts("   maximum failures reached, aborting test...");
+		goto done;
+	    }
+	}
+	puts(" PASSED");
+    }
+
+ done:
+    if (buf) free (buf);
+    if (saved) free (saved);
+    return (int)fails_all_tests;
+
+ error:
+    if (buf) free (buf);
+    if (saved) free (saved);
+    return (int)MIN(1, fails_all_tests);
+}
 
 
 /*-------------------------------------------------------------------------
@@ -672,7 +976,11 @@ test_conv_num (void)
 int
 main(void)
 {
-    int		nerrors = 0;
+    unsigned long	nerrors = 0;
+
+#if 0
+    signal(SIGFPE,SIG_IGN);
+#endif
 
     /* Set the error handler */
     H5Eset_auto (display_error_cb, NULL);
@@ -683,11 +991,36 @@ main(void)
     nerrors += test_compound()<0 ? 1 : 0;
     nerrors += test_transient ()<0 ? 1 : 0;
     nerrors += test_named ()<0 ? 1 : 0;
-    nerrors += test_conv_num ()<0 ? 1 : 0;
+    nerrors += test_conv_int ()<0 ? 1 : 0;
+
+#ifndef LATER
+    /*
+     * NOT READY FOR TESTING YET BECAUSE SOME SYSTEMS GENERATE A SIGFPE WHEN
+     * AN OVERFLOW OCCURS CASTING A DOUBLE TO A FLOAT.
+     */
+#else
+    /* Test degenerate cases */
+    nerrors += test_conv_flt_1("noop", H5T_NATIVE_FLOAT, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1("noop", H5T_NATIVE_DOUBLE, H5T_NATIVE_DOUBLE);
+
+    /* Test hardware conversion functions */
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1("hw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
+
+    /* Test software conversion functions */
+    H5Tunregister(H5T_conv_float_double);
+    H5Tunregister(H5T_conv_double_float);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_FLOAT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_DOUBLE, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
+    nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
+#endif
     
     if (nerrors) {
-        printf("***** %d DATA TYPE TEST%s FAILED! *****\n",
-               nerrors, 1 == nerrors ? "" : "S");
+        printf("***** %lu FAILURE%s! *****\n",
+               nerrors, 1==nerrors?"":"S");
         exit(1);
     }
     printf("All data type tests passed.\n");

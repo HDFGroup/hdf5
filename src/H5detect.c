@@ -71,7 +71,7 @@ static int byte_cmp(int, void *, void *);
 static int bit_cmp(int, int *, void *, void *);
 static void fix_order(int, int, int, int *, const char **);
 static int imp_bit(int, int *, void *, void *);
-static unsigned long find_bias(int, int, int, int *, void *);
+static unsigned long find_bias(int, int, int *, void *);
 static void precision (detected_t*);
 static void print_header(void);
 
@@ -300,7 +300,7 @@ static detected_t       Known[] =
    INFO.esize = INFO.sign - INFO.epos;                                        \
                                                                               \
    _v1 = 1.0;                                                                 \
-   INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.imp, INFO.perm, &_v1);  \
+   INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.perm, &_v1);            \
    precision (&(INFO));							      \
 }
 
@@ -755,7 +755,7 @@ imp_bit(int n, int *perm, void *_a, void *_b)
  *-------------------------------------------------------------------------
  */
 static unsigned long
-find_bias(int epos, int esize, int imp, int *perm, void *_a)
+find_bias(int epos, int esize, int *perm, void *_a)
 {
     unsigned char       *a = (unsigned char *) _a;
     unsigned char       mask;
@@ -771,8 +771,7 @@ find_bias(int epos, int esize, int imp, int *perm, void *_a)
         esize -= nbits;
         epos += nbits;
     }
-
-    return bias - (imp ? 0 : 1);
+    return bias;
 }
 
 

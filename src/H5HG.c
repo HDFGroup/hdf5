@@ -271,7 +271,7 @@ H5HG_load (H5F_t *f, const haddr_t *addr, const void __unused__ *udata1,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    heap->nalloc = nalloc;
+    heap->nalloc = (intn)nalloc;
     while (p<heap->chunk+heap->size) {
 	if (p+H5HG_SIZEOF_OBJHDR(f)>heap->chunk+heap->size) {
 	    /*

@@ -722,7 +722,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, const haddr_t *addr,
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			   "memory allocation failed");
 	}
-        slot->aprots = na;
+        slot->aprots = (intn)na;
 	slot->prot = x;
     }
     slot->prot[slot->nprots].type = type;

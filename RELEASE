@@ -1,6 +1,84 @@
 Release information for hdf5-1.0.0a
 -----------------------------------
 
+		    CHANGES SINCE THE FIRST ALPHA
+
+* Two of the packages have been renamed.  The data space API has been
+  renamed from `H5P' to `H5S' and the property list (template) API has 
+  been renamed from `H5C' to `H5P'.
+
+* The new attribute API `H5A' has been added.  An attribute is a small 
+  dataset which can be attached to some other object (for instance, a
+  4x4 transformation matrix attached to a 3-dimensional dataset, or an 
+  English abstract attached to a group).
+
+* The error handling API `H5E' has been completed.  By default, when an
+  API function returns failure an error stack is displayed on the
+  standard error stream.  The H5Eset_auto() controls the automatic
+  printing and H5E_BEGIN_TRY/H5E_END_TRY macros can temporarily
+  disable the automatic error printing.
+
+* Support for large files and datasets (>2GB) has been added.  There
+  is an html document that describes how it works.  Some of the types
+  for function arguments have changed to support this: all arguments
+  pertaining to sizes of memory objects are `size_t' and all arguments 
+  pertaining to file sizes are `hsize_t'.
+
+* More data type conversions have been added although none of them are
+  fine tuned for performance.  There are new converters from integer
+  to integer and float to float, but not between integers and floating
+  points.  A bug has been fixed in the converter between compound
+  types.
+
+* The numbered types have been removed from the API: int8, uint8,
+  int16, uint16, int32, uint32, int64, uint64, float32, and float64.
+  Use standard C types instead.  Similarly, the numbered types were
+  removed from the H5T_NATIVE_* architecture; use unnumbered types
+  which correspond to the standard C types like H5T_NATIVE_INT.
+
+* More debugging support was added.  If tracing is enabled at
+  configuration time and the HDF5_TRACE environment variable is set to 
+  a file descriptor then all API calls will emit the function name,
+  argument names and values, and return value on that file number.
+  There is an html document that describes this.  If appropriate
+  debugging options are enabled at configuration time, some packages
+  will display performance information on stderr.
+
+* Data types can be stored in the file as independent objects and
+  multiple datasets can share a data type.
+
+* The raw data I/O stream has been implemented and the application can 
+  control meta and raw data caches, so I/O performance should be
+  improved from the first alpha release.
+
+* Group and attribute query functions have been implemented so it is
+  now possible to find out the contents of a file with no prior
+  knowledge.
+
+* External raw data storage allows datasets to be written by other
+  applications or I/O libraries and described and accessed through
+  HDF5.
+
+* Hard and soft (symbolic) links are implemented which allow groups to 
+  share objects.
+
+* User-defined data compression is implemented although we may
+  generalize the interface to allow arbitrary user-defined filters
+  which can be used for compression, checksums, encryption,
+  performance monitoring, etc.  The publicly-available `deflate'
+  method is predefined if the GNU libz.a can be found at configuration 
+  time.
+
+* The configuration scripts have been modified to make it easier to
+  build debugging vs. production versions of the library.
+
+* The library automatically checks that the application was compiled
+  with the correct version of header files.
+
+* Parallel feature changes...(?)
+
+			LIST OF API FUNCTIONS
+
 The following functions are implemented. Errors are returned if an
 attempt is made to use some feature which is not implemented and
 printing the error stack will show `not implemented yet'.

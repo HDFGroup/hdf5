@@ -591,7 +591,7 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    if (prec>0) {
 		sprintf (template+strlen (template), ".%d", prec);
 	    }
-	    if (modifier) {
+	    if (*modifier) {
 		sprintf (template+strlen (template), "%s", modifier);
 	    }
 	    sprintf (template+strlen (template), "%c", conv);
@@ -1281,24 +1281,26 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 
 	case 'M':
 	    switch (type[1]) {
-#ifdef HAVE_PARALLEL
 	    case 'c':
 		if (ptr) {
 		    fprintf (out, "0x%lx", (unsigned long)vp);
 		} else {
+#ifdef HAVE_PARALLEL
 		    MPI_Comm comm = va_arg (ap, MPI_Comm);
 		    fprintf (out, "%ld", (long)comm);
+#endif
 		}
 		break;
 	    case 'i':
 		if (ptr) {
 		    fprintf (out, "0x%lx", (unsigned long)vp);
 		} else {
+#ifdef HAVE_PARALLEL
 		    MPI_Info info = va_arg (ap, MPI_Info);
 		    fprintf (out, "%ld", (long)info);
+#endif
 		}
 		break;
-#endif
 	    default:
 		goto error;
 	    }

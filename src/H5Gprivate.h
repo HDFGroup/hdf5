@@ -110,7 +110,7 @@ herr_t H5G_set (H5G_t *grp);
 herr_t H5G_push (H5G_t *grp);
 herr_t H5G_pop (H5F_t *f);
 H5G_t *H5G_getcwg(H5F_t *f);
-herr_t H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
+herr_t H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
 		 const char *new_name);
 herr_t H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
 		 H5G_stat_t *statbuf/*out*/);

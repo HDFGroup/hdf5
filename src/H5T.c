@@ -572,6 +572,11 @@ H5T_init_interface(void)
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
+    if (H5Tregister_soft ("f_f", H5T_FLOAT, H5T_FLOAT,
+			  H5T_conv_f_f) < 0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to register conversion function");
+    }
     if (H5Tregister_soft("ibo", H5T_INTEGER, H5T_INTEGER,
 			 H5T_conv_order) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -597,7 +602,16 @@ H5T_init_interface(void)
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
-    
+    if (H5Tregister_hard("flt_dbl", H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE,
+			 H5T_conv_float_double)<0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to register conversion function");
+    }
+    if (H5Tregister_hard("dbl_flt", H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT,
+			 H5T_conv_double_float)<0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to register conversion function");
+    }
     
     FUNC_LEAVE(ret_value);
 }
@@ -2879,7 +2893,7 @@ H5Tregister_soft (const char *name, H5T_class_t src_cls, H5T_class_t dst_cls,
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	H5T_asoft_g = na;
+	H5T_asoft_g = (intn)na;
 	H5T_soft_g = x;
     }
     HDstrncpy (H5T_soft_g[H5T_nsoft_g].name, name, H5T_NAMELEN);
@@ -3697,7 +3711,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	parent->u.compnd.nalloc = na;
+	parent->u.compnd.nalloc = (intn)na;
 	parent->u.compnd.memb = x;
     }
 
@@ -4197,7 +4211,7 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			       "memory allocation failed");
 	    }
-	    H5T_apath_g = na;
+	    H5T_apath_g = (intn)na;
 	    H5T_path_g = x;
 	}
 	if (cmp > 0) md++;
@@ -4266,6 +4280,7 @@ H5T_path_find(const char *name, const H5T_t *src, const H5T_t *dst,
 		}
 		if ((H5T_soft_g[i].func) (src_id, dst_id, &(path->cdata),
 					  H5T_CONV_INIT, NULL, NULL) < 0) {
+		    H5MM_xfree(path->cdata.stats);
 		    HDmemset (&(path->cdata), 0, sizeof(H5T_cdata_t));
 		    H5E_clear(); /*ignore the error*/
 		} else {

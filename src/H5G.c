@@ -1732,7 +1732,7 @@ H5G_loc (hid_t loc_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
+H5G_link (H5G_t *loc, H5G_link_t type, const char *cur_name,
 	  const char *new_name)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
@@ -1882,7 +1882,7 @@ H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
 
     /*
      * Initialize the stat buf.  Symbolic links aren't normal objects and
-     * therefor don't have much of the normal info.  However, the link value
+     * therefore don't have much of the normal info.  However, the link value
      * length is specific to symbolic links.
      */
     if (statbuf) {

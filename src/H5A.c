@@ -157,7 +157,6 @@ H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     H5G_entry_t    	*ent = NULL;
     H5T_t		*type = NULL;
     H5S_t		*space = NULL;
-    const H5D_create_t	*create_parms = NULL;
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Acreate, FAIL);
@@ -195,14 +194,11 @@ H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
 	NULL == (space = H5I_object(dataspace))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
-    if (H5P_DEFAULT!=create_plist) {
-	if (H5P_DATASET_CREATE != H5Pget_class(create_plist) ||
-	    NULL == (create_parms = H5I_object(create_plist))) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-			  "not a dataset creation property list");
-	}
-    } else {
-	create_parms = &H5D_create_dflt;
+    if (H5P_DEFAULT!=create_plist &&
+	(H5P_DATASET_CREATE != H5Pget_class(create_plist) ||
+	 NULL == H5I_object(create_plist))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a dataset creation property list");
     }
 
     /* Go do the real work for attaching the attribute to the dataset */

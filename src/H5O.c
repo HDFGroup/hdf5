@@ -393,7 +393,7 @@ H5O_load(H5F_t *f, const haddr_t *addr, const void __unused__ *_udata1,
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
 	    }
-	    oh->alloc_nchunks = na;
+	    oh->alloc_nchunks = (intn)na;
 	    oh->chunk = x;
 	}
 	
@@ -1455,7 +1455,7 @@ H5O_alloc_extend_chunk(H5O_t *oh, intn chunkno, size_t size)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	oh->alloc_nmesgs = na;
+	oh->alloc_nmesgs = (intn)na;
 	oh->mesg = x;
     }
     delta = MAX(H5O_MIN_SIZE, size+H5O_SIZEOF_MSGHDR(f));
@@ -1589,7 +1589,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	oh->alloc_nchunks = na;
+	oh->alloc_nchunks = (intn)na;
 	oh->chunk = x;
     }
     chunkno = oh->nchunks++;
@@ -1613,7 +1613,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-        oh->alloc_nmesgs = na;
+        oh->alloc_nmesgs = (intn)na;
         oh->mesg = x;
 
         /* Set new object header info to zeros */
@@ -1770,7 +1770,7 @@ H5O_alloc(H5F_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
 		HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			       "memory allocation failed");
 	    }
-	    oh->alloc_nmesgs = na;
+	    oh->alloc_nmesgs = (intn)na;
 	    oh->mesg = x;
 
 	    /* Set new object header info to zeros */

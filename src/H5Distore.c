@@ -1086,7 +1086,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
 	    }
-	    rdcc->nslots = na;
+	    rdcc->nslots = (intn)na;
 	    rdcc->slot = x;
 	}
 	HDmemmove (rdcc->slot+1, rdcc->slot,

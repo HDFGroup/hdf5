@@ -19,6 +19,7 @@
 #include <H5MMprivate.h>
 
 /* Interface initialization? */
+#define PABLO_MASK H5MM_mask
 static hbool_t interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 

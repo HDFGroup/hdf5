@@ -161,7 +161,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 		HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			     "memory allocation failed");
 	    }
-	    lf->u.fam.nalloc = na;
+	    lf->u.fam.nalloc = (intn)na;
 	    lf->u.fam.memb = x;
 	}
 	lf->u.fam.memb[lf->u.fam.nmemb++] = member;
@@ -425,7 +425,7 @@ H5F_fam_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 		    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 				   "memory allocation failed");
 		}
-		lf->u.fam.nalloc = na;
+		lf->u.fam.nalloc = (intn)na;
 		lf->u.fam.memb = x;
 	    }
 	    for (i = lf->u.fam.nmemb; i <= membno; i++) {

@@ -517,7 +517,6 @@ extern char *strdup(const char *s);
 #define H5TRACE_RETURN(V)		  /*void*/
 #endif
 
-extern FILE *H5_trace_g;
 void H5_trace (hbool_t returning, const char *func, const char *type, ...);
 
 

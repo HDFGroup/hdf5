@@ -127,6 +127,12 @@ herr_t H5T_conv_struct (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			size_t nelmts, void *_buf, void *bkg);
 herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *_buf, void __unused__ *bkg);
+herr_t H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *_buf, void __unused__ *bkg);
+herr_t H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			      size_t nelmts, void *buf, void __unused__ *bkg);
+herr_t H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			      size_t nelmts, void *buf, void __unused__ *bkg);
 herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			     size_t nelmts, void *_buf, void __unused__ *bkg);
 
@@ -134,7 +140,10 @@ herr_t H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 void H5T_bit_copy (uint8 *dst, size_t dst_offset, const uint8 *src,
 		   size_t src_offset, size_t size);
 void H5T_bit_set (uint8 *buf, size_t offset, size_t size, hbool_t value);
+hsize_t H5T_bit_get_d (uint8 *buf, size_t offset, size_t size);
+void H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val);
 ssize_t H5T_bit_find (uint8 *buf, size_t offset, size_t size,
 		      H5T_sdir_t direction, hbool_t value);
+hbool_t H5T_bit_inc(uint8 *buf, size_t start, size_t size);
 
 #endif
