@@ -14,12 +14,12 @@
 static char		RcsId[] = "@(#)$Revision$";
 #endif
 
-#define H5D_PACKAGE		/*suppress error about including H5Tpkg	  */
+/* $Id$ */
 
 #include <H5private.h>		/* Generic Functions			*/
 #include <H5Iprivate.h>		/* IDs			  		*/
 #include <H5ACprivate.h>	/* Cache			  	*/
-#include <H5Dpkg.h>		    /* Dataset functions			*/
+#include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5Gprivate.h>		/* Group headers		  	*/
 #include <H5HLprivate.h>	/* Name heap				*/
@@ -36,6 +36,17 @@ static char		RcsId[] = "@(#)$Revision$";
  * be optimized.
  */
 #define H5D_OPTIMIZE_PIPE 1
+
+/*
+ * A dataset is the following struct.
+ */
+struct H5D_t {
+    H5G_entry_t		ent;		/*cached object header stuff	*/
+    H5T_t		*type;		/*datatype of this dataset	*/
+    H5S_t		*space;		/*dataspace of this dataset	*/
+    H5D_create_t	*create_parms;	/*creation parameters		*/
+    H5O_layout_t	layout;		/*data layout			*/
+};
 
 /* Default dataset creation property list */
 const H5D_create_t	H5D_create_dflt = {
@@ -1209,9 +1220,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
 		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->read)(dataset->ent.file, &(dataset->layout),
+					     &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
 					     H5T_get_size (dataset->type), file_space,
-					     mem_space, buf/*out*/);
+                                             mem_space, buf/*out*/);
 		if (status>=0) goto succeed;
 		HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
 		    "collective read failed");
@@ -1504,9 +1516,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		access_mode_saved = dataset->ent.file->shared->access_parms.u.mpio.access_mode;
 		dataset->ent.file->shared->access_parms.u.mpio.access_mode = H5D_XFER_COLLECTIVE;
 		status = (sconv_func->write)(dataset->ent.file, &(dataset->layout),
+				             &(dataset->create_parms->compress),
 					     &(dataset->create_parms->efl),
 					     H5T_get_size (dataset->type), file_space,
-					     mem_space, buf);
+                                             mem_space, buf);
 		if (status>=0) goto succeed;
 		HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		    "collective write failed");
