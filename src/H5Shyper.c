@@ -763,7 +763,8 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start + region_size;
@@ -784,7 +785,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
                 /* Step through each location in each region */
-                for(j=regions[i].start; j<=regions[i].end && io_info->nelmts>0; j++) {
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
 #ifdef QAK
     printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
@@ -799,7 +800,8 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
                     if(io_info->iter->hyp.pos[dim+1]==(-1))
                         io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
-                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1))
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
@@ -1032,7 +1034,8 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start +
@@ -1049,7 +1052,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
             /* Step through each region in this dimension */
             for(i=0; i<num_regions && io_info->nelmts>0; i++) {
                 /* Step through each location in each region */
-                for(j=regions[i].start; j<=regions[i].end && io_info->nelmts>0; j++) {
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
@@ -1060,7 +1063,8 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                     if(io_info->iter->hyp.pos[dim+1]==(-1))
                         io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
-                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1))
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
@@ -1273,7 +1277,8 @@ H5S_hyper_mread (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] =regions[i].start +
@@ -1298,19 +1303,19 @@ H5S_hyper_mread (intn dim, H5S_hyper_io_info_t *io_info)
 		    printf("%s: check 4.0, dim=%d, location=%d\n",FUNC,dim,j);
 #endif /* QAK */
 
-                    /*
-                     * If we are moving to a new position in this dim, reset
-                     * the next lower dim. location.
-                     */
-                    if(io_info->iter->hyp.pos[dim]!=j)
-                        io_info->iter->hyp.pos[dim+1]=(-1);
-
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
                     /* Go get the regions in the next lower dimension */
                     num_read+=H5S_hyper_mread(dim, io_info);
+
+                    /* Advance to the next row if we got the whole region */
+                    if(io_info->iter->hyp.pos[dim+1]==(-1))
+                        io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
+                    io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
 
@@ -1528,7 +1533,8 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 io_info->nelmts-=region_size;
 
                 /* Set the next position to start at */
-                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1))
+                if(region_size==(hsize_t)((regions[i].end-regions[i].start)+1)
+                        && i==(num_regions-1))
                     io_info->iter->hyp.pos[dim+1]=(-1);
                 else
                     io_info->iter->hyp.pos[dim+1] = regions[i].start +
@@ -1553,23 +1559,20 @@ H5S_hyper_mwrite (intn dim, H5S_hyper_io_info_t *io_info)
 		       FUNC, i, (int)regions[i].start, i,
 		       (int)regions[i].end, (int)io_info->nelmts);
 #endif /* QAK */
-                for(j=regions[i].start;
-		    j<=regions[i].end && io_info->nelmts>0;
-		    j++) {
-
-                    /*
-		     * If we are moving to a new position in this dim, reset
-		     * the next lower dim. location.
-		     */
-                    if(io_info->iter->hyp.pos[dim]!=j)
-                        io_info->iter->hyp.pos[dim+1]=(-1);
-
+                for(j=MAX(io_info->iter->hyp.pos[dim],regions[i].start); j<=regions[i].end && io_info->nelmts>0; j++) {
                     /* Set the correct position we are working on */
                     io_info->iter->hyp.pos[dim]=j;
 
                     /* Go get the regions in the next lower dimension */
                     num_read+=H5S_hyper_mwrite(dim, io_info);
+
+                    /* Advance to the next row if we got the whole region */
+                    if(io_info->iter->hyp.pos[dim+1]==(-1))
+                        io_info->iter->hyp.pos[dim]=j+1;
                 } /* end for */
+                if(j>regions[i].end && io_info->iter->hyp.pos[dim+1]==(-1)
+                        && i==(num_regions-1))
+                    io_info->iter->hyp.pos[dim]=(-1);
             } /* end for */
         } /* end else */
 
