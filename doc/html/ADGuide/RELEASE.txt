@@ -1,4 +1,4 @@
-HDF5 version 1.5.51 released on Sat Apr 26 05:00:45 CDT 2003
+HDF5 version 1.5.52 released on Sat May  3 06:48:56 CDT 2003
 ================================================================================
 
 
@@ -283,6 +283,8 @@ Documentation
 New Features
 ============
 
+    * Added option to print 1-byte integer datasets as ASCII to h5dump. BW -
+      2003/04/30
     * Added a new utility "h5fc". It can be used to compile easily Fortran
       programs which use HDF5. It automatically uses the compiler the HDF5
       library was built with and links in any libraries HDF5 requires.
