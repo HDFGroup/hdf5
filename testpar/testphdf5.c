@@ -352,7 +352,6 @@ int main(int argc, char **argv)
     TestInit(argv[0], usage, parse_options);
 
     /* Tests are generally arranged from least to most complexity... */
-
     AddTest("mpiodup", test_fapl_mpio_dup, NULL, 
 	    "fapl_mpio duplicate", NULL);
     AddTest("posixdup", test_fapl_mpiposix_dup, NULL, 
@@ -446,10 +445,15 @@ int main(int argc, char **argv)
             "collective irregular simple chunk write",PARATESTFILE);
     AddTest("cschunkr",coll_irregular_simple_chunk_read,NULL,
             "collective irregular simple chunk read",PARATESTFILE);
-   #endif
 
+    AddTest("ccchunkw",coll_irregular_complex_chunk_write,NULL,
+            "collective irregular complex chunk write",PARATESTFILE);
+
+    AddTest("ccchunkr",coll_irregular_complex_chunk_read,NULL,
+            "collective irregular complex chunk read",PARATESTFILE);
+
+#endif
     
-
     AddTest("null", null_dataset, NULL, 
 	    "null dataset test", PARATESTFILE);
 
