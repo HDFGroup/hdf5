@@ -33,7 +33,8 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define INSERT_SPLIT_ROOT_NREC    80
+#define INSERT_SPLIT_ROOT_NREC  80
+#define INSERT_MANY             (320*1000)
 
 
 /*-------------------------------------------------------------------------
@@ -1465,7 +1466,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     /* Insert enough records to force root to split into 2 internal nodes */
     /* Also forces right-most internal node to split */
     for(u=0; u<(INSERT_SPLIT_ROOT_NREC*21); u++) {
-        record=u+(INSERT_SPLIT_ROOT_NREC*19)+28;
+        record=u+(INSERT_SPLIT_ROOT_NREC*20);
         if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
             H5_FAILED();
             H5Eprint_stack(H5E_DEFAULT, stdout);
@@ -1475,7 +1476,7 @@ test_insert_level2_3internal_split(hid_t fapl)
 
     /* Force left-most internal node to split */
     /* Force middle node to split */
-    for(u=0; u<INSERT_SPLIT_ROOT_NREC*19+28; u++) {
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC*20; u++) {
         record=u;
         if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
             H5_FAILED();
@@ -1493,7 +1494,7 @@ test_insert_level2_3internal_split(hid_t fapl)
     }
 
     /* Make certain that the index is correct */
-    if(idx != (INSERT_SPLIT_ROOT_NREC*40)+28) TEST_ERROR;
+    if(idx != (INSERT_SPLIT_ROOT_NREC*41)) TEST_ERROR;
 
     PASSED();
 
@@ -1507,6 +1508,130 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* test_insert_level2_3internal_split() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_insert_lots
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
+ *              records in random order, enough to make at a level 4 B-tree.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, February 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_lots(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    time_t      curr_time;              /* Current time, for seeding random number generator */
+    hsize_t     *records;               /* Record #'s for random insertion */
+    unsigned    u;                      /* Local index variable */
+    unsigned    swap_idx;               /* Location to swap with when shuffling */
+    hsize_t     temp_rec;               /* Temporary record */
+
+    /* Initialize random number seed */
+    curr_time=HDtime(NULL);
+#ifdef QAK
+curr_time=1109170019;
+HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+#endif /* QAK */
+    HDsrandom((unsigned long)curr_time);
+
+    /* Allocate space for the records */
+    if((records = HDmalloc(sizeof(hsize_t)*INSERT_MANY))==NULL) TEST_ERROR;
+
+    /* Initialize record #'s */
+    for(u=0; u<INSERT_MANY; u++)
+        records[u] = u;
+
+    /* Shuffle record #'s */
+    for(u=0; u<INSERT_MANY; u++) {
+        swap_idx = (unsigned)(HDrandom()%(INSERT_MANY-u))+u;
+        temp_rec = records[u];
+        records[u] = records[swap_idx];
+        records[swap_idx] = temp_rec;
+    } /* end for */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree insert: create random level 4 B-tree");
+
+    /* Insert random records */
+    for(u=0; u<INSERT_MANY; u++) {
+        record=records[u];
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+#ifdef QAK
+HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+#endif /* QAK */
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+#ifdef QAK
+HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+#endif /* QAK */
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Make certain that the index is correct */
+    if(idx != INSERT_MANY) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    HDfree(records);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    HDfree(records);
+    return 1;
+} /* test_insert_lots() */
 
 
 /*-------------------------------------------------------------------------
@@ -1549,6 +1674,7 @@ main(void)
     nerrors += test_insert_level2_2internal_split(fapl);
     nerrors += test_insert_level2_3internal_redistrib(fapl);
     nerrors += test_insert_level2_3internal_split(fapl);
+    nerrors += test_insert_lots(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
