@@ -321,3 +321,15 @@
 ./tools/h5tools.c
 ./tools/h5tools.h
 ./tools/testh5dump.sh
+
+./tools/testfiles/h5dumptst.c
+./tools/testfiles/tall.ddl
+./tools/testfiles/tall.h5
+./tools/testfiles/tattr.ddl
+./tools/testfiles/tattr.h5
+./tools/testfiles/tdset.ddl
+./tools/testfiles/tdset.h5
+./tools/testfiles/tgroup.ddl
+./tools/testfiles/tgroup.h5
+./tools/testfiles/tslink.ddl
+./tools/testfiles/tslink.h5
