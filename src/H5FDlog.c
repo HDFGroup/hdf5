@@ -183,7 +183,7 @@ static const H5FD_class_t H5FD_log_g = {
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
-    sizeof(char *), 		/*fapl_size		*/
+    sizeof(H5FD_log_fapl_t), /*fapl_size		*/
     H5FD_log_fapl_get,		/*fapl_get		*/
     H5FD_log_fapl_copy,		/*fapl_copy		*/
     H5FD_log_fapl_free,		/*fapl_free		*/
@@ -268,10 +268,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
-    if(logfile!=NULL)
-        fa.logfile = H5MM_xstrdup(logfile);
-    else
-        fa.logfile = NULL;
+    fa.logfile = logfile;
     fa.verbosity=verbosity;
     ret_value= H5Pset_driver(fapl_id, H5FD_LOG, &fa);
 

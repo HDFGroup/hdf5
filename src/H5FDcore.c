@@ -411,6 +411,7 @@ H5FD_core_close(H5FD_t *_file)
     if (file->name) H5MM_xfree(file->name);
     if (file->mem) H5MM_xfree(file->mem);
     memset(file, 0, sizeof(H5FD_core_t));
+    H5MM_xfree(file);
     FUNC_LEAVE(0);
 }
 
