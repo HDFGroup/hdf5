@@ -3924,7 +3924,7 @@ echo "configure:3924: checking how to print long long" >&5
 if eval "test \"`echo '$''{'hdf5_cv_printf_ll'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
-  for hdf5_cv_printf_ll in ll q l; do
+  for hdf5_cv_printf_ll in l L q ll unknown; do
                 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
@@ -3953,15 +3953,14 @@ fi
 	     done
 fi
 
-echo "$ac_t""$hdf5_cv_printf_ll" 1>&6
+echo "$ac_t""%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u" 1>&6
 cat >> confdefs.h <<EOF
 #define PRINTF_LL_WIDTH "$hdf5_cv_printf_ll"
 EOF
 
 
-
 echo $ac_n "checking for debug flags""... $ac_c" 1>&6
-echo "configure:3965: checking for debug flags" >&5
+echo "configure:3964: checking for debug flags" >&5
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -3993,7 +3992,7 @@ if test "X" != "X$DEBUG_PKG"; then
 fi
 
 echo $ac_n "checking for API tracing""... $ac_c" 1>&6
-echo "configure:3997: checking for API tracing" >&5;
+echo "configure:3996: checking for API tracing" >&5;
 # Check whether --enable-trace or --disable-trace was given.
 if test "${enable_trace+set}" = set; then
   enableval="$enable_trace"
@@ -4016,7 +4015,7 @@ if test "${enable_parallel+set}" = set; then
 fi
 
 echo $ac_n "checking for parallel support""... $ac_c" 1>&6
-echo "configure:4020: checking for parallel support" >&5;
+echo "configure:4019: checking for parallel support" >&5;
 
 
 
@@ -4043,7 +4042,7 @@ case "X-$PARALLEL" in
 EOF
 
         echo $ac_n "checking for main in -lmpi""... $ac_c" 1>&6
-echo "configure:4047: checking for main in -lmpi" >&5
+echo "configure:4046: checking for main in -lmpi" >&5
 ac_lib_var=`echo mpi'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4051,14 +4050,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4055 "configure"
+#line 4054 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4062: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4061: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4085,7 +4084,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
           echo $ac_n "checking for main in -lmpio""... $ac_c" 1>&6
-echo "configure:4089: checking for main in -lmpio" >&5
+echo "configure:4088: checking for main in -lmpio" >&5
 ac_lib_var=`echo mpio'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4093,14 +4092,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4097 "configure"
+#line 4096 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4104: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4103: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else

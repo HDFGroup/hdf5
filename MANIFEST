@@ -313,6 +313,7 @@
 ./test/cmpd_dset.c
 ./test/dsets.c
 ./test/dtypes.c
+./test/enum.c
 ./test/extend.c
 ./test/external.c
 ./test/fillval.c

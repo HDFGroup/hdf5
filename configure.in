@@ -396,7 +396,7 @@ dnl default in case none of the others work.
 dnl
 AC_MSG_CHECKING(how to print long long)
 AC_CACHE_VAL(hdf5_cv_printf_ll,
-             for hdf5_cv_printf_ll in ll q l; do
+             for hdf5_cv_printf_ll in l L q ll unknown; do
                 AC_TRY_RUN([
 #include <stdio.h>
 #include <stdlib.h>
@@ -407,9 +407,8 @@ AC_CACHE_VAL(hdf5_cv_printf_ll,
 	             exit (strcmp(s,"1099511627776"));}],
 		 break)
 	     done)
-AC_MSG_RESULT($hdf5_cv_printf_ll)
+AC_MSG_RESULT(%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u)
 AC_DEFINE_UNQUOTED(PRINTF_LL_WIDTH,"$hdf5_cv_printf_ll")
-
 
 dnl ----------------------------------------------------------------------
 dnl Turn on debugging by setting compiler flags
