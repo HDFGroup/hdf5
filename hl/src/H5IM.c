@@ -537,7 +537,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
  hsize_t     dim_ref;
  int         ok_pal;
 
- /* The image dataset may or not have the attribute "PALETTE" 
+ /* The image dataset may or may not have the attribute "PALETTE" 
   * First we try to open to see if it is already there; if not, it is created.
   * If it exists, the array of references is extended to hold the reference 
   * to the new palette
@@ -946,6 +946,10 @@ herr_t H5IMget_palette_info( hid_t loc_id,
   if ( H5Sclose( attr_space_id ) < 0 )
    goto out;
 
+  /* close the dereferenced dataset */
+  if (H5Dclose(pal_id)<0)
+   goto out;
+
    free( refbuf );
     
   } /* H5T_REFERENCE */ 
@@ -1055,6 +1059,10 @@ herr_t H5IMget_palette( hid_t loc_id,
     goto out;
 
    if ( H5Sclose( attr_space_id ) < 0 )
+    goto out;
+
+   /* close the dereferenced dataset */
+   if (H5Dclose(pal_id)<0)
     goto out;
 
    free( refbuf );

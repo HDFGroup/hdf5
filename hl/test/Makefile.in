@@ -16,7 +16,7 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_srcdi
 ## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
 
-TEST_PROGS=test_lite test_image test_table 
+TEST_PROGS=test_lite test_image test_table test_ds
 
 ## The libh5test.a library provides common support code for the tests. We link
 ## this library statically because some systems can only link executables to
@@ -40,7 +40,7 @@ CLEAN=*.h5
 ## other source lists are for the individual tests, the files of which may
 ## overlap with other tests.
 
-TEST_SRC=test_lite.c test_image.c test_table.c
+TEST_SRC=test_lite.c test_image.c test_table.c test_ds.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
@@ -60,5 +60,8 @@ test_image: test_image.lo
 test_table: test_table.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_table.lo $(LIBHDF5_HL) $(LIBHDF5)  $(LDFLAGS) $(LIBS)
 
-	
+test_ds: test_ds.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ test_ds.lo $(LIBHDF5_HL) $(LIBHDF5)  $(LDFLAGS) $(LIBS)
+
+
 @CONCLUDE@

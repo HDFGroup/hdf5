@@ -4,9 +4,9 @@
 H5LT.lo: \
    $(top_srcdir)/hl/src/H5LT.c \
    $(top_srcdir)/hl/src/H5LT.h
-H5TA.lo: \
-   $(top_srcdir)/hl/src/H5TA.c \
-   $(top_srcdir)/hl/src/H5TA.h \
+H5TB.lo: \
+   $(top_srcdir)/hl/src/H5TB.c \
+   $(top_srcdir)/hl/src/H5TB.h \
    $(top_srcdir)/hl/src/H5LT.h
 H5IM.lo: \
    $(top_srcdir)/hl/src/H5IM.c \

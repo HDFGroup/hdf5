@@ -18,7 +18,7 @@ LIBHDF5=$(top_builddir)/src/libhdf5.la
 CLEAN=
 
 ## Source and object files for the library (lexicographically)...
-LIB_SRC=H5LT.c H5TB.c H5IM.c
+LIB_SRC=H5LT.c H5TB.c H5IM.c H5DS.c
 
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 
@@ -26,7 +26,7 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 MOSTLYCLEAN=
 
 ## Public header files (to be installed)...
-PUB_HDR=H5IM.h H5LT.h H5TB.h 
+PUB_HDR=H5IM.h H5LT.h H5TB.h H5DS.h
 
 ## Other header files (not to be installed)...
 PRIVATE_HDR=

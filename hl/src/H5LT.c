@@ -16,7 +16,7 @@
 
 /*-------------------------------------------------------------------------
  * 
- * Private functions
+ * internal functions
  * 
  *-------------------------------------------------------------------------
  */
@@ -2617,6 +2617,12 @@ herr_t H5LTget_attribute( hid_t loc_id,
  return 0;
 }
 
+ 
+/*-------------------------------------------------------------------------
+ * private functions
+ *-------------------------------------------------------------------------
+ */
+
 
 /*-------------------------------------------------------------------------
  * Function: H5LT_get_attribute_mem
@@ -2713,4 +2719,95 @@ out:
 
 
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5LT_set_attribute_string
+ *
+ * Purpose: creates and writes an attribute named NAME to the dataset DSET_ID
+ *
+ * Return: FAIL on error, SUCCESS on success
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *
+ * Date: January 04, 2005
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+herr_t H5LT_set_attribute_string(hid_t dset_id, 
+                                 char *name,
+                                 char *buf ) 
+{
+ hid_t   tid;
+ hid_t   sid;
+ hid_t   aid;
+ int     has_attr;
+	size_t  size;
+ 
+ /* verify if the attribute already exists */
+ has_attr = H5LT_find_attribute(dset_id,name);
+ 
+ /* the attribute already exists, delete it */
+ if ( has_attr == 1 )
+ {
+  if ( H5Adelete(dset_id,name)<0)
+    return FAIL;
+ }
+ 
+/*-------------------------------------------------------------------------
+ * create the attribute type
+ *-------------------------------------------------------------------------
+ */
+ if ((tid = H5Tcopy(H5T_C_S1))<0)
+  return FAIL;
+
+ size = strlen(buf) + 1; /* extra null term */
+
+ if (H5Tset_size(tid,(size_t)size)<0)
+  goto out;
+
+ if (H5Tset_strpad(tid,H5T_STR_NULLTERM)<0)
+  goto out;
+
+ if ((sid = H5Screate(H5S_SCALAR))<0)
+  goto out;
+
+ 
+/*-------------------------------------------------------------------------
+ * create and write the attribute
+ *-------------------------------------------------------------------------
+ */
+ if ((aid = H5Acreate(dset_id,name,tid,sid,H5P_DEFAULT))<0)
+  goto out;
+
+ if (H5Awrite(aid,tid,buf)<0)
+  goto out;
+   
+ if (H5Aclose(aid)<0)
+  goto out;
+ 
+ if (H5Sclose(sid)<0)
+  goto out;
+
+ if (H5Tclose(tid)<0)
+  goto out;
+
+ return SUCCESS;
+ 
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Aclose(aid);
+  H5Tclose(tid);
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return FAIL;
+ 
+}
 

@@ -1553,6 +1553,8 @@
 ./hl/src/H5LT.h
 ./hl/src/H5TB.c
 ./hl/src/H5TB.h
+./hl/src/H5DS.c
+./hl/src/H5DS.h
 ./hl/test/Dependencies
 ./hl/test/Makefile.in
 ./hl/test/test_image.c
