@@ -49,6 +49,9 @@ New Features
 
     Parallel Library:
     -----------------
+	- The parallel tests in testpar/ now provides different levels of
+	  verbosity via the '-v' option.  The default is less verbose
+	  than before.  AKC - 2004/01/23
         - Added parallel test, test_mpio_1wMr, which tests if the
           underlaying parallel I/O system is conforming to the POSIX
           write/read requirement. This version includes options of using
@@ -195,8 +198,8 @@ Platforms Tested
     OSF1 V5.1                     Compaq C V6.4-014
                                   Compaq C V6.3-027
 				  Compaq Fortran V5.5-2602
-				  Compaq C++ V6.5-030
-				  MPI_64bit_R5
+				  Compaq C++ V6.5-033
+				  MPI_64bit_R13
                                   g++ version 3.0 for C++
     SunOS 5.7(32 and 64 bit)      WorkShop Compilers 5.0 98/12/15 C 5.0
      (Solaris 2.7)                WorkShop Compilers 5.0 98/12/15 C++ 5.0 
