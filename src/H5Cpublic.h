@@ -19,6 +19,9 @@
 #ifndef _H5Cpublic_H
 #define _H5Cpublic_H
 
+/* Default Template for creation, access, etc. templates */
+#define H5C_DEFAULT_TEMPLATE    0
+
 #ifdef __cplusplus
 extern "C" {
 #endif

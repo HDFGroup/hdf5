@@ -24,6 +24,7 @@
 #include <H5Apublic.h>
 
 /* file access codes */
+#define H5ACC_DEFAULT       0x0000  /* Use in H5Fopen & H5Fcreate to open a file with default access */
 #define H5ACC_WRITE         0x0001  /* Use in H5Fopen to open a file with write access */
 #define H5ACC_OVERWRITE     0x0002  /* Use in H5Fcreate truncate an existing file */
 

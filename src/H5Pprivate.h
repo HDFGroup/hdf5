@@ -36,7 +36,7 @@ typedef struct H5P_sdim_t {
     uint32 *perm;       /* Dimension permutations */
 } H5P_sdim_t;
 
-#define H5P_RESERVED_ATOMS  1
+#define H5P_RESERVED_ATOMS  2
 
 /* Private functions */
 hid_t H5P_create(hid_t owner_id, hobjtype_t type, const char *name);
