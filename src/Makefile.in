@@ -156,6 +156,7 @@ TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
 USE_FILTER_NBIT = @USE_FILTER_NBIT@
+USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
 USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 VERSION = @VERSION@
@@ -226,7 +227,7 @@ libhdf5_la_SOURCES = H5.c H5A.c H5AC.c H5B.c H5B2.c H5B2cache.c H5B2dbg.c      \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Topaque.c H5Torder.c   \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
-        H5Ztrans.c
+        H5Zscaleoffset.c H5Ztrans.c
 
 
 # Public headers
@@ -295,7 +296,8 @@ am_libhdf5_la_OBJECTS = H5.lo H5A.lo H5AC.lo H5B.lo H5B2.lo H5B2cache.lo \
 	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
 	H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo \
 	H5Tvlen.lo H5TS.lo H5V.lo H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo \
-	H5Znbit.lo H5Zshuffle.lo H5Zszip.lo H5Ztrans.lo
+	H5Znbit.lo H5Zshuffle.lo H5Zszip.lo H5Zscaleoffset.lo \
+	H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 noinst_PROGRAMS = H5detect$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
@@ -371,9 +373,10 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/H5V.Plo ./$(DEPDIR)/H5Z.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Zdeflate.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/H5Zfletcher32.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5Znbit.Plo ./$(DEPDIR)/H5Zshuffle.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5Zszip.Plo ./$(DEPDIR)/H5Ztrans.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/H5detect.Po
+@AMDEP_TRUE@	./$(DEPDIR)/H5Znbit.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5Zscaleoffset.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5Zshuffle.Plo ./$(DEPDIR)/H5Zszip.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/H5Ztrans.Plo ./$(DEPDIR)/H5detect.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -580,6 +583,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zdeflate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zfletcher32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Znbit.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zscaleoffset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zshuffle.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zszip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ztrans.Plo@am__quote@

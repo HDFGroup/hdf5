@@ -57,6 +57,13 @@ H5_DLLVAR H5Z_class_t H5Z_SZIP[1];
 H5_DLLVAR H5Z_class_t H5Z_NBIT[1];
 #endif /* H5_HAVE_FILTER_NBIT */
 
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+/*
+ * scaleoffset filter
+ */
+H5_DLLVAR H5Z_class_t H5Z_SCALEOFFSET[1];
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
 /* Package-local function prototypes */
 H5_DLL void H5Z_update_class_vers(H5Z_class_t * old_vers, H5Z_class_t * curr_vers);
 

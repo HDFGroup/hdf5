@@ -35,6 +35,7 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_FLETCHER32   3       /*fletcher32 checksum of EDC       */
 #define H5Z_FILTER_SZIP         4       /*szip compression               */
 #define H5Z_FILTER_NBIT         5       /*nbit compression               */
+#define H5Z_FILTER_SCALEOFFSET  6       /*scaleoffset compression        */
 #define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved */
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 #define H5Z_MAX_NFILTERS        32      /* Maximum number of filters allowed in a pipeline (should probably be allowed to be an unlimited amount) */

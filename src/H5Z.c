@@ -105,10 +105,14 @@ H5Z_init_interface (void)
     if (H5Z_register (H5Z_NBIT)<0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
 #endif /* H5_HAVE_FILTER_NBIT */
+#ifdef H5_HAVE_FILTER_SCALEOFFSET
+    if (H5Z_register (H5Z_SCALEOFFSET)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
+#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
-#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT)
+#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET)
 done:
-#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT) */
+#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET) */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

@@ -49,6 +49,9 @@
 /* Define if support for nbit filter is enabled */
 #undef HAVE_FILTER_NBIT
 
+/* Define if support for scaleoffset filter is enabled */
+#undef HAVE_FILTER_SCALEOFFSET
+
 /* Define if support for shuffle filter is enabled */
 #undef HAVE_FILTER_SHUFFLE
 
