@@ -1091,7 +1091,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset			mpi_off, mpi_disp;
-    MPI_Status  		mpi_stat;
+    MPI_Status  		mpi_stat = {0};
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_read, n;
     int				use_types_this_time, used_types_last_time;
@@ -1347,7 +1347,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     const H5FD_mpio_dxpl_t	*dx=NULL;
     H5FD_mpio_dxpl_t		_dx;
     MPI_Offset 		 	mpi_off, mpi_disp;
-    MPI_Status			mpi_stat;
+    MPI_Status			mpi_stat = {0};
     MPI_Datatype		buf_type, file_type;
     int         		size_i, bytes_written;
     int				mpi_rank=-1;
@@ -1552,7 +1552,7 @@ H5FD_mpio_flush(H5FD_t *_file)
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     int                 mpi_rank=-1;
     uint8_t             byte=0;
-    MPI_Status          mpi_stat;
+    MPI_Status          mpi_stat = {0};
     MPI_Offset          mpi_off;
 
     FUNC_ENTER(H5FD_mpio_flush, FAIL);
