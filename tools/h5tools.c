@@ -37,6 +37,9 @@ static void display_string(hsize_t hs_nelmts, hid_t p_type,
 static void display_compound_data(hsize_t hs_nelmts, hid_t p_type,
 				  unsigned char *sm_buf, size_t p_type_nbytes,
 				  hsize_t p_nelmts, hsize_t elmtno);
+
+
+int h5dump_attr(hid_t oid, hid_t ptype);				  
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -2308,12 +2311,6 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
     hid_t	p_type = _p_type;
     hid_t	f_type;
     int		status = -1;
-/* for getting the attribute */
-	void *sm_buf;
-	hid_t type;
-	hsize_t size[64], nelmts = 1, dim_n_size;
-	size_t p_type_nbytes, need;
-	int ndims, i;
 
     if (p_type < 0) {
 
@@ -2344,65 +2341,7 @@ print_data(hid_t oid, hid_t _p_type, int obj_data)
 			status = h5dump_simple_dset(NULL,NULL, oid,p_type);
 		}
 		else { /*attribute data*/
-			/* all this was taken from various places like h5ls.c and 
-			 * h5dump_simple.  I plan on either taken this and making
-			 * another function for it or just taking the print stuff
-			 * and making a function for it
-			 */
-
-			/* get the size of the attribute and allocate enough mem*/
-			type = H5Aget_type(oid);
-			ndims = H5Sget_simple_extent_dims(f_space, size, NULL);
-			if (ndims){
-				for (i = 0; i < ndims; i++){
-					nelmts *= size[i];	
-				}
-			}
-			need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-			sm_buf = malloc(need);
-			p_type_nbytes = H5Tget_size(p_type);
-			dim_n_size = size[ndims - 1];
-
-			/*read the attr*/
-			if (H5Aread(oid, p_type, sm_buf) < 0){
-				return (status);
-			}
-			status = 0;
-			/*print it*/
-			switch (H5Tget_class(p_type)) {
-			case H5T_INTEGER:
-				display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
-					nelmts, dim_n_size, 0);
-				break;
-				
-			case H5T_FLOAT:
-				display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
-					nelmts, dim_n_size, 0);
-				break;
-				
-			case H5T_TIME:
-				break;
-				
-			case H5T_STRING:
-				display_string (nelmts, p_type, sm_buf, p_type_nbytes, 
-					nelmts, dim_n_size, 0);
-				break;
-				
-			case H5T_BITFIELD:
-				break;
-				
-			case H5T_OPAQUE:
-				break;
-				
-			case H5T_COMPOUND:
-				compound_data = 1;
-				display_compound_data (nelmts, p_type, sm_buf, p_type_nbytes, nelmts, 0);
-				compound_data = 0;
-				break;
-				
-			default: break;
-			}
-			free(sm_buf);
+			status = h5dump_attr(oid,p_type);
 		}
 
     H5Sclose(f_space);
@@ -2484,4 +2423,85 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace){
 
 	if (x == 0) x = FAIL;
 	return(x);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5dump_attr
+ *
+ * Purpose:    dumps an attribute
+ *
+ * Return:      0 = succeed or -1 for fail
+ *
+ * Programmer:  Patrick Lu
+ *
+ * Modifications:
+ *
+ *-----------------------------------------------------------------------*/
+
+int h5dump_attr(hid_t oid, hid_t p_type){
+	
+	hid_t f_space;
+	void *sm_buf;
+	hid_t type;
+	hsize_t size[64], nelmts = 1, dim_n_size;
+	size_t p_type_nbytes, need;
+	int ndims, i;
+	int status = -1;
+	
+	f_space = H5Aget_space(oid);
+
+	/* get the size of the attribute and allocate enough mem*/
+	type = H5Aget_type(oid);
+	ndims = H5Sget_simple_extent_dims(f_space, size, NULL);
+	if (ndims){
+		for (i = 0; i < ndims; i++){
+			nelmts *= size[i];	
+		}
+	}
+	need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
+	sm_buf = malloc(need);
+	p_type_nbytes = H5Tget_size(p_type);
+	dim_n_size = size[ndims - 1];
+	
+	/*read the attr*/
+	if (H5Aread(oid, p_type, sm_buf) < 0){
+		return (status);
+	}
+	status = 0;
+	/*print it*/
+	switch (H5Tget_class(p_type)) {
+	case H5T_INTEGER:
+		display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0);
+		break;
+		
+	case H5T_FLOAT:
+		display_numeric_data (nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0);
+		break;
+		
+	case H5T_TIME:
+		break;
+		
+	case H5T_STRING:
+		display_string (nelmts, p_type, sm_buf, p_type_nbytes, 
+			nelmts, dim_n_size, 0);
+		break;
+		
+	case H5T_BITFIELD:
+		break;
+		
+	case H5T_OPAQUE:
+		break;
+		
+	case H5T_COMPOUND:
+		compound_data = 1;
+		display_compound_data (nelmts, p_type, sm_buf, p_type_nbytes, nelmts, 0);
+		compound_data = 0;
+		break;
+		
+	default: break;
+	}
+	free(sm_buf);
+	return (status);
 }
