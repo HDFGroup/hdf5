@@ -243,6 +243,15 @@ while test -n "$hname"; do
 done
 
 dnl ----------------------------------------------------------------------
+dnl Enable dependency tracking unless the configure options or a
+dnl site-specific file told us not to.  This prevents configure from
+dnl silently disabling dependencies for some compilers.
+dnl
+if test -z "${enable_dependency_tracking}"; then
+  enable_dependency_tracking="yes"
+fi
+
+dnl ----------------------------------------------------------------------
 dnl Check for programs.
 dnl
 AC_PROG_CC
