@@ -117,8 +117,8 @@ test_file_create(void)
 	* exists from the previous steps.
 	*/
 	try { 
-	    file1 = new H5File( FILE1, H5F_ACC_EXCL );  // should throw E
-	    verify_val(file1->getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
+	    H5File file2(FILE1, H5F_ACC_EXCL);  // should throw E
+	    verify_val(file2.getId(), FAIL, "H5File constructor", __LINE__, __FILE__);
 	}
 	catch( FileIException E ) {} // do nothing, FAIL expected
 
