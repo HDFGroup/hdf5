@@ -33,6 +33,7 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 #include "H5private.h"
+#include "H5Bprivate.h"		/*B-link trees				*/
 #include "H5Dprivate.h"
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"
@@ -186,9 +187,9 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5F_istore_debug_key,	/*debug			*/
 }};
 
-#define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
-                                /* This should be the same size as the alignment of */
-                                /* of the smallest file format object written to the file.  */
+#define H5F_HASH_DIVISOR 1     /* Attempt to spread out the hashing */
+                               /* This should be the same size as the alignment of */
+                               /* of the smallest file format object written to the file.  */
 #define H5F_HASH(F,ADDR) H5F_addr_hash((ADDR/H5F_HASH_DIVISOR),(F)->shared->rdcc.nslots)
 
 
@@ -499,9 +500,7 @@ H5F_istore_new_node(H5F_t *f, H5B_ins_t op,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_istore_new_node, FAIL);
-#ifdef AKC
-    printf("%s: Called\n", FUNC);
-#endif
+
     /* check args */
     assert(f);
     assert(lt_key);
@@ -654,12 +653,9 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
     H5F_istore_ud1_t	*udata = (H5F_istore_ud1_t *) _udata;
     int		cmp;
     unsigned		u;
-    H5B_ins_t		ret_value = H5B_INS_ERROR;
+    H5B_ins_t		ret_value;
 
     FUNC_ENTER_NOAPI(H5F_istore_insert, H5B_INS_ERROR);
-#ifdef AKC
-    printf("%s: Called\n", FUNC);
-#endif
 
     /* check args */
     assert(f);
@@ -688,12 +684,25 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
          * then we should reallocate storage.
          */
         if (lt_key->nbytes != udata->key.nbytes) {
-#ifdef AKC
-            printf("calling H5MF_realloc for new chunk\n");
-#endif
+/* Currently, the old chunk data is "thrown away" after the space is reallocated,
+ * so avoid data copy in H5MF_realloc() call by just free'ing the space and
+ * allocating new space.
+ * 
+ * This should keep the file smaller also, by freeing the space and then
+ * allocating new space, instead of vice versa (in H5MF_realloc).
+ *
+ * QAK - 11/19/2002
+ */
+#ifdef OLD_WAY
             if (HADDR_UNDEF==(*new_node_p=H5MF_realloc(f, H5FD_MEM_DRAW, addr,
                       (hsize_t)lt_key->nbytes, (hsize_t)udata->key.nbytes)))
-                HGOTO_ERROR (H5E_STORAGE, H5E_WRITEERROR, H5B_INS_ERROR, "unable to reallocate chunk storage");
+                HGOTO_ERROR (H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk storage");
+#else /* OLD_WAY */
+            if (H5MF_xfree(f, H5FD_MEM_DRAW, addr,(hsize_t)lt_key->nbytes)<0)
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk");
+            if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)udata->key.nbytes)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk");
+#endif /* OLD_WAY */
             lt_key->nbytes = udata->key.nbytes;
             lt_key->filter_mask = udata->key.filter_mask;
             *lt_key_changed = TRUE;
@@ -724,11 +733,8 @@ H5F_istore_insert(H5F_t *f, haddr_t addr, void *_lt_key,
         /*
          * Allocate storage for the new chunk
          */
-#ifdef AKC
-        printf("calling H5MF_alloc for new chunk\n");
-#endif
         if (HADDR_UNDEF==(*new_node_p=H5MF_alloc(f, H5FD_MEM_DRAW, (hsize_t)udata->key.nbytes)))
-            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, H5B_INS_ERROR, "file allocation failed");
+            HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "file allocation failed");
         udata->addr = *new_node_p;
         ret_value = H5B_INS_RIGHT;
 
@@ -769,7 +775,7 @@ H5F_istore_iter_allocated (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
     H5F_istore_ud1_t	*bt_udata = (H5F_istore_ud1_t *)_udata;
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
 
-    FUNC_ENTER_NOINIT(H5F_istore_iterate);
+    FUNC_ENTER_NOINIT(H5F_istore_iter_allocated);
 
     bt_udata->total_storage += lt_key->nbytes;
 
@@ -806,11 +812,10 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
     H5F_istore_key_t	*lt_key = (H5F_istore_key_t *)_lt_key;
     unsigned		u;
 
-    FUNC_ENTER_NOINIT(H5F_istore_iterate);
+    FUNC_ENTER_NOINIT(H5F_istore_iter_dump);
 
     if (bt_udata->stream) {
         if (0==bt_udata->total_storage) {
-            fprintf(bt_udata->stream, "    Address:\n");
             fprintf(bt_udata->stream,
                 "             Flags    Bytes    Address Logical Offset\n");
             fprintf(bt_udata->stream,
@@ -819,10 +824,12 @@ H5F_istore_iter_dump (H5F_t UNUSED *f, void *_lt_key, haddr_t UNUSED addr,
         }
         HDfprintf(bt_udata->stream, "        0x%08x %8Zu %10a [",
               lt_key->filter_mask, lt_key->nbytes, addr);
-        for (u=0; u<bt_udata->mesg.ndims; u++) {
+        for (u=0; u<bt_udata->mesg.ndims; u++)
             HDfprintf(bt_udata->stream, "%s%Hd", u?", ":"", lt_key->offset[u]);
-        }
         HDfputs("]\n", bt_udata->stream);
+
+        /* Use "total storage" information as flag for printing headers */
+        bt_udata->total_storage++;
     }
 
     FUNC_LEAVE(SUCCEED);
@@ -885,7 +892,7 @@ done:
 static herr_t
 H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
 {
-    herr_t		ret_value=FAIL;	/*return value			*/
+    herr_t		ret_value=SUCCEED;	/*return value			*/
     H5F_istore_ud1_t 	udata;		/*pass through B-tree		*/
     unsigned		u;		/*counters			*/
     void		*buf=NULL;	/*temporary buffer		*/
@@ -965,8 +972,6 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
             ent->chunk = H5MM_xfree(ent->chunk);
     }
     
-    ret_value = SUCCEED;
-
 done:
     /* Free the temp buffer only if it's different than the entry chunk */
     if (buf!=ent->chunk)
@@ -1320,16 +1325,15 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     size_t		chunk_alloc=0;		/*allocated chunk size	*/
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the file chunk	*/
-    void		*ret_value=NULL;	/*return value		*/
+    void		*ret_value;	        /*return value		*/
     H5P_genplist_t *plist=NULL;                 /* Property list */
 
     FUNC_ENTER_NOINIT(H5F_istore_lock);
 
     if (rdcc->nslots>0) {
-        /* We don't care about loss of precision in the following statement. */
         for (u=0, temp_idx=0; u<layout->ndims; u++) {
-            temp_idx *= layout->dim[u];
             temp_idx += offset[u];
+            temp_idx *= layout->dim[u];
         }
         temp_idx += (hsize_t)(layout->addr);
         idx=H5F_HASH(f,temp_idx);
@@ -1428,18 +1432,6 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #ifdef H5F_ISTORE_DEBUG
             HDputc('#', stderr);
             HDfflush(stderr);
-#endif
-#if 0
-            HDfprintf(stderr, "\ncollision %3d %10a {",
-                  idx, ent->layout->addr);
-            for (u=0; u<layout->ndims; u++) {
-                HDfprintf(stderr, "%s%Zu", u?",":"", ent->offset[u]);
-            }
-            HDfprintf(stderr, "}\n              %10a {", layout->addr);
-            for (u=0; u<layout->ndims; u++) {
-                HDfprintf(stderr, "%s%Zu", u?",":"", offset[u]);
-            }
-            fprintf(stderr, "}\n");
 #endif
             if (H5F_istore_preempt(f, ent, TRUE)<0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache");
@@ -2117,7 +2109,9 @@ H5F_istore_dump_btree(H5F_t *f, FILE *stream, unsigned ndims, haddr_t addr)
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg.ndims = ndims;
     udata.stream = stream;
-    if (H5B_iterate(f, H5B_ISTORE, H5F_istore_iter_dump, addr, &udata)<0)
+    if(stream)
+        HDfprintf(stream, "    Address: %a\n",addr);
+    if(H5B_iterate(f, H5B_ISTORE, H5F_istore_iter_dump, addr, &udata)<0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over chunk B-tree");
 
 done:
@@ -2248,7 +2242,7 @@ H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 {
     H5F_istore_ud1_t	udata;                  /* Information about a chunk */
     unsigned	u;
-    haddr_t	ret_value=HADDR_UNDEF;		/* Return value */
+    haddr_t	ret_value;		/* Return value */
     
     FUNC_ENTER_NOINIT(H5F_istore_get_addr);
 
@@ -2936,7 +2930,7 @@ H5F_istore_initialize_by_extent(H5F_t *f, const H5O_layout_t *layout,
 	} /* end for */
 
 	/* 
-	 * Figure out what chunks have to be initialized. These are the chunks where the database 
+	 * Figure out what chunks have to be initialized. These are the chunks where the dataspace 
 	 * extent boundary is within the chunk
 	 */
 	for(u = 0, found = 0; u < layout->ndims - 1; u++) {
@@ -3002,3 +2996,4 @@ done:
 
     FUNC_LEAVE(ret_value);
 }
+
