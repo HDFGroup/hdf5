@@ -75,11 +75,12 @@
 
 /* Packages needed by this file... */
 #include <H5private.h>
-#include <H5Iprivate.h>
 #include <H5Bprivate.h>
+#include <H5Dprivate.h>
 #include <H5Eprivate.h>
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>
+#include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
@@ -561,6 +562,7 @@ H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
     
     FUNC_ENTER (H5Glink, FAIL);
 
+    /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     }
@@ -611,6 +613,93 @@ H5Gunlink (hid_t __unused__ loc_id, const char __unused__ *name)
 
     HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
 		   "unable to unlink name (not implemented yet)");
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gstat
+ *
+ * Purpose:	Returns information about an object.  If FOLLOW_LINK is
+ *		non-zero then all symbolic links are followed; otherwise all
+ *		links except the last component of the name are followed.
+ *
+ * Return:	Success:	SUCCEED with the fields of STATBUF (if
+ *				non-null) initialized.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
+	 H5G_stat_t *statbuf/*out*/)
+{
+    H5G_t	*loc = NULL;
+    
+    FUNC_ENTER (H5Gstat, FAIL);
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    }
+
+    /* Get info */
+    if (H5G_stat (loc, name, follow_link, statbuf)<0) {
+	HRETURN_ERROR (H5E_ARGS, H5E_CANTINIT, FAIL, "cannot stat object");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_linkval
+ *
+ * Purpose:	Returns the value of a symbolic link whose name is NAME.  At
+ *		most SIZE characters (counting the null terminator) are
+ *		copied to the BUF result buffer.
+ *
+ * Return:	Success:	SUCCEED, the link value is in BUF.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
+{
+    H5G_t	*loc = NULL;
+    
+    FUNC_ENTER (H5Gget_linkval, FAIL);
+
+    /* Check arguments */
+    if (NULL==(loc=H5G_loc (loc_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    }
+
+    /* Get the link value */
+    if (H5G_linkval (loc, name, size, buf)<0) {
+	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		       "unable to get link value");
+    }
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -746,12 +835,18 @@ H5G_component(const char *name, size_t *size_p)
  *		LOC_ENT.  The component `.' is a no-op, but `..' is not
  *		understood by this function (unless it appears as an entry in
  *		the symbol table).
+ *
+ *		Symbolic links are followed automatically, but if
+ *		FOLLOW_SLINK is false and the last component of the name is a
+ *		symbolic link then that link is not followed.  At most NLINKS
+ *		are followed and the next link generates an error.
  *		
  * Errors:
  *
  * Return:	Success:	SUCCEED if name can be fully resolved.	See
  *				above for values of REST, GRP_ENT, and
- *				OBJ_ENT.
+ *				OBJ_ENT.  NLINKS has been decremented for
+ *				each symbolic link that was followed.
  *
  *		Failure:	FAIL if the name could not be fully resolved.
  *				See above for values of REST, GRP_ENT, and
@@ -767,22 +862,21 @@ H5G_component(const char *name, size_t *size_p)
  */
 static herr_t
 H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
-	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/)
+	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
+	  hbool_t follow_slink, intn *nlinks)
 {
     H5G_entry_t		_grp_ent;	/*entry for current group	*/
     H5G_entry_t		_obj_ent;	/*entry found			*/
     size_t		nchars;		/*component name length		*/
     char		comp[1024];	/*component name buffer		*/
-
-    /* clear output args before FUNC_ENTER() in case it fails */
+    int			_nlinks = H5G_NLINKS;
+    const char		*s = NULL;
+    
     if (rest) *rest = name;
     if (!grp_ent) grp_ent = &_grp_ent;
     if (!obj_ent) obj_ent = &_obj_ent;
-    memset(grp_ent, 0, sizeof(H5G_entry_t));
-    H5F_addr_undef(&(grp_ent->header));
-    memset(obj_ent, 0, sizeof(H5G_entry_t));
-    H5F_addr_undef(&(obj_ent->header));
-
+    if (!nlinks) nlinks = &_nlinks;
+    
     FUNC_ENTER(H5G_namei, FAIL);
 
     /*
@@ -799,6 +893,9 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     } else {
 	*obj_ent = *loc_ent;
     }
+    memset(grp_ent, 0, sizeof(H5G_entry_t));
+    H5F_addr_undef(&(grp_ent->header));
+
 
     /* traverse the name */
     while ((name = H5G_component(name, &nchars)) && *name) {
@@ -837,12 +934,87 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	     */
 	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found");
 	}
+
+	/*
+	 * If we found a symbolic link then we should follow it.  But if this
+	 * is the last component of the name and FOLLOW_SLINK is zero then we
+	 * don't follow it.
+	 */
+	if (H5G_CACHED_SLINK==obj_ent->type &&
+	    (follow_slink || ((s=H5G_component(name+nchars, NULL)) && *s))) {
+	    if ((*nlinks)-- <= 0) {
+		HRETURN_ERROR (H5E_SYM, H5E_SLINK, FAIL,
+			       "too many symbolic links");
+	    }
+	    if (H5G_traverse_slink (grp_ent, obj_ent, nlinks)<0) {
+		HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+			       "symbolic link traversal failed");
+	    }
+	}
+
 	/* next component */
 	name += nchars;
     }
     if (rest) *rest = name; /*final null */
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_traverse_slink
+ *
+ * Purpose:	Traverses symbolic link.  The link head appears in the group
+ *		whose entry is GRP_ENT and the link head entry is OBJ_ENT.
+ *
+ * Return:	Success:	SUCCEED, OBJ_ENT will contain information
+ *				about the object to which the link points and
+ *				GRP_ENT will contain the information about
+ *				the group in which the link tail appears.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, April 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
+		    H5G_entry_t *obj_ent/*in,out*/,
+		    intn *nlinks/*in,out*/)
+{
+    H5O_stab_t		stab_mesg;		/*info about local heap	*/
+    const char		*clv = NULL;		/*cached link value	*/
+    char		*linkval = NULL;	/*the copied link value	*/
+    herr_t		ret_value = FAIL;	/*return value		*/
+    
+    FUNC_ENTER (H5G_traverse_slink, FAIL);
+
+    /* Get the link value */
+    if (NULL==H5O_read (grp_ent, H5O_STAB, 0, &stab_mesg)) {
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to determine local heap address");
+    }
+    if (NULL==(clv=H5HL_peek (grp_ent->file, &(stab_mesg.heap_addr),
+			      obj_ent->cache.slink.lval_offset))) {
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to read symbolic link value");
+    }
+    linkval = H5MM_xstrdup (clv);
+
+    /* Traverse the link */
+    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, TRUE, nlinks)) {
+	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		     "unable to follow symbolic link");
+    }
+    ret_value = SUCCEED;
+
+ done:
+    H5MM_xfree (linkval);
+    FUNC_LEAVE (ret_value);
 }
 
 
@@ -963,7 +1135,8 @@ H5G_create(H5G_t *loc, const char *name, size_t size_hint)
     assert(name && *name);
 
     /* lookup name */
-    if (0 == H5G_namei(H5G_entof(loc), name, &rest, &grp_ent, NULL)) {
+    if (0 == H5G_namei(H5G_entof(loc), name, &rest, &grp_ent, NULL,
+		       TRUE, NULL)) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1338,7 +1511,7 @@ H5G_insert(H5G_t *loc, const char *name, H5G_entry_t *ent)
     /*
      * Look up the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(H5G_entof(loc), name, &rest, &grp, NULL) >= 0) {
+    if (H5G_namei(H5G_entof(loc), name, &rest, &grp, NULL, TRUE, NULL) >= 0) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1411,7 +1584,8 @@ H5G_find(H5G_t *loc, const char *name,
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(H5G_entof(loc), name, NULL, grp_ent, obj_ent) < 0) {
+    if (H5G_namei(H5G_entof(loc), name, NULL, grp_ent, obj_ent,
+		  TRUE, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1531,7 +1705,13 @@ herr_t
 H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
 	  const char *new_name)
 {
-    H5G_entry_t		cur_obj;
+    H5G_entry_t		cur_obj;	/*entry for the link tail	*/
+    H5G_entry_t		grp_ent;	/*ent for grp containing link hd*/
+    H5O_stab_t		stab_mesg;	/*symbol table message		*/
+    const char		*rest = NULL;	/*last component of new name	*/
+    char		_comp[1024];	/*name component		*/
+    size_t		nchars;		/*characters in component	*/
+    size_t		offset;		/*offset to sym-link value	*/
     
     FUNC_ENTER (H5G_link, FAIL);
 
@@ -1542,8 +1722,74 @@ H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
 
     switch (type) {
     case H5G_LINK_SOFT:
-	HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
-		       "unable to create soft link (not implemented yet)");
+	/*
+	 * Lookup the the new_name so we can get the group which will contain
+	 * the new entry.  The entry shouldn't exist yet.
+	 */
+	if (H5G_namei (H5G_entof(loc), new_name, &rest, &grp_ent, NULL,
+		       TRUE, NULL)>=0) {
+	    HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
+	}
+	H5E_clear (); /*it's okay that we didn't find it*/
+	rest = H5G_component (rest, &nchars);
+
+	/*
+	 * There should be one component left.  Make sure it's null
+	 * terminated and that `rest' points to it.
+	 */
+	if (rest[nchars]) {
+	    if (H5G_component (rest+nchars, NULL)) {
+		HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+			       "component not found");
+	    } else if (nchars+1 > sizeof _comp) {
+		HRETURN_ERROR (H5E_SYM, H5E_COMPLEN, FAIL,
+			       "name component is too long");
+	    } else {
+		HDmemcpy (_comp, rest, nchars);
+		_comp[nchars] = '\0';
+		rest = _comp;
+	    }
+	}
+
+	/*
+	 * Add the link-value to the local heap for the symbol table which
+	 * will contain the link.
+	 */
+	if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg)) {
+	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			   "unable to determine local heap address");
+	}
+	if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file,
+					       &(stab_mesg.heap_addr),
+					       strlen(cur_name)+1,
+					       cur_name))) {
+	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			   "unable to write link value to local heap");
+	}
+	H5O_reset (H5O_STAB, &stab_mesg);
+
+	/*
+	 * Create a symbol table entry for the link.  The object header is
+	 * undefined and the cache contains the link-value offset.
+	 */
+	HDmemset (&cur_obj, 0, sizeof cur_obj);
+	H5F_addr_undef (&(cur_obj.header));
+	cur_obj.file = grp_ent.file;
+	cur_obj.type = H5G_CACHED_SLINK;
+	cur_obj.cache.slink.lval_offset = offset;
+
+	/*
+	 * Insert the link head in the symbol table.  This shouldn't ever
+	 * fail because we've already checked that the link head doesn't
+	 * exist and the file is writable (because the local heap is
+	 * writable).  But if it does, the only side effect is that the local
+	 * heap has some extra garbage in it.
+	 */
+	if (H5G_stab_insert (&grp_ent, rest, &cur_obj)<0) {
+	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			   "unable to create new name/link for object");
+	}
+	break;
 
     case H5G_LINK_HARD:
 	if (H5G_find (loc, cur_name, NULL, &cur_obj)<0) {
@@ -1563,3 +1809,153 @@ H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
 
     FUNC_LEAVE (SUCCEED);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stat
+ *
+ * Purpose:	Returns information about an object.
+ *
+ * Return:	Success:	SUCCEED with info about the object returned
+ *				through STATBUF if it isn't the null pointer.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
+	  H5G_stat_t *statbuf/*out*/)
+{
+    H5O_stab_t		stab_mesg;
+    H5G_entry_t		grp_ent, obj_ent;
+    const char		*s = NULL;
+    H5D_t		*temp_dset = NULL;
+    H5G_t		*temp_grp = NULL;
+    
+    FUNC_ENTER (H5G_stat, FAIL);
+
+    assert (loc);
+    assert (name && *name);
+    if (statbuf) HDmemset (statbuf, 0, sizeof *statbuf);
+
+    /* Find the object's symbol table entry */
+    if (H5G_namei (H5G_entof(loc), name, NULL, &grp_ent/*out*/,
+		   &obj_ent/*out*/, follow_link, NULL)<0) {
+	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
+    }
+
+    /*
+     * Initialize the stat buf.  Symbolic links aren't normal objects and
+     * therefor don't have much of the normal info.  However, the link value
+     * length is specific to symbolic links.
+     */
+    if (statbuf) {
+	if (H5G_CACHED_SLINK!=obj_ent.type) {
+	    statbuf->objno[0] = (unsigned long)(obj_ent.header.offset);
+	    statbuf->objno[1] = (unsigned long)(obj_ent.header.offset >>
+						8*sizeof(long));
+	    statbuf->nlink = H5O_link (&obj_ent, 0);
+	    statbuf->type = H5G_LINK;
+	} else {
+	    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg) ||
+		NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr), 
+				    obj_ent.cache.slink.lval_offset))) {
+		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+			       "unable to read symbolic link value");
+	    }
+	    statbuf->linklen = strlen(s)+1; /*count the null terminator*/
+
+	    /*
+	     * Determining the type of an object is a rather expensive
+	     * operation compared to the other stuff here.  It's also not
+	     * very flexible.
+	     */
+	    if (NULL!=(temp_dset=H5D_open (loc, name))) {
+		statbuf->type = H5G_DATASET;
+		H5D_close (temp_dset);
+	    } else if (NULL!=(temp_grp=H5G_open (loc, name))) {
+		statbuf->type = H5G_GROUP;
+		H5G_close (temp_grp);
+	    } else {
+		statbuf->type = H5G_UNKNOWN;
+	    }
+	    H5E_clear(); /*clear errors resulting from checking type*/
+	}
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_linkval
+ *
+ * Purpose:	Returns the value of a symbolic link.
+ *
+ * Return:	Success:	SUCCEED, with at most SIZE bytes of the link
+ *				value copied into the BUF buffer.  If the
+ *				link value is larger than SIZE characters
+ *				counting the null terminator then the BUF
+ *				result will not be null terminated.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, April 13, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_linkval (H5G_t *loc, const char *name, size_t size, char *buf/*out*/)
+{
+    const char		*s = NULL;
+    H5G_entry_t		grp_ent, obj_ent;
+    H5O_stab_t		stab_mesg;
+    
+    FUNC_ENTER (H5G_linkval, FAIL);
+
+    /*
+     * Get the symbol table entry for the link head and the symbol table
+     * entry for the group in which the link head appears.
+     */
+    if (H5G_namei (H5G_entof(loc), name, NULL, &grp_ent/*out*/,
+		   &obj_ent/*out*/, FALSE, NULL)<0) {
+	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		       "symbolic link was not found");
+    }
+    if (H5G_CACHED_SLINK!=obj_ent.type) {
+	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
+		       "object is not a symbolic link");
+    }
+
+    /*
+     * Get the address of the local heap for the link value and a pointer
+     * into that local heap.
+     */
+    if (NULL==H5O_read (&grp_ent, H5O_STAB, 0, &stab_mesg)) {
+	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		       "unable to determine local heap address");
+    }
+    if (NULL==(s=H5HL_peek (grp_ent.file, &(stab_mesg.heap_addr),
+			    obj_ent.cache.slink.lval_offset))) {
+	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		       "unable to read symbolic link value");
+    }
+    
+    /* Copy to output buffer */
+    if (size>0 && buf) {
+	strncpy (buf, s, size);
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+    

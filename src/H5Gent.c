@@ -10,6 +10,7 @@
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5Gpkg.h>
+#include <H5HLprivate.h>
 #include <H5MMprivate.h>
 
 #define PABLO_MASK      H5G_ent_mask
@@ -204,6 +205,10 @@ H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
         H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
         break;
 
+    case H5G_CACHED_SLINK:
+	UINT32DECODE (*pp, ent->cache.slink.lval_offset);
+	break;
+
     default:
         HDabort();
     }
@@ -310,6 +315,10 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
             H5F_addr_encode(f, pp, &(ent->cache.stab.heap_addr));
             break;
 
+	case H5G_CACHED_SLINK:
+	    UINT32ENCODE (*pp, ent->cache.slink.lval_offset);
+	    break;
+
         default:
             HDabort();
         }
@@ -350,8 +359,10 @@ H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
  */
 herr_t
 H5G_ent_debug(H5F_t __unused__ *f, H5G_entry_t *ent, FILE * stream,
-	      intn indent, intn fwidth)
+	      intn indent, intn fwidth, const haddr_t *heap)
 {
+    const char		*lval = NULL;
+    
     FUNC_ENTER(H5G_ent_debug, FAIL);
 
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
@@ -387,6 +398,19 @@ H5G_ent_debug(H5F_t __unused__ *f, H5G_entry_t *ent, FILE * stream,
         fprintf(stream, "\n");
         break;
 
+    case H5G_CACHED_SLINK:
+	fprintf (stream, "Symbolic Link\n");
+	fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
+		 "Link value offset:",
+		 (unsigned long)(ent->cache.slink.lval_offset));
+	if (heap && H5F_addr_defined (heap)) {
+	    lval = H5HL_peek (ent->file, heap, ent->cache.slink.lval_offset);
+	    fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
+		     "Link value:",
+		     lval);
+	}
+	break;
+	
     default:
         fprintf(stream, "*** Unknown symbol type %d\n", ent->type);
         break;

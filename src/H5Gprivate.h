@@ -33,6 +33,7 @@
 #define H5G_NODE_MAGIC  "SNOD"          /*symbol table node magic number     */
 #define H5G_NODE_SIZEOF_MAGIC 4         /*sizeof symbol node magic number    */
 #define H5G_NO_CHANGE   (-1)            /*see H5G_ent_modified()             */
+#define H5G_NLINKS	16		/*max symlinks to follow per lookup  */
 
 /*
  * The disk size for a symbol table entry...
@@ -54,8 +55,9 @@ typedef enum H5G_type_t {
     H5G_CACHED_ERROR	= -1, 	/*force enum to be signed		     */
     H5G_NOTHING_CACHED  = 0,    /*nothing is cached, must be 0               */
     H5G_CACHED_STAB     = 1,    /*symbol table, `stab'                       */
+    H5G_CACHED_SLINK	= 2, 	/*symbolic link				     */
 
-    H5G_NCACHED         = 2     /*THIS MUST BE LAST                          */
+    H5G_NCACHED         = 3     /*THIS MUST BE LAST                          */
 } H5G_type_t;
 
 /*
@@ -70,6 +72,10 @@ typedef union H5G_cache_t {
         haddr_t btree_addr;             /*file address of symbol table B-tree*/
         haddr_t heap_addr;              /*file address of stab name heap     */
     } stab;
+
+    struct {
+	size_t	lval_offset;		/*link value offset		     */
+    } slink;
 } H5G_cache_t;
 
 /*
@@ -106,9 +112,16 @@ herr_t H5G_pop (H5F_t *f);
 H5G_t *H5G_getcwg(H5F_t *f);
 herr_t H5G_link (H5G_t *loc, H5G_type_t type, const char *cur_name,
 		 const char *new_name);
+herr_t H5G_stat (H5G_t *loc, const char *name, hbool_t follow_link,
+		 H5G_stat_t *statbuf/*out*/);
+herr_t H5G_linkval (H5G_t *loc, const char *name, size_t size,
+		    char *buf/*out*/);
 herr_t H5G_insert (H5G_t *cwg, const char *name, H5G_entry_t *ent);
 herr_t H5G_find (H5G_t *cwg, const char *name, H5G_entry_t *grp_ent/*out*/,
                  H5G_entry_t *ent/*out*/);
+herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
+			   H5G_entry_t *obj_ent/*in,out*/,
+			   intn *nlinks/*in,out*/);
 herr_t H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent);
 herr_t H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent/*out*/);
 
@@ -127,6 +140,6 @@ H5G_entry_t *H5G_ent_calloc (H5G_entry_t *init);
 H5G_cache_t *H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type);
 herr_t H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type);
 herr_t H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE * stream, intn indent,
-                      intn fwidth);
+                      intn fwidth, const haddr_t *heap);
 #endif
 

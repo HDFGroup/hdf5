@@ -197,7 +197,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 	 * descriptors (all family members are open at once).
 	 */
 #ifdef H5F_DEBUG
-	if (access_parms->u.fam.offset_bits+2>=8*sizeof(off_t)) {
+	if (access_parms->u.fam.offset_bits+2>8*sizeof(off_t)) {
 	    fprintf (stderr, "H5F: family member size may be too large.\n");
 	}
 #endif

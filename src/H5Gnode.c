@@ -985,7 +985,7 @@ H5G_node_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		    "Name:",
 		    s);
 	}
-	H5G_ent_debug(f, sn->entry + i, stream, indent, fwidth);
+	H5G_ent_debug(f, sn->entry + i, stream, indent, fwidth, heap);
     }
 
     H5AC_unprotect(f, H5AC_SNODE, addr, sn);

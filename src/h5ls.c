@@ -44,13 +44,22 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     hid_t	(*func)(void*);
     void	*edata;
     int		i;
-
+    char	linkval[512];
+    H5G_stat_t	statbuf;
+    
     /* Disable error reporting */
     H5Eget_auto (&func, &edata);
     H5Eset_auto (NULL, NULL);
 
     /* Print info about each name */
     printf ("%-30s", name);
+
+    if (H5Gstat (group, name, TRUE, &statbuf)>=0) {
+	printf ("FILE={%lu,%lu}, OID={%lu,%lu} ",
+		statbuf.fileno[0], statbuf.fileno[1],
+		statbuf.objno[0], statbuf.objno[1]);
+    }
+
     if ((obj=H5Dopen (group, name))>=0) {
 	hsize_t size[64];
 	hid_t space = H5Dget_space (obj);
@@ -65,6 +74,11 @@ list (hid_t group, const char *name, void __unused__ *op_data)
     } else if ((obj=H5Gopen (group, name))>=0) {
 	printf (" Group\n");
 	H5Gclose (obj);
+    } else if (H5Gget_linkval (group, name, sizeof(linkval), linkval)>=0) {
+	if (NULL==HDmemchr (linkval, 0, sizeof(linkval))) {
+	    strcpy (linkval+sizeof(linkval)-4, "...");
+	}
+	printf (" -> %s\n", linkval);
     } else {
 	printf (" Unknown Type\n");
     }

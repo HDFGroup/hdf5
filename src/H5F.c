@@ -1633,7 +1633,7 @@ H5F_debug(H5F_t *f, const haddr_t __unused__ *addr, FILE * stream,
 	    f->shared->root_grp ? "" : "(none)");
     if (f->shared->root_grp) {
 	H5G_ent_debug(f, H5G_entof (f->shared->root_grp), stream,
-		      indent + 3, MAX(0, fwidth - 3));
+		      indent+3, MAX(0, fwidth-3), NULL);
     }
     FUNC_LEAVE(SUCCEED);
 }

@@ -100,6 +100,7 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
     {H5E_COMPLEN, 	"Name component is too long"},
     {H5E_CWG, 		"Problem with current working group"},
     {H5E_LINK, 		"Link count failure"},
+    {H5E_SLINK,		"Symbolic link error"},
 };
 
 /* Interface initialization? */
