@@ -45,7 +45,7 @@ elements of a dataset.
     <li><a href="#Dataspace-ExtentNpoints">H5Sextent_npoints</a>
     <li><a href="#Dataspace-ExtentNdims">H5Sextent_ndims</a>
     <li><a href="#Dataspace-ExtentDims">H5Sextent_dims</a>
-    <li><a href="#Dataspace-GetClass">H5Sget_class</a>
+    <li><a href="#Dataspace-ExtentClass">H5Sextent_class</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
@@ -360,19 +360,18 @@ elements of a dataset.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Dataspace-GetClass">H5Sget_class</a>
+<dt><strong>Name:</strong> <a name="Dataspace-ExtentClass">H5Sextent_class</a>
 <dt><strong>Signature:</strong>
-    <dd><em>H5S_class_t</em> <code>H5Sget_class</code>(<em>hid_t</em> <code>space_id</code>)
+    <dd><em>H5S_class_t</em> <code>H5Sextent_class</code>(<em>hid_t</em> <code>space_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determine the current class of a dataspace.
 <dt><strong>Description:</strong>
-    <dd><code>H5Sget_class</code> queries a dataspace to determine the 
+    <dd><code>H5Sextent_class</code> queries a dataspace to determine the 
         current class of a dataspace.  
         <p>
         The function returns a class name, one of the following: 
             <code>H5S_SCALAR</code>, 
-            <code>H5S_SIMPLE</code>, or 
-            <code>H5S_NONE</code>.
+            <code>H5S_SIMPLE</code>.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
@@ -380,7 +379,7 @@ elements of a dataset.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace class name if successful; 
-        otherwise FAIL (-1).
+        otherwise H5S_NO_CLASS (-1).
 </dl>
 
 
