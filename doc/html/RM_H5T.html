@@ -68,6 +68,8 @@ of a dataset.
     <li><a href="#Datatype-GetClass">H5Tget_class</a>
     <li><a href="#Datatype-GetSize">H5Tget_size</a>
     <li><a href="#Datatype-GetSuper">H5Tget_super</a>
+    <li><a href="#Datatype-GetNativeType">H5Tget_native_type</a>
+    <li><a href="#Datatype-DetectClass">H5Tdetect_class</a>
     <li><a href="#Datatype-Close">H5Tclose</a>
 <p>
 <i>Conversion Functions</i>
@@ -169,6 +171,8 @@ facilitate moving easily between them.</i>
     <li><a href="#Datatype-GetClass">h5tget_class_f</a>
     <li><a href="#Datatype-GetSize">h5tget_size_f</a>
     <li><a href="#Datatype-GetSuper">h5tget_super_f</a>
+<!--<li><a href="#Datatype-GetNativeType">h5tget_native_type_f</a>      -->
+<!--<li><a href="#Datatype-DetectClass">h5tdetect_class_f</a>             -->
     <li><a href="#Datatype-Close">h5tclose_f</a>
 <!--<p>                                                                     -->
 <!--<i>Conversion Functions</i>                                             -->
@@ -650,15 +654,25 @@ H5Tget_overflow ()
 </dl>
 
 
-
-
-
-
-
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Datatype-IsVariableString">H5Tis_variable_str</a>
-
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Tis_variable_str</code>(<em>hid_t </em><code>dtype_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether datatype is a variable-length string.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tvlen_create</code> determines whether the datatype 
+        identified in <code>dtype_id</code> is a variable-length string.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dtype_id</code>
+            <dd>Datatype identifier.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
+        otherwise returns a negative value.
 <dt><strong>Non-C API(s):</strong>
     <dd><a href="fortran/h5t_FORTRAN.html#h5tis_variable_str_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
@@ -667,11 +681,6 @@ H5Tget_overflow ()
         <img src="Graphics/C++.gif">
         -->
 </dl>
-
-
-
-
-
 
 
 <hr>
@@ -880,6 +889,42 @@ H5Tget_overflow ()
 
 <hr>
 <dl>
+<dt><strong>Name:</strong> <a name="Datatype-DetectClass">H5Tdetect_class</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Tdetect_class</code>(<em>hid_t</em> <code>dtype_id</code>,
+        <em>H5T_class_t</em><code>dtype_class</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether a datatype is of the given datatype class.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tdetect_class</code> determines whether the datatype 
+        specified in <code>dtype_id</code> is of the 
+        datatype class specified in <code>dtype_class</code>.
+        <p>
+        Valid class identifiers are as defined in 
+	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>dtype_id</code>
+            <dd>Datatype identifier.
+        <dt><em>H5T_class_t</em><code>dtype_class</code>
+            <dd>Datatype class.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
+        otherwise returns a negative value.
+<!--<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tdetect_class_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
 <dt><strong>Name:</strong> <a name="Datatype-GetSize">H5Tget_size</a>
 <dt><strong>Signature:</strong>
     <dd><em>size_t </em><code>H5Tget_size</code>(<em>hid_t </em><code>type_id</code>
@@ -971,6 +1016,90 @@ H5Tget_overflow ()
     <dd><a href="fortran/h5t_FORTRAN.html#h5tget_super_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetNativeType">H5Tget_native_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_native_type</code>(<em>hid_t</em> <code>type_id</code>,
+        <em>H5T_direction_t</em> <code>direction</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the native datatype of a specified datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_native_type</code> returns the equivalent native datatype  
+        for the dataset datatype specified in <code>type_id</code>.  
+        <p>
+        <code>H5Tget_native_type</code> is a high-level function designed
+	primarily to facilitate use of the <code>H5Dread</code> function,
+	for which users otherwise must undertake a multi-step process to 
+	determine the native datatype of a dataset prior to reading it 
+	into memory.     
+        It can be used not only to determine 
+	the native datatype for atomic datatypes, 
+	but also to determine the native datatypes of the individual components of 
+	a compound datatype, an enumerated datatype, an array datatype, or 
+        a variable-length datatype.
+        <p>
+	<code>H5Tget_native_type</code> selects the matching native datatype 
+	from the following list:
+        <pre>        H5T_NATIVE_CHAR         
+        H5T_NATIVE_SHORT        
+        H5T_NATIVE_INT          
+        H5T_NATIVE_LONG         
+        H5T_NATIVE_LLONG        
+
+        H5T_NATIVE_UCHAR
+        H5T_NATIVE_USHORT
+        H5T_NATIVE_UINT
+        H5T_NATIVE_ULONG
+        H5T_NATIVE_ULLONG
+
+        H5T_NATIVE_FLOAT
+        H5T_NATIVE_DOUBLE
+        H5T_NATIVE_LDOUBLE</pre>
+        <p>
+        The <code>direction</code> parameter indicates the order 
+	in which the library searches for a native datatype match.
+	Valid values for <code>direction</code> are as follows:
+	<table border=0>
+	<tr valign=top><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	    <code>H5T_DIR_ASCEND</code></td><td>
+	    Searches the above list in ascending size of the datatype,<br>
+	    i.e., from top to bottom.  (Default)
+	    </td></tr>
+	<tr valign=top><td>&nbsp;</td><td>
+	    <code>H5T_DIR_DESCEND</code>&nbsp;&nbsp;</td><td>
+	    Searches the above list in descending size of the datatype,<br>
+	    i.e., from bottom to top.
+	    </td></tr>
+	</table>
+        <p>
+	<code>H5Tget_native_type</code> is designed primarily for
+	use with intenger and floating point datatypes.
+	Time, bifield, opaque, and reference datatypes are returned
+	as a copy of <code>type_id</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>type_id</code>
+            <dd>Datatype identifier for the dataset datatype.
+        <dt><em>H5T_direction_t</em> <code>direction</code>
+            <dd>Direction of search.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the native datatype identifier for the  
+        specified dataset datatype if successful;
+        otherwise returns a negative value.
+<!--
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5t_FORTRAN.html#h5tget_native_type_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+-->     <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -2816,7 +2945,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 7 April 2003
+Last modified: 1 May 2003
  
 </body>
 </html>
