@@ -3031,7 +3031,7 @@ facilitate moving easily between them.</i>
 	that the fill value is to be undefined. 
   <dt><strong>Notes:</strong>
     <dd> Applications sometimes write data only to portions of 
-	an allcoated dataset.  It is often useful in such cases 
+	an allocated dataset.  It is often useful in such cases 
 	to fill the unused space with a known 
 	<span class="termEmphasis">fill value</span>.  
 	This function allows the user application to set that fill value;
@@ -3125,7 +3125,7 @@ facilitate moving easily between them.</i>
         <dt><em>hid_t</em> <code>type_id</code>,
             <dd>IN: Datatype identifier for the value passed 
 	        via <code>value</code>.
-        <dt><em>const void *</em><code>value</code>
+        <dt><em>void *</em><code>value</code>
             <dd>OUT: Pointer to buffer to contain the returned fill value.
     </dl>
   <dt><strong>Returns:</strong>
@@ -3276,12 +3276,18 @@ facilitate moving easily between them.</i>
         <p>
 	Valid values returned in <code>fill_time</code> are as follows:
 	<table border=0 >
-           <tr valign="top"><td rowspan="2">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+           <tr valign="top"><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_IFSET</code>&nbsp;&nbsp; 
+             </td><td>
+	     Fill values are written to the dataset when storage space is allocated 
+	     only if there is a user-defined fill value, i.e., one set with 
+	     <a href="#Property-SetFillValue">H5Pset_fill_value</a>.
+	     &nbsp;&nbsp;(Default)
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
 	     <code>H5D_FILL_TIME_ALLOC</code>&nbsp;&nbsp; 
              </td><td>
 	     Fill values are written to the dataset when storage space is allocated.
-	     &nbsp;&nbsp;(Default)
-	   </td></tr><tr valign="top"><td>
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
              <code>H5D_FILL_TIME_NEVER</code>
              </td><td>
              Fill values are never written to the dataset.
@@ -3504,7 +3510,9 @@ facilitate moving easily between them.</i>
               clear and a filter fails, then <code>H5Dwrite</code> 
               or <code>H5Dread</code> also fails.
 	      <p>
-	      This flag is mandatory for the Fletcher32 checksum filter.</td>
+	      This flag should not be set for the Fletcher32 checksum 
+	      filter as it will bypass the checksum filter without 
+	      reporting checksum errors to an application.</td>
           </tr>
         </table>
         </center>
@@ -3529,13 +3537,24 @@ facilitate moving easily between them.</i>
             </td><td>
             Error detection filter, employing the Fletcher32 checksum algorithm 
         </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
 	</table>
 	</center>
+	<p>
+	Also see <a href="#Property-SetEdcCheck">H5Pset_edc_check</a> and
+	<a href="Property-SetFilterCallback">H5Pset_filter_callback</a>.
 	
-  <dt><strong>Note:</strong>
+  <dt><strong>Notes:</strong>
     <dd>This function currently supports only the permanent filter
         pipeline; <code>plist</code> must be a dataset creation 
         property list.
+	<p>
+	If multiple filters are set for a property list, they will be 
+	applied to each chunk in the order in which they were set.
   <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>plist</code>
@@ -3723,6 +3742,11 @@ facilitate moving easily between them.</i>
             </td><td>
             Error detection filter, employing the Fletcher32 checksum algorithm 
         </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
 	</table>
 	</center>
         Otherwise returns a negative value.
@@ -4091,6 +4115,7 @@ facilitate moving easily between them.</i>
         <img src="Graphics/C++.gif">
         -->
 
+<!--
     <p>
   <dt><strong>References:</strong>
     (This material will appear in a separate file in the final release documents.)
@@ -4142,6 +4167,7 @@ facilitate moving easily between them.</i>
         Appears In: CCSDS Publications
 
     </ul>
+-->
 </dl>
 
 
@@ -4163,9 +4189,9 @@ facilitate moving easily between them.</i>
 	Valid values are as follows:
 	<table border="0">
 	<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
-	<code>H5Z_ENABLE_EDC</code>
+	<code>H5Z_ENABLE_EDC</code> &nbsp; (default)
 	<br>
-	<code>H5Z_DISABLE_EDC</code> &nbsp; (default)
+	<code>H5Z_DISABLE_EDC</code>
 	</td></tr>
 	</table>
 	<p>
@@ -7607,7 +7633,7 @@ And in this document, the
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
  
-Last modified: 23 June 2003
+Last modified: 25 June 2003
  
 </body>
 </html>
