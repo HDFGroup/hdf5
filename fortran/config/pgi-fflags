@@ -14,6 +14,7 @@
 if test X = "X$f9x_flags_set"; then
     f9x_version="`$F9X $FFLAGS -V 2>&1 |grep '^pgf90 '`"
     if test X != "X$f9x_version"; then
+        is_mpi="`$F9X $FFLAGS -help 2>&1 |grep 'link MPI'`"
         f9x_vendor=`echo $f9x_version |sed 's/\([a-z0-9]*\).*/\1/'`
         f9x_version=`echo $f9x_version |sed 's/pgf90 \([-a-z0-9\.\-]*\).*/\1/'`
         echo "compiler '$F9X' is PGI $f9x_vendor-$f9x_version"
@@ -59,7 +60,12 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     FFLAGS="$FFLAGS -Mdclchk -Mstandard -Minform,warn"
 
     # Production
-    PROD_FFLAGS="-fast -s -Mnoframe"
+    # Check for MPI wrapper being used and tweak down compiler options
+    if test "X-" == "X-$is_mpi"; then
+        PROD_FFLAGS="-fast -s -Mnoframe"
+    else
+        PROD_FFLAGS="-O2 -s"
+    fi
 
     # Debug
     DEBUG_FFLAGS="-g -Mbounds -Mchkfpstk -Mchkptr"
