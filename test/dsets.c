@@ -378,7 +378,7 @@ test_compression(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_COMPRESS_NAME, H5T_NATIVE_INT, space,
 			     dc))<0) goto error;
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -405,7 +405,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -427,7 +427,7 @@ test_compression(hid_t file)
 
     if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points)<0)
 	goto error;
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -456,7 +456,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -496,7 +496,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -528,7 +528,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();
@@ -574,7 +574,7 @@ test_compression(hid_t file)
 	    }
 	}
     }
-#ifdef HAVE_COMPRESS2
+#ifdef H5_HAVE_COMPRESS2
     PASSED();
 #else
     SKIPPED();

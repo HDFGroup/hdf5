@@ -112,16 +112,16 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 		      "badly formatted modification time message");
     }
 
-#if defined(HAVE_TM_GMTOFF)
+#if defined(H5_HAVE_TM_GMTOFF)
     /* FreeBSD, OSF 4.0 */
     the_time += tm.tm_gmtoff;
-#elif defined(HAVE___TM_GMTOFF)
+#elif defined(H5_HAVE___TM_GMTOFF)
     /* Linux libc-4 */
     the_time += tm.__tm_gmtoff;
-#elif defined(HAVE_TIMEZONE)
+#elif defined(H5_HAVE_TIMEZONE)
     /* Linux libc-5 */
     the_time -= timezone - (tm.tm_isdst?3600:0);
-#elif defined(HAVE_BSDGETTIMEOFDAY) && defined(HAVE_STRUCT_TIMEZONE)
+#elif defined(H5_HAVE_BSDGETTIMEOFDAY) && defined(H5_HAVE_STRUCT_TIMEZONE)
     /* Irix5.3 */
     {
 	struct timezone tz;
@@ -131,7 +131,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 	}
 	the_time -= tz.tz_minuteswest*60 - (tm.tm_isdst?3600:0);
     }
-#elif defined(HAVE_GETTIMEOFDAY) && defined(HAVE_STRUCT_TIMEZONE)
+#elif defined(H5_HAVE_GETTIMEOFDAY) && defined(H5_HAVE_STRUCT_TIMEZONE)
     {
 	struct timezone tz;
 	if (gettimeofday(NULL, &tz)<0) {

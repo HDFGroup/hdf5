@@ -10,11 +10,11 @@
 #include <H5MMprivate.h>
 #include <H5Zprivate.h>
 
-#ifdef HAVE_ZLIB_H
+#ifdef H5_HAVE_ZLIB_H
 #   include <zlib.h>
 #else
 /* Make sure compression is disabled too. */
-#undef HAVE_COMPRESS2
+#undef H5_HAVE_COMPRESS2
 #endif
 
 /* Interface initialization */
@@ -46,7 +46,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 {
     size_t	ret_value = 0;
     void	*outbuf = NULL;
-#if defined(HAVE_COMPRESS2)
+#if defined(H5_HAVE_COMPRESS2)
     int		aggression = 6;
     int		status;
 #endif
@@ -59,7 +59,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 		    "invalid deflate aggression level");
     }
 
-#if defined(HAVE_COMPRESS2)
+#if defined(H5_HAVE_COMPRESS2)
     aggression = cd_values[0];
     if (flags & H5Z_FLAG_REVERSE) {
 	/* Input; uncompress */

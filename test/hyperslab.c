@@ -15,7 +15,7 @@
 #include <H5MMprivate.h>
 #include <H5Vprivate.h>
 
-#ifndef HAVE_FUNCTION
+#ifndef H5_HAVE_FUNCTION
 #undef __FUNCTION__
 #define __FUNCTION__ ""
 #endif

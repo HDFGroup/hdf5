@@ -329,7 +329,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
 		"***displacements: 0, %d\n", i, displacement[1]);
 #endif
 
-#ifdef HAVE_MPI2  /*  have MPI-2  */
+#ifdef H5_HAVE_MPI2  /*  have MPI-2  */
             err = MPI_Type_create_resized
                                   ( outer_type,        /* old type  */
                                     0,                 /* blocklengths */

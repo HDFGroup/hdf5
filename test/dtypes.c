@@ -89,7 +89,7 @@ static int num_opaque_conversions_g = 0;
  * be allowed to continue (cf. Posix signals) so in order to recover from a
  * SIGFPE we run tests that might generate one in a child process.
  */
-#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #   define HANDLE_SIGFPE
 #endif
 
@@ -198,7 +198,7 @@ some_dummy_func(float x)
 static void
 generates_sigfpe(void)
 {
-#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
     pid_t	pid;
     int		status;
     size_t	i, j;

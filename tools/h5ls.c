@@ -1849,35 +1849,35 @@ get_width(void)
 	width = (int)strtol(s, NULL, 0);
     }
 
-#if defined(HAVE_STRUCT_VIDEOCONFIG) && defined(HAVE__GETVIDEOCONFIG)
+#if defined(H5_HAVE_STRUCT_VIDEOCONFIG) && defined(H5_HAVE__GETVIDEOCONFIG)
     {
 	/* Microsoft C */
 	struct videoconfig w;
 	_getvideoconfig(&w);
 	width = w.numtextcols;
     }
-#elif defined(HAVE_STRUCT_TEXT_INFO) && defined(HAVE_GETTEXTINFO)
+#elif defined(H5_HAVE_STRUCT_TEXT_INFO) && defined(H5_HAVE_GETTEXTINFO)
     {
 	/* Borland C or DJGPPC */
 	struct text_info w;
 	gettextinfo(&w);
 	width = w.screenwidth;
     }
-#elif defined(HAVE_GETCONSOLESCREENBUFFERINFO)
+#elif defined(H5_HAVE_GETCONSOLESCREENBUFFERINFO)
     {
 	/* Win32 C */
 	CONSOLE_SCREEN_BUFFER_INFO scr;
 	GetConsoleScreenBufferInfo(con_out, &scr);
 	width = scr.srWindow.Right - scr.srWindow.Left + 1;
     }
-#elif defined(HAVE__SCRSIZE)
+#elif defined(H5_HAVE__SCRSIZE)
     {
 	/* OS/2 */
 	int w[2];
 	_scrsize(w);
 	width = w[0];
     }
-#elif defined(HAVE_TIOCGWINSZ) && defined(HAVE_IOCTL)
+#elif defined(H5_HAVE_TIOCGWINSZ) && defined(H5_HAVE_IOCTL)
     {
 	/* Unix with ioctl(TIOCGWINSZ) */
 	struct winsize w;
@@ -1885,7 +1885,7 @@ get_width(void)
 	    width = w.ws_col;
 	}
     }
-#elif defined(HAVE_TIOCGETD) && defined(HAVE_IOCTL)
+#elif defined(H5_HAVE_TIOCGETD) && defined(H5_HAVE_IOCTL)
     {
 	/* Unix with ioctl(TIOCGETD) */
 	struct uwdata w;

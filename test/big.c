@@ -82,7 +82,7 @@ is_sparse(void)
     if (close(fd)<0) return 0;
     if (stat("x.h5", &sb)<0) return 0;
     if (unlink("x.h5")<0) return 0;
-#ifdef HAVE_STAT_ST_BLOCKS
+#ifdef H5_HAVE_STAT_ST_BLOCKS
     return ((unsigned long)sb.st_blocks*512 < (unsigned long)sb.st_size);
 #else
     return (0);

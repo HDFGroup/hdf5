@@ -4,7 +4,7 @@
 #include <mfhdf.h>
 #include <hdf5.h>
 
-#ifdef HAVE_SYS_STAT_H
+#ifdef H5_HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
 

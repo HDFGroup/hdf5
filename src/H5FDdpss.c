@@ -64,7 +64,7 @@ typedef struct H5FD_dpss_t {
  * file_seek:           The function which adjusts the current file position,
  *                      either lseek() or lseek64().
  */
-#ifdef HAVE_LSEEK64
+#ifdef H5_HAVE_LSEEK64
 #   define file_offset_t        off64_t
 #   define file_seek            lseek64
 #else

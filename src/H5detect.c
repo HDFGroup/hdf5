@@ -242,7 +242,7 @@ precision (detected_t *d)
    precision (&(INFO));							      \
 }
 
-#if defined(HAVE_LONGJMP) && defined(HAVE_SIGNAL)
+#if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL)
 #define ALIGNMENT(TYPE,ALIGN) {						      \
     char		*volatile _buf=NULL;				      \
     volatile TYPE	_val=0;						      \
@@ -269,7 +269,7 @@ precision (detected_t *d)
 #endif
 
 #if 0
-#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #define ALIGNMENT(TYPE,ALIGN) {						      \
     char	*_buf;							      \
     TYPE	_val=0;							      \
@@ -841,7 +841,7 @@ print_header(void)
     char		host_name[256];
     int			i;
     const char		*s;
-#ifdef HAVE_GETPWUID
+#ifdef H5_HAVE_GETPWUID
     struct passwd	*pwd = NULL;
 #else
     int			pwd = 1;
@@ -891,7 +891,7 @@ bit.\n";
     /*
      * The real name is the first item from the passwd gecos field.
      */
-#ifdef HAVE_GETPWUID
+#ifdef H5_HAVE_GETPWUID
     {
 	size_t n;
 	char *comma;
@@ -915,7 +915,7 @@ bit.\n";
     /*
      * The FQDM of this host or the empty string.
      */
-#ifdef HAVE_GETHOSTNAME
+#ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(host_name, sizeof(host_name)) < 0) {
 	host_name[0] = '\0';
     }
@@ -934,7 +934,7 @@ bit.\n";
     if (pwd || real_name[0] || host_name[0]) {
 	printf(" *\t\t\t");
 	if (real_name[0]) printf("%s <", real_name);
-#ifdef HAVE_GETPWUID
+#ifdef H5_HAVE_GETPWUID
 	if (pwd) fputs(pwd->pw_name, stdout);
 #endif
 	if (host_name[0]) printf("@%s", host_name);
@@ -981,7 +981,7 @@ main(void)
     detected_t		d[MAXDETECT];
     volatile int	nd = 0;
 
-#if defined(HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
+#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
 #if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
     /*
      * Make sure unaligned access generates SIGBUS and doesn't print warning

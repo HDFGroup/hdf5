@@ -35,7 +35,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5FDmpio.h>
 
 /* we need this for the struct rusage declaration */
-#if defined(HAVE_GETRUSAGE) && defined(linux)
+#if defined(H5_HAVE_GETRUSAGE) && defined(linux)
 #include <sys/resource.h>
 #endif
 
@@ -586,7 +586,7 @@ H5close (void)
 }
 
 
-#ifndef HAVE_SNPRINTF
+#ifndef H5_HAVE_SNPRINTF
 /*-------------------------------------------------------------------------
  * Function:	HDsnprintf
  *
@@ -626,10 +626,10 @@ HDsnprintf(char *buf, size_t UNUSED size, const char *fmt, ...)
     va_end(ap);
     return n;
 }
-#endif /* HAVE_SNPRINTF */
+#endif /* H5_HAVE_SNPRINTF */
 
 
-#ifndef HAVE_VSNPRINTF
+#ifndef H5_HAVE_VSNPRINTF
 /*-------------------------------------------------------------------------
  * Function:	HDvsnprintf
  *
@@ -659,7 +659,7 @@ HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
     return vsprintf(buf, fmt, ap);
 }
-#endif /* HAVE_VSNPRINTF */
+#endif /* H5_HAVE_VSNPRINTF */
 
 
 /*-------------------------------------------------------------------------
@@ -1111,16 +1111,16 @@ H5_timer_reset (H5_timer_t *timer)
 void
 H5_timer_begin (H5_timer_t *timer)
 {
-#ifdef HAVE_GETRUSAGE
+#ifdef H5_HAVE_GETRUSAGE
     struct rusage	rusage;
 #endif
-#ifdef HAVE_GETTIMEOFDAY
+#ifdef H5_HAVE_GETTIMEOFDAY
     struct timeval	etime;
 #endif
 
     assert (timer);
 
-#ifdef HAVE_GETRUSAGE
+#ifdef H5_HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &rusage);
     timer->utime = (double)rusage.ru_utime.tv_sec +
                    (double)rusage.ru_utime.tv_usec/1e6;
@@ -1130,7 +1130,7 @@ H5_timer_begin (H5_timer_t *timer)
     timer->utime = 0.0;
     timer->stime = 0.0;
 #endif
-#ifdef HAVE_GETTIMEOFDAY
+#ifdef H5_HAVE_GETTIMEOFDAY
     gettimeofday (&etime, NULL);
     timer->etime = (double)etime.tv_sec + (double)etime.tv_usec/1e6;
 #else

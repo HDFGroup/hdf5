@@ -1534,7 +1534,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 
 	/* Print the data */
 	flags = ((elmtno == 0 ? START_OF_DATA : 0) |
-		 (elmtno + hs_nelmts >= p_nelmts ? END_OF_DATA : 0));
+		 ((elmtno + hs_nelmts) >= p_nelmts ? END_OF_DATA : 0));
 	h5dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
                            p_type, sm_buf);
 
@@ -1961,7 +1961,8 @@ h5dump_vlen_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     hid_t mem_space;
     const char *bad_type;
     herr_t ret;
-    hssize_t start = 0, count = 1;
+    hssize_t start = 0;
+    hsize_t count = 1;
     unsigned int i;
 
     memset(&ctx, 0, sizeof(h5dump_context_t));

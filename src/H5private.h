@@ -7,7 +7,7 @@
  *
  * Purpose:	This file is included by all HDF5 library source files to
  *		define common things which are not defined in the HDF5 API.
- *		The configuration constants like HAVE_UNISTD_H etc. are
+ *		The configuration constants like H5_HAVE_UNISTD_H etc. are
  *		defined in H5config.h which is included by H5public.h.
  */
 #ifndef _H5private_H
@@ -23,7 +23,7 @@
 /*
  * Include ANSI-C header files.
  */
-#ifdef STDC_HEADERS
+#ifdef H5_STDC_HEADERS
 #   include <assert.h>
 #   include <ctype.h>
 #   include <errno.h>
@@ -42,7 +42,7 @@
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
  * compliant. Otherwise all bets are off.
  */
-#ifdef HAVE_UNISTD_H
+#ifdef H5_HAVE_UNISTD_H
 #   include <sys/types.h>
 #   include <unistd.h>
 #endif
@@ -54,7 +54,7 @@
 /*
  * C9x integer types
  */
-#ifdef HAVE_STDINT_H
+#ifdef H5_HAVE_STDINT_H
 #   include <stdint.h>
 #endif
 
@@ -63,7 +63,7 @@
  * but often apears on non-Posix systems also.	The `struct stat' is required
  * for hdf5 to compile, although only a few fields are actually used.
  */
-#ifdef HAVE_SYS_STAT_H
+#ifdef H5_HAVE_SYS_STAT_H
 #   include <sys/stat.h>
 #endif
 
@@ -77,10 +77,10 @@
  * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
  * by `AC_CHECK_HEADERS(sys/time.h)' in configure.in.
  */
-#if defined(TIME_WITH_SYS_TIME)
+#if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
 #   include <time.h>
-#elif defined(HAVE_SYS_TIME_H)
+#elif defined(H5_HAVE_SYS_TIME_H)
 #   include <sys/time.h>
 #else
 #   include <time.h>
@@ -89,7 +89,7 @@
 /*
  * Longjumps are used to detect alignment constrants
  */
-#ifdef HAVE_SETJMP_H
+#ifdef H5_HAVE_SETJMP_H
 #   include <setjmp.h>
 #endif
 
@@ -97,7 +97,7 @@
  * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
  * and debugging code if available.
  */
-#ifdef HAVE_SYS_RESOURCE_H
+#ifdef H5_HAVE_SYS_RESOURCE_H
 #   include <sys/resource.h>
 #endif
 
@@ -105,7 +105,7 @@
  * Unix ioctls.	 These are used by h5ls (and perhaps others) to determine a
  * resonable output width.
  */
-#ifdef HAVE_SYS_IOCTL_H
+#ifdef H5_HAVE_SYS_IOCTL_H
 #   include <sys/ioctl.h>
 #endif
 
@@ -114,20 +114,20 @@
  * of unaligned accesses by the operating system during detection of
  * alignment constraints in H5detect.c:main().
  */
-#ifdef HAVE_SYS_SYSINFO_H
+#ifdef H5_HAVE_SYS_SYSINFO_H
 #   include <sys/sysinfo.h>
 #endif
-#ifdef HAVE_SYS_PROC_H
+#ifdef H5_HAVE_SYS_PROC_H
 #   include <sys/proc.h>
 #endif
 
 /*
  * Win32 is severely broken when it comes to ANSI-C and Posix.1 compliance.
  */
-#ifdef HAVE_IO_H
+#ifdef H5_HAVE_IO_H
 #   include <io.h>
 #endif
-#ifdef HAVE_WINDOWS_H
+#ifdef H5_HAVE_WINDOWS_H
 #include <windows.h>
 #endif
 #ifndef F_OK
@@ -139,7 +139,7 @@
 /*
  * Pablo support files.
  */
-#ifdef HAVE_PABLO
+#ifdef H5_HAVE_PABLO
 #   define IOTRACE
 #   define HDFIOTRACE
 #   include "HDFIOTrace.h"
@@ -162,7 +162,7 @@
  * suppresses warnings about unused function arguments.	 It's no big deal if
  * we don't.
  */
-#ifdef HAVE_ATTRIBUTE
+#ifdef H5_HAVE_ATTRIBUTE
 #   define UNUSED		__attribute__((unused))
 #else
 #   define __attribute__(X)	/*void*/
@@ -174,7 +174,7 @@
  * currently being defined?  If not then define it to be some constant
  * string.
  */
-#ifndef HAVE_FUNCTION
+#ifndef H5_HAVE_FUNCTION
 #   define __FUNCTION__	 "NoFunctionName"
 #endif
 
@@ -479,7 +479,7 @@ __DLL__ void H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds);
 #define HDctermid(S)		ctermid(S)
 #define HDctime(T)		ctime(T)
 #define HDcuserid(S)		cuserid(S)
-#ifdef HAVE_DIFFTIME
+#ifdef H5_HAVE_DIFFTIME
 #define HDdifftime(X,Y)		difftime(X,Y)
 #else
 #define HDdifftime(X,Y)		((double)(X)-(double)(Y))
@@ -634,7 +634,7 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDsin(X)		sin(X)
 #define HDsinh(X)		sinh(X)
 #define HDsleep(N)		sleep(N)
-#ifdef HAVE_SNPRINTF
+#ifdef H5_HAVE_SNPRINTF
 #   define HDsnprintf		snprintf /*varargs*/
 #endif
 /* sprintf() variable arguments */
@@ -695,7 +695,7 @@ __DLL__ int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvfprintf(F,FMT,A)	vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
-#ifdef HAVE_VSNPRINTF
+#ifdef H5_HAVE_VSNPRINTF
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
 #endif
 #define HDwait(W)		wait(W)
@@ -713,10 +713,10 @@ char *strdup(const char *s);
 #endif
 #define HDstrdup(S)		strdup(S)
 
-#ifndef HAVE_SNPRINTF
+#ifndef H5_HAVE_SNPRINTF
 __DLL__ int HDsnprintf(char *buf, size_t size, const char *fmt, ...);
 #endif
-#ifndef HAVE_VSNPRINTF
+#ifndef H5_HAVE_VSNPRINTF
 __DLL__ int HDvsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 #endif
 
@@ -999,7 +999,7 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
  * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions
  * through one of these two sets of macros.
  */
-#ifdef HAVE_PABLO
+#ifdef H5_HAVE_PABLO
 #  define PABLO_SAVE(func_id)	intn pablo_func_id = func_id;
 #  define PABLO_TRACE_ON(m, f)	TRACE_ON(m,f)
 #  define PABLO_TRACE_OFF(m, f) TRACE_OFF(m,f)

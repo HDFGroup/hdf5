@@ -1661,7 +1661,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         IS_H5FD_MPIO(dataset->ent.file)) {
 	sconv->read = H5S_mpio_spaces_read;
     }
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/
 
     /*
      * If there is no type conversion then try reading directly into the
@@ -2074,7 +2074,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         IS_H5FD_MPIO(dataset->ent.file)) {
 	sconv->write = H5S_mpio_spaces_write;
     }
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/
     
     /*
      * If there is no type conversion then try writing directly from

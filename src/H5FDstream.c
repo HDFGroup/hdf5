@@ -41,7 +41,7 @@
 #endif
 #include <netdb.h>                    /* gethostbyname                       */
 #include <netinet/in.h>               /* socket stuff                        */
-#ifdef HAVE_NETINET_TCP_H
+#ifdef H5_HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>              /* socket stuff                        */
 #endif
 #endif
@@ -128,7 +128,7 @@ static const H5FD_stream_fapl_t default_fapl =
  * REGION_OVERFLOW:      Checks whether an address and size pair describe data
  *                        which can be addressed entirely in memory.
  */
-#ifdef HAVE_LSEEK64
+#ifdef H5_HAVE_LSEEK64
 #   define file_offset_t        off64_t
 #else
 #   define file_offset_t        off_t
