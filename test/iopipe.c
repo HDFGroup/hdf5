@@ -9,6 +9,11 @@
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 #include "hdf5.h"
+#ifdef H5_HAVE_WINSOCK_H
+#include <Winsock.h>
+#endif /*Winsock.h includes windows.h, due to the different value of
+         WINVER, windows.h should be put before H5private.h. Kent yang 6/21/2001*/
+
 #include "H5private.h"
 
 #ifdef H5_STDC_HEADERS
@@ -37,9 +42,6 @@
 #   include <sys/resource.h>
 #endif
 
-#ifdef H5_HAVE_WINSOCK_H
-#include <Winsock.h>
-#endif
 
 
 #if defined (__MWERKS__)
