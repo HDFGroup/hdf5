@@ -306,6 +306,9 @@ EOF
     hp3[0-9][05]:NetBSD:*:*)
 	echo m68k-hp-netbsd${UNAME_RELEASE}
 	exit 0 ;;
+    i[3456]86:Paragon*:*:*)
+	echo ${UNAME_MACHINE}-intel-osf1
+	exit 0 ;;
     i[34]86:BSD/386:*:* | *:BSD/OS:*:*)
 	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
 	exit 0 ;;

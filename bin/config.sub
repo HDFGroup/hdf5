@@ -413,6 +413,10 @@ case $basic_machine in
 		basic_machine=i860-intel
 		os=-osf
 		;;
+	janus | tflop)
+		basic_machine=i386-intel
+		os=-osf1
+		;;
 	pbd)
 		basic_machine=sparc-tti
 		;;
