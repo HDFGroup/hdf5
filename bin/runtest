@@ -156,8 +156,8 @@ CHECK_RSH()
     # Test "ping -c ..." style first because some '-c' machines treat
     # the command 'ping localhost 3' means to ping host '3'.
     if [ -z "$PING" ]; then
-	if ping -c 3 localhost >/dev/null 2>&1; then
-	    PING='ping -c 3'
+	if ping -c 3 -w 5 localhost >/dev/null 2>&1; then
+	    PING='ping -c 3 -w 5'
 	    PINGCOUNT=
 	elif ping localhost 3 >/dev/null 2>&1; then
 	    PING=ping
