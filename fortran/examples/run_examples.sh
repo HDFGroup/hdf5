@@ -1,4 +1,5 @@
-#!/bin/csh
+#! /bin/sh
+
 ./dsetexample
 ./fileexample
 ./rwdsetexample
