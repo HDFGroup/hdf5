@@ -15,6 +15,11 @@
 #include <H5public.h>		/* Include Public Definitions		*/
 #include <H5config.h>		/* Include all configuration info	*/
 
+/* include the pthread library */
+#ifdef H5_HAVE_THREADSAFE
+#include <pthread.h>
+#endif
+
 /*
  * Include ANSI-C header files.
  */
@@ -868,10 +873,88 @@ __DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
  *	Added auto variable RTYPE which is initialized by the tracing macros.
  *-------------------------------------------------------------------------
  */
-extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
 
 /* Is `S' the name of an API function? */
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
+
+/* Lock headers */
+#ifdef H5_HAVE_THREADSAFE
+typedef struct H5_mutex_struct {
+  pthread_t owner_thread;         /* current lock owner */
+  pthread_mutex_t atomic_lock;    /* lock for atomicity of new mechanism */
+  pthread_cond_t cond_var;        /* condition variable */
+  unsigned int lock_count;
+} H5_mutex_t;
+
+/* cancelability structure */
+typedef struct H5_cancel_struct {
+  int previous_state;
+  unsigned int cancel_count;
+} H5_cancel_t;
+
+/* replacement structure for original global variable */
+typedef struct H5_api_struct {
+  H5_mutex_t init_lock;           /* API entrance mutex */
+  hbool_t H5_libinit_g;
+} H5_api_t;
+
+
+/* Macro for first thread initialization */
+#define H5_FIRST_THREAD_INIT                                                  \
+   pthread_once(&H5_first_init_g, H5_first_thread_init);
+
+/* Macros for threadsafe HDF-5 Phase I locks */
+#define H5_INIT_GLOBAL H5_g.H5_libinit_g
+#define H5_API_LOCK_BEGIN                                                     \
+   if (H5_IS_API(FUNC)) {                                                     \
+     H5_mutex_lock(&H5_g.init_lock);
+#define H5_API_LOCK_END }
+#define H5_API_UNLOCK_BEGIN                                                   \
+  if (H5_IS_API(FUNC)) {                                                      \
+    H5_mutex_unlock(&H5_g.init_lock);
+#define H5_API_UNLOCK_END }
+
+/* Macros for thread cancellation-safe mechanism */
+#define H5_API_UNSET_CANCEL                                                   \
+  if (H5_IS_API(FUNC)) {                                                      \
+    H5_cancel_count_inc();                                                    \
+  }
+
+#define H5_API_SET_CANCEL                                                     \
+  if (H5_IS_API(FUNC)) {                                                      \
+    H5_cancel_count_dec();                                                    \
+  }
+
+/* Extern global variables */
+extern pthread_once_t H5_first_init_g;
+extern pthread_key_t H5_errstk_key_g;
+extern pthread_key_t H5_cancel_key_g;
+extern hbool_t H5_allow_concurrent_g;
+extern H5_api_t H5_g;
+
+void H5_first_thread_init(void);
+
+#else
+
+/* disable any first thread init mechanism */
+#define H5_FIRST_THREAD_INIT
+
+#define H5_INIT_GLOBAL H5_libinit_g
+
+/* disable locks (sequential version) */
+#define H5_API_LOCK_BEGIN
+#define H5_API_LOCK_END
+#define H5_API_UNLOCK_BEGIN
+#define H5_API_UNLOCK_END
+
+/* disable cancelability (sequential version) */
+#define H5_API_UNSET_CANCEL
+#define H5_API_SET_CANCEL
+
+/* extern global variables */
+
+extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
+#endif
 
 #define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
 
@@ -883,13 +966,17 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
 									      \
    /* Initialize the library */						      \
-   if (!H5_libinit_g) {							      \
-      H5_libinit_g = TRUE;						      \
-      if (H5_init_library()<0) {					      \
-	 HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
-			"library initialization failed");		      \
-      }									      \
-   }									      \
+   H5_FIRST_THREAD_INIT                                                       \
+   H5_API_UNSET_CANCEL                                                        \
+   H5_API_LOCK_BEGIN                                                          \
+     if (!(H5_INIT_GLOBAL)) {                                                 \
+       H5_INIT_GLOBAL = TRUE;                                                 \
+       if (H5_init_library()<0) {					      \
+	  HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+		 	"library initialization failed");		      \
+       }								      \
+     }									      \
+   H5_API_LOCK_END                                                            \
 									      \
    /* Initialize this interface or bust */				      \
    if (!interface_initialize_g) {					      \
@@ -924,7 +1011,6 @@ extern hbool_t H5_libinit_g;   /*good thing C's lazy about extern! */
  *-------------------------------------------------------------------------
  */
 #define FUNC_LEAVE(return_value) HRETURN(return_value)}}
-
 
 /*
  * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions

@@ -16,10 +16,12 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 ## These are our main targets. They should be listed in the order to be
 ## executed, generally most specific tests to least specific tests.
 RUNTEST=$(LT_RUN)
+
 TEST_PROGS=testhdf5 lheap ohdr stab gheap hyperslab istore bittests dtypes \
       dsets cmpd_dset extend external links unlink big mtime fillval mount \
       flush1 flush2 enum gass_write gass_read gass_append dpss_write \
-      dpss_read srb_write srb_append srb_read
+      dpss_read srb_write srb_append srb_read ttsafe 
+
 TIMINGS=iopipe chunk ragged overhead
 
 ## The libh5test.a library provides common support code for the tests. We link
@@ -46,25 +48,28 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    big.data big[0-9][0-9][0-9][0-9][0-9].h5 dtypes1.h5 dtypes2.h5   \
             tattr.h5 tselect.h5 mtime.h5 ragged.h5 unlink.h5 overhead.h5     \
             fillval_[0-9].h5 fillval.raw mount_[0-9].h5 trefer[12].h5        \
-            tvltypes.h5 tvlstr.h5 flush.h5 enum1.h5 titerate.h5
+            tvltypes.h5 tvlstr.h5 flush.h5 enum1.h5 titerate.h5 ttsafe.h5
 CLEAN=$(TIMINGS)
 
 ## Source and object files for programs...  The TEST_SRC list contains all the
 ## source files and is used for things like dependencies, archiving, etc.  The
 ## other source lists are for the individual tests, the files of which may
 ## overlap with other tests.
+
 TEST_SRC=big.c bittests.c chunk.c cmpd_dset.c dsets.c dtypes.c extend.c      \
 	 external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c \
 	 iopipe.c istore.c lheap.c links.c mount.c mtime.c ohdr.c overhead.c \
 	 ragged.c stab.c tattr.c testhdf5.c tfile.c th5s.c titerate.c tmeta.c \
      trefer.c tselect.c ttbbt.c tvltypes.c tvlstr.c unlink.c enum.c \
+     ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c \
+     ttsafe_acreate.c \
      gass_write.c gass_read.c gass_append.c dpss_read.c dpss_write.c \
      srb_read.c srb_write.c srb_append.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
 
 ## Private header files (not to be installed)...
-PRIVATE_HDR=testhdf5.h
+PRIVATE_HDR=testhdf5.h ttsafe.h
 
 ## Additional targets
 .PHONY: timings _timings
@@ -78,7 +83,12 @@ timings _timings: $(TIMINGS)
 
 ## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
+
 TESTHDF5_OBJ=testhdf5.lo tattr.lo tfile.lo titerate.lo tmeta.lo trefer.lo tselect.lo ttbbt.lo tvltypes.lo tvlstr.lo th5s.lo
+
+TTS_OBJ=ttsafe.lo ttsafe_dcreate.lo ttsafe_error.lo ttsafe_cancel.lo \
+        ttsafe_acreate.lo
+
 testhdf5: $(TESTHDF5_OBJ)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
@@ -157,6 +167,9 @@ flush2: flush2.lo
 enum: enum.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ enum.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
+ttsafe: $(TTS_OBJ)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TTS_OBJ) $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
 gass_write: gass_write.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gass_write.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
@@ -182,3 +195,4 @@ srb_append: srb_append.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ srb_append.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
+

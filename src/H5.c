@@ -40,7 +40,19 @@ FILE *fdopen(int fd, const char *mode);
 
 #define PABLO_MASK      H5_mask
 
+/* statically initialize block for pthread_once call used in initializing */
+/* the first global mutex                                                 */
+#ifdef H5_HAVE_THREADSAFE
+pthread_once_t H5_first_init_g = PTHREAD_ONCE_INIT;
+pthread_key_t H5_errstk_key_g;
+pthread_key_t H5_cancel_key_g;
+hbool_t H5_allow_concurrent_g = FALSE; /* concurrent APIs override this */
+
+H5_api_t H5_g;
+#else
 hbool_t                 H5_libinit_g = FALSE;
+#endif
+
 hbool_t                 dont_atexit_g = FALSE;
 H5_debug_t		H5_debug_g;		/*debugging info	*/
 static void		H5_debug_mask(const char*);
@@ -50,17 +62,19 @@ static intn          	interface_initialize_g = 0;
 #define INTERFACE_INIT 	NULL
 
 /*--------------------------------------------------------------------------
-NAME
-   H5_init_library -- Initialize library-global information
-USAGE
-    herr_t H5_init_library()
-   
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any library-global data or routines.
-
---------------------------------------------------------------------------*/
+ * NAME
+ *   H5_init_library -- Initialize library-global information
+ * USAGE
+ *    herr_t H5_init_library()
+ *   
+ * RETURNS
+ *    Non-negative on success/Negative on failure
+ *
+ * DESCRIPTION
+ *    Initializes any library-global data or routines.
+ *
+ *--------------------------------------------------------------------------
+ */
 herr_t 
 H5_init_library(void)
 {
@@ -147,7 +161,17 @@ H5_term_library(void)
     H5E_auto_t func;
     
     /* Don't do anything if the library is already closed */
+#ifdef H5_HAVE_THREADSAFE
+
+    /* explicit locking of the API */
+    pthread_once(&H5_first_init_g, H5_first_thread_init);
+
+    H5_mutex_lock(&H5_g.init_lock);
+
+    if (!H5_g.H5_libinit_g) return;
+#else
     if (!H5_libinit_g) return;
+#endif
 
     /* Check if we should display error output */
     H5Eget_auto(&func,NULL);
@@ -190,7 +214,13 @@ H5_term_library(void)
     }
     
     /* Mark library as closed */
+#ifdef H5_HAVE_THREADSAFE
+    H5_g.H5_libinit_g = FALSE;
+
+    H5_mutex_unlock(&H5_g.init_lock);
+#else
     H5_libinit_g = FALSE;
+#endif
 }
 
 
@@ -223,10 +253,20 @@ herr_t
 H5dont_atexit(void)
 {
     /* FUNC_ENTER_INIT() should not be called */
+
+  /* locking code explicitly since FUNC_ENTER is not called */
+#ifdef H5_HAVE_THREADSAFE
+    pthread_once(&H5_first_init_g, H5_first_thread_init);
+
+    H5_mutex_lock(&H5_g.init_lock);
+#endif
     H5_trace(FALSE, "H5dont_atexit", "");
     if (dont_atexit_g) return FAIL;
     dont_atexit_g = TRUE;
     H5_trace(TRUE, NULL, "e", SUCCEED);
+#ifdef H5_HAVE_THREADSAFE
+    H5_mutex_unlock(&H5_g.init_lock);
+#endif
     return(SUCCEED);
 }
 
@@ -479,7 +519,16 @@ H5close (void)
      * thing just to release it all right away.  It is safe to call this
      * function for an uninitialized library.
      */
+  /* Explicitly lock the call since FUNC_ENTER is not called */
+#ifdef H5_HAVE_THREADSAFE
+    pthread_once(&H5_first_init_g, H5_first_thread_init);
+
+    H5_mutex_lock(&H5_g.init_lock);
+#endif
     H5_term_library();
+#ifdef H5_HAVE_THREADSAFE
+    H5_mutex_unlock(&H5_g.init_lock);
+#endif
     return SUCCEED;
 }
 

@@ -43,6 +43,9 @@
    if (H5_IS_API(FUNC) && H5E_auto_g) {					      \
        (H5E_auto_g)(H5E_auto_data_g);					      \
    }									      \
+   H5_API_UNLOCK_BEGIN                                                        \
+   H5_API_UNLOCK_END                                                          \
+   H5_API_SET_CANCEL                                                          \
    return (ret_val);							      \
 }
 
@@ -54,6 +57,9 @@
 #define HRETURN(ret_val) {						      \
    PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
    H5TRACE_RETURN(ret_val);						      \
+   H5_API_UNLOCK_BEGIN                                                        \
+   H5_API_UNLOCK_END                                                          \
+   H5_API_SET_CANCEL                                                          \
    return (ret_val);							      \
 }
 

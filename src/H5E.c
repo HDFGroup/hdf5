@@ -146,13 +146,26 @@ static intn interface_initialize_g = 0;
 static herr_t H5E_init_interface (void);
 const hbool_t H5E_clearable_g = TRUE;	/* DO NOT CHANGE */
 
+#ifdef H5_HAVE_THREADSAFE
+/*
+ * The per-thread error stack. pthread_once() initializes a special
+ * key that will be used by all threads to create a stack specific to
+ * each thread individually. The association of stacks to threads will
+ * be handled by the pthread library.
+ *
+ * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * by "H5E_t *estack =".
+ */
+H5E_t *H5E_get_stack(void);
+#define H5E_get_my_stack()  H5E_get_stack()
+#else
 /*
  * The error stack.  Eventually we'll have some sort of global table so each
  * thread has it's own stack.  The stacks will be created on demand when the
- * thread first calls H5E_push().
- */
+ * thread first calls H5E_push().  */
 H5E_t		H5E_stack_g[1];
 #define H5E_get_my_stack()	(H5E_stack_g+0)
+#endif
 
 /*
  * Automatic error stack traversal occurs if the traversal callback function
@@ -161,6 +174,39 @@ H5E_t		H5E_stack_g[1];
  */
 herr_t (*H5E_auto_g)(void*) = (herr_t(*)(void*))H5Eprint;
 void *H5E_auto_data_g = NULL;
+
+
+#ifdef H5_HAVE_THREADSAFE
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_stack
+ *
+ * Purpose:	Support function for H5E_get_my_stack() to initialize and
+ *              acquire per-thread error stack.
+ *
+ * Return:	Success:	error stack (H5E_t *)
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Chee Wai LEE
+ *              April 24, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5E_t *H5E_get_stack() {
+  H5E_t *estack;
+
+  if (estack = pthread_getspecific(H5_errstk_key_g)) {
+    return estack;
+  } else {
+    /* no associated value with current thread - create one */
+    estack = (H5E_t *)malloc(sizeof(H5E_t));
+    pthread_setspecific(H5_errstk_key_g, (void *)estack);
+    return estack;
+  }
+}
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -311,7 +357,12 @@ H5Eprint(FILE *stream)
     /*NO TRACE*/
     
     if (!stream) stream = stderr;
+#ifdef H5_HAVE_THREADSAFE
+    fprintf (stream, "HDF5-DIAG: Error detected in thread %d."
+	     ,pthread_self());
+#else
     fprintf (stream, "HDF5-DIAG: Error detected in thread 0.");
+#endif
     if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");
     HDfputc ('\n', stream);
     status = H5E_walk (H5E_WALK_DOWNWARD, H5Ewalk_cb, (void*)stream);
