@@ -937,19 +937,41 @@ main(void)
 
     print_header();
 
-    DETECT_I (signed char,        CHAR,    d[nd]); nd++;
-    DETECT_I (unsigned char,      UCHAR,   d[nd]); nd++;
-    DETECT_I (short,              SHORT,   d[nd]); nd++;
-    DETECT_I (unsigned short,     USHORT,  d[nd]); nd++;
-    DETECT_I (int,                INT,     d[nd]); nd++;
-    DETECT_I (unsigned int,       UINT,    d[nd]); nd++;
-    DETECT_I (long,               LONG,    d[nd]); nd++;
-    DETECT_I (unsigned long,      ULONG,   d[nd]); nd++;
-    DETECT_I (long long,          LLONG,   d[nd]); nd++;
-    DETECT_I (unsigned long long, ULLONG,  d[nd]); nd++;
-    DETECT_F (float,              FLOAT,   d[nd]); nd++;
-    DETECT_F (double,             DOUBLE,  d[nd]); nd++;
-    DETECT_F (long double,        LDOUBLE, d[nd]); nd++;
+    DETECT_I(signed char,	  CHAR,	   d[nd]); nd++;
+    DETECT_I(unsigned char,	  UCHAR,   d[nd]); nd++;
+    DETECT_I(short,		  SHORT,   d[nd]); nd++;
+    DETECT_I(unsigned short,	  USHORT,  d[nd]); nd++;
+    DETECT_I(int,		  INT,	   d[nd]); nd++;
+    DETECT_I(unsigned int,	  UINT,	   d[nd]); nd++;
+    DETECT_I(long,		  LONG,	   d[nd]); nd++;
+    DETECT_I(unsigned long,	  ULONG,   d[nd]); nd++;
+
+#if SIZEOF_LONG == SIZEOF_LONG_LONG
+    /*
+     * If sizeof(long)==sizeof(long long) then assume that `long long' isn't
+     * supported and use `long' instead.  This suppresses warnings on some
+     * systems.
+     */
+    DETECT_I(long,                LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned long,       ULLONG,  d[nd]); dn++;
+#else
+    DETECT_I(long long,	  	  LLONG,   d[nd]); nd++;
+    DETECT_I(unsigned long long,  ULLONG,  d[nd]); nd++;
+#endif
+    
+    DETECT_F(float,		  FLOAT,   d[nd]); nd++;
+    DETECT_F(double,		  DOUBLE,  d[nd]); nd++;
+
+#if SIZEOF_DOUBLE == SIZEOF_LONG_DOUBLE
+    /*
+     * If sizeof(double)==sizeof(long double) then assume that `long double'
+     * isn't supported and use `double' instead.  This suppresses warnings on
+     * some systems.
+     */
+    DETECT_F(double, 		  LDOUBLE, d[nd]); nd++;
+#else
+    DETECT_F(long double,	  LDOUBLE, d[nd]); nd++;
+#endif
 
     print_results (nd, d);
     return 0;

@@ -821,11 +821,10 @@ H5D_create(H5G_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
 	 * Also, only the slowest varying dimension of a simple data space
 	 * can be extendible.
 	 */
-	if ((ndims=H5S_extent_dims(space, new_dset->layout.dim, max_dim)) < 0) {
+	if ((ndims=H5S_extent_dims(space, new_dset->layout.dim, max_dim))<0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize contiguous storage");
 	}
-
 	for (i=1; i<ndims; i++) {
 	    if (max_dim[i]>new_dset->layout.dim[i]) {
 		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,

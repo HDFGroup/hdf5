@@ -545,7 +545,7 @@ H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  */
 intn
 H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
-	       size_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
+	       hsize_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
 {
     intn	ret_value = FAIL;
     hsize_t	wasted;

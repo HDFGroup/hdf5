@@ -323,7 +323,7 @@ typedef struct H5F_low_class_t {
 			  const H5F_access_t *access_parms,
 			  intn op, hsize_t size, haddr_t *addr/*out*/);
     intn        (*alloc)(struct H5F_low_t *lf, intn op, hsize_t alignment,
-			 hsize_t threshold, size_t size, H5MF_free_t *blk,
+			 hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 			 haddr_t *addr/*out*/);
 } H5F_low_class_t;
 
@@ -557,7 +557,7 @@ herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 		      intn op, hsize_t size, haddr_t *addr/*out*/);
 herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
 intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
-		    hsize_t threshold, size_t size, H5MF_free_t *blk,
+		    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 		    haddr_t *addr/*out*/);
 hbool_t H5F_low_access(const H5F_low_class_t *type, const char *name,
 		       const H5F_access_t *access_parms, int mode,

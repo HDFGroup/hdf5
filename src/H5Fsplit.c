@@ -44,7 +44,7 @@ static herr_t H5F_split_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 static herr_t H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
 			       intn op, hsize_t size, haddr_t *addr/*out*/);
 static intn H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
-			     hsize_t threshold, size_t size, H5MF_free_t *blk,
+			     hsize_t threshold, hsize_t size, H5MF_free_t *blk,
 			     haddr_t *addr/*out*/);
 
 const H5F_low_class_t	H5F_LOW_SPLIT_g[1] = {{
@@ -487,7 +487,7 @@ H5F_split_extend(H5F_low_t *lf, const H5F_access_t *access_parms, intn op,
  */
 static intn
 H5F_split_alloc (H5F_low_t *lf, intn op, hsize_t alignment, hsize_t threshold,
-		 size_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
+		 hsize_t size, H5MF_free_t *blk, haddr_t *addr/*out*/)
 {
     intn	ret_value = FAIL;
     hsize_t	wasted;

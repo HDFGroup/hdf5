@@ -7,16 +7,21 @@
  */
 #include <assert.h>
 #include <ctype.h>
+#include <fcntl.h>
 #include <hdf5.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include <H5private.h> /*needed for HDfprintf() */
 
 #define FNAME		"big%05d.h5"
+#define DNAME		"big.data"
 #define WRT_N		50
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
+#define GB8LL		((unsigned long long)8*1024*1024*1024)
 
 static hsize_t
 randll (hsize_t limit)
@@ -27,35 +32,97 @@ randll (hsize_t limit)
     return acc % limit;
 }
 
-
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:	display_error_cb
  *
- * Purpose:	Creates a *big* dataset.
+ * Purpose:	Displays the error stack after printing "*FAILED*".
  *
- * Return:	Success:	
+ * Return:	Success:	0
  *
- *		Failure:	
+ *		Failure:	-1
  *
  * Programmer:	Robb Matzke
- *              Wednesday, April  8, 1998
+ *		Wednesday, March  4, 1998
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
+display_error_cb (void __unused__ *client_data)
+{
+    puts ("*FAILED*");
+    H5Eprint (stdout);
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	is_sparse
+ *
+ * Purpose:	Determines if the file system of the current working
+ *		directory supports holes.
+ *
+ * Return:	Success:	Non-zero if holes are supported; zero
+ *				otherwise.
+ *
+ *		Failure:	zero
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, July 15, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+is_sparse(void)
+{
+    int		fd;
+    struct stat	sb;
+    
+    if ((fd=open("x.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
+    if (lseek(fd, 1024*1024, SEEK_SET)!=1024*1024) return 0;
+    if (5!=write(fd, "hello", 5)) return 0;
+    if (stat("x.h5", &sb)<0) return 0;
+    if (unlink("x.h5")<0) return 0;
+    return (sb.st_blocks*512 < (unsigned)sb.st_size);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	writer
+ *
+ * Purpose:	Creates a *big* dataset.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	>0
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April  8, 1998
+ *
+ * Modifications:
+ * 	Robb Matzke, 15 Jul 1998
+ *	Addresses are written to the file DNAME instead of stdout.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
 writer (int wrt_n)
 {
     hsize_t	size1[4] = {8, 1024, 1024, 1024};
-    hsize_t	size2[1] = {8589934592LL};
+    hsize_t	size2[1] = {GB8LL};
     hssize_t	hs_start[1];
     hsize_t	hs_size[1];
     hid_t	plist, file, space1, space2, mem_space, d1, d2;
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
     int		i, j;
+    FILE	*out = fopen(DNAME, "w");
 
+    printf("%-70s", "Writing large dataset");
+    
     /*
      * Make sure that `hsize_t' is large enough to represent the entire data
      * space.
@@ -66,39 +133,53 @@ writer (int wrt_n)
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
      */
-    plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
+    if ((plist = H5Pcreate (H5P_FILE_ACCESS))<0) goto error;
+    if (H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
     file = H5Fcreate (FNAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT, plist);
-    H5Pclose (plist);
+    if (file<0) goto error;
+    if (H5Pclose (plist)<0) goto error;
 
     /* Create simple data spaces according to the size specified above. */
-    space1 = H5Screate_simple (4, size1, size1);
-    space2 = H5Screate_simple (1, size2, size2);
-
+    if ((space1 = H5Screate_simple (4, size1, size1))<0 ||
+	(space2 = H5Screate_simple (1, size2, size2))<0) {
+	goto error;
+    }
+    
     /* Create the datasets */
-    d1 = H5Dcreate (file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT);
-    d2 = H5Dcreate (file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT);
+    if ((d1=H5Dcreate (file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT))<0 ||
+	(d2=H5Dcreate (file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT))<0) {
+	goto error;
+    }
+    
 
     /* Write some things to them randomly */
     hs_size[0] = WRT_SIZE;
-    mem_space = H5Screate_simple (1, hs_size, hs_size);
+    if ((mem_space = H5Screate_simple (1, hs_size, hs_size))<0) goto error;
     for (i=0; i<wrt_n; i++) {
 	hs_start[0] = randll (size2[0]);
-	HDfprintf (stdout, "#%03d 0x%016Hx\n", i, hs_start[0]);
-	H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL);
+	HDfprintf (out, "#%03d 0x%016Hx\n", i, hs_start[0]);
+	if (H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL,
+				 hs_size, NULL)<0) goto error;
 	for (j=0; j<WRT_SIZE; j++) {
 	    buf[j] = i+1;
 	}
-	H5Dwrite (d2, H5T_NATIVE_INT, mem_space, space2, H5P_DEFAULT, buf);
+	if (H5Dwrite (d2, H5T_NATIVE_INT, mem_space, space2,
+		      H5P_DEFAULT, buf)<0) goto error;
     }
 	
-    H5Dclose (d1);
-    H5Dclose (d2);
-    H5Sclose (mem_space);
-    H5Sclose (space1);
-    H5Sclose (space2);
-    H5Fclose (file);
+    if (H5Dclose (d1)<0) goto error;
+    if (H5Dclose (d2)<0) goto error;
+    if (H5Sclose (mem_space)<0) goto error;
+    if (H5Sclose (space1)<0) goto error;
+    if (H5Sclose (space2)<0) goto error;
+    if (H5Fclose (file)<0) goto error;
     free (buf);
+    fclose(out);
+    puts(" PASSED");
+    return 0;
+
+ error:
+    return 1;
 }
 
 
@@ -107,7 +188,9 @@ writer (int wrt_n)
  *
  * Purpose:	Reads some data from random locations in the dataset.
  *
- * Return:	void
+ * Return:	Success:	0
+ *
+ * 		Failure:	>0
  *
  * Programmer:	Robb Matzke
  *              Friday, April 10, 1998
@@ -116,43 +199,48 @@ writer (int wrt_n)
  *
  *-------------------------------------------------------------------------
  */
-static void
-reader (const char *script_name)
+static int
+reader (void)
 {
     FILE	*script;
     hid_t	plist, file, mspace, fspace, d2;
-    char	ln[64], *s;
+    char	ln[128], *s;
     hssize_t	hs_offset[1];
     hsize_t	hs_size[1] = {WRT_SIZE};
     int		*buf = malloc (sizeof(int) * WRT_SIZE);
-    int		i, j, zero, wrong;
+    int		i, j, zero, wrong, nerrors=0;
 
     /* Open script file */
-    script = fopen (script_name, "r");
+    script = fopen (DNAME, "r");
 
     /* Open HDF5 file */
-    plist = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT);
-    file = H5Fopen (FNAME, H5F_ACC_RDONLY|H5F_ACC_DEBUG, plist);
-    H5Pclose (plist);
+    if ((plist = H5Pcreate (H5P_FILE_ACCESS))<0) goto error;
+    if (H5Pset_family (plist, FAMILY_SIZE, H5P_DEFAULT)<0) goto error;
+    if ((file = H5Fopen (FNAME, H5F_ACC_RDONLY|H5F_ACC_DEBUG, plist))<0) {
+	goto error;
+    }
+    if (H5Pclose (plist)<0) goto error;
 
     /* Open the dataset */
-    d2 = H5Dopen (file, "d2");
-    fspace = H5Dget_space (d2);
+    if ((d2 = H5Dopen (file, "d2"))<0) goto error;
+    if ((fspace = H5Dget_space (d2))<0) goto error;
 
     /* Describe `buf' */
-    mspace = H5Screate_simple (1, hs_size, hs_size);
+    if ((mspace = H5Screate_simple (1, hs_size, hs_size))<0) goto error;
 
     /* Read each region */
     while (fgets (ln, sizeof(ln), script)) {
 	if ('#'!=ln[0]) break;
 	i = (int)strtol (ln+1, &s, 10);
 	hs_offset[0] = HDstrtoll (s, NULL, 0);
-	HDfprintf (stdout, "#%03d 0x%016Hx", i, hs_offset[0]);
+	HDfprintf (stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
 	fflush (stdout);
 
-	H5Sselect_hyperslab (fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
-	H5Dread (d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf);
+	if (H5Sselect_hyperslab (fspace, H5S_SELECT_SET, hs_offset, NULL,
+				 hs_size, NULL)<0) goto error;
+	if (H5Dread (d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf)<0) {
+	    goto error;
+	}
 
 	/* Check */
 	for (j=zero=wrong=0; j<WRT_SIZE; j++) {
@@ -160,20 +248,57 @@ reader (const char *script_name)
 	    else if (buf[j]!=i+1) wrong++;
 	}
 	if (zero) {
-	    printf (" *FAILED*  (%d zeros)\n", zero);
+	    puts("*FAILED*");
+	    printf("   %d zero%s\n", zero, 1==zero?"":"s");
 	} else if (wrong) {
-	    printf (" *SKIPPED* (possible overlap with another region)\n");
+	    puts("--SKIP--");
+	    puts("   Possible overlap with another region.");
+	    nerrors++;
 	} else {
-	    printf ("  PASSED\n");
+	    puts(" PASSED");
 	}
     }
 
-    H5Dclose (d2);
-    H5Sclose (mspace);
-    H5Sclose (fspace);
-    H5Fclose (file);
+    if (H5Dclose (d2)<0) goto error;
+    if (H5Sclose (mspace)<0) goto error;
+    if (H5Sclose (fspace)<0) goto error;
+    if (H5Fclose (file)<0) goto error;
     free (buf);
     fclose (script);
+    return nerrors;
+
+ error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	cleanup
+ *
+ * Purpose:	Removes test files
+ *
+ * Return:	void
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June  4, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+cleanup (void)
+{
+    int		i;
+    char	buf[256];
+    
+    if (!getenv ("HDF5_NOCLEANUP")) {
+	for (i=0; i<512; i++) {
+	    sprintf(buf, FNAME, i);
+	    remove(buf);
+	}
+	remove(DNAME);
+    }
 }
 
 
@@ -194,14 +319,24 @@ reader (const char *script_name)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, char *argv[])
+main (void)
 {
-    if (1==argc) {
-	writer (WRT_N);
-    } else if (isdigit (argv[1][0])) {
-	writer ((int)strtol(argv[1], NULL, 0));
-    } else {
-	reader (argv[1]);
+    int		nerrors = 0;
+    
+    /*
+     * We shouldn't run this test if the file system doesn't support holes
+     * because we would generate multi-gigabyte files.
+     */
+    if (!is_sparse()) {
+	puts("Test skipped because file system does not support holes.");
+	exit(0);
     }
-    return 0;
+
+    /* Set the error handler */
+    H5Eset_auto (display_error_cb, NULL);
+
+    if ((nerrors=writer(WRT_N))>0) exit(nerrors);
+    nerrors = reader();
+    cleanup();
+    return nerrors;
 }
