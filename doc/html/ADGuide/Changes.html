@@ -74,9 +74,44 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td align="left" valign="top"><em>ssize_t</em> <code>H5Fget_name</code> 
                     (<em>hid_t</em> <code>obj_id</code>, 
-		     <em>char *</em><code>name</code>),
-		     <em>size_t</em> <code>size</code><br>
+		     <em>char *</em><code>name</code>,
+		     <em>size_t</em> <code>size</code>)<br>
                     See <a href="../RM_H5F.html#File-GetName">entry</a>.</td>
+              </tr>
+
+              <tr>
+                <td align="left" valign="top"><code>H5Fget_filesize</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>herr_t</em> <code>H5Fget_filesize</code> 
+                    (<em>hid_t</em> <code>file_id</code>, 
+		     <em>hsize_t *</em> <code>size</code>)<br>
+                    See <a href="../RM_H5F.html#File-GetFileSize">entry</a>.</td>
+              </tr>
+
+              <tr>
+                <td align="left" valign="top"><code>H5Iget_file_id</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>herr_t</em> <code>H5Iget_file_id</code> 
+                    (<em>hid_t</em> <code>obj_id</code>)<br>
+                    See <a href="../RM_H5I.html#Identify-GetFileID">entry</a>.</td>
+              </tr>
+
+              <tr>
+                <td align="left" valign="top"><code>H5Premove_filter</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>herr_t</em> <code>H5Premove_filter</code> 
+                    (<em>hid_t</em> <code>obj_id</code>,
+		     <em>H5Z_filter_t</em> <code>filter</code>)<br>
+                    See <a href="../RM_H5P.html#Property-RemoveFilter">entry</a>.</td>
+              </tr>
+
+              <tr>
+                <td align="left" valign="top"><code>H5Zget_filter_info</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>herr_t</em> <code>H5Zget_filter_info</code> 
+                    (<em>H5Z_filter_t</em> <code>filter</code>,
+		     <em>unsigned *</em> <code>flags</code>)<br>
+                    See <a href="../RM_H5Z.html#Compression-GetFilterInfo">entry</a>.</td>
               </tr>
               </table>    
 	      
@@ -170,16 +205,75 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 
     <h3>Functions with Changed Syntax</h3>
 
-        None.
-
-        <!--
         The following functions have changed as noted.
 	
         <dl>
         <dt>C functions:
-        <dt><code>H5function?</code>
-          <dd>Change....
-	
+        <dt><code>H5FDset_fapl_multi</code>
+          <dd>The prototype for this function was changed from:
+                <ul>
+                <li><em>herr_t</em> <code>H5FDset_fapl_multi</code> 
+                    (<em>hid_t</em> <code>fapl_id</code>, 
+		     <em>const H5FD_mem_t *</em> <code>memb_map</code>,
+		     <em>const hid_t *</em> <code>memb_fapl</code>,
+		     <em>const char **</em> <code>memb_name</code>,
+		     <em>const haddr_t *</em> <code>memb_addr</code>,
+		     <em>hbool_t</em> <code>relax</code>)<br>
+                </ul>
+
+                to:
+
+                <ul>
+                <li><em>herr_t</em> <code>H5FDset_fapl_multi</code> 
+                    (<em>hid_t</em> <code>fapl_id</code>, 
+		     <em>const H5FD_mem_t *</em> <code>memb_map</code>,
+		     <em>const hid_t *</em> <code>memb_fapl</code>,
+		     <em>const char * const *</em> <code>memb_name</code>,
+		     <em>const haddr_t *</em> <code>memb_addr</code>,
+		     <em>hbool_t</em> <code>relax</code>)<br>
+                </ul>
+
+            This change should not appreciably affect application programs.
+
+        <dt><code>H5Tconvert</code>
+          <dd>The prototype for this function was changed from:
+                <ul>
+                <li><em>herr_t</em> <code>H5Tconvert</code> 
+                    (<em>hid_t</em> <code>src_id</code>, 
+		     <em>hid_t</em> <code>dst_id</code>,
+		     <em>hsize_t</em> <code>nelmts</code>,
+		     <em>void *</em> <code>buf</code>,
+		     <em>void *</em> <code>background</code>,
+		     <em>hid_t</em> <code>plist_id</code>)<br>
+                </ul>
+
+                to:
+
+                <ul>
+                <li><em>herr_t</em> <code>H5Tconvert</code> 
+                    (<em>hid_t</em> <code>src_id</code>, 
+		     <em>hid_t</em> <code>dst_id</code>,
+		     <em>size_t</em> <code>nelmts</code>,
+		     <em>void *</em> <code>buf</code>,
+		     <em>void *</em> <code>background</code>,
+		     <em>hid_t</em> <code>plist_id</code>)<br>
+                </ul>
+
+            This was changed to prevent overflows when <code>hsize_t</code> and
+            <code>size_t</code> types are different sizes.  Application code
+            may need to be modified to take this into account.  Application
+            code using this function may also be affected by the changes to
+            <code>H5Tregister</code> and <code>H5Tunregister</code> described
+            below.
+
+        <dt><code>H5Tregister</code> and <code>H5Tunregister</code>
+          <dd>These two routines are affected by the change to the H5T_conv_t
+                typedef (described below) and may require application
+                registered datatype conversion routines to be modified to
+                conform to the changed typedef.
+        </dl>
+
+        <!--
         <dd>&nbsp;
         <dt>Fortran90 subroutines:
         <dt><code>h5subroutine_f?</code>
@@ -190,8 +284,45 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 
     <h3>Constants with Changed Values</h3>
     
-        None.
-        
+        The following library structures have changed as noted.
+	
+        <dl>
+        <dt>C API:
+        <dt><code>H5T_conv_t</code>
+          <dd>This function pointer typedef's definition has been changed from:
+	
+                <ul>
+                <li><em>typedef herr_t</em> <code>(*H5T_conv_t)</code> 
+                    (<em>hid_t</em> <code>src_id</code>, 
+		     <em>hid_t</em> <code>dst_id</code>,
+		     <em>H5T_cdata_t *</em> <code>cdata</code>,
+		     <em>hsize_t</em> <code>nelmts</code>,
+		     <em>size_t</em> <code>buf_stride</code>,
+		     <em>size_t</em> <code>bkg_stride</code>,
+		     <em>void *</em> <code>buf</code>,
+		     <em>void *</em> <code>bkg</code>,
+		     <em>hid_t</em> <code>plist_id</code>)<br>
+                </ul>
+
+                to:
+
+                <ul>
+                <li><em>typedef herr_t</em> <code>(*H5T_conv_t)</code> 
+                    (<em>hid_t</em> <code>src_id</code>, 
+		     <em>hid_t</em> <code>dst_id</code>,
+		     <em>H5T_cdata_t *</em> <code>cdata</code>,
+		     <em>size_t</em> <code>nelmts</code>,
+		     <em>size_t</em> <code>buf_stride</code>,
+		     <em>size_t</em> <code>bkg_stride</code>,
+		     <em>void *</em> <code>buf</code>,
+		     <em>void *</em> <code>bkg</code>,
+		     <em>hid_t</em> <code>plist_id</code>)<br>
+                </ul>
+
+            This was changed to prevent overflows when <code>hsize_t</code> and
+            <code>size_t</code> types are different sizes.  Application code
+            may need to be modified to take this into account.
+
 
     </dir>
 <p>&nbsp;
