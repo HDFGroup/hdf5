@@ -28,6 +28,13 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5O_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5O_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -42,8 +49,6 @@
 #ifdef H5_HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif /* H5_HAVE_GETTIMEOFDAY */
-
-#define PABLO_MASK	H5O_mask
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_init(H5F_t *f, hid_t dxpl_id, size_t size_hint,
@@ -95,11 +100,6 @@ static const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_dest_func_t)H5O_dest,
     (H5AC_clear_func_t)H5O_clear,
 }};
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	H5O_init_interface
-static herr_t H5O_init_interface(void);
 
 /* ID to type mapping */
 static const H5O_class_t *const message_type_g[] = {

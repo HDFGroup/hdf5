@@ -66,10 +66,6 @@ const H5O_class_t H5O_DTYPE[1] = {{
  * class objects (array definitely, potentially compound & vlen sequences also) */
 #define H5O_DTYPE_VERSION_UPDATED	2
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Declare external the free list for H5T_t's */
 H5FL_EXTERN(H5T_t);
 
@@ -828,7 +824,7 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p,
     H5T_t		   *dt = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode);
 
     /* check args */
     assert(p);
@@ -876,7 +872,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     const H5T_t		   *dt = (const H5T_t *) mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode);
 
     /* check args */
     assert(f);
@@ -916,7 +912,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     H5T_t		   *dst = NULL;
     void 		   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy);
 
     /* check args */
     assert(src);
@@ -966,7 +962,7 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
     size_t		    ret_value = 8;
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
-    FUNC_ENTER_NOAPI(H5O_dtype_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_size);
 
     assert(mesg);
 
@@ -1028,7 +1024,6 @@ H5O_dtype_size(H5F_t *f, const void *mesg)
             break;
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1052,15 +1047,13 @@ static herr_t
 H5O_dtype_reset(void *_mesg)
 {
     H5T_t		   *dt = (H5T_t *) _mesg;
-    herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_dtype_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_reset);
 
     if (dt)
         H5T_free(dt);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1081,16 +1074,13 @@ done:
 static herr_t
 H5O_dtype_free (void *mesg)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5O_dtype_free, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_free);
 
     assert (mesg);
 
     H5FL_FREE(H5T_t,mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1116,7 +1106,7 @@ H5O_dtype_get_share(H5F_t UNUSED *f, const void *_mesg,
     const H5T_t	*dt = (const H5T_t *)_mesg;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_get_share, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_share);
 
     assert (dt);
     assert (sh);
@@ -1157,9 +1147,8 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
 		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_set_share, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_set_share);
 
     assert (dt);
     assert (sh);
@@ -1175,8 +1164,7 @@ H5O_dtype_set_share (H5F_t UNUSED *f, void *_mesg/*in,out*/,
     /* Note that the datatype is a named datatype */
     dt->state = H5T_STATE_NAMED;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1208,9 +1196,8 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     char		buf[256];
     unsigned		i;
     size_t		k;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_dtype_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dtype_debug);
 
     /* check args */
     assert(f);
@@ -1494,6 +1481,5 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 	}
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

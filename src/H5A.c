@@ -15,6 +15,9 @@
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	*/
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5A_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5A_mask
@@ -26,11 +29,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Spkg.h"		/* Dataspace functions			*/
-
-/* Is the interface initialized? */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	H5A_init_interface
-static herr_t		H5A_init_interface(void);
 
 /* PRIVATE PROTOTYPES */
 static hid_t H5A_create(const H5G_entry_t *ent, const char *name,
@@ -99,12 +97,12 @@ H5A_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_term_interface)
     
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_ATTR))) {
 	    H5I_clear_type(H5I_ATTR, FALSE);
 	} else {
 	    H5I_dec_type_ref(H5I_ATTR);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1;
 	}
     }

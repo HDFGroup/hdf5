@@ -35,10 +35,6 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
-/* Interface initialization */
-static int              interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5D_compact_readvv

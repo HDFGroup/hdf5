@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 /* private headers */
 #include "H5private.h"		/*library                 		*/
 #include "H5Eprivate.h"		/*error handling          		*/

@@ -19,9 +19,12 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_vlen_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tvlen_mask
+#define PABLO_MASK	H5T_vlen_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
@@ -32,11 +35,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_vlen_interface
-static herr_t H5T_init_vlen_interface(void);
 
 /* Local functions */
 static herr_t H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);

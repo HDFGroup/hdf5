@@ -19,16 +19,13 @@
  *
  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5RS_mask
+
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5RSprivate.h"        /* Reference-counted strings            */
-
-/* Pablo information */
-#define PABLO_MASK	H5RS_mask
-
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
 
 /* Private typedefs & structs */
 struct H5RS_str_t {
@@ -226,9 +223,7 @@ done:
 herr_t
 H5RS_decr(H5RS_str_t *rs)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5RS_decr,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_decr);
 
     /* Sanity check */
     assert(rs);
@@ -241,8 +236,7 @@ H5RS_decr(H5RS_str_t *rs)
         H5FL_FREE(H5RS_str_t,rs);
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5RS_decr() */
 
 
@@ -267,9 +261,7 @@ done:
 herr_t
 H5RS_incr(H5RS_str_t *rs)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5RS_incr,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_incr);
 
     /* Sanity check */
     assert(rs);
@@ -287,8 +279,7 @@ H5RS_incr(H5RS_str_t *rs)
     /* Increment reference count for string */
     rs->n++;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5RS_incr() */
 
 
@@ -314,14 +305,13 @@ done:
 H5RS_str_t *
 H5RS_dup(H5RS_str_t *ret_value)
 {
-    FUNC_ENTER_NOAPI(H5RS_dup,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_dup);
 
     /* Check for valid reference counted string */
     if(ret_value!=NULL)
         /* Increment reference count for string */
         ret_value->n++;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5RS_dup() */
 
@@ -384,18 +374,13 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
 ssize_t
 H5RS_len(const H5RS_str_t *rs)
 {
-    ssize_t ret_value;     /* Return value */
-
-    FUNC_ENTER_NOAPI(H5RS_len,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_len);
 
     /* Sanity check */
     assert(rs);
     assert(rs->s);
 
-    ret_value=(ssize_t)HDstrlen(rs->s);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(rs->s));
 } /* end H5RS_len() */
 
 
@@ -423,18 +408,13 @@ done:
 char *
 H5RS_get_str(const H5RS_str_t *rs)
 {
-    char *ret_value;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5RS_get_str,NULL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_str);
 
     /* Sanity check */
     assert(rs);
     assert(rs->s);
 
-    ret_value=rs->s;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(rs->s);
 } /* end H5RS_get_str() */
 
 
@@ -460,17 +440,12 @@ done:
 unsigned
 H5RS_get_count(const H5RS_str_t *rs)
 {
-    unsigned ret_value;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5RS_get_count,0);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_count);
 
     /* Sanity check */
     assert(rs);
     assert(rs->n>0);
 
-    ret_value=rs->n;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(rs->n);
 } /* end H5RS_get_count() */
 

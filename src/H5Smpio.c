@@ -24,6 +24,10 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5S_mpio_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
@@ -33,11 +37,6 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
 #ifdef H5_HAVE_PARALLEL
-
-/* Interface initialization */
-#define PABLO_MASK      H5Sall_mask
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
 
 static herr_t
 H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
@@ -748,12 +747,11 @@ H5S_mpio_spaces_read(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t 
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_mpio_spaces_read);
 
     ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, buf, 0/*read*/);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_mpio_spaces_read() */
 
@@ -787,13 +785,12 @@ H5S_mpio_spaces_write(H5F_t *f, const H5D_dxpl_cache_t UNUSED *dxpl_cache, hid_t
 {
     herr_t ret_value;
 
-    FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_mpio_spaces_write);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     ret_value = H5S_mpio_spaces_xfer(f, dset, elmt_size, file_space,
         mem_space, dxpl_id, (void*)buf, 1/*write*/);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_mpio_spaces_write() */
 

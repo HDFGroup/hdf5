@@ -32,10 +32,6 @@
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Private typedefs */
 
 /* Information about object objects in a file */
@@ -115,7 +111,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     hid_t ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_opened,FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_opened)
 
     /* Sanity check */
     assert(f);
@@ -133,7 +129,6 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
     else
         ret_value=FAIL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_opened() */
 
@@ -276,7 +271,7 @@ H5FO_mark(const H5F_t *f, haddr_t addr)
     H5FO_open_obj_t *open_obj;  /* Information about open object */
     herr_t ret_value=SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FO_mark,FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5FO_mark)
 
     /* Sanity check */
     assert(f);
@@ -293,7 +288,6 @@ H5FO_mark(const H5F_t *f, haddr_t addr)
     else
         ret_value=FAIL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FO_mark() */
 

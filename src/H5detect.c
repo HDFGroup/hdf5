@@ -499,33 +499,18 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
     /* Include files */
     printf("\
 #define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
-#define PABLO_MASK	H5Tinit_mask\n\
+#define PABLO_MASK	H5T_init_mask\n\
 \n\
 #include \"H5private.h\"\n\
 #include \"H5Iprivate.h\"\n\
 #include \"H5Eprivate.h\"\n\
 #include \"H5FLprivate.h\"\n\
-#include \"H5MMprivate.h\"\n\
 #include \"H5Tpkg.h\"\n\
-\n\
-static int interface_initialize_g = 0;\n\
-#define INTERFACE_INIT NULL\n\
 \n\
 /* Declare external the free list for H5T_t's */\n\
 H5FL_EXTERN(H5T_t);\n\
 \n\
 \n");
-
-    /* The interface termination function */
-    printf("\n\
-int\n\
-H5TN_term_interface(void)\n\
-{\n\
-    interface_initialize_g = 0;\n\
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TN_term_interface);\n\
-    \n\
-    FUNC_LEAVE_NOAPI(0);\n\
-}\n");
 
     /* The interface initialization function */
     printf("\n\

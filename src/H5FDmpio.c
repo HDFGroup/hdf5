@@ -20,6 +20,9 @@
  *
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_mpio_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_mpio_mask
@@ -149,9 +152,27 @@ static int H5FD_mpio_Debug[256] =
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 #endif
 
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_mpio_init
-static int interface_initialize_g = 0;
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FD_mpio_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FD_mpio_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5FD_mpio_init currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FD_mpio_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_mpio_init_interface)
+
+    FUNC_LEAVE_NOAPI(H5FD_mpio_init())
+} /* H5FD_mpio_init_interface() */
 
 
 /*-------------------------------------------------------------------------

@@ -37,10 +37,6 @@
 /* Pablo mask */
 #define PABLO_MASK      H5FPclient_mask
 
-/* Is the interface initialized? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT  NULL
-
 /* local functions */
 static unsigned H5FP_gen_request_id(void);
 static herr_t H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id);

@@ -62,10 +62,6 @@ const H5O_class_t H5O_EFL[1] = {{
 
 #define H5O_EFL_VERSION		1
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_efl_decode
@@ -96,7 +92,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *s
     size_t		u;      /* Local index variable */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_decode);
 
     /* Check args */
     assert(f);
@@ -202,9 +198,8 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     size_t		u;      /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_encode);
 
     /* check args */
     assert(f);
@@ -241,8 +236,7 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 	H5F_ENCODE_LENGTH (f, p, mesg->slot[u].size);
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -271,7 +265,7 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     size_t		u;              /* Local index variable */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_copy);
 
     /* check args */
     assert(mesg);
@@ -328,7 +322,7 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5O_efl_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_size);
 
     /* check args */
     assert(f);
@@ -342,7 +336,6 @@ H5O_efl_size(H5F_t *f, const void *_mesg)
 			       H5F_SIZEOF_SIZE(f) +	/*file offset	*/
 			       H5F_SIZEOF_SIZE(f));	/*file size	*/
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -367,9 +360,8 @@ H5O_efl_reset(void *_mesg)
 {
     H5O_efl_t	*mesg = (H5O_efl_t *) _mesg;
     size_t	u;              /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_reset);
 
     /* check args */
     assert(mesg);
@@ -382,8 +374,7 @@ H5O_efl_reset(void *_mesg)
     if(mesg->slot)
         mesg->slot = H5MM_xfree(mesg->slot);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -409,7 +400,7 @@ H5O_efl_total_size (H5O_efl_t *efl)
 {
     hsize_t	ret_value = 0, tmp;
     
-    FUNC_ENTER_NOAPI(H5O_efl_total_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_total_size);
 
     if (efl->nused>0 &&
 	H5O_EFL_UNLIMITED==efl->slot[efl->nused-1].size) {
@@ -461,7 +452,7 @@ H5O_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
     size_t      u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_read, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_read);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -547,7 +538,7 @@ H5O_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
     size_t	u;                      /* Local index variable */
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_efl_write, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_efl_write);
 
     /* Check args */
     assert (efl && efl->nused>0);
@@ -783,9 +774,8 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;
     char		    buf[64];
     size_t		    u;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_efl_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_efl_debug);
 
     /* check args */
     assert(f);
@@ -822,6 +812,5 @@ H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * s
 		   (unsigned long)(mesg->slot[u].size));
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

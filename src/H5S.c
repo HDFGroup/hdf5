@@ -14,6 +14,13 @@
 
 #define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5S_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5S_mask
+
 #define _H5S_IN_H5S_C
 #include "H5private.h"		/* Generic Functions			  */
 #include "H5Eprivate.h"		/* Error handling		  */
@@ -28,12 +35,6 @@ static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
-
-/* Interface initialization */
-#define PABLO_MASK	H5S_mask
-#define INTERFACE_INIT	H5S_init_interface
-static int		interface_initialize_g = 0;
-static herr_t		H5S_init_interface(void);
 
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
@@ -134,7 +135,7 @@ H5S_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASPACE))) {
 	    H5I_clear_type(H5I_DATASPACE, FALSE);
 	} else {
@@ -265,7 +266,7 @@ H5S_term_interface(void)
 	    H5S_nconv_g = H5S_aconv_g = 0;
 
 	    /* Shut down interface */
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }

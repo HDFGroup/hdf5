@@ -41,10 +41,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
-static int interface_initialize_g = 0;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_seq_readvv

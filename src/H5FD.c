@@ -25,6 +25,9 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_mask
@@ -54,12 +57,7 @@
 #include "H5FPprivate.h"        /*Flexible Parallel HDF5                */
 #endif  /* H5_HAVE_FPHDF5 */
 
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_init_interface
-static int interface_initialize_g = 0;
-
 /* static prototypes */
-static herr_t H5FD_init_interface(void);
 static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,
     const void *old_pl, void **copied_pl);
 static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
@@ -162,7 +160,7 @@ H5FD_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_term_interface)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_VFL))) {
 	    H5I_clear_type(H5I_VFL, FALSE);
 
@@ -193,7 +191,7 @@ H5FD_term_interface(void)
             } /* end if */
 	} else {
 	    H5I_dec_type_ref(H5I_VFL);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }

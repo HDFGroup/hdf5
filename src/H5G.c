@@ -88,6 +88,13 @@
 #define H5G_PACKAGE     /*suppress error message about including H5Gpkg.h */
 #define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5G_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5G_mask
+
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
@@ -116,13 +123,6 @@
 #define H5G_TARGET_NORMAL	0x0000
 #define H5G_TARGET_SLINK	0x0001
 #define H5G_TARGET_MOUNT	0x0002
-
-#define PABLO_MASK		H5G_mask
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	H5G_init_interface
-static herr_t H5G_init_interface(void);
 
 /* Local typedefs */
 
@@ -1000,7 +1000,7 @@ H5G_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_interface);
     
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_GROUP))) {
 	    H5I_clear_type(H5I_GROUP, FALSE);
 	} else {
@@ -1018,7 +1018,7 @@ H5G_term_interface(void)
             H5G_comp_alloc_g = 0;
 
 	    /* Mark closed */
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
@@ -1811,7 +1811,7 @@ H5G_isa(H5G_entry_t *ent, hid_t dxpl_id)
 {
     htri_t	ret_value;
     
-    FUNC_ENTER_NOAPI(H5G_isa, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_isa);
 
     assert(ent);
 
@@ -2315,10 +2315,7 @@ H5G_loc (hid_t loc_id)
         case H5I_REFERENCE:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get symbol table entry of reference");
 
-        case H5I_NTYPES:
-        case H5I_BADID:
-        case H5I_FILE_CLOSING:
-        case H5I_VFL:
+        default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object ID");
     }
 

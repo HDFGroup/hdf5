@@ -14,6 +14,9 @@
 
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5Z_init_interface
+
 /* Pablo mask */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5Z_mask
@@ -27,11 +30,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Zpkg.h"		/* Data filters				*/
-
-/* Interface initialization */
-#define INTERFACE_INIT H5Z_init_interface
-static int interface_initialize_g = 0;
-static herr_t H5Z_init_interface (void);
 
 /* Local typedefs */
 #ifdef H5Z_DEBUG
@@ -130,7 +128,7 @@ H5Z_term_interface (void)
     char	comment[16], bandwidth[32];
 #endif
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 #ifdef H5Z_DEBUG
 	if (H5DEBUG(Z)) {
 	    for (i=0; i<H5Z_table_used_g; i++) {
@@ -185,7 +183,7 @@ H5Z_term_interface (void)
 	H5Z_stat_table_g = H5MM_xfree(H5Z_stat_table_g);
 #endif /* H5Z_DEBUG */
 	H5Z_table_used_g = H5Z_table_alloc_g = 0;
-	interface_initialize_g = 0;
+	H5_interface_initialize_g = 0;
     }
     return 0;
 }

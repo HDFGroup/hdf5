@@ -84,10 +84,6 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_clear_func_t)H5HL_clear,
 }};
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Declare a free list to manage the H5HL_free_t struct */
 H5FL_DEFINE_STATIC(H5HL_free_t);
 
@@ -847,7 +843,7 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, const H5HL_t *heap, haddr_t addr)
     assert(H5F_addr_defined(addr));
 
     if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, FALSE) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

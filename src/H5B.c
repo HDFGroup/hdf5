@@ -167,10 +167,6 @@ static const H5AC_class_t H5AC_BT[1] = {{
     (H5AC_clear_func_t)H5B_clear,
 }};
 
-/* Interface initialization? */
-#define INTERFACE_INIT NULL
-static int interface_initialize_g = 0;
-
 /* Declare a free list to manage the page information */
 H5FL_BLK_DEFINE_STATIC(page);
 
@@ -2307,9 +2303,8 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
 	     size_t *total_nkey_size/*out*/, size_t sizeof_rkey)
 {
     size_t	size;
-    size_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_nodesize, 0)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_nodesize)
 
     /*
      * Check arguments.
@@ -2332,11 +2327,7 @@ H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
 	    2 * H5F_KVALUE(f, type) * H5F_SIZEOF_ADDR(f) +	/*child pointers */
 	    (2 * H5F_KVALUE(f, type) + 1) * sizeof_rkey);	/*keys		*/
 
-    /* Set return value */
-    ret_value=size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(size)
 }
 
 

@@ -29,10 +29,6 @@
 #include "H5HGpkg.h"		/* Global heaps				*/
 #include "H5Iprivate.h"		/* ID Functions		                */
 
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5HG_debug

@@ -26,10 +26,6 @@
 /* Pablo mask */
 #define PABLO_MASK          H5FP_mask
 
-/* Interface initialization */
-#define INTERFACE_INIT      NULL
-static int interface_initialize_g = 0;
-
 MPI_Datatype H5FP_request;      /* MPI datatype for the H5FP_request_t type */
 MPI_Datatype H5FP_reply;        /* MPI datatype for the H5FP_reply_t type   */
 MPI_Datatype H5FP_read;         /* MPI datatype for the H5FP_read_t type    */

@@ -44,10 +44,6 @@
 static herr_t H5D_contig_write(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
     hsize_t offset, size_t size, const void *buf);
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Declare a PQ free list to manage the sieve buffer information */
 H5FL_BLK_DEFINE(sieve_buf);
 
@@ -318,19 +314,13 @@ done:
 haddr_t
 H5D_contig_get_addr(const H5D_t *dset)
 {
-    haddr_t ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_contig_get_addr, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_contig_get_addr);
 
     /* check args */
     assert(dset);
     assert(dset->layout.type==H5D_CONTIGUOUS);
 
-    /* Get the address */
-    ret_value=dset->layout.u.contig.addr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(dset->layout.u.contig.addr);
 } /* end H5D_contig_get_addr */
 
 

@@ -19,16 +19,16 @@
 #define H5G_PACKAGE
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5G_ent_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5MMprivate.h"	/* Memory management			*/
-
-#define PABLO_MASK      H5G_ent_mask
-static int          	interface_initialize_g = 0;
-#define INTERFACE_INIT  NULL
 
 /* Private prototypes */
 #ifdef NOT_YET
@@ -187,9 +187,8 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_decode, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_decode);
 
     /* check arguments */
     assert(f);
@@ -226,8 +225,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 
     *pp = p_ret + H5G_SIZEOF_ENTRY(f);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -307,9 +305,8 @@ herr_t
 H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_encode);
 
     /* check arguments */
     assert(f);
@@ -351,8 +348,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     while (*pp < p_ret) *(*pp)++ = 0;
     *pp = p_ret;
     
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -395,9 +391,8 @@ herr_t
 H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t depth)
 {
     H5RS_str_t *tmp_user_path_r=NULL;   /* Temporary string pointer for entry's user path */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_ent_copy, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_copy);
 
     /* Check arguments */
     assert(src);
@@ -424,8 +419,7 @@ H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src, H5G_ent_copy_depth_t dept
         dst->canon_path_r=NULL;
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -453,9 +447,8 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_ent_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_debug);
 
     /* Calculate the indent & field width values for nested information */
     nested_indent=indent+3;
@@ -514,6 +507,5 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             break;
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

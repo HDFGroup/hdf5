@@ -20,18 +20,15 @@
  *
  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5HP_mask
+
 /* Private headers needed */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5HPprivate.h"	/* Heap routines			*/
 #include "H5FLprivate.h"	/* Memory management functions		*/
-
-/* Pablo information */
-#define PABLO_MASK	H5HP_mask
-
-/* Interface initialization? */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 /* Local Macros */
 #define H5HP_START_SIZE 16      /* Initial number of entries for heaps */
@@ -418,7 +415,7 @@ H5HP_count(const H5HP_t *heap)
 {
     ssize_t ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HP_count,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_count);
 
     /* Check args */
     assert(heap);
@@ -435,9 +432,7 @@ H5HP_count(const H5HP_t *heap)
     H5_CHECK_OVERFLOW(heap->nobjs,size_t,ssize_t);
     ret_value=(ssize_t)heap->nobjs;
 
-done:
     /* No post-condition check necessary, since heap is constant */
-
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_count() */
 
@@ -546,9 +541,7 @@ done:
 herr_t
 H5HP_top(const H5HP_t *heap, int *val)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HP_top,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_top);
 
     /* Check args */
     assert(heap);
@@ -565,11 +558,8 @@ H5HP_top(const H5HP_t *heap, int *val)
     /* Get value of the top object in the heap */
     *val=heap->heap[1].val;
 
-done:
-
     /* No post-condition check necessary, since heap is constant */
-
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5HP_top() */
 
 
@@ -908,9 +898,7 @@ done:
 herr_t
 H5HP_close(H5HP_t *heap)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HP_close,FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_close);
 
     /* Check args */
     assert(heap);
@@ -929,7 +917,6 @@ H5HP_close(H5HP_t *heap)
     /* Free actual heap object */
     H5FL_FREE(H5HP_t,heap);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5HP_close() */
 

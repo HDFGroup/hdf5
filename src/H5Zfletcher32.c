@@ -31,10 +31,6 @@
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
 
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
-static int interface_initialize_g = 0;
-
 /* Local function prototypes */
 static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);

@@ -16,7 +16,7 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Z_deflate_mask
+#define PABLO_MASK	H5Z_trans_mask
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -78,10 +78,6 @@ typedef struct {
     const char *tok_last_begin; /* The beginning of the last token      */
     const char *tok_last_end;   /* The end of the last token            */
 } H5Z_token;
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL 
 
 /* Local function prototypes */
 static H5Z_token *H5Z_get_token(H5Z_token *current);
@@ -344,10 +340,10 @@ H5Z_xform_parse(const char *expression)
     H5Z_token tok;
     void* ret_value;
    
-    FUNC_ENTER_NOAPI(H5Z_xform_parse, NULL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_parse)
     
     if (!expression)
-        return NULL;
+        HGOTO_DONE(NULL)
 
     /* Set up the initial H5Z_token for parsing */
     tok.tok_expr = tok.tok_begin = tok.tok_end = expression;
@@ -683,7 +679,6 @@ H5Z_parse_factor(H5Z_token *current)
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(factor);
 }
 
@@ -703,21 +698,16 @@ done:
 static H5Z_node *
 H5Z_new_node(H5Z_token_type type)
 {
-    H5Z_node* ret_value;
     H5Z_node* new_node;
     
-    FUNC_ENTER_NOAPI(H5Z_new_node, NULL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5Z_new_node)
     
     new_node = H5MM_calloc(sizeof(H5Z_node));
+    assert(new_node);
  
-    if (new_node) 
-        new_node->type = type;
-    else 
-        assert(new_node);
+    new_node->type = type;
 
-done:
-        
-        FUNC_LEAVE_NOAPI(new_node);
+    FUNC_LEAVE_NOAPI(new_node);
 }
 
 
@@ -1697,9 +1687,7 @@ done:
 herr_t
 H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
 {
-    herr_t ret_value=SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5Z_xform_destroy, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_destroy)
 
     if(data_xform_prop) {
         /* Destroy the parse tree */
@@ -1712,8 +1700,7 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
         H5MM_xfree(data_xform_prop);
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)  
+    FUNC_LEAVE_NOAPI(SUCCEED)  
 } /* H5Z_xform_destroy() */
 
 
@@ -1741,7 +1728,7 @@ done:
 herr_t
 H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 {
-    H5Z_data_xform_t *new_data_xform_prop;
+    H5Z_data_xform_t *new_data_xform_prop=NULL;
     herr_t ret_value=SUCCEED;
 
     FUNC_ENTER_NOAPI(H5Z_xform_copy, FAIL)
@@ -1801,11 +1788,10 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
     hbool_t ret_value;
 
-    FUNC_ENTER_NOAPI(H5Z_xform_noop, TRUE)
+    FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_noop)
 
     ret_value=(data_xform_prop ? FALSE : TRUE);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)  
 } /* H5Z_xform_noop() */
 

@@ -14,6 +14,9 @@
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5D_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5D_mask
@@ -32,12 +35,7 @@
 
 /*#define H5D_DEBUG*/
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5D_init_interface
-
 /* Local functions */
-static herr_t H5D_init_interface(void);
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static H5D_t * H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static H5D_t * H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, 
@@ -418,7 +416,7 @@ H5D_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_term_interface)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_DATASET))) {
             /* The dataset API uses the "force" flag set to true because it
              * is using the "file objects" (H5FO) API functions to track open
@@ -445,7 +443,7 @@ H5D_term_interface(void)
 	    H5I_clear_type(H5I_DATASET, TRUE);
 	} else {
 	    H5I_dec_type_ref(H5I_DATASET);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }

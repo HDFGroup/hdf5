@@ -57,10 +57,6 @@ hbool_t                 dont_atexit_g = FALSE;
 H5_debug_t		H5_debug_g;		/*debugging info	*/
 static void		H5_debug_mask(const char*);
 
-/* Interface initialization */
-static int          	interface_initialize_g = 0;
-#define INTERFACE_INIT 	NULL
-
 /*--------------------------------------------------------------------------
  * NAME
  *   H5_init_library -- Initialize library-global information
@@ -227,7 +223,6 @@ H5_term_library(void)
 	pending += DOWN(G);
 	pending += DOWN(A);
 	pending += DOWN(S);
-	pending += DOWN(TN);
 	pending += DOWN(T);
         /* Don't shut down the file code until objects in files are shut down */
         if(pending==0)
@@ -624,7 +619,6 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 	    /* Bail out now. */
 	    HDfputs ("Bye...\n", stderr);
 	    HDabort ();
-	    break;
 	case 2:
 	    /* continue silently */
 	    break;
@@ -1807,8 +1801,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    } else {
 		herr_t status = va_arg (ap, herr_t);
 		if (status>=0) fprintf (out, "SUCCEED");
-		else if (status<0) fprintf (out, "FAIL");
-		else fprintf (out, "%d", (int)status);
+		else fprintf (out, "FAIL");
 	    }
 	    break;
 	    

@@ -32,17 +32,15 @@
  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK      H5MF_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"
 #include "H5MFprivate.h"
-
-#define PABLO_MASK      H5MF_mask
-
-/* Is the interface initialized? */
-static int             interface_initialize_g = 0;
-#define INTERFACE_INIT  NULL
 
 
 /*-------------------------------------------------------------------------
@@ -121,7 +119,7 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5MF_xfree, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5MF_xfree);
 
     /* check arguments */
     assert(f);

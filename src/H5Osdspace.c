@@ -58,10 +58,6 @@ const H5O_class_t H5O_SDSPACE[1] = {{
 /* Initial version of the "new" data space information */
 #define H5O_SDSPACE_VERSION_2	2
 
-/* Is the interface initialized? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Declare external the free list for H5S_extent_t's */
 H5FL_EXTERN(H5S_extent_t);
 
@@ -109,7 +105,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     unsigned		i;		/* local counting variable */
     unsigned		flags, version;
     
-    FUNC_ENTER_NOAPI(H5O_sdspace_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode);
 
     /* check args */
     assert(f);
@@ -219,9 +215,8 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
     const H5S_extent_t	*sdim = (const H5S_extent_t *) mesg;
     unsigned		u;  /* Local counting variable */
     unsigned		flags = 0;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_sdspace_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode);
 
     /* check args */
     assert(f);
@@ -257,8 +252,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
         }
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -289,7 +283,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     H5S_extent_t	   *dst = (H5S_extent_t *) dest;
     void                   *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_sdspace_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_copy);
 
     /* check args */
     assert(src);
@@ -339,7 +333,7 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
      */
     size_t		    ret_value = 8;
 
-    FUNC_ENTER_NOAPI(H5O_sdspace_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_size);
 
     /* add in the dimension sizes */
     ret_value += space->rank * H5F_SIZEOF_SIZE (f);
@@ -347,7 +341,6 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     /* add in the space for the maximum dimensions, if they are present */
     ret_value += space->max ? space->rank * H5F_SIZEOF_SIZE (f) : 0;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -371,14 +364,12 @@ static herr_t
 H5O_sdspace_reset(void *_mesg)
 {
     H5S_extent_t	*mesg = (H5S_extent_t*)_mesg;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5O_sdspace_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_reset);
 
     H5S_extent_release(mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -399,16 +390,13 @@ done:
 static herr_t
 H5O_sdspace_free (void *mesg)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5O_sdspace_free, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_free);
 
     assert (mesg);
 
     H5FL_FREE(H5S_extent_t,mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -436,9 +424,8 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
 {
     const H5S_extent_t	   *sdim = (const H5S_extent_t *) mesg;
     unsigned		    u;	/* local counting variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_sdspace_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_debug);
 
     /* check args */
     assert(f);
@@ -473,6 +460,5 @@ H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
         }
     } /* end if */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

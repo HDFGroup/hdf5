@@ -21,6 +21,9 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5T_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5T_mask
@@ -39,10 +42,6 @@
 #ifdef H5_HAVE_SYS_FPU_H
 #include <sys/fpu.h>
 #endif /* H5_HAVE_SYS_FPU_H */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5T_init_interface
 
 /*
  * Predefined data types. These are initialized at runtime in H5Tinit.c and
@@ -471,11 +470,11 @@ H5T_init(void)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_init, FAIL);
+    FUNC_ENTER_NOAPI(H5T_init,FAIL);
     /* FUNC_ENTER() does all the work */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -1263,7 +1262,7 @@ H5T_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	/* Unregister all conversion functions */
 	for (i=0; i<H5T_g.npaths; i++) {
 	    path = H5T_g.path[i];
@@ -1398,7 +1397,7 @@ H5T_term_interface(void)
         H5T_NATIVE_UINT_FAST64_g		= FAIL;
 
 	/* Mark interface as closed */
-	interface_initialize_g = 0;
+	H5_interface_initialize_g = 0;
 	n = 1; /*H5I*/
     }
     FUNC_LEAVE_NOAPI(n);

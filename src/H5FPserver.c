@@ -43,10 +43,6 @@
 /* Pablo mask */
 #define PABLO_MASK      H5FPserver_mask
 
-/* Is the interface initialized? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT  NULL
-
 /* Internal SAP structures */
 
 /*===----------------------------------------------------------------------===
@@ -799,12 +795,10 @@ done:
 static hbool_t
 H5FP_mod_node_overlaps_with_next(H5TB_NODE *node_ptr)
 {
-    hbool_t ret_value;
+    hbool_t ret_value=FALSE;
     H5TB_NODE *next_node_ptr;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FP_mod_node_overlaps_with_next);
-
-    ret_value = FALSE;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FP_mod_node_overlaps_with_next);
 
     HDassert(node_ptr != NULL);
 
@@ -856,10 +850,7 @@ H5FP_mod_node_overlaps_with_next(H5TB_NODE *node_ptr)
         }
     }
 
-done:
-
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5FP_mod_node_overlaps_with_next() */
 
 /*
@@ -881,17 +872,14 @@ done:
 static hbool_t
 H5FP_mod_node_overlaps_with_prev(H5TB_NODE *node_ptr)
 {
-    hbool_t ret_value;
+    hbool_t ret_value=FALSE;
     H5TB_NODE *prev_node_ptr;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5FP_mod_node_overlaps_with_prev);
-
-    ret_value = FALSE;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FP_mod_node_overlaps_with_prev);
 
     HDassert(node_ptr != NULL);
 
     prev_node_ptr = H5TB_prev(node_ptr);
-
 
     if ( prev_node_ptr != NULL )
     {
@@ -920,10 +908,7 @@ H5FP_mod_node_overlaps_with_prev(H5TB_NODE *node_ptr)
         }
     }
 
-done:
-
     FUNC_LEAVE_NOAPI(ret_value);
-
 } /* H5FP_mod_node_overlaps_with_prev() */
 
 /*

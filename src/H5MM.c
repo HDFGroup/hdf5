@@ -24,14 +24,14 @@
  *
  *-------------------------------------------------------------------------
  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5MM_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
-
-/* Interface initialization? */
-#define PABLO_MASK H5MM_mask
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 #ifndef NDEBUG
 

@@ -22,17 +22,13 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK	H5Tbit_mask
+#define PABLO_MASK	H5T_bit_mask
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Tpkg.h"		/*data-type functions			  */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 
 /*-------------------------------------------------------------------------
@@ -213,12 +209,12 @@ H5T_bit_shift (uint8_t *buf, ssize_t shift_dist, size_t offset, size_t size)
         H5T_bit_copy (buf, offset+shift_dist, tmp_buf, 0, (size_t)(size-shift_dist));
         
         /* Zero-set the left part*/
-        H5T_bit_set(buf, offset, shift_dist, 0);
+        H5T_bit_set(buf, offset, (size_t)shift_dist, 0);
     } else { /* right shift */
         shift_dist = - shift_dist;
         H5T_bit_copy(tmp_buf, 0, buf, offset+shift_dist, (size_t)(size-shift_dist));
         H5T_bit_copy (buf, offset, tmp_buf, 0, (size_t)(size-shift_dist));
-        H5T_bit_set(buf, offset+size-shift_dist, shift_dist, 0);
+        H5T_bit_set(buf, offset+size-shift_dist, (size_t)shift_dist, 0);
     }
 
     /* Free temporary buffer */
@@ -254,7 +250,7 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     size_t	i, hs;
     hsize_t	ret_value;      /* Return value */
     
-    FUNC_ENTER_NOAPI(H5T_bit_get_d, 0);
+    FUNC_ENTER_NOAPI_NOFUNC(H5T_bit_get_d);
 
     assert (8*sizeof(val)>=size);
 
@@ -278,7 +274,6 @@ H5T_bit_get_d (uint8_t *buf, size_t offset, size_t size)
     /* Set return value */
     ret_value=val;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 

@@ -19,6 +19,10 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5G_stab_mask
+
 #include "H5private.h"
 #include "H5Eprivate.h"
 #include "H5Fpkg.h"         /*file access                             */
@@ -27,10 +31,6 @@
 #include "H5HLprivate.h"
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
-
-#define PABLO_MASK	H5G_stab_mask
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);

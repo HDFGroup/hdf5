@@ -24,6 +24,9 @@
  *		application to the same file).
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_sec2_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_sec2_mask
@@ -192,12 +195,30 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_sec2_init
-static int interface_initialize_g = 0;
-
 /* Declare a free list to manage the H5FD_sec2_t struct */
 H5FL_DEFINE_STATIC(H5FD_sec2_t);
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FD_sec2_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FD_sec2_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5FD_sec2_init currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FD_sec2_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_sec2_init_interface)
+
+    FUNC_LEAVE_NOAPI(H5FD_sec2_init())
+} /* H5FD_sec2_init_interface() */
 
 
 /*-------------------------------------------------------------------------

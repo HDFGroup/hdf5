@@ -36,6 +36,13 @@
 
 #define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5I_init_interface
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5I_mask
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -52,13 +59,6 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #endif /* H5I_DEBUG_OUTPUT */
-
-/* Pablo information */
-#define PABLO_MASK	H5I_mask
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5I_init_interface
 
 /* Local Macros */
 
@@ -126,7 +126,6 @@ static H5I_type_t H5I_next_type = (H5I_type_t) H5I_NTYPES;
 H5FL_DEFINE_STATIC(H5I_id_info_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
-static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static hid_t H5I_get_file_id(hid_t obj_id);
 static int H5I_get_ref(hid_t id);
@@ -135,22 +134,19 @@ static herr_t H5I_debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5I_init_interface
- *
- * Purpose:	Initialize interface-specific information.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t 
+/*--------------------------------------------------------------------------
+NAME
+   H5I_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5I_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+static herr_t
 H5I_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_init_interface);
@@ -186,7 +182,7 @@ H5I_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5I_term_interface);
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* How many types are still being used? */
         for (type=(H5I_type_t)0; type<H5I_next_type; H5_INC_ENUM(H5I_type_t,type)) {
             if ((type_ptr=H5I_id_type_list_g[type]) && type_ptr->id_list)
@@ -203,10 +199,12 @@ H5I_term_interface(void)
         }
 
         /* Mark interface closed */
-        interface_initialize_g = 0;
+        H5_interface_initialize_g = 0;
     }
     FUNC_LEAVE_NOAPI(n);
 }
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iregister_type
  *
@@ -243,7 +241,7 @@ done:
 	FUNC_LEAVE_API(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_register_type
  *
@@ -284,7 +282,7 @@ done:
 
 H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func)
 {
-	H5I_type_t ret_value;                   /* type ID to return */
+	H5I_type_t ret_value=H5I_BADID;                   /* type ID to return */
         H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
 	int i;
 	int done;
@@ -375,6 +373,7 @@ H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned rese
 	FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Inmembers
  *
@@ -410,6 +409,8 @@ int H5Inmembers(H5I_type_t type)
 	done:
 		FUNC_LEAVE_API(ret_value);
 }
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_nmembers
  *
@@ -454,6 +455,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iclear_type
  *
@@ -489,6 +491,7 @@ herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_clear_type
  *
@@ -625,6 +628,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Idestroy_type
  *
@@ -660,6 +664,7 @@ herr_t H5Idestroy_type(H5I_type_t type)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_destroy_type
  *
@@ -703,6 +708,7 @@ done:
 	FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iregister
  *
@@ -736,6 +742,7 @@ hid_t H5Iregister(H5I_type_t type, void *object)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_register
  *
@@ -885,6 +892,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iobject_verify
  *
@@ -922,6 +930,7 @@ void *H5Iobject_verify(hid_t id, H5I_type_t id_type)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_object_verify
  *
@@ -1123,6 +1132,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iremove_verify
  *
@@ -1161,6 +1171,7 @@ void *H5Iremove_verify(hid_t id, H5I_type_t id_type)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_remove_verify
  *
@@ -1200,6 +1211,7 @@ done:
 }
 
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_remove
  *
@@ -1272,7 +1284,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Idec_ref
  *
@@ -1569,8 +1581,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5I_get_ref() */
 
-
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iinc_type_ref
  *
@@ -1653,6 +1664,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Idec_type_ref
  *
@@ -1694,6 +1706,7 @@ herr_t H5Idec_type_ref(H5I_type_t type)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_dec_type_ref
  *
@@ -1755,7 +1768,7 @@ H5I_dec_type_ref(H5I_type_t type)
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Iget_type_ref
  *
@@ -1797,7 +1810,7 @@ done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Iget_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_get_type_ref
  *
@@ -1838,7 +1851,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5I_get_ref() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Isearch
  *
@@ -1882,6 +1895,7 @@ void *H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 		FUNC_LEAVE_API(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5I_search
  *

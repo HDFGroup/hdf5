@@ -20,7 +20,7 @@
 
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
-#define PABLO_MASK    H5Tconv_mask
+#define PABLO_MASK    H5T_conv_mask
 
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
@@ -51,10 +51,6 @@ typedef struct H5T_conv_hw_t {
     size_t	s_aligned;		/*number source elements aligned     */
     size_t	d_aligned;		/*number destination elements aligned*/
 } H5T_conv_hw_t;
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
 
 /* Declare a free list to manage pieces of vlen data */
 H5FL_BLK_DEFINE_STATIC(vlen_seq);
@@ -2321,9 +2317,9 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     }
                     n -= priv->base;
 
-                    except_ret = H5T_CONV_UNHANDLED;
                     if (n<0 || n>=priv->length || priv->src2dst[n]<0) {
                         /*overflow*/
+                        except_ret = H5T_CONV_UNHANDLED;
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     s, d, cb_struct.user_data);
@@ -2356,6 +2352,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
                     }
                     if (lt>=rt) {
+                        except_ret = H5T_CONV_UNHANDLED;
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, 
                                     src, d, cb_struct.user_data);
@@ -3406,6 +3403,10 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
+                /* Set these variables to default */
+                except_ret = H5T_CONV_UNHANDLED;
+                reverse    = TRUE;
+
                 /*
                  * If the source and destination buffers overlap then use a
                  * temporary buffer for the destination.
@@ -3532,10 +3533,6 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (H5T_NORM_NONE==dst.u.f.norm)
                     mrsh++;
                 
-                /* Set these variables to default */
-                except_ret = H5T_CONV_UNHANDLED;
-                reverse    = TRUE;
-
                 /*
                  * Calculate the destination exponent by adding the destination
                  * bias and clipping by the minimum and maximum possible
@@ -3614,13 +3611,13 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     H5T_bit_set(d, dst.u.f.mpos, 1, TRUE);
                 } else if (mrsh==dst.u.f.msize) {
                     H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                    H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), implied);
+                    H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
                 } else {
                     if (mrsh>0) {
                         H5T_bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
                                     FALSE);
                         H5T_bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, 2,
-                                      implied);
+                                      (hsize_t)implied);
                     }
                     if (mrsh+msize>=dst.u.f.msize) {
                         H5T_bit_copy(d, dst.u.f.mpos,
@@ -8756,7 +8753,7 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /* Allocate enough space for the buffer holding temporary 
              * converted value
              */ 
-            buf_size = (size_t)HDpow((double)2.0, (double)src.u.f.esize) / 8 + 1;          
+            buf_size = (size_t)HDpow((double)2.0, (double)src.u.f.esize) / 8 + 1;
             int_buf = (uint8_t*)H5MM_calloc(buf_size);
 
             /* Get the plist structure. Do I need to close it? */
@@ -8772,6 +8769,11 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
+                /* Set these variables to default */
+                except_ret = H5T_CONV_UNHANDLED;
+                truncated  = FALSE;
+                reverse    = TRUE;
+
                 /*
                  * If the source and destination buffers overlap then use a
                  * temporary buffer for the destination.
@@ -8918,11 +8920,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 sfirst = H5T_bit_find(int_buf, 0, 8*buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
-
-                /* Set these variables to default */
-                except_ret = H5T_CONV_UNHANDLED;
-                truncated  = FALSE;
-                reverse    = TRUE;
 
                 if(sfirst < 0) {
                     /*
@@ -9240,10 +9237,15 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
+                /* Set these variables to default */
+                except_ret = H5T_CONV_UNHANDLED;
+                reverse    = TRUE;
+
                 /* Make sure these variables are reset to 0. */
                 sign = 0;               /*source sign bit value         */
                 is_max_neg = 0;         /*source is maximal negative value*/
                 do_round = 0;           /*whether there is roundup      */
+                sfirst = 0;
 
                 /*
                  * If the source and destination buffers overlap then use a
@@ -9333,14 +9335,10 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     H5T_bit_set(int_buf, src.prec, buf_size*8-src.prec, 0);
 
                     /* Set sign bit in destiny */
-                    H5T_bit_set_d(d, dst.u.f.sign, 1, sign);
+                    H5T_bit_set_d(d, dst.u.f.sign, 1, (hsize_t)sign);
                 }
 
                 first = (size_t)sfirst;
-
-                /* Set these variables to default */
-                except_ret = H5T_CONV_UNHANDLED;
-                reverse    = TRUE;
 
                 /*
                  * Calculate the true destination exponent by adjusting according to
@@ -9542,22 +9540,19 @@ done:
 static herr_t
 H5T_reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 {
-    herr_t      ret_value = SUCCEED;
     size_t      i;
 
-    FUNC_ENTER_NOAPI(H5T_reverse_order, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_reverse_order);
 
     assert(s);
     assert(size);
 
-    if (H5T_ORDER_BE == order) {
+    if (H5T_ORDER_BE == order)
         for (i=0; i<size; i++)
             rev[size-(i+1)] = s[i];
-    } else {
+    else
         for (i=0; i<size; i++)
             rev[i] = s[i];
-    }
     
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }

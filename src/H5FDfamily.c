@@ -33,6 +33,9 @@
  *		
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FD_family_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FD_family_mask
@@ -45,10 +48,6 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
-
-/* Interface initialization */
-#define INTERFACE_INIT	H5FD_family_init
-static int interface_initialize_g = 0;
 
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
@@ -135,6 +134,28 @@ static const H5FD_class_t H5FD_family_g = {
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FD_family_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FD_family_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.  (Just calls
+    H5FD_family_init currently).
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FD_family_init_interface(void)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_init_interface)
+
+    FUNC_LEAVE_NOAPI(H5FD_family_init())
+} /* H5FD_family_init_interface() */
 
 
 /*-------------------------------------------------------------------------

@@ -144,10 +144,6 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     (H5AC_clear_func_t)H5HG_clear,
 }};
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /* Declare a free list to manage the H5HG_t struct */
 H5FL_DEFINE_STATIC(H5HG_heap_t);
 
@@ -761,7 +757,7 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
 
     /* Re-allocate the heap information in memory */
     if (NULL==(new_chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size+need)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "new heap allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed");
 
     /* Adjust the size of the heap */
     old_size=heap->size;

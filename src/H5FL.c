@@ -26,6 +26,9 @@
  *      move frequently accessed free lists to the head of the queue.
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FL_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5FL_mask
@@ -36,9 +39,6 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5MMprivate.h"	/* Memory management			*/
-
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
 
 /*
  * Private type definitions
@@ -110,6 +110,31 @@ static herr_t H5FL_blk_gc_list(H5FL_blk_head_t *head);
 
 /* Declare a free list to manage the H5FL_blk_node_t struct */
 H5FL_DEFINE(H5FL_blk_node_t);
+
+
+/*--------------------------------------------------------------------------
+NAME
+   H5FL_init_interface -- Initialize interface-specific information
+USAGE
+    herr_t H5FL_init_interface()
+   
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+static herr_t
+H5FL_init_interface(void)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_init_interface)
+
+    /* Nothing currently... */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FL_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -495,7 +520,7 @@ H5FL_reg_term(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FL_reg_term)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
         left=NULL;
         while(H5FL_reg_gc_head.first!=NULL) {
@@ -525,7 +550,7 @@ H5FL_reg_term(void)
         /* Point to the list of nodes left with allocations open, if any */
         H5FL_reg_gc_head.first=left;
         if (!left)
-            interface_initialize_g = 0; /*this layer has reached its initial state*/
+            H5_interface_initialize_g = 0; /*this layer has reached its initial state*/
     }
 
     /* Terminating this layer never affects other layers; rather, other layers affect

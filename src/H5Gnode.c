@@ -127,10 +127,6 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_debug_key,		/*debug			*/
 }};
 
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Declare a free list to manage the H5G_node_t struct */
 H5FL_DEFINE_STATIC(H5G_node_t);
 
@@ -188,9 +184,8 @@ static herr_t
 H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_decode_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_decode_key);
 
     assert(f);
     assert(raw);
@@ -198,8 +193,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 
     H5F_DECODE_LENGTH(f, raw, key->offset);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -222,9 +216,8 @@ static herr_t
 H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_encode_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_encode_key);
 
     assert(f);
     assert(raw);
@@ -232,8 +225,7 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
 
     H5F_ENCODE_LENGTH(f, raw, key->offset);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
 
@@ -261,7 +253,7 @@ H5G_node_debug_key (FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidt
     const char		   *s;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
-    FUNC_ENTER_NOAPI(H5G_node_debug_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_debug_key);
     assert (key);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Heap offset:",
@@ -342,7 +334,7 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
     const uint8_t	   *p = NULL;
     H5G_node_t		   *ret_value;	/*for error handling */
 
-    FUNC_ENTER_NOAPI(H5G_node_load, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_load);
 
     /*
      * Check arguments.
@@ -433,7 +425,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
     int		i;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_flush, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush);
 
     /*
      * Check arguments.
@@ -512,7 +504,7 @@ H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf)
     uint8_t    *p;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5G_node_serialize, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize);
 
     /* check args */
     assert(f);
@@ -657,7 +649,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     hsize_t		    size = 0;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_create, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_create);
 
     /*
      * Check arguments.
@@ -734,7 +726,7 @@ H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     const char		   *base;           /* Base of heap */
     int		    ret_value;
 
-    FUNC_ENTER_NOAPI(H5G_node_cmp2, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_cmp2);
 
     assert(udata);
     assert(lt_key);
@@ -799,7 +791,7 @@ H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     const char          *base;              /* Base of heap */
     int                  ret_value=0;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_cmp3, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_cmp3);
 
     /* Get base address of heap */
     if (NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
@@ -866,7 +858,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     const char          *base;           /* Base of heap */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_found, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_found);
 
     /*
      * Check arguments.
@@ -984,7 +976,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
     H5G_node_t		*insert_into = NULL;	/*node that gets new entry*/
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI(H5G_node_insert, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_insert);
 
     /*
      * Check arguments.
@@ -1177,7 +1169,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     const char          *base;              /* Base of heap */
     H5B_ins_t		ret_value = H5B_INS_ERROR;
 
-    FUNC_ENTER_NOAPI(H5G_node_remove, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_remove);
 
     /* Check arguments */
     assert(f);

@@ -33,10 +33,6 @@
 #   include "szlib.h"
 #endif
 
-/* Interface initialization */
-#define INTERFACE_INIT	NULL
-static int interface_initialize_g = 0;
-
 /* Local function prototypes */
 static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);

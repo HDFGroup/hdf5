@@ -88,10 +88,6 @@
 
 /*#define H5D_ISTORE_DEBUG */
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT NULL
-
 /*
  * Given a B-tree node return the dimensionality of the chunks pointed to by
  * that node.
@@ -239,7 +235,6 @@ H5D_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
     const H5D_istore_ud1_t *udata = (const H5D_istore_ud1_t *) _udata;
     size_t		    nbytes;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_sizeof_rkey);
 
     assert(udata);
@@ -273,9 +268,8 @@ H5D_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
     int		i;
     int		ndims = H5D_ISTORE_NDIMS(bt);
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_decode_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_decode_key);
 
     /* check args */
     assert(f);
@@ -290,8 +284,7 @@ H5D_istore_decode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     for (i=0; i<ndims; i++)
 	UINT64DECODE(raw, key->offset[i]);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_decode_key() */
 
 
@@ -315,9 +308,8 @@ H5D_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
     int		ndims = H5D_ISTORE_NDIMS(bt);
     int		i;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_encode_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_encode_key);
 
     /* check args */
     assert(f);
@@ -332,8 +324,7 @@ H5D_istore_encode_key(H5F_t UNUSED *f, H5B_t *bt, uint8_t *raw, void *_key)
     for (i=0; i<ndims; i++)
 	UINT64ENCODE(raw, key->offset[i]);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_encode_key() */
 
 
@@ -358,9 +349,8 @@ H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
     const H5D_istore_key_t	*key = (const H5D_istore_key_t *)_key;
     const H5D_istore_ud1_t	*udata = (const H5D_istore_ud1_t *)_udata;
     unsigned		u;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_istore_debug_key, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_debug_key);
 
     assert (key);
 
@@ -374,8 +364,7 @@ H5D_istore_debug_key (FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int i
         HDfprintf (stream, "%s%Hd", u?", ":"", key->offset[u]);
     HDfputs ("}\n", stream);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_debug_key() */
 
 
@@ -409,7 +398,7 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
     H5D_istore_ud1_t	*udata = (H5D_istore_ud1_t *) _udata;
     int		ret_value;
 
-    FUNC_ENTER_NOAPI(H5D_istore_cmp2, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_cmp2);
 
     assert(lt_key);
     assert(rt_key);
@@ -419,7 +408,6 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
     /* Compare the offsets but ignore the other fields */
     ret_value = H5V_vector_cmp_s(udata->mesg.u.chunk.ndims, lt_key->offset, rt_key->offset);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_cmp2() */
 
@@ -462,7 +450,7 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
     H5D_istore_ud1_t	*udata = (H5D_istore_ud1_t *) _udata;
     int		ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5D_istore_cmp3, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_cmp3);
 
     assert(lt_key);
     assert(rt_key);
@@ -477,7 +465,6 @@ H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
 	ret_value = 1;
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_istore_cmp3() */
 
@@ -513,7 +500,7 @@ H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
     unsigned		u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_new_node, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_new_node);
 
     /* check args */
     assert(f);
@@ -595,7 +582,7 @@ H5D_istore_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void
     unsigned		u;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_found, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_found);
 
     /* Check arguments */
     assert(f);
@@ -669,7 +656,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     unsigned		u;
     H5B_ins_t		ret_value;
 
-    FUNC_ENTER_NOAPI(H5D_istore_insert, H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_insert);
 
     /* check args */
     assert(f);
@@ -2019,7 +2006,7 @@ H5D_istore_get_addr(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     unsigned	u;
     haddr_t	ret_value;		/* Return value */
     
-    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_get_addr);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_addr);
 
     assert(f);
     assert(layout && (layout->u.chunk.ndims > 0));
@@ -2663,9 +2650,8 @@ H5D_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
 	hbool_t *rt_key_changed /*out */ )
 {
     H5D_istore_key_t    *lt_key = (H5D_istore_key_t *)_lt_key;
-    H5B_ins_t ret_value=H5B_INS_REMOVE; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_istore_remove,H5B_INS_ERROR);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_remove);
 
     /* Remove raw data chunk from file */
     H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes);
@@ -2674,8 +2660,7 @@ H5D_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
     *lt_key_changed = FALSE;
     *rt_key_changed = FALSE;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(H5B_INS_REMOVE);
 } /* end H5D_istore_remove() */
 
 
@@ -3141,15 +3126,13 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 		 int fwidth, int ndims)
 {
     H5D_istore_ud1_t	udata;
-    herr_t ret_value=SUCCEED;   /* Return value */
     
-    FUNC_ENTER_NOAPI(H5D_istore_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_istore_debug);
 
     HDmemset (&udata, 0, sizeof udata);
     udata.mesg.u.chunk.ndims = ndims;
 
     H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5D_istore_debug() */

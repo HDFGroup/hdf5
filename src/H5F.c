@@ -14,6 +14,9 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5F_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5F_mask
@@ -45,11 +48,6 @@
 #include "H5FDsrb.h"            /*SRB I/O                               */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
 #include "H5FDstream.h"         /*in-memory files streamed via sockets  */
-
-/* Interface initialization */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5F_init_interface
-static herr_t H5F_init_interface(void);
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
@@ -160,7 +158,6 @@ H5F_init_interface(void)
 {
     size_t      nprops;                 /* Number of properties */
     herr_t	ret_value = SUCCEED;
-    herr_t	status;
 
     /* File creation property class variables.  In sequence, they are
      * - File create property list class to modify
@@ -293,36 +290,6 @@ H5F_init_interface(void)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
-    /* Register predefined file drivers */
-    H5E_BEGIN_TRY {
-	if ((status=H5FD_SEC2)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_LOG)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_STDIO)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_FAMILY)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_GASS
-	if ((status=H5FD_GASS)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-#ifdef H5_HAVE_SRB
-	if ((status=H5FD_SRB)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-	if ((status=H5FD_CORE)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_MULTI)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_PARALLEL
-	if ((status=H5FD_MPIO)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-	if ((status=H5FD_MPIPOSIX)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#ifdef H5_HAVE_FPHDF5
-	if ((status=H5FD_FPHDF5)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif /* H5_HAVE_FPHDF5 */
-#endif /* H5_HAVE_PARALLEL */
-#ifdef H5_HAVE_STREAM
-	if ((status=H5FD_STREAM)<0) goto end_registration; /*lint !e801 Tell lint that our use of goto is OK here */
-#endif
-end_registration: ;
-	} H5E_END_TRY;
-
-    if (status<0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "file driver registration failed")
-    
     /* ========== File Access Property Class Initialization ============*/
     assert(H5P_CLS_FILE_ACCESS_g!=-1);
 
@@ -461,13 +428,13 @@ H5F_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_term_interface)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_FILE))) {
             H5I_clear_type(H5I_FILE, FALSE);
 	} else if (0==(n=H5I_nmembers(H5I_FILE_CLOSING))) {
 	    H5I_dec_type_ref(H5I_FILE);
 	    H5I_dec_type_ref(H5I_FILE_CLOSING);
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }

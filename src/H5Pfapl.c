@@ -12,9 +12,11 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+/* Pablo information */
+/* (Put before include files to avoid problems with inline functions) */
+#define PABLO_MASK	H5P_fapl_mask
 
 /* Private header files */
 #include "H5private.h"		/* Generic Functions			*/
@@ -27,13 +29,6 @@
 
 /* Default file driver - see H5Pget_driver() */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
-
-/* Pablo mask */
-#define PABLO_MASK	H5Pfapl_mask
-
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
 
 /* Local datatypes */
 

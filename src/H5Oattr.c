@@ -67,10 +67,6 @@ const H5O_class_t H5O_ATTR[1] = {{
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT  NULL
-
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
 
@@ -116,7 +112,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *p, H5O_shared_t UNUSED *
     unsigned            flags=0;        /* Attribute flags */
     H5A_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_decode, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_decode);
 
     /* check args */
     assert(f);
@@ -257,7 +253,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     hbool_t     type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_encode, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_encode);
 
     /* check args */
     assert(f);
@@ -373,7 +369,7 @@ H5O_attr_copy(const void *_src, void *_dst)
     H5A_t                  *dst = NULL;
     void                   *ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_copy, NULL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy);
 
     /* check args */
     assert(src);
@@ -425,7 +421,7 @@ H5O_attr_size(H5F_t UNUSED *f, const void *_mesg)
     hbool_t             type_shared;    /* Flag to indicate that a shared datatype is used for this attribute */
     size_t		ret_value = 0;
 
-    FUNC_ENTER_NOAPI(H5O_attr_size, 0);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_size);
 
     assert(attr);
 
@@ -464,7 +460,6 @@ H5O_attr_size(H5F_t UNUSED *f, const void *_mesg)
                     attr->ds_size +		/*data space		*/
                     attr->data_size;		/*the data itself	*/
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -491,7 +486,7 @@ H5O_attr_reset(void *_mesg)
     H5A_t                  *tmp = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_reset, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_reset);
 
     if (attr) {
         if (NULL==(tmp = H5MM_malloc(sizeof(H5A_t))))
@@ -526,7 +521,7 @@ H5O_attr_delete(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
     const H5A_t            *attr = (const H5A_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_delete, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_delete);
 
     /* check args */
     assert(f);
@@ -565,7 +560,7 @@ H5O_attr_link(H5F_t UNUSED *f, hid_t dxpl_id, const void *_mesg)
     const H5A_t            *attr = (const H5A_t *) _mesg;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_link, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_link);
 
     /* check args */
     assert(f);
@@ -611,7 +606,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     herr_t      (*debug)(H5F_t*, hid_t, const void*, FILE*, int, int)=NULL;
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_attr_debug, FAIL);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_debug);
 
     /* check args */
     assert(f);

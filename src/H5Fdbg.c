@@ -30,10 +30,6 @@
 #include "H5Iprivate.h"		/* ID Functions		                */
 #include "H5Pprivate.h"		/* Property lists			*/
 
-/* Interface initialization */
-#define INTERFACE_INIT  NULL
-static int             interface_initialize_g = 0;
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_debug

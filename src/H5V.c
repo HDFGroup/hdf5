@@ -26,10 +26,6 @@
 #include "H5Oprivate.h"
 #include "H5Vprivate.h"
 
-/* Interface initialization */
-static int		interface_initialize_g = 0;
-#define INTERFACE_INIT	NULL
-
 /* Local macros */
 #define H5V_HYPER_NDIMS H5O_LAYOUT_NDIMS
 
@@ -285,7 +281,7 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
     int		i;		/*counter				*/
     hsize_t	    ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_hyper_stride, (HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_stride)
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(size);
@@ -355,7 +351,6 @@ H5V_hyper_stride(unsigned n, const hsize_t *size,
     /* Set return value */
     ret_value=skip;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -500,7 +495,7 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER_NOAPI(H5V_hyper_fill, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_fill)
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -525,7 +520,6 @@ H5V_hyper_fill(unsigned n, const hsize_t *_size,
     ret_value = H5V_stride_fill(n, elmt_size, size, dst_stride, dst+dst_start,
 			     fill_value);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -589,7 +583,7 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     unsigned	u;
 #endif
 
-    FUNC_ENTER_NOAPI(H5V_hyper_copy, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_hyper_copy)
 
     /* check args */
     assert(n > 0 && n <= H5V_HYPER_NDIMS);
@@ -727,7 +721,6 @@ H5V_hyper_copy(unsigned n, const hsize_t *_size,
     ret_value = H5V_stride_copy(n, elmt_size, size,
              dst_stride, dst+dst_start, src_stride, src+src_start);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -757,9 +750,8 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
     hsize_t	i;			/*counter			*/
     int	j;			/*counter			*/
     hbool_t	carry;			/*subtraction carray value	*/
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_stride_fill, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_stride_fill)
     assert (elmt_size < SIZET_MAX);
 
     H5V_vector_cpy(n, idx, size);
@@ -782,8 +774,7 @@ H5V_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size,
         }
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -820,9 +811,8 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
     hsize_t	i;				/*counter		*/
     int	j;				/*counters		*/
     hbool_t	carry;				/*carray for subtraction*/
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_stride_copy, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_stride_copy)
     assert (elmt_size<SIZET_MAX);
 
     if (n) {
@@ -852,8 +842,7 @@ H5V_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size,
         HDmemcpy (dst, src, (size_t)elmt_size); /*lint !e671 The elmt_size will be OK */
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 #ifdef LATER
@@ -896,7 +885,7 @@ H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size,
     int		j;              /* Local index variable */
     hbool_t	carry;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5V_stride_copy2)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_stride_copy2)
 
     assert (elmt_size < SIZET_MAX);
     assert(dst_n>0);
@@ -960,9 +949,8 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
     size_t      copy_items;         /* number of items currently copying*/
     size_t      items_left;         /* number of items left to copy 	*/
     uint8_t     *dst=(uint8_t*)_dst;/* alias for pointer arithmetic	*/
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_fill, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_fill)
 
     assert (dst);
     assert (src);
@@ -990,8 +978,7 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
     if (items_left > 0)   /* if there are any items left to copy */
         HDmemcpy(dst, _dst, items_left * size);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5V_array_fill() */
 
 
@@ -1017,9 +1004,8 @@ H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
 {
     hsize_t	acc;	                /*accumulator			*/
     int	        i;		        /*counter			*/
-    herr_t	ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_down, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_down)
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(total_size);
@@ -1032,8 +1018,7 @@ H5V_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
         acc *= total_size[i];
     } /* end for */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5V_array_down() */
 
 
@@ -1067,7 +1052,7 @@ H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hssize_t *offset)
     int             i;		/*counter				*/
     hsize_t	    ret_value;  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_offset_pre, (HDabort(), 0)) /*lint !e527 Don't worry about unreachable statement */
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_offset_pre)
 
     assert(n <= H5V_HYPER_NDIMS);
     assert(acc);
@@ -1082,7 +1067,6 @@ H5V_array_offset_pre(unsigned n, const hsize_t *acc, const hssize_t *offset)
     /* Set return value */
     ret_value=skip;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5V_array_offset_pre() */
 
@@ -1158,9 +1142,8 @@ H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hssize_t *
     hsize_t     acc;                    /* Size accumulator */
     unsigned    u;                      /* Local index variable */
     int         i;                      /* Local index variable */
-    herr_t	ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_array_calc, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_array_calc)
 
     /* Sanity check */
     assert(n <= H5V_HYPER_NDIMS);
@@ -1181,8 +1164,7 @@ H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hssize_t *
         offset %= idx[u];
     } /* end for */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5V_array_calc() */
 
 
@@ -1234,9 +1216,8 @@ H5V_chunk_index(unsigned ndims, const hssize_t *coord, const size_t *chunk,
 {
     hssize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
     unsigned    u;                      /* Local index variable */
-    herr_t	ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_chunk_index, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_chunk_index)
 
     /* Sanity check */
     assert(ndims <= H5V_HYPER_NDIMS);
@@ -1253,8 +1234,7 @@ H5V_chunk_index(unsigned ndims, const hssize_t *coord, const size_t *chunk,
     /* Compute the chunk index */
     *chunk_idx=H5V_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5V_chunk_index() */
 
 
@@ -1292,7 +1272,7 @@ H5V_memcpyvv(void *_dst,
     size_t u,v;                 /* Local index variables */
     ssize_t ret_value=0;        /* Return value */
 
-    FUNC_ENTER_NOAPI(H5V_memcpyvv, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5V_memcpyvv)
 
     /* Sanity check */
     assert(_dst);
@@ -1343,7 +1323,6 @@ H5V_memcpyvv(void *_dst,
     *dst_curr_seq=u;
     *src_curr_seq=v;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5V_memcpyvv() */
 

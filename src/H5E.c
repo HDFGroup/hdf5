@@ -40,6 +40,9 @@
  *
  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5E_init_interface
+
 /* Pablo information */
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5E_mask
@@ -48,10 +51,6 @@
 #include "H5Iprivate.h"		/* IDs                                    */
 #include "H5Eprivate.h"		/* Private error routines		  */
 #include "H5MMprivate.h"	/* Memory management			  */
-
-/* Interface initialization? */
-static int interface_initialize_g = 0;
-#define INTERFACE_INIT H5E_init_interface
 
 /* HDF5 error class ID */
 hid_t H5E_ERR_CLS_g			= FAIL;
@@ -96,7 +95,6 @@ int	H5E_mpi_error_str_len;
 #endif
 
 /* Static function declarations */
-static herr_t H5E_init_interface (void);
 static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name, 
                                 const char *version);
 static herr_t  H5E_unregister_class(H5E_cls_t *cls);
@@ -203,7 +201,7 @@ H5E_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_term_interface)
 
-    if (interface_initialize_g) {
+    if (H5_interface_initialize_g) {
         /* Check if there are any open error stacks, classes or messages */
         ncls = H5I_nmembers(H5I_ERROR_CLASS);
         nmsg = H5I_nmembers(H5I_ERROR_MSG);
@@ -242,7 +240,7 @@ H5E_term_interface(void)
 	    H5I_dec_type_ref(H5I_ERROR_MSG);
 
 	    /* Mark closed */
-	    interface_initialize_g = 0;
+	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	}
     }
