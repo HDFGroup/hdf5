@@ -1700,11 +1700,11 @@ gpfs_access_range(int handle, off_t start, off_t length, int is_write)
     access_range.hdr.totalLength = sizeof(access_range);
     access_range.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
     access_range.hdr.fcntlReserved = 0;
-    access_range.start.structLen = sizeof(gpfsAccessRange_t);
-    access_range.start.structType = GPFS_ACCESS_RANGE;
-    access_range.start.start = start;
-    access_range.start.length = length;
-    access_range.start.isWrite = is_write;
+    access_range.access.structLen = sizeof(gpfsAccessRange_t);
+    access_range.access.structType = GPFS_ACCESS_RANGE;
+    access_range.access.start = start;
+    access_range.access.length = length;
+    access_range.access.isWrite = is_write;
 
     if (gpfs_fcntl(handle, &access_range) != 0) {
         fprintf(stderr,
@@ -1793,8 +1793,8 @@ gpfs_clear_file_cache(int handle)
     clear_cache.hdr.totalLength = sizeof(clear_cache);
     clear_cache.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
     clear_cache.hdr.fcntlReserved = 0;
-    clear_cache.start.structLen = sizeof(gpfsClearFileCache_t);
-    clear_cache.start.structType = GPFS_CLEAR_FILE_CACHE;
+    clear_cache.clear.structLen = sizeof(gpfsClearFileCache_t);
+    clear_cache.clear.structType = GPFS_CLEAR_FILE_CACHE;
 
     if (gpfs_fcntl(handle, &clear_cache) != 0) {
         fprintf(stderr,
@@ -1839,8 +1839,8 @@ gpfs_cancel_hints(int handle)
     cancel_hints.hdr.totalLength = sizeof(cancel_hints);
     cancel_hints.hdr.fcntlVersion = GPFS_FCNTL_CURRENT_VERSION;
     cancel_hints.hdr.fcntlReserved = 0;
-    cancel_hints.start.structLen = sizeof(gpfsCancelHints_t);
-    cancel_hints.start.structType = GPFS_CANCEL_HINTS;
+    cancel_hints.cancel.structLen = sizeof(gpfsCancelHints_t);
+    cancel_hints.cancel.structType = GPFS_CANCEL_HINTS;
 
     if (gpfs_fcntl(handle, &cancel_hints) != 0) {
         fprintf(stderr,
