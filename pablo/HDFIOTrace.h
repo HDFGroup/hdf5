@@ -289,7 +289,7 @@ void  HDFtraceWriteEnd ( int );
 void  HDFtraceIOBegin ( int, int );
 void  HDFtraceIOEnd ( int, double, char * );
 
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 
 #include "HDFmpioProtos.h"
 
@@ -418,6 +418,6 @@ void  HDFtraceIOEnd ( int, double, char * );
 #ifdef __cplusplus
 }
 
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 
-#endif		/* HDFIOTRACE conditional */
+#endif	/* HDFIOTRACE conditional */
