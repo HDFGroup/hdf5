@@ -54,7 +54,7 @@ int main (void)
    /*
    * Buffers' initialization.
    */
-   uint   i,j;
+   int   i,j;
    int    vector[MSPACE1_DIM];
    vector[0] = vector[MSPACE1_DIM - 1] = -1;
    for (i = 1; i < MSPACE1_DIM - 1; i++)
