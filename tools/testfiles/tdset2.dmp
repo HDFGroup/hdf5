@@ -212,7 +212,7 @@ File name: testfiles/tdset2.hdf
 
 Vdata: 0
    tag = 1962; reference = 7;
-   number of records = 1; interlace = FULL_INTERLACE (0);
+   number of records = 1; interlace = 0;
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim0; class = DimVal0.1;
@@ -224,7 +224,7 @@ Loc.     Data
 
 Vdata: 1
    tag = 1962; reference = 9;
-   number of records = 1; interlace = FULL_INTERLACE (0);
+   number of records = 1; interlace = 0;
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim1; class = DimVal0.1;
@@ -236,7 +236,7 @@ Loc.     Data
 
 Vdata: 2
    tag = 1962; reference = 11;
-   number of records = 1; interlace = FULL_INTERLACE (0);
+   number of records = 1; interlace = 0;
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim2; class = DimVal0.1;
@@ -248,7 +248,7 @@ Loc.     Data
 
 Vdata: 3
    tag = 1962; reference = 13;
-   number of records = 1; interlace = FULL_INTERLACE (0);
+   number of records = 1; interlace = 0;
    fields = [Values];
    record size (in bytes) = 4;
    name = fakeDim3; class = DimVal0.1;
