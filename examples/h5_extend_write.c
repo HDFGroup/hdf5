@@ -77,7 +77,8 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 0;
 offset[1] = 0;
-status = H5Sset_hyperslab(filespace, offset, dims1, NULL);  
+status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
+                             dims1, NULL);  
 
 /*
  * Write the data to the hyperslab.
@@ -99,7 +100,8 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 3;
 offset[1] = 0;
-status = H5Sset_hyperslab(filespace, offset, dims2, NULL);  
+status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
+                              dims2, NULL);  
 
 /*
  * Define memory space
@@ -126,7 +128,8 @@ status = H5Dextend (dataset, size);
 filespace = H5Dget_space (dataset);
 offset[0] = 0;
 offset[1] = 3;
-status = H5Sset_hyperslab(filespace, offset, dims3, NULL);  
+status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
+                             dims3, NULL);  
 
 /*
  * Define memory space.

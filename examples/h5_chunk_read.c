@@ -22,12 +22,12 @@ main ()
    H5T_class_t class;                       /* data type class */
    size_t      elem_size;                   /* size of the data element
                                                stored in file */ 
-   size_t      dims[2];                     /* dataset and chunk dimensions */ 
-   size_t      chunk_dims[2];
-   size_t      col_dims[1];
+   hsize_t     dims[2];                     /* dataset and chunk dimensions */ 
+   hsize_t     chunk_dims[2];
+   hsize_t     col_dims[1];
    size_t      size[2];
-   size_t      count[2];
-   int         offset[2];
+   hsize_t     count[2];
+   hsize_t     offset[2];
 
    herr_t      status, status_n;                             
 
@@ -49,13 +49,13 @@ dataset = H5Dopen(file, DATASETNAME);
  
 filespace = H5Dget_space(dataset);    /* Get filespace handle first. */
 rank      = H5Sget_ndims(filespace);
-status_n  = H5Sget_dims(filespace, dims);
+status_n  = H5Sget_dims(filespace, dims, NULL);
 printf("dataset rank %d, dimensions %d x %d \n", rank, dims[0], dims[1]);
 
 /*
- * Get creation properties.
+ * Get creation properties list.
  */
-cparms = H5Dget_create_parms(dataset); /* Get properties handle first. */
+cparms = H5Dget_create_plist(dataset); /* Get properties handle first. */
 
 /* 
  * Check if dataset is chunked.
@@ -119,7 +119,8 @@ offset[0] = 0;
 offset[1] = 2;
 count[0]  = 10;
 count[1]  = 1;
-status = H5Sset_hyperslab(filespace, offset, count, NULL);
+status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
+                             count, NULL);
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
                  H5P_DEFAULT, column);
 printf("\n");
@@ -155,7 +156,8 @@ offset[0] = 2;
 offset[1] = 0;
 count[0]  = chunk_dims[0];
 count[1]  = chunk_dims[1];
-status = H5Sset_hyperslab(filespace, offset, count, NULL);
+status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
+                              count, NULL);
 
 /*
  * Read chunk back and display.

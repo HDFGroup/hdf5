@@ -1,9 +1,9 @@
 /*  
- *  This example writes data to HDF5 file.
+ *  This example writes data to the HDF5 file.
  *  Data conversion is performed during write operation.  
  */
  
-#include "hdf5.h"
+#include <hdf5.h>
 
 #define FILE        "SDS.h5"
 #define DATASETNAME "IntArray" 
@@ -15,9 +15,9 @@ main ()
 {
    hid_t       file, dataset;         /* file and dataset handles */
    hid_t       datatype, dataspace;   /* handles */
-   size_t      dimsf[2];              /* dataset dimensions */
+   hsize_t     dimsf[2];              /* dataset dimensions */
    herr_t      status;                             
-   int32       data[NX][NY];          /* data to write */
+   int         data[NX][NY];          /* data to write */
    int         i, j;
 
 /* 
@@ -51,9 +51,9 @@ dataspace = H5Screate_simple(RANK, dimsf, NULL);
 
 /* 
  * Define datatype for the data in the file.
- * We will store little endian INT32 numbers.
+ * We will store little endian INT numbers.
  */
-datatype = H5Tcopy(H5T_NATIVE_INT32);
+datatype = H5Tcopy(H5T_NATIVE_INT);
 status = H5Tset_order(datatype, H5T_ORDER_LE);
 /*
  * Create a new dataset within the file using defined dataspace and
@@ -65,7 +65,7 @@ dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
 /*
  * Write the data to the dataset using default transfer properties.
  */
-status = H5Dwrite(dataset, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL,
+status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
                   H5P_DEFAULT, data);
 
 /*

@@ -17,8 +17,8 @@ main()
    hid_t    dataset, dataspace;
 
    herr_t   status;
-   size_t   dims[2];
-   size_t   size[1];
+   hsize_t  dims[2];
+   hsize_t  size[1];
 
 /*
  * Create a file.

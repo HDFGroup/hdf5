@@ -40,10 +40,8 @@ float      s3[LENGTH];
 int        i;
 hid_t      file, datatype, dataset, space; /* Handles */
 herr_t     status;
-size_t     dim[] = {LENGTH};   /* Dataspace dimensions */
+hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
 
-H5T_class_t class;
-size_t     size;
 
 /*
  * Initialize the data
@@ -68,9 +66,9 @@ file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  * Create the memory data type. 
  */
 s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-status = H5Tinsert(s1_tid, "a_name", HPOFFSET(s1, a), H5T_NATIVE_INT);
-status = H5Tinsert(s1_tid, "c_name", HPOFFSET(s1, c), H5T_NATIVE_DOUBLE);
-status = H5Tinsert(s1_tid, "b_name", HPOFFSET(s1, b), H5T_NATIVE_FLOAT);
+H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
+H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
 
 /* 
  * Create the dataset.
@@ -102,11 +100,11 @@ dataset = H5Dopen(file, DATASETNAME);
  */
 s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
 
-status = H5Tinsert(s2_tid, "c_name", HPOFFSET(s2, c), H5T_NATIVE_DOUBLE);
-status = H5Tinsert(s2_tid, "a_name", HPOFFSET(s2, a), H5T_NATIVE_INT);
+H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
+H5Tinsert(s2_tid, "a_name", HOFFSET(s2_t, a), H5T_NATIVE_INT);
 
 /*
- * Read two fields c and a from s1 dataset. Fields iin the file
+ * Read two fields c and a from s1 dataset. Fields in the file
  * are found by their names "c_name" and "a_name".
  */
 status = H5Dread(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2);
@@ -150,6 +148,5 @@ printf("\n");
 H5Tclose(s2_tid);
 H5Tclose(s3_tid);
 H5Dclose(dataset);
-H5Sclose(space);
 H5Fclose(file);
 }
