@@ -86,6 +86,9 @@ void tts_cancel(void)
 
 	H5Dclose(dataset);
 	H5Fclose(cancel_file);
+
+        /* Destroy the thread attribute */
+        pthread_attr_destroy(&attribute);
 }
 
 void *tts_cancel_thread(void *arg)
@@ -201,7 +204,6 @@ void tts_cancel_barrier(void)
 
 void cleanup_cancel(void)
 {
-	H5close();
 	HDunlink(FILENAME);
 }
 

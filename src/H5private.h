@@ -1091,6 +1091,18 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 
 #endif /* H5_HAVE_THREADSAFE */
 
+#ifdef H5_HAVE_FUNCSTACK
+
+/* Include required function stack header */
+#include "H5FSprivate.h"
+
+#define H5_PUSH_FUNC            H5FS_push(FUNC)
+#define H5_POP_FUNC             H5FS_pop()
+#else /* H5_HAVE_FUNCSTACK */
+#define H5_PUSH_FUNC            /* void */
+#define H5_POP_FUNC             /* void */
+#endif /* H5_HAVE_FUNCSTACK */
+
 #ifdef H5_HAVE_MPE
 extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 #endif
@@ -1149,6 +1161,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     FUNC_ENTER_API_VARS                                                       \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(FUNC));                             \
     FUNC_ENTER_API_THREADSAFE;                                                \
+    H5_PUSH_FUNC;                                                             \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
@@ -1159,7 +1172,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     {
 
 /*
- * Use this macro for non-API functions which fall into two categories:
+ * Use this macro for non-API functions which fall into these categories:
  *      - static functions, since they must be called from a function in the
  *              interface, the library and interface must already be
  *              initialized.
@@ -1168,16 +1181,25 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
  */
 #define FUNC_ENTER_NOINIT(func_name) {                                        \
     FUNC_ENTER_COMMON(func_name,!H5_IS_API(FUNC));                            \
+    H5_PUSH_FUNC;                                                             \
+    {
+
+/*
+ * Use this macro for non-API functions which fall into these categories:
+ *      - functions which shouldn't push their name on the function stack
+ *              (so far, just the H5FS routines themselves)
+ */
+#define FUNC_ENTER_NOAPI_NOFS(func_name) {                                    \
+    FUNC_ENTER_COMMON(func_name,!H5_IS_API(FUNC));                            \
     {
 
 #define FUNC_ENTER_API_COMMON(func_name,interface_init_func,err)       	      \
    /* Initialize the library */           				      \
    if (!(H5_INIT_GLOBAL)) {                                                   \
        H5_INIT_GLOBAL = TRUE;                                                 \
-       if (H5_init_library()<0) {					      \
+       if (H5_init_library()<0)  					      \
           HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "library initialization failed");		                      \
-       }								      \
    }								              \
                                                                               \
    /* Initialize this interface or bust */				      \
@@ -1190,7 +1212,11 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
             "interface initialization failed");		                      \
       }								              \
    }                                                                          \
-  BEGIN_MPE_LOG(func_name)
+                                                                              \
+   /* Push the name of this function on the function stack */                 \
+   H5_PUSH_FUNC;                                                              \
+                                                                              \
+   BEGIN_MPE_LOG(func_name)
 
 #define FUNC_ENTER_NOAPI_INIT(func_name,interface_init_func,err)       	      \
    /* Initialize this interface or bust */				      \
@@ -1202,7 +1228,10 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
          HGOTO_ERROR (H5E_FUNC, H5E_CANTINIT, err,		              \
             "interface initialization failed");		                      \
       }								              \
-   }
+   }                                                                          \
+                                                                              \
+   /* Push the name of this function on the function stack */                 \
+   H5_PUSH_FUNC;
 
 /*-------------------------------------------------------------------------
  * Purpose:	Register function exit for code profiling.  This should be
@@ -1223,6 +1252,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
         FINISH_MPE_LOG;                                                       \
         PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
         H5TRACE_RETURN(ret_value);					      \
+        H5_POP_FUNC;                                                          \
         H5_API_UNLOCK                                                         \
         H5_API_SET_CANCEL                                                     \
         return (ret_value);						      \
@@ -1231,13 +1261,26 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
         PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        H5_POP_FUNC;                                                          \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI_VOID                                                 \
         PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        H5_POP_FUNC;                                                          \
         return;						                      \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+} /*end scope from beginning of FUNC_ENTER*/
+
+/*
+ * Use this macro for non-API functions which fall into these categories:
+ *      - functions which didn't push their name on the function stack
+ *              (so far, just the H5FS routines themselves)
+ */
+#define FUNC_LEAVE_NOAPI_NOFS(ret_value)                                      \
+        PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);			      \
+        return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 

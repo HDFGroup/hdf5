@@ -840,6 +840,8 @@
 ./src/H5FPprivate.h
 ./src/H5FPpublic.h
 ./src/H5FPserver.c
+./src/H5FS.c
+./src/H5FSprivate.h
 ./src/H5G.c
 ./src/H5Gent.c
 ./src/H5Gnode.c

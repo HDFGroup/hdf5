@@ -30,6 +30,7 @@ typedef struct H5TS_cancel_struct {
 /* Global variable definitions */
 pthread_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
 pthread_key_t H5TS_errstk_key_g;
+pthread_key_t H5TS_funcstk_key_g;
 pthread_key_t H5TS_cancel_key_g;
 hbool_t H5TS_allow_concurrent_g = FALSE; /* concurrent APIs override this */
 
@@ -37,6 +38,36 @@ hbool_t H5TS_allow_concurrent_g = FALSE; /* concurrent APIs override this */
 #ifdef NOT_USED
 static void H5TS_mutex_init(H5TS_mutex_t *mutex);
 #endif /* NOT_USED */
+
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *    H5TS_key_destructor
+ *
+ * USAGE
+ *    H5TS_key_destructor()
+ * 
+ * RETURNS
+ *
+ * DESCRIPTION
+ *   Frees the memory for a key.  Called by each thread as it exits.
+ *   Currently all the thread-specific information for all keys are simple
+ *   structures allocated with malloc, so we can free them all uniformly.
+ *
+ * PROGRAMMER: Quincey Koziol
+ *             February 7, 2003
+ *
+ * MODIFICATIONS:
+ *
+ *--------------------------------------------------------------------------
+ */
+static void
+H5TS_key_destructor(void *key_val)
+{
+    /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5FS routines */
+    if(key_val!=NULL)
+        HDfree(key_val);
+}
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -73,46 +104,14 @@ H5TS_first_thread_init(void)
     H5_g.init_lock.lock_count = 0;
 
     /* initialize key for thread-specific error stacks */
-    pthread_key_create(&H5TS_errstk_key_g, NULL);
+    pthread_key_create(&H5TS_errstk_key_g, H5TS_key_destructor);
+
+    /* initialize key for thread-specific function stacks */
+    pthread_key_create(&H5TS_funcstk_key_g, H5TS_key_destructor);
 
     /* initialize key for thread cancellability mechanism */
-    pthread_key_create(&H5TS_cancel_key_g, NULL);
+    pthread_key_create(&H5TS_cancel_key_g, H5TS_key_destructor);
 }
-
-#ifdef NOT_USED
-/*--------------------------------------------------------------------------
- * NAME
- *    H5TS_mutex_init
- *
- * USAGE
- *    H5TS_mutex_init(&mutex_var)
- * 
- * RETURNS
- *
- * DESCRIPTION
- *    Recursive lock semantics for HDF5 (lock initialization) -
- *    Multiple acquisition of a lock by a thread is permitted with a
- *    corresponding unlock operation required.
- *
- * PROGRAMMER: Chee Wai LEE
- *             May 2, 2000
- *
- * MODIFICATIONS:
- *
- *    19 May 2000, Bill Wendling
- *    Changed (*foo). form of accessing structure members to the -> form.
- *
- *--------------------------------------------------------------------------
- */
-static void
-H5TS_mutex_init(H5TS_mutex_t *mutex)
-{
-    H5_g.init_lock.owner_thread = NULL;
-    pthread_mutex_init(&mutex->atomic_lock, NULL);
-    pthread_cond_init(&mutex->cond_var, NULL);
-    mutex->lock_count = 0;
-}
-#endif /* NOT_USED */
 
 /*--------------------------------------------------------------------------
  * NAME

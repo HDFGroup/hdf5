@@ -513,6 +513,14 @@ main (void)
 {
     int	nerrors=0;
 
+    /*
+     * Open the library explicitly for thread-safe builds, so per-thread
+     * things are initialized correctly.
+     */
+#ifdef H5_HAVE_THREADSAFE
+    H5open();
+#endif  /* H5_HAVE_THREADSAFE */
+
     nerrors += test_find ()<0?1:0;
     nerrors += test_set  ()<0?1:0;
     nerrors += test_clear()<0?1:0;
@@ -524,5 +532,9 @@ main (void)
         exit(1);
     }
     printf("All bit tests passed.\n");
+
+#ifdef H5_HAVE_THREADSAFE
+    H5close();
+#endif  /* H5_HAVE_THREADSAFE */
     return 0;
 }

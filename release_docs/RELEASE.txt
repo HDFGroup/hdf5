@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Corrected memory/resource leaks in per-thread key information when
+      thread-safe operation was enabled.  QAK - 2003/02/07
     * H5Fopen without the H5F_ACC_CREAT flag should not succeed in creating
       a new file with the 'core' VFL driver.  QAK - 2003/01/24
     * Allow opening objects with unknown object header messages.

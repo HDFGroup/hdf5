@@ -21,14 +21,14 @@
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
+/* Define if support for Adler32 checksum is enabled */
+#undef HAVE_FILTER_ADLER32
+
 /* Define if support for deflate filter is enabled */
 #undef HAVE_FILTER_DEFLATE
 
 /* Define if support for shuffle filter is enabled */
 #undef HAVE_FILTER_SHUFFLE
-
-/* Define if support for Adler32 checksum filter is enabled */
-#undef HAVE_FILTER_ADLER32
 
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
@@ -38,6 +38,9 @@
 
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
+
+/* Define if the function stack tracing code is to be compiled in */
+#undef HAVE_FUNCSTACK
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION

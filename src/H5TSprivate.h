@@ -34,6 +34,7 @@ typedef struct H5TS_mutex_struct {
 /* Extern global variables */
 extern pthread_once_t H5TS_first_init_g;
 extern pthread_key_t H5TS_errstk_key_g;
+extern pthread_key_t H5TS_funcstk_key_g;
 
 #if defined c_plusplus || defined __cplusplus
 extern      "C"

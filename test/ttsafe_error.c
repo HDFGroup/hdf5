@@ -130,6 +130,9 @@ void tts_error(void)
 
 	/* turn our error stack handler off */
 	H5Eset_auto(old_error_cb, old_error_client_data);
+
+        /* Destroy the thread attribute */
+        pthread_attr_destroy(&attribute);
 }
 
 static

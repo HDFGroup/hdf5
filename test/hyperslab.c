@@ -1114,6 +1114,14 @@ main(int argc, char *argv[])
     printf("\n");
 
     /*
+     * Open the library explicitly for thread-safe builds, so per-thread
+     * things are initialized correctly.
+     */
+#ifdef H5_HAVE_THREADSAFE
+    H5open();
+#endif  /* H5_HAVE_THREADSAFE */
+
+    /*
      *------------------------------ 
      * TEST HYPERSLAB FILL OPERATION
      *------------------------------ 
@@ -1259,5 +1267,9 @@ main(int argc, char *argv[])
 	exit(1);
     }
     printf("All hyperslab tests passed.\n");
+
+#ifdef H5_HAVE_THREADSAFE
+    H5close();
+#endif  /* H5_HAVE_THREADSAFE */
     return 0;
 }
