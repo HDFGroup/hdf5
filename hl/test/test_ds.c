@@ -20,18 +20,10 @@
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
+/* prototypes */
+static int test_simple();
+static int test_errors();
 
-
-
-/*-------------------------------------------------------------------------
- * DS API test
- *
- * Functions tested:
- *
- * H5DSattach_scale
- *
- *-------------------------------------------------------------------------
- */
 
 #define RANK      2
 #define DIM_DATA  12
@@ -44,6 +36,40 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_da
  */
 
 int main(void)
+{
+ int	nerrors=0;
+
+ nerrors += test_simple()<0 	?1:0;
+ nerrors += test_errors()<0 	?1:0;
+
+ if (nerrors) goto error;
+ printf("All dimension scales tests passed.\n");
+ return 0;
+ 
+error:
+ printf("***** %d DIMENSION SCALES TEST%s FAILED! *****\n",nerrors, 1 == nerrors ? "" : "S");
+ return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * DS API test
+ *
+ * Functions tested:
+ *
+ * H5DSattach_scale
+ * H5DSdetach_scale
+ * H5DSset_label
+ * H5DSget_label
+ * H5DSset_scale
+ * H5DSget_scale_name
+ * H5DSis_scale
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+static int test_simple()
 {
  hid_t   fid;                                              /* file ID */
  hid_t   did;                                              /* dataset ID */
@@ -60,15 +86,18 @@ int main(void)
  char    s1_label[16];                                     /* read label for DS 1 */
  char    s2_label[16];                                     /* read label for DS 2 */
  unsigned int dim;                                         /* dataset dimension index */
- int     scale_idx;                                        /* scale index */
-	
+ int     scale_idx;     
+ 
+  
+ printf("Testing API functions\n");
+ 	
 /*-------------------------------------------------------------------------
  * create a file for the test
  *-------------------------------------------------------------------------
  */  
 
  /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if ((fid=H5Fcreate("test_ds1.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
 	
 /*-------------------------------------------------------------------------
@@ -106,7 +135,7 @@ int main(void)
  *-------------------------------------------------------------------------
  */  
 
- TESTING("attach scales");
+ TESTING2("attach scales");
 
  /* get the dataset id for "dset_a" */
  if ((did = H5Dopen(fid,"dset_a"))<0)
@@ -252,7 +281,7 @@ int main(void)
  *-------------------------------------------------------------------------
  */  
 
- TESTING("has scales");
+ TESTING2("has scales");
 
 /*-------------------------------------------------------------------------
  * verify that "dset_a" has dimension scales
@@ -298,7 +327,7 @@ int main(void)
  *-------------------------------------------------------------------------
  */ 
 
- TESTING("detach scales ");
+ TESTING2("detach scales ");
 
 
 /*-------------------------------------------------------------------------
@@ -396,7 +425,7 @@ int main(void)
  *-------------------------------------------------------------------------
  */ 
  
- TESTING("set/get label");
+ TESTING2("set/get label");
 
  if ((did = H5Dopen(fid,"dset_a"))<0)
   goto out;
@@ -429,7 +458,7 @@ int main(void)
  */ 
  
 
- TESTING("set scale/get scale name");
+ TESTING2("set scale/get scale name");
 
 /*-------------------------------------------------------------------------
  * make a dataset named "ds5" and convert it to a DS dataset
@@ -468,7 +497,7 @@ int main(void)
  * test 6: test iterate scales with a function verifiy_scale
  *-------------------------------------------------------------------------
  */ 
- TESTING("iterate scales");
+ TESTING2("iterate scales");
 
  /* get the dataset id for "dset_a" */
  if ((did = H5Dopen(fid,"dset_a"))<0)
@@ -499,7 +528,7 @@ int main(void)
  * test 6: test iterate scales with a function read_scale
  *-------------------------------------------------------------------------
  */ 
- TESTING("read scale values with iterate scales");
+ TESTING2("read scale values with iterate scales");
 
  /* get the dataset id for "dset_a" */
  if ((did = H5Dopen(fid,"dset_a"))<0)
@@ -525,7 +554,6 @@ int main(void)
 
  PASSED();
 
-
 /*-------------------------------------------------------------------------
  * end
  *-------------------------------------------------------------------------
@@ -543,10 +571,102 @@ out:
   H5Fclose(fid);
  } H5E_END_TRY;
  H5_FAILED();
- return 1;
+ return FAIL;
 }
 
 
+/*-------------------------------------------------------------------------
+ * test error conditions
+ *-------------------------------------------------------------------------
+ */
+
+static int test_errors()
+{
+ hid_t   fid;                                              /* file ID */
+ int     rank     = RANK;                                  /* rank of data dataset */
+ int     rankds   = 1;                                     /* rank of DS dataset */
+ hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
+ int     buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};     /* data of data dataset */
+ hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
+ hsize_t s2_dim[1]  = {DIM2_SIZE};                         /* size of DS 2 dataset */
+ hid_t   dset;                                             /* dataset ID */
+ hid_t   scale;                                            /* scale ID */
+ hid_t   gid;                                              /* group ID */
+ hid_t   sid;                                              /* space ID */
+ hid_t   sidds; 
+ 
+ printf("Testing error conditions\n");
+
+/*-------------------------------------------------------------------------
+ * create a file for the test
+ *-------------------------------------------------------------------------
+ */  
+
+ /* create a file using default properties */
+ if ((fid=H5Fcreate("test_ds2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attempt to attach the dataset with the dataset
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("attach a dataset to itself");
+
+ /* create the data space for the dataset. */
+ if ((sid=H5Screate_simple(rank,dims,NULL))<0)
+  goto out;
+ if ((sidds=H5Screate_simple(rankds,s1_dim,NULL))<0)
+  goto out;
+
+ /* create a dataset. */
+ if ((dset=H5Dcreate(fid,"dset_1",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
+  goto out;
+
+ /* create a dataset. */
+ if ((scale=H5Dcreate(fid,"scale_1",H5T_NATIVE_INT,sidds,H5P_DEFAULT))<0)
+  goto out;
+
+ /* attempt to attach the dataset with the dataset, it should fail */
+ if (H5DSattach_scale(dset,dset,0)==SUCCESS)
+  goto out;
+
+
+
+ if (H5Dclose(scale)<0)
+  goto out;
+ if (H5Dclose(dset)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
+  goto out;
+ if (H5Sclose(sidds)<0)
+  goto out;
+
+ PASSED();
+
+
+
+/*-------------------------------------------------------------------------
+ * end
+ *-------------------------------------------------------------------------
+ */  
+
+ /* close */
+ H5Fclose(fid);
+
+ return 0;
+  
+ /* error zone, gracefully close */
+out:
+ H5E_BEGIN_TRY {
+  H5Sclose(sid);
+  H5Sclose(sidds);
+  H5Dclose(dset);
+  H5Dclose(scale);
+  H5Fclose(fid);
+ } H5E_END_TRY;
+ H5_FAILED();
+ return FAIL;
+}
 
 
 /*-------------------------------------------------------------------------

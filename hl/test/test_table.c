@@ -50,7 +50,6 @@
 #define TITLE "Title"
 #define NFIELDS  (hsize_t)5
 #define NRECORDS (hsize_t)8
-#define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
 
 /*-------------------------------------------------------------------------
  * structure used for all tests, a particle with properties
