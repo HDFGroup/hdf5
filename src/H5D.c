@@ -1977,7 +1977,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                  * layout.
                  */
                 tmp_size = H5S_get_simple_extent_npoints(space) *
-                                        H5T_get_size(type);
+                                        H5T_get_size(new_dset->type);
                 H5_ASSIGN_OVERFLOW(new_dset->layout.size,tmp_size,hssize_t,size_t);
                 /* Verify data size is smaller than maximum header message size
                  * (64KB) minus other layout message fields.
@@ -2757,8 +2757,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
-	/* Sanity check that space is allocated, then read data from it */ 
-        assert(dataset->layout.addr!=HADDR_UNDEF || dataset->efl.nused > 0);
+	/* read data from space */ 
         n = H5S_select_fgath(dataset->ent.file, &(dataset->layout), 
                 dc_plist, &(dataset->efl), src_type_size, file_space, 
                 &file_iter, smine_nelmts, dxpl_id, tconv_buf/*out*/);
