@@ -191,6 +191,7 @@
 
 ./doc/html/PSandPDF/Dependencies
 ./doc/html/PSandPDF/Makefile.in
+./doc/html/PSandPDF/process.txt         _DO_NOT_DISTRIBUTE_
 
 ./doc/html/TechNotes.html
 ./doc/html/TechNotes/shuffling-algorithm-report.pdf
