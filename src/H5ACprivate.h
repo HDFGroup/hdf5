@@ -132,7 +132,7 @@ extern hid_t H5AC_ind_dxpl_id;
  * Library prototypes.
  */
 H5_DLL herr_t H5AC_init(void);
-H5_DLL herr_t H5AC_create(H5F_t *f, int size_hint);
+H5_DLL herr_t H5AC_create(const H5F_t *f, int size_hint);
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 			void *thing);
 H5_DLL void *H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,

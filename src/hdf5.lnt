@@ -1,5 +1,7 @@
-// Turn off warnings about not using the return value from these functions
--esym(534, HDfprintf, H5E_clear, H5E_push, H5I_clear_group, H5I_destroy_group)
+// Turn off warnings about not using the return value from these functions:
+-esym(534, HDfprintf, H5E_clear, H5E_push)
+-esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free)
+-esym(534, H5I_clear_group, H5I_destroy_group)
 -esym(534, H5MM_xfree)
 
 // Suppress message about our use of 'goto' in our error macros
@@ -23,6 +25,12 @@
 // Suppress message about "Shift right of signed quantity" in H5I_GRP macro
 -emacro(702,H5I_GRP)
 
+// Suppress message about "Constant expression evaluates to 0 in expression" in H5FL_ARR* macros
+-emacro(778,H5FL_ARR_DEFINE_COMMON)
+
+// Suppress message about "Union initialization" in H5FL_ARR* macros
+-emacro(708,H5FL_ARR_DEFINE_COMMON)
+
 // Suppress message about "enum constant not used within defaulted switch"
 -e788
 
@@ -39,4 +47,6 @@
 /* So far, the following files have been linted with these options:
         H5.c
         H5A.c
+        H5AC.c
+        H5B.c
 */
