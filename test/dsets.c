@@ -221,8 +221,8 @@ test_simple_io(hid_t file, char *fname)
     int			i, j, n;
     hsize_t		dims[2];
     void		*tconv_buf = NULL;
-    FILE                *f;
-    haddr_t              offset;
+    int                 f;
+    haddr_t             offset;
     int                 rdata[100][200];
     
     TESTING("simple I/O");
@@ -261,9 +261,9 @@ test_simple_io(hid_t file, char *fname)
      * compare it with the data written in.*/
     if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
-    f = fopen(fname, "r");
-    fseek(f, (long int)offset, SEEK_SET);
-    fread(rdata, sizeof(int), 100*200, f);
+    f = HDopen(fname, O_RDONLY, 0);
+    HDlseek(f, (off_t)offset, SEEK_SET);
+    HDread(f, rdata, sizeof(int)*100*200);
     
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
@@ -277,7 +277,7 @@ test_simple_io(hid_t file, char *fname)
 	}
     }   
 
-    fclose(f);
+    HDclose(f);
 
     /* Read the dataset back */
     if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check)<0)
