@@ -24,7 +24,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.5.50], [hdfhelp@ncsa.uiuc.edu])
+AC_INIT([HDF5], [1.5.48], [hdfhelp@ncsa.uiuc.edu])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -761,7 +761,7 @@ dnl If the library path is specified then it must be preceded by a comma.
 dnl
 AC_ARG_WITH([zlib],
             [AC_HELP_STRING([--with-zlib=DIR],
-                            [Use zlib library for external deflate I/O filter [default=yes]])],,
+                            [Use GNU zlib compression [default=yes]])],,
             withval=yes)
 
 case $withval in
@@ -830,100 +830,8 @@ case $withval in
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-    AC_DEFINE(HAVE_FILTER_DEFLATE, 1,
+  AC_DEFINE(HAVE_FILTER_DEFLATE, 1,
             [Define if support for deflate filter is enabled])
-
-    dnl Add "deflate" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate"
-fi
-
-
-dnl ----------------------------------------------------------------------
-dnl Is the szlib present? It has a header file `szlib.h' and a library
-dnl `-lsz' and their locations might be specified with the `--with-szlib'
-dnl command-line switch. The value is an include path and/or a library path.
-dnl If the library path is specified then it must be preceded by a comma.
-dnl
-AC_ARG_WITH([szlib],
-            [AC_HELP_STRING([--with-szlib=DIR],
-                            [Use szlib library for external szlib I/O filter [default=yes]])],,
-            withval=yes)
-
-case $withval in
-  yes)
-    HAVE_SZLIB="yes"
-    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"])
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
-
-    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find szlib library])
-    fi
-    ;;
-  no)
-    HAVE_SZLIB="no"
-    AC_MSG_CHECKING([for szlib])
-    AC_MSG_RESULT([suppressed])
-    ;;
-  *)
-    HAVE_SZLIB="yes"
-    case "$withval" in
-      *,*)
-        szlib_inc="`echo $withval |cut -f1 -d,`"
-        szlib_lib="`echo $withval |cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          szlib_inc="$withval/include"
-          szlib_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    dnl Trying to include -I/usr/include and -L/usr/lib is redundant and
-    dnl can mess some compilers up.
-    if test "X$szlib_inc" = "X/usr/include"; then
-      szlib_inc=""
-    fi
-    if test "X$szlib_lib" = "X/usr/lib"; then
-      szlib_lib=""
-    fi
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-
-    if test -n "$szlib_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$szlib_inc"
-    fi
-
-    AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"])
-
-    if test -n "$szlib_lib"; then
-      LDFLAGS="$LDFLAGS -L$szlib_lib"
-    fi
-
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                 [LDFLAGS="$saved_LDFLAGS"; unset HAVE_SZLIB])
-
-    if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find szlib library])
-    fi
-    ;;
-esac
-
-if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-    AC_DEFINE(HAVE_FILTER_SZIP, 1,
-            [Define if support for szip filter is enabled])
-
-    dnl Add "szip" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
 fi
 
 dnl ----------------------------------------------------------------------
@@ -2252,6 +2160,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  perform/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile
+                 tools/h5import/Makefile
                  tools/h5diff/Makefile
                  tools/h5ls/Makefile
                  tools/lib/Makefile
@@ -2270,8 +2179,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  doc/html/Tutor/Graphics/Makefile
                  doc/html/Tutor/examples/Makefile
                  doc/html/cpplus/Makefile
-                 doc/html/ed_libs/Makefile
-                 doc/html/ed_styles/Makefile
                  doc/html/fortran/Makefile])
 
 AC_OUTPUT
@@ -2313,11 +2220,6 @@ if test -z "$ECHO_N" -o -z "$ECHO_C"; then
     ECHO_C='\c'
   fi
 fi
-
-PRINT_PLAIN() {
-  echo $ECHO_N "$1$ECHO_C"
-  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5.settings
-}
 
 PRINT_N() {
   echo $ECHO_N "$1:  $ECHO_C"
@@ -2426,17 +2328,14 @@ IF_YES_NO "$GPFS"
 PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
 
+PRINT_N "           Internal I/O filters"
+PRINT "$FILTERS"
+
 PRINT_N "                        hsize_t"
 case "$HSIZET" in
   no|small)  PRINT "Small" ;;
   *)         PRINT "Large" ;;
 esac
-
-PRINT_N "         I/O filters (external)"
-PRINT "$EXTERNAL_FILTERS"
-
-PRINT_N "         I/O filters (internal)"
-PRINT "$FILTERS"
 
 PRINT_N " Linux Large File Support (LFS)"
 IF_ENABLED_DISABLED "$LINUX_LFS"
@@ -2462,3 +2361,6 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
+
+PRINT_N "               Zlib-compression"
+IF_YES_NO "$HAVE_ZLIB"
