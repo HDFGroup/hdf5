@@ -242,12 +242,6 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
                      * first when decreasing the precision of a floating point
                      * type.
                      */
-                    /*printf("\nsign: %d  ", dt->shared->u.atomic.u.f.sign);
-                    printf("epos: %d  ", dt->shared->u.atomic.u.f.epos);
-                    printf("esize: %d  ", dt->shared->u.atomic.u.f.esize);
-                    printf("mpos: %d  ", dt->shared->u.atomic.u.f.mpos);
-                    printf("msize: %d  ", dt->shared->u.atomic.u.f.msize);
-                    printf("prec: %d\n", prec); */ 
                     if (dt->shared->u.atomic.u.f.sign >= prec+offset ||
                             dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec+offset ||
                             dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec+offset)

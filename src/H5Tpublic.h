@@ -373,7 +373,7 @@ H5_DLLVAR hid_t H5T_FORTRAN_S1_g;
  * name.  If the type begins with `U' then it is the unsigned version of the
  * integer type; other integer types are signed.  The type LLONG corresponds
  * to C's `long_long' and LDOUBLE is `long double' (these types might be the
- * same as `LONG' and `DOUBLE' respectively.
+ * same as `LONG' and `DOUBLE' respectively).
  */
 #define H5T_NATIVE_CHAR		(CHAR_MIN?H5T_NATIVE_SCHAR:H5T_NATIVE_UCHAR)
 #define H5T_NATIVE_SCHAR        (H5OPEN H5T_NATIVE_SCHAR_g)

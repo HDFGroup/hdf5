@@ -6617,6 +6617,15 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 
             /* Make certain that there isn't some weird number of destination bits */
             assert(dst_nbits%8==0);
+            
+            /* For Intel machines, the size of "long double" is 12 byte, precision
+             * is 80 bits.  During hardware conversion, the last 2 byte may have 
+             * garbage in them.  Clean them out with 0s before compare the values.
+             */ 
+            if(endian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE && dst_size==12) { 
+                buf[j*dst_size+10] = 0x00;
+                buf[j*dst_size+11] = 0x00;
+            }
 
             /* Are the two results the same? */
             for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++)
@@ -7290,33 +7299,32 @@ run_int_float_conv(const char *name)
 #endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 #endif
 
-    if(!strcmp(name, "sw")) {
 #if H5_SW_INTEGER_TO_LDOUBLE_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-        nerrors += test_conv_int_float(name, H5T_NATIVE_SCHAR, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_UCHAR, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_SHORT, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_USHORT, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_SCHAR, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_UCHAR, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_SHORT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_USHORT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_INT, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_UINT, H5T_NATIVE_LDOUBLE);
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
 #endif
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
 #if H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS
-        nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
 #else /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS */
-        {
-            char		str[256];		/*hello string		*/
+    {
+        char		str[256];		/*hello string		*/
 
-            sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "unsigned long long", "long double");
-            printf("%-70s", str);
-            SKIPPED();
-            HDputs("    Test skipped due to compiler not handling conversion.");
-        }
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "unsigned long long", "long double");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+    }
 #endif /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION_WORKS */
 #endif
 #endif
@@ -7331,7 +7339,6 @@ run_int_float_conv(const char *name)
         HDputs("    Test skipped due to hardware conversion error.");
     }
 #endif /*H5_SW_INTEGER_TO_LDOUBLE_WORKS*/
-    }
 
     return nerrors;
 }
@@ -7416,61 +7423,59 @@ run_float_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
 
-    if(!strcmp(name, "sw")) {
 #if H5_SW_LDOUBLE_TO_INTEGER_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_INT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_INT);
 #if H5_CV_LDOUBLE_TO_UINT_WORKS
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
 #else /*H5_CV_LDOUBLE_TO_UINT_WORKS*/ 
-        {
-            char		str[256];		/*string		*/
+    {
+        char		str[256];		/*string		*/
 
-            sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "long double", "unsigned int");
-            printf("%-70s", str);
-            SKIPPED();
-            HDputs("    Test skipped due to hardware conversion error.");
-        }
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "long double", "unsigned int");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to hardware conversion error.");
+    }
 #endif /*H5_CV_LDOUBLE_TO_UINT_WORKS*/
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULONG);
 #endif
 
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
 #ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM
-        nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
+    nerrors += test_conv_int_float(name, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
 #else /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/
-        {
-            char		str[256];		/*string		*/
+    {
+        char		str[256];		/*string		*/
 
-            sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "long double", "unsigned long long");
-            printf("%-70s", str);
-            SKIPPED();
-            HDputs("    Test skipped due to hardware conversion error.");
-        }
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "long double", "unsigned long long");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to hardware conversion error.");
+    }
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/ 
 #endif
 #endif
 #else /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
-        {
-            char		str[256];		/*hello string		*/
+    {
+        char		str[256];		/*hello string		*/
 
-            sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "long double", "all integers");
-            printf("%-70s", str);
-            SKIPPED();
-            HDputs("    Test skipped due to hardware conversion error.");
-        }
-#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "long double", "all integers");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to hardware conversion error.");
     }
+#endif /*H5_SW_LDOUBLE_TO_INTEGER_WORKS*/
 
     return nerrors;
 }
