@@ -125,8 +125,8 @@ main (void)
     herr_t		status;
     static size_t	dim[] = {NX, NY};
     int 		f_offset[2];	/*offset of hyperslab in file	*/
-    int 		h_size[2];	/*size of hyperslab		*/
-    int 		h_sample[2];	/*hyperslab sampling		*/
+    size_t 		h_size[2];	/*size of hyperslab		*/
+    size_t 		h_sample[2];	/*hyperslab sampling		*/
 
     /* Create the file */
     file = H5Fcreate ("cmpd_dset.h5", H5ACC_OVERWRITE,
@@ -395,13 +395,7 @@ STEP  8: Read middle third hyperslab into memory array.\n");
     assert (status>=0);
 
     /* Create memory data space */
-    {   /* H5Pcreate_simple expects dimsize be size_t type. */
-	/* Use a temporary array.  A kludge--need to fix hyperslab */
-	/* argument types later. */
-    size_t tdim[2];
-    tdim[0] = h_size[0];
-    tdim[1] = h_size[1];
-    s8_m_sid = H5Pcreate_simple (2, tdim);
+    s8_m_sid = H5Pcreate_simple (2, h_size);
     assert (s8_m_sid>=0);
     }
 
