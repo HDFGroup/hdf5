@@ -35,7 +35,7 @@
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
      INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
-     INTEGER :: class
+     INTEGER :: class, ref_size
      !
      !  Initialize FORTRAN predefined datatypes
      !
@@ -91,7 +91,8 @@
      CALL h5rcreate_f(file_id, "/GROUP1/GROUP2", ref(2), error)
      CALL h5rcreate_f(file_id, dsetnamei, ref(3), error)
      CALL h5rcreate_f(file_id, "MyType", ref(4), error)
-     CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, error)
+     ref_size = size(ref)
+     CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, ref_size, error)
      !
      ! Close the dataset
      !
@@ -100,7 +101,8 @@
      ! Reopen the dataset with object references and read references to the buffer
      !
      CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
-     CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, error)
+     ref_size = size(ref_out)
+     CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, ref_size, error)
      !
      ! Dereference the third reference. We know that it is a dataset. On practice
      ! one should use h5rget_object_type_f function to find out
