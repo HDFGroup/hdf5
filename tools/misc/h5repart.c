@@ -1,7 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
- * Copyright (C) 1998 NCSA
- *                    All rights reserved.
- *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Wednesday, May 13, 1998
  *
@@ -13,7 +24,8 @@
  */
 
 /* See H5private.h for how to include system headers */
-#include <hdf5.h>
+#include "hdf5.h"
+#include "H5private.h"
 #ifdef H5_STDC_HEADERS
 #   include <ctype.h>
 #   include <errno.h>
@@ -34,22 +46,23 @@
 
 #ifdef WIN32
 #   include <io.h>
+#	include <fcntl.h>
 #endif
 
 #ifndef FALSE
-#define FALSE	0
+#   define FALSE	0
 #endif
 #ifndef TRUE
-#define TRUE	1
+#   define TRUE 	1
 #endif
-#define NAMELEN	4096
+#   define NAMELEN	4096
 #define GB	*1024*1024*1024
 
 #ifndef MIN
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
+#   define MIN(X,Y)	((X)<(Y)?(X):(Y))
 #endif
 #ifndef MIN3
-#define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
+#   define MIN3(X,Y,Z)	MIN(MIN(X,Y),Z)
 #endif
 
 
@@ -178,25 +191,39 @@ main (int argc, char *argv[])
     int		src, dst=-1;		/*source & destination files	*/
     int		need_seek=FALSE;	/*destination needs to seek?	*/
     int		need_write;		/*data needs to be written?	*/
-    struct stat	sb;			/*temporary file stat buffer	*/
+    /*struct stat	sb;			temporary file stat buffer	*/
+	/*struct _stati64 sb;*/
+	h5_stat_t sb;
+
     int		verbose=FALSE;		/*display file names?		*/
     size_t	left_overs=0;		/*amount of zeros left over	*/
 
     const char	*src_gen_name;		/*general source name		*/
     char	src_name[NAMELEN];	/*source member name		*/
-    off_t	src_offset=0;		/*offset in source member	*/
+
     int		src_is_family;		/*is source name a family name?	*/
     int		src_membno=0;		/*source member number		*/
-    off_t	src_size;		/*source logical member size	*/
-    off_t	src_act_size;		/*source actual member size	*/
-    
+  
     const char	*dst_gen_name;		/*general destination name	*/
     char	dst_name[NAMELEN];	/*destination member name	*/
-    off_t	dst_offset=0;		/*offset in destination member	*/
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
-    off_t	dst_size=1 GB;		/*destination logical memb size	*/
 
+#ifdef WIN32
+
+	_int64	src_offset=0;		/*offset in source member	*/
+	_int64	dst_offset=0;		/*offset in destination member	*/
+	_int64	src_size;		/*source logical member size	*/
+    _int64	src_act_size;		/*source actual member size	*/
+    _int64	dst_size=1 GB;		/*destination logical memb size	*/
+#else
+	off_t	src_offset=0;		/*offset in source member	*/
+	off_t	dst_offset=0;		/*offset in destination member	*/
+	off_t	src_size;		/*source logical member size	*/
+    off_t	src_act_size;		/*source actual member size	*/
+    off_t	dst_size=1 GB;		/*destination logical memb size	*/
+#endif
+	
     /*
      * Get the program name from argv[0]. Use only the last component.
      */
@@ -231,11 +258,13 @@ main (int argc, char *argv[])
     src_gen_name = argv[argno++];
     sprintf (src_name, src_gen_name, src_membno);
     src_is_family = strcmp (src_name, src_gen_name);
-    if ((src=open (src_name, O_RDONLY))<0) {
+
+    if ((src=HDopen(src_name, O_RDONLY,0))<0) {
 	perror (src_name);
 	exit (1);
     }
-    if (fstat (src, &sb)<0) {
+
+    if (HDfstat(src, &sb)<0) {
 	perror ("fstat");
 	exit (1);
     }
@@ -249,7 +278,8 @@ main (int argc, char *argv[])
     dst_gen_name = argv[argno++];
     sprintf (dst_name, dst_gen_name, dst_membno);
     dst_is_family = strcmp (dst_name, dst_gen_name);
-    if ((dst=open (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
+
+    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 	perror (dst_name);
 	exit (1);
     }
@@ -298,8 +328,8 @@ main (int argc, char *argv[])
 	 * later in the destination when we finally get non-zero data.
 	 */
 	if (need_write) {
-	    if (need_seek && lseek (dst, dst_offset, SEEK_SET)<0) {
-		perror ("lseek");
+	    if (need_seek && HDlseek (dst, dst_offset, SEEK_SET)<0) {
+		perror ("HDlseek");
 		exit (1);
 	    }
 	    if ((nio=write (dst, buf, n))<0) {
@@ -330,14 +360,14 @@ main (int argc, char *argv[])
 		break;
 	    }
 	    sprintf (src_name, src_gen_name, ++src_membno);
-	    if ((src=open (src_name, O_RDONLY))<0 && ENOENT==errno) {
+	    if ((src=HDopen (src_name, O_RDONLY,0))<0 && ENOENT==errno) {
 		dst_offset += n;
 		break;
 	    } else if (src<0) {
 		perror (src_name);
 		exit (1);
 	    }
-	    if (fstat (src, &sb)<0) {
+	    if (HDfstat (src, &sb)<0) {
 		perror ("fstat");
 		exit (1);
 	    }
@@ -358,16 +388,16 @@ main (int argc, char *argv[])
 	dst_offset += n;
 	if (dst_is_family && dst_offset==dst_size) {
 	    if (0==dst_membno) {
-		if (lseek (dst, dst_size-1, SEEK_SET)<0) {
-		    perror ("lseek");
+		if (HDlseek (dst, dst_size-1, SEEK_SET)<0) {
+		    perror ("HDHDlseek");
 		    exit (1);
 		}
 		if (read (dst, buf, 1)<0) {
 		    perror ("read");
 		    exit (1);
 		}
-		if (lseek (dst, dst_size-1, SEEK_SET)<0) {
-		    perror ("lseek");
+		if (HDlseek (dst, dst_size-1, SEEK_SET)<0) {
+		    perror ("HDlseek");
 		    exit (1);
 		}
 		if (write (dst, buf, 1)<0) {
@@ -377,7 +407,7 @@ main (int argc, char *argv[])
 	    }
 	    close (dst);
 	    sprintf (dst_name, dst_gen_name, ++dst_membno);
-	    if ((dst=open (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
+	    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 		perror (dst_name);
 		exit (1);
 	    }
@@ -393,16 +423,16 @@ main (int argc, char *argv[])
      * family has been truncated.
      */
     if (need_seek) {
-	if (lseek (dst, dst_offset-1, SEEK_SET)<0) {
-	    perror ("lseek");
+	if (HDlseek (dst, dst_offset-1, SEEK_SET)<0) {
+	    perror ("HDlseek");
 	    exit (1);
 	}
 	if (read (dst, buf, 1)<0) {
 	    perror ("read");
 	    exit (1);
 	}
-	if (lseek (dst, dst_offset-1, SEEK_SET)<0) {
-	    perror ("lseek");
+	if (HDlseek (dst, dst_offset-1, SEEK_SET)<0) {
+	    perror ("HDlseek");
 	    exit (1);
 	}
 	if (write (dst, buf, 1)<0) {
