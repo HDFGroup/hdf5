@@ -31,6 +31,7 @@ H5VER=			# default to current CVS version
 H5VERSION=		# default to current CVS version
 
 # Default to do checkout (only once) and test, no release.
+# Will run test only if there is significant differences from previous version.
 # If srcdir is not used, don't launched multiple tests
 SNAPSHOT="${DEBUGMODE:+echo }bin/snapshot"
 SRCDIR="srcdir"
@@ -518,6 +519,7 @@ PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}
 FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
 CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
+DIFFLOG=${SNAPYARD}/log/DIFF_LOG_${TODAY}
 # Snap Test Configuration file
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
 
@@ -593,6 +595,17 @@ else
 	REPORT_ERR "****FAILED ${HOSTNAME}: Time expired waiting CVS update to finish****"
 	exit $errcode
     fi
+fi
+
+# run a snapshot diff to see if any significant differences between
+# the current and previous versions
+($SNAPSHOT diff ) >> $DIFFLOG 2>&1
+errcode=$?
+if [ $errcode -eq 0 ]; then
+    # no need to run test
+    PRINT "NO TEST: no significant differences between current and previous versions" |
+        tee -a $PASSEDLOG
+    exit 0
 fi
 
 # we can use the version of script in SNAPYARD/current now
