@@ -13,9 +13,11 @@ DATASET "shuffle" {
       PREPROCESSING SHUFFLE
    }
    FILLVALUE {
-      FILL_TIME IFSET
-      ALLOC_TIME INCR
+      FILL_TIME H5D_FILL_TIME_IFSET
       VALUE  -99   
+   }
+   ALLOCATION_TIME {
+      H5D_ALLOC_TIME_INCR
    }
 }
 }

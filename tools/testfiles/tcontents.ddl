@@ -21,12 +21,13 @@ FILE_CONTENTS {
  dataset    /fletcher32
  group      /g1
  dataset    /g1/mydset
- link       /g1/slink
+ dataset    /hlink to all (HARDLINK)
  dataset    /myfilter
  datatype   /mytype
  datatype   /myvlen
  dataset    /reference
  dataset    /shuffle
+ link       /slink to all -> all
  dataset    /string
  dataset    /szip
  dataset    /vlen

@@ -11,10 +11,15 @@ COMMENT "This is a dataset with contiguous storage"
       SIZE 800
       OFFSET 4096
    }
+   FILTERS {
+      NONE
+   }
    FILLVALUE {
-      FILL_TIME IFSET
-      ALLOC_TIME LATE
+      FILL_TIME H5D_FILL_TIME_IFSET
       VALUE  -99   
+   }
+   ALLOCATION_TIME {
+      H5D_ALLOC_TIME_LATE
    }
 }
 }

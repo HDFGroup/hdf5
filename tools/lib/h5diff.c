@@ -72,8 +72,8 @@ int  h5diff(const char *fname1,
  *-------------------------------------------------------------------------
  */
 
- nobjects1 = h5trav_getinfo( file1_id, NULL );
- nobjects2 = h5trav_getinfo( file2_id, NULL );
+ nobjects1 = h5trav_getinfo( file1_id, NULL, 0 );
+ nobjects2 = h5trav_getinfo( file2_id, NULL, 0 );
 
 /*-------------------------------------------------------------------------
  * get the list of objects in the files
@@ -88,8 +88,8 @@ int  h5diff(const char *fname1,
   goto out;
  }
 
- h5trav_getinfo( file1_id, info1 );
- h5trav_getinfo( file2_id, info2 );
+ h5trav_getinfo( file1_id, info1, 0 );
+ h5trav_getinfo( file2_id, info2, 0 );
 
 /*-------------------------------------------------------------------------
  * object name was supplied

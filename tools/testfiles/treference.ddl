@@ -6,7 +6,7 @@ DATASET "reference" {
    DATATYPE  H5T_REFERENCE
    DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
    DATA {
-        (0) DATASET 0:60656 /g1/mydset 
+        (0), DATASET 0:60328 /g1/mydset 
    }
 }
 }

@@ -10,10 +10,15 @@ COMMENT "This is a dataset with compact storage"
       COMPACT
       SIZE 800
    }
+   FILTERS {
+      NONE
+   }
    FILLVALUE {
-      FILL_TIME IFSET
-      ALLOC_TIME EARLY
+      FILL_TIME H5D_FILL_TIME_IFSET
       VALUE  -99   
+   }
+   ALLOCATION_TIME {
+      H5D_ALLOC_TIME_EARLY
    }
 }
 }

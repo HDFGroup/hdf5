@@ -6,7 +6,7 @@ DATASET "/g1/g1.1/dset3" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  SIMPLE { ( 5 ) / ( 5 ) }
    DATA {
-        (0) 0, 1, 2, 3, 4
+        (0), 0, 1, 2, 3, 4
    }
 }
 DATASET "/g1/dset2" {

@@ -97,7 +97,7 @@ extern "C" {
  * "h5trav info" public functions
  *-------------------------------------------------------------------------
  */
-int  h5trav_getinfo( hid_t file_id, trav_info_t *info );
+int  h5trav_getinfo( hid_t fid, trav_info_t *info, int print );
 int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
 void h5trav_freeinfo( trav_info_t *info, int nobjs );
 void h5trav_printinfo(int nobjs, trav_info_t *info);
