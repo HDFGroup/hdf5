@@ -414,8 +414,10 @@ void short_dataset(const char *filename)
                     } /* end else */
     if(err_num > MAX_ERR_REPORT && !verbose)
         printf("[more errors ...]\n");
-    if(err_num)
+    if(err_num){
         printf("%d errors found in check_value\n", err_num);
+	nerrors++;
+    }
 
     /* Close all file objects */
     ret=H5Dclose (dataset);
