@@ -748,8 +748,8 @@ create or access function.
         <code>H5Gget_objinfo</code> fills in the following data structure:
         <pre>
                   typedef struct H5G_stat_t {
-                      unsigned long fileno[2];
-                      unsigned long objno[2];
+                      unsigned long fileno;
+                      haddr_t objno;
                       unsigned nlink;
                       int type;
                       time_t mtime; 
@@ -757,8 +757,8 @@ create or access function.
                   } H5G_stat_t
         </pre>
         The <code>fileno</code> and <code>objno</code> fields contain 
-        four values which uniquely itentify an object among those 
-        HDF5 files which are open: if all four values are the same 
+        values which uniquely itentify an object among those 
+        HDF5 files which are open: if both values are the same 
         between two objects, then the two objects are the same 
         (provided both files are still open).  
         <ul>
