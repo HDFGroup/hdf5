@@ -10,8 +10,9 @@ srcdir=@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=java
+SUBDIRS=
 DOCDIR=$(docdir)/hdf5/Tutor/examples
+SUBDOCDIR=$(docdir)/hdf5/Tutor/examples/java
 
 # Public doc files (to be installed)...
 PUB_DOCS=attrexample.f90 chunk.f90 compound.f90 dsetexample.f90            \
@@ -22,6 +23,8 @@ PUB_DOCS=attrexample.f90 chunk.f90 compound.f90 dsetexample.f90            \
 	 h5_ref2objr.c h5_ref2objw.c h5_ref2regr.c h5_ref2regw.c           \
 	 h5_reference.c hyperslab.f90 mountexample.f90 refobjexample.f90   \
 	 refregexample.f90 rwdsetexample.f90 selectele.f90
+
+PUB_SUBDOCS=java/Makefile.in java/Makefile
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=
