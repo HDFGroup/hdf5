@@ -27,11 +27,11 @@ ADD_PARALLEL_FILES=@ADD_PARALLEL_FILES@
 FPAR_MOD=${ADD_PARALLEL_FILES:yes=HDF5mpio.f90}
 
 CPARALLEL=${ADD_PARALLEL_FILES:yes=H5FDmpiof.c}
-CLIB_SRC=H5f90kit.c H5f.c H5Git.c H5Rf.c H5Ff.c  H5Sf.c H5Df.c H5Gf.c	\
+CLIB_SRC=H5f90kit.c H5_f.c H5Git.c H5Rf.c H5Ff.c  H5Sf.c H5Df.c H5Gf.c	\
 	 H5Af.c H5Tf.c H5Pf.c H5If.c H5Ef.c ${CPARALLEL:no=}
 
 FPARALLEL=${ADD_PARALLEL_FILES:yes=H5FDmpioff.f90}
-FLIB_SRC=H5fortran_types.f90 H5fortran_flags.f90 H5f90global.f90 H5ff.f90	\
+FLIB_SRC=H5fortran_types.f90 H5fortran_flags.f90 H5f90global.f90 H5_ff.f90	\
          H5Rff.f90 H5Fff.f90 H5Sff.f90 H5Dff.f90 H5Gff.f90 H5Aff.f90 H5Tff.f90 	\
 	 H5Pff.f90 H5Iff.f90 H5Eff.f90 ${FPARALLEL:no=} ${FPAR_MOD:no=HDF5.f90}
 

@@ -22,6 +22,12 @@
 ! Comment:		
 !----------------------------------------------------------------------
       SUBROUTINE h5open_f(error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5open_f
+!DEC$endif
+!
         USE H5GLOBAL
 
         IMPLICIT NONE
@@ -114,6 +120,12 @@
 !----------------------------------------------------------------------
 
       SUBROUTINE h5close_f(error)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5close_f
+!DEC$endif
+!
         USE H5GLOBAL
 
         IMPLICIT NONE
