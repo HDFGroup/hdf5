@@ -15,6 +15,7 @@
 
 #ifdef WIN32
 #include <process.h>
+#include <direct.h>
 #endif  /* WIN32 */
 
 /*
@@ -393,7 +394,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
                 if (stat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
-                    if (mkdir(fullname, 0755) < 0 && errno != EEXIST)
+                    if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST)
                         /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
                          * Default to PREFIX's original prefix value. */
                         strcpy(fullname, prefix);
