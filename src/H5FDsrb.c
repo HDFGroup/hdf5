@@ -123,6 +123,7 @@ typedef struct H5FD_srb_fapl_t {
 static const H5FD_class_t H5FD_srb_g = {
     "srb",					/*name			*/
     MAXADDR,					/*maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree		*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
