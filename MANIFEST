@@ -270,6 +270,9 @@
 ./doc/html/Tutor/title.html
 ./doc/html/Tutor/util.html
 
+./doc/html/XML_DTD.html
+./doc/html/XML_DTD/DesignNotes.html
+
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/dataset_p1.gif
@@ -579,3 +582,5 @@
 ./tools/testfiles/Expected/tslink.hdf
 ./tools/testfiles/Expected/tstr.hdf
 ./tools/testfiles/Expected/tstr2.hdf
+
+./xml_dtd/HDF5-File.dtd
