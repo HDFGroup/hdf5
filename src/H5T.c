@@ -562,15 +562,15 @@ H5T_init_interface(void)
     if (NULL==(native_double=H5I_object(H5T_NATIVE_DOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
 
-    /*------------------------------------------------------------
-     * Defaults for C9x types
-     *------------------------------------------------------------ 
-     */
-
     /* Use this global as a proxy for all the globals, since they all get
      * initialized and shutdown at the same time.
      */
     if(H5T_NATIVE_INT_LEAST8_g<0) {
+        /*------------------------------------------------------------
+         * Defaults for C9x types
+         *------------------------------------------------------------ 
+         */
+
         /* int8 */
         H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST8_g,COPY,native_int,SET,1)
         H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST8_g,COPY,native_uint,SET,1)
