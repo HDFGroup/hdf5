@@ -2338,15 +2338,19 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
 
         /* Indicate that this space needs to be released */
         equiv_mspace_init=1;
+
+        /* Set the number of dimensions for the memory dataspace */
+        fm->m_ndims=dataset->layout.ndims-1;
     } /* end else */
-    else
+    else {
         equiv_mspace=(H5S_t *)mem_space; /* Casting away 'const' OK... */
+
+        /* Set the number of dimensions for the memory dataspace */
+        H5_ASSIGN_OVERFLOW(fm->m_ndims,sm_ndims,int,unsigned);
+    } /* end else */
  
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims=f_ndims=dataset->layout.ndims-1;
-    if((sm_ndims = H5S_get_simple_extent_ndims(equiv_mspace))<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
-    H5_ASSIGN_OVERFLOW(fm->m_ndims,sm_ndims,int,unsigned);
 
     if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
