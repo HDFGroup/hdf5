@@ -44,7 +44,9 @@ H5Z_init_interface (void)
 {
     FUNC_ENTER_NOINIT(H5Z_init_interface);
 
+#ifdef H5_HAVE_FILTER_GZIP
     H5Z_register (H5Z_FILTER_DEFLATE, "deflate", H5Z_filter_deflate);
+#endif /* H5_HAVE_FILTER_GZIP */
 
     FUNC_LEAVE (SUCCEED);
 }

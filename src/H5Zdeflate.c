@@ -10,6 +10,8 @@
 #include "H5MMprivate.h"
 #include "H5Zprivate.h"
 
+#ifdef H5_HAVE_FILTER_GZIP
+
 #ifdef H5_HAVE_ZLIB_H
 #   include "zlib.h"
 #else
@@ -152,3 +154,5 @@ done:
         H5MM_xfree(outbuf);
     FUNC_LEAVE (ret_value);
 }
+
+#endif /* H5_HAVE_FILTER_GZIP */
