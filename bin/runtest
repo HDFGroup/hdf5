@@ -496,10 +496,8 @@ echo TEST_TYPES=$TEST_TYPES
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
-echo NOCVS=$NOCVS
 if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
     echo Running CVS checkout with output saved in $CVSLOG
-exit -1
     # Set CVS lock first
     touch $CVSLOG_LOCK
     ($SNAPSHOT checkout ) >> $CVSLOG 2>&1
