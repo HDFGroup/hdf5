@@ -17,7 +17,7 @@ fi
 
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
-    CFLAGS="-erroff=%none"
+    CFLAGS="-erroff=%none -DBSD_COMP"
     LIBS="$LIBS -lsocket"
     DEBUG_CFLAGS=-g
     DEBUG_CPPFLAGS=
