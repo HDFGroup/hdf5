@@ -220,13 +220,13 @@ case "X-$enable_production" in
    X-|X-no)
       AC_MSG_RESULT("development")
       CONFIG_MODE=development
-      CXXFLAGS="$CFLAGS $DEBUG_CXXFLAGS"
+      CXXFLAGS="$CXXFLAGS $DEBUG_CXXFLAGS"
       CPPFLAGS="$CPPFLAGS $DEBUG_CPPFLAGS"
       ;;
    X-pg|X-profile)
       AC_MSG_RESULT("profile")
       CONFIG_MODE=profile
-      CXXFLAGS="$CFLAGS $PROFILE_CXXFLAGS"
+      CXXFLAGS="$CXXFLAGS $PROFILE_CXXFLAGS"
       CPPFLAGS="$CPPFLAGS $PROFILE_CPPFLAGS"
       ;;
    *)
