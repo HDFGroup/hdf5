@@ -131,6 +131,8 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size, hbool_t prefer_derived_
         H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
         if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
             HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
+        if(MPI_Type_commit(new_type))
+            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't commit MPI contiguous type");
         *count = 1;
         *extra_offset = 0;
         *use_view = 1;
@@ -571,6 +573,8 @@ H5S_mpio_hyper_contig_type( const H5S_t *space, size_t elmt_size, hbool_t prefer
         H5_CHECK_OVERFLOW(total_bytes, hsize_t, int);
         if (MPI_Type_contiguous( (int)total_bytes, MPI_BYTE, new_type ))
             HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't create MPI contiguous type");
+        if(MPI_Type_commit(new_type))
+            HRETURN_ERROR(H5E_DATASPACE, H5E_MPI, FAIL,"couldn't commit MPI contiguous type");
         *count = 1;
         *extra_offset = byte_offset;
         *use_view = 1;
