@@ -6,9 +6,9 @@
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.2.0 and 
-HDF5-1.2.1, and contains information on the platforms where HDF5-1.2.1
-was tested and known problems in HDF5-1.2.1. For more details check the
+This document describes the differences between HDF5-1.2.1 and 
+HDF5-1.2.2, and contains information on the platforms where HDF5-1.2.2
+was tested(??????????) and known problems in HDF5-1.2.2. For more details check the
 HISTORY file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server 
@@ -28,9 +28,8 @@ If you have any questions or comments, please send them to:
 CONTENTS
 
 - Bug fixes since HDF5-1.2.1 
-- Bug fixes since HDF5-1.2.0 
-- Platforms Tested
 - Known Problems
+- Platforms Tested
 
 
 Bug fixes since HDF5-1.2.1
@@ -44,48 +43,15 @@ Bug fixes since HDF5-1.2.1
    * h5dump correctly displays the committed copy of predefined types
      correctly.
 
-Bug fixes since HDF5-1.2.0
-==========================
 
-Configuration
--------------
+Known Problems:
+==============
 
-   * The hdf5.h include file was fixed to allow the HDF5 Library to be compiled
-     with other libraries/applications that use GNU autoconf. 
-   * Configuration for parallel HDF5 was improved. Configure now attempts to
-     link with libmpi.a and/or libmpio.a as the MPI libraries by default.
-     It also uses "mpirun" to launch MPI tests by default.  It tests to
-     link MPIO routines during the configuration stage, rather than failing
-     later as before.  One can just do "./configure --enable-parallel"
-     if the MPI library is in the system library.
+o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
+  fail if library is compiled using optimization of any level.
 
-Dataset region references
--------------------------
-
-    * Error was fixed which was not allowing dataset region references to have
-      their regions retrieved correctly.
-
-Tools
-------
-
-    * Added an option, -V, to show the version information of h5dump.
-    * Fixed a core dumping bug of h5toh4 when executed on platforms like 
-      TFLOPS.
-    * The test script for h5toh4 used to not able to detect the hdp
-      dumper command was not valid.  It now detects and reports the
-      failure of hdp execution.
-
-Documentation
--------------
-
-    * User's Guide and Reference Manual were updated. 
-      See doc/html/PSandPDF/index.html for more details. 
-
-   
-Platforms Tested:
-================
- Note: Due to the nature of bug fixes, only static versions of the library and tools were tested.
-
+Platforms tested
+=================
 
   AIX 4.3.2 (IBM SP)            3.6.6
   Cray T3E 2.0.4.81             cc 6.3.0.1
@@ -107,10 +73,5 @@ Platforms Tested:
                                 mpich-1.1.2 with local changes
   Windows NT4.0 sp5             MSVC++ 6.0
 
-Known Problems:
-==============
-
-o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
-  fail if library is compiled using optimization of any level.
 
 

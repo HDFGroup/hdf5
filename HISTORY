@@ -2,8 +2,8 @@ HDF5 HISTORY
 ============
 
 CONTENTS
-
-I.   Release Information for hdf5-1.2.0
+I.   Release Information for hdf5-1.2.1
+II.  Release Information for hdf5-1.2.0
      A. Platforms Supported
      B. Known Problems
      C. Changes Since Version 1.0.1  
@@ -24,17 +24,89 @@ I.   Release Information for hdf5-1.2.0
            g. Ragged Arrays
         9. Tools
 
-II.  Changes Since the Version 1.0.0 Release   
+III.  Changes Since the Version 1.0.0 Release   
 
-III. Changes Since the Beta 1.0.0 Release
+IV.   Changes Since the Beta 1.0.0 Release
 
-IV.  Changes Since the Second Alpha 1.0.0 Release
+V.    Changes Since the Second Alpha 1.0.0 Release
 
-V.   Changes Since the First Alpha 1.0.0 Release 
+VI.   Changes Since the First Alpha 1.0.0 Release 
 
 -----------------------------------------------------------------------
+I. Release Information for hdf5-1.2.1
+
+Bug fixes since HDF5-1.2.0
+==========================
+
+Configuration
+-------------
+
+   * The hdf5.h include file was fixed to allow the HDF5 Library to be compiled
+     with other libraries/applications that use GNU autoconf. 
+   * Configuration for parallel HDF5 was improved. Configure now attempts to
+     link with libmpi.a and/or libmpio.a as the MPI libraries by default.
+     It also uses "mpirun" to launch MPI tests by default.  It tests to
+     link MPIO routines during the configuration stage, rather than failing
+     later as before.  One can just do "./configure --enable-parallel"
+     if the MPI library is in the system library.
+
+Dataset region references
+-------------------------
+
+    * Error was fixed which was not allowing dataset region references to have
+      their regions retrieved correctly.
+
+Tools
+------
+
+    * Added an option, -V, to show the version information of h5dump.
+    * Fixed a core dumping bug of h5toh4 when executed on platforms like 
+      TFLOPS.
+    * The test script for h5toh4 used to not able to detect the hdp
+      dumper command was not valid.  It now detects and reports the
+      failure of hdp execution.
+
+Documentation
+-------------
+
+    * User's Guide and Reference Manual were updated. 
+      See doc/html/PSandPDF/index.html for more details. 
+
+   
+Platforms Tested:
+================
+ Note: Due to the nature of bug fixes, only static versions of the library and tools were tested.
+
+
+  AIX 4.3.2 (IBM SP)            3.6.6
+  Cray T3E 2.0.4.81             cc 6.3.0.1
+                                mpt.1.3
+  FreeBSD 3.3-STABLE            gcc 2.95.2
+  HP-UX B.10.20                 HP C  HP92453-01 A.10.32
+  IRIX 6.5                      MIPSpro cc 7.30
+  IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
+                                mpt.1.3 (SGI MPI 3.2.0.0)
+
+  Linux 2.2.10 SuSE             egcs-2.91.66               configured with
+  (i686-pc-linux-gnu)                                      --disable-hsizet
+                                mpich-1.2.0 egcs-2.91.66 19990314/Linux 
+
+  OSF1 V4.0                     DEC-V5.2-040
+  SunOS 5.6                     cc WorkShop Compilers 4.2  no optimization
+  SunOS 5.7                     cc WorkShop Compilers 5.0
+  TFLOPS 2.8                    cicc (pgcc Rel 3.0-5i)
+                                mpich-1.1.2 with local changes
+  Windows NT4.0 sp5             MSVC++ 6.0
+
+Known Problems:
+==============
+
+o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
+  fail if library is compiled using optimization of any level.
+
+
          
-I. Release Information for hdf5-1.2.0
+II. Release Information for hdf5-1.2.0
 
 A. Platforms Supported
    -------------------
@@ -285,7 +357,7 @@ C. Changes Since Version 1.0.1
 
 
 
-II. Changes Since The Version 1.0.0 Release
+III. Changes Since The Version 1.0.0 Release
 
 * [Improvement]: configure sets up the Makefile in the parallel tests
   suit (testpar/) correctly.
@@ -351,7 +423,7 @@ II. Changes Since The Version 1.0.0 Release
 
 
 
-III. Changes Since The Beta 1.0.0 Release
+IV. Changes Since The Beta 1.0.0 Release
 
 * Added fill values for datasets.  For contiguous datasets fill value
   performance may be quite poor since the fill value is written to the 
@@ -371,7 +443,7 @@ III. Changes Since The Beta 1.0.0 Release
 * Various optimizations and bug fixes.
 
 
-IV. Changes Since The Second Alpha 1.0.0 Release
+V. Changes Since The Second Alpha 1.0.0 Release
 
 * Strided hyperslab selections in dataspaces now working.
 
@@ -398,7 +470,7 @@ IV. Changes Since The Second Alpha 1.0.0 Release
   values of a dataset.
 
 
-V. Changes Since The First Alpha 1.0.0 Release
+VI. Changes Since The First Alpha 1.0.0 Release
 
 * Two of the packages have been renamed.  The data space API has been
   renamed from `H5P' to `H5S' and the property list (template) API has 
