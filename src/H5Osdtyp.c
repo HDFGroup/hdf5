@@ -168,27 +168,22 @@ static void *
 H5O_sim_dtype_fast (const H5G_entry_t *ent, void *mesg)
 {
    H5O_sim_dtype_t *sdtype = (H5O_sim_dtype_t *)mesg;
-   const uint8 *p;
    
    FUNC_ENTER (H5O_sim_dtype_fast, NULL, NULL);
 
    /* check args */
    assert (ent);
 
-   if (H5G_CACHED_SDATA==ent->type)
-     {
-      if (!sdtype)
-          if((sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t)))!=NULL)
-            {
-              p=(const uint8 *)&ent->cache.sdata.nt;
-              sdtype->len=*p++;
-              sdtype->arch=*p++;
-              UINT16DECODE(p,sdtype->base);
-              sdtype->base=MAKE_ATOM(H5_DATATYPE,sdtype->base);   /* convert into atomic base type */
-            } /* end if */
-     } /* end if */
-   else
+   if (H5G_CACHED_SDATA==ent->type) {
+      if (!sdtype) sdtype = H5MM_xcalloc (1, sizeof(H5O_sim_dtype_t));
+      sdtype->len = ent->cache.sdata.nt.length;
+      sdtype->arch = ent->cache.sdata.nt.arch;
+
+      /* Convert into atomic base type. */
+      sdtype->base = MAKE_ATOM (H5_DATATYPE, ent->cache.sdata.nt.type);
+   } else {
       sdtype = NULL;
+   }
 
    FUNC_LEAVE (sdtype);
 } /* end H5O_sim_dtype_fast() */
@@ -215,7 +210,6 @@ static hbool_t
 H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
 {
     const H5O_sim_dtype_t *sdtype = (const H5O_sim_dtype_t *)mesg;
-    uint8 *p;
     hbool_t modified = BFALSE;
    
     FUNC_ENTER (H5O_sim_dtype_cache, NULL, BFAIL);
@@ -224,40 +218,34 @@ H5O_sim_dtype_cache (H5G_entry_t *ent, const void *mesg)
     assert (ent);
     assert (sdtype);
 
-    /*
-     * We do this in two steps so Purify doesn't complain about
-     * uninitialized memory reads even though they don't bother
-     * anything.
-     */
-    p=(uint8 *)&(ent->cache.sdata);
-    if (H5G_CACHED_SDATA != ent->type)
-      {
-        modified = BTRUE;
-        ent->type = H5G_CACHED_SDATA;
-        *p++=sdtype->len;
-        *p++=sdtype->arch;
-        UINT16ENCODE(p,sdtype->base);
-      } /* end if */
-    else
-      {
-        if(ent->cache.sdata.nt.length != sdtype->len)
-          {
-            modified = BTRUE;
-            ent->cache.sdata.nt.length = sdtype->len;
-          } /* end if */
+    if (H5G_CACHED_SDATA != ent->type) {
+       /*
+        * No sdata cached yet.
+        */
+       modified = BTRUE;
+       ent->type = H5G_CACHED_SDATA;
+       ent->cache.sdata.nt.length = sdtype->len;
+       ent->cache.sdata.nt.arch = sdtype->arch;
+       ent->cache.sdata.nt.type = sdtype->base;
+    } else {
+       /*
+        * Some sdata already cached.
+        */
+       if (ent->cache.sdata.nt.length != sdtype->len) {
+	  modified = BTRUE;
+	  ent->cache.sdata.nt.length = sdtype->len;
+       }
 
-        if (ent->cache.sdata.nt.arch != sdtype->arch)
-          {
-           modified = BTRUE;
-           ent->cache.sdata.nt.arch = sdtype->arch;
-          } /* end if */
+       if (ent->cache.sdata.nt.arch != sdtype->arch) {
+	  modified = BTRUE;
+	  ent->cache.sdata.nt.arch = sdtype->arch;
+       }
 
-        if (ent->cache.sdata.nt.type != (uint16)sdtype->base)
-          {
-           modified = BTRUE;
-           ent->cache.sdata.nt.type = (uint16)sdtype->base;
-          } /* end if */
-      } /* end else */
+       if (ent->cache.sdata.nt.type != (uint16)sdtype->base) {
+	  modified = BTRUE;
+	  ent->cache.sdata.nt.type = (uint16)sdtype->base;
+       }
+    }
 
     FUNC_LEAVE (modified);
 } /* end H5O_sim_dtype_cache() */

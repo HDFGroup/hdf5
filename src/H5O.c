@@ -121,7 +121,7 @@ H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
    oh->chunk[0].dirty = TRUE;
    oh->chunk[0].addr = addr + H5O_SIZEOF_HDR(f);
    oh->chunk[0].size = size_hint;
-   oh->chunk[0].image = H5MM_xmalloc (size_hint);
+   oh->chunk[0].image = H5MM_xcalloc (1, size_hint);
 
    /* create the message list and initialize the first message */
    oh->nmesgs = 1;

@@ -211,26 +211,25 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
 {
    H5O_sim_dim_t *sdim = (H5O_sim_dim_t *)mesg;
    uintn u;                    /* local counting variable */
-   const uint8 *p;
    
    FUNC_ENTER (H5O_sim_dim_fast, NULL, NULL);
 
    /* check args */
    assert (ent);
 
-   if (H5G_CACHED_SDATA==ent->type)
-     {
-	if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
-	p=(const uint8 *)&ent->cache.sdata.ndim;
-	UINT32DECODE(p,sdim->rank);
-	sdim->dim_flags=0;    /* cached dimensions never have max. dims or permutation vectors */
-	sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-	for(u=0; u<sdim->rank; u++)
-	   UINT32DECODE(p,sdim->size[u]);
-     } /* end if */
-   else
+   if (H5G_CACHED_SDATA==ent->type) {
+      if (!sdim) sdim = H5MM_xcalloc (1, sizeof(H5O_sim_dim_t));
+      sdim->rank = ent->cache.sdata.ndim;
+      assert (sdim->rank<=NELMTS (ent->cache.sdata.dim));
+      sdim->dim_flags = 0;
+      sdim->size = H5MM_xmalloc (sizeof(uint32) * sdim->rank);
+      for (u=0; u<sdim->rank; u++) {
+	 sdim->size[u] = ent->cache.sdata.dim[u];
+      }
+   } else {
       sdim = NULL;
-
+   }
+   
    FUNC_LEAVE (sdim);
 } /* end H5O_sim_dim_fast() */
 
@@ -257,7 +256,6 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
 {
     const H5O_sim_dim_t *sdim = (const H5O_sim_dim_t *)mesg;
     uintn u;        /* Local counting variable */
-    uint8 *p;
     hbool_t modified = BFALSE;
    
     FUNC_ENTER (H5O_sim_dim_cache, NULL, BFAIL);
@@ -266,42 +264,40 @@ H5O_sim_dim_cache (H5G_entry_t *ent, const void *mesg)
     assert (ent);
     assert (sdim);
 
-    /*
-     * We do this in two steps so Purify doesn't complain about
-     * uninitialized memory reads even though they don't bother
-     * anything.
-     */
-    p=(uint8 *)&(ent->cache.sdata);
-    if (H5G_CACHED_SDATA != ent->type)
-      {
-        modified = BTRUE;
-        ent->type = H5G_CACHED_SDATA;
-        UINT32ENCODE(p,sdim->rank);
-        for(u=0; u<=sdim->rank; u++)
-            UINT32ENCODE(p,sdim->size[u]);
-      } /* end if */
-    else
-      {
-        if(ent->cache.sdata.ndim!= sdim->rank)
-          {
-            modified = BTRUE;
-            ent->cache.sdata.ndim = sdim->rank;
-          } /* end if */
+    if (sdim->rank <= NELMTS (ent->cache.sdata.dim)) {
+       if (H5G_CACHED_SDATA != ent->type) {
+	  modified = BTRUE;
+	  ent->type = H5G_CACHED_SDATA;
+	  ent->cache.sdata.ndim = sdim->rank;
+	  for (u=0; u<=sdim->rank; u++) {
+	     ent->cache.sdata.dim[u] = sdim->size[u];
+	  }
+       } else {
+	  if(ent->cache.sdata.ndim!= sdim->rank) {
+	     modified = BTRUE;
+	     ent->cache.sdata.ndim = sdim->rank;
+          }
 
-        /* Check each dimension */
-        if(ent->cache.sdata.dim==NULL)
-           modified = BTRUE;
-        else
-          {
-            for(u=0; u<sdim->rank; u++)
-                if (ent->cache.sdata.dim[u] != sdim->size[u])
-                  {
+	  /* Check each dimension */
+	  if (NULL==ent->cache.sdata.dim) {
+	     modified = BTRUE;
+	  } else {
+	     for (u=0; u<sdim->rank; u++) {
+                if (ent->cache.sdata.dim[u] != sdim->size[u]) {
                    modified = BTRUE;
                    ent->cache.sdata.dim[u] = sdim->size[u];
-                  } /* end if */
-          } /* end else */
-      } /* end else */
-
+		}
+	     }
+          }
+       }
+    } else if (H5G_CACHED_SDATA == ent->type) {
+       /*
+        * Number of dimensions is too large to cache.
+        */
+       modified = TRUE;
+       ent->type = H5G_NOTHING_CACHED;
+    }
+       
     FUNC_LEAVE (modified);
 } /* end H5O_sim_dim_cache() */
 

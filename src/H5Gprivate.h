@@ -63,10 +63,10 @@ typedef struct H5G_entry_t {
    union {
       struct {
 	 struct	{
-        uint8 length;
-        uint8 arch;
-        uint16 type;
-     }nt ;		/*number type				*/
+	    uint8 length;
+	    uint8 arch;
+	    uint16 type;
+	 } nt ;			/*number type				*/
 	 uint32 ndim;		/*number of dimensions			*/
 	 uint32 dim[4];		/*dimension sizes			*/
       } sdata;
