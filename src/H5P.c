@@ -449,6 +449,7 @@ herr_t H5P_release(hatom_t oid)
             if(dim->s->perm!=NULL)
                 HDfree(dim->s->perm);
             HDfree(dim->s);
+            dim->s=NULL;
           } /* end if */
       } /* end if */
     HDfree(dim);

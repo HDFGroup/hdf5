@@ -190,8 +190,10 @@ hatom_t H5D_find_name(hatom_t grp_id, hobjtype_t type, const char *name)
         HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL);
 
     /* Get the dataset's type (currently only atomic types) */
-    if (NULL==(dset->type=H5O_read (dset->file, dset->ent.header, &(dset->ent),
-				    H5O_SIM_DTYPE, 0, NULL)))
+    if((dset->type=HDmalloc(sizeof(h5_datatype_t)))==NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+    if (NULL==H5O_read (dset->file, dset->ent.header, &(dset->ent),
+				    H5O_SIM_DTYPE, 0, dset->type))
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL);
     
     /* Get the dataset's dimensionality (currently only simple dataspaces) */

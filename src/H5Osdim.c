@@ -224,7 +224,7 @@ H5O_sim_dim_fast (const H5G_entry_t *ent, void *mesg)
       sdim->dim_flags = 0;
       sdim->size = H5MM_xmalloc (sizeof(uint32) * sdim->rank);
       for (u=0; u<sdim->rank; u++) {
-	 sdim->size[u] = ent->cache.sdata.dim[u];
+         sdim->size[u] = ent->cache.sdata.dim[u];
       }
    } else {
       sdim = NULL;
