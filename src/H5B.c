@@ -1033,7 +1033,7 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
     assert(type);
     assert(type->decode);
     assert(type->cmp3);
-    assert(type->new);
+    assert(type->new_node);
     assert(lt_key);
     assert(lt_key_changed);
     assert(rt_key);
@@ -1076,8 +1076,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         assert(0 == bt->level);
         bt->key[0].nkey = bt->native;
         bt->key[1].nkey = bt->native + type->sizeof_nkey;
-        if ((type->new) (f, H5B_INS_FIRST, bt->key[0].nkey, udata,
-                         bt->key[1].nkey, bt->child + 0 /*out */ ) < 0) {
+        if ((type->new_node) (f, H5B_INS_FIRST, bt->key[0].nkey, udata,
+			      bt->key[1].nkey, bt->child + 0/*out*/) < 0) {
             bt->key[0].nkey = bt->key[1].nkey = NULL;
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, H5B_INS_ERROR,
                         "unable to create leaf node");
@@ -1152,8 +1152,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         }
         my_ins = H5B_INS_LEFT;
         HDmemcpy(md_key, bt->key[idx].nkey, type->sizeof_nkey);
-        if ((type->new) (f, H5B_INS_LEFT, bt->key[idx].nkey, udata, md_key,
-                         &child_addr /*out */ ) < 0) {
+        if ((type->new_node) (f, H5B_INS_LEFT, bt->key[idx].nkey, udata,
+			      md_key, &child_addr/*out*/) < 0) {
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
                         "can't insert minimum leaf node");
         }
@@ -1209,8 +1209,8 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
         }
         my_ins = H5B_INS_RIGHT;
         HDmemcpy(md_key, bt->key[idx + 1].nkey, type->sizeof_nkey);
-        if ((type->new) (f, H5B_INS_RIGHT, md_key, udata,
-			 bt->key[idx + 1].nkey, &child_addr /*out */ ) < 0) {
+        if ((type->new_node) (f, H5B_INS_RIGHT, md_key, udata,
+			      bt->key[idx + 1].nkey, &child_addr/*out*/) < 0) {
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
                         "can't insert maximum leaf node");
         }

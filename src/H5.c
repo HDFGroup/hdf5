@@ -121,17 +121,17 @@ herr_t
 H5_add_exit(void        (*func) (void))
 {
     herr_t                  ret_value = SUCCEED;
-    H5_exit_t              *new;
+    H5_exit_t              *new_exit;
 
     FUNC_ENTER_INIT(H5_add_exit, NULL, FAIL);
 
     assert(func);
 
-    new = H5MM_xcalloc(1, sizeof(H5_exit_t));
+    new_exit = H5MM_xcalloc(1, sizeof(H5_exit_t));
 
-    new->func = func;
-    new->next = lib_exit_head;
-    lib_exit_head = new;
+    new_exit->func = func;
+    new_exit->next = lib_exit_head;
+    lib_exit_head = new_exit;
 
     FUNC_LEAVE(ret_value);
 }                               /* end H5_add_exit() */

@@ -174,6 +174,7 @@ H5T_init_interface(void)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "can't initialize H5T layer");
     }
+
     /* STRING */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     dt->locked = TRUE;
@@ -190,6 +191,7 @@ H5T_init_interface(void)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "can't initialize H5T layer");
     }
+
     /* BITFIELD */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     dt->locked = TRUE;
@@ -204,6 +206,7 @@ H5T_init_interface(void)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to initialize H5T layer");
     }
+
     /* OPAQUE */
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     dt->locked = TRUE;
@@ -218,6 +221,7 @@ H5T_init_interface(void)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to initialize H5T layer");
     }
+
     /*
      * Define aliases.
      */
@@ -231,7 +235,6 @@ H5T_init_interface(void)
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
-
     if (H5Tregister_soft(H5T_INTEGER, H5T_INTEGER, H5T_conv_order) < 0) {
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to register conversion function");
@@ -240,6 +243,12 @@ H5T_init_interface(void)
         HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                       "unable to register conversion function");
     }
+    if (H5Tregister_soft (H5T_COMPOUND, H5T_COMPOUND, H5T_conv_struct)<0) {
+	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		       "unable to register conversion function");
+    }
+    
+    
     FUNC_LEAVE(ret_value);
 }
 
@@ -2629,12 +2638,12 @@ H5T_sort_by_offset(H5T_t *dt)
 
     /* Use a bubble sort because we can short circuit */
     nmembs = dt->u.compnd.nmembs;
-    for (i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
-        for (j = 0, swapped = FALSE; j < i; j++) {
-            if (dt->u.compnd.memb[j].offset > dt->u.compnd.memb[j + 1].offset) {
-                H5T_member_t            tmp = dt->u.compnd.memb[j];
-                dt->u.compnd.memb[j] = dt->u.compnd.memb[j + 1];
-                dt->u.compnd.memb[j + 1] = tmp;
+    for (i=nmembs-1, swapped=TRUE; i>0 && swapped; --i) {
+        for (j=0, swapped=FALSE; j<i; j++) {
+            if (dt->u.compnd.memb[j].offset > dt->u.compnd.memb[j+1].offset) {
+                H5T_member_t tmp = dt->u.compnd.memb[j];
+                dt->u.compnd.memb[j] = dt->u.compnd.memb[j+1];
+                dt->u.compnd.memb[j+1] = tmp;
                 swapped = 1;
             }
         }
