@@ -128,7 +128,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     Performance
     -------------
-
+    Many changes were done to the library to improve performance
+    especially for the variable length datatypes and metadata cache.
+   
     Tools
     -----
         - h5fc and h5c++ work correctly when -c compiler flag
