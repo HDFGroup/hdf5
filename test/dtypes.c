@@ -4777,7 +4777,7 @@ overflows(unsigned char *origin_bits, dtype_t src_dtype, size_t src_size_bytes, 
     else
         sig >>= expt_digits - expt;
 
-    indx = H5T_bit_find(&sig, 0, 8*sizeof(hsize_t), H5T_BIT_MSB, 1);
+    indx = H5T_bit_find((uint8_t *)&sig, 0, 8*sizeof(hsize_t), H5T_BIT_MSB, 1);
 
     if(indx>=dst_num_bits)
         ret_value=TRUE;
