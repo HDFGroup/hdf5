@@ -1,4 +1,4 @@
-HDF5 version 1.5.45 released on Sat Jan 11 07:09:10 CST 2003
+HDF5 version 1.5.46 released on Sat Feb  1 04:18:37 CST 2003
 ================================================================================
 
 
@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * H5Fopen without the H5F_ACC_CREAT flag should not succeed in creating
+      a new file with the 'core' VFL driver.  QAK - 2003/01/24
+    * Allow opening objects with unknown object header messages.
+      QAK - 2003/01/21
     * Improved error assertion for nil VL strings, making it fails with error
       stack instead of just assertion failure.  SLU - 2002/12/16
     * Added two new API functions: H5Zunregister & H5Zfilter_avail.
@@ -198,6 +202,9 @@ Configuration
     * Basic port to Compaq (nee DEC) Alpha OSF 5.
     * Changed the default value of $NPROCS from 2 to 3 since 3 processes
       have a much bigger chance catching parallel errors than just 2.
+    * Fixed minor problem with configuration when users specified /usr/include
+      and /usr/lib for the --with-* options that some compilers can't handle.
+      BW - 2003/01/23
 
 
 Tools
@@ -656,4 +663,8 @@ Known Problems
 
       # How to pass a linker flag through the compiler.
       wl="-Wl,"
+
+  UPDATE: This is now done automatically by the configure script. However, if
+  you still experience a problem, you may want to check this line in the
+  libtool file and make sure that it has the correct value.
 
