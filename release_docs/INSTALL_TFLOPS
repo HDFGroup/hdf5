@@ -30,7 +30,7 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) ./configure tflop
+2) ./configure --host=i386-intel-osf1
    Due to a bug, you need to patch up two Makefile, src/Makefile and
    test/Makefile, before the next step.  You can use the following
    shell commands.
@@ -103,7 +103,7 @@ FROM SASN100,
 
 1) cd <hdf5>
 
-2) CC=/usr/community/mpich/mpich-1.2.0/bin/mpicc ./configure tflop
+2) CC=/usr/community/mpich/mpich-1.2.0/bin/mpicc ./configure --host=i386-intel-osf1
    Due to a bug, you need to patch up two Makefile, src/Makefile and
    test/Makefile, before the next step.  You can use the following
    shell commands.
