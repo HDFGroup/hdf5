@@ -63,6 +63,7 @@
 ./config/powerpc-ibm-aix4.3.2.0
 ./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
+./config/unicos
 ./config/unicosmk
 
 ./doc/Makefile.in
