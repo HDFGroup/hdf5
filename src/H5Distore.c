@@ -1252,6 +1252,8 @@ H5D_istore_dest (H5D_t *dset, hid_t dxpl_id)
     HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Free the raw B-tree node buffer */
+    if(dset->shared->layout.u.chunk.btree_shared==NULL)
+        HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5RC_DEC(dset->shared->layout.u.chunk.btree_shared)<0)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
 
@@ -3232,6 +3234,8 @@ H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
             HGOTO_ERROR(H5E_IO, H5E_CANTDELETE, 0, "unable to delete chunk B-tree")
 
         /* Free the raw B-tree node buffer */
+        if(tmp_layout.u.chunk.btree_shared==NULL)
+            HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
         if(H5RC_DEC(tmp_layout.u.chunk.btree_shared)<0)
             HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
     } /* end if */
@@ -3484,6 +3488,8 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
     (void)H5B_debug (f, dxpl_id, addr, stream, indent, fwidth, H5B_ISTORE, &udata);
 
     /* Free the raw B-tree node buffer */
+    if(layout.u.chunk.btree_shared==NULL)
+        HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
     if(H5RC_DEC(layout.u.chunk.btree_shared)<0)
 	HGOTO_ERROR (H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
 
