@@ -50,7 +50,8 @@ New Features
 
     F90 API:
     --------
-
+     - Added missing h5tget_member_class_f function
+                                            EIP 2005/04/06
     C++ API:
     --------
 

@@ -334,6 +334,12 @@
                 write(*,*) "Wrong member type returned for character member"
                 total_error = total_error + 1
              endif 
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
+              if (class .ne. H5T_STRING_F) then
+                 write(*,*) "Wrong class returned for character member"
+                 total_error = total_error + 1
+              endif
         CASE("integer_field")
              if(offset_out .ne. type_sizec) then
                write(*,*) "Offset of the integer member is incorrect"
@@ -347,6 +353,12 @@
                 write(*,*) "Wrong member type returned for integer memebr"
                 total_error = total_error + 1
              endif 
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
+              if (class .ne. H5T_INTEGER_F) then
+                 write(*,*) "Wrong class returned for integer member"
+                 total_error = total_error + 1
+              endif
         CASE("double_field")
              if(offset_out .ne. (type_sizec+type_sizei)) then
                write(*,*) "Offset of the double precision member is incorrect"
@@ -360,6 +372,12 @@
                 write(*,*) "Wrong member type returned for double precision memebr"
                 total_error = total_error + 1
              endif 
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
+              if (class .ne. H5T_FLOAT_F) then
+                 write(*,*) "Wrong class returned for double precision member"
+                 total_error = total_error + 1
+              endif
         CASE("real_field")
              if(offset_out .ne. (type_sizec+type_sizei+type_sized)) then
                write(*,*) "Offset of the real member is incorrect"
@@ -373,6 +391,12 @@
                 write(*,*) "Wrong member type returned for real memebr"
                 total_error = total_error + 1
              endif 
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
+              if (class .ne. H5T_FLOAT_F) then
+                 write(*,*) "Wrong class returned for real member"
+                 total_error = total_error + 1
+              endif
         CASE DEFAULT
                write(*,*) "Wrong member's name"
                total_error = total_error + 1
