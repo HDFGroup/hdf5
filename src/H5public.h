@@ -56,7 +56,7 @@ static char             RcsId[] = "@(#)$Revision$";
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	3	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	25	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	26	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0               */
 				/* Empty string for real releases.           */
 
