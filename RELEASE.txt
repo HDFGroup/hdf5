@@ -7,7 +7,7 @@ INTRODUCTION
 
 This document describes the differences between HDF5-1.2.0 and
 HDF5-1.4-Beta3, and contains information on the platforms tested and
-known problems in HDF5-1.4-Beta3. For more details check the HISTORY 
+known problems in HDF5-1.4-Beta3. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
