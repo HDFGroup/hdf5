@@ -969,10 +969,9 @@ print_io_api(long io_types)
 static void
 report_parameters(struct options *opts)
 {
-    int rank;
+    int rank = comm_world_rank_g;
 
-    MPI_Comm_rank(pio_comm_g, &rank);
-
+    print_version("HDF5 Library");	/* print library version */
     HDfprintf(output, "rank %d: ==== Parameters ====\n", rank);
 
     HDfprintf(output, "rank %d: IO API=", rank);
@@ -1288,6 +1287,7 @@ usage(const char *prog)
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
         printf("     -B S, --block-size=S        Interleaved block size\n");
+        printf("                                 [not implemented yet]\n");
         printf("                                 [default: 0 no interleaved IO]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
