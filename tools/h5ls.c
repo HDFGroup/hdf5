@@ -1986,9 +1986,7 @@ main (int argc, char *argv[])
 	} else if (!strcmp(argv[argno], "--verbose")) {
 	    verbose_g++;
 	} else if (!strcmp(argv[argno], "--version")) {
-	    printf("This is %s version %u.%u release %u%s\n",
-		   progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-		   H5_VERS_SUBRELEASE);
+            print_version(progname);
 	    exit(0);
 	} else if (!strcmp(argv[argno], "--hexdump")) {
 	    hexdump_g = TRUE;
@@ -2046,9 +2044,7 @@ main (int argc, char *argv[])
 		    verbose_g++;
 		    break;
 		case 'V':	/* --version */
-		    printf("This is %s version %u.%u release %u\n",
-			   progname, H5_VERS_MAJOR, H5_VERS_MINOR,
-			   H5_VERS_RELEASE);
+                    print_version(progname);
 		    exit(0);
 		case 'x':	/* --hexdump */
 		    hexdump_g = TRUE;
