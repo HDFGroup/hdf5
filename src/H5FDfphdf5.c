@@ -1003,6 +1003,8 @@ static haddr_t
 H5FD_fphdf5_get_eoa(H5FD_t *_file)
 {
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t *)_file;
+    unsigned        req_id = 0;
+    H5FP_status_t   status = H5FP_STATUS_OK;
     haddr_t         ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_get_eoa, HADDR_UNDEF)
@@ -1010,6 +1012,12 @@ H5FD_fphdf5_get_eoa(H5FD_t *_file)
     /* check args */
     assert(file);
     assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* The SAP's eoa field is correct */
+    if (!H5FD_fphdf5_is_sap(_file))
+        /* Retrieve the EOA information */
+        if (H5FP_request_get_eoa(_file, &file->eoa, &req_id, &status))
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTRECV, HADDR_UNDEF, "can't retrieve eoa information")
 
     /* Set return value */
     ret_value = file->eoa;
@@ -1036,6 +1044,8 @@ static herr_t
 H5FD_fphdf5_set_eoa(H5FD_t *_file, haddr_t addr)
 {
     H5FD_fphdf5_t  *file = (H5FD_fphdf5_t *)_file;
+    unsigned        req_id = 0;
+    H5FP_status_t   status = H5FP_STATUS_OK;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_fphdf5_set_eoa, FAIL)
@@ -1043,6 +1053,12 @@ H5FD_fphdf5_set_eoa(H5FD_t *_file, haddr_t addr)
     /* check args */
     assert(file);
     assert(file->pub.driver_id == H5FD_FPHDF5);
+
+    /* The SAP's eoa field is correct */
+    if (!H5FD_fphdf5_is_sap(_file))
+        /* Retrieve the EOA information */
+        if (H5FP_request_set_eoa(_file, addr, &req_id, &status))
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTRECV, HADDR_UNDEF, "can't retrieve eoa information")
 
     file->eoa = addr;
 
@@ -1570,11 +1586,8 @@ H5FD_fphdf5_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     /* Only the captain process needs to flush the metadata. */
     if (H5FD_fphdf5_is_captain(_file)) {
         if (H5FP_request_flush_metadata(_file, file->file_id, dxpl_id,
-                                        &req_id, &status) != SUCCEED) {
-            /* FIXME: This failed */
-H5Eprint(H5E_DEFAULT,stderr);
-HDfprintf(stderr, "%s:%d: Flush failed (%d)\n", FUNC, __LINE__, status);
-        }
+                                        &req_id, &status) != SUCCEED)
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTFLUSH, FAIL, "can't flush metadata")
 
         /* Only sync the file if we are not going to immediately close it */
         if (!closing)
