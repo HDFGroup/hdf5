@@ -365,6 +365,24 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name testhdf5_cppdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name blocktrack
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name blocktrackdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name btree2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name btree2dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sheap
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sheapdll
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -430,6 +448,78 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5dll
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "blocktrack"="..\..\test\blocktrack\blocktrack.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "blocktrackdll"="..\..\test\blocktrackdll\blocktrackdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "btree2"="..\..\test\btree2\btree2.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "btree2dll"="..\..\test\btree2dll\btree2dll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
@@ -2305,6 +2395,42 @@ Package=<4>
 ###############################################################################
 
 Project: "set_extentdll"="..\..\test\set_extentdll\set_extentdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "sheap"="..\..\test\sheap\sheap.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "sheapdll"="..\..\test\sheapdll\sheapdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
