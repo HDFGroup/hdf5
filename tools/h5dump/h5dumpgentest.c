@@ -4462,7 +4462,7 @@ static void gent_filters()
  hsize_t  dims2[1]={2};
  hvl_t    buf2[2];
  hsize_t  dims3[1]={1};
- char     buf3[]={"this is\n a string with three\n newline\n escape characters"};
+ char     buf3[]={"this is\n a string \twith three\n newline\n escape \tcharacters"};
  hsize_t  dims4[1]={6};
  char     buf4[6]={"abcdef"};
  hobj_ref_t buf5[5]; 

@@ -464,7 +464,10 @@ h5tools_print_char(h5tools_str_t *str, const h5dump_t *info, unsigned char ch)
             h5tools_str_append(str, "\\r");
             break;
         case '\t':
-            h5tools_str_append(str, "\\t");
+         if (info->do_lf)
+          h5tools_str_append(str, "\t");
+         else
+          h5tools_str_append(str, "\\t");
             break;
         default:
             if (isprint(ch))
