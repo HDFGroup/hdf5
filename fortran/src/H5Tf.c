@@ -236,6 +236,7 @@ nh5tget_order_c ( hid_t_f *type_id , int_f *order)
   c_order = H5Tget_order(c_type_id);
   if ( c_order < 0  ) return ret_value;
   *order = (int_f)c_order;
+   ret_value = 0;
 /*
   if ( c_order == H5T_ORDER_LE)  *order = H5T_ORDER_LE_F;
   if ( c_order == H5T_ORDER_BE)  *order = H5T_ORDER_BE_F;
