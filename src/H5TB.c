@@ -468,14 +468,11 @@ H5TB_dfind(H5TB_TREE * tree, const void * key, H5TB_NODE ** pp)
  *-------------------------------------------------------------------------
  */
 H5TB_NODE  *
-H5TB_find(H5TB_NODE * root, const void * key,
+H5TB_find(H5TB_NODE * ptr, const void * key,
      H5TB_cmp_t compar, int arg, H5TB_NODE ** pp)
 {
-    H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
     int        cmp = 1;
-    int        side;
-    H5TB_NODE  *ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5TB_find);
 
@@ -483,20 +480,27 @@ H5TB_find(H5TB_NODE * root, const void * key,
     if(ptr) {
         while (0 != (cmp = KEYcmp(key, ptr->key, arg))) {
             parent = ptr;
-            side = (cmp < 0) ? LEFT : RIGHT;
-            if (!HasChild(ptr, side))
-                break;
-            ptr = ptr->link[side];
-          } /* end while */
+            if(cmp<0) {
+                if(!LeftCnt(ptr)) {
+                    ptr=NULL;
+                    break;
+                } /* end if */
+                ptr = ptr->link[LEFT];
+            } /* end if */
+            else {
+                if(!RightCnt(ptr)) {
+                    ptr=NULL;
+                    break;
+                } /* end if */
+                ptr = ptr->link[RIGHT];
+            } /* end else */
+        } /* end while */
     } /* end if */
 
     if (NULL != pp)
         *pp = parent;
 
-    /* Set return value */
-    ret_value= (0 == cmp) ? ptr : NULL;
-
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ptr);
 }   /* end H5TB_find() */
 
 
@@ -1317,90 +1321,120 @@ done:
 /* This routine is based on tbbtfind (fix bugs in both places!) */
 /* Returns a pointer to the found node (or NULL) */
 static H5TB_NODE  *
-H5TB_ffind(H5TB_NODE * root, const void * key, unsigned fast_compare, H5TB_NODE ** pp)
+H5TB_ffind(H5TB_NODE * ptr, const void * key, unsigned fast_compare, H5TB_NODE ** pp)
 {
-    H5TB_NODE  *ptr = root;
     H5TB_NODE  *parent = NULL;
-    int        side;
-    int        cmp = 1;
-    H5TB_NODE  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_ffind);
 
-    switch(fast_compare) {
-        case H5TB_FAST_HADDR_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = H5F_addr_cmp(*(const haddr_t *)key,*(haddr_t *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+    if(ptr) {
+        switch(fast_compare) {
+            case H5TB_FAST_HADDR_COMPARE:
+                {
+                    haddr_t key_val=*(const haddr_t *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(haddr_t *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(haddr_t *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_INTN_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = (*(const int *)key - *(int *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_INTN_COMPARE:
+                {
+                    int key_val=*(const int *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(int *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(int *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_STR_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = HDstrcmp(key,ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_STR_COMPARE:
+                {
+                    int cmp;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (0 != (cmp = HDstrcmp(key,ptr->key))) {
+                        parent = ptr;
+                        if(cmp<0) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        case H5TB_FAST_HSIZE_COMPARE:
-            if (ptr) {
-                while (0 != (cmp = (int)(*(const hsize_t *)key - *(hsize_t *)ptr->key))) {
-                      parent = ptr;
-                      side = (cmp < 0) ? LEFT : RIGHT;
-                      if (!HasChild(ptr, side))
-                          break;
-                      ptr = ptr->link[side];
-                  } /* end while */
-              } /* end if */
-            if (NULL != pp)
-                *pp = parent;
+            case H5TB_FAST_HSIZE_COMPARE:
+                {
+                    hsize_t key_val=*(const hsize_t *)key;
 
-            /* Set return value */
-            ret_value= (0 == cmp) ? ptr : NULL;
-            break;
+                    while (key_val != *(hsize_t *)ptr->key) {
+                        parent = ptr;
+                        if(key_val < *(hsize_t *)ptr->key) {
+                            if(!LeftCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[LEFT];
+                        } /* end if */
+                        else {
+                            if(!RightCnt(ptr)) {
+                                ptr=NULL;
+                                break;
+                            } /* end if */
+                            ptr = ptr->link[RIGHT];
+                        } /* end else */
+                    } /* end while */
+                } /* end case */
+                break;
 
-        default:
-            break;
-    } /* end switch */
+            default:
+                assert("invalid fast compare type" && 0);
+                break;
+        } /* end switch */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    if (NULL != pp)
+        *pp = parent;
+
+    FUNC_LEAVE_NOAPI(ptr);
 } /* H5TB_ffind() */
 
 /* swapkid -- Often refered to as "rotating" nodes.  ptr and ptr's `side'
