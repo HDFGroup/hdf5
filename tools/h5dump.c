@@ -431,7 +431,12 @@ H5G_stat_t statbuf;
         break;
 
     case H5T_OPAQUE: 
-        printf( "H5T_OPAQUE: not yet implemented");
+        printf( "\n");
+        indentation (indent+COL);	
+		printf("H5T_OPAQUE\n");
+        indentation (indent+COL);	
+		printf("OPAQUE_TAG \"%s\"\n", H5Tget_tag(type));
+        indentation (indent);
         break;
 
     case H5T_COMPOUND: 
@@ -1119,10 +1124,10 @@ hid_t  type, space;
          printf("DATA{ not yet implemented.}\n");
          break;
     case H5T_OPAQUE:
-         indent += COL;
+        /* indent += COL;
          indentation (indent);
-         indent -= COL;
-         printf("DATA{ not yet implemented.}\n");
+         indent -= COL;*/
+		 dump_data(did, DATASET_DATA);
          break;
     case H5T_COMPOUND:
          dump_data(did, DATASET_DATA);
