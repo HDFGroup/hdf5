@@ -67,7 +67,9 @@ elements of a dataset.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+<!--		NOT YET IMPLEMENTED (R1.2 -- 9908)
     <li><a href="#Dataspace-ExtentClass">H5Sextent_class</a>
+-->
     <li><a href="#Dataspace-ExtentCopy">H5Sextent_copy</a>
     <li><a href="#Dataspace-SetExtentSimple">H5Sset_extent_simple</a>
     <li><a href="#Dataspace-SetExtentNone">H5Sset_extent_none</a>
@@ -100,11 +102,10 @@ of the <cite>HDF5 User's Guide.</cite>.
     <li>H5Scommit
     <li>H5Sis_subspace
     <li>H5Slock
-    <li>H5Sopen
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
-    <li>H5Sselect_name
+    <li>H5Sopen
     <li>H5Sselect_op
     <li>H5Sselect_order
 </ul>
@@ -335,9 +336,10 @@ of the <cite>HDF5 User's Guide.</cite>.
                 selection is being reset.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns <tt>TRUE</tt> if the selection is contained within 
-        the extent and <tt>FALSE</tt> if it is not.
-        Returns returns a negative value on error conditions 
+    <dd>Returns a positive value, for <code>TRUE</code>, 
+        if the selection is contained within the extent 
+        or <code>0</code> (zero), for <code>FALSE</code>, if it is not.
+        Returns a negative value on error conditions 
         such as the selection or extent not being defined.
 </dl>
 
@@ -522,8 +524,9 @@ of the <cite>HDF5 User's Guide.</cite>.
             <dd>Identifier of the dataspace to query
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Returns TRUE or FALSE if Successful;
-        otherwise returns a negative value.
+    <dd>When successful, returns a positive value, for <code>TRUE</code>,
+        or <code>0</code> (zero), for <code>FALSE</code>.
+        Otherwise returns a negative value.
 </dl>
 
 
@@ -560,6 +563,8 @@ of the <cite>HDF5 User's Guide.</cite>.
 </dl>
 
 
+<!--		NOT YET IMPLEMENTED (R1.2 -- 9908)
+
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-ExtentClass">H5Sextent_class</a>
@@ -583,6 +588,8 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dd>Returns a dataspace class name if successful; 
         otherwise H5S_NO_CLASS (-1).
 </dl>
+
+-->
 
 
 <hr>
