@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1997-2001 NCSA
+ * Copyright (C) 1997-2002 NCSA
  *		           All rights reserved.
  *
  * Programmer:	Robb Matzke <matzke@llnl.gov>
@@ -9,6 +9,8 @@
  *		other file drivers depending on the purpose of the address
  *		region being accessed. For instance, all meta-data could be
  *		place in one file while all raw data goes to some other file.
+ *		This also serves as an example of coding a complex file driver,
+ *		therefore, it should not use any non-public definitions.
  */
 #include <assert.h>
 #include <stdlib.h>
@@ -1869,3 +1871,13 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+
+
+#ifdef _H5private_H
+/*
+ * This is not related to the functionality of the driver code.
+ * It is added here to trigger warning if HDF5 private definitions are included
+ * by mistake.  The code should use only HDF5 public API and definitions.
+ */
+#error "Do not use HDF5 private definitions"
+#endif

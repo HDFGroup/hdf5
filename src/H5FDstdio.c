@@ -1,11 +1,13 @@
 /*
- * Copyright © 1999-2001 NCSA
+ * Copyright (C) 1999-2002 NCSA
  *		         All rights reserved.
  *
- * Programmer: Robb Matzke <matzke@llnl.gov>
- *	       Wednesday, October 22, 1997
+ * Programmer:	Robb Matzke <matzke@llnl.gov>
+ *	      	Wednesday, October 22, 1997
  *
- * Purpose:    This is the Posix stdio.h I/O subclass of H5Flow.
+ * Purpose:   	This is the Posix stdio.h I/O subclass of H5Flow.
+ *		It also serves as an example of coding a simple file driver,
+ *		therefore, it should not use any non-public definitions.
  *
  * Notes:  Ported to the new H5FD architecture on 10/18/99 - QAK
  *
@@ -836,3 +838,13 @@ H5FD_stdio_flush(H5FD_t *_file)
 
     return(0);
 }
+
+
+#ifdef _H5private_H
+/*
+ * This is not related to the functionality of the driver code.
+ * It is added here to trigger warning if HDF5 private definitions are included
+ * by mistake.  The code should use only HDF5 public API and definitions.
+ */
+#error "Do not use HDF5 private definitions"
+#endif
