@@ -61,7 +61,7 @@ LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
 ## complains if it sees a reference to a variable which has never been
 ## defined. The main makefile is free to redefine these to something else.
 DOCDIR=$(docdir)
-EXAMPLEDIR=$(docdir)
+EXAMPLEDIR=$(docdir)/hdf5/examples/c++
 LIB=
 LIB_SRC=
 LIB_OBJ=

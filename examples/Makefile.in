@@ -17,8 +17,6 @@ top_builddir=..
 srcdir=@srcdir@
 @COMMENCE@
 
-EXAMPLEDIR=$(docdir)/hdf5/examples/c
-
 ## Replace building CC with the just installed h5cc
 CC=$(bindir)/h5cc
 CPPFLAGS=-I. -I$(srcdir)

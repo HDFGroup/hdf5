@@ -21,8 +21,6 @@ srcdir=@srcdir@
 
 @COMMENCE@
 
-EXAMPLEDIR=$(docdir)/hdf5/examples/c++
-
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
 
