@@ -27,6 +27,11 @@
 /* Default file driver - see H5Pget_driver() */
 #include "H5FDsec2.h"		/* Posix unbuffered I/O	file driver	*/
 
+#include "H5IMimage.h"
+#include "H5IMpalette.h"
+
+
+
 #ifdef WANT_H5_V1_2_COMPAT
 /* Other predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
@@ -341,6 +346,13 @@ H5Pcreate(H5P_class_t type)
         case H5P_MOUNT:
             src = &H5F_mount_dflt;
             break;
+        /*pvn*/
+        case H5P_IMAGE:
+            src = &H5IM_create_dflt8bit;
+            break;
+        case H5P_PALETTE:
+            src = &H5IM_create_dfltpalette;
+            break;
         default:
             HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                   "unknown property list class");
@@ -501,6 +513,13 @@ H5P_close(void *_plist)
 
         case H5P_MOUNT:
             break;
+
+        case H5P_IMAGE:
+            break;
+
+        case H5P_PALETTE:
+            break;
+
 
         default:
             HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
@@ -689,6 +708,15 @@ H5P_copy (H5P_class_t type, const void *src)
             size = sizeof(H5F_mprop_t);
             break;
 
+        /*pvn*/
+        case H5P_IMAGE:
+            size = sizeof(H5IM_imageinfo_t);
+            break;
+
+        case H5P_PALETTE:
+            size = sizeof(H5IM_paletteinfo_t);
+            break;
+
         default:
             HRETURN_ERROR(H5E_ARGS, H5E_BADRANGE, NULL,
                   "unknown property list class");
@@ -756,6 +784,14 @@ H5P_copy (H5P_class_t type, const void *src)
             break;
 
         case H5P_MOUNT:
+            /* Nothing to do */
+            break;
+
+        case H5P_IMAGE:
+            /* Nothing to do */
+            break;
+
+        case H5P_PALETTE:
             /* Nothing to do */
             break;
 
