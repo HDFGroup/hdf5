@@ -1503,6 +1503,7 @@
 ./tools/testfiles/h5repack_info.txt
 
 
+./tools/h5repack/Dependencies
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_verify.c
 ./tools/h5repack/testh5repack_dset.c

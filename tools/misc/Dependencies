@@ -115,6 +115,4 @@ pdb2hdf.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
-   pdb.h \
-   score.h
+   $(top_srcdir)/src/H5FDstream.h
