@@ -213,6 +213,9 @@ test_reference_region(void)
     hsize_t		count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t		block[SPACE2_RANK];     /* Block size of hyperslab */
     hssize_t	coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
+    hsize_t *   coords;             /* Coordinate buffer */
+    hsize_t		low[SPACE2_RANK];   /* Selection bounds */
+    hsize_t		high[SPACE2_RANK];     /* Selection bounds */
     hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
@@ -271,6 +274,9 @@ test_reference_region(void)
     ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 36, "H5Sget_select_npoints");
+
     /* Store first dataset region */
     ret = H5Rcreate(&wbuf[0],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
     CHECK(ret, FAIL, "H5Rcreate");
@@ -288,6 +294,9 @@ test_reference_region(void)
     coord1[9][0]=3; coord1[9][1]=3;
     ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hssize_t **)coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
+
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 10, "H5Sget_select_npoints");
 
     /* Store second dataset region */
     ret = H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
@@ -329,22 +338,95 @@ test_reference_region(void)
     dset2 = H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf[0]);
     CHECK(dset2, FAIL, "H5Rdereference");
 
-#ifdef LATER
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
     CHECK(sid1, FAIL, "H5Dget_space");
 
     ret=H5Sget_simple_extent_npoints(sid1);
-    VERIFY(ret, 4, "H5Sget_simple_extent_npoints");
+    VERIFY(ret, 100, "H5Sget_simple_extent_npoints");
 
     /* Read from disk */
-    ret=H5Dread(dset2,H5T_STD_U32LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf);
+    ret=H5Dread(dset2,H5T_STD_U8LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(tu32=(uint32 *)drbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
-        VERIFY(*tu32, (uint32)(i*3), "Data");
+    for(tu8=(uint8_t *)drbuf,i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++,tu8++)
+        VERIFY(*tu8, (uint8_t)(i*3), "Data");
 
-#endif /* LATER */
+    /* Get the hyperslab selection */
+    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[0]);
+    CHECK(sid2, FAIL, "H5Rget_region");
+
+    /* Verify correct hyperslab selected */
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 36, "H5Sget_select_npoints");
+    ret = H5Sget_select_hyper_nblocks(sid2);
+    VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
+    coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)*2); /* allocate space for the hyperslab blocks */
+    ret = H5Sget_select_hyper_blocklist(sid2,coords);
+    CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
+    VERIFY(coords[0], 2, "Hyperslab Coordinates");
+    VERIFY(coords[1], 2, "Hyperslab Coordinates");
+    VERIFY(coords[2], 7, "Hyperslab Coordinates");
+    VERIFY(coords[3], 7, "Hyperslab Coordinates");
+    HDfree(coords);
+    ret = H5Sget_select_bounds(sid2,low,high);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low[0], 2, "Selection Bounds");
+    VERIFY(low[1], 2, "Selection Bounds");
+    VERIFY(high[0], 7, "Selection Bounds");
+    VERIFY(high[1], 7, "Selection Bounds");
+
+    /* Close region space */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Get the element selection */
+    sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf[1]);
+    CHECK(sid2, FAIL, "H5Rget_region");
+
+    /* Verify correct elements selected */
+    ret = H5Sget_select_npoints(sid2);
+    VERIFY(ret, 10, "H5Sget_select_npoints");
+    ret = H5Sget_select_elem_npoints(sid2);
+    VERIFY(ret, 10, "H5Sget_select_elem_npoints");
+    coords=HDmalloc(ret*SPACE2_RANK*sizeof(hsize_t)); /* allocate space for the element points */
+    ret = H5Sget_select_elem_pointlist(sid2,coords);
+    CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
+    VERIFY((hssize_t)coords[0], coord1[0][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[1], coord1[0][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[2], coord1[1][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[3], coord1[1][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[4], coord1[2][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[5], coord1[2][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[6], coord1[3][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[7], coord1[3][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[8], coord1[4][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[9], coord1[4][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[10], coord1[5][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[11], coord1[5][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[12], coord1[6][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[13], coord1[6][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[14], coord1[7][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[15], coord1[7][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[16], coord1[8][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[17], coord1[8][1], "Element Coordinates");
+    VERIFY((hssize_t)coords[18], coord1[9][0], "Element Coordinates");
+    VERIFY((hssize_t)coords[19], coord1[9][1], "Element Coordinates");
+    HDfree(coords);
+    ret = H5Sget_select_bounds(sid2,low,high);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(low[0], 0, "Selection Bounds");
+    VERIFY(low[1], 0, "Selection Bounds");
+    VERIFY(high[0], 9, "Selection Bounds");
+    VERIFY(high[1], 9, "Selection Bounds");
+
+    /* Close region space */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close first space */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
 
     /* Close dereferenced Dataset */
     ret = H5Dclose(dset2);
