@@ -1852,6 +1852,10 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *	Albert Cheng, 2000-11-21
+ *	Disable the code that does early return when size==0 for
+ *	Parallel mode since a collective call would require the process
+ *	to continue on with "nothing" to transfer.
  *
  *-------------------------------------------------------------------------
  */
@@ -1865,8 +1869,12 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
 	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) || H5I_object(dxpl_id)));
     assert(buf);
 
+#ifndef H5_HAVE_PARALLEL
+    /* Do not return early for Parallel mode since the I/O could be a */
+    /* collective transfer. */
     /* The no-op case */
     if (0==size) HRETURN(SUCCEED);
+#endif
 
     /* Check if this information is in the metadata accumulator */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) &&
@@ -2001,6 +2009,10 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *	Albert Cheng, 2000-11-21
+ *	Disable the code that does early return when size==0 for
+ *	Parallel mode since a collective call would require the process
+ *	to continue on with "nothing" to transfer.
  *
  *-------------------------------------------------------------------------
  */
@@ -2017,8 +2029,12 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
 	   (H5P_DATA_XFER==H5P_get_class(dxpl_id) && H5I_object(dxpl_id)));
     assert(buf);
     
+#ifndef H5_HAVE_PARALLEL
+    /* Do not return early for Parallel mode since the I/O could be a */
+    /* collective transfer. */
     /* The no-op case */
     if (0==size) HRETURN(SUCCEED);
+#endif
 
     /* Check for accumulating metadata */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {

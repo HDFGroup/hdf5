@@ -1534,25 +1534,30 @@ H5D_close(H5D_t *dataset)
  *		Thursday, December  4, 1997
  *
  * Modifications:
- *		Robb Matzke, 1998-06-09
- *		The data space is no longer cached in the dataset struct.
+ *	Robb Matzke, 1998-06-09
+ *	The data space is no longer cached in the dataset struct.
  *
- * 		Robb Matzke, 1998-08-11
- *		Added timing calls around all the data space I/O functions.
+ * 	Robb Matzke, 1998-08-11
+ *	Added timing calls around all the data space I/O functions.
  *
- * 		rky, 1998-09-18
- *		Added must_convert to do non-optimized read when necessary.
+ * 	rky, 1998-09-18
+ *	Added must_convert to do non-optimized read when necessary.
  *
- *  		Quincey Koziol, 1999-07-02
- *		Changed xfer_parms parameter to xfer plist parameter, so it
- *		could be passed to H5T_convert.
+ *  	Quincey Koziol, 1999-07-02
+ *	Changed xfer_parms parameter to xfer plist parameter, so it
+ *	could be passed to H5T_convert.
+ *
+ *	Albert Cheng, 2000-11-21
+ *	Added the code that when it detects it is not safe to process a
+ *	COLLECTIVE read request without hanging, it changes it to
+ *	INDEPENDENT calls.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
-    const H5D_xfer_t	   *xfer_parms = NULL;
+    const H5D_xfer_t	*xfer_parms = NULL;
     hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1574,6 +1579,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
+#ifdef H5_HAVE_PARALLEL
+    H5FD_mpio_dxpl_t	*dx = NULL;
+    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
+    hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
+    hbool_t		doing_mpio=0;		/*This is an MPIO access */
+#endif
 #ifdef H5S_DEBUG
     H5_timer_t		timer;
 #endif
@@ -1609,17 +1620,20 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     nelmts = H5S_get_select_npoints(mem_space);
 
 #ifdef H5_HAVE_PARALLEL
-    {
-	/* Collective access is not permissible without the MPIO driver */
-	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==xfer_parms->driver_id &&
-	    (dx=xfer_parms->driver_info) &&
-	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
-		if (!(IS_H5FD_MPIO(dataset->ent.file)))
-		    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-			     "collective access for MPIO driver only");
-	}
+    /* Collect Parallel I/O information for possible later use */
+    if (H5FD_MPIO==xfer_parms->driver_id){
+	doing_mpio++;
+	if (dx=xfer_parms->driver_info){
+	    xfer_mode = dx->xfer_mode;
+	}else
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		"unable to retrieve data xfer info");
     }
+    /* Collective access is not permissible without the MPIO driver */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
+	!(IS_H5FD_MPIO(dataset->ent.file)))
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		"collective access for MPIO driver only");
 #endif
 
     /*
@@ -1705,6 +1719,30 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         H5E_clear ();
     }
 	
+#ifdef H5_HAVE_PARALLEL
+    /* The following may not handle a collective call correctly
+     * since it does not ensure all processes can handle the read
+     * request according to the MPI collective specification.
+     * Do the collective request via independent mode.
+     */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE){
+	/* Kludge: change the xfer_mode to independent, handle the request,
+	 * then xfer_mode before return.
+	 * Better way is to get a temporary data_xfer property with
+	 * INDEPENDENT xfer_mode and pass it downwards.
+	 */
+	dx->xfer_mode = H5FD_MPIO_INDEPENDENT;
+	xfer_mode_changed++;	/* restore it before return */
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D)) {
+	    fprintf(H5DEBUG(D),
+		"H5D: Cannot handle this COLLECTIVE read request.  Do it via INDEPENDENT calls\n"
+		"dx->xfermode was %d, changed to %d\n",
+		xfer_mode, dx->xfer_mode);
+	}
+#endif
+    }
+#endif
     /*
      * This is the general case.  Figure out the strip mine size.
      */
@@ -1884,6 +1922,19 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
     ret_value = SUCCEED;
     
  done:
+#ifdef H5_HAVE_PARALLEL
+    /* restore xfer_mode due to the kludge */
+    if (doing_mpio && xfer_mode_changed){
+
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D)) {
+	    fprintf (H5DEBUG(D), "H5D: dx->xfermode was %d, restored to %d\n",
+		dx->xfer_mode, xfer_mode);
+	}
+#endif
+	dx->xfer_mode = xfer_mode;
+    }
+#endif
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
     H5S_sel_iter_release(mem_space,&mem_iter);
@@ -1918,17 +1969,22 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
  * 	rky 980918
  *	Added must_convert to do non-optimized read when necessary.
  *
- *  Quincey Koziol, 2 July 1999
- *  Changed xfer_parms parameter to xfer plist parameter, so it could be passed
- *  to H5T_convert
+ *      Quincey Koziol, 2 July 1999
+ *      Changed xfer_parms parameter to xfer plist parameter, so it could
+ *      be passed to H5T_convert
  *
+ *	Albert Cheng, 2000-11-21
+ *	Added the code that when it detects it is not safe to process a
+ *	COLLECTIVE write request without hanging, it changes it to
+ *	INDEPENDENT calls.
+ *      
  *-------------------------------------------------------------------------
  */
 herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
-    const H5D_xfer_t	   *xfer_parms = NULL;
+    const H5D_xfer_t	*xfer_parms = NULL;
     hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1950,6 +2006,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_bkg_t		need_bkg;		/*type of background buf*/
     H5S_t		*free_this_space=NULL;	/*data space to free	*/
     hbool_t             must_convert;        /*have to xfer the slow way*/
+#ifdef H5_HAVE_PARALLEL
+    H5FD_mpio_dxpl_t	*dx = NULL;
+    H5FD_mpio_xfer_t	xfer_mode;		/*xfer_mode for this request */
+    hbool_t		xfer_mode_changed=0;	/*xfer_mode needs restore */
+    hbool_t		doing_mpio=0;		/*This is an MPIO access */
+#endif
 #ifdef H5S_DEBUG
     H5_timer_t		timer;
 #endif
@@ -2015,17 +2077,20 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     nelmts = H5S_get_select_npoints(mem_space);
 
 #ifdef H5_HAVE_PARALLEL
-    {
-	/* Collective access is not permissible without the MPIO driver */
-	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==xfer_parms->driver_id &&
-	    (dx=xfer_parms->driver_info) &&
-	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
-		if (!(IS_H5FD_MPIO(dataset->ent.file)))
-		    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-			     "collective access for MPIO driver only");
-	}
+    /* Collect Parallel I/O information for possible later use */
+    if (H5FD_MPIO==xfer_parms->driver_id){
+	doing_mpio++;
+	if (dx=xfer_parms->driver_info){
+	    xfer_mode = dx->xfer_mode;
+	}else
+	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
+		"unable to retrieve data xfer info");
     }
+    /* Collective access is not permissible without the MPIO driver */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE &&
+	!(IS_H5FD_MPIO(dataset->ent.file)))
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+		"collective access for MPIO driver only");
 #endif
 
     /*
@@ -2116,6 +2181,30 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	H5E_clear ();
     }
 
+#ifdef H5_HAVE_PARALLEL
+    /* The following may not handle a collective call correctly
+     * since it does not ensure all processes can handle the write
+     * request according to the MPI collective specification.
+     * Do the collective request via independent mode.
+     */
+    if (doing_mpio && xfer_mode==H5FD_MPIO_COLLECTIVE){
+	/* Kludge: change the xfer_mode to independent, handle the request,
+	 * then xfer_mode before return.
+	 * Better way is to get a temporary data_xfer property with
+	 * INDEPENDENT xfer_mode and pass it downwards.
+	 */
+	dx->xfer_mode = H5FD_MPIO_INDEPENDENT;
+	xfer_mode_changed++;	/* restore it before return */
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D)) {
+	    fprintf(H5DEBUG(D),
+		"H5D: Cannot handle this COLLECTIVE write request.  Do it via INDEPENDENT calls\n"
+		"dx->xfermode was %d, changed to %d\n",
+		xfer_mode, dx->xfer_mode);
+	}
+#endif
+    }
+#endif
     /*
      * This is the general case.  Figure out the strip mine size.
      */
@@ -2305,6 +2394,19 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     ret_value = SUCCEED;
     
  done:
+#ifdef H5_HAVE_PARALLEL
+    /* restore xfer_mode due to the kludge */
+    if (doing_mpio && xfer_mode_changed){
+
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D)) {
+	    fprintf (H5DEBUG(D), "H5D: dx->xfermode was %d, restored to %d\n",
+		dx->xfer_mode, xfer_mode);
+	}
+#endif
+	dx->xfer_mode = xfer_mode;
+    }
+#endif
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
     H5S_sel_iter_release(mem_space,&mem_iter);
