@@ -246,7 +246,7 @@ H5R_dereference(href_t *ref)
      */
     /* Allocate the dataset structure */
     if (NULL==(dataset = H5D_new(NULL))) {
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
 
@@ -258,7 +258,7 @@ H5R_dereference(href_t *ref)
 
     /* Open the dataset object */
     if (H5D_open_oid(dataset, &ent) < 0) {
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found");
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
     }
 
     /* Create an atom for the dataset */

@@ -56,6 +56,15 @@ struct H5G_t {
 };
 
 /*
+ * During name lookups (see H5G_namei()) we sometimes want information about
+ * a symbolic link or a mount point.  The normal operation is to follow the
+ * symbolic link or mount point and return information about its target.
+ */
+#define H5G_TARGET_NORMAL	0x0000
+#define H5G_TARGET_SLINK	0x0001
+#define H5G_TARGET_MOUNT	0x0002
+
+/*
  * These operations can be passed down from the H5G_stab layer to the
  * H5G_node layer through the B-tree layer.
  */

@@ -427,7 +427,7 @@ H5Glink(hid_t loc_id, H5G_link_t type, const char *cur_name,
 	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "no new name specified");
     }
-    if (H5G_link (loc, type, cur_name, new_name)<0) {
+    if (H5G_link (loc, type, cur_name, new_name, H5G_TARGET_NORMAL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_LINK, FAIL, "unable to create link");
     }
 
@@ -839,15 +839,21 @@ H5G_basename(const char *name, size_t *size_p)
  *		understood by this function (unless it appears as an entry in
  *		the symbol table).
  *
- *		Symbolic links are followed automatically, but if
- *		FOLLOW_SLINK is false and the last component of the name is a
- *		symbolic link then that link is not followed.  At most NLINKS
- *		are followed and the next link generates an error.
+ *		Symbolic links are followed automatically, but if TARGET
+ *		includes the H5G_TARGET_SLINK bit and the last component of
+ *		the name is a symbolic link then that link is not followed.
+ *		The *NLINKS value is decremented each time a link is followed
+ *		and link traversal fails if the value would become negative.
+ *		If NLINKS is the null pointer then a default value is used.
  *
  *		Mounted files are handled by calling H5F_mountpoint() after
  *		each step of the translation.  If the input argument to that
  *		function is a mount point then the argument shall be replaced
  *		with information about the root group of the mounted file.
+ *		But if TARGET includes the H5G_TARGET_MOUNT bit and the last
+ *		component of the name is a mount point then H5F_mountpoint()
+ *		is not called and information about the mount point itself is
+ *		returned.
  *		
  * Errors:
  *
@@ -871,7 +877,7 @@ H5G_basename(const char *name, size_t *size_p)
 static herr_t
 H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	  H5G_entry_t *grp_ent/*out*/, H5G_entry_t *obj_ent/*out*/,
-	  hbool_t follow_slink, intn *nlinks)
+	  uintn target, intn *nlinks)
 {
     H5G_entry_t		_grp_ent;	/*entry for current group	*/
     H5G_entry_t		_obj_ent;	/*entry found			*/
@@ -944,11 +950,12 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 
 	/*
 	 * If we found a symbolic link then we should follow it.  But if this
-	 * is the last component of the name and FOLLOW_SLINK is zero then we
-	 * don't follow it.
+	 * is the last component of the name and the H5G_TARGET_SLINK bit of
+	 * TARGET is set then we don't follow it.
 	 */
 	if (H5G_CACHED_SLINK==obj_ent->type &&
-	    (follow_slink || ((s=H5G_component(name+nchars, NULL)) && *s))) {
+	    (0==(target & H5G_TARGET_SLINK) ||
+	     ((s=H5G_component(name+nchars, NULL)) && *s))) {
 	    if ((*nlinks)-- <= 0) {
 		HRETURN_ERROR (H5E_SYM, H5E_SLINK, FAIL,
 			       "too many symbolic links");
@@ -959,8 +966,17 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
 	    }
 	}
 
+	/*
+	 * Resolve mount points to the mounted group.  Do not do this step if
+	 * the H5G_TARGET_MOUNT bit of TARGET is set and this is the last
+	 * component of the name.
+	 */
+	if (0==(target & H5G_TARGET_MOUNT) ||
+	    ((s=H5G_component(name+nchars, NULL)) && *s)) {
+	    H5F_mountpoint(obj_ent/*in,out*/);
+	}
+	
 	/* next component */
-	H5F_mountpoint(obj_ent/*in,out*/);
 	name += nchars;
     }
     if (rest) *rest = name; /*final null */
@@ -1014,7 +1030,8 @@ H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
     linkval = H5MM_xstrdup (clv);
 
     /* Traverse the link */
-    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, TRUE, nlinks)) {
+    if (H5G_namei (grp_ent, linkval, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL,
+		   nlinks)) {
 	HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		     "unable to follow symbolic link");
     }
@@ -1101,8 +1118,8 @@ H5G_mkroot (H5F_t *f, H5G_entry_t *ent)
     }
     f->shared->root_grp->ent = *ent;
     f->shared->root_grp->nref = 1;
-    assert (1==f->nopen);
-    f->nopen = 0;
+    assert (1==f->nopen_objs);
+    f->nopen_objs = 0;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1146,7 +1163,8 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint)
     assert(name && *name);
 
     /* lookup name */
-    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, TRUE, NULL)) {
+    if (0 == H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
+		       NULL)) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1320,11 +1338,15 @@ H5G_close(H5G_t *grp)
 /*-------------------------------------------------------------------------
  * Function:	H5G_rootof
  *
- * Purpose:	Return a pointer to the root group of the file.
+ * Purpose:	Return a pointer to the root group of the file.  If the file
+ *		is part of a virtual file then the root group of the virtual
+ *		file is returned.
  *
- * Return:	Success:	
+ * Return:	Success:	Ptr to the root group of the file.  Do not
+ *				free the pointer -- it points directly into
+ *				the file struct.
  *
- *		Failure:	
+ *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
  *              Tuesday, October 13, 1998
@@ -1336,8 +1358,8 @@ H5G_close(H5G_t *grp)
 H5G_t *
 H5G_rootof(H5F_t *f)
 {
-    
     FUNC_ENTER(H5G_rootof, NULL);
+    while (f->mtab.parent) f = f->mtab.parent;
     FUNC_LEAVE(f->shared->root_grp);
 }
 
@@ -1378,7 +1400,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
     /*
      * Look up the name -- it shouldn't exist yet.
      */
-    if (H5G_namei(loc, name, &rest, &grp, NULL, TRUE, NULL) >= 0) {
+    if (H5G_namei(loc, name, &rest, &grp, NULL, H5G_TARGET_NORMAL, NULL)>=0) {
 	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "already exists");
     }
     H5E_clear(); /*it's OK that we didn't find it */
@@ -1409,6 +1431,7 @@ H5G_insert(H5G_entry_t *loc, const char *name, H5G_entry_t *ent)
 		      "unable to increment hard link count");
     }
     if (H5G_stab_insert(&grp, rest, ent) < 0) {
+	H5O_link(ent, -1);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to insert name");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1452,7 +1475,8 @@ H5G_find(H5G_entry_t *loc, const char *name,
     assert (loc);
     assert (name && *name);
 
-    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, grp_ent, obj_ent, H5G_TARGET_NORMAL,
+		  NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
     FUNC_LEAVE(SUCCEED);
@@ -1650,7 +1674,7 @@ H5G_loc (hid_t loc_id)
  */
 herr_t
 H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
-	  const char *new_name)
+	  const char *new_name, uintn namei_flags)
 {
     H5G_entry_t		cur_obj;	/*entry for the link tail	*/
     H5G_entry_t		grp_ent;	/*ent for grp containing link hd*/
@@ -1673,7 +1697,8 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	 * Lookup the the new_name so we can get the group which will contain
 	 * the new entry.  The entry shouldn't exist yet.
 	 */
-	if (H5G_namei (loc, new_name, &rest, &grp_ent, NULL, TRUE, NULL)>=0) {
+	if (H5G_namei (loc, new_name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
+		       NULL)>=0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_EXISTS, FAIL, "already exists");
 	}
 	H5E_clear (); /*it's okay that we didn't find it*/
@@ -1738,9 +1763,10 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	break;
 
     case H5G_LINK_HARD:
-	if (H5G_find (loc, cur_name, NULL, &cur_obj)<0) {
-	    HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
-			   "source object not found");
+	if (H5G_namei(loc, cur_name, NULL, NULL, &cur_obj, namei_flags,
+		      NULL)<0) {
+	    HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
+			  "source object not found");
 	}
 	if (H5G_insert (loc, new_name, &cur_obj)<0) {
 	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
@@ -1793,7 +1819,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 
     /* Find the object's symbol table entry */
     if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
-		   follow_link, NULL)<0) {
+		   follow_link?H5G_TARGET_NORMAL:H5G_TARGET_SLINK, NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL, "unable to stat object");
     }
 
@@ -1889,8 +1915,8 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
      * Get the symbol table entry for the link head and the symbol table
      * entry for the group in which the link head appears.
      */
-    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/, FALSE,
-		   NULL)<0) {
+    if (H5G_namei (loc, name, NULL, &grp_ent/*out*/, &obj_ent/*out*/,
+		   H5G_TARGET_SLINK, NULL)<0) {
 	HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL,
 		       "symbolic link was not found");
     }
@@ -1947,7 +1973,8 @@ H5G_set_comment(H5G_entry_t *loc, const char *name, const char *buf)
     FUNC_ENTER(H5G_set_comment, FAIL);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
+		  NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
 
@@ -1996,7 +2023,8 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
     FUNC_ENTER(H5G_get_comment, FAIL);
 
     /* Get the symbol table entry for the object */
-    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, TRUE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, NULL, &obj_ent/*out*/, H5G_TARGET_NORMAL,
+		  NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
 
@@ -2043,7 +2071,8 @@ H5G_unlink(H5G_entry_t *loc, const char *name)
     assert(name && *name);
 
     /* Get the entry for the group that contains the object to be unlinked */
-    if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent, FALSE, NULL)<0) {
+    if (H5G_namei(loc, name, NULL, &grp_ent, &obj_ent,
+		  H5G_TARGET_SLINK|H5G_TARGET_MOUNT, NULL)<0) {
 	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found");
     }
     if (!H5F_addr_defined(&(grp_ent.header))) {
@@ -2113,7 +2142,8 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
 			      "unable to read symbolic link value");
 	    }
 	} while (linkval[lv_size-1]);
-	if (H5G_link(loc, H5G_LINK_SOFT, linkval, dst_name)<0) {
+	if (H5G_link(loc, H5G_LINK_SOFT, linkval, dst_name,
+		     H5G_TARGET_NORMAL)<0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 			  "unable to rename symbolic link");
 	}
@@ -2123,7 +2153,8 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
 	/*
 	 * Rename the object.
 	 */
-	if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name)<0) {
+	if (H5G_link(loc, H5G_LINK_HARD, src_name, dst_name,
+		     H5G_TARGET_MOUNT)<0) {
 	    HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 			  "unable to register new name for object");
 	}
@@ -2136,4 +2167,56 @@ H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name)
     }
 
     FUNC_LEAVE(SUCCEED);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_insertion_file
+ *
+ * Purpose:	Given a location and name that specifies a not-yet-existing
+ *		object return the file into which the object is about to be
+ *		inserted.
+ *
+ * Return:	Success:	File pointer
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, October 14, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5G_insertion_file(H5G_entry_t *loc, const char *name)
+{
+    const char	*rest;
+    H5G_entry_t	grp_ent;
+    size_t	size;
+
+    FUNC_ENTER(H5G_insertion_file, NULL);
+    assert(loc);
+    assert(name && *name);
+
+    /*
+     * Look up the name to get the containing group and to make sure the name
+     * doesn't already exist.
+     */
+    if (H5G_namei(loc, name, &rest, &grp_ent, NULL, H5G_TARGET_NORMAL,
+		  NULL)>=0) {
+	HRETURN_ERROR(H5E_SYM, H5E_EXISTS, NULL, "name already exists");
+    }
+    H5E_clear();
+
+    /* Make sure only the last component wasn't resolved */
+    rest = H5G_component(rest, &size);
+    assert(*rest && size>0);
+    rest = H5G_component(rest+size, NULL);
+    if (*rest) {
+	HRETURN_ERROR(H5E_SYM, H5E_NOTFOUND, NULL,
+		      "insertion point not found");
+    }
+
+    FUNC_LEAVE(grp_ent.file);
 }

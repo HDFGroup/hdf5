@@ -298,6 +298,7 @@
 ./test/iopipe.c
 ./test/istore.c
 ./test/links.c
+./test/mount.c
 ./test/mtime.c
 ./test/overhead.c
 ./test/ragged.c

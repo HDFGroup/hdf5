@@ -3679,6 +3679,7 @@ herr_t
 H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 {
     herr_t	ret_value = FAIL;
+    H5F_t	*file = NULL;
     
     FUNC_ENTER (H5T_commit, FAIL);
 
@@ -3699,11 +3700,17 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type)
 		       "data type is immutable");
     }
 
+    /* Find the insertion file */
+    if (NULL==(file=H5G_insertion_file(loc, name))) {
+	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
+		      "unable to find insertion point");
+    }
+
     /*
      * Create the object header and open it for write access. Insert the data
      * type message and then give the object header a name.
      */
-    if (H5O_create (loc->file, 64, &(type->ent))<0) {
+    if (H5O_create (file, 64, &(type->ent))<0) {
 	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		     "unable to create data type object header");
     }

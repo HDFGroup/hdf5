@@ -479,7 +479,7 @@ typedef struct H5F_t {
     uintn		intent;		/* The flags passed to H5F_open()*/
     char		*name;		/* Name used to open file	*/
     H5F_file_t		*shared;	/* The shared file info		*/
-    uintn		nopen;		/* Number of open object headers*/
+    uintn		nopen_objs;	/* Number of open object headers*/
     hbool_t		close_pending;	/* File close is pending	*/
     H5F_mtab_t		mtab;		/* File mount table		*/
 } H5F_t;

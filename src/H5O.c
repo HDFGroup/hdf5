@@ -244,7 +244,7 @@ H5O_open(H5G_entry_t *obj_ent)
 #endif
 
     /* Increment open-lock counters */
-    obj_ent->file->nopen++;
+    obj_ent->file->nopen_objs++;
     FUNC_LEAVE(SUCCEED);
 }
 
@@ -273,16 +273,16 @@ H5O_close(H5G_entry_t *obj_ent)
     /* Check args */
     assert(obj_ent);
     assert(obj_ent->file);
-    assert(obj_ent->file->nopen > 0);
+    assert(obj_ent->file->nopen_objs > 0);
 
     /* Decrement open-lock counters */
-    --obj_ent->file->nopen;
+    --obj_ent->file->nopen_objs;
 
     /*
      * If the file open-lock count has reached zero and the file has a close
      * pending then close the file.
      */
-    if (0 == obj_ent->file->nopen && obj_ent->file->close_pending) {
+    if (0 == obj_ent->file->nopen_objs && obj_ent->file->close_pending) {
 	H5F_close(obj_ent->file);
     }
 #ifdef H5O_DEBUG
@@ -1203,8 +1203,14 @@ H5O_modify(H5G_entry_t *ent, const H5O_class_t *type, intn overwrite,
 	    } else {
 		/*
 		 * The shared message is stored in some other object header.
-		 * Increment the reference count on that object header.
+		 * The other object header must be in the same file as the
+		 * new object header. Increment the reference count on that
+		 * object header.
 		 */
+		if (sh_mesg->u.ent.file->shared != ent->file->shared) {
+		    HGOTO_ERROR(H5E_OHDR, H5E_LINK, FAIL,
+				"interfile hard links are not allowed");
+		}
 		if (H5O_link (&(sh_mesg->u.ent), 1)<0) {
 		    HGOTO_ERROR (H5E_OHDR, H5E_LINK, FAIL,
 				 "unable to adjust shared object link count");

@@ -1172,7 +1172,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     }
 
     /* Clear array sizes */
-    for (i=0; i<NELMTS(asize); i++) asize[i] = -1;
+    for (i=0; i<(hssize_t)NELMTS(asize); i++) asize[i] = -1;
 
     /* Parse the argument types */
     for (argno=0; *type; argno++, type+=HDisupper(*type)?2:1) {

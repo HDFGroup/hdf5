@@ -289,7 +289,7 @@ H5Fget_create_plist(hid_t file_id)
     H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5I_FILE != H5I_get_type(file_id) || NULL==(file=H5I_object(file_id))) {
+    if (H5I_FILE!=H5I_get_type(file_id) || NULL==(file=H5I_object(file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     
@@ -1535,7 +1535,21 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
 herr_t
 H5F_close(H5F_t *f)
 {
+    uintn	i;
+
     FUNC_ENTER(H5F_close, FAIL);
+
+    /*
+     * Find the root of the virtual file. Then unmount and close each child
+     * before closing the current file.
+     */
+    while (f->mtab.parent) f = f->mtab.parent;
+    for (i=0; i<f->mtab.nmounts; i++) {
+	H5G_close(f->mtab.child[i].group);
+	f->mtab.child[i].file->mtab.parent = NULL;
+	H5F_close(f->mtab.child[i].file);
+    }
+    f->mtab.nmounts = 0;
 
     /*
      * If object headers are still open then delay deletion of resources until
@@ -1543,7 +1557,7 @@ H5F_close(H5F_t *f)
      * header anyway so that failing to close all objects isn't a major
      * problem.
      */
-    if (f->nopen>0) {
+    if (f->nopen_objs>0) {
 	if (H5F_flush(f, FALSE)<0) {
 	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			  "unable to flush cache");
@@ -1553,9 +1567,9 @@ H5F_close(H5F_t *f)
 	    fprintf(H5DEBUG(F), "H5F: H5F_close(%s): %u object header%s still "
 		    "open (file close will complete when %s closed)\n",
 		    f->name,
-		    f->nopen,
-		    1 == f->nopen ? " is" : "s are",
-		    1 == f->nopen ? "that header is" : "those headers are");
+		    f->nopen_objs,
+		    1 == f->nopen_objs?" is":"s are",
+		    1 == f->nopen_objs?"that header is":"those headers are");
 	}
 #endif
 	f->close_pending = TRUE;
@@ -1942,6 +1956,7 @@ H5F_mountpoint(H5G_entry_t *find/*in,out*/)
 	if (0==cmp) {
 	    ent = H5G_entof(parent->mtab.child[md].file->shared->root_grp);
 	    *find = *ent;
+	    parent = ent->file;
 	}
     } while (!cmp);
     

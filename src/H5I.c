@@ -564,8 +564,8 @@ H5I_get_type(hid_t id)
 
     FUNC_ENTER(H5I_get_type, H5I_BADID);
 
-    ret_value = H5I_GROUP(id);
-    assert(ret_value>H5I_BADID && ret_value<H5I_MAXID);
+    if (id>0) ret_value = H5I_GROUP(id);
+    assert(ret_value>=H5I_BADID && ret_value<H5I_MAXID);
 
     FUNC_LEAVE(ret_value);
 }

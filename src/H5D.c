@@ -832,10 +832,12 @@ H5D_new(const H5D_create_t *create_parms)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		     "memory allocation failed");
     }
-    if(create_parms!=NULL)
+    if(create_parms!=NULL) {
         ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
-    else
-        ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE, &H5D_create_dflt);
+    } else {
+        ret_value->create_parms = H5P_copy (H5P_DATASET_CREATE,
+					    &H5D_create_dflt);
+    }
     H5F_addr_undef(&(ret_value->ent.header));
 
     /* Success */
@@ -887,17 +889,28 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     intn		i, ndims;
     hsize_t		max_dim[H5O_LAYOUT_NDIMS];
     H5O_efl_t		*efl = NULL;
-    H5F_t		*f = loc->file;
+    H5F_t		*f = NULL;
 
     FUNC_ENTER(H5D_create, NULL);
 
     /* check args */
-    assert (f);
     assert (loc);
     assert (name && *name);
     assert (type);
     assert (space);
     assert (create_parms);
+    if (create_parms->pline.nfilters>0 &&
+	H5D_CHUNKED!=create_parms->layout) {
+	HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
+		     "filters can only be used with chunked layout");
+    }
+
+    /* What file is the dataset being added to? */
+    if (NULL==(f=H5G_insertion_file(loc, name))) {
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
+		    "unable to locate insertion point");
+    }
+
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
     if (f->shared->access_parms->driver == H5F_LOW_MPIO &&
@@ -906,12 +919,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 		     "Parallel IO does not support filters yet");
     }
 #endif
-    if (create_parms->pline.nfilters>0 &&
-	H5D_CHUNKED!=create_parms->layout) {
-	HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
-		     "filters can only be used with chunked layout");
-    }
-
+    
     /* Initialize the dataset object */
     if (NULL==(new_dset = H5D_new(create_parms))) {
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
@@ -1118,8 +1126,9 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
  * Modifications:
  * 	Robb Matzke, 9 Jun 1998
  *	The data space message is no longer cached in the dataset struct.
- *  Quincey Koziol, 12 Oct 1998
- *  Moved guts of function into H5D_open_oid
+ *	
+ *  	Quincey Koziol, 12 Oct 1998
+ *  	Moved guts of function into H5D_open_oid
  *
  *-------------------------------------------------------------------------
  */
@@ -1204,14 +1213,16 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
     }
 
     /* Get the optional fill value message */
-    if (NULL==H5O_read(&(dataset->ent), H5O_FILL, 0, &(dataset->create_parms->fill))) {
+    if (NULL==H5O_read(&(dataset->ent), H5O_FILL, 0,
+		       &(dataset->create_parms->fill))) {
         H5E_clear();
         HDmemset(&(dataset->create_parms->fill), 0,
                 sizeof(dataset->create_parms->fill));
     }
 
     /* Get the optional filters message */
-    if (NULL==H5O_read (&(dataset->ent), H5O_PLINE, 0, &(dataset->create_parms->pline))) {
+    if (NULL==H5O_read (&(dataset->ent), H5O_PLINE, 0,
+			&(dataset->create_parms->pline))) {
         H5E_clear ();
         HDmemset (&(dataset->create_parms->pline), 0,
                 sizeof(dataset->create_parms->pline));
@@ -1219,7 +1230,7 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (dataset.ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
+    if (dataset->ent.file->shared->access_parms->driver == H5F_LOW_MPIO &&
             dataset->create_parms->pline.nfilters>0){
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support filters yet");
@@ -1255,12 +1266,14 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
             break;
 
         default:
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "not implemented yet");
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
+			"not implemented yet");
     }
 
     /* Get the external file list message, which might not exist */
-    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0, &(dataset->create_parms->efl)) &&
-            !H5F_addr_defined (&(dataset->layout.addr))) {
+    if (NULL==H5O_read (&(dataset->ent), H5O_EFL, 0,
+			&(dataset->create_parms->efl)) &&
+	!H5F_addr_defined (&(dataset->layout.addr))) {
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL,
 		     "storage address is undefined an no external file list");
     }
@@ -1270,7 +1283,8 @@ H5D_open_oid(H5D_t *dataset, H5G_entry_t *ent)
      * This is especially important for parallel I/O where the B-tree must
      * be fully populated before I/O can happen.
      */
-    if ((dataset->ent.file->intent & H5F_ACC_RDWR) && H5D_CHUNKED==dataset->layout.type) {
+    if ((dataset->ent.file->intent & H5F_ACC_RDWR) &&
+	H5D_CHUNKED==dataset->layout.type) {
         if (H5D_init_storage(dataset, space)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "unable to initialize file storage");
@@ -1831,7 +1845,8 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * turns off background preservation.
      */
 #ifdef QAK
-    printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n",FUNC,(int)nelmts,mem_space->extent.u.simple.rank);
+    printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n", FUNC,
+	   (int)nelmts, mem_space->extent.u.simple.rank);
 #endif /* QAK */
     if (nelmts!=H5S_get_select_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
@@ -2266,8 +2281,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     intn		ndims;
     hsize_t		dim[H5O_LAYOUT_NDIMS];
     hsize_t		npoints, ptsperbuf;
-    size_t		i, size, bufsize=8*1024;
-    hbool_t		all_zero;
+    size_t		size, bufsize=8*1024;
     hid_t		buf_id = -1;
     haddr_t		addr;
     herr_t		ret_value = FAIL;
@@ -2280,18 +2294,13 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     switch (dset->layout.type) {
     case H5D_CONTIGUOUS:
 	/*
-	 * If the fill value is non-zero then write the fill value to the
-	 * specified selection.
+	 * If the fill value is set then write it to the specified selection
+	 * even if it is all zero.  This allows the application to force
+	 * filling when the underlying storage isn't initialized to zero.
 	 */
-	for (i=0, all_zero=TRUE; i<dset->create_parms->fill.size; i++) {
-	    if (((uint8*)(dset->create_parms->fill.buf))[i]) {
-		all_zero = FALSE;
-		break;
-	    }
-	}
 	npoints = H5S_get_simple_extent_npoints(space);
-
-	if (!all_zero && npoints==H5S_get_select_npoints(space)) {
+	if (dset->create_parms->fill.buf &&
+	    npoints==H5S_get_select_npoints(space)) {
 	    /*
 	     * Fill the entire current extent with the fill value.  We can do
 	     * this quite efficiently by making sure we copy the fill value
@@ -2330,7 +2339,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 		npoints -= MIN(ptsperbuf, npoints);
 		H5F_addr_inc(&addr, size);
 	    }
-	} else if (!all_zero) {
+	} else if (dset->create_parms->fill.buf) {
 	    /*
 	     * Fill the specified selection with the fill value.
 	     */

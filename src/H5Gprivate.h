@@ -109,7 +109,7 @@ H5G_t *H5G_reopen (H5G_t *grp);
 herr_t H5G_close (H5G_t *grp);
 H5G_t *H5G_rootof(H5F_t *f);
 herr_t H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
-		 const char *new_name);
+		 const char *new_name, uintn namei_flags);
 herr_t H5G_get_objinfo (H5G_entry_t *loc, const char *name,
 			hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 herr_t H5G_linkval (H5G_entry_t *loc, const char *name, size_t size,
@@ -122,6 +122,7 @@ herr_t H5G_move(H5G_entry_t *loc, const char *src_name, const char *dst_name);
 herr_t H5G_unlink(H5G_entry_t *loc, const char *name);
 herr_t H5G_find (H5G_entry_t *loc, const char *name,
 		 H5G_entry_t *grp_ent/*out*/, H5G_entry_t *ent/*out*/);
+H5F_t *H5G_insertion_file(H5G_entry_t *loc, const char *name);
 herr_t H5G_traverse_slink (H5G_entry_t *grp_ent/*in,out*/,
 			   H5G_entry_t *obj_ent/*in,out*/,
 			   intn *nlinks/*in,out*/);
