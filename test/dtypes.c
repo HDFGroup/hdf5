@@ -1135,8 +1135,7 @@ test_compound_6(void)
 /*-------------------------------------------------------------------------
  * Function:	test_compound_7
  *
- * Purpose:	Tests inserting fields into compound datatypes when the field
- *              overlaps the end of the compound datatype.
+ * Purpose:	Tests increasing compound type size. 
  *
  * Return:	Success:	0
  *
@@ -1146,6 +1145,9 @@ test_compound_6(void)
  *              Tuesday, December 18, 2001
  *
  * Modifications:
+ *              The size of compound datatype can be expanded now.
+ *              Raymond Lu
+ *              Wednesday, September 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1206,19 +1208,22 @@ test_compound_7(void)
         goto error;
     } /* end if */
 
-    if(H5Tget_size(tid2)==sizeof(struct s2)) {
+    /* Increase compound type size */
+    if(H5Tset_size(tid2, sizeof(struct s2))<0) {
         H5_FAILED();
         printf("Incorrect size for struct 2\n");
         goto error;
     } /* end if */
 
-    /* Should not be able to insert field past end of compound datatype */
-    H5E_BEGIN_TRY {
-        ret=H5Tinsert(tid2,"d",HOFFSET(struct s2,d),H5T_NATIVE_DOUBLE);
-    } H5E_END_TRY;
-    if(ret>=0) {
+    if( H5Tinsert(tid2,"d",HOFFSET(struct s2,d),H5T_NATIVE_DOUBLE)<0) {
         H5_FAILED();
-        printf("Inserted field 'd'?\n");
+        printf("Can't expand compound datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tget_size(tid2)!=sizeof(struct s2)) {
+        H5_FAILED();
+        printf("Incorrect size for struct 2\n");
         goto error;
     } /* end if */
 
@@ -1234,6 +1239,126 @@ test_compound_7(void)
     return 0;
 
  error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_8
+ *
+ * Purpose:     Tests H5Tpack for compound data types.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Robb Matzke
+ *              Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_8(void)
+{
+    typedef struct s1 {
+        char    a;
+        int     b;
+    } s1;
+
+    typedef struct s2 {
+        char    c;
+        s1      d;
+    } s2;
+
+    hid_t  tid1, tid2;
+    size_t cmpd_size;
+    herr_t ret;
+
+    TESTING("H5Tpack for compound data types");
+   
+    /* Create first compound datatype */ 
+    if((tid1 = H5Tcreate( H5T_COMPOUND, sizeof(struct s1)))<0) {
+        H5_FAILED();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_CHAR)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'a'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_INT)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'b'\n");
+        goto error;
+    } /* end if */
+
+    /* Test H5Tpack for the first compound type */
+    if(H5Tpack(tid1)<0) {
+        H5_FAILED();
+        printf("Can't pack the compound data type\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tlock(tid1)<0) {
+        H5_FAILED();
+        printf("Can't lock the compound data type\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tpack(tid1)<0) {
+        H5_FAILED();
+        printf("Can't pack the compound data type for second time\n");
+        goto error;
+    } /* end if */
+
+    
+    /* Create second compound datatype */
+    if((tid2 = H5Tcreate( H5T_COMPOUND, sizeof(struct s2)))<0) {
+        H5_FAILED();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid2,"c",HOFFSET(struct s2,c),H5T_NATIVE_CHAR)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'c'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(tid2,"d",HOFFSET(struct s2,d),tid1)<0) {
+        H5_FAILED();
+        printf("Can't insert field 'd'\n");
+        goto error;
+    } /* end if */
+
+    /* Test H5Tpack for the second compound type */
+    if(H5Tpack(tid2)<0) {
+        H5_FAILED();
+        printf("Can't pack the compound data type\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tlock(tid2)<0) {
+        H5_FAILED();
+        printf("Can't lock the compound data type\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tpack(tid2)<0) {
+        H5_FAILED();
+        printf("Can't pack the compound data type for second time\n");
+        goto error;
+    } /* end if */
+
+    PASSED();
+    return 0;
+
+  error:
     return 1;
 }
 
@@ -4363,6 +4488,7 @@ main(void)
     nerrors += test_compound_5();
     nerrors += test_compound_6();
     nerrors += test_compound_7();
+    nerrors += test_compound_8();
     nerrors += test_conv_int ();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
@@ -4403,7 +4529,7 @@ main(void)
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
-    
+
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
