@@ -1,0 +1,16 @@
+#							-*- shell-script -*-
+#
+# This file is part of the HDF5 build script.  It is processed shortly
+# after configure starts and defines, among other things, flags for
+# the various compile modes.
+#
+# See BlankForm in this directory for details.
+
+# The default compiler is `g++'.
+if test -z "$CXX"; then
+    CXX=g++
+    CXX_BASENAME=g++
+fi
+
+# Figure out compiler flags
+#. $srcdir/config/gnu-flags

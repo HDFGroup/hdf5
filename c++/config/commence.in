@@ -1,0 +1,155 @@
+##------------------------------------------------------------ -*- makefile -*-
+## The following section of this makefile comes from the
+## `./config/commence' file which was generated with config.status
+## from `./config/commence.in'.
+##-----------------------------------------------------------------------------
+
+## Things that Make needs
+.SUFFIXES:
+.SUFFIXES: .C .o .lo
+@SET_MAKE@
+
+## Directories to search
+@SEARCH@
+
+## Programs
+SHELL=/bin/sh
+CXX=@CXX@
+CXXFLAGS=@CXXFLAGS@
+CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@
+LDFLAGS=@LDFLAGS@
+ROOT=@ROOT@
+LIBS=@LIBS@
+AR=@AR@
+RANLIB=@RANLIB@
+RM=rm -f
+CP=cp
+INSTALL=@INSTALL@
+INSTALL_PROGRAM=@INSTALL_PROGRAM@
+INSTALL_DATA=@INSTALL_DATA@
+RUNSERIAL=@RUNSERIAL@
+RUNPARALLEL=@RUNPARALLEL@
+RUNTEST=$(RUNSERIAL)
+TRACE=:
+
+## Installation points
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+libdir=@libdir@
+includedir=@includedir@
+docdir=@exec_prefix@/doc
+PUB_LIB=$(LIB)
+
+## Shared libraries
+LT_STATIC_EXEC=@LT_STATIC_EXEC@
+DYNAMIC_DIRS=@DYNAMIC_DIRS@
+LT=$(top_builddir)/libtool
+LT_COMPILE=$(LT) --mode=compile $(CXX)
+LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
+LT_LINK_EXE=$(LT) --mode=link $(CXX) $(LT_STATIC_EXEC) -rpath $(bindir) $(DYNAMIC_DIRS)
+LT_RUN=$(LT) --mode=execute
+LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
+LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
+LT_UNINSTALL=$(LT) --mode=uninstall $(RM)
+
+## Optional variables. We must declare them here because Irix pmake
+## complains if it sees a reference to a variable which has never been
+## defined. The main makefile is free to redefine these to something else.
+DOCDIR=$(docdir)
+LIB=
+LIB_SRC=
+LIB_OBJ=
+PUB_HDR=
+PUB_PROGS=
+PUB_DOCS=
+PROGS=
+TEST_PROGS=
+TEST_FLAGS=
+TEST_SCRIPTS=
+
+## The default is to build the library and/or programs.  We must build
+## them sequentially.
+all:
+	$(MAKE) lib
+	$(MAKE) progs
+	$(MAKE) tests
+
+## The following rules insure that the Makefile is up-to-date by rerunning
+## various autoconf components (although not all versions of make assume
+## that the makefile is implicitly a target).  We use time stamp files to
+## keep track of the most recent update of H5config.h.in and H5config.h
+## because autoheader and config.status don't update the modification time
+## if the contents don't change.
+## Invoke it by "gmake reconfigure".
+##
+## Graphically, the dependencies are:
+##
+##		         configure.in
+##                           |  |
+##         +-----------------+  +------------+
+##         |                                 |
+##      stamp1                           configure
+##   (H5config.h.in)                         |
+##       |  |                                |
+##       |  +---------------+    +-----------+
+##       |                  |    |
+##       |               config.status
+##       |                     |
+##       |  +------------------+
+##       |  |
+##      stamp2
+##    (H5config.h)                   Makefile.in et al
+##         |                                 |
+##         +------------------+  +-----------+
+##                            |  |
+##                          Makefile
+##
+## A side effect of updating stamp1 is to generate H5config.h.in and a
+## side effect of updating stamp2 is to generate H5config.h.  When using
+## a version of make that doesn't treat the makefile as the initial target
+## the user may want to occassionally type `make Makefile' in any source
+## directory.
+## The `Makefile' target has been renamed to `reconfigure' so that the
+## autoconf and make depend processes do not start up automatically.
+## One must do `make reconfigure' explicitedly to start the process.
+## (When srcdir is used and if more than one machines are running,
+## this automatic Makefile/autoconf can get things unstable.)
+##
+STAMP1=$(top_builddir)/config/stamp1
+STAMP2=$(top_builddir)/config/stamp2
+
+MAKEFILE_PARTS=$(srcdir)/Makefile.in		\
+	       $(top_srcdir)/config/commence.in	\
+	       $(top_srcdir)/config/conclude.in	\
+	       $(top_srcdir)/config/depend1.in	\
+	       $(top_srcdir)/config/depend2.in	\
+	       $(top_srcdir)/config/depend3.in	\
+	       $(top_srcdir)/config/depend4.in	\
+	       $(top_srcdir)/config/dependN.in
+
+$(STAMP1): $(top_srcdir)/configure.in
+	touch $(STAMP1)
+	-cd $(top_srcdir); autoheader
+
+$(STAMP2): $(STAMP1) $(top_builddir)/config.status
+	touch $(STAMP2)
+	-cd $(top_builddir); \
+	   CONFIG_FILES= CONFIG_HEADERS=src/H5config.h ./config.status
+
+$(top_srcdir)/configure: $(top_srcdir)/configure.in
+	-cd $(top_srcdir); autoconf
+
+$(top_builddir)/config.status: $(top_srcdir)/configure $(STAMP1)
+	-cd $(top_builddir); ./config.status --recheck
+
+# rerun the autoconf process if any configure components have changed. 
+reconfigure: $(MAKEFILE_PARTS) $(STAMP2)
+	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
+
+##-----------------------------------------------------------------------------
+## The following section of this makefile comes from the middle of
+## `Makefile.in' from this directory.  It was generated by running
+## `config.status'.
+##-----------------------------------------------------------------------------

@@ -1,0 +1,184 @@
+##------------------------------------------------------------ -*- makefile -*-
+## The following section of this makefile comes from the
+## `./config/conclude' file which was generated with config.status
+## from `./config/conclude.in'.
+##-----------------------------------------------------------------------------
+
+## This is the target for the library described in the main body of the
+## makefile.
+##
+lib: $(LIB)
+$(LIB) __no_library__: $(LIB_OBJ)
+	@$(LT_LINK_LIB) -o $@ $(CXXFLAGS) $(LIB_OBJ) $(LDFLAGS) $(LIBS)
+
+progs: $(LIB) $(PROGS)
+
+## Build a tags file in this directory.
+TAGS: $(LIB_SRC)
+	$(RM) $@
+	-etags $(LIB_SRC)
+
+## Runs each test in order, passing $(TEST_FLAGS) to the program.
+## Since tests are done in a shell loop, "make -i" does apply inside it.
+## Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
+tests: $(TEST_PROGS) $(LIB)
+check test _test: tests
+	@for test in $(TEST_PROGS) dummy; do                                  \
+	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
+	      srcdir="$(srcdir)"					      \
+		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
+	      echo "";							      \
+	   fi;								      \
+	done;								      \
+	test $$test = dummy || false
+	@for test in $(TEST_SCRIPTS) dummy; do                                \
+	   if test $$test != dummy; then				      \
+	      echo "============================";			      \
+	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      echo "============================";			      \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	      srcdir="$(srcdir)"					      \
+		 /bin/sh $$test $(TEST_FLAGS) ||		              \
+		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
+		 break;							      \
+	      echo "";							      \
+	   fi;								      \
+	done;								      \
+	test $$test = dummy || false
+
+## Make installation directories directories if they don't exist.
+$(libdir):
+	mkdir $@ && chmod 755 $@
+
+$(includedir):
+	mkdir $@ && chmod 755 $@
+
+$(bindir):
+	mkdir $@ && chmod 755 $@
+
+$(DOCDIR):
+	mkdir $@ && chmod 755 $@
+
+## Install the library, the public header files, and public programs.
+install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
+	@for f in X $(PUB_LIB); do					      \
+	   if test $$f != X; then					      \
+	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
+	   fi;								      \
+	done
+	@if test -f libhdf5.settings; then				      \
+	   (set -x; $(INSTALL_DATA) libhdf5.settings $(libdir)/. || exit 1);  \
+	fi
+	@for f in X $(PUB_HDR); do					      \
+	   if test $$f != X; then					      \
+	      if test -f $$f; then					      \
+		 (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
+	      else							      \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
+		    exit 1);						      \
+	      fi;							      \
+	   fi;								      \
+	done
+	@for f in X $(PUB_PROGS); do					      \
+	   if test $$f != X; then					      \
+	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	   fi;							              \
+	done
+
+## Install the documents.
+install-doc: $(PUB_DOCS) $(DOCDIR)
+	@for d in X $(SUBDIRS); do					      \
+	    if test $$d != X; then					      \
+	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
+	    fi;								      \
+	done
+	@for f in X $(PUB_DOCS); do					      \
+	   if test $$f != X; then					      \
+	      if test -f $$f; then					      \
+		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
+	      else							      \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
+		    exit 1);						      \
+	      fi;							      \
+	   fi;								      \
+	done
+
+## Removes those things that `make install' (would have) installed.
+uninstall:
+	@for f in libhdf5.settings $(LIB); do				      \
+            $(LT_UNINSTALL) $(libdir)/$$f;				      \
+	done
+	@if test "X$(PUB_HDR)" != X; then				      \
+	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
+	fi
+	@for f in X $(PUB_PROGS); do					      \
+	    if test $$f != X; then					      \
+	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
+	    fi;								      \
+	done
+
+## Removes those things that `make install-doc' (would have) installed.
+uninstall-doc:
+	@for d in X $(SUBDIRS); do					      \
+	    if test $$d != X; then					      \
+	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
+	    fi;								      \
+	done
+	@if test "X$(PUB_DOCS)" != X; then				      \
+	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
+	fi
+
+## Removes temporary files without removing the final target files.  That is,
+## remove things like object files but not libraries or executables.
+##
+mostlyclean:
+	-$(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o)
+	-$(RM) $(TEST_OBJ) $(TEST_OBJ:.lo=.o)
+	-$(RM) $(PROG_OBJ) $(PROG_OBJ:.lo=.o) $(MOSTLYCLEAN)
+
+## Like `mostlyclean' except it also removes the final targets: things like
+## libraries and executables.  This target doesn't remove any file that
+## is part of the HDF5 distribution.
+##
+clean: mostlyclean
+	-$(RM) $(LIB) $(TEST_PROGS) $(PROGS) $(CLEAN)
+	-$(RM) -r .libs
+
+## Like `clean' except it also removes files that were created by running
+## configure.  If you've unpacked the source and built HDF5 without creating
+## any other files, then `make distclean' will leave only the files that were
+## in the distribution.
+##
+distclean: clean
+	-$(RM) .depend TAGS *~ core *.core *.bak *.old *.new $(DISTCLEAN)
+	@if test -f $(srcdir)/Makefile.in; then				      \
+	   (set -x; $(RM) Makefile);					      \
+	fi
+
+
+## Like `distclean' except it deletes all files that can be regenerated from
+## the makefile, including those generated from autoheader and autoconf.
+##
+maintainer-clean: distclean
+	-$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
+
+## Implicit rules
+.C.o:
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
+
+.C.lo:
+	@$(LT_COMPILE) $(CXXFLAGS) $(CPPFLAGS) -c $<
+
+##-----------------------------------------------------------------------------
+## The following section of this makefile contains dependencies between the
+## source files and the header files.
+##-----------------------------------------------------------------------------
+.PHONY: dep depend
+dep depend: $(srcdir)/Dependencies
+
+@DEPEND@
