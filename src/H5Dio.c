@@ -1037,11 +1037,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t 
-H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
-    const H5S_t *mem_space, const H5S_t *file_space, H5T_path_t *tpath,
-    H5S_conv_t *sconv,
+H5D_contig_read(hsize_t nelmts, H5D_t *dataset,
+    const H5T_t *mem_type, const H5S_t *mem_space,
+    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
@@ -1051,6 +1050,7 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
 #endif
     size_t	src_type_size;		/*size of source type	*/
     size_t	dst_type_size;	        /*size of destination type*/
+    size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
@@ -1102,21 +1102,29 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type,
     } /* end if */
 
     /*
-     * This is the general case(type conversion).
+     * This is the general case (type conversion, usually).
      */
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
+    max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-            target_size<MAX(src_type_size, dst_type_size))
-        target_size = MAX(src_type_size, dst_type_size);
-    request_nelmts = target_size / MAX(src_type_size, dst_type_size);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+        /* If the buffer is too small to hold even one element, make it bigger */
+        if(target_size<max_type_size)
+            target_size = max_type_size;
+        /* If the buffer is too large to hold all the elements, make it smaller */
+        else if(target_size>(nelmts*max_type_size))
+            target_size=(nelmts*max_type_size);
+    } /* end if */
+    request_nelmts = target_size / max_type_size;
     
     /* Sanity check elements in temporary buffer */
     if (request_nelmts==0)
@@ -1273,9 +1281,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_contig_write(hsize_t nelmts, H5D_t *dataset,
+    const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, const void *buf)
@@ -1286,6 +1294,7 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
 #endif
     size_t	src_type_size;		/*size of source type	*/
     size_t	dst_type_size;	        /*size of destination type*/
+    size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
@@ -1334,19 +1343,27 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     /*
      * This is the general case.
      */
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
+    max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-            target_size<MAX(src_type_size, dst_type_size))
-        target_size = MAX(src_type_size, dst_type_size);
-    request_nelmts = target_size / MAX (src_type_size, dst_type_size);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+        /* If the buffer is too small to hold even one element, make it bigger */
+        if(target_size<max_type_size)
+            target_size = max_type_size;
+        /* If the buffer is too large to hold all the elements, make it smaller */
+        else if(target_size>(nelmts*max_type_size))
+            target_size=(nelmts*max_type_size);
+    } /* end if */
+    request_nelmts = target_size / max_type_size;
 
     /* Sanity check elements in temporary buffer */
     if (request_nelmts==0)
@@ -1503,13 +1520,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5D_chunk_read(hsize_t
-#ifdef NDEBUG
-UNUSED
-#endif /* NDEBUG */
-    nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_chunk_read(hsize_t nelmts, H5D_t *dataset,
+    const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
@@ -1522,6 +1535,7 @@ UNUSED
 #endif
     size_t	src_type_size;		/*size of source type	*/
     size_t	dst_type_size;	        /*size of destination type*/
+    size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
@@ -1597,21 +1611,29 @@ UNUSED
     } /* end if */
 
     /*
-     * This is the general case(type conversion).
+     * This is the general case (type conversion, usually).
      */
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
+    max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-            target_size<MAX(src_type_size, dst_type_size))
-        target_size = MAX(src_type_size, dst_type_size);
-    request_nelmts = target_size / MAX (src_type_size, dst_type_size);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+        /* If the buffer is too small to hold even one element, make it bigger */
+        if(target_size<max_type_size)
+            target_size = max_type_size;
+        /* If the buffer is too large to hold all the elements, make it smaller */
+        else if(target_size>(nelmts*max_type_size))
+            target_size=(nelmts*max_type_size);
+    } /* end if */
+    request_nelmts = target_size / max_type_size;
         
     /* Sanity check elements in temporary buffer */
     if (request_nelmts==0)
@@ -1807,13 +1829,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
-H5D_chunk_write(hsize_t
-#ifdef NDEBUG
-UNUSED
-#endif /* NDEBUG */
-nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
+H5D_chunk_write(hsize_t nelmts, H5D_t *dataset,
+    const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv,
     const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, const void *buf)
@@ -1826,6 +1844,7 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
     size_t	src_type_size;		/*size of source type	*/
     size_t	dst_type_size;	        /*size of destination type*/
+    size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
     hsize_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
@@ -1939,21 +1958,29 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /* QAK */
    
     /*
-     * This is the general case(type conversion).
+     * This is the general case (type conversion, usually).
      */
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
      
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
+    max_type_size = MAX(src_type_size, dst_type_size);
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
      * too large for the buffer... - QAK
      */
-    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-            target_size<MAX(src_type_size, dst_type_size))
-        target_size = MAX(src_type_size, dst_type_size);
-    request_nelmts = target_size / MAX (src_type_size, dst_type_size);
+    if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF) {
+        /* If the buffer is too small to hold even one element, make it bigger */
+        if(target_size<max_type_size)
+            target_size = max_type_size;
+        /* If the buffer is too large to hold all the elements, make it smaller */
+        else if(target_size>(nelmts*max_type_size))
+            target_size=(nelmts*max_type_size);
+    } /* end if */
+    request_nelmts = target_size / max_type_size;
 
     /* Sanity check elements in temporary buffer */
     if (request_nelmts==0)
