@@ -14,12 +14,15 @@ Preconditions
     2. MSVC++ V 6.0, DEC Visual Fortran V6.0, or Intel C and Fortran compilers,
        and WinZip must be installed prior to building the HDF5 library.  
 
-    3. Download the hdf5-1.* distribution archive and run WinZip to unpack 
-       the source code.  The code will be unpacked into the hdf5\ directory.
+    3. Download the hdf5-1.*.* distribution archive and run WinZip to unpack 
+       the source code.  The code will be unpacked into the hdf5-1.*.*\ directory.
+       (*.* stands for the minor release and revision number). Rename the
+       unpacked directory to hdf5.
 
     4. GNU zlib and szlib library should be installed on the machine. You may
-       find prebuilt binaries on the HDF ftp site. 
-
+       find prebuilt binaries on the HDF ftp site (see ftp://ftp.ncsa.uiuc.edu/HDF/)
+       If you wish not to use zlib and/or szlib libraries, see Section V in the 
+       INSTALL_Windows.txt how to disable external filters.
 Note:
     Only static libraries are built for this release.
 
@@ -33,6 +36,7 @@ Building the HDF5 Fortran and C libraries :
        libraries on your system. Go to Tools-->Options-->Directories
        Select "Include files" or "Library files" in the "Show directories for" tab.
        Add corresponding directories for zlib and szlib include files and libraries. 
+       This step is not needed if you disabled external filters in step 4 above.
     3".  Skip this step if you are not using Intel compilers
          Go to Tools-->Select Compiler
          Check Intel box and click OK button.
