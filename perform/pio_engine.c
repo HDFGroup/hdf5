@@ -57,28 +57,28 @@
 } while(0)
 
 #ifndef HDopen
-#ifdef O_BINARY
-#define HDopen(S,F,M)           open(S,F|_O_BINARY,M)
-#else
-#define HDopen(S,F,M)           open(S,F,M)
-#endif
-#endif
+#  ifdef O_BINARY
+#    define HDopen(S,F,M)       open(S,F|_O_BINARY,M)
+#  else   /* O_BINARY */
+#    define HDopen(S,F,M)       open(S,F,M)
+#  endif  /* !O_BINARY */
+#endif  /* !HDopen */
 
 #ifndef HDclose
-#define HDclose(F)		close(F)
-#endif
+#  define HDclose(F)            close(F)
+#endif  /* !HDclose */
 
 #ifndef HDseek
-#define HDseek(F,L,W)		lseek(F,L,W)
-#endif
+#  define HDseek(F,L,W)         lseek(F,L,W)
+#endif  /* !HDseek */
 
 #ifndef HDwrite
-#define HDwrite(F,B,S)		write(F,B,S)
-#endif
+#  define HDwrite(F,B,S)        write(F,B,S)
+#endif  /* !HDwrite */
 
 #ifndef HDread
-#define HDread(F,B,S)		read(F,B,S)
-#endif
+#  define HDread(F,B,S)         read(F,B,S)
+#endif  /* !HDread */
 
 /* Raw I/O macros */
 #define RAWCREATE(fn)           HDopen(fn, O_CREAT|O_TRUNC|O_RDWR, 0600)
@@ -103,12 +103,15 @@ enum {
 #ifndef HDF5_PARAPREFIX
 #  ifdef __PUMAGON__
      /* For the PFS of TFLOPS */
-#    define HDF5_PARAPREFIX "pfs:/pfs_grande/multi/tmp_1"
+#    define HDF5_PARAPREFIX     "pfs:/pfs_grande/multi/tmp_1"
 #  else
-#    define HDF5_PARAPREFIX "/tmp"
+#    define HDF5_PARAPREFIX     "/tmp"
 #  endif    /* __PUMAGON__ */
 #endif  /* !HDF5_PARAPREFIX */
+
+#ifndef MIN
 #define MIN(a,b) (a < b ? a : b)
+#endif  /* !MIN */
 
 /* the different types of file descriptors we can expect */
 typedef union _file_descr {
@@ -126,13 +129,14 @@ static herr_t do_fopen(iotype iot, char *fname, file_descr fd /*out*/,
                        int flags, MPI_Comm comm);
 static herr_t do_fclose(iotype iot, file_descr fd);
 
-herr_t
+results
 do_pio(parameters param)
 {
     /* return codes */
     herr_t          rc;             /*routine return code                   */
     int             mrc;            /*MPI return code                       */
     herr_t          ret_code = 0;   /*return code                           */
+    results         res;
 
     file_descr      fd;
     iotype          iot;
@@ -151,10 +155,8 @@ do_pio(parameters param)
     hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
 
     /* MPI variables */
-    MPI_Comm	    comm = MPI_COMM_NULL;
-    int		    myrank, nprocs = 1;
-
-    pio_time       *timer = NULL;
+    MPI_Comm	    comm;
+    int             myrank, nprocs = 1;
 
     /* Sanity check parameters */
 
@@ -163,12 +165,14 @@ do_pio(parameters param)
 
     switch (iot) {
     case MPIO:
-        timer = pio_time_new(MPI_TIMER);
+        comm = MPI_COMM_WORLD;
+        res.timers = pio_time_new(MPI_TIMER);
         break;
 
     case RAW:
     case PHDF5:
-        timer = pio_time_new(SYS_TIMER);
+        comm = MPI_COMM_NULL;
+        res.timers = pio_time_new(SYS_TIMER);
         break;
 
     default:
@@ -205,15 +209,6 @@ do_pio(parameters param)
                 maxprocs, nprocs);
         GOTOERROR(FAIL);
     }
-
-/* DEBUG*/
-fprintf(stderr, "nfiles=%u\n", nfiles);
-fprintf(stderr, "ndsets=%lu\n", ndsets);
-fprintf(stderr, "nelmts=%lu\n", nelmts);
-fprintf(stderr, "niters=%u\n", niters);
-fprintf(stderr, "maxprocs=%u\n", maxprocs);
-nfiles=3;
-/*ndsets=5; */
 
     /* Create a sub communicator for this run. Easier to use the first N
      * processes. */
@@ -261,22 +256,30 @@ nfiles=3;
         /* Open file for write */
         char base_name[256];
 
-MSG("creating file");
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
 
+
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         rc = do_fopen(iot, fname, fd, PIO_CREATE | PIO_WRITE, comm);
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
+
         VRFY((rc == SUCCESS), "do_fopen failed\n");
+
+        set_time(res.timers, HDF5_WRITE_FIXED_DIMS, START);
         rc = do_write(fd, iot, ndsets, nelmts, h5dset_space_id, buffer);
+        set_time(res.timers, HDF5_WRITE_FIXED_DIMS, STOP);
+
         VRFY((rc == SUCCESS), "do_write failed\n");
 
-	/* Close file for write */
-MSG("closing write file");
+        /* Close file for write */
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         rc = do_fclose(iot, fd);
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
+
         VRFY((rc == SUCCESS), "do_fclose failed\n");
 
         /* Open file for read */
-MSG("opening file to read");
         hrc = do_fopen(iot, fname, fd, PIO_READ, comm);
         VRFY((rc == SUCCESS), "do_fopen failed\n");
 
@@ -295,7 +298,6 @@ MSG("opening file to read");
         /* Close dataset for read */
 
         /* Close file for read */
-MSG("closing read file");
         rc = do_fclose(iot, fd);
         VRFY((rc == SUCCESS), "do_fclose failed\n");
         remove(fname);
@@ -331,10 +333,8 @@ done:
 
     /* release generic resources */
     free(buffer);
-    pio_time_destroy(timer);
-
-fprintf(stderr, "returning with ret_code=%d\n", ret_code);
-    return ret_code;
+    res.ret_code = ret_code;
+    return res;
 }
 
 /*
