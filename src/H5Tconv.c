@@ -2554,7 +2554,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     size_t	msize=0;		/*useful size of mantissa in src*/
     size_t	mpos;			/*offset to useful mant is src	*/
     size_t	mrsh;			/*amount to right shift mantissa*/
-    hbool_t	carry;			/*carry after rounding mantissa	*/
+    hbool_t	carry=0;		/*carry after rounding mantissa	*/
     size_t	i;			/*miscellaneous counters	*/
     hsize_t	implied;		/*destination implied bits	*/
     
@@ -2825,6 +2825,8 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 		carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
 		if (carry) implied = 2;
 	    }
+            else
+                carry=0;
 
 	    /*
 	     * Write the mantissa to the destination
