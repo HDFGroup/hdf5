@@ -649,12 +649,10 @@ herr_t H5D_flush(hatom_t oid)
 	   }
 	}
 
-#if 1
 	/* Flush dataset header to disk -- just for debugging */
 	if (H5AC_flush (dataset->file, NULL, dataset->ent->header, FALSE)<0) {
           HRETURN_ERROR (H5E_OHDR, H5E_CANTFLUSH, FAIL);
        }
-#endif
        
 	dataset->dirty = FALSE;	/*it's clean now*/
     }
