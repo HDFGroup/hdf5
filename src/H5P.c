@@ -128,33 +128,30 @@ H5P_term_interface(void)
     return n;
 }
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Pcreate
- PURPOSE
-    Returns a copy of the default property list for some class of property
- *  lists.
- USAGE
-    herr_t H5Pcreate (type)
-	H5P_class_t type;	IN: Property list class whose default is
- *				    desired.
- RETURNS
-    Property list ID or Negative
- 
- ERRORS
-    ARGS      BADVALUE	    Unknown property list class. 
-    ATOM      CANTINIT	    Can't register property list. 
-    INTERNAL  UNSUPPORTED   Not implemented yet. 
-
- DESCRIPTION
-    Returns a copy of the default property list for some class of property
- *  lists.
---------------------------------------------------------------------------*/
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pcreate
+ *
+ * Purpose:	Creates a new property list by copying a default property
+ *		list.
+ *
+ * Return:	Success:	A new copy of a default property list.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Unknown
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-08-18
+ *		Rewritten in terms of H5P_copy() to fix memory leaks.
+ *-------------------------------------------------------------------------
+ */
 hid_t
 H5Pcreate(H5P_class_t type)
 {
-    hid_t		    ret_value = FAIL;
-    void		   *plist = NULL;
+    hid_t	ret_value = FAIL;
+    const void	*src = NULL;
+    void	*new_plist = NULL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
     H5TRACE1("i","p",type);
@@ -162,57 +159,40 @@ H5Pcreate(H5P_class_t type)
     /* Allocate a new property list and initialize it with default values */
     switch (type) {
     case H5P_FILE_CREATE:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_create_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
+	src = &H5F_create_dflt;
 	break;
-
     case H5P_FILE_ACCESS:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_access_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
+	src = &H5F_access_dflt;
 	break;
-
     case H5P_DATASET_CREATE:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5D_create_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
+	src = &H5D_create_dflt;
 	break;
-
     case H5P_DATA_XFER:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_xfer_t)))) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			   "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_xfer_dflt, sizeof(H5F_xfer_t));
+	src = &H5F_xfer_dflt;
 	break;
-
     case H5P_MOUNT:
-	if (NULL==(plist = H5MM_malloc(sizeof(H5F_mprop_t)))) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-			  "memory allocation failed");
-	}
-	HDmemcpy(plist, &H5F_mount_dflt, sizeof(H5F_mprop_t));
+	src = &H5F_mount_dflt;
 	break;
-
     default:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
 		      "unknown property list class");
     }
 
+    /* Copy the property list */
+    if (NULL==(new_plist=H5P_copy(type, src))) {
+	HRETURN_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,
+		      "unable to copy default property list");
+    }
+    
     /* Atomize the new property list */
-    if ((ret_value = H5P_create(type, plist)) < 0) {
+    if ((ret_value = H5P_create(type, new_plist)) < 0) {
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to register property list");
     }
+    
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5P_create

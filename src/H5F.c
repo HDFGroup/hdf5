@@ -21,9 +21,11 @@ static char		RcsId[] = "@(#)$Revision$";
 /* $Id$ */
 
 /* Predefined file drivers */
-#include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
+#include <H5FDcore.h>		/*temporary in-memory files		  */
 #include <H5FDfamily.h>		/*family of files			  */
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
+#include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
+#include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
@@ -200,8 +202,11 @@ H5F_init_interface(void)
     H5E_BEGIN_TRY {
 	if ((status=H5FD_SEC2)<0) goto end_registration;
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
-	/*...others just like above...*/
-
+	if ((status=H5FD_CORE)<0) goto end_registration;
+	if ((status=H5FD_MULTI)<0) goto end_registration;
+#ifdef HAVE_PARALLEL
+	if ((status=H5FD_MPIO)<0) goto end_registration;
+#endif
     end_registration:
     } H5E_END_TRY;
     if (status<0) {
@@ -473,7 +478,7 @@ H5Fget_access_plist(hid_t file_id)
     _fapl.threshold = f->shared->threshold;
     _fapl.alignment = f->shared->alignment;
     _fapl.gc_ref = f->shared->gc_ref;
-    _fapl.driver_id = f->shared->driver_id;
+    _fapl.driver_id = f->shared->lf->driver_id;
     _fapl.driver_info = NULL; /*just for now */
 
     /* Copy properties */
@@ -711,7 +716,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	f->shared->threshold = fapl->threshold;
 	f->shared->alignment = fapl->alignment;
 	f->shared->gc_ref = fapl->gc_ref;
-	f->shared->driver_id = H5I_inc_ref(fapl->driver_id);
 
 #ifdef HAVE_PARALLEL
 	/*
@@ -719,7 +723,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * does not permit caching.  (maybe able to relax it for
 	 * read only open.)
 	 */
-	if (H5FD_MPIO==f->shared->driver_id){
+	if (H5FD_MPIO==f->shared->lf->driver_id){
 	    f->shared->rdcc_nbytes = 0;
 	    f->shared->mdc_nelmts = 0;
 	}
@@ -807,9 +811,6 @@ H5F_dest(H5F_t *f)
 
 	    /* Destroy file creation properties */
 	    H5P_close(H5P_FILE_CREATE, f->shared->fcpl);
-
-	    /* Destroy file access properties (most don't need destruction) */
-	    H5I_dec_ref(f->shared->driver_id);
 
 	    /* Destroy shared file struct */
 	    if (H5FD_close(f->shared->lf)<0) {

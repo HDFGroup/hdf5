@@ -315,7 +315,6 @@ typedef struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     uintn	gc_ref;		/* Garbage-collect references?		*/
-    hid_t	driver_id;	/* File driver ID			*/
     struct H5G_t *root_grp;	/* Open root group			*/
     intn	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

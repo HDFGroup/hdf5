@@ -1675,7 +1675,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	 * MPI processes could be writing to other elements in the same chunk.
 	 * Do a direct write-through of only the elements requested.
 	 */
-	if (H5FD_MPIO==f->shared->driver_id) {
+	if (H5FD_MPIO==f->shared->lf->driver_id) {
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
 
@@ -1849,7 +1849,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	 * MPI processes could be writing to other elements in the same chunk.
 	 * Do a direct write-through of only the elements requested.
 	 */
-	if (H5FD_MPIO==f->shared->driver_id) {
+	if (H5FD_MPIO==f->shared->lf->driver_id) {
 	    H5F_istore_ud1_t	udata;
 	    H5O_layout_t	l;	/* temporary layout */
 	    if (H5F_istore_get_addr(f, layout, chunk_offset, &udata)<0){

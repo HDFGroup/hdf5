@@ -25,7 +25,11 @@ typedef enum H5FD_mpio_xfer_t {
     H5FD_MPIO_COLLECTIVE
 } H5FD_mpio_xfer_t;
 
-/* MPIO-specific data transfer properties */
+/*
+ * MPIO-specific data transfer properties. This struct is here only because
+ * we need it in special case code throughout the library. Applications
+ * please use H5Pset_dxpl_mpio() instead.
+ */
 typedef struct H5FD_mpio_dxpl_t {
     H5FD_mpio_xfer_t	xfer_mode;	/*collective or independent I/O	*/
 } H5FD_mpio_dxpl_t;

@@ -900,7 +900,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (H5FD_MPIO==f->shared->driver_id &&
+    if (H5FD_MPIO==f->shared->lf->driver_id &&
 	create_parms->pline.nfilters>0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
@@ -1277,7 +1277,7 @@ H5D_open_oid(H5G_entry_t *ent)
 
 #ifdef HAVE_PARALLEL
     /* If MPIO is used, no filter support yet. */
-    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	dataset->create_parms->pline.nfilters>0){
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
 		     "Parallel IO does not support filters yet");
@@ -1511,7 +1511,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     {
 	/* Collective access is not permissible with the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+	if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	    H5FD_MPIO==xfer_parms->driver_id &&
 	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
@@ -1557,7 +1557,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
-        H5FD_MPIO==dataset->ent.file->shared->driver_id) {
+        H5FD_MPIO==dataset->ent.file->shared->lf->driver_id) {
 	sconv->read = H5S_mpio_spaces_read;
     }
 #endif /*HAVE_PARALLEL*/
@@ -1868,7 +1868,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no VL datatype support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	H5T_get_class(mem_type)==H5T_VLEN) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		     "Parallel IO does not support writing VL datatypes yet");
@@ -1878,7 +1878,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* If MPIO is used, no dataset region reference support yet. */
     /* This is because they use the global heap in the file and we don't */
     /* support parallel access of that yet */
-    if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+    if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	H5T_get_class(mem_type)==H5T_REFERENCE &&
 	H5T_get_ref_type(mem_type)==H5R_DATASET_REGION) {
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1918,7 +1918,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     {
 	/* Collective access is not permissible with the MPIO driver */
 	H5FD_mpio_dxpl_t *dx;
-	if (H5FD_MPIO==dataset->ent.file->shared->driver_id &&
+	if (H5FD_MPIO==dataset->ent.file->shared->lf->driver_id &&
 	    H5FD_MPIO==xfer_parms->driver_id &&
 	    (dx=xfer_parms->driver_info) &&
 	    H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
@@ -1971,7 +1971,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * (the latter in case the arguments to sconv_funcs
      * turn out to be inappropriate for MPI-IO).  */
     if (H5_mpi_opt_types_g &&
-        H5FD_MPIO==dataset->ent.file->shared->driver_id) {
+        H5FD_MPIO==dataset->ent.file->shared->lf->driver_id) {
 	sconv->write = H5S_mpio_spaces_write;
     }
 #endif /*HAVE_PARALLEL*/
@@ -2407,8 +2407,6 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
     haddr_t		addr;
     herr_t		ret_value = FAIL;
     void		*buf = NULL;
-    intn		ndims;
-    hsize_t		dim[H5O_LAYOUT_NDIMS];
     
     FUNC_ENTER(H5D_init_storage, FAIL);
     assert(dset);
@@ -2473,12 +2471,16 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 	break;
 
     case H5D_CHUNKED:
+#ifdef HAVE_PARALLEL
 	/*
 	 * If the dataset is accessed via parallel I/O, allocate file space
 	 * for all chunks now and initialize each chunk with the fill value.
 	 */
-	if (H5FD_MPIO==dset->ent.file->shared->driver_id) {
+	if (H5FD_MPIO==dset->ent.file->shared->lf->driver_id) {
 	    /* We only handle simple data spaces so far */
+	    intn		ndims;
+	    hsize_t		dim[H5O_LAYOUT_NDIMS];
+	    
 	    if ((ndims=H5S_get_simple_extent_dims(space, dim, NULL))<0) {
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 			    "unable to get simple data space info");
@@ -2494,6 +2496,7 @@ H5D_init_storage(H5D_t *dset, const H5S_t *space)
 			    "unable to allocate all chunks of dataset");
 	    }
 	}
+#endif /*HAVE_PARALLEL*/
 	break;
     }
     ret_value = SUCCEED;
