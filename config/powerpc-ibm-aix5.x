@@ -8,10 +8,10 @@
 # Use -D_LARGE_FILES by default to support large file size.
 if test "X-" =  "X-$CC"; then
   if test "X-$enable_parallel" = "X-yes"; then
-    CC='mpcc_r -qlanglvl=ansi -D_LARGE_FILES'
+    CC='mpcc_r -qlanglvl=ansi -D_LARGE_FILES -DSTDC'
     CC_BASENAME=mpcc_r
   else
-    CC='xlc -qlanglvl=ansi -D_LARGE_FILES'
+    CC='xlc -qlanglvl=ansi -D_LARGE_FILES -DSTDC'
     CC_BASENAME=xlc
   fi
 fi
