@@ -22,8 +22,6 @@
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
 
-static herr_t H5S_select_none(H5S_t *space);
-
 
 /*--------------------------------------------------------------------------
  NAME
@@ -120,7 +118,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5S_select_none (H5S_t *space)
+herr_t H5S_select_none (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 

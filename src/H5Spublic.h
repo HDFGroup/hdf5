@@ -74,6 +74,16 @@ typedef enum H5S_seloper_t {
     H5S_SELECT_INVALID          /* Invalid upper bound on selection operations */
 } H5S_seloper_t;
 
+/* Enumerated type for the type of selection */
+typedef enum {
+    H5S_SEL_ERROR	= -1, 	/* Error			*/
+    H5S_SEL_NONE	= 0,    /* Nothing selected 		*/
+    H5S_SEL_POINTS	= 1,    /* Sequence of points selected	*/
+    H5S_SEL_HYPERSLABS  = 2,    /* "New-style" hyperslab selection defined	*/
+    H5S_SEL_ALL		= 3,    /* Entire extent selected	*/
+    H5S_SEL_N		= 4	/*THIS MUST BE LAST		*/
+}H5S_sel_type;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -125,6 +135,7 @@ __DLL__ hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
 __DLL__ herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t *buf);
 __DLL__ herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t *buf);
 __DLL__ herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end);
+__DLL__ H5S_sel_type H5Sget_select_type(hid_t spaceid);
 
 #ifdef __cplusplus
 }

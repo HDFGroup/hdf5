@@ -36,16 +36,6 @@ typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
 
-/* Enumerated type for the type of selection */
-typedef enum {
-    H5S_SEL_ERROR	= -1, 	/* Error			*/
-    H5S_SEL_NONE	= 0,    /* Nothing selected 		*/
-    H5S_SEL_POINTS	= 1,    /* Sequence of points selected	*/
-    H5S_SEL_HYPERSLABS  = 2,    /* "New-style" hyperslab selection defined	*/
-    H5S_SEL_ALL		= 3,    /* Entire extent selected	*/
-    H5S_SEL_N		= 4	/*THIS MUST BE LAST		*/
-}H5S_sel_type;
-
 /* Point selection iteration container */
 typedef struct {
     hsize_t elmt_left;      /* Number of elements left to iterate over */

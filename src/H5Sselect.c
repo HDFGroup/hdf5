@@ -1285,3 +1285,34 @@ H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op,
     FUNC_LEAVE(ret_value);
 }   /* end H5S_select_iterate() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_select_type
+ PURPOSE
+    Retrieve the type of selection in a dataspace
+ USAGE
+    H5S_sel_type H5Sget_select_type(space_id)
+        hid_t space_id;	        IN: Dataspace object to reset
+ RETURNS
+    Non-negative on success/Negative on failure.  Return value is from the
+    set of values in the H5S_sel_type enumerated type.
+ DESCRIPTION
+	This function retrieves the type of selection currently defined for
+    a dataspace.
+--------------------------------------------------------------------------*/
+H5S_sel_type
+H5Sget_select_type(hid_t space_id)
+{
+    H5S_t		   *space = NULL;	/* dataspace to modify */
+
+    FUNC_ENTER(H5Sget_select_type, H5S_SEL_ERROR);
+    H5TRACE1("St","i",space_id);
+
+    /* Check args */
+    if (H5I_DATASPACE != H5I_get_type(space_id) || NULL == (space = H5I_object(space_id)))
+        HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a data space");
+
+    FUNC_LEAVE(space->select.type);
+}   /* end H5Sget_select_type() */
+

@@ -176,6 +176,7 @@ __DLL__ herr_t H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space,
                 H5D_operator_t op, void *operator_data);
 
 /* "None" selection functions */
+__DLL__ herr_t H5S_select_none(H5S_t *space);
 __DLL__ herr_t H5S_none_select_serialize(const H5S_t *space, uint8_t *buf);
 __DLL__ herr_t H5S_none_select_deserialize(H5S_t *space, const uint8_t *buf);
 __DLL__ herr_t H5S_none_select_iterate(void *buf, hid_t type_id, H5S_t *space,

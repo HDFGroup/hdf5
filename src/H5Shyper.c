@@ -804,7 +804,7 @@ partial_done:   /* Yes, goto's are evil, so sue me... :-) */
         /* Read in the sequence */
         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, space,
             elmt_size, nseq, seq_len_arr, buf_off_arr, dst/*out*/)<0) {
-            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
         } /* end if */
     } /* end if */
 
@@ -976,7 +976,7 @@ printf("%s: buf_off=%ld, actual_read=%d, actual_bytes=%d\n",FUNC,(long)buf_off,(
         /* Read in the rest of the sequence */
         if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
             elmt_size, actual_bytes, buf_off, buf/*out*/)<0) {
-            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
         }
 
         /* Increment the offset of the buffer */
@@ -1204,7 +1204,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
-                            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -1276,7 +1276,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
-                            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -1320,7 +1320,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
-                            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -1385,7 +1385,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Read in the sequence */
             if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                 elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
-                HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
             } /* end if */
         } /* end if */
 
@@ -1590,7 +1590,7 @@ printf("%s: Called!\n",FUNC);
 
         if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, space,
             elmt_size, span_size, loc_off, src)<0) {
-            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         } /* end if */
 
         /* Increment offset in destination */
@@ -2075,7 +2075,7 @@ printf("%s: buf_off=%ld, actual_write=%d, actual_bytes=%d\n",FUNC,(long)buf_off,
         /* Write out the rest of the sequence */
         if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
             elmt_size, actual_bytes, buf_off, buf)<0) {
-            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         }
 
         /* Increment the offset of the buffer */
@@ -2303,7 +2303,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
-                                HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -2375,7 +2375,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
-                            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -2419,7 +2419,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
-                            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
                         } /* end if */
 
                         /* Increment the offset of the destination buffer */
@@ -2484,7 +2484,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Write out the sequence */
             if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                 elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
-                HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
+                HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
             } /* end if */
         } /* end if */
 
@@ -6279,7 +6279,7 @@ H5S_hyper_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t 
 
     /* Get the datatype size */
     if (NULL==(dt=H5I_object(type_id)))
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
     elmt_size=H5T_get_size(dt);
 
     /* Construct iterator for hyperslab selection */
@@ -7852,7 +7852,7 @@ printf("%s: new_spans=%p\n",FUNC,new_spans);
                 break;
 
             default:
-                HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
         } /* end switch */
 #ifdef QAK
 printf("%s: a_not_b=%p, a_and_b=%p, b_not_a=%p\n",FUNC,a_not_b,a_and_b,b_not_a);
@@ -7935,13 +7935,89 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         block = _block;
     }
 
-    /* Fixup operation if selection is 'none' and operation is an OR */
-    /* (Allows for 'or'ing a sequence of hyperslab into a 'none' selection to */
-    /* have same affect as setting the first hyperslab in the sequence to have */
-    /* the 'set' operation and the rest of the hyperslab sequence to be 'or'ed */
-    /* after that */
-    if(space->select.type==H5S_SEL_NONE && op==H5S_SELECT_OR)
-        op=H5S_SELECT_SET;
+    /* Fixup operation for non-hyperslab selections */
+    switch(space->select.type) {
+        case H5S_SEL_NONE:   /* No elements selected in dataspace */
+            switch(op) {
+                case H5S_SELECT_SET:   /* Select "set" operation */
+                    /* Change "none" selection to hyperslab selection */
+                    break;
+
+                case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+                case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+                case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                    op=H5S_SELECT_SET; /* Maps to "set" operation when applied to "none" selection */
+                    break;
+
+                case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+                case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                    HGOTO_DONE(SUCCEED);        /* Selection stays "none" */
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            } /* end switch */
+            break;
+
+        case H5S_SEL_ALL:    /* All elements selected in dataspace */
+            switch(op) {
+                case H5S_SELECT_SET:   /* Select "set" operation */
+                    /* Change "all" selection to hyperslab selection */
+                    break;
+
+                case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+                    HGOTO_DONE(SUCCEED);        /* Selection stays "all" */
+
+                case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+                    op=H5S_SELECT_SET; /* Maps to "set" operation when applied to "none" selection */
+                    break;
+
+                case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+                case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                    /* Convert current "all" selection to "real" hyperslab selection */
+                    /* Then allow operation to proceed */
+                    {
+                        hssize_t tmp_start[H5O_LAYOUT_NDIMS];   /* Temporary start information */
+                        hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
+                        hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
+                        hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+
+                        /* Fill in temporary information for the dimensions */
+                        for(u=0; u<space->extent.u.simple.rank; u++) {
+                            tmp_start[u]=0;
+                            tmp_stride[u]=1;
+                            tmp_count[u]=1;
+                            tmp_block[u]=space->extent.u.simple.size[u];
+                        } /* end for */
+
+                        /* Convert to hyperslab selection */
+                        if(H5S_select_hyperslab(space,H5S_SELECT_SET,tmp_start,tmp_stride,tmp_count,tmp_block)<0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                    } /* end case */
+                    break;
+
+                case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                    /* Convert to "none" selection */
+                    if(H5S_select_none(space)<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                    HGOTO_DONE(SUCCEED);
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            } /* end switch */
+            break;
+
+        case H5S_SEL_HYPERSLABS:
+            /* Hyperslab operation on hyperslab selection, OK */
+            break;
+
+        case H5S_SEL_POINTS: /* Can't combine hyperslab operations and point selections currently */
+            if(op==H5S_SELECT_SET)      /* Allow only "set" operation to proceed */
+                break;
+            /* Else fall through to error */
+
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    } /* end switch */
 
     if(op==H5S_SELECT_SET) {
         /*
@@ -7996,34 +8072,26 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else if(op>=H5S_SELECT_OR && op<=H5S_SELECT_NOTA) {
-        switch(space->select.type) {
-            case H5S_SEL_ALL:
-                /* break out now, 'or'ing with an all selection leaves the all selection */
-                HGOTO_DONE(SUCCEED);
+        /* Sanity check */
+        assert(space->select.type==H5S_SEL_HYPERSLABS);
 
-            case H5S_SEL_HYPERSLABS:
-                /* Is this the first 'or' operation? */
-                if(space->select.sel_info.hslab.diminfo != NULL) {
-                    /* Remove the 'diminfo' information, since we're adding to it */
-                    H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
-                    space->select.sel_info.hslab.diminfo = NULL;
+        /* Is this the first 'or' operation? */
+        if(space->select.sel_info.hslab.diminfo != NULL) {
+            /* Remove the 'diminfo' information, since we're adding to it */
+            H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
+            space->select.sel_info.hslab.diminfo = NULL;
 
-                    /* Remove the 'app_diminfo' information also, since we're adding to it */
-                    H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
-                    space->select.sel_info.hslab.app_diminfo = NULL;
-                } /* end if */
+            /* Remove the 'app_diminfo' information also, since we're adding to it */
+            H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
+            space->select.sel_info.hslab.app_diminfo = NULL;
+        } /* end if */
 
-                /* Add in the new hyperslab information */
-                if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
-                break;
-
-            default:
-                HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
-        } /* end switch() */
+        /* Add in the new hyperslab information */
+        if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     /* Set selection type */
     space->select.type=H5S_SEL_HYPERSLABS;
@@ -8233,7 +8301,7 @@ H5S_operate_hyperslab (H5S_t *result, H5S_hyper_span_info_t *spans1, H5S_seloper
                 break;
 
             default:
-                HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+                HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
         } /* end switch */
 
         /* Free the hyperslab trees generated from the clipping algorithm */
@@ -8382,7 +8450,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         stride = _stride;
-    }
+    } /* end if */
 
     /* Fill in the correct block values */
     if(block==NULL) {
@@ -8393,15 +8461,92 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         block = _block;
-    }
+    } /* end if */
 
-    /* Fixup operation if selection is 'none' and operation is an OR */
-    /* (Allows for 'or'ing a sequence of hyperslab into a 'none' selection to */
-    /* have same affect as setting the first hyperslab in the sequence to have */
-    /* the 'set' operation and the rest of the hyperslab sequence to be 'or'ed */
-    /* after that */
-    if(space->select.type==H5S_SEL_NONE && op==H5S_SELECT_OR)
-        op=H5S_SELECT_SET;
+    /* Fixup operation for non-hyperslab selections */
+    switch(space->select.type) {
+        case H5S_SEL_NONE:   /* No elements selected in dataspace */
+            switch(op) {
+                case H5S_SELECT_SET:   /* Select "set" operation */
+                    /* Change "none" selection to hyperslab selection */
+                    break;
+
+                case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+                case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+                case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                    op=H5S_SELECT_SET; /* Maps to "set" operation when applied to "none" selection */
+                    break;
+
+                case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+                case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                    HGOTO_DONE(SUCCEED);        /* Selection stays "none" */
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            } /* end switch */
+            break;
+
+        case H5S_SEL_ALL:    /* All elements selected in dataspace */
+            switch(op) {
+                case H5S_SELECT_SET:   /* Select "set" operation */
+                    /* Change "all" selection to hyperslab selection */
+                    break;
+
+                case H5S_SELECT_OR:    /* Binary "or" operation for hyperslabs */
+                    HGOTO_DONE(SUCCEED);        /* Selection stays "all" */
+
+                case H5S_SELECT_AND:   /* Binary "and" operation for hyperslabs */
+                    op=H5S_SELECT_SET; /* Maps to "set" operation when applied to "none" selection */
+                    break;
+
+                case H5S_SELECT_XOR:   /* Binary "xor" operation for hyperslabs */
+                case H5S_SELECT_NOTB:  /* Binary "A not B" operation for hyperslabs */
+                    /* Convert current "all" selection to "real" hyperslab selection */
+                    /* Then allow operation to proceed */
+                    {
+                        hssize_t tmp_start[H5O_LAYOUT_NDIMS];   /* Temporary start information */
+                        hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
+                        hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
+                        hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+
+                        /* Fill in temporary information for the dimensions */
+                        for(u=0; u<space->extent.u.simple.rank; u++) {
+                            tmp_start[u]=0;
+                            tmp_stride[u]=1;
+                            tmp_count[u]=1;
+                            tmp_block[u]=space->extent.u.simple.size[u];
+                        } /* end for */
+
+                        /* Convert to hyperslab selection */
+                        if(H5S_select_hyperslab(space,H5S_SELECT_SET,tmp_start,tmp_stride,tmp_count,tmp_block)<0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                    } /* end case */
+                    break;
+
+                case H5S_SELECT_NOTA:  /* Binary "B not A" operation for hyperslabs */
+                    /* Convert to "none" selection */
+                    if(H5S_select_none(space)<0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection");
+                    HGOTO_DONE(SUCCEED);
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+            } /* end switch */
+            break;
+
+        case H5S_SEL_HYPERSLABS:
+            /* Hyperslab operation on hyperslab selection, OK */
+            break;
+
+        case H5S_SEL_POINTS: /* Can't combine hyperslab operations and point selections currently */
+            if(op==H5S_SELECT_SET)      /* Allow only "set" operation to proceed */
+                break;
+            /* Else fall through to error */
+
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    } /* end switch */
+
 
     if(op==H5S_SELECT_SET) {
         /*
@@ -8456,30 +8601,26 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else if(op>=H5S_SELECT_OR && op<=H5S_SELECT_NOTA) {
-        switch(space->select.type) {
-            case H5S_SEL_HYPERSLABS:
-                /* Is this the first 'or' operation? */
-                if(space->select.sel_info.hslab.diminfo != NULL) {
-                    /* Remove the 'diminfo' information, since we're adding to it */
-                    H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
-                    space->select.sel_info.hslab.diminfo = NULL;
+        /* Sanity check */
+        assert(space->select.type==H5S_SEL_HYPERSLABS);
 
-                    /* Remove the 'app_diminfo' information also, since we're adding to it */
-                    H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
-                    space->select.sel_info.hslab.app_diminfo = NULL;
-                } /* end if */
+        /* Is this the first 'or' operation? */
+        if(space->select.sel_info.hslab.diminfo != NULL) {
+            /* Remove the 'diminfo' information, since we're adding to it */
+            H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
+            space->select.sel_info.hslab.diminfo = NULL;
 
-                /* Add in the new hyperslab information */
-                if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
-                break;
+            /* Remove the 'app_diminfo' information also, since we're adding to it */
+            H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
+            space->select.sel_info.hslab.app_diminfo = NULL;
+        } /* end if */
 
-            default:
-                HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
-        } /* end switch() */
+        /* Add in the new hyperslab information */
+        if(H5S_generate_hyperslab (space, op, start, stride, count, block)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs");
     } /* end if */
     else
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     ret_value=SUCCEED;
 
@@ -8705,7 +8846,7 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     /* Check that both dataspaces have the same rank */
     if(space1->extent.u.simple.rank!=space2->extent.u.simple.rank)
@@ -8819,7 +8960,7 @@ H5Sselect_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
     }
     if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
-        HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     /* Check that both dataspaces have the same rank */
     if(space1->extent.u.simple.rank!=space2->extent.u.simple.rank)
