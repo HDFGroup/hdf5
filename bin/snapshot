@@ -118,29 +118,35 @@ done
 
 if [ "$cmd" = help ]; then
     set -
-    echo "Usage: $0 [all] [checkout] [test] [srcdir] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>] [op-configure <option>]"
-    echo "    all:      Run all commands (checkout, test & release)"
-    echo "              [Default is all]"
-    echo "    checkout: Run cvs checkout"
-    echo "    test:     Run test"
-    echo "    release:  Run release"
-    echo "    srcdir:   Use srcdir option (does not imply other commands)"
-    echo '              "snapshot srcdir" is equivalent to "snapshot srcdir all"'
-    echo '              "snapshot srcdir checkout" is equivalent to "snapshot checkout"'
-    echo "    srcdirname <dir>:"
-    echo "              Use <dir> as the srcdir testing directory if srcdir is choosen."
-    echo "              If <dir> starts with '-', it is append to the default name"
-    echo '              E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx'
-    echo "              [Default is hostname]"
-    echo "    help:     Print this message"
-    echo "    hdf4 <hdf4lib_path>:"
-    echo "              Use <hdf4lib_path> as the HDF4LIB locations"
-    echo "              [Default is $HDF4LIB_default]"
-    echo "    archive <arch_path>:"
-    echo "              Use <arch_path> as the release ARCHIVE area"
-    echo "              [Default is $ARCHIVES_default]"
-    echo "    op-configure <option>:"
-    echo "              Pass <option> to the configure command"
+    cat <<EOF
+Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
+          [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>]
+	  [op-configure <option>]
+    all:      Run all commands (checkout, test & release)
+              [Default is all]
+    checkout: Run cvs checkout
+    test:     Run test
+    release:  Run release
+    srcdir:   Use srcdir option (does not imply other commands)
+              "snapshot srcdir" is equivalent to "snapshot srcdir all"
+              "snapshot srcdir checkout" is equivalent to "snapshot checkout"
+    srcdirname <dir>:
+              Use <dir> as the srcdir testing directory if srcdir is choosen.
+              If <dir> starts with '-', it is append to the default name
+              E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx
+              [Default is hostname]
+    help:     Print this message
+    hdf4 <hdf4lib_path>:
+              Use <hdf4lib_path> as the HDF4LIB locations
+              [Default is $HDF4LIB_default]
+    archive <arch_path>:
+              Use <arch_path> as the release ARCHIVE area
+              [Default is $ARCHIVES_default]
+    op-configure <option>:
+              Pass <option> to the configure command
+              E.g., "snapshot op-configure --enable-parallel"
+                  configures for parallel mode
+EOF
     exit $errcode
 fi
 
