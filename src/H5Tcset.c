@@ -61,7 +61,7 @@ H5T_init_cset_interface(void)
  *		different nationalities and to convert between them to the
  *		extent possible.
  *		
- * Return:	Success:	The character set of an H5T_STRING type.
+ * Return:	Success:	The character set of a string type.
  *
  *		Failure:	H5T_CSET_ERROR (Negative)
  *
@@ -86,10 +86,9 @@ H5Tget_cset(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_CSET_ERROR, "not a data type");
-    /* Don't see any reason for this.  Causes problem for variable-length
-     *  string. -SLU (& QAK) */
-    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+    while (dt->parent && !H5T_IS_STRING(dt))
+        dt = dt->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_CSET_ERROR, "operation not defined for data type class");
     
     /* result */
@@ -139,10 +138,9 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
 	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "data type is read-only");
     if (cset < 0 || cset >= H5T_NCSET)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal character set type");
-    /* Don't see any reason for this.  Causes problem for variable-length
-     *  string. -SLU (& QAK) */
-    /*if (dt->parent) dt = dt->parent;*/ /*defer to parent*/
-    if (!(H5T_STRING == dt->type || (H5T_VLEN == dt->type && H5T_VLEN_STRING == dt->u.vlen.type)))
+    while (dt->parent && !H5T_IS_STRING(dt))
+        dt = dt->parent;  /*defer to parent*/
+    if (!H5T_IS_STRING(dt))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for data type class");
     
     /* Commit */

@@ -727,8 +727,8 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
     /* Check the datatype of this element */
     switch(dt->type) {
         case H5T_ARRAY:
-            /* Recurse on each element, if the array's base type is array, VL or compound */
-            if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+            /* Recurse on each element, if the array's base type is array, VL, enum or compound */
+            if(H5T_IS_COMPLEX(dt->parent->type)) {
                 void *off;     /* offset of field */
 
                 /* Calculate the offset member and recurse on it */
@@ -741,10 +741,10 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
             break;
 
         case H5T_COMPOUND:
-            /* Check each field and recurse on VL, compound or array ones */
+            /* Check each field and recurse on VL, compound, enum or array ones */
             for (i=0; i<dt->u.compnd.nmembs; i++) {
-                /* Recurse if it's VL, compound or array */
-                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY) {
+                /* Recurse if it's VL, compound, enum or array */
+                if(H5T_IS_COMPLEX(dt->u.compnd.memb[i].type->type)) {
                     void *off;     /* offset of field */
 
                     /* Calculate the offset member and recurse on it */
@@ -756,14 +756,14 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
             break;
 
         case H5T_VLEN:
-            /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
+            /* Recurse on the VL information if it's VL, compound, enum or array, then free VL sequence */
             if(dt->u.vlen.type==H5T_VLEN_SEQUENCE) {
                 hvl_t *vl=(hvl_t *)elem;    /* Temp. ptr to the vl info */
 
                 /* Check if there is anything actually in this sequence */
                 if(vl->len!=0) {
-                    /* Recurse if it's VL or compound */
-                    if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+                    /* Recurse if it's VL, array, enum or compound */
+                    if(H5T_IS_COMPLEX(dt->parent->type)) {
                         void *off;     /* offset of field */
 
                         /* Calculate the offset of each array element and recurse on it */

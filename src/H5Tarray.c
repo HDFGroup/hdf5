@@ -181,10 +181,9 @@ H5T_array_create(H5T_t *base, int ndims, const hsize_t dim[/* ndims */],
     ret_value->size = ret_value->parent->size * ret_value->u.array.nelem;
 
     /*
-     * Set the "force conversion" flag if a VL base datatype is used or
-     * or if any components of the base datatype are VL types.
+     * Set the "force conversion" flag if the base datatype indicates
      */
-    if(base->type==H5T_VLEN || base->force_conv==TRUE)
+    if(base->force_conv==TRUE)
         ret_value->force_conv=TRUE;
 
 done:
@@ -269,7 +268,7 @@ done:
  *
  * Purpose:	Query the sizes of dimensions for an array datatype.
  *
- * Return:	Success:	Non-negative
+ * Return:	Success:	Number of dimensions of the array type
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -279,11 +278,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+int
 H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
 {
     H5T_t	*dt = NULL;		    /* pointer to array data type	*/
-    herr_t	ret_value = SUCCEED;	/* return value			*/
+    int	ret_value;	/* return value			*/
     
     FUNC_ENTER_API(H5Tget_array_dims, FAIL);
     H5TRACE3("e","i*h*Is",type_id,dims,perm);
@@ -295,7 +294,7 @@ H5Tget_array_dims(hid_t type_id, hsize_t dims[], int perm[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an array datatype");
 
     /* Retrieve the sizes of the dimensions */
-    if(H5T_get_array_dims(dt, dims, perm)<0)
+    if((ret_value=H5T_get_array_dims(dt, dims, perm))<0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unable to get dimension sizes");
 done:
     FUNC_LEAVE_API(ret_value);
@@ -308,7 +307,7 @@ done:
  * Purpose:	Private function for H5T_get_array_dims.  Query the sizes 
  *              of dimensions for an array datatype.
  *
- * Return:	Success:	Non-negative
+ * Return:	Success:	Number of dimensions of the array type
  *		Failure:	Negative
  *
  * Programmer:  Raymond Lu
@@ -318,10 +317,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+int
 H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
 {
-    herr_t	ret_value = SUCCEED;	/* return value			*/
+    int	ret_value;	/* return value			*/
     int    i;                  /* Local index variable */
     
     FUNC_ENTER_NOAPI(H5T_get_array_dims, FAIL);
@@ -338,6 +337,9 @@ H5T_get_array_dims(H5T_t *dt, hsize_t dims[], int perm[])
     if(perm) 
         for(i=0; i<dt->u.array.ndims; i++)
             perm[i]=dt->u.array.perm[i];
+
+    /* Pass along the array rank as the return value */
+    ret_value=dt->u.array.ndims;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

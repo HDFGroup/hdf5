@@ -74,6 +74,11 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Return rank of the array datatype on successful call to
+            H5Tget_array_dims().  QAK - 2003/08/30
+        - Corrected bug in H5Tdetect_class which was not correctly detecting
+            datatype classes of fields in nested compound datatypes in some
+            circumstances.  QAK - 2003/08/30
         - Corrected bug in sieve buffer code which could cause loss of data
             when a small dataset was created and deleted in quick succession.
             QAK - 2003/08/27

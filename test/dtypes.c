@@ -383,6 +383,137 @@ test_copy(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_detect
+ *
+ * Purpose:     Are we able to detect datatype classes correctly?  (Especially
+ *              in nested types)
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, August 30, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_detect(void)
+{
+    struct atomic {     /* Struct with atomic fields */
+        int i;
+        float f;
+        char c;
+        double d;
+        short s;
+    };
+    struct complex {    /* Struct with complex fields */
+        hobj_ref_t arr_r[3][3];
+        int i;
+        hvl_t vl_f;
+        char c;
+        short s;
+    };
+    hid_t atom_cmpd_id; /* Atomic Compound datatype */
+    hid_t atom_arr_id;  /* Atomic Array datatype */
+    hid_t atom_vl_id;   /* Atomic VL datatype */
+    hid_t cplx_cmpd_id; /* Complex Compound datatype */
+    int rank=2;         /* Rank for array datatype */
+    hsize_t dims[2]={3,3};      /* Dimensions for array datatype */
+
+    TESTING("H5Tdetect_class()");
+
+    /* Native integers should be in the integer class */
+    if(H5Tdetect_class(H5T_NATIVE_INT,H5T_INTEGER)!=TRUE) TEST_ERROR
+
+    /* Native integers should _not_ be in other classes */
+    if(H5Tdetect_class(H5T_NATIVE_INT,H5T_FLOAT)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(H5T_NATIVE_INT,H5T_ARRAY)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(H5T_NATIVE_INT,H5T_ENUM)!=FALSE) TEST_ERROR
+
+    /* Create a compound datatype and insert some atomic types */
+    if ((atom_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct atomic)))<0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "i", HOFFSET(struct atomic, i), H5T_NATIVE_INT)<0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "f", HOFFSET(struct atomic, f), H5T_NATIVE_FLOAT)<0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "c", HOFFSET(struct atomic, c), H5T_NATIVE_CHAR)<0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "d", HOFFSET(struct atomic, d), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "s", HOFFSET(struct atomic, s), H5T_NATIVE_SHORT)<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(atom_cmpd_id,H5T_COMPOUND)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_cmpd_id,H5T_INTEGER)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_cmpd_id,H5T_FLOAT)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(atom_cmpd_id,H5T_VLEN)!=FALSE) TEST_ERROR
+
+    /* Create an array datatype with an atomic base type */
+    if((atom_arr_id=H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, NULL))<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(atom_arr_id,H5T_ARRAY)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_arr_id,H5T_REFERENCE)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(atom_arr_id,H5T_VLEN)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(atom_arr_id,H5T_FLOAT)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(atom_arr_id,H5T_INTEGER)!=FALSE) TEST_ERROR
+
+    /* Create a VL datatype with an atomic base type */
+    if((atom_vl_id=H5Tvlen_create(H5T_NATIVE_FLOAT))<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(atom_vl_id,H5T_VLEN)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(atom_vl_id,H5T_FLOAT)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(atom_vl_id,H5T_COMPOUND)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(atom_vl_id,H5T_INTEGER)!=FALSE) TEST_ERROR
+
+    /* Create a compound datatype and insert some atomic types */
+    if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex)))<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id)<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT)<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vl_id)<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR)<0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT)<0) TEST_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_COMPOUND)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_ARRAY)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_REFERENCE)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_INTEGER)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_FLOAT)!=TRUE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_VLEN)!=TRUE) TEST_ERROR
+
+    /* Make certain that an incorrect class is not detected */
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_TIME)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_ENUM)!=FALSE) TEST_ERROR
+    if(H5Tdetect_class(cplx_cmpd_id,H5T_STRING)!=FALSE) TEST_ERROR
+
+    /* Close complex compound datatype */
+    if(H5Tclose(cplx_cmpd_id)<0) TEST_ERROR
+
+    /* Close atomic VL datatype */
+    if(H5Tclose(atom_vl_id)<0) TEST_ERROR
+
+    /* Close atomic array datatype */
+    if(H5Tclose(atom_arr_id)<0) TEST_ERROR
+
+    /* Close atomic compound datatype */
+    if(H5Tclose(atom_cmpd_id)<0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_compound_1
  *
  * Purpose:     Tests various things about compound data types.
@@ -4216,6 +4347,7 @@ main(void)
     /* Do the tests */
     nerrors += test_classes();
     nerrors += test_copy();
+    nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
     nerrors += test_transient (fapl);

@@ -84,10 +84,9 @@ H5Tget_order(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_ORDER_ERROR, "not a data type");
-
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY ==dt->type)
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Order */
@@ -133,9 +132,9 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order");
     if (H5T_ENUM==dt->type && dt->u.enumer.nmembs>0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined");
-    if (dt->parent)
+    while (dt->parent)
         dt = dt->parent; /*defer to parent*/
-    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type || H5T_ARRAY==dt->type)
+    if (H5T_COMPOUND==dt->type || H5T_OPAQUE==dt->type)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5T_ORDER_ERROR, "operation not defined for specified data type");
 
     /* Commit */
