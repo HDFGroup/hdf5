@@ -2141,8 +2141,9 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
  *                2. Copy VL data from src buffer into dst buffer
  *                3. Convert VL data into dst representation
  *                4. Allocate buffer in dst heap
- *                5. Write dst VL data into dst heap
- *                6. Store (heap ID or pointer) and length in main dst buffer
+ *		  5. Free heap objects storing old data
+ *                6. Write dst VL data into dst heap
+ *                7. Store (heap ID or pointer) and length in main dst buffer
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2157,12 +2158,17 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
  *		BUF_STRIDE bytes each time; otherwise assume both source and
  *		destination values are packed.
  *
+ *		Raymond Lu, 26 June, 2002
+ *		Background buffer is used for freeing heap objects storing 
+ * 		old data.  At this moment, it only frees the first level of 
+ *		VL datatype.  It doesn't handle nested VL datatypes.    
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *_buf,
-              void UNUSED *_bkg, hid_t dset_xfer_plist)
+              void *_bkg, hid_t dset_xfer_plist)
 {
     H5T_path_t	*tpath;			/* Type conversion path		     */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
@@ -2171,14 +2177,16 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     hsize_t	olap;			/*num overlapping elements	     */
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs     */
     uint8_t 	**dptr;		        /*pointer to correct destination pointer*/
-    size_t	src_delta, dst_delta;	/*source & destination stride	     */
+    uint8_t	*bg_ptr=NULL;		/*background buf traversal pointer   */
+    uint8_t	*bg=NULL;		
+    size_t	src_delta, dst_delta, bkg_delta;/*source & destination stride*/
     hssize_t 	seq_len;                /*the number of elements in the current sequence*/
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;     /*source & destination total size in bytes*/
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
     size_t	conv_buf_size=0;  	/*size of conversion buffer in bytes */
-    void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
-    size_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
+    void	*tmp_buf=NULL;     	/*temporary background buffer 	     */
+    size_t	tmp_buf_size=0;	        /*size of temporary bkg buffer	     */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
     int	        direction;		/*direction of traversal	     */
     hsize_t	elmtno;			/*element number counter	     */
@@ -2231,12 +2239,16 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             if (src->size==dst->size || buf_stride>0) {
                 olap = nelmts;
                 sp = dp = (uint8_t*)_buf;
+                if(_bkg!=NULL)
+                    bg_ptr  = (uint8_t*)_bkg;
                 direction = 1;
             } else if (src->size>=dst->size) {
                 /* potentially this uses the destination buffer 1 extra
                  * time, but its faster that floating-point calcs */
                 olap = ((dst->size)/(src->size-dst->size))+1;
                 sp = dp = (uint8_t*)_buf;
+                if(_bkg!=NULL)
+                    bg_ptr  = (uint8_t*)_bkg;
                 direction = 1;
             } else {
                 /* potentially this uses the destination buffer 1 extra
@@ -2246,6 +2258,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                      (buf_stride ? buf_stride : src->size);
                 dp = (uint8_t*)_buf + (nelmts-1) *
                      (buf_stride ? buf_stride : dst->size);
+                if(_bkg!=NULL)
+                     bg_ptr = (uint8_t*)_bkg + (nelmts-1) *
+                     (bkg_stride ? bkg_stride : dst->size);
                 direction = -1;
             }
 
@@ -2254,6 +2269,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
              */
             src_delta = direction * (buf_stride ? buf_stride : src->size);
             dst_delta = direction * (buf_stride ? buf_stride : dst->size);
+            bkg_delta = direction * (bkg_stride ? bkg_stride : dst->size);
 
             /*
              * If the source and destination buffers overlap then use a
@@ -2271,7 +2287,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
             /* Get initial conversion buffer */
             conv_buf_size=MAX(src_base_size,dst_base_size);
-            if ((conv_buf=H5FL_BLK_ALLOC(vlen_seq,conv_buf_size,0))==NULL)
+            if ((conv_buf=H5FL_BLK_ALLOC(vlen_seq,conv_buf_size,1))==NULL)
                 HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
             /* Set up conversion path for base elements */
@@ -2284,17 +2300,19 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 }
             }
 
-            /* Check if we need a background buffer for this conversion */
+            /* Check if we need a temporary buffer for this conversion */
             if(tpath->cdata.need_bkg) {
                 /* Set up initial background buffer */
-                bkg_buf_size=MAX(src_base_size,dst_base_size);
-                if ((bkg_buf=H5FL_BLK_ALLOC(vlen_seq,bkg_buf_size,0))==NULL)
+                tmp_buf_size=MAX(src_base_size,dst_base_size);
+                if ((tmp_buf=H5FL_BLK_ALLOC(vlen_seq,tmp_buf_size,1))==NULL)
                     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
 
             for (elmtno=0; elmtno<nelmts; elmtno++) {
                 s = sp;
                 d = *dptr;
+                if(bg_ptr!=NULL)
+                    bg = bg_ptr;
 
                 /* Get length of sequences in bytes */
                 seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
@@ -2317,25 +2335,24 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL,
                                   "can't read VL data");
 
-                /* Check if background buffer is large enough, resize if necessary */      
+                /* Check if temporary buffer is large enough, resize if necessary */      
                 /* (Chain off the conversion buffer size) */
-                if(tpath->cdata.need_bkg && bkg_buf_size<conv_buf_size) {
+                if(tpath->cdata.need_bkg && tmp_buf_size<conv_buf_size) {
                     /* Set up initial background buffer */
-                    bkg_buf_size=conv_buf_size;
-                    if((bkg_buf=H5FL_BLK_REALLOC(vlen_seq,bkg_buf,bkg_buf_size))==NULL)
+                    tmp_buf_size=conv_buf_size;
+                    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)
                         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+		    HDmemset(tmp_buf,0,tmp_buf_size);	
                 } /* end if */
 
                 /* Convert VL sequence */
                 H5_CHECK_OVERFLOW(seq_len,hssize_t,hsize_t);
-                if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, bkg_stride,
-                                conv_buf, bkg_buf, dset_xfer_plist)<0)
+                if (H5T_convert(tpath, tsrc_id, tdst_id, (hsize_t)seq_len, 0, bkg_stride, conv_buf, tmp_buf, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                   "datatype conversion failed");
 
                 /* Write sequence to destination location */
-                if((*(dst->u.vlen.write))(dset_xfer_plist,dst->u.vlen.f,d,conv_buf,
-                              (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
+                if((*(dst->u.vlen.write))(dset_xfer_plist,dst->u.vlen.f,d,conv_buf, bg, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL,
                                   "can't write VL data");
 
@@ -2347,6 +2364,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 if (d==dbuf) HDmemcpy (dp, d, dst->size);
                 sp += src_delta;
                 dp += dst_delta;
+                if(bg_ptr!=NULL)
+                    bg_ptr += bkg_delta;
 
                 /* switch destination pointer around when the olap gets to 0 */
                 if(--olap==0) {
@@ -2361,8 +2380,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             H5FL_BLK_FREE(vlen_seq,conv_buf);
 
             /* Release the background buffer, if we have one */
-            if(bkg_buf!=NULL)
-                H5FL_BLK_FREE(vlen_seq,bkg_buf);
+            if(tmp_buf!=NULL)
+                H5FL_BLK_FREE(vlen_seq,tmp_buf);
 
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0)

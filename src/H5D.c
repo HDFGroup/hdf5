@@ -1545,7 +1545,13 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if(IS_H5FD_MPIO(f) && dcpl_pline.nfilters > 0) 
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet");
 #endif /*H5_HAVE_PARALLEL*/
-    
+   
+    if(H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill time");
+
+    if(fill_time==H5D_FILL_TIME_NEVER && H5T_detect_class(type, H5T_VLEN))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Dataset doesn't support VL datatype when fill value is not defined");
+ 
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5D_new(dcpl_id)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -2876,6 +2882,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
         if(H5P_get(dx_plist, H5D_XFER_BKGR_BUF_TYPE_NAME, &need_bkg)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve background buffer type");
         need_bkg = MAX (tpath->cdata.need_bkg, need_bkg);
+    } else if(H5T_detect_class(dataset->type, H5T_VLEN)) {
+	/* Old data is retrieved into background buffer for VL datatype.  The 
+	 * data is used later for freeing heap objects. */
+        need_bkg = H5T_BKG_YES;
     } else {
         need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
     } /* end else */
@@ -2887,7 +2897,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (need_bkg && NULL==(bkg_buf=H5P_peek_voidp(dx_plist,H5D_XFER_BKGR_BUF_NAME))) {
         /* Allocate background buffer */
         H5_CHECK_OVERFLOW((request_nelmts*dst_type_size),hsize_t,size_t);
-        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),0))==NULL)
+        if((bkg_buf=H5FL_BLK_ALLOC(bkgr_conv,(size_t)(request_nelmts*dst_type_size),1))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion");
     } /* end if */
 

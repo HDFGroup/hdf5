@@ -204,7 +204,7 @@ herr_t H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_seq_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
@@ -332,7 +332,7 @@ herr_t H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_str_mem_write(hid_t plist_id, H5F_t UNUSED *f, void *vl_addr, void *buf, void UNUSED *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
     H5MM_allocate_t alloc_func;     /* Vlen allocation function */
     void *alloc_info;               /* Vlen allocation information */
@@ -464,13 +464,20 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Thursday, June 26, 2002
+ *		Free heap objects storing old data.
+ *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void *buf, void *bg_addr, hsize_t seq_len, hsize_t base_size)
 {
-    uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
+    uint8_t *vl=(uint8_t *)vl_addr; /*Pointer to the user's hvl_t information*/
+    uint8_t *bg=(uint8_t *)bg_addr; /*Pointer to the old data hvl_t          */
     H5HG_t hobjid;
+    H5HG_t bg_hobjid;
     size_t len;
+    hsize_t bg_seq_len=0;
 
     FUNC_ENTER_NOAPI(H5T_vlen_disk_write, FAIL);
 
@@ -478,6 +485,23 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     assert(vl);
     assert(buf);
     assert(f);
+    
+    /* Get the length of the sequence and heap object ID from background data.
+     * Free heap object for old data.  */
+    if(bg!=NULL) {
+        UINT32DECODE(bg, bg_seq_len);
+
+        /* Free heap object for old data */
+        if(bg_seq_len!=0) {
+            /* Get heap information */
+            H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
+            INT32DECODE(bg, bg_hobjid.idx);
+            /* Free heap object */
+            if(H5HG_remove(f, &bg_hobjid)<0)
+                HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL,
+                        "Unable to remove heap object");
+         } /* end if */
+    } /* end if */
 
     /* Set the length of the sequence */
     H5_CHECK_OVERFLOW(seq_len,hsize_t,size_t);
