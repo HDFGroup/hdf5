@@ -75,8 +75,6 @@ H5_DLL int      H5FD_fphdf5_mpi_rank(H5FD_t *_file);
 H5_DLL int      H5FD_fphdf5_mpi_size(H5FD_t *_file);
 
 H5_DLL herr_t   H5FD_fphdf5_write_real(H5FD_t *_file, hid_t dxpl_id,
-                                       MPI_Datatype UNUSED file_type,
-                                       MPI_Datatype buf_type,
                                        MPI_Offset mpi_off, int size,
                                        const void *buf);
 
