@@ -79,11 +79,19 @@
  *
  *-------------------------------------------------------------------------
  */
+#ifdef HAVE_GETRUSAGE
 static void
 print_stats (const char *prefix,
 	     struct rusage *r_start, struct rusage *r_stop,
 	     struct timeval *t_start, struct timeval *t_stop,
 	     size_t nbytes)
+#else /* HAVE_GETRUSAGE */
+static void
+print_stats (const char *prefix,
+	     struct timeval *r_start, struct timeval *r_stop,
+	     struct timeval *t_start, struct timeval *t_stop,
+	     size_t nbytes)
+#endif /* HAVE_GETRUSAGE */
 {
     double	e_time, bw;
 #ifdef HAVE_GETRUSAGE
