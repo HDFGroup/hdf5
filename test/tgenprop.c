@@ -72,7 +72,7 @@ test_genprop_basic_class(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check class name */
@@ -105,7 +105,7 @@ test_genprop_basic_class(void)
     CHECK_I(ret, "H5Pclose_class");
 
     /* Create another new generic class, derived from file creation class */
-    cid1 = H5Pcreate_class(H5P_FILE_CREATE_NEW,CLASS2_NAME,CLASS2_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_FILE_CREATE_NEW,CLASS2_NAME,CLASS2_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check class name */
@@ -164,7 +164,7 @@ test_genprop_basic_class_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Properties Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Check the number of properties in class */
@@ -177,11 +177,11 @@ test_genprop_basic_class_prop(void)
     VERIFY(ret, 0, "H5Pexist");
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Try to insert the first property again (should fail) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     VERIFY(ret, FAIL, "H5Pregister");
 
     /* Check the existance of the first property */
@@ -199,11 +199,11 @@ test_genprop_basic_class_prop(void)
     VERIFY(nprops, 1, "H5Pget_nprops");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Try to insert the second property again (should fail) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     VERIFY(ret, FAIL, "H5Pregister");
 
     /* Check the existance of the second property */
@@ -221,7 +221,7 @@ test_genprop_basic_class_prop(void)
     VERIFY(nprops, 2, "H5Pget_nprops");
 
     /* Insert third property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Check the existance of the third property */
@@ -320,23 +320,23 @@ test_genprop_class_iter(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Property Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert third property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert third property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Check the number of properties in class */
@@ -403,23 +403,23 @@ test_genprop_class_callback(void)
     MESSAGE(5, ("Testing Basic Generic Property List Class Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,test_genprop_cls_cb1,&crt_cb_struct,test_genprop_cls_cb1,&cls_cb_struct);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,test_genprop_cls_cb1,&crt_cb_struct,NULL,NULL,test_genprop_cls_cb1,&cls_cb_struct);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert third property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert fourth property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Check the number of properties in class */
@@ -502,17 +502,17 @@ test_genprop_basic_list(void)
     MESSAGE(5, ("Testing Basic Generic Property List Creation Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (w/default values) */
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Check the number of properties in class */
@@ -604,17 +604,17 @@ test_genprop_basic_list_prop(void)
     MESSAGE(5, ("Testing Basic Generic Property List Property Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Create a property list from the class */
@@ -629,11 +629,11 @@ test_genprop_basic_list_prop(void)
     /* Add temporary properties */
 
     /* Insert first temporary property into class (with no callbacks) */
-    ret = H5Pinsert(lid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(lid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pinsert");
 
     /* Insert second temporary property into class (with no callbacks) */
-    ret = H5Pinsert(lid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(lid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pinsert");
 
     /* Check the number of properties in list */
@@ -761,17 +761,17 @@ test_genprop_list_iter(void)
     MESSAGE(5, ("Testing Generic Property List Iteration Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Add several properties (several w/default values) */
 
     /* Insert first property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Create a property list from the class */
@@ -786,11 +786,11 @@ test_genprop_list_iter(void)
     /* Add temporary properties */
 
     /* Insert first temporary property into class (with no callbacks) */
-    ret = H5Pinsert(lid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(lid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pinsert");
 
     /* Insert second temporary property into class (with no callbacks) */
-    ret = H5Pinsert(lid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(lid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pinsert");
 
     /* Check the number of properties in list */
@@ -844,6 +844,11 @@ typedef struct {
     char *del_name;
     void *del_value;
 
+    /* Copy information */
+    int cop_count;
+    char *cop_name;
+    void *cop_value;
+
     /* Close information */
     int cls_count;
     char *cls_name;
@@ -860,13 +865,13 @@ prop_cb_info prop2_cb_info;     /* Callback statistics for property #2 */
 ** 
 ****************************************************************/
 static herr_t 
-test_genprop_prop_crt_cb1(const char *name, void *def_value)
+test_genprop_prop_crt_cb1(const char *name, size_t size, void *def_value)
 {
     /* Set the information from the creation call */
     prop1_cb_info.crt_count++;
     prop1_cb_info.crt_name=HDstrdup(name);
-    prop1_cb_info.crt_value=HDmalloc(PROP1_SIZE);
-    HDmemcpy(prop1_cb_info.crt_value,def_value,PROP1_SIZE);
+    prop1_cb_info.crt_value=HDmalloc(size);
+    HDmemcpy(prop1_cb_info.crt_value,def_value,size);
 
     return(SUCCEED);
 }
@@ -877,7 +882,7 @@ test_genprop_prop_crt_cb1(const char *name, void *def_value)
 ** 
 ****************************************************************/
 static herr_t 
-test_genprop_prop_set_cb1(hid_t plist_id, const char *name, void *value)
+test_genprop_prop_set_cb1(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the set call */
     prop1_cb_info.set_count++;
@@ -885,8 +890,8 @@ test_genprop_prop_set_cb1(hid_t plist_id, const char *name, void *value)
     if(prop1_cb_info.set_name==NULL)
         prop1_cb_info.set_name=HDstrdup(name);
     if(prop1_cb_info.set_value==NULL)
-        prop1_cb_info.set_value=HDmalloc(PROP1_SIZE);
-    HDmemcpy(prop1_cb_info.set_value,value,PROP1_SIZE);
+        prop1_cb_info.set_value=HDmalloc(size);
+    HDmemcpy(prop1_cb_info.set_value,value,size);
 
     return(SUCCEED);
 }
@@ -897,7 +902,7 @@ test_genprop_prop_set_cb1(hid_t plist_id, const char *name, void *value)
 ** 
 ****************************************************************/
 static herr_t 
-test_genprop_prop_get_cb1(hid_t plist_id, const char *name, void *value)
+test_genprop_prop_get_cb1(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the get call */
     prop1_cb_info.get_count++;
@@ -905,8 +910,27 @@ test_genprop_prop_get_cb1(hid_t plist_id, const char *name, void *value)
     if(prop1_cb_info.get_name==NULL)
         prop1_cb_info.get_name=HDstrdup(name);
     if(prop1_cb_info.get_value==NULL)
-        prop1_cb_info.get_value=HDmalloc(PROP1_SIZE);
-    HDmemcpy(prop1_cb_info.get_value,value,PROP1_SIZE);
+        prop1_cb_info.get_value=HDmalloc(size);
+    HDmemcpy(prop1_cb_info.get_value,value,size);
+
+    return(SUCCEED);
+}
+
+/****************************************************************
+**
+**  test_genprop_prop_cop_cb1(): Property copy callback for test_genprop_list_callback
+** 
+****************************************************************/
+static herr_t 
+test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
+{
+    /* Set the information from the get call */
+    prop1_cb_info.cop_count++;
+    if(prop1_cb_info.cop_name==NULL)
+        prop1_cb_info.cop_name=HDstrdup(name);
+    if(prop1_cb_info.cop_value==NULL)
+        prop1_cb_info.cop_value=HDmalloc(size);
+    HDmemcpy(prop1_cb_info.cop_value,value,size);
 
     return(SUCCEED);
 }
@@ -917,13 +941,13 @@ test_genprop_prop_get_cb1(hid_t plist_id, const char *name, void *value)
 ** 
 ****************************************************************/
 static herr_t 
-test_genprop_prop_cls_cb1(const char *name, void *value)
+test_genprop_prop_cls_cb1(const char *name, size_t size, void *value)
 {
     /* Set the information from the close call */
     prop1_cb_info.cls_count++;
     prop1_cb_info.cls_name=HDstrdup(name);
-    prop1_cb_info.cls_value=HDmalloc(PROP1_SIZE);
-    HDmemcpy(prop1_cb_info.cls_value,value,PROP1_SIZE);
+    prop1_cb_info.cls_value=HDmalloc(size);
+    HDmemcpy(prop1_cb_info.cls_value,value,size);
 
     return(SUCCEED);
 }
@@ -934,14 +958,14 @@ test_genprop_prop_cls_cb1(const char *name, void *value)
 ** 
 ****************************************************************/
 static herr_t 
-test_genprop_prop_del_cb2(hid_t plist_id, const char *name, void *value)
+test_genprop_prop_del_cb2(hid_t plist_id, const char *name, size_t size, void *value)
 {
     /* Set the information from the delete call */
     prop2_cb_info.del_count++;
     prop2_cb_info.del_plist_id=plist_id;
     prop2_cb_info.del_name=HDstrdup(name);
-    prop2_cb_info.del_value=HDmalloc(PROP2_SIZE);
-    HDmemcpy(prop2_cb_info.del_value,value,PROP2_SIZE);
+    prop2_cb_info.del_value=HDmalloc(size);
+    HDmemcpy(prop2_cb_info.del_value,value,size);
 
     return(SUCCEED);
 }
@@ -957,35 +981,40 @@ test_genprop_list_callback(void)
 {
     hid_t	cid1;		/* Generic Property class ID */
     hid_t	lid1;		/* Generic Property list ID */
+    hid_t	lid2;		/* 2nd Generic Property list ID */
     size_t	nprops;		/* Number of properties in class */
     int         prop1_value;    /* Value for property #1 */
     int         prop1_new_value=20;   /* Property #1 new value */
     float       prop2_value;    /* Value for property #2 */
     char        prop3_value[10];/* Property #3 value */
     double      prop4_value;    /* Property #4 value */
+    struct {                    /* Struct for callbacks */
+        int count;
+        hid_t id;
+    } cop_cb_struct;
     herr_t	ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Generic Property List Property Callback Functionality\n"));
 
     /* Create a new generic class, derived from the root of the class hierarchy */
-    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,NULL,NULL);
+    cid1 = H5Pcreate_class(H5P_NO_CLASS_NEW,CLASS1_NAME,CLASS1_HASHSIZE,NULL,NULL,test_genprop_cls_cb1,&cop_cb_struct,NULL,NULL);
     CHECK_I(cid1, "H5Pcreate_class");
 
     /* Insert first property into class (with callbacks) */
-    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,test_genprop_prop_crt_cb1,test_genprop_prop_set_cb1,test_genprop_prop_get_cb1,NULL,test_genprop_prop_cls_cb1);
+    ret = H5Pregister(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,test_genprop_prop_crt_cb1,test_genprop_prop_set_cb1,test_genprop_prop_get_cb1,NULL,test_genprop_prop_cop_cb1,test_genprop_prop_cls_cb1);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert second property into class (with only delete callback) */
-    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,test_genprop_prop_del_cb2,NULL);
+    ret = H5Pregister(cid1,PROP2_NAME,PROP2_SIZE,PROP2_DEF_VALUE,NULL,NULL,NULL,test_genprop_prop_del_cb2,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert third property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Insert fourth property into class (with no callbacks) */
-    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid1,PROP4_NAME,PROP4_SIZE,PROP4_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
     CHECK_I(ret, "H5Pregister");
 
     /* Check the number of properties in class */
@@ -993,8 +1022,13 @@ test_genprop_list_callback(void)
     CHECK_I(ret, "H5Pget_nprops");
     VERIFY(nprops, 4, "H5Pget_nprops");
 
+    /* Initialize class callback structs */
+    cop_cb_struct.count=0;
+    cop_cb_struct.id=(-1);
+
     /* Initialize callback information for properties tracked */
     HDmemset(&prop1_cb_info,0,sizeof(prop_cb_info));
+    HDmemset(&prop2_cb_info,0,sizeof(prop_cb_info));
 
     /* Create a property list from the class */
     lid1 = H5Pcreate_list(cid1);
@@ -1091,6 +1125,25 @@ test_genprop_list_callback(void)
         printf("Property #2 value doesn't match!, line=%d\n",__LINE__);
     } /* end if */
 
+    /* Copy first list */
+    lid2 = H5Pcopy(lid1);
+    CHECK_I(lid2, "H5Pcopy");
+
+    /* Verify copy callback information for properties tracked */
+    VERIFY(prop1_cb_info.cop_count, 1, "H5Pcopy");
+    if(HDstrcmp(prop1_cb_info.cop_name,PROP1_NAME)!=0) {
+        num_errs++;
+        printf("Property #1 name doesn't match!, line=%d\n",__LINE__);
+    } /* end if */
+    if(HDmemcmp(prop1_cb_info.cop_value,&prop1_new_value,PROP1_SIZE)!=0) {
+        num_errs++;
+        printf("Property #1 value doesn't match!, line=%d\n",__LINE__);
+    } /* end if */
+
+    /* Verify that the class creation callback occurred */
+    VERIFY(cop_cb_struct.count, 1, "H5Pcopy");
+    VERIFY(cop_cb_struct.id, lid2, "H5Pcopy");
+
     /* Close first list */
     ret = H5Pclose_list(lid1);
     CHECK_I(ret, "H5Pclose_list");
@@ -1113,6 +1166,8 @@ test_genprop_list_callback(void)
     HDfree(prop1_cb_info.get_value);
     HDfree(prop1_cb_info.set_name);
     HDfree(prop1_cb_info.set_value);
+    HDfree(prop1_cb_info.cop_name);
+    HDfree(prop1_cb_info.cop_value);
     HDfree(prop1_cb_info.cls_name);
     HDfree(prop1_cb_info.cls_value);
     HDfree(prop2_cb_info.del_name);

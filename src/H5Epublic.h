@@ -142,6 +142,8 @@ typedef enum H5E_minor_t {
     /* Object atom related errors */
     H5E_BADATOM,                /*Can't find atom information                */
     H5E_CANTREGISTER,           /*Can't register new atom                    */
+    H5E_CANTINC,                /*Can't increment reference count            */
+    H5E_CANTDEC,                /*Can't decrement reference count            */
 
     /* Cache related errors */
     H5E_CANTFLUSH,              /*Can't flush object from cache              */
@@ -174,6 +176,10 @@ typedef enum H5E_minor_t {
 
     /* Datatype conversion errors */
     H5E_CANTCONVERT,            /*Can't convert datatypes */
+
+    /* Property list errors */
+    H5E_CANTGET,                /*Can't get value */
+    H5E_CANTSET,                /*Can't set value */
 
     /* Parallel errors */
     H5E_MPI			/*some MPI function failed		     */

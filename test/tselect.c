@@ -2227,8 +2227,8 @@ test_select_hyper_union(void)
     dataset=H5Dcreate(fid1,"Dataset4",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    xfer = H5Pcreate (H5P_DATASET_XFER);
-    CHECK(xfer, FAIL, "H5Pcreate");
+    xfer = H5Pcreate_list (H5P_DATASET_XFER_NEW);
+    CHECK(xfer, FAIL, "H5Pcreate_list");
 
     ret = H5Pset_hyper_cache(xfer,0,1);
     CHECK(ret, FAIL, "H5Pset_hyper_cache");
@@ -2258,7 +2258,7 @@ test_select_hyper_union(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Close transfer property list */
-    ret = H5Pclose(xfer);
+    ret = H5Pclose_list(xfer);
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Compare data read with data written out */
@@ -3170,7 +3170,7 @@ test_select(void)
     MESSAGE(5, ("Testing Selections\n"));
 
     /* Create a dataset transfer property list */
-    plist_id=H5Pcreate(H5P_DATASET_XFER);
+    plist_id=H5Pcreate_list(H5P_DATASET_XFER_NEW);
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     /* test I/O with a very small buffer for reads */
@@ -3231,7 +3231,7 @@ test_select(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Close dataset transfer property list */
-    ret=H5Pclose(plist_id);
+    ret=H5Pclose_list(plist_id);
     CHECK(ret, FAIL, "H5Pclose");
 
 }   /* test_select() */

@@ -157,7 +157,7 @@ main (int argc, char *argv[])
     if ((space = H5Screate_simple (2, dim, NULL))<0) goto error;
 
     /* Create xfer properties to preserve initialized data */
-    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
+    if ((PRESERVE = H5Pcreate_list (H5P_DATASET_XFER_NEW))<0) goto error;
     if (H5Pset_preserve (PRESERVE, 1)<0) goto error;
 
     /*
@@ -703,7 +703,7 @@ main (int argc, char *argv[])
     /*
      * Release resources.
      */
-    H5Pclose (PRESERVE);
+    H5Pclose_list (PRESERVE);
     H5Dclose (dataset);
     H5Fclose (file);
 

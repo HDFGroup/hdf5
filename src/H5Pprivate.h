@@ -50,6 +50,7 @@ typedef struct H5P_genprop_tag {
     H5P_prp_set_func_t set; /* Function to call when a property value is set */
     H5P_prp_get_func_t get; /* Function to call when a property value is retrieved */
     H5P_prp_delete_func_t del; /* Function to call when a property is deleted */
+    H5P_prp_copy_func_t copy;  /* Function to call when a property is copied */
     H5P_prp_close_func_t close; /* Function to call when a property is closed */
 
     struct H5P_genprop_tag *next;  /* Pointer to the next property in this list */
@@ -70,8 +71,10 @@ typedef struct H5P_genclass_tag {
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
     void *create_data;  /* Pointer to user data to pass along to create callback */
+    H5P_cls_copy_func_t copy_func;   /* Function to call when a property list is copied */
+    void *copy_data;    /* Pointer to user data to pass along to copy callback */
     H5P_cls_close_func_t close_func;   /* Function to call when a property list is closed */
-    void *close_data;  /* Pointer to user data to pass along to close callback */
+    void *close_data;   /* Pointer to user data to pass along to close callback */
 
     H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the class */
 } H5P_genclass_t;
@@ -93,7 +96,6 @@ typedef struct {
         H5F_create_t fcreate;   /* File creation properties */
         H5F_access_t faccess;   /* File access properties */
         H5D_create_t dcreate;   /* Dataset creation properties */
-        H5D_xfer_t dxfer;       /* Data transfer properties */
         H5F_mprop_t mount;      /* Mounting properties */
     } u;
     H5P_class_t cls;            /* Property list class */
@@ -104,7 +106,19 @@ __DLL__ herr_t H5P_init(void);
 __DLL__ hid_t H5P_create(H5P_class_t type, H5P_t *plist);
 __DLL__ void *H5P_copy(H5P_class_t type, const void *src);
 __DLL__ herr_t H5P_close(void *plist);
+__DLL__ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
+            void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
+            H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
+            H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
+__DLL__ herr_t H5P_get(hid_t plist_id, const char *name, void *value);
+__DLL__ herr_t H5P_set(hid_t plist_id, const char *name, void *value);
 __DLL__ H5P_class_t H5P_get_class(hid_t tid);
 __DLL__ hid_t H5P_get_driver(hid_t plist_id);
+
+/* Private functions to "peek" at properties of a certain type */
+__DLL__ uintn H5P_peek_uintn(hid_t plist_id, const char *name);
+__DLL__ hid_t H5P_peek_hid_t(hid_t plist_id, const char *name);
+__DLL__ void *H5P_peek_voidp(hid_t plist_id, const char *name);
+__DLL__ hsize_t H5P_peek_hsize_t(hid_t plist_id, const char *name);
 
 #endif

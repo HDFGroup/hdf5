@@ -65,7 +65,6 @@
 -T H5D_create_t
 -T H5D_layout_t
 -T H5D_t
--T H5D_xfer_t
 -T H5E_error_t
 -T H5E_major_mesg_t
 -T H5E_major_t

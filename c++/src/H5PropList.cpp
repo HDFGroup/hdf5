@@ -39,7 +39,20 @@ Description:
 	the identifier still has reference counter; the p_close function
 	will take care of not to call H5Pclose on the default id.
 */
-PropList::PropList( const hid_t plist_id ) : IdComponent( plist_id ) { }
+PropList::PropList( const hid_t plist_id ) : IdComponent()
+{
+    if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
+        // call C routine to create the new property
+        id = H5Pcreate_list(plist_id);
+        if( id <= 0 )
+        {
+            throw PropListIException("PropList constructor", "H5Pcreate_list failed");
+        }
+    }
+    else {
+        id=plist_id;
+    }
+}
 
 // Makes a copy of an existing property list 
 void PropList::copy( const PropList& like_plist )
@@ -77,10 +90,17 @@ void PropList::p_close() const
 {
    if( id != H5P_DEFAULT ) // not a constant, should call H5Pclose
    {
-      herr_t ret_value = H5Pclose( id );
+      herr_t ret_value;
+
+      if (H5I_GENPROP_LST == H5Iget_type(id)) {
+        ret_value = H5Pclose_list( id );
+      } else {
+        ret_value = H5Pclose( id );
+      }
+    
       if( ret_value < 0 )
       {
-         throw PropListIException(NULL, "H5Pclose failed" );
+         throw PropListIException(NULL, "property list close failed" );
       }
    }
 }

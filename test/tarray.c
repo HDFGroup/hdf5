@@ -1141,7 +1141,7 @@ test_array_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate_list(H5P_DATASET_XFER_NEW);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_array_alloc_custom,&mem_used,test_array_free_custom,&mem_used);
@@ -1195,6 +1195,10 @@ test_array_vlen_atomic(void)
     ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
+    /* Close dataset transfer property list */
+    ret = H5Pclose_list(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
+    
     /* Close Datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
@@ -1391,7 +1395,7 @@ test_array_vlen_array(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate_list(H5P_DATASET_XFER_NEW);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_array_alloc_custom,&mem_used,test_array_free_custom,&mem_used);
@@ -1447,6 +1451,10 @@ test_array_vlen_array(void)
     ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
+    /* Close dataset transfer property list */
+    ret = H5Pclose_list(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
+    
     /* Close Datatype */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");

@@ -152,7 +152,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
 #endif
 #ifdef COALESCE_READS
-    H5D_xfer_t *xfer_parms;                     /*transfer property list*/
+    uintn gather_reads;                         /* # of MPIO reads to gather */
 #endif
    
     FUNC_ENTER(H5F_arr_read, FAIL);
@@ -165,6 +165,9 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(mem_offset);
     assert(mem_size);
     assert(buf);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
     /* Make a local copy of size so we can modify it */
     H5V_vector_cpy(layout->ndims, hslab_size, _hslab_size);
@@ -172,17 +175,25 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
-	H5D_xfer_t *dxpl;
 	H5FD_mpio_dxpl_t *dx;
-	if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
-	    H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
-	    H5FD_MPIO_INDEPENDENT!=dx->xfer_mode) {
-	    xfer_mode = dx->xfer_mode;
-	}
+        hid_t driver_id;            /* VFL driver ID */
+
+        /* Get the driver ID */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+
+        /* Check if we are using the MPIO driver */
+        if(H5FD_MPIO==driver_id) {
+            /* Get the driver information */
+            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+            /* Check if we are not using independent I/O */
+            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                xfer_mode = dx->xfer_mode;
+        } /* end if */
     }
-#endif
     
-#ifdef H5_HAVE_PARALLEL
     /* Collective MPIO access is unsupported for non-contiguous datasets */
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
 	HRETURN_ERROR (H5E_DATASET, H5E_READERROR, FAIL,
@@ -282,30 +293,25 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
                 if (max != min)
-                HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+                    HRETURN_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
                           "collective access with unequal number of "
                           "blocks not supported yet");
             }
 #endif
 
-#ifdef COALESCE_READS
-                /* Get the dataset transfer property list */
-                if (H5P_DEFAULT == dxpl_id) {
-                    xfer_parms = &H5D_xfer_dflt;
-                } else if (H5P_DATASET_XFER != H5P_get_class (dxpl_id) ||
-                       NULL == (xfer_parms = H5I_object (dxpl_id))) {
-                    HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
-                }
-
-            for (z=0, xfer_parms->gather_reads = nelmts - 1;
-                     z<nelmts;
-                     z++, xfer_parms->gather_reads--) {
-#else
 #ifdef QAK
         printf("%s: nelmts=%d, addr=%lu, elmt_size=%lu\n",FUNC,(int)nelmts,(unsigned long)addr,(unsigned long)elmt_size);
         printf("%s: sieve_buf=%p, sieve_loc=%lu, sieve_size=%lu, sieve_buf_size=%lu, sieve_dirty=%u\n",FUNC,f->shared->sieve_buf,(unsigned long)f->shared->sieve_loc,(unsigned long)f->shared->sieve_size,(unsigned long)f->shared->sieve_buf_size,(unsigned)f->shared->sieve_dirty);
         printf("%s: feature_flags=%lx\n",FUNC,(unsigned long)f->shared->lf->feature_flags);
 #endif /* QAK */
+#ifdef COALESCE_READS
+            for (z=0, gather_reads = nelmts - 1; z<nelmts; z++, gather_reads--) {
+
+            /* Track the number of reads to gather */
+            if(H5P_set(dxpl_id, H5D_XFER_GATHER_READS_NAME, &gather_reads)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve gather reads");
+
+#else
             for (z=0; z<nelmts; z++) {
 #endif
 
@@ -446,6 +452,9 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(mem_offset);
     assert(mem_size);
     assert(buf);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
     /* Make a local copy of _size so we can modify it */
     H5V_vector_cpy(layout->ndims, hslab_size, _hslab_size);
@@ -453,17 +462,25 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     {
 	/* Get the transfer mode */
-	H5D_xfer_t *dxpl;
 	H5FD_mpio_dxpl_t *dx;
-	if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
-	    H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
-	    H5FD_MPIO_INDEPENDENT!=dx->xfer_mode) {
-	    xfer_mode = dx->xfer_mode;
-	}
+        hid_t driver_id;            /* VFL driver ID */
+
+        /* Get the driver ID */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+
+        /* Check if we are using the MPIO driver */
+        if(H5FD_MPIO==driver_id) {
+            /* Get the driver information */
+            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+            /* Check if we are not using independent I/O */
+            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                xfer_mode = dx->xfer_mode;
+        } /* end if */
     }
-#endif
     
-#ifdef H5_HAVE_PARALLEL
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode) {
 	HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL,
 		       "collective access on non-contiguous datasets not "
@@ -566,7 +583,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 printf("nelmts=%lu, min=%lu, max=%lu\n", temp, min, max);
 #endif
                 if (max != min) {
-                HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
+                    HRETURN_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                           "collective access with unequal number of "
                           "blocks not supported yet");
                 }
@@ -614,8 +631,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
              */
             if (efl && efl->nused>0) {
                 HRETURN_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                      "chunking and external files are mutually "
-                      "exclusive");
+                      "chunking and external files are mutually exclusive");
             }
             for (u=0; u<layout->ndims; u++) {
                 if (0!=mem_offset[u] || hslab_size[u]!=mem_size[u]) {

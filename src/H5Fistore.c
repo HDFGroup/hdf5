@@ -1001,7 +1001,7 @@ H5F_istore_flush_entry(H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t reset)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                 "unable to allocate chunk");
         }
-        if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+        if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DATASET_XFER_DEFAULT,
                     buf)<0) {
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                 "unable to write raw data to file");
@@ -1421,7 +1421,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             /*
              * The chunk exists on disk.
              */
-            if (H5F_block_read(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DEFAULT,
+            if (H5F_block_read(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, H5P_DATASET_XFER_DEFAULT,
                        chunk)<0) {
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, NULL,
                      "unable to read raw data chunk");
@@ -1500,13 +1500,9 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         ent->wr_count = chunk_size;
         ent->chunk = chunk;
         
-        {
-            H5D_xfer_t *dxpl;
-            dxpl = (H5P_DEFAULT==dxpl_id) ? &H5D_xfer_dflt : (H5D_xfer_t *)H5I_object(dxpl_id);
-            ent->split_ratios[0] = dxpl->split_ratios[0];
-            ent->split_ratios[1] = dxpl->split_ratios[1];
-            ent->split_ratios[2] = dxpl->split_ratios[2];
-        }
+        assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+        assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+        H5Pget(dxpl_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(ent->split_ratios));
         
         /* Add it to the cache */
         assert(NULL==rdcc->slot[idx]);
@@ -1646,13 +1642,10 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             }
             x.alloc_size = x.chunk_size;
             x.chunk = chunk;
-            {
-            H5D_xfer_t *dxpl;
-            dxpl = (H5P_DEFAULT==dxpl_id) ? &H5D_xfer_dflt : (H5D_xfer_t *)H5I_object(dxpl_id);
-            x.split_ratios[0] = dxpl->split_ratios[0];
-            x.split_ratios[1] = dxpl->split_ratios[1];
-            x.split_ratios[2] = dxpl->split_ratios[2];
-            }
+
+            assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+            assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
+            H5Pget(dxpl_id,H5D_XFER_BTREE_SPLIT_RATIO_NAME,&(x.split_ratios));
             
             H5F_istore_flush_entry (f, &x, TRUE);
         } else {
@@ -1800,7 +1793,7 @@ H5F_istore_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             for (u=l.ndims; u-- > 0; /*void*/)
                 l.dim[u] = layout->dim[u];
             l.addr = udata.addr;
-            if (H5F_arr_read(f, H5P_DEFAULT, &l, pline, fill, NULL/*no efl*/,
+            if (H5F_arr_read(f, H5P_DATASET_XFER_DEFAULT, &l, pline, fill, NULL/*no efl*/,
                      sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0) {
                 HRETURN_ERROR (H5E_IO, H5E_READERROR, FAIL,
                      "unable to read raw data from file");
@@ -1976,7 +1969,7 @@ H5F_istore_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             for (u=l.ndims; u-- > 0; /*void*/)
                 l.dim[u] = layout->dim[u];
             l.addr = udata.addr;
-            if (H5F_arr_write(f, H5P_DEFAULT, &l, pline, fill, NULL/*no efl*/,
+            if (H5F_arr_write(f, H5P_DATASET_XFER_DEFAULT, &l, pline, fill, NULL/*no efl*/,
                      sub_size, size_m, sub_offset_m, offset_wrt_chunk, buf)<0) {
                 HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
                        "unable to write raw data to file");

@@ -609,17 +609,18 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     uintn u;
 #endif /* QAK */
     hsize_t num_read=0;          /* Number of elements read */
-    const H5D_xfer_t *xfer_parms;/* Data transfer property list */
+    uintn cache_hyper;          /* Hyperslab caching turned on? */
+    uintn block_limit;          /* Hyperslab cache limit */
 
     FUNC_ENTER (H5S_hyper_fread, 0);
 
     assert(io_info);
-    if (H5P_DEFAULT==io_info->dxpl_id) {
-	xfer_parms = &H5D_xfer_dflt;
-    } else {
-	xfer_parms = H5I_object(io_info->dxpl_id);
-	assert(xfer_parms);
-    }
+
+    /* Get the hyperslab cache setting and limit */
+    if (H5P_get(io_info->dxpl_id,H5D_XFER_HYPER_CACHE_NAME,&cache_hyper)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
+    if (H5P_get(io_info->dxpl_id,H5D_XFER_HYPER_CACHE_LIM_NAME,&block_limit)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
 #ifdef QAK
     printf("%s: check 1.0, dim=%d\n",FUNC,dim);
@@ -672,9 +673,8 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
 #endif /* QAK */
                 /* Check if this hyperslab block is cached or could be cached */
                 if(!regions[i].node->cinfo.cached &&
-		   (xfer_parms->cache_hyper &&
-		    (xfer_parms->block_limit==0 ||
-		     xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
+		   (cache_hyper &&
+		    (block_limit==0 || block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
 #ifdef QAK
 	printf("%s: check 2.1.3, caching block\n",FUNC);
@@ -992,7 +992,7 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 #ifndef NO_DUFFS_DEVICE
     size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
-    const H5D_xfer_t *xfer_parms;/* Data transfer property list */
+    size_t vector_size;         /* Value for vector size */
     hsize_t ret_value=0;        /* Return value */
 
     FUNC_ENTER (H5S_hyper_fread_opt, 0);
@@ -1011,18 +1011,14 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: file_file->hyp.pos[%d]=%d\n",FUNC,(int)i,(int)file_iter->hyp.pos[i]);
 #endif /* QAK */
 
-    /* Get the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id) {
-	xfer_parms = &H5D_xfer_dflt;
-    } else {
-	xfer_parms = H5I_object(dxpl_id);
-	assert(xfer_parms);
-    } /* end else */
+    /* Get the hyperslab vector size */
+    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
-    if((seq_len_arr = H5FL_ARR_ALLOC(size_t,xfer_parms->vector_size,0))==NULL)
+    if((seq_len_arr = H5FL_ARR_ALLOC(size_t,vector_size,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate vector I/O array");
-    if((buf_off_arr = H5FL_ARR_ALLOC(hsize_t,xfer_parms->vector_size,0))==NULL)
+    if((buf_off_arr = H5FL_ARR_ALLOC(hsize_t,vector_size,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate vector I/O array");
 
     /* Set the rank of the fastest changing dimension */
@@ -1186,7 +1182,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             skip[i]=(tdiminfo[i].stride-tdiminfo[i].block)*slab[i];
 
         /* Fill the sequence length array (since they will all be the same for optimized hyperslabs) */
-        for(u=0; u<xfer_parms->vector_size; u++)
+        for(u=0; u<vector_size; u++)
             seq_len_arr[u]=actual_bytes;
 
         /* Read in data until an entire sequence can't be read in any longer */
@@ -1205,7 +1201,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Gather the sequence */
 
                     /* Compute the number of sequences to fill */
-                    tot_seq=MIN(xfer_parms->vector_size-nseq,fast_dim_count);
+                    tot_seq=MIN(vector_size-nseq,fast_dim_count);
 
                     /* Get a copy of the number of sequences to fill */
                     seq_count=tot_seq;
@@ -1308,7 +1304,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     fast_dim_count -= tot_seq;
 
                     /* If the sequence & offset arrays are full, read them in */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
@@ -1350,7 +1346,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Gather the sequence */
 
                     /* Compute the number of sequences to fill */
-                    tot_seq=MIN(xfer_parms->vector_size-nseq,fast_dim_count);
+                    tot_seq=MIN(vector_size-nseq,fast_dim_count);
 
                     /* Get a copy of the number of sequences to fill */
                     seq_count=tot_seq;
@@ -1380,7 +1376,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     fast_dim_count -= tot_seq;
 
                     /* If the sequence & offset arrays are full, read them in */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
@@ -1424,7 +1420,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     nseq++;
 
                     /* If the sequence & offset arrays are full, read them in */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Read in the sequences */
                         if (H5F_seq_readv(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf/*out*/)<0) {
@@ -1638,17 +1634,19 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
     size_t i;                   /* Counters */
     intn j;
     hsize_t num_written=0;          /* Number of elements read */
-    const H5D_xfer_t *xfer_parms;	/* Data transfer properties */
+    uintn cache_hyper;          /* Hyperslab caching turned on? */
+    uintn block_limit;          /* Hyperslab cache limit */
 
     FUNC_ENTER (H5S_hyper_fwrite, 0);
 
     assert(io_info);
-    if (H5P_DEFAULT==io_info->dxpl_id) {
-        xfer_parms = &H5D_xfer_dflt;
-    } else {
-        xfer_parms = H5I_object(io_info->dxpl_id);
-        assert(xfer_parms);
-    }
+
+    /* Get the hyperslab cache setting and limit */
+    if (H5P_get(io_info->dxpl_id,H5D_XFER_HYPER_CACHE_NAME,&cache_hyper)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
+    if (H5P_get(io_info->dxpl_id,H5D_XFER_HYPER_CACHE_LIM_NAME,&block_limit)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
+
 
 #ifdef QAK
     printf("%s: check 1.0\n", FUNC);
@@ -1682,7 +1680,7 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
                 region_size=MIN((hssize_t)io_info->nelmts, (regions[i].end-regions[i].start)+1);
 
                 /* Check if this hyperslab block is cached or could be cached */
-                if(!regions[i].node->cinfo.cached && (xfer_parms->cache_hyper && (xfer_parms->block_limit==0 || xfer_parms->block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
+                if(!regions[i].node->cinfo.cached && (cache_hyper && (block_limit==0 || block_limit>=(regions[i].node->cinfo.size*io_info->elmt_size)))) {
                     /* if we aren't cached, attempt to cache the block */
                     H5S_hyper_block_cache(regions[i].node,io_info,0);
                 } /* end if */
@@ -1837,7 +1835,7 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 #ifndef NO_DUFFS_DEVICE
     size_t duffs_index;         /* Counting index for Duff's device */
 #endif /* NO_DUFFS_DEVICE */
-    const H5D_xfer_t *xfer_parms;/* Data transfer property list */
+    size_t vector_size;         /* Value for vector size */
     hsize_t ret_value=0;        /* Return value */
 
     FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
@@ -1856,18 +1854,14 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: file_file->hyp.pos[%d]=%d\n",FUNC,(int)i,(int)file_iter->hyp.pos[i]);
 #endif /* QAK */
 
-    /* Get the data transfer properties */
-    if (H5P_DEFAULT==dxpl_id) {
-	xfer_parms = &H5D_xfer_dflt;
-    } else {
-	xfer_parms = H5I_object(dxpl_id);
-	assert(xfer_parms);
-    } /* end else */
+    /* Get the hyperslab vector size */
+    if (H5P_get(dxpl_id,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&vector_size)<0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get value");
 
     /* Allocate the vector I/O arrays */
-    if((seq_len_arr = H5FL_ARR_ALLOC(size_t,xfer_parms->vector_size,0))==NULL)
+    if((seq_len_arr = H5FL_ARR_ALLOC(size_t,vector_size,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate vector I/O array");
-    if((buf_off_arr = H5FL_ARR_ALLOC(hsize_t,xfer_parms->vector_size,0))==NULL)
+    if((buf_off_arr = H5FL_ARR_ALLOC(hsize_t,vector_size,0))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "can't allocate vector I/O array");
 
     /* Set the rank of the fastest changing dimension */
@@ -2031,7 +2025,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             skip[i]=(tdiminfo[i].stride-tdiminfo[i].block)*slab[i];
 
         /* Fill the sequence length array (since they will all be the same for optimized hyperslabs) */
-        for(u=0; u<xfer_parms->vector_size; u++)
+        for(u=0; u<vector_size; u++)
             seq_len_arr[u]=actual_bytes;
 
         /* Write out data until an entire sequence can't be written any longer */
@@ -2050,7 +2044,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Gather the sequence */
 
                     /* Compute the number of sequences to fill */
-                    tot_seq=MIN(xfer_parms->vector_size-nseq,fast_dim_count);
+                    tot_seq=MIN(vector_size-nseq,fast_dim_count);
 
                     /* Get a copy of the number of sequences to fill */
                     seq_count=tot_seq;
@@ -2153,7 +2147,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     fast_dim_count -= tot_seq;
 
                     /* If the sequence & offset arrays are full, write them out */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
@@ -2195,7 +2189,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Gather the sequence */
 
                     /* Compute the number of sequences to fill */
-                    tot_seq=MIN(xfer_parms->vector_size-nseq,fast_dim_count);
+                    tot_seq=MIN(vector_size-nseq,fast_dim_count);
 
                     /* Get a copy of the number of sequences to fill */
                     seq_count=tot_seq;
@@ -2225,7 +2219,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     fast_dim_count -= tot_seq;
 
                     /* If the sequence & offset arrays are full, write them out */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {
@@ -2269,7 +2263,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     nseq++;
 
                     /* If the sequence & offset arrays are full, write them out */
-                    if(nseq>=xfer_parms->vector_size) {
+                    if(nseq>=vector_size) {
                         /* Write out the sequences */
                         if (H5F_seq_writev(f, dxpl_id, layout, pline, fill, efl, file_space,
                             elmt_size, nseq, seq_len_arr, buf_off_arr, buf)<0) {

@@ -379,7 +379,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 
     /* read fixed-lenth part of object header */
     hdr_size = H5O_SIZEOF_HDR(f);
-    if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, H5P_DEFAULT, buf) < 0) {
+    if (H5F_block_read(f, H5FD_MEM_OHDR, addr, hdr_size, H5P_DATASET_XFER_DEFAULT, buf) < 0) {
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 		    "unable to read object header");
     }
@@ -437,7 +437,7 @@ H5O_load(H5F_t *f, haddr_t addr, const void UNUSED *_udata1,
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 			 "memory allocation failed");
 	}
-	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, H5P_DEFAULT,
+	if (H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, H5P_DATASET_XFER_DEFAULT,
 			   oh->chunk[chunkno].image) < 0) {
 	    HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL,
 			"unable to read object header data");
@@ -593,7 +593,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
                 H5FD_mpio_tas_allsame(f->shared->lf, TRUE); /*only p0 will write*/
 #endif /* H5_HAVE_PARALLEL */
             if (H5F_block_write(f, H5FD_MEM_OHDR, addr, H5O_SIZEOF_HDR(f), 
-                        H5P_DEFAULT, buf) < 0) {
+                        H5P_DATASET_XFER_DEFAULT, buf) < 0) {
                 HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                       "unable to write object header hdr to disk");
             }
@@ -680,7 +680,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 #endif /* H5_HAVE_PARALLEL */
                     if (H5F_block_write(f, H5FD_MEM_OHDR, addr,
                                 (H5O_SIZEOF_HDR(f)+oh->chunk[u].size),
-                                H5P_DEFAULT, p) < 0) {
+                                H5P_DATASET_XFER_DEFAULT, p) < 0) {
                         HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                               "unable to write object header data to disk");
                     } /* end if */
@@ -695,7 +695,7 @@ H5O_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5O_t *oh)
 #endif /* H5_HAVE_PARALLEL */
                     if (H5F_block_write(f, H5FD_MEM_OHDR, oh->chunk[u].addr,
                                 (oh->chunk[u].size),
-                                H5P_DEFAULT, oh->chunk[u].image) < 0) {
+                                H5P_DATASET_XFER_DEFAULT, oh->chunk[u].image) < 0) {
                         HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,
                               "unable to write object header data to disk");
                     } /* end if */

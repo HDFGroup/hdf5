@@ -154,7 +154,7 @@ test_vlstrings_basic(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL string */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid=H5Pcreate_list(H5P_DATASET_XFER_NEW);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
     ret=H5Pset_vlen_mem_manager(xfer_pid,test_vlstr_alloc_custom,&mem_used,test_vlstr_free_custom,&mem_used);
@@ -212,7 +212,7 @@ test_vlstrings_basic(void)
     CHECK(ret, FAIL, "H5Sclose");
     
     /* Close dataset transfer property list */
-    ret = H5Pclose(xfer_pid);
+    ret = H5Pclose_list(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
     
     /* Close file */

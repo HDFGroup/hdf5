@@ -322,7 +322,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
  By default, we will compress HDF5 dataset by using gzip compression if HDF5 file is compressed. */
 
   
- write_plist = H5Pcreate(H5P_DATASET_XFER);
+ write_plist = H5Pcreate_list(H5P_DATASET_XFER_NEW);
  bufsize = h4memsize *h5dims[1]*ncomp;
 
   if(H5Pset_buffer(write_plist,bufsize,NULL,NULL)<0) {
@@ -330,7 +330,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     free(image_data);
     free(h5cimage_name);
     H5Pclose(create_plist);
-    H5Pclose(write_plist);
+    H5Pclose_list(write_plist);
     return FAIL;		
   }
 
@@ -343,7 +343,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -354,7 +354,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -364,7 +364,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	free(image_data);
 	free(h5cimage_name);
         H5Pclose(create_plist);
-	 H5Pclose(write_plist);
+	 H5Pclose_list(write_plist);
         return FAIL;
      }
 	
@@ -378,7 +378,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -388,7 +388,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
     
@@ -404,7 +404,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -414,7 +414,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -424,7 +424,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -434,7 +434,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -444,7 +444,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
      
@@ -454,7 +454,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
      }
@@ -465,7 +465,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -476,7 +476,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
        free(image_data);
        free(h5cimage_name);
        H5Pclose(create_plist);
-        H5Pclose(write_plist);
+        H5Pclose_list(write_plist);
        return FAIL;
      }
 
@@ -486,7 +486,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
 	free(image_data);
 	free(h5cimage_name);
         H5Pclose(create_plist);
-	 H5Pclose(write_plist);
+	 H5Pclose_list(write_plist);
 	return FAIL;
      } 
      ret   = H5Tclose(h5_ctype);
@@ -512,7 +512,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     free(image_data);
     free(h5cimage_name);
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -523,7 +523,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     free(h5cimage_name);
     free(image_data);
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -534,7 +534,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     free(h5cimage_name);
     free(image_data);
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -549,7 +549,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
     printf(" cannot obtain attributes. \n");
      free(image_data);
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     return FAIL;
@@ -573,7 +573,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_TYPE,grlabel)==FAIL){
     printf("error in getting hdf4 image type attribute \n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -585,7 +585,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transpredattrs(h5dset,HDF4_OBJECT_NAME,image_name)==FAIL){
     printf("error in getting hdf4 image name attribute. \n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -596,7 +596,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transpredattrs(h5dset,HDF4_IMAGE_CLASS,image_class)==FAIL){
     printf("error in getting hdf4 image class attribute. \n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -611,7 +611,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(gr_ref == 0) {
     printf("error in obtaining reference number of GR.\n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -622,7 +622,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(h4_transnumattr(h5dset,HDF4_REF_NUM,gr_ref)==FAIL) {
     printf("error in getting hdf4 image number attribute.\n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -635,7 +635,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   if(gr_palette(file_id,ri_id,h5dset,h5_palgroup,h4_attr)== FAIL) {
     printf("error in translating palette into h5 dataset.\n");
     H5Pclose(create_plist);
-     H5Pclose(write_plist);
+     H5Pclose_list(write_plist);
     H5Sclose(h5d_sid); 
     H5Dclose(h5dset);
     free(h5cimage_name);
@@ -644,7 +644,7 @@ int Image_h4_to_h5(int32 file_id,int32 ri_id,hid_t h5_group,hid_t h5_palgroup,in
   }
  
   ret   = H5Pclose(create_plist);
-   ret  = H5Pclose(write_plist);
+   ret  = H5Pclose_list(write_plist);
   ret   = H5Sclose(h5d_sid); 
   ret   = H5Dclose(h5dset);
   istat = GRendaccess(ri_id);

@@ -101,7 +101,9 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Object atom related errors */
     {H5E_BADATOM, 	"Unable to find atom information (already closed?)"},
-    {H5E_CANTREGISTER, 	"Unable to  register new atom"},
+    {H5E_CANTREGISTER, 	"Unable to register new atom"},
+    {H5E_CANTINC,      	"Unable to increment reference count"},
+    {H5E_CANTDEC,      	"Unable to decrement reference count"},
 
     /* Cache related errors */
     {H5E_CANTFLUSH, 	"Unable to flush data from cache"},
@@ -134,6 +136,10 @@ static const H5E_minor_mesg_t H5E_minor_mesg_g[] = {
 
     /* Datatype conversion errors */
     {H5E_CANTCONVERT,		"Can't convert datatypes"},
+
+    /* Property list errors */
+    {H5E_CANTGET,		"Can't get value"},
+    {H5E_CANTSET,		"Can't set value"},
 
     /* Datatype conversion errors */
     {H5E_MPI,		"Some MPI function failed"}

@@ -172,18 +172,30 @@ H5F_seq_readv(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(f);
     assert(layout);
     assert(real_buf);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
 #ifdef H5_HAVE_PARALLEL
     {
-        /* Get the transfer mode */
-        H5D_xfer_t *dxpl;
-        H5FD_mpio_dxpl_t *dx;
+	/* Get the transfer mode */
+	H5FD_mpio_dxpl_t *dx;
+        hid_t driver_id;            /* VFL driver ID */
 
-        if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
-                H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
-                H5FD_MPIO_INDEPENDENT!=dx->xfer_mode) {
-            xfer_mode = dx->xfer_mode;
-        }
+        /* Get the driver ID */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+
+        /* Check if we are using the MPIO driver */
+        if(H5FD_MPIO==driver_id) {
+            /* Get the driver information */
+            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+            /* Check if we are not using independent I/O */
+            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                xfer_mode = dx->xfer_mode;
+        } /* end if */
     }
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */
@@ -534,18 +546,30 @@ H5F_seq_writev(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     assert(f);
     assert(layout);
     assert(real_buf);
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
 #ifdef H5_HAVE_PARALLEL
     {
-        /* Get the transfer mode */
-        H5D_xfer_t *dxpl;
-        H5FD_mpio_dxpl_t *dx;
+	/* Get the transfer mode */
+	H5FD_mpio_dxpl_t *dx;
+        hid_t driver_id;            /* VFL driver ID */
 
-        if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
-                H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
-                H5FD_MPIO_INDEPENDENT!=dx->xfer_mode) {
-            xfer_mode = dx->xfer_mode;
-        }
+        /* Get the driver ID */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+
+        /* Check if we are using the MPIO driver */
+        if(H5FD_MPIO==driver_id) {
+            /* Get the driver information */
+            if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+            /* Check if we are not using independent I/O */
+            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                xfer_mode = dx->xfer_mode;
+        } /* end if */
     }
 
     /* Collective MPIO access is unsupported for non-contiguous datasets */

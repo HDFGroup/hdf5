@@ -575,6 +575,9 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
     assert (mem_space);
     assert (buf);
     assert (IS_H5FD_MPIO(f));
+    /* Make certain we have the correct type of property list */
+    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    assert(TRUE==H5Pisa_class(dxpl_id,H5P_DATASET_XFER_NEW));
 
     /* INCOMPLETE!!!  rky 980816 */
     /* Currently can only handle H5D_CONTIGUOUS layout */
@@ -601,18 +604,24 @@ H5S_mpio_spaces_xfer(H5F_t *f, const struct H5O_layout_t *layout,
      * the following block of code, though with the right idea, is not
      * correct yet.
      */
-    {   /* Get the transfer mode */
-        H5D_xfer_t *dxpl;
-        H5FD_mpio_dxpl_t *dx;
+    {
+	/* Get the transfer mode */
+	H5FD_mpio_dxpl_t *dx;
+        hid_t driver_id;            /* VFL driver ID */
 
-        if (H5P_DEFAULT!=dxpl_id && (dxpl=H5I_object(dxpl_id)) &&
-                H5FD_MPIO==dxpl->driver_id && (dx=dxpl->driver_info) &&
-                H5FD_MPIO_COLLECTIVE==dx->xfer_mode) {
-	    /* let it fall through */
-	}else{
+        /* Get the driver ID */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+
+        /* Get the driver information */
+        if(H5P_get(dxpl_id, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+
+        /* Check if we are using the MPIO driver */
+        if(H5FD_MPIO!=driver_id || H5FD_MPIO_COLLECTIVE!=dx->xfer_mode) {
 	    *must_convert = 1;	/* can't do optimized xfer; do the old way */
 	    HGOTO_DONE(SUCCEED);
-	}
+        } /* end if */
     }
 #endif
 
