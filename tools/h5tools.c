@@ -100,6 +100,7 @@ typedef struct h5dump_context_t {
     hsize_t		p_max_idx[H5S_MAX_RANK]; /*max selected index	*/
     int			prev_multiline;	/*was prev datum multiline?	*/
     size_t		prev_prefix_len;/*length of previous prefix	*/
+    int			continuation;	/*continuation of previous data?*/
 } h5dump_context_t;
     
 
@@ -1160,7 +1161,7 @@ h5dump_simple_data(FILE *stream, const h5dump_t *info, hid_t container,
 	    if (ctx->need_prefix) {
 		if (secnum) multiline++;
 		h5dump_simple_prefix(stream, info, ctx, i, secnum);
-	    } else if (i && 0==secnum) {
+	    } else if ((i || ctx->continuation) && 0==secnum) {
 		fputs(OPT(info->elmt_suf2, " "), stream);
 		ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
 	    }
@@ -1206,6 +1207,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     int			carry;			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
     unsigned		flags;			/*buffer extent flags	*/
+    hsize_t		total_size[H5S_MAX_RANK];/*total size of dataset*/
 
     /* Print info */
     h5dump_context_t	ctx;			/*print context		*/
@@ -1233,19 +1235,15 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      */
     memset(&ctx, 0, sizeof ctx);
     ctx.need_prefix = 1;
-
-
-	f_space = H5Dget_space(dset);
-    
-	
+    f_space = H5Dget_space(dset);
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
     if ((size_t)(ctx.ndims)>NELMTS(sm_size)) return -1;
 
     /* Assume entire data space to be printed */
     for (i=0; i<(hsize_t)(ctx.ndims); i++) ctx.p_min_idx[i] = 0;
-    H5Sget_simple_extent_dims(f_space, ctx.p_max_idx, NULL);
+    H5Sget_simple_extent_dims(f_space, total_size, NULL);
     for (i=0, p_nelmts=1; i<(hsize_t)(ctx.ndims); i++) {
-	p_nelmts *= ctx.p_max_idx[i]-ctx.p_min_idx[i];
+	p_nelmts *= total_size[i];
     }
     if (0==p_nelmts) return 0; /*nothing to print*/
 
@@ -1255,8 +1253,7 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
      */
     p_type_nbytes = H5Tget_size(p_type);
     for (i=ctx.ndims, sm_nbytes=p_type_nbytes; i>0; --i) {
-	sm_size[i-1] = MIN (ctx.p_max_idx[i-1] - ctx.p_min_idx[i-1],
-			    H5DUMP_BUFSIZE/sm_nbytes);
+	sm_size[i-1] = MIN (total_size[i-1], H5DUMP_BUFSIZE/sm_nbytes);
 	sm_nbytes *= sm_size[i-1];
 	assert(sm_nbytes>0);
     }
@@ -1272,14 +1269,15 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	/* Calculate the hyperslab size */
 	if (ctx.ndims>0) {
 	    for (i=0, hs_nelmts=1; i<(hsize_t)(ctx.ndims); i++) {
-		hs_size[i] = MIN(ctx.p_max_idx[i]-hs_offset[i], sm_size[i]);
+		hs_size[i] = MIN(total_size[i]-hs_offset[i], sm_size[i]);
+		ctx.p_max_idx[i] = ctx.p_min_idx[i] + hs_size[i];
 		hs_nelmts *= hs_size[i];
 	    }
 	    H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
 				hs_size, NULL);
 	    H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
 				&hs_nelmts, NULL);
-	    dim_n_size = ctx.p_max_idx[ctx.ndims-1];
+	    dim_n_size = total_size[ctx.ndims-1];
 	} else {
 	    H5Sselect_all(f_space);
 	    H5Sselect_all(sm_space);
@@ -1288,11 +1286,10 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	}
 	
 	/* Read the data */
-	
-	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT,
-		sm_buf)<0) {
-		return -1;	
+	if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf)<0) {
+	    return -1;	
 	}
+
 	/* Print the data */
 	flags = ((0==elmtno?START_OF_DATA:0) |
 		 (elmtno+hs_nelmts>=p_nelmts?END_OF_DATA:0));
@@ -1334,19 +1331,22 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 		compound_data = 0;
 		break;
 			
-		case H5T_REFERENCE:
-			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
-				      p_nelmts, dim_n_size, elmtno, dset);
-			break;
-					  
-/*			display_reference_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
-				      p_nelmts, dim_n_size, elmtno, dset);*/
-		case H5T_ENUM:
-			display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
-				      p_nelmts, dim_n_size, elmtno, dset);
-			break;	
+	    case H5T_REFERENCE:
+		display_numeric_data(hs_nelmts, p_type, sm_buf, p_type_nbytes,
+				     p_nelmts, dim_n_size, elmtno, dset);
+		break;
+#if 0
+		display_reference_data(hs_nelmts, p_type, sm_buf,
+				       p_type_nbytes, p_nelmts, dim_n_size,
+				       elmtno, dset);
+#endif
+	    case H5T_ENUM:
+		    display_numeric_data(hs_nelmts, p_type, sm_buf,
+					 p_type_nbytes, p_nelmts, dim_n_size,
+					 elmtno, dset);
+		    break;	
 
-    		default:
+	    default:
 		break;
 	    }
 		
@@ -1354,13 +1354,15 @@ h5dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
 	
 	/* Calculate the next hyperslab offset */
 	for (i=ctx.ndims, carry=1; i>0 && carry; --i) {
+	    ctx.p_min_idx[i-1] = ctx.p_max_idx[i-1];
 	    hs_offset[i-1] += hs_size[i-1];
-	    if (hs_offset[i-1]==(hssize_t)(ctx.p_max_idx[i-1])) {
-		hs_offset[i-1] = ctx.p_min_idx[i-1];
+	    if (hs_offset[i-1]==(hssize_t)(total_size[i-1])) {
+		hs_offset[i-1] = 0;
 	    } else {
 		carry = 0;
 	    }
 	}
+	ctx.continuation++;
     }
 
     /* Terminate the output */
