@@ -209,6 +209,17 @@
 #define NBYTEDECODE(s, d, n) {	 HDmemcpy(d,s,n); p+=n }
 
 /*
+ * Macros that check for overflows.  These are somewhat dangerous to fiddle
+ * with.
+ */
+#if (SIZEOF_SIZE_T >= SIZEOF_OFF_T)
+#   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
+    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
+#else
+#   define H5F_OVERFLOW_SIZET2OFFT(X) 0
+#endif
+
+/*
  * File-creation property list.
  */
 typedef struct H5F_create_t {

@@ -166,7 +166,7 @@ H5V_hyper_stride(intn n, const size_t *size,
     for (i = n - 2, acc = 1; i >= 0; --i) {
 	size_t tmp = acc * (total_size[i+1] - size[i+1]);
 	assert (tmp<((size_t)1<<(8*sizeof(ssize_t)-1)));
-	stride[i] = (size_t)tmp; /*overflow checked*/
+	stride[i] = (ssize_t)tmp; /*overflow checked*/
 	acc *= total_size[i+1];
 	skip += acc * (offset ? offset[i] : 0);
     }

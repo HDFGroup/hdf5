@@ -43,8 +43,14 @@
 /* The number of bytes in a long long.  */
 #undef SIZEOF_LONG_LONG
 
+/* The number of bytes in a off_t.  */
+#undef SIZEOF_OFF_T
+
 /* The number of bytes in a short.  */
 #undef SIZEOF_SHORT
+
+/* The number of bytes in a size_t.  */
+#undef SIZEOF_SIZE_T
 
 /* Define if you have the fseek64 function.  */
 #undef HAVE_FSEEK64
@@ -57,6 +63,9 @@
 
 /* Define if you have the lseek64 function.  */
 #undef HAVE_LSEEK64
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
 
 /* Define if you have the mpi library (-lmpi).  */
 #undef HAVE_LIBMPI

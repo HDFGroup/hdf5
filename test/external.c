@@ -630,16 +630,16 @@ test_2 (void)
 static void
 test_3 (void)
 {
-    hid_t	file, plist, space, dset;
+    hid_t	file, plist, mem_space, file_space, dset;
     herr_t	status;
-    int		i;
-    int		part[25], whole[100];
-    size_t	size;
+    int		i, fd;
+    int		part[25], whole[100], hs_start=100;
+    size_t	size=100, max_size=200, hs_count=100;
 
     /*
-     * Open the file from test_2().
+     * Create another file
      */
-    file = H5Fcreate ("extern_2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate ("extern_3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert (file>=0);
 
     /* Create the external file list */
@@ -651,31 +651,37 @@ test_3 (void)
     assert (status>=0);
     status = H5Pset_external (plist, "extern_3b.raw", 20, sizeof(part));
     assert (status>=0);
-    status = H5Pset_external (plist, "extern_4b.raw", 30, sizeof(part));
+    status = H5Pset_external (plist, "extern_4b.raw", 30, H5F_UNLIMITED);
     assert (status>=0);
 
-    /* Touch the files so they exist */
-    system ("touch extern_1b.raw extern_2b.raw extern_3b.raw extern_4b.raw");
+    /* Make sure the output files are fresh*/
+    fd = open ("extern_1b.raw", O_RDWR|O_CREAT|O_TRUNC, 0666);
+    close (fd);
+    fd = open ("extern_2b.raw", O_RDWR|O_CREAT|O_TRUNC, 0666);
+    close (fd);
+    fd = open ("extern_3b.raw", O_RDWR|O_CREAT|O_TRUNC, 0666);
+    close (fd);
+    fd = open ("extern_4b.raw", O_RDWR|O_CREAT|O_TRUNC, 0666);
+    close (fd);
 
     /* Create the data space */
-    size = 100;
-    space = H5Screate_simple (1, &size, NULL);
-    assert (space>=0);
+    mem_space = H5Screate_simple (1, &size, &max_size);
+    assert (mem_space>=0);
+    file_space = H5Scopy (mem_space);
 
     /* Create the dataset */
-    dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, plist);
+    dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, file_space, plist);
     assert (dset>=0);
 
     /*
      * Write the entire dataset and compare with the original
      */
     do {
-	/* Write to the dataset */
 	printf ("%-70s", "...writing entire dataset");
 	fflush (stdout);
 
-	for (i=0; i<100; i++) whole[i] = i;
-	status = H5Dwrite (dset, H5T_NATIVE_INT, space, space,
+	for (i=0; i<size; i++) whole[i] = i;
+	status = H5Dwrite (dset, H5T_NATIVE_INT, mem_space, file_space,
 			   H5P_DEFAULT, whole);
 	if (status<0) break;
 	for (i=0; i<4; i++) {
@@ -692,10 +698,43 @@ test_3 (void)
 	puts (" PASSED");
     } while (0);
 
+    /*
+     * Extend the dataset by another 100 elements
+     */
+    do {
+	printf ("%-70s", "...extending external contiguous dataset");
+	fflush (stdout);
+
+	if (H5Dextend (dset, &max_size)<0) break;
+	H5Sclose (file_space);
+	file_space = H5Dget_space (dset);
+	puts (" PASSED");
+    } while (0);
+
+    /*
+     * Write second half of dataset
+     */
+    do {
+	printf ("%-70s", "...writing to extended part of dataset");
+	fflush (stdout);
+
+	for (i=0; i<hs_count; i++) {
+	    whole[i] = 100+i;
+	}
+	status = H5Sset_hyperslab (file_space, &hs_start, &hs_count, NULL);
+	assert (status>=0);
+	status = H5Dwrite (dset, H5T_NATIVE_INT, mem_space, file_space,
+			   H5P_DEFAULT, whole);
+	if (status<0) break;
+	puts (" PASSED");
+    } while (0);
+    
+
 
     H5Dclose (dset);
     H5Pclose (plist);
-    H5Sclose (space);
+    H5Sclose (mem_space);
+    H5Sclose (file_space);
     H5Fclose (file);
 }
 
@@ -732,5 +771,5 @@ main (void)
 	printf ("%d TEST%s FAILED.\n", nerrors_g, 1==nerrors_g?"":"s");
     }
 
-    exit (nerrors_g?1:0);
+    return (nerrors_g?1:0);
 }

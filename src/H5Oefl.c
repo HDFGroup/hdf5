@@ -386,7 +386,8 @@ H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 
     /* Find the first efl member from which to read */
     for (i=0, cur=0; i<efl->nused; i++) {
-	if (addr->offset < cur+efl->slot[i].size) {
+	if (H5O_EFL_UNLIMITED==efl->slot[i].size ||
+	    addr->offset < cur+efl->slot[i].size) {
 	    skip = addr->offset - cur;
 	    break;
 	}
@@ -399,11 +400,15 @@ H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
 			 "read past logical end of file");
 	}
+	if (H5F_OVERFLOW_SIZET2OFFT (efl->slot[i].offset+skip)) {
+	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
+			 "external file address overflowed");
+	}
 	if ((fd=open (efl->slot[i].name, O_RDONLY))<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
 			 "unable to open external raw data file");
 	}
-	if (lseek (fd, efl->slot[i].offset+skip, SEEK_SET)<0) {
+	if (lseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
@@ -454,7 +459,6 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 {
     int		i, fd=-1;
     size_t	to_write, cur, skip;
-    ssize_t	n;
     herr_t	ret_value = FAIL;
     
     FUNC_ENTER (H5O_efl_write, FAIL);
@@ -466,7 +470,8 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 
     /* Find the first efl member in which to write */
     for (i=0, cur=0; i<efl->nused; i++) {
-	if (addr->offset < cur+efl->slot[i].size) {
+	if (H5O_EFL_UNLIMITED==efl->slot[i].size ||
+	    addr->offset < cur+efl->slot[i].size) {
 	    skip = addr->offset - cur;
 	    break;
 	}
@@ -479,6 +484,10 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
 			 "write past logical end of file");
 	}
+	if (H5F_OVERFLOW_SIZET2OFFT (efl->slot[i].offset+skip)) {
+	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
+			 "external file address overflowed");
+	}
 	if ((fd=open (efl->slot[i].name, O_RDWR))<0) {
 	    if (access (efl->slot[i].name, F_OK)<0) {
 		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
@@ -488,12 +497,12 @@ H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr, size_t size,
 			     "unable to open external raw data file");
 	    }
 	}
-	if (lseek (fd, efl->slot[i].offset+skip, SEEK_SET)<0) {
+	if (lseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
 	to_write = MIN(efl->slot[i].size-skip, size);
-	if ((n=write (fd, buf, to_write))!=to_write) {
+	if (write (fd, buf, to_write)!=to_write) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "write error in external raw data file");
 	} 

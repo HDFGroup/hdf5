@@ -746,7 +746,9 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
 {
     H5D_t		*new_dset = NULL;
     H5D_t		*ret_value = NULL;
-    intn		i;
+    intn		i, ndims;
+    size_t		max_dim[H5O_LAYOUT_NDIMS];
+    H5O_efl_t		*efl = NULL;
 
     FUNC_ENTER(H5D_create, NULL);
 
@@ -763,6 +765,7 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     new_dset->type = H5T_copy(type);
     new_dset->space = H5S_copy(space);
     new_dset->create_parms = H5P_copy (H5P_DATASET_CREATE, create_parms);
+    efl = &(new_dset->create_parms->efl);
 
     /* Total raw data size */
     new_dset->layout.type = new_dset->create_parms->layout;
@@ -772,26 +775,53 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
 
     switch (new_dset->create_parms->layout) {
     case H5D_CONTIGUOUS:
-	if (H5S_get_dims(space, new_dset->layout.dim, NULL) < 0) {
+	/*
+	 * The maximum size of the dataset cannot exceed the storage size.
+	 * Also, only the slowest varying dimension of a simple data space
+	 * can be extendible.
+	 */
+	if ((ndims=H5S_get_dims(space, new_dset->layout.dim, max_dim)) < 0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize contiguous storage");
 	}
-	if (new_dset->create_parms->efl.nused>0) {
-	    size_t max_points = H5S_get_npoints_max (space);
-	    if (max_points*H5T_get_size (type) >
-		H5O_efl_total_size (&(new_dset->create_parms->efl))) {
+	for (i=1; i<ndims; i++) {
+	    if (max_dim[i]>new_dset->layout.dim[i]) {
 		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
-			     "max size exceeds external storage size");
+			     "only the first dimension can be extendible");
 	    }
+	}
+	if (efl->nused>0) {
+	    size_t max_points = H5S_get_npoints_max (space);
+	    size_t max_storage = H5O_efl_total_size (efl);
+
+	    if (H5S_UNLIMITED==max_points) {
+		if (H5O_EFL_UNLIMITED!=max_storage) {
+		    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+				 "unlimited data space but finite storage");
+		}
+	    } else if (max_points * H5T_get_size (type) < max_points) {
+		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+			     "data space * type size overflowed");
+	    } else if (max_points * H5T_get_size (type) > max_storage) {
+		HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
+			     "data space size exceeds external storage size");
+	    }
+	} else if (max_dim[0]>new_dset->layout.dim[0]) {
+	    HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL,
+			 "extendible contiguous non-external dataset");
 	}
 	break;
 
     case H5D_CHUNKED:
+	/*
+	 * Chunked storage allows any type of data space extension, so we
+	 * don't even bother checking.
+	 */
 	if (new_dset->create_parms->chunk_ndims != H5S_get_ndims(space)) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL,
 		   "dimensionality of chunks doesn't match the data space");
 	}
-	if (new_dset->create_parms->efl.nused>0) {
+	if (efl->nused>0) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_BADVALUE, NULL,
 			 "external storage not supported with chunked layout");
 	}
@@ -818,8 +848,12 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
 		    "can't update type or space header messages");
     }
 
-    /* Initialize storage */
-    if (0==new_dset->create_parms->efl.nused) {
+    /*
+     * Initialize storage.  We assume that external storage is already
+     * initialized by the caller, or at least will be before I/O is
+     * performed.
+     */
+    if (0==efl->nused) {
 	if (H5F_arr_create(f, &(new_dset->layout)) < 0) {
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 			"unable to initialize storage");
@@ -827,26 +861,27 @@ H5D_create(H5F_t *f, const char *name, const H5T_t *type, const H5S_t *space,
     } else {
 	H5F_addr_undef (&(new_dset->layout.addr));
     }
+
+    /* Update layout message */
     if (H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, H5O_FLAG_CONSTANT,
 		    &(new_dset->layout)) < 0) {
 	HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 		     "unable to update layout message");
     }
-    if (new_dset->create_parms->efl.nused>0) {
+
+    /* Update external storage message */
+    if (efl->nused>0) {
 	size_t heap_size = H5H_ALIGN (1);
-	for (i=0; i<new_dset->create_parms->efl.nused; i++) {
-	    size_t n = strlen (new_dset->create_parms->efl.slot[i].name)+1;
-	    heap_size += H5H_ALIGN (n);
+	for (i=0; i<efl->nused; i++) {
+	    heap_size += H5H_ALIGN (strlen (efl->slot[i].name)+1);
 	}
-	if (H5H_create (f, H5H_LOCAL, heap_size,
-			&(new_dset->create_parms->efl.heap_addr))<0 ||
-	    H5H_insert (f, &(new_dset->create_parms->efl.heap_addr),
-			1, "")<0) {
+	if (H5H_create (f, H5H_LOCAL, heap_size, &(efl->heap_addr))<0 ||
+	    (size_t)(-1)==H5H_insert (f, &(efl->heap_addr), 1, "")) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 			 "unable to create external file list name heap");
 	}
 	if (H5O_modify (&(new_dset->ent), H5O_EFL, 0, H5O_FLAG_CONSTANT,
-			&(new_dset->create_parms->efl))<0) {
+			efl)<0) {
 	    HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL,
 			 "unable to update external file list message");
 	}
@@ -1368,16 +1403,12 @@ H5D_extend (H5D_t *dataset, const size_t *size)
     assert (dataset);
     assert (size);
 
-    if (dataset->create_parms->efl.nused>0) {
-	HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		       "extending externally-stored data is not implemente yet");
-    }
-    
-    /* This is only allowed for data spaces with chunked layout */
-    if (H5D_CHUNKED!=dataset->layout.type) {
-	HRETURN_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL,
-		       "size can only be increased for chunked datasets");
-    }
+    /*
+     * Restrictions on extensions were checked when the dataset was created.
+     * All extensions are allowed here since none should be able to muck
+     * things up.
+     */
+    /*void*/
 
     /* Increase the size of the data space */
     if ((changed=H5S_extend (dataset->space, size))<0) {
