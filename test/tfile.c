@@ -70,12 +70,38 @@ test_file_create(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
+    /* Test create with various sequences of H5F_ACC_EXCL and */
+    /* H5F_ACC_TRUNC flags */
+
+    /* Create with H5F_ACC_EXCL */
+    /* First ensure the file does not exist */
+    remove(FILE1);
+    fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* try to create the same file with H5F_ACC_TRUNC (should fail) */
+    fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(fid2, FAIL, "H5Fcreate");
+
+    /* Close the file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Try again with H5F_ACC_EXCL (should fail) */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(fid1, FAIL, "H5Fcreate");
+
+    /* Test create with H5F_ACC_TRUNC */
     /* Create first file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Try to create first file again (should fail) */
     fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(fid2, FAIL, "H5Fcreate");
+
+    /* Try with H5F_ACC_EXCL (should fail too) */
+    fid2 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Get the file-creation template */
