@@ -1785,6 +1785,7 @@
 ./tools/testfiles/h5diff_80.txt
 
 # h5repack test files
+./tools/testfiles/test0.h5
 ./tools/testfiles/test1.h5
 ./tools/testfiles/test3.h5
 ./tools/testfiles/test4.h5

@@ -257,7 +257,8 @@ int         parse_number(char *str);
  * tests
  *-------------------------------------------------------------------------
  */
-
+#define FNAME0     "test0.h5"
+#define FNAME0OUT  "test0.out.h5"
 #define FNAME1     "test1.h5"
 #define FNAME1OUT  "test1.out.h5"
 #define FNAME2     "test2.h5"

@@ -24,7 +24,7 @@
 
 int make_all_objects(hid_t loc_id);
 int make_attributes(hid_t loc_id);
-int make_special_objects(hid_t loc_id);
+int make_hlinks(hid_t loc_id);
 int make_early(void);
 int make_layout(hid_t loc_id);
 int make_szip(hid_t loc_id);
@@ -32,6 +32,7 @@ int make_deflate(hid_t loc_id);
 int make_shuffle(hid_t loc_id);
 int make_fletcher32(hid_t loc_id);
 int make_all(hid_t loc_id);
+int make_fill(hid_t loc_id);
 
 
 /*-------------------------------------------------------------------------
@@ -52,6 +53,17 @@ int make_testfiles(void)
  * create a file for general copy test 
  *-------------------------------------------------------------------------
  */
+ if((loc_id = H5Fcreate(FNAME0,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_fill(loc_id)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create another file for general copy test (all datatypes)
+ *-------------------------------------------------------------------------
+ */
  if((loc_id = H5Fcreate(FNAME1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
  if (make_all_objects(loc_id)<0)
@@ -70,12 +82,12 @@ int make_testfiles(void)
  if(H5Fclose(loc_id)<0)
   return -1;
 /*-------------------------------------------------------------------------
- * create a file for special items test
+ * create a file for hard links test
  *-------------------------------------------------------------------------
  */
  if((loc_id = H5Fcreate(FNAME3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- if (make_special_objects(loc_id)<0)
+ if (make_hlinks(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
@@ -289,26 +301,20 @@ int make_attributes(hid_t loc_id)
  
 }
 
-
-
 /*-------------------------------------------------------------------------
- * Function: make_special_objects
+ * Function: make_hlinks
  *
- * Purpose: make a test file with non common items  
+ * Purpose: make a test file with hard links
  *
  *-------------------------------------------------------------------------
  */
-int make_special_objects(hid_t loc_id)
+int make_hlinks(hid_t loc_id)
 {
  hid_t   group1_id;
  hid_t   group2_id;
  hid_t   group3_id;
  hsize_t dims[2]={3,2};
  int     buf[3][2]= {{1,1},{1,2},{2,2}};  
- hid_t   dset_id;
- hid_t   space_id;  
-	hid_t   plist_id;
-	int     fillvalue=2;
 
 /*-------------------------------------------------------------------------
  * create a dataset and some hard links to it
@@ -345,20 +351,6 @@ int make_special_objects(hid_t loc_id)
  H5Gclose(group1_id);
  H5Gclose(group2_id);
  H5Gclose(group3_id);
-
-/*-------------------------------------------------------------------------
- * H5T_INTEGER, write a fill value
- *-------------------------------------------------------------------------
- */
-
- plist_id = H5Pcreate(H5P_DATASET_CREATE);
-	H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue);
-	space_id = H5Screate_simple(2,dims,NULL);
-	dset_id = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,space_id,plist_id);
-	H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-	H5Pclose(plist_id);
-	H5Dclose(dset_id);
- H5Sclose(space_id);
 
  return 0;                                                 
  
@@ -958,3 +950,38 @@ out:
 
 
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: make a file with an integer dataset with a fill value
+ *
+ * Purpose: test copy of fill values 
+ *
+ *-------------------------------------------------------------------------
+ */
+int make_fill(hid_t loc_id)
+{
+ hid_t   did;
+ hid_t   sid;
+ hid_t   dcpl;
+ hsize_t dims[2]={3,2};
+ int     buf[3][2]= {{1,1},{1,2},{2,2}};  
+ int     fillvalue=2;
+ 
+/*-------------------------------------------------------------------------
+ * H5T_INTEGER, write a fill value
+ *-------------------------------------------------------------------------
+ */
+
+ dcpl = H5Pcreate(H5P_DATASET_CREATE);
+	H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue);
+	sid = H5Screate_simple(2,dims,NULL);
+	did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl);
+	H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+	H5Pclose(dcpl);
+	H5Dclose(did);
+ H5Sclose(sid);
+
+ return 0;                                                 
+ 
+}
