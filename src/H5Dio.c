@@ -994,8 +994,12 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    /* XXX: This could cause a problem if the user sets their buffer size
+     * to the same size as the default, and then the dataset elements are
+     * too large for the buffer... - QAK
+     */
     if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-        target_size<MAX(src_type_size, dst_type_size))
+            target_size<MAX(src_type_size, dst_type_size))
         target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX(src_type_size, dst_type_size);
     
@@ -1013,10 +1017,6 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     if (H5S_select_iter_init(&bkg_iter, mem_space, dst_type_size)<0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information");
     bkg_iter_init=1;	/*file selection iteration info has been initialized */
-
-    /* Sanity check elements in temporary buffer */
-    if (request_nelmts<=0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small");
 
     /*
      * Get a temporary buffer for type conversion unless the app has already
@@ -1237,8 +1237,12 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    /* XXX: This could cause a problem if the user sets their buffer size
+     * to the same size as the default, and then the dataset elements are
+     * too large for the buffer... - QAK
+     */
     if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-        target_size<MAX(src_type_size, dst_type_size))
+            target_size<MAX(src_type_size, dst_type_size))
         target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
@@ -1501,8 +1505,12 @@ H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    /* XXX: This could cause a problem if the user sets their buffer size
+     * to the same size as the default, and then the dataset elements are
+     * too large for the buffer... - QAK
+     */
     if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-        target_size<MAX(src_type_size, dst_type_size))
+            target_size<MAX(src_type_size, dst_type_size))
         target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
         
@@ -1800,8 +1808,12 @@ H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->type);
     target_size = H5P_peek_size_t(dx_plist,H5D_XFER_MAX_TEMP_BUF_NAME);
+    /* XXX: This could cause a problem if the user sets their buffer size
+     * to the same size as the default, and then the dataset elements are
+     * too large for the buffer... - QAK
+     */
     if(target_size==H5D_XFER_MAX_TEMP_BUF_DEF &&
-        target_size<MAX(src_type_size, dst_type_size))
+            target_size<MAX(src_type_size, dst_type_size))
         target_size = MAX(src_type_size, dst_type_size);
     request_nelmts = target_size / MAX (src_type_size, dst_type_size);
 
