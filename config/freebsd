@@ -27,8 +27,7 @@ NOFP=${NOFP:=-fomit-frame-pointer}
 # Special setup to use pthread support if enable-threadsafe is on.
 # Works with static executable only.
 if test "X-" != "X-$enable_threadsafe"; then
-  CFLAGS="$CFLAGS -pthread -D_THREAD_SAFE" 
+  CFLAGS="$CFLAGS -D_THREAD_SAFE" 
+  CXXFLAGS="$CXXFLAGS -D_THREAD_SAFE" 
   LDFLAGS="$LDFLAGS -pthread"
-  LIBS="$LIBS -lcipher"
-  enable_static_exec=yes
 fi
