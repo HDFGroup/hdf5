@@ -20,10 +20,10 @@ else
   # If this is heping, run commands in order
   echo /usr/bin/aclocal
   /usr/bin/aclocal
-  echo /usr/bin/automake --foreign
-  /usr/bin/automake --foreign
   echo /usr/local/autoconf-2.59/bin/autoheader
   /usr/local/autoconf-2.59/bin/autoheader
+  echo /usr/bin/automake --foreign
+  /usr/bin/automake --foreign
   echo /usr/local/autoconf-2.59/bin/autoconf
   /usr/local/autoconf-2.59/bin/autoconf
 
