@@ -1,4 +1,4 @@
-HDF5 version 1.7.2 released on Sun Aug 31 03:30:53 CDT 2003
+HDF5 version 1.7.3 released on Sun Sep 14 05:47:50 CDT 2003
 ================================================================================
 
 
@@ -74,6 +74,15 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Allow compound datatypes to grow in size.  SLU - 2003/09/10
+        - Detect if a type is already packed before attempting to pack it
+            again or check if it is locked.  SLU - 2003/09/10
+        - Corrected bug when opening a file twice with read-only permission
+            for one open and then closing the read-only access file ID would
+            generate an error.  QAK - 2003/09/10
+        - Corrected bug in repeated calls to H5Pget_access_plist() which would
+            incorrectly manage reference counts of internal information and
+            eventually blow up.  QAK - 2003/09/02
         - Return rank of the array datatype on successful call to
             H5Tget_array_dims().  QAK - 2003/08/30
         - Corrected bug in H5Tdetect_class which was not correctly detecting
