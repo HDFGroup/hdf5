@@ -422,7 +422,13 @@ Known Problems
 * When building hdf5 tools and applications on windows platform, a linking
   warning: defaultlib "LIBC" conflicts with use of other libs will appear
   on debug version when running VC++6.0. This warning doesn't affect building
-  and testing hdf5 applications. We are investigating this now.
+  and testing hdf5 applications. We will continue investigating this.
+
+* h5toh4 converter fails two cases(tstr.h5 and tmany.h5) for release dll version on
+  windows 2000 and NT.
+  The reason is possibly due to windows NT DLL convention on freeing memory. It seems   
+  that memory cannot be free across library or DLL. It is still under investigated.
+
 * The Stream VFD was not tested yet under Windows.
   It is not supported in the TFLOPS machine.
 
