@@ -1,0 +1,1 @@
+ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}  # or 'no'
