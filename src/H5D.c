@@ -832,10 +832,12 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 {
     size_t		nelmts	;		/*number of elements	*/
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     const H5P_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
     H5P_number_t	numbering;		/*element numbering info*/
+    void		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5D_read, FAIL);
@@ -863,7 +865,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information.
      */
-    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type))) {
+    if (NULL == (tconv_func = H5T_find(dataset->type, mem_type, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
@@ -893,23 +895,31 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	size_t src_size = nelmts * H5T_get_size(dataset->type);
 	size_t dst_size = nelmts * H5T_get_size(mem_type);
 	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+	bkg_buf = H5MM_xmalloc (dst_size);
     }
 #endif
 
     /*
-     * Gather the data from disk into the data type conversion buffer.
+     * Gather the data from disk into the data type conversion buffer. Also
+     * gather data from application to background buffer (this step is not
+     * needed for most conversions, but we leave that as an exercise for
+     * later ;-)
      */
     if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
 			    H5T_get_size (dataset->type), file_space,
 			    &numbering, 0, nelmts,
 			    tconv_buf/*out*/)!=nelmts) {
-	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "gather failed");
+	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed");
+    }
+    if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
+			    &numbering, 0, nelmts, bkg_buf/*out*/)!=nelmts) {
+	HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
     }
 
     /*
      * Perform data type conversion.
      */
-    if ((tconv_func) (src_id, dst_id, nelmts, tconv_buf, NULL) < 0) {
+    if ((tconv_func) (src_id, dst_id, &cdata, nelmts, tconv_buf, bkg_buf)<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
@@ -919,7 +929,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
      */
     if ((sconv_func->mscat)(tconv_buf, H5T_get_size (mem_type), mem_space,
 			    &numbering, 0, nelmts, buf/*out*/)<0) {
-	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "scatter failed");
+	HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "scatter failed");
     }
     ret_value = SUCCEED;
     
@@ -927,6 +937,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
     tconv_buf = H5MM_xfree(tconv_buf);
+    bkg_buf = H5MM_xfree (bkg_buf);
     FUNC_LEAVE(ret_value);
 }
 
@@ -954,10 +965,12 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 {
     size_t		nelmts;
     uint8		*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8		*bkg_buf = NULL;	/*background buffer	*/
     H5T_conv_t		tconv_func = NULL;	/*conversion function	*/
     hid_t		src_id = -1, dst_id = -1;/*temporary type atoms */
     const H5P_conv_t	*sconv_func = NULL;	/*space conversion funcs*/
     H5P_number_t	numbering;		/*element numbering info*/
+    void		*cdata = NULL;		/*type conversion data	*/
     herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5D_write, FAIL);
@@ -985,7 +998,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information.
      */
-    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type))) {
+    if (NULL == (tconv_func = H5T_find(mem_type, dataset->type, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
 		    "unable to convert between src and dest data types");
     }
@@ -1015,22 +1028,31 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
 	size_t src_size = nelmts * H5T_get_size(mem_type);
 	size_t dst_size = nelmts * H5T_get_size(dataset->type);
 	tconv_buf = H5MM_xmalloc(MAX(src_size, dst_size));
+	bkg_buf = H5MM_xmalloc (dst_size);
     }
 #endif
 
 
     /*
-     * Gather data into the data type conversion buffer.
+     * Gather data from application buffer into the data type conversion
+     * buffer. Also gather data from the file into the background buffer
+     * (this step is not needed for most conversions, but we leave that as an
+     * exercise for later ;-)
      */
     if ((sconv_func->mgath)(buf, H5T_get_size (mem_type), mem_space,
 			    &numbering, 0, nelmts, tconv_buf/*out*/)!=nelmts) {
-	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "gather failed");
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed");
+    }
+    if ((sconv_func->fgath)(dataset->ent.file, &(dataset->layout),
+			    H5T_get_size (dataset->type), file_space,
+			    &numbering, 0, nelmts, bkg_buf/*out*/)!=nelmts) {
+	HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed");
     }
 
     /*
      * Perform data type conversion.
      */
-    if ((tconv_func) (src_id, dst_id, nelmts, tconv_buf, NULL) < 0) {
+    if ((tconv_func) (src_id, dst_id, &cdata, nelmts, tconv_buf, bkg_buf)<0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "data type conversion failed");
     }
@@ -1049,5 +1071,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5P_t *mem_space,
     if (src_id >= 0) H5A_dec_ref(src_id);
     if (dst_id >= 0) H5A_dec_ref(dst_id);
     tconv_buf = H5MM_xfree(tconv_buf);
+    bkg_buf = H5MM_xfree (bkg_buf);
     FUNC_LEAVE(ret_value);
 }

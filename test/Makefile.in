@@ -11,7 +11,7 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-PROGS=testhdf5  hyperslab istore dtypes dsets
+PROGS=testhdf5  hyperslab istore dtypes dsets cmpd_dset
 TESTS=$(PROGS)
 
 # Source and object files for programs...  The PROG_SRC list contains all the
@@ -19,7 +19,7 @@ TESTS=$(PROGS)
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
 PROG_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c dtypes.c  \
-         hyperslab.c istore.c dsets.c
+         hyperslab.c istore.c dsets.c cmpd_dset.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 TESTHDF5_SRC=testhdf5.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5p.c
@@ -36,6 +36,9 @@ HYPERSLAB_OBJ=$(HYPERSLAB_SRC:.c=.o)
 
 ISTORE_SRC=istore.c
 ISTORE_OBJ=$(ISTORE_SRC:.c=.o)
+
+CMPD_DSET_SRC=cmpd_dset.c
+CMPD_DSET_OBJ=$(CMPD_DSET_SRC:.c=.o)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
@@ -55,5 +58,8 @@ hyperslab: $(HYPERSLAB_OBJ) ../src/libhdf5.a
 
 istore: $(ISTORE_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(ISTORE_OBJ) ../src/libhdf5.a $(LIBS)
+
+cmpd_dset: $(CMPD_DSET_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(CMPD_DSET_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@

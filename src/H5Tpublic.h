@@ -20,6 +20,9 @@
 #include <H5public.h>
 #include <H5Apublic.h>
 
+#define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
+#define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)
+
 /* These are the various classes of data types */
 typedef enum H5T_class_t {
     H5T_NO_CLASS         = -1,  /*error                                      */
@@ -90,9 +93,8 @@ typedef enum H5T_pad_t {
 } H5T_pad_t;
 
 /* All data type conversion functions are... */
-typedef herr_t (*H5T_conv_t) (hid_t, hid_t, size_t, void *, const void *);
-#define HOFFSET(S,M)    ((const char*)&S.M-(const char*)&S)
-#define HPOFFSET(P,M)   ((const char*)&(P->M)-(const char*)P)
+typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, void **pcdata,
+			      size_t nelmts, void *buf, void *bkg);
 
 /* The predefined types */
 #define H5T_NATIVE_CHAR         (H5init(), H5T_NATIVE_CHAR_g)
@@ -207,7 +209,7 @@ herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
 herr_t H5Tregister_hard (hid_t src_id, hid_t dst_id, H5T_conv_t func);
 herr_t H5Tregister_soft (H5T_class_t src, H5T_class_t dst, H5T_conv_t func);
 herr_t H5Tunregister (H5T_conv_t func);
-H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id);
+H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, void **pcdata);
 
 #ifdef __cplusplus
 }

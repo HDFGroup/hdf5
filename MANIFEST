@@ -104,6 +104,7 @@
 ./src/Makefile.in
 ./src/Naming-Conventions
 ./test/Makefile.in
+./test/cmpd_dset.c
 ./test/dsets.c
 ./test/dtypes.c
 ./test/hyperslab.c
@@ -119,3 +120,5 @@
 ./tgif/APIGrammar.obj
 ./tgif/FileGrammar.obj
 ./tgif/UserView.obj
+./tgif/IOPipe.obj
+./tgif/RobbPipe.obj
