@@ -304,29 +304,27 @@ RUNSNAPTEST()
 		SNAPCMD_OPT="$SNAPCMD_OPT $1"
 		;;
 	    setenv)
-		# set environment variable
+		# pass them along to snapshot set environment variable
 		shift
-		eval $1="$2"
-		export $1
+		SNAPCMD_OPT="$SNAPCMD_OPT setenv $1 $2"
 		shift
 		;;
 	    setenvN)
 		# set environment variable with $1 values
 		# e.g., setenvN 3 x a b c is same as setenv x="a b c".
-		# a kludge now--the extra single quotes are needed
-		# else eval complains.
+		# pass them along to snapshot set environment variable
 		shift
 		envN=$1
 		shift
 		envname=$1
+		SNAPCMD_OPT="$SNAPCMD_OPT setenvN $envN $envname"
 		envalue=
 		while test $envN -gt 0; do
 		    shift
 		    envalue="$envalue $1"
 		    envN=`expr $envN - 1`
 		done
-		eval $envname="'$envalue'"
-		export $envname
+		SNAPCMD_OPT="$SNAPCMD_OPT $envalue"
 		;;
 	    skip)
 		# skip this test
@@ -409,9 +407,11 @@ RUNSNAPTEST()
 #    op-snapshot <option>	snapshot option
 #    --*		configure option
 #    setenv <name> <value>	set environment variable <name> to <value>
-#    setenvN) <N> <name> <value> ...
+#                       Pass along to snapshot
+#    setenvN <N> <name> <value> ...
 #		        set environment variable with <N> values
 #		        e.g., setenvN 3 x a b c is same as setenv x="a b c".
+#                       Pass along to snapshot.
 #    skip		skip this test
 #    srcdirname <name>	use <name> as the build-directory.
 SNAPTEST_CONFIG_PARSE()
