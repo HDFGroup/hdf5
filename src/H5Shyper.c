@@ -968,8 +968,14 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -1993,8 +1999,14 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+            if(file_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (file_iter->hyp.off[i]-file_space->select.sel_info.hslab.diminfo[i].start)%file_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -2923,8 +2935,14 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            if(mem_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */
@@ -3752,8 +3770,14 @@ H5S_hyper_mwrite_opt (const void *_tconv_buf, size_t elmt_size,
 
         /* Compute the current "counts" for this location */
         for(i=0; i<ndims; i++) {
-            tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
-            tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+            if(mem_space->select.sel_info.hslab.diminfo[i].stride==1) {
+                tmp_count[i] = 0;
+                tmp_block[i] = mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start;
+            } /* end if */
+            else {
+                tmp_count[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)/mem_space->select.sel_info.hslab.diminfo[i].stride;
+                tmp_block[i] = (mem_iter->hyp.off[i]-mem_space->select.sel_info.hslab.diminfo[i].start)%mem_space->select.sel_info.hslab.diminfo[i].stride;
+            } /* end else */
         } /* end for */
 
         /* Compute the initial buffer offset */

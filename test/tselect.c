@@ -939,7 +939,7 @@ compare_size_t(const void *s1, const void *s2)
 ** 
 ****************************************************************/
 static void 
-test_select_hyper_stride(void)
+test_select_hyper_stride(hid_t xfer_plist)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -1026,7 +1026,7 @@ test_select_hyper_stride(void)
     dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close memory dataspace */
@@ -1046,7 +1046,7 @@ test_select_hyper_stride(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Read selection from disk */
-    ret=H5Dread(dataset,H5T_NATIVE_USHORT,sid2,sid1,H5P_DEFAULT,rbuf);
+    ret=H5Dread(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,rbuf);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Sort the locations into the proper order */
@@ -4996,7 +4996,7 @@ test_select(void)
     CHECK(plist_id, FAIL, "H5Pcreate");
 
     /* test I/O with a very small buffer for reads */
-    ret=H5Pset_buffer(plist_id,128,NULL,NULL);
+    ret=H5Pset_buffer(plist_id,59,NULL,NULL);
     CHECK(ret, FAIL, "H5Pset_buffer");
 
     /* These next tests use the same file */
@@ -5011,7 +5011,8 @@ test_select(void)
 
     /* These next tests use the same file */
     test_select_combo();        /* Test combined hyperslab & element selection code */
-    test_select_hyper_stride(); /* Test strided hyperslab selection code */
+    test_select_hyper_stride(H5P_DEFAULT); /* Test strided hyperslab selection code */
+    test_select_hyper_stride(plist_id); /* Test strided hyperslab selection code */
     test_select_hyper_contig(H5T_STD_U16LE,H5P_DEFAULT); /* Test contiguous hyperslab selection code */
     test_select_hyper_contig(H5T_STD_U16LE,plist_id); /* Test contiguous hyperslab selection code */
     test_select_hyper_contig(H5T_STD_U16BE,H5P_DEFAULT); /* Test contiguous hyperslab selection code */
