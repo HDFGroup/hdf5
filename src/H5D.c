@@ -621,7 +621,7 @@ H5D_crt_fill_value_cmp(const void *value1, const void *value2, size_t UNUSED siz
     if(fill1->type==NULL && fill2->type!=NULL) HGOTO_DONE(-1);
     if(fill1->type!=NULL && fill2->type==NULL) HGOTO_DONE(1);
     if(fill1->type!=NULL)
-        if((cmp_value=H5T_cmp(fill1->type,fill2->type))!=0)
+        if((cmp_value=H5T_cmp(fill1->type,fill2->type, FALSE))!=0)
             HGOTO_DONE(cmp_value);
 
     /* Check the fill values in the buffers */

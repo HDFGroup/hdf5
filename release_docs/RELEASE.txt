@@ -67,12 +67,16 @@ Bug Fixes since HDF5-1.6.4 release
 
     Library
     -------
+        - Fixed error in opening object in group that was opened in mounted
+            file which has been unmounted.  QAK - 2005/03/17
 
     Configuration
     -------------
 
     Performance
     -------------
+        - Optimized I/O for enumerated datatypes that are a superset of source
+            enumerated datatype.  QAK - 2005/03/19
    
     Tools
     -----

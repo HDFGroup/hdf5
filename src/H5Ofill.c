@@ -823,7 +823,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
     assert(dset_type);
 
     /* No-op cases */
-    if (!fill->buf || !fill->type || 0==H5T_cmp(fill->type, dset_type)) {
+    if (!fill->buf || !fill->type || 0==H5T_cmp(fill->type, dset_type, FALSE)) {
 	if (fill->type)
             H5T_close(fill->type);
 	fill->type = NULL;
