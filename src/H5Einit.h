@@ -553,6 +553,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't open object"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTOPENOBJ_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTCLOSEOBJ_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't close object"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTCLOSEOBJ_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_COMPLEN_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Name component is too long"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")

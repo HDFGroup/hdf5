@@ -164,6 +164,7 @@ MINOR, OHDR, H5E_CANTDELETE, Can't delete message
 
 # Group related errors
 MINOR, GROUP, H5E_CANTOPENOBJ, Can't open object
+MINOR, GROUP, H5E_CANTCLOSEOBJ, Can't close object
 MINOR, GROUP, H5E_COMPLEN, Name component is too long
 MINOR, GROUP, H5E_CWG, Problem with current working group
 MINOR, GROUP, H5E_LINK, Link count failure

@@ -153,6 +153,7 @@ H5E_NOTCACHED_g=
 
 /* Group related errors */    
 H5E_CANTOPENOBJ_g=    
+H5E_CANTCLOSEOBJ_g=    
 H5E_COMPLEN_g=    
 H5E_CWG_g=    
 H5E_LINK_g=    

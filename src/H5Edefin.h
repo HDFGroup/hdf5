@@ -151,6 +151,7 @@ hid_t H5E_NOTCACHED_g      = FAIL;      /* Metadata not currently cached */
 
 /* Group related errors */
 hid_t H5E_CANTOPENOBJ_g    = FAIL;      /* Can't open object */
+hid_t H5E_CANTCLOSEOBJ_g   = FAIL;      /* Can't close object */
 hid_t H5E_COMPLEN_g        = FAIL;      /* Name component is too long */
 hid_t H5E_CWG_g            = FAIL;      /* Problem with current working group */
 hid_t H5E_LINK_g           = FAIL;      /* Link count failure */
