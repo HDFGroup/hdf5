@@ -78,6 +78,9 @@ Bug Fixes since HDF5-1.6.1 release
 
     Library
     -------
+        - Fixed bug that caused variable-length datatypes (strings or sequences)
+            used for datasets in files with objects that were unlinked to
+            fail to be read/written to a file.  QAK - 2004/01/13
         - Fixed small internal memory leak of fill-value information.
             QAK - 2004/01/06
         - Detect situation where szip 'pixels per block' is larger than the
