@@ -914,7 +914,7 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
         H5MM_xfree(space->h.start);
         H5MM_xfree(space->h.count);
         H5MM_xfree(space->h.stride);
-        space->hslab=FALSE;
+        space->hslab_def=FALSE;
 
       } /* end if */
 
