@@ -595,14 +595,19 @@ H5T_term_interface(void)
 			      H5T_get_size (path->dst));
 		nbytes *= path->cdata.stats->nelmts;
 		HDfprintf (stderr,
-			   "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f %15g\n",
+			   "   %-*s %8Hd/%-5d %8.2f %8.2f %8.2f",
 			   H5T_NAMELEN-1, path->name,
 			   path->cdata.stats->nelmts,
 			   path->cdata.stats->ncalls,
 			   path->cdata.stats->timer.utime, 
 			   path->cdata.stats->timer.stime, 
-			   path->cdata.stats->timer.etime,
-			   nbytes / path->cdata.stats->timer.etime);
+			   path->cdata.stats->timer.etime);
+		if (path->cdata.stats->timer.etime>0) {
+		    HDfprintf (stderr, " %15g\n", 
+			       nbytes / path->cdata.stats->timer.etime);
+		} else {
+		    HDfprintf (stderr, " %15s\n", "Inf");
+		}
 	    }
 #endif
 	    H5T_close (path->src);

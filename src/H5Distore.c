@@ -1052,7 +1052,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	}
     }
 
-    assert (chunk_size>0);
+    assert (found>=0 || chunk_size>0);
     if (found<0 && chunk_size<=f->shared->access_parms->rdcc_nbytes) {
 	/*
 	 * Add the chunk to the beginning of the cache after pruning the cache
