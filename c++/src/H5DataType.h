@@ -34,7 +34,7 @@ class __DLLCPP__ DataType : public H5Object {
 	H5T_conv_t find( const DataType& dest, H5T_cdata_t **pcdata ) const;
 
 	// Converts data from between specified datatypes. 
-	void convert( const DataType& dest, size_t nelmts, void *buf, void *background, PropList& plist ) const;
+	void convert( const DataType& dest, hsize_t nelmts, void *buf, void *background, PropList& plist ) const;
 
 	// Sets the overflow handler to a specified function. 
 	void setOverflow(H5T_overflow_t func) const;
