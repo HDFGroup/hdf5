@@ -106,7 +106,7 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
 
 // Sets an exception handling callback for datatype conversion 
 // for a dataset transfer property list
-void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t *op, void *user_data) const
+void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t op, void *user_data) const
 {
    herr_t ret_value = H5Pset_type_conv_cb( id, op, user_data);
    if( ret_value < 0 )
@@ -118,7 +118,7 @@ void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t *op, void *user_
 
 // Sets an exception handling callback for datatype conversion 
 // for a dataset transfer property list
-void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t **op, void **user_data) const
+void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user_data) const
 {
    herr_t ret_value = H5Pget_type_conv_cb( id, op, user_data);
    if( ret_value < 0 )
