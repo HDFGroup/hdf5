@@ -48,14 +48,19 @@ Preconditions
 
       Compression feature inside HDF5 is optional. 
       
-   5. Define environment variables: HDF5_EXT_LIBS and HDF5_EXT_LIBS_DLL   
+   5. Define the following environment variables: 
+
+        HDF5_EXT_ZLIB
+        HDF5_EXT_SZIP
+        H5_SZIP_CAN_ENCODE
+        HDF5_EXT_ZLIB_DLL
+        HDF5_EXT_SZIP_DLL
       
-      These two environment variable must be defined even if you
-      do not want to use zlib and szip.  In this section, zlib and szip
-      are assumed to be used.  Please read section V as well as this 
-      section if you do not want to use compression feature inside HDF5.
+      In this section, zlib and szip are assumed to be used.  Please 
+      read section V as well as this section if you do not want to use
+      compression feature inside HDF5.
       
-      To define these two environment variables:
+      To define these environment variables:
       
       Click "Start", click "Control Panel", and then double-click
       "System".  On the "Advanced" tab, click "Environment Variables".
@@ -65,27 +70,25 @@ Preconditions
       click "New" under "System Variables" box; otherwise, click "New"
       under "User Variables" box.
       
-      In the New Variable window, set Variable name as HDF5_EXT_LIBS
-      and Variable value as zlib.lib szlib.lib, then click OK.
+      In the New Variable window, set Variable name as HDF5_EXT_ZLIB
+      and Variable value as zlib.lib, then click OK.
       
-      Similarly, you can add the HDF5_EXT_LIBS_DLL environment variable 
-      as c:\zlib114\dll\zlib.lib szlibdll.lib, then click OK.
+      Similarly, you can set:
+
+      HDF5_EXT_SZIP environment variable as szlib.lib
+      H5_SZIP_CAN_ENCODE environment variable as 1
+      HDF5_EXT_ZLIB_DLL environment variable as c:\zlib114\dll\zlib.lib
+      HDF5_EXT_SZIP_DLL environment variable as szlibdll.lib.
 
       Notes:
-         a. Do not put any separation symbol, such as comma(,) or 
-            semicolon(;) between zlib.lib and szlib.lib, 
-            C:\zlib114\dll\zlib.lib and szlibdll.lib.  Otherwise, the
-            interactive development enviroment will fail to recognize
-            HDF5_EXT_LIBS and HDF5_EXT_LIBS_DLL environment variables.
-      
-         b. If the zlib DLL library path is not C:\zlib114\dll, replace
-            it with the correct path in the HDF5_EXT_LIBS_DLL
+         a. If the zlib DLL library path is not C:\zlib114\dll, replace
+            it with the correct path in the HDF5_EXT_ZLIB_DLL
             environment variable.
       
-         c. You might have to close and reopen running programs for
+         b. You might have to close and reopen running programs for
             the new environment variable settings to take effect. 
 
-         d. By default, c:\zlib114\dll\zlib.dll and 
+         c. By default, c:\zlib114\dll\zlib.dll and 
             c:\szlib\dll\szibdll.dll should be copied into the location
             that the application can find, one suggestion is to use the 
             C:\WINNT\system or C:\WINDOWS\system directory before
@@ -94,7 +97,7 @@ Preconditions
    6. Set up path for external libraries and headers
     
       Skip this part if you don't want to use any compression features
-      provided by HDF5. Please do read section V.
+      provided by HDF5.  Please do read section V.
 
       You have to read this part is you want to only use gzip or szip.
       You also need to read section V.
@@ -834,13 +837,22 @@ Section V: How to disable gzip(zlib)/szip compression
 
           then save the file.
 	
-      1.2 Remove string zlib.lib from HDF5_EXT_LIBS environment
-          variable
+      1.2 Delete HDF5_EXT_ZLIB environment variable if you have
+          set it in preconditions.
    
-      1.3 Remove string c:\zlib114\dll\zlib.lib from HDF5_EXT_LIBS_DLL 
-          environment variable
+      1.3 Delete HDF5_EXT_ZLIB_DLL environment variable if you have
+          set it in preconditions.
    
       1.4 Run-compile HDF5 library according to section II.
+
+      When you disable gzip, you may get the following message
+      when building HDF5 libraries:
+
+      The following environment variables were not found
+      $(HDF5_EXT_ZLIB)
+      $(HDF5_EXT_ZLIB_DLL)
+
+      This message can be ignored.
 
    2. Disable szip compression (both encoder and decoder)
 
@@ -857,33 +869,33 @@ Section V: How to disable gzip(zlib)/szip compression
 		   
           then save the file.
 	
-      2.2 Remove string szlib.lib from HDF5_EXT_LIBS environment
-          variable
+      2.2 Delete HDF5_EXT_SZIP environment variable if you have
+          set it in preconditions.
    
-      2.3 Remove string szlibdll.lib from HDF5_EXT_LIBS_DLL
-          environment variable 
+      2.3 Delete HDF5_EXT_SZIP_DLL environment variable if you have
+          set it in preconditions. 
    
       2.4 Run-compile HDF5 library according to section II.
+
+      When you disable szip, you may get the following message 
+      when building HDF5 libraries:
+
+      The following environment variables were not found
+      $(HDF5_EXT_SZIP)
+      $(HDF5_EXT_SZIP_DLL)
+
+      This message can be ignored.
 
    Note:   
 
    To disable gzip and szip at the same time, just following 1.1~1.3
    and 2.1~2.3 and run-compile HDF5 library according to section II.
 
-   When you disable gzip and szip at the same time, HDF5_EXT_LIBS and 
-   HDF5_EXT_LIBS_DLL environment variables will be empty.  You may get 
-   the following message when building HDF5 libraries:
-
-      The following environment variables were not found
-      $(HDF5_EXT_LIBS)
-      $(HDF5_EXT_LIBS_DLL)
-
-   This message can be ignored.
-   
    3. Disable szip encoder
 
       If you would like to just disable szip encoder from the HDF5
-      library while keeping szip decoder enabled, follow the steps below.
+      library while keeping szip decoder enabled, follow the steps
+      below.
 
       3.1 Download szip library without encoder
 
@@ -900,7 +912,9 @@ Section V: How to disable gzip(zlib)/szip compression
 		   
           then save the file.
 	
-      3.3 Run-compile HDF5 library according to section II.
+      3.3 Set H5_SZIP_CAN_ENCODE environment variable as 0.
+
+      3.4 Run-compile HDF5 library according to section II.
 
 ************************************************************************
 
@@ -917,11 +931,15 @@ We just briefly introduce you how to build HDF5 in VS 7.0(.NET);
 3. If you want to change some project setting, select the project and
    right click the button to choose Properties; find the similar menu
    there as in 6.0.
-4. You need to specify the zlib include header files and libraries under
-   Tools->Options->Projects->VC++ Directories and choose Include and 
-   libraries under the category of "show directories for" to add the
-   corresponding path.
+4. You need to specify the zlib and szip include header files and 
+   libraries under Tools->Options->Projects->VC++ Directories and choose
+   Include and libraries under the category of "show directories for" to
+   add the corresponding path if you want to use compression feature
+   inside HDF5.
 
+NOTE: Please read section V if you do not want to use compression
+      feature inside HDF5.
+ 
 ************************************************************************
 
 
