@@ -16,13 +16,28 @@
 #include "h5diff.h"
 #include "H5private.h" 
 
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_objname
+ *
+ * Purpose: print object name only when:
+ *  1) verbose mode
+ *  2) when diff was found (normal mode)
+ *-------------------------------------------------------------------------
+ */
+int print_objname(diff_opt_t *options, hsize_t nfound)
+{
+ return ( (options->m_verbose || nfound) && !options->m_quiet) ?1:0;
+}
+
 /*-------------------------------------------------------------------------
  * Function: h5diff
  *
- * Purpose: public function, can be called in an applicattion program.
+ * Purpose: public function, can be called in an application program.
  *   return differences between 2 HDF5 files
  *
- * Return: Number of differences found; -1 for error.
+ * Return: Number of differences found.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -31,17 +46,25 @@
  *-------------------------------------------------------------------------
  */
 
-int  h5diff(const char *fname1, 
-            const char *fname2, 
-            const char *objname1, 
-            const char *objname2, 
-            diff_opt_t *options)
+hsize_t h5diff(const char *fname1, 
+               const char *fname2, 
+               const char *objname1, 
+               const char *objname2, 
+               diff_opt_t *options)
 {
  int          nobjects1, nobjects2;
  trav_info_t  *info1=NULL;
  trav_info_t  *info2=NULL;
  hid_t        file1_id, file2_id; 
- int          nfound=0;
+ hsize_t      nfound=0;
+
+ if (options->m_quiet && 
+     (options->m_verbose || options->m_report))
+ {
+  printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+  options->err_stat=1;
+  return 0;
+ }
 
 /*-------------------------------------------------------------------------
  * open the files first; if they are not valid, no point in continuing
@@ -50,30 +73,39 @@ int  h5diff(const char *fname1,
 
  /* disable error reporting */
  H5E_BEGIN_TRY {
- 
  /* Open the files */
  if ((file1_id=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
   printf("h5diff: <%s>: unable to open file\n", fname1 );
-  nfound = -1;
+  options->err_stat=1;
+  goto out;
  }
  if ((file2_id=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
   printf("h5diff: <%s>: unable to open file\n", fname2 );
-  nfound = -1;
+  options->err_stat=1;
+  goto out;
  }
  /* enable error reporting */
  } H5E_END_TRY;
- if (nfound<0)
-  return -1;
+
 
 /*-------------------------------------------------------------------------
  * get the number of objects in the files
  *-------------------------------------------------------------------------
  */
-
  nobjects1 = h5trav_getinfo( file1_id, NULL, 0 );
  nobjects2 = h5trav_getinfo( file2_id, NULL, 0 );
+
+ if (nobjects1<0 || nobjects2<0)
+ {
+  printf("Error: Could not get get file contents\n");
+  options->err_stat=1;
+  goto out;
+ }
+
+ assert(nobjects1>0);
+ assert(nobjects2>0);
 
 /*-------------------------------------------------------------------------
  * get the list of objects in the files
@@ -84,7 +116,10 @@ int  h5diff(const char *fname1,
  info2 = (trav_info_t*) malloc( nobjects2 * sizeof(trav_info_t));
  if (info1==NULL || info2==NULL)
  {
-  nfound=-1;
+  printf("Error: Not enough memory for object list\n");
+  options->err_stat=1;
+  if (info1) h5trav_freeinfo(info1,nobjects1);
+  if (info2) h5trav_freeinfo(info2,nobjects1);
   goto out;
  }
 
@@ -99,6 +134,7 @@ int  h5diff(const char *fname1,
  if ( objname1 )
  {
   assert(objname2);
+  options->cmn_objs=1; /* eliminate warning */
   nfound=diff_compare(file1_id,fname1,objname1,nobjects1,info1,
                       file2_id,fname2,objname2,nobjects2,info2,options);
  }
@@ -120,12 +156,13 @@ int  h5diff(const char *fname1,
 
 out:
  /* close */
- H5Fclose(file1_id);
- H5Fclose(file2_id);
+ H5E_BEGIN_TRY {
+  H5Fclose(file1_id);
+  H5Fclose(file2_id);
+ } H5E_END_TRY;
+
 
  return nfound;
-
-
 }
 
 
@@ -145,13 +182,13 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-int diff_match( hid_t file1_id, 
-                int nobjects1, 
-                trav_info_t *info1,
-                hid_t file2_id, 
-                int nobjects2, 
-                trav_info_t *info2, 
-                diff_opt_t *options )
+hsize_t diff_match( hid_t file1_id, 
+                    int nobjects1, 
+                    trav_info_t *info1,
+                    hid_t file2_id, 
+                    int nobjects2, 
+                    trav_info_t *info2, 
+                    diff_opt_t *options )
 {
  int           more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
  trav_table_t  *table=NULL;
@@ -160,7 +197,8 @@ int diff_match( hid_t file1_id,
  int           curr2=0;
  unsigned      infile[2]; 
  char          c1, c2;
- int           nfound=0, i;
+ hsize_t       nfound=0;
+ int           i;
 
 /*-------------------------------------------------------------------------
  * build the list
@@ -168,7 +206,6 @@ int diff_match( hid_t file1_id,
  */
  trav_table_init( &table );
 
- 
  while ( more_names_exist )
  {
   /* criteria is string compare */
@@ -226,7 +263,7 @@ int diff_match( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
- if (options->verbose)
+ if (options->m_verbose)
  {
   printf("\n");
   printf("file1     file2\n");
@@ -249,12 +286,15 @@ int diff_match( hid_t file1_id,
  for (i = 0; i < table->nobjs; i++)
  {
   if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
+  {
+   options->cmn_objs=1;
    nfound+=diff( file1_id, 
                  table->objs[i].name, 
                  file2_id, 
                  table->objs[i].name, 
                  options, 
                  table->objs[i].type );
+  }
  }
 
  /* free table */
@@ -294,21 +334,21 @@ int diff_match( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
-int diff_compare( hid_t file1_id, 
-                  const char *file1_name, 
-                  const char *obj1_name, 
-                  int nobjects1, 
-                  trav_info_t *info1,
-                  hid_t file2_id, 
-                  const char *file2_name, 
-                  const char *obj2_name, 
-                  int nobjects2, 
-                  trav_info_t *info2,
-                  diff_opt_t *options )
+hsize_t diff_compare( hid_t file1_id, 
+                      const char *file1_name, 
+                      const char *obj1_name, 
+                      int nobjects1, 
+                      trav_info_t *info1,
+                      hid_t file2_id, 
+                      const char *file2_name, 
+                      const char *obj2_name, 
+                      int nobjects2, 
+                      trav_info_t *info2,
+                      diff_opt_t *options )
 {
 
- int f1=0, f2=0;
- int nfound=0;
+ int     f1=0, f2=0;
+ hsize_t nfound=0;
 
  int i = h5trav_getindex( obj1_name, nobjects1, info1 );
  int j = h5trav_getindex( obj2_name, nobjects2, info2 );
@@ -323,20 +363,23 @@ int diff_compare( hid_t file1_id,
   printf( "Object <%s> could not be found in <%s>\n", obj2_name, file2_name );
   f2=1;
  }
- if ( f1 || f2 )
-  return -1;
+ if ( f1 || f2 ) {
+  options->err_stat=1;
+  return 0;
+ }
 
   /* use the name with "/" first, as obtained by iterator function */
  obj1_name=info1[i].name;
  obj2_name=info2[j].name;
 
  /* objects are not the same type */
- if ( info1[i].type != info2[j].type && options->verbose)
+ if ( info1[i].type != info2[j].type)
  {
+  if (options->m_verbose)
   printf("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n", 
    obj1_name, get_type(info1[i].type), 
    obj2_name, get_type(info2[j].type) );
-  return 1;
+  return 0;
  }
   
  nfound=diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
@@ -364,23 +407,23 @@ int diff_compare( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
-int diff( hid_t      file1_id, 
-          const char *path1, 
-          hid_t      file2_id, 
-          const char *path2, 
-          diff_opt_t *options, 
-          H5G_obj_t  type )
+hsize_t diff( hid_t      file1_id, 
+              const char *path1, 
+              hid_t      file2_id, 
+              const char *path2, 
+              diff_opt_t *options, 
+              H5G_obj_t1  type )
 {
- hid_t       type1_id=-1;
- hid_t       type2_id=-1;
- hid_t       grp1_id=-1;
- hid_t       grp2_id=-1;
+ hid_t       type1_id;
+ hid_t       type2_id;
+ hid_t       grp1_id;
+ hid_t       grp2_id;
  int         ret;
  H5G_stat_t  sb1;
  H5G_stat_t  sb2;
  char        *buf1=NULL;
  char        *buf2=NULL;
- int         nfound=-1;
+ hsize_t     nfound=0;
 
  switch ( type )
  {
@@ -389,9 +432,9 @@ int diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_DATASET:
-  if (options->verbose)
-   printf( "Dataset:     <%s> and <%s>\n",path1,path2);
-  nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+   nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+   if (print_objname(options,nfound))
+    printf( "Dataset:     <%s> and <%s>\n",path1,path2);
   break;
 
 /*-------------------------------------------------------------------------
@@ -399,9 +442,6 @@ int diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_TYPE:
-  if (options->verbose)
-   printf( "Datatype:    <%s> and <%s>\n",path1,path2);
-  
   if ((type1_id = H5Topen(file1_id, path1))<0) 
    goto out;
   if ((type2_id = H5Topen(file2_id, path2))<0) 
@@ -412,6 +452,9 @@ int diff( hid_t      file1_id,
   
   /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
   nfound = (ret>0) ? 0 : 1;
+
+  if (print_objname(options,nfound))
+   printf( "Datatype:    <%s> and <%s>\n",path1,path2);
   
 /*-------------------------------------------------------------------------
  * compare attributes
@@ -419,7 +462,7 @@ int diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
   if (path1)  
-   nfound=diff_attr(type1_id,type2_id,path1,path2,options);
+   diff_attr(type1_id,type2_id,path1,path2,options);
   
   if ( H5Tclose(type1_id)<0)
    goto out;
@@ -433,9 +476,6 @@ int diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_GROUP:
-  if (options->verbose)
-   printf( "Group:       <%s> and <%s>\n",path1,path2);
-  
   if ((grp1_id = H5Gopen(file1_id, path1))<0) 
    goto out;
   if ((grp2_id = H5Gopen(file2_id, path2))<0) 
@@ -445,6 +485,9 @@ int diff( hid_t      file1_id,
   
   /* if "path1" != "path2" then the groups are "different" */
   nfound = (ret!=0) ? 1 : 0;
+
+  if (print_objname(options,nfound))
+   printf( "Group:       <%s> and <%s>\n",path1,path2);
   
  /*-------------------------------------------------------------------------
   * compare attributes
@@ -452,7 +495,7 @@ int diff( hid_t      file1_id,
   *-------------------------------------------------------------------------
   */
   if (path1) 
-   nfound=diff_attr(grp1_id,grp2_id,path1,path2,options);
+   diff_attr(grp1_id,grp2_id,path1,path2,options);
   
   if ( H5Gclose(grp1_id)<0)
    goto out;
@@ -467,9 +510,6 @@ int diff( hid_t      file1_id,
  *-------------------------------------------------------------------------
  */
  case H5G_LINK:
-  if (options->verbose)
-   printf( "Link:        <%s> and <%s>\n",path1,path2);
- 
   if (H5Gget_objinfo(file1_id,path1,FALSE,&sb1)<0)
    goto out;
   if (H5Gget_objinfo(file1_id,path1,FALSE,&sb2)<0)
@@ -488,6 +528,9 @@ int diff( hid_t      file1_id,
   /* if "buf1" != "buf2" then the links are "different" */
   nfound = (ret!=0) ? 1 : 0;
 
+  if (print_objname(options,nfound))
+   printf( "Link:        <%s> and <%s>\n",path1,path2);
+
   if (buf1) {
    free(buf1);
    buf1=NULL;
@@ -503,7 +546,7 @@ int diff( hid_t      file1_id,
   
  default:
   nfound=0;
-  if (options->verbose) {
+  if (options->m_verbose) {
    printf("Comparison not supported: <%s> and <%s> are of type %s\n", 
     path1, path2, get_type(type) );
   }

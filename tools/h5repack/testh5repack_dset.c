@@ -617,31 +617,7 @@ void write_dset_in(hid_t loc_id,
  write_dset(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
 
-/*-------------------------------------------------------------------------
- * Function: write_null_dset
- *
- * Purpose: write null dataset in LOC_ID 
- *
- * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
- *
- * Date: May 24, 2004
- *
- *-------------------------------------------------------------------------
- */
-void write_null_dset(hid_t loc_id)
-{
-     hid_t sid, dset_id;
-     int        val = 2;
-    
-     /* Create the null dataset */
-     sid = H5Screate(H5S_NULL);
-     dset_id  = H5Dcreate(loc_id,"null_dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
-     H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&val);
 
-     /* Close */
-     H5Dclose(dset_id);
-     H5Sclose(sid);
-}
 
 /*-------------------------------------------------------------------------
  * Function: make_dset_reg_ref

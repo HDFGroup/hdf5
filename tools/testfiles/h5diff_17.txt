@@ -1,6 +1,17 @@
 #############################
-Expected output for 'h5diff file1.h5 file2.h5 -r'
+Expected output for 'h5diff file1.h5 file2.h5 -v'
 #############################
+
+file1     file2
+---------------------------------------
+    x      x    /g1            
+    x      x    /g1/dset1      
+           x    /g1/dset2      
+    x           /g1/dset3      
+           x    /g1/dset4      
+           x    /g2            
+
+Group:       </g1> and </g1>
 position        dset1           dset1           difference          
 ------------------------------------------------------------
 [ 0 1 ]          1.000000        1.100000        0.100000       
@@ -8,4 +19,5 @@ position        dset1           dset1           difference
 [ 1 1 ]          1.000000        1.001000        0.001000       
 [ 2 0 ]          1.000000        1.000100        0.000100       
 Dataset:     </g1/dset1> and </g1/dset1>
+Group:       </> and </>
 4 differences found

@@ -56,10 +56,11 @@ obj_list_t* parse_filter(const char *str,
  unsigned    i, u;
  char        c;
  size_t      len=strlen(str);
- int         j, m, n, k, end_obj=-1, no_param=0;
+ int         j, m, n, k, l, end_obj=-1, no_param=0;
  char        sobj[MAX_NC_NAME]; 
  char        scomp[10];
  char        stype[5];
+ char        smask[3]; 
  obj_list_t* obj_list=NULL;
  unsigned    pixels_per_block;
 
@@ -132,17 +133,74 @@ obj_list_t* parse_filter(const char *str,
    if ( c=='=') {      /*one more parameter */
     scomp[k]='\0';     /*cut space */
 
-    /* here we could have 1, 2 or 3 digits  */
-    for ( m=0,u=i+1; u<len; u++,m++) {
-     c = str[u];
-     if (!isdigit(c)){
-      if (obj_list) free(obj_list);
-      printf("Input Error: Compression parameter not digit in <%s>\n",str);
-      exit(1);
-     }
-     stype[m]=c;
-    }
-    stype[m]='\0';
+     /*SZIP is a special case , it can be
+      SZIP=8,EC
+      SZIP=8,NN
+      */
+   
+    if (strcmp(scomp,"SZIP")==0)
+    {
+     l=-1; /* mask index check */
+     for ( m=0,u=i+1; u<len; u++,m++) 
+     {
+      if (str[u]==',')
+      {
+       stype[m]='\0'; /* end digit of szip */
+       l=0;  /* start EC or NN search */
+       u++;  /* skip ',' */
+      }
+      c = str[u];
+      if (!isdigit(c) && l==-1){
+       if (obj_list) free(obj_list);
+       printf("Input Error: Compression parameter not digit in <%s>\n",str);
+       exit(1);
+      }
+      if (l==-1)
+       stype[m]=c;
+      else 
+      {
+       smask[l]=c;
+       l++;
+       if (l==2)
+       {
+        smask[l]='\0';
+        i=len-1; /* end */
+        (*n_objs)--; /* we counted an extra ',' */
+        if (strcmp(smask,"NN")==0) 
+         filt->szip_coding=0;
+        else if (strcmp(smask,"EC")==0)
+         filt->szip_coding=1;
+        else
+        {
+         printf("Input Error: szip mask must be 'NN' or 'EC' \n");
+         exit(1);
+        }
+        
+       }
+      }
+      
+     }  /* u */
+    } /*if */
+    
+    else
+    {
+     /* here we could have 1 or 2 digits  */
+     for ( m=0,u=i+1; u<len; u++,m++) 
+     {
+      c = str[u];
+      if (!isdigit(c)){
+       if (obj_list) free(obj_list);
+       printf("Input Error: Compression parameter not digit in <%s>\n",str);
+       exit(1);
+      }
+      stype[m]=c;
+     } /* u */
+
+     stype[m]='\0';
+    } /*if */
+
+
+    
     filt->cd_values[j++]=atoi(stype);
     i+=m; /* jump */
    }
@@ -247,6 +305,11 @@ obj_list_t* parse_filter(const char *str,
   if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) {
    if (obj_list) free(obj_list);
    printf("Input Error: pixels_per_block is too large in <%s>\n",str);
+   exit(1);
+  }
+  if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) {
+   if (obj_list) free(obj_list);
+   printf("Input Error: szip mask must be 'NN' or 'EC' \n");
    exit(1);
   }
   break;

@@ -234,9 +234,6 @@ static int check_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
 
- unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
- unsigned szip_pixels_per_block;
-
 /*-------------------------------------------------------------------------
  * objects to layout
  *-------------------------------------------------------------------------
@@ -337,8 +334,17 @@ static int check_options(pack_opt_t *options)
    default:
     break;
    case H5Z_FILTER_SZIP:
+    {
+     
+    unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
+    unsigned szip_pixels_per_block;
 
     szip_pixels_per_block=pack.filter[j].cd_values[0];
+
+    if (pack.filter[j].szip_coding==0)
+     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
+    else 
+     szip_options_mask=H5_SZIP_EC_OPTION_MASK;
     
     /* check szip parameters */
     if ( pack.chunk.rank!=-1 /* 
@@ -364,6 +370,7 @@ static int check_options(pack_opt_t *options)
 
     }
      
+    }
     break;
    } /* switch */
 

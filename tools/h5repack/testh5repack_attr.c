@@ -21,7 +21,7 @@
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype) 
  *
- * Programmer:  pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November 12, 2003
  *
@@ -1028,30 +1028,5 @@ etc
  make_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
 
-/*-------------------------------------------------------------------------
- * Function: write_null_attr
- *
- * Purpose: write null attribute in LOC_ID (dataset, group, named datatype) 
- *
- * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
- *
- * Date: May 24, 2004
- *
- *-------------------------------------------------------------------------
- */
-void write_null_attr(hid_t loc_id)
-{
-     hid_t sid, attr_id;
-     int        val = 2;
-    
-     /* Create the null attribute */
-     sid = H5Screate(H5S_NULL);
-     attr_id = H5Acreate(loc_id, "null_attr", H5T_NATIVE_INT, sid, H5P_DEFAULT);
-  
-     /* Not supposed to write anything */
-     H5Awrite(attr_id, H5T_NATIVE_INT, &val);
 
-     /* Close */
-     H5Aclose(attr_id);
-     H5Sclose(sid);
-}
+

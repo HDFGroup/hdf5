@@ -25,7 +25,7 @@ USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 H5REPACK=h5repack               # The tool name
 H5REPACK_BIN=`pwd`/$H5REPACK    # The path of the tool binary
 
-H5DIFF=../h5diff/h5diff         # The h5diff tool name
+H5DIFF=../h5diff/h5diff         # The h5diff tool name 
 H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff  tool binary
 
 nerrors=0
@@ -68,9 +68,9 @@ DIFFTEST()
 {
     VERIFY  $@
     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-     $RUNSERIAL $H5DIFF_BIN $@
+     $RUNSERIAL $H5DIFF_BIN $@ -q
     else
-     $RUNSERIAL $H5DIFF_BIN "$@"
+     $RUNSERIAL $H5DIFF_BIN "$@" -q
     fi
     RET=$?
     if [ $RET != 0 ] ; then
@@ -151,7 +151,7 @@ else
 fi
 
 # szip with individual object
-arg="test4.h5 -f dset2:SZIP=8  -l dset2:CHUNK=20x10"
+arg="test4.h5 -f dset2:SZIP=8,EC  -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -159,7 +159,7 @@ else
 fi
 
 # szip for all
-arg="test4.h5 -f SZIP=8"
+arg="test4.h5 -f SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -200,7 +200,7 @@ else
 fi
 
 # all filters
-arg="test4.h5 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8 -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
+arg="test4.h5 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
@@ -285,7 +285,7 @@ fi
 
 #filter conversions
 
-arg="test_deflate.h5 -f dset_deflate:SZIP=8"
+arg="test_deflate.h5 -f dset_deflate:SZIP=8,NN"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else

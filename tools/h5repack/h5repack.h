@@ -21,7 +21,9 @@
 #include "h5diff.h"
 #include "h5tools.h"
 
+#if 0
 #define CHECK_SZIP
+#endif
 
 
 #define H5FOPENERROR "unable to open file"
@@ -58,6 +60,11 @@ typedef struct {
 typedef struct {
  H5Z_filter_t filtn;               /* filter identification number */
  int          cd_values[CDVALUES]; /* filter client data values */
+ /* extra input for szip, selects the coding method
+    entropy coding method: EC=0 
+    nearest neighbor coding method: NN=1 
+ */
+ int          szip_coding;         
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
@@ -192,17 +199,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);
 
-int check_szip_params( unsigned bits_per_pixel, 
-                       unsigned pixels_per_block, 
-                       unsigned pixels_per_scanline, 
-                       hsize_t image_pixels);
-
-int check_szip(hid_t type_id,   /* dataset datatype */
-               int rank,        /* chunk rank */
-               hsize_t *dims,   /* chunk dims */
-               unsigned szip_options_mask /*IN*/,
-               unsigned *szip_pixels_per_block /*IN,OUT*/,
-               pack_opt_t *options);
 
 int can_read(const char* name,    /* object name from traverse list */
              hid_t dcpl_id,       /* dataset creation property list */
@@ -306,12 +302,12 @@ void write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
                    int make_diffs /* flag to modify data buffers */);
-void write_null_attr(hid_t loc_id); 
 void write_dset_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
                    int make_diffs /* flag to modify data buffers */);
-void write_null_dset(hid_t loc_id);
+
+
 
 /*-------------------------------------------------------------------------
  * tests utils
@@ -336,6 +332,22 @@ int make_attr(hid_t loc_id,
  * check SZIP parameters
  *-------------------------------------------------------------------------
  */
+
+#if defined (CHECK_SZIP)
+
+int check_szip_params( unsigned bits_per_pixel, 
+                       unsigned pixels_per_block, 
+                       unsigned pixels_per_scanline, 
+                       hsize_t image_pixels);
+
+int check_szip(hid_t type_id,   /* dataset datatype */
+               int rank,        /* chunk rank */
+               hsize_t *dims,   /* chunk dims */
+               unsigned szip_options_mask /*IN*/,
+               unsigned *szip_pixels_per_block /*IN,OUT*/,
+               pack_opt_t *options);
+
+
 
 typedef struct 
 {
@@ -368,6 +380,7 @@ typedef struct
 #define NN_MODE	1
 #endif
 
+#endif /* CHECK_SZIP */
 
 
 #endif  /* H5REPACK_H__ */

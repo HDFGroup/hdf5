@@ -16,54 +16,28 @@
 #include "h5diff.h"
 #include "H5private.h" 
 
-static int diff_datum(void  *_mem1, 
-                void       *_mem2, 
-                hid_t      m_type,
-                hsize_t    i, 
-                int        rank, 
-                hsize_t    *acc,  
-                hsize_t    *pos, 
-                diff_opt_t *options, 
-                const char *obj1, 
-                const char *obj2,
-                hid_t      container1_id,
-                hid_t      container2_id,
-                int        *ph); 
-
-static int diff_native_uchar(unsigned char *mem1,
-                      unsigned char *mem2,
-                      hsize_t       i, 
-                      int           rank, 
-                      hsize_t       *acc,  
-                      hsize_t       *pos,
-                      diff_opt_t    *options, 
-                      const char    *obj1, 
-                      const char    *obj2,
-                      int           *ph);
-
-static int diff_char(unsigned char *mem1,
-             unsigned char *mem2,
-             hsize_t       i, 
-             int           rank, 
-             hsize_t       *acc,  
-             hsize_t       *pos,
-             diff_opt_t    *options, 
-             const char    *obj1, 
-             const char    *obj2,
-             int           *ph);
-
+/* local functions */
+static void    close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
+static int     diff_region(hid_t region1_id, hid_t region2_id);
 static hbool_t is_zero(const void *_mem, size_t size);
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id);
-static int diff_region(hid_t region1_id, hid_t region2_id);
 
-
+/*-------------------------------------------------------------------------
+ * Function: print_data
+ *
+ * Purpose: print data only in report or verbose modes
+ *-------------------------------------------------------------------------
+ */
+static int print_data(diff_opt_t *options)
+{
+ return (options->m_report || options->m_verbose==1)?1:0;
+}
 
 /*-------------------------------------------------------------------------
  * Function: diff_array
  *
  * Purpose: compare two memory buffers;
  *
- * Return: number of differences found, -1 on error
+ * Return: number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -72,19 +46,19 @@ static int diff_region(hid_t region1_id, hid_t region2_id);
  *-------------------------------------------------------------------------
  */
 
-int diff_array( void *_mem1, 
-                void *_mem2, 
-                hsize_t nelmts, 
-                int rank, 
-                hsize_t *dims, 
-                diff_opt_t *options, 
-                const char *name1, 
-                const char *name2,
-                hid_t m_type,
-                hid_t container1_id,
-                hid_t container2_id) /* dataset where the reference came from*/
+hsize_t diff_array( void *_mem1, 
+                    void *_mem2, 
+                    hsize_t nelmts, 
+                    int rank, 
+                    hsize_t *dims, 
+                    diff_opt_t *options, 
+                    const char *name1, 
+                    const char *name2,
+                    hid_t m_type,
+                    hid_t container1_id,
+                    hid_t container2_id) /* dataset where the reference came from*/
 { 
- int           nfound=0;          /* number of differences found */
+ hsize_t       nfound=0;          /* number of differences found */
  size_t        size;              /* size of datum */
  unsigned char *mem1 = (unsigned char*)_mem1;
  unsigned char *mem2 = (unsigned char*)_mem2;
@@ -164,7 +138,7 @@ int diff_array( void *_mem1,
  *
  * Purpose: Compare the values pointed to in _MEM1 and _MEM2 of type M_TYPE
  *
- * Return: number of differences found, -1 on error
+ * Return: number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -197,20 +171,19 @@ int diff_array( void *_mem1,
  *-------------------------------------------------------------------------
  */
 
-static 
-int diff_datum( void       *_mem1, 
-                void       *_mem2, 
-                hid_t      m_type,
-                hsize_t    i, 
-                int        rank, 
-                hsize_t    *acc,  
-                hsize_t    *pos, 
-                diff_opt_t *options, 
-                const char *obj1, 
-                const char *obj2,
-                hid_t      container1_id,
-                hid_t      container2_id, /*where the reference came from*/
-                int        *ph)           /*print header */ 
+hsize_t diff_datum(void       *_mem1, 
+                   void       *_mem2, 
+                   hid_t      m_type,
+                   hsize_t    i, 
+                   int        rank, 
+                   hsize_t    *acc,  
+                   hsize_t    *pos, 
+                   diff_opt_t *options, 
+                   const char *obj1, 
+                   const char *obj2,
+                   hid_t      container1_id,
+                   hid_t      container2_id, /*where the reference came from*/
+                   int        *ph)           /*print header */ 
 {
  char          fmt_llong[255],  fmt_ullong[255];
  char          fmt_llongp[255], fmt_ullongp[255];
@@ -228,13 +201,14 @@ int diff_datum( void       *_mem1,
  size_t        size;
  int           iszero1;
  int           iszero2;
- H5G_obj_t     obj1_type;
- H5G_obj_t     obj2_type;
+ H5G_obj_t1    obj1_type;
+ H5G_obj_t1    obj2_type;
  hid_t         obj1_id;
  hid_t         obj2_id;
  H5G_stat_t    sb1;
  H5G_stat_t    sb2;
- int           nfound=0;   /* differences found */
+ hsize_t       nfound=0;   /* differences found */
+ int           ret;
 
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
@@ -381,7 +355,7 @@ int diff_datum( void       *_mem1,
      if (HDstrcmp(enum_name1,enum_name2)!=0)
      {
       nfound=1;
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -501,17 +475,22 @@ int diff_datum( void       *_mem1,
     hid_t  region2_id;
 
     if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
-     return -1;
+     ret= -1;
     if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
-     return -1;
+     ret= -1;
     if (H5Gget_objinfo(obj1_id, ".", FALSE, &sb1)<0)
-     return -1;
+     ret= -1;
     if (H5Gget_objinfo(obj2_id, ".", FALSE, &sb2)<0)
-     return -1;
+     ret= -1;
     if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
-     return -1;
+     ret= -1;
     if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2))<0)
-     return -1;
+     ret= -1;
+
+    if (ret==-1) {
+     options->err_stat=1;
+     return 0;
+    }
 
     if (diff_region(region1_id,region2_id))
     {
@@ -535,9 +514,13 @@ int diff_datum( void       *_mem1,
    {
 
     if ((obj1_type = H5Rget_obj_type(container1_id, H5R_OBJECT, _mem1))<0)
-     return -1;
+     ret= -1;
     if ((obj2_type = H5Rget_obj_type(container2_id, H5R_OBJECT, _mem2))<0)
-     return -1;
+     ret= -1;
+    if (ret==-1) {
+     options->err_stat=1;
+     return 0;
+    }
 
     /* check object type */
     if (obj1_type!=obj2_type)
@@ -547,9 +530,13 @@ int diff_datum( void       *_mem1,
     }
 
     if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1))<0)
-     return -1;
+     ret= -1;
     if ((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2))<0)
-     return -1;
+     ret= -1;
+    if (ret==-1) {
+     options->err_stat=1;
+     return 0;
+    }
 
 
     /*deep compare */
@@ -597,7 +584,7 @@ int diff_datum( void       *_mem1,
     {
      if (abs(temp1_char-temp2_char) > options->delta)
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -611,7 +598,7 @@ int diff_datum( void       *_mem1,
     {
      if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -627,7 +614,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_char!=0 && abs(1-temp2_char/temp1_char) > options->percent && 
       abs(temp1_char-temp2_char) > options->delta )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -639,7 +626,7 @@ int diff_datum( void       *_mem1,
     }
     else if (temp1_char != temp2_char)
     {
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -667,7 +654,7 @@ int diff_datum( void       *_mem1,
     {
      if (abs(temp1_uchar-temp2_uchar) > options->delta)
      {
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -681,7 +668,7 @@ int diff_datum( void       *_mem1,
     {
      if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -697,7 +684,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
       abs(temp1_uchar-temp2_uchar) > options->delta )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -709,7 +696,7 @@ int diff_datum( void       *_mem1,
     }
     else if (temp1_uchar != temp2_uchar)
     {
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -739,7 +726,7 @@ int diff_datum( void       *_mem1,
     {
      if (abs(temp1_short-temp2_short) > options->delta)
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -753,7 +740,7 @@ int diff_datum( void       *_mem1,
     {
      if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -769,7 +756,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_short!=0 && abs(1-temp2_short/temp1_short) > options->percent && 
       abs(temp1_short-temp2_short) > options->delta )
      {
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -781,7 +768,7 @@ int diff_datum( void       *_mem1,
     }
     else if (temp1_short != temp2_short)
     {
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -812,7 +799,7 @@ int diff_datum( void       *_mem1,
      if (abs(temp1_ushort-temp2_ushort) > options->delta)
      {
    
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -827,7 +814,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_ushort!=0 && abs(1-temp2_ushort/temp1_ushort) > options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -844,7 +831,7 @@ int diff_datum( void       *_mem1,
       abs(temp1_ushort-temp2_ushort) > options->delta )
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -857,7 +844,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_ushort != temp2_ushort)
     {
    
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -889,7 +876,7 @@ int diff_datum( void       *_mem1,
      if (abs(temp1_int-temp2_int) > options->delta)
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -904,7 +891,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_int!=0 && abs(1-temp2_int/temp1_int) > options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -921,7 +908,7 @@ int diff_datum( void       *_mem1,
       abs(temp1_int-temp2_int) > options->delta )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -934,7 +921,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_int != temp2_int)
     {
    
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -966,7 +953,7 @@ int diff_datum( void       *_mem1,
      if (abs((int)(temp1_uint-temp2_uint)) > options->delta)
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -981,7 +968,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_uint!=0 && abs((int)(1-temp2_uint/temp1_uint)) > options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -998,7 +985,7 @@ int diff_datum( void       *_mem1,
       abs((int)(temp1_uint-temp2_uint)) > options->delta )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1011,7 +998,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_uint != temp2_uint)
     {
     
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1044,7 +1031,7 @@ int diff_datum( void       *_mem1,
      if (labs(temp1_long-temp2_long) > (long)options->delta)
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1059,7 +1046,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_long!=0 && labs(1-temp2_long/temp1_long) > (long)options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1076,7 +1063,7 @@ int diff_datum( void       *_mem1,
       labs(temp1_long-temp2_long) > (long)options->delta )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1089,7 +1076,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_long != temp2_long)
     {
     
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1121,7 +1108,7 @@ int diff_datum( void       *_mem1,
      if (labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta)
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1136,7 +1123,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_ulong!=0 && labs((long)(1-temp2_ulong/temp1_ulong)) > (long)options->percent )
      {
       
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1153,7 +1140,7 @@ int diff_datum( void       *_mem1,
       labs((long)(temp1_ulong-temp2_ulong)) > (long)options->delta )
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1166,7 +1153,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_ulong != temp2_ulong)
     {
     
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1197,7 +1184,7 @@ int diff_datum( void       *_mem1,
      if (labs((long)(temp1_llong-temp2_llong)) > (long)options->delta)
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1212,7 +1199,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_llong!=0 && labs((long)(1-temp2_llong/temp1_llong)) > (long)options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1229,7 +1216,7 @@ int diff_datum( void       *_mem1,
       labs((long)(temp1_llong-temp2_llong)) > (long)options->delta )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1242,7 +1229,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_llong != temp2_llong)
     {
    
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1273,7 +1260,7 @@ int diff_datum( void       *_mem1,
      if (labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta)
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1289,7 +1276,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_ullong!=0 && labs((long)(1-temp2_ullong/temp1_ullong)) > (long)options->percent )
      {
    
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1307,7 +1294,7 @@ int diff_datum( void       *_mem1,
       labs((long)(temp1_ullong-temp2_ullong)) > (long)options->delta )
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1321,7 +1308,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_ullong != temp2_ullong)
     {
    
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1358,7 +1345,7 @@ int diff_datum( void       *_mem1,
      if (fabs(temp1_float-temp2_float) > options->delta)
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1373,7 +1360,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_float!=0 && fabs(1-temp2_float/temp1_float) > options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1390,7 +1377,7 @@ int diff_datum( void       *_mem1,
       fabs(temp1_float-temp2_float) > options->delta )
      {
     
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1403,7 +1390,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_float != temp2_float)
     {
     
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1433,7 +1420,7 @@ int diff_datum( void       *_mem1,
      if (fabs(temp1_double-temp2_double) > options->delta)
      {
    
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1448,7 +1435,7 @@ int diff_datum( void       *_mem1,
      if ( temp1_double!=0 && fabs(1-temp2_double/temp1_double) > options->percent )
      {
      
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1465,7 +1452,7 @@ int diff_datum( void       *_mem1,
       fabs(temp1_double-temp2_double) > options->delta )
      {
    
-      if ( options->r==0 ) 
+      if ( print_data(options) ) 
       {
        print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
@@ -1478,7 +1465,7 @@ int diff_datum( void       *_mem1,
     else if (temp1_double != temp2_double)
     {
     
-     if ( options->r==0 ) 
+     if ( print_data(options) ) 
      {
       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
@@ -1514,19 +1501,18 @@ int diff_datum( void       *_mem1,
  *-------------------------------------------------------------------------
  */
 
-static
-int diff_native_uchar(unsigned char *mem1,
-                      unsigned char *mem2,
-                      hsize_t       i, 
-                      int           rank, 
-                      hsize_t       *acc,  
-                      hsize_t       *pos,
-                      diff_opt_t    *options, 
-                      const char    *obj1, 
-                      const char    *obj2,
-                      int           *ph)
+hsize_t diff_native_uchar(unsigned char *mem1,
+                          unsigned char *mem2,
+                          hsize_t       i, 
+                          int           rank, 
+                          hsize_t       *acc,  
+                          hsize_t       *pos,
+                          diff_opt_t    *options, 
+                          const char    *obj1, 
+                          const char    *obj2,
+                          int           *ph)
 {
- int                nfound=0;  /* differences found */
+ hsize_t            nfound=0;  /* differences found */
  unsigned char      temp1_uchar;
  unsigned char      temp2_uchar;
  
@@ -1538,7 +1524,7 @@ int diff_native_uchar(unsigned char *mem1,
  {
   if (abs(temp1_uchar-temp2_uchar) > options->delta)
   {
-   if ( options->r==0 ) 
+   if ( print_data(options) ) 
    {
     print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
@@ -1552,7 +1538,7 @@ int diff_native_uchar(unsigned char *mem1,
  {
   if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent )
   {
-   if ( options->r==0 ) 
+   if ( print_data(options) ) 
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
@@ -1568,7 +1554,7 @@ int diff_native_uchar(unsigned char *mem1,
   if ( temp1_uchar!=0 && abs(1-temp2_uchar/temp1_uchar) > options->percent && 
    abs(temp1_uchar-temp2_uchar) > options->delta )
   {
-   if ( options->r==0 ) 
+   if ( print_data(options) ) 
    {
     print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
@@ -1580,7 +1566,7 @@ int diff_native_uchar(unsigned char *mem1,
  }
  else if (temp1_uchar != temp2_uchar)
  {
-  if ( options->r==0 ) 
+  if ( print_data(options) ) 
   {
    print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
    printf(SPACES);
@@ -1607,19 +1593,18 @@ int diff_native_uchar(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 
-static
-int diff_char(unsigned char *mem1,
-              unsigned char *mem2,
-              hsize_t       i, 
-              int           rank, 
-              hsize_t       *acc,  
-              hsize_t       *pos,
-              diff_opt_t    *options, 
-              const char    *obj1, 
-              const char    *obj2,
-              int           *ph)
+hsize_t diff_char(unsigned char *mem1,
+                  unsigned char *mem2,
+                  hsize_t       i, 
+                  int           rank, 
+                  hsize_t       *acc,  
+                  hsize_t       *pos,
+                  diff_opt_t    *options, 
+                  const char    *obj1, 
+                  const char    *obj2,
+                  int           *ph)
 {
- int                nfound=0;  /* differences found */
+ hsize_t            nfound=0;  /* differences found */
  unsigned char      temp1_uchar;
  unsigned char      temp2_uchar;
  
@@ -1628,7 +1613,7 @@ int diff_char(unsigned char *mem1,
 
  if (temp1_uchar != temp2_uchar)
  {
-  if ( options->r==0 ) 
+  if ( print_data(options) ) 
   {
    print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
    printf(SPACES);
@@ -1673,7 +1658,7 @@ is_zero(const void *_mem, size_t size)
  */
 
 static 
-void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
 {
  
  switch (obj_type) {

@@ -333,6 +333,18 @@ get_class(H5T_class_t tclass)
  }
 }
 
+/*-------------------------------------------------------------------------
+ * Function: print_found
+ *
+ * Purpose: print number of differences found
+ *
+ *-------------------------------------------------------------------------
+ */
+void print_found(hsize_t nfound)
+{
+ HDfprintf(stdout,"%Hu differences found\n",nfound);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: print_sizes

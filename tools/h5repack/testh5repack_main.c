@@ -29,7 +29,7 @@
  * Return: Success: zero
  *  Failure: non-zero
  *
- * Programmer:  <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
  *             January, 6, 2004
  *
  *-------------------------------------------------------------------------
@@ -58,7 +58,7 @@ int main (void)
  *     it returns RET==0 if the objects have the same data
  *-------------------------------------------------------------------------
  */
- 
+
 /*-------------------------------------------------------------------------
  * file with all kinds of dataset datatypes
  *-------------------------------------------------------------------------
@@ -178,7 +178,7 @@ int main (void)
 
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("GZIP=9",&pack_options)<0)
+ if (h5repack_addfilter("GZIP=1",&pack_options)<0)
   TEST_ERROR;
  if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
@@ -212,7 +212,7 @@ int main (void)
  
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset2:SZIP=8",&pack_options)<0)
+ if (h5repack_addfilter("dset2:SZIP=8,EC",&pack_options)<0)
   TEST_ERROR;
  if (h5repack_addlayout("dset2:CHUNK=20x10",&pack_options)<0)
   TEST_ERROR;
@@ -240,7 +240,7 @@ TESTING("    adding szip filter to all");
 #if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
  if (h5repack_init (&pack_options, 0)<0)
   TEST_ERROR;
- if (h5repack_addfilter("SZIP=8",&pack_options)<0)
+ if (h5repack_addfilter("SZIP=8,NN",&pack_options)<0)
   TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -399,8 +399,8 @@ TESTING("    addding shuffle filter to all");
   TEST_ERROR;
 #endif
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_SZIP_CAN_ENCODE)
- if (h5repack_addfilter("dset1:SZIP=8",&pack_options)<0)
+#if defined (H5_SZIP_CAN_ENCODE) &&  defined (H5_HAVE_FILTER_SZIP)
+ if (h5repack_addfilter("dset1:SZIP=8,NN",&pack_options)<0)
   TEST_ERROR;
 #endif
 
@@ -408,7 +408,6 @@ TESTING("    addding shuffle filter to all");
  if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
   TEST_ERROR;
 #endif
-
 
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
@@ -902,8 +901,65 @@ TESTING("    addding shuffle filter to all");
  SKIPPED();
 #endif
 
-
  
+/*-------------------------------------------------------------------------
+ * file with all filters 
+ *  dset_all
+ *  dset_deflate
+ *  dset_szip
+ *  dset_shuffle
+ *  dset_fletcher32
+ *-------------------------------------------------------------------------
+ */
+ 
+
+ TESTING("    filter conversion from deflate to szip");
+
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
+    && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_deflate:SZIP=8,NN",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+ TESTING("    filter conversion from szip to deflate");
+
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
+    && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
+
+ if (h5repack_init (&pack_options, 0)<0)
+  TEST_ERROR;
+ if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
+  TEST_ERROR;
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options)<0)
+  TEST_ERROR;
+ if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) == 1)
+  TEST_ERROR;
+ if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
+  TEST_ERROR;
+ if (h5repack_end (&pack_options)<0)
+  TEST_ERROR;
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+  
 /*-------------------------------------------------------------------------
  * test the NONE global option
  *-------------------------------------------------------------------------
@@ -932,53 +988,6 @@ TESTING("    addding shuffle filter to all");
  SKIPPED();
 #endif
  
- TESTING("    filter conversion from deflate to szip");
-/*-------------------------------------------------------------------------
- * filter conversion from deflate to szip
- *-------------------------------------------------------------------------
- */
-#if (defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)) && defined(H5_HAVE_FILTER_DEFLATE)
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset_deflate:SZIP=8",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME8,FNAME8OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME8,FNAME8OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME8OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
- PASSED();
-#else
- SKIPPED();
-#endif
-
- TESTING("    filter conversion from szip to deflate");
-/*-------------------------------------------------------------------------
- * filter conversion from szip to deflate
- *-------------------------------------------------------------------------
- */
-#if (defined (H5_SZIP_CAN_ENCODE) && defined (H5_HAVE_FILTER_SZIP)) && defined(H5_HAVE_FILTER_DEFLATE)
- if (h5repack_init (&pack_options, 0)<0)
-  TEST_ERROR;
- if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
-  TEST_ERROR;
- if (h5repack(FNAME7,FNAME7OUT,&pack_options)<0)
-  TEST_ERROR;
- if (h5diff(FNAME7,FNAME7OUT,NULL,NULL,&diff_options) == 1)
-  TEST_ERROR;
- if (h5repack_verify(FNAME7OUT,&pack_options)<=0)
-  TEST_ERROR;
- if (h5repack_end (&pack_options)<0)
-  TEST_ERROR;
- PASSED();
-#else
- SKIPPED();
-#endif
-
-
   
 /*-------------------------------------------------------------------------
  * end

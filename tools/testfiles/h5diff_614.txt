@@ -10,8 +10,9 @@ file2             File name of the second HDF5 file
 [obj2]            Name of an HDF5 object, in absolute path
 [OPTIONS] are:
 [-h]              Print out this information
-[-v]              Verbose mode
-[-r]              Print only what objects differ, not the differences
+[-r]              Report mode. Print the differences
+[-v]              Verbose mode. Print the differences, list of objects, warnings
+[-q]              Quiet mode. Do not do output
 [-n count]        Print difference up to count number
 [-d delta]        Print difference when it is greater than limit delta
 [-p relative]     Print difference when it is greater than a relative limit
@@ -23,17 +24,28 @@ The 'delta' and 'relative' values must be positive numbers
 The -d compare criteria is |a - b| > delta
 The -p compare criteria is |1 - b/a| > relative
 
-Examples:
+h5diff has four modes of output:
+ Normal mode: print the number of differences found and where they occured
+ Report mode: print the above plus the differences
+ Verbose mode: print the above plus a list of objects and warnings
+ Quiet mode: do not print output (h5diff always returns an exit code of 1 when differences are found)
 
-1) h5diff file1 file2 /a/b /a/c
+Examples of use:
 
-   Compares object '/a/b' in file1 with '/a/c' in file2
+1) h5diff file1 file2 /g1/dset1 /g1/dset2
 
-2) h5diff file1 file2 /a/b
+   Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2
 
-   Compares object '/a/b' in both files
+2) h5diff file1 file2 /g1/dset1
+
+   Compares object '/g1/dset1' in both files
 
 3) h5diff file1 file2
 
    Compares all objects in both files
 
+Note)  file1 and file2 can be the same file. Use
+
+   h5diff file1 file1 /g1/dset1 /g1/dset2
+
+   to compare '/g1/dset1' and '/g1/dset2' in the same file

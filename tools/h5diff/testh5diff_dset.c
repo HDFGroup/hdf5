@@ -602,37 +602,6 @@ static void write_dset_in(hid_t loc_id,
  write_dset(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
 
-/*-------------------------------------------------------------------------
- * Function: write_null_dset
- *
- * Purpose: write null dataset in LOC_ID 
- *
- * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
- *
- * Date: May 24, 2004
- *
- *-------------------------------------------------------------------------
- */
-static void write_null_dset(hid_t loc_id, int make_diffs)
-{
-     hid_t sid, dset_id;
-     int        val = 2;
-     double     dval = 7.8;
-    
-     /* Create the null dataset */
-     sid = H5Screate(H5S_NULL);
-     if(make_diffs) {
-         dset_id  = H5Dcreate(loc_id,"null_dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
-         H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,&val);
-     } else {
-         dset_id  = H5Dcreate(loc_id,"null_dset",H5T_NATIVE_DOUBLE,sid,H5P_DEFAULT);
-         H5Dwrite(dset_id,H5T_NATIVE_DOUBLE,H5S_ALL,H5S_ALL,H5P_DEFAULT,&dval);
-     }
-
-     /* Close */
-     H5Dclose(dset_id);
-     H5Sclose(sid);
-}
 
 /*-------------------------------------------------------------------------
  * Check all HDF5 classes
@@ -641,6 +610,8 @@ static void write_null_dset(hid_t loc_id, int make_diffs)
  * H5T_ENUM, H5T_VLEN, H5T_ARRAY
  *-------------------------------------------------------------------------
  */
+
+ 
 int test_dsetall(const char *file,
                  int make_diffs /* flag to modify data buffers */)
 {
@@ -677,7 +648,6 @@ int test_dsetall(const char *file,
  */
 
  write_dset_in(group_id,"/dset",file_id,make_diffs);
- write_null_dset(file_id, make_diffs);
 
  /* Close */
  status = H5Dclose(dset_id);
@@ -690,3 +660,6 @@ int test_dsetall(const char *file,
  assert(status>=0);
  return status;
 }
+
+
+

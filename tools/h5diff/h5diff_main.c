@@ -16,11 +16,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-/* Due to alignment issue in Alpha clusters, options must be declared here
- * not as a local variable in main().
- */
-diff_opt_t  options = {0,0,0,0,0,0,0,0};
-
 static void usage(void);
 static int check_n_input( const char* );
 static int check_f_input( const char* );
@@ -40,7 +35,12 @@ static int check_f_input( const char* );
  *
  * Comments:
  *
- * Modifications:
+ * Modifications: July 2004
+ *  Introduced the four modes:
+ *   Normal mode: print the number of differences found and where they occured
+ *   Report mode: print the above plus the differences
+ *   Verbose mode: print the above plus a list of objects and warnings
+ *   Quiet mode: do not print output 
  *
  *-------------------------------------------------------------------------
  */
@@ -53,7 +53,11 @@ int main(int argc, const char *argv[])
  const char *fname2 = NULL;
  const char *objname1  = NULL;
  const char *objname2  = NULL;
- int        nfound=0, ret;
+ hsize_t    nfound=0;
+ int        ret;
+ diff_opt_t options;
+
+ memset(&options, 0, sizeof (diff_opt_t));
 
 /*-------------------------------------------------------------------------
  * initial check of command line options
@@ -98,10 +102,14 @@ int main(int argc, const char *argv[])
      usage();
      break;
     case 'v': 
-     options.verbose = 1;
+     options.m_verbose = 1;
+     break;
+    case 'q': 
+     /* use quiet mode; supress the message "0 differences found" */
+     options.m_quiet = 1;
      break;
     case 'r': 
-     options.r = 1;
+     options.m_report = 1;
      break;
     case 'd': 
      /* if it is not another option */
@@ -189,24 +197,36 @@ int main(int argc, const char *argv[])
   
  }/*for*/
 
+ nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+
 /*-------------------------------------------------------------------------
- * print the command line options
+ * print how many differences were found
  *-------------------------------------------------------------------------
  */
- 
- if (options.verbose)
+ if (!options.m_quiet) 
  {
-  printf("$h5diff");
-  for (i=1; i<argc ; i++) 
+  if (options.cmn_objs==0)
   {
-   printf(" %s", argv[i] );
+   printf("No common objects found. Files are not comparable.\n");
+   if (!options.m_verbose)
+    printf("Use -v for a list of objects.\n");
   }
-  printf("\n");
+  else
+  {
+   if (!options.err_stat)
+    print_found(nfound);
+  }
  }
 
- nfound = h5diff(fname1,fname2,objname1,objname2,&options);
- if (options.verbose) printf("\n");
+/*-------------------------------------------------------------------------
+ * exit code 
+ *   >0 if differences, 0 if no differences, <0 if error
+ *-------------------------------------------------------------------------
+ */
+
  ret= (nfound==0 ? 0 : 1 );
+ if (options.err_stat)
+  ret=-1;
  return ret;
  
 }
@@ -256,8 +276,6 @@ int check_n_input( const char *str )
  *
  * Return: 1 for ok, -1 for fail
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
  * Date: May 9, 2003
  *
  * Comments:
@@ -292,10 +310,6 @@ int check_f_input( const char *str )
  *
  * Return: void
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
  *-------------------------------------------------------------------------
  */
 static 
@@ -309,8 +323,9 @@ void usage(void)
  printf("[obj2]            Name of an HDF5 object, in absolute path\n");
  printf("[OPTIONS] are:\n");
  printf("[-h]              Print out this information\n");
- printf("[-v]              Verbose mode\n");
- printf("[-r]              Print only what objects differ, not the differences\n");
+ printf("[-r]              Report mode. Print the differences\n");
+ printf("[-v]              Verbose mode. Print the differences, list of objects, warnings\n");
+ printf("[-q]              Quiet mode. Do not do output\n");
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
  printf("[-p relative]     Print difference when it is greater than a relative limit\n");
@@ -322,20 +337,31 @@ void usage(void)
  printf("The -d compare criteria is |a - b| > delta\n");
  printf("The -p compare criteria is |1 - b/a| > relative\n");
  printf("\n");
- printf("Examples:\n");
+ printf("h5diff has four modes of output:\n");
+ printf(" Normal mode: print the number of differences found and where they occured\n");
+ printf(" Report mode: print the above plus the differences\n");
+ printf(" Verbose mode: print the above plus a list of objects and warnings\n");
+ printf(" Quiet mode: do not print output (h5diff always returns an exit code of 1 when differences are found)\n");
  printf("\n");
- printf("1) h5diff file1 file2 /a/b /a/c\n");
+ printf("Examples of use:\n");
  printf("\n");
- printf("   Compares object '/a/b' in file1 with '/a/c' in file2\n");
+ printf("1) h5diff file1 file2 /g1/dset1 /g1/dset2\n");
  printf("\n");
- printf("2) h5diff file1 file2 /a/b\n");
+ printf("   Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2\n");
  printf("\n");
- printf("   Compares object '/a/b' in both files\n");
+ printf("2) h5diff file1 file2 /g1/dset1\n");
+ printf("\n");
+ printf("   Compares object '/g1/dset1' in both files\n");
  printf("\n");
  printf("3) h5diff file1 file2\n");
  printf("\n");
  printf("   Compares all objects in both files\n");
  printf("\n");
+ printf("Note)  file1 and file2 can be the same file. Use\n");
+ printf("\n");
+ printf("   h5diff file1 file1 /g1/dset1 /g1/dset2\n");
+ printf("\n");
+ printf("   to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
  exit(0);
 }
 
