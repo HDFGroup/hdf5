@@ -401,7 +401,7 @@ done:
  DESCRIPTION
         This function reads dataset object data from the file.  The dataspace
     ID determines the slice/hyper-slab/portion of the dataset to write.
-    H5P_SCALAR is a special value which indicates that the entire dataset is
+    H5P_ALL is a special value which indicates that the entire dataset is
     to be written out.  (For datasets which have a scalar dataspace for the
     entire dataset, this is somewhat redundant.... :-)
 --------------------------------------------------------------------------*/
@@ -433,7 +433,7 @@ herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
     /* Compute the number of bytes to read */
-    if(did==H5P_SCALAR) /* Check if we are reading the entire dataset */
+    if(did==H5P_ALL) /* Check if we are reading the entire dataset */
         toread=H5Tsize(dataset->tid,BTRUE)*H5Pnelem(dataset->sid);
     else
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
@@ -485,7 +485,7 @@ done:
  DESCRIPTION
         This function writes dataset object data to the file.  The dataspace
     ID determines the slice/hyper-slab/portion of the dataset to write.
-    H5P_SCALAR is a special value which indicates that the entire dataset is
+    H5P_ALL is a special value which indicates that the entire dataset is
     to be written out.  (For datasets which have a scalar dataspace for the
     entire dataset, this is somewhat redundant.... :-)
 --------------------------------------------------------------------------*/
@@ -517,7 +517,7 @@ herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
     /* Compute the number of bytes to write out */
-    if(did==H5P_SCALAR) /* Check if we are writing out the entire dataset */
+    if(did==H5P_ALL) /* Check if we are writing out the entire dataset */
         towrite=H5Tsize(dataset->tid,BTRUE)*H5Pnelem(dataset->sid);
     else
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
