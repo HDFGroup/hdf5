@@ -93,7 +93,8 @@ TOOLTEST()
     TESTING $H5REPACK $@
 
     infile=$srcdir/../testfiles/$1
-    outfile=out.$1
+    path=`pwd`
+    outfile=$path/out.$1
     shift
     if [ "`uname -s`" = "TFLOPS O/S" ]; then
      $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile $@
