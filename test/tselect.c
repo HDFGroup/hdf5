@@ -52,6 +52,9 @@ static char		RcsId[] = "$Revision$";
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
+/* Location comparison function */
+int compare_size_t(const void *s1, const void *s2);
+
 /****************************************************************
 **
 **  test_select_hyper(): Test basic H5S (dataspace) selection code.
@@ -152,6 +155,7 @@ test_select_hyper(void)
         for(j=0; j<SPACE3_DIM2; j++, tbuf++, tbuf2++) {
             if(*tbuf!=*tbuf2) {
                 printf("hyperslab values don't match!, i=%d, j=%d\n",i,j);
+exit(-1);
             } /* end if */
         } /* end for */
     } /* end for */
@@ -449,6 +453,172 @@ test_select_combo(void)
     free(rbuf);
 }   /* test_select_combo() */
 
+int 
+compare_size_t(const void *s1, const void *s2)
+{
+    if(*(const size_t *)s1<*(const size_t *)s2)
+        return(-1);
+    else
+        if(*(const size_t *)s1>*(const size_t *)s2)
+            return(1);
+        else
+            return(0);
+}
+
+/****************************************************************
+**
+**  test_select_hyper_stride(): Test H5S (dataspace) selection code.
+**      Tests strided hyperslabs of various sizes and dimensionalities.
+** 
+****************************************************************/
+static void 
+test_select_hyper_stride(void)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
+    hsize_t		dims3[] = {SPACE3_DIM1, SPACE3_DIM2};
+    hsize_t		start[SPACE1_RANK];     /* Starting location of hyperslab */
+    hsize_t		stride[SPACE1_RANK];    /* Stride of hyperslab */
+    hsize_t		count[SPACE1_RANK];     /* Element count of hyperslab */
+    hsize_t		block[SPACE1_RANK];     /* Block size of hyperslab */
+    uint16     *wbuf,       /* buffer to write to disk */
+               *rbuf,       /* buffer read from disk */
+               *tbuf,       /* temporary buffer pointer */
+               *tbuf2;      /* temporary buffer pointer */
+    size_t      loc1[72]={  /* Gruesomely ugly way to make certain hyperslab locations are checked correctly */
+       27, 28, 29, 53, 54, 55, 79, 80, 81,   /* Block #1 */
+       32, 33, 34, 58, 59, 60, 84, 85, 86,   /* Block #2 */
+      157,158,159,183,184,185,209,210,211,   /* Block #3 */
+      162,163,164,188,189,190,214,215,216,   /* Block #4 */
+      287,288,289,313,314,315,339,340,341,   /* Block #5 */
+      292,293,294,318,319,320,344,345,346,   /* Block #6 */
+      417,418,419,443,444,445,469,470,471,   /* Block #7 */
+      422,423,424,448,449,450,474,475,476,   /* Block #8 */
+            };
+    size_t      loc2[72]={
+        0,  1,  2, 26, 27, 28,    /* Block #1 */
+        4,  5,  6, 30, 31, 32,    /* Block #2 */
+        8,  9, 10, 34, 35, 36,    /* Block #3 */
+       12, 13, 14, 38, 39, 40,    /* Block #4 */
+      104,105,106,130,131,132,    /* Block #5 */
+      108,109,110,134,135,136,    /* Block #6 */
+      112,113,114,138,139,140,    /* Block #7 */
+      116,117,118,142,143,144,    /* Block #8 */
+      208,209,210,234,235,236,    /* Block #9 */
+      212,213,214,238,239,240,    /* Block #10 */
+      216,217,218,242,243,244,    /* Block #11 */
+      220,221,222,246,247,248,    /* Block #12 */
+            };
+    intn        i,j;        /* Counters */
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Hyperslabs with Strides Functionality\n"));
+
+    /* Allocate write & read buffers */
+    wbuf=malloc(sizeof(uint16)*SPACE2_DIM1*SPACE2_DIM2);
+    rbuf=calloc(sizeof(uint16),SPACE3_DIM1*SPACE3_DIM2);
+
+    /* Initialize write buffer */
+    for(i=0, tbuf=wbuf; i<SPACE2_DIM1; i++)
+        for(j=0; j<SPACE2_DIM2; j++)
+            *tbuf++=(uint16)((i*SPACE2_DIM2)+j);
+
+    /* Create file */
+    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create dataspace for writing buffer */
+    sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 2x3x3 count with a stride of 2x4x3 & 1x2x2 block hyperslab for disk dataset */
+    start[0]=0; start[1]=0; start[2]=0;
+    stride[0]=2; stride[1]=4; stride[2]=3;
+    count[0]=2; count[1]=3; count[2]=3;
+    block[0]=1; block[1]=2; block[2]=2;
+    ret = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Select 4x2 count with a stride of 5x5 & 3x3 block hyperslab for memory dataset */
+    start[0]=1; start[1]=1;
+    stride[0]=5; stride[1]=5;
+    count[0]=4; count[1]=2;
+    block[0]=3; block[1]=3;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Create a dataset */
+    dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+
+    /* Write selection to disk */
+    ret=H5Dwrite(dataset,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Create dataspace for reading buffer */
+    sid2 = H5Screate_simple(SPACE3_RANK, dims3, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Select 3x4 count with a stride of 4x4 & 2x3 block hyperslab for memory dataset */
+    start[0]=0; start[1]=0;
+    stride[0]=4; stride[1]=4;
+    count[0]=3; count[1]=4;
+    block[0]=2; block[1]=3;
+    ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read selection from disk */
+    ret=H5Dread(dataset,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,rbuf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Sort the locations into the proper order */
+    qsort(loc1,72,sizeof(size_t),compare_size_t);
+    qsort(loc2,72,sizeof(size_t),compare_size_t);
+    /* Compare data read with data written out */
+    for(i=0; i<72; i++) {
+        tbuf=wbuf+loc1[i];
+        tbuf2=rbuf+loc2[i];
+        if(*tbuf!=*tbuf2) {
+            printf("hyperslab values don't match!, loc1[%d]=%d, loc2[%d]=%d\n",i,(int)loc1[i],i,(int)loc2[i]);
+#ifdef QAK
+            printf("wbuf=%p, *tbuf=%p, rbuf=%p, tbuf2=%p\n",wbuf,tbuf,rbuf,tbuf2);
+            printf("*tbuf=%d, *tbuf2=%d\n",(int)*tbuf,(int)*tbuf2);
+#endif /* QAK */
+        } /* end if */
+    } /* end for */
+
+    /* Close memory dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
+}   /* test_select_hyper() */
+
 /****************************************************************
 **
 **  test_select(): Main H5S selection testing routine.
@@ -460,10 +630,11 @@ test_select(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
 
-    /* These next two tests use the same file information */
+    /* These next tests use the same file */
     test_select_hyper();        /* Test basic H5S hyperslab selection code */
     test_select_point();        /* Test basic H5S element selection code */
     test_select_combo();        /* Test combined hyperslab & element selection code */
+    test_select_hyper_stride();     /* Test strided hyperslab selection code */
 
 }   /* test_select() */
 
