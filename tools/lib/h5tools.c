@@ -445,7 +445,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 
     /* Calculate new prefix */
     h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx->p_min_idx,
-                       ctx->p_max_idx);
+                       ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
     if (ctx->indent_level >= 0) {
@@ -746,6 +746,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5dump_t *info, hid_t dset,
     count = sset->count[ctx.ndims - 1];
     sset->count[ctx.ndims - 1] = 1;
 
+    if(ctx.ndims>0)
+     init_acc_pos(&ctx,total_size);
+
     for (; count > 0; sset->start[ctx.ndims - 1] += sset->stride[ctx.ndims - 1],
                       count--) {
         /* calculate the potential number of elements we're going to print */
@@ -954,6 +957,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5dump_t *info, hid_t dset,
     sm_nelmts = sm_nbytes / p_type_nbytes;
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
+    if(ctx.ndims>0)
+     init_acc_pos(&ctx,total_size);
+
     /* The stripmine loop */
     memset(hs_offset, 0, sizeof hs_offset);
     memset(zero, 0, sizeof zero);
@@ -1080,6 +1086,9 @@ h5tools_dump_simple_mem(FILE *stream, const h5dump_t *info, hid_t obj_id,
     } /* end if */
     else
         ctx.size_last_dim = 0;
+
+    if(ctx.ndims>0)
+     init_acc_pos(&ctx,ctx.p_max_idx);
 
     /* Print it */
     h5tools_dump_simple_data(stream, info, obj_id, &ctx,
@@ -1227,4 +1236,35 @@ h5tools_dump_mem(FILE *stream, const h5dump_t *info, hid_t obj_id, hid_t type,
     return h5tools_dump_simple_mem(stream, info, obj_id, type, space, mem,
                                    indentlevel);
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    init_acc_pos
+ *
+ * Purpose:     initialize accumulator and matrix position
+ *
+ * Return:      void
+ *
+ * Programmer:  pvn
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims)
+{
+ int i;
+
+ assert(ctx->ndims);
+ 
+ ctx->acc[ctx->ndims-1]=1;
+ for(i=(ctx->ndims-2); i>=0; i--)
+ {
+  ctx->acc[i]=ctx->acc[i+1] * dims[i+1];
+ }
+ for ( i = 0; i < ctx->ndims; i++)
+  ctx->pos[i]=0;
+}
+
 

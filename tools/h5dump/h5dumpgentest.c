@@ -5197,10 +5197,12 @@ static void gent_aindices(void)
  hsize_t  dims1[1]  = {100};
  hsize_t  dims2[2]  = {2,100};
  hsize_t  dims3[3]  = {2,2,100};
+ hsize_t  dims4[4]  = {2,3,4,5};
  int      buf1[100];
  int      buf2[2][100];
  int      buf3[2][2][100];
- int      i, j, k, n, ret;
+ int      buf4[2][3][4][5];
+ int      i, j, k, l, n, ret;
 
  for (i=n=0; i<100; i++){
   buf1[i]=n++;
@@ -5218,7 +5220,16 @@ static void gent_aindices(void)
    }
   }
  }
- 
+ for (i=n=0; i<2; i++){
+  for (j=0; j<3; j++){
+   for (k=0; k<4; k++){
+    for (l=0; l<5; l++){
+     buf4[i][j][k][l]=n++;
+    }
+   }
+  }
+ }
+  
  /* create a file */
  fid  = H5Fcreate(FILE50, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  assert(fid>=0);
@@ -5230,6 +5241,7 @@ static void gent_aindices(void)
  write_dset(fid,1,dims1,"1d",H5T_NATIVE_INT,buf1);
  write_dset(fid,2,dims2,"2d",H5T_NATIVE_INT,buf2);
  write_dset(fid,3,dims3,"3d",H5T_NATIVE_INT,buf3);
+ write_dset(fid,4,dims4,"4d",H5T_NATIVE_INT,buf4);
 
 /*-------------------------------------------------------------------------
  * test with group indentation
@@ -5244,6 +5256,7 @@ static void gent_aindices(void)
  write_dset(gid[5],1,dims1,"1d",H5T_NATIVE_INT,buf1);
  write_dset(gid[5],2,dims2,"2d",H5T_NATIVE_INT,buf2);
  write_dset(gid[5],3,dims3,"3d",H5T_NATIVE_INT,buf3);
+ write_dset(gid[5],4,dims4,"4d",H5T_NATIVE_INT,buf4);
  for (i=0; i<6; i++)
   H5Gclose(gid[i]);
   
@@ -5261,7 +5274,6 @@ static void gent_aindices(void)
  *
  *-------------------------------------------------------------------------
  */
-
 
 int main(void)
 {

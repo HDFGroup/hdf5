@@ -665,3 +665,4 @@ add_obj(table_t *table, haddr_t objno, char *objname)
     free(table->objs[i].objname);
     table->objs[i].objname = HDstrdup(objname);
 }
+

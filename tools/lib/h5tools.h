@@ -413,9 +413,12 @@ typedef struct h5tools_context_t {
                                  *row */
     int		indent_level;   /*the number of times we need some
                                  *extra indentation */
-    int		default_indent_level; /*this is used when the indent
-                                       *level gets changed */
+    int		default_indent_level; /*this is used when the indent level gets changed */
+    hsize_t acc[H5S_MAX_RANK];    /* accumulator position */
+    hsize_t pos[H5S_MAX_RANK];    /* matrix position */
 } h5tools_context_t;
+
+   
 
 /* a structure to hold the subsetting particulars for a dataset */
 struct subset_t {
@@ -510,5 +513,8 @@ extern void     h5tools_dump_simple_data(FILE *stream, const h5dump_t *info, hid
 extern int      h5tools_canreadf(const char* name,
                                  hid_t dcpl_id);
 extern int      h5tools_can_encode(H5Z_filter_t filtn);
+
+void            init_acc_pos(h5tools_context_t	*ctx, hsize_t *dims);
+
 
 #endif	/* H5TOOLS_H__ */
