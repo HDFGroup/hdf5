@@ -3219,6 +3219,8 @@ test_filters_endianess(void)
     int       buf[2];
     int       rank=1;
     int       i;
+    char      *srcdir = getenv("srcdir"); /* the source directory */
+    char      data_file[512]="";          /* buffer to hold name of existing file */
     
     for (i=0; i<2; i++){
      buf[i]=1;
@@ -3259,8 +3261,17 @@ test_filters_endianess(void)
     * step 2: open a file written on a little-endian machine in step 1 
     *-------------------------------------------------------------------------
     */  
+     /* compose the name of the file to open, using the srcdir, if appropriate */
+    strcpy(data_file, "");
+    if ( srcdir )
+    {
+     strcpy(data_file, srcdir);
+     strcat(data_file, "/");
+    } 
+	   strcat( data_file, "test_filters_le.hdf5");
+
     /* open */
-    if ((fid=H5Fopen("test_filters_le.hdf5",H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
+    if ((fid=H5Fopen(data_file,H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
      goto error;
 
     /* read */
@@ -3272,8 +3283,17 @@ test_filters_endianess(void)
     * step 3: open a file written on a big-endian machine in step 1 
     *-------------------------------------------------------------------------
     */  
+    /* compose the name of the file to open, using the srcdir, if appropriate */
+    strcpy(data_file, "");
+    if ( srcdir )
+    {
+     strcpy(data_file, srcdir);
+     strcat(data_file, "/");
+    } 
+	   strcat( data_file, "test_filters_be.hdf5");
+
     /* open */
-    if ((fid=H5Fopen("test_filters_be.hdf5",H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
+    if ((fid=H5Fopen(data_file,H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
      goto error;
 
     /* read */
