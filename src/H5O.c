@@ -169,7 +169,7 @@ static H5O_t *
 H5O_load (hdf5_file_t *f, haddr_t addr, const void *_data)
 {
    H5O_t	*oh = NULL;
-   H5O_t	*ret_value = (void*)SUCCEED; /*kludge for HGOTO_ERROR*/
+   H5O_t	*ret_value = (void*)1; /*kludge for HGOTO_ERROR*/
    uint8	buf[16], *p;
    size_t	hdr_size, mesg_size;
    uintn	id;
