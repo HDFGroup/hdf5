@@ -61,9 +61,6 @@ $(includedir):
 $(bindir):
 	mkdir $@ && chmod 755 $@
 
-$(DOCDIR):
-	mkdir $@ && chmod 755 $@
-
 ## Install the library, the public header files, and public programs.
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
@@ -91,7 +88,12 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	done
 
 ## Install the documents.
-install-doc: $(PUB_DOCS) $(DOCDIR)
+install-doc: $(PUB_DOCS)
+	@if test -d $(DOCDIR) ; then                                          \
+           :;                                                                 \
+        else                                                                  \
+	   mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
+	fi
 	@for d in X $(SUBDIRS); do					      \
 	    if test $$d != X; then					      \
 	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
@@ -113,7 +115,7 @@ uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
             $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
-	@if test "X$(PUB_HDR)" != X; then				      \
+	@if test "X$(PUB_HDR)" != "X"; then				      \
 	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
@@ -129,7 +131,7 @@ uninstall-doc:
 	       (set -x; cd $$d && $(MAKE) $@) || exit 1;                      \
 	    fi;								      \
 	done
-	@if test "X$(PUB_DOCS)" != X; then				      \
+	@if test "X$(PUB_DOCS)" != "X"; then				      \
 	   set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
 
