@@ -46,9 +46,9 @@ PUB_LIB=$(LIB)
 LT_STATIC_EXEC=@LT_STATIC_EXEC@
 DYNAMIC_DIRS=@DYNAMIC_DIRS@
 LT=$(top_builddir)/libtool
-LT_COMPILE=$(LT) --mode=compile $(CXX)
+LT_COMPILE=$(LT) --mode=compile $(CXX) -dlopen self
 LT_LINK_LIB=$(LT) --mode=link $(CXX) -rpath $(libdir)
-LT_LINK_EXE=$(LT) --mode=link $(CXX) $(LT_STATIC_EXEC) -rpath $(bindir) $(DYNAMIC_DIRS)
+LT_LINK_EXE=$(LT) --mode=link $(CXX) $(LT_STATIC_EXEC) -dlopen self -static -rpath $(bindir) $(DYNAMIC_DIRS)
 LT_RUN=$(LT) --mode=execute
 LT_INSTALL_PROG=$(LT) --mode=install $(INSTALL_PROGRAM)
 LT_INSTALL_LIB=$(LT) --mode=install $(INSTALL_DATA)
