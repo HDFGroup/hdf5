@@ -44,9 +44,6 @@ static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 /* Declare external the free list for hssize_t arrays */
 H5FL_ARR_EXTERN(hssize_t);
 
-/* Declare external the free list for hsize_t arrays */
-H5FL_ARR_EXTERN(hsize_t);
-
 /* Declare a free list to manage sequences of size_t */
 H5FL_SEQ_DEFINE_STATIC(size_t);
 
@@ -641,12 +638,8 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     sel_iter->rank=space->extent.u.simple.rank;
 
     if(sel_iter->rank>0) {
-        /* Allocate room for the dataspace dimensions */
-        sel_iter->dims = H5FL_ARR_MALLOC(hsize_t,sel_iter->rank);
-        assert(sel_iter->dims);
-
-        /* Keep a copy of the dataspace dimensions */
-        HDmemcpy(sel_iter->dims,space->extent.u.simple.size,sel_iter->rank*sizeof(hsize_t));
+        /* Point to the dataspace dimensions */
+        sel_iter->dims=space->extent.u.simple.size;
     } /* end if */
     else
         sel_iter->dims = NULL;
@@ -909,9 +902,6 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
 
     /* Check args */
     assert(sel_iter);
-
-    /* Release the array of dimensions common to all iterators */
-    H5FL_ARR_FREE(hsize_t,sel_iter->dims);
 
     /* Call selection type-specific release routine */
     ret_value = (*sel_iter->iter_release)(sel_iter);

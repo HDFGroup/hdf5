@@ -6147,8 +6147,8 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[],
 		      const hsize_t *block)
 {
-    hsize_t *_stride=NULL;      /* Stride array */
-    hsize_t *_block=NULL;       /* Block size array */
+    hsize_t _stride[H5O_LAYOUT_NDIMS];      /* Stride array */
+    hsize_t _block[H5O_LAYOUT_NDIMS];       /* Block size array */
     unsigned u;                    /* Counters */
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -6165,9 +6165,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(stride==NULL) {
         hsize_t fill=1;
 
-        /* Allocate temporary buffer */
-        if ((_stride=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         stride = _stride;
     } /* end if */
@@ -6176,9 +6173,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     if(block==NULL) {
         hsize_t fill=1;
 
-        /* Allocate temporary buffer */
-        if ((_block=H5FL_ARR_MALLOC(hsize_t,space->extent.u.simple.rank))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for stride buffer");
         H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
         block = _block;
     } /* end if */
@@ -6348,10 +6342,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
 done:
-    if(_stride!=NULL)
-        H5FL_ARR_FREE(hsize_t,_stride);
-    if(_block!=NULL)
-        H5FL_ARR_FREE(hsize_t,_block);
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* end H5S_select_hyperslab() */
 
