@@ -202,8 +202,11 @@ int apply_filters(const char* name,    /* object name from traverse list */
  unsigned     aggression;     /* the deflate level */
  hsize_t      nelmts;         /* number of elements in dataset */
  size_t       size;           /* size of datatype in bytes */
+ hsize_t      chsize[64];     /* chunk size in elements */
+ H5D_layout_t layout;
  int          i;
 	pack_info_t  obj;
+ 
 		
  if (rank==0)
   goto out;
@@ -250,6 +253,31 @@ int apply_filters(const char* name,    /* object name from traverse list */
   if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
    return -1;
  }
+
+
+ /*-------------------------------------------------------------------------
+		* check if there is an existent chunk
+  * read it only if there is not a requested layout
+		*-------------------------------------------------------------------------
+  */
+ if (obj.layout == -1 )
+ {
+  if ((layout = H5Pget_layout(dcpl_id))<0) 
+   return -1;
+  
+  if (layout==H5D_CHUNKED)
+  {
+   if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
+    return -1;
+   obj.layout=H5D_CHUNKED;
+   obj.chunk.rank=rank;
+   for ( i=0; i<rank; i++)
+    obj.chunk.chunk_lengths[i] = chsize[i];
+  }
+ }
+
+
+
 	
 	/*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
