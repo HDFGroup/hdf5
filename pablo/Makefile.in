@@ -46,10 +46,10 @@ LIB_SRC=H5.c H5FDmulti.c H5HG.c H5Oname.c H5T.c H5A.c H5FDsec2.c H5HL.c  \
         H5MM.c H5Ostab.c H5Tconv.c H5E.c H5FL.c H5O.c H5P.c H5Tinit.c    \
         H5F.c H5Farray.c H5Oattr.c H5R.c H5Tvlen.c H5FD.c H5Fcontig.c    \
         H5Ocomp.c H5S.c H5V.c H5FDcore.c H5Fistore.c H5Ocont.c H5Sall.c  \
-        H5Z.c H5FDdpss.c H5Fseq.c H5Odtype.c H5Shyper.c H5Zdeflate.c     \
-        H5FDfamily.c H5G.c H5Oefl.c H5Smpio.c H5detect.c H5FDgass.c      \
-        H5Gent.c H5Ofill.c H5Snone.c H5FDlog.c H5Gnode.c H5Olayout.c     \
-        H5Spoint.c H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
+        H5Z.c H5Fseq.c H5Odtype.c H5Shyper.c H5Zdeflate.c H5FDfamily.c   \
+        H5G.c H5Oefl.c H5Smpio.c H5detect.c H5FDgass.c H5Gent.c          \
+        H5Ofill.c H5Snone.c H5FDlog.c H5Gnode.c H5Olayout.c H5Spoint.c   \
+        H5FDmpio.c H5Gstab.c H5Omtime.c H5Sselect.c
 
 PABLO_OBJ=PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDF_MPIO.o
 
@@ -58,7 +58,7 @@ LIB_COBJ=$(LIB_XOBJ:.x=.o)
 LIB_OBJ=$(PABLO_OBJ) $(LIB_COBJ)
 
 .c.x:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(top_srcdir)/src/$*.c -o $*.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $*.o
 	cp $*.o $@
 
 # 'vpath' directive is only supported in gmake, take out - QAK
@@ -204,7 +204,6 @@ H5E.c: $(top_srcdir)/src/H5E.c
 H5F.c: $(top_srcdir)/src/H5F.c
 H5FD.c: $(top_srcdir)/src/H5FD.c
 H5FDcore.c: $(top_srcdir)/src/H5FDcore.c
-H5FDdpss.c: $(top_srcdir)/src/H5FDdpss.c
 H5FDfamily.c: $(top_srcdir)/src/H5FDfamily.c
 H5FDgass.c: $(top_srcdir)/src/H5FDgass.c
 H5FDlog.c: $(top_srcdir)/src/H5FDlog.c
@@ -256,7 +255,7 @@ H5TB.c: $(top_srcdir)/src/H5TB.c
 H5TS.c: $(top_srcdir)/src/H5TS.c
 H5Tbit.c: $(top_srcdir)/src/H5Tbit.c
 H5Tconv.c: $(top_srcdir)/src/H5Tconv.c
-H5Tinit.c: $(top_srcdir)/src/H5Tinit.c
+H5Tinit.c: $(top_builddir)/src/H5Tinit.c
 H5Tvlen.c: $(top_srcdir)/src/H5Tvlen.c
 H5V.c: $(top_srcdir)/src/H5V.c
 H5Z.c: $(top_srcdir)/src/H5Z.c
