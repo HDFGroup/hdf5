@@ -62,6 +62,7 @@
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/powerpc-ibm-aix4.x
+./config/powerpc-ibm-aix5.x
 ./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
 ./config/sv1-cray
@@ -517,6 +518,7 @@
 ./fortran/config/linux-gnulibc1
 ./fortran/config/linux-gnulibc2
 ./fortran/config/powerpc-ibm-aix4.x
+./fortran/config/powerpc-ibm-aix5.x
 ./fortran/config/rs6000-ibm-aix4.x
 ./fortran/config/solaris2.x
 ./fortran/config/sv1-cray
