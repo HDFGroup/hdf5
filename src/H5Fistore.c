@@ -1072,7 +1072,10 @@ H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
     assert(ent->idx>=0 && ent->idx<rdcc->nslots);
 
     /* Flush */
-    H5F_istore_flush_entry(f, ent, TRUE);
+    if (H5F_istore_flush_entry(f, ent, TRUE)<0) {
+        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                      "cannot flush indexed storage buffer");
+    }
 
     /* Unlink from list */
     if (ent->prev) {
