@@ -225,7 +225,7 @@ dangle: dangle.lo
 
 error_test: error_test.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ error_test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-   
+
 err_compat: err_compat.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ err_compat.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
