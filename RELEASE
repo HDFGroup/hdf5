@@ -354,7 +354,7 @@ Platforms Tested
   IRIX 6.5                      MIPSpro cc 7.30
   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1m
                                 mpt.1.4.0.2
-				mpich-1.2.1
+                                mpich-1.2.1
   Linux 2.2.16-3smp             gcc-2.95.2
                                 g++ 2.95.2
                                 pgf90 3.1-3
@@ -374,13 +374,13 @@ Platforms Tested
 Known Problems
 ==============
 
-* The gcc 2.95.2 compiler has a bug which causes spurious warnings such
-  as:
+* With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
+  compilation. The ANSI version of the compiler complains about not being
+  able to handle the `long long' datatype with the warning:
 
-    "warning: pointer of type `void *' used in arithmetic"
-
-  and other such warnings having to do with string handling. These
-  warnings are innocuous and don't effect the resulting executable.
+        warning: ANSI C does not support `long long'
+  
+  This warning is innocuous and can be safely ignored.
 
 * When building the HDF5 test project on Windows NT 4.0 (testhdf5
   and testhdf5dll), the compiler fails to compile tvstr.c within
