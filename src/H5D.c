@@ -18,7 +18,6 @@ static char		RcsId[] = "@(#)$Revision$";
 
 #include <H5private.h>		/* Generic Functions			*/
 #include <H5Iprivate.h>		/* IDs			  		*/
-#include <H5ACprivate.h>	/* Cache			  	*/
 #include <H5Dprivate.h>		/* Dataset functions			*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
 #include <H5FLprivate.h>	/*Free Lists	  */

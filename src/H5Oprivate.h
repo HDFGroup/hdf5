@@ -100,6 +100,8 @@ typedef struct H5O_chunk_t {
 } H5O_chunk_t;
 
 typedef struct H5O_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
     hbool_t	dirty;			/*out of data wrt disk		     */
     intn	version;		/*version number		     */
     intn	nlink;			/*link count			     */

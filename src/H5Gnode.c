@@ -71,7 +71,7 @@ static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 /* H5G inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_SNODE[1] = {{
     H5AC_SNODE_ID,
-    (void *(*)(H5F_t*, haddr_t, const void*, void*))H5G_node_load,
+    (H5AC_load_func_t)H5G_node_load,
     (herr_t (*)(H5F_t*, hbool_t, haddr_t, void*))H5G_node_flush,
 }};
 
@@ -1209,3 +1209,4 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
     H5AC_unprotect(f, H5AC_SNODE, addr, sn);
     FUNC_LEAVE(SUCCEED);
 }
+

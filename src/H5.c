@@ -18,7 +18,6 @@ static char             RcsId[] = "@(#)$Revision$";
 
 /* private headers */
 #include <H5private.h>          /*library                 		*/
-#include <H5ACprivate.h>        /*cache                           	*/
 #include <H5Bprivate.h>         /*B-link trees                    	*/
 #include <H5Eprivate.h>         /*error handling          		*/
 #include <H5FDprivate.h>	/*file driver				*/

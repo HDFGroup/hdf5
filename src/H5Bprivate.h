@@ -22,6 +22,7 @@
 /* Private headers needed by this file */
 #include <H5private.h>
 #include <H5Fprivate.h>
+#include <H5ACprivate.h>	/*cache					*/
 
 /*
  * Feature: Define this constant if you want to check B-tree consistency
@@ -106,6 +107,8 @@ typedef struct H5B_key_t {
 } H5B_key_t;
 
 typedef struct H5B_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
     const H5B_class_t	*type;		/*type of tree			     */
     size_t		sizeof_rkey;	/*size of raw (disk) key	     */
     hbool_t		dirty;		/*something in the tree is dirty     */

@@ -9,7 +9,6 @@
 #define H5G_PACKAGE
 
 #include <H5private.h>
-#include <H5ACprivate.h>
 #include <H5Eprivate.h>
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>

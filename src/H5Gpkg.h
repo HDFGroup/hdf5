@@ -33,6 +33,8 @@
  * table or group.
  */
 typedef struct H5G_node_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
     hbool_t     dirty;                  /*has cache been modified?           */
     int         nsyms;                  /*number of symbols                  */
     H5G_entry_t *entry;                 /*array of symbol table entries      */

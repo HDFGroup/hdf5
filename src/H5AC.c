@@ -80,12 +80,18 @@ H5AC_create(H5F_t *f, intn size_hint)
 		       "memory allocation failed");
     }
     cache->nslots = size_hint;
-    cache->slot = H5MM_calloc(cache->nslots*sizeof(H5AC_slot_t));
+    cache->slot = H5MM_calloc(cache->nslots*sizeof(H5AC_info_t *));
     if (NULL==cache->slot) {
-	f->shared->cache = H5MM_xfree (f->shared->cache);
-	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-		       "memory allocation failed");
+        f->shared->cache = H5MM_xfree (f->shared->cache);
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     }
+#ifdef H5AC_DEBUG
+    if ((cache->prot = H5MM_calloc(cache->nslots*sizeof(H5AC_prot_t)))==NULL) {
+        cache->slot = H5MM_xfree (cache->slot);
+        f->shared->cache = H5MM_xfree (f->shared->cache);
+        HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    }
+#endif /* H5AC_DEBUG */
 
     FUNC_LEAVE(size_hint);
 }
@@ -125,10 +131,11 @@ H5AC_dest(H5F_t *f)
     {
         uintn i;
         for (i=0; i<cache->nslots; i++) {
-            cache->slot[i].prot = H5MM_xfree(cache->slot[i].prot);
-            cache->slot[i].aprots = 0;
-            cache->slot[i].nprots = 0;
+            cache->prot[i].slot = H5MM_xfree(cache->prot[i].slot);
+            cache->prot[i].aprots = 0;
+            cache->prot[i].nprots = 0;
         }
+        cache->prot = H5MM_xfree(cache->prot);
     }
 #endif
 
@@ -190,8 +197,8 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     unsigned                idx;
     herr_t                  status;
     void                   *thing = NULL;
-    herr_t                  (*flush) (H5F_t *, hbool_t, haddr_t, void*) = NULL;
-    H5AC_slot_t            *slot = NULL;
+    H5AC_flush_func_t       flush;
+    H5AC_info_t           **info = NULL;
     H5AC_t                 *cache = NULL;
 
     FUNC_ENTER(H5AC_find, NULL);
@@ -204,14 +211,14 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     assert(H5F_addr_defined(addr));
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
-    slot = cache->slot + idx;
+    info = cache->slot + idx;
 
     /*
      * Return right away if the item is in the cache.
      */
-    if (slot->type == type && H5F_addr_eq(slot->addr, addr)) {
+    if ((*info) && (*info)->type == type && H5F_addr_eq((*info)->addr, addr)) {
         cache->diagnostics[type->id].nhits++;
-        HRETURN(slot->thing);
+        HRETURN(*info);
     }
     cache->diagnostics[type->id].nmisses++;
 
@@ -219,7 +226,7 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      * Fail if the item in the cache is at the correct address but is
      * of the wrong type.
      */
-    if (slot->type && slot->type != type && H5F_addr_eq(slot->addr, addr)) {
+    if ((*info) && (*info)->type && (*info)->type != type && H5F_addr_eq((*info)->addr, addr)) {
         HRETURN_ERROR(H5E_CACHE, H5E_BADTYPE, NULL,
                       "internal error (correct address, wrong type)");
     }
@@ -230,12 +237,15 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      * H5AC_protect() function.
      */
     {
+        H5AC_prot_t            *prot = NULL;
         intn                    i;
-        for (i = 0; i < slot->nprots; i++) {
-            assert(H5F_addr_ne(addr, slot->prot[i].addr));
+
+        prot = cache->prot + idx;
+        for (i = 0; i < prot->nprots; i++) {
+            assert(H5F_addr_ne(addr, prot->slot[i]->addr));
         }
     }
-#endif
+#endif /* H5AC_DEBUG */
 
     /*
      * Load a new thing.  If it can't be loaded, then return an error
@@ -247,9 +257,9 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     /*
      * Free the previous cache entry if there is one.
      */
-    if (slot->type) {
-        flush = slot->type->flush;
-        status = (flush)(f, TRUE, slot->addr, slot->thing);
+    if (*info) {
+        flush = (*info)->type->flush;
+        status = (flush)(f, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             /*
              * The old thing could not be removed from the stack.
@@ -262,14 +272,14 @@ H5AC_find_f(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL,
                           "unable to flush existing cached object");
         }
-        cache->diagnostics[slot->type->id].nflushes++;
+        cache->diagnostics[(*info)->type->id].nflushes++;
     }
     /*
      * Make the cache point to the new thing.
      */
-    slot->type = type;
-    slot->addr = addr;
-    slot->thing = thing;
+    (*info)=thing;
+    (*info)->type = type;
+    (*info)->addr = addr;
 
     FUNC_LEAVE(thing);
 }
@@ -301,17 +311,17 @@ H5AC_compare(const void *_a, const void *_b)
 
     assert(current_cache_g);
 
-    if (NULL == current_cache_g->slot[a].type) {
-        if (NULL == current_cache_g->slot[b].type) {
+    if (NULL == current_cache_g->slot[a]->type) {
+        if (NULL == current_cache_g->slot[b]->type) {
             return 0;
         } else {
             return -1;
         }
-    } else if (NULL == current_cache_g->slot[b].type) {
+    } else if (NULL == current_cache_g->slot[b]->type) {
         return 1;
-    } else if (current_cache_g->slot[a].addr < current_cache_g->slot[b].addr) {
+    } else if (current_cache_g->slot[a]->addr < current_cache_g->slot[b]->addr) {
         return -1;
-    } else if (current_cache_g->slot[a].addr > current_cache_g->slot[b].addr) {
+    } else if (current_cache_g->slot[a]->addr > current_cache_g->slot[b]->addr) {
         return 1;
     }
     return 0;
@@ -349,8 +359,8 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
 {
     uintn                   i;
     herr_t                  status;
-    herr_t                  (*flush)(H5F_t *, hbool_t, haddr_t, void*) = NULL;
-    H5AC_slot_t            *slot;
+    H5AC_flush_func_t       flush=NULL;
+    H5AC_info_t           **info;
     intn                   *map = NULL;
     uintn                   nslots;
     H5AC_t                 *cache = NULL;
@@ -373,7 +383,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
 			   "memory allocation failed");
 	}
         for (i = nslots = 0; i < cache->nslots; i++) {
-            if (cache->slot[i].type)
+            if (cache->slot[i]!=NULL)
                 map[nslots++] = i;
         }
         assert(NULL == current_cache_g);
@@ -382,7 +392,7 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
         current_cache_g = NULL;
 #ifdef NDEBUG
         for (i = 1; i < nslots; i++) {
-            assert(H5F_addr_lt(cache->slot[i - 1].addr, cache->slot[i].addr));
+            assert(H5F_addr_lt(cache->slot[i - 1]->addr, cache->slot[i]->addr));
         }
 #endif
 #else
@@ -394,23 +404,25 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
          */
         for (i = 0; i < nslots; i++) {
 #ifdef H5AC_SORT_BY_ADDR
-            slot = cache->slot + map[i];
-            if (NULL == slot->type) break;          /*the rest are empty */
+            info = cache->slot + map[i];
+            if (NULL == (*info))
+                 break;          /*the rest are empty */
 #else
-            slot = cache->slot + i;
-            if (NULL == slot->type) continue;
+            info = cache->slot + i;
+            if (NULL == (*info))
+                continue;
 #endif
-            if (!type || type == slot->type) {
-                flush = slot->type->flush;
-                status = (flush)(f, destroy, slot->addr, slot->thing);
+            if ((*info) || type == (*info)->type) {
+                flush = (*info)->type->flush;
+                status = (flush)(f, destroy, (*info)->addr, (*info));
                 if (status < 0) {
                     map = H5MM_xfree(map);
                     HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                                   "unable to flush cache");
                 }
-                cache->diagnostics[slot->type->id].nflushes++;
+                cache->diagnostics[(*info)->type->id].nflushes++;
                 if (destroy)
-                    slot->type = NULL;
+                    (*info)= NULL;
             }
         }
         map = H5MM_xfree(map);
@@ -425,21 +437,21 @@ H5AC_flush(H5F_t *f, const H5AC_class_t *type, haddr_t addr, hbool_t destroy)
         }
     } else {
         i = H5AC_HASH(f, addr);
-        if ((!type || cache->slot[i].type == type) &&
-            H5F_addr_eq(cache->slot[i].addr, addr)) {
+        if (cache->slot[i] && (!type || cache->slot[i]->type == type) &&
+            H5F_addr_eq(cache->slot[i]->addr, addr)) {
             /*
              * Flush just this entry.
              */
-            flush = cache->slot[i].type->flush;
-            status = (flush)(f, destroy, cache->slot[i].addr,
-			     cache->slot[i].thing);
+            flush = cache->slot[i]->type->flush;
+            status = (flush)(f, destroy, cache->slot[i]->addr,
+			     cache->slot[i]);
             if (status < 0) {
                 HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                               "unable to flush object");
             }
-            cache->diagnostics[cache->slot[i].type->id].nflushes++;
+            cache->diagnostics[cache->slot[i]->type->id].nflushes++;
             if (destroy)
-                cache->slot[i].type = NULL;
+                cache->slot[i]= NULL;
         }
     }
 
@@ -472,8 +484,8 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
     herr_t                  status;
     uintn                   idx;
-    herr_t                  (*flush)(H5F_t *, hbool_t, haddr_t, void*) = NULL;
-    H5AC_slot_t            *slot = NULL;
+    H5AC_flush_func_t       flush=NULL;
+    H5AC_info_t           **info = NULL;
     H5AC_t                 *cache = NULL;
 
     FUNC_ENTER(H5AC_set, FAIL);
@@ -486,30 +498,33 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     assert(thing);
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
-    slot = cache->slot + idx;
+    info = cache->slot + idx;
 
 #ifdef H5AC_DEBUG
     {
+        H5AC_prot_t            *prot = NULL;
         intn                    i;
-        for (i = 0; i < slot->nprots; i++) {
-            assert(H5F_addr_ne(addr, slot->prot[i].addr));
+
+        prot = cache->prot + idx;
+        for (i = 0; i < prot->nprots; i++) {
+            assert(H5F_addr_ne(addr, prot->slot[i]->addr));
         }
     }
 #endif
 
 
-    if (slot->type) {
-        flush = slot->type->flush;
-        status = (flush)(f, TRUE, slot->addr, slot->thing);
+    if ((*info)) {
+        flush = (*info)->type->flush;
+        status = (flush)(f, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[slot->type->id].nflushes++;
+        cache->diagnostics[(*info)->type->id].nflushes++;
     }
-    slot->type = type;
-    slot->addr = addr;
-    slot->thing = thing;
+    (*info)=thing;
+    (*info)->type = type;
+    (*info)->addr = addr;
     cache->diagnostics[type->id].ninits++;
 
     FUNC_LEAVE(SUCCEED);
@@ -541,7 +556,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
 	    haddr_t new_addr)
 {
     uintn                   old_idx, new_idx;
-    herr_t                  (*flush)(H5F_t *, hbool_t, haddr_t, void*);
+    H5AC_flush_func_t       flush=NULL;
     herr_t                  status;
     H5AC_t                 *cache = NULL;
 
@@ -556,13 +571,16 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
 
 #ifdef H5AC_DEBUG
     {
+        H5AC_prot_t            *prot = NULL;
         int                     i;
 
-        for (i = 0; i < cache->slot[old_idx].nprots; i++) {
-            assert(H5F_addr_ne(old_addr, cache->slot[old_idx].prot[i].addr));
+        prot = cache->prot + old_idx;
+        for (i = 0; i < prot->nprots; i++) {
+            assert(H5F_addr_ne(old_addr, prot->slot[i]->addr));
         }
-        for (i = 0; i < cache->slot[new_idx].nprots; i++) {
-            assert(H5F_addr_ne(new_addr, cache->slot[new_idx].prot[i].addr));
+        prot = cache->prot + new_idx;
+        for (i = 0; i < prot->nprots; i++) {
+            assert(H5F_addr_ne(new_addr, prot->slot[i]->addr));
         }
     }
 #endif
@@ -571,34 +589,34 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr,
      * We don't need to do anything if the object isn't cached or if the
      * new hash value is the same as the old one.
      */
-    if (cache->slot[old_idx].type != type ||
-        H5F_addr_ne(cache->slot[old_idx].addr, old_addr)) {
+    if (cache->slot[old_idx]->type != type ||
+        H5F_addr_ne(cache->slot[old_idx]->addr, old_addr)) {
         HRETURN(SUCCEED);
     }
     if (old_idx == new_idx) {
-        cache->slot[old_idx].addr = new_addr;
+        cache->slot[old_idx]->addr = new_addr;
         HRETURN(SUCCEED);
     }
     /*
      * Free the item from the destination cache line.
      */
-    if (cache->slot[new_idx].type) {
-        flush = cache->slot[new_idx].type->flush;
-        status = (flush)(f, TRUE, cache->slot[new_idx].addr,
-			 cache->slot[new_idx].thing);
+    if (cache->slot[new_idx]) {
+        flush = cache->slot[new_idx]->type->flush;
+        status = (flush)(f, TRUE, cache->slot[new_idx]->addr,
+			 cache->slot[new_idx]);
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[cache->slot[new_idx].type->id].nflushes++;
+        cache->diagnostics[cache->slot[new_idx]->type->id].nflushes++;
     }
     /*
      * Move the source to the destination (it might not be cached)
      */
-    cache->slot[new_idx].type = cache->slot[old_idx].type;
-    cache->slot[new_idx].addr = new_addr;
-    cache->slot[new_idx].thing = cache->slot[old_idx].thing;
-    cache->slot[old_idx].type = NULL;
+    cache->slot[new_idx]= cache->slot[old_idx];
+    cache->slot[new_idx]->type = cache->slot[old_idx]->type;
+    cache->slot[new_idx]->addr = new_addr;
+    cache->slot[old_idx]= NULL;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -637,9 +655,11 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     int                     idx;
     void                   *thing = NULL;
     H5AC_t                 *cache = NULL;
-    H5AC_slot_t            *slot = NULL;
+    H5AC_info_t           **info = NULL;
 
 #ifdef H5AC_DEBUG
+    H5AC_prot_t            *prot = NULL;
+
     static int ncalls = 0;
     if (0 == ncalls++) {
 	if (H5DEBUG(AC)) {
@@ -661,19 +681,22 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
     assert(H5F_addr_defined(addr));
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
-    slot = cache->slot + idx;
+    info = cache->slot + idx;
+#ifdef H5AC_DEBUG
+    prot = cache->prot + idx;
+#endif /* H5AC_DEBUG */
 
-    if (slot->type == type && H5F_addr_eq(slot->addr, addr)) {
+    if ((*info) && (*info)->type == type && H5F_addr_eq((*info)->addr, addr)) {
         /*
          * The object is already cached; simply remove it from the cache.
          */
-        cache->diagnostics[slot->type->id].nhits++;
-        thing = slot->thing;
-        slot->type = NULL;
-        slot->addr = HADDR_UNDEF;
-        slot->thing = NULL;
+        cache->diagnostics[(*info)->type->id].nhits++;
+        thing = (*info);
+        (*info)->type = NULL;
+        (*info)->addr = HADDR_UNDEF;
+        (*info)= NULL;
 
-    } else if (slot->type && H5F_addr_eq(slot->addr, addr)) {
+    } else if ((*info) && (*info)->type && H5F_addr_eq((*info)->addr, addr)) {
         /*
          * Right address but wrong object type.
          */
@@ -688,10 +711,11 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
          * H5AC_protect() function.
          */
         intn                    i;
-        for (i = 0; i < slot->nprots; i++) {
-            assert(H5F_addr_ne(addr, slot->prot[i].addr));
+
+        for (i = 0; i < prot->nprots; i++) {
+            assert(H5F_addr_ne(addr, prot->slot[i]->addr));
         }
-#endif
+#endif /* H5AC_DEBUG */
 
         /*
          * Load a new thing.  If it can't be loaded, then return an error
@@ -709,22 +733,22 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
      * Add the protected object to the protect debugging fields of the
      * cache.
      */
-    if (slot->nprots >= slot->aprots) {
-	size_t na = slot->aprots + 10;
-        H5AC_prot_t *x = H5MM_realloc(slot->prot,
-				      na * sizeof(H5AC_prot_t));
-	if (NULL==x) {
-	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
-			   "memory allocation failed");
-	}
-        slot->aprots = (intn)na;
-	slot->prot = x;
+    if (prot->nprots >= prot->aprots) {
+        size_t na = prot->aprots + 10;
+        H5AC_info_t **x = H5MM_realloc(prot->slot,
+                          na * sizeof(H5AC_info_t *));
+        if (NULL==x) {
+            HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
+                   "memory allocation failed");
+        }
+        prot->aprots = (intn)na;
+        prot->slot = x;
     }
-    slot->prot[slot->nprots].type = type;
-    slot->prot[slot->nprots].addr = addr;
-    slot->prot[slot->nprots].thing = thing;
-    slot->nprots += 1;
-#endif
+    prot->slot[prot->nprots]= thing;
+    prot->slot[prot->nprots]->type = type;
+    prot->slot[prot->nprots]->addr = addr;
+    prot->nprots += 1;
+#endif /* H5AC_DEBUG */
 
     cache->nprots += 1;
     FUNC_LEAVE(thing);
@@ -758,9 +782,9 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
 {
     herr_t                  status;
     uintn                   idx;
-    herr_t                  (*flush)(H5F_t*, hbool_t, haddr_t, void*) = NULL;
+    H5AC_flush_func_t       flush=NULL;
     H5AC_t                 *cache = NULL;
-    H5AC_slot_t            *slot = NULL;
+    H5AC_info_t           **info = NULL;
 
     FUNC_ENTER(H5AC_unprotect, FAIL);
 
@@ -773,21 +797,21 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     assert(thing);
     idx = H5AC_HASH(f, addr);
     cache = f->shared->cache;
-    slot = cache->slot + idx;
+    info = cache->slot + idx;
 
     /*
      * Flush any object already in the cache at that location.  It had
      * better not be another copy of the protected object.
      */
-    if (slot->type) {
-        assert(H5F_addr_ne(slot->addr, addr));
-        flush = slot->type->flush;
-        status = (flush)(f, TRUE, slot->addr, slot->thing);
+    if ((*info)) {
+        assert(H5F_addr_ne((*info)->addr, addr));
+        flush = (*info)->type->flush;
+        status = (flush)(f, TRUE, (*info)->addr, (*info));
         if (status < 0) {
             HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
                           "unable to flush object");
         }
-        cache->diagnostics[slot->type->id].nflushes++;
+        cache->diagnostics[(*info)->type->id].nflushes++;
     }
 #ifdef H5AC_DEBUG
     /*
@@ -795,26 +819,29 @@ H5AC_unprotect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
      * protected.
      */
     {
+        H5AC_prot_t            *prot = NULL;
         int                     found, i;
-        for (i = 0, found = FALSE; i < slot->nprots && !found; i++) {
-            if (H5F_addr_eq(addr, slot->prot[i].addr)) {
-                assert(slot->prot[i].type == type);
-                HDmemmove(slot->prot + i, slot->prot + i + 1,
-                          ((slot->nprots - i) - 1) * sizeof(H5AC_prot_t));
-                slot->nprots -= 1;
+
+        prot = cache->prot + idx;
+        for (i = 0, found = FALSE; i < prot->nprots && !found; i++) {
+            if (H5F_addr_eq(addr, prot->slot[i]->addr)) {
+                assert(prot->slot[i]->type == type);
+                HDmemmove(prot->slot + i, prot->slot + i + 1,
+                          ((prot->nprots - i) - 1) * sizeof(H5AC_info_t *));
+                prot->nprots -= 1;
                 found = TRUE;
             }
         }
         assert(found);
     }
-#endif
+#endif /* H5AC_DEBUG */
 
     /*
      * Insert the object back into the cache; it is no longer protected.
      */
-    slot->type = type;
-    slot->addr = addr;
-    slot->thing = thing;
+    (*info)=thing;
+    (*info)->type = type;
+    (*info)->addr = addr;
     cache->nprots -= 1;
 
     FUNC_LEAVE(SUCCEED);

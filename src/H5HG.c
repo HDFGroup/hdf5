@@ -42,6 +42,8 @@ typedef struct H5HG_obj_t {
 } H5HG_obj_t;
 
 struct H5HG_heap_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
     haddr_t		addr;		/*collection address		*/
     hbool_t		dirty;		/*does heap need to be saved?	*/
     size_t		size;		/*total size of collection	*/
