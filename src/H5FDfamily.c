@@ -642,7 +642,7 @@ static haddr_t
 H5FD_family_get_eof(H5FD_t *_file)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    haddr_t		eof;
+    haddr_t		eof=0;
     int			i;
 
     /*

@@ -1288,21 +1288,21 @@ dump_data (hid_t obj_id, int obj_data) {
  *
  *-----------------------------------------------------------------------*/
 int
-main(int argc, char *argv[]) {
-hid_t fid, gid, dsetid, typeid;
-hid_t plist=H5P_DEFAULT;
-const char *fname = NULL;
-int i, index, curr_arg, display_bb=0, display_all=1, newwidth= 0;
-int nopts=0, *opts;
-char *buf, name[128], name1[128];
-H5G_stat_t statbuf;
-void UNUSED *op_data;
-void *edata;
-hid_t (*func)(void*);
+main(int argc, char *argv[])
+{
+    hid_t fid, gid, dsetid, typeid;
+    hid_t plist=H5P_DEFAULT;
+    const char *fname = NULL;
+    int i, index, curr_arg, display_bb=0, display_all=1, newwidth= 0;
+    int nopts=0, *opts;
+    char *buf, name[128], name1[128];
+    H5G_stat_t statbuf;
+    void *edata;
+    hid_t (*func)(void*);
 
-/* Disable error reporting */
-H5Eget_auto (&func, &edata);
-H5Eset_auto (NULL, NULL);
+    /* Disable error reporting */
+    H5Eget_auto (&func, &edata);
+    H5Eset_auto (NULL, NULL);
 
     if (argc < 2 ) {
         usage();

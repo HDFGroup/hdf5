@@ -556,7 +556,7 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
 	     const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/,
 	     hbool_t *must_convert/*out*/)
 {
-    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
@@ -662,7 +662,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 	      const H5S_t *mem_space, hid_t dxpl_id, const void *buf,
 	      hbool_t *must_convert/*out*/)
 {
-    H5S_hyper_node_t *file_node,*mem_node;     /* Hyperslab node */
+    H5S_hyper_node_t *file_node=NULL,*mem_node=NULL;     /* Hyperslab node */
     hsize_t	mem_size,file_size;
     hssize_t	file_off,mem_off;
     hsize_t	size[H5S_MAX_RANK];
@@ -972,7 +972,7 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
     hsize_t nelemts;            /* Number of elements to iterate through */
     void *tmp_buf;              /* temporary location of the element in the buffer */
     intn rank;              /* Dataspace rank */
-    intn index;             /* Index to increment */
+    intn indx;              /* Index to increment */
     herr_t ret_value=0;     /* return value */
 
     FUNC_ENTER (H5S_all_select_iterate, 0);
@@ -1007,10 +1007,10 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
         nelemts--;
 
         /* Advance the coordinate (currently in C memory order) */
-        index=rank-1; /* Leave the byte offset in the element alone */
-        while(index>=0 && ++mem_offset[index]==mem_size[index]) {
-            mem_offset[index]=0;
-            index--;
+        indx=rank-1; /* Leave the byte offset in the element alone */
+        while(indx>=0 && ++mem_offset[indx]==mem_size[indx]) {
+            mem_offset[indx]=0;
+            indx--;
           } /* end while */
       } /* end while */
 
