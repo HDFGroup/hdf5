@@ -194,6 +194,7 @@ writer (hid_t fapl, int wrt_n)
     int		i, j;
     FILE	*out = fopen(DNAME, "w");
     char	filename[1024];
+    hid_t       dcpl;
 
     TESTING("large dataset write");
     
@@ -213,8 +214,24 @@ writer (hid_t fapl, int wrt_n)
     }
     
     /* Create the datasets */
+/* 
+ *  The fix below is provided for bug#921
+ *  H5Dcreate with H5P_DEFAULT creation properties
+ *  will create a set of solid 1GB files; test will crash if quotas are enforced
+ *  or it will take some time to write a file.
+ *  We should create a dataset allocating space late and never writing fill values.
+ *  EIP 4/8/03
+
     if ((d1=H5Dcreate (file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT))<0 ||
 	(d2=H5Dcreate (file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT))<0) {
+	goto error;
+    }
+*/
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
+    H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+    if ((d1=H5Dcreate (file, "d1", H5T_NATIVE_INT, space1, dcpl))<0 ||
+	(d2=H5Dcreate (file, "d2", H5T_NATIVE_INT, space2, dcpl))<0) {
 	goto error;
     }
     
