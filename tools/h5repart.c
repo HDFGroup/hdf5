@@ -32,6 +32,10 @@
 #   include <sys/stat.h>
 #endif
 
+#ifdef WIN32
+#include <io.h>
+#endif
+
 #ifndef FALSE
 #define FALSE	0
 #endif
