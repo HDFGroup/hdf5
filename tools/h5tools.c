@@ -463,19 +463,78 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	sprintf(fmt_ullong, "%%%su", PRINTF_LL_WIDTH);
     }
 
-	if (info) {
-		/* Append value depending on data type */
-		start = h5dump_str_len(str);
-		if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-			h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((double*)vp));
+	
+	/* Append value depending on data type */
+	start = h5dump_str_len(str);
+	if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+		h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((double*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+		h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((float*)vp));
+		
+	} else if (info->ascii &&
+		(H5Tequal(type, H5T_NATIVE_SCHAR) ||
+		H5Tequal(type, H5T_NATIVE_UCHAR))) {
+		switch (*((char*)vp)) {
+		case '"':
+			h5dump_str_append(str, "\\\"");
+			break;
+		case '\\':
+			h5dump_str_append(str, "\\\\");
+			break;
+		case '\b':
+			h5dump_str_append(str, "\\b");
+			break;
+		case '\f':
+			h5dump_str_append(str, "\\f");
+			break;
+		case '\n':
+			h5dump_str_append(str, "\\n");
+			break;
+		case '\r':
+			h5dump_str_append(str, "\\r");
+			break;
+		case '\t':
+			h5dump_str_append(str, "\\t");
+			break;
+		default:
+			if (isprint(*((char*)vp))) {
+				h5dump_str_append(str, "%c", *((char*)vp));
+			} else {
+				h5dump_str_append(str, "\\%03o", *((unsigned char*)vp));
+			}
+			break;
+		}
+		
+	} else if (H5T_STRING==H5Tget_class(type)) {
+		size = H5Tget_size(type);
+		quote = '\0';
+		if (str->s == '"') {
+			quote = 'a';
+		}
+		for (i=0; i<size && ((char*)vp)[i] != '\0'; i++) {
 			
-		} else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-			h5dump_str_append(str, OPT(info->fmt_double, "%g"), *((float*)vp));
+			/* Count how many times the next character repeats */
+			j=1;
+			while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
 			
-		} else if (info->ascii &&
-			(H5Tequal(type, H5T_NATIVE_SCHAR) ||
-			H5Tequal(type, H5T_NATIVE_UCHAR))) {
-			switch (*((char*)vp)) {
+			/*
+			* Print the opening quote.  If the repeat count is high enough
+			* to warrant printing the number of repeats instead of
+			* enumerating the characters, then make sure the character to be
+			* repeated is in it's own quote.
+			*/
+			if (j>repeat_threshold) {
+				if (quote) h5dump_str_append(str, "%c", quote);
+				quote = '\'';
+				h5dump_str_append(str, "%s%c", i?" ":"", quote);
+			} else if (!quote) {
+				quote = '"';
+				h5dump_str_append(str, "%s%c", i?" ":"", quote);
+			}
+			
+			/* Print the character */
+			switch (((char*)vp)[i]) {
 			case '"':
 				h5dump_str_append(str, "\\\"");
 				break;
@@ -498,201 +557,134 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 				h5dump_str_append(str, "\\t");
 				break;
 			default:
-				if (isprint(*((char*)vp))) {
-					h5dump_str_append(str, "%c", *((char*)vp));
+				if (isprint(((char*)vp)[i])) {
+					h5dump_str_append(str, "%c", ((char*)vp)[i]);
 				} else {
-					h5dump_str_append(str, "\\%03o", *((unsigned char*)vp));
+					h5dump_str_append(str, "\\%03o", ((unsigned char*)vp)[i]);
 				}
 				break;
 			}
 			
-		} else if (H5T_STRING==H5Tget_class(type)) {
-			size = H5Tget_size(type);
-			quote = '\0';
-			if (str->s == '"') {
-				quote = 'a';
-			}
-			for (i=0; i<size && ((char*)vp)[i] != '\0'; i++) {
-				
-				/* Count how many times the next character repeats */
-				j=1;
-				while (i+j<size && ((char*)vp)[i]==((char*)vp)[i+j]) j++;
-				
-				/*
-				* Print the opening quote.  If the repeat count is high enough
-				* to warrant printing the number of repeats instead of
-				* enumerating the characters, then make sure the character to be
-				* repeated is in it's own quote.
-				*/
-				if (j>repeat_threshold) {
-					if (quote) h5dump_str_append(str, "%c", quote);
-					quote = '\'';
-					h5dump_str_append(str, "%s%c", i?" ":"", quote);
-				} else if (!quote) {
-					quote = '"';
-					h5dump_str_append(str, "%s%c", i?" ":"", quote);
-				}
-				
-				/* Print the character */
-				switch (((char*)vp)[i]) {
-				case '"':
-					h5dump_str_append(str, "\\\"");
-					break;
-				case '\\':
-					h5dump_str_append(str, "\\\\");
-					break;
-				case '\b':
-					h5dump_str_append(str, "\\b");
-					break;
-				case '\f':
-					h5dump_str_append(str, "\\f");
-					break;
-				case '\n':
-					h5dump_str_append(str, "\\n");
-					break;
-				case '\r':
-					h5dump_str_append(str, "\\r");
-					break;
-				case '\t':
-					h5dump_str_append(str, "\\t");
-					break;
-				default:
-					if (isprint(((char*)vp)[i])) {
-						h5dump_str_append(str, "%c", ((char*)vp)[i]);
-					} else {
-						h5dump_str_append(str, "\\%03o", ((unsigned char*)vp)[i]);
-					}
-					break;
-				}
-				
-				/* Print the repeat count */
-				if (j>repeat_threshold) {
+			/* Print the repeat count */
+			if (j>repeat_threshold) {
 #ifdef REPEAT_VERBOSE
-					h5dump_str_append(str, "%c repeats %d times", quote, j-1);
+				h5dump_str_append(str, "%c repeats %d times", quote, j-1);
 #else
-					h5dump_str_append(str, "%c*%d", quote, j-1);
+				h5dump_str_append(str, "%c*%d", quote, j-1);
 #endif
-					quote = '\0';
-					i += j-1;
-				}
+				quote = '\0';
+				i += j-1;
 			}
-			if (quote) h5dump_str_append(str, "%c", quote);
-			
-		} else if (H5Tequal(type, H5T_NATIVE_INT)) {
+		}
+		if (quote) h5dump_str_append(str, "%c", quote);
+		
+	} else if (H5Tequal(type, H5T_NATIVE_INT)) {
+		h5dump_str_append(str, OPT(info->fmt_int, "%d"),
+			*((int*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+		h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
+			*((unsigned*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+		h5dump_str_append(str, OPT(info->fmt_schar, "%d"),
+			*((signed char*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+		h5dump_str_append(str, OPT(info->fmt_uchar, "%u"),
+			*((unsigned char*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+		h5dump_str_append(str, OPT(info->fmt_short, "%d"),
+			*((short*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+		h5dump_str_append(str, OPT(info->fmt_ushort, "%u"),
+			*((unsigned short*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+		h5dump_str_append(str, OPT(info->fmt_long, "%ld"),
+			*((long*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+		h5dump_str_append(str, OPT(info->fmt_ulong, "%lu"),
+			*((unsigned long*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+		h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
+			*((long_long*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+		h5dump_str_append(str, OPT(info->fmt_ullong, fmt_ullong),
+			*((unsigned long_long*)vp));
+		
+	} else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
+		if (sizeof(hssize_t)==sizeof(int)) {
 			h5dump_str_append(str, OPT(info->fmt_int, "%d"),
 				*((int*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-			h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
-				*((unsigned*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-			h5dump_str_append(str, OPT(info->fmt_schar, "%d"),
-				*((signed char*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-			h5dump_str_append(str, OPT(info->fmt_uchar, "%u"),
-				*((unsigned char*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-			h5dump_str_append(str, OPT(info->fmt_short, "%d"),
-				*((short*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-			h5dump_str_append(str, OPT(info->fmt_ushort, "%u"),
-				*((unsigned short*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+		} else if (sizeof(hssize_t)==sizeof(long)) {
 			h5dump_str_append(str, OPT(info->fmt_long, "%ld"),
 				*((long*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+		} else {
+			h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
+				*((int64_t*)vp));
+		}
+		
+	} else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
+		if (sizeof(hsize_t)==sizeof(int)) {
+			h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
+				*((unsigned*)vp));
+		} else if (sizeof(hsize_t)==sizeof(long)) {
 			h5dump_str_append(str, OPT(info->fmt_ulong, "%lu"),
 				*((unsigned long*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-			h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
-				*((long_long*)vp));
-			
-		} else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+		} else {
 			h5dump_str_append(str, OPT(info->fmt_ullong, fmt_ullong),
-				*((unsigned long_long*)vp));
+				*((uint64_t*)vp));
+		}
+		
+	} else if (H5T_COMPOUND==H5Tget_class(type)) {
+		nmembs = H5Tget_nmembers(type);
+		h5dump_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+		for (j=0; j<nmembs; j++) {
+			if (j) h5dump_str_append(str, "%s",
+				OPT(info->cmpd_sep,
+				", " OPTIONAL_LINE_BREAK));
 			
-		} else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
-			if (sizeof(hssize_t)==sizeof(int)) {
-				h5dump_str_append(str, OPT(info->fmt_int, "%d"),
-					*((int*)vp));
-			} else if (sizeof(hssize_t)==sizeof(long)) {
-				h5dump_str_append(str, OPT(info->fmt_long, "%ld"),
-					*((long*)vp));
-			} else {
-				h5dump_str_append(str, OPT(info->fmt_llong, fmt_llong),
-					*((int64_t*)vp));
+			/* The name */
+			name = H5Tget_member_name(type, j);
+			h5dump_str_append(str, OPT(info->cmpd_name, ""), name);
+			free(name);
+			
+			/* The value */
+			offset = H5Tget_member_offset(type, j);
+			memb = H5Tget_member_type(type, j);
+			size = H5Tget_size(memb);
+			ndims = H5Tget_member_dims(type, j, dims, NULL);
+			assert(ndims>=0 && ndims<=H5S_MAX_RANK);
+			for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
+			
+			if (nelmts>1) {
+				h5dump_str_append(str, "%s", OPT(info->arr_pre, "["));
 			}
-			
-		} else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
-			if (sizeof(hsize_t)==sizeof(int)) {
-				h5dump_str_append(str, OPT(info->fmt_uint, "%u"),
-					*((unsigned*)vp));
-			} else if (sizeof(hsize_t)==sizeof(long)) {
-				h5dump_str_append(str, OPT(info->fmt_ulong, "%lu"),
-					*((unsigned long*)vp));
-			} else {
-				h5dump_str_append(str, OPT(info->fmt_ullong, fmt_ullong),
-					*((uint64_t*)vp));
+			for (i=0; i<nelmts; i++) {
+				if (i) {
+					h5dump_str_append(str, "%s",
+						OPT(info->arr_sep,
+						"," OPTIONAL_LINE_BREAK));
+				}
+				h5dump_sprint(str, info, memb, (char*)vp+offset+i*size);
 			}
-			
-		} else if (H5T_COMPOUND==H5Tget_class(type)) {
-			nmembs = H5Tget_nmembers(type);
-			h5dump_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
-			for (j=0; j<nmembs; j++) {
-				if (j) h5dump_str_append(str, "%s",
-					OPT(info->cmpd_sep,
-					", " OPTIONAL_LINE_BREAK));
-				
-				/* The name */
-				name = H5Tget_member_name(type, j);
-				h5dump_str_append(str, OPT(info->cmpd_name, ""), name);
-				free(name);
-				
-				/* The value */
-				offset = H5Tget_member_offset(type, j);
-				memb = H5Tget_member_type(type, j);
-				size = H5Tget_size(memb);
-				ndims = H5Tget_member_dims(type, j, dims, NULL);
-				assert(ndims>=0 && ndims<=H5S_MAX_RANK);
-				for (k=0, nelmts=1; k<ndims; k++) nelmts *= dims[k];
-				
-				if (nelmts>1) {
-					h5dump_str_append(str, "%s", OPT(info->arr_pre, "["));
-				}
-				for (i=0; i<nelmts; i++) {
-					if (i) {
-						h5dump_str_append(str, "%s",
-							OPT(info->arr_sep,
-							"," OPTIONAL_LINE_BREAK));
-					}
-					h5dump_sprint(str, info, memb, (char*)vp+offset+i*size);
-				}
-				if (nelmts>1) {
-					h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
-				}
-				H5Tclose(memb);
+			if (nelmts>1) {
+				h5dump_str_append(str, "%s", OPT(info->arr_suf, "]"));
 			}
-			h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
-			
-		} else if (H5T_ENUM==H5Tget_class(type)) {
-			char enum_name[1024];
-			if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name)>=0) {
-				h5dump_escape(enum_name, sizeof enum_name, TRUE);
-			} else {
-				h5dump_str_append(str, "0x");
-				n = H5Tget_size(type);
-				for (i=0; i<n; i++) {
-					h5dump_str_append(str, "%02x", ((unsigned char*)vp)[i]);
-				}
-			}
-			
+			H5Tclose(memb);
+		}
+		h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+		
+	} else if (H5T_ENUM==H5Tget_class(type)) {
+		char enum_name[1024];
+		if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name)>=0) {
+			h5dump_escape(enum_name, sizeof enum_name, TRUE);
 		} else {
 			h5dump_str_append(str, "0x");
 			n = H5Tget_size(type);
@@ -701,10 +693,18 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 			}
 		}
 		
-		return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
-
+	} else {
+		h5dump_str_append(str, "0x");
+		n = H5Tget_size(type);
+		for (i=0; i<n; i++) {
+			h5dump_str_append(str, "%02x", ((unsigned char*)vp)[i]);
+		}
 	}
-	else {}
+	
+	return h5dump_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
+	
+	
+
 }
 
 
