@@ -36,9 +36,11 @@
  *===-----------------------------------------------------------------------===
  */
 static hid_t create_group(hid_t loc, const char *name, size_t size_hint);
-static hid_t create_dset(hid_t loc, const char *name, int ndims, ...);
+static hid_t create_dset(hid_t loc, const char *name);
 static void access_dset(hid_t loc, const char *dset_name, ...);
-static void write_data(hid_t loc, const char *name, const void *buf);
+static void slab_set(hssize_t start[], hsize_t count[],
+                     hsize_t stride[], hsize_t block[]);
+static void write_data(hid_t loc, const char *name, int *buf);
 static void create_file(const char *filename);
 
 /*===-----------------------------------------------------------------------===
@@ -46,23 +48,42 @@ static void create_file(const char *filename);
  *===-----------------------------------------------------------------------===
  * The names of the test files for 
  */
-static const char *FILENAME[2] = {  /* List of files we want to create       */
+static const char *FILENAME[2] = {  /* List of files we want to create      */
     "FPHDF5Test",
     NULL
 };
-static char filenames[2][PATH_MAX]; /* "Fixed" filenames                     */
+static char filenames[2][PATH_MAX]; /* "Fixed" filenames                    */
 
 /*===-----------------------------------------------------------------------===
  *                             Global Variables
  *===-----------------------------------------------------------------------===
  */
-static MPI_Comm SAP_Comm = MPI_COMM_NULL;           /* COMM for FPHDF5       */
-static MPI_Comm SAP_Barrier_Comm = MPI_COMM_NULL;   /* COMM used in barriers */
+#ifdef RANK
+#undef RANK
+#endif  /* RANK */
+#ifdef DIM0
+#undef DIM0
+#endif  /* !DIM0 */
+#ifdef DIM1
+#undef DIM1
+#endif  /* !DIM1 */
 
-static hid_t    fapl = -1;          /* FPHDF5 file access property list      */
+enum {
+    SAP_RANK = 1,                /* The rank acting as the SAP           */
+    RANK = 2,
+    DIM0 = 6,
+    DIM1 = 12
+};
 
-int             nerrors;            /* Errors count                          */
-int             verbose;            /* Verbose, default is no                */
+static MPI_Comm SAP_Comm = MPI_COMM_NULL;           /* COMM for FPHDF5      */
+static MPI_Comm SAP_Barrier_Comm = MPI_COMM_NULL;   /* COMM used in barriers*/
+
+static hid_t    fapl = -1;          /* FPHDF5 file access property list     */
+static int      mpi_rank;           /* Rank of this process                 */
+static int      mpi_size;           /* Size of the COMM passed to FPHDF5    */
+
+int             nerrors;            /* Errors count                         */
+int             verbose;            /* Verbose, default is no               */
 
 /*-------------------------------------------------------------------------
  * Function:	create_group
@@ -77,11 +98,8 @@ int             verbose;            /* Verbose, default is no                */
  */
 static hid_t create_group(hid_t loc, const char *name, size_t size_hint)
 {
-    int     mpi_rank, mrc;
     hid_t   group;
 
-    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
     printf("%d: Creating group \"%s\"\n", mpi_rank, name);
 
     group = H5Gcreate(loc, name, size_hint);
@@ -101,26 +119,12 @@ static hid_t create_group(hid_t loc, const char *name, size_t size_hint)
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static hid_t create_dset(hid_t loc, const char *name, int ndims, ...)
+static hid_t create_dset(hid_t loc, const char *name)
 {
-    va_list ap;
-    hsize_t dims[3];
-    int     i, mpi_rank, mrc;
+    hsize_t dims[RANK] = { DIM0, DIM1 };
     hid_t   dset, sid;
 
-    VRFY((ndims >= 1 && ndims <= 3), "create_dset");
-
-    va_start(ap, ndims);
-
-    for (i = 0; i < ndims; ++i)
-        dims[i] = va_arg(ap, int);
-
-    va_end(ap);
-
-    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
-
-    sid = H5Screate_simple(ndims, dims, NULL);
+    sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple");
     printf("%d: Created simple dataspace\n", mpi_rank);
 
@@ -144,11 +148,7 @@ static hid_t create_dset(hid_t loc, const char *name, int ndims, ...)
 static void access_dset(hid_t loc, const char *dset_name, ...)
 {
     va_list ap;
-    int     mpi_rank, mrc;
     hid_t   dataset;
-
-    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
 
     /* Open the dataset */
     dataset = H5Dopen(loc, dset_name);
@@ -176,6 +176,32 @@ static void access_dset(hid_t loc, const char *dset_name, ...)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:	slab_set
+ * Purpose:	Setup the dimensions of the hyperslab.
+ * Return:	Nothing
+ * Programmer:	Bill Wendling
+ *              05. November 2003
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void slab_set(hssize_t start[], hsize_t count[],
+                     hsize_t stride[], hsize_t block[])
+{
+    /* Each process takes a slab of rows. */
+    block[0] = DIM0 / mpi_size;
+    block[1] = DIM1;
+
+    stride[0] = block[0];
+    stride[1] = block[1];
+
+    count[0] = 1;
+    count[1] = 1;
+
+    start[0] = mpi_rank * block[0];
+    start[1] = 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function:	write_data
  * Purpose:	Helper function that writes data to a dataset.
  * Return:	Nothing, but aborts if an error occurs.
@@ -184,26 +210,49 @@ static void access_dset(hid_t loc, const char *dset_name, ...)
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static void write_data(hid_t loc, const char *name, const void *buf)
+static void write_data(hid_t loc, const char *name, int *buf)
 {
-    int     mpi_rank, mrc;
-    hid_t   dataset, xfer;
-
-    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
+    herr_t      hrc;
+    hid_t       file_dataspace, mem_dataspace;
+    hid_t       dataset, xfer;
+    hsize_t     j, k;
+    int        *dataptr = buf;
+    hssize_t    start[RANK];    /* for hyperslab setting    */
+    hsize_t     count[RANK];    /* for hyperslab setting    */
+    hsize_t     stride[RANK];   /* for hyperslab setting    */
+    hsize_t     block[RANK];    /* for hyperslab setting    */
 
     /* See if dataset is there */
-    dataset = H5Dopen(loc, name);
-    VRFY((dataset >= 0), "H5Dopen");
+    VRFY(((dataset = H5Dopen(loc, name)) >= 0), "H5Dopen");
     printf("%d: Opened dataset \"%s\"\n", mpi_rank, name);
 
     xfer = H5Pcreate(H5P_DATASET_XFER);
     VRFY((xfer >= 0), "H5Pcreate");
 
-    mrc = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, buf);
-    VRFY((mrc >= 0), "H5Dwrite");
-    printf("%d: Wrote to dataset \"%s\"\n", mpi_rank, name);
+    file_dataspace = H5Dget_space(dataset);
+    VRFY((file_dataspace >= 0), "H5Dget_space");
 
+    slab_set(start, count, stride, block);
+
+    /* put some trivial data in the buffer */
+    for (j = 0; j < block[0]; ++j)
+        for (k = 0; k < block[1]; ++k)
+            *dataptr++ = (k + start[0]) * 100 + k + start[1] + 1;
+
+    hrc = H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET,
+                              start, stride, count, block);
+    VRFY((hrc >= 0), "H5Sselect_hyperslab");
+
+    /* create a memory dataspace independently */
+    mem_dataspace = H5Screate_simple(RANK, block, NULL);
+    VRFY((mem_dataspace >= 0), "");
+
+    hrc = H5Dwrite(dataset, H5T_NATIVE_INT, mem_dataspace,
+                   file_dataspace, H5P_DEFAULT, buf);
+    VRFY((hrc >= 0), "H5Dwrite");
+
+    VRFY((H5Sclose(mem_dataspace) >= 0), "H5Sclose");
+    VRFY((H5Sclose(file_dataspace) >= 0), "H5Sclose");
     VRFY((H5Pclose(xfer) >= 0), "H5Pclose");
     VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 }
@@ -221,58 +270,72 @@ static void write_data(hid_t loc, const char *name, const void *buf)
  */
 static void create_file(const char *filename)
 {
-    int     mpi_rank, mrc;
-    hid_t   fid = -1, dataset = -1, group = -1;
+    hid_t       fid = -1, dataset = -1, group = -1;
+    int         i;
+    int        *data_array = NULL;
 
-    /* Datasets to create */
-    const char dset_3x5[]       = "Dataset 3x5";
-    const char dset_3x5x7[]     = "Dataset 3x5x7";
-    const char dset_2x4x8[]     = "Dataset 2x4x8";
-    const char dset_5x7x11[]    = "Dataset 5x7x11";
+    /* Dataset Name Template */
+    const char *dset_tmpl       = "Dataset %d";
+    char        dset_name[128];
 
-    /* Groups to create */
-    const char group_dsets[]    = "Group Datasets";
-    const char group_1[]        = "Group 1";
-    const char group_2[]        = "Group 2";
+    /* Dataset Group Name Template */
+    const char *grp_tmpl        = "Process %d's Datasets";
+    char        grp_name[128];
 
-    mrc = MPI_Comm_rank(SAP_Comm, &mpi_rank);
-    VRFY((mrc == MPI_SUCCESS), "MPI_Comm_rank");
-
-    /*===-------------------------------------------------------------------===
+    /*=========================================================================
      * Create the file
-     *===-------------------------------------------------------------------===
+     *=========================================================================
      */
     printf("%d: Creating file %s\n", mpi_rank, filenames[0]);
-
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     VRFY((fid >= 0), "H5Fcreate");
     printf("%d: Created file %s\n", mpi_rank, filename);
 
+    /*=========================================================================
+     *  For each non-SAP process:
+     *      Create datasets in non-root group
+     *      Access all datasets from all processes
+     *      Write to all datasets from all processes
+     *  End
+     *=========================================================================
+     */
+    if (mpi_rank == 0)
+        for (i = 0; i < mpi_size; ++i)
+            if (i != SAP_RANK) {
+                sprintf(grp_name, grp_tmpl, i);
+                group = create_group(fid, grp_name, 4);
+                VRFY((H5Gclose(group) >= 0), "H5Gclose");
+            }
+
+    SYNC(SAP_Barrier_Comm);
+
     /*===-------------------------------------------------------------------===
-     * Create datasets
+     * Each process creates datasets in individual, non-root groups.
      *===-------------------------------------------------------------------===
      */
-    if (mpi_rank == 0) {
-        /* Create a dataset in the file */
-        group = create_group(fid, group_dsets, 4);
+    sprintf(grp_name, grp_tmpl, mpi_rank);
+    group = H5Gopen(fid, grp_name);
+    VRFY((group >= 0), "H5Gopen");
 
-        /* Create 3x5 dataset */
-        dataset = create_dset(group, dset_3x5, 2, 3, 5);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+    sprintf(dset_name, dset_tmpl, 0);
+    dataset = create_dset(group, dset_name);
+    VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        /* Create 3x5x7 dataset */
-        dataset = create_dset(group, dset_3x5x7, 3, 3, 5, 7);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+    /* Create 3x5x(mpi_size) dataset */
+    sprintf(dset_name, dset_tmpl, 1);
+    dataset = create_dset(group, dset_name);
+    VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        /* Create 2x4x8 dataset */
-        dataset = create_dset(group, dset_2x4x8, 3, 2, 4, 8);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+    /* Create 2x4x(mpi_size) dataset */
+    sprintf(dset_name, dset_tmpl, 2);
+    dataset = create_dset(group, dset_name);
+    VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
 
-        /* Create 5x7x11 dataset */
-        dataset = create_dset(group, dset_5x7x11, 3, 5, 7, 11);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    } 
+    /* Create 5x7x(mpi_size) dataset */
+    sprintf(dset_name, dset_tmpl, 3);
+    dataset = create_dset(group, dset_name);
+    VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
+    VRFY((H5Gclose(group) >= 0), "H5Gclose");
 
     SYNC(SAP_Barrier_Comm);
 
@@ -280,104 +343,57 @@ static void create_file(const char *filename)
      * Check that we can access all of the datasets created above
      *===-------------------------------------------------------------------===
      */
-    VRFY((group = H5Gopen(fid, group_dsets)), "H5Gopen");
-    access_dset(group, dset_3x5, group_dsets, NULL);
-    access_dset(group, dset_3x5x7, group_dsets, NULL);
-    access_dset(group, dset_2x4x8, group_dsets, NULL);
-    access_dset(group, dset_5x7x11, group_dsets, NULL);
-    VRFY((H5Gclose(group) >= 0), "H5Gclose");
+    for (i = 0; i < mpi_size; ++i)
+        if (i != SAP_RANK) {
+            sprintf(grp_name, grp_tmpl, i);
+            VRFY(((group = H5Gopen(fid, grp_name)) >= 0), "H5Gopen");
+            sprintf(dset_name, dset_tmpl, 0);
+            access_dset(group, dset_name, grp_name, NULL);
+            sprintf(dset_name, dset_tmpl, 1);
+            access_dset(group, dset_name, grp_name, NULL);
+            sprintf(dset_name, dset_tmpl, 2);
+            access_dset(group, dset_name, grp_name, NULL);
+            sprintf(dset_name, dset_tmpl, 3);
+            access_dset(group, dset_name, grp_name, NULL);
+            VRFY((H5Gclose(group) >= 0), "H5Gclose");
+        }
 
     SYNC(SAP_Barrier_Comm);
+
+    data_array = (int *)malloc(DIM0 * DIM1 * sizeof(int));
+    VRFY((data_array != NULL), "data_array malloc succeeded");
 
     /*===-------------------------------------------------------------------===
-     * Access datasets
+     * All processes write to each dataset.
      *===-------------------------------------------------------------------===
      */
-    if (mpi_rank == 2) {
-        int     i, j, k;
-        int     rdata[3][5];
-        int     sdata[3][5][7];
+    for (i = 0; i < mpi_size; ++i)
+        if (i != SAP_RANK) {
+            sprintf(grp_name, grp_tmpl, i);
+            VRFY(((group = H5Gopen(fid, grp_name)) >= 0), "H5Gopen");
 
-        VRFY(((group = H5Gopen(fid, group_dsets)) >= 0), "H5Gopen");
+            /* Write to this dataset */
+            sprintf(dset_name, dset_tmpl, 0);
+            printf("%d: Writing to /%s/%s\n", mpi_rank, grp_name, dset_name);
+            write_data(group, dset_name, data_array);
 
-        /*===---------------------------------------------------------------===
-         * Open 3x5 dataset and write values to it.
-         *===---------------------------------------------------------------===
-         */
-        for (i = 0; i < 3; ++i)
-            for (j = 0; j < 5; ++j)
-                rdata[i][j] = i * j + 37;
+            sprintf(dset_name, dset_tmpl, 1);
+            printf("%d: Writing to /%s/%s\n", mpi_rank, grp_name, dset_name);
+            write_data(group, dset_name, data_array);
 
-        write_data(group, dset_3x5, rdata);
+            sprintf(dset_name, dset_tmpl, 2);
+            printf("%d: Writing to /%s/%s\n", mpi_rank, grp_name, dset_name);
+            write_data(group, dset_name, data_array);
 
-        /*===---------------------------------------------------------------===
-         * Open 3x5x7 dataset
-         *===---------------------------------------------------------------===
-         */
-        for (i = 0; i < 3; ++i)
-            for (j = 0; j < 5; ++j)
-                for (k = 0; k < 7; ++k)
-                    sdata[i][j][k] = i * j * k + 927;
+            sprintf(dset_name, dset_tmpl, 3);
+            printf("%d: Writing to /%s/%s\n", mpi_rank, grp_name, dset_name);
+            write_data(group, dset_name, data_array);
+            
+            /* Close the group */
+            VRFY((H5Gclose(group) >= 0), "H5Gclose");
+        }
 
-        write_data(group, dset_3x5x7, sdata);
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    }
-
-    SYNC(SAP_Barrier_Comm);
-
-    /*===-------------------------------------------------------------------===
-     * Create a group
-     *===-------------------------------------------------------------------===
-     */
-    if (mpi_rank == 2) {
-        /* Create group "/group_1" */
-        group = create_group(fid, group_1, 37);
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    }
-
-    SYNC(SAP_Barrier_Comm);
-
-    /*===-------------------------------------------------------------------===
-     * Create another group
-     *===-------------------------------------------------------------------===
-     */
-    if (mpi_rank == 0) {
-        /* Create group "/group_2" */
-        group = create_group(fid, group_2, 37);
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    }
-
-    SYNC(SAP_Barrier_Comm);
-
-    /*===-------------------------------------------------------------------===
-     * Access groups and co-create datasets in them
-     *===-------------------------------------------------------------------===
-     */
-    if (mpi_rank == 0) {
-        /* Access group "/group_1" */
-        printf("%d: Opening group \"%s\"\n", mpi_rank, group_1);
-
-        VRFY(((group = H5Gopen(fid, group_1)) >= 0), "H5Gopen");
-        printf("%d: Opened group \"%s\"\n", mpi_rank, group_1);
-
-        /* Create dataset "/group_1/dset-2x4x8" */
-        dataset = create_dset(group, dset_2x4x8, 3, 2, 4, 8);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    } else if (mpi_rank == 2) {
-        /* Access group "/group_2" */
-        printf("%d: Opening group \"%s\"\n", mpi_rank, group_2);
-
-        VRFY(((group = H5Gopen(fid, group_2)) >= 0), "H5Gopen");
-        printf("%d: Opened group \"%s\"\n", mpi_rank, group_2);
-
-        /* Create dataset "/group_2/dset-5x7x11" */
-        dataset = create_dset(group, dset_5x7x11, 3, 5, 7, 11);
-        VRFY((H5Dclose(dataset) >= 0), "H5Dclose");
-        VRFY((H5Gclose(group) >= 0), "H5Gclose");
-    }
-
-    SYNC(SAP_Barrier_Comm);
+    free(data_array);
 
     if (fid > -1) {
         VRFY((H5Fclose(fid) >= 0), "H5Fclose");
@@ -387,12 +403,11 @@ static void create_file(const char *filename)
 
 int main(int argc, char *argv[])
 {
-    int     mrc;
-    int     mpi_rank;
-    int     sap_rank = 1;
+    herr_t  hrc;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     H5open();
     h5_show_hostname();
@@ -403,11 +418,11 @@ int main(int argc, char *argv[])
         printf("===================================\n");
     }
 
-    mrc = H5FPinit(MPI_COMM_WORLD, sap_rank, &SAP_Comm, &SAP_Barrier_Comm);
-    VRFY((mrc == MPI_SUCCESS), "H5FP_init");
+    hrc = H5FPinit(MPI_COMM_WORLD, SAP_RANK, &SAP_Comm, &SAP_Barrier_Comm);
+    VRFY((hrc == MPI_SUCCESS), "H5FP_init");
     printf("%d: Initialized FPHDF5\n", mpi_rank);
 
-    if (mpi_rank != sap_rank) {
+    if (mpi_rank != SAP_RANK) {
         /*
          * Setup the file access property list that's used to create the
          * file.
@@ -418,8 +433,8 @@ int main(int argc, char *argv[])
         VRFY((fapl >= 0), "H5Pcreate");
         fprintf(stderr, "%d: Created access property list\n", mpi_rank);
 
-        mrc = H5Pset_fapl_fphdf5(fapl, SAP_Comm, SAP_Barrier_Comm,
-                                 MPI_INFO_NULL, (unsigned)sap_rank);
+        hrc = H5Pset_fapl_fphdf5(fapl, SAP_Comm, SAP_Barrier_Comm,
+                                 MPI_INFO_NULL, (unsigned)SAP_RANK);
         VRFY((fapl >= 0), "H5Pset_fapl_fphdf5");
         printf("%d: Set access property list\n", mpi_rank);
 
