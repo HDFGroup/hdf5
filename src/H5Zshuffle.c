@@ -12,10 +12,14 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Ppublic.h"		/* Property lists			*/
+#include "H5Tpublic.h"		/* Datatype functions			*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
 
@@ -23,6 +27,72 @@
 #define PABLO_MASK	H5Z_shuffle_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
+
+/* Local function prototypes */
+static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_SHUFFLE[1] = {{
+    H5Z_FILTER_SHUFFLE,		/* Filter id number		*/
+    "shuffle",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    H5Z_set_local_shuffle,      /* The "set local" callback     */
+    H5Z_filter_shuffle,		/* The actual filter function	*/
+}};
+
+/* Local macros */
+#define H5Z_SHUFFLE_USER_NPARMS    0       /* Number of parameters that users can set */
+#define H5Z_SHUFFLE_TOTAL_NPARMS   1       /* Total number of parameters for filter */
+#define H5Z_SHUFFLE_PARM_SIZE      0       /* "Local" parameter for shuffling size */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_set_local_shuffle
+ *
+ * Purpose:	Set the "local" dataset parameter for data shuffling to be
+ *              the size of the datatype.
+ *
+ * Return:	Success: Non-negative
+ *		Failure: Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, April  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+{
+    unsigned flags;         /* Filter flags */
+    size_t cd_nelmts=H5Z_SHUFFLE_USER_NPARMS;     /* Number of filter parameters */
+    unsigned cd_values[H5Z_SHUFFLE_TOTAL_NPARMS];  /* Filter parameters */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_set_local_shuffle, FAIL);
+
+    /* Get the filter's current parameters */
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters");
+
+    /* Check that no parameters are currently set */
+    if(cd_nelmts!=H5Z_SHUFFLE_USER_NPARMS)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of shuffle parameters");
+
+    /* Set "local" parameter for this dataset */
+    if((cd_values[H5Z_SHUFFLE_PARM_SIZE]=H5Tget_size(type_id))==0)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
+
+    /* Modify the filter's parameters for this dataset */
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SHUFFLE, flags, H5Z_SHUFFLE_TOTAL_NPARMS, cd_values)<0)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5Z_set_local_shuffle() */
 
 
 /*-------------------------------------------------------------------------
@@ -47,7 +117,7 @@ static int interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
                    size_t nbytes, size_t *buf_size, void **buf)
 {
@@ -63,11 +133,11 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     FUNC_ENTER_NOAPI(H5Z_filter_shuffle, 0);
 
     /* Check arguments */
-    if (cd_nelmts!=1 || cd_values[0]==0)
+    if (cd_nelmts!=H5Z_SHUFFLE_TOTAL_NPARMS || cd_values[H5Z_SHUFFLE_PARM_SIZE]==0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid shuffle parameters");
 
     /* Get the number of bytes per element from the parameter block */
-    bytesoftype=cd_values[0];
+    bytesoftype=cd_values[H5Z_SHUFFLE_PARM_SIZE];
 
     /* Don't do anything for 1-byte elements */
     if(bytesoftype>1) {

@@ -12,10 +12,16 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"         /* File access                          */
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Ppublic.h"		/* Property lists			*/
+#include "H5Tpublic.h"		/* Datatype functions			*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_SZIP
 
@@ -27,6 +33,185 @@
 #define PABLO_MASK	H5Z_szip_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
+
+/* Local function prototypes */
+static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_SZIP[1] = {{
+    H5Z_FILTER_SZIP,		/* Filter id number		*/
+    "szip",			/* Filter name for debugging	*/
+    H5Z_can_apply_szip,		/* The "can apply" callback     */
+    H5Z_set_local_szip,         /* The "set local" callback     */
+    H5Z_filter_szip,		/* The actual filter function	*/
+}};
+
+/* Local macros */
+#define H5Z_SZIP_USER_NPARMS    2       /* Number of parameters that users can set */
+#define H5Z_SZIP_TOTAL_NPARMS   4       /* Total number of parameters for filter */
+#define H5Z_SZIP_PARM_MASK      0       /* "User" parameter for option mask */
+#define H5Z_SZIP_PARM_PPB       1       /* "User" parameter for pixels-per-block */
+#define H5Z_SZIP_PARM_BPP       2       /* "Local" parameter for bits-per-pixel */
+#define H5Z_SZIP_PARM_PPS       3       /* "Local" parameter for pixels-per-scanline */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_can_apply_szip
+ *
+ * Purpose:	Check the parameters for szip compression for validity and
+ *              whether they fit a particular dataset.
+ *
+ * Note:        This function currently range-checks for datatypes with
+ *              8-bit boundaries (8, 16, 24, etc.).  It appears that the szip
+ *              library can actually handle 1-24, 32 & 64 bit samples.  If
+ *              this becomes important, we should make the checks below more
+ *              sophisticated and have them check for n-bit datatypes of the
+ *              correct size, etc. - QAK
+ *
+ * Return:	Success: Non-negative
+ *		Failure: Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, April  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    unsigned flags;         /* Filter flags */
+    size_t cd_nelmts=H5Z_SZIP_USER_NPARMS;     /* Number of filter parameters */
+    unsigned cd_values[H5Z_SZIP_TOTAL_NPARMS];  /* Filter parameters */
+    hsize_t dims[H5O_LAYOUT_NDIMS];     /* Dataspace (i.e. chunk) dimensions */
+    int dtype_size;                     /* Datatype's size (in bits) */
+    H5T_order_t dtype_order;            /* Datatype's endianness order */
+    hsize_t scanline;                   /* Size of dataspace's fastest changing dimension */
+    herr_t ret_value=TRUE;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_can_apply_szip, FAIL);
+
+    /* Get the filter's current parameters */
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
+
+    /* Check that no parameters are currently set */
+    if(cd_nelmts!=H5Z_SZIP_USER_NPARMS)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of szip parameters");
+
+    /* Get datatype's size, for checking the "bits-per-pixel" */
+    if((dtype_size=(sizeof(unsigned char)*H5Tget_size(type_id)))==0)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
+
+    /* Range check datatype's size */
+    if(dtype_size>32 && dtype_size!=64)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid datatype size");
+
+    /* Get datatype's endianness order */
+    if((dtype_order=H5Tget_order(type_id))==H5T_ORDER_ERROR)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "can't retrieve datatype endianness order");
+
+    /* Range check datatype's endianness order */
+    /* (Note: this may not handle non-atomic datatypes well) */
+    if(dtype_order != H5T_ORDER_LE && dtype_order != H5T_ORDER_BE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid datatype endianness order");
+
+    /* Get dimensions for dataspace */
+    if (H5Sget_simple_extent_dims(space_id, dims, NULL)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get dataspace dimensions");
+
+    /* Get "local" parameter for this dataset's "pixels-per-scanline" */
+    scanline=dims[0];
+
+    /* Range check the scanline's size */
+    if(scanline > SZ_MAX_PIXELS_PER_SCANLINE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid scanline size");
+
+    /* Range check the scanline's number of blocks */
+    if((scanline/cd_values[H5Z_SZIP_PARM_PPB]) > SZ_MAX_BLOCKS_PER_SCANLINE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "invalid number of blocks per scanline");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5Z_can_apply_szip() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_set_local_szip
+ *
+ * Purpose:	Set the "local" dataset parameters for szip compression.
+ *
+ * Return:	Success: Non-negative
+ *		Failure: Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, April  7, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+{
+    unsigned flags;         /* Filter flags */
+    size_t cd_nelmts=H5Z_SZIP_USER_NPARMS;     /* Number of filter parameters */
+    unsigned cd_values[H5Z_SZIP_TOTAL_NPARMS];  /* Filter parameters */
+    hsize_t dims[H5O_LAYOUT_NDIMS];             /* Dataspace (i.e. chunk) dimensions */
+    H5T_order_t dtype_order;    /* Datatype's endianness order */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_set_local_szip, FAIL);
+
+    /* Get the filter's current parameters */
+    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SZIP,&flags,&cd_nelmts, cd_values,0,NULL)<0)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get szip parameters");
+
+    /* Check that no parameters are currently set */
+    if(cd_nelmts!=H5Z_SZIP_USER_NPARMS)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of szip parameters");
+
+    /* Get dimensions for dataspace */
+    if (H5Sget_simple_extent_dims(space_id, dims, NULL)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get dataspace dimensions");
+
+    /* Set "local" parameter for this dataset's "bits-per-pixel" */
+    if((cd_values[H5Z_SZIP_PARM_BPP]=(sizeof(unsigned char)*H5Tget_size(type_id)))==0)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
+
+    /* Set "local" parameter for this dataset's "pixels-per-scanline" */
+    cd_values[H5Z_SZIP_PARM_PPS]=dims[0];
+
+    /* Get datatype's endianness order */
+    if((dtype_order=H5Tget_order(type_id))==H5T_ORDER_ERROR)
+	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
+
+    /* Set the correct endianness flag for szip */
+    /* (Note: this may not handle non-atomic datatypes well) */
+    switch(dtype_order) {
+        case H5T_ORDER_LE:      /* Little-endian byte order */
+            cd_values[H5Z_SZIP_PARM_MASK] |= SZ_LSB_OPTION_MASK;
+            break;
+
+        case H5T_ORDER_BE:      /* Big-endian byte order */
+            cd_values[H5Z_SZIP_PARM_MASK] |= SZ_MSB_OPTION_MASK;
+            break;
+
+        default:
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order");
+    } /* end switch */
+
+    /* Modify the filter's parameters for this dataset */
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SZIP, flags, H5Z_SZIP_TOTAL_NPARMS, cd_values)<0)
+	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local szip parameters");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5Z_set_local_szip() */
 
 
 /*-------------------------------------------------------------------------
@@ -47,7 +232,7 @@ static int interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
     size_t nbytes, size_t *buf_size, void **buf)
 {

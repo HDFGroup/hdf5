@@ -17,10 +17,12 @@
  *              Friday, August 27, 1999
  */
 
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
@@ -32,6 +34,19 @@
 #define PABLO_MASK	H5Z_deflate_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
+
+/* Local function prototypes */
+static size_t H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_DEFLATE[1] = {{
+    H5Z_FILTER_DEFLATE,		/* Filter id number		*/
+    "deflate",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    H5Z_filter_deflate,         /* The actual filter function	*/
+}};
 
 #define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil((double)((s)*1.001))+12)
 
@@ -52,7 +67,7 @@ static int interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 		    const unsigned cd_values[], size_t nbytes,
 		    size_t *buf_size, void **buf)

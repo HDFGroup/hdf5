@@ -17,19 +17,35 @@
  *              Jan 3, 2003
  */
 
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"         /* File access                          */
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
-
-#define FLETCHER_LEN       4
 
 /* Interface initialization */
 #define PABLO_MASK	H5Z_fletcher32_mask
 #define INTERFACE_INIT	NULL
 static int interface_initialize_g = 0;
+
+/* Local function prototypes */
+static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_FLETCHER32[1] = {{
+    H5Z_FILTER_FLETCHER32,	/* Filter id number		*/
+    "fletcher32",		/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    H5Z_filter_fletcher32,	/* The actual filter function	*/
+}};
+
+#define FLETCHER_LEN       4
 
 
 /*-------------------------------------------------------------------------
@@ -48,7 +64,8 @@ static int interface_initialize_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-static uint32_t H5Z_filter_fletcher32_compute(unsigned short *src, size_t len)
+static uint32_t
+H5Z_filter_fletcher32_compute(unsigned short *src, size_t len)
 {
     size_t count = len;         /* Number of bytes left to checksum */
     uint32_t s1 = 0, s2 = 0;    /* Temporary partial checksums */
@@ -102,7 +119,7 @@ static uint32_t H5Z_filter_fletcher32_compute(unsigned short *src, size_t len)
  *
  *-------------------------------------------------------------------------
  */
-size_t
+static size_t
 H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[], 
                      size_t nbytes, size_t *buf_size, void **buf)
 {
