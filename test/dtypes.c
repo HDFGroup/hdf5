@@ -5742,7 +5742,7 @@ my_isnan(dtype_t type, void *val)
 	} else {
 	    return 0;
 	}
-	 if (HDstrstr(s, "NaN") || HDstrstr(s, "NAN") || HDstrstr(s, "nan")) 
+	if (HDstrstr(s, "NaN") || HDstrstr(s, "NAN") || HDstrstr(s, "nan")) 
 	    retval = 1;
     }
 
@@ -6967,6 +6967,39 @@ test_conv_int_float(const char *name, hbool_t run_special, hid_t src, hid_t dst)
 	    if (k==dst_size)
                 continue; /*no error*/
 
+            /*          Test library's handling of NaN:
+ 	     * Hardware usually doesn't handle NaN too gracefully. The
+	     * hardware conversion result is usually garbage so we must handle 
+             * those cases differetly when checking results.
+             *
+             *          Test user's exception handler when NaN happens:  
+             * Try to follow the except_func callback function to check if the 
+             * desired value was set.
+	     */
+            if (run_special && (FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)) {
+                if (my_isnan(src_type, saved+j*src_size)) {
+                    if(!except_set) {
+                        if(!strcmp(name, "sw")) {
+                            /*Although bit operation should be on little-endian order, this special
+                             *case should be fine because we're searching non-zero bit only.*/ 
+                            if (H5T_bit_find(buf+j*dst_size, 0, 8*dst_size-1, H5T_BIT_LSB, 1)<0)
+                                continue; /*no error. Software conversion set integer to 0.*/
+                        } else if(!strcmp(name, "hw")) {
+                            continue; /*don't compare because hardware conversion may fill in garbage*/
+                        } 
+                    } else {
+                        /* fill_value is small so we only want to know the 1st byte is set.  Also 
+                         * consider endianess here. */
+                        if(endian==H5T_ORDER_LE)
+                            if(buf[j*dst_size] == fill_value)
+                                continue; /*no error*/
+                        else
+                            if(buf[(j+1)*dst_size-1] == fill_value)
+                                continue; /*no error*/
+                    }
+                }
+            }
+
 	    /*
 	     * Convert the source and destination values to little endian
 	     * order so we can use the HDF5 bit vector operations to test
@@ -7051,32 +7084,6 @@ test_conv_int_float(const char *name, hbool_t run_special, hid_t src, hid_t dst)
                         if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
                             continue; /*no error*/
                     } else {
-                        if (dst_bits[0] == fill_value)
-                            continue; /*no error*/
-                    }
-                }
-            }
-            
-            /*          Test library's handling of NaN:
- 	     * Hardware usually doesn't handle NaN too gracefully. The
-	     * hardware conversion result is usually garbage so we must handle 
-             * those cases differetly when checking results.
-             *
-             *          Test user's exception handler when NaN happens:  
-             * Try to follow the except_func callback function to check if the 
-             * desired value was set.
-	     */
-            if (run_special && (FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)) {
-                if (my_isnan(src_type, src_bits)) {
-                    if(!except_set) {
-                        if(!strcmp(name, "sw")) {
-                            if (H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 1)<0)
-                                continue; /*no error. Software conversion set integer to 0.*/
-                        } else if(!strcmp(name, "hw")) {
-                            continue; /*don't compare because hardware conversion may fill in garbage*/
-                        } 
-                    } else {
-                        /* fill_value is small so we know only the 1st byte is set */
                         if (dst_bits[0] == fill_value)
                             continue; /*no error*/
                     }
