@@ -102,10 +102,6 @@ test_h5s_basic(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataspace Manipulation\n"));
 
-    /* Create file */
-    fid1 = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    CHECK(fid1, FAIL, "H5Fcreate");
-
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
@@ -147,10 +143,6 @@ test_h5s_basic(void)
 
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
-
-    /* Close first file */
-    ret = H5Fclose(fid1);
-    CHECK(ret, FAIL, "H5Fclose");
 
     /*
      * Check to be sure we can't create a simple data space that has too many
