@@ -2474,7 +2474,6 @@ int h5dump_attr(hid_t oid, hid_t p_type){
 	need = nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
 	sm_buf = malloc(need);
 	p_type_nbytes = H5Tget_size(p_type);
-	dim_n_size = size[ndims - 1];
 	
 	/*read the attr*/
 	if (H5Aread(oid, p_type, sm_buf) < 0){
