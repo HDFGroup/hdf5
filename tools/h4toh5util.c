@@ -1,4 +1,17 @@
 #include "h4toh5util.h"
+/* Function h4toh5_ZeroMemory
+* Purpose: Zero out memory
+* return:  None
+* In: size_t n(DWORD in windows)
+      void* s(PVOID in windows)
+*/
+void h4toh5_ZeroMemory(void*s,size_t n) {
+#ifdef WIN32
+     ZeroMemory(s,n);
+#else
+    bzero(s,n);
+#endif
+}
 
 /*-------------------------------------------------------------------------
  * Function:	h5string_to_int
@@ -1332,7 +1345,7 @@ char* get_obj_aboname(char* obj_name,char* refstr,char* path_name,
 	  printf("error in allocating memory. \n");
 	  return NULL;
 	}
-	bzero(abo_objname,strlen(path_name)+strlen(objstr)+
+	h4toh5_ZeroMemory(abo_objname,strlen(path_name)+strlen(objstr)+
 	      strlen(refstr)+3);
 	strcpy(abo_objname,path_name);
 	strcat(abo_objname,"/");
@@ -1347,7 +1360,7 @@ char* get_obj_aboname(char* obj_name,char* refstr,char* path_name,
 	  printf("error in allocating memory. \n");
 	  return NULL;
 	}
-	bzero(abo_objname,strlen(objstr)+strlen(refstr)+3);
+	h4toh5_ZeroMemory(abo_objname,strlen(objstr)+strlen(refstr)+3);
 	strcat(abo_objname,"/");
 	strcat(abo_objname,objstr);
 	strcat(abo_objname,"_");
@@ -1393,7 +1406,7 @@ char* make_objname_no(char* refstr,char* path_name,const char*objstr) {
 	  printf("error in allocating memory. \n");
 	  return NULL;
       }
-      bzero(new_objname,strlen(objstr)+strlen(refstr)+3);
+      h4toh5_ZeroMemory(new_objname,strlen(objstr)+strlen(refstr)+3);
       strcpy(new_objname,"/");
       strcat(new_objname,objstr);
       strcat(new_objname,"_");
@@ -1407,7 +1420,7 @@ char* make_objname_no(char* refstr,char* path_name,const char*objstr) {
 	printf("error in allocating memory. \n");
 	return NULL;
       }
-      bzero(new_objname,strlen(path_name)+strlen(objstr)+strlen(refstr)+3);
+      h4toh5_ZeroMemory(new_objname,strlen(path_name)+strlen(objstr)+strlen(refstr)+3);
       strcpy(new_objname,path_name);
       strcat(new_objname,"/");
       strcat(new_objname,objstr);
@@ -1443,7 +1456,7 @@ char* make_objname_yes(char* obj_name,char* path_name){
      printf("error in allocating memory. \n");
      return NULL;
    }
-   bzero(new_objname,strlen(obj_name)+2);
+   h4toh5_ZeroMemory(new_objname,strlen(obj_name)+2);
    strcpy(new_objname,"/");
    strcat(new_objname,obj_name);
   }
@@ -1453,7 +1466,7 @@ char* make_objname_yes(char* obj_name,char* path_name){
      printf("error in allocating memory. \n");
      return NULL;
    }
-   bzero(new_objname,strlen(path_name)+strlen(obj_name)+2);
+   h4toh5_ZeroMemory(new_objname,strlen(path_name)+strlen(obj_name)+2);
    strcpy(new_objname,path_name);
    strcat(new_objname,"/");
    strcat(new_objname,obj_name);
@@ -1485,7 +1498,7 @@ char* trans_obj_name(int32 obj_tag,int32 index) {
     printf("cannot allocate memory for object name. \n");
     return NULL;
   }
-  bzero(obj_name,strlen(HDF4_PALETTE)+strlen(ATTR)+8);
+  h4toh5_ZeroMemory(obj_name,strlen(HDF4_PALETTE)+strlen(ATTR)+8);
 
   if(conv_int_str(index,indstr)== FAIL) {
     printf("indstr is not allocated. \n");
@@ -1590,7 +1603,7 @@ char *correct_name(char* oldname){
   }
 
   newname = malloc(strlen(oldname)+1);
-  bzero(newname,strlen(oldname)+1);
+  h4toh5_ZeroMemory(newname,strlen(oldname)+1);
   newname = strncpy(newname, oldname, strlen(oldname));
 
   while(strchr(newname,ORI_SLASH)!= NULL){

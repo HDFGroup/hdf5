@@ -95,6 +95,8 @@ converter.*/
 #define VG_DEFHASHSIZE 64
 #define VD_DEFHASHSIZE 64
 #define MAXREF_LENGTH  5
+/*considering the string size of HDF4_DIMGROUP. we add this into 276.*/
+#define MAX_DIM_NAME   276
 
 int32 estnum_vg;
 int32 estnum_vd;
@@ -135,6 +137,8 @@ struct table* pal_hashtab;
 struct name_table* name_hashtab;
 struct name_table* dim_hashtab;
 
+/* routine for zeroing out the memory. */
+void h4toh5_ZeroMemory(void*s,size_t n);
 /* look-up table, object reference is the key.*/
 int lookup(int,int,struct table*);
 

@@ -1,9 +1,12 @@
+#ifndef H4TOH5MAIN_H
+#define H4TOH5MAIN_H
 #include "hdf.h"
 #include "mfhdf.h"
 #include "hdf5.h"
 #include "h4toh5util.h"
 #include <fcntl.h>
 #include <errno.h>
+
 /* subroutines adapted from h5toh4 tools and used for h4toh5main.c */
 void PrintOptions_h4toh5(void);
 int test_file(char *filename,int oflag,mode_t mode);
@@ -54,3 +57,10 @@ int Annoobj_h4_to_h5(int32,int32,int32,hid_t);
 
 /*subroutines for h4toh5pal.c*/
 int Palette_h4_to_h5(int32,int32 ,hid_t,char *);
+#endif
+
+
+
+
+
+
