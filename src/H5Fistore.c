@@ -44,9 +44,9 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Bprivate.h"		/* B-link trees				*/
-#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"
+#include "H5Fpkg.h"		/* Files				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File space management		*/

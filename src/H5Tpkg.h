@@ -34,11 +34,44 @@
 #  undef H5T_DEBUG
 #endif
 
-#include "H5HGprivate.h"
-#include "H5Dprivate.h"
-#include "H5Fprivate.h"
-#include "H5Rprivate.h"
+/* Get package's private header */
 #include "H5Tprivate.h"
+
+#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Fprivate.h"		/* Files				*/
+#include "H5HGprivate.h"	/* Global heaps				*/
+
+/* Number of reserved IDs in ID group */
+#define H5T_RESERVED_ATOMS 	8
+
+/* Length of debugging name buffer */
+#define H5T_NAMELEN		32
+
+/* Statistics about a conversion function */
+struct H5T_stats_t {
+    unsigned	ncalls;			/*num calls to conversion function   */
+    hsize_t	nelmts;			/*total data points converted	     */
+    H5_timer_t	timer;			/*total time for conversion	     */
+};
+
+/* The data type conversion database */
+struct H5T_path_t {
+    char	name[H5T_NAMELEN];	/*name for debugging only	     */
+    H5T_t	*src;			/*source data type ID		     */
+    H5T_t	*dst;			/*destination data type ID	     */
+    H5T_conv_t	func;			/*data conversion function	     */
+    hbool_t	is_hard;		/*is it a hard function?	     */
+    H5T_stats_t	stats;			/*statistics for the conversion	     */
+    H5T_cdata_t	cdata;			/*data for this function	     */
+};
+
+/* VL types */
+typedef enum {
+    H5T_VLEN_BADTYPE =  -1, /* invalid VL Type */
+    H5T_VLEN_SEQUENCE=0,    /* VL sequence */
+    H5T_VLEN_STRING,        /* VL string */
+    H5T_VLEN_MAXTYPE        /* highest type (Invalid as true type) */
+} H5T_vlen_type_t;
 
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */

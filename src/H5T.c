@@ -21,10 +21,10 @@
 
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Dprivate.h"		/*datasets (for H5Tcopy)		  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5private.h"		/*generic functions			*/
+#include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Gprivate.h"		/*groups				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
@@ -4754,6 +4754,59 @@ done:
     
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_path_noop
+ *
+ * Purpose:	Is the path the special no-op path? The no-op function can be
+ *              set by the application and there might be more than one no-op
+ *              path in a multi-threaded application if one thread is using
+ *              the no-op path when some other thread changes its definition.
+ *
+ * Return:	TRUE/FALSE (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, May  8, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5T_path_noop(const H5T_path_t *p)
+{
+    FUNC_ENTER_NOINIT(H5T_path_noop);
+
+    assert(p);
+
+    FUNC_LEAVE_NOAPI(p->is_hard && 0==H5T_cmp(p->src, p->dst));
+} /* end H5T_path_noop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_path_bkg
+ *
+ * Purpose:	Get the "background" flag for the conversion path.
+ *
+ * Return:	Background flag (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, May  8, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_bkg_t
+H5T_path_bkg(const H5T_path_t *p)
+{
+    FUNC_ENTER_NOINIT(H5T_path_bkg);
+
+    assert(p);
+
+    FUNC_LEAVE_NOAPI(p->cdata.need_bkg);
+} /* end H5T_path_bkg() */
 
 
 /*-------------------------------------------------------------------------

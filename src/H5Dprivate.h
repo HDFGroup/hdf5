@@ -18,6 +18,7 @@
 #ifndef _H5Dprivate_H
 #define _H5Dprivate_H
 
+/* Include package's public header */
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
@@ -171,6 +172,5 @@ H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(H5F_t *f, hid_t dxpl_id);
-
 
 #endif

@@ -21,13 +21,13 @@
 
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Iprivate.h"
-#include "H5MMprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object header functions                 */
-#include "H5Pprivate.h"
+#include "H5Pprivate.h"		/* Property lists			*/
 
 #define PABLO_MASK	H5O_fill_mask
 
@@ -870,7 +870,7 @@ H5O_fill_convert(void *_fill, H5T_t *dset_type, hid_t dxpl_id)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 	HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
     }
-    if (tpath->cdata.need_bkg && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
+    if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(dset_type))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
 
     /* Do the conversion */

@@ -34,6 +34,10 @@
 #define INTERFACE_INIT  NULL
 static int             interface_initialize_g = 0;
 
+/* Static function prototypes */
+static herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
+    size_t num_elem, const hssize_t **coord);
+
 /* Declare a free list to manage the H5S_pnt_node_t struct */
 H5FL_DEFINE_STATIC(H5S_pnt_node_t);
 
@@ -419,7 +423,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
     const hssize_t **coord)
 {

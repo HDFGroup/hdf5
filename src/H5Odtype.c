@@ -15,13 +15,13 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5T_PACKAGE		/*prevent warning from including H5Tpkg   */
 
-#include "H5private.h"
-#include "H5Eprivate.h"
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gprivate.h"
-#include "H5MMprivate.h"
-#include "H5Opkg.h"             /* Object header functions                 */
-#include "H5Tpkg.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5Gprivate.h"		/* Groups				*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
+#include "H5Tpkg.h"		/* Datatypes				*/
 
 #define PABLO_MASK	H5O_dtype_mask
 

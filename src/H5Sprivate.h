@@ -21,17 +21,12 @@
 #include "H5Spublic.h"
 
 /* Private headers needed by this file */
-#include "H5private.h"
-#include "H5Dpublic.h"
-#include "H5Fprivate.h"
-#include "H5Oprivate.h"
-#include "H5Pprivate.h"
-
-#define H5S_RESERVED_ATOMS  2
-
-/* Flags to indicate special dataspace features are active */
-#define H5S_VALID_MAX	0x01
-#define H5S_VALID_PERM	0x02
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Fprivate.h"		/* Files				*/
+#include "H5Gprivate.h"		/* Groups				*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /* Flags for H5S_find */
 #define H5S_CONV_PAR_IO_POSSIBLE        0x0001
@@ -42,16 +37,12 @@
 #define H5S_CONV_STORAGE_CHUNKED        0x0004  /* i.e. '2' */
 #define H5S_CONV_STORAGE_MASK           0x0006
 
-/* Flags for "get_seq_list" methods */
-#define H5S_GET_SEQ_LIST_SORTED         0x0001
-
-/* Forward references of common typedefs */
+/* Forward references of package typedefs */
 typedef struct H5S_t H5S_t;
 typedef struct H5S_pnt_node_t H5S_pnt_node_t;
 typedef struct H5S_hyper_span_t H5S_hyper_span_t;
 typedef struct H5S_hyper_span_info_t H5S_hyper_span_info_t;
 typedef struct H5S_hyper_dim_t H5S_hyper_dim_t;
-union H5D_storage_t;
 
 /* Point selection iteration container */
 typedef struct {
@@ -128,7 +119,7 @@ typedef struct H5S_conv_t {
     
     /* Read from file to application w/o intermediate scratch buffer */
     herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
-           H5P_genplist_t *dc_plist, const union H5D_storage_t *store,
+           H5P_genplist_t *dc_plist, const H5D_storage_t *store,
            size_t elmt_size, const H5S_t *file_space,
            const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/);
 
@@ -160,9 +151,7 @@ typedef struct H5S_conv_t {
 #endif
 } H5S_conv_t;
 
-/* We get the declaration of H5G_entry_t from the H5Oprivate.h file */
-
-H5_DLL H5S_t *H5S_create(H5S_class_t type);
+/* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src);
 H5_DLL herr_t H5S_close(H5S_t *ds);
 H5_DLL H5S_conv_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space,
@@ -173,15 +162,10 @@ H5_DLL hsize_t H5S_get_npoints_max(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
 					hsize_t max_dims[]/*out*/);
-H5_DLL herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
-		       const hsize_t *max);
 H5_DLL herr_t H5S_modify(struct H5G_entry_t *ent, const H5S_t *space,
         hbool_t update_time, hid_t dxpl_id);
 H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds);
 H5_DLL H5S_t *H5S_read(struct H5G_entry_t *ent, hid_t dxpl_id);
-H5_DLL int H5S_cmp(const H5S_t *ds1, const H5S_t *ds2);
-H5_DLL htri_t H5S_is_simple(const H5S_t *sdim);
-H5_DLL herr_t H5S_extent_release(H5S_t *space);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
@@ -190,10 +174,8 @@ H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream
 			 int indent, int fwidth);
 
 /* Operations on selections */
-H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
 H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
 H5_DLL H5S_sel_type H5S_get_select_type(const H5S_t *space);
-H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
 H5_DLL herr_t H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space,
 				H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5S_select_fill(void *fill, size_t fill_size,
@@ -220,11 +202,6 @@ H5_DLL herr_t H5S_select_write(H5F_t *f, struct H5O_layout_t *layout,
         H5P_genplist_t *dc_plist, const union H5D_storage_t *store, size_t elmt_size,
         const H5S_t *file_space, const H5S_t *mem_space, hid_t dxpl_id,
         const void *buf/*out*/);
-H5_DLL herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, 
-        size_t num_elem, const hssize_t **coord);
-#ifdef NEW_HYPERSLAB_API
-H5_DLL herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
-#endif /*NEW_HYPERSLAB_API */
 H5_DLL htri_t H5S_select_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
@@ -242,38 +219,5 @@ H5_DLL herr_t H5S_select_iter_coords(const H5S_sel_iter_t *sel_iter, hssize_t *c
 H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
-
-#ifdef H5_HAVE_PARALLEL
-/* MPI-IO function to read directly from app buffer to file rky980813 */
-H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f,
-				    const struct H5O_layout_t *layout,
-                                    H5P_genplist_t *dc_plist,
-                                    const H5O_efl_t *efl,
-				    size_t elmt_size, const H5S_t *file_space,
-				    const H5S_t *mem_space, hid_t dxpl_id,
-				    void *buf/*out*/);
-
-/* MPI-IO function to write directly from app buffer to file rky980813 */
-H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f,
-				    struct H5O_layout_t *layout,
-                                    H5P_genplist_t *dc_plist,
-                                    const H5O_efl_t *efl,
-				    size_t elmt_size, const H5S_t *file_space,
-				    const H5S_t *mem_space, hid_t dxpl_id,
-				    const void *buf);
-
-/* MPI-IO function to check if a direct I/O transfer is possible between
- * memory and the file */
-H5_DLL htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
-                                     const H5S_t *file_space, const unsigned flags);
-
-#ifndef _H5S_IN_H5S_C
-/* Global vars whose value comes from environment variable */
-/* (Defined in H5S.c) */
-H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
-H5_DLLVAR hbool_t		H5S_mpi_prefer_derived_types_g;
-#endif /* _H5S_IN_H5S_C */
-
-#endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */

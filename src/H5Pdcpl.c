@@ -1275,12 +1275,12 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
      */
     if (H5T_get_size(type)>=H5T_get_size(fill.type)) {    
         buf = value;
-        if (tpath->cdata.need_bkg && NULL==(bkg=H5MM_malloc(H5T_get_size(type))))
+        if (H5T_path_bkg(tpath) && NULL==(bkg=H5MM_malloc(H5T_get_size(type))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
     } else {
         if (NULL==(buf=H5MM_malloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-        if (tpath->cdata.need_bkg)
+        if (H5T_path_bkg(tpath))
             bkg = value;
     }
     HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));

@@ -20,7 +20,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
-#include "H5HLprivate.h"	/* Name heap				*/
+#include "H5HLprivate.h"	/* Local heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
@@ -57,6 +57,17 @@ static haddr_t H5D_get_offset(H5D_t *dset);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_close(H5D_t *dataset);
+
+/* Internal data structure for computing variable-length dataset's total size */
+typedef struct {
+    hid_t dataset_id;   /* ID of the dataset we are working on */
+    hid_t fspace_id;    /* ID of the file dataset's dataspace we are working on */
+    hid_t mspace_id;    /* ID of the memory dataset's dataspace we are working on */
+    void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
+    void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
+    hid_t xfer_pid;     /* ID of the dataset xfer property list */
+    hsize_t size;       /* Accumulated number of bytes for the selection */
+} H5D_vlen_bufsize_t;
 
 /* Declare a free list to manage the H5D_t struct */
 H5FL_DEFINE_STATIC(H5D_t);
@@ -2908,7 +2919,7 @@ done:
 static void *
 H5D_vlen_get_buf_size_alloc(size_t size, void *info)
 {
-    H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)info;
+    H5D_vlen_bufsize_t *vlen_bufsize=(H5D_vlen_bufsize_t *)info;
     void *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_vlen_get_buf_size_alloc, NULL);
@@ -2955,7 +2966,7 @@ done:
 static herr_t
 H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t *point, void *op_data)
 {
-    H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)op_data;
+    H5D_vlen_bufsize_t *vlen_bufsize=(H5D_vlen_bufsize_t *)op_data;
     H5T_t	*dt = NULL;
     herr_t ret_value=0;         /* The correct return value, if this function succeeds */
 
@@ -3015,7 +3026,7 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
-    H5T_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
+    H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
     char bogus;         /* bogus value to pass to H5Diterate() */
     H5P_genclass_t  *pclass;    /* Property class */
     H5P_genplist_t  *plist;     /* Property list */

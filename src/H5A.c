@@ -46,6 +46,9 @@ static int H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id);
 static hsize_t H5A_get_storage_size(H5A_t *attr);
 static herr_t H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t dxpl_id);
 
+/* The number of reserved IDs in dataset ID group */
+#define H5A_RESERVED_ATOMS  0
+
 
 /*--------------------------------------------------------------------------
 NAME
@@ -631,7 +634,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     /* Set up type conversion function */
     if (NULL == (tpath = H5T_path_find(mem_type, attr->dt, NULL, NULL, dxpl_id))) {
         HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-    } else if (!H5T_IS_NOOP(tpath)) {
+    } else if (!H5T_path_noop(tpath)) {
         if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0 ||
                 (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->dt, H5T_COPY_ALL)))<0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
@@ -784,7 +787,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
         /* Set up type conversion function */
         if (NULL == (tpath = H5T_path_find(attr->dt, mem_type, NULL, NULL, dxpl_id))) {
             HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types");
-        } else if (!H5T_IS_NOOP(tpath)) {
+        } else if (!H5T_path_noop(tpath)) {
             if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->dt, H5T_COPY_ALL)))<0 ||
                     (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL)))<0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");

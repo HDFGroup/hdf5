@@ -41,6 +41,10 @@ static herr_t H5S_hyper_free_span (H5S_hyper_span_t *span);
 static H5S_hyper_span_info_t *H5S_hyper_copy_span (H5S_hyper_span_info_t *spans);
 static herr_t H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value);
 static herr_t H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size);
+/* Needed for use in hyperslab code (H5Shyper.c) */
+#ifdef NEW_HYPERSLAB_API
+static herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
+#endif /*NEW_HYPERSLAB_API*/
 
 /* Declare a free list to manage the H5S_hyper_span_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_span_t);
@@ -5518,7 +5522,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_hyper_span_info_t *tmp_spans=NULL;   /* Temporary copy of selection */

@@ -31,7 +31,7 @@
 #include "H5Dprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5Gprivate.h"		/* Group headers		  	*/
+#include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Tprivate.h"		/* Datatype functions			*/

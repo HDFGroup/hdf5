@@ -24,6 +24,11 @@
 #include "H5Spkg.h"		/* Dataspace functions			  */
 
 /* Local static function prototypes */
+static H5S_t * H5S_create(H5S_class_t type);
+static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
+    const hsize_t *dims, const hsize_t *max);
+static htri_t H5S_is_simple(const H5S_t *sdim);
+static herr_t H5S_extent_release(H5S_t *ds);
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
@@ -295,7 +300,7 @@ H5S_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5S_t *
+static H5S_t *
 H5S_create(H5S_class_t type)
 {
     H5S_t *ret_value;
@@ -389,7 +394,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_extent_release(H5S_t *ds)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
@@ -1222,81 +1227,6 @@ done:
 }
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5S_cmp
- *
- * Purpose:	Compares two data space extents.
- *
- * Return:	Success:	0 if DS1 and DS2 are the same.
- *				<0 if DS1 is less than DS2.
- *				>0 if DS1 is greater than DS2.
- *
- *		Failure:	0, never fails
- *
- * Programmer:	Robb Matzke
- *		Wednesday, December 10, 1997
- *
- * Modifications:
- *      6/9/98 Changed to only compare extents - QAK
- *
- *-------------------------------------------------------------------------
- */
-int
-H5S_cmp(const H5S_t *ds1, const H5S_t *ds2)
-{
-    unsigned    u;
-    int ret_value=0;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_cmp, 0);
-
-    /* check args */
-    assert(ds1);
-    assert(ds2);
-
-    /* compare */
-    if (ds1->extent.type < ds2->extent.type)
-        HGOTO_DONE(-1);
-    if (ds1->extent.type > ds2->extent.type)
-        HGOTO_DONE(1);
-
-    switch (ds1->extent.type) {
-        case H5S_SIMPLE:
-            if (ds1->extent.u.simple.rank < ds2->extent.u.simple.rank)
-                HGOTO_DONE(-1);
-            if (ds1->extent.u.simple.rank > ds2->extent.u.simple.rank)
-                HGOTO_DONE(1);
-
-            for (u = 0; u < ds1->extent.u.simple.rank; u++) {
-                if (ds1->extent.u.simple.size[u] < ds2->extent.u.simple.size[u])
-                    HGOTO_DONE(-1);
-                if (ds1->extent.u.simple.size[u] > ds2->extent.u.simple.size[u])
-                    HGOTO_DONE(1);
-            }
-
-            /* don't compare max dimensions */
-
-#ifdef LATER
-            for (u = 0; u < ds1->extent.u.simple.rank; u++) {
-                if ((ds1->extent.u.simple.perm ? ds1->extent.u.simple.perm[u] : u) <
-                        (ds2->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : i))
-                    HGOTO_DONE(-1);
-                if ((ds1->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : u) >
-                        (ds2->extent.u.simple.perm ? ds2->extent.u.simple.perm[u] : i))
-                    HGOTO_DONE(1);
-            }
-#endif
-
-            break;
-
-        default:
-            assert("not implemented yet" && 0);
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-
-
 /*--------------------------------------------------------------------------
  NAME
     H5S_is_simple
@@ -1311,7 +1241,7 @@ done:
 	This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-htri_t
+static htri_t
 H5S_is_simple(const H5S_t *sdim)
 {
     htri_t		    ret_value;
@@ -1444,7 +1374,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {

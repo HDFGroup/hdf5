@@ -29,6 +29,16 @@
 
 #include "H5Sprivate.h"
 
+/* Number of reserved IDs in ID group */
+#define H5S_RESERVED_ATOMS  2
+
+/* Flags to indicate special dataspace features are active */
+#define H5S_VALID_MAX	0x01
+#define H5S_VALID_PERM	0x02
+
+/* Flags for "get_seq_list" methods */
+#define H5S_GET_SEQ_LIST_SORTED         0x0001
+
 /* 
  * Dataspace extent information
  */
@@ -173,6 +183,10 @@ H5_DLL herr_t H5S_close_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_release_simple(H5S_simple_t *simple);
 H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src);
 
+/* Operations on selections */
+H5_DLL herr_t H5S_select_copy(H5S_t *dst, const H5S_t *src);
+H5_DLL htri_t H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2);
+
 /* Point selection iterator functions */
 H5_DLL herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);
 H5_DLL herr_t H5S_point_iter_coords(const H5S_sel_iter_t *iter, hssize_t *coords);
@@ -262,9 +276,38 @@ H5_DLL htri_t H5S_none_is_regular(const H5S_t *space);
 H5_DLL herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t elem_size, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
-/* Needed for use in hyperslab code (H5Shyper.c) */
-#ifdef NEW_HYPERSLAB_API
-H5_DLL herr_t H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
-#endif /*NEW_HYPERSLAB_API*/
+
+#ifdef H5_HAVE_PARALLEL
+/* MPI-IO function to read directly from app buffer to file rky980813 */
+H5_DLL herr_t H5S_mpio_spaces_read(H5F_t *f,
+				    const struct H5O_layout_t *layout,
+                                    H5P_genplist_t *dc_plist,
+                                    const H5O_efl_t *efl,
+				    size_t elmt_size, const H5S_t *file_space,
+				    const H5S_t *mem_space, hid_t dxpl_id,
+				    void *buf/*out*/);
+
+/* MPI-IO function to write directly from app buffer to file rky980813 */
+H5_DLL herr_t H5S_mpio_spaces_write(H5F_t *f,
+				    struct H5O_layout_t *layout,
+                                    H5P_genplist_t *dc_plist,
+                                    const H5O_efl_t *efl,
+				    size_t elmt_size, const H5S_t *file_space,
+				    const H5S_t *mem_space, hid_t dxpl_id,
+				    const void *buf);
+
+/* MPI-IO function to check if a direct I/O transfer is possible between
+ * memory and the file */
+H5_DLL htri_t H5S_mpio_opt_possible(const H5S_t *mem_space,
+                                     const H5S_t *file_space, const unsigned flags);
+
+#ifndef _H5S_IN_H5S_C
+/* Global vars whose value comes from environment variable */
+/* (Defined in H5S.c) */
+H5_DLLVAR hbool_t		H5S_mpi_opt_types_g;
+H5_DLLVAR hbool_t		H5S_mpi_prefer_derived_types_g;
+#endif /* _H5S_IN_H5S_C */
+
+#endif /* H5_HAVE_PARALLEL */
 
 #endif /*_H5Spkg_H*/

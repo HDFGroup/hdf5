@@ -47,7 +47,7 @@
 #include "H5FLprivate.h"	/*Free Lists	  */
 #include "H5FPprivate.h"        /*Flexible Parallel HDF5                  */
 #include "H5Iprivate.h"		/*object IDs				  */
-#include "H5Gprivate.h"		/*symbol tables				  */
+#include "H5Gprivate.h"		/* Groups				*/
 #include "H5MMprivate.h"	/*core memory management		  */
 #include "H5Pprivate.h"		/*property lists			  */
 #include "H5Tprivate.h"		/*data types				  */

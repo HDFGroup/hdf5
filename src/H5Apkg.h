@@ -34,9 +34,12 @@
 #  undef H5A_DEBUG
 #endif
 
+/* Get package's private header */
 #include "H5Aprivate.h"
-#include "H5HGprivate.h"
-#include "H5Sprivate.h"
+
+/* Other private headers needed by this file */
+#include "H5HGprivate.h"	/* Global heaps				*/
+#include "H5Sprivate.h"		/* Dataspace				*/
 
 struct H5A_t {
     unsigned       initialized;/* Indicate whether the attribute has been modified */
@@ -53,6 +56,8 @@ struct H5A_t {
     H5F_t	*sh_file;   /*file pointer if this is a shared attribute    */
 };
 
-/* Function prototypes for H5T package scope */
+/* Function prototypes for H5A package scope */
+H5_DLL H5A_t       *H5A_copy(const H5A_t *old_attr);
+H5_DLL herr_t      H5A_close(H5A_t *attr);
 
 #endif

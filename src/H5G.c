@@ -89,21 +89,22 @@
 #define H5F_PACKAGE     /*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file... */
-#include "H5private.h"
-#include "H5Aprivate.h"
-#include "H5Bprivate.h"
-#include "H5Dprivate.h"
-#include "H5Eprivate.h"
-#include "H5Fpkg.h"         /*file access                             */
-#include "H5FLprivate.h"	/*Free Lists	  */
-#include "H5Gpkg.h"
-#include "H5HLprivate.h"
-#include "H5Iprivate.h"
-#include "H5MMprivate.h"
-#include "H5Oprivate.h"
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes				*/
+#include "H5Bprivate.h"		/* B-trees				*/
+#include "H5Dprivate.h"		/* Dataset functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File access				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 
 #define H5G_INIT_HEAP		8192
 #define H5G_RESERVED_ATOMS	0
+
 #define PABLO_MASK		H5G_mask
 
 /* Interface initialization */
