@@ -2073,6 +2073,10 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
             } else if (ndims>0 && max_dim[0]>new_dset->layout.dim[0]) {
                 HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "extendible contiguous non-external dataset")
             }
+
+            /* Compute the total size of a chunk */
+            for (u=1, new_dset->layout.chunk_size=new_dset->layout.dim[0]; u<new_dset->layout.ndims; u++)
+                new_dset->layout.chunk_size *= new_dset->layout.dim[u];
             break;
 
         case H5D_CHUNKED:
@@ -2104,7 +2108,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                 new_dset->layout.dim[u] = chunk_size[u];
 
             /* Compute the total size of a chunk */
-            for (u=0, new_dset->layout.chunk_size=1; u<new_dset->layout.ndims; u++)
+            for (u=1, new_dset->layout.chunk_size=new_dset->layout.dim[0]; u<new_dset->layout.ndims; u++)
                 new_dset->layout.chunk_size *= new_dset->layout.dim[u];
             break;
 
