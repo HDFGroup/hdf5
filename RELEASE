@@ -310,14 +310,21 @@ Platforms Tested:
   OSF1 V4.0                     DEC-V5.2-040
   SunOS 5.6                     cc WorkShop Compilers 4.2  no optimization
   SunOS 5.7                     cc WorkShop Compilers 5.0
-  TFLOPS 2.8                    cicc (pgcc Rel 3.0-5i)
-                                mpich-1.1.2 with local changes
+  TFLOPS 3.3                    mpich-1.2.0 with local changes
   Windows NT4.0 sp5             MSVC++ 6.0
 
 Known Problems:
 ==============
 
-o SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
+* SunOS 5.6 with C WorkShop Compilers 4.2:  Hyperslab selections will 
   fail if library is compiled using optimization of any level.
 
-o The Stream VFD was not tested yet under Windows.
+* The Stream VFD was not tested yet under Windows.
+  It is not supported in the TFLOPS machine.
+
+* Shared library (--enable-shared) option does not work with Pacific
+  Blue, Mountain Blue.  It is not supported in the TFLOPS machine.
+
+* The ./dsets tests failed in the TFLOPS machine if the test program,
+  dsets.c, is compiled with the -O option.  The hdf5 library still works
+  correctly with the -O option.
