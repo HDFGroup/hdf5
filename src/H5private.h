@@ -662,7 +662,11 @@ __DLL__ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDsinh(X)		sinh(X)
 #define HDsleep(N)		sleep(N)
 #ifdef H5_HAVE_SNPRINTF
+#ifdef __WATCOMC__
+#   define HDsnprintf		_snprintf /*varargs*/
+#else /* __WATCOMC__ */
 #   define HDsnprintf		snprintf /*varargs*/
+#endif /* __WATCOMC__ */
 #endif
 /* sprintf() variable arguments */
 #define HDsqrt(X)		sqrt(X)
