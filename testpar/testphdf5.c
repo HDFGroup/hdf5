@@ -39,7 +39,7 @@ void *old_client_data;			/* previous error handler arg.*/
 /* other option flags */
 
 /* FILENAME and filenames must have the same number of names */
-const char *FILENAME[14]={
+const char *FILENAME[11]={
 	    "ParaEg1",
 	    "ParaEg2",
 	    "ParaEg3",
@@ -49,12 +49,9 @@ const char *FILENAME[14]={
             "ParaIndividual",
             "ParaBig",
             "ParaFill",
-	    "ParaCC1",
-	    "ParaCC2",
-	    "ParaCC3",
-            "ParaCC4",
+	    "ParaCC",
 	    NULL};
-char	filenames[14][PATH_MAX];
+char	filenames[11][PATH_MAX];
 hid_t	fapl;				/* file access property list */
 
 #ifdef USE_PAUSE
@@ -430,11 +427,11 @@ int main(int argc, char **argv)
       AddTest("cchunk1", coll_chunk1,NULL,
 	      "simple collective chunk io",filenames[9]);
       AddTest("cchunk2", coll_chunk2,NULL,
-	      "noncontiguous collective chunk io",filenames[10]);
+	      "noncontiguous collective chunk io",filenames[9]);
       AddTest("cchunk3", coll_chunk3,NULL,
-	      "multi-chunk collective chunk io",filenames[11]);
+	      "multi-chunk collective chunk io",filenames[9]);
       AddTest("cchunk4", coll_chunk4,NULL,
-	      "collective to independent chunk io",filenames[12]);
+	      "collective to independent chunk io",filenames[9]);
     }
 
     /* Display testing information */
