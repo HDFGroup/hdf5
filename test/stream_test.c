@@ -64,7 +64,7 @@ int main (void)
 #define RANK          2                 /* sample dataset rank       */
 #define DIMS          50                /* sample dataset dimensions */
 #define DATASETNAME   "IntArray"        /* sample dataset name       */
-#define FILENAME      "localhost:5678"  /* filename argument         */
+#define FILENAME      "localhost:10007"  /* filename argument         */
 
 
 static int sender (void)
