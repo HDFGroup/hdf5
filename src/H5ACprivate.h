@@ -71,8 +71,11 @@ typedef struct H5AC_class_t {
  * cache entry by hashing the object's file address.  Each file has its
  * own cache, an array of slots.
  */
-#define H5AC_NSLOTS	10330		/*prime number tend to work best     */
-#define H5AC_HASH(F,ADDR) H5F_addr_hash(ADDR,(F)->shared->cache->nslots)
+#define H5AC_NSLOTS	10330		/* The library "likes" this number... */
+#define H5AC_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
+                                /* This should be the same size as the alignment of */
+                                /* of the smallest file format object written to the file.  */
+#define H5AC_HASH(F,ADDR) H5F_addr_hash((ADDR/H5AC_HASH_DIVISOR),(F)->shared->cache->nslots)
 
 typedef struct H5AC_prot_t {
     const H5AC_class_t	*type;		/*type of protected thing	     */

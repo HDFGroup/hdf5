@@ -494,6 +494,7 @@ H5AC_set(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *thing)
     }
 #endif
 
+
     if (slot->type) {
         flush = slot->type->flush;
         status = (flush)(f, TRUE, slot->addr, slot->thing);
@@ -666,7 +667,7 @@ H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr,
         cache->diagnostics[slot->type->id].nhits++;
         thing = slot->thing;
         slot->type = NULL;
-	slot->addr = HADDR_UNDEF;
+        slot->addr = HADDR_UNDEF;
         slot->thing = NULL;
 
     } else if (slot->type && H5F_addr_eq(slot->addr, addr)) {
