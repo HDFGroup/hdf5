@@ -3404,19 +3404,8 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
         /* Locate node pointer for child */
         cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
-        if(cmp>0)
+        if(cmp >= 0)
             idx++;
-
-        /* Handle deleting a record from an internal node */
-        if(cmp==0) {
-            /* Increment the index to work with */
-            idx++;
-
-            /* Swap record to delete with record from child */
-            if(H5B2_swap_child(f,dxpl_id,depth,internal,idx) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
-        } /* end if */
-
 
         /* Set the number of redistribution retries */
         /* This takes care of the case where a B-tree node needs to be
@@ -3470,12 +3459,20 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             /* Locate node pointer for child (after merge/redistribute) */
 /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
             cmp=H5B2_locate_record(shared->type,internal->nrec,shared->nat_off,internal->int_native,udata,&idx);
-            if(cmp > 0)
+            if(cmp >= 0)
                 idx++;
 
             /* Decrement the number of redistribution retries left */
             retries--;
         } /* end while */
+
+        /* Handle deleting a record from an internal node */
+        if(cmp==0) {
+            /* Swap record to delete with record from child */
+            if(H5B2_swap_child(f,dxpl_id,depth,internal,idx) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTSWAP, FAIL, "Can't swap records in B-tree")
+        } /* end if */
+
     } /* end block */
 
     /* Attempt to remove node */
