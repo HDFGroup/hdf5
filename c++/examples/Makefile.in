@@ -16,10 +16,16 @@ EXAMPLEDIR=$(docdir)/hdf5/examples/c++
 hdf5_srcdir=$(top_srcdir)/src
 hdf5_builddir=$(top_builddir)/src
 
-## Add include directory to the C++ preprocessor flags and the hdf5
-## library to the library list.
-LIB=../src/libhdf5_cpp.la
+## Obtain default library; the current version of libtool does not fully
+## support C++ yet, and it does not know which default library to find.
+## With libtool 1.5, this support can be removed.  - BMR - Jan, 2002 
+DEFAULT_LIBS=@DEFAULT_LIBS@
+
+## Add include directory to the cpp preprocessor flags
 CPPFLAGS=-I. -I../src -I$(srcdir)/../src -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
+
+## Add the C++ API library and the hdf5 library to the library lists
+LIB=../src/libhdf5_cpp.la
 LIBHDF5=$(hdf5_builddir)/libhdf5.la
 
 ## List all source files here. The list of object files will be
@@ -46,24 +52,24 @@ CLEAN=
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
 compound: compound.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ compound.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ compound.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 h5group: h5group.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ h5group.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ h5group.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 create: create.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ create.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ create.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 readdata: readdata.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ readdata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ readdata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 chunks: chunks.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ chunks.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ chunks.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 extend_ds: extend_ds.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ extend_ds.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ extend_ds.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 writedata: writedata.lo 
-	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ writedata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5)
+	@$(LT_LINK_EXE) $(CXXFLAGS) -o $@ writedata.lo $(LDFLAGS) $(LIB) $(LIBS) $(LIBHDF5) $(DEFAULT_LIBS)
 
 @CONCLUDE@
