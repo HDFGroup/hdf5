@@ -322,9 +322,11 @@ struct H5P_genplist_t;
 
 typedef struct H5O_fphdf5_t {
     uint8_t oid[H5R_OBJ_REF_BUF_SIZE];  /* OID of object                    */
+    haddr_t header;                     /* Header address info              */
     struct H5S_simple_t *sdim;          /* Simple dimensionality structure  */
     H5T_t *dtype;                       /* Datatype structure               */
     time_t *mtime;                      /* Modification time                */
+    H5O_layout_t *layout;               /* Dataset layout                   */
     H5O_name_t *group;                  /* Group name                       */
     H5O_name_t *dset;                   /* Dataset name                     */
     struct H5P_genplist_t *plist;       /* Property list of the object      */
@@ -336,6 +338,8 @@ typedef struct H5O_fphdf5_t {
 /* General message operators */
 H5_DLL herr_t H5O_create(H5F_t *f, size_t size_hint,
 			  H5G_entry_t *ent/*out*/);
+H5_DLL herr_t H5O_init(H5F_t *f, size_t size_hint,
+                       H5G_entry_t *ent/*out*/, haddr_t header);
 H5_DLL herr_t H5O_open(H5G_entry_t *ent);
 H5_DLL herr_t H5O_close(H5G_entry_t *ent);
 H5_DLL int H5O_link(H5G_entry_t *ent, int adjust);

@@ -1461,6 +1461,225 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_update_entry_cache
+ *
+ * Purpose:	Create and fill an H5G_entry_t object for insertion into
+ *              the group LOC.
+ *
+ *              This code was originally found at the end of H5D_create()
+ *              but was placed here for general use.
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Bill Wendling
+ *		Thursday, October 31, 2002
+ *
+ * Modifications:
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_update_entry_cache(H5F_t *file, H5G_entry_t *ent, H5G_entry_t *loc,
+                       const char *name, const H5S_t *space,
+                       H5P_genplist_t *plist, H5O_layout_t *layout, H5T_t *type,
+                       hbool_t allocate_header, haddr_t header)
+{
+    H5O_pline_t         dcpl_pline;
+    H5D_alloc_time_t    alloc_time;
+    size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
+
+    /* fill value variables */
+    H5D_fill_time_t	fill_time;
+    H5O_fill_t		fill_prop = { NULL, 0, NULL };
+    H5O_fill_new_t      fill = { NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_ALLOC, TRUE };
+    H5D_fill_value_t	fill_status;
+
+    /* return code */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5D_update_entry_cache, FAIL);
+
+    if (layout->type == H5D_COMPACT)
+        ohdr_size += layout->size;
+
+    /* If TRUE, then allocate the space in the file for the header */
+    if (allocate_header) {
+        /* Create (open for write access) an object header */
+        if (H5O_create(file, ohdr_size, ent) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to create dataset object header");
+    } else {
+        /*
+         * Just initialize the header to the specified address and open
+         * it for us
+         */
+        HDmemset(ent, 0, sizeof(H5G_entry_t));
+
+        if (H5O_init(file, ohdr_size, ent, header) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to initialize dataset object header");
+    }
+
+    /*
+     * Retrieve properties of fill value and others. Copy them into new fill
+     * value struct. Convert the fill value to the dataset type and write 
+     * the message
+     */
+    if (H5P_get(plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve space allocation time");
+
+    if (H5P_get(plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill time");
+
+    if (H5P_fill_value_defined(plist, &fill_status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined");
+
+    if (fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
+	if (H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve fill value");
+
+        if (H5O_copy(H5O_FILL, &fill_prop, &fill) == NULL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to copy fill value");
+
+        if (fill_prop.buf && fill_prop.size > 0 && H5O_fill_convert(&fill, type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to convert fill value to dataset type");
+
+	fill.fill_defined = TRUE;
+    } else if (fill_status == H5D_FILL_VALUE_UNDEFINED) {
+	fill.size = -1;
+ 	fill.type = fill.buf = NULL;
+ 	fill.fill_defined = FALSE;
+    } else {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "unable to determine if fill value is defined");
+    }
+
+    fill.alloc_time = alloc_time;
+    fill.fill_time = fill_time;
+   
+    if (fill.fill_defined == FALSE && fill_time != H5D_FILL_TIME_NEVER)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL, "unable to create dataset");
+
+    /* Write new fill value message */
+    if (H5O_modify(ent, H5O_FILL_NEW, 0, H5O_FLAG_CONSTANT, &fill) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value header message");        
+    H5O_reset(H5O_FILL, &fill_prop);
+
+    if (fill.buf && H5O_copy(H5O_FILL, &fill, &fill_prop) == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,FAIL,"unable to copy fill value");
+
+    H5O_reset(H5O_FILL_NEW, &fill);
+
+    /* Write old fill value */
+    if (fill_prop.buf && H5O_modify(ent, H5O_FILL, 0, H5O_FLAG_CONSTANT, &fill_prop) < 0)        
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "unable to update fill value header message");
+
+    if (H5P_set(plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value");  
+
+    /* Update the type and space header messages */
+    if (H5O_modify(ent, H5O_DTYPE, 0, H5O_FLAG_CONSTANT | H5O_FLAG_SHARED, type) < 0 ||
+            H5S_modify(ent, space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "unable to update type or space header messages");
+
+    /* Update the filters message */
+    if (H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &dcpl_pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve pipeline filter");
+
+    if (dcpl_pline.nfilters > 0 &&
+            H5O_modify(ent, H5O_PLINE, 0, H5O_FLAG_CONSTANT, &dcpl_pline) < 0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message");
+
+    /* Add a modification time message. */
+    if (H5O_touch(ent, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                    "unable to update modification time message");
+    
+    /* Give the dataset a name */
+    if (H5G_insert(loc, name, ent) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to name dataset");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_update_external_storage_cache
+ *
+ * Purpose:	Update the external cache if the dataset uses external
+ *              files.
+ *
+ *              This code was originally found at the end of H5D_create()
+ *              but was placed here for general use.
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Errors:
+ *
+ * Programmer:	Bill Wendling
+ *		Thursday, October 31, 2002
+ *
+ * Modifications:
+ *	
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_update_external_storage_cache(H5F_t *file, H5G_entry_t *ent,
+                                  H5O_efl_t *efl, H5O_layout_t *layout)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5D_update_external_storage_cache, FAIL);
+
+    /* Update external storage message */
+    if (efl->nused > 0) {
+        size_t heap_size = H5HL_ALIGN(1);
+        int i;
+
+        for (i = 0; i < efl->nused; ++i)
+            heap_size += H5HL_ALIGN(HDstrlen(efl->slot[i].name) + 1);
+
+        if (H5HL_create(file, heap_size, &efl->heap_addr/*out*/) < 0 ||
+                H5HL_insert(file, efl->heap_addr, 1, "") == (size_t)(-1))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to create external file list name heap");
+
+        for (i = 0; i < efl->nused; ++i) {
+            size_t offset = H5HL_insert(file, efl->heap_addr,
+                                        HDstrlen(efl->slot[i].name) + 1,
+                                        efl->slot[i].name);
+
+            assert(0 == efl->slot[i].name_offset);
+
+            if (offset == (size_t)(-1))
+                HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, FAIL, "unable to insert URL into name heap");
+
+            efl->slot[i].name_offset = offset;
+        }
+
+        if (H5O_modify(ent, H5O_EFL, 0, H5O_FLAG_CONSTANT, efl) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+                        "unable to update external file list message");
+    }
+
+    /* Update layout message */
+    if (H5D_COMPACT != layout->type && H5O_modify(ent, H5O_LAYOUT, 0, 0, layout) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout"); 
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_create
  *
  * Purpose:	Creates a new dataset with name NAME in file F and associates
@@ -1505,6 +1724,15 @@ done:
  *	A new fill value message is added.  Two properties, space allocation
  *	time and fill value writing time, govern space allocation and fill
  *      value writing.   
+ *
+ *      Bill Wendling, 1. November 2002
+ *      Removed the cache updating mechanism. This was done so that it
+ *      can be called separately from the H5D_create function. There were
+ *      two of these mechanisms: one to create and insert into the parent
+ *      group the H5G_entry_t object and the other to update based upon
+ *      whether we're working with an external file or not. Between the
+ *      two, there is a conditional call to allocate space which isn't
+ *      part of updating the cache.
  *	
  *-------------------------------------------------------------------------
  */
@@ -1526,12 +1754,8 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     hsize_t             chunk_size[32]={0};
     H5D_alloc_time_t    alloc_time;
     H5D_fill_time_t	fill_time;
-    H5O_fill_t		fill_prop={NULL,0,NULL};
-    H5O_fill_new_t      fill={NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_ALLOC, TRUE};
-    H5D_fill_value_t	fill_status;
     H5P_genplist_t 	*plist;      /* Property list */
     H5P_genplist_t 	*new_plist;  /* New Property list */
-    size_t              ohdr_size=H5D_MINHDR_SIZE;      /* Size of dataset's object header */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL);
 
@@ -1709,7 +1933,6 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             if ((ndims=H5S_get_simple_extent_dims(space, new_dset->layout.dim, max_dim))<0) 
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize dimension size of compact dataset storage");
             /* remember to check if size is small enough to fit header message */
-            ohdr_size+=new_dset->layout.size;
 
             break;
             
@@ -1717,108 +1940,30 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
     } /* end switch */
 
-    /* Create (open for write access) an object header */
-    if (H5O_create(f, ohdr_size, &(new_dset->ent)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset object header");
+    /*
+     * Update the entry cache. That is, create and add a new
+     * "H5G_entry_t" object to the group this dataset is being initially
+     * created in.
+     */
+    if (H5D_update_entry_cache(f, &new_dset->ent, loc, name, space, new_plist,
+                               &new_dset->layout, new_dset->type, TRUE, (haddr_t)0) != SUCCEED)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache");
 
-    /* Retrieve properties of fill value and others.  Copy them into new fill
-     * value struct.  Convert the fill value to the dataset type and write 
-     * the message */
-    if(H5P_get(new_plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
+    /*
+     * Allocate storage if space allocate time is early; otherwise delay
+     * allocation until later.
+     */
+    if (H5P_get(new_plist, H5D_CRT_ALLOC_TIME_NAME, &alloc_time) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve space allocation time");
-    if(H5P_get(new_plist, H5D_CRT_FILL_TIME_NAME, &fill_time) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill time");
-    if(H5P_fill_value_defined(new_plist, &fill_status)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
-    if(fill_status== H5D_FILL_VALUE_DEFAULT || fill_status==H5D_FILL_VALUE_USER_DEFINED) {
-	if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value");
-        if(NULL==H5O_copy(H5O_FILL, &fill_prop, &fill))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL, "unable to copy fill value");
-        if (fill_prop.buf && fill_prop.size>0 && H5O_fill_convert(&fill, new_dset->type) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to convert fill value to dataset type");
-	fill.fill_defined = TRUE;
-    } else if(fill_status==H5D_FILL_VALUE_UNDEFINED) {
-	fill.size = -1;
- 	fill.type = fill.buf = NULL;
- 	fill.fill_defined = FALSE;
-    } else {
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to determine if fill value is defined");
-    } /* end else */
-    fill.alloc_time = alloc_time;
-    fill.fill_time   = fill_time;
-   
-    if(fill.fill_defined == FALSE && fill_time != H5D_FILL_TIME_NEVER)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL, "unable to create dataset");
 
-    /* Write new fill value message */
-    if (H5O_modify(&(new_dset->ent), H5O_FILL_NEW, 0, H5O_FLAG_CONSTANT, &fill) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");        
-    H5O_reset(H5O_FILL, &fill_prop);
-    if(fill.buf && (NULL==H5O_copy(H5O_FILL, &fill, &fill_prop)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT,NULL,"unable to copy fill value");
-    H5O_reset(H5O_FILL_NEW, &fill);
-
-    /* Write old fill value */
-    if (fill_prop.buf && H5O_modify(&(new_dset->ent), H5O_FILL, 0, H5O_FLAG_CONSTANT, &fill_prop) < 0)        
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update fill value header message");
-    if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &fill_prop) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set fill value");  
-
-    /* Update the type and space header messages */
-    if (H5O_modify(&(new_dset->ent), H5O_DTYPE, 0,
-            H5O_FLAG_CONSTANT|H5O_FLAG_SHARED, new_dset->type)<0 ||
-            H5S_modify(&(new_dset->ent), space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update type or space header messages");
-
-    /* Update the filters message */
-    if(H5P_get(new_plist, H5D_CRT_DATA_PIPELINE_NAME, &dcpl_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "Can't retrieve pipeline filter");
-    if (dcpl_pline.nfilters>0 && H5O_modify (&(new_dset->ent), H5O_PLINE, 0, H5O_FLAG_CONSTANT, &dcpl_pline) < 0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update filter header message");
-
-    /*
-     * Add a modification time message.
-     */
-    if (H5O_touch(&(new_dset->ent), TRUE)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update modification time message");
-    
-    /* Give the dataset a name */
-    if (H5G_insert(loc, name, &(new_dset->ent)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to name dataset");
-
-    /*
-     * Allocate storage if space allocate time is early; otherwise delay allocation until later.
-     */
-    if(alloc_time==H5D_ALLOC_TIME_EARLY)
-        if (H5D_alloc_storage(f, new_dset,H5D_ALLOC_CREATE)<0)
+    if (alloc_time == H5D_ALLOC_TIME_EARLY)
+        if (H5D_alloc_storage(f, new_dset, H5D_ALLOC_CREATE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage"); 
 
-    /* Update external storage message */
-    if (efl.nused>0) {
-        size_t heap_size = H5HL_ALIGN (1);
+    /* Update the external storage cache if this is an external object */
+    if (H5D_update_external_storage_cache(f, &new_dset->ent, &efl, &new_dset->layout) != SUCCEED)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the external metadata cache");
 
-        for (i=0; i<efl.nused; i++)
-            heap_size += H5HL_ALIGN (HDstrlen (efl.slot[i].name)+1);
-        if (H5HL_create (f, heap_size, &(efl.heap_addr)/*out*/)<0 ||
-                (size_t)(-1)==H5HL_insert(f, efl.heap_addr, 1, ""))
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to create external file list name heap");
-        for (i=0; i<efl.nused; i++) {
-            size_t offset = H5HL_insert(f, efl.heap_addr,
-                        HDstrlen(efl.slot[i].name)+1, efl.slot[i].name);
-            assert(0==efl.slot[i].name_offset);
-            if ((size_t)(-1)==offset)
-                HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, NULL, "unable to insert URL into name heap");
-            efl.slot[i].name_offset = offset;
-        } /* end for */
-        if (H5O_modify (&(new_dset->ent), H5O_EFL, 0, H5O_FLAG_CONSTANT, &efl)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update external file list message");
-    } /* end if */
-
-    /* Update layout message */
-    if (H5D_COMPACT != new_dset->layout.type && H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, 0, &(new_dset->layout))<0)
-         HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, NULL, "unable to update layout"); 
-    
     /* Success */
     ret_value = new_dset;
 

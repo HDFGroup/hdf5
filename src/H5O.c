@@ -131,10 +131,10 @@ H5O_init_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5O_create
  *
- * Purpose:	Creates a new object header, sets the link count
- *		to 0, and caches the header.  The object header is opened for
- *		write access and should eventually be closed by calling
- *		H5O_close().
+ * Purpose:	Creates a new object header. Allocates space for it and
+ *              then calls an initialization function. The object header
+ *              is opened for write access and should eventually be
+ *              closed by calling H5O_close().
  *
  * Return:	Success:	Non-negative, the ENT argument contains
  *				information about the object header,
@@ -148,33 +148,85 @@ H5O_init_interface(void)
  *
  * Modifications:
  *
+ *      Bill Wendling, 1. November 2002
+ *      Separated the create function into two different functions. One
+ *      which allocates space and an initialization function which
+ *      does the rest of the work (initializes, caches, and opens the
+ *      object header).
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 {
-    hsize_t	size;	/*total size of object header	*/
-    H5O_t	*oh = NULL;
-    haddr_t	tmp_addr;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    haddr_t	header;
+    herr_t      ret_value = SUCCEED;    /* return value */
 
     FUNC_ENTER_NOAPI(H5O_create, FAIL);
 
     /* check args */
     assert(f);
     assert(ent);
+
     HDmemset(ent, 0, sizeof(H5G_entry_t));
     size_hint = H5O_ALIGN (MAX (H5O_MIN_SIZE, size_hint));
 
     /* allocate disk space for header and first chunk */
-    size = H5O_SIZEOF_HDR(f) + size_hint;
+    if (HADDR_UNDEF == (header = H5MF_alloc(f, H5FD_MEM_OHDR,
+                                            (hsize_t)H5O_SIZEOF_HDR(f) + size_hint)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                    "file allocation failed for object header header");
+
+    /* initialize the object header */
+    if (H5O_init(f, size_hint, ent, header) != SUCCEED)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to initialize object header");
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_init
+ *
+ * Purpose:	Initialize a new object header, sets the link count to 0,
+ *              and caches the header. The object header is opened for
+ *              write access and should eventually be closed by calling
+ *              H5O_close().
+ *
+ * Return:	Success:    SUCCEED, the ENT argument contains
+ *                          information about the object header,
+ *                          including its address.
+ *		Failure:    FAIL
+ *
+ * Programmer:	Bill Wendling
+ *		1, November 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_init(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/, haddr_t header)
+{
+    H5O_t      *oh = NULL;
+    haddr_t     tmp_addr;
+    herr_t      ret_value = SUCCEED;    /* return value */
+
+    FUNC_ENTER_NOAPI(H5O_init, FAIL);
+
+    /* check args */
+    assert(f);
+    assert(ent);
+
+    size_hint = H5O_ALIGN(MAX(H5O_MIN_SIZE, size_hint));
     ent->file = f;
-    if (HADDR_UNDEF==(ent->header=H5MF_alloc(f, H5FD_MEM_OHDR, size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header header");
-    
+    ent->header = header;
+
     /* allocate the object header and fill in header fields */
-    if (NULL==(oh = H5FL_ALLOC(H5O_t,1)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    if (NULL == (oh = H5FL_ALLOC(H5O_t, 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
     oh->dirty = TRUE;
     oh->version = H5O_VERSION;
     oh->nlink = 0;
@@ -182,20 +234,25 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
     /* create the chunk list and initialize the first chunk */
     oh->nchunks = 1;
     oh->alloc_nchunks = H5O_NCHUNKS;
-    if (NULL==(oh->chunk=H5FL_ARR_ALLOC(H5O_chunk_t,oh->alloc_nchunks,0)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    if (NULL == (oh->chunk = H5FL_ARR_ALLOC(H5O_chunk_t, oh->alloc_nchunks, 0)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
     tmp_addr = ent->header + (hsize_t)H5O_SIZEOF_HDR(f);
     oh->chunk[0].dirty = TRUE;
     oh->chunk[0].addr = tmp_addr;
     oh->chunk[0].size = size_hint;
-    if (NULL==(oh->chunk[0].image = H5FL_BLK_ALLOC(chunk_image,size_hint,1)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    if (NULL == (oh->chunk[0].image = H5FL_BLK_ALLOC(chunk_image, size_hint, 1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     
     /* create the message list and initialize the first message */
     oh->nmesgs = 1;
     oh->alloc_nmesgs = H5O_NMESGS;
-    if (NULL==(oh->mesg=H5FL_ARR_ALLOC(H5O_mesg_t,oh->alloc_nmesgs,1)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    if (NULL == (oh->mesg = H5FL_ARR_ALLOC(H5O_mesg_t, oh->alloc_nmesgs, 1)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
     oh->mesg[0].type = H5O_NULL;
     oh->mesg[0].dirty = TRUE;
     oh->mesg[0].native = NULL;
@@ -205,13 +262,13 @@ H5O_create(H5F_t *f, size_t size_hint, H5G_entry_t *ent/*out*/)
 
     /* cache it */
     if (H5AC_set(f, H5AC_OHDR, ent->header, oh) < 0) {
-	H5FL_FREE(H5O_t,oh);
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header");
+        H5FL_FREE(H5O_t,oh);
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header");
     }
 
     /* open it */
     if (H5O_open(ent) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header");
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object header");
 
 done:
     FUNC_LEAVE(ret_value);

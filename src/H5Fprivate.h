@@ -144,7 +144,7 @@ typedef struct H5F_t H5F_t;
  * Note:  the NBYTEDECODE macro is backwards from the memcpy() routine, in
  *	  the spirit of the other DECODE macros.
  */
-#define NBYTEDECODE(s, d, n)    do { HDmemcpy(d,s,n); d += n; } while (0)
+#define NBYTEDECODE(s, d, n)    do { HDmemcpy(d,s,n); s += n; } while (0)
 
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \

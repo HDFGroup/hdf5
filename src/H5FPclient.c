@@ -31,18 +31,6 @@
 static int interface_initialize_g = 0;
 #define INTERFACE_INIT  NULL
 
-MPI_Datatype SAP_request_t;     /* MPI datatype for the SAP_request obj */
-MPI_Datatype SAP_reply_t;       /* MPI datatype for the SAP_reply obj   */
-MPI_Datatype SAP_sync_t;        /* MPI datatype for the SAP_sync obj    */
-
-/* SAP specific variables */
-MPI_Comm H5FP_SAP_COMM;         /* Comm we use: Supplied by user        */
-MPI_Comm H5FP_SAP_BARRIER_COMM; /* Comm if you want to do a barrier     */
-
-unsigned H5FP_sap_rank;         /* The rank of the SAP: Supplied by user*/
-unsigned H5FP_my_rank;          /* Rank of this process in the COMM     */
-int H5FP_comm_size;             /* Size of the COMM                     */
-
 /* local functions */
 static unsigned int H5FP_gen_request_id(void);
 static herr_t H5FP_update_metadata_cache(hid_t file_id, struct SAP_sync *sap_sync,

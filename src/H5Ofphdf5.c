@@ -41,6 +41,7 @@ static void     *H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t *sh)
 static herr_t    H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t    H5O_fphdf5_size(H5F_t *f, const void *_mesg);
 static herr_t    H5O_fphdf5_reset(void *_mesg);
+static void     *H5O_fphdf5_copy(const void *mesg, void *dest);
 static herr_t    H5O_fphdf5_free(void *_mesg);
 static herr_t    H5O_fphdf5_debug(H5F_t *f, const void *_mesg,
                                   FILE *stream, int indent, int fwidth);
@@ -52,7 +53,7 @@ const H5O_class_t H5O_FPHDF5[1] = {{
     sizeof(H5O_fphdf5_t),       /* native message size                  */
     H5O_fphdf5_decode,          /* decode message                       */
     H5O_fphdf5_encode,          /* encode message                       */
-    NULL,                       /* copy the native value                */
+    H5O_fphdf5_copy,            /* copy the native value                */
     H5O_fphdf5_size,            /* size of symbol table entry           */
     H5O_fphdf5_reset,           /* default reset method                 */
     H5O_fphdf5_free,            /* free method                          */
@@ -97,7 +98,6 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 {
     H5O_fphdf5_t *fmeta = NULL; /* New FPHDF5 metadata structure */
     void *ret_value;
-    unsigned int i;
     
     FUNC_ENTER_NOAPI(H5O_fphdf5_decode, NULL);
 
@@ -110,7 +110,10 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     fmeta = H5FL_ALLOC(H5O_fphdf5_t, 1);
 
     /* decode the OID first */
-    NBYTEDECODE(fmeta->oid,p,sizeof(fmeta->oid));
+    NBYTEDECODE(p, fmeta->oid, sizeof(fmeta->oid));
+
+    /* decode the header address next */
+    NBYTEDECODE(p, &fmeta->header, sizeof(fmeta->header));
 
     /* decode the dataspace dimensions next */
     fmeta->sdim = H5O_SDSPACE[0].decode(f, p, NULL);
@@ -133,11 +136,20 @@ H5O_fphdf5_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     /* decode the modification time next */
     fmeta->mtime = H5O_DTYPE[0].decode(f, p, NULL);
 
-    if (!fmeta->dtype)
+    if (!fmeta->mtime)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* jump past the modification time part */
     p += H5O_MTIME[0].raw_size(f, fmeta->mtime);
+
+    /* decode the dataset layout next */
+    fmeta->layout = H5O_LAYOUT[0].decode(f, p, NULL);
+
+    if (!fmeta->layout)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* jump past the dataset layout part */
+    p += H5O_LAYOUT[0].raw_size(f, fmeta->layout);
 
     /* decode the group the modification took place in */
     fmeta->group = H5O_NAME[0].decode(f, p, NULL);
@@ -178,6 +190,9 @@ done:
         if (H5O_MTIME[0].free)
             H5O_MTIME[0].free(fmeta->mtime);
 
+        if (H5O_LAYOUT[0].free)
+            H5O_LAYOUT[0].free(fmeta->layout);
+
         if (H5O_PLIST[0].free)
             H5O_PLIST[0].free(fmeta->plist);
 
@@ -209,7 +224,6 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
 {
     const H5O_fphdf5_t *fmeta = (const H5O_fphdf5_t *)mesg;
     herr_t ret_value = SUCCEED;
-    unsigned int i;
 
     FUNC_ENTER_NOAPI(H5O_fphdf5_encode, FAIL);
 
@@ -219,7 +233,10 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
     assert(fmeta);
 
     /* encode the OID first */
-    NBYTEENCODE(p,fmeta->oid,sizeof(fmeta->oid));
+    NBYTEENCODE(p, fmeta->oid, sizeof(fmeta->oid));
+
+    /* encode the header address info next */
+    NBYTEENCODE(p, &fmeta->header, sizeof(fmeta->header));
 
     /* encode the dataspace dimensions next */
     ret_value = H5O_SDSPACE[0].encode(f, p, fmeta->sdim);
@@ -247,6 +264,15 @@ H5O_fphdf5_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     /* jump past the modification time part */
     p += H5O_MTIME[0].raw_size(f, fmeta->mtime);
+
+    /* encode the dataset layout next */
+    ret_value = H5O_LAYOUT[0].encode(f, p, fmeta->layout);
+
+    if (ret_value < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* jump past the dataset layout part */
+    p += H5O_LAYOUT[0].raw_size(f, fmeta->layout);
 
     /* encode the group name next */
     ret_value = H5O_NAME[0].encode(f, p, fmeta->group);
@@ -308,8 +334,10 @@ H5O_fphdf5_copy(const void *mesg, void *dest)
     HDmemcpy(dst->oid,src->oid,sizeof(src->oid));
 
     H5O_SDSPACE[0].copy(src->sdim, dst->sdim);
+    dst->header = src->header;
     H5O_DTYPE[0].copy(src->dtype, dst->dtype);
     H5O_MTIME[0].copy(src->mtime, dst->mtime);
+    H5O_LAYOUT[0].copy(src->layout, dst->layout);
     H5O_NAME[0].copy(src->group, dst->group);
     H5O_NAME[0].copy(src->dset, dst->dset);
 
@@ -352,8 +380,10 @@ H5O_fphdf5_size(H5F_t *f, const void *mesg)
     /* add in the metadata sizes */
     ret_value = sizeof(fmeta->oid);
     ret_value += H5O_SDSPACE[0].raw_size(f, fmeta->sdim);
+    ret_value += sizeof(fmeta->header);
     ret_value += H5O_DTYPE[0].raw_size(f, fmeta->dtype);
     ret_value += H5O_MTIME[0].raw_size(f, fmeta->mtime);
+    ret_value += H5O_LAYOUT[0].raw_size(f, fmeta->layout);
     ret_value += H5O_NAME[0].raw_size(f, fmeta->group);
     ret_value += H5O_NAME[0].raw_size(f, fmeta->dset);
     ret_value += H5O_PLIST[0].raw_size(f, fmeta->plist);
@@ -379,7 +409,6 @@ H5O_fphdf5_reset(void *mesg)
 {
     H5O_fphdf5_t *fmeta = (H5O_fphdf5_t *)mesg;
     herr_t ret_value = SUCCEED;
-    unsigned int i;
     
     FUNC_ENTER_NOAPI(H5O_fphdf5_reset, FAIL);
 
@@ -389,11 +418,16 @@ H5O_fphdf5_reset(void *mesg)
     if (H5O_SDSPACE[0].reset)
         ret_value = H5O_SDSPACE[0].reset(fmeta->sdim);
 
+    fmeta->header = 0;
+
     if (H5O_DTYPE[0].reset)
         ret_value = H5O_DTYPE[0].reset(fmeta->dtype);
 
     if (H5O_MTIME[0].reset)
         ret_value = H5O_MTIME[0].reset(fmeta->mtime);
+
+    if (H5O_LAYOUT[0].reset)
+        ret_value = H5O_LAYOUT[0].reset(fmeta->layout);
 
     if (H5O_NAME[0].reset)
         ret_value = H5O_NAME[0].reset(fmeta->group);
@@ -436,6 +470,9 @@ H5O_fphdf5_free(void *mesg)
 
     if (H5O_MTIME[0].free)
         ret_value = H5O_MTIME[0].free(fmeta->mtime);
+
+    if (H5O_LAYOUT[0].free)
+        ret_value = H5O_MTIME[0].free(fmeta->layout);
 
     if (H5O_NAME[0].free)
         ret_value = H5O_NAME[0].free(fmeta->group);
@@ -492,8 +529,11 @@ H5O_fphdf5_debug(H5F_t UNUSED *f, const void *mesg,
 
     HDfprintf(stream, "\n");
     ret_value = H5O_SDSPACE[0].debug(f, fmeta->sdim, stream, indent + 1, fwidth);
+    HDfprintf(stream, "%*sHeader Address: %" H5_PRINTF_LL_WIDTH "u\n",
+              indent, "", (unsigned long_long)fmeta->header);
     ret_value = H5O_DTYPE[0].debug(f, fmeta->dtype, stream, indent + 1, fwidth);
     ret_value = H5O_MTIME[0].debug(f, fmeta->mtime, stream, indent + 1, fwidth);
+    ret_value = H5O_LAYOUT[0].debug(f, fmeta->layout, stream, indent + 1, fwidth);
     ret_value = H5O_NAME[0].debug(f, fmeta->group, stream, indent + 1, fwidth);
     ret_value = H5O_NAME[0].debug(f, fmeta->dset, stream, indent + 1, fwidth);
     ret_value = H5O_PLIST[0].debug(f, fmeta->plist, stream, indent + 1, fwidth);

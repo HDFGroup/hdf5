@@ -145,6 +145,15 @@ typedef struct H5D_t H5D_t;
   
 /* Functions defined in H5D.c */
 H5_DLL herr_t H5D_init(void);
+
+H5_DLL herr_t H5D_update_entry_cache(H5F_t *f, H5G_entry_t *ent, H5G_entry_t *loc,
+                                     const char *name, const H5S_t *space,
+                                     H5P_genplist_t *new_plist, H5O_layout_t *layout,
+                                     H5T_t *type, hbool_t allocate_header,
+                                     haddr_t header);
+H5_DLL herr_t H5D_update_external_storage_cache(H5F_t *file, H5G_entry_t *ent,
+                                                H5O_efl_t *efl, H5O_layout_t *layout);
+
 H5_DLL H5D_t *H5D_create(H5G_entry_t *loc, const char *name, 
                           const H5T_t *type, const H5S_t *space, 
                           hid_t dcpl_id);
