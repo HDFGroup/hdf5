@@ -117,8 +117,8 @@ H5Z_term_interface (void)
 
 	    /* Print the statistics */
 	    HDfprintf (stderr,
-		       "   %c%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
-		       "%10s\n", dir?'<':'>', comment, 
+		       "   %s%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
+		       "%10s\n", dir?"<":">", comment, 
 		       H5Z_table_g[i].stats[dir].total,
 		       H5Z_table_g[i].stats[dir].errors,
 		       H5Z_table_g[i].stats[dir].timer.utime,
@@ -310,6 +310,8 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, uintn flags,
 	for (i=0; i<cd_nelmts; i++) {
 	    pline->filter[idx].cd_values[i] = cd_values[i];
 	}
+    } else {
+       pline->filter[idx].cd_values = NULL;
     }
     pline->nfilters++;
 

@@ -300,8 +300,9 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
 	printf("%s: check 2.0.5, lo_bounds[%d][%d].bound=%d\n",FUNC,
         (int)dim,(int)i,(int)lo_bounds[dim][i].bound);
 #endif /* QAK */
-        for(; pos[dim]>=(lo_bounds[dim][i].bound+offset[dim]) && i<bound_count; i++) {
-
+        for (/*void*/;
+             i<bound_count && pos[dim]>=lo_bounds[dim][i].bound+offset[dim];
+	     i++) {
 #ifdef QAK
 	    printf("%s: check 2.1, i=%d, num_reg=%d, pos[%d]=%d\n",
 		   FUNC,i,(int)num_reg,dim,(int)pos[dim]);
@@ -1875,7 +1876,8 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
     printf("%s: check 3.0\n", FUNC);
 #endif /* QAK */
     /* Create the per-dimension selection info */
-    if((new_diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t *)*src->extent.u.simple.rank))==NULL)
+    if((new_diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*
+				  src->extent.u.simple.rank))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
             "can't allocate per-dimension array");
 

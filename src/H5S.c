@@ -183,6 +183,7 @@ H5S_term_interface(void)
     /* Clear/free conversion table */
     HDmemset(H5S_fconv_g, 0, sizeof(H5S_fconv_g));
     HDmemset(H5S_mconv_g, 0, sizeof(H5S_mconv_g));
+    for (i=0; i<H5S_nconv_g; i++) H5MM_xfree(H5S_conv_g[i]);
     H5S_conv_g = H5MM_xfree(H5S_conv_g);
     H5S_nconv_g = H5S_aconv_g = 0;
 }

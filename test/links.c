@@ -9,6 +9,7 @@
  */
 #include <hdf5.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <H5config.h>
 #ifndef HAVE_ATTRIBUTE

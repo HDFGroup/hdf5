@@ -171,7 +171,7 @@ H5F_istore_decode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
     intn		i;
-    intn		ndims = (intn)((bt->sizeof_rkey-4)/4);
+    intn		ndims = (intn)((bt->sizeof_rkey-8)/4);
 
     FUNC_ENTER(H5F_istore_decode_key, FAIL);
 
@@ -213,7 +213,7 @@ static herr_t
 H5F_istore_encode_key(H5F_t __unused__ *f, H5B_t *bt, uint8 *raw, void *_key)
 {
     H5F_istore_key_t	*key = (H5F_istore_key_t *) _key;
-    intn		ndims = (intn)((bt->sizeof_rkey-4) / 4);
+    intn		ndims = (intn)((bt->sizeof_rkey-8) / 4);
     intn		i;
 
     FUNC_ENTER(H5F_istore_encode_key, FAIL);

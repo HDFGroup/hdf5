@@ -120,7 +120,7 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
 	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
 			  "unable to obtain local timezone information");
 	}
-	the_time -= tz.tz_minuteswest*60 - (tm.tm_idst?3600:0);
+	the_time -= tz.tz_minuteswest*60 - (tm.tm_isdst?3600:0);
     }
 #elif defined(HAVE_GETTIMEOFDAY) && defined(HAVE_STRUCT_TIMEZONE)
     {

@@ -11,7 +11,7 @@ date
 
 # The path isn't properly initialized on hawkwind -- /usr/local/bin is
 # either missing or is after /usr/bin when it should be before.
-$ENV{PATH} = "/usr/local/bin:" . $ENV{PATH};
+PATH="/usr/local/bin:$PATH"
 
 # Where are the snapshots stored?
 ARCHIVES=/hdf3/ftp/pub/outgoing/hdf5/snapshots

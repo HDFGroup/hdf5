@@ -372,6 +372,9 @@ bogus(unsigned int __unused__ flags, size_t __unused__ cd_nelmts,
       const unsigned int __unused__ cd_values[], size_t nbytes,
       size_t __unused__ *buf_size, void __unused__ **buf)
 {
+#if 0
+    abort();
+#endif
     return nbytes;
 }
 
@@ -777,9 +780,11 @@ cleanup(void)
 int
 main(void)
 {
-    hid_t		    file, grp;
-    herr_t		    status;
-    int			    nerrors = 0;
+    hid_t		file, grp, fapl;
+    herr_t		status;
+    int			nerrors=0, mdc_nelmts;
+    size_t		rdcc_nbytes;
+    double		rdcc_w0;
 
     status = H5open ();
     assert (status>=0);
@@ -787,9 +792,22 @@ main(void)
     /* Automatic error reporting to standard output */
     H5Eset_auto (display_error_cb, NULL);
 
+    /* Create the file */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    assert(fapl>=0);
+
+#if 1
+    /* Turn off raw data cache */
+    status = H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nbytes, &rdcc_w0);
+    assert(status>=0);
+    status = H5Pset_cache(fapl, mdc_nelmts, 0, rdcc_w0);
+    assert(status>=0);
+#endif
+    
     file = H5Fcreate(TEST_FILE_NAME, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-		     H5P_DEFAULT, H5P_DEFAULT);
+		     H5P_DEFAULT, fapl);
     assert(file >= 0);
+    H5Pclose(fapl);
 
     /* Cause the library to emit initial messages */
     grp = H5Gcreate (file, "emit diagnostics", 0);
