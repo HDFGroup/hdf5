@@ -34,11 +34,11 @@ class FileCreatPropList : public PropList {
 	void getSizes( size_t& sizeof_addr, size_t& sizeof_size ) const;
 
 	// Sets the size of parameters used to control the symbol table nodes.
-	void setSymk( int int_nodes_k, int leaf_nodes_k ) const;
+	void setSymk( int int_nodes_k, unsigned leaf_nodes_k ) const;
 
 	// Retrieves the size of the symbol table B-tree 1/2 rank and the
 	// symbol table leaf node 1/2 size.
-	void getSymk( int& int_nodes_k, int& leaf_nodes_k ) const;
+	void getSymk( int& int_nodes_k, unsigned& leaf_nodes_k ) const;
 
 	// Sets the size of parameter used to control the B-trees for
 	// indexing chunked datasets.

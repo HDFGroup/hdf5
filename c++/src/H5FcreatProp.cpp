@@ -72,7 +72,7 @@ void FileCreatPropList::getSizes( size_t& sizeof_addr, size_t& sizeof_size ) con
    }
 }
 
-void FileCreatPropList::setSymk( int ik, int lk ) const
+void FileCreatPropList::setSymk( int ik, unsigned lk ) const
 {
    herr_t ret_value = H5Pset_sym_k( id, ik, lk );
    if( ret_value < 0 )
@@ -82,7 +82,7 @@ void FileCreatPropList::setSymk( int ik, int lk ) const
    }
 }
 
-void FileCreatPropList::getSymk( int& ik, int& lk ) const
+void FileCreatPropList::getSymk( int& ik, unsigned& lk ) const
 {
    herr_t ret_value = H5Pget_sym_k( id, &ik, &lk );
    if( ret_value < 0 )
