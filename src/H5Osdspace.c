@@ -1,17 +1,17 @@
 /****************************************************************************
-* NCSA HDF								   *
-* Software Development Group						   *
-* National Center for Supercomputing Applications			   *
-* University of Illinois at Urbana-Champaign				   *
-* 605 E. Springfield, Champaign IL 61820				   *
-*									   *
-* For conditions of distribution and use, see the accompanying		   *
-* hdf/COPYING file.							   *
-*									   *
+* NCSA HDF                                                                 *
+* Software Development Group                                               *
+* National Center for Supercomputing Applications                          *
+* University of Illinois at Urbana-Champaign                               *
+* 605 E. Springfield, Champaign IL 61820                                   *
+*                                                                          *
+* For conditions of distribution and use, see the accompanying             *
+* hdf/COPYING file.                                                        *
+*                                                                          *
 ****************************************************************************/
 
 #ifdef RCSID
-static char RcsId[] = "@(#)$Revision$";
+static char             RcsId[] = "@(#)$Revision$";
 #endif
 
 /* $Id$ */
@@ -22,32 +22,34 @@ static char RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
-#define PABLO_MASK	H5O_sdspace_mask
+#define PABLO_MASK      H5O_sdspace_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_sdspace_decode (H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_sdspace_encode (H5F_t *f, size_t size, uint8 *p,
-			       const void *_mesg);
-static void *H5O_sdspace_copy (const void *_mesg, void *_dest);
-static size_t H5O_sdspace_size (H5F_t *f, const void *_mesg);
-static herr_t H5O_sdspace_debug (H5F_t *f, const void *_mesg,
-				 FILE *stream, intn indent, intn fwidth);
+static void            *H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t           H5O_sdspace_encode(H5F_t *f, size_t size, uint8 *p,
+                                           const void *_mesg);
+static void            *H5O_sdspace_copy(const void *_mesg, void *_dest);
+static size_t           H5O_sdspace_size(H5F_t *f, const void *_mesg);
+static herr_t           H5O_sdspace_debug(H5F_t *f, const void *_mesg,
+                                   FILE * stream, intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t H5O_SDSPACE[1] = {{
-   H5O_SDSPACE_ID,		/* message id number			*/
-   "simple_dspace",		/* message name for debugging		*/
-   sizeof (H5P_simple_t),	/* native message size			*/
-   H5O_sdspace_decode,		/* decode message			*/
-   H5O_sdspace_encode,		/* encode message			*/
-   H5O_sdspace_copy,		/* copy the native value		*/
-   H5O_sdspace_size,		/* size of symbol table entry		*/
-   NULL,			/* default reset method			*/
-   H5O_sdspace_debug,		/* debug the message			*/
-}};
+const H5O_class_t       H5O_SDSPACE[1] =
+{
+    {
+        H5O_SDSPACE_ID,         /* message id number                    */
+        "simple_dspace",        /* message name for debugging           */
+        sizeof(H5P_simple_t),   /* native message size                  */
+        H5O_sdspace_decode,     /* decode message                       */
+        H5O_sdspace_encode,     /* encode message                       */
+        H5O_sdspace_copy,       /* copy the native value                */
+        H5O_sdspace_size,       /* size of symbol table entry           */
+        NULL,                   /* default reset method                 */
+        H5O_sdspace_debug,      /* debug the message                    */
+    }};
 
 /* Is the interface initialized? */
-static hbool_t interface_initialize_g = FALSE;
+static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT NULL
 
 /*--------------------------------------------------------------------------
@@ -55,68 +57,61 @@ static hbool_t interface_initialize_g = FALSE;
     H5O_sdspace_decode
  PURPOSE
     Decode a simple dimensionality message and return a pointer to a memory
-	struct with the decoded information
+        struct with the decoded information
  USAGE
     void *H5O_sdspace_decode(f, raw_size, p)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	size_t raw_size;	IN: size of the raw information buffer
-	const uint8 *p;		IN: the raw information buffer
+        H5F_t *f;         IN: pointer to the HDF5 file struct
+        size_t raw_size;        IN: size of the raw information buffer
+        const uint8 *p;         IN: the raw information buffer
  RETURNS
     Pointer to the new message in native order on success, NULL on failure
  DESCRIPTION
-	This function decodes the "raw" disk form of a simple dimensionality
+        This function decodes the "raw" disk form of a simple dimensionality
     message into a struct in memory native format.  The struct is allocated
     within this function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
-static void *
-H5O_sdspace_decode (H5F_t *f, size_t raw_size, const uint8 *p)
+static void            *
+H5O_sdspace_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 {
-    H5P_simple_t *sdim=NULL;	/* New simple dimensionality structure */
-    uintn u;			/* local counting variable */
-   
-    FUNC_ENTER (H5O_sdspace_decode, NULL);
+    H5P_simple_t           *sdim = NULL;        /* New simple dimensionality structure */
+    uintn                   u;  /* local counting variable */
+
+    FUNC_ENTER(H5O_sdspace_decode, NULL);
 
     /* check args */
-    assert (f);
-    assert (raw_size >= 8); /* at least the rank and flags must be present */
-    assert (p);
+    assert(f);
+    assert(raw_size >= 8);      /* at least the rank and flags must be present */
+    assert(p);
 
     /* decode */
-    if((sdim = H5MM_xcalloc (1, sizeof(H5P_simple_t)))!=NULL)
-      {
-	UINT32DECODE(p,sdim->rank);
-	UINT32DECODE(p,sdim->dim_flags);
-	if(sdim->rank>0)
-	  {
-	    sdim->size=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-	    for(u=0; u<sdim->rank; u++)
-		UINT32DECODE(p,sdim->size[u]);
-	    if(sdim->dim_flags&0x01)
-	      {
-		sdim->max=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-		for(u=0; u<sdim->rank; u++)
-		    UINT32DECODE(p,sdim->max[u]);
-	      } /* end if */
-	    if(sdim->dim_flags&0x02)
-	      {
-		sdim->perm=H5MM_xmalloc(sizeof(uint32)*sdim->rank);
-		for(u=0; u<sdim->rank; u++)
-		    UINT32DECODE(p,sdim->perm[u]);
-	      } /* end if */
-	  } /* end if */
-      } /* end if */
-
+    if ((sdim = H5MM_xcalloc(1, sizeof(H5P_simple_t))) != NULL) {
+        UINT32DECODE(p, sdim->rank);
+        UINT32DECODE(p, sdim->dim_flags);
+        if (sdim->rank > 0) {
+            sdim->size = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+            for (u = 0; u < sdim->rank; u++)
+                UINT32DECODE(p, sdim->size[u]);
+            if (sdim->dim_flags & 0x01) {
+                sdim->max = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+                for (u = 0; u < sdim->rank; u++)
+                    UINT32DECODE(p, sdim->max[u]);
+            }                   /* end if */
+            if (sdim->dim_flags & 0x02) {
+                sdim->perm = H5MM_xmalloc(sizeof(uint32) * sdim->rank);
+                for (u = 0; u < sdim->rank; u++)
+                    UINT32DECODE(p, sdim->perm[u]);
+            }                   /* end if */
+        }                       /* end if */
+    }                           /* end if */
+    
 #ifdef LATER
-done:
+  done:
 #endif /* LATER */
-  if(sdim == NULL)   
-    { /* Error condition cleanup */
+    if (sdim == NULL) {         /* Error condition cleanup */
 
-    } /* end if */
-
+    }                           /* end if */
     /* Normal function cleanup */
-
-    FUNC_LEAVE (sdim);
+    FUNC_LEAVE(sdim);
 }
 
 /*--------------------------------------------------------------------------
@@ -126,50 +121,46 @@ done:
     Encode a simple dimensionality message 
  USAGE
     herr_t H5O_sdspace_encode(f, raw_size, p, mesg)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	size_t raw_size;	IN: size of the raw information buffer
-	const uint8 *p;		IN: the raw information buffer
-	const void *mesg;	IN: Pointer to the simple dimensionality struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
+        size_t raw_size;        IN: size of the raw information buffer
+        const uint8 *p;         IN: the raw information buffer
+        const void *mesg;       IN: Pointer to the simple dimensionality struct
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-	This function encodes the native memory form of the simple
+        This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
+H5O_sdspace_encode(H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
 {
-    const H5P_simple_t *sdim = (const H5P_simple_t *)mesg;
-    uintn u;	    /* Local counting variable */
+    const H5P_simple_t     *sdim = (const H5P_simple_t *) mesg;
+    uintn                   u;  /* Local counting variable */
 
-    FUNC_ENTER (H5O_sdspace_encode, FAIL);
+    FUNC_ENTER(H5O_sdspace_encode, FAIL);
 
     /* check args */
-    assert (f);
-    assert (raw_size >= 8); /* at least the rank & flags must be present */
-    assert (p);
-    assert (sdim);
+    assert(f);
+    assert(raw_size >= 8);      /* at least the rank & flags must be present */
+    assert(p);
+    assert(sdim);
 
     /* encode */
-    UINT32ENCODE(p,sdim->rank);
-    UINT32ENCODE(p,sdim->dim_flags);
-    if(sdim->rank>0)
-      {
-	for(u=0; u<sdim->rank; u++)
-	    UINT32ENCODE(p,sdim->size[u]);
-	if(sdim->dim_flags&0x01)
-	  {
-	    for(u=0; u<sdim->rank; u++)
-		UINT32ENCODE(p,sdim->max[u]);
-	  } /* end if */
-	if(sdim->dim_flags&0x02)
-	  {
-	    for(u=0; u<sdim->rank; u++)
-		UINT32ENCODE(p,sdim->perm[u]);
-	  } /* end if */
-      } /* end if */
-
-    FUNC_LEAVE (SUCCEED);
+    UINT32ENCODE(p, sdim->rank);
+    UINT32ENCODE(p, sdim->dim_flags);
+    if (sdim->rank > 0) {
+        for (u = 0; u < sdim->rank; u++)
+            UINT32ENCODE(p, sdim->size[u]);
+        if (sdim->dim_flags & 0x01) {
+            for (u = 0; u < sdim->rank; u++)
+                UINT32ENCODE(p, sdim->max[u]);
+        }                       /* end if */
+        if (sdim->dim_flags & 0x02) {
+            for (u = 0; u < sdim->rank; u++)
+                UINT32ENCODE(p, sdim->perm[u]);
+        }                       /* end if */
+    }                           /* end if */
+    FUNC_LEAVE(SUCCEED);
 }
 
 /*--------------------------------------------------------------------------
@@ -179,49 +170,48 @@ H5O_sdspace_encode (H5F_t *f, size_t raw_size, uint8 *p, const void *mesg)
     Copies a message from MESG to DEST, allocating DEST if necessary.
  USAGE
     void *H5O_sdspace_copy(mesg, dest)
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
-	const void *dest;	IN: Pointer to the destination simple dimensionality struct
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
+        const void *dest;       IN: Pointer to the destination simple dimensionality struct
  RETURNS
     Pointer to DEST on success, NULL on failure
  DESCRIPTION
-	This function copies a native (memory) simple dimensionality message,
+        This function copies a native (memory) simple dimensionality message,
     allocating the destination structure if necessary.
 --------------------------------------------------------------------------*/
-static void *
-H5O_sdspace_copy (const void *mesg, void *dest)
+static void            *
+H5O_sdspace_copy(const void *mesg, void *dest)
 {
-   const H5P_simple_t	*src = (const H5P_simple_t *)mesg;
-   H5P_simple_t		*dst = (H5P_simple_t *)dest;
-   
-   FUNC_ENTER (H5O_sdspace_copy, NULL);
+    const H5P_simple_t     *src = (const H5P_simple_t *) mesg;
+    H5P_simple_t           *dst = (H5P_simple_t *) dest;
 
-   /* check args */
-   assert (src);
-   if (!dst)
-       dst = H5MM_xcalloc (1, sizeof(H5P_simple_t));
+    FUNC_ENTER(H5O_sdspace_copy, NULL);
 
-   /* deep copy -- pointed-to values are copied also */
-   HDmemcpy(dst,src,sizeof(H5P_simple_t));
-   if (src->size) dst->size = H5MM_xcalloc (src->rank, sizeof(uint32));
-   if (src->max)  dst->max  = H5MM_xcalloc (src->rank, sizeof(uint32));
-   if (src->perm) dst->perm = H5MM_xcalloc (src->rank, sizeof(uint32));
+    /* check args */
+    assert(src);
+    if (!dst)
+        dst = H5MM_xcalloc(1, sizeof(H5P_simple_t));
 
-   if(src->rank>0)
-     {
-       HDmemcpy(dst->size,src->size,src->rank*sizeof(uint32));
-       /* Check for maximum dimensions and copy those */
-       if((src->dim_flags&0x01)>0)
-	 {
-	   HDmemcpy(dst->max,src->max,src->rank*sizeof(uint32));
-	 } /* end if */
-       /* Check for dimension permutation and copy those */
-       if((src->dim_flags&0x02)>0)
-	 {
-	   HDmemcpy(dst->perm,src->perm,src->rank*sizeof(uint32));
-	 } /* end if */
-     } /* end if */
+    /* deep copy -- pointed-to values are copied also */
+    HDmemcpy(dst, src, sizeof(H5P_simple_t));
+    if (src->size)
+        dst->size = H5MM_xcalloc(src->rank, sizeof(uint32));
+    if (src->max)
+        dst->max = H5MM_xcalloc(src->rank, sizeof(uint32));
+    if (src->perm)
+        dst->perm = H5MM_xcalloc(src->rank, sizeof(uint32));
 
-   FUNC_LEAVE ((void*)dst);
+    if (src->rank > 0) {
+        HDmemcpy(dst->size, src->size, src->rank * sizeof(uint32));
+        /* Check for maximum dimensions and copy those */
+        if ((src->dim_flags & 0x01) > 0) {
+            HDmemcpy(dst->max, src->max, src->rank * sizeof(uint32));
+        }                       /* end if */
+        /* Check for dimension permutation and copy those */
+        if ((src->dim_flags & 0x02) > 0) {
+            HDmemcpy(dst->perm, src->perm, src->rank * sizeof(uint32));
+        }                       /* end if */
+    }                           /* end if */
+    FUNC_LEAVE((void *) dst);
 }
 
 /*--------------------------------------------------------------------------
@@ -231,28 +221,28 @@ H5O_sdspace_copy (const void *mesg, void *dest)
     Return the raw message size in bytes
  USAGE
     void *H5O_sdspace_copy(f, mesg)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
+        H5F_t *f;         IN: pointer to the HDF5 file struct
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
  RETURNS
     Size of message on success, FAIL on failure
  DESCRIPTION
-	This function returns the size of the raw simple dimensionality message on
+        This function returns the size of the raw simple dimensionality message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_sdspace_size (H5F_t *f, const void *mesg)
+H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
-   const H5P_simple_t	*sdim = (const H5P_simple_t *)mesg;
-   size_t ret_value=8;	/* all dimensionality messages are at least 8 bytes long (rank and flags) */
+    const H5P_simple_t     *sdim = (const H5P_simple_t *) mesg;
+    size_t                  ret_value = 8;      /* all dimensionality messages are at least 8 bytes long (rank and flags) */
 
-   FUNC_ENTER (H5O_sim_dtype_size, FAIL);
+    FUNC_ENTER(H5O_sim_dtype_size, FAIL);
 
-   ret_value+=sdim->rank*4; /* add in the dimension sizes */
-   ret_value+=((sdim->dim_flags&0x01)>0)*sdim->rank*4;	/* add in the space for the maximum dimensions, if they are present */
-   ret_value+=((sdim->dim_flags&0x02)>0)*sdim->rank*4;	/* add in the space for the dimension permutations, if they are present */
+    ret_value += sdim->rank * 4;        /* add in the dimension sizes */
+    ret_value += ((sdim->dim_flags & 0x01) > 0) * sdim->rank * 4;       /* add in the space for the maximum dimensions, if they are present */
+    ret_value += ((sdim->dim_flags & 0x02) > 0) * sdim->rank * 4;       /* add in the space for the dimension permutations, if they are present */
 
-   FUNC_LEAVE (ret_value);
+    FUNC_LEAVE(ret_value);
 }
 
 /*--------------------------------------------------------------------------
@@ -262,54 +252,53 @@ H5O_sdspace_size (H5F_t *f, const void *mesg)
     Prints debugging information for a simple dimensionality message
  USAGE
     void *H5O_sdspace_debug(f, mesg, stream, indent, fwidth)
-	H5F_t *f;	  IN: pointer to the HDF5 file struct
-	const void *mesg;	IN: Pointer to the source simple dimensionality struct
-	FILE *stream;		IN: Pointer to the stream for output data
-	intn indent;		IN: Amount to indent information by
-	intn fwidth;		IN: Field width (?)
+        H5F_t *f;         IN: pointer to the HDF5 file struct
+        const void *mesg;       IN: Pointer to the source simple dimensionality struct
+        FILE *stream;           IN: Pointer to the stream for output data
+        intn indent;            IN: Amount to indent information by
+        intn fwidth;            IN: Field width (?)
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
-	This function prints debugging output to the stream passed as a 
+        This function prints debugging output to the stream passed as a 
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_debug (H5F_t *f, const void *mesg, FILE *stream,
-		intn indent, intn fwidth)
+H5O_sdspace_debug(H5F_t *f, const void *mesg, FILE * stream,
+                  intn indent, intn fwidth)
 {
-   const H5P_simple_t	*sdim = (const H5P_simple_t *)mesg;
-   uintn u;	/* local counting variable */
-   
-   FUNC_ENTER (H5O_sdspace_debug, FAIL);
+    const H5P_simple_t     *sdim = (const H5P_simple_t *) mesg;
+    uintn                   u;  /* local counting variable */
 
-   /* check args */
-   assert (f);
-   assert (sdim);
-   assert (stream);
-   assert (indent>=0);
-   assert (fwidth>=0);
+    FUNC_ENTER(H5O_sdspace_debug, FAIL);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Rank:",
-	    (unsigned long)(sdim->rank));
-   fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
-	    "Flags:",
-	    (unsigned long)(sdim->dim_flags));
-    for(u=0; u<sdim->rank; u++)
-       fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
-	    "Dim Size:",
-	    (unsigned long)(sdim->size[u]));
-    if(sdim->dim_flags&0x01)
-	for(u=0; u<sdim->rank; u++)
-	   fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
-		"Dim Max:",
-		(unsigned long)(sdim->max[u]));
-    if(sdim->dim_flags&0x02)
-	for(u=0; u<sdim->rank; u++)
-	   fprintf (stream, "%*s%-*s %lx\n", indent, "", fwidth,
-		"Dim Perm:",
-		(unsigned long)(sdim->perm[u]));
+    /* check args */
+    assert(f);
+    assert(sdim);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-   FUNC_LEAVE (SUCCEED);
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            "Rank:",
+            (unsigned long) (sdim->rank));
+    fprintf(stream, "%*s%-*s %lx\n", indent, "", fwidth,
+            "Flags:",
+            (unsigned long) (sdim->dim_flags));
+    for (u = 0; u < sdim->rank; u++)
+        fprintf(stream, "%*s%-*s %lx\n", indent, "", fwidth,
+                "Dim Size:",
+                (unsigned long) (sdim->size[u]));
+    if (sdim->dim_flags & 0x01)
+        for (u = 0; u < sdim->rank; u++)
+            fprintf(stream, "%*s%-*s %lx\n", indent, "", fwidth,
+                    "Dim Max:",
+                    (unsigned long) (sdim->max[u]));
+    if (sdim->dim_flags & 0x02)
+        for (u = 0; u < sdim->rank; u++)
+            fprintf(stream, "%*s%-*s %lx\n", indent, "", fwidth,
+                    "Dim Perm:",
+                    (unsigned long) (sdim->perm[u]));
+
+    FUNC_LEAVE(SUCCEED);
 }
-

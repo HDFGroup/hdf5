@@ -24,33 +24,33 @@
 
 /* Group values allowed */
 typedef enum {
-   BADGROUP=(-1),   		/* Invalid Group */
-   H5_ERR=0,                    /* Group ID for Error stack objects */
-   H5_FILE,                     /* Group ID for File objects */
-   H5_TEMPLATE_0,               /* Group ID for Template objects */
-   H5_TEMPLATE_1,               /* Group ID for Template objects */
-   H5_TEMPLATE_2,               /* Group ID for Template objects */
-   H5_TEMPLATE_3,               /* Group ID for Template objects */
-   H5_TEMPLATE_4,               /* Group ID for Template objects */
-   H5_TEMPLATE_5,               /* Group ID for Template objects */
-   H5_TEMPLATE_6,               /* Group ID for Template objects */
-   H5_TEMPLATE_7,               /* Group ID for Template objects */
+    BADGROUP = (-1),            /* Invalid Group */
+    H5_ERR = 0,                 /* Group ID for Error stack objects */
+    H5_FILE,                    /* Group ID for File objects */
+    H5_TEMPLATE_0,              /* Group ID for Template objects */
+    H5_TEMPLATE_1,              /* Group ID for Template objects */
+    H5_TEMPLATE_2,              /* Group ID for Template objects */
+    H5_TEMPLATE_3,              /* Group ID for Template objects */
+    H5_TEMPLATE_4,              /* Group ID for Template objects */
+    H5_TEMPLATE_5,              /* Group ID for Template objects */
+    H5_TEMPLATE_6,              /* Group ID for Template objects */
+    H5_TEMPLATE_7,              /* Group ID for Template objects */
 #ifndef NDEBUG
-   H5_TEMPLATE_MAX, 		/* Not really a group ID */
+    H5_TEMPLATE_MAX,            /* Not really a group ID */
 #endif
-   H5_GROUP,			/* Group ID for Group objects */
-   H5_DATATYPE,                 /* Group ID for Datatype objects */
-   H5_DATASPACE,                /* Group ID for Dataspace objects */
-   H5_DATASET,                  /* Group ID for Dataset objects */
-   H5_DIRECTORY,                /* Group ID for Directory objects */
-   MAXGROUP                     /* Highest group in group_t (Invalid as true group) */
+    H5_GROUP,                   /* Group ID for Group objects */
+    H5_DATATYPE,                /* Group ID for Datatype objects */
+    H5_DATASPACE,               /* Group ID for Dataspace objects */
+    H5_DATASET,                 /* Group ID for Dataset objects */
+    H5_DIRECTORY,               /* Group ID for Directory objects */
+    MAXGROUP                    /* Highest group in group_t (Invalid as true group) */
 } group_t;
 
 /* Type of atoms to return to users */
 typedef int32 hid_t;
 
 /* Type of the function to compare objects & keys */
-typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
+typedef intn            (*H5Asearch_func_t) (const VOIDP obj, const VOIDP key);
 
 /* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
 #define GROUP_BITS  8
@@ -61,11 +61,11 @@ typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
 #define ATOM_MASK   0x0FFFFFFF
 
 /* Combine a Group number and an atom index into an atom */
-#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ATOM_BITS)|	\
-			     ((hid_t)(i)&ATOM_MASK))
+#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ATOM_BITS)|      \
+                             ((hid_t)(i)&ATOM_MASK))
 
 #ifdef __cplusplus
-extern "C" {
+extern                  "C" {
 #endif
 
 /* Functions in H5A.c */
@@ -82,11 +82,11 @@ extern "C" {
     Returns SUCCEED if successful and FAIL otherwise
 
 *******************************************************************************/
-intn H5Ainit_group(group_t grp,     /* IN: Group to initialize */
-    intn hash_size,                 /* IN: Minimum hash table size to use for group */
-    uintn reserved,                 /* IN: Number of hash table entries to reserve */
-    herr_t (*free_func)(void *)       /* IN: Function to call when releasing ref counted objects */
-);
+    intn                    H5Ainit_group(group_t grp,  /* IN: Group to initialize */
+                                          intn hash_size,       /* IN: Minimum hash table size to use for group */
+                                          uintn reserved,       /* IN: Number of hash table entries to reserve */
+                               herr_t                  (*free_func) (void *)    /* IN: Function to call when releasing ref counted objects */
+    );
 
 /******************************************************************************
  NAME
@@ -102,8 +102,8 @@ intn H5Ainit_group(group_t grp,     /* IN: Group to initialize */
     Returns SUCCEED if successful and FAIL otherwise
 
 *******************************************************************************/
-intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
-);
+    intn                    H5Adestroy_group(group_t grp        /* IN: Group to destroy */
+    );
 
 /******************************************************************************
  NAME
@@ -121,9 +121,9 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
     Returns atom if successful and FAIL otherwise
 
 *******************************************************************************/
-hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
-    const void *object                    /* IN: Object to attach to atom */
-);
+    hid_t                   H5Aregister_atom(group_t grp,       /* IN: Group to register the object in */
+                                             const void *object         /* IN: Object to attach to atom */
+    );
 
 /******************************************************************************
  NAME
@@ -136,8 +136,8 @@ hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in *
     Returns object ptr if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP H5Aatom_object(hid_t atm   /* IN: Atom to retrieve object for */
-);
+    VOIDP                   H5Aatom_object(hid_t atm    /* IN: Atom to retrieve object for */
+    );
 
 /******************************************************************************
  NAME
@@ -150,8 +150,8 @@ VOIDP H5Aatom_object(hid_t atm   /* IN: Atom to retrieve object for */
     Returns group if successful and FAIL otherwise
 
 *******************************************************************************/
-group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
-);
+    group_t                 H5Aatom_group(hid_t atm     /* IN: Atom to retrieve group for */
+    );
 
 /******************************************************************************
  NAME
@@ -164,9 +164,8 @@ group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
     Returns atom's object if successful and FAIL otherwise
 
 *******************************************************************************/
-VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
-);
-
+    VOIDP                   H5Aremove_atom(hid_t atm    /* IN: Atom to remove */
+    );
 
 /******************************************************************************
  NAME
@@ -182,10 +181,10 @@ VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
     Returns pointer an atom's object if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object in */
-    H5Asearch_func_t func,               /* IN: Ptr to the comparison function */
-    const VOIDP key                     /* IN: pointer to key to compare against */
-);
+    VOIDP                   H5Asearch_atom(group_t grp,         /* IN: Group to search for the object in */
+                                           H5Asearch_func_t func,       /* IN: Ptr to the comparison function */
+                                           const VOIDP key      /* IN: pointer to key to compare against */
+    );
 
 /******************************************************************************
  NAME
@@ -199,8 +198,8 @@ VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object i
     Returns BTRUE/BFALSE/BFAIL
 
 *******************************************************************************/
-intn H5Ais_reserved(hid_t atm      /* IN: Group to search for the object in */
-);
+    intn                    H5Ais_reserved(hid_t atm    /* IN: Group to search for the object in */
+    );
 
 /******************************************************************************
  NAME
@@ -213,11 +212,10 @@ intn H5Ais_reserved(hid_t atm      /* IN: Group to search for the object in */
     Returns SUCCEED/FAIL
 
 *******************************************************************************/
-void H5A_term_interface(void);
+    void                    H5A_term_interface(void);
 
 #ifdef __cplusplus
 }
-#endif
 
 #endif
-
+#endif

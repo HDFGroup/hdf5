@@ -26,8 +26,8 @@
 #include <H5private.h>
 #include <H5Eprivate.h>
 
-extern int num_errs;
-extern int Verbosity;
+extern int              num_errs;
+extern int              Verbosity;
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */
@@ -36,30 +36,30 @@ do {if (Verbosity>9) print_func("   Call to routine: %15s at line %4d in %s retu
 if(ret == val) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in %s\n", where, (long)ret, (int)__LINE__,__FILE__); num_errs++;H5Eprint (H5E_thrdid_g, stdout);} \
 } while(0)
 
-#define CHECK_I(ret,where) {						      \
-   if (Verbosity>9) {							      \
+#define CHECK_I(ret,where) {                                                  \
+   if (Verbosity>9) {                                                         \
       print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", \
-		 (where), (int)__LINE__, __FILE__, (long)(ret));	      \
-   }									      \
-   if ((ret)<0) {							      \
+                 (where), (int)__LINE__, __FILE__, (long)(ret));              \
+   }                                                                          \
+   if ((ret)<0) {                                                             \
       print_func ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n",    \
-		  (where), (long)(ret), (int)__LINE__, __FILE__);	      \
-      H5Eprint (H5E_thrdid_g, stdout);					      \
-      num_errs++;							      \
-   }									      \
+                  (where), (long)(ret), (int)__LINE__, __FILE__);             \
+      H5Eprint (H5E_thrdid_g, stdout);                                        \
+      num_errs++;                                                             \
+   }                                                                          \
 }
-		     
-#define CHECK_PTR(ret,where) {						      \
-   if (Verbosity>9) {							      \
+
+#define CHECK_PTR(ret,where) {                                                \
+   if (Verbosity>9) {                                                         \
       print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
-		 (where), (int)__LINE__, __FILE__, (ret));		      \
-   }									      \
-   if (!(ret)) {							      \
+                 (where), (int)__LINE__, __FILE__, (ret));                    \
+   }                                                                          \
+   if (!(ret)) {                                                              \
       print_func ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",   \
-		  (where), (int)__LINE__, __FILE__);			      \
-      H5Eprint (H5E_thrdid_g, stdout);					      \
-      num_errs++;							      \
-   }									      \
+                  (where), (int)__LINE__, __FILE__);                          \
+      H5Eprint (H5E_thrdid_g, stdout);                                        \
+      num_errs++;                                                             \
+   }                                                                          \
 }
 
 /* Used to make certain a return value _is_ a value */
@@ -80,35 +80,34 @@ if(ret == FAIL) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in
 #define MESSAGE(V,A) {if (Verbosity>(V)) print_func A;}
 
 /* definitions for command strings */
-#define VERBOSITY_STR	"Verbosity"
-#define SKIP_STR	"Skip"
-#define TEST_STR	"Test"
-#define CLEAN_STR	"Cleanup"
+#define VERBOSITY_STR   "Verbosity"
+#define SKIP_STR        "Skip"
+#define TEST_STR        "Test"
+#define CLEAN_STR       "Cleanup"
 
 /* System command to use for Cleanup */
 #ifdef VMS
-#define CLEAN_CMD	"delete *.hdf;*"
+#define CLEAN_CMD       "delete *.hdf;*"
 #else
 #   ifdef WIN32
-#   define CLEAN_CMD  "del *.hdf"   
+#   define CLEAN_CMD  "del *.hdf"
 #   else
 /* default is Unix */
-#   define CLEAN_CMD	"rm -f *.hdf"
-#   endif  /* WIN32  */
+#   define CLEAN_CMD    "rm -f *.hdf"
+#   endif                       /* WIN32  */
 #endif /*VMS */
 
 /* Prototypes for the support routines */
-int print_func(const char *, ...);
+int                     print_func(const char *,...);
 
 /* Prototypes for the test routines */
-void test_metadata(void);
-void test_file(void);
-void test_heap (void);
-void test_ohdr (void);
-void test_stab (void);
-void test_h5t (void);
-void test_h5p (void);
-void test_h5d (void);
+void                    test_metadata(void);
+void                    test_file(void);
+void                    test_heap(void);
+void                    test_ohdr(void);
+void                    test_stab(void);
+void                    test_h5t(void);
+void                    test_h5p(void);
+void                    test_h5d(void);
 
 #endif /* HDF5TEST_H */
-

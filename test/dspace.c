@@ -5,10 +5,9 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, December  9, 1997
  *
- * Purpose:	Tests the data space interface (H5P).
+ * Purpose:     Tests the data space interface (H5P).
  */
 
 int
-main (void)
+main(void)
 {
-   

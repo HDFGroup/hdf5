@@ -24,6 +24,6 @@
 #include <H5private.h>
 #include <H5Fprivate.h>
 
-hid_t H5C_create (H5C_class_t type, void *tmpl);
+hid_t                   H5C_create(H5C_class_t type, void *tmpl);
 
 #endif

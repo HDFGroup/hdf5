@@ -12,86 +12,85 @@
 #include <H5Gpkg.h>
 #include <H5MMprivate.h>
 
-#define PABLO_MASK	H5G_ent_mask
-static hbool_t interface_initialize_g = FALSE;
-#define INTERFACE_INIT	NULL
-
+#define PABLO_MASK      H5G_ent_mask
+static hbool_t          interface_initialize_g = FALSE;
+#define INTERFACE_INIT  NULL
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_calloc
+ * Function:    H5G_ent_calloc
  *
- * Purpose:	Returns a pointer to a malloc'd, zeroed symbol table entry.
+ * Purpose:     Returns a pointer to a malloc'd, zeroed symbol table entry.
  *
- * Return:	Success:	Ptr to entry
+ * Return:      Success:        Ptr to entry
  *
- *		Failure:	never fails
+ *              Failure:        never fails
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, September 19, 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-H5G_entry_t *
-H5G_ent_calloc (H5G_entry_t *init)
+H5G_entry_t            *
+H5G_ent_calloc(H5G_entry_t *init)
 {
-   H5G_entry_t *ent;
-   
-   ent = H5MM_xcalloc (1, sizeof(H5G_entry_t));
-   if (init) *ent = *init;
-   else H5F_addr_undef (&(ent->header));
-   return ent;
-}
+    H5G_entry_t            *ent;
 
+    ent = H5MM_xcalloc(1, sizeof(H5G_entry_t));
+    if (init)
+        *ent = *init;
+    else
+        H5F_addr_undef(&(ent->header));
+    return ent;
+}
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_cache
+ * Function:    H5G_ent_cache
  *
- * Purpose:	Returns a pointer to the cache associated with the symbol
- *		table entry.  You should modify the cache directly, then call
- *		H5G_modified() with the new cache type (even if the type is
- *		still the same).
+ * Purpose:     Returns a pointer to the cache associated with the symbol
+ *              table entry.  You should modify the cache directly, then call
+ *              H5G_modified() with the new cache type (even if the type is
+ *              still the same).
  *
- * Return:	Success:	Ptr to the cache in the symbol table entry.
+ * Return:      Success:        Ptr to the cache in the symbol table entry.
  *
- *		Failure:	NULL
+ *              Failure:        NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, September 19, 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-H5G_cache_t *
-H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type)
+H5G_cache_t            *
+H5G_ent_cache(H5G_entry_t *ent, H5G_type_t *cache_type)
 {
-   FUNC_ENTER (H5G_ent_cache, NULL);
-   if (!ent) {
-      HRETURN_ERROR (H5E_SYM, H5E_BADVALUE, NULL, "no entry");
-   }
-   if (cache_type) *cache_type = ent->type;
-   
-   FUNC_LEAVE (&(ent->cache));
+    FUNC_ENTER(H5G_ent_cache, NULL);
+    if (!ent) {
+        HRETURN_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "no entry");
+    }
+    if (cache_type)
+        *cache_type = ent->type;
+
+    FUNC_LEAVE(&(ent->cache));
 }
-
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_modified
+ * Function:    H5G_ent_modified
  *
- * Purpose:	This function should be called after you make any
- *		modifications to a symbol table entry cache.  Supply the new
- *		type for the cache.  If CACHE_TYPE is the constant
- *		H5G_NO_CHANGE then the cache type isn't changed--just the
- *		dirty bit is set.
+ * Purpose:     This function should be called after you make any
+ *              modifications to a symbol table entry cache.  Supply the new
+ *              type for the cache.  If CACHE_TYPE is the constant
+ *              H5G_NO_CHANGE then the cache type isn't changed--just the
+ *              dirty bit is set.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, September 19, 1997
  *
  * Modifications:
@@ -99,302 +98,298 @@ H5G_ent_cache (H5G_entry_t *ent, H5G_type_t *cache_type)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_modified (H5G_entry_t *ent, H5G_type_t cache_type)
+H5G_ent_modified(H5G_entry_t *ent, H5G_type_t cache_type)
 {
-   FUNC_ENTER (H5G_ent_modified, FAIL);
-   assert (ent);
-   if (H5G_NO_CHANGE!=ent->type) ent->type = cache_type;
-   ent->dirty = TRUE;
-   FUNC_LEAVE (SUCCEED);
+    FUNC_ENTER(H5G_ent_modified, FAIL);
+    assert(ent);
+    if (H5G_NO_CHANGE != ent->type)
+        ent->type = cache_type;
+    ent->dirty = TRUE;
+    FUNC_LEAVE(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_decode_vec
+ * Function:    H5G_ent_decode_vec
  *
- * Purpose:	Same as H5G_ent_decode() except it does it for an array of
- *		symbol table entries.
+ * Purpose:     Same as H5G_ent_decode() except it does it for an array of
+ *              symbol table entries.
  *
  * Errors:
- *		SYM       CANTDECODE    Can't decode. 
+ *              SYM       CANTDECODE    Can't decode. 
  *
- * Return:	Success:	SUCCEED, with *pp pointing to the first byte
- *				after the last symbol.
+ * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ *                              after the last symbol.
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 18 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec (H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_decode_vec(H5F_t *f, const uint8 **pp, H5G_entry_t *ent, intn n)
 {
-   intn		i;
+    intn                    i;
 
-   FUNC_ENTER (H5G_ent_decode_vec, FAIL);
+    FUNC_ENTER(H5G_ent_decode_vec, FAIL);
 
-   /* check arguments */
-   assert (f);
-   assert (pp);
-   assert (ent);
-   assert (n>=0);
+    /* check arguments */
+    assert(f);
+    assert(pp);
+    assert(ent);
+    assert(n >= 0);
 
-   /* decode entries */
-   for (i=0; i<n; i++) {
-      if (H5G_ent_decode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
-      }
-   }
+    /* decode entries */
+    for (i = 0; i < n; i++) {
+        if (H5G_ent_decode(f, pp, ent + i) < 0) {
+            HRETURN_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode");
+        }
+    }
 
-   FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_decode
+ * Function:    H5G_ent_decode
  *
- * Purpose:	Decodes a symbol table entry pointed to by `*pp'.
+ * Purpose:     Decodes a symbol table entry pointed to by `*pp'.
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED with *pp pointing to the first byte
- *				following the symbol table entry.
+ * Return:      Success:        SUCCEED with *pp pointing to the first byte
+ *                              following the symbol table entry.
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 18 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode (H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
+H5G_ent_decode(H5F_t *f, const uint8 **pp, H5G_entry_t *ent)
 {
-   const uint8	*p_ret = *pp;
+    const uint8            *p_ret = *pp;
 
-   FUNC_ENTER (H5G_ent_decode, FAIL);
+    FUNC_ENTER(H5G_ent_decode, FAIL);
 
-   /* check arguments */
-   assert (f);
-   assert (pp);
-   assert (ent);
+    /* check arguments */
+    assert(f);
+    assert(pp);
+    assert(ent);
 
-   ent->file = f;
+    ent->file = f;
 
-   /* decode header */
-   H5F_decode_length (f, *pp, ent->name_off);
-   H5F_addr_decode (f, pp, &(ent->header));
-   UINT32DECODE (*pp, ent->type);
+    /* decode header */
+    H5F_decode_length(f, *pp, ent->name_off);
+    H5F_addr_decode(f, pp, &(ent->header));
+    UINT32DECODE(*pp, ent->type);
 
-   /* decode scratch-pad */
-   switch (ent->type) {
-   case H5G_NOTHING_CACHED:
-      break;
+    /* decode scratch-pad */
+    switch (ent->type) {
+    case H5G_NOTHING_CACHED:
+        break;
 
-   case H5G_CACHED_STAB:
-      assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
-      H5F_addr_decode (f, pp, &(ent->cache.stab.btree_addr));
-      H5F_addr_decode (f, pp, &(ent->cache.stab.heap_addr));
-      break;
+    case H5G_CACHED_STAB:
+        assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+        H5F_addr_decode(f, pp, &(ent->cache.stab.btree_addr));
+        H5F_addr_decode(f, pp, &(ent->cache.stab.heap_addr));
+        break;
 
-   default:
-      HDabort();
-   }
+    default:
+        HDabort();
+    }
 
-   *pp = p_ret + H5G_SIZEOF_ENTRY(f);
-   FUNC_LEAVE (SUCCEED);
+    *pp = p_ret + H5G_SIZEOF_ENTRY(f);
+    FUNC_LEAVE(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_encode_vec
+ * Function:    H5G_ent_encode_vec
  *
- * Purpose:	Same as H5G_ent_encode() except it does it for an array of
- *		symbol table entries.
+ * Purpose:     Same as H5G_ent_encode() except it does it for an array of
+ *              symbol table entries.
  *
  * Errors:
- *		SYM       CANTENCODE    Can't encode. 
+ *              SYM       CANTENCODE    Can't encode. 
  *
- * Return:	Success:	SUCCEED, with *pp pointing to the first byte
- *				after the last symbol.
+ * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ *                              after the last symbol.
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 18 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec (H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
+H5G_ent_encode_vec(H5F_t *f, uint8 **pp, H5G_entry_t *ent, intn n)
 {
-   intn		i;
+    intn                    i;
 
-   FUNC_ENTER (H5G_ent_encode_vec, FAIL);
+    FUNC_ENTER(H5G_ent_encode_vec, FAIL);
 
-   /* check arguments */
-   assert (f);
-   assert (pp);
-   assert (ent);
-   assert (n>=0);
+    /* check arguments */
+    assert(f);
+    assert(pp);
+    assert(ent);
+    assert(n >= 0);
 
-   /* encode entries */
-   for (i=0; i<n; i++) {
-      if (H5G_ent_encode (f, pp, ent+i)<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
-      }
-   }
+    /* encode entries */
+    for (i = 0; i < n; i++) {
+        if (H5G_ent_encode(f, pp, ent + i) < 0) {
+            HRETURN_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode");
+        }
+    }
 
-   FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }
-
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_encode
+ * Function:    H5G_ent_encode
  *
- * Purpose:	Encodes the specified symbol table entry into the buffer
- *		pointed to by *pp.
+ * Purpose:     Encodes the specified symbol table entry into the buffer
+ *              pointed to by *pp.
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED, with *pp pointing to the first byte
- *				after the symbol table entry.
+ * Return:      Success:        SUCCEED, with *pp pointing to the first byte
+ *                              after the symbol table entry.
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 18 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 18 1997
  *
  * Modifications:
  *
- * 	Robb Matzke, 8 Aug 1997
- *	Writes zeros for the bytes that aren't used so the file doesn't
- *	contain junk.
+ *      Robb Matzke, 8 Aug 1997
+ *      Writes zeros for the bytes that aren't used so the file doesn't
+ *      contain junk.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode (H5F_t *f, uint8 **pp, H5G_entry_t *ent)
+H5G_ent_encode(H5F_t *f, uint8 **pp, H5G_entry_t *ent)
 {
-   uint8	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
+    uint8                  *p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
-   FUNC_ENTER (H5G_ent_encode, FAIL);
+    FUNC_ENTER(H5G_ent_encode, FAIL);
 
-   /* check arguments */
-   assert (f);
-   assert (pp);
+    /* check arguments */
+    assert(f);
+    assert(pp);
 
-   if (ent) {
-      /* encode header */
-      H5F_encode_length (f, *pp, ent->name_off);
-      H5F_addr_encode (f, pp, &(ent->header));
-      UINT32ENCODE (*pp, ent->type);
+    if (ent) {
+        /* encode header */
+        H5F_encode_length(f, *pp, ent->name_off);
+        H5F_addr_encode(f, pp, &(ent->header));
+        UINT32ENCODE(*pp, ent->type);
 
-      /* encode scratch-pad */
-      switch (ent->type) {
-      case H5G_NOTHING_CACHED:
-	 break;
+        /* encode scratch-pad */
+        switch (ent->type) {
+        case H5G_NOTHING_CACHED:
+            break;
 
-      case H5G_CACHED_STAB:
-	 assert (2*H5F_SIZEOF_ADDR (f) <= H5G_SIZEOF_SCRATCH);
-	 H5F_addr_encode (f, pp, &(ent->cache.stab.btree_addr));
-	 H5F_addr_encode (f, pp, &(ent->cache.stab.heap_addr));
-	 break;
+        case H5G_CACHED_STAB:
+            assert(2 * H5F_SIZEOF_ADDR(f) <= H5G_SIZEOF_SCRATCH);
+            H5F_addr_encode(f, pp, &(ent->cache.stab.btree_addr));
+            H5F_addr_encode(f, pp, &(ent->cache.stab.heap_addr));
+            break;
 
-      default:
-	 HDabort();
-      }
-   } else {
-      haddr_t undef;
-      H5F_encode_length (f, *pp, 0);
-      H5F_addr_undef (&undef);
-      H5F_addr_encode (f, pp, &undef);
-      UINT32ENCODE (*pp, H5G_NOTHING_CACHED);
-   }
+        default:
+            HDabort();
+        }
+    } else {
+        haddr_t                 undef;
+        H5F_encode_length(f, *pp, 0);
+        H5F_addr_undef(&undef);
+        H5F_addr_encode(f, pp, &undef);
+        UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
+    }
 
-   /* fill with zero */
-   while (*pp<p_ret) *(*pp)++ = 0;
-   
-   *pp = p_ret;
-   FUNC_LEAVE (SUCCEED);
+    /* fill with zero */
+    while (*pp < p_ret)
+        *(*pp)++ = 0;
+
+    *pp = p_ret;
+    FUNC_LEAVE(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_ent_debug
+ * Function:    H5G_ent_debug
  *
- * Purpose:	Prints debugging information about a symbol table entry.
+ * Purpose:     Prints debugging information about a symbol table entry.
  *
  * Errors:
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug 29 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Aug 29 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug (H5F_t *f, H5G_entry_t *ent, FILE *stream, intn indent,
-	       intn fwidth)
+H5G_ent_debug(H5F_t *f, H5G_entry_t *ent, FILE * stream, intn indent,
+              intn fwidth)
 {
-   FUNC_ENTER (H5G_ent_debug, FAIL);
+    FUNC_ENTER(H5G_ent_debug, FAIL);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Name offset into private heap:",
-	    (unsigned long)(ent->name_off));
-   
-   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	    "Object header address:");
-   H5F_addr_print (stream, &(ent->header));
-   fprintf (stream, "\n");
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            "Name offset into private heap:",
+            (unsigned long) (ent->name_off));
 
-   fprintf (stream, "%*s%-*s %s\n", indent, "", fwidth,
-	    "Dirty:",
-	    ent->dirty ? "Yes" : "No");
-   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	    "Symbol type:");
-   switch (ent->type) {
-   case H5G_NOTHING_CACHED:
-      fprintf (stream, "Nothing Cached\n");
-      break;
-	 
-   case H5G_CACHED_STAB:
-      fprintf (stream, "Symbol Table\n");
-      
-      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	       "B-tree address:");
-      H5F_addr_print (stream, &(ent->cache.stab.btree_addr));
-      fprintf (stream, "\n");
-      
-      fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	       "Heap address:");
-      H5F_addr_print (stream, &(ent->cache.stab.heap_addr));
-      fprintf (stream, "\n");
-      break;
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth,
+            "Object header address:");
+    H5F_addr_print(stream, &(ent->header));
+    fprintf(stream, "\n");
 
-   default:
-      fprintf (stream, "*** Unknown symbol type %d\n", ent->type);
-      break;
-   }
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Dirty:",
+            ent->dirty ? "Yes" : "No");
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth,
+            "Symbol type:");
+    switch (ent->type) {
+    case H5G_NOTHING_CACHED:
+        fprintf(stream, "Nothing Cached\n");
+        break;
 
-   FUNC_LEAVE (SUCCEED);
+    case H5G_CACHED_STAB:
+        fprintf(stream, "Symbol Table\n");
+
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth,
+                "B-tree address:");
+        H5F_addr_print(stream, &(ent->cache.stab.btree_addr));
+        fprintf(stream, "\n");
+
+        fprintf(stream, "%*s%-*s ", indent, "", fwidth,
+                "Heap address:");
+        H5F_addr_print(stream, &(ent->cache.stab.heap_addr));
+        fprintf(stream, "\n");
+        break;
+
+    default:
+        fprintf(stream, "*** Unknown symbol type %d\n", ent->type);
+        break;
+    }
+
+    FUNC_LEAVE(SUCCEED);
 }

@@ -1,19 +1,19 @@
 /*-------------------------------------------------------------------------
- * Copyright (C) 1997	National Center for Supercomputing Applications.
+ * Copyright (C) 1997   National Center for Supercomputing Applications.
  *                      All rights reserved.
  *
  *-------------------------------------------------------------------------
  *
- * Created:		H5Ocont.c
- * 			Aug  6 1997
- * 			Robb Matzke <matzke@llnl.gov>
+ * Created:             H5Ocont.c
+ *                      Aug  6 1997
+ *                      Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		The object header continuation message.  This
- *			message is only generated and read from within
- *			the H5O package.  Therefore, do not change
- *			any definitions in this file!
+ * Purpose:             The object header continuation message.  This
+ *                      message is only generated and read from within
+ *                      the H5O package.  Therefore, do not change
+ *                      any definitions in this file!
  *
- * Modifications:	
+ * Modifications:       
  *
  *-------------------------------------------------------------------------
  */
@@ -22,152 +22,151 @@
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 
-#define PABLO_MASK	H5O_cont_mask
+#define PABLO_MASK      H5O_cont_mask
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p);
-static herr_t H5O_cont_encode (H5F_t *f, size_t size, uint8 *p,
-			       const void *_mesg);
-static herr_t H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
-			      intn indent, intn fwidth);
+static void            *H5O_cont_decode(H5F_t *f, size_t raw_size, const uint8 *p);
+static herr_t           H5O_cont_encode(H5F_t *f, size_t size, uint8 *p,
+                                        const void *_mesg);
+static herr_t           H5O_cont_debug(H5F_t *f, const void *_mesg, FILE * stream,
+                                       intn indent, intn fwidth);
 
 /* This message derives from H5O */
-const H5O_class_t H5O_CONT[1] = {{
-   H5O_CONT_ID,				/*message id number		*/
-   "hdr continuation",			/*message name for debugging	*/
-   sizeof (H5O_cont_t),			/*native message size		*/
-   H5O_cont_decode,			/*decode message		*/
-   H5O_cont_encode,			/*encode message		*/
-   NULL,				/*no copy method		*/
-   NULL,				/*no size method		*/
-   NULL,				/*default reset method		*/
-   H5O_cont_debug,			/*debugging			*/
-}};
+const H5O_class_t       H5O_CONT[1] =
+{
+    {
+        H5O_CONT_ID,            /*message id number             */
+        "hdr continuation",     /*message name for debugging    */
+        sizeof(H5O_cont_t),     /*native message size           */
+        H5O_cont_decode,        /*decode message                */
+        H5O_cont_encode,        /*encode message                */
+        NULL,                   /*no copy method                */
+        NULL,                   /*no size method                */
+        NULL,                   /*default reset method          */
+        H5O_cont_debug,         /*debugging                     */
+    }};
 
 /* Interface initialization */
-static intn interface_initialize_g = FALSE;
-#define INTERFACE_INIT	NULL
-
+static intn             interface_initialize_g = FALSE;
+#define INTERFACE_INIT  NULL
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cont_decode
+ * Function:    H5O_cont_decode
  *
- * Purpose:	Decode the raw header continuation message.
+ * Purpose:     Decode the raw header continuation message.
  *
- * Return:	Success:	Ptr to the new native message
+ * Return:      Success:        Ptr to the new native message
  *
- *		Failure:	NULL
+ *              Failure:        NULL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  6 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Aug  6 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5O_cont_decode (H5F_t *f, size_t raw_size, const uint8 *p)
+static void            *
+H5O_cont_decode(H5F_t *f, size_t raw_size, const uint8 *p)
 {
-   H5O_cont_t	*cont = NULL;
-   
-   FUNC_ENTER (H5O_cont_decode, NULL);
+    H5O_cont_t             *cont = NULL;
 
-   /* check args */
-   assert (f);
-   assert (raw_size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
-   assert (p);
+    FUNC_ENTER(H5O_cont_decode, NULL);
 
-   /* decode */
-   cont = H5MM_xcalloc (1, sizeof(H5O_cont_t));
-   H5F_addr_decode (f, &p, &(cont->addr));
-   H5F_decode_length (f, p, cont->size);
+    /* check args */
+    assert(f);
+    assert(raw_size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
+    assert(p);
 
-   FUNC_LEAVE ((void*)cont);
+    /* decode */
+    cont = H5MM_xcalloc(1, sizeof(H5O_cont_t));
+    H5F_addr_decode(f, &p, &(cont->addr));
+    H5F_decode_length(f, p, cont->size);
+
+    FUNC_LEAVE((void *) cont);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cont_encode
+ * Function:    H5O_cont_encode
  *
- * Purpose:	Encodes a continuation message.
+ * Purpose:     Encodes a continuation message.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  7 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Aug  7 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_encode (H5F_t *f, size_t size, uint8 *p, const void *_mesg)
+H5O_cont_encode(H5F_t *f, size_t size, uint8 *p, const void *_mesg)
 {
-   const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;
+    const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 
-   FUNC_ENTER (H5O_cont_encode, FAIL);
+    FUNC_ENTER(H5O_cont_encode, FAIL);
 
-   /* check args */
-   assert (f);
-   assert (size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
-   assert (p);
-   assert (cont);
+    /* check args */
+    assert(f);
+    assert(size == H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
+    assert(p);
+    assert(cont);
 
-   /* encode */
-   H5F_addr_encode (f, &p, &(cont->addr));
-   H5F_encode_length (f, p, cont->size);
+    /* encode */
+    H5F_addr_encode(f, &p, &(cont->addr));
+    H5F_encode_length(f, p, cont->size);
 
-   FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE(SUCCEED);
 }
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_cont_debug
+ * Function:    H5O_cont_debug
  *
- * Purpose:	Prints debugging info.
+ * Purpose:     Prints debugging info.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug  6 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Aug  6 1997
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_debug (H5F_t *f, const void *_mesg, FILE *stream,
-		intn indent, intn fwidth)
+H5O_cont_debug(H5F_t *f, const void *_mesg, FILE * stream,
+               intn indent, intn fwidth)
 {
-   const H5O_cont_t	*cont = (const H5O_cont_t *)_mesg;
-   
-   FUNC_ENTER (H5O_cont_debug, FAIL);
+    const H5O_cont_t       *cont = (const H5O_cont_t *) _mesg;
 
-   /* check args */
-   assert (f);
-   assert (cont);
-   assert (stream);
-   assert (indent>=0);
-   assert (fwidth>=0);
+    FUNC_ENTER(H5O_cont_debug, FAIL);
 
-   fprintf (stream, "%*s%-*s ", indent, "", fwidth,
-	    "Continuation address:");
-   H5F_addr_print (stream, &(cont->addr));
-   fprintf (stream, "\n");
+    /* check args */
+    assert(f);
+    assert(cont);
+    assert(stream);
+    assert(indent >= 0);
+    assert(fwidth >= 0);
 
-   fprintf (stream, "%*s%-*s %lu\n", indent, "", fwidth,
-	    "Continuation size in bytes:",
-	    (unsigned long)(cont->size));
-   fprintf (stream, "%*s%-*s %d\n", indent, "", fwidth,
-	    "Points to chunk number:",
-	    (int)(cont->chunkno));
+    fprintf(stream, "%*s%-*s ", indent, "", fwidth,
+            "Continuation address:");
+    H5F_addr_print(stream, &(cont->addr));
+    fprintf(stream, "\n");
 
-   FUNC_LEAVE (SUCCEED);
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+            "Continuation size in bytes:",
+            (unsigned long) (cont->size));
+    fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+            "Points to chunk number:",
+            (int) (cont->chunkno));
+
+    FUNC_LEAVE(SUCCEED);
 }

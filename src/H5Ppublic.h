@@ -24,33 +24,32 @@
 #include <H5Apublic.h>
 
 /* Define atomic datatypes */
-#define H5P_ALL		(-2)
+#define H5P_ALL         (-2)
 
 /* Different types of dataspaces */
 typedef enum H5P_class_t {
-   H5P_NO_CLASS		=-1, 		/*error				*/
-   H5P_SCALAR		=0, 		/*scalar variable		*/
-   H5P_SIMPLE		=1, 		/*simple data space		*/
-   H5P_COMPLEX		=2		/*complex data space		*/
+    H5P_NO_CLASS = -1,          /*error                         */
+    H5P_SCALAR = 0,             /*scalar variable               */
+    H5P_SIMPLE = 1,             /*simple data space             */
+    H5P_COMPLEX = 2             /*complex data space            */
 } H5P_class_t;
 
-
 #ifdef __cplusplus
-extern "C" {
+extern                  "C" {
 #endif
 
 /* Functions in H5P.c */
-hid_t H5Pcreate (H5P_class_t type);
-herr_t H5Pclose (hid_t space_id);
-size_t H5Pget_npoints (hid_t space_id);
-intn H5Pget_ndims (hid_t space_id);
-intn H5Pget_dims (hid_t space_id, size_t dims[]);
+    hid_t                   H5Pcreate(H5P_class_t type);
+    herr_t                  H5Pclose(hid_t space_id);
+    size_t                  H5Pget_npoints(hid_t space_id);
+    intn                    H5Pget_ndims(hid_t space_id);
+    intn                    H5Pget_dims(hid_t space_id, size_t dims[]);
 
-hbool_t H5Pis_simple(hid_t space_id);
-herr_t H5Pset_space(hid_t space_id, intn rank, const size_t *dims);
+    hbool_t                 H5Pis_simple(hid_t space_id);
+    herr_t                  H5Pset_space(hid_t space_id, intn rank, const size_t *dims);
 
 #ifdef __cplusplus
 }
-#endif
 
+#endif
 #endif

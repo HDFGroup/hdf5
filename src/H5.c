@@ -11,7 +11,7 @@
 ****************************************************************************/
 
 #ifdef RCSID
-static char RcsId[] = "@(#)$Revision$";
+static char             RcsId[] = "@(#)$Revision$";
 #endif
 
 /* $Id$ */
@@ -19,51 +19,49 @@ static char RcsId[] = "@(#)$Revision$";
 /*LINTLIBRARY */
 /*+
    FILE
-       hdf5.c
+   hdf5.c
    HDF library support routines
 
    EXPORTED ROUTINES
-       H5dont_atexit    -- Indicate that an 'atexit' routine is _not_ to be installed
-       H5version        -- Check the version of the library
+   H5dont_atexit    -- Indicate that an 'atexit' routine is _not_ to be installed
+   H5version        -- Check the version of the library
 
    LIBRARY-SCOPED ROUTINES
-       H5_init_library      -- initialize the HDF5 library
-       H5_term_library      -- shut-down the HDF5 library
-       H5_init_thread       -- initialize thread-specific information
+   H5_init_library      -- initialize the HDF5 library
+   H5_term_library      -- shut-down the HDF5 library
+   H5_init_thread       -- initialize thread-specific information
 
    LOCAL ROUTINES
-       H5_init_interface    -- initialize the H5 interface
+   H5_init_interface    -- initialize the H5 interface
    + */
 
-
 /* private headers */
-#include <H5private.h>			/*library			*/
-#include <H5ACprivate.h>		/*cache				*/
-#include <H5Bprivate.h>			/*B-link trees			*/
-#include <H5Eprivate.h>			/*error handling		*/
-#include <H5MMprivate.h>		/*memory management		*/
-#include <H5Tprivate.h>			/*data types			*/
+#include <H5private.h>          /*library                 */
+#include <H5ACprivate.h>        /*cache                           */
+#include <H5Bprivate.h>         /*B-link trees                    */
+#include <H5Eprivate.h>         /*error handling          */
+#include <H5MMprivate.h>        /*memory management               */
+#include <H5Tprivate.h>         /*data types                      */
 
-#define PABLO_MASK	H5_mask
+#define PABLO_MASK      H5_mask
 
 /*--------------------- Locally scoped variables -----------------------------*/
 
-
-hbool_t library_initialize_g = FALSE;
-hbool_t	thread_initialize_g = FALSE;
-hbool_t install_atexit_g = TRUE;
+hbool_t                 library_initialize_g = FALSE;
+hbool_t                 thread_initialize_g = FALSE;
+hbool_t                 install_atexit_g = TRUE;
 
 typedef struct H5_exit {
-   void (*func)(void);     /* Interface function to call during exit */
-   struct H5_exit *next;   /* Pointer to next node with exit function */
+    void                    (*func) (void);     /* Interface function to call during exit */
+    struct H5_exit         *next;       /* Pointer to next node with exit function */
 } H5_exit_t;
 
-H5_exit_t *lib_exit_head;   /* Pointer to the head of the list of 'atexit' functions */
+H5_exit_t              *lib_exit_head;  /* Pointer to the head of the list of 'atexit' functions */
 
 /* Interface initialization */
-static hbool_t interface_initialize_g = FALSE;
+static hbool_t          interface_initialize_g = FALSE;
 #define INTERFACE_INIT H5_init_interface
-static herr_t H5_init_interface (void);
+static herr_t           H5_init_interface(void);
 
 /*--------------------------------------------------------------------------
 NAME
@@ -77,27 +75,26 @@ DESCRIPTION
     Initializes any library-global data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t H5_init_library(void)
+herr_t 
+H5_init_library(void)
 {
-   FUNC_ENTER_INIT (H5_init_library, NULL, FAIL);
+    FUNC_ENTER_INIT(H5_init_library, NULL, FAIL);
 
-   /* Install atexit() library cleanup routine */
-   if(install_atexit_g==TRUE)
-      if (HDatexit(&H5_term_library) != 0)
-	 HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-		       "unable to register atexit function");
+    /* Install atexit() library cleanup routine */
+    if (install_atexit_g == TRUE)
+        if (HDatexit(&H5_term_library) != 0)
+            HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                          "unable to register atexit function");
 
-   /*
-    * Initialize interfaces that might not be able to initialize themselves
-    * soon enough.
-    */
-   if (H5T_init_interface ()<0) {
-      HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
-		     "unable to initialize type interface");
-   }
-   
-
-   FUNC_LEAVE (SUCCEED);
+    /*
+     * Initialize interfaces that might not be able to initialize themselves
+     * soon enough.
+     */
+    if (H5T_init_interface() < 0) {
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                      "unable to initialize type interface");
+    }
+    FUNC_LEAVE(SUCCEED);
 }
 
 /*--------------------------------------------------------------------------
@@ -121,23 +118,23 @@ herr_t H5_init_library(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5_add_exit (void (*func)(void))
+H5_add_exit(void        (*func) (void))
 {
-    herr_t ret_value = SUCCEED;
-    H5_exit_t *new;
+    herr_t                  ret_value = SUCCEED;
+    H5_exit_t              *new;
 
-    FUNC_ENTER_INIT (H5_add_exit, NULL, FAIL);
+    FUNC_ENTER_INIT(H5_add_exit, NULL, FAIL);
 
     assert(func);
 
-    new = H5MM_xcalloc (1, sizeof(H5_exit_t));
+    new = H5MM_xcalloc(1, sizeof(H5_exit_t));
 
-    new->func=func;
-    new->next=lib_exit_head;
-    lib_exit_head=new;
+    new->func = func;
+    new->next = lib_exit_head;
+    lib_exit_head = new;
 
     FUNC_LEAVE(ret_value);
-} /* end H5_add_exit() */
+}                               /* end H5_add_exit() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -158,19 +155,18 @@ H5_add_exit (void (*func)(void))
  REVISION LOG
 --------------------------------------------------------------------------*/
 void
-H5_term_library (void)
+H5_term_library(void)
 {
-    H5_exit_t *temp;
+    H5_exit_t              *temp;
 
-    temp=lib_exit_head;
-    while(lib_exit_head!=NULL)
-      {
-          (*lib_exit_head->func)();
-          lib_exit_head=lib_exit_head->next;
-          HDfree(temp);
-          temp=lib_exit_head;
-      } /* end while */
-} /* end H5_term_library() */
+    temp = lib_exit_head;
+    while (lib_exit_head != NULL) {
+        (*lib_exit_head->func) ();
+        lib_exit_head = lib_exit_head->next;
+        HDfree(temp);
+        temp = lib_exit_head;
+    }                           /* end while */
+}                               /* end H5_term_library() */
 
 /*--------------------------------------------------------------------------
 NAME
@@ -184,22 +180,23 @@ DESCRIPTION
     Initializes any thread-specific data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t H5_init_thread(void)
+herr_t 
+H5_init_thread(void)
 {
-    FUNC_ENTER_INIT (H5_init_thread, NULL, FAIL);
+    FUNC_ENTER_INIT(H5_init_thread, NULL, FAIL);
 
     /* Create/initialize this thread's error stack */
-    if((H5E_thrdid_g=H5Ecreate(16))==FAIL)
-       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
-		      "unable to create thread error stack");
+    if ((H5E_thrdid_g = H5Ecreate(16)) == FAIL)
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                      "unable to create thread error stack");
 
     /* Add the "thread termination" routine to the exit chain */
-    if(H5_add_exit(&H5_term_thread)==FAIL)
-       HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, FAIL,
-		      "unable to set thread atexit function");
+    if (H5_add_exit(&H5_term_thread) == FAIL)
+        HRETURN_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                      "unable to set thread atexit function");
 
-    FUNC_LEAVE (SUCCEED);
-}	/* H5_init_thread */
+    FUNC_LEAVE(SUCCEED);
+}                               /* H5_init_thread */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -220,10 +217,10 @@ herr_t H5_init_thread(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 void
-H5_term_thread (void)
+H5_term_thread(void)
 {
-    H5Eclose (H5E_thrdid_g);
-} /* end H5_term_thread() */
+    H5Eclose(H5E_thrdid_g);
+}                               /* end H5_term_thread() */
 
 /*--------------------------------------------------------------------------
 NAME
@@ -237,12 +234,13 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t H5_init_interface(void)
+static herr_t 
+H5_init_interface(void)
 {
-    FUNC_ENTER (H5_init_interface, FAIL);
+    FUNC_ENTER(H5_init_interface, FAIL);
 
-    FUNC_LEAVE (SUCCEED);
-}	/* H5_init_interface */
+    FUNC_LEAVE(SUCCEED);
+}                               /* H5_init_interface */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -270,15 +268,16 @@ static herr_t H5_init_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5dont_atexit(void)
+herr_t 
+H5dont_atexit(void)
 {
-    FUNC_ENTER_INIT (H5dont_atexit, NULL, FAIL);
+    FUNC_ENTER_INIT(H5dont_atexit, NULL, FAIL);
 
-    if(install_atexit_g == TRUE)
-        install_atexit_g=FALSE;
+    if (install_atexit_g == TRUE)
+        install_atexit_g = FALSE;
 
-    FUNC_LEAVE (SUCCEED);
-} /* end H5dont_atexit() */
+    FUNC_LEAVE(SUCCEED);
+}                               /* end H5dont_atexit() */
 
 /*--------------------------------------------------------------------------
 NAME
@@ -296,50 +295,46 @@ DESCRIPTION
     Checks the version numbers of the library.
 
 --------------------------------------------------------------------------*/
-herr_t H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
+herr_t 
+H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
 {
-    herr_t ret_value = SUCCEED;
+    herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER (H5version, FAIL);
+    FUNC_ENTER(H5version, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
-    if (majnum==NULL || minnum==NULL || relnum==NULL || patnum==NULL)
+    if (majnum == NULL || minnum == NULL || relnum == NULL || patnum == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
-		    "null pointer argument");
+                    "null pointer argument");
 
     /* Set the version information */
-    *majnum=HDF5_MAJOR_VERSION;
-    *minnum=HDF5_MINOR_VERSION;
-    *relnum=HDF5_RELEASE_VERSION;
-    *patnum=HDF5_PATCH_VERSION;
+    *majnum = HDF5_MAJOR_VERSION;
+    *minnum = HDF5_MINOR_VERSION;
+    *relnum = HDF5_RELEASE_VERSION;
+    *patnum = HDF5_PATCH_VERSION;
 
-done:
-  if(ret_value == FAIL)   
-    { /* Error condition cleanup */
+  done:
+    if (ret_value == FAIL) {    /* Error condition cleanup */
 
-    } /* end if */
-
+    }                           /* end if */
     /* Normal function cleanup */
-
     FUNC_LEAVE(ret_value);
 }
-
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5init
+ * Function:    H5init
  *
- * Purpose:	Initialize the library.  This is normally called
- *		automatically, but if you find that an HDF5 library function
- *		is failing inexplicably, then try calling this function
- *		first.
+ * Purpose:     Initialize the library.  This is normally called
+ *              automatically, but if you find that an HDF5 library function
+ *              is failing inexplicably, then try calling this function
+ *              first.
  *
- * Return:	Success:	SUCCEED
+ * Return:      Success:        SUCCEED
  *
- *		Failure:	FAIL
+ *              Failure:        FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, December  9, 1997
  *
  * Modifications:
@@ -347,11 +342,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5init (void)
+H5init(void)
 {
-   FUNC_ENTER (H5init, FAIL);
-   /* all work is done by FUNC_ENTER() */
-   FUNC_LEAVE (SUCCEED);
+    FUNC_ENTER(H5init, FAIL);
+    /* all work is done by FUNC_ENTER() */
+    FUNC_LEAVE(SUCCEED);
 }
-
-   

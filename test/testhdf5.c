@@ -11,31 +11,31 @@
  ****************************************************************************/
 
 #ifdef RCSID
-static char RcsId[] = "@(#)$Revision$";
+static char             RcsId[] = "@(#)$Revision$";
 #endif
 
 /* $Id$ */
 
 /*
    FILE
-       testhdf5.c - HDF5 testing framework main file.
+   testhdf5.c - HDF5 testing framework main file.
 
    REMARKS
-       General test wrapper for HDF5 base library test programs
+   General test wrapper for HDF5 base library test programs
 
    DESIGN
-       Each test function should be implemented as function having no
-    parameters and returning void (i.e. no return value).  They should be put
-    into the list of InitTest() calls in main() below.  Functions which depend
-    on other functionality should be placed below the InitTest() call for the
-    base functionality testing.
-       Each test module should include testhdf5.h and define a unique set of
-    names for test files they create.
+   Each test function should be implemented as function having no
+   parameters and returning void (i.e. no return value).  They should be put
+   into the list of InitTest() calls in main() below.  Functions which depend
+   on other functionality should be placed below the InitTest() call for the
+   base functionality testing.
+   Each test module should include testhdf5.h and define a unique set of
+   names for test files they create.
 
    BUGS/LIMITATIONS
 
    EXPORTED ROUTINES/VARIABLES:
-       Two variables are exported: num_errs, and Verbosity.
+   Two variables are exported: num_errs, and Verbosity.
 
  */
 
@@ -49,35 +49,33 @@ static char RcsId[] = "@(#)$Revision$";
 #define HDF5_TEST_MASTER
 
 /* Internal Variables */
-static int  Index = 0;
+static int              Index = 0;
 
 /* Global variables */
-int num_errs;
-int Verbosity;
+int                     num_errs;
+int                     Verbosity;
 
 /* ANY new test needs to have a prototype in tproto.h */
 #include <testhdf5.h>
 
-struct TestStruct
-  {
-      int         NumErrors;
-      char        Description[64];
-      int         SkipFlag;
-      char        Name[16];
-      VOID        (*Call) (void);
-  }
-         Test[MAXNUMOFTESTS];
+struct TestStruct {
+    int                     NumErrors;
+    char                    Description[64];
+    int                     SkipFlag;
+    char                    Name[16];
+                            VOID(*Call) (void);
+} Test[MAXNUMOFTESTS];
 
-static void InitTest(const char *TheName, VOID(*TheCall) (void), const char *TheDescr);
-static void usage(void);
+static void             InitTest(const char *TheName, VOID(*TheCall) (void), const char *TheDescr);
+static void             usage(void);
 
-static void InitTest(const char *TheName, VOID(*TheCall) (void), const char *TheDescr)
+static void 
+InitTest(const char *TheName, VOID(*TheCall) (void), const char *TheDescr)
 {
-    if (Index >= MAXNUMOFTESTS)
-      {
-          print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
-          exit(0);
-      }     /* end if */
+    if (Index >= MAXNUMOFTESTS) {
+        print_func("Uh-oh, too many tests added, increase MAXNUMOFTEST!\n");
+        exit(0);
+    }                           /* end if */
     HDstrcpy(Test[Index].Description, TheDescr);
     HDstrcpy(Test[Index].Name, TheName);
     Test[Index].Call = TheCall;
@@ -86,9 +84,10 @@ static void InitTest(const char *TheName, VOID(*TheCall) (void), const char *The
     Index++;
 }
 
-static void usage(void)
+static void 
+usage(void)
 {
-    intn        i;
+    intn                    i;
 
     print_func("Usage: testhdf5 [-v[erbose] (l[ow]|m[edium]|h[igh]|0-10)] \n");
     print_func("               [-[e]x[clude] name+] \n");
@@ -114,32 +113,34 @@ static void usage(void)
     for (i = 0; i < Index; i++)
         print_func("%16s %s\n", Test[i].Name, Test[i].Description);
     print_func("\n\n");
-}   /* end usage() */
+}                               /* end usage() */
 
 /*
  * This routine is designed to provide equivalent functionality to 'printf'
  * and allow easy replacement for environments which don't have stdin/stdout
  * available.  (i.e. Windows & the Mac)
  */
-int print_func(const char *format, ...)
+int 
+print_func(const char *format,...)
 {
-    va_list arglist;
-    int ret_value;
+    va_list                 arglist;
+    int                     ret_value;
 
     va_start(arglist, format);
-    ret_value=vprintf(format, arglist);
+    ret_value = vprintf(format, arglist);
     va_end(arglist);
-    return(ret_value);
+    return (ret_value);
 }
 
-int main(int argc, char *argv[])
+int 
+main(int argc, char *argv[])
 {
-    int         CLLoop;         /* Command Line Loop */
-    int         Loop, Loop1;
-    int         Summary = 0;
-    int         CleanUp = 1;
-    int         Cache = 1;
-    uintn       major, minor, release, patch;
+    int                     CLLoop;     /* Command Line Loop */
+    int                     Loop, Loop1;
+    int                     Summary = 0;
+    int                     CleanUp = 1;
+    int                     Cache = 1;
+    uintn                   major, minor, release, patch;
 
 #if defined __MWERKS__
     argc = ccommand(&argv);
@@ -159,112 +160,97 @@ int main(int argc, char *argv[])
     InitTest("stab", test_stab, "Symbol Tables");
     InitTest("h5p", test_h5p, "Dataspaces");
 
-    Verbosity = 4;  /* Default Verbosity is Low */
+    Verbosity = 4;              /* Default Verbosity is Low */
     H5version(&major, &minor, &release, &patch);
 
     print_func("\nFor help use: testhdf5 -help\n");
     print_func("Linked with HDF %u.%u.%u%c\n\n", (unsigned) major,
-           (unsigned) minor, (unsigned) release, 'a'+patch);
-    for (CLLoop = 1; CLLoop < argc; CLLoop++)
-      {
-          if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
-                                      (HDstrcmp(argv[CLLoop], "-v") == 0)))
-            {
-                if (argv[CLLoop + 1][0] == 'l')
-                    Verbosity = 4;
-                else if (argv[CLLoop + 1][0] == 'm')
-                    Verbosity = 6;
-                else if (argv[CLLoop + 1][0] == 'h')
-                    Verbosity = 10;
-                else
-                    Verbosity = atoi(argv[CLLoop + 1]);
-            }   /* end if */
-          if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
-                                  (HDstrcmp(argv[CLLoop], "-s") == 0)))
-              Summary = 1;
+               (unsigned) minor, (unsigned) release, 'a' + patch);
+    for (CLLoop = 1; CLLoop < argc; CLLoop++) {
+        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-verbose") == 0) ||
+                                    (HDstrcmp(argv[CLLoop], "-v") == 0))) {
+            if (argv[CLLoop + 1][0] == 'l')
+                Verbosity = 4;
+            else if (argv[CLLoop + 1][0] == 'm')
+                Verbosity = 6;
+            else if (argv[CLLoop + 1][0] == 'h')
+                Verbosity = 10;
+            else
+                Verbosity = atoi(argv[CLLoop + 1]);
+        }                       /* end if */
+        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-summary") == 0) ||
+                                (HDstrcmp(argv[CLLoop], "-s") == 0)))
+            Summary = 1;
 
-          if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-help") == 0) ||
-                                  (HDstrcmp(argv[CLLoop], "-h") == 0)))
-            {
-                usage();
-                exit(0);
-            }
+        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-help") == 0) ||
+                                (HDstrcmp(argv[CLLoop], "-h") == 0))) {
+            usage();
+            exit(0);
+        }
+        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-cleanoff") == 0) ||
+                                (HDstrcmp(argv[CLLoop], "-c") == 0)))
+            CleanUp = 0;
 
-          if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-cleanoff") == 0) ||
-                                  (HDstrcmp(argv[CLLoop], "-c") == 0)))
-              CleanUp = 0;
+        if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-nocache") == 0) ||
+                                (HDstrcmp(argv[CLLoop], "-n") == 0)))
+            Cache = 0;
 
-          if ((argc > CLLoop) && ((HDstrcmp(argv[CLLoop], "-nocache") == 0) ||
-                                  (HDstrcmp(argv[CLLoop], "-n") == 0)))
-              Cache = 0;
-
-          if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-exclude") == 0) ||
-                                      (HDstrcmp(argv[CLLoop], "-x") == 0)))
-            {
-                Loop = CLLoop + 1;
-                while ((Loop < argc) && (argv[Loop][0] != '-'))
-                  {
-                      for (Loop1 = 0; Loop1 < Index; Loop1++)
-                          if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                              Test[Loop1].SkipFlag = 1;
-                      Loop++;
-                  }     /* end while */
-            }   /* end if */
-          if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-begin") == 0) ||
-                                      (HDstrcmp(argv[CLLoop], "-b") == 0)))
-            {
-                Loop = CLLoop + 1;
-                while ((Loop < argc) && (argv[Loop][0] != '-'))
-                  {
-                      for (Loop1 = 0; Loop1 < Index; Loop1++)
-                        {
-                            if (HDstrcmp(argv[Loop], Test[Loop1].Name) != 0)
-                                Test[Loop1].SkipFlag = 1;
-                            if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                                Loop1 = Index;
-                        }   /* end for */
-                      Loop++;
-                  }     /* end while */
-            }   /* end if */
-          if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-only") == 0) ||
-                                      (HDstrcmp(argv[CLLoop], "-o") == 0)))
-            {
-                for (Loop = 0; Loop < Index; Loop++)
-                    Test[Loop].SkipFlag = 1;
-                Loop = CLLoop + 1;
-                while ((Loop < argc) && (argv[Loop][0] != '-'))
-                  {
-                      for (Loop1 = 0; Loop1 < Index; Loop1++)
-                          if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
-                              Test[Loop1].SkipFlag = 0;
-                      Loop++;
-                  }     /* end while */
-            }   /* end if */
-      }     /* end for */
+        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-exclude") == 0) ||
+                                    (HDstrcmp(argv[CLLoop], "-x") == 0))) {
+            Loop = CLLoop + 1;
+            while ((Loop < argc) && (argv[Loop][0] != '-')) {
+                for (Loop1 = 0; Loop1 < Index; Loop1++)
+                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
+                        Test[Loop1].SkipFlag = 1;
+                Loop++;
+            }                   /* end while */
+        }                       /* end if */
+        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-begin") == 0) ||
+                                    (HDstrcmp(argv[CLLoop], "-b") == 0))) {
+            Loop = CLLoop + 1;
+            while ((Loop < argc) && (argv[Loop][0] != '-')) {
+                for (Loop1 = 0; Loop1 < Index; Loop1++) {
+                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) != 0)
+                        Test[Loop1].SkipFlag = 1;
+                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
+                        Loop1 = Index;
+                }               /* end for */
+                Loop++;
+            }                   /* end while */
+        }                       /* end if */
+        if ((argc > CLLoop + 1) && ((HDstrcmp(argv[CLLoop], "-only") == 0) ||
+                                    (HDstrcmp(argv[CLLoop], "-o") == 0))) {
+            for (Loop = 0; Loop < Index; Loop++)
+                Test[Loop].SkipFlag = 1;
+            Loop = CLLoop + 1;
+            while ((Loop < argc) && (argv[Loop][0] != '-')) {
+                for (Loop1 = 0; Loop1 < Index; Loop1++)
+                    if (HDstrcmp(argv[Loop], Test[Loop1].Name) == 0)
+                        Test[Loop1].SkipFlag = 0;
+                Loop++;
+            }                   /* end while */
+        }                       /* end if */
+    }                           /* end for */
 
 #ifdef NOT_YET
-    if(Cache) /* turn on caching, unless we were instucted not to */
-        Hcache(CACHE_ALL_FILES,TRUE);
+    if (Cache)                  /* turn on caching, unless we were instucted not to */
+        Hcache(CACHE_ALL_FILES, TRUE);
 #endif /* NOT_YET */
 
-    for (Loop = 0; Loop < Index; Loop++)
-      {
-          if (Test[Loop].SkipFlag)
-            {
-                MESSAGE(2, ("Skipping -- %s \n", Test[Loop].Description));
-            }
-          else
-            {
-                MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description,
-			    Test[Loop].Name));
-                MESSAGE(5, ("===============================================\n"));
-                Test[Loop].NumErrors = num_errs;
-                (*Test[Loop].Call) ();
-                Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-                MESSAGE(5, ("===============================================\n"));
-                MESSAGE(5, ("There were %d errors detected.\n\n", (int) Test[Loop].NumErrors));
-            }   /* end else */
-      }     /* end for */
+    for (Loop = 0; Loop < Index; Loop++) {
+        if (Test[Loop].SkipFlag) {
+            MESSAGE(2, ("Skipping -- %s \n", Test[Loop].Description));
+        } else {
+            MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description,
+                        Test[Loop].Name));
+            MESSAGE(5, ("===============================================\n"));
+            Test[Loop].NumErrors = num_errs;
+            (*Test[Loop].Call) ();
+            Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
+            MESSAGE(5, ("===============================================\n"));
+            MESSAGE(5, ("There were %d errors detected.\n\n", (int) Test[Loop].NumErrors));
+        }                       /* end else */
+    }                           /* end for */
 
     MESSAGE(2, ("\n\n"))
         if (num_errs)
@@ -272,33 +258,29 @@ int main(int argc, char *argv[])
     else
         print_func("All tests were successful. \n\n");
 
-    if (Summary)
-      {
-          print_func("Summary of Test Results:\n");
-          print_func("Name of Test     Errors Description of Test\n");
-          print_func("---------------- ------ --------------------------------------\n");
+    if (Summary) {
+        print_func("Summary of Test Results:\n");
+        print_func("Name of Test     Errors Description of Test\n");
+        print_func("---------------- ------ --------------------------------------\n");
 
-          for (Loop = 0; Loop < Index; Loop++)
-            {
-                if (Test[Loop].NumErrors == -1)
-                    print_func("%16s %6s %s\n", Test[Loop].Name, "N/A", Test[Loop].Description);
-                else
-                    print_func("%16s %6d %s\n", Test[Loop].Name, (int) Test[Loop].NumErrors,
+        for (Loop = 0; Loop < Index; Loop++) {
+            if (Test[Loop].NumErrors == -1)
+                print_func("%16s %6s %s\n", Test[Loop].Name, "N/A", Test[Loop].Description);
+            else
+                print_func("%16s %6d %s\n", Test[Loop].Name, (int) Test[Loop].NumErrors,
                            Test[Loop].Description);
-            }   /* end for */
-          print_func("\n\n");
-      }     /* end if */
-
-    if (CleanUp)
-      {
-          MESSAGE(2, ("\nCleaning Up...\n\n"));
+        }                       /* end for */
+        print_func("\n\n");
+    }                           /* end if */
+    if (CleanUp) {
+        MESSAGE(2, ("\nCleaning Up...\n\n"));
 #if !(defined DOS386 | defined WIN386)
-          system("rm -f *.h5 *.tmp");
-#else   /* OLD_WAY */
-          remove("*.h5");
-          remove("*.tmp");
-#endif  /* OLD_WAY */
-      }     /* end if */
+        system("rm -f *.h5 *.tmp");
+#else /* OLD_WAY */
+        remove("*.h5");
+        remove("*.tmp");
+#endif /* OLD_WAY */
+    }                           /* end if */
     exit(0);
     return (0);
-}   /* end main() */
+}                               /* end main() */

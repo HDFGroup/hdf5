@@ -18,60 +18,60 @@
 
 #ifndef _H5public_H
 #define _H5public_H
-#include <H5config.h>			/* From configure		*/
+#include <H5config.h>           /* From configure         */
 #include <sys/types.h>
 
 /*
  * Data types
  */
-typedef void		VOID;
-typedef void		*VOIDP;
-typedef char		char8;
-typedef signed char	int8;
-typedef unsigned char	uchar8, uint8;
+typedef void            VOID;
+typedef void           *VOIDP;
+typedef char            char8;
+typedef signed char int8;
+typedef unsigned char   uchar8, uint8;
 
 #if SIZEOF_SHORT==2
-typedef short		int16;
-typedef unsigned short	uint16;
+typedef short int16;
+typedef unsigned short uint16;
 #else
-typedef int		int16;		/*not really*/
-typedef unsigned	uint16;		/*not really*/
+typedef int int16;              /*not really */
+typedef unsigned uint16;        /*not really */
 #endif
 
 #if SIZEOF_INT==4
-typedef int		int32;
-typedef unsigned int	uint32;
+typedef int int32;
+typedef unsigned int uint32;
 #elif SIZEOF_LONG==4
-typedef long		int32;
-typedef unsigned long	uint32;
+typedef long int32;
+typedef unsigned long uint32;
 #else
-typedef int		int32;		/*not really*/
-typedef unsigned	uint32;		/*not really*/
+typedef int int32;              /*not really */
+typedef unsigned uint32;        /*not really */
 #endif
 
 #if SIZEOF_INT==8
-typedef int		int64;
-typedef unsigned	uint64;
+typedef int             int64;
+typedef unsigned        uint64;
 #elif SIZEOF_LONG==8
-typedef long		int64;
-typedef unsigned long	uint64;
+typedef long            int64;
+typedef unsigned long   uint64;
 #elif SIZEOF_LONG_LONG==8
-typedef long long	int64;
+typedef long long       int64;
 typedef unsigned long long uint64;
 #else
 #  error "no 64-bit integer type"
 #endif
 
 #if SIZEOF_FLOAT==4
-typedef float		float32;
+typedef float float32;
 #else
-typedef float		float32;	/*not really*/
+typedef float float32;          /*not really */
 #endif
 
 #if SIZEOF_FLOAT==8
-typedef float		float64;
+typedef float float64;
 #elif SIZEOF_DOUBLE==8
-typedef double		float64;
+typedef double float64;
 #else
 #  error "no 64-bit floating point type"
 #endif
@@ -80,8 +80,8 @@ typedef double		float64;
  * Define a type for generic integers.  Use this instead of `int' to
  * show that some thought went into the algorithm.
  */
-typedef int		intn;
-typedef unsigned	uintn;
+typedef int intn;
+typedef unsigned uintn;
 
 /*
  * Status return values.
@@ -92,31 +92,31 @@ typedef unsigned	uintn;
  * function, remember to compare against zero and not one of these two
  * values.
  */
-typedef intn		herr_t;
-#define SUCCEED 	0
-#define FAIL 		(-1)
-#define UFAIL 		(unsigned)(-1)
+typedef intn herr_t;
+#define SUCCEED         0
+#define FAIL            (-1)
+#define UFAIL           (unsigned)(-1)
 
 /*
  * Boolean type.
  */
 typedef enum {
-   BFAIL	=(-1),		/*error value*/
-   BFALSE	=0,
-   BTRUE	=1
+    BFAIL = (-1),               /*error value */
+    BFALSE = 0,
+    BTRUE = 1
 } hbool_t;
 
 #ifdef __cplusplus
-extern "C" {
+extern                  "C" {
 #endif
 
 /* Functions in H5.c */
-herr_t H5init (void);
-herr_t H5dont_atexit(void);
-herr_t H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum);
+    herr_t                  H5init(void);
+    herr_t                  H5dont_atexit(void);
+    herr_t                  H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum);
 
 #ifdef __cplusplus
 }
-#endif
 
+#endif
 #endif
