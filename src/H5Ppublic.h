@@ -39,8 +39,7 @@ typedef long off_t;
 /* Property list classes */
 typedef enum H5P_class_t_old {
     H5P_NO_CLASS_OLD     = -1,  /*error return value                 */
-    H5P_FILE_ACCESS_OLD  = 0,   /*file access properties             */
-    H5P_MOUNT_OLD        = 1,   /*file mounting properties           */
+    H5P_MOUNT_OLD        = 0,   /*file mounting properties           */
     H5P_NCLASSES_OLD            /*this must be last!                 */
 } H5P_class_t_old;
 
@@ -55,7 +54,6 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 /*      - merge/delete H5Pcopy and H5Pcopy_new */
 /*      - merge/delete H5Pclose and H5Pclose_list */
 __DLLVAR__ hid_t H5P_NO_CLASS;
-__DLLVAR__ hid_t H5P_FILE_ACCESS;
 __DLLVAR__ hid_t H5P_MOUNT;
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
@@ -92,16 +90,16 @@ extern "C" {
  */
 #define H5P_NO_CLASS_NEW   	(H5open(), H5P_CLS_NO_CLASS_g)
 #define H5P_NO_CLASS_HASH_SIZE   1  /* 1, not 0, otherwise allocations get weird */
-#define H5P_FILE_CREATE (H5open(), H5P_CLS_FILE_CREATE_g)
-#define H5P_FILE_CREATE_HASH_SIZE   17
-#define H5P_FILE_ACCESS_NEW (H5open(), H5P_CLS_FILE_ACCESS_g)
-#define H5P_FILE_ACCESS_HASH_SIZE   17
-#define H5P_DATASET_CREATE     (H5open(), H5P_CLS_DATASET_CREATE_g)
-#define H5P_DATASET_CREATE_HASH_SIZE   17
-#define H5P_DATASET_XFER       (H5open(), H5P_CLS_DATASET_XFER_g)
-#define H5P_DATASET_XFER_HASH_SIZE   17
-#define H5P_MOUNT_NEW       (H5open(), H5P_CLS_MOUNT_g)
-#define H5P_MOUNT_HASH_SIZE   17
+#define H5P_FILE_CREATE 		(H5open(), H5P_CLS_FILE_CREATE_g)
+#define H5P_FILE_CREATE_HASH_SIZE  	17
+#define H5P_FILE_ACCESS 		(H5open(), H5P_CLS_FILE_ACCESS_g)
+#define H5P_FILE_ACCESS_HASH_SIZE   	17
+#define H5P_DATASET_CREATE     		(H5open(), H5P_CLS_DATASET_CREATE_g)
+#define H5P_DATASET_CREATE_HASH_SIZE   	17
+#define H5P_DATASET_XFER       		(H5open(), H5P_CLS_DATASET_XFER_g)
+#define H5P_DATASET_XFER_HASH_SIZE   	17
+#define H5P_MOUNT_NEW       		(H5open(), H5P_CLS_MOUNT_g)
+#define H5P_MOUNT_HASH_SIZE   		17
 __DLLVAR__ hid_t H5P_CLS_NO_CLASS_g;
 __DLLVAR__ hid_t H5P_CLS_FILE_CREATE_g;
 __DLLVAR__ hid_t H5P_CLS_FILE_ACCESS_g;
@@ -111,12 +109,12 @@ __DLLVAR__ hid_t H5P_CLS_MOUNT_g;
 /*
  * The library created default property lists
  */
-#define H5P_NO_CLASS_DEFAULT   	(H5open(), H5P_LST_NO_CLASS_g)
-#define H5P_FILE_CREATE_DEFAULT	(H5open(), H5P_LST_FILE_CREATE_g)
-#define H5P_FILE_ACCESS_DEFAULT (H5open(), H5P_LST_FILE_ACCESS_g)
-#define H5P_DATASET_CREATE_DEFAULT  (H5open(), H5P_LST_DATASET_CREATE_g)
-#define H5P_DATASET_XFER_DEFAULT   (H5open(), H5P_LST_DATASET_XFER_g)
-#define H5P_MOUNT_DEFAULT       (H5open(), H5P_LST_MOUNT_g)
+#define H5P_NO_CLASS_DEFAULT   		(H5open(), H5P_LST_NO_CLASS_g)
+#define H5P_FILE_CREATE_DEFAULT		(H5open(), H5P_LST_FILE_CREATE_g)
+#define H5P_FILE_ACCESS_DEFAULT 	(H5open(), H5P_LST_FILE_ACCESS_g)
+#define H5P_DATASET_CREATE_DEFAULT  	(H5open(), H5P_LST_DATASET_CREATE_g)
+#define H5P_DATASET_XFER_DEFAULT   	(H5open(), H5P_LST_DATASET_XFER_g)
+#define H5P_MOUNT_DEFAULT       	(H5open(), H5P_LST_MOUNT_g)
 __DLLVAR__ hid_t H5P_LST_NO_CLASS_g;
 __DLLVAR__ hid_t H5P_LST_FILE_CREATE_g;
 __DLLVAR__ hid_t H5P_LST_FILE_ACCESS_g;

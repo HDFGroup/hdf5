@@ -82,6 +82,7 @@ typedef struct H5P_genclass_tag {
 /* Define structure to hold property list information */
 typedef struct H5P_genplist_tag {
     H5P_genclass_t *pclass; /* Pointer to class info */
+    hid_t   plist_id;       /* Copy of the property list ID (for use in close callback) */
     size_t  nprops;         /* Number of properties in class */
     unsigned   class_init:1;   /* Whether the class initialization callback finished successfully */
 
@@ -93,7 +94,6 @@ typedef struct H5P_genplist_tag {
 typedef struct {
     /* Union of all the different kinds of property lists */
     union {
-        H5F_access_t faccess;   /* File access properties */
         H5F_mprop_t mount;      /* Mounting properties */
     } u;
     H5P_class_t_old cls;        /* Property list class */

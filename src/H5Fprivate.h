@@ -288,23 +288,63 @@ __DLL__ size_t H5F_sizeof_size(const H5F_t *f);
 #define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(int)
 #define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 
+/* ========= File Access properties ============ */
+/* Definitions for size of meta data cache(elements) */
+#define H5F_ACS_META_CACHE_SIZE_NAME           "mdc_nelmts"
+#define H5F_ACS_META_CACHE_SIZE_SIZE           sizeof(int)
+#define H5F_ACS_META_CACHE_SIZE_DEF            H5AC_NSLOTS
 
-/*
- * File-access property list.
- */
-typedef struct H5F_access_t {
-    int	mdc_nelmts;	/* Size of meta data cache (elements)	*/
-    size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
-    size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
-    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
-    hsize_t	threshold;	/* Threshold for alignment		*/
-    hsize_t	alignment;	/* Alignment				*/
-    size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations) */
-    size_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
-    unsigned	gc_ref;		/* Garbage-collect references?		*/
-    hid_t	driver_id;	/* File driver ID			*/
-    void	*driver_info;	/* File driver specific information	*/
-} H5F_access_t;
+/* Definitions for size of raw data chunk cache(elements) */
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME      "rdcc_nelmts"
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE      sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF       521
+
+/* Definition for size of raw data chunk cache(bytes) */
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME      "rdcc_nbytes"
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE      sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF       1024*1024
+
+/* Definition for preemption read chunks first */
+#define H5F_ACS_PREEMPT_READ_CHUNKS_NAME       "rdcc_w0"
+#define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE       sizeof(double)
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF        0.75  
+
+/* Definition for threshold for alignment */
+#define H5F_ACS_ALIGN_THRHD_NAME               "threshold"
+#define H5F_ACS_ALIGN_THRHD_SIZE               sizeof(hsize_t)
+#define H5F_ACS_ALIGN_THRHD_DEF                1
+
+/* Definition for alignment */
+#define H5F_ACS_ALIGN_NAME                     "align"
+#define H5F_ACS_ALIGN_SIZE                     sizeof(hsize_t)
+#define H5F_ACS_ALIGN_DEF                      1
+
+/* Definition for minimum metadata allocation block size(when
+   aggregating metadata allocations. */
+#define H5F_ACS_META_BLOCK_SIZE_NAME           "meta_block_size"
+#define H5F_ACS_META_BLOCK_SIZE_SIZE           sizeof(size_t)
+#define H5F_ACS_META_BLOCK_SIZE_DEF            2048
+
+/* Definition for maximum sieve buffer size (when data sieving 
+   is allowed by file driver */
+#define H5F_ACS_SIEVE_BUF_SIZE_NAME         "sieve_buf_size"
+#define H5F_ACS_SIEVE_BUF_SIZE_SIZE         sizeof(size_t)
+#define H5F_ACS_SIEVE_BUF_SIZE_DEF          64*1024
+
+/* Definition for garbage-collect references */
+#define H5F_ACS_GARBG_COLCT_REF_NAME           "gc_ref"
+#define H5F_ACS_GARBG_COLCT_REF_SIZE           sizeof(unsigned)
+#define H5F_ACS_GARBG_COLCT_REF_DEF            0
+
+/* Definition for file driver ID */
+#define H5F_ACS_FILE_DRV_ID_NAME               "driver_id"
+#define H5F_ACS_FILE_DRV_ID_SIZE               sizeof(hid_t)
+#define H5F_ACS_FILE_DRV_ID_DEF                H5FD_SEC2
+
+/* Definition for file driver info */
+#define H5F_ACS_FILE_DRV_INFO_NAME             "driver_info"
+#define H5F_ACS_FILE_DRV_INFO_SIZE             sizeof(void*)
+#define H5F_ACS_FILE_DRV_INFO_DEF              NULL
 
 /* Mount property list */
 typedef struct H5F_mprop_t {
@@ -312,7 +352,6 @@ typedef struct H5F_mprop_t {
 } H5F_mprop_t;
 
 /* library variables */
-__DLLVAR__ H5F_access_t H5F_access_dflt;
 __DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
 /* Forward declarations for prototypes arguments */
@@ -397,5 +436,11 @@ __DLL__ void H5F_addr_decode(H5F_t *, const uint8_t** /*in,out*/,
 			     haddr_t* /*out*/);
 __DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr_p /*out*/,
 			     const unsigned long objno[2]);
+
+/* callback Functions for file access class */
+__DLL__ herr_t H5F_acs_create(hid_t fapl_id, void UNUSED *close_data);
+__DLL__ herr_t H5F_acs_close(hid_t fapl_id, void UNUSED *close_data);
+__DLL__ herr_t H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, 
+                            void UNUSED *close_data);
 
 #endif

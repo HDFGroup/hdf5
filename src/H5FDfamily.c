@@ -164,6 +164,11 @@ H5FD_family_init(void)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -176,11 +181,13 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
     H5TRACE3("e","ihi",fapl_id,memb_size,memb_fapl_id);
     
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
-    if (H5P_DEFAULT!=memb_fapl_id &&
-            H5P_FILE_ACCESS!=H5Pget_class(memb_fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
+    if(H5P_DEFAULT != memb_fapl_id &&
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     /*
      * Initialize driver specific information. No need to copy it into the FA
@@ -210,6 +217,11 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -221,14 +233,15 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     FUNC_ENTER(H5Pget_fapl_family, FAIL);
     H5TRACE3("e","ixx",fapl_id,memb_size,memb_fapl_id);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list"); 
     if (H5FD_FAMILY!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
     if (memb_size) *memb_size = fa->memb_size;
-    if (memb_fapl_id) *memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
+    if (memb_fapl_id) *memb_fapl_id = H5P_copy_new(fa->memb_fapl_id);
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -423,7 +436,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
 {
     H5FD_family_t	*file=NULL;
-    H5FD_t     *ret_value=NULL;
+    H5FD_t     		*ret_value=NULL;
     char		memb_name[4096], temp[4096];
     hsize_t		eof;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;

@@ -1,17 +1,17 @@
 /****************************************************************************
-* NCSA HDF								   *
-* Software Development Group						   *
-* National Center for Supercomputing Applications			   *
-* University of Illinois at Urbana-Champaign				   *
-* 605 E. Springfield, Champaign IL 61820				   *
-*									   *
-* For conditions of distribution and use, see the accompanying		   *
-* hdf/COPYING file.							   *
-*
-* MODIFICATIONS
-*	Robb Matzke, 30 Aug 1997
-*	Added `ERRORS' fields to function prologues.
-*
+* NCSA HDF								    *
+* Software Development Group						    *
+* National Center for Supercomputing Applications			    *
+* University of Illinois at Urbana-Champaign				    *
+* 605 E. Springfield, Champaign IL 61820				    *
+*									    *
+* For conditions of distribution and use, see the accompanying		    *
+* hdf/COPYING file.   							    *
+*                                                                           *
+* MODIFICATIONS                                                             *
+*	Robb Matzke, 30 Aug 1997                                            *
+*	Added `ERRORS' fields to function prologues.                        *
+*                                                                           *  
 ****************************************************************************/
 
 /* $Id$ */
@@ -47,13 +47,6 @@
 #include "H5Tprivate.h"		/*data types				  */
 
 #define PABLO_MASK	H5F_mask
-
-
-/*
- * Define the default file access property list.  The template is initialized
- * by H5F_init_interface().
- */
-H5F_access_t H5F_access_dflt;
 
 /*
  * Define the default mount property list.
@@ -171,6 +164,32 @@ H5F_init_interface(void)
     int             freespace_ver       = H5F_CRT_FREESPACE_VERS_DEF;
     int             objectdir_ver       = H5F_CRT_OBJ_DIR_VERS_DEF;
     int             sharedheader_ver    = H5F_CRT_SHARE_HEAD_VERS_DEF;
+    /* File access property class variables.  In sequence, they are 
+     * - Size of meta data cache(elements)
+     * - Size of raw data chunk cache(elements)
+     * - Size of raw data chunk cache(bytes)
+     * - Preemption for reading chunks
+     * - Threshold for alignment
+     * - Alignment
+     * - Minimum metadata allocation block size
+     * - Maximum sieve buffer size
+     * - Garbage-collect reference
+     * - File driver ID
+     * - File driver info 
+     */
+    H5P_genclass_t  *acs_pclass;
+    int             mdc_nelmts          = H5F_ACS_META_CACHE_SIZE_DEF;
+    size_t          rdcc_nelmts         = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;
+    size_t          rdcc_nbytes         = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;
+    double          rdcc_w0             = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;
+    hsize_t         threshold           = H5F_ACS_ALIGN_THRHD_DEF;
+    hsize_t         alignment           = H5F_ACS_ALIGN_DEF;
+    size_t          meta_block_size     = H5F_ACS_META_BLOCK_SIZE_DEF;
+    size_t          sieve_buf_size      = H5F_ACS_SIEVE_BUF_SIZE_DEF;
+    unsigned        gc_ref              = H5F_ACS_GARBG_COLCT_REF_DEF;
+    hid_t           driver_id           = H5F_ACS_FILE_DRV_ID_DEF;
+    void            *driver_info        = H5F_ACS_FILE_DRV_INFO_DEF;
+
     
     FUNC_ENTER(H5F_init_interface, FAIL);
 
@@ -197,11 +216,9 @@ H5F_init_interface(void)
             HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
 		       "unable to initialize interface");
     }
-
-    
-    assert(H5P_CLS_FILE_CREATE_g!=-1);
    
     /* ========== File Creation Property Class Initialization ============*/ 
+    assert(H5P_CLS_FILE_CREATE_g!=-1);
     /* Get the pointer to file creation class */
     if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_CREATE_g) ||
          NULL == (crt_pclass = H5I_object(H5P_CLS_FILE_CREATE_g)))
@@ -271,9 +288,6 @@ H5F_init_interface(void)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
                      "can't insert property into class");
 
-
-/* Register the default file access properties */
-
     /* Register predefined file drivers */
     H5E_BEGIN_TRY {
 	if ((status=H5FD_SEC2)<0) goto end_registration;
@@ -304,18 +318,72 @@ H5F_init_interface(void)
 		      "file driver registration failed");
     }
     
-    /* Initialize the default file access property list */
-    H5F_access_dflt.mdc_nelmts = H5AC_NSLOTS;
-    H5F_access_dflt.rdcc_nelmts = 521;
-    H5F_access_dflt.rdcc_nbytes = 1024*1024; /*1MB*/
-    H5F_access_dflt.rdcc_w0 = 0.75; /*preempt fully read chunks*/
-    H5F_access_dflt.threshold = 1; /*alignment applies to everything*/
-    H5F_access_dflt.alignment = 1; /*no alignment*/
-    H5F_access_dflt.gc_ref = 0; /*don't garbage-collect references*/
-    H5F_access_dflt.meta_block_size = 2048; /* set metadata block allocations to 2KB */
-    H5F_access_dflt.sieve_buf_size = 64*1024; /* set sieve buffer allocation to 64KB */
-    H5F_access_dflt.driver_id = H5FD_SEC2; /*default driver*/
-    H5F_access_dflt.driver_info = NULL; /*driver file access properties*/
+    /* ========== File Access Property Class Initialization ============*/
+    assert(H5P_CLS_FILE_ACCESS_g!=-1);
+    /* Get the pointer to file creation class */
+    if(H5I_GENPROP_CLS != H5I_get_type(H5P_CLS_FILE_ACCESS_g) ||
+         NULL == (acs_pclass = H5I_object(H5P_CLS_FILE_ACCESS_g)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+
+    /* Register the size of meta data cache(elements) */
+    if(H5P_register(acs_pclass,H5F_ACS_META_CACHE_SIZE_NAME,H5F_ACS_META_CACHE_SIZE_SIZE, &mdc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the size of raw data chunk cache (elements) */
+    if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME,H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the size of raw data chunk cache(bytes) */
+    if(H5P_register(acs_pclass,H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME,H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the preemption for reading chunks */
+    if(H5P_register(acs_pclass,H5F_ACS_PREEMPT_READ_CHUNKS_NAME,H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the threshold for alignment */
+    if(H5P_register(acs_pclass,H5F_ACS_ALIGN_THRHD_NAME,H5F_ACS_ALIGN_THRHD_SIZE, &threshold,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the alignment */
+    if(H5P_register(acs_pclass,H5F_ACS_ALIGN_NAME,H5F_ACS_ALIGN_SIZE, &alignment,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the minimum metadata allocation block size */
+    if(H5P_register(acs_pclass,H5F_ACS_META_BLOCK_SIZE_NAME,H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the maximum sieve buffer size */
+    if(H5P_register(acs_pclass,H5F_ACS_SIEVE_BUF_SIZE_NAME,H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the garbage collection reference */
+    if(H5P_register(acs_pclass,H5F_ACS_GARBG_COLCT_REF_NAME,H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the file driver ID */
+    if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_ID_NAME,H5F_ACS_FILE_DRV_ID_SIZE, &driver_id,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class"); 
+
+    /* Register the file driver info */
+    if(H5P_register(acs_pclass,H5F_ACS_FILE_DRV_INFO_NAME,H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info,NULL,NULL,NULL,NULL,NULL,NULL)<0) 
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
+                     "can't insert property into class");
+
+    /* Register the default file access property list */
+    if((H5P_LST_FILE_ACCESS_g = H5Pcreate_list(H5P_CLS_FILE_ACCESS_g))<0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
+                     "can't insert property into class");
 
 done:
     FUNC_LEAVE(ret_value);
@@ -358,6 +426,157 @@ H5F_term_interface(void)
 	}
     }
     return n;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Function:	H5F_acs_create
+ * 
+ * Purpose:	Callback routine which is called whenever a file access 
+ *		property list is closed.  This routine performs any generic
+ * 		initialization needed on the properties the library put into
+ * 		the list.
+ *		
+ * Return:	Success:		Non-negative
+ * 		Failure:		Negative
+ * 
+ * Programmer:	Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *
+ * Modifications:
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t 
+H5F_acs_create(hid_t fapl_id, void UNUSED *copy_data)
+{
+    hid_t          driver_id;
+    void*          driver_info;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER(H5F_acs_create, FAIL);
+
+    /* Check argument */
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Retrieve properties */
+    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID");
+    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
+    
+    if(driver_id > 0) {
+        /* Increment the reference count on driver and copy driver info */
+        H5I_inc_ref(driver_id);
+        driver_info = H5FD_fapl_copy(driver_id, driver_info);
+        /* Set the driver properties for the list */
+        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
+        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
+}
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5F_acs_close
+ * 
+ * Purpose:	Callback routine which is called whenever a file access 
+ *		property list is closed.  This routine performs any generic 
+ *		cleanup needed on the properties.
+ *
+ * Return:	Success:	Non-negative
+ * 		
+ * 		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ * 
+ * Modifications:
+ *
+ *---------------------------------------------------------------------------
+ */ 
+herr_t 
+H5F_acs_close(hid_t fapl_id, void UNUSED *close_data)
+{
+    hid_t      driver_id;
+    void       *driver_info;
+    herr_t     ret_value = SUCCEED;
+
+    /* Can't use FUNC_ENTER when library is shutting down */
+
+    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+
+    if(driver_id > 0) {
+        /* Free memory for driver info and decrement reference count for driver */
+        H5FD_fapl_free(driver_id, driver_info);
+        H5I_dec_ref(driver_id);
+        driver_info = NULL;
+        driver_id   = -1;
+        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+        if(H5P_set(fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+	    HGOTO_DONE(FAIL); /* Can't return errors when library is shutting down */
+    }
+
+done:
+    /* Can't use FUNC_LEAVE when library is shutting down */
+    return(ret_value);
+}
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5F_acs_copy
+ *
+ * Purpose:	Callback routine which is called whenever a file access 
+ * 		property list is copied.  This routine performs any generic
+ * 	 	copy needed on the properties.
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ * Programmer:	Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *
+ * Modifications:	
+ *
+ *--------------------------------------------------------------------------
+ */	
+herr_t 
+H5F_acs_copy(hid_t new_fapl_id, hid_t old_fapl_id, void UNUSED *copy_data)
+{
+    hid_t          driver_id;
+    void*          driver_info;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER(H5F_acs_copy, FAIL);
+
+    if(H5I_GENPROP_LST != H5I_get_type(new_fapl_id) || H5I_GENPROP_LST != 
+       H5I_get_type(old_fapl_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(old_fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver ID");
+    if(H5P_get(old_fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get drver info");
+    
+    if(driver_id > 0) {
+        H5I_inc_ref(driver_id);
+        driver_info = H5FD_fapl_copy(driver_id, driver_info);
+        if(H5P_set(new_fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver ID");
+        if(H5P_set(new_fapl_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set drver info");
+    }
+
+done:
+    FUNC_LEAVE(ret_value);
 }
 
 
@@ -539,15 +758,17 @@ H5Fget_create_plist(hid_t file_id)
  *              Wednesday, February 18, 1998
  *
  * Modifications:
- *
+ *		Raymond Lu, Oct 23, 2001
+ *		Changed file access property list to the new generic 
+ * 		property list.
+ * 		
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5F_access_t	_fapl;
-    H5P_t	    *plist=NULL;
+    H5P_t	    	*plist=NULL;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER(H5Fget_access_plist, FAIL);
@@ -558,35 +779,59 @@ H5Fget_access_plist(hid_t file_id)
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
 
-    /* Initialize the property list */
-    HDmemset(&_fapl, 0, sizeof _fapl);
-    _fapl.mdc_nelmts = f->shared->mdc_nelmts;
-    _fapl.rdcc_nelmts = f->shared->rdcc_nelmts;
-    _fapl.rdcc_nbytes = f->shared->rdcc_nbytes;
-    _fapl.rdcc_w0 = f->shared->rdcc_w0;
-    _fapl.threshold = f->shared->threshold;
-    _fapl.alignment = f->shared->alignment;
-    _fapl.gc_ref = f->shared->gc_ref;
-    _fapl.meta_block_size = f->shared->lf->def_meta_block_size;
-    _fapl.sieve_buf_size = f->shared->sieve_buf_size;
-    _fapl.driver_id = f->shared->lf->driver_id;
-    _fapl.driver_info = NULL; /*just for now */
+    /* Make a copy of the default file access property list */
+    if((ret_value=H5P_copy_new(H5P_LST_FILE_ACCESS_g)) < 0)
+	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, 
+                      "can't copy file access property list");
 
-    /* Copy properties */
-    if (NULL==(plist=H5P_copy(H5P_FILE_ACCESS, &_fapl))) {
-	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		      "unable to copy file access properties");
-    }
+    /* Copy properties of the file access property list */
+    if(H5P_set(ret_value, H5F_ACS_META_CACHE_SIZE_NAME, 
+               &(f->shared->mdc_nelmts)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set meta data cache size");
+    if(H5P_set(ret_value, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, 
+               &(f->shared->rdcc_nelmts)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set data cache element size");
+    if(H5P_set(ret_value, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, 
+               &(f->shared->rdcc_nbytes)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set data cache byte size");
 
-    /* Get the properties for the file driver */
-    plist->u.faccess.driver_info = H5FD_fapl_get(f->shared->lf);
+    if(H5P_set(ret_value, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, 
+               &(f->shared->rdcc_w0)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set preempt read chunks");
+    if(H5P_set(ret_value, H5F_ACS_ALIGN_THRHD_NAME,
+               &(f->shared->threshold)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set alignment threshold");
+    if(H5P_set(ret_value, H5F_ACS_ALIGN_NAME, 
+               &(f->shared->alignment)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set alignment");
 
-    /* Create an atom */
-    if ((ret_value = H5P_create(H5P_FILE_ACCESS, plist))<0) {
-        H5P_close(plist);
-        HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		      "unable to register property list");
-    }
+    if(H5P_set(ret_value, H5F_ACS_GARBG_COLCT_REF_NAME, 
+               &(f->shared->gc_ref)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set garbage collect reference");
+    if(H5P_set(ret_value, H5F_ACS_META_BLOCK_SIZE_NAME, 
+               &(f->shared->lf->def_meta_block_size)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set meta data cache size");
+    if(H5P_set(ret_value, H5F_ACS_SIEVE_BUF_SIZE_NAME, 
+               &(f->shared->sieve_buf_size)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't sieve buffer size");
+
+    if(H5P_set(ret_value, H5F_ACS_FILE_DRV_ID_NAME, 
+               &(f->shared->lf->driver_id)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set file driver ID");
+    if(H5P_set(ret_value, H5F_ACS_FILE_DRV_INFO_NAME, 
+               H5FD_fapl_get(f->shared->lf)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set file driver info");
 
     FUNC_LEAVE(ret_value);
 }
@@ -764,17 +1009,18 @@ H5Fis_hdf5(const char *name)
  * Modifications:
  *
  *		Raymond Lu, Oct 14, 2001
- *		Changed to generic property list.
+ *		Changed the file creation and access property list to the 
+ *		new generic property list.
  *
  *-------------------------------------------------------------------------
  */
 static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t		*f=NULL, *ret_value=NULL;
+    H5F_t	*f=NULL, *ret_value=NULL;
     int		n;
-    const H5F_access_t	*fapl=NULL;
-    
+    hid_t       driver_id = -1;
+ 
     FUNC_ENTER(H5F_new, NULL);
 
     if (NULL==(f=H5FL_ALLOC(H5F_t,1))) {
@@ -804,15 +1050,43 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
         f->shared->fcpl_id = H5P_copy_new(fcpl_id);
 
 
-	fapl = (H5P_DEFAULT==fapl_id)? &H5F_access_dflt : (const H5F_access_t *)H5I_object(fapl_id);
-	f->shared->mdc_nelmts = fapl->mdc_nelmts;
-	f->shared->rdcc_nelmts = fapl->rdcc_nelmts;
-	f->shared->rdcc_nbytes = fapl->rdcc_nbytes;
-	f->shared->rdcc_w0 = fapl->rdcc_w0;
-	f->shared->threshold = fapl->threshold;
-	f->shared->alignment = fapl->alignment;
-	f->shared->gc_ref = fapl->gc_ref;
-	f->shared->sieve_buf_size = fapl->sieve_buf_size;
+        if(H5P_DEFAULT == fapl_id)
+            fapl_id = H5P_FILE_ACCESS_DEFAULT;
+        if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+            TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, 
+                          "not file access property list");
+
+        if(H5P_get(fapl_id, H5F_ACS_META_CACHE_SIZE_NAME, 
+                   &(f->shared->mdc_nelmts)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get meta data cache size");  
+        if(H5P_get(fapl_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, 
+                   &(f->shared->rdcc_nelmts)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get data cache element size");  
+        if(H5P_get(fapl_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, 
+                   &(f->shared->rdcc_nbytes)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get data cache cache size");  
+        if(H5P_get(fapl_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, 
+                   &(f->shared->rdcc_w0)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get preempt read chunk");
+  
+        if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold))<0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get alignment threshold");  
+        if(H5P_get(fapl_id, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");  
+        if(H5P_get(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME,&(f->shared->gc_ref))<0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get garbage collect reference");  
+        if(H5P_get(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, 
+                   &(f->shared->sieve_buf_size)) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                          "can't get sieve buffer size");  
+
 
 #ifdef H5_HAVE_PARALLEL
 	/*
@@ -820,7 +1094,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 	 * does not permit caching.  (maybe able to relax it for
 	 * read only open.)
 	 */
-	if (H5FD_MPIO==fapl->driver_id){
+        if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+	if (H5FD_MPIO==driver_id){
 	    f->shared->rdcc_nbytes = 0;
 	    f->shared->mdc_nelmts = 0;
 	}
@@ -1030,7 +1306,8 @@ done:
  *		arguments would be the same.
  *
  *		Raymond Lu, 2001-10-14
- *		Changed to generic property list.
+ *		Changed the file creation and access property lists to the 
+ *		new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1470,7 +1747,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
  *		to the H5F_open() as object IDs.
  *	
  *		Raymond Lu, 2001-10-14
- *              Changed to generic property list.
+ *              Changed the file creation and access property list to the 
+ * 		new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1481,7 +1759,10 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value = FAIL;	/*return value			*/
+    size_t      meta_block_size = 0;
+    hid_t       driver_id=-1;
 
+ 
     FUNC_ENTER(H5Fcreate, FAIL);
     H5TRACE4("i","sIuii",filename,flags,fcpl_id,fapl_id);
 
@@ -1497,6 +1778,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
 		     "mutually exclusive flags for file creation");
     }
 
+    /* Check file creation property list */
     if(H5P_DEFAULT == fcpl_id)
         fcpl_id = H5P_FILE_CREATE_DEFAULT;
     if(H5I_GENPROP_LST != H5I_get_type(fcpl_id) ||
@@ -1504,12 +1786,13 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
                       "not file create property list");
 
-    if (H5P_DEFAULT!=fapl_id &&
-	(H5P_FILE_ACCESS!=H5P_get_class(fapl_id) ||
-	 NULL==H5I_object(fapl_id))) {
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		    "not a file access property list");
-    }
+    /* Check the file access property list */
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not file access property list");
 
     /*
      * Adjust bit flags by turning on the creation bit and making sure that
@@ -1597,12 +1880,12 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 	(flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags");
     }
-    if (H5P_DEFAULT!=fapl_id &&
-	(H5P_FILE_ACCESS!=H5P_get_class(fapl_id) ||
-	 NULL==H5I_object(fapl_id))) {
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		    "not a file access property list");
-    }
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+       TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not file access property list");
 
     /* Open the file */
     if (NULL==(new_file=H5F_open(filename, flags, H5P_DEFAULT, fapl_id))) {

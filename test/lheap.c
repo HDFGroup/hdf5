@@ -40,7 +40,7 @@ const char *FILENAME[] = {
 int
 main(void)
 {
-    hid_t	fapl=-1;		/*file access properties	*/
+    hid_t	fapl=H5P_DEFAULT;	/*file access properties	*/
     hid_t	file=-1;		/*hdf5 file 			*/
     H5F_t	*f=NULL;		/*hdf5 file pointer		*/
     char	filename[1024];		/*file name			*/
@@ -89,6 +89,7 @@ main(void)
     /*
      * Test reading from the heap...
      */
+
     TESTING("local heap read");
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
@@ -116,7 +117,6 @@ main(void)
     }
     if (H5Fclose(file)<0) goto error;
     PASSED();
-
 
     puts("All local heap tests passed.");
     h5_cleanup(FILENAME, fapl);

@@ -277,38 +277,35 @@ H5FDunregister(hid_t driver_id)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 H5FD_class_t *
 H5FD_get_class(hid_t id)
 {
     H5FD_class_t	*ret_value=NULL;
-    H5F_access_t	*fapl=NULL;
-    
+    hid_t               driver_id = -1;
+
     FUNC_ENTER(H5FD_get_class, NULL);
 
-    if (H5P_DEFAULT==id) {
-	ret_value = H5FD_get_class(H5F_access_dflt.driver_id);
-    } else if (H5I_VFL==H5I_get_type(id)) {
+    if (H5I_VFL==H5I_get_type(id)) {
 	ret_value = H5I_object(id);
     } else if (H5I_GENPROP_LST == H5I_get_type(id) &&
-            TRUE==H5Pisa_class(id,H5P_DATASET_XFER)) {
+        TRUE==H5Pisa_class(id,H5P_FILE_ACCESS)) {
+        if(H5P_get(id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+        ret_value = H5FD_get_class(driver_id);
+    } else if (H5I_GENPROP_LST == H5I_get_type(id) &&
+        TRUE==H5Pisa_class(id,H5P_DATASET_XFER)) {
         ret_value = H5FD_get_class(H5P_peek_hid_t(id,H5D_XFER_VFL_ID_NAME));
     } else {
-	switch (H5P_get_class(id)) {
-            case H5P_FILE_ACCESS_OLD:
-                if (NULL==(fapl=H5I_object(id))) {
-                    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-                                  "not a file access property list");
-                }
-                ret_value = H5FD_get_class(fapl->driver_id);
-                break;
-
-            default:
-                HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-                              "not a driver id, file access property list or "
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
+	      "not a driver id, file access property list or "
                               "data transfer property list");
-	}
     }
     FUNC_LEAVE(ret_value);
 }
@@ -733,33 +730,42 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    const H5F_access_t	*fapl=NULL;
     H5FD_class_t	*driver;
     H5FD_t		*file=NULL;
+    hid_t               driver_id = -1;
+    size_t              meta_block_size=0;    
     
     FUNC_ENTER(H5FD_open, NULL);
 
     /* Check arguments */
-    if (H5P_DEFAULT==fapl_id) {
-	fapl = &H5F_access_dflt;
-    } else if (H5P_FILE_ACCESS != H5P_get_class(fapl_id) ||
-	       NULL == (fapl = H5I_object(fapl_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL,
-		      "not a file access property list");
-    }
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, 
+                      "not a file access property list"); 
+ 
     if (0==maxaddr) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "zero format address range");
     }
 
+    if(H5P_get(fapl_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
+
     /* Get driver info */
-    if (H5I_VFL!=H5I_get_type(fapl->driver_id) ||
-	NULL==(driver=H5I_object(fapl->driver_id))) {
+    if (H5I_VFL!=H5I_get_type(driver_id) ||
+	NULL==(driver=H5I_object(driver_id))) {
 	HRETURN_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
 		      "invalid driver ID in file access property list");
     }
@@ -778,16 +784,22 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * Fill in public fields. We must increment the reference count on the
      * driver ID to prevent it from being freed while this file is open.
      */
-    file->driver_id = fapl->driver_id;
+    file->driver_id = driver_id;
     H5I_inc_ref(file->driver_id);
     file->cls = driver;
     file->maxaddr = maxaddr;
     HDmemset(file->fl, 0, sizeof(file->fl));
-    file->def_meta_block_size = fapl->meta_block_size;
+    if(H5P_get(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, 
+               &(meta_block_size)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, 
+                      "can't get meta data block size");
+    file->def_meta_block_size = meta_block_size;
     file->accum_loc = HADDR_UNDEF;
-    file->threshold = fapl->threshold;
-    file->alignment = fapl->alignment;
-    
+    if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
+                      "can't get alignment threshold");
+    if(H5P_get(fapl_id, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment");    
     /* Retrieve the VFL driver feature flags */
     if (H5FD_query(file, &(file->feature_flags))<0)
         HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver");

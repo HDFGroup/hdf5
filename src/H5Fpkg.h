@@ -94,7 +94,7 @@ typedef struct H5F_file_t {
     haddr_t	driver_addr;	/* File driver information block address*/
     struct H5AC_t *cache;	/* The object cache			*/
     hid_t       fcpl_id;	/* File creation property list ID 	*/
-    int	mdc_nelmts;	/* Size of meta data cache (elements)	*/
+    int	mdc_nelmts;		/* Size of meta data cache (elements)	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/

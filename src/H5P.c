@@ -38,7 +38,6 @@ static herr_t		H5P_init_interface(void);
 /* These go away as each old-style property list is converted to a generic */
 /* property list -QAK */
 hid_t H5P_NO_CLASS=(hid_t)H5P_NO_CLASS_OLD;
-hid_t H5P_FILE_ACCESS=(hid_t)H5P_FILE_ACCESS_OLD;
 hid_t H5P_MOUNT=(hid_t)H5P_MOUNT_OLD;
 
 /*
@@ -222,7 +221,7 @@ H5P_init_interface(void)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class");
 
     /* Allocate the file access class */
-    if (NULL==(pclass = H5P_create_class (root_class,"file access",H5P_FILE_ACCESS_HASH_SIZE,1,NULL,NULL,NULL,NULL,NULL,NULL)))
+    if (NULL==(pclass = H5P_create_class (root_class,"file access",H5P_FILE_ACCESS_HASH_SIZE,1,H5F_acs_create,NULL,H5F_acs_copy,NULL,H5F_acs_close,NULL)))
         HRETURN_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed");
 
     /* Register the file access class */
@@ -343,14 +342,10 @@ H5Pcreate(hid_t type)
     else {
         /* Set the type of the property list to create for older property lists */
         old_type=(H5P_class_t_old)type;
-        assert( old_type==H5P_FILE_ACCESS_OLD ||
-		old_type==H5P_MOUNT_OLD);
+        assert( old_type == H5P_MOUNT_OLD);
 
         /* Allocate a new property list and initialize it with default values */
         switch (old_type) {
-            case H5P_FILE_ACCESS_OLD:
-                src = &H5F_access_dflt;
-                break;
             case H5P_MOUNT_OLD:
                 src = &H5F_mount_dflt;
                 break;
@@ -487,7 +482,6 @@ herr_t
 H5P_close(void *_plist)
 {
     H5P_t           *plist=(H5P_t *)_plist;
-    H5F_access_t	*fa_list = &(plist->u.faccess);
     
     FUNC_ENTER (H5P_close, FAIL);
 
@@ -497,15 +491,6 @@ H5P_close(void *_plist)
 
     /* Some property lists may need to do special things */
     switch (plist->cls) {
-        case H5P_FILE_ACCESS_OLD:
-            if (fa_list->driver_id>=0) {
-                H5FD_fapl_free(fa_list->driver_id, fa_list->driver_info);
-                H5I_dec_ref(fa_list->driver_id);
-                fa_list->driver_info = NULL;
-                fa_list->driver_id = -1;
-            }
-            break;
-        
         case H5P_MOUNT_OLD:
             break;
 
@@ -754,6 +739,9 @@ static hid_t H5P_copy_plist(H5P_genplist_t *old_plist, hid_t old_plist_id)
     if ((new_plist_id = H5I_register(H5I_GENPROP_LST, new_plist))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list");
 
+    /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */
+    new_plist->plist_id=new_plist_id;
+
     /* Call the class callback (if it exists) now that we have the property list ID */
     if(new_plist->pclass->copy_func!=NULL) {
         if((new_plist->pclass->copy_func)(new_plist_id,old_plist_id,old_plist->pclass->copy_data)<0) {
@@ -927,16 +915,11 @@ H5P_copy (H5P_class_t_old type, const void *src)
 {
     size_t		size;
     H5P_t		*dst = NULL;
-    H5F_access_t	*fa_dst = NULL;
     
     FUNC_ENTER (H5P_copy, NULL);
     
     /* How big is the property list */
     switch (type) {
-        case H5P_FILE_ACCESS_OLD:
-            size = sizeof(H5F_access_t);
-            break;
-
         case H5P_MOUNT_OLD:
             size = sizeof(H5F_mprop_t);
             break;
@@ -960,15 +943,6 @@ H5P_copy (H5P_class_t_old type, const void *src)
 
     /* Deep-copy pointers */
     switch (type) {
-        case H5P_FILE_ACCESS_OLD:
-            fa_dst = (H5F_access_t*)dst;
-
-            if (fa_dst->driver_id>=0) {
-                H5I_inc_ref(fa_dst->driver_id);
-                fa_dst->driver_info = H5FD_fapl_copy(fa_dst->driver_id,
-                                fa_dst->driver_info);
-            }
-            break;
         
         case H5P_MOUNT_OLD:
             /* Nothing to do */
@@ -1157,30 +1131,35 @@ H5Pget_userblock(hid_t plist_id, hsize_t *size)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *		Changed file access property list mechanism to the new 
+ *		generic property list.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
 {
-    H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_alignment, FAIL);
     H5TRACE3("e","ihh",fapl_id,threshold,alignment);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
+    
     if (alignment<1) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "alignment must be positive");
     }
 
     /* Set values */
-    fapl->threshold = threshold;
-    fapl->alignment = alignment;
+    if(H5P_set(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set threshold");
+    if(H5P_set(fapl_id, H5F_ACS_ALIGN_NAME, &alignment) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1200,29 +1179,33 @@ H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list design to the new generic 
+ *		property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 		  hsize_t *alignment/*out*/)
 {
-    H5F_access_t	*fapl = NULL;
-
     FUNC_ENTER (H5Pget_alignment, FAIL);
     H5TRACE3("e","ixx",fapl_id,threshold,alignment);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))     
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
 
     /* Get values */
     if (threshold)
-        *threshold = fapl->threshold;
+        if(H5P_get(fapl_id, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold");
     if (alignment)
-        *alignment = fapl->alignment;
+        if(H5P_set(fapl_id, H5F_ACS_ALIGN_NAME, alignment) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -1972,12 +1955,16 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
  *
  * Modifications:
  *
+ * 		Raymond Lu
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list design to the new generic 
+ *		property list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
-    H5F_access_t	*fapl=NULL;
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
     void *tmp_driver_info;      /* Temporary VFL driver info */
@@ -1989,23 +1976,27 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
     if (H5I_VFL!=H5I_get_type(new_driver_id) || NULL==H5I_object(new_driver_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
 
-    if (H5P_FILE_ACCESS==H5P_get_class(plist_id)) {
-        if (NULL==(fapl=H5I_object(plist_id))) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                  "not a file access property list");
-        }
-	
+    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
         /* Remove old driver */
-        assert(fapl->driver_id>=0);
-        H5FD_fapl_free(fapl->driver_id, fapl->driver_info);
-        H5I_dec_ref(fapl->driver_id);
+        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
+        assert(driver_id>=0);
+        H5FD_fapl_free(driver_id, driver_info);
+        H5I_dec_ref(driver_id);
 
         /* Add new driver */
         H5I_inc_ref(new_driver_id);
-        fapl->driver_id = new_driver_id;
-        fapl->driver_info = H5FD_fapl_copy(new_driver_id, new_driver_info);
+        driver_id   = new_driver_id;
+        driver_info = H5FD_fapl_copy(new_driver_id, new_driver_info);
+ 
+        if(H5P_set(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID");
+        if(H5P_set(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set driver info");
         
-    } else if (H5I_GENPROP_LST==H5I_get_type(plist_id)) {
+    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
         /* Get the current driver information */
         if(H5P_get(plist_id, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
@@ -2035,7 +2026,7 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
         /* Set the driver info for the property list */
         if(H5P_set(plist_id, H5D_XFER_VFL_ID_NAME, &new_driver_id)<0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver ID");
-        if(H5P_set(plist_id, H5D_XFER_VFL_INFO_NAME, &tmp_driver_info)<0)
+        if(H5P_set(plist_id, H5D_XFER_VFL_INFO_NAME, &tmp_driver_info) < 0)
             HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Can't set VFL driver info");
         
     } else {
@@ -2084,6 +2075,8 @@ H5Pget_driver(hid_t plist_id)
     FUNC_ENTER (H5Pget_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     ret_value = H5P_get_driver(plist_id);
 
     FUNC_LEAVE(ret_value);
@@ -2111,25 +2104,30 @@ H5Pget_driver(hid_t plist_id)
  *		Rewritten to use the virtual file layer.
  *
  * 		Robb Matzke, 1999-08-05
- *		If the driver ID is H5FD_VFD_DEFAULT then substitute the current value
- *      of H5FD_SEC2.
+ *		If the driver ID is H5FD_VFD_DEFAULT then substitute the 
+ *              current value of H5FD_SEC2.
  *
  * 		Quincey Koziol 2000-11-28
  *		Added internal function..
+ *
+ *		Raymond Lu, 2001-10-23
+ *		Changed the file access list design to the new generic 
+ *		property list. 
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5P_get_driver(hid_t plist_id)
 {
-    H5F_access_t	*fapl=NULL;
     hid_t		ret_value=-1;
 
     FUNC_ENTER (H5P_get_driver, FAIL);
     H5TRACE1("i","i",plist_id);
 
-    if (H5P_FILE_ACCESS==H5P_get_class(plist_id) && (fapl=H5I_object(plist_id))) {
-        ret_value = fapl->driver_id;
-    } else if (H5I_GENPROP_LST==H5I_get_type(plist_id)) {
+    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_ID_NAME, &ret_value) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
         /* Get the current driver ID */
         if(H5P_get(plist_id, H5D_XFER_VFL_ID_NAME, &ret_value)<0)
             HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
@@ -2164,19 +2162,24 @@ H5P_get_driver(hid_t plist_id)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list design to the new generic 
+ *		property list.
+ *	
  *-------------------------------------------------------------------------
  */
 void *
 H5Pget_driver_info(hid_t plist_id)
 {
-    H5F_access_t	*fapl=NULL;
     void		*ret_value=NULL;
 
     FUNC_ENTER(H5Pget_driver_info, NULL);
 
-    if (H5P_FILE_ACCESS==H5P_get_class(plist_id) && (fapl=H5I_object(plist_id))) {
-        ret_value = fapl->driver_info;
-    } else if (H5I_GENPROP_LST==H5I_get_type(plist_id)) {
+    if( TRUE == H5Pisa_class(plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist_id, H5F_ACS_FILE_DRV_INFO_NAME, &ret_value) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get driver info");
+    } else if( TRUE == H5Pisa_class(plist_id, H5P_DATASET_XFER) ) {
         /* Get the current driver info */
         if(H5P_get(plist_id, H5D_XFER_VFL_INFO_NAME, &ret_value)<0)
             HRETURN_ERROR (H5E_PLIST, H5E_CANTGET, NULL, "Can't retrieve VFL driver ID");
@@ -2211,23 +2214,24 @@ H5Pget_driver_info(hid_t plist_id)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_cache(hid_t plist_id, int mdc_nelmts,
 	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
 {
-    H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_cache, FAIL);
     H5TRACE5("e","iIszzd",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
-            NULL==(fapl=H5I_object (plist_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
+    if( H5I_GENPROP_LST != H5I_get_type(plist_id) ||
+        TRUE != H5Pisa_class(plist_id, H5P_FILE_ACCESS) )
+
     if (mdc_nelmts<0) {
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		       "meta data cache size must be non-negative");
@@ -2239,10 +2243,18 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
     }
 
     /* Set sizes */
-    fapl->mdc_nelmts = mdc_nelmts;
-    fapl->rdcc_nelmts = rdcc_nelmts;
-    fapl->rdcc_nbytes = rdcc_nbytes;
-    fapl->rdcc_w0 = rdcc_w0;
+    if(H5P_set(plist_id, H5F_ACS_META_CACHE_SIZE_NAME, &mdc_nelmts) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
+                      "can't set meta data cache size");
+    if(H5P_set(plist_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
+                      "can't set data cache element size");
+    if(H5P_set(plist_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
+                      "can't set data cache byte size");
+    if(H5P_set(plist_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,
+                      "can't set preempt read chunks");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -2264,34 +2276,44 @@ H5Pset_cache(hid_t plist_id, int mdc_nelmts,
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 	     size_t *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
 {
-    H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pget_cache, FAIL);
     H5TRACE5("e","i*Is*z*z*d",plist_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,
              rdcc_w0);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5P_get_class (plist_id) ||
-            NULL==(fapl=H5I_object (plist_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
+        TRUE != H5Pisa_class(plist_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Get sizes */
     if (mdc_nelmts)
-        *mdc_nelmts = fapl->mdc_nelmts;
+        if(H5P_get(plist_id, H5F_ACS_META_CACHE_SIZE_NAME, mdc_nelmts) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
+                      "can't get meta data cache size");
     if (rdcc_nelmts)
-        *rdcc_nelmts = fapl->rdcc_nelmts;
+        if(H5P_get(plist_id, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
+                      "can't get data cache element size");
     if (rdcc_nbytes)
-        *rdcc_nbytes = fapl->rdcc_nbytes;
+        if(H5P_get(plist_id, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
+                      "can't get data cache byte size");
     if (rdcc_w0)
-        *rdcc_w0 = fapl->rdcc_w0;
+        if(H5P_get(plist_id, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,
+                      "can't get preempt read chunks");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -3159,25 +3181,28 @@ done:
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
 {
-    H5F_access_t	*fapl = NULL;
-    
     FUNC_ENTER(H5Pset_gc_references, FAIL);
     H5TRACE2("e","iIu",fapl_id,gc_ref);
 
     /* Check args */
-    if (H5P_FILE_ACCESS!=H5P_get_class(fapl_id) ||
-        NULL==(fapl=H5I_object(fapl_id))) {
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access property list");
-    }
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");   
 
     /* Set values */
-    fapl->gc_ref = (gc_ref!=0);
+    if(H5P_set(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME, &gc_ref) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set garbage collect reference");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -3196,26 +3221,28 @@ H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref)
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *	
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/)
 {
-    H5F_access_t	*fapl = NULL;
-
     FUNC_ENTER(H5Pget_gc_references, FAIL);
     H5TRACE2("e","ix",fapl_id,gc_ref);
 
     /* Check args */
-    if (H5P_FILE_ACCESS!=H5P_get_class(fapl_id) ||
-            NULL==(fapl=H5I_object(fapl_id))) {
-        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a file access property list");
-    }
-
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
     /* Get values */
     if (gc_ref)
-        *gc_ref = fapl->gc_ref;
+        if(H5P_get(fapl_id, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get garbage collect reference");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -3339,25 +3366,27 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
  *
  * Modifications:
  *
+ *		Raymond Lu
+ *		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list. 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_meta_block_size(hid_t fapl_id, size_t size)
 {
-    H5F_access_t	*fapl = NULL;
-    
     FUNC_ENTER (H5Pset_meta_block_size, FAIL);
     H5TRACE2("e","iz",fapl_id,size);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
-
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
     /* Set values */
-    fapl->meta_block_size = size;
+    if(H5P_set(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set meta data block size");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -3376,26 +3405,29 @@ H5Pset_meta_block_size(hid_t fapl_id, size_t size)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/)
 {
-    H5F_access_t	*fapl = NULL;
 
     FUNC_ENTER (H5Pget_meta_block_size, FAIL);
     H5TRACE2("e","ix",fapl_id,size);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
-
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
     /* Get values */
     if (size)
-        *size = fapl->meta_block_size;
+        if(H5P_get(fapl_id, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get meta data block size");
 
     FUNC_LEAVE (SUCCEED);
 }
@@ -3423,25 +3455,28 @@ H5Pget_meta_block_size(hid_t fapl_id, size_t *size/*out*/)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
 {
-    H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_sieve_buf_size, FAIL);
     H5TRACE2("e","iz",fapl_id,size);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
-
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
     /* Set values */
-    fapl->sieve_buf_size = size;
+    if(H5P_set(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, 
+                      "can't set sieve buffer size");
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5Pset_sieve_buf_size() */
@@ -3460,26 +3495,28 @@ H5Pset_sieve_buf_size(hid_t fapl_id, size_t size)
  *
  * Modifications:
  *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/)
 {
-    H5F_access_t	*fapl = NULL;
-
     FUNC_ENTER (H5Pget_sieve_buf_size, FAIL);
     H5TRACE2("e","ix",fapl_id,size);
 
     /* Check args */
-    if (H5P_FILE_ACCESS != H5P_get_class (fapl_id) ||
-            NULL == (fapl = H5I_object (fapl_id))) {
-        HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL,
-		       "not a file access property list");
-    }
-
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");  
     /* Get values */
     if (size)
-        *size = fapl->sieve_buf_size;
+        if(H5P_get(fapl_id, H5F_ACS_SIEVE_BUF_SIZE_NAME, size) < 0)
+            HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, 
+                          "can't get sieve buffer size");
 
     FUNC_LEAVE (SUCCEED);
 } /* end H5Pget_sieve_buf_size() */
@@ -4380,6 +4417,9 @@ hid_t H5Pcreate_list(hid_t cls_id)
     /* Get an atom for the property list */
     if ((plist_id = H5I_register(H5I_GENPROP_LST, plist))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list");
+
+    /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */
+    plist->plist_id=plist_id;
 
     /* Call the class callback (if it exists) now that we have the property list ID */
     if(plist->pclass->create_func!=NULL) {
@@ -7341,6 +7381,12 @@ static herr_t H5P_close_list(void *_plist)
 
     assert(plist);
 
+    /* Make call to property list class close callback, if needed */
+    if(plist->class_init!=0 && plist->pclass->close_func!=NULL) {
+        /* Call user's "close" callback function, ignoring return value */
+        (plist->pclass->close_func)(plist->plist_id,plist->pclass->close_data);
+    } /* end if */
+
     /* Make calls to any property close callbacks which exist */
     H5P_free_all_prop(plist->props,plist->pclass->hashsize,1);
 
@@ -7389,12 +7435,6 @@ herr_t H5Pclose_list(hid_t plist_id)
     /* Check arguments. */
     if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
-    /* Make call to property list class close callback, if needed */
-    if(plist->class_init!=0 && plist->pclass->close_func!=NULL) {
-        /* Call user's "close" callback function, ignoring return value */
-        (plist->pclass->close_func)(plist_id,plist->pclass->close_data);
-    } /* end if */
 
     /* Close the property list */
     if ((ret_value=H5P_close_list(plist)) < 0)

@@ -226,6 +226,12 @@ H5FD_mpio_init(void)
  *
  * 		Robb Matzke, 1999-08-06
  *		Modified to work with the virtual file layer.
+ *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -238,8 +244,11 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     H5TRACE3("e","iMcMi",fapl_id,comm,info);
 
     /* Check arguments */
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
+
+
 #ifdef LATER
 #warning "We need to verify that COMM and INFO contain sensible information."
 #endif
@@ -275,10 +284,15 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
  *
  * Modifications:
  *
- *	Albert Cheng, Apr 16, 1998
- *	Removed the access_mode argument.  The access_mode is changed
- *	to be controlled by data transfer property list during data
- *	read/write calls.
+ *	        Albert Cheng, Apr 16, 1998
+ *	        Removed the access_mode argument.  The access_mode is changed
+ *	        to be controlled by data transfer property list during data
+ *	        read/write calls.
+ *
+ *		Raymond Lu 
+ * 		Tuesday, Oct 23, 2001
+ *		Changed the file access list to the new generic property 
+ *		list.
  *
  *-------------------------------------------------------------------------
  */
@@ -290,8 +304,9 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     FUNC_ENTER(H5Pget_fapl_mpio, FAIL);
     H5TRACE3("e","ixx",fapl_id,comm,info);
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_GET_TYPE(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list");
     if (H5FD_MPIO!=H5P_get_driver(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver");
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
