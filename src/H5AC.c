@@ -51,10 +51,8 @@ static int             interface_initialize_g = 0;
 #define INTERFACE_INIT H5AC_init_interface
 static herr_t H5AC_init_interface(void);
 
-#ifdef H5_HAVE_PARALLEL
 /* Dataset transfer property list for flush calls */
 static hid_t H5AC_dxpl_id=(-1);
-#endif /* H5_HAVE_PARALLEL */
 
 #ifdef H5AC_SORT_BY_ADDR
 static H5AC_t          *current_cache_g = NULL;         /*for sorting */
@@ -92,15 +90,14 @@ H5FL_ARR_DEFINE_STATIC(H5AC_prot_t,-1);
 static herr_t
 H5AC_init_interface(void)
 {
-#ifdef H5_HAVE_PARALLEL
     H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
+#ifdef H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
     unsigned block_before_meta_write=1; /* Custom value for "block before meta write" property */
 #endif /* H5_HAVE_PARALLEL */
 
     FUNC_ENTER_NOINIT(H5AC_init_interface);
 
-#ifdef H5_HAVE_PARALLEL
     /* Sanity check */
     assert(H5P_CLS_DATASET_XFER_g!=(-1));
 
@@ -112,6 +109,7 @@ H5AC_init_interface(void)
     if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
         HRETURN_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list");
 
+#ifdef H5_HAVE_PARALLEL
     /* Get the property list object */
     if (NULL == (xfer_plist = H5I_object(H5AC_dxpl_id)))
         HRETURN_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object");
@@ -150,7 +148,6 @@ H5AC_term_interface(void)
     FUNC_ENTER_NOINIT(H5AC_term_interface);
 
     if (interface_initialize_g) {
-#ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id>0) {
             /* Indicate more work to do */
             n = 1; /* H5I */
@@ -167,7 +164,6 @@ H5AC_term_interface(void)
             } /* end else */
         } /* end if */
         else
-#endif /* H5_HAVE_PARALLEL */
             /* Reset interface initialization flag */
             interface_initialize_g = 0;
     } /* end if */
