@@ -1158,7 +1158,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     intn		idx;
 
     FUNC_ENTER(H5Aiterate, FAIL);
-    H5TRACE4("Is","i*Iuxx",loc_id,attr_num,op,op_data);
+    H5TRACE4("e","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
     if (H5I_FILE==H5I_get_type(loc_id) ||
