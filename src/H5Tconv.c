@@ -1035,7 +1035,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		    if (H5T_convert(priv->memb_path[i],
 				    priv->src_memb_id[i],
 				    priv->dst_memb_id[src2dst[i]],
-                    1, 0, 0, /*no striding (packed array)*/
+                                    1, 0, 0, /*no striding (packed array)*/
 				    xbuf+src_memb->offset,
 				    xbkg+dst_memb->offset,
                                     dset_xfer_plist)<0) {
