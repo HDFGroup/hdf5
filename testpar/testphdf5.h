@@ -23,7 +23,8 @@
     }								      	      \
     else{								      \
 	printf("Proc %d: ", mpi_rank); \
-        printf("*** PHDF5 Assertion failed (%s) at line %4d in %s\n",         \
+        printf("*** PHDF5 ERROR ***\n");         			      \
+        printf("        Assertion (%s) failed at line %4d in %s\n",           \
 	    mesg, (int)__LINE__, __FILE__);     			      \
         nerrors++;                                                            \
 	fflush(stdout);							      \
@@ -48,7 +49,8 @@
     }								      	      \
     else{								      \
 	printf("Proc %d: ", mpi_rank); \
-        printf("*** PHDF5 Assertion failed (%s) at line %4d in %s\n",         \
+        printf("*** PHDF5 REMARK (not an error) ***\n");         	      \
+        printf("        Condition (%s) failed at line %4d in %s\n",           \
 	    mesg, (int)__LINE__, __FILE__);     			      \
 	fflush(stdout);							      \
     }                                                                         \
