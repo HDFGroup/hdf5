@@ -46,6 +46,7 @@ typedef enum {
     H5FP_REQ_RELEASE_END,       /* Last unlock request in unlock sequence   */
     H5FP_REQ_WRITE,             /* Writing a piece of metadata              */
     H5FP_REQ_READ,              /* Reading a piece of metadata              */
+    H5FP_REQ_FLUSH,             /* Flush the metadata out to disk           */
     H5FP_REQ_CLOSE,             /* Close a file (or eventually an object)   */
     H5FP_REQ_STOP               /* Stop SAP                                 */
 } H5FP_req_t;
@@ -151,12 +152,15 @@ typedef enum sap_status {
     H5FP_STATUS_CATASTROPHIC
 } H5FP_status_t;
 
-/*
+/*===----------------------------------------------------------------------===
+ *                              H5FP_request
+ *===----------------------------------------------------------------------===
+ *
  * The structure sent to the SAP which holds all of the requested action
  */
 typedef struct {
-    H5FP_req_t      req_type;   /* Request type                             */
     unsigned        req_id;     /* ID for request set by sending process    */
+    H5FP_req_t      req_type;   /* Request type                             */
     unsigned        proc_rank;  /* Rank of sending process                  */
     unsigned        file_id;    /* SAP's file ID for the specific file      */
     H5FP_obj_t      obj_type;   /* Type of the object                       */
@@ -169,7 +173,10 @@ typedef struct {
 
 extern MPI_Datatype H5FP_request_t; /* MPI datatype for the H5FP_request obj*/
 
-/*
+/*===----------------------------------------------------------------------===
+ *                               H5FP_reply
+ *===----------------------------------------------------------------------===
+ *
  * Reply from the SAP on an H5FP_request send
  */
 typedef struct {
@@ -181,7 +188,10 @@ typedef struct {
 
 extern MPI_Datatype H5FP_reply_t;   /* MPI datatype for the H5FP_reply obj  */
 
-/*
+/*===----------------------------------------------------------------------===
+ *                               H5FP_read
+ *===----------------------------------------------------------------------===
+ *
  * The reply message from the SAP on an H5FP_request H5FP_REQ_READ send
  */
 typedef struct {
@@ -213,27 +223,29 @@ extern "C" {
 extern herr_t H5FP_sap_receive_loop(void);
 
 /* Use these functions to communicate with the SAP */
-extern herr_t H5FP_request_open(const char *mdata, int md_len, H5FP_obj_t obj_type,
-                                MPI_Offset maxaddr, unsigned *file_id, unsigned *req_id);
+extern herr_t H5FP_request_open(H5FP_obj_t obj_type, MPI_Offset maxaddr,
+                                unsigned *file_id, unsigned *req_id);
 extern herr_t H5FP_request_lock(unsigned sap_file_id, unsigned char *mdata,
                                 H5FP_lock_t rw_lock, int last, unsigned *req_id,
                                 H5FP_status_t *status);
 extern herr_t H5FP_request_release_lock(unsigned sap_file_id, unsigned char *mdata,
                                         int last, unsigned *req_id,
                                         H5FP_status_t *status);
-extern herr_t H5FP_request_read_metadata(H5FD_t *file, unsigned sap_file_id,
+extern herr_t H5FP_request_read_metadata(H5FD_t *file, unsigned sap_file_id, hid_t dxpl_id,
                                          H5FD_mem_t mem_type, MPI_Offset addr,
                                          size_t size, uint8_t **buf, int *bytes_read,
                                          unsigned *req_id, H5FP_status_t *status);
-extern herr_t H5FP_request_write_metadata(H5FD_t *file, unsigned file_id,
-                                          H5FD_mem_t mem_type, unsigned char *obj_oid,
-                                          MPI_Offset addr, int mdata_size,
-                                          const char *mdata, unsigned *req_id,
+extern herr_t H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
+                                          H5FD_mem_t mem_type, MPI_Offset addr,
+                                          int mdata_size, const char *mdata,
+                                          unsigned *req_id, H5FP_status_t *status);
+extern herr_t H5FP_request_flush_metadata(H5FD_t *file, unsigned file_id,
+                                          hid_t dxpl_id, unsigned *req_id,
                                           H5FP_status_t *status);
-extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id, unsigned *req_id,
-                                 H5FP_status_t *status);
+extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id,
+                                 unsigned *req_id, H5FP_status_t *status);
 
-/* NOTE: Don't use these functions outside of the H5FD* modules! */
+/* NOTE: Don't use these functions outside of the H5FP* modules! */
 extern herr_t H5FP_send_metadata(const char *mdata, int len, int to);
 extern herr_t H5FP_read_metadata(char **mdata, int len, int from);
 

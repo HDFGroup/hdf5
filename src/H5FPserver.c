@@ -44,6 +44,13 @@ static int interface_initialize_g = 0;
 
 /* Internal SAP structures */
 
+/*===----------------------------------------------------------------------===
+ *                            H5FP_object_lock
+ *===----------------------------------------------------------------------===
+ *
+ * A lock on a given object. A list of current locks is kept in the
+ * appropriate H5FP_file_info structure.
+ */
 typedef struct {
     uint8_t         oid[H5R_OBJ_REF_BUF_SIZE]; /* Buffer to store OID of object */
     unsigned        owned_rank; /* rank which has the lock                  */
@@ -52,6 +59,14 @@ typedef struct {
     H5FP_lock_t     rw_lock;    /* indicates if it's a read or write lock   */
 } H5FP_object_lock;
 
+/*===----------------------------------------------------------------------===
+ *                             H5FP_mdata_mod
+ *===----------------------------------------------------------------------===
+ *
+ * A given modification (write) of metadata in the file. A list of
+ * current modifications is kept in the appropriate H5FP_file_info
+ * structure.
+ */
 typedef struct {
     H5FD_mem_t      mem_type;   /* type of memory updated                   */
     H5FP_obj_t      obj_type;   /* type of object modified                  */
@@ -60,10 +75,21 @@ typedef struct {
     char           *metadata;   /* encoded metadata about the object        */
 } H5FP_mdata_mod;
 
+/*===----------------------------------------------------------------------===
+ *                             H5FP_file_info
+ *===----------------------------------------------------------------------===
+ *
+ * This has all the information the SAP cares about for a given file: a
+ * copy of the H5FD_t structure for keeping track of metadata allocations
+ * in the file, the file ID assigned by the SAP, whether the file is in
+ * the process of being closed (and, therefore, can't accept anymore
+ * modifications), a count of the number of modifications not written to
+ * the file, a list of modifications (writes) made by clients to the
+ * metadata, and a list of current locks on objects in the file.
+ */
 typedef struct {
     H5FD_t          file;       /* file driver structure                    */
     unsigned        file_id;    /* the file id the SAP keeps per file       */
-    char           *filename;   /* the filename - of dubious use            */
     int             closing;    /* we're closing the file - no more changes */
     unsigned        num_mods;   /* number of mdata writes outstanding       */
     H5TB_TREE      *mod_tree;   /* a tree of metadata updates done          */
@@ -99,10 +125,9 @@ static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *info,
                                                 H5FP_object_lock *ol);
 
     /* local file information handling functions */
-static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename,
-                                             MPI_Offset maxaddr);
+static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr);
 static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
-static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id, char *filename);
+static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id);
 static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
 static herr_t H5FP_remove_file_id_from_list(unsigned file_id);
 static herr_t H5FP_free_file_info_node(H5FP_file_info *info);
@@ -116,15 +141,14 @@ static H5FP_mdata_mod *H5FP_new_file_mod_node(unsigned rank,
 static herr_t H5FP_free_mod_node(H5FP_mdata_mod *info);
 
     /* local request handling functions */
-static herr_t H5FP_sap_handle_open_request(H5FP_request req,
-                                           char *mdata,
-                                           unsigned md_size);
+static herr_t H5FP_sap_handle_open_request(H5FP_request req, unsigned md_size);
 static herr_t H5FP_sap_handle_lock_request(H5FP_request req);
 static herr_t H5FP_sap_handle_release_lock_request(H5FP_request req);
+static herr_t H5FP_sap_handle_read_request(H5FP_request req);
 static herr_t H5FP_sap_handle_write_request(H5FP_request req,
                                             char *mdata,
                                             unsigned md_size);
-static herr_t H5FP_sap_handle_read_request(H5FP_request req);
+static herr_t H5FP_sap_handle_flush_request(H5FP_request req);
 static herr_t H5FP_sap_handle_close_request(H5FP_request req);
 
 /*
@@ -172,7 +196,7 @@ H5FP_sap_receive_loop(void)
 
         switch (req.req_type) {
         case H5FP_REQ_OPEN:
-            if ((hrc = H5FP_sap_handle_open_request(req, buf, req.md_size)) != SUCCEED)
+            if ((hrc = H5FP_sap_handle_open_request(req, req.md_size)) != SUCCEED)
                 HGOTO_ERROR(H5E_FPHDF5, H5E_CANTOPENOBJ, FAIL, "cannot open file");
             break;
         case H5FP_REQ_LOCK:
@@ -188,6 +212,9 @@ H5FP_sap_receive_loop(void)
             break;
         case H5FP_REQ_READ:
             hrc = H5FP_sap_handle_read_request(req);
+            break;
+        case H5FP_REQ_FLUSH:
+            hrc = H5FP_sap_handle_flush_request(req);
             break;
         case H5FP_REQ_CLOSE:
             hrc = H5FP_sap_handle_close_request(req);
@@ -509,7 +536,6 @@ H5FP_free_file_info_node(H5FP_file_info *info)
     if (info) {
         H5TB_dfree(info->mod_tree, (void (*)(void*))H5FP_free_mod_node, NULL);
         H5TB_dfree(info->locks, (void (*)(void*))H5FP_free_object_lock, NULL);
-        HDfree(info->filename);
         HDfree(info);
     }
 
@@ -541,7 +567,7 @@ H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int UNUSED cmparg)
  * Modifications:
  */
 static H5FP_file_info *
-H5FP_new_file_info_node(unsigned file_id, char *filename)
+H5FP_new_file_info_node(unsigned file_id)
 {
     H5FP_file_info *ret_value;
 
@@ -551,7 +577,6 @@ H5FP_new_file_info_node(unsigned file_id, char *filename)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "out of memory");
 
     ret_value->file_id = file_id;
-    ret_value->filename = filename;
     ret_value->closing = FALSE;
     ret_value->num_mods = 0;
 
@@ -609,14 +634,14 @@ H5FP_find_file_info(unsigned file_id)
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, MPI_Offset maxaddr)
+H5FP_add_new_file_info_to_list(unsigned file_id, MPI_Offset maxaddr)
 {
     H5FP_file_info *info;
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_NOINIT(H5FP_add_new_file_info_to_list);
 
-    if ((info = H5FP_new_file_info_node(file_id, filename)) != NULL) {
+    if ((info = H5FP_new_file_info_node(file_id)) != NULL) {
         if (!H5TB_dins(file_info_tree, (void *)info, NULL)) {
             H5FP_free_file_info_node(info);
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
@@ -723,6 +748,7 @@ H5FP_dump(H5FP_file_info *info, unsigned to, unsigned req_id, unsigned file_id)
 
     FUNC_ENTER_NOINIT(H5FP_dump);
 
+    /* check args */
     assert(info);
 
     if (!info->mod_tree)
@@ -803,7 +829,7 @@ H5FP_gen_sap_file_id()
  * Modifications:
  */
 static herr_t
-H5FP_sap_handle_open_request(H5FP_request req, char *mdata, unsigned UNUSED md_size)
+H5FP_sap_handle_open_request(H5FP_request req, unsigned UNUSED md_size)
 {
     herr_t ret_value = SUCCEED;
     int mrc;
@@ -814,7 +840,7 @@ H5FP_sap_handle_open_request(H5FP_request req, char *mdata, unsigned UNUSED md_s
         unsigned new_file_id = H5FP_gen_sap_file_id();
 
         /* N.B. At this point, req.addr is equiv. to maxaddr in H5FD_open() */
-        if (H5FP_add_new_file_info_to_list(new_file_id, mdata, req.addr) != SUCCEED)
+        if (H5FP_add_new_file_info_to_list(new_file_id, req.addr) != SUCCEED)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert new file structure to list");
 
@@ -1219,6 +1245,11 @@ done:
  * Function:    H5FP_sap_handle_write_request
  * Purpose:     Handle a request to write a piece of metadata in the
  *              file.
+ *
+ *              N.B: We assume that the client has the lock on the
+ *              requesting object before getting here. Why? Because it's
+ *              hard to pass the OID for that object down to the
+ *              low-level I/O routines...*sigh*
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 06. August, 2002
@@ -1261,6 +1292,12 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
             HGOTO_DONE(FAIL);
         }
 
+#if 0
+        /*
+         * We're assuming that the client has the correct lock at this
+         * point...
+         */
+
         /* handle the change request */
         lock = H5FP_find_object_lock(info, req.oid);
 
@@ -1273,6 +1310,7 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
             exit_state = H5FP_STATUS_NO_LOCK;
             HGOTO_DONE(FAIL);
         }
+#endif  /* 0 */
 
         if (H5FP_add_file_mod_to_list(info, req.mem_type, req.addr,
                                       req.proc_rank, md_size, mdata) != SUCCEED) {
@@ -1284,6 +1322,49 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
         exit_state = H5FP_STATUS_BAD_FILE_ID;
         HGOTO_DONE(FAIL);
     }
+
+done:
+    H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+/*
+ * Function:    H5FP_sap_handle_flush_request
+ * Purpose:     Handle a request to flush the metadata to a file.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ * Programmer:  Bill Wendling
+ *              12. February 2003
+ * Modifications:
+ */
+static herr_t
+H5FP_sap_handle_flush_request(H5FP_request req)
+{
+    H5FP_file_info *info;
+    H5FP_status_t exit_state = H5FP_STATUS_OK;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOINIT(H5FP_sap_handle_flush_request);
+
+    if ((info = H5FP_find_file_info(req.file_id)) != NULL)
+        if (info->num_mods) {
+            /*
+             * If there are any modifications not written out yet, dump
+             * them to this process
+             */
+            if (H5FP_send_reply(req.proc_rank, req.req_id, req.file_id,
+                                H5FP_STATUS_DUMPING) == FAIL) {
+                exit_state = H5FP_STATUS_DUMPING_FAILED;
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
+                            "can't send message to client");
+            }
+
+            if (H5FP_dump(info, req.proc_rank, req.req_id, req.file_id) == FAIL) {
+                exit_state = H5FP_STATUS_DUMPING_FAILED;
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
+                            "can't dump metadata to client");
+            }
+        }
 
 done:
     H5FP_send_reply(req.proc_rank, req.req_id, req.file_id, exit_state);
@@ -1309,25 +1390,6 @@ H5FP_sap_handle_close_request(H5FP_request req)
 
     if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
         int comm_size;
-
-        if (info->num_mods) {
-            /*
-             * If there are any modifications not written out yet, dump
-             * them to this process
-             */
-            if (H5FP_send_reply(req.proc_rank, req.req_id, req.file_id,
-                                H5FP_STATUS_DUMPING) == FAIL) {
-                exit_state = H5FP_STATUS_DUMPING_FAILED;
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
-                            "can't send message to client");
-            }
-
-            if (H5FP_dump(info, req.proc_rank, req.req_id, req.file_id) == FAIL) {
-                exit_state = H5FP_STATUS_DUMPING_FAILED;
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTSENDMDATA, FAIL,
-                            "can't dump metadata to client");
-            }
-        }
 
         /* Get the size of the SAP communicator */
         if (MPI_Comm_size(H5FP_SAP_COMM, &comm_size) != MPI_SUCCESS)
