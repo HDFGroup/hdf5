@@ -510,6 +510,10 @@ struct H5O_pline_t;		/*forward decl for prototype arguments */
 extern const H5F_create_t H5F_create_dflt;
 extern H5F_access_t H5F_access_dflt;
 
+#ifdef HAVE_PARALLEL
+extern  hbool_t H5_mpi_1_metawrite_g;
+#endif /* HAVE_PARALLEL */
+
 /* Private functions, not part of the publicly documented API */
 herr_t H5F_init_interface(void);
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
@@ -607,5 +611,10 @@ void H5F_addr_inc(haddr_t *addr/*in,out*/, hsize_t inc);
 void H5F_addr_adj(haddr_t *addr/*in,out*/, hssize_t adj);
 void H5F_addr_add(haddr_t *, const haddr_t *);
 uintn H5F_addr_hash(const haddr_t *, uintn mod);
+
+/* Functions for MPI-IO */
+#ifdef HAVE_PARALLEL
+hbool_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
+#endif /* HAVE_PARALLEL */
 
 #endif
