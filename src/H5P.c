@@ -617,11 +617,11 @@ static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
             while(tmp!=NULL) {
                 /* Make a copy of the class's property */
                 if((pcopy=H5P_copy_prop(tmp))==NULL)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
                 /* Insert the initialized property into the property list */
                 if(H5P_add_prop(new_pclass->props,new_pclass->hashsize,pcopy)<0)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class");
 
                 /* Increment property count for class */
                 new_pclass->nprops++;
@@ -635,7 +635,7 @@ static hid_t H5P_copy_pclass(H5P_genclass_t *pclass)
     /* Increment parent class's derived class value */
     if(new_pclass->parent!=NULL)
         if(H5P_access_class(new_pclass->parent,H5P_MOD_INC_CLS)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment parent class ref count");
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment parent class ref count");
 
     /* Get an atom for the class */
     if ((ret_value = H5I_register(H5I_GENPROP_CLS, new_pclass))<0)
@@ -689,7 +689,7 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
 
     /* Allocate room for the property list & it's hash table of properties */
     if (NULL==(new_plist = H5MM_calloc (sizeof(H5P_genplist_t)+((plist->pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed");
 
     /* Set class state */
     new_plist->pclass = plist->pclass;
@@ -704,19 +704,19 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
         while(tprop!=NULL) {
             /* Make a copy of the class's property */
             if((new_prop=H5P_copy_prop(tprop))==NULL)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
 
             /* Call property copy callback, if it exists */
             if(new_prop->copy) {
                 if((new_prop->copy)(new_prop->name,new_prop->size,new_prop->value)<0) {
                     H5P_free_prop(new_prop);
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't copy property");
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't copy property");
                 } /* end if */
             } /* end if */
 
             /* Insert the initialized property into the property list */
             if(H5P_add_prop(new_plist->props,new_plist->pclass->hashsize,new_prop)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into list");
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into list");
 
             /* Increment the number of properties in list */
             new_plist->nprops++;
@@ -728,7 +728,7 @@ static hid_t H5P_copy_plist(H5P_genplist_t *plist)
 
     /* Increment the number of property lists derived from class */
     if(H5P_access_class(new_plist->pclass,H5P_MOD_INC_LST)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, NULL,"Can't increment class ref count");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ref count");
 
     /* Get an atom for the property list */
     if ((plist_id = H5I_register(H5I_GENPROP_LST, new_plist))<0)
