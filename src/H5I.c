@@ -793,6 +793,94 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Iget_file_id
+ *
+ * Purpose:	The public version of H5I_get_file_id(), obtains the file
+ *              ID given an object ID.  User has to close this ID. 
+ *
+ * Return:	Success:	file ID
+ *
+ *		Failure:	a negative value
+ *
+ * Programmer:  Raymond Lu
+ *              Oct 27, 2003	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Iget_file_id(hid_t obj_id)
+{
+    hid_t		ret_value = FAIL;
+
+    FUNC_ENTER_API(H5Iget_file_id, FAIL);
+    H5TRACE1("i","i",obj_id);
+
+    ret_value = H5I_get_file_id(obj_id);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_file_id
+ *
+ * Purpose:	The private version of H5Iget_file_id(), obtains the file
+ *              ID given an object ID. 
+ *
+ * Return:	Success:	file ID
+ *
+ *		Failure:	a negative value
+ *
+ * Programmer:  Raymond Lu
+ *              Oct 27, 2003	
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5I_get_file_id(hid_t obj_id)
+{
+    hid_t		ret_value = FAIL;
+    H5I_type_t          obj_type  = H5I_BADID;
+    H5G_entry_t         *ent;
+
+    FUNC_ENTER_NOAPI(H5I_get_file_id, FAIL);
+
+    /* Get object type */
+    obj_type = H5I_GRP(obj_id);
+
+    switch(obj_type) {
+        case H5I_FILE:
+            ret_value = obj_id;
+            /* Increment reference count on atom. */
+            if (H5I_inc_ref(ret_value)<0)
+	        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "incrementing file ID failed");
+           
+            break;
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_ATTR:
+            ent = H5G_loc(obj_id);
+            ret_value = H5F_get_id(ent->file);
+            /* Increment reference count on atom. */
+            if (H5I_inc_ref(ret_value)<0)
+	        HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "incrementing file ID failed");
+
+            break;
+        default:
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID");
+    } 
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_remove
  *
  * Purpose:	Removes the specified ID from its group.

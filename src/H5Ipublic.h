@@ -59,6 +59,7 @@ extern "C" {
 
 /* Public API functions */
 H5_DLL H5I_type_t H5Iget_type(hid_t id);
+H5_DLL hid_t H5Iget_file_id(hid_t obj_id);
 H5_DLL ssize_t H5Iget_name(hid_t object_id, char *name/*out*/, size_t size);
 
 #ifdef __cplusplus

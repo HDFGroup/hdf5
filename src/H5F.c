@@ -2137,6 +2137,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if ((ret_value = H5I_register(H5I_FILE, new_file))<0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
+    /* Keep this ID in file object structure */
+    new_file->file_id = ret_value;
+            
 done:
     if (ret_value<0 && new_file)
         if(H5F_close(new_file)<0)
@@ -4161,6 +4164,36 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_fileno() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'file id'
+ *              (Mainly added to stop non-file routines from poking about 
+ *              in the H5F_t data structure)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file)
+{
+    hid_t       ret_value;
+    
+    FUNC_ENTER_NOINIT(H5F_get_id)
+
+    assert(file);
+    ret_value = file->file_id;
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */
 
 
 /*-------------------------------------------------------------------------
