@@ -2233,7 +2233,7 @@ H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
     /* collective transfer. */
     /* The no-op case */
     if (0==size) HRETURN(SUCCEED);
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
     /* Check if this information is in the metadata accumulator */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {
@@ -2457,7 +2457,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
     /* collective transfer. */
     /* The no-op case */
     if (0==size) HRETURN(SUCCEED);
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
     /* Check for accumulating metadata */
     if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {

@@ -218,7 +218,7 @@ H5F_init_interface(void)
             H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
         }
     }
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
     /*
      * Initialize the atom group for the file IDs. There are two groups:
@@ -304,7 +304,7 @@ H5F_init_interface(void)
 	if ((status=H5FD_MULTI)<0) goto end_registration;
 #ifdef H5_HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
-#endif
+#endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_STREAM
 	if ((status=H5FD_STREAM)<0) goto end_registration;
 #endif
@@ -1337,9 +1337,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*f=NULL, *ret_value=NULL;
     int		n;
-#ifdef H5_HAVE_PARALLEL
-    hid_t       driver_id = -1;
-#endif /* H5_HAVE_PARALLEL */
     H5P_genplist_t *plist;              /* Property list */
  
     FUNC_ENTER_NOINIT(H5F_new);
@@ -1390,20 +1387,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference");  
         if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size");  
-
-#ifdef H5_HAVE_PARALLEL
-	/*
-	 * Disable cache if file is open using MPIO driver.  Parallel
-	 * does not permit caching.  (maybe able to relax it for
-	 * read only open.)
-	 */
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID");
-	if (H5FD_MPIO==driver_id){
-	    f->shared->rdcc_nbytes = 0;
-	    f->shared->mdc_nelmts = 0;
-	}
-#endif
 
 	/*
 	 * Create a meta data cache with the specified number of elements.

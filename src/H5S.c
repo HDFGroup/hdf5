@@ -43,7 +43,7 @@ static size_t			H5S_nconv_g = 0;	/*entries used*/
 #ifdef H5_HAVE_PARALLEL
 /* Global var whose value can be set from environment variable also */
 hbool_t         H5_mpi_opt_types_g = TRUE;
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
 /* Declare a free list to manage the H5S_simple_t struct */
 H5FL_DEFINE(H5S_simple_t);
@@ -98,7 +98,7 @@ H5S_init_interface(void)
             H5_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
         }
     }
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE(SUCCEED);
 }

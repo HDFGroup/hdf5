@@ -17,7 +17,7 @@
 #   define H5FD_MPIO	(H5FD_mpio_init())
 #else
 #   define H5FD_MPIO	(-1)
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
 /* Type of I/O for data transfer properties */
 typedef enum H5FD_mpio_xfer_t {
@@ -68,6 +68,6 @@ __DLL__ int H5FD_mpio_mpi_size(H5FD_t *_file);
 }
 #endif
 
-#endif /*H5_HAVE_PARALLEL*/
+#endif /* H5_HAVE_PARALLEL */
 
 #endif

@@ -50,7 +50,7 @@
  * desired flags.
  */
 #define H5F_MPIO_DEBUG_KEY "H5F_mpio_debug_key"
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
 /* The difference between a single file and a set of mounted files */
 typedef enum H5F_scope_t {

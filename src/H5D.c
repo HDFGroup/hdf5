@@ -38,7 +38,7 @@
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
 #   include "H5Rpublic.h"
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 
 #define PABLO_MASK	H5D_mask
 
@@ -1544,7 +1544,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     /* If MPIO is used, no filter support yet. */
     if(IS_H5FD_MPIO(f) && dcpl_pline.nfilters > 0) 
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet");
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5D_new(dcpl_id)))
@@ -1724,13 +1724,13 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
      * space allocate time is early; otherwise delay allocation until H5Dwrite.
      */
 #ifdef H5_HAVE_PARALLEL
-    if (0==efl.nused && H5F_arr_create(f, &(new_dset->layout))<0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, 
-			"unable to initialize storage");
-    } else if(0<efl.nused) {
+    if (0==efl.nused) {
+        if(H5F_arr_create(f, &(new_dset->layout))<0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
+    } /* end if */
+    else
 	new_dset->layout.addr = HADDR_UNDEF;
-    }
-#else
+#else /*H5_HAVE_PARALLEL*/
     if (0==efl.nused) {
         if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && 
                 space_time==H5D_SPACE_ALLOC_EARLY)) {
@@ -1739,11 +1739,10 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
         } /* end if */
         else
 	    new_dset->layout.addr = HADDR_UNDEF;
-	
-    } else {
+    } /* end if */
+    else
         new_dset->layout.addr = HADDR_UNDEF;
-    }
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 
     /* Update layout message */
     if (H5O_modify (&(new_dset->ent), H5O_LAYOUT, 0, 0, &(new_dset->layout))<0)
@@ -1779,13 +1778,12 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
 #ifdef H5_HAVE_PARALLEL
     if (H5D_init_storage(new_dset, space)<0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
-#else
-    if(dcpl_layout==H5D_CHUNKED || (dcpl_layout==H5D_CONTIGUOUS && 
-            fill_time==H5D_FILL_TIME_ALLOC && ((space_time==H5D_SPACE_ALLOC_EARLY && !efl.nused) ||
-            (efl.nused))))
+#else /*H5_HAVE_PARALLEL*/
+    if(fill_time==H5D_FILL_TIME_ALLOC &&
+        ((space_time==H5D_SPACE_ALLOC_EARLY && !efl.nused) || (efl.nused)))
 	if (H5D_init_storage(new_dset, space)<0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize storage");
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     
     /* Success */
     ret_value = new_dset;
@@ -2017,7 +2015,7 @@ H5D_open_oid(H5G_entry_t *ent)
     /* If MPIO is used, no filter support yet. */
     if(IS_H5FD_MPIO(dataset->ent.file) && pline.nfilters > 0)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel IO does not support filters yet");
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     
     /*
      * Get the raw data layout info.  It's actually stored in two locations:
@@ -2223,7 +2221,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5FD_mpio_xfer_t xfer_mode;		/*xfer_mode for this request */
     hbool_t	xfer_mode_changed=0;	/*xfer_mode needs restore */
     hbool_t	doing_mpio=0;		/*This is an MPIO access */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
 #endif
@@ -2416,7 +2414,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	} /* end if */
 #endif
     } /* end if */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     /*
      * This is the general case.
      */
@@ -2546,7 +2544,7 @@ done:
 #endif
 	dx->xfer_mode = xfer_mode;
     } /* end if */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
     H5S_sel_iter_release(mem_space,&mem_iter);
@@ -2639,7 +2637,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5FD_mpio_xfer_t	xfer_mode;	/*xfer_mode for this request */
     hbool_t	xfer_mode_changed=0;	/*xfer_mode needs restore */
     hbool_t	doing_mpio=0;		/*This is an MPIO access */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 #ifdef H5S_DEBUG
     H5_timer_t	timer;
 #endif
@@ -2678,7 +2676,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     /* support parallel access of that yet */
     if (IS_H5FD_MPIO(dataset->ent.file) && H5T_get_class(mem_type)==H5T_VLEN)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 #ifdef H5_HAVE_PARALLEL
     /* If MPIO is used, no dataset region reference support yet. */
     /* This is because they use the global heap in the file and we don't */
@@ -2687,7 +2685,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             H5T_get_class(mem_type)==H5T_REFERENCE &&
             H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
-#endif
+#endif /*H5_HAVE_PARALLEL*/
 
     if (0==(H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
@@ -2843,7 +2841,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	} /* end if */
 #endif
     } /* end if */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     /*
      * This is the general case.
      */
@@ -2981,7 +2979,7 @@ done:
 #endif
 	dx->xfer_mode = xfer_mode;
     } /* end if */
-#endif
+#endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
     H5S_sel_iter_release(file_space,&file_iter);
     H5S_sel_iter_release(mem_space,&mem_iter);

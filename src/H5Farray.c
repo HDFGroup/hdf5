@@ -149,7 +149,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
-#endif
+#endif /* H5_HAVE_PARALLEL */
     herr_t      ret_value = SUCCEED;            /* Return value */
    
     FUNC_ENTER_NOAPI(H5F_arr_read, FAIL);
@@ -198,7 +198,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Collective MPIO access is unsupported for non-contiguous datasets */
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
 	HGOTO_ERROR (H5E_DATASET, H5E_READERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
     /* Get necessary properties from property list */
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
@@ -273,7 +273,7 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 if (max != min)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "collective access with unequal number of blocks not supported yet");
             }
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
             for (z=0; z<nelmts; z++) {
                 /* Read directly from file if the dataset is in an external file */
@@ -390,7 +390,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
     H5P_genplist_t *plist=NULL;                 /* Property list */
-#endif
+#endif /* H5_HAVE_PARALLEL */
     herr_t      ret_value = SUCCEED;            /* Return value */
    
     FUNC_ENTER_NOAPI(H5F_arr_write, FAIL);
@@ -438,7 +438,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     
     if (H5D_CONTIGUOUS!=layout->type && H5FD_MPIO_COLLECTIVE==xfer_mode)
 	HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access on non-contiguous datasets not supported yet");
-#endif
+#endif /* H5_HAVE_PARALLEL */
     
     /* Get necessary properties from property list */
     if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
@@ -515,7 +515,7 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 if (max != min)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "collective access with unequal number of blocks not supported yet");
             }
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
             for (z=0; z<nelmts; z++) {
 

@@ -1878,4 +1878,4 @@ H5FD_mpio_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 
     FUNC_LEAVE(ret_value);
 }
-#endif /*H5_HAVE_PARALLEL*/
+#endif /* H5_HAVE_PARALLEL */
