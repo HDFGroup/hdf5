@@ -25,6 +25,7 @@ HDF5/H5I API Specification
 <!-- #EndLibraryItem --></head>
 
 <body bgcolor="#FFFFFF">
+<!-- HEADER RIGHT " " -->
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
@@ -60,8 +61,7 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><center>
+<hr><!-- #EndLibraryItem --><center>
 <h1>H5I: Identifier Interface</h1>
 </center>
 
@@ -91,20 +91,20 @@ object names.
 </table>
 
 
-<p>
+<br>
 <strong>The FORTRAN90 Interface:</strong>
 
 <br>
 <font size=-1>
 <i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below go to the C function 
+as the corresponding C function.  The links below (electronic versions only) go to the C function 
 descriptions, which serve as general descriptions for both.  A button, 
 under <strong>Non-C API(s)</strong> at the end of the C function description,
 opens an external browser window displaying the FORTRAN90-specific 
 information.  You will probably want to adjust the size and location of 
 this external window so that both browser windows are visible and to 
 facilitate moving easily between them.</i>
-</font>
+</font><br>
 
 <table border=0>
 <tr><td valign=top>
@@ -122,62 +122,9 @@ facilitate moving easily between them.</i>
 </td></tr>
 </table>
 
-
-<hr>
-<dl>
-<dt><strong>Name:</strong> <a name="Identify-GetType">H5Iget_type</a>
-<dt><strong>Signature:</strong>
-    <dd><em>H5I_type_t</em> <code>H5Iget_type</code>(<em>hid_t</em> <code>obj_id</code>)
-<dt><strong>Purpose:</strong>
-    <dd>Retrieves the type of an object.
-<dt><strong>Description:</strong>
-    <dd><code>H5Iget_type</code> retrieves the type of the object
-        identified by <code>obj_id</code>.
-        <p>
-        Valid types returned by the function are 
-        <table>
-        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_FILE</code>
-           </td><td>File</td></tr>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_GROUP</code>
-           </td><td>Group</td></tr>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATATYPE</code>
-           </td><td>Datatype</td></tr>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASPACE</code>
-           </td><td>Dataspace</td></tr>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASET</code>
-           </td><td>Dataset</td></tr>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_ATTR</code>
-           </td><td>Attribute</td></tr>
-        </table>
-        If no valid type can be determined or the identifier 
-        submitted is invalid, the function returns
-        <table>
-        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_BADID</code>
-           </td><td>Invalid identifier</td></tr>
-        </table>
-        <p>
-        This function is of particular value in determining the 
-        type of object closing function (<code>H5Dclose</code>, 
-        <code>H5Gclose</code>, etc.) to call after a call to 
-        <code>H5Rdereference</code>.
-<dt><strong>Parameters:</strong>
-    <dl>
-        <dt><em>hid_t</em> <code>obj_id</code>
-            <dd>IN: Object identifier whose type is to be determined.
-    </dl>
-<dt><strong>Returns:</strong>
-    <dd>Returns the object type if successful;
-        otherwise <code>H5I_BADID</code>.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5i_FORTRAN.html#h5iget_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
-
-
+<!-- NEW PAGE -->
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_name" -->
 <hr>
 <dl>
 <dt><strong>Name:</strong> <a name="Identify-GetName">H5Iget_name</a>
@@ -236,6 +183,61 @@ facilitate moving easily between them.</i>
         -->
 </dl>
 
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetType">H5Iget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5I_type_t</em> <code>H5Iget_type</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the type of an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_type</code> retrieves the type of the object
+        identified by <code>obj_id</code>.
+        <p>
+        Valid types returned by the function are 
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_FILE</code>
+           </td><td>File</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_GROUP</code>
+           </td><td>Group</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATATYPE</code>
+           </td><td>Datatype</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASPACE</code>
+           </td><td>Dataspace</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASET</code>
+           </td><td>Dataset</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_ATTR</code>
+           </td><td>Attribute</td></tr>
+        </table>
+        If no valid type can be determined or the identifier 
+        submitted is invalid, the function returns
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_BADID</code>
+           </td><td>Invalid identifier</td></tr>
+        </table>
+        <p>
+        This function is of particular value in determining the 
+        type of object closing function (<code>H5Dclose</code>, 
+        <code>H5Gclose</code>, etc.) to call after a call to 
+        <code>H5Rdereference</code>.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>obj_id</code>
+            <dd>IN: Object identifier whose type is to be determined.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the object type if successful;
+        otherwise <code>H5I_BADID</code>.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5i_FORTRAN.html#h5iget_type_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
 <center>
@@ -270,14 +272,15 @@ And in this document, the
 </td></tr>
 </table>
 </center>
-<hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
+<hr><!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 <br>
 Describes HDF5 Release 1.6.0, July 2003
-</address><!-- #EndLibraryItem -->
- 
-Last modified: 10 June 2003
+</address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
+<!--
+document.writeln("Last modified: 3 October 2003");
+-->
+</SCRIPT>
 
 </body>
 </html>
