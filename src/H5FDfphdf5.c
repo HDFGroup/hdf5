@@ -938,6 +938,7 @@ H5FD_fphdf5_close(H5FD_t *_file)
                     "can't inform SAP of file close");
 
     /* Let all of the processes catch up to this point. */
+    /* XXX: This barrier isn't necessary, MPI-I/O will syncronize for you -QAK */
     if ((mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mrc);
 
