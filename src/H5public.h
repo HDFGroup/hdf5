@@ -10,6 +10,13 @@
  *                                                                          *
  ****************************************************************************/
 
+#ifdef RCSID
+static char             RcsId[] = "@(#)$Revision$";
+#endif
+
+/* $Id$ */
+
+
 /*
  * This file contains public declarations for the HDF5 module.
  */
