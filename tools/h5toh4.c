@@ -907,7 +907,7 @@ int32 order_array[512];
 
 	} else {
 
-        	fprintf(stdout,"Warning: H5 datasets of H5T_COMPOUND type with ndims > 1 are not converted.\n");
+        	fprintf(stderr,"Warning: H5 datasets of H5T_COMPOUND type with ndims > 1 are not converted.\n");
 
 	}
 	break;
@@ -1167,7 +1167,7 @@ convert_all (hid_t group, char *name, op_data_t *op_data)
 
 	/* test to see if object exists */
     	if ((status = H5Gget_objinfo(group, name, TRUE, NULL)) != SUCCEED ) {
-		fprintf(stdout,"Warning: the object pointed to by the symbolic link \"%s\" does not exist.\n",name);
+		fprintf(stderr,"Warning: the object pointed to by the symbolic link \"%s\" does not exist.\n",name);
     	}
 
 	/* Enable error reporting */
@@ -1687,8 +1687,12 @@ int32 h5type_to_h4type(hid_t h5_datatype)
  		h4_datatype = DFNT_INT16;
 	} else if (H5Tequal(h5_datatype,H5T_STD_I32BE)) {
  		h4_datatype = DFNT_INT32;
+/*
+ *	This is not supported by HDF4
+ *
 	} else if (H5Tequal(h5_datatype,H5T_STD_I64BE)) {
  		h4_datatype = DFNT_INT64;
+*/
 	} else if (H5Tequal(h5_datatype,H5T_STD_U8BE)) {
  		h4_datatype = DFNT_UINT8;
 	} else if (H5Tequal(h5_datatype,H5T_STD_U16BE)) {
@@ -1707,8 +1711,12 @@ int32 h5type_to_h4type(hid_t h5_datatype)
  		h4_datatype = DFNT_INT16;
 	} else if (H5Tequal(h5_datatype,H5T_STD_I32LE)) {
  		h4_datatype = DFNT_INT32;
+/*
+ *	This is not supported by HDF4
+ *
 	} else if (H5Tequal(h5_datatype,H5T_STD_I64LE)) {
  		h4_datatype = DFNT_INT64;
+*/
 	} else if (H5Tequal(h5_datatype,H5T_STD_U8LE)) {
  		h4_datatype = DFNT_UINT8;
 	} else if (H5Tequal(h5_datatype,H5T_STD_U16LE)) {
@@ -1733,20 +1741,32 @@ int32 h5type_to_h4type(hid_t h5_datatype)
  		h4_datatype = DFNT_INT32;
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_UINT)) {
  		h4_datatype = DFNT_UINT32;
+/*
+ *	This is not supported by HDF4
+ *
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_LONG)) {
  		h4_datatype = DFNT_INT64;
+*/
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_ULONG)) {
  		h4_datatype = DFNT_UINT64;
+/*
+ *	This is not supported by HDF4
+ *
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_LLONG)) {
  		h4_datatype = DFNT_INT128;
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_ULLONG)) {
  		h4_datatype = DFNT_UINT128;
+*/
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_FLOAT)) {
 		h4_datatype = DFNT_FLOAT32;
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_DOUBLE)) {
  		h4_datatype = DFNT_FLOAT64;
+/*
+ *	This is not supported by HDF4
+ *
 	} else if (H5Tequal(h5_datatype,H5T_NATIVE_LDOUBLE)) {
  		h4_datatype = DFNT_FLOAT128;
+*/
 	} else {
  		h4_datatype = FAIL;
 	}
