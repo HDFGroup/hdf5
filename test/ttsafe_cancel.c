@@ -92,10 +92,8 @@ void tts_cancel(void)
 		&buffer);
 
 	if (buffer != 11) {
-		fprintf(stderr,
-			"operation unsuccessful with value at %d instead of 11\n",
+		TestErrPrintf("operation unsuccessful with value at %d instead of 11\n",
 			buffer);
-		num_errs++;
 	}
 
 	H5Dclose(dataset);
@@ -169,9 +167,8 @@ herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, hsize_t UNUSED ndim
 	sleep(3);
 
 	if (value != 1) {
-		fprintf(stderr, "Error! Element value should be 1 and not %d\n",
+		TestErrPrintf("Error! Element value should be 1 and not %d\n",
 			value);
-		num_errs++;
 		return -1;
 	}
 

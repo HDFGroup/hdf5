@@ -127,17 +127,14 @@ void tts_acreate(void)
 		attribute = H5Aopen_name(dataset,gen_name(i));
 
 		if (attribute < 0) {
-			fprintf(stderr,
+			TestErrPrintf(
 				"unable to open appropriate attribute. "
 				"Test failed!\n");
-			num_errs++;
 		} else {
 			ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
 
 			if (ret < 0 || buffer != i) {
-				fprintf(stderr,
-					"wrong data values. Test failed!\n");
-				num_errs++;
+				TestErrPrintf("wrong data values. Test failed!\n");
 			}
 
 			H5Aclose(attribute);

@@ -263,8 +263,7 @@ test_reference_obj(void)
 
     /* Check for correct comment value */
     if(HDstrcmp(write_comment,read_comment)!=0) {
-        num_errs++;
-        MESSAGE(0, ("Error! Incorrect group comment, wanted: %s, got: %s",write_comment,read_comment));
+        TestErrPrintf("Error! Incorrect group comment, wanted: %s, got: %s\n",write_comment,read_comment);
     }
 
     /* Close group */

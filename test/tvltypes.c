@@ -226,8 +226,7 @@ test_vltypes_vlen_atomic(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i].len!=0 || rdata[i].p!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
+            TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
         } /* end if */
     } /* end for */
     
@@ -242,8 +241,7 @@ test_vltypes_vlen_atomic(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i].len!=0 || rdata[i].p!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
+            TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
         } /* end if */
     } /* end for */
     
@@ -279,8 +277,7 @@ test_vltypes_vlen_atomic(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i].len!=0 || rdata[i].p!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
+            TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
         } /* end if */
     } /* end for */
     
@@ -295,8 +292,7 @@ test_vltypes_vlen_atomic(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i].len!=0 || rdata[i].p!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
+            TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
         } /* end if */
     } /* end for */
     
@@ -362,14 +358,12 @@ test_vltypes_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
             if( ((unsigned int *)wdata[i].p)[j] != ((unsigned int *)rdata[i].p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -436,14 +430,12 @@ test_vltypes_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
             if( ((unsigned int *)wdata[i].p)[j] != ((unsigned int *)rdata[i].p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -593,14 +585,12 @@ rewrite_vltypes_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
             if( ((unsigned int *)wdata[i].p)[j] != ((unsigned int *)rdata[i].p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -735,19 +725,16 @@ test_vltypes_vlen_compound(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
             if( ((s1 *)wdata[i].p)[j].i != ((s1 *)rdata[i].p)[j].i ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
                 continue;
             } /* end if */
             if( ((s1 *)wdata[i].p)[j].f != ((s1 *)rdata[i].p)[j].f ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
                 continue;
             } /* end if */
         } /* end for */
@@ -883,19 +870,16 @@ rewrite_vltypes_vlen_compound(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].len; j++) {
             if( ((s1 *)wdata[i].p)[j].i != ((s1 *)rdata[i].p)[j].i ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
                 continue;
             } /* end if */
             if( ((s1 *)wdata[i].p)[j].f != ((s1 *)rdata[i].p)[j].f ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
                 continue;
             } /* end if */
         } /* end for */
@@ -1044,32 +1028,27 @@ test_vltypes_compound_vlen_vlen(void)
     /* Compare data read in */
     for(i=0; i<SPACE3_DIM1; i++) {
         if(wdata[i].i!=rdata[i].i) {
-            num_errs++;
-            printf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
+            TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
         if(wdata[i].f!=rdata[i].f) {
-            num_errs++;
-            printf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
+            TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
         
         if(wdata[i].v.len!=rdata[i].v.len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
 
         for(t1=wdata[i].v.p, t2=rdata[i].v.p, j=0; j<rdata[i].v.len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
-                num_errs++;
-                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
+                TestErrPrintf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
-                    num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                    TestErrPrintf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
             } /* end for */
@@ -1208,24 +1187,20 @@ test_vltypes_compound_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].i!=rdata[i].i) {
-            num_errs++;
-            printf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
+            TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
         if(wdata[i].f!=rdata[i].f) {
-            num_errs++;
-            printf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
+            TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
         if(wdata[i].v.len!=rdata[i].v.len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
             if( ((unsigned int *)wdata[i].v.p)[j] != ((unsigned int *)rdata[i].v.p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -1265,8 +1240,7 @@ test_vltypes_compound_vlen_atomic(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i].i!=0 || rdata[i].f!=0.0 || rdata[i].v.len!=0 || rdata[i].v.p!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
+            TestErrPrintf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
         } /* end if */
     } /* end for */
     
@@ -1281,24 +1255,20 @@ test_vltypes_compound_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].i!=rdata[i].i) {
-            num_errs++;
-            printf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
+            TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
         if(wdata[i].f!=rdata[i].f) {
-            num_errs++;
-            printf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
+            TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
         if(wdata[i].v.len!=rdata[i].v.len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
             if( ((unsigned int *)wdata[i].v.p)[j] != ((unsigned int *)rdata[i].v.p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -1437,24 +1407,20 @@ rewrite_vltypes_compound_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].i!=rdata[i].i) {
-            num_errs++;
-            printf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
+            TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
         if(wdata[i].f!=rdata[i].f) {
-            num_errs++;
-            printf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
+            TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
         if(wdata[i].v.len!=rdata[i].v.len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].v.len=%d, rdata[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata[i].v.len,(int)i,(int)rdata[i].v.len);
             continue;
         } /* end if */
         for(j=0; j<rdata[i].v.len; j++) {
             if( ((unsigned int *)wdata[i].v.p)[j] != ((unsigned int *)rdata[i].v.p)[j] ) {
-                num_errs++;
-                printf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
+                TestErrPrintf("VL data values don't match!, wdata[%d].v.p[%d]=%d, rdata[%d].v.p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].v.p)[j], (int)i,(int)j, (int)((unsigned int *)rdata[i].v.p)[j]);
                 continue;
             } /* end if */
         } /* end for */
@@ -1547,16 +1513,14 @@ test_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].p=malloc((i+1)*sizeof(hvl_t));
         if(wdata[i].p==NULL) {
-            printf("Cannot allocate memory for VL data! i=%u\n",i);
-            num_errs++;
+            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
             return;
         } /* end if */
         wdata[i].len=i+1;
         for(t1=wdata[i].p,j=0; j<(i+1); j++, t1++) {
             t1->p=malloc((j+1)*sizeof(unsigned int));
             if(t1->p==NULL) {
-                printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                num_errs++;
+                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
                 return;
             } /* end if */
             t1->len=j+1;
@@ -1656,20 +1620,17 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
-                num_errs++;
-                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
+                TestErrPrintf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
-                    num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                    TestErrPrintf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
             } /* end for */
@@ -1743,16 +1704,14 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].p=malloc((i+increment)*sizeof(hvl_t));
         if(wdata[i].p==NULL) {
-            printf("Cannot allocate memory for VL data! i=%u\n",i);
-            num_errs++;
+            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
             return;
         } /* end if */
         wdata[i].len=i+increment;
         for(t1=wdata[i].p,j=0; j<(i+increment); j++, t1++) {
             t1->p=malloc((j+1)*sizeof(unsigned int));
             if(t1->p==NULL) {
-                printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                num_errs++;
+                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
                 return;
             } /* end if */
             t1->len=j+1;
@@ -1841,20 +1800,17 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
-        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++)
-{
+        for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
-                num_errs++;
-                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
+                TestErrPrintf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
-                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {                    num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) {
+                    TestErrPrintf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
             } /* end for */
@@ -1924,16 +1880,14 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].p=malloc((i+increment)*sizeof(hvl_t));
         if(wdata[i].p==NULL) {
-            printf("Cannot allocate memory for VL data! i=%u\n",i);
-            num_errs++;
+            TestErrPrintf("Cannot allocate memory for VL data! i=%u\n",i);
             return;
         } /* end if */
         wdata[i].len=i+increment;
         for(t1=wdata[i].p,j=0; j<(i+increment); j++, t1++) {
             t1->p=malloc((j+1)*sizeof(unsigned int));
             if(t1->p==NULL) {
-                printf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
-                num_errs++;
+                TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
                 return;
             } /* end if */
             t1->len=j+1;
@@ -2022,20 +1976,17 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(wdata[i].len!=rdata[i].len) {
-            num_errs++;
-            printf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            TestErrPrintf("%d: VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             continue;
         } /* end if */
         for(t1=wdata[i].p, t2=rdata[i].p, j=0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len!=t2->len) {
-                num_errs++;
-                printf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
+                TestErrPrintf("%d: VL data length don't match!, i=%d, j=%d, t1->len=%d, t2->len=%d\n",__LINE__,(int)i,(int)j,(int)t1->len,(int)t2->len);
                 continue;
             } /* end if */
             for(k=0; k<t2->len; k++) {
                 if( ((unsigned int *)t1->p)[k] != ((unsigned int *)t2->p)[k] ) { 
-                    num_errs++;
-                    printf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
+                    TestErrPrintf("VL data values don't match!, t1->p[%d]=%d, t2->p[%d]=%d\n",(int)k, (int)((unsigned int *)t1->p)[k], (int)k, (int)((unsigned int *)t2->p)[k]);
                     continue;
                 } /* end if */
             } /* end for */

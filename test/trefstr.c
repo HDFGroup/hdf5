@@ -208,8 +208,7 @@ test_refstr_cmp(void)
     VERIFY(cmp, 0, "H5RS_cmp");
     cmp=H5RS_cmp(rs1,rs2);
     if(cmp>=0) {
-        num_errs++;
-        printf("%d: string comparison incorrect!\n",__LINE__);
+        TestErrPrintf("%d: string comparison incorrect!\n",__LINE__);
     } /* end if */
 
     /* Check the lengths of the strings also */
@@ -271,8 +270,7 @@ test_refstr_wrap(void)
     CHECK(s, buf, "wrapping");
     cmp=HDstrcmp(s,buf);
     if(cmp<=0) {
-        num_errs++;
-        printf("%d: string comparison incorrect!\n",__LINE__);
+        TestErrPrintf("%d: string comparison incorrect!\n",__LINE__);
     } /* end if */
 
     /* Decrement reference count for string */

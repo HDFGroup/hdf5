@@ -35,10 +35,6 @@
 
  */
 
-#include "h5test.h"
-
-#define HDF5_TEST_MASTER
-
 /* ANY new test needs to have a prototype in testhdf5.h */
 #include "testhdf5.h"
 
@@ -88,5 +84,5 @@ main(int argc, char *argv[])
     if (CleanUp && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
-    return (num_errs);
+    return (GetTestNumErrs());
 }                               /* end main() */

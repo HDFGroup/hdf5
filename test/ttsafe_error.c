@@ -119,24 +119,20 @@ void tts_error(void)
 		pthread_join(threads[i],NULL);
 
 	if (error_flag) {
-		fprintf(stderr, "Threads reporting different error values!\n");
-		num_errs++;
+		TestErrPrintf("Threads reporting different error values!\n");
 	}
 
 	if (error_count != NUM_THREAD - 1) {
-		fprintf(stderr, "Error: %d threads failed instead of %d\n",
+		TestErrPrintf("Error: %d threads failed instead of %d\n",
 			error_count, NUM_THREAD-1);
-		num_errs++;
 	}
 
 	dataset = H5Dopen(error_file, DATASETNAME);
 	H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
 
 	if (value != WRITE_NUMBER) {
-		fprintf(stderr,
-			"Error: Successful thread wrote value %d instead of %d\n",
+		TestErrPrintf("Error: Successful thread wrote value %d instead of %d\n",
 			value, WRITE_NUMBER);
-		num_errs++;
 	}
 
 	H5Dclose(dataset);

@@ -37,7 +37,7 @@ TIMINGS=testmeta
 ## a single shared library and libhdf5 is much bigger than libh5test.
 LIBHDF5=../src/libhdf5.la
 LIB=libh5test.la
-LIB_SRC=h5test.c
+LIB_SRC=h5test.c testframe.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 
@@ -102,11 +102,11 @@ timings _timings: $(TIMINGS)
 ## How to build the tests...  They all depend on the test and hdf5 libraries.
 $(TEST_PROGS): $(LIB) $(LIBHDF5)
 
-TESTHDF5_OBJ=testhdf5.lo testframe.lo tarray.lo tattr.lo tconfig.lo tfile.lo  \
+TESTHDF5_OBJ=testhdf5.lo tarray.lo tattr.lo tconfig.lo tfile.lo  \
     tgenprop.lo th5s.lo theap.lo titerate.lo tmeta.lo ttime.lo trefer.lo      \
     trefstr.lo tselect.lo ttbbt.lo ttst.lo tvltypes.lo tvlstr.lo tmisc.lo
 
-TTS_OBJ=ttsafe.lo testframe.lo ttsafe_dcreate.lo ttsafe_error.lo              \
+TTS_OBJ=ttsafe.lo ttsafe_dcreate.lo ttsafe_error.lo              \
     ttsafe_cancel.lo ttsafe_acreate.lo
 
 testhdf5: $(TESTHDF5_OBJ)

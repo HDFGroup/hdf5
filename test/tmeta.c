@@ -82,8 +82,7 @@ test_metadata(void)
 
         for (u = 0; u < sizeof(compar_buffer); u++) {
             if (compar_buffer[u] != encode_buffer[u]) {
-                print_func("Error encoding meta-data at offset %u, wanted: %u, got: %u\n", (unsigned) u, (unsigned) compar_buffer[u], (unsigned) encode_buffer[u]);
-                num_errs++;
+                TestErrPrintf("Error encoding meta-data at offset %u, wanted: %u, got: %u\n", (unsigned) u, (unsigned) compar_buffer[u], (unsigned) encode_buffer[u]);
             }                   /* end if */
         }                       /* end for */
     }                           /* end if */
@@ -96,28 +95,24 @@ test_metadata(void)
 
     /* Check the values decoded */
     if (di16 != TEST_INT16_VALUE) {
-        print_func("Error decoding int16 meta-data wanted: %d, got: %d "
+        TestErrPrintf("Error decoding int16 meta-data wanted: %d, got: %d "
                    "at %s:%d\n", (int) TEST_INT16_VALUE, (int) di16,
                    __FILE__, __LINE__);
-        num_errs++;
     }                           /* end if */
     if (du16 != TEST_UINT16_VALUE) {
-        print_func("Error decoding uint16 meta-data wanted: %u, got: %u "
+        TestErrPrintf("Error decoding uint16 meta-data wanted: %u, got: %u "
                    "at %s:%d\n", (unsigned) TEST_UINT16_VALUE, (unsigned) du16,
                    __FILE__, __LINE__);
-        num_errs++;
     }                           /* end if */
     if (di32 != TEST_INT32_VALUE) {
-        print_func("Error decoding int32 meta-data wanted: %ld, got: %ld "
+        TestErrPrintf("Error decoding int32 meta-data wanted: %ld, got: %ld "
                    "at %s:%d\n", (long) TEST_INT32_VALUE, (long) di32,
                    __FILE__, __LINE__);
-        num_errs++;
     }                           /* end if */
     if (du32 != TEST_UINT32_VALUE) {
-        print_func("Error decoding uint32 meta-data wanted: %lu, got: %lu "
+        TestErrPrintf("Error decoding uint32 meta-data wanted: %lu, got: %lu "
                    "at %s:%d\n", (unsigned long) TEST_UINT32_VALUE, (unsigned long) du32,
                    __FILE__, __LINE__);
-        num_errs++;
     }                           /* end if */
 }                               /* test_metadata() */
 

@@ -206,13 +206,11 @@ test_vlstrings_basic(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(strlen(wdata[i])!=strlen(rdata[i])) {
-            num_errs++;
-            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if( strcmp(wdata[i],rdata[i]) != 0 ) {
-            num_errs++;
-            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -297,8 +295,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i]!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
         } /* end if */
     } /* end for */
     
@@ -313,13 +310,11 @@ test_vlstrings_special(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(strlen(wdata[i])!=strlen(rdata[i])) {
-            num_errs++;
-            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if( strcmp(wdata[i],rdata[i]) != 0 ) {
-            num_errs++;
-            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -355,8 +350,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i]!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
         } /* end if */
     } /* end for */
     
@@ -371,8 +365,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(rdata[i]!=NULL) {
-            num_errs++;
-            printf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
         } /* end if */
     } /* end for */
     
@@ -538,13 +531,11 @@ test_compact_vlstring(void)
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
         if(strlen(wdata[i])!=strlen(rdata[i])) {
-            num_errs++;
-            printf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if( strcmp(wdata[i],rdata[i]) != 0 ) {
-            num_errs++;
-            printf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -615,8 +606,7 @@ static void test_write_vl_string_attribute(void)
     CHECK(ret, FAIL, "H5Aread");
 
     if(HDstrcmp(string_att_check,string_att)!=0) {
-        num_errs++;
-        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
     } /* end if */
 
     HDfree(string_att_check);
@@ -638,8 +628,7 @@ static void test_write_vl_string_attribute(void)
     CHECK(ret, FAIL, "H5Aread");
 
     if(HDstrcmp(string_att_check,string_att_write)!=0) {
-        num_errs++;
-        printf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+        TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
     } /* end if */
 
     HDfree(string_att_check);
@@ -699,8 +688,7 @@ static void test_read_vl_string_attribute(void)
     CHECK(ret, FAIL, "H5Aread");
 
     if(HDstrcmp(string_att_check,string_att)!=0) {
-        num_errs++;
-        printf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
+        TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",string_att,string_att_check);
     } /* end if */
 
     HDfree(string_att_check);
@@ -716,8 +704,7 @@ static void test_read_vl_string_attribute(void)
     CHECK(ret, FAIL, "H5Aread");
 
     if(HDstrcmp(string_att_check,string_att_write)!=0) {
-        num_errs++;
-        printf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
+        TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
     } /* end if */
 
     HDfree(string_att_check);

@@ -170,8 +170,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
          } /* end if */
 
     /* Close attribute */
@@ -212,8 +211,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
         } /* end if */
 
     /* Close attribute */
@@ -247,8 +245,7 @@ test_attr_basic_write(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1a[i]!=read_data1[i]) {
-            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
         } /* end if */
 
     /* Close attribute */
@@ -356,8 +353,7 @@ test_attr_basic_read(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
          } /* end if */
 
     /* Close attribute */
@@ -386,8 +382,7 @@ test_attr_basic_read(void)
     for(i=0; i<ATTR2_DIM1; i++)
         for(j=0; j<ATTR2_DIM2; j++)
         if(attr_data2[i][j]!=read_data2[i][j]) {
-            printf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
          } /* end if */
 
     /* Close attribute */
@@ -546,12 +541,10 @@ test_attr_compound_read(void)
     ret=H5Sget_simple_extent_dims(space,dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR4_DIM1) {
-        printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR4_DIM1);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR4_DIM1);
      } /* end if */
     if(dims[1]!=ATTR4_DIM2) {
-        printf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR4_DIM2);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR4_DIM2);
      } /* end if */
     H5Sclose(space);
 
@@ -567,8 +560,7 @@ test_attr_compound_read(void)
         if(!(HDstrcmp(fieldname,ATTR4_FIELDNAME1) || 
                 HDstrcmp(fieldname,ATTR4_FIELDNAME2) ||
                 HDstrcmp(fieldname,ATTR4_FIELDNAME3))) {
-            printf("invalid field name for field #%d: %s\n",i,fieldname);
-            num_errs++;
+            TestErrPrintf("invalid field name for field #%d: %s\n",i,fieldname);
           } /* end if */
         free(fieldname);
       } /* end for */
@@ -618,16 +610,14 @@ test_attr_compound_read(void)
             if(HDmemcmp(&attr_data4[i][j],&read_data4[i][j],sizeof(struct attr4_struct))) {
                 printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
                 printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
-                printf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
-                num_errs++;
+                TestErrPrintf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
              } /* end if */
 
     /* Verify Name */
     name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR4_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR4_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR4_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR4_NAME);
      } /* end if */
 
     /* Close attribute datatype */
@@ -948,8 +938,7 @@ test_attr_mult_read(void)
     ret=H5Sget_simple_extent_dims(space,dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR1_DIM1) {
-        printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR1_DIM1);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR1_DIM1);
      } /* end if */
     H5Sclose(space);
 
@@ -971,16 +960,14 @@ test_attr_mult_read(void)
     /* Verify values read in */
     for(i=0; i<ATTR1_DIM1; i++)
         if(attr_data1[i]!=read_data1[i]) {
-            printf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
          } /* end if */
 
     /* Verify Name */
     name_len=H5Aget_name(attr, ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
      } /* end if */
 
     /* Verify Name with too small of a buffer */
@@ -989,8 +976,7 @@ test_attr_mult_read(void)
     HDstrcpy(temp_name,ATTR1_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR1_NAME)-1]='\0';   /* truncate it to match the one retrieved */
     if(HDstrcmp(attr_name,temp_name)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
      } /* end if */
 
     /* Close attribute */
@@ -1009,12 +995,10 @@ test_attr_mult_read(void)
     ret=H5Sget_simple_extent_dims(space,dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR2_DIM1) {
-        printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR2_DIM1);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR2_DIM1);
      } /* end if */
     if(dims[1]!=ATTR2_DIM2) {
-        printf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR2_DIM2);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR2_DIM2);
      } /* end if */
     H5Sclose(space);
 
@@ -1037,16 +1021,14 @@ test_attr_mult_read(void)
     for(i=0; i<ATTR2_DIM1; i++)
         for(j=0; j<ATTR2_DIM2; j++)
         if(attr_data2[i][j]!=read_data2[i][j]) {
-            printf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
-            num_errs++;
+            TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
          } /* end if */
 
     /* Verify Name */
     name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR2_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR2_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR2_NAME);
      } /* end if */
 
     /* Verify Name with too small of a buffer */
@@ -1055,8 +1037,7 @@ test_attr_mult_read(void)
     HDstrcpy(temp_name,ATTR2_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR2_NAME)-1]='\0';   /* truncate it to match the one retrieved */
     if(HDstrcmp(attr_name,temp_name)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
      } /* end if */
 
     /* Close attribute */
@@ -1075,16 +1056,13 @@ test_attr_mult_read(void)
     ret=H5Sget_simple_extent_dims(space,dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
     if(dims[0]!=ATTR3_DIM1) {
-        printf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR3_DIM1);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR3_DIM1);
      } /* end if */
     if(dims[1]!=ATTR3_DIM2) {
-        printf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR3_DIM2);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR3_DIM2);
      } /* end if */
     if(dims[2]!=ATTR3_DIM3) {
-        printf("attribute dimensions different: dims[2]=%d, should be %d\n",(int)dims[2],ATTR3_DIM3);
-        num_errs++;
+        TestErrPrintf("attribute dimensions different: dims[2]=%d, should be %d\n",(int)dims[2],ATTR3_DIM3);
      } /* end if */
     H5Sclose(space);
 
@@ -1108,16 +1086,14 @@ test_attr_mult_read(void)
         for(j=0; j<ATTR3_DIM2; j++)
             for(k=0; k<ATTR3_DIM3; k++)
                 if(attr_data3[i][j][k]!=read_data3[i][j][k]) {
-                    printf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
-                    num_errs++;
+                    TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
                  } /* end if */
 
     /* Verify Name */
     name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
      } /* end if */
 
     /* Verify Name with too small of a buffer */
@@ -1126,8 +1102,7 @@ test_attr_mult_read(void)
     HDstrcpy(temp_name,ATTR3_NAME);     /* make a copy of the name */
     temp_name[HDstrlen(ATTR3_NAME)-1]='\0';   /* truncate it to match the one retrieved */
     if(HDstrcmp(attr_name,temp_name)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
      } /* end if */
 
     /* Close attribute */
@@ -1156,24 +1131,21 @@ herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
     switch(*count) {
         case 0:
             if(HDstrcmp(name,ATTR1_NAME)) {
-                printf("attribute name different: name=%s, should be %s\n",name,ATTR1_NAME);
-                num_errs++;
+                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR1_NAME);
              } /* end if */
              (*count)++;
              break;
 
         case 1:
             if(HDstrcmp(name,ATTR2_NAME)) {
-                printf("attribute name different: name=%s, should be %s\n",name,ATTR2_NAME);
-                num_errs++;
+                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR2_NAME);
              } /* end if */
              (*count)++;
              break;
 
         case 2:
             if(HDstrcmp(name,ATTR3_NAME)) {
-                printf("attribute name different: name=%s, should be %s\n",name,ATTR3_NAME);
-                num_errs++;
+                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR3_NAME);
              } /* end if */
              (*count)++;
              break;
@@ -1311,8 +1283,7 @@ test_attr_delete(void)
     name_len=H5Aget_name(attr,ATTR_NAME_LEN,attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR1_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
      } /* end if */
 
     /* Close attribute */
@@ -1327,8 +1298,7 @@ test_attr_delete(void)
     name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
      } /* end if */
 
     /* Close attribute */
@@ -1351,8 +1321,7 @@ test_attr_delete(void)
     name_len=H5Aget_name(attr,ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME)) {
-        printf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
-        num_errs++;
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
      } /* end if */
 
     /* Close attribute */
@@ -1411,8 +1380,7 @@ test_attr_dtype_shared(void)
     /* Get size of file */
     empty_filesize=h5_get_file_size(FILENAME);
     if(empty_filesize==0) {
-        printf("Line %d: file size wrong!\n",__LINE__);
-        num_errs++;
+        TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
     } /* end if */
 
     /* Re-open file */

@@ -31,16 +31,10 @@
  * BUGS/LIMITATIONS
  *
  * EXPORTED ROUTINES/VARIABLES:
- * Two variables are exported: num_errs, and Verbosity.
+ * 
  */
 
-#if defined __MWERKS__
-#include <console.h>
-#endif
-
 #include "h5test.h"
-
-#define HDF5_TEST_MASTER
 
 /* ANY new test needs to have a prototype in ttsafe.h */
 #include "ttsafe.h"
@@ -119,6 +113,6 @@ int main(int argc, char *argv[])
 	if (CleanUp && !getenv("HDF5_NOCLEANUP"))
             TestCleanup();
 
-	return num_errs;
+	return GetTestNumErrs();
 } /* end main() */
 #endif  /*H5_HAVE_THREADSAFE*/
