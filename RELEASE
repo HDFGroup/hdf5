@@ -42,6 +42,10 @@ New features
    * Improved configure to detect if MPIO routines are available when
      parallel mode is requested.
    * Added Thread-Safe support.  Phase I implemented.
+   * Added data sieve buffering to raw data I/O path.  This is enabled for
+     all VFL drivers except the mpio & core drivers.  Setting the sieve buffer
+     size is controlled with new API functions: H5Pset_sieve_buf_size() and
+     retrieved with H5Pget_sieve_buf_size().
 
 Bug fixes since HDF5-1.2.0
 ==========================
