@@ -38,9 +38,7 @@ typedef enum H5P_class_t {
     H5P_DATASET_CREATE   = 2,   /*dataset creation properties        */
     H5P_DATASET_XFER     = 3,   /*data transfer properties           */
     H5P_MOUNT            = 4,   /*file mounting properties           */
-    H5P_IMAGE            = 5,   /*image properties                   */
-    H5P_PALETTE          = 6,   /*palette properties                 */
-    H5P_NCLASSES         = 7    /*this must be last!                 */
+    H5P_NCLASSES                /*this must be last!                 */
 } H5P_class_t;
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
