@@ -491,7 +491,6 @@ hid_t
 H5Rdereference(hid_t id, H5R_type_t ref_type, void *_ref)
 {
     H5G_entry_t *loc = NULL;    /* Symbol table entry */
-    H5D_t *dset = NULL;     /* dataset object */
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = FAIL;
 
@@ -499,19 +498,15 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, void *_ref)
     H5TRACE3("i","iRtx",id,ref_type,_ref);
 
     /* Check args */
-    if (H5I_DATASET == H5I_get_type(id)) {
-        if(NULL == (dset = H5I_object(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-        file=H5D_get_file(dset);
-    } else {
-        if (NULL == (loc = H5G_loc(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-        file=loc->file;
-    }
+    if (NULL == (loc = H5G_loc(id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if(ref_type<=H5R_BADTYPE || ref_type>=H5R_MAXTYPE)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
     if(_ref==NULL)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+
+    /* Get the file pointer from the entry */
+    file=loc->file;
 
     /* Create reference */
     if ((ret_value=H5R_dereference(file, ref_type, _ref))<0)
@@ -635,7 +630,6 @@ hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, void *_ref)
 {
     H5G_entry_t *loc = NULL;    /* Symbol table entry */
-    H5D_t *dset = NULL;     /* dataset object */
     H5S_t *space = NULL;    /* dataspace object */
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = FAIL;
@@ -644,19 +638,15 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, void *_ref)
     H5TRACE3("i","iRtx",id,ref_type,_ref);
 
     /* Check args */
-    if (H5I_DATASET == H5I_get_type(id)) {
-        if(NULL == (dset = H5I_object(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-        file=H5D_get_file(dset);
-    } else {
-        if (NULL == (loc = H5G_loc(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-        file=loc->file;
-    }
+    if (NULL == (loc = H5G_loc(id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if(ref_type!=H5R_DATASET_REGION)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
     if(_ref==NULL)
         HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+
+    /* Get the file pointer from the entry */
+    file=loc->file;
 
     /* Get the dataspace with the correct region selected */
     if ((space=H5R_get_region(file,ref_type,_ref))==NULL)
@@ -749,7 +739,6 @@ int
 H5Rget_object_type(hid_t id, void *_ref)
 {
     H5G_entry_t *loc = NULL;    /* Symbol table entry */
-    H5D_t *dset = NULL;     /* dataset object */
     H5F_t *file=NULL;       /* File object */
     hid_t ret_value = H5G_UNKNOWN;
 
@@ -757,18 +746,14 @@ H5Rget_object_type(hid_t id, void *_ref)
     H5TRACE2("Is","ix",id,_ref);
 
     /* Check args */
-    if (H5I_DATASET == H5I_get_type(id)) {
-        if(NULL == (dset = H5I_object(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-        file=H5D_get_file(dset);
-    } else {
-        if (NULL == (loc = H5G_loc(id)))
-            HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-        file=loc->file;
-    }
+    if (NULL == (loc = H5G_loc(id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if(_ref==NULL)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN,
 		     "invalid reference pointer");
+
+    /* Get the file pointer from the entry */
+    file=loc->file;
 
     /* Get the object information */
     if ((ret_value=H5R_get_object_type(file,_ref))<0) {
