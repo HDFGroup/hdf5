@@ -551,7 +551,7 @@ hsize_t sdim, maxdim;
   
   H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
   H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
-  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_D64BE);
+  H5Tinsert(type, "c_name", HOFFSET(dset1_t, c), H5T_IEEE_F64BE);
 
   dataset = H5Dcreate(fid, "/dset1", type, space, create_plist);
 
@@ -881,8 +881,8 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   dim[0] = dim[1] = dim[2] = dim[3] = 2;
   H5Tinsert_array(type, "a_array", HOFFSET(dset1_t, a), 4, dim, perm, H5T_STD_I32BE);
-  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_IEEE_D64BE);
-  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_IEEE_D64BE);
+  H5Tinsert_array(type, "b_array", HOFFSET(dset1_t, b), 4, dim, perm, H5T_IEEE_F64BE);
+  H5Tinsert_array(type, "c_array", HOFFSET(dset1_t, c), 4, dim, perm, H5T_IEEE_F64BE);
 
   type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
 
@@ -915,7 +915,7 @@ const int perm[4] = {0,1,2,3};  /* the 0'th and the 3'rd indices are permuted */
 
   dims[0] = 10;
   space2 = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr3", H5T_IEEE_D64BE, space2, H5P_DEFAULT);
+  attr = H5Acreate (dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT);
   for (i = 0; i < 10; i++) d[i] = 0.1 * i;
   H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
   H5Sclose(space2);
