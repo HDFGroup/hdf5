@@ -1272,14 +1272,14 @@ H5F_open(const char *name, uintn flags, hid_t fcpl_id, hid_t fapl_id)
 	 * possible is if the first file of a family of files was opened
 	 * individually.
 	 */
-	if (HADDR_UNDEF==(eof=H5FD_get_eof(lf))) {
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"unable to determine file size");
-	}
-	if (eof<stored_eoa) {
-	    HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file");
-	}
-
+        if (HADDR_UNDEF==(eof=H5FD_get_eof(lf))) {
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                        "unable to determine file size");
+        }
+        if (eof<stored_eoa) {
+            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, NULL, "truncated file");
+        }
+        
 	/*
 	 * Tell the file driver how much address space has already been
 	 * allocated so that it knows how to allocated additional memory.
