@@ -256,10 +256,10 @@ buf_size=MIN(1024*1024, buf_size);
         GOTOERROR(FAIL);
     }
 
-    if (pio_debug_level >= 4) {
+    if (pio_debug_level >= 4)
         /* output all of the times for all iterations */
-        output_report(output, "Timer details:\n");
-    }
+        if (myrank == 0)
+            fprintf(output, "Timer details:\n");
 
     for (nf = 1; nf <= nfiles; nf++) {
 	/*
