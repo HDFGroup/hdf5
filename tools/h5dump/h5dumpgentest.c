@@ -1479,13 +1479,13 @@ static void gent_enum(void)
 
     file = H5Fcreate(FILE15,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-
+    /* Try to test names with special characters */
     type = H5Tcreate(H5T_ENUM, sizeof(enumtype));
     H5Tenum_insert(type, "RED",   (val = 0, &val));
-    H5Tenum_insert(type, "GREEN", (val = 1, &val));
-    H5Tenum_insert(type, "BLUE",  (val = 2, &val));
-    H5Tenum_insert(type, "WHITE", (val = 3, &val));
-    H5Tenum_insert(type, "BLACK", (val = 4, &val));
+    H5Tenum_insert(type, "GREEN\ngreen", (val = 1, &val));
+    H5Tenum_insert(type, "BLUE blue",  (val = 2, &val));
+    H5Tenum_insert(type, "WHITE \"white\"", (val = 3, &val));
+    H5Tenum_insert(type, "BLACK \'black\'", (val = 4, &val));
     H5Tcommit(file, "enum normal", type);
 
     space = H5Screate_simple(1,size,NULL);
@@ -3940,8 +3940,8 @@ static void write_dset_in(hid_t loc_id,
 
 static void gent_attr_all(void)
 {
- hid_t   file_id; 
- hid_t   dset_id;
+    hid_t   file_id; 
+    hid_t   dset_id;
 	hid_t   group_id;
 	hid_t   group2_id;
 	hid_t   root_id;
