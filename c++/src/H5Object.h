@@ -74,6 +74,9 @@ class H5_DLLCPP H5Object : public IdComponent {
 	void removeAttr( const char* name ) const;
 	void removeAttr( const string& name ) const;
 
+	// Gets the name of the file, in which this HDF5 object belongs.
+	string getFileName() const;
+
 	// Noop destructor
 	virtual ~H5Object();
 

@@ -21,6 +21,8 @@
 #include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
+#include "H5DcreatProp.h"
+#include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
 #include "H5AbstractDs.h"
@@ -284,6 +286,18 @@ void H5Object::flush(H5F_scope_t scope ) const
    {
       throw FileIException("H5Object::flush", "H5Fflush failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::getFileName
+///\brief	Gets the name of the file, in which this HDF5 object belongs.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+string H5Object::getFileName() const
+{
+   return(p_get_file_name());
 }
 
 //--------------------------------------------------------------------------

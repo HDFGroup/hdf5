@@ -59,6 +59,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	static bool isHdf5(const string& name );
 	static bool isHdf5(const char* name );
 
+	// Gets the name of this file.
+	string getFileName() const;
+
 	// Creates a reference to a named Hdf5 object in this object.
 	void* Reference(const char* name) const;
 

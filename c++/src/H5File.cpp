@@ -401,6 +401,18 @@ void H5File::getVFDHandle(void **file_handle) const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5File::getFileName
+///\brief	Gets the name of this file.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+string H5File::getFileName() const
+{
+   return(p_get_file_name());
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File::Reference
 ///\brief	Creates a reference to an Hdf5 object or a dataset region.
 ///\param	name - IN: Name of the object to be referenced
