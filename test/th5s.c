@@ -31,6 +31,7 @@ static char		RcsId[] = "$Revision$";
 #include <H5Sprivate.h>
 #include <H5Pprivate.h>
 
+#define TESTFILE   "th5s.h5"
 #define FILE   "th5s1.h5"
 
 /* 3-D dataset with fixed dimensions */
@@ -163,8 +164,11 @@ test_h5s_basic(void)
     /*
      * Try reading a file that has been prepared that has a dataset with a
      * higher dimensionality than what the library can handle.
+     *
+     * If this test fails and the H5S_MAX_RANK variable has changed, follow
+     * the instructions in space_overflow.c for regenating the th5s.h5 file.
      */
-    fid1 = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid1 = H5Fopen(TESTFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
     dset1 = H5Dopen(fid1, "dset");
     VERIFY(dset1, FAIL, "H5Dopen");
