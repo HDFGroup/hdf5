@@ -26,7 +26,7 @@ LIB_OBJ=$(LIB_SRC:.c=.lo)
 MOSTLYCLEAN=
 
 ## Public header files (to be installed)...
-PUB_HDR=H5IM.h H5LT.h H5TA.h H5HL.h
+PUB_HDR=H5IM.h H5LT.h H5TA.h 
 
 ## Other header files (not to be installed)...
 PRIVATE_HDR=
