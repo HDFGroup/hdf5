@@ -127,9 +127,9 @@ extern	int	H5E_mpi_error_str_len;
     MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);      \
     HERROR(H5E_INTERNAL, H5E_MPIERRSTR, H5E_mpi_error_str);                   \
 }
-#define	HMPI_GOTO_ERROR(retcode, str, mpierr){			      \
+#define	HMPI_GOTO_ERROR(retcode, str, mpierr){				      \
     HMPI_ERROR(mpierr);							      \
-    HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                       \
+    HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);			      \
 }
 #define	HMPI_RETURN_ERROR(retcode, str, mpierr){			      \
     HMPI_ERROR(mpierr);							      \
