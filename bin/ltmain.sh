@@ -3483,6 +3483,11 @@ libdir='$install_libdir'\
               tmpdir=`mktemp -d $tmpdir/libtool-XXXXXX 2> /dev/null`
               if test $? = 0 ; then :
               else
+			  	## HACK: Added the following two lines. The "mktemp" line
+				## above overwrites "tmpdir" on a failure. So, we need to
+				## regen the "tmpdir" value on a failure...Hence...
+                tmpdir="/tmp"
+                test -n "$TMPDIR" && tmpdir="$TMPDIR"
                 tmpdir="$tmpdir/libtool-$$"
               fi
 	      if $mkdir -p "$tmpdir" && chmod 700 "$tmpdir"; then :
