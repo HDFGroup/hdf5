@@ -364,8 +364,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name, hid_t dxpl_id)
 	if(HDstrcmp(found_attr.name,name)==0) {
 	    if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
-	    ret_value = i;
-	    break;
+            HGOTO_DONE(i);
 	}
 	if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
@@ -524,7 +523,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx, hid_t dxpl_id)
 
     /* Read in attribute with H5O_read() */
     H5_CHECK_OVERFLOW(idx,unsigned,int);
-    if (NULL==(attr=H5O_read(ent, H5O_ATTR_ID, (int)idx, attr, dxpl_id)))
+    if (NULL==(attr=H5O_read(ent, H5O_ATTR_ID, (int)idx, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from dataset header")
     attr->initialized=1;
    
@@ -1230,7 +1229,7 @@ static herr_t
 H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t dxpl_id)
 {
     int         seq, idx=FAIL;  /* Index of attribute being querried */
-    H5A_t       *found_attr;    /* Attribute with OLD_NAME */
+    H5A_t       found_attr;     /* Attribute with OLD_NAME */
     herr_t	ret_value=SUCCEED;      /* Return value */
     
     FUNC_ENTER_NOAPI_NOINIT(H5A_rename)
@@ -1240,45 +1239,41 @@ H5A_rename(H5G_entry_t *ent, const char *old_name, const char *new_name, hid_t d
     assert(old_name);
     assert(new_name);
     
-    /* Build the attribute information */
-    if((found_attr = H5FL_CALLOC(H5A_t))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for attribute info")
-        
     /* Read in the existing attributes to check for duplicates */
     seq=0;
-    while(H5O_read(ent, H5O_ATTR_ID, seq, found_attr, dxpl_id)!=NULL) {
+    while(H5O_read(ent, H5O_ATTR_ID, seq, &found_attr, dxpl_id)!=NULL) {
         /*
 	 * Compare found attribute name.
 	 */
-	if(HDstrcmp(found_attr->name,old_name)==0) {
+	if(HDstrcmp(found_attr.name,old_name)==0) {
             idx = seq;
             break;
 	}
-	if(H5O_reset (H5O_ATTR_ID, found_attr)<0)
+	if(H5O_reset (H5O_ATTR_ID, &found_attr)<0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't release attribute info")
 	seq++;
     }
- 
+    H5E_clear ();
     if(idx<0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "attribute cannot be found")
         
     /* Copy the attribute name. */
-    if(found_attr->name)
-        HDfree(found_attr->name);
-    found_attr->name = HDstrdup(new_name); 
-    if(!found_attr->name) 
+    if(found_attr.name)
+        HDfree(found_attr.name);
+    found_attr.name = HDstrdup(new_name); 
+    if(!found_attr.name) 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "String copy failed")
 
     /* Indicate entry is not opened and the attribute doesn't need fill-values. */
-    found_attr->ent_opened=FALSE;
-    found_attr->initialized=TRUE;
+    found_attr.ent_opened=FALSE;
+    found_attr.initialized=TRUE;
 
     /* Modify the attribute message */
-    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, 1, found_attr, dxpl_id) < 0) 
+    if (H5O_modify(ent, H5O_ATTR_ID, idx, 0, 1, &found_attr, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to update attribute header messages")
    
     /* Close the attribute */
-    if(H5A_close(found_attr)<0)
+    if(H5A_free(&found_attr)<0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close renamed attribute")
 
 done:
