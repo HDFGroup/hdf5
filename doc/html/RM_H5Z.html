@@ -103,6 +103,38 @@ data compression.
          <p>
          The statistics associated with a method number are not reset
          by this function; they accumulate over the life of the library.
+
+    <p><strong>New filters</strong> are defined in two phases.  Before a filter can be 
+      linked into the application with <code>H5Zregister</code>, 
+      <code>H5Z_func_t</code> must first be defined as follows:
+
+    <dir>
+          <em>typedef size_t</em> (*<code>H5Z_func_t</code>)
+          (<em>unsigned int</em> <code>flags</code>,
+          <em>size_t</em> <code>cd_nelmts</code>,
+          <em>const unsigned int</em> <code>cd_values[]</code>,
+          <em>size_t</em> <code>nbytes</code>,
+          <em>size_t *</em><code>buf_size</code>,
+          <em>void **</em><code>buf</code>)
+    </dir>
+
+    <p>The parameters <code>flags</code>, <code>cd_nelmts</code>, 
+      and <code>cd_values</code> are the same as for the
+      <code>H5Pset_filter()</code> function.
+      The additional flag <code>H5Z_FLAG_REVERSE</code> is set when 
+      the filter is called as part of the input pipeline. 
+      The parameter <code>*buf</code> points to the input buffer 
+      which has a total size of <code>*buf_size</code> bytes,
+      <code>nbytes</code> of which are valid data. 
+    <p>The filter should perform the transformation in place if
+      possible and return the number of valid bytes or zero for
+      failure.  If the transformation cannot be done in place, 
+      then the filter should allocate a new buffer with
+      <code>malloc()</code> and assign it to <code>*buf</code>,
+      assigning the allocated size of that buffer to
+      <code>*buf_size</code>. 
+      The old buffer should be freed by calling <code>free()</code>.
+
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5Z_method_t</em> <code>method</code>
@@ -159,7 +191,7 @@ H5Z&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
 
 <br>
-Last modified:  3 July 2002
+Last modified:  11 February 2003
 <br>
 Describes HDF5 Release 1.5, Unreleased Development Branch
 
