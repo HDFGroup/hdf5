@@ -105,11 +105,11 @@ typedef union _file_descr {
 /* local functions */
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
-static herr_t do_write(file_descr *fd, iotype iot, long ndsets,
-                       long nelmts, size_t buf_size, void *buffer);
-static herr_t do_read(file_descr *fd, iotype iot, long ndsets,
-		      long nelmts, size_t buf_size, void *buffer /*out*/);
-static herr_t do_fopen(iotype iot, char *fname, file_descr *fd /*out*/,
+static herr_t do_write(results *res, file_descr *fd, parameters *parms,
+                    long ndsets, off_t nelmts, size_t buf_size, void *buffer);
+static herr_t do_read(results *res, file_descr *fd, parameters *parms,
+                    long ndsets, off_t nelmts, size_t buf_size, void *buffer /*out*/);
+static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
@@ -135,7 +135,7 @@ do_pio(parameters param)
     int         maxprocs;
     int		nfiles, nf;
     long        ndsets;
-    long        nelmts;
+    off_t       nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
     size_t      buf_size;               /*data buffer size in bytes     */
 
@@ -191,13 +191,6 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-    if (nelmts <= 0 ) {
-        fprintf(stderr,
-                "number of elements per dataset must be > 0 (%ld)\n",
-                nelmts);
-        GOTOERROR(FAIL);
-    }
-
     if (maxprocs <= 0 ) {
         fprintf(stderr,
                 "maximum number of process to use must be > 0 (%d)\n",
@@ -205,11 +198,6 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-    if (buf_size <= 0 ){
-        fprintf(stderr,
-                "buffer size must be > 0 (%ld)\n", buf_size);
-        GOTOERROR(FAIL);
-    }
 
 #if akcdebug
 /* debug*/
@@ -227,12 +215,14 @@ buf_size=MIN(1024*1024, buf_size);
 #endif
 
     /* allocate data buffer */
-    buffer = malloc(buf_size);
+    if(buf_size>0) {
+        buffer = malloc(buf_size);
 
-    if (buffer == NULL){
-        fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
-  	    buf_size);
-        GOTOERROR(FAIL);
+        if (buffer == NULL){
+            fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
+                buf_size);
+            GOTOERROR(FAIL);
+        }
     }
 
     if (pio_debug_level >= 4) {
@@ -261,12 +251,12 @@ fprintf(stderr, "filename=%s\n", fname);
 #endif
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
-        hrc = do_fopen(iot, fname, &fd, PIO_CREATE | PIO_WRITE);
+        hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
-        hrc = do_write(&fd, iot, ndsets, nelmts, buf_size, buffer);
+        hrc = do_write(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_write failed");
@@ -284,12 +274,12 @@ fprintf(stderr, "filename=%s\n", fname);
 	 */
         /* Open file for read */
         set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, START);
-        hrc = do_fopen(iot, fname, &fd, PIO_READ);
+        hrc = do_fopen(&param, fname, &fd, PIO_READ);
 
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-        hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
+        hrc = do_read(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -326,7 +316,8 @@ done:
     }
 
     /* release generic resources */
-    free(buffer);
+    if(buffer)
+        free(buffer);
     res.ret_code = ret_code;
     return res;
 }
@@ -450,23 +441,25 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  * Modifications:
  */
 static herr_t
-do_write(file_descr *fd, iotype iot, long ndsets,
-         long nelmts, size_t buf_size, void *buffer)
+do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
+         off_t nelmts, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
-    int         rc;             /*routine return code                   */
+    long        rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     MPI_Offset	mpi_offset;
     MPI_Status	mpi_status;
     long        ndset;
-    long        nelmts_towrite, nelmts_written;
+    off_t       nelmts_written;
+    size_t      nelmts_towrite;
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
-    long        nelmts_in_buf;
-    long        elmts_begin;    /*first elmt this process transfer      */
-    long        elmts_count;    /*number of elmts this process transfer */
+    size_t      nelmts_in_buf;
+    off_t       elmts_begin;    /*first elmt this process transfer      */
+    off_t       elmts_count;    /*number of elmts this process transfer */
+    hid_t       dcpl = -1;      /* Dataset creation property list       */
 
     /* HDF5 variables */
     herr_t          hrc;                    /*HDF5 return code              */
@@ -487,16 +480,28 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
     nelmts_in_buf = buf_size/ELMT_SIZE;
 
     /* hdf5 data space setup */
-    if (iot == PHDF5){
-        /* define a contiquous dataset of nelmts native ints */
-        h5dims[0] = nelmts;
-        h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
-        VRFY((h5dset_space_id >= 0), "H5Screate_simple");
+    if (parms->io_type == PHDF5){
+        if(nelmts>0) {
+            /* define a contiquous dataset of nelmts native ints */
+            h5dims[0] = nelmts;
+            h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
+            VRFY((h5dset_space_id >= 0), "H5Screate_simple");
+        } /* end if */
+        else {
+            h5dset_space_id = H5Screate(H5S_SCALAR);
+            VRFY((h5dset_space_id >= 0), "H5Screate");
+        } /* end else */
 
         /* create the memory dataspace that corresponds to the xfer buffer */
-        h5dims[0] = nelmts_in_buf;
-        h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
-        VRFY((h5mem_space_id >= 0), "H5Screate_simple");
+        if(nelmts_in_buf>0) {
+            h5dims[0] = nelmts_in_buf;
+            h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
+            VRFY((h5mem_space_id >= 0), "H5Screate_simple");
+        } /* end if */
+        else {
+            h5mem_space_id = H5Screate(H5S_SCALAR);
+            VRFY((h5mem_space_id >= 0), "H5Screate");
+        } /* end else */
     }
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
@@ -504,7 +509,7 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
         /* Calculate dataset offset within a file */
 
         /* create dataset */
-        switch (iot) {
+        switch (parms->io_type) {
         case POSIXIO:
         case MPIO:
             /* both posix and mpi io just need dataset offset in file*/
@@ -512,12 +517,47 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             break;
 
         case PHDF5:
+            dcpl = H5Pcreate(H5P_DATASET_CREATE);
+            if (dcpl < 0) {
+                fprintf(stderr, "HDF5 Property List Create failed\n");
+                GOTOERROR(FAIL);
+            }
+
+            /* Make the dataset chunked if asked */
+            if(parms->h5_use_chunks) {
+                /* Set the chunk size to be the same as the buffer size */
+                h5dims[0] = nelmts_in_buf;
+                hrc = H5Pset_chunk(dcpl, 1, h5dims);
+                if (hrc < 0) {
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    GOTOERROR(FAIL);
+                } /* end if */
+            } /* end if */
+
+#if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
+            /* Disable writing fill values if asked */
+            if(parms->h5_no_fill) {
+                hrc = H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+                if (hrc < 0) {
+                    fprintf(stderr, "HDF5 Property List Set failed\n");
+                    GOTOERROR(FAIL);
+                } /* end if */
+            } /* end if */
+#endif
+
             sprintf(dname, "Dataset_%ld", ndset);
             h5ds_id = H5Dcreate(fd->h5fd, dname, H5T_NATIVE_INT,
-                                h5dset_space_id, H5P_DEFAULT);
+                                h5dset_space_id, dcpl);
 
             if (h5ds_id < 0) {
                 fprintf(stderr, "HDF5 Dataset Create failed\n");
+                GOTOERROR(FAIL);
+            }
+
+            hrc = H5Pclose(dcpl);
+            /* verifying the close of the dcpl */
+            if (hrc < 0) {
+                fprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
             }
 
@@ -529,11 +569,11 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
          * and the next process.  Count of elements is the difference between
          * these two beginnings.  This way, it avoids any rounding errors.
          */
-        elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
+        elmts_begin = (long)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
 
         if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
-            elmts_count = ((nelmts * 1.0) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
-                            - elmts_begin;
+            elmts_count = (long)((((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
+                            - (double)elmts_begin);
         else
             /* last process.  Take whatever are left */
             elmts_count = nelmts - elmts_begin;
@@ -545,10 +585,13 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
     
         nelmts_written = 0 ;
 
+        /* Start "raw data" write timer */
+        set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, START);
+
         while (nelmts_written < elmts_count){
             nelmts_towrite = elmts_count - nelmts_written;
 
-            if (elmts_count - nelmts_written >= nelmts_in_buf) {
+            if ((elmts_count - nelmts_written) >= nelmts_in_buf) {
                 nelmts_towrite = nelmts_in_buf;
             } else {
                 /* last write of a partial buffer */
@@ -568,7 +611,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 
             /* Write */
             /* Calculate offset of write within a dataset/file */
-            switch (iot) {
+            switch (parms->io_type) {
             case POSIXIO:
 		/* need to (off_t) the elmnts_begin expression because they */
 		/* may be of smaller sized integer types */
@@ -594,7 +637,7 @@ fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
 #endif
 
                 mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
-                                        nelmts_towrite * ELMT_SIZE, MPI_CHAR,
+                                        (int)(nelmts_towrite*ELMT_SIZE), MPI_CHAR,
                                         &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
                 break;
@@ -628,10 +671,13 @@ fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
             nelmts_written += nelmts_towrite;
         }
 
+        /* Stop "raw data" write timer */
+        set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, STOP);
+
         /* Calculate write time */
 
         /* Close dataset. Only HDF5 needs to do an explicit close. */
-        if (iot == PHDF5){
+        if (parms->io_type == PHDF5){
             hrc = H5Dclose(h5ds_id);
 
             if (hrc < 0) {
@@ -676,23 +722,24 @@ done:
  * Modifications:
  */
 static herr_t
-do_read(file_descr *fd, iotype iot, long ndsets,
-        long nelmts, size_t buf_size, void *buffer /*out*/)
+do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
+        off_t nelmts, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
-    int         rc;             /*routine return code                   */
+    long        rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     MPI_Offset  mpi_offset;
     MPI_Status  mpi_status;
     long        ndset;
-    long        nelmts_toread, nelmts_read;
+    size_t      nelmts_toread;
+    off_t       nelmts_read;
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;	/*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
-    long        nelmts_in_buf;
-    long        elmts_begin;    /*first elmt this process transfer      */
-    long        elmts_count;    /*number of elmts this process transfer */
+    size_t      nelmts_in_buf;
+    off_t       elmts_begin;    /*first elmt this process transfer      */
+    off_t       elmts_count;    /*number of elmts this process transfer */
 
     /* HDF5 variables */
     herr_t      hrc;            /*HDF5 return code                      */
@@ -713,23 +760,35 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
     nelmts_in_buf = buf_size/ELMT_SIZE;
 
     /* hdf5 data space setup */
-    if (iot == PHDF5){
-        /* define a contiquous dataset of nelmts native ints */
-        h5dims[0] = nelmts;
-        h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
-        VRFY((h5dset_space_id >= 0), "H5Screate_simple");
+    if (parms->io_type == PHDF5){
+        if(nelmts>0) {
+            /* define a contiquous dataset of nelmts native ints */
+            h5dims[0] = nelmts;
+            h5dset_space_id = H5Screate_simple(1, h5dims, NULL);
+            VRFY((h5dset_space_id >= 0), "H5Screate_simple");
+        } /* end if */
+        else {
+            h5dset_space_id = H5Screate(H5S_SCALAR);
+            VRFY((h5dset_space_id >= 0), "H5Screate");
+        } /* end else */
 
         /* create the memory dataspace that corresponds to the xfer buffer */
-        h5dims[0] = nelmts_in_buf;
-        h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
-        VRFY((h5mem_space_id >= 0), "H5Screate_simple");
+        if(nelmts_in_buf>0) {
+            h5dims[0] = nelmts_in_buf;
+            h5mem_space_id = H5Screate_simple(1, h5dims, NULL);
+            VRFY((h5mem_space_id >= 0), "H5Screate_simple");
+        } /* end if */
+        else {
+            h5mem_space_id = H5Screate(H5S_SCALAR);
+            VRFY((h5mem_space_id >= 0), "H5Screate");
+        } /* end else */
     }
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
         /* Calculate dataset offset within a file */
 
         /* create dataset */
-        switch (iot) {
+        switch (parms->io_type) {
         case POSIXIO:
         case MPIO:
             /* both posix and mpi io just need dataset offset in file*/
@@ -753,11 +812,11 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
          * and the next process.  Count of elements is the difference between
          * these two beginnings.  This way, it avoids any rounding errors.
          */
-        elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
+        elmts_begin = (long)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
 
         if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
-            elmts_count = ((nelmts * 1.0) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1)) -
-                                elmts_begin;
+            elmts_count = (long)((((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1)) -
+                                (double)elmts_begin);
         else
             /* last process.  Take whatever are left */
             elmts_count = nelmts - elmts_begin;
@@ -769,10 +828,13 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
     
         nelmts_read = 0 ;
 
+        /* Start "raw data" read timer */
+        set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, START);
+
         while (nelmts_read < elmts_count){
             nelmts_toread = elmts_count - nelmts_read;
 
-            if (elmts_count - nelmts_read >= nelmts_in_buf)
+            if ((elmts_count - nelmts_read) >= nelmts_in_buf)
                 nelmts_toread = nelmts_in_buf;
             else
                 /* last read of a partial buffer */
@@ -780,7 +842,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 
             /* read */
             /* Calculate offset of read within a dataset/file */
-            switch (iot){
+            switch (parms->io_type){
             case POSIXIO:
 		/* need to (off_t) the elmnts_begin expression because they */
 		/* may be of smaller sized integer types */
@@ -806,7 +868,7 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
 #endif
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
-                                       nelmts_toread*ELMT_SIZE, MPI_CHAR,
+                                       (int)(nelmts_toread*ELMT_SIZE), MPI_CHAR,
                                        &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_read");
                 break;
@@ -853,10 +915,13 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
             nelmts_read += nelmts_toread;
         }
 
+        /* Stop "raw data" read timer */
+        set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, STOP);
+
         /* Calculate read time */
 
         /* Close dataset. Only HDF5 needs to do an explicit close. */
-        if (iot == PHDF5){
+        if (parms->io_type == PHDF5){
             hrc = H5Dclose(h5ds_id);
 
             if (hrc < 0) {
@@ -901,13 +966,13 @@ done:
  * Modifications:
  */
 static herr_t
-do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
+do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS, mrc;
     herr_t hrc;
     hid_t acc_tpl = -1;     /* file access templates */
 
-    switch (iot) {
+    switch (param->io_type) {
     case POSIXIO:
         if (flags & (PIO_CREATE | PIO_WRITE))
             fd->posixfd = POSIXCREATE(fname);
@@ -920,7 +985,7 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
         }
 
          
-        /* The perils of POSIX I/O API in a parallel environment. The problem is:
+        /* The perils of POSIX I/O in a parallel environment. The problem is:
          *
          *      - Process n opens a file with truncation and then starts
          *        writing to the file.
@@ -965,14 +1030,20 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
     case PHDF5:
         acc_tpl = H5Pcreate(H5P_FILE_ACCESS);
-
         if (acc_tpl < 0) {
             fprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
 
+        /* Set the file driver to the MPI-I/O driver */
         hrc = H5Pset_fapl_mpio(acc_tpl, pio_comm_g, pio_info_g);     
+        if (hrc < 0) {
+            fprintf(stderr, "HDF5 Property List Set failed\n");
+            GOTOERROR(FAIL);
+        }
 
+        /* Set the alignment of objects in HDF5 file */
+        hrc = H5Pset_alignment(acc_tpl, param->h5_thresh, param->h5_align);
         if (hrc < 0) {
             fprintf(stderr, "HDF5 Property List Set failed\n");
             GOTOERROR(FAIL);

@@ -41,15 +41,12 @@ pio_time   *timer_g;            /* timer: global for stub functions     */
  * Modifications:
  */
 pio_time *
-pio_time_new(unsigned int type)
+pio_time_new(clock_type type)
 {
     pio_time *pt = (pio_time *)calloc(1, sizeof(struct pio_time_));
-    register int i;
 
     /* set global timer variable */
     timer_g = pt;
-    for (i = 0; i < NUM_TIMERS; ++i)
-        pt->total_time[i] = 0.0;
 
     pt->type = type;
     return pt;
@@ -82,7 +79,7 @@ pio_time_destroy(pio_time *pt)
  * Modifications:
  */
 void
-set_timer_type(pio_time *pt, timer_type type)
+set_timer_type(pio_time *pt, clock_type type)
 {
     pt->type = type;
 }
@@ -94,7 +91,7 @@ set_timer_type(pio_time *pt, timer_type type)
  * Programmer:  Bill Wendling, 04. October 2001
  * Modifications:
  */
-timer_type
+clock_type
 get_timer_type(pio_time *pt)
 {
     return pt->type;
@@ -131,47 +128,53 @@ set_time(pio_time *pt, timer_type t, int start_stop)
                             ((double)pt->sys_timer[t].tv_usec) / MICROSECOND);
             }
         }
-    }
 
-    if (pio_debug_level >= 4) {
-        char *msg;
-        int myrank;
+        if (pio_debug_level >= 4) {
+            char *msg;
+            int myrank;
 
-        MPI_Comm_rank(pio_comm_g, &myrank);
+            MPI_Comm_rank(pio_comm_g, &myrank);
 
-        switch (t) {
-        case HDF5_FILE_OPENCLOSE:
-            msg = "File Open/Close";
-            break;
-        case HDF5_DATASET_CREATE:
-            msg = "Dataset Create";
-            break;
-        case HDF5_MPI_WRITE:
-            msg = "MPI Write";
-            break;
-        case HDF5_MPI_READ:
-            msg = "MPI Read";
-            break;
-        case HDF5_FINE_WRITE_FIXED_DIMS:
-            msg = "Fine Write";
-            break;
-        case HDF5_FINE_READ_FIXED_DIMS:
-            msg = "Fine Read";
-            break;
-        case HDF5_GROSS_WRITE_FIXED_DIMS:
-            msg = "Gross Write";
-            break;
-        case HDF5_GROSS_READ_FIXED_DIMS:
-            msg = "Gross Read";
-            break;
-        default:
-            msg = "Unknown Timer";
-            break;
+            switch (t) {
+            case HDF5_FILE_OPENCLOSE:
+                msg = "File Open/Close";
+                break;
+            case HDF5_DATASET_CREATE:
+                msg = "Dataset Create";
+                break;
+            case HDF5_MPI_WRITE:
+                msg = "MPI Write";
+                break;
+            case HDF5_MPI_READ:
+                msg = "MPI Read";
+                break;
+            case HDF5_FINE_WRITE_FIXED_DIMS:
+                msg = "Fine Write";
+                break;
+            case HDF5_FINE_READ_FIXED_DIMS:
+                msg = "Fine Read";
+                break;
+            case HDF5_GROSS_WRITE_FIXED_DIMS:
+                msg = "Gross Write";
+                break;
+            case HDF5_GROSS_READ_FIXED_DIMS:
+                msg = "Gross Read";
+                break;
+            case HDF5_RAW_WRITE_FIXED_DIMS:
+                msg = "Raw Write";
+                break;
+            case HDF5_RAW_READ_FIXED_DIMS:
+                msg = "Raw Read";
+                break;
+            default:
+                msg = "Unknown Timer";
+                break;
+            }
+
+            fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
+                    (start_stop == START ? "Start" : "Stop"),
+                    pt->total_time[t]);
         }
-
-        fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
-                (start_stop == START ? "Start" : "Stop"),
-                pt->total_time[t]);
     }
 
     return pt;
