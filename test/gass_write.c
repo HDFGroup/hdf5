@@ -25,7 +25,7 @@ int main(void)
 }
 #else
 
-#define URL    "ftp://gass:gass12@eirene/tmp/gass/junk.w"   
+#define URL    "ftp://gass:gass12@which/tmp/gass/junk.w"   
 
 #define DATASETNAME "IntArray"
 #define NX     5                      /* dataset dimensions */
