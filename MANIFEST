@@ -947,6 +947,7 @@
 ./test/th5s.h5
 ./test/titerate.c
 ./test/tmeta.c
+./test/tmisc.c
 ./test/ttime.c
 ./test/trefer.c
 ./test/tselect.c
