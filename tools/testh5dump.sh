@@ -19,7 +19,7 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
-mkdir testfiles >/dev/null 2>&1
+test -d testfiles || mkdir testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -50,8 +50,8 @@ TOOLTEST() {
       echo "Expected output for '$DUMPER $@'" 
       echo "#############################"
       cd $srcdir/testfiles
-      $RUNSERIAL $DUMPER_BIN "$@" 2>&1
-   ) >$actual
+      $RUNSERIAL $DUMPER_BIN "$@"
+   ) >$actual 2>&1
     
    if $CMP $expect $actual; then
       echo " PASSED"
