@@ -943,8 +943,8 @@
 ./src/H5Shyper.c
 ./src/H5Smpio.c
 ./src/H5Snone.c
-./src/H5Spoint.c
 ./src/H5Spkg.h
+./src/H5Spoint.c
 ./src/H5Sprivate.h
 ./src/H5Spublic.h
 ./src/H5Sselect.c
@@ -981,10 +981,11 @@
 ./src/H5Z.c
 ./src/H5Zfletcher32.c
 ./src/H5Zdeflate.c
-./src/H5Zszip.c
-./src/H5Zshuffle.c
+./src/H5Zpkg.h
 ./src/H5Zprivate.h
 ./src/H5Zpublic.h
+./src/H5Zszip.c
+./src/H5Zshuffle.c
 ./src/H5config.h.in
 ./src/H5detect.c
 ./src/H5private.h
