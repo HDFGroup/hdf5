@@ -25,7 +25,7 @@
 /* Define some handy debugging shorthands, routines, ... */
 /* debugging tools */
 #define MESG(x)\
-	if (verbose) printf("%s\n", x);\
+	if (verbose) printf("%s\n", x);
 
 #define MPI_BANNER(mesg)\
     {printf("--------------------------------\n");\
@@ -917,10 +917,12 @@ test_split_comm_access(char *filenames[])
 	/* setup file access template */
 	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
 	assert(acc_tpl != FAIL);
+	MESG("H5Pcreate succeed");
 	
 	/* set Parallel access with communicator */
 	ret = H5Pset_mpi(acc_tpl, comm, info);     
 	assert(ret != FAIL);
+	MESG("H5Pset_mpi succeed");
 
 	/* create the file collectively */
 	fid=H5Fcreate(filenames[color],H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
@@ -983,7 +985,12 @@ parse_options(int argc, char **argv){
 
 main(int argc, char **argv)
 {
+#ifdef HAVE_PARALLEL
+    char    *filenames[]={ "pfs:/pfs/multi/tmp_1/your_own/Eg1.h5f", "pfs:/pfs/multi/tmp_1/your_own/Eg2.h5f" };
     char    *filenames[]={ "ParaEg1.h5f", "ParaEg2.h5f" };
+#else
+    char    *filenames[]={ "Eg1.h5f", "Eg2.h5f" };
+#endif
 
     int mpi_namelen;		
     char mpi_name[MPI_MAX_PROCESSOR_NAME];

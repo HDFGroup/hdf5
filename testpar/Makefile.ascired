@@ -1,0 +1,109 @@
+
+# Things that Make needs
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+# Programs
+SHELL=/bin/sh
+
+MPICH=/usr/community/mpi-io/romio/mpich_1.1.0
+ROMIO=/usr/community/mpi-io/romio/current
+
+# MPI include directories and libs
+MPI_INC=-I$(MPICH)/include
+MPI_LIBS=$(MPICH)/lib/tflops/ptls/libmpi.a
+MPIO_INC=-I$(ROMIO)/include
+MPIO_LIBS=$(ROMIO)/lib/tflops/libmpio.a
+
+RUN=yod -sz 8
+RUNSEQ=yod -sz 1
+LIBS = -lnoop_stubs
+
+CC=cicc
+# 1429 -- long long non-standard
+CFLAGS=-g
+CPPFLAGS=-I. -I../src $(MPI_INC) $(MPIO_INC)
+RM=rm -f
+
+# temporary test files that can be cleaned away
+MOSTLYCLEAN=/pfs/multi/tmp_1/your_own/Eg1.h5f /pfs/multi/tmp_1/your_own/Eg2.h5f go
+
+# The default is to build the library and programs.
+all: testphdf5 shdf5
+
+
+# These are our main targets. They should be listed in the order to be
+# executed, generally most specific tests to least specific tests.
+PROGS=testphdf5 shdf5
+TESTS=$(PROGS)
+
+# Source and object files for programs...  The PROG_SRC list contains all the
+# source files and is used for things like dependencies, archiving, etc.  The
+# other source lists are for the individual tests, the files of which may
+# overlap with other tests.
+PROG_SRC=testphdf5.c shdf5.c
+PROG_OBJ=$(PROG_SRC:.c=.o)
+
+TESTPHDF5_SRC=testphdf5.c
+TESTPHDF5_OBJ=$(TESTPHDF5_SRC:.c=.o)
+
+# Private header files (not to be installed)...
+PRIVATE_HDR=testhdf5.h
+
+# How to build the programs...
+testphdf5: $(TESTPHDF5_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(TESTPHDF5_OBJ) ../src/libhdf5.a $(MPIO_LIBS) $(MPI_LIBS) $(LIBS)
+
+shdf5: testphdf5.c ../src/libhdf5.a
+	cp testphdf5.c shdf5.c
+	$(CC) -UHAVE_PARALLEL $(CFLAGS) $(CPPFLAGS) -o $@ $@.c ../src/libhdf5.a $(MPIO_LIBS) $(MPI_LIBS) $(LIBS)
+
+
+#------------------------------------------------------------- -*- makefile -*-
+# The following section of this makefile comes from the
+# `./config/conclude' file which was generated with config.status
+# from `./config/conclude.in'.
+#------------------------------------------------------------------------------
+
+
+progs: $(PROGS)
+
+# Runs each test in order, passing $(TEST_FLAGS) to the program.
+test: $(PROGS)
+	$(RUN) testphdf5
+	$(RUNSEQ) shdf5
+
+# Removes temporary files without removing the final target files.  That is,
+# remove things like object files but not libraries or executables.
+#
+mostlyclean:
+	$(RM) $(LIB_OBJ) $(PROG_OBJ) $(MOSTLYCLEAN)
+
+# Like `mostlyclean' except it also removes the final targets: things like
+# libraries and executables.  This target doesn't remove any file that
+# is part of the HDF5 distribution.
+#
+clean: mostlyclean
+	$(RM) $(LIB) $(PROGS) $(CLEAN)
+
+# Like `clean' except it also removes files that were created by running
+# configure.  If you've unpacked the source and built HDF5 without creating
+# any other files, then `make distclean' will leave only the files that were
+# in the distribution.
+#
+distclean: clean
+	$(RM) .depend TAGS *~ core *.bak *.old *.new $(DISTCLEAN)
+	@if test -f Makefile.in; then					      \
+	   (set -x; $(RM) Makefile);					      \
+	fi
+
+# Like `distclean' except it deletes all files that can be regenerated from
+# the makefile, including those generated from autoheader and autoconf.
+#
+maintainer-clean: distclean
+
+# Implicit rules
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+
