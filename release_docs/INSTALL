@@ -554,7 +554,9 @@
 		./src/.libs/libhdf5.a
 
 	    The public header files:
-		./src/H5*public.h
+		./src/H5*public.h, ./src/H5public.h
+                ./src/H5FD*.h except ./src/H5FDprivate.h,
+                ./src/H5api_adpt.h
 
 	    The main header file:
 		./src/hdf5.h
