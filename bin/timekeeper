@@ -1,0 +1,101 @@
+#!/bin/sh
+##
+## Copyright by the Board of Trustees of the University of Illinois.
+## All rights reserved.
+##
+## This file is part of HDF5.  The full HDF5 copyright notice, including
+## terms governing use, modification, and redistribution, is contained in
+## the files COPYING and Copyright.html.  COPYING can be found at the root
+## of the source code distribution tree; Copyright.html can be found at the
+## root level of an installed copy of the electronic HDF5 document set and
+## is linked from the top-level documents page.  It can also be found at
+## http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+## access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+##
+# As a time keeper of the remote daily test process launched by runtest.
+# It sleeps for a certain time and then wakes up to hangup those processes
+# that are still around, assuming they have run too long.
+#
+# Programmer: Albert Cheng
+# Created Date: 2004/12/23
+
+# variable initialization
+waitperiod=300		# default to 5 hours
+debugtimelimit=
+debugflag=		# no debug
+
+# Function definitions
+#
+# PRINTMSG
+# Print a one line message left justified in a field of 70 characters
+# without newline.  More output for this line later.
+#
+PRINTMSG() {
+    SPACES="                                                               "
+    echo "$* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+
+USAGE()
+{
+    echo "Usage: %0 [-h] [-debug] [<time-limit>]"
+    echo "    Run timekeeper with <time-limit>, default is $waitperiod."
+    echo "    -h      print this help page"
+    echo "    -debug  run debug mode"
+}
+
+
+ParseOption()
+{
+    if [ $# -gt 0 -a "$1" = -h ]; then
+	shift
+	USAGE
+	exit 0
+    fi
+    if [ $# -gt 0 -a "$1" = -debug ]; then
+	shift
+	debugflag=yes
+	waitperiod=20		# use shorter time for debug
+    fi
+    if [ $# -gt 0 ]; then
+	waitperiod=$1
+	shift
+    fi
+}
+
+
+# Main body
+ParseOption $*
+
+if [ -z "$debugflag" ]; then
+    # normal time keeping mode
+    # sleep first
+    sleep $waitperiod
+    # Look for any processes still around
+    for x in PID.* ; do
+	if [ -f $x ]; then
+	    pid=`cat $x`
+	    echo "terminating process $x ($pid)"
+	    kill -HUP $pid
+	fi
+    done
+else
+    # Debug mode. Launch two rsh process, one ends before, the other after
+    # waitperiod.  Must launch timekeeper from a subshell, else the debug
+    # will wait for it too.
+    myhostname=`hostname`
+    ( $0 $waitperiod &)
+    debugtimelimit=`expr $waitperiod - 5`
+    echo rsh $myhostname sleep $debugtimelimit
+    rsh $myhostname sleep $debugtimelimit &
+    echo $! > PID.before
+    debugtimelimit=`expr $waitperiod + 5`
+    echo rsh $myhostname sleep $debugtimelimit
+    rsh $myhostname sleep $debugtimelimit &
+    echo $! > PID.after
+
+    wait
+    rm PID.before PID.after
+fi
+
+echo Timekeeper Done.
