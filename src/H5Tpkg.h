@@ -227,6 +227,11 @@ __DLL__ herr_t H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      hsize_t nelmts, size_t buf_stride,
                               size_t bkg_stride, void *_buf, void *bkg,
                               hid_t dset_xfer_plist);
+__DLL__ herr_t H5T_conv_order_opt(hid_t src_id, hid_t dst_id,
+                                  H5T_cdata_t *cdata, hsize_t nelmts,
+                                  size_t buf_stride, size_t bkg_stride,
+                                  void *_buf, void *bkg,
+                                  hid_t dset_xfer_plist);
 __DLL__ herr_t H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			       hsize_t nelmts, size_t buf_stride,
                                size_t bkg_stride, void *_buf, void *bkg,
