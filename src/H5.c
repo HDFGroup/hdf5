@@ -312,13 +312,58 @@ H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum,
     FUNC_ENTER(H5version, FAIL);
 
     /* Set the version information */
-    if (majnum) *majnum = HDF5_MAJOR_VERSION;
-    if (minnum) *minnum = HDF5_MINOR_VERSION;
-    if (relnum) *relnum = HDF5_RELEASE_VERSION;
-    if (patnum) *patnum = HDF5_PATCH_VERSION;
+    if (majnum) *majnum = H5_VERS_MAJOR;
+    if (minnum) *minnum = H5_VERS_MINOR;
+    if (relnum) *relnum = H5_VERS_RELEASE;
+    if (patnum) *patnum = H5_VERS_PATCH;
 
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5vers_check
+ *
+ * Purpose:	Verifies that the arguments match the version numbers
+ *		compiled into the library.  This function is intended to be
+ *		called from user to verify that the versions of header files
+ *		compiled into the application match the version of the hdf5
+ *		library.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	abort()
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum,
+	      unsigned patnum)
+{
+    /* Don't initialize the library quite yet */
+    
+    if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
+	H5_VERS_RELEASE!=relnum || H5_VERS_PATCH!=patnum) {
+	fputs ("Warning! The HDF5 header files included by this application "
+	       "do not match the\nversion used by the HDF5 library to which "
+	       "this application is linked. Data\ncorruption or segmentation "
+	       "faults would be likely if the application were\nallowed to "
+	       "continue.\n", stderr);
+	fprintf (stderr, "Headers are %u.%u.%u%c, library is %u.%u.%u%c\n",
+		 majnum, minnum, relnum, 'a'+patnum,
+		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+		 'a'+H5_VERS_PATCH);
+	fputs ("Bye...\n", stderr);
+	abort ();
+    }
+    return SUCCEED;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5open
@@ -792,8 +837,10 @@ H5_timer_begin (H5_timer_t *timer)
 
 #ifdef HAVE_GETRUSAGE
     getrusage (RUSAGE_SELF, &rusage);
-    timer->utime = rusage.ru_utime.tv_sec + rusage.ru_utime.tv_usec/1e6;
-    timer->stime = rusage.ru_stime.tv_sec + rusage.ru_stime.tv_usec/1e6;
+    timer->utime = (double)rusage.ru_utime.tv_sec +
+                   (double)rusage.ru_utime.tv_usec/1e6;
+    timer->stime = (double)rusage.ru_stime.tv_sec +
+                   (double)rusage.ru_stime.tv_usec/1e6;
 #else
     timer->utime = 0.0;
     timer->stime = 0.0;
@@ -830,9 +877,9 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
     assert (timer);
     H5_timer_begin (&now);
 
-    timer->utime = now.utime - timer->utime;
-    timer->stime = now.stime - timer->stime;
-    timer->etime = now.etime - timer->etime;
+    timer->utime = MAX(0.0, now.utime - timer->utime);
+    timer->stime = MAX(0.0, now.stime - timer->stime);
+    timer->etime = MAX(0.0, now.etime - timer->etime);
 
     if (sum) {
 	sum->utime += timer->utime;

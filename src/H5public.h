@@ -23,6 +23,15 @@
 #  include <mpio.h>
 #endif
 
+/* Version numbers */
+#define H5_VERS_MAJOR	1       /* For major interface changes    	     */
+#define H5_VERS_MINOR	0       /* For minor interface changes    	     */
+#define H5_VERS_RELEASE	2       /* For interface tweaks & bug-fixes	     */
+#define H5_VERS_PATCH	0       /* For small groups of bug fixes	     */
+
+#define H5check()	H5vers_check(H5_VERS_MAJOR,H5_VERS_MINOR,\
+				     H5_VERS_RELEASE, H5_VERS_PATCH)
+
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
@@ -64,6 +73,8 @@ herr_t H5close (void);
 herr_t H5dont_atexit (void);
 herr_t H5version (unsigned *majnum, unsigned *minnum, unsigned *relnum,
 		  unsigned *patnum);
+herr_t H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum,
+		     unsigned patnum);
 
 #ifdef __cplusplus
 }

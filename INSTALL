@@ -13,6 +13,11 @@ can do the following:
 	$ make install		# Optional
 
 
+Step 0: Install optional third-party packages.
+
+    * GNU zlib compression library, version 1.0.2 or later is used for
+      the `deflate' compression method.
+
 Step 1. Unpack the source tree.
 
     * The tarball will unpack into an hdf5-1.0.0a directory with one of

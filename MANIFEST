@@ -60,6 +60,7 @@
 ./html/MemoryManagement.html
 ./html/ObjectHeader.txt
 ./html/Properties.html
+./html/Version.html
 ./html/chunk1.gif
 ./html/chunk1.obj
 ./html/compat.html
@@ -103,6 +104,8 @@
 ./html/study_p1.gif
 ./html/study_p1.obj
 ./html/symtab
+./html/version.gif
+./html/version.obj
 ./src/.distdep
 ./src/.indent.pro
 ./src/H5.c

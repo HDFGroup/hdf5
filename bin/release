@@ -21,12 +21,12 @@ $releases = "./releases";	# Directory for release tarballs
 sub getver () {
    my @ver;
 
-   open SRC, "./src/H5private.h" or die "cannot read HDF5 version";
+   open SRC, "./src/H5public.h" or die "cannot read HDF5 version";
    while (<SRC>) {
-      $ver[0] = $1 if /define\s+HDF5_MAJOR_VERSION\s+(\d+)/;
-      $ver[1] = $1 if /define\s+HDF5_MINOR_VERSION\s+(\d+)/;
-      $ver[2] = $1 if /define\s+HDF5_RELEASE_VERSION\s+(\d+)/;
-      $ver[3] = $1 if /define\s+HDF5_PATCH_VERSION\s+(\d+)/;
+      $ver[0] = $1 if /define\s+H5_VERS_MAJOR\s+(\d+)/;
+      $ver[1] = $1 if /define\s+H5_VERS_MINOR\s+(\d+)/;
+      $ver[2] = $1 if /define\s+H5_VERS_RELEASE\s+(\d+)/;
+      $ver[3] = $1 if /define\s+H5_VERS_PATCH\s+(\d+)/;
    }
    close SRC;
    wantarray ? @ver : "$ver[0].$ver[1].$ver[2]".chr(ord('a')+$ver[3]);
@@ -44,12 +44,12 @@ sub setver ($;$$$) {
       $ver[3] = ord($ver[3])-ord('a');
    }
 
-   $_ = `cat ./src/H5private.h`;
-   s/(define\s+HDF5_MAJOR_VERSION\s+)(\d+)/$1$ver[0]/;
-   s/(define\s+HDF5_MINOR_VERSION\s+)(\d+)/$1$ver[1]/;
-   s/(define\s+HDF5_RELEASE_VERSION\s+)(\d+)/$1$ver[2]/;
-   s/(define\s+HDF5_PATCH_VERSION\s+)(\d+)/$1$ver[3]/;
-   open SRC, "> ./src/H5private.h" or return "";
+   $_ = `cat ./src/H5public.h`;
+   s/(define\s+H5_VERS_MAJOR\s+)(\d+)/$1$ver[0]/;
+   s/(define\s+H5_VERS_MINOR\s+)(\d+)/$1$ver[1]/;
+   s/(define\s+H5_VERS_RELEASE\s+)(\d+)/$1$ver[2]/;
+   s/(define\s+H5_VERS_PATCH\s+)(\d+)/$1$ver[3]/;
+   open SRC, "> ./src/H5public.h" or return "";
    print SRC $_;
    close SRC;
 

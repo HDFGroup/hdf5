@@ -21,12 +21,6 @@
 #define _H5private_H
 #include <H5public.h>           /* Include Public Definitions     */
 
-/* Version #'s of library code */
-#define HDF5_MAJOR_VERSION      1       /* For major interface changes    */
-#define HDF5_MINOR_VERSION      0       /* For minor interface changes    */
-#define HDF5_RELEASE_VERSION    1       /* For interface tweaks & bug-fixes */
-#define HDF5_PATCH_VERSION      0       /* For small groups of bug fixes */
-
 /* Version #'s of the major components of the file format */
 #define HDF5_BOOTBLOCK_VERSION  0       /* of the boot block format       */
 #define HDF5_FREESPACE_VERSION  0       /* of the Free-Space Info         */

@@ -732,6 +732,52 @@ H5O_link(H5G_entry_t *ent, intn adjust)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_count
+ *
+ * Purpose:	Counts the number of messages in an object header which are a
+ *		certain type.
+ *
+ * Return:	Success:	Number of messages of specified type.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+intn
+H5O_count (H5G_entry_t *ent, const H5O_class_t *type)
+{
+    H5O_t	*oh = NULL;
+    intn	i, acc;
+    
+    FUNC_ENTER (H5O_count, FAIL);
+
+    /* Check args */
+    assert (ent);
+    assert (ent->file);
+    assert (H5F_addr_defined (&(ent->header)));
+    assert (type);
+
+    /* Load the object header */
+    if (NULL==(oh=H5AC_find (ent->file, H5AC_OHDR, &(ent->header),
+			     NULL, NULL))) {
+	HRETURN_ERROR (H5E_OHDR, H5E_CANTLOAD, FAIL,
+		       "unable to load object header");
+    }
+
+    for (i=acc=0; i<oh->nmesgs; i++) {
+	if (oh->mesg[i].type==type) acc++;
+    }
+
+    FUNC_LEAVE (acc);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_read
  *
  * Purpose:	Reads a message from an object header and returns a pointer

@@ -372,10 +372,9 @@ test_tconv(hid_t file)
  *-------------------------------------------------------------------------
  */
 static size_t
-bogus (unsigned int flags,
-       size_t cd_size, const void *client_data,
-       size_t src_nbytes, const void *src,
-       size_t dst_nbytes, void *dst/*out*/)
+bogus (unsigned int __unused__ flags, size_t __unused__ cd_size,
+       const void __unused__ *client_data, size_t src_nbytes, const void *src,
+       size_t __unused__ dst_nbytes, void *dst/*out*/)
 {
     memcpy (dst, src, src_nbytes);
     return src_nbytes;
@@ -419,14 +418,15 @@ test_compression(hid_t file)
     space = H5Screate_simple(2, size, NULL);
     assert(space>=0);
 
-    /* Create a small conversion buffer to test strip mining */
+    /*
+     * Create a small conversion buffer to test strip mining. We
+     * might as well test all we can!
+     */
     xfer = H5Pcreate (H5P_DATASET_XFER);
     assert (xfer>=0);
-#if 0
     tconv_buf = malloc (1000);
     status = H5Pset_buffer (xfer, 1000, tconv_buf, NULL);
     assert (status>=0);
-#endif
 
     /* Use chunked storage with compression */
     dc = H5Pcreate (H5P_DATASET_CREATE);

@@ -3600,9 +3600,10 @@ H5T_timer_begin (H5_timer_t *timer, H5T_cdata_t *cdata)
 {
     assert (timer);
     assert (cdata);
+#ifdef H5T_DEBUG
     assert (cdata->stats);
-
     H5_timer_begin (timer);
+#endif
 }
 
 
@@ -3625,11 +3626,12 @@ H5T_timer_end (H5_timer_t *timer, H5T_cdata_t *cdata, size_t nelmts)
 {
     assert (timer);
     assert (cdata);
+#ifdef H5T_DEBUG
     assert (cdata->stats);
-
     H5_timer_end (&(cdata->stats->timer), timer);
     cdata->stats->ncalls++;
     cdata->stats->nelmts += nelmts;
+#endif
 }
 
 

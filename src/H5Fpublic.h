@@ -23,13 +23,17 @@
 /*
  * These are the bits that can be passed to the `flags' argument of
  * H5Fcreate() and H5Fopen(). Use the bit-wise OR operator (|) to combine
- * them as needed.
+ * them as needed.  As a side effect, they call H5vers_check() to make sure
+ * that the application is compiled with a version of the hdf5 header files
+ * which are compatible with the library to which the application is linked.
+ * We're assuming that these constants are used rather early in the hdf5
+ * session.
  */
-#define H5F_ACC_RDONLY	0x0000u	/*absence of write implies read only	*/
-#define H5F_ACC_RDWR	0x0001u	/*open file for reading and writing	*/
-#define H5F_ACC_TRUNC	0x0002u	/*overwrite existing files during create*/
-#define H5F_ACC_EXCL	0x0004u	/*create fails if file already exists	*/
-#define H5F_ACC_DEBUG	0x0008u  /*print debug info			*/
+#define H5F_ACC_RDONLY	(H5check(),0x0000u)	/*absence of rdwr => rd-only */
+#define H5F_ACC_RDWR	(H5check(),0x0001u)	/*open for read and write    */
+#define H5F_ACC_TRUNC	(H5check(),0x0002u)	/*overwrite existing files   */
+#define H5F_ACC_EXCL	(H5check(),0x0004u)	/*fail if file already exists*/
+#define H5F_ACC_DEBUG	(H5check(),0x0008u)	/*print debug info	     */
 
 
 #ifdef LATER
