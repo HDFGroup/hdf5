@@ -2021,7 +2021,7 @@ struct for VL datatypes.
 VL strings may be created in one of two ways: by creating a VL datatype with
 a base type of <code>H5T_NATIVE_ASCII</code>, <code>H5T_NATIVE_UNICODE</code>, 
 etc., or by creating a string datatype and setting its length to 
-<code>H5T_STRING_VARIABLE</code>.  The second method is used to access 
+<code>H5T_VARIABLE</code>.  The second method is used to access 
 native VL strings in memory.  The library will convert between the two types, 
 but they are stored on disk using different datatypes and have different 
 memory representations.
@@ -2881,7 +2881,7 @@ H5Tregister(H5T_PERS_SOFT, "cus2be",
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  17 July 2000
+Last modified:  5 February 2001
 <!-- hhmts end -->
 
 <br>
