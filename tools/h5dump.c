@@ -217,7 +217,7 @@ h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
   -header       Display header only; no data is displayed.\n\
   -v            Display the object ids\n\
   -V            Display version information and exit.\n\
-  -xml			Display the output in XML format.\n\
+  -xml          Display the output in XML format.\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
