@@ -1887,6 +1887,8 @@ touch ./config/stamp2
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
+chmod 755 tools/misc/h5cc
+
 dnl We don't want inline defined for C++ compilers
 dnl Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
 dnl 'H5_inline' isn't a C++ keyword.
