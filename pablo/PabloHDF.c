@@ -132,7 +132,7 @@ extern void preInitIOTrace( void );
 
 void HDFinitTrace_RT ( const char *, int );
 void HDFinitTrace_SDDF ( const char *, int );
-void hinittracex_ ( int [], int *, int[], int *,unsigned * );
+void hinittracex_ ( char [], int *, int[], int *,unsigned * );
 void hdfendtrace_ ( void ) ;
 void HDFendTrace_RT (int);
 void HDFendTrace_SDDF(int);
@@ -163,12 +163,10 @@ double ReadTotals = 0.0;
 //     None.								*
 //======================================================================*/
 /*======================================================================*
-// fortran to C interface.  To insure portability, the character array  *
-// passed in Fortran is converted to an integer array using the ICHAR	*
-// function.  This program converts it from integer to char, then 	*
-// passes it to the C initialization routine.				*
+// fortran to C interface.                                              *
+// This is called from hdfinittracef_                                   *
 //======================================================================*/
-void hinittracex_( int *file, int *len, int flags[], int *nflags,
+void hinittracex_( char *file, int *len, int flags[], int *nflags,
                                                        unsigned *out_sw )
 {
         char *traceFileName;
