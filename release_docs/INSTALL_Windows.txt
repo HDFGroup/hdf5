@@ -2,7 +2,7 @@ HDF5 Build and Install Instructions for Windows 2000/NT/98.
 ----------------------------------------------------------
 
 The instructions which follow assume that you will be using the 
-source code release 'zip' file (hdf5-1_4_3.zip).
+source code release 'zip' file (hdf5-1_4_4.zip).
 
 ***************************WARNINGS****************************
 Please read CAREFULLY about Preconditions before you go to the 
@@ -26,9 +26,11 @@ Preconditions
       several files and directories. Rename directory "hdf5xxx"
       into "hdf5".
 
-   4. HDF5 uses zlib for compression and zlib is distributed 
-      with hdf5 lib. If you have your own version read section 
-      VI about the zlib library.
+   4. HDF5 uses zlib for compression and zlib is NOT distributed 
+      with hdf5 lib in 1.4.4 release. You have to install your own
+      zlib library or you may go to HDF web site(????URL) to download
+      the correponding zlib library by yourself. If you want to build
+      HDF5 library without using zlib, please read section V.
 
    5. HDF4-related tools are not built and released with HDF5 library
       packages any more. To obtain HDF4-related tools, please check
@@ -67,7 +69,7 @@ What do we build and install?
 	debug and release version 
 
  HDF5 tools:
-	non-hdf4 related tools and hdf4 related tools
+	non-hdf4 related tools 
 
  HDF5 library testing programs:
       hdf5 library related comprehensive tests
@@ -93,18 +95,30 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
        c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system 
        directory.
 
-	 The system directory can usually be found under the path 
+       The system directory can usually be found under the path 
 		C:\WINNT\system or C:\WINDOWS\system
       
-    2. Invoke Microsoft Visual C++, go to "File" and select 
+    2. Make sure you have your own zlib library(both dll and static)
+       stored at your machine. In this document we will use
+       c:\zlib114 to represent the top directory of your zlib library.
+
+    3. Invoke Microsoft Visual C++, go to "File" and select 
        the "Open Workspace" option. 
 
        Then open the c:\myHDFstuff\hdf5\proj\all\all.dsw 
        workspace. 
 
-    3. If you don't want to build and test backward 
+    4. Go to "Tools" and select "Options", find "Directories";
+        4.1 Find the box "Show directories for", choose "Include files",
+            If you cannot find C:\zlib114\include at the directory listed,
+            add C:\zlib114\include to the included directories.
+        4.2 Find the box "Show directories for", choose "Library files",
+            If you cannot find C:\zlib114\old at the directory listed,
+            add C:\zlib114\lib to the included directories.
+
+    5. If you don't want to build and test backward 
        compatibility with hdf5 1.2, you may skip this part and
-       go to part 4.
+       go to part 6.
 
        To build and test backward compatibility with hdf5 1.2, 
            a) go to "Project" and select "Settings"
@@ -127,7 +141,7 @@ STEP 1: Building hdf5 libraries and non-hdf4 related tools
            g) repeat a)-f) and choose the option as 
               "win32 Debug" on step b).
              
-    4. Select "Build", then Select "Set Active Configuration".
+    6. Select "Build", then Select "Set Active Configuration".
 
        On Windows platform select as the active configuration
 
@@ -563,31 +577,13 @@ use your own version of the zlib library then follow the steps below.
 
 Removing the zlib library completely:
 
-    Open the all.dsw workspace file in Microsoft Visual C++. Go to the
-    hdf5 project. Select the zlib.lib file from this project and
-    delete(press the 'delete' key) it. Next open the H5config.h and
-    H5pubconf.h files from the src directory and remove the following
-    two lines:
+    1) Open the H5pubconf.h file from the src directory and remove the 
+    following two lines:
 
 		#define H5_HAVE_LIBZ 1
 		#define H5_HAVE_COMPRESS2
 
     then save the file.
 	
-    Next go to the hdf5dll project. Remove the zlib.lib from this 
-    project too. Open the project settings for the hdf5dll project. 
-    Go to the C/C++ settings tab and under the preprocessor definitions 
-    remove the ZLIB_DLL in both the debug and the release settings. 
-    Recompile the all project and then save the workspace.
+    2) run-compile HDF5 library according to the previous steps.
 
-
-Replacing the zlib library:
-
-    Open the all.dsw workspace and go to the hdf5 project. Delete the
-    zlib.lib file from the file listing. Then select the hdf5 project
-    and richt click to get a menu. Pick the "add files to project..."
-    option and find the version of the zlib that you would like to use.
-    Then click OK in the file chooser dialog. Repeat the steps for the
-    hdf5dll project. You may also want to replace the zlib.h and zconf.h
-    files which are in the src directory with your own versions of these
-    files. Then recompile the all project.
