@@ -11,6 +11,8 @@ static int unamedtype = 0;  /* shared data type with no name */
 static int prefix_len = 1024;
 static char *prefix;
 static table_t *group_table = NULL, *dset_table = NULL, *type_table = NULL;
+static dump_header *dump_header_format;
+
 
 static void dump_group (hid_t , const char* );
 static void dump_dataset (hid_t, const  char*);
@@ -22,6 +24,175 @@ static void print_enum(hid_t type);
 
 extern int print_data(hid_t, hid_t, int);
 static void dump_oid(hid_t oid);
+
+
+static h5dump_t dataformat = {
+
+	0,/*raw*/
+
+	"", /*fmt_raw*/
+	"%d",	 /*fmt_int*/
+	"%u", /*fmt_uint*/
+	"%d", /*fmt_schar*/
+	"%u", /*fmt_uchar*/
+	"%d", /*fmt_short*/
+	"%u", /*fmt_ushort*/
+	"%ld", /*fmt_long*/
+	"%lu", /*fmt_ulong*/
+	NULL, /*fmt_llong*/
+	NULL, /*fmt_ullong*/
+	"%g", /*fmt_double*/
+	"%g", /*fmt_float*/
+
+	0,     /*ascii*/
+	0, /*str_locale*/
+	0,/*str_repeat*/
+
+
+	"[ ",	/*arr_pre*/
+	", ",	/*arr_sep*/
+	" ]",	/*arr_suf*/
+	1,	/*arr_linebreak*/
+
+	"", /*cmpd_name*/
+	",\n",/*cmpd_sep*/
+	"{\n",/*cmpd_pre*/
+	"}",/*cmpd_suf*/
+	"\n",/*cmpd_end*/
+
+	"%s", /*elmt_fmt*/
+	",",/*elmt_suf1*/
+	" ",	/*elmt_suf2*/
+
+	"", /*idx_n_fmt*/
+	"",/*idx_sep*/
+	"",/*idx_fmt*/
+
+	80, /*line_ncols*//*standard default columns*/
+	0, /*line_per_line*/
+	"         ",/*line_pre*/
+	"        %s ",/*line_1st*/
+	"        %s",/*line_cont*/
+	"",/*line_suf*/
+	"",/*line_sep*/
+	1,/*line_multi_new*/
+	"   ",/*line_indent*/
+
+	1, /*skip_first*/
+
+	1,/*obj_hidefileno*/
+	" %lu:%lu", /*obj_format*/
+
+	1, /*dset_hidefileno*/
+	"DATASET %lu:%lu ",/*dset_format*/
+	"%s",/*dset_blockformat_pre*/
+	"%s",/*dset_ptformat_pre*/
+	"%s",/*dset_ptformat*/
+	
+
+};
+static const dump_header standardformat = {
+	"standardformat",	/*name*/
+	"HDF5",				/*fileebgin*/
+	"",					/*fileend*/
+	BOOT_BLOCK,			/*bootblockbegin*/
+	"",					/*bootblockend*/
+	GROUPNAME,			/*groupbegin*/
+	"",					/*groupend*/
+	DATASET,			/*datasetbegin*/
+	"",					/*datasetend*/
+	ATTRIBUTE,			/*attributebegin*/
+	"",					/*attributeend*/
+	DATATYPE,			/*datatypebegin*/
+	"",					/*datatypeend*/
+	DATASPACE,			/*dataspacebegin*/
+	"",					/*dataspaceend*/
+	DATA,				/*databegin*/
+	"",					/*dataend*/
+	SOFTLINK,			/*softlinkbegin*/
+	"",					/*softlinkend*/
+
+
+	"{",				/*fileblockbegin*/
+	"}",				/*fileblockend*/
+	"{",				/*bootblockblockbegin*/
+	"}",				/*bootblockblockend*/
+	"{",				/*groupblockbegin*/
+	"}",				/*groupblockend*/
+	"{",				/*datasetblockbegin*/
+	"}",				/*datasetblockend*/
+	"{",				/*attributeblockbegin*/
+	"}",				/*attributeblockend*/
+	"{",				/*datatypeblockbegin*/
+	"}",				/*datatypeblockend*/
+	"{",				/*dataspaceblockbegin*/
+	"}",				/*dataspaceblockend*/
+	"{",				/*datablockbegin*/
+	"}",				/*datablockend*/
+	"{",				/*softlinkblockbegin*/
+	"}",				/*softlinkblockend*/
+	"{",				/*strblockbegin*/
+	"}",				/*strblockend*/
+	"{",				/*enumblockbegin*/
+	"}",				/*enumblockend*/
+
+	"{",				/*dataspacedescriptionbegin*/
+	"}",				/*dataspacedescriptionend*/
+	"(",				/*dataspacedimbegin*/
+	")",				/*dataspacedimend*/
+};
+
+static const dump_header xmlformat = {
+	"xml",
+	"<FILE>",
+	"</FILE>",
+	"<BOOTBLOCK>",
+	"</BOOTBLOCK>",
+	"<GROUP>",
+	"</GROUP>",	
+	"<DATASET>",	
+	"</DATASET>",			
+	"<ATTRIBUTE>",
+	"</ATTRIBUTE>",	
+	"<DATASPACE>",	
+	"<DATATYPE>",
+	"</DATATYPE>",	
+	"</DATASPACE>",
+	"<DATA>",	
+	"</DATA>",
+	"<SOFTLINK>",
+	"</SOFTLINK>",
+
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",				/*strblockbegin*/
+	"",				/*strblockend*/
+	"",				/*enumblockbegin*/
+	"",				/*enumblockend*/
+
+	"{",
+	"}",
+	"(",
+	")",
+
+};
+
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -46,6 +217,7 @@ h5dump [-h] [-bb] [-header] [-a <names>] [-d <names>] [-g <names>]\n  \
   -header       Display header only; no data is displayed.\n\
   -v            Display the object ids\n\
   -V            Display version information and exit.\n\
+  -xml			Display the output in XML format.\n\
   -a <names>    Display the specified attribute(s).\n\
   -d <names>    Display the specified dataset(s).\n\
   -g <names>    Display the specified group(s) and all the members.\n\
@@ -178,7 +350,7 @@ H5G_stat_t statbuf;
         cset = H5Tget_cset(type);
 
         indentation (indent+COL);
-        printf("%s %s %d;\n", BEGIN, STRSIZE, (int)size);
+        printf("%s %s %d;\n", dump_header_format->strblockbegin, STRSIZE, (int)size);
   
         indentation (indent+COL);
         printf("  %s ", STRPAD);
@@ -230,7 +402,7 @@ H5G_stat_t statbuf;
           H5Tclose(str_type);
         }
         indentation (indent+COL);
-        printf("%s", END);
+        printf("%s", dump_header_format->strblockend);
 
         break;
 
@@ -324,14 +496,14 @@ H5G_stat_t statbuf;
 	case H5T_ENUM:
 		printf("H5T_ENUM\n");
 		indentation(indent + COL);
-		printf("{ ");	
+		printf("%s ", dump_header_format->enumblockbegin);	
 		super = H5Tget_super(type);
 		print_datatype(super);
 		printf(";");
 		print_enum(type);
 		printf("\n");
 		indentation (indent + COL);
-		printf("}");
+		printf("%s", dump_header_format->enumblockend);
 		break;
     default:
         printf( "unknown data type");
@@ -381,20 +553,21 @@ dump_datatype (hid_t type) {
     indent += COL;
     indentation (indent);
     if (H5Tget_class(type) == H5T_COMPOUND) {
-        printf ("%s %s\n", DATATYPE, BEGIN);
+       printf ("%s %s\n", dump_header_format->datatypebegin , dump_header_format->datatypeblockbegin);
         print_datatype(type);
         indentation (indent);
-        printf ("%s\n", END);
+        printf ("%s %s\n", dump_header_format->datatypeblockend, dump_header_format->datatypeend);
+		
     } else if (H5Tget_class(type) == H5T_STRING) {
-        printf ("%s %s\n", DATATYPE, BEGIN);
+        printf ("%s %s\n", dump_header_format->datatypebegin, dump_header_format->datatypeblockbegin);
         print_datatype(type);
         printf("\n");
         indentation (indent);
-        printf ("%s\n", END);
+		printf ("%s %s\n", dump_header_format->datatypeblockend, dump_header_format->datatypeend);
     } else {
-        printf ("%s %s ", DATATYPE, BEGIN);
+        printf ("%s %s ", dump_header_format->datatypebegin, dump_header_format->datatypeblockbegin);
         print_datatype(type);
-        printf (" %s\n", END);
+		printf (" %s %s\n", dump_header_format->datatypeblockend, dump_header_format->datatypeend);
     }
     indent -= COL;
 }
@@ -423,22 +596,23 @@ dump_dataspace (hid_t space)
 
     indentation (indent+COL);
 
-    printf("%s ", DATASPACE);
+    printf("%s ", dump_header_format->dataspacebegin);
 
     if (H5Sis_simple(space)) {
 
         if (ndims == 0) /* scalar dataspace */ 
-            HDfprintf (stdout, "%s %s %s\n", BEGIN, SCALAR, END);
+            HDfprintf (stdout, "%s %s ", dump_header_format->dataspacedescriptionbegin, SCALAR);
         else { /* simple dataspace */
-            HDfprintf (stdout, "%s %s ( %Hu",BEGIN, SIMPLE, size[0]);
+            HDfprintf (stdout, "%s %s %s %Hu",dump_header_format->dataspacedescriptionbegin, SIMPLE, 
+					dump_header_format->dataspacedimbegin,size[0]);
             for (i = 1; i < ndims; i++) 
                 HDfprintf (stdout, ", %Hu", size[i]);
-            printf(" ) / ");
+            printf(" %s / ",dump_header_format->dataspacedimend);
            
            if (maxsize[0]==H5S_UNLIMITED)
-               HDfprintf (stdout, "( %s", "H5S_UNLIMITED");
+               HDfprintf (stdout, "%s %s", dump_header_format->dataspacedimbegin,"H5S_UNLIMITED");
             else
-               HDfprintf (stdout, "( %Hu", maxsize[0]);
+               HDfprintf (stdout, "%s %Hu", dump_header_format->dataspacedimbegin,maxsize[0]);
 
             for (i = 1; i < ndims; i++) 
                  if (maxsize[i]==H5S_UNLIMITED)
@@ -446,11 +620,13 @@ dump_dataspace (hid_t space)
                  else
                      HDfprintf (stdout, ", %Hu", maxsize[i]);
 
-            printf(" ) %s\n", END);
+            printf(" %s ", dump_header_format->dataspacedimend);
         }
 
     } else
         printf("%s not yet implemented %s\n", BEGIN, END);
+
+	end_obj(dump_header_format->dataspaceend, dump_header_format->dataspaceblockend);
 
 }
 
@@ -475,7 +651,7 @@ dump_attr (hid_t attr, const char *attr_name, void UNUSED *op_data)
 hid_t  attr_id, type, space;
 
     indentation(indent);
-    begin_obj (ATTRIBUTE, attr_name); 
+    begin_obj (dump_header_format->attributebegin, attr_name, dump_header_format->attributeblockbegin); 
 
     if ((attr_id = H5Aopen_name (attr, attr_name))>= 0) {
 
@@ -491,13 +667,13 @@ hid_t  attr_id, type, space;
         H5Sclose(space);
 		H5Aclose (attr_id);
         indentation (indent);
-        end_obj();
+        end_obj(dump_header_format->attributeend,dump_header_format->attributeblockend );
 
     } else {
         indentation (indent+COL);
         printf("h5dump error: unable to open attribute.\n");
         indentation (indent);
-        end_obj();
+        end_obj(dump_header_format->attributeend,dump_header_format->attributeblockend);
         status = 1;
         return FAIL;
     }
@@ -543,7 +719,7 @@ H5G_stat_t statbuf;
     }
 
     attr_name = name+j+1;
-    begin_obj (ATTRIBUTE, name);
+    begin_obj (dump_header_format->attributebegin, name, dump_header_format->attributeblockbegin);
 
     H5Gget_objinfo(loc_id, obj_name, FALSE , &statbuf);
     switch (statbuf.type) {
@@ -551,7 +727,7 @@ H5G_stat_t statbuf;
          if ((oid = H5Gopen (loc_id, obj_name))<0) {
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
-             end_obj();
+             end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
              status = 1;
              return FAIL;
          }
@@ -560,7 +736,7 @@ H5G_stat_t statbuf;
          if ((oid = H5Dopen (loc_id, obj_name))<0) {
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
-             end_obj();
+             end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
              status = 1;
              return FAIL;
          }
@@ -569,7 +745,7 @@ H5G_stat_t statbuf;
          if ((oid =  H5Topen(loc_id, obj_name)) < 0 ) {
              indentation (COL);
              fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
-             end_obj();
+             end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
              status = 1;
              return FAIL;
          } 
@@ -577,7 +753,7 @@ H5G_stat_t statbuf;
     default:
          indentation (COL);
          fprintf (stdout, "h5dump error: unable to open %s\n", obj_name);
-         end_obj();
+         end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
          status = 1;
          return FAIL;
     }
@@ -595,12 +771,12 @@ H5G_stat_t statbuf;
         H5Tclose(type);
         H5Sclose(space);
 		H5Aclose (attr_id);
-        end_obj();
+        end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
 
     } else {
         indentation (COL);
         printf("h5dump error: unable to open attribute.\n");
-        end_obj();
+        end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
         status = 1;
     }
 
@@ -669,7 +845,7 @@ int i;
 
         buf = malloc (statbuf.linklen*sizeof(char));
 
-        begin_obj(SOFTLINK, name);
+        begin_obj(dump_header_format->softlinkbegin, name, dump_header_format->softlinkblockbegin);
         indentation (indent+COL);
         if (H5Gget_linkval (group, name, statbuf.linklen, buf)>=0) 
             printf ("LINKTARGET \"%s\"\n", buf);
@@ -679,7 +855,7 @@ int i;
         }
 
         indentation (indent);
-        end_obj();
+        end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
         free (buf);
         break;
 
@@ -706,20 +882,20 @@ int i;
                  i = search_obj (dset_table, statbuf.objno);
                  if (i < 0) {
                      indentation (indent);
-                     begin_obj(DATASET, name);
+                     begin_obj(dump_header_format->datasetbegin, name, dump_header_format->datasetblockbegin);
                      indentation (indent+COL);
                      printf("h5dump error: internal error\n");
                      indentation (indent);
-                     end_obj();
+                     end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
                      status = 1;
                      goto done;
                  } else if (dset_table->objs[i].displayed) {
                      indentation (indent);
-                     begin_obj(DATASET, name);
+                     begin_obj(dump_header_format->datasetbegin, name, dump_header_format->datasetblockbegin);
                      indentation (indent+COL);
                      printf("%s \"%s\"\n", HARDLINK, dset_table->objs[i].objname);
                      indentation (indent);
-                     end_obj();
+                     end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
                      goto done;
                  } else {
                      dset_table->objs[i].displayed = 1;
@@ -780,10 +956,10 @@ dump_named_datatype (hid_t type, const char *name) {
 	char *compname;
 	int ndims, perm[H5DUMP_MAX_RANK];
 size_t dims[H5DUMP_MAX_RANK];
-;
+
 
     indentation (indent);
-    begin_obj(DATATYPE, name);
+    begin_obj(dump_header_format->datatypebegin, name, dump_header_format->datatypeblockbegin);
 
 	if (H5Tget_class(type) == H5T_COMPOUND){
 		nmembers = H5Tget_nmembers(type);
@@ -807,7 +983,7 @@ size_t dims[H5DUMP_MAX_RANK];
 		printf(";\n");
 	}
     indentation (indent);
-    end_obj();
+    end_obj(dump_header_format->datatypeend, dump_header_format->datatypeblockend);
 }
 
 /*-------------------------------------------------------------------------
@@ -834,7 +1010,7 @@ int i;
 
 
     indentation (indent);
-    begin_obj(GROUPNAME, name);
+    begin_obj(dump_header_format->groupbegin, name, dump_header_format->groupblockbegin);
     indent += COL;
 	if (display_oid) {
 		dump_oid(gid);
@@ -885,7 +1061,7 @@ int i;
 
     indent -= COL;
     indentation (indent);
-    end_obj();
+    end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
     
     free(tmp);
 
@@ -909,7 +1085,7 @@ dump_dataset (hid_t did, const char *name) {
 hid_t  type, space;
 
     indentation (indent);
-    begin_obj(DATASET, name);
+    begin_obj(dump_header_format->datasetbegin, name, dump_header_format->datasetblockbegin);
 
     type = H5Dget_type (did);
     space = H5Dget_space (did);
@@ -969,7 +1145,7 @@ hid_t  type, space;
     H5Sclose(space);
 
     indentation (indent);
-    end_obj();
+    end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
     
 }
 
@@ -1037,7 +1213,7 @@ int i;
  */
 static void
 dump_data (hid_t obj_id, int obj_data) {
-	h5dump_t info;
+	h5dump_t *outputformat = &dataformat;
 	int status = -1;
 	void *buf;
 	char *attr_name = malloc(sizeof(char)*80);
@@ -1047,65 +1223,8 @@ dump_data (hid_t obj_id, int obj_data) {
 	int depth;
 	int stdindent = COL; /* should be 3*/
 
-	info.elmt_fmt = "%s";
-	info.elmt_suf1 = ",";
-	info.elmt_suf2 = " ";	
-	
-	info.idx_fmt = "";
-	info.idx_n_fmt = "";
-	info.idx_sep = "";
 
-	info.line_ncols = nCols;
-	info.line_multi_new = 1;
-	info.line_1st = "        %s ";
-	info.line_pre  = "         ";
-	info.line_cont = "        %s";
-	info.line_sep = "";
-	info.line_suf = "";
-	info.line_per_line = 0;
-	info.line_indent = "   ";
-
-	info.cmpd_name = "";
-	info.cmpd_pre = "{\n";
-	info.cmpd_sep = ",\n";
-	info.cmpd_suf = "}";
-	info.cmpd_end = "\n";
-
-	info.fmt_raw = "%02x";
-	info.fmt_double = "%g";
-	info.fmt_float = "%g";
-	info.fmt_schar = "%d";
-	info.fmt_int = "%d";
-	info.fmt_uint = "%u";
-	info.fmt_schar = "%d";
-	info.fmt_uchar = "%u";
-	info.fmt_short = "%d";
-	info.fmt_ushort = "%u";
-	info.fmt_long = "%ld";
-	info.fmt_ulong = "%lu";
-	info.fmt_llong = NULL;
-	info.fmt_ullong = NULL;
-
-	info.str_repeat = 0;
-	info.raw = 0;
-
-	info.ascii = 0;
-
-	info.arr_pre = "[ ";
-	info.arr_suf = " ]";
-	info.arr_sep = ", ";
-	info.arr_linebreak = 1;
-
-	info.skip_first = 1;
-
-	info.obj_hidefileno = 1;
-	info.obj_format = " %lu:%lu";
-
-	info.dset_hidefileno = 1;
-	info.dset_format = "DATASET %lu:%lu ";
-	info.dset_blockformat_pre = "%s";
-	info.dset_ptformat_pre  = "%s";
-
+	outputformat->line_ncols = nCols;
 
     indent += COL;
 	/*the depth will tell us how far we need to indent extra.  we use to just
@@ -1115,12 +1234,12 @@ dump_data (hid_t obj_id, int obj_data) {
 	depth = indent/stdindent - 2;
 
     indentation (indent);
-    printf("%s %s\n", DATA, BEGIN);
-
+  /*  printf("%s %s\n", dump_header_format->databegin, BEGIN);*/
+	begin_obj(dump_header_format->databegin, NULL, dump_header_format->datablockbegin);
 
     /* Print all the values. */
 	if (obj_data == DATASET_DATA){
-		status = h5dump_dset(stdout, &info, obj_id, -1,depth);
+		status = h5dump_dset(stdout, outputformat, obj_id, -1,depth);
 	}
 	else { /* need to call h5dump_mem for the attribute data */	
 
@@ -1148,7 +1267,7 @@ dump_data (hid_t obj_id, int obj_data) {
 		buf = malloc(nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type)));
 	   	assert(buf);
 	    if (H5Aread(obj_id, p_type, buf)>=0) {
-			status = h5dump_mem(stdout, &info, p_type, space, buf, depth);
+			status = h5dump_mem(stdout, outputformat, p_type, space, buf, depth);
 	    }
 	    free(buf);
 	    H5Tclose(p_type); 
@@ -1163,9 +1282,12 @@ dump_data (hid_t obj_id, int obj_data) {
         status = 1;
     }
     indentation(indent);
-    printf("%s\n", END);
+  /*  printf("%s\n", END);*/
+	end_obj(dump_header_format->dataend, dump_header_format->datablockend);
     indent -= COL;
 }
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -1194,8 +1316,8 @@ main(int argc, char *argv[])
     void *edata;
     hid_t (*func)(void*);
 	find_objs_t *info = malloc(sizeof(find_objs_t));
-	
 
+	dump_header_format = &standardformat;
 
     /* Disable error reporting */
     H5Eget_auto (&func, &edata);
@@ -1245,6 +1367,9 @@ main(int argc, char *argv[])
 		     */
 		     newwidth = curr_arg;
 	     }
+		 else if (!strcmp(argv[curr_arg], "-xml")){
+			dump_header_format = &xmlformat;
+		 }
              else if (strcmp(argv[curr_arg],"-a") &&
                       strcmp(argv[curr_arg],"-d") &&
                       strcmp(argv[curr_arg],"-g") &&
@@ -1290,6 +1415,7 @@ main(int argc, char *argv[])
         if (argc - opts[nopts-1] == 2) {
             if (strcmp(argv[opts[i]], "-bb") &&
                 strcmp(argv[opts[i]], "-header") &&
+				strcmp(argv[opts[i]], "-xml") &&
                 strcmp(argv[opts[i]], "-v")) {
                 fprintf (stderr, "h5dump error: no <file> or no <names> or no <number> after option %s\n", argv[opts[i]]);
                 usage();
@@ -1347,7 +1473,7 @@ main(int argc, char *argv[])
     }
 
     /* start to dump */
-    begin_obj("HDF5", fname);
+    begin_obj(dump_header_format->filebegin, fname, dump_header_format->fileblockbegin);
 
 	
     if (display_bb) dump_bb();
@@ -1385,11 +1511,11 @@ main(int argc, char *argv[])
                      curr_arg++) {
 
                      if ((dsetid = H5Dopen (fid, argv[curr_arg]))<0) {
-                         begin_obj (DATASET, argv[curr_arg]); 
+                         begin_obj (dump_header_format->datasetbegin, argv[curr_arg], dump_header_format->datasetblockbegin); 
                          indentation (COL);
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
-                         end_obj();
+                         end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
                          status = 1;
                      } else {
                          H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
@@ -1397,12 +1523,12 @@ main(int argc, char *argv[])
                              index = search_obj (dset_table, statbuf.objno);
                              if (index >= 0) {
                                  if (dset_table->objs[index].displayed) {
-                                     begin_obj(DATASET, argv[curr_arg]);
+                                     begin_obj(dump_header_format->datasetbegin, argv[curr_arg], dump_header_format->datasetblockbegin);
                                      indentation (indent+COL);
                                      printf("%s \"%s\"\n", HARDLINK,
                                                            dset_table->objs[index].objname);
                                      indentation (indent);
-                                     end_obj();
+                                     end_obj(dump_header_format->datasetend, dump_header_format->datasetblockend);
                                  } else {
                                      strcpy(dset_table->objs[index].objname, argv[curr_arg]);
                                      dset_table->objs[index].displayed = 1;
@@ -1424,11 +1550,11 @@ main(int argc, char *argv[])
                      curr_arg < ((i+1)==nopts?(argc-1):opts[i+1]); 
                      curr_arg++) {
                      if ((gid = H5Gopen (fid, argv[curr_arg])) < 0) {
-                         begin_obj (GROUPNAME, argv[curr_arg]); 
+                         begin_obj (dump_header_format->groupbegin, argv[curr_arg], dump_header_format->groupblockbegin); 
                          indentation (COL);
                          fprintf (stdout, "h5dump error: unable to open %s\n", 
                                   argv[curr_arg]);
-                         end_obj();
+                         end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
                          status = 1;
                      } else {
                          H5Gget_objinfo(gid, ".", TRUE, &statbuf);
@@ -1446,16 +1572,16 @@ main(int argc, char *argv[])
 
 
                      if (H5Gget_objinfo(fid, argv[curr_arg], FALSE, &statbuf) < 0) {
-                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         begin_obj(dump_header_format->softlinkbegin, argv[curr_arg], dump_header_format->softlinkblockbegin);
                          indentation (COL);
                          fprintf(stdout, "h5dump error: unable to get obj info from %s\n", argv[curr_arg]);
-                         end_obj();
+                         end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
                          status = 1;
 
                      } else if (statbuf.type == H5G_LINK) {
 
                          buf = malloc(statbuf.linklen*sizeof(char));
-                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         begin_obj(dump_header_format->softlinkbegin, argv[curr_arg], dump_header_format->softlinkblockbegin);
                          indentation (COL);
                          if (H5Gget_linkval (fid, argv[curr_arg], statbuf.linklen, buf)>=0) 
                              printf ("LINKTARGET \"%s\"\n", buf);
@@ -1463,14 +1589,14 @@ main(int argc, char *argv[])
                              fprintf (stdout, "h5dump error: unable to get link value\n");
                              status = 1;
                          }
-                         end_obj();
+                         end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
                          free(buf);
 
                      } else {
-                         begin_obj(SOFTLINK, argv[curr_arg]);
+                         begin_obj(dump_header_format->softlinkbegin, argv[curr_arg], dump_header_format->softlinkblockbegin);
                          indentation (COL);
                          fprintf(stdout, "h5dump error: %s is not a link\n", argv[curr_arg]);
-                         end_obj();
+                         end_obj(dump_header_format->softlinkend, dump_header_format->softlinkblockend);
                          status = 1;
                      }
 
@@ -1501,11 +1627,11 @@ main(int argc, char *argv[])
                              index++;
                          }
                          if (index ==  type_table->nobjs) {  /* unknown type */
-                              begin_obj (DATATYPE, argv[curr_arg]); 
+                              begin_obj (dump_header_format->datatypebegin, argv[curr_arg], dump_header_format->datatypeblockbegin); 
                               indentation (COL);
                               fprintf (stdout, "h5dump error: unable to open %s\n", 
                                        argv[curr_arg]);
-                              end_obj();
+                              end_obj(dump_header_format->datatypeend, dump_header_format->datatypeblockend);
                               status = 1;
                          } else {
                               dsetid = H5Dopen (fid, type_table->objs[index].objname) ;
@@ -1523,7 +1649,7 @@ main(int argc, char *argv[])
            } 
       }
 
-    end_obj();
+    end_obj(dump_header_format->fileend, dump_header_format->fileblockend);
 
 done:
 
