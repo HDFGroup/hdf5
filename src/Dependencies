@@ -2073,7 +2073,7 @@ H5Tconv.lo: \
    $(srcdir)/H5Zprivate.h \
    $(srcdir)/H5Sprivate.h
 H5Tinit.lo: \
-   $(srcdir)/H5Tinit.c \
+   H5Tinit.c \
    $(srcdir)/H5private.h \
    $(srcdir)/H5public.h \
    $(srcdir)/H5pubconf.h \
