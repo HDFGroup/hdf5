@@ -52,7 +52,11 @@ const char *FILENAME[] = {
 #define DSET_COMPRESS_NAME	"compressed"
 #define DSET_BOGUS_NAME		"bogus"
 
-#define H5Z_BOGUS		305
+#define H5Z_FILTER_BOGUS		305
+
+/* Local prototypes for filter functions */
+static size_t bogus(unsigned int flags, size_t cd_nelmts, 
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 
 /*-------------------------------------------------------------------------
@@ -368,6 +372,15 @@ test_tconv( H5File& file)
 	return -1;
 }
 
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_BOGUS[1] = {{
+    H5Z_FILTER_BOGUS,		/* Filter id number		*/
+    "bogus",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    bogus,			/* The actual filter function	*/
+}};
+
 /*-------------------------------------------------------------------------
  * Function:	bogus
  *
@@ -637,9 +650,9 @@ test_compression(H5File& file)
 	TESTING("compression (app-defined method)");
 
 	// BMR: not sure how to handle this yet
-	if (H5Zregister (H5Z_BOGUS, DSET_BOGUS_NAME, bogus)<0) goto error;
-	if (H5Pset_filter (dscreatplist.getId(), H5Z_BOGUS, 0, 0, NULL)<0) goto error;
-	dscreatplist.setFilter (H5Z_BOGUS, 0, 0, NULL);
+	if (H5Zregister (H5Z_BOGUS)<0) goto error;
+	if (H5Pset_filter (dscreatplist.getId(), H5Z_FILTER_BOGUS, 0, 0, NULL)<0) goto error;
+	dscreatplist.setFilter (H5Z_FILTER_BOGUS, 0, 0, NULL);
 
 	DataSpace space2 (2, size, NULL);
 	dataset = new DataSet (file.createDataSet (DSET_BOGUS_NAME, PredType::NATIVE_INT, space2, dscreatplist));
