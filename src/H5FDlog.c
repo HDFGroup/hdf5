@@ -1055,8 +1055,8 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
 
         /* Log information about the seek */
         if(file->fa.flags&H5FD_LOG_LOC_SEEK) {
-            HDfprintf(file->logfp,"Seek: From %10a To %10a",file->pos,addr);
 #ifdef H5_HAVE_GETTIMEOFDAY
+            HDfprintf(file->logfp,"Seek: From %10a To %10a",file->pos,addr);
             if(file->fa.flags&H5FD_LOG_TIME_SEEK) {
                  /* Calculate the elapsed gettimeofday time */
                  timeval_diff.tv_usec=timeval_stop.tv_usec-timeval_start.tv_usec;
@@ -1068,8 +1068,9 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
                 HDfprintf(file->logfp," (%f s)\n",(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
             } /* end if */
             else 
-#else /* H5_HAVE_GETTIMEOFDAY */
                 HDfprintf(file->logfp,"\n");
+#else /* H5_HAVE_GETTIMEOFDAY */
+            HDfprintf(file->logfp,"Seek: From %10a To %10a\n",file->pos,addr);
 #endif /* H5_HAVE_GETTIMEOFDAY */
         } /* end if */
     } /* end if */
@@ -1131,8 +1132,9 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
             HDfprintf(file->logfp," (%f s)\n",(double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0));
         } /* end if */
         else
-#else /* H5_HAVE_GETTIMEOFDAY */
             HDfprintf(file->logfp,"\n");
+#else /* H5_HAVE_GETTIMEOFDAY */
+        HDfprintf(file->logfp,"\n");
 #endif /* H5_HAVE_GETTIMEOFDAY */
     } /* end if */
 
