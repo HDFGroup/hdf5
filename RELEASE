@@ -4,6 +4,9 @@ Release information for hdf5-1.0.23a
 
 * Strided hyperslab selections in dataspaces now working.
 
+* The compression API has been replaced with a more general filter
+  API.  See doc/html/Filters.html for details.
+
 		    CHANGES SINCE THE FIRST ALPHA
 
 * Two of the packages have been renamed.  The data space API has been

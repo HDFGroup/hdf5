@@ -74,6 +74,13 @@
         opened by <code>H5Fcreate()</code> or <code>H5Fopen()</code>. After
         closing a file the <em>file_id</em> should not be used again.  This
         function returns zero for success or a negative value for failure.
+
+	<br><br>
+      <dt><code>herr_t H5Fflush (hid_t <em>object_id</em>)</code>
+      <dd>This function will cause all buffers associated with a file
+	to be immediately flushed to the file.  The <em>object_id</em> 
+	can be any object which is associated with a file, including
+	the file itself.
     </dl>
 
     <h2>4. File Property Lists</h2>
@@ -523,7 +530,7 @@
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
 <!-- hhmts start -->
-Last modified: Tue Jun  9 15:03:44 EDT 1998
+Last modified: Thu Aug  6 16:17:08 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

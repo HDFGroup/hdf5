@@ -1494,3 +1494,29 @@ H5A_close(H5A_t *attr)
     FUNC_LEAVE(SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5A_entof
+ *
+ * Purpose:	Return the symbol table entry for an attribute.  It's the
+ *		symbol table entry for the object to which the attribute
+ *		belongs, not the attribute itself.
+ *
+ * Return:	Success:	Ptr to entry
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, August  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_entry_t *
+H5A_entof(H5A_t *attr)
+{
+    FUNC_ENTER(H5A_entof, NULL);
+    assert(attr);
+    FUNC_LEAVE(&(attr->ent));
+}

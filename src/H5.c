@@ -452,9 +452,7 @@ H5close (void)
  *		prints an `hsize_t' value as a hex number right justified and
  *		zero filled in an 18-character field.
  *
- *		The conversion `a' refers to an `haddr_t*' type. Field widths
- *		and other flags are ignored and the address is printed by
- *		calling H5F_addr_print().
+ *		The conversion `a' refers to an `haddr_t*' type.
  *
  * Bugs:	Return value will be incorrect if `%a' appears in the format
  *		string.
@@ -666,8 +664,32 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'a':
 		if (1) {
 		    haddr_t *x = va_arg (ap, haddr_t*);
-		    H5F_addr_print (stream, x);
-		    n = 0;
+		    if (x && H5F_addr_defined(x)) {
+			sprintf(template, "%%%s%s%s%s%s",
+				leftjust?"-":"", plussign?"+":"",
+				ldspace?" ":"", prefix?"#":"",
+				zerofill?"0":"");
+			if (fwidth>0) {
+			    sprintf(template+strlen(template), "%d", fwidth);
+			}
+			if (sizeof(x->offset)==SIZEOF_INT) {
+			    strcat(template, "d");
+			} else if (sizeof(x->offset)==SIZEOF_LONG) {
+			    strcat(template, "ld");
+			} else if (sizeof(x->offset)==SIZEOF_LONG_LONG) {
+			    strcat(template, PRINTF_LL_WIDTH);
+			    strcat(template, "d");
+			}
+			n = fprintf(stream, template, x->offset);
+		    } else {
+			strcpy(template, "%");
+			if (leftjust) strcat(template, "-");
+			if (fwidth) {
+			    sprintf(template+strlen(template), "%d", fwidth);
+			}
+			strcat(template, "s");
+			fprintf(stream, template, x?"UNDEF":"NULL");
+		    }
 		}
 		break;
 

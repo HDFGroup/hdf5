@@ -92,6 +92,61 @@ is_sparse(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	enough_room
+ *
+ * Purpose:	Tries to create a bunch of sparse files to see if quotas will
+ *		get in the way.  Some systems also have problems opening
+ *		enough files and we'll check that too.
+ *
+ * Return:	Success:	Non-zero
+ *
+ *		Failure:	zero
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, August  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+enough_room(void)
+{
+    int		ret_value=0;
+    int		fd[68];
+    size_t	i, size = (size_t)1 << 30;
+    char	name[32];
+
+    /* Initialize file descriptors */
+    for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
+
+    /* Create files */
+    for (i=0; i<NELMTS(fd); i++) {
+	sprintf(name, FNAME, i);
+	if ((fd[i]=open(name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
+	    goto done;
+	}
+	if ((ssize_t)size != lseek(fd[i], size, SEEK_SET)) {
+	    goto done;
+	}
+	if (1!=write(fd[i], "X", 1)) {
+	    goto done;
+	}
+    }
+    ret_value = 1;
+
+ done:
+    for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
+	sprintf(name, FNAME, i);
+	close(fd[i]);
+	unlink(name);
+    }
+    
+    return ret_value;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	writer
  *
  * Purpose:	Creates a *big* dataset.
@@ -327,11 +382,16 @@ main (void)
      * We shouldn't run this test if the file system doesn't support holes
      * because we would generate multi-gigabyte files.
      */
+    puts("Checking if file system is adequate for this test...");
     if (!is_sparse()) {
 	puts("Test skipped because file system does not support holes.");
 	exit(0);
     }
-
+    if (!enough_room()) {
+	puts("Test skipped because of quota (file size or num open files).");
+	exit(0);
+    }
+    
     /* Set the error handler */
     H5Eset_auto (display_error_cb, NULL);
 

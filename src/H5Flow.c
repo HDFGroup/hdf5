@@ -840,31 +840,12 @@ H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
 void
 H5F_addr_print(FILE *stream, const haddr_t *addr)
 {
-    haddr_t		tmp;
-
     assert(stream);
     assert(addr);
 
-    if (addr_defined(addr)) {
-	/*
-	 * It would be nice if we could use the `%Lu', `%llu', or `%qu', but
-	 * we don't know which is supported.  So we split the address into a
-	 * low 4-bytes and a high 4-bytes.  If the high 4-bytes are non-zero
-	 * then we print the address in hexadecimal, otherwise we use decimal.
-	 */
-	tmp = *addr;
-	tmp.offset >>= 32;
-	if (tmp.offset) {
-	    fprintf(stream, "0x%08lx%08lx",
-		    (unsigned long) (tmp.offset),
-		    (unsigned long) (addr->offset & 0xffffffff));
-	} else {
-	    fprintf(stream, "%lu", (unsigned long) (addr->offset));
-	}
-    } else {
-	fprintf(stream, "UNDEF");
-    }
+    HDfprintf(stream, "%a", addr);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_addr_pow2

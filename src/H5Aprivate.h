@@ -17,6 +17,7 @@
 #define _H5Aprivate_H
 
 #include <H5Apublic.h>
+#include <H5Gprivate.h>
 
 #define H5A_RESERVED_ATOMS  0
 typedef struct H5A_t H5A_t;
@@ -26,5 +27,6 @@ typedef struct H5A_t H5A_t;
 /* Functions defined in H5A.c */
 H5A_t * H5A_copy(const H5A_t *old_attr);
 herr_t H5A_close(H5A_t *attr);
+H5G_entry_t *H5A_entof(H5A_t *attr);
 
 #endif

@@ -38,7 +38,9 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
-#include <H5Iprivate.h>		/* IDs					  */
+#include <H5Aprivate.h>		/*attributes				  */
+#include <H5Dprivate.h>		/*datasets				  */
+#include <H5Iprivate.h>		/*object IDs				  */
 #include <H5ACprivate.h>	/*cache					  */
 #include <H5Eprivate.h>		/*error handling			  */
 #include <H5Gprivate.h>		/*symbol tables				  */
@@ -1287,6 +1289,105 @@ H5Fopen (const char *filename, unsigned flags, hid_t access_id)
 
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fflush
+ *
+ * Purpose:	Flushes all outstanding buffers of a file to disk but does
+ *		not remove them from the cache.  The OBJECT_ID can be a file,
+ *		dataset, group, attribute, or named data type.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, August  6, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fflush (hid_t object_id)
+{
+    H5F_t	*f = NULL;
+    H5G_t	*grp = NULL;
+    H5T_t	*type = NULL;
+    H5D_t	*dset = NULL;
+    H5A_t	*attr = NULL;
+    H5G_entry_t	*ent = NULL;
+    
+    FUNC_ENTER(H5Fflush, FAIL);
+    H5TRACE1("e","i",object_id);
+
+    switch (H5I_group(object_id)) {
+    case H5_FILE:
+	if (NULL==(f=H5I_object(object_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "invalid file identifier");
+	}
+	break;
+
+    case H5_GROUP:
+	if (NULL==(grp=H5I_object(object_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "invalid group identifier");
+	}
+	ent = H5G_entof(grp);
+	break;
+
+    case H5_DATATYPE:
+	if (NULL==(type=H5I_object(object_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "invalid type identifier");
+	}
+	ent = H5T_entof(type);
+	break;
+
+    case H5_DATASET:
+	if (NULL==(dset=H5I_object(object_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "invalid dataset identifier");
+	}
+	ent = H5D_entof(dset);
+	break;
+
+    case H5_ATTR:
+	if (NULL==(attr=H5I_object(object_id))) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "invalid attribute identifier");
+	}
+	ent = H5A_entof(attr);
+	break;
+
+    default:
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "not a file or file object");
+    }
+
+    if (!f) {
+	if (!ent) {
+	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+			  "object is not assocated with a file");
+	}
+	f = ent->file;
+    }
+    if (!f) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+		      "object is not associated with a file");
+    }
+
+    /* Flush the file */
+    if (H5F_flush(f, FALSE)<0) {
+	HRETURN_ERROR(H5E_FILE, H5E_CANTINIT, FAIL,
+		      "flush failed");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush

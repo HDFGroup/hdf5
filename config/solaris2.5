@@ -10,26 +10,30 @@
 # flags like `-DH5G_DEBUG' since these are added with the
 # `--enable-debug' switch of configure.
 
-# We can only use gcc
-CC=gcc
+# We use gcc unless something else is specified.
+CC=${CC:-gcc}
 
-# What must *always* be present for things to compile correctly?
-CFLAGS="$CFLAGS -ansi"
-#CPPFLAGS="$CPPFLAGS -I."
+case $CC in
+    *gcc*)
+	CFLAGS="$CFLAGS -ansi"
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROD_CFLAGS="-O3 -finline-functions"
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
 
-# What compiler flags should be used for code development?
-DEBUG_CFLAGS=-g
-DEBUG_CPPFLAGS=
-
-# What compiler flags should be used for building a production
-# library?
-PROD_CFLAGS=-O2
-PROD_CPPFLAGS=
-
-# What compiler flags enable code profiling?
-PROFILE_CFLAGS=-pg
-PROFILE_CPPFLAGS=
-
+    *)
+	CFLAGS="-erroff=%none"
+	DEBUG_CFLAGS=-g
+	DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROD_CFLAGS=-xO2
+	PROD_CPPFLAGS=
+	PROFILE_CFLAGS=-xpg
+	PROFILE_CPPFLAGS=
+	;;
+esac
 
 #----------------------------------------------------------------------------
 # Values for overriding configuration tests when cross compiling.
