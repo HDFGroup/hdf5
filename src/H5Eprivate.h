@@ -60,10 +60,6 @@ typedef struct H5E_t_new {
 } H5E_t_new;
 
 /* HDF5 error class */
-/*#define H5E_ERR_CLS		(H5OPEN H5E_ERR_CLS_g)*/
-H5_DLLVAR hid_t H5E_ERR_CLS_g;
-
-/* HDF5 error class */
 #define    H5E_CLS_NAME         "HDF5"
 #define    H5E_CLS_LIB_NAME     "HDF5"
 #define    H5E_CLS_LIB_VERS     ""              /* How to find out version number? */

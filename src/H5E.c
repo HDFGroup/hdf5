@@ -46,6 +46,138 @@
 
 #define PABLO_MASK	H5E_mask
 
+#ifndef NEW_ERR
+
+/* Major error IDs */
+hid_t    H5E_NONE_MAJOR_g   = FAIL;                /*special zero, no error                     */
+hid_t    H5E_ARGS_g         = FAIL;                      /*invalid arguments to routine               */
+hid_t    H5E_RESOURCE_g     = FAIL;                  /*resource unavailable                       */
+hid_t    H5E_INTERNAL_g     = FAIL;                  /*Internal error (too specific to document in detail) */
+hid_t    H5E_FILE_g         = FAIL;                      /*file Accessability                         */
+hid_t    H5E_IO_g           = FAIL;                        /*Low-level I/O                              */
+hid_t    H5E_FUNC_g         = FAIL;                      /*function Entry/Exit                        */
+hid_t    H5E_ATOM_g         = FAIL;                      /*object Atom                                */
+hid_t    H5E_CACHE_g        = FAIL;                     /*object Cache                               */
+hid_t    H5E_BTREE_g        = FAIL;                     /*B-Tree Node                                */
+hid_t    H5E_SYM_g          = FAIL;                       /*symbol Table                               */
+hid_t    H5E_HEAP_g         = FAIL;                      /*Heap                                       */
+hid_t    H5E_OHDR_g         = FAIL;                      /*object Header                              */
+hid_t    H5E_DATATYPE_g     = FAIL;                  /*Datatype                                   */
+hid_t    H5E_DATASPACE_g    = FAIL;                 /*Dataspace                                  */
+hid_t    H5E_DATASET_g      = FAIL;                   /*Dataset                                    */
+hid_t    H5E_STORAGE_g      = FAIL;                   /*data storage                               */
+hid_t    H5E_PLIST_g        = FAIL;                     /*Property lists                             */
+hid_t    H5E_ATTR_g         = FAIL;                      /*Attribute                                  */
+hid_t    H5E_PLINE_g        = FAIL;                     /*Data filters                               */
+hid_t    H5E_EFL_g          = FAIL;                       /*External file list                         */
+hid_t    H5E_REFERENCE_g    = FAIL;                 /*References                                 */
+hid_t    H5E_VFL_g          = FAIL;		        /*Virtual File Layer			     */
+hid_t    H5E_TBBT_g         = FAIL; 		        /*Threaded, Balanced, Binary Trees           */
+hid_t    H5E_FPHDF5_g       = FAIL;		        /*Flexible Parallel HDF5                     */
+hid_t    H5E_TST_g          = FAIL; 		        /*Ternary Search Trees                       */
+hid_t    H5E_RS_g           = FAIL;  		        /*Reference Counted Strings                  */
+hid_t    H5E_ERROR_g        = FAIL;  		        /*Error API				     */
+
+/* Minor error IDs */
+hid_t    H5E_NONE_MINOR_g         = FAIL;                /*special zero, no error                     */
+hid_t    H5E_UNINITIALIZED_g              = FAIL;             /*information is unitialized                 */
+hid_t    H5E_UNSUPPORTED_g                = FAIL;               /*feature is unsupported                     */
+hid_t    H5E_BADTYPE_g            = FAIL;                   /*incorrect type found                       */
+hid_t    H5E_BADRANGE_g           = FAIL;                  /*argument out of range                      */
+hid_t    H5E_BADVALUE_g           = FAIL;                  /*bad value for argument                     */
+
+hid_t    H5E_NOSPACE_g            = FAIL;                   /*no space available for allocation          */
+hid_t    H5E_CANTCOPY_g           = FAIL;                  /*unable to copy object                      */
+hid_t    H5E_CANTFREE_g           = FAIL;                  /*unable to free object                      */
+hid_t    H5E_ALREADYEXISTS_g              = FAIL;             /*Object already exists                      */
+hid_t    H5E_CANTLOCK_g           = FAIL;                  /*Unable to lock object                      */
+hid_t    H5E_CANTUNLOCK_g         = FAIL;                /*Unable to unlock object                    */
+hid_t    H5E_CANTGC_g             = FAIL;		        /*Unable to garbage collect                  */
+
+hid_t    H5E_FILEEXISTS_g         = FAIL;                /*file already exists                        */
+hid_t    H5E_FILEOPEN_g           = FAIL;                  /*file already open                          */
+hid_t    H5E_CANTCREATE_g         = FAIL;                /*Can't create file                          */
+hid_t    H5E_CANTOPENFILE_g               = FAIL;              /*Can't open file                            */
+hid_t    H5E_CANTCLOSEFILE_g             = FAIL;             /*Can't close file			     */
+hid_t    H5E_NOTHDF5_g            = FAIL;                   /*not an HDF5 format file                    */
+hid_t    H5E_BADFILE_g            = FAIL;                   /*bad file ID accessed                       */
+hid_t    H5E_TRUNCATED_g          = FAIL;                 /*file has been truncated                    */
+hid_t    H5E_MOUNT_g              = FAIL;			/*file mount error			     */
+
+hid_t    H5E_SEEKERROR_g          = FAIL;                 /*seek failed                                */
+hid_t    H5E_READERROR_g          = FAIL;                 /*read failed                                */
+hid_t    H5E_WRITEERROR_g         = FAIL;                /*write failed                               */
+hid_t    H5E_CLOSEERROR_g         = FAIL;                /*close failed                               */
+hid_t    H5E_OVERFLOW_g           = FAIL;		        /*address overflowed			     */
+hid_t    H5E_FCNTL_g              = FAIL;                     /*file fcntl failed                          */
+
+hid_t    H5E_CANTINIT_g           = FAIL;                  /*Can't initialize object                    */
+hid_t    H5E_ALREADYINIT_g                = FAIL;               /*object already initialized                 */
+hid_t    H5E_CANTRELEASE_g                = FAIL;               /*Can't release object                       */
+
+hid_t    H5E_BADATOM_g            = FAIL;                   /*Can't find atom information                */
+hid_t    H5E_BADGROUP_g           = FAIL;                  /*Can't find group information               */
+hid_t    H5E_CANTREGISTER_g               = FAIL;              /*Can't register new atom                    */
+hid_t    H5E_CANTINC_g            = FAIL;                   /*Can't increment reference count            */
+hid_t    H5E_CANTDEC_g            = FAIL;                   /*Can't decrement reference count            */
+hid_t    H5E_NOIDS_g              = FAIL;                     /*Out of IDs for group                       */
+
+hid_t    H5E_CANTFLUSH_g          = FAIL;                 /*Can't flush object from cache              */
+hid_t    H5E_CANTLOAD_g           = FAIL;                  /*Can't load object into cache               */
+hid_t    H5E_PROTECT_g            = FAIL;                   /*protected object error                     */
+hid_t    H5E_NOTCACHED_g          = FAIL;                 /*object not currently cached                */
+
+hid_t    H5E_NOTFOUND_g           = FAIL;                  /*object not found                           */
+hid_t    H5E_EXISTS_g             = FAIL;                    /*object already exists                      */
+hid_t    H5E_CANTENCODE_g         = FAIL;                /*Can't encode value                         */
+hid_t    H5E_CANTDECODE_g         = FAIL;                /*Can't decode value                         */
+hid_t    H5E_CANTSPLIT_g          = FAIL;                 /*Can't split node                           */
+hid_t    H5E_CANTINSERT_g         = FAIL;                /*Can't insert object                        */
+hid_t    H5E_CANTLIST_g           = FAIL;                  /*Can't list node                            */
+
+hid_t    H5E_LINKCOUNT_g          = FAIL;                 /*bad object header link count               */
+hid_t    H5E_VERSION_g            = FAIL;                   /*wrong version number                       */
+hid_t    H5E_ALIGNMENT_g          = FAIL;                 /*alignment error                            */
+hid_t    H5E_BADMESG_g            = FAIL;                   /*unrecognized message                       */
+hid_t    H5E_CANTDELETE_g         = FAIL;                /* Can't delete message                      */
+
+hid_t    H5E_CANTOPENOBJ_g                = FAIL;               /*Can't open object                          */
+hid_t    H5E_COMPLEN_g            = FAIL;                   /*name component is too long                 */
+hid_t    H5E_CWG_g                = FAIL;                       /*problem with current working group         */
+hid_t    H5E_LINK_g               = FAIL;                      /*link count failure                         */
+hid_t    H5E_SLINK_g              = FAIL;			/*symbolic link error			     */
+
+hid_t    H5E_CANTCONVERT_g                = FAIL;               /*Can't convert datatypes                    */
+hid_t    H5E_BADSIZE_g            = FAIL;                   /*Bad size for object                        */
+
+hid_t    H5E_CANTCLIP_g           = FAIL;                  /*Can't clip hyperslab region                */
+hid_t    H5E_CANTCOUNT_g          = FAIL;                 /*Can't count elements                       */
+hid_t    H5E_CANTSELECT_g         = FAIL;                /*Can't select hyperslab                     */
+hid_t    H5E_CANTNEXT_g           = FAIL;                  /*Can't move to next iterator location       */
+hid_t    H5E_BADSELECT_g          = FAIL;                 /*Invalid selection                          */
+hid_t    H5E_CANTCOMPARE_g                = FAIL;               /*Can't compare objects                      */
+
+hid_t    H5E_CANTGET_g            = FAIL;                   /*Can't get value                            */
+hid_t    H5E_CANTSET_g            = FAIL;                   /*Can't set value                            */
+hid_t    H5E_DUPCLASS_g           = FAIL;                  /*Duplicate class name in parent class */
+
+hid_t    H5E_MPI_g                = FAIL;			/*some MPI function failed		     */
+hid_t    H5E_MPIERRSTR_g          = FAIL;		        /*MPI Error String 			     */
+
+hid_t    H5E_CANTMAKETREE_g               = FAIL;              /*can't make a TBBT tree                     */
+hid_t    H5E_CANTRECV_g           = FAIL;                  /*can't receive messages from processes      */
+hid_t    H5E_CANTSENDMDATA_g              = FAIL;             /*can't send metadata message                */
+hid_t    H5E_CANTCHANGE_g         = FAIL;                /*can't register change on server            */
+hid_t    H5E_CANTALLOC_g          = FAIL;                 /*can't allocate from file                   */
+
+hid_t    H5E_NOFILTER_g           = FAIL;                  /*requested filter is not available          */
+hid_t    H5E_CALLBACK_g           = FAIL;                  /*callback failed                            */
+hid_t    H5E_CANAPPLY_g           = FAIL;                  /*error from filter "can apply" callback     */
+hid_t    H5E_SETLOCAL_g           = FAIL;                  /*error from filter "set local" callback     */
+
+#endif /* NEW_ERR */
+
+
 static const H5E_major_mesg_t H5E_major_mesg_g[] = {
     {H5E_NONE_MAJOR,	"No error"},
     {H5E_ARGS,		"Function arguments"},
@@ -359,134 +491,134 @@ H5E_init_interface(void)
 
     H5E_ERR_CLS_g = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, H5E_CLS_LIB_VERS);
 
-    H5E_NONE_MAJOR_new  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_NONE_MAJOR_MSG_new);
-    H5E_ARGS_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ARGS_MSG_new);
-    H5E_RESOURCE_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RESOURCE_MSG_new);
-    H5E_INTERNAL_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_INTERNAL_MSG_new);
-    H5E_FILE_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FILE_MSG_new);
+    H5E_NONE_MAJOR_g  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_NONE_MAJOR_MSG_new);
+    H5E_ARGS_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ARGS_MSG_new);
+    H5E_RESOURCE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RESOURCE_MSG_new);
+    H5E_INTERNAL_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_INTERNAL_MSG_new);
+    H5E_FILE_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FILE_MSG_new);
 
-    H5E_IO_new          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_IO_MSG_new);
-    H5E_FUNC_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FUNC_MSG_new);
-    H5E_ATOM_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATOM_MSG_new);
-    H5E_CACHE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_CACHE_MSG_new);
-    H5E_BTREE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_BTREE_MSG_new);
+    H5E_IO_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_IO_MSG_new);
+    H5E_FUNC_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FUNC_MSG_new);
+    H5E_ATOM_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATOM_MSG_new);
+    H5E_CACHE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_CACHE_MSG_new);
+    H5E_BTREE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_BTREE_MSG_new);
 
-    H5E_SYM_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_SYM_MSG_new);
-    H5E_HEAP_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
-    H5E_OHDR_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
-    H5E_DATATYPE_new    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATATYPE_MSG_new);
-    H5E_DATASPACE_new   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASPACE_MSG_new);
+    H5E_SYM_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_SYM_MSG_new);
+    H5E_HEAP_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
+    H5E_OHDR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_HEAP_MSG_new);
+    H5E_DATATYPE_g    = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATATYPE_MSG_new);
+    H5E_DATASPACE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASPACE_MSG_new);
 
-    H5E_DATASET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASET_MSG_new);
-    H5E_STORAGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_STORAGE_MSG_new);
-    H5E_PLIST_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLIST_MSG_new);
-    H5E_ATTR_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATTR_MSG_new);
-    H5E_PLINE_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLINE_MSG_new);
+    H5E_DATASET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_DATASET_MSG_new);
+    H5E_STORAGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_STORAGE_MSG_new);
+    H5E_PLIST_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLIST_MSG_new);
+    H5E_ATTR_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ATTR_MSG_new);
+    H5E_PLINE_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_PLINE_MSG_new);
     
-    H5E_EFL_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_EFL_MSG_new);
-    H5E_REFERENCE_new   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_REFERENCE_MSG_new);
-    H5E_VFL_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_VFL_MSG_new);
-    H5E_TBBT_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TBBT_MSG_new);
-    H5E_FPHDF5_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FPHDF5_MSG_new);
+    H5E_EFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_EFL_MSG_new);
+    H5E_REFERENCE_g   = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_REFERENCE_MSG_new);
+    H5E_VFL_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_VFL_MSG_new);
+    H5E_TBBT_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TBBT_MSG_new);
+    H5E_FPHDF5_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_FPHDF5_MSG_new);
 
-    H5E_TST_new         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TST_MSG_new);
-    H5E_RS_new          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RS_MSG_new);
-    H5E_ERROR_new       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ERROR_MSG_new);
+    H5E_TST_g         = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_TST_MSG_new);
+    H5E_RS_g          = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_RS_MSG_new);
+    H5E_ERROR_g       = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MAJ_ERROR_MSG_new);
 
     /* Minor errors */
-    H5E_NONE_MINOR_new  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR_new, H5E_NONE_MINOR_MSG_new);
-    H5E_UNINITIALIZED_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNINITIALIZED_MSG_new);
-    H5E_UNSUPPORTED_new        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNSUPPORTED_MSG_new);
-    H5E_BADTYPE_new      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADTYPE_MSG_new);
-    H5E_BADRANGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADRANGE_MSG_new);
-    H5E_BADVALUE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADVALUE_MSG_new);
+    H5E_NONE_MINOR_g  = H5E_create_msg(H5E_ERR_CLS_g, H5E_MINOR_new, H5E_NONE_MINOR_MSG_new);
+    H5E_UNINITIALIZED_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNINITIALIZED_MSG_new);
+    H5E_UNSUPPORTED_g        = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_UNSUPPORTED_MSG_new);
+    H5E_BADTYPE_g      = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADTYPE_MSG_new);
+    H5E_BADRANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADRANGE_MSG_new);
+    H5E_BADVALUE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADVALUE_MSG_new);
 
-    H5E_NOSPACE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOSPACE_MSG_new);
-    H5E_CANTCOPY_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOPY_MSG_new);
-    H5E_CANTFREE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFREE_MSG_new);
-    H5E_ALREADYEXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYEXISTS_MSG_new);
-    H5E_CANTLOCK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOCK_MSG_new);
-    H5E_CANTUNLOCK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTUNLOCK_MSG_new);
-    H5E_CANTGC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGC_MSG_new);
+    H5E_NOSPACE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOSPACE_MSG_new);
+    H5E_CANTCOPY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOPY_MSG_new);
+    H5E_CANTFREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFREE_MSG_new);
+    H5E_ALREADYEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYEXISTS_MSG_new);
+    H5E_CANTLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOCK_MSG_new);
+    H5E_CANTUNLOCK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTUNLOCK_MSG_new);
+    H5E_CANTGC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGC_MSG_new);
     
-    H5E_FILEEXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEEXISTS_MSG_new);
-    H5E_FILEOPEN_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEOPEN_MSG_new);
-    H5E_CANTCREATE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCREATE_MSG_new);
-    H5E_CANTOPENFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENFILE_MSG_new);
-    H5E_CANTCLOSEFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLOSEFILE_MSG_new);
-    H5E_NOTHDF5_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTHDF5_MSG_new);
-    H5E_BADFILE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADFILE_MSG_new);
-    H5E_TRUNCATED_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_TRUNCATED_MSG_new);
-    H5E_MOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MOUNT_MSG_new);
+    H5E_FILEEXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEEXISTS_MSG_new);
+    H5E_FILEOPEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_FILEOPEN_MSG_new);
+    H5E_CANTCREATE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCREATE_MSG_new);
+    H5E_CANTOPENFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENFILE_MSG_new);
+    H5E_CANTCLOSEFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLOSEFILE_MSG_new);
+    H5E_NOTHDF5_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTHDF5_MSG_new);
+    H5E_BADFILE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADFILE_MSG_new);
+    H5E_TRUNCATED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_TRUNCATED_MSG_new);
+    H5E_MOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MOUNT_MSG_new);
 
-    H5E_SEEKERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SEEKERROR_MSG_new);
-    H5E_READERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_READERROR_MSG_new);
-    H5E_WRITEERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_WRITEERROR_MSG_new);
-    H5E_CLOSEERROR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CLOSEERROR_MSG_new);
+    H5E_SEEKERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SEEKERROR_MSG_new);
+    H5E_READERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_READERROR_MSG_new);
+    H5E_WRITEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_WRITEERROR_MSG_new);
+    H5E_CLOSEERROR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CLOSEERROR_MSG_new);
 
-    H5E_CANTINIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINIT_MSG_new);
-    H5E_ALREADYINIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYINIT_MSG_new);
-    H5E_CANTRELEASE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRELEASE_MSG_new);
+    H5E_CANTINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINIT_MSG_new);
+    H5E_ALREADYINIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALREADYINIT_MSG_new);
+    H5E_CANTRELEASE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRELEASE_MSG_new);
     
-    H5E_BADATOM_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADATOM_MSG_new);
-    H5E_BADGROUP_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADGROUP_MSG_new);
-    H5E_CANTREGISTER_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTREGISTER_MSG_new);
-    H5E_CANTINC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINC_MSG_new);
-    H5E_CANTDEC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDEC_MSG_new);
-    H5E_NOIDS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOIDS_MSG_new);
+    H5E_BADATOM_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADATOM_MSG_new);
+    H5E_BADGROUP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADGROUP_MSG_new);
+    H5E_CANTREGISTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTREGISTER_MSG_new);
+    H5E_CANTINC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINC_MSG_new);
+    H5E_CANTDEC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDEC_MSG_new);
+    H5E_NOIDS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOIDS_MSG_new);
     
-    H5E_CANTFLUSH_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFLUSH_MSG_new);
-    H5E_CANTLOAD_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOAD_MSG_new);
-    H5E_PROTECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_PROTECT_MSG_new);
-    H5E_NOTCACHED_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTCACHED_MSG_new);
+    H5E_CANTFLUSH_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTFLUSH_MSG_new);
+    H5E_CANTLOAD_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLOAD_MSG_new);
+    H5E_PROTECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_PROTECT_MSG_new);
+    H5E_NOTCACHED_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTCACHED_MSG_new);
     
-    H5E_NOTFOUND_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTFOUND_MSG_new);
-    H5E_EXISTS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_EXISTS_MSG_new);
-    H5E_CANTENCODE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTENCODE_MSG_new);
-    H5E_CANTDECODE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDECODE_MSG_new);
-    H5E_CANTSPLIT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSPLIT_MSG_new);
-    H5E_CANTINSERT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINSERT_MSG_new);
-    H5E_CANTLIST_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLIST_MSG_new);
+    H5E_NOTFOUND_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOTFOUND_MSG_new);
+    H5E_EXISTS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_EXISTS_MSG_new);
+    H5E_CANTENCODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTENCODE_MSG_new);
+    H5E_CANTDECODE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDECODE_MSG_new);
+    H5E_CANTSPLIT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSPLIT_MSG_new);
+    H5E_CANTINSERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTINSERT_MSG_new);
+    H5E_CANTLIST_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTLIST_MSG_new);
     
-    H5E_LINKCOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINKCOUNT_MSG_new);
-    H5E_VERSION_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_VERSION_MSG_new);
-    H5E_ALIGNMENT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALIGNMENT_MSG_new);
-    H5E_BADMESG_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADMESG_MSG_new);
-    H5E_CANTDELETE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDELETE_MSG_new);
+    H5E_LINKCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINKCOUNT_MSG_new);
+    H5E_VERSION_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_VERSION_MSG_new);
+    H5E_ALIGNMENT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_ALIGNMENT_MSG_new);
+    H5E_BADMESG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADMESG_MSG_new);
+    H5E_CANTDELETE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTDELETE_MSG_new);
     
-    H5E_CANTOPENOBJ_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENOBJ_MSG_new);
-    H5E_COMPLEN_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_COMPLEN_MSG_new);
-    H5E_CWG_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CWG_MSG_new);
-    H5E_LINK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINK_MSG_new);
-    H5E_SLINK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SLINK_MSG_new);
+    H5E_CANTOPENOBJ_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTOPENOBJ_MSG_new);
+    H5E_COMPLEN_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_COMPLEN_MSG_new);
+    H5E_CWG_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CWG_MSG_new);
+    H5E_LINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_LINK_MSG_new);
+    H5E_SLINK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SLINK_MSG_new);
     
-    H5E_CANTCONVERT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCONVERT_MSG_new);
-    H5E_BADSIZE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSIZE_MSG_new);
+    H5E_CANTCONVERT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCONVERT_MSG_new);
+    H5E_BADSIZE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSIZE_MSG_new);
     
-    H5E_CANTCLIP_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLIP_MSG_new);
-    H5E_CANTCOUNT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOUNT_MSG_new);
-    H5E_CANTSELECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSELECT_MSG_new);
-    H5E_CANTNEXT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTNEXT_MSG_new);
-    H5E_BADSELECT_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSELECT_MSG_new);
-    H5E_CANTCOMPARE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOMPARE_MSG_new);
+    H5E_CANTCLIP_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCLIP_MSG_new);
+    H5E_CANTCOUNT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOUNT_MSG_new);
+    H5E_CANTSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSELECT_MSG_new);
+    H5E_CANTNEXT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTNEXT_MSG_new);
+    H5E_BADSELECT_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_BADSELECT_MSG_new);
+    H5E_CANTCOMPARE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCOMPARE_MSG_new);
     
-    H5E_CANTGET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGET_MSG_new);
-    H5E_CANTSET_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSET_MSG_new);
-    H5E_DUPCLASS_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_DUPCLASS_MSG_new);
+    H5E_CANTGET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTGET_MSG_new);
+    H5E_CANTSET_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSET_MSG_new);
+    H5E_DUPCLASS_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_DUPCLASS_MSG_new);
 
-    H5E_MPI_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPI_MSG_new);
-    H5E_MPIERRSTR_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPIERRSTR_MSG_new);
+    H5E_MPI_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPI_MSG_new);
+    H5E_MPIERRSTR_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_MPIERRSTR_MSG_new);
     
-    H5E_CANTMAKETREE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTMAKETREE_MSG_new);
-    H5E_CANTRECV_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRECV_MSG_new);
-    H5E_CANTSENDMDATA_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSENDMDATA_MSG_new);
-    H5E_CANTCHANGE_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCHANGE_MSG_new);
-    H5E_CANTALLOC_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTALLOC_MSG_new);
+    H5E_CANTMAKETREE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTMAKETREE_MSG_new);
+    H5E_CANTRECV_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTRECV_MSG_new);
+    H5E_CANTSENDMDATA_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTSENDMDATA_MSG_new);
+    H5E_CANTCHANGE_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTCHANGE_MSG_new);
+    H5E_CANTALLOC_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANTALLOC_MSG_new);
 
-    H5E_NOFILTER_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOFILTER_MSG_new);
-    H5E_CALLBACK_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CALLBACK_MSG_new);
-    H5E_CANAPPLY_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANAPPLY_MSG_new);
-    H5E_SETLOCAL_new     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SETLOCAL_MSG_new);
+    H5E_NOFILTER_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_NOFILTER_MSG_new);
+    H5E_CALLBACK_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CALLBACK_MSG_new);
+    H5E_CANAPPLY_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_CANAPPLY_MSG_new);
+    H5E_SETLOCAL_g     = H5E_create_msg(H5E_ERR_CLS_g, H5E_MAJOR_new, H5E_MIN_SETLOCAL_MSG_new);
 
     /* From the old function; take out later */
     H5E_auto_data_g = stderr;
