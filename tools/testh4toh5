@@ -6,7 +6,7 @@ diff='diff -c'
 
 RM='rm -f'
 SED='sed '
-H5DUMP=${PWD}/h5dump	# Use the h5dumper in the same tools directory
+H5DUMP='h5dump'	# Use the h5dumper in the same tools directory
 
 # Verify if $H5DUMP is a valid command.
 tmpfile=/tmp/testh4toh5.$$
