@@ -1,3 +1,17 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
  * MPIO independent overlapping writes.
  *
@@ -267,7 +281,7 @@ test_mpio_gb_file(char *filename)
 
 	mrc = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_CREATE|MPI_MODE_RDWR,
 		    info, &fh);
-	VRFY((mrc==MPI_SUCCESS), "");
+	VRFY((mrc==MPI_SUCCESS), "MPI_FILE_OPEN");
 
 	printf("MPIO GB file write test %s\n", filename);
 
@@ -440,6 +454,7 @@ main(int argc, char **argv)
 	printf("MPI functionality tests\n");
 	printf("===================================\n");
     }
+    H5open();
     h5_show_hostname();
 
     fapl = H5Pcreate (H5P_FILE_ACCESS);
@@ -457,6 +472,10 @@ main(int argc, char **argv)
     test_mpio_overlap_writes(filenames[0]);
 
 finish:
+    /* make sure all processes are finished before final report, cleanup
+     * and exit.
+     */
+    MPI_Barrier(MPI_COMM_WORLD);
     if (MAINPROCESS){		/* only process 0 reports */
 	printf("===================================\n");
 	if (nerrors){
@@ -467,8 +486,13 @@ finish:
 	}
 	printf("===================================\n");
     }
-    MPI_Finalize();
+
     h5_cleanup(FILENAME, fapl);
+    H5close();
+
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
+    MPI_Finalize();
+
     /* always return 0 as this test is informational only. */
     return(0);
 }
