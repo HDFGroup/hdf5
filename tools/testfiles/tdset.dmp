@@ -1,4 +1,4 @@
-File name: testfiles/tdset.hdf 
+File name: ./testfiles/tdset.hdf 
 
 
 Vgroup:0
@@ -127,7 +127,7 @@ Entries:-
 
 Vgroup:7
      tag = 1965; reference = 19;
-     name = tdset.hdf; class = CDF0.0;
+     name = ./testfiles/tdset.hdf; class = CDF0.0;
      number of entries = 6;
    number of attributes = 0 
 Entries:-
@@ -208,7 +208,7 @@ Graphical representation of the file:-
 		-- SciData dimension record  
 		-- Numeric Data Group  
 
-File name: testfiles/tdset.hdf 
+File name: ./testfiles/tdset.hdf 
 
 Vdata: 0
    tag = 1962; reference = 7;
@@ -258,7 +258,7 @@ Vdata: 3
 Loc.     Data
 0        20  ; 
 
-File name: testfiles/tdset.hdf 
+File name: ./testfiles/tdset.hdf 
 
 Variable Name = dset1
 	 Index = 0

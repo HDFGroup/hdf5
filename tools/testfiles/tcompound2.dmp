@@ -1,4 +1,4 @@
-File name: testfiles/tcompound2.hdf 
+File name: ./testfiles/tcompound2.hdf 
 
 
 Vgroup:0
@@ -76,7 +76,7 @@ Graphical representation of the file:-
 
    vg2 	-- vd  
 
-File name: testfiles/tcompound2.hdf 
+File name: ./testfiles/tcompound2.hdf 
 
 Vdata: 0
    tag = 1962; reference = 3;
@@ -144,4 +144,4 @@ Loc.     Data
 3        3  3.000000  ; 4  4.000000  ; 5  5.000000  ; 
 
 
-File name: testfiles/tcompound2.hdf 
+File name: ./testfiles/tcompound2.hdf 

@@ -1,4 +1,4 @@
-File name: testfiles/tstr2.hdf 
+File name: ./testfiles/tstr2.hdf 
 
 
 Vgroup:0
@@ -151,7 +151,7 @@ Graphical representation of the file:-
 
    vg6 	-- vd  
 
-File name: testfiles/tstr2.hdf 
+File name: ./testfiles/tstr2.hdf 
 
 Vdata: 0
    tag = 1962; reference = 4;
@@ -301,4 +301,4 @@ Loc.     Data
 9        84 104 105 115 32 105 115 32 114 111 119 32 57 32 111 102 32 116 121 112 101 32 72 53 84 95 83 84 82 95 83 80 65 67 69 80 65 68 32 111 102 32 115 116 114 105 110 103 32 97  ; 
 
 
-File name: testfiles/tstr2.hdf 
+File name: ./testfiles/tstr2.hdf 

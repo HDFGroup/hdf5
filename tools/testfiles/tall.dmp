@@ -1,4 +1,4 @@
-File name: testfiles/tall.hdf 
+File name: ./testfiles/tall.hdf 
 
 
 Vgroup:0
@@ -287,7 +287,7 @@ Entries:-
 
 Vgroup:16
      tag = 1965; reference = 40;
-     name = tall.hdf; class = CDF0.0;
+     name = ./testfiles/tall.hdf; class = CDF0.0;
      number of entries = 10;
    number of attributes = 0 
 Entries:-
@@ -437,7 +437,7 @@ Graphical representation of the file:-
 		-- SciData dimension record  
 		-- Numeric Data Group  
 
-File name: testfiles/tall.hdf 
+File name: ./testfiles/tall.hdf 
 
 Vdata: 0
    tag = 1962; reference = 3;
@@ -571,7 +571,7 @@ Loc.     Data
 20       116  ; 49  ; 46  ; 49  ; 
 24       46  ; 49  ; 0  ; 
 
-File name: testfiles/tall.hdf 
+File name: ./testfiles/tall.hdf 
 
 Variable Name = dset1.1.1
 	 Index = 0

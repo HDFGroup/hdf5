@@ -1,4 +1,4 @@
-File name: testfiles/tmany.hdf 
+File name: ./testfiles/tmany.hdf 
 
 
 Vgroup:0
@@ -254,7 +254,7 @@ Entries:-
 
 Vgroup:15
      tag = 1965; reference = 31;
-     name = tmany.hdf; class = CDF0.0;
+     name = ./testfiles/tmany.hdf; class = CDF0.0;
      number of entries = 6;
    number of attributes = 0 
 Entries:-
@@ -359,7 +359,7 @@ Graphical representation of the file:-
 		-- SciData dimension record  
 		-- Numeric Data Group  
 
-File name: testfiles/tmany.hdf 
+File name: ./testfiles/tmany.hdf 
 
 Vdata: 0
    tag = 1962; reference = 5;
@@ -474,7 +474,7 @@ Vdata: 7
 Loc.     Data
 0        10  ; 
 
-File name: testfiles/tmany.hdf 
+File name: ./testfiles/tmany.hdf 
 
 Variable Name = link3
 	 Index = 0

@@ -8,6 +8,15 @@ RM='rm -f'
 SED='sed '
 H4DUMP='hdp'
 
+# The build (current) directory might be different than the source directory.
+if test "X$srcdir" = X; then
+    srcdir=.
+fi
+mkdir testfiles >/dev/null 2>&1
+
+INDIR="$srcdir/testfiles"
+OUTDIR="./testfiles"
+
 nerrors=0
 verbose=yes
 
@@ -31,9 +40,117 @@ CONVERT()
     # Run h5toh4 convert.
     TESTING $h5toh4 $@
     (
-	cd testfiles
-        ../$h5toh4 "$@" 2>/dev/null
-    ) 
+        case "$1" in
+
+        "-m")
+   	    if [ $# -eq 2 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $OUTDIR
+		    set - $1 $OUTDIR/$2
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2
+		fi
+	    elif [ $# -eq 3 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3
+		fi
+	    elif [ $# -eq 4 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4
+		fi
+	    elif [ $# -eq 5 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4 $5
+		fi
+	    elif [ $# -eq 6 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4 $5 $6
+		fi
+	    elif [ $# -eq 7 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4 $5 $6 $7
+		fi
+	    elif [ $# -eq 8 ]
+	    then
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7 $OUTDIR/$8
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4 $5 $6 $7 $8
+		fi
+	    else
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $1 $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $INDIR/$9
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$2 $INDIR/$3 $INDIR/$4 $INDIR/$5 $INDIR/$6 $INDIR/$7 $INDIR/$8 $INDIR/$9 $OUTDIR
+		    set - $1 $OUTDIR/$2 $OUTDIR/$3 $OUTDIR/$4 $OUTDIR/$5 $OUTDIR/$6 $OUTDIR/$7 $OUTDIR/$8 $OUTDIR/$9
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $2 $3 $4 $5 $6 $7 $8 $9
+		fi
+	    fi
+            ;;
+	* )
+   	    if [ $# -eq 1 ]
+	    then 
+		if test "$INDIR" = "$OUTDIR"; then
+		    set - $INDIR/$1
+        	    $h5toh4 "$@" 2>/dev/null
+		else
+		    cp $INDIR/$1 $OUTDIR
+		    set - $OUTDIR/$1
+        	    $h5toh4 "$@" 2>/dev/null
+		    $RM $1
+		fi
+	    else
+ 		set - $INDIR/$1 $OUTDIR/$2
+        	$h5toh4 "$@" 2>/dev/null
+	    fi
+            ;;
+        esac
+    )
 
     case "$1" in
 
@@ -43,29 +160,27 @@ CONVERT()
 	shift
 	for i in $@
 	do
-		h4file=testfiles/`echo $i | $SED -e s/\.h5/.hdf/g`
+		h4file=`echo $i | $SED -e s/\.h5/.hdf/g`
 
 	    	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
 	    	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-		if test "testfiles/tloop.hdf" = "$h4file"; then
-			($H4DUMP dumpvg $h4file |head -50 >$actual) 2>/dev/null
+		if test "tloop.hdf" = "$h4file"; then
+			($H4DUMP dumpvg "$OUTDIR/$h4file" |head -50 >"$OUTDIR/$actual") 2>/dev/null
 		else
-			$H4DUMP dumpvg $h4file > $actual
+			$H4DUMP dumpvg "$OUTDIR/$h4file" > "$OUTDIR/$actual"
 		fi
-
-		$H4DUMP dumpvd $h4file >> $actual
-
-		$H4DUMP dumpsds $h4file >> $actual
+		$H4DUMP dumpvd "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
+		$H4DUMP dumpsds "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
 
     		# Results. We normalize the result to account for different output 
     		# widths.  That is, the test should succeed if the only
     		# differences are in white space. We have to do this the hard way
     		# because diff isn't always smart enough.
-    		tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
-    		tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
+		tr '\n' ' ' <"$OUTDIR/$actual" |tr -s ' \t' |fold >"$OUTDIR/$actual-norm"
+		tr '\n' ' ' <"$INDIR/$expect" |tr -s ' \t' |fold >"$OUTDIR/$expect-norm"
 
-    		if $cmp $expect-norm $actual-norm; then
+    		if $cmp "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"; then
 			set unrelated
 		else
 			if test "passed" = "$multirun"; then
@@ -74,14 +189,14 @@ CONVERT()
 				nerrors="`expr $nerrors + 1`"
 				multirun=failed
 			fi
-			test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
+			test yes = "$verbose" && $diff "$INDIR/$expect" "$OUTDIR/$actual" |sed 's/^/    /'
     		fi
 
     		# Clean up output file
-    		rm -f $expect-norm $actual-norm
+    		$RM "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"
     		if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-			rm -f $actual
-			rm -f $h4file
+			$RM "$OUTDIR/$actual"
+			$RM "$OUTDIR/$h4file"
     		fi
 	done
 	if test "passed" = "$multirun"; then
@@ -95,44 +210,44 @@ CONVERT()
 
    	if [ $# -eq 1 ]
 	then 
-		h4file=testfiles/`echo $1 | $SED -e s/\.h5/.hdf/`
+		h4file=`echo $1 | $SED -e s/\.h5/.hdf/`
 	else
-		h4file=testfiles/$2
+		h4file=$2
 	fi
 
 	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
 	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-	if test "testfiles/tloop.hdf" = "$h4file"; then
-		($H4DUMP dumpvg $h4file |head -50 >$actual) 2>/dev/null
+	if test "tloop.hdf" = "$h4file"; then
+		($H4DUMP dumpvg "$OUTDIR/$h4file" |head -50 >"$OUTDIR/$actual") 2>/dev/null
 	else
-		$H4DUMP dumpvg $h4file > $actual
+		$H4DUMP dumpvg "$OUTDIR/$h4file" > "$OUTDIR/$actual"
 	fi
-	$H4DUMP dumpvd $h4file >> $actual
-	$H4DUMP dumpsds $h4file >> $actual
+	$H4DUMP dumpvd "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
+	$H4DUMP dumpsds "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
 
 
 	# Results. We normalize the result to account for different output 
 	# widths.  That is, the test should succeed if the only
 	# differences are in white space. We have to do this the hard way
 	# because diff isn't always smart enough.
-	tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
-	tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
+	tr '\n' ' ' <"$OUTDIR/$actual" |tr -s ' \t' |fold >"$OUTDIR/$actual-norm"
+	tr '\n' ' ' <"$INDIR/$expect" |tr -s ' \t' |fold >"$OUTDIR/$expect-norm"
 
-	if $cmp $expect-norm $actual-norm; then
+	if $cmp "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"; then
 		echo " PASSED"
 	else
 		echo "*FAILED*"
 		echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
 		nerrors="`expr $nerrors + 1`"
-		test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
+		test yes = "$verbose" && $diff "$INDIR/$expect" "$OUTDIR/$actual" |sed 's/^/    /'
 	fi
 
 	# Clean up output file
-	rm -f $expect-norm $actual-norm
+	$RM "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"
 	if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-		rm -f $actual
-		rm -f $h4file
+		$RM "$OUTDIR/$actual"
+		$RM "$OUTDIR/$h4file"
 	fi
 	;;
 
@@ -148,7 +263,7 @@ CONVERT()
 ##############################################################################
 ##############################################################################
 
-$RM ./testfiles/*.hdf ./testfiles/*.tmp
+$RM $OUTDIR/*.hdf $OUTDIR/*.tmp
 
 #
 # The HDF4 filenames are created based upon the HDF5 filenames
@@ -199,7 +314,7 @@ CONVERT tstr2.h5
 # being that the HDF4 filenames are given explicitly.
 #
 
-$RM ./testfiles/*.tmp
+$RM $OUTDIR/*.tmp
 CONVERT tgroup.h5 tgroup.hdf
 CONVERT tdset.h5 tdset.hdf
 CONVERT tattr.h5 tattr.hdf
@@ -219,7 +334,7 @@ CONVERT tstr2.h5 tstr2.hdf
 # Here, multiple conversion are done on HDF5 files at one time.
 #
 
-$RM ./testfiles/*.hdf ./testfiles/*.tmp
+$RM $OUTDIR/*.hdf $OUTDIR/*.tmp
 CONVERT -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5
 CONVERT -m tcompound.h5 tall.h5 tloop.h5
 CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5

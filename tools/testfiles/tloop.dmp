@@ -1,4 +1,4 @@
-File name: testfiles/tloop.hdf 
+File name: ./testfiles/tloop.hdf 
 
 
 Vgroup:0
@@ -48,6 +48,6 @@ Entries:-
 Graphical representation of the file:-
 (vg#: vgroup;   vd: vdata)
 
-File name: testfiles/tloop.hdf 
+File name: ./testfiles/tloop.hdf 
 
-File name: testfiles/tloop.hdf 
+File name: ./testfiles/tloop.hdf 
