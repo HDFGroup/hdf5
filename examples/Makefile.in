@@ -12,20 +12,21 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 # These are the programs that `make all' will build, `make install'
 # will copy to the binaries directory, and `make uninstall' will
 # remove from that directory.
-PROGS=h5_chunk_read h5_compound h5_extend_write h5_group h5_read h5_write
+PROGS=h5_chunk_read h5_compound h5_extend_write h5_group h5_read h5_write \
+	h5_select h5_attribute
 
 # These are the programs that `make test' will run
 TESTS=
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
-CLEAN=
+CLEAN=*.h5
 
 # List all source files here.  The list of object files will be
 # created by replacing the `.c' with a `.o'.  This list is necessary
 # for building automatic dependencies.
 PROG_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
-	 h5_read.c h5_write.c
+	 h5_read.c h5_write.c h5_select.c h5_attribute.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
 # List the source files for each individual program.  Most programs
@@ -51,6 +52,13 @@ READ_OBJ=$(READ_SRC:.c=.o)
 WRITE_SRC=h5_write.c
 WRITE_OBJ=$(WRITE_SRC:.c=.o)
 
+SELECT_SRC=h5_select.c
+SELECT_OBJ=$(SELECT_SRC:.c=.o)
+
+
+ATTRIBUTE_SRC=h5_attribute.c
+ATTRIBUTE_OBJ=$(ATTRIBUTE_SRC:.c=.o)
+
 # How to build the programs...
 h5_chunk_read: $(CHUNK_READ_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(CHUNK_READ_OBJ) ../src/libhdf5.a $(LIBS)
@@ -64,10 +72,16 @@ h5_extend_write: $(EXTEND_WRITE_OBJ) ../src/libhdf5.a
 h5_group: $(GROUP_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(GROUP_OBJ) ../src/libhdf5.a $(LIBS)
 
+h5_write: $(WRITE_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(WRITE_OBJ) ../src/libhdf5.a $(LIBS)
+
 h5_read: $(READ_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(READ_OBJ) ../src/libhdf5.a $(LIBS)
 
-h5_write: $(WRITE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(WRITE_OBJ) ../src/libhdf5.a $(LIBS)
+h5_select: $(SELECT_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(SELECT_OBJ) ../src/libhdf5.a $(LIBS)
+
+h5_attribute: $(ATTRIBUTE_OBJ) ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ $(ATTRIBUTE_OBJ) ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@
