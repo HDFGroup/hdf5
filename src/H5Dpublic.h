@@ -39,6 +39,10 @@ typedef enum H5D_transfer_t {
 } H5D_transfer_t;
 
 
+/* Define the operator function pointer for H5Diterate() */
+typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, hsize_t ndim,
+        hssize_t *point, void *operator_data);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +60,8 @@ __DLL__ herr_t H5Dread (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 __DLL__ herr_t H5Dwrite (hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
 __DLL__ herr_t H5Dextend (hid_t dset_id, const hsize_t *size);
+__DLL__ herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
+            H5D_operator_t operator, void *operator_data);
 __DLL__ herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 __DLL__ herr_t H5Ddebug(hid_t dset_id, unsigned int flags);
 

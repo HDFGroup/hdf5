@@ -72,6 +72,8 @@ __DLL__ herr_t H5V_stride_optimize2(intn *np, hsize_t *elmt_size,
 				    hssize_t *stride2);
 __DLL__ herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
 			      size_t count);
+__DLL__ hsize_t H5V_array_offset(intn n, const hsize_t *total_size,
+				 const hssize_t *offset);
 
 
 /*-------------------------------------------------------------------------

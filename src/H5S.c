@@ -1818,6 +1818,7 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
 
     FUNC_LEAVE(SUCCEED);
 }   /* end H5Soffset_simple() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_debug

@@ -914,3 +914,92 @@ H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
 
     FUNC_LEAVE (ret_value);
 }   /* H5Sget_all_bounds() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_select_iterate
+ PURPOSE
+    Iterate over a "all" selection, calling a user's function for each
+        element.
+ USAGE
+    herr_t H5S_all_select_iterate(buf, type_id, space, operator, operator_data)
+        void *buf;      IN/OUT: Buffer containing elements to iterate over
+        hid_t type_id;  IN: Datatype ID of BUF array.
+        H5S_t *space;   IN: Dataspace object containing selection to iterate over
+        H5D_operator_t operator; IN: Function pointer to the routine to be
+                                called for each element in BUF iterated over.
+        void *operator_data;    IN/OUT: Pointer to any user-defined data
+                                associated with the operation.
+ RETURNS
+    Returns the return value of the last operator if it was non-zero, or zero
+    if all elements were processed. Otherwise returns a negative value.
+ DESCRIPTION
+    Iterates over the selected elements in a memory buffer, calling the user's
+    callback function for each element.  The selection in the dataspace is
+    modified so that any elements already iterated over are removed from the
+    selection if the iteration is interrupted (by the H5D_operator_t function
+    returning non-zero) in the "middle" of the iteration and may be re-started
+    by the user where it left off.
+
+    NOTE: Until "subtracting" elements from a selection is implemented,
+        the selection is not modified.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operator,
+        void *operator_data)
+{
+    hsize_t	mem_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
+    hsize_t	mem_offset[H5O_LAYOUT_NDIMS]; /* current coordinates */
+    hsize_t offset;             /* offset of region in buffer */
+    hsize_t nelemts;            /* Number of elements to iterate through */
+    void *tmp_buf;              /* temporary location of the element in the buffer */
+    intn rank;              /* Dataspace rank */
+    intn index;             /* Index to increment */
+    herr_t ret_value=0;     /* return value */
+
+    FUNC_ENTER (H5S_all_select_iterate, 0);
+
+    assert(buf);
+    assert(space);
+    assert(operator);
+    assert(H5I_DATATYPE != H5I_get_type(type_id));
+
+    /* Get the dataspace extent rank */
+    rank=space->extent.u.simple.rank;
+
+    /* Set up the size of the memory space */
+    HDmemcpy(mem_size, space->extent.u.simple.size, rank*sizeof(hsize_t));
+    mem_size[rank]=H5Tget_size(type_id);
+
+    /* Set the coordinates to zero */
+    HDmemset(mem_offset, 0, (rank+1)*sizeof(hsize_t));
+
+    /* Get the number of elements to iterate through */
+    nelemts=H5S_get_simple_extent_npoints(space);
+
+    /* Iterate through the entire dataset */
+    while(nelemts>0 && ret_value==0) {
+        /* Get the offset in the memory buffer */
+        offset=H5V_array_offset(rank+1,mem_size,mem_offset);
+        tmp_buf=((char *)buf+offset);
+
+        ret_value=(*operator)(tmp_buf,type_id,rank,mem_offset,operator_data);
+
+        /* Advance the coordinate (currently in C memory order) */
+        index=rank-1; /* Leave the byte offset in the element alone */
+        while(++mem_offset[index]==mem_size[index] && index>=0) {
+            mem_offset[index]=0;
+            index--;
+          } /* end while */
+
+        /* Decrement the number of elements to iterate through */
+        nelemts--;
+      } /* end while */
+
+    FUNC_LEAVE (ret_value);
+}   /* H5S_all_select_iterate() */

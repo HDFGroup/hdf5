@@ -679,3 +679,49 @@ H5V_array_fill(void *_dst, const void *src, size_t size, size_t count)
 
     FUNC_LEAVE(SUCCEED);
 }   /* H5V_array_fill() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5V_array_offset
+ *
+ * Purpose:	Given a coordinate description of a location in an array, this
+ *      function returns the byte offset of the coordinate.
+ *
+ *		The dimensionality of the whole array, the hyperslab, and the
+ *		returned stride array is N.  The whole array dimensions are
+ *		TOTAL_SIZE and the coordinate is at offset OFFSET.
+ *
+ * Return:	Success: Byte offset from beginning of array to start
+ *				of striding.
+ *
+ *		Failure: abort() -- should never fail
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June 22, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5V_array_offset(intn n, const hsize_t *total_size, const hssize_t *offset)
+{
+    hsize_t	    skip;	/*starting point byte offset		*/
+    hsize_t	    acc;	/*accumulator				*/
+    int		    i;		/*counter				*/
+
+    FUNC_ENTER(H5V_array_stride, (HDabort(), 0));
+
+    assert(n >= 0 && n <= H5V_HYPER_NDIMS);
+    assert(total_size);
+    assert(offset);
+
+    /* others */
+    for (i=n-1, acc=1, skip=0; i>=0; --i) {
+        skip += acc * offset[i];
+        acc *= total_size[i];
+    }
+
+    FUNC_LEAVE(skip);
+}
+

@@ -2579,6 +2579,93 @@ H5D_get_storage_size(H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Diterate
+ *
+ * Purpose:	This routine iterates over all the elements selected in a memory
+ *      buffer.  The callback function is called once for each element selected
+ *      in the dataspace.  The selection in the dataspace is modified so
+ *      that any elements already iterated over are removed from the selection
+ *      if the iteration is interrupted (by the H5D_operator_t function
+ *      returning non-zero) in the "middle" of the iteration and may be
+ *      re-started by the user where it left off.
+ *
+ *      NOTE: Until "subtracting" elements from a selection is implemented,
+ *          the selection is not modified.
+ *
+ * Parameters:
+ *      void *buf;          IN/OUT: Pointer to the buffer in memory containing
+ *                              the elements to iterate over.
+ *      hid_t type_id;      IN: Datatype ID for the elements stored in BUF.
+ *      hid_t space_id;     IN: Dataspace ID for BUF, also contains the
+ *                              selection to iterate over.
+ *      H5D_operator_t operator; IN: Function pointer to the routine to be
+ *                              called for each element in BUF iterated over.
+ *      void *operator_data;    IN/OUT: Pointer to any user-defined data
+ *                              associated with the operation.
+ *
+ * Operation information:
+ *      H5D_operator_t is defined as:
+ *          typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id,
+ *              hsize_t ndim, hssize_t *point, void *operator_data);
+ *
+ *      H5D_operator_t parameters:
+ *          void *elem;         IN/OUT: Pointer to the element in memory containing
+ *                                  the current point.
+ *          hid_t type_id;      IN: Datatype ID for the elements stored in ELEM.
+ *          hsize_t ndim;       IN: Number of dimensions for POINT array
+ *          hssize_t *point;    IN: Array containing the location of the element
+ *                                  within the original dataspace.
+ *          void *operator_data;    IN/OUT: Pointer to any user-defined data
+ *                                  associated with the operation.
+ *
+ *      The return values from an operator are: 
+ *          Zero causes the iterator to continue, returning zero when all
+ *              elements have been processed. 
+ *          Positive causes the iterator to immediately return that positive
+ *              value, indicating short-circuit success.  The iterator can be
+ *              restarted at the next element. 
+ *          Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              element.
+ *
+ * Return:	Returns the return value of the last operator if it was non-zero,
+ *          or zero if all elements were processed. Otherwise returns a
+ *          negative value.
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, June 11, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t operator,
+        void *operator_data)
+{
+    H5S_t		   *space = NULL;
+    herr_t ret_value=FAIL;
+
+    FUNC_ENTER(H5Diterate, FAIL);
+
+    /* Check args */
+    if (NULL==operator)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
+    if (buf==NULL)
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
+    if (H5I_DATATYPE != H5I_get_type(type_id))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
+    if (H5I_DATASPACE != H5I_get_type(space_id) ||
+            NULL == (space = H5I_object(space_id)))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace");
+
+    ret_value=H5S_select_iterate(buf,type_id,space,operator,operator_data);
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5Diterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Dvlen_reclaim
  *
  * Purpose:	Frees the buffers allocated for storing variable-length data
@@ -2614,7 +2701,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 /* Call H5Diterate with args, etc. */
 
     FUNC_LEAVE(ret_value);
-}
+}   /* end H5Dvlen_reclaim() */
 
 
 /*-------------------------------------------------------------------------

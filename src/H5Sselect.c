@@ -1683,3 +1683,72 @@ H5S_select_contiguous(const H5S_t *space)
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_contiguous() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_iterate
+ PURPOSE
+    Iterate over the selected elements in a memory buffer.
+ USAGE
+    herr_t H5S_select_iterate(buf, type_id, space, operator, operator_data)
+        void *buf;      IN/OUT: Buffer containing elements to iterate over
+        hid_t type_id;  IN: Datatype ID of BUF array.
+        H5S_t *space;   IN: Dataspace object containing selection to iterate over
+        H5D_operator_t operator; IN: Function pointer to the routine to be
+                                called for each element in BUF iterated over.
+        void *operator_data;    IN/OUT: Pointer to any user-defined data
+                                associated with the operation.
+ RETURNS
+    Returns the return value of the last operator if it was non-zero, or zero
+    if all elements were processed. Otherwise returns a negative value.
+ DESCRIPTION
+    Iterates over the selected elements in a memory buffer, calling the user's
+    callback function for each element.  The selection in the dataspace is
+    modified so that any elements already iterated over are removed from the
+    selection if the iteration is interrupted (by the H5D_operator_t function
+    returning non-zero) in the "middle" of the iteration and may be re-started
+    by the user where it left off.
+
+    NOTE: Until "subtracting" elements from a selection is implemented,
+        the selection is not modified.
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t operator,
+        void *operator_data)
+{
+    herr_t ret_value=FAIL;
+
+    FUNC_ENTER(H5S_select_iterate, FAIL);
+
+    /* Check args */
+    assert(buf);
+    assert(space);
+    assert(operator);
+    assert(H5I_DATATYPE != H5I_get_type(type_id));
+
+    switch(space->select.type) {
+        case H5S_SEL_POINTS:         /* Sequence of points selected */
+            ret_value=H5S_point_select_iterate(buf,type_id,space,operator,operator_data);
+            break;
+
+        case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
+            ret_value=H5S_hyper_select_iterate(buf,type_id,space,operator,operator_data);
+            break;
+
+        case H5S_SEL_ALL:            /* Entire extent selected */
+            ret_value=H5S_all_select_iterate(buf,type_id,space,operator,operator_data);
+            break;
+
+        case H5S_SEL_NONE:           /* Nothing selected */
+            ret_value=H5S_none_select_iterate(buf,type_id,space,operator,operator_data);
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+            break;
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}   /* end H5S_select_iterate() */
+
