@@ -167,7 +167,9 @@ static void test_h5d_basic_write(void)
 static void test_h5d_basic_read(void)
 {
     hatom_t fid1;   /* HDF5 File IDs */
+#if 0
     hatom_t oid1;   /* Dataset OID */
+#endif
     hatom_t did1;   /* Dataset ID */
     hatom_t tid1;   /* Datatype ID */
     hatom_t sid1;   /* Dataspace ID */
@@ -185,11 +187,16 @@ static void test_h5d_basic_read(void)
     fid1=H5Fopen(FILE,0,0);
     CHECK(fid1,FAIL,"H5Fopen");
 
+#if 0
     oid1=H5Mfind_name(fid1,H5_DATASET,DATA1_NAME);
     CHECK(oid1,FAIL,"H5Mfind_name");
 
     did1=H5Maccess(oid1);
     CHECK(did1,FAIL,"H5Maccess");
+#else
+    did1 = H5Mfind_name (fid1, H5_DATASET,  DATA1_NAME);
+    CHECK (did1, FAIL, "H5Mfind_name");
+#endif
 
     ret=H5Dget_info(did1,&tid1,&sid1);
     CHECK(ret,FAIL,"H5Pset_space");
