@@ -1,0 +1,81 @@
+<html>
+<head><title>
+FORTRAN General Library API -- h5i
+</title></head>
+
+<body bgcolor="#FFFFFF">
+
+
+
+<center>
+<h1>The FORTRAN 90 API to HDF5<br>h5: General Library</h1>
+</center>
+
+
+<dl>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5open_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5open_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Initializes the HDF5 library and the Fortran90 interface.
+
+<pre>
+          SUBROUTINE h5open_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5open_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5close_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5close_f</strong>
+
+<dt><strong>Purpose:</strong> 
+    Closes the HDF5 library and the Fortran90 interface.
+
+<pre>
+          SUBROUTINE h5close_f(hdferr) 
+            IMPLICIT NONE
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+          END SUBROUTINE h5close_f
+</pre>
+
+
+</dl>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+
+
+
+<address>
+<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+</address>
+
+Last modified:  19 February 2001
+<br>
+Describes HDF5 Release 1.5, Unreleased Development Branch
+
+</body>
+</html>
