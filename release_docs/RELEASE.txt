@@ -164,6 +164,10 @@ Documentation
 New Features
 ============
 
+    * Changed method for allocating chunked dataset blocks in parallel to only
+      allocate blocks that don't already exist, instead of attempting to create
+      all the blocks all the time.  This improves parallel I/O performance for
+      chunked datasets.  QAK - 2002/05/17
     * Allowed the call to MPI_File_sync to be avoided when the file is going to
       immediately be closed, improving performance.  QAK - 2002/05/13
     * Allow the metadata writes to be shared among all processes, easing the
@@ -184,9 +188,12 @@ New Features
       datatype conversion is unneccessary.  QAK - 2002/04/02
     * Improved performance of single hyperslab I/O when datatype conversion is
       unneccessary.  QAK - 2002/04/02
+    * New API function H5Dset_extent. Modifies the dimensions of a dataset, 
+      allows change to a lower dimension. The unused space in the file is freed.
+      PVN - 2002/03/31
     * Added new "H5Sget_select_type" API function to determine which type of
       selection is defined for a dataspace ("all", "none", "hyperslab" or
-      "point"). QAK - 2002/02/7
+      "point"). QAK - 2002/02/07
     * Added support to read/write portions of chunks directly, if they are
       uncompressed and too large to cache.  This should speed up I/O on chunked
       datasets for a few more cases.  QAK - 2002/01/31
@@ -279,9 +286,6 @@ New Features
     * A helper script called ``h5cc'', which helps compilation of HDF5
       programs, is now distributed with HDF5. See the reference manual
       for information on how to use this feature.
-    * New API function H5Dset_extent. Modifies the dimensions of a dataset, 
-      allows change to a lower dimension. The unused space in the file is freed.
-      PVN - 2002/03/31
 
 Support for new platforms and languages
 =======================================
