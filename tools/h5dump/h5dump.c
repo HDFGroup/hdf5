@@ -1377,6 +1377,13 @@ dump_all(hid_t group, const char *name, void * op_data)
 	    d_status = EXIT_FAILURE;
             ret = FAIL;
 	} else {
+            int new_len = strlen(prefix) + strlen(name) + 2;
+
+            if (prefix_len <= new_len) {
+                prefix_len = new_len + 1;
+                prefix = realloc(prefix, prefix_len);
+            }
+
 	    strcat(strcat(prefix, "/"), name);
 	    dump_function_table->dump_group_function(obj, name);
 	    strcpy(prefix, tmp);
@@ -1448,7 +1455,8 @@ dump_all(hid_t group, const char *name, void * op_data)
 		    dset_table->objs[i].displayed = 1;
 		    strcat(tmp, "/");
 		    strcat(tmp, name);
-		    strcpy(dset_table->objs[i].objname, tmp);
+		    free(dset_table->objs[i].objname);
+		    dset_table->objs[i].objname = HDstrdup(tmp);
 		}
 	    }
 
@@ -1590,7 +1598,8 @@ dump_group(hid_t gid, const char *name)
 	    indentation(indent);
 	    printf("%s \"%s\"\n", HARDLINK, group_table->objs[i].objname);
 	} else {
-	    strcpy(group_table->objs[i].objname, prefix);
+	    free(group_table->objs[i].objname);
+	    group_table->objs[i].objname = HDstrdup(prefix);
 	    group_table->objs[i].displayed = 1;
 	    H5Aiterate(gid, NULL, dump_attr, NULL);
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
@@ -2193,7 +2202,8 @@ handle_datasets(hid_t fid, char *dset, void *data)
                 end_obj(dump_header_format->datasetend,
                         dump_header_format->datasetblockend);
             } else {
-                strcpy(dset_table->objs[idx].objname, dset);
+                free(dset_table->objs[idx].objname);
+                dset_table->objs[idx].objname = HDstrdup(dset);
                 dset_table->objs[idx].displayed = 1;
                 dump_dataset(dsetid, dset, sset);
             }
@@ -2237,6 +2247,13 @@ handle_groups(hid_t fid, char *group, void * UNUSED data)
                 dump_header_format->groupblockend);
         d_status = EXIT_FAILURE;
     } else {
+        int new_len = strlen(group) + 1;
+
+        if (prefix_len <= new_len) {
+            prefix_len = new_len;
+            prefix = realloc(prefix, prefix_len);
+        }
+
         H5Gget_objinfo(gid, ".", TRUE, &statbuf);
         strcpy(prefix, group);
         dump_group(gid, group);
@@ -4342,7 +4359,8 @@ xml_dump_group(hid_t gid, const char *name)
             free(t_objname);
 	} else {
 	    /* first time this group has been seen -- describe it  */
-	    strcpy(group_table->objs[i].objname, prefix);
+	    free(group_table->objs[i].objname);
+	    group_table->objs[i].objname = HDstrdup(prefix);
 	    group_table->objs[i].displayed = 1;
 
 	    /* 1.  do all the attributes of the group */

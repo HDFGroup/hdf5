@@ -55,6 +55,7 @@
 #define FILE34  "tsplit_file"
 #define FILE35  "tfamily%05d.h5"
 #define FILE36  "tmulti"
+#define FILE37  "tlarge_objname.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2811,6 +2812,25 @@ void test_multi(void)
     H5Pclose(fapl);
 }
 
+static void test_large_objname(void)
+{
+    hid_t fid, group;
+    char grp_name[128];
+    register int i;
+  
+    fid = H5Fcreate(FILE37, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    group = H5Gcreate(fid, "this_is_a_large_group_name", 0);
+
+    for (i = 0; i < 50; ++i) {
+        sprintf(grp_name, "this_is_a_large_group_name%d", i);
+        group = H5Gcreate(group, grp_name, 0);
+    }
+
+    H5Gclose(group);
+    H5Fclose(fid);
+}
+
 int main(void)
 {
     test_group();
@@ -2859,6 +2879,8 @@ int main(void)
     test_split_file();
     test_family();
     test_multi();
+
+    test_large_objname();
 
     return 0;
 }

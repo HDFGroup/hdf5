@@ -69,7 +69,7 @@ extern int    get_option(int argc, const char **argv, const char *opt,
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
     unsigned long objno[2];
-    char objname[1024];
+    char *objname;
     int displayed;
     int recorded;
     int objflag;

@@ -155,6 +155,9 @@ TOOLTEST tsplit_file.ddl --filedriver=split tsplit_file
 TOOLTEST tfamily.ddl --filedriver=family tfamily%05d.h5
 TOOLTEST tmulti.ddl --filedriver=multi tmulti
 
+# test for files with group names which reach > 1024 bytes in size
+TOOLTEST tlarge_objname.ddl -w157 tlarge_objname.h5
+
 # test Subsetting
 TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5

@@ -318,6 +318,7 @@ init_table(table_t **tbl)
         table->objs[i].displayed = 0;
         table->objs[i].recorded = 0;
         table->objs[i].objflag = 0;
+        table->objs[i].objname = NULL;
     }
 
     *tbl = table;
@@ -495,7 +496,8 @@ find_objs(hid_t group, const char *name, void *op_data)
                 /* named data type */
                 info->type_table->objs[info->type_table->nobjs-1].objflag = 1;
             } else {
-                strcpy (info->type_table->objs[i].objname, tmp);
+                free(info->type_table->objs[i].objname);
+                info->type_table->objs[i].objname = HDstrdup(tmp);
                 info->type_table->objs[i].recorded = 1; 
 
                 /* named data type */  
@@ -649,11 +651,13 @@ add_obj(table_t *table, unsigned long *objno, char *objname)
             table->objs[i].displayed = 0;
             table->objs[i].recorded = 0;
             table->objs[i].objflag = 0;
+            table->objs[i].objname = NULL;
         }
     }
 
     i = table->nobjs++;
     table->objs[i].objno[0] = objno[0];
     table->objs[i].objno[1] = objno[1];
-    HDstrcpy(table->objs[i].objname, objname);
+    free(table->objs[i].objname);
+    table->objs[i].objname = HDstrdup(objname);
 }
