@@ -659,10 +659,10 @@ We provide 2 options for users to test HDF5 libraries and tools.
          hdf5\proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll
          hdf5\proj\hdf5_fortrandll\release\hdf5_fortrandll.dll
          hdf5\proj\hdf5_fortrandll\debug\hdf5_fortranddll.dll
-         hdf5\proj\libtest_cstubdll\release\libtest_cstubdll.dll
-         hdf5\proj\libtest_cstubdll\debug\libtest_cstubddll.dll
-         hdf5\proj\libtest_fortrandll\release\libtest_fortrandll.dll
-         hdf5\proj\libtest_fortrandll\debug\libtest_fortranddll.dll
+         hdf5\fortran\test\libtest_cstubdll\release\libtest_cstubdll.dll
+         hdf5\fortran\test\libtest_cstubdll\debug\libtest_cstubddll.dll
+         hdf5\fortran\test\libtest_fortrandll\release\libtest_fortrandll.dll
+         hdf5\fortran\test\libtest_fortrandll\debug\libtest_fortranddll.dll
 
       Run testhdf5_fortran.bat at the command prompt as below:
 
