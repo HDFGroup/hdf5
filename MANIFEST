@@ -1476,6 +1476,7 @@
 ./tools/testfiles/h5diff_629.txt
 ./tools/testfiles/h5diff_70.txt
 ./tools/testfiles/h5diff_80.txt
+./tools/testfiles/h5diff_81.txt
 
 #test files for h5repack
 ./tools/testfiles/test1.h5
