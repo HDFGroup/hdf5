@@ -227,6 +227,9 @@
 /* Define if you have the fseek64 function.  */
 #undef HAVE_FSEEK64
 
+/* Define if you have the getdents64 function.  */
+#undef HAVE_GETDENTS64
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
