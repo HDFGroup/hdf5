@@ -7,9 +7,8 @@ DATASET "str4" {
    DATASPACE  SIMPLE { ( 93 ) / ( 93 ) }
    DATA {
          "Four score and seven
-            years ago our fo"
-         "refathers brought forth on this continent a new n"
-         "ation\000"
+            years ago our forefathers brought fo"
+         "rth on this continent a new nation\000"
    }
 }
 }
