@@ -11,7 +11,7 @@
 namespace H5 {
 #endif
 
-const FileAccPropList FileAccPropList::DEFAULT( H5P_NO_CLASS );
+const FileAccPropList FileAccPropList::DEFAULT( H5P_DEFAULT );
 
 // Creates a file access property list
 FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}

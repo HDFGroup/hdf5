@@ -13,7 +13,7 @@
 namespace H5 {
 #endif
 
-const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_NO_CLASS );
+const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
 
 // Copy constructor: makes a copy of the original DSetCreatPropList object;
 DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList( orig ) {}

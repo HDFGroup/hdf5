@@ -11,7 +11,7 @@
 namespace H5 {
 #endif
 
-const PropList PropList::DEFAULT( H5P_NO_CLASS );
+const PropList PropList::DEFAULT( H5P_DEFAULT );
 
 // Default constructor - set id to 0 by default here but may be set
 // to a valid one, if any, by a subclass constructor.

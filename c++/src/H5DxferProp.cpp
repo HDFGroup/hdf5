@@ -11,7 +11,7 @@
 namespace H5 {
 #endif
 
-const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_NO_CLASS );
+const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
 
 // Creates a dataset memory and transfer property list
 DSetMemXferPropList::DSetMemXferPropList() : PropList( H5P_DATASET_XFER) {}
