@@ -21,6 +21,7 @@
          
 #include "h5test.h"
 
+#define KB              1024
 #define FAMILY_NUMBER   4
 #define FAMILY_SIZE     128 
 #define MULTI_SIZE      128 
@@ -49,6 +50,10 @@ const char *FILENAME[] = {
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Wednesday, June 23, 2004
+ *              Added test for H5Fget_filesize.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t          
@@ -57,7 +62,8 @@ test_sec2(void)
     hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     int         *fhandle=NULL;
-
+    haddr_t    file_size;
+    
     TESTING("SEC2 file driver");
    
     /* Set property list and file name for SEC2 driver. */
@@ -81,6 +87,16 @@ test_sec2(void)
     if(H5Fget_vfd_handle(file, H5P_DEFAULT, (void **)&fhandle)<0)
         goto error;
     if(*fhandle<0)
+        goto error;
+
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* There is no garantee the size of metadata in file is constant.  
+     * Just try to check if it's reasonable.  It's 2KB right now.
+     */ 
+    if(file_size<1*KB || file_size>4*KB)
         goto error;
 
     if(H5Fclose(file)<0)
@@ -111,6 +127,10 @@ error:
  *              Tuesday, Sept 24, 2002
  *              
  * Modifications:
+ *
+ *              Raymond Lu
+ *              Wednesday, June 23, 2004
+ *              Added test for H5Fget_filesize.
  * 
  *-------------------------------------------------------------------------
  */
@@ -120,6 +140,7 @@ test_core(void)
     hid_t       file=(-1), fapl, access_fapl = -1;
     char        filename[1024];
     void        *fhandle=NULL;
+    haddr_t    file_size;
 
     TESTING("CORE file driver");
 
@@ -147,6 +168,17 @@ test_core(void)
         printf("fhandle==NULL\n");
                goto error;
     }
+
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* There is no garantee the size of metadata in file is constant.  
+     * Just try to check if it's reasonable.  Currently, this file size
+     * is 976.
+     */ 
+    if(file_size<KB/2 || file_size>1*KB)
+        goto error;
 
     if(H5Fclose(file)<0)
         goto error;
@@ -177,6 +209,10 @@ error:
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Wednesday, June 23, 2004
+ *              Added test for H5Fget_filesize.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -190,6 +226,7 @@ test_family(void)
     int         *fhandle=NULL, *fhandle2=NULL;
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
+    haddr_t    file_size;
 
     TESTING("FAMILY file driver");
 
@@ -200,6 +237,14 @@ test_family(void)
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+        goto error;
+
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* The file size is supposed to be 2KB right now. */
+    if(file_size<1*KB || file_size>4*KB)
         goto error;
 
     /* Create and write dataset */
@@ -241,6 +286,14 @@ test_family(void)
     if(*fhandle2<0)
         goto error;
 
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* Some data has been written.  The file size should be bigger(4KB) now. */ 
+    if(file_size<2*KB || file_size>6*KB)
+        goto error;
+
     if(H5Sclose(space)<0)
         goto error;
     if(H5Dclose(dset)<0)
@@ -279,6 +332,10 @@ error:
  *
  * Modifications:
  *
+ *              Raymond Lu
+ *              Wednesday, June 23, 2004
+ *              Added test for H5Fget_filesize.
+ *  
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -288,6 +345,7 @@ test_multi(void)
     hid_t       access_fapl = -1;
     char        filename[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
+    haddr_t     file_size;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
@@ -341,9 +399,20 @@ test_multi(void)
     if (H5Pclose(access_fapl) < 0)
         goto error;
 
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* Before any data is written, the raw data file is empty.  So
+     * the file size is only the size of metadata file.  It's supposed
+     * to be 2KB.
+     */ 
+    if(file_size<1*KB || file_size>4*KB)
+        goto error;
+
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
         goto error;
-                                
+    
     for(i=0; i<MULTI_SIZE; i++)
         for(j=0; j<MULTI_SIZE; j++)
             buf[i][j] = i*10000+j;
@@ -364,6 +433,17 @@ test_multi(void)
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2)<0)
         goto error;
     if(*fhandle2<0)
+        goto error;
+
+    /* Check file size API */
+    if((file_size = H5Fget_filesize(file)) <= 0)
+        goto error;
+
+    /* After the data is written, the file size is huge because the 
+     * beginning of raw data file is set at HADDR_MAX/2.  It's supposed
+     * to be (HADDR_MAX/2 + 128*128*4) 
+     */
+    if(file_size < HADDR_MAX/2 || file_size > HADDR_MAX)
         goto error;
 
     if(H5Sclose(space)<0)

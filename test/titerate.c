@@ -859,7 +859,11 @@ static void test_links(void)
     herr_t ret;		    /* Generic return value */
     hid_t    gid, gid1;
     int i;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+    int       obj_type;     /* Type of object */
+#else /*H5_WANT_H5_V1_4_COMPAT*/
     H5G_obj_t obj_type;     /* Type of object */
+#endif /*H5_WANT_H5_V1_4_COMPAT*/
     hsize_t   nobjs;        /* Number of objects */
 
     /* Output message about test being performed */
