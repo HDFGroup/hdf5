@@ -536,7 +536,7 @@ static void H5FDstream_read_from_socket (H5FD_stream_t *stream,
     /* now receive the next chunk of data */
     size = recv (stream->socket, ptr, max_size, 0);
 
-    if (size < 0 && (EINTR == errno || EAGAIN == errno))
+    if (size < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK))
     {
       continue;
     }
@@ -806,7 +806,7 @@ static herr_t H5FD_stream_flush (H5FD_t *_stream)
       while (size)
       {
         bytes_send = send (sock, ptr, size, 0);
-        if (bytes_send < 0 && (EINTR == errno || EAGAIN == errno))
+        if (bytes_send < 0 && (EINTR == errno || EAGAIN == errno || EWOULDBLOCK))
         {
           continue;
         }
