@@ -16,6 +16,21 @@ Preconditions
           or Intel Fortran compiler if you want to build HDF5 Fortran
           libraries.    
 
+      Note: By default, WinZip will convert the unix end of line format
+            when extracting .tar file.  This conversion will cause
+            "false" failure in some HDF5 tools testings.
+ 
+            Please uncheck the "TAR file smart CR/LF conversion" option
+            in your WinZip to prevent the vonversion when extracting
+            .tar file.
+
+            To uncheck the "TAR file smart CR/LF conversion" option:
+
+            Invoke WinZip, go to "Options", select "Configuration..."
+
+            Click the "Miscellaneous" tab and uncheck "TAR file smart
+            CR/LF conversion" option, then click OK.
+
    2. Set up a directory structure to unpack the library.  For example:
 
 	        c:\                              (any drive)
