@@ -208,6 +208,11 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC17_SPACE_DIM2       8 
 #define MISC17_DSET_NAME        "Dataset"
 
+/* Definitions for misc. test #18 */
+#define MISC18_FILE             "tmisc18.h5"
+#define MISC18_DSET1_NAME       "Dataset1"
+#define MISC18_DSET2_NAME       "Dataset2"
+
 
 /****************************************************************
 **
@@ -2796,6 +2801,112 @@ test_misc17(void)
 
 /****************************************************************
 **
+**  test_misc18(): Test new object header information in H5G_stat_t
+**  struct.
+**
+****************************************************************/
+static void
+test_misc18(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t sid;          /* 'Space ID */
+    hid_t did1, did2;   /* Dataset IDs */
+    hid_t aid;          /* Attribute ID */
+    H5G_stat_t statbuf; /* Information about object */
+    char attr_name[32]; /* Attribute name buffer */
+    unsigned u;         /* Local index variable */
+    herr_t ret;         /* Generic return value */
+
+    /* Create the file */
+    fid = H5Fcreate(MISC18_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create first dataset */
+    did1 = H5Dcreate(fid, MISC18_DSET1_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Screate_simple");
+
+    /* Get object information */
+    ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
+
+    /* Create second dataset */
+    did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    CHECK(did2, FAIL, "H5Screate_simple");
+
+    /* Get object information */
+    ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
+
+    /* Loop creating attributes on each dataset, flushing them to the file each time */
+    for(u=0; u<10; u++) {
+        /* Set up attribute name */
+        sprintf(attr_name,"Attr %u",u);
+
+        /* Create & close attribute on first dataset */
+        aid = H5Acreate(did1, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Gget_objinfo");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "HAclose");
+
+        /* Create & close attribute on second dataset */
+        aid = H5Acreate(did2, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Gget_objinfo");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "HAclose");
+
+        /* Flush file, to 'fix' size of dataset object headers */
+        ret = H5Fflush(fid,H5F_SCOPE_GLOBAL);
+        CHECK(ret, FAIL, "HAclose");
+    } /* end for */
+
+    /* Get object information for dataset #1 now */
+    ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
+
+    /* Get object information for dataset #2 now */
+    ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
+    CHECK(ret, FAIL, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
+    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
+
+    /* Close second dataset */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close first dataset */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc18() */
+
+/****************************************************************
+**
 **  test_misc(): Main misc. test routine.
 ** 
 ****************************************************************/
@@ -2822,6 +2933,7 @@ test_misc(void)
     test_misc15();      /* Test that checking a file's access property list more than once works */
     test_misc16();      /* Test array of fixed-length string */
     test_misc17();      /* Test array of ASCII character */
+    test_misc18();      /* Test new object header information in H5G_stat_t struct */
 
 } /* test_misc() */
 
@@ -2863,4 +2975,5 @@ cleanup_misc(void)
     HDremove(MISC15_FILE);
     HDremove(MISC16_FILE);
     HDremove(MISC17_FILE);
+    HDremove(MISC18_FILE);
 }

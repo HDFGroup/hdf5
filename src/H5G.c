@@ -2539,7 +2539,6 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    /* Some other type of object */
 	    statbuf->objno = obj_ent.header;
 	    statbuf->nlink = H5O_link (&obj_ent, 0, dxpl_id);
-	    statbuf->type = H5G_LINK;
 	    if (NULL==H5O_read(&obj_ent, H5O_MTIME_ID, 0, &(statbuf->mtime), dxpl_id)) {
                 H5E_clear(NULL);
                 if (NULL==H5O_read(&obj_ent, H5O_MTIME_NEW_ID, 0, &(statbuf->mtime), dxpl_id)) {
@@ -2549,6 +2548,10 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 	    }
 	    statbuf->type = H5G_get_type(&obj_ent, dxpl_id);
 	    H5E_clear(NULL); /*clear errors resulting from checking type*/
+
+            /* Get object header information */
+            if(H5O_get_info(&obj_ent, &(statbuf->ohdr), dxpl_id)<0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object header information")
 	}
 
         /* Common code to retrieve the file's fileno */

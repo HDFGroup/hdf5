@@ -33,6 +33,7 @@
 
 #include "H5public.h"
 #include "H5Ipublic.h"
+#include "H5Opublic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,6 +78,7 @@ typedef struct H5G_stat_t {
     H5G_obj_t 		type;		/*basic object type		*/
     time_t		mtime;		/*modification time		*/
     size_t		linklen;	/*symbolic link value length	*/
+    H5O_stat_t          ohdr;           /* Object header information    */
 } H5G_stat_t;
     
 #define H5G_SAME_LOC 0

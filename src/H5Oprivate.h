@@ -234,6 +234,7 @@ H5_DLL void *H5O_copy(hid_t type_id, const void *mesg, void *dst);
 H5_DLL size_t H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg);
 H5_DLL herr_t H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share);
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+H5_DLL herr_t H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id);
 H5_DLL herr_t H5O_debug_id(hid_t type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			 int fwidth);

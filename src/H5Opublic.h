@@ -14,7 +14,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5Oproto.h
+ * Created:             H5Opublic.h
  *                      Aug  5 1997
  *                      Robb Matzke <matzke@llnl.gov>
  *
@@ -30,6 +30,13 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+
+typedef struct H5O_stat_t {
+    hsize_t size;               /* Total size of object header in file */
+    hsize_t free;               /* Free space within object header */
+    unsigned nmesgs;            /* Number of object header messages */
+    unsigned nchunks;           /* Number of object header chunks */
+} H5O_stat_t;
 
 #ifdef __cplusplus
 extern "C" {

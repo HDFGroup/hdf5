@@ -3279,6 +3279,67 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5O_get_info
+ *
+ * Purpose:	Retrieve information about an object header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Oct  7 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_info(H5G_entry_t *ent, H5O_stat_t *ostat, hid_t dxpl_id)
+{
+    H5O_t *oh=NULL;             /* Object header information */
+    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
+    hsize_t total_size;         /* Total amount of space used in file */
+    hsize_t free_space;         /* Free space in object header */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5O_get_info,FAIL);
+
+    /* Check args */
+    assert (ent);
+    assert (ostat);
+
+    /* Get the object header information */
+    if (NULL == (oh = H5AC_protect(ent->file, dxpl_id, H5AC_OHDR, ent->header, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header");
+
+    /* Iterate over all the messages, accumulating the total size & free space */
+    total_size=H5O_SIZEOF_HDR(ent->file);
+    free_space=0;
+    for (u = 0, curr_msg=&oh->mesg[0]; u < oh->nmesgs; u++,curr_msg++) {
+        /* Accumulate the size for this message */
+        total_size+= H5O_SIZEOF_MSGHDR(ent->file) + curr_msg->raw_size;
+
+        /* Check for this message being free space */
+	if (H5O_NULL_ID == curr_msg->type->id)
+            free_space+= H5O_SIZEOF_MSGHDR(ent->file) + curr_msg->raw_size;
+    } /* end for */
+
+    /* Set the information for this object header */
+    ostat->size=total_size;
+    ostat->free=free_space;
+    ostat->nmesgs=oh->nmesgs;
+    ostat->nchunks=oh->nchunks;
+
+done:
+    if (oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, FALSE)<0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header");
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_get_info() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_debug_id
  *
  * Purpose:	Act as a proxy for calling the 'debug' method for a
