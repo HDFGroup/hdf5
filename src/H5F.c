@@ -232,18 +232,6 @@ H5F_init_interface(void)
     
     FUNC_ENTER_NOAPI_NOINIT(H5F_init_interface);
 
-#ifdef OLD_METADATA_WRITE
-#ifdef H5_HAVE_PARALLEL
-    {
-        /* Allow MPI buf-and-file-type optimizations? */
-        const char *s = HDgetenv ("HDF5_MPI_1_METAWRITE");
-        if (s && HDisdigit(*s)) {
-            H5_mpiposix_1_metawrite_g = H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
-        }
-    }
-#endif /* H5_HAVE_PARALLEL */
-#endif /* OLD_METADATA_WRITE */
-
     /*
      * Initialize the atom group for the file IDs. There are two groups:
      * the H5I_FILE group contains all the ID's for files which are currently

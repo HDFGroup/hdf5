@@ -87,19 +87,16 @@ their defined effects are as follows:
             directory do not remove temporary HDF5 data files.
             The default is for each test to remove the files before exit.
 
+    <dt><tt>HDF5_DISABLE_VERSION_CHECK</tt> 
+        <dd>When set to <code>1</code>, HDF5 will not abort when the version
+            of the HDF5 headers doesn't match the version of the HDF5 library.
+
     <dt><tt>HDF5_MPI_OPT_TYPES</tt> 
             &nbsp;&nbsp;(for parallel beta version only)
         <dd>When set to <code>1</code>, PHDF5 will use the MPI optimized 
             code to perform parallel read/write accesses to datasets.
             Currently, this optimization fails when accessing extendable
             datasets.  The default is not to use the optimized code.
-
-    <dt><tt>HDF5_MPI_1_METAWRITE</tt> 
-            &nbsp;&nbsp;(for parallel beta version only)
-        <dd>When set to <code>1</code>, PHDF5 will write the metadata 
-            via process 0 of each opened parallel HDF5 file.  This should 
-            improve I/O throughput.  The default is not to use this 
-            optimization.
 
 </dl>
 </dir>

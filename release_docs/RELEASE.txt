@@ -128,6 +128,9 @@ Bug Fixes since HDF5-1.6.1 release
 
     Configuration
     -------------
+        - Parallel I/O with the MPI-I/O driver will no longer work if the
+            filesystem is not POSIX compliant.  The "HDF5_MPI_1_METAWRITE"
+            environment variable has been removed.  QAK - 2004/01/30
 
     Performance
     -------------

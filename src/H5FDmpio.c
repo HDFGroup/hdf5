@@ -52,6 +52,7 @@ typedef struct H5FD_mpio_t {
     MPI_Info	info;		/*file information			*/
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
+    hbool_t	truncate_pending; /* Whether a file truncation is pending */
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
@@ -140,17 +141,6 @@ static int H5FD_mpio_Debug[256] =
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 #endif
-
-#ifdef OLD_METADATA_WRITE
-/* Global var to allow elimination of redundant metadata writes
- * to be controlled by the value of an environment variable. */
-/* Use the elimination by default unless this is the Intel Red machine */
-#ifndef __PUMAGON__
-hbool_t	H5_mpi_1_metawrite_g = TRUE;
-#else
-hbool_t	H5_mpi_1_metawrite_g = FALSE;
-#endif
-#endif /* OLD_METADATA_WRITE */
 
 /* Interface initialization */
 #define PABLO_MASK	H5FD_mpio_mask
@@ -1006,10 +996,9 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     const H5FD_mpio_fapl_t	*fa=NULL;
     H5FD_mpio_fapl_t		_fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5FD_t			*ret_value;     /* Return value */
     MPI_Comm                    comm_dup=MPI_COMM_NULL;
     MPI_Info                    info_dup=MPI_INFO_NULL;
-
+    H5FD_t			*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL);
 
@@ -1063,8 +1052,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
-    mpi_code=MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh);
-    if (MPI_SUCCESS != mpi_code)
+    if (MPI_SUCCESS != (mpi_code=MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code);
     file_opened=1;
 
@@ -1074,39 +1062,63 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if (MPI_SUCCESS != (mpi_code=MPI_Comm_size (comm_dup, &mpi_size)))
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
 
-/*  Following changes in handling file-truncation made be rkyates and ppweidhaas, sep 99  */
-
-    /* Only processor p0 will get the filesize and broadcast it. */
-    if (mpi_rank == 0) {
-        /* Get current file size */
-        if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
-            HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code);
-    }
-
-    /* Broadcast file-size */
-    if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
-        HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-
-    /* Only if size > 0, truncate the file - if requested */
-    if (size && (flags & H5F_ACC_TRUNC)) {
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(fh, (MPI_Offset)0)))
-            HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code);
-
-	/* Don't let any proc return until all have truncated the file. */
-        if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(comm_dup)))
-            HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mpi_code);
-        size = 0;
-    }
-
     /* Build the return value and initialize it */
     if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpio_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-
     file->f = fh;
     file->comm = comm_dup;
     file->info = info_dup;
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
+
+    /* Determine if the file should be truncated */
+    if(flags & H5F_ACC_TRUNC) {
+#ifdef H5_MPI_FILE_SET_SIZE_BIG
+        /* Indicate that a 'truncate' operation is pending on the file */
+        file->truncate_pending=TRUE;
+
+        /* File is treated as zero size now */
+        size=0;
+#else /* H5_MPI_FILE_SET_SIZE_BIG */
+        /* Only processor p0 will get the filesize and broadcast it. */
+        if (mpi_rank == 0) {
+            /* Get current file size */
+            if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
+                HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
+        } /* end if */
+
+        /* Broadcast file-size */
+        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
+            HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+
+        /* Only truncate the file if it is non-zero length */
+        if(size) {
+            if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(fh, (MPI_Offset)0)))
+                HMPI_GOTO_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
+
+            /* Don't let any proc return until all have truncated the file. */
+            if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(comm_dup)))
+                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mpi_code)
+
+            /* File is zero size now */
+            size = 0;
+        } /* end if */
+#endif /* H5_MPI_FILE_SET_SIZE_BIG */
+    } /* end if */
+    else {
+        /* Only processor p0 will get the filesize and broadcast it. */
+        if (mpi_rank == 0) {
+            /* Get current file size */
+            if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
+                HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
+        } /* end if */
+
+        /* Broadcast file size */
+        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
+            HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+    } /* end else */
+
+    /* Set the size of the file (from library's perspective) */
     file->eof = H5FD_mpio_MPIOff_to_haddr(size);
 
     /* Set return value */
@@ -1159,8 +1171,8 @@ static herr_t
 H5FD_mpio_close(H5FD_t *_file)
 {
     H5FD_mpio_t	*file = (H5FD_mpio_t*)_file;
-    int				mpi_code;	/* mpi return code */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    int		mpi_code;	        /* MPI return code */
+    herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_close, FAIL);
 
@@ -1170,6 +1182,25 @@ H5FD_mpio_close(H5FD_t *_file)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
+    assert(file->eoa>0);
+
+#ifdef H5_MPI_FILE_SET_SIZE_BIG
+    /* Check if we should truncate the file */
+    if(file->truncate_pending) {
+        MPI_Offset 	mpi_off;        /* Offset to write test data at */
+
+        /* Some numeric conversions */
+        if (H5FD_mpio_haddr_to_MPIOff(file->eoa, &mpi_off)<0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
+
+        /* Truncate the extra data off the end */
+        /* (Don't worry about a barrier after the call, since we are closing) */
+        if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
+            HMPI_DONE_ERROR(NULL, "MPI_File_set_size failed", mpi_code)
+    } /* end if */
+#else /* H5_MPI_FILE_SET_SIZE_BIG */
+    assert(!file->truncate_pending);
+#endif /* H5_MPI_FILE_SET_SIZE_BIG */
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != (mpi_code=MPI_File_close(&(file->f)/*in,out*/)))
@@ -1820,36 +1851,17 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
-#ifdef OLD_METADATA_WRITE
-        /* Only p<round> will do the actual write if all procs in comm write same metadata */
-        if (H5_mpi_1_metawrite_g) {
-            if (file->mpi_rank != H5_PAR_META_WRITE) {
+        /* Only one process will do the actual write if all procs in comm write same metadata */
+        if (file->mpi_rank != H5_PAR_META_WRITE) {
 #ifdef H5FDmpio_DEBUG
-                if (H5FD_mpio_Debug[(int)'w']) {
-                    fprintf(stdout,
-                        "  proc %d: in H5FD_mpio_write (write omitted)\n",
-                        file->mpi_rank );
-                }
-#endif
-                HGOTO_DONE(SUCCEED) /* skip the actual write */
+            if (H5FD_mpio_Debug[(int)'w']) {
+                fprintf(stdout,
+                    "  proc %d: in H5FD_mpio_write (write omitted)\n",
+                    file->mpi_rank );
             }
+#endif
+            HGOTO_DONE(SUCCEED) /* skip the actual write */
         }
-#else /* OLD_METADATA_WRITE */
-        /* Remember that views are used */
-        use_view_this_time=TRUE;
-
-        /*
-         * Set the file view when we are using MPI derived types
-         */
-        /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_off, MPI_BYTE, MPI_BYTE, (char*)"native", file->info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
-
-        /* When using types, use the address as the displacement for
-         * MPI_File_set_view and reset the address for the read to zero
-         */
-        mpi_off=0;
-#endif /* OLD_METADATA_WRITE */
     } /* end if */
 
     /* Write the data. */
@@ -1896,20 +1908,17 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     file->eof = HADDR_UNDEF;
     
 done:
-#ifdef OLD_METADATA_WRITE
-    /* if only p<round> writes, need to broadcast the ret_value to other processes */
-    if ((type!=H5FD_MEM_DRAW) && H5_mpi_1_metawrite_g) {
-        if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
-            HMPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+    /* if only one process writes, need to broadcast the ret_value to other processes */
+    if (type!=H5FD_MEM_DRAW) {
+	if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
+	    HMPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
     } /* end if */
-#endif /* OLD_METADATA_WRITE */
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "proc %d: Leaving H5FD_mpio_write with ret_value=%d\n",
 	    file->mpi_rank, ret_value );
 #endif
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -1950,10 +1959,6 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
     int			mpi_code;	/* mpi return code */
     MPI_Offset          mpi_off;
     herr_t              ret_value=SUCCEED;
-#ifndef H5_MPI_FILE_SET_SIZE_BIG
-    uint8_t             byte=0;
-    MPI_Status          mpi_stat;
-#endif  /* OLD_WAY */
 
     FUNC_ENTER_NOAPI(H5FD_mpio_flush, FAIL);
 
@@ -1963,11 +1968,6 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 #endif
     assert(file);
     assert(H5FD_MPIO==file->pub.driver_id);
-
-#ifndef H5_MPI_FILE_SET_SIZE_BIG
-    /* Portably initialize MPI status variable */
-    HDmemset(&mpi_stat,0,sizeof(MPI_Status));
-#endif /* OLD_WAY */
 
     /* Extend the file to make sure it's large enough, then sync.
      * Unfortunately, keeping track of EOF is an expensive operation, so
@@ -1981,8 +1981,17 @@ H5FD_mpio_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
         /* Extend the file's size */
         if (MPI_SUCCESS != (mpi_code=MPI_File_set_size(file->f, mpi_off)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_size failed", mpi_code);
+
+        /* File does not need to be truncated now */
+        file->truncate_pending=FALSE;
 #else /* H5_MPI_FILE_SET_SIZE_BIG */
         if (0==file->mpi_rank) {
+            uint8_t             byte=0;
+            MPI_Status          mpi_stat;
+
+            /* Portably initialize MPI status variable */
+            HDmemset(&mpi_stat,0,sizeof(MPI_Status));
+
             if (H5FD_mpio_haddr_to_MPIOff(file->eoa-1, &mpi_off)<0)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset");
             if (MPI_SUCCESS != (mpi_code=MPI_File_read_at(file->f, mpi_off, &byte, 1, MPI_BYTE, &mpi_stat)))
