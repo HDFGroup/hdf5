@@ -169,10 +169,10 @@ H5P_init_interface(void)
     /*
      * Initialize the Generic Property class & object groups.
      */
-    if (H5I_init_group(H5I_GENPROP_CLS, H5I_GENPROPCLS_HASHSIZE, 0, NULL) < 0)
+    if (H5I_init_group(H5I_GENPROP_CLS, H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to initialize atom group");
-    if (H5I_init_group(H5I_GENPROP_LST, H5I_GENPROPOBJ_HASHSIZE, 0, NULL) < 0)
+    if (H5I_init_group(H5I_GENPROP_LST, H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close_list) < 0)
         HRETURN_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL,
 		      "unable to initialize atom group");
 
@@ -3567,7 +3567,7 @@ H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
     if(parent==H5P_DEFAULT)
         par_class=NULL;
     else if (NULL == (par_class = H5I_object(parent)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class");
 
     /* Create the new property list class */
     if (NULL==(pclass=H5P_create_class(par_class, name, hashsize, 0, cls_create, create_data, cls_close, close_data)))
@@ -3610,7 +3610,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
+H5P_genplist_t *H5P_create_list(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *tclass=NULL;        /* Temporary class pointer */
     H5P_genplist_t *plist=NULL;         /* New property list created */
@@ -3628,11 +3628,11 @@ H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
      */
 
     /* Allocate room for the property list & it's hash table of properties */
-    if (NULL==(plist = H5MM_calloc (sizeof(H5P_genplist_t)+((class->hashsize-1)*sizeof(H5P_genprop_t *)))))
+    if (NULL==(plist = H5MM_calloc (sizeof(H5P_genplist_t)+((pclass->hashsize-1)*sizeof(H5P_genprop_t *)))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,"memory allocation failed");
 
     /* Set class state */
-    plist->pclass = class;
+    plist->pclass = pclass;
     plist->nprops = 0;      /* Initially the plist has the same number of properties as the class */
     plist->class_init = 0;  /* Initially, wait until the class callback finishes to set */
 
@@ -3640,7 +3640,7 @@ H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
      * Copy class properties (up through list of parent classes also),
      * initialize each with default value & make property 'create' callback.
      */
-    tclass=class;
+    tclass=pclass;
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
             /* Walk through the hash table */
@@ -3649,7 +3649,7 @@ H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
                 /* Walk through the list of properties at each hash location */
                 while(tmp!=NULL) {
                     /* Check for property already existing in list */
-                    if(H5P_find_prop(plist->props,class->hashsize,tmp->name)==NULL) {
+                    if(H5P_find_prop(plist->props,tclass->hashsize,tmp->name)==NULL) {
                         /* Make a copy of the class's property */
                         if((pcopy=H5P_copy_prop(tmp))==NULL)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
@@ -3676,7 +3676,7 @@ H5P_genplist_t *H5P_create_list(H5P_genclass_t *class)
                         } /* end if */
 
                         /* Insert the initialized property into the property list */
-                        if(H5P_add_prop(plist->props,class->hashsize,pcopy)<0)
+                        if(H5P_add_prop(plist->props,tclass->hashsize,pcopy)<0)
                             HGOTO_ERROR (H5E_PLIST, H5E_CANTINSERT, NULL,"Can't insert property into class");
                     } /* end if */
 
@@ -3702,10 +3702,10 @@ done:
     if(ret_value==NULL) {
         if(plist!=NULL) {
             /* Close & free all the properties */
-            H5P_free_all_prop(plist->props,class->hashsize,1);
+            H5P_free_all_prop(plist->props,pclass->hashsize,1);
 
             /* Decrement the number of property lists derived from the class */
-            class->plists--;
+            pclass->plists--;
         } /* end if */
     } /* end if */
 
@@ -3884,10 +3884,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_register(H5P_genclass_t *class, const char *name, size_t size,
+herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
     void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
     H5P_prp_get_func_t prp_get, H5P_prp_close_func_t prp_close)
 {
+    H5P_genclass_t *new_class; /* New class pointer */
+    H5P_genprop_t *tmp_prop;   /* Temporary property pointer */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_register, FAIL);
@@ -3896,9 +3898,23 @@ herr_t H5P_register(H5P_genclass_t *class, const char *name, size_t size,
     assert(name);
     assert((size>0 && def_value!=NULL) || (size==0));
 
-/* Check for duplicate named properties */
-/* Check if class needs to be split because property lists or classes have been */
-/* created since the last modification was made to the class.  Insert property */
+    /* Check for duplicate named properties */
+    if((tmp_prop=H5P_find_prop(pclass->props,pclass->hashsize,name))!=NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
+
+    /* Check if class needs to be split because property lists or classes have
+     *  been created since the last modification was made to the class.
+     */
+    if(pclass->plists>0 || pclass->classes>0) {
+        if((new_class=H5P_create_class(pclass->parent,pclass->name,pclass->hashsize,
+                pclass->internal,pclass->create_func,pclass->create_data,
+                pclass->close_func,pclass->close_data))==NULL)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class");
+    } /* end if */
+    else {
+    } /* end else */
+
+/* Insert property */
 /* into property list class, increment modification made to class, reset */
 /* information about property lists & classes created */
 
@@ -4137,6 +4153,7 @@ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_close_func_t prp_close)
 {
+    H5P_genprop_t *tmp_prop;   /* Temporary property pointer */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_insert, FAIL);
@@ -4145,7 +4162,10 @@ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     assert(name);
     assert((size>0 && value!=NULL) || (size==0));
 
-/* Check for duplicate named properties */
+    /* Check for duplicate named properties */
+    if((tmp_prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))!=NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
+
 /* Insert property into property list */
 
     /* Set return value */
@@ -4857,8 +4877,9 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_close_list(H5P_genplist_t *plist)
+herr_t H5P_close_list(void *_plist)
 {
+    H5P_genplist_t *plist=(H5P_genplist_t *)_plist;
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_close_list, FAIL);
@@ -4945,23 +4966,25 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_close_class(H5P_genclass_t *class)
+H5P_close_class(void *_pclass)
 {
+    H5P_genclass_t *pclass=(H5P_genclass_t *)_pclass;
     herr_t ret_value = FAIL;     /* return value */
 
     FUNC_ENTER (H5P_close_class, FAIL);
 
-    assert(class);
+    assert(pclass);
 
     /* Decrement parent class's dependant property class value! */
-    if (H5P_access_class(class->parent, H5P_MOD_DEC_CLS) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't decrement class ref count");
+    if(pclass->parent)
+        if (H5P_access_class(pclass->parent, H5P_MOD_DEC_CLS) < 0)
+            HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't decrement class ref count");
     
     /* Mark class as deleted */
-    class->deleted = 1;
+    pclass->deleted = 1;
 
     /* Check dependancies on this class, deleting it if allowed */
-    if (H5P_access_class(class, H5P_MOD_CHECK) < 0)
+    if (H5P_access_class(pclass, H5P_MOD_CHECK) < 0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't check class ref count");
 
     /* Set return value */
