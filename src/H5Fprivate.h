@@ -254,6 +254,7 @@ typedef struct H5F_access_t {
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
+    size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations */
     uintn	gc_ref;		/* Garbage-collect references?		*/
     hid_t	driver_id;	/* File driver ID			*/
     void	*driver_info;	/* File driver specific information	*/
@@ -495,8 +496,8 @@ __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
 /* Functions that operate on contiguous storage wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
 			      hid_t dxpl_id, void *buf/*out*/);
-__DLL__ herr_t H5F_block_write(H5F_t *f, haddr_t addr, hsize_t size,
-			       hid_t dxpl_id, const void *buf);
+__DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
+                  hsize_t size, hid_t dxpl_id, const void *buf);
 
 /* Address-related macros and functions */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
