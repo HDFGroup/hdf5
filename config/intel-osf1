@@ -24,8 +24,10 @@ RANLIB=:
 LIBS="$LIBS -lnoop_stubs"
 
 # How to run serial and parallel test programs
-RUNSERIAL="yod -sz 1"
-RUNPARALLEL="yod -sz 8"
+# Default parallel tests can fit within 1 processor in -proc 3 mode.
+# You may want to use -proc 3 to use fewer physical nodes. 
+RUNSERIAL=${RUNSERIAL:-"yod -sz 1"}
+RUNPARALLEL=${RUNPARALLEL:-"yod -sz 8"}
 
 # CFLAGS must be set else configure set it to -g
 CFLAGS="$CFLAGS"
@@ -148,3 +150,5 @@ hdf5_cv_system_scope_threads=${hdf5_cv_system_scope_threads="no"}
 # Hard set MPI_File_set_size() working for files over 2GB to no
 hdf5_cv_mpi_file_set_size_big=${hdf5_cv_mpi_file_set_size_big='no'}
 
+# Set gettimeofday_tz to yes.
+hdf5_cv_gettimeofday_tz=${hdf5_cv_gettimeofday_tz='yes'}
