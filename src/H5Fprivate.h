@@ -212,6 +212,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags&(FL))
 /* B-tree node raw page */
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
+/* Base address of file */
+#define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
 #else /* H5F_PACKAGE */
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
@@ -222,6 +224,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
+#define H5F_BASE_ADDR(F)        (H5F_base_addr(F))
 #endif /* H5F_PACKAGE */
 
 

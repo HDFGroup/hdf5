@@ -1839,8 +1839,8 @@ rename_entry(H5C_t * cache_ptr,
 {
     herr_t         result;
     hbool_t	   done = TRUE; /* will set to FALSE if we have work to do */
-    haddr_t        old_addr;
-    haddr_t        new_addr;
+    haddr_t        old_addr = HADDR_UNDEF;
+    haddr_t        new_addr = HADDR_UNDEF;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 

@@ -2573,15 +2573,18 @@ herr_t
 H5Tencode(hid_t obj_id, unsigned char* buf, size_t* nalloc)
 {
     H5T_t       *dtype;
-    herr_t      ret_value;
+    herr_t      ret_value=SUCCEED;
     
     FUNC_ENTER_API (H5Tencode, FAIL);
 
     /* Check argument and retrieve object */
     if (NULL==(dtype=H5I_object_verify(obj_id, H5I_DATATYPE)))
 	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (nalloc==NULL)
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size")
 
-    ret_value = H5T_encode(dtype, buf, nalloc);
+    if(H5T_encode(dtype, buf, nalloc)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -2615,7 +2618,7 @@ H5Tdecode(unsigned char* buf)
     FUNC_ENTER_API (H5Tdecode, FAIL);
 
     if (buf==NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "empty buffer")
+	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer")
 
     if((dt = H5T_decode(buf))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");

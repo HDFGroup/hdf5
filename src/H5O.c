@@ -716,11 +716,10 @@ H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh)
                         assert(!H5F_addr_defined(oh->chunk[cont->chunkno].addr));
                         cont->size = oh->chunk[cont->chunkno].size;
 
-						/* Free the space we'd reserved in the file to hold this chunk */
-						H5MF_free_reserved(f, cont->size);
+                        /* Free the space we'd reserved in the file to hold this chunk */
+                        H5MF_free_reserved(f, (hsize_t)cont->size);
 
-						if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f,
-                                            H5FD_MEM_OHDR, dxpl_id, (hsize_t)cont->size)))
+                        if (HADDR_UNDEF==(cont->addr=H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)cont->size)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for object header data");
                         oh->chunk[cont->chunkno].addr = cont->addr;
                     }
@@ -970,7 +969,7 @@ H5O_compute_size(H5F_t *f, H5O_t *oh, size_t *size_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_reset(hid_t type_id, void *native)
+H5O_reset(unsigned type_id, void *native)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
@@ -978,7 +977,7 @@ H5O_reset(hid_t type_id, void *native)
     FUNC_ENTER_NOAPI(H5O_reset,FAIL);
 
     /* check args */
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
@@ -1050,7 +1049,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_free (hid_t type_id, void *mesg)
+H5O_free (unsigned type_id, void *mesg)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     void * ret_value;                   /* Return value */
@@ -1058,7 +1057,7 @@ H5O_free (hid_t type_id, void *mesg)
     FUNC_ENTER_NOAPI(H5O_free, NULL);
 
     /* check args */
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
     
@@ -1131,7 +1130,7 @@ H5O_free_real(const H5O_class_t *type, void *mesg)
  *-------------------------------------------------------------------------
  */
 void *
-H5O_copy (hid_t type_id, const void *mesg, void *dst)
+H5O_copy (unsigned type_id, const void *mesg, void *dst)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     void	*ret_value;             /* Return value */
@@ -1139,7 +1138,7 @@ H5O_copy (hid_t type_id, const void *mesg, void *dst)
     FUNC_ENTER_NOAPI(H5O_copy, NULL);
 
     /* check args */
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
@@ -1307,7 +1306,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_count (H5G_entry_t *ent, hid_t type_id, hid_t dxpl_id)
+H5O_count (H5G_entry_t *ent, unsigned type_id, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     int	ret_value;                      /* Return value */
@@ -1318,7 +1317,7 @@ H5O_count (H5G_entry_t *ent, hid_t type_id, hid_t dxpl_id)
     assert (ent);
     assert (ent->file);
     assert (H5F_addr_defined(ent->header));
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert (type);
 
@@ -1409,7 +1408,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5O_exists(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
+H5O_exists(H5G_entry_t *ent, unsigned type_id, int sequence, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     htri_t      ret_value;              /* Return value */
@@ -1418,7 +1417,7 @@ H5O_exists(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
 
     assert(ent);
     assert(ent->file);
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
     assert(sequence>=0);
@@ -1519,7 +1518,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_read(H5G_entry_t *ent, hid_t type_id, int sequence, void *mesg, hid_t dxpl_id)
+H5O_read(H5G_entry_t *ent, unsigned type_id, int sequence, void *mesg, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1530,7 +1529,7 @@ H5O_read(H5G_entry_t *ent, hid_t type_id, int sequence, void *mesg, hid_t dxpl_i
     assert(ent);
     assert(ent->file);
     assert(H5F_addr_defined(ent->header));
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
     assert(sequence >= 0);
@@ -1764,7 +1763,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_modify(H5G_entry_t *ent, hid_t type_id, int overwrite,
+H5O_modify(H5G_entry_t *ent, unsigned type_id, int overwrite,
    unsigned flags, unsigned update_time, const void *mesg, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
@@ -1776,7 +1775,7 @@ H5O_modify(H5G_entry_t *ent, hid_t type_id, int overwrite,
     assert(ent);
     assert(ent->file);
     assert(H5F_addr_defined(ent->header));
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
     assert(mesg);
@@ -2017,7 +2016,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hid_t type_id, unsigned flags,
+H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned flags,
     const void *mesg)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
@@ -2028,7 +2027,7 @@ H5O_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hid_t type_id, unsigned flags,
     /* check args */
     assert(f);
     assert(oh);
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
     assert(0==(flags & ~H5O_FLAG_BITS));
@@ -2469,7 +2468,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_remove(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
+H5O_remove(H5G_entry_t *ent, unsigned type_id, int sequence, hid_t dxpl_id)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
@@ -2480,7 +2479,7 @@ H5O_remove(H5G_entry_t *ent, hid_t type_id, int sequence, hid_t dxpl_id)
     assert(ent);
     assert(ent->file);
     assert(H5F_addr_defined(ent->header));
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
@@ -2641,15 +2640,15 @@ H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size)
     for (idx=0; idx<oh->nmesgs; idx++) {
 	if (oh->mesg[idx].chunkno==chunkno) {
             if (H5O_NULL_ID == oh->mesg[idx].type->id &&
-                (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
-                 oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
+                    (oh->mesg[idx].raw + oh->mesg[idx].raw_size ==
+                     oh->chunk[chunkno].image + oh->chunk[chunkno].size)) {
 
                 delta = MAX (H5O_MIN_SIZE, aligned_size - oh->mesg[idx].raw_size);
                 assert (delta=H5O_ALIGN (delta));
 
-	/* Reserve space in the file to hold the increased chunk size */
-	if( H5MF_reserve(f, delta) < 0 )
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file");
+                /* Reserve space in the file to hold the increased chunk size */
+                if( H5MF_reserve(f, (hsize_t)delta) < 0 )
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file");
 
                 oh->mesg[idx].dirty = TRUE;
                 oh->mesg[idx].raw_size += delta;
@@ -2678,12 +2677,12 @@ H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno, size_t size)
         } /* end if */
     }
 
-	/* Reserve space in the file */
+    /* Reserve space in the file */
     delta = MAX(H5O_MIN_SIZE, aligned_size+H5O_SIZEOF_MSGHDR(f));
     delta = H5O_ALIGN(delta);
 
-	if( H5MF_reserve(f, delta) < 0 )
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file");
+    if( H5MF_reserve(f, (hsize_t)delta) < 0 )
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file");
 
     /* create a new null message */
     if (oh->nmesgs >= oh->alloc_nmesgs) {
@@ -2824,7 +2823,7 @@ H5O_alloc_new_chunk(H5F_t *f, H5O_t *oh, size_t size)
     assert (size == H5O_ALIGN (size));
 
     /* Reserve space in the file to hold the new chunk */
-    if( H5MF_reserve(f, size) < 0 )
+    if( H5MF_reserve(f, (hsize_t)size) < 0 )
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to reserve space in file for new chunk");
 
     /*
@@ -3128,7 +3127,7 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg)
+H5O_raw_size(unsigned type_id, H5F_t *f, const void *mesg)
 {
     const H5O_class_t *type;            /* Actual H5O class type for the ID */
     size_t      ret_value;       /* Return value */
@@ -3136,7 +3135,7 @@ H5O_raw_size(hid_t type_id, H5F_t *f, const void *mesg)
     FUNC_ENTER_NOAPI(H5O_raw_size,0);
 
     /* Check args */
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert (type);
     assert (type->raw_size);
@@ -3172,7 +3171,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
+H5O_get_share(unsigned type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
 {
     const H5O_class_t *type;    /* Actual H5O class type for the ID */
     herr_t ret_value;           /* Return value */
@@ -3180,7 +3179,7 @@ H5O_get_share(hid_t type_id, H5F_t *f, const void *mesg, H5O_shared_t *share)
     FUNC_ENTER_NOAPI(H5O_get_share,FAIL);
 
     /* Check args */
-    assert(type_id>=0 && type_id<(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])));
+    assert(type_id<NELMTS(message_type_g));
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert (type);
     assert (type->get_share);
@@ -3445,7 +3444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, hid_t type_id)
+H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, unsigned type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
     size_t              size;             /* size of the message*/
@@ -3454,26 +3453,22 @@ H5O_encode(unsigned char *buf, void *obj, size_t *nalloc, hid_t type_id)
     FUNC_ENTER_NOAPI(H5O_encode,FAIL);
 
     /* check args */
-    if(type_id<0 || type_id>=(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object type");
-
-    /* map the type ID to the actual type object */
-    if((type=message_type_g[type_id])==NULL)
-        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, FAIL, "unable to find object type");
+    assert(type_id<NELMTS(message_type_g));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
 
     /* check buffer size */
-    if ((size=(type->raw_size)(NULL, obj))<0)
+    if ((size=(type->raw_size)(NULL, obj))<=0)
         HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 
     /* Don't encode if buffer size isn't big enough */
-    if(!buf || *nalloc<size) {
+    if(!buf || *nalloc<size)
         *nalloc = size;
-	HGOTO_DONE(ret_value);
-    }
-    
-    /* Encode */    
-    if ((type->encode)(NULL, buf, obj)<0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+    else {
+        /* Encode */    
+        if ((type->encode)(NULL, buf, obj)<0)
+            HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3499,21 +3494,17 @@ done:
  *-------------------------------------------------------------------------
  */
 void*
-H5O_decode(unsigned char *buf, hid_t type_id)
+H5O_decode(unsigned char *buf, unsigned type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
-    size_t              size;             /* size of the message*/
-    void 	        *ret_value=NULL;       /* Return value */
+    void 	        *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_decode,NULL);
 
     /* check args */
-    if(type_id<0 || type_id>=(hid_t)(sizeof(message_type_g)/sizeof(message_type_g[0])))
-        HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, NULL, "invalid object type");
-
-    /* map the type ID to the actual type object */
-    if((type=message_type_g[type_id])==NULL)
-        HGOTO_ERROR (H5E_OHDR, H5E_BADTYPE, NULL, "unable to find object type");
+    assert(type_id<NELMTS(message_type_g));
+    type=message_type_g[type_id];    /* map the type ID to the actual type object */
+    assert(type);
 
     /* decode */
     ret_value = (type->decode)(NULL, 0, buf, NULL);

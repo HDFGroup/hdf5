@@ -33,8 +33,8 @@
  *
  */
 typedef enum {
-	H5I_UNINIT		= (-2), /*uninitialized type			*/
-	H5I_BADID		= (-1),	/*invalid Type				    */
+    H5I_UNINIT		= (-2), /*uninitialized type			*/
+    H5I_BADID		= (-1),	/*invalid Type				    */
     H5I_FILE		= 1,	/*type ID for File objects		    */
     H5I_FILE_CLOSING,		/*files pending close due to open objhdrs   */
     H5I_GROUP,		        /*type ID for Group objects		    */

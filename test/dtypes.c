@@ -1885,13 +1885,13 @@ test_encode(void)
         double d;
     };
     hid_t       file=-1, tid1=-1, tid2=-1;
-    hid_t       decoded_tid1, decoded_tid2;
+    hid_t       decoded_tid1=-1, decoded_tid2=-1;
     char        filename[1024];
     char        compnd_type[]="Compound_type", enum_type[]="Enum_type";
     short       enum_val;
     size_t      cmpd_buf_size = 0;
     size_t      enum_buf_size = 0;
-    unsigned char       *cmpd_buf, *enum_buf;
+    unsigned char       *cmpd_buf=NULL, *enum_buf=NULL;
 
     TESTING("functions of encoding and decoding data types");
 
@@ -1990,6 +1990,13 @@ test_encode(void)
         goto error;
     } /* end if */
 
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid1, tid1)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
     /* Query member number and member index by name, for compound type. */
     if(H5Tget_nmembers(decoded_tid1)!=4) {
         H5_FAILED();
@@ -2023,6 +2030,13 @@ test_encode(void)
     if((decoded_tid2=H5Tdecode(enum_buf))<0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid2, tid2)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
         goto error;
     } /* end if */
 
@@ -2116,6 +2130,13 @@ test_encode(void)
         goto error;
     } /* end if */
 
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid1, tid1)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
+        goto error;
+    } /* end if */
+
     /* Query member number and member index by name, for compound type. */
     if(H5Tget_nmembers(decoded_tid1)!=4) {
         H5_FAILED();
@@ -2152,6 +2173,13 @@ test_encode(void)
     if((decoded_tid2=H5Tdecode(enum_buf))<0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
+        goto error;
+    } /* end if */
+
+    /* Verify that the datatype was copied exactly */
+    if(H5Tequal(decoded_tid2, tid2)<=0) {
+        H5_FAILED();
+        printf("Datatype wasn't encoded & decoded identically\n");
         goto error;
     } /* end if */
 

@@ -4347,7 +4347,6 @@ H5F_get_eoa(const H5F_t *f)
 {
     haddr_t	ret_value;
 
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI(H5F_get_eoa, HADDR_UNDEF)
 
     assert(f);
@@ -4359,7 +4358,7 @@ H5F_get_eoa(const H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_base_addr() */
+} /* end H5F_get_eoa() */
 
 #ifdef H5_HAVE_PARALLEL
 

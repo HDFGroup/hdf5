@@ -341,7 +341,7 @@ H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap)
      * When the heap is being flushed to disk, release the file space reserved
      * for it.
      */
-    H5MF_free_reserved(f, heap->disk_resrv);
+    H5MF_free_reserved(f, (hsize_t)heap->disk_resrv);
     heap->disk_resrv = 0;
 
     /*
@@ -1021,7 +1021,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
 	else
 		disk_resrv = heap->mem_alloc + need_more - heap->disk_resrv;
 
-	if( H5MF_reserve(f, disk_resrv) < 0 )
+	if( H5MF_reserve(f, (hsize_t)disk_resrv) < 0 )
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, (size_t)(-1), "unable to reserve space in file");
 
 	/* Update heap's record of how much space it has reserved */
@@ -1359,8 +1359,15 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free local heap data");
     } /* end else */
 
+    /* Release the local heap metadata from the cache */
+    if (H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, TRUE)<0) {
+        heap = NULL;
+        HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
+    }
+    heap = NULL;
+
 done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, TRUE)<0)
+    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, FALSE)<0)
 	HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap");
 
     FUNC_LEAVE_NOAPI(ret_value);

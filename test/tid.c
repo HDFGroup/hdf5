@@ -7,7 +7,7 @@
 #include "H5Ipkg.h"
 
 	/* Test basic functionality of registering and deleting types and IDs */
-int id_test()
+static int id_test(void)
 {
 	H5I_type_t myType = H5I_BADID;
 	hid_t arrayID = H5I_INVALID_HID;
@@ -183,16 +183,14 @@ out:
 
 
 	/* A dummy search function for the next test */
-int test_search_func(void * ptr1, void * ptr2);
-int test_search_func(void * ptr1, void * ptr2) { return 0; }
+static int test_search_func(void UNUSED * ptr1, void UNUSED * ptr2) { return 0; }
 
 	/* Ensure that public functions cannot access "predefined" ID types */
-int id_predefined_test()
+static int id_predefined_test(void )
 {
 	void * testObj;
 	hid_t testID;
 	hid_t typeID = H5I_INVALID_HID;
-	int testInt;
 	void * testPtr;
 	herr_t testErr;
 
@@ -289,7 +287,7 @@ out:
 	/* destroy it, this test will mysteriously fail (because it will expect there to */
 	/* be one more "free" type ID than there is). */
 	/* H5I_NTYPES is defined in h5public.h, MAX_NUM_TYPES is defined in h5pkg.h */
-int test_id_type_list()
+static int test_id_type_list(void)
 {
 	H5I_type_t startType;	/* The first type ID we were assigned in this test */
 	H5I_type_t currentType;
@@ -358,7 +356,7 @@ out:
 	return -1;
 }
 
-void test_ids()
+void test_ids(void)
 {
 	id_test();
 	id_predefined_test();

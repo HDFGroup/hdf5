@@ -1816,7 +1816,7 @@ error:
 static int
 test_resurrect_dataset(void)
 {
-    hid_t       f, s, d, fapl;
+    hid_t       f=-1, s=-1, d=-1, fapl=-1;
     char	filename[1024];
 
     TESTING("Resurrecting dataset after deletion");

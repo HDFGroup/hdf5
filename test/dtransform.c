@@ -6,7 +6,7 @@
 int compare_int(int* a, int* b, int tol);
 int compare_float(float* a, float* b, float tol);
 
-int main()
+int main(void)
 {
     hid_t file_id, dxpl_id_f_to_c, dxpl_id_c_to_f, dxpl_id_simple, dset_id_int, dset_id_float, datatype, dataspace;
     hsize_t dim[2] = {ROWS, COLS};
