@@ -53,7 +53,7 @@ void parallel_print(const char* format, ...)
             va_end(ap);
 	    va_start(ap, format);
 
-#ifdef VSNPRINTF_WORKS
+#ifdef H5_VSNPRINTF_WORKS
 	    if(bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
 #else
 	    if((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
