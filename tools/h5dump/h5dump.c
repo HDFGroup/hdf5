@@ -55,10 +55,6 @@ static int          display_dcpl      = FALSE; /*dcpl */
 static int          display_fi        = FALSE; /*file index */   
 static int          display_ai        = TRUE;  /*array index */   
 static int          display_escape    = FALSE; /*escape non printable characters */ 
-static int          display_dsets     = TRUE;  /*display datasets */ 
-static int          display_groups    = TRUE;  /*display groups */
-static int          display_dtypes    = TRUE;  /*display named datatypes */
-static int          display_links     = TRUE;  /*display soft links */
 
 
 /**
@@ -336,7 +332,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHLGTEirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -1268,8 +1264,7 @@ dump_all(hid_t group, const char *name, void * op_data)
     switch (statbuf.type) {
     case H5G_LINK:
      
-     if (display_links) 
-     {
+  
       indentation(indent);
       targbuf = malloc(statbuf.linklen);
       
@@ -1358,12 +1353,11 @@ dump_all(hid_t group, const char *name, void * op_data)
       }
       
       free(targbuf);
-     } /*display_links */
-     break;
+
+      break;
 
     case H5G_GROUP:
-     if (display_groups) 
-     {
+    
       if ((obj = H5Gopen(group, name)) < 0) {
        error_msg(progname, "unable to dump group \"%s\"\n", name);
        d_status = EXIT_FAILURE;
@@ -1381,12 +1375,10 @@ dump_all(hid_t group, const char *name, void * op_data)
        strcpy(prefix, tmp);
        H5Gclose(obj);
       }
-     } /*display_groups*/
      break;
 
     case H5G_DATASET:
-     if (display_dsets) 
-     {
+
       if ((obj = H5Dopen(group, name)) >= 0) {
        /* hard link */
        H5Gget_objinfo(obj, ".", TRUE, &statbuf);
@@ -1481,12 +1473,10 @@ dump_all(hid_t group, const char *name, void * op_data)
        d_status = EXIT_FAILURE;
        ret = FAIL;
       }
-     } /*display_dsets*/
      break;
      
     case H5G_TYPE:
-     if (display_dtypes) 
-     {
+  
       if ((obj = H5Topen(group, name)) < 0) {
        error_msg(progname, "unable to dump data type \"%s\"\n", name);
        d_status = EXIT_FAILURE;
@@ -1495,7 +1485,6 @@ dump_all(hid_t group, const char *name, void * op_data)
        dump_function_table->dump_named_datatype_function(obj, name);
        H5Tclose(obj);
       }
-     } /*display_dtypes */
      break;
      
     default:
@@ -3041,18 +3030,6 @@ parse_start:
             break;
         case 'e':
             display_escape = TRUE;
-            break;
-        case 'L':
-            display_links = FALSE;
-            break;
-        case 'G':
-            display_groups = FALSE;
-            break;
-        case 'T':
-            display_dtypes = FALSE;
-            break;
-        case 'E':
-            display_dsets = FALSE;
             break;
         case 'H':
             display_data = FALSE;

@@ -21,7 +21,7 @@ FILE_CONTENTS {
  dataset    /fletcher32
  group      /g1
  dataset    /g1/mydset
- dataset    /hlink to all (HARDLINK)
+ dataset    /hlink to all -> /all
  dataset    /myfilter
  datatype   /mytype
  datatype   /myvlen
