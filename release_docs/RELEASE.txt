@@ -46,6 +46,8 @@ New Features
 
     Parallel Library:
     -----------------
+        - Allow compressed, chunked datasets to be read in parallel.
+            QAK - 2004/10/04
 
     Tools:
     ------

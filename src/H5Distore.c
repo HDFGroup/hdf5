@@ -1922,16 +1922,10 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
      * writing to other elements in the same chunk.  Do a direct
      * read-through of only the elements requested.
      */
-    if ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && dset->shared->dcpl_cache.pline.nused==0 && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file)))) {
+    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
+            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
-
-#ifdef H5_HAVE_PARALLEL
-        /* Additional sanity check when operating in parallel */
-        if (chunk_addr==HADDR_UNDEF || dset->shared->dcpl_cache.pline.nused>0)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
-#endif /* H5_HAVE_PARALLEL */
 
         /* Set up the storage information for the chunk */
         chk_store.contig.dset_addr=chunk_addr;
@@ -2125,16 +2119,20 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * writing to other elements in the same chunk.  Do a direct
      * write-through of only the elements requested.
      */
-    if ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && dset->shared->dcpl_cache.pline.nused==0 && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file)))) {
+#ifdef H5_HAVE_PARALLEL
+    /* Additional sanity checks when operating in parallel */
+    if(IS_H5FD_MPI(dset->ent.file)) {
+        if (chunk_addr==HADDR_UNDEF)
+            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
+        if (dset->shared->dcpl_cache.pline.nused>0)
+            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel");
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
+            || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
-
-#ifdef H5_HAVE_PARALLEL
-        /* Additional sanity check when operating in parallel */
-        if (chunk_addr==HADDR_UNDEF || dset->shared->dcpl_cache.pline.nused>0)
-            HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk");
-#endif /* H5_HAVE_PARALLEL */
 
         /* Set up the storage information for the chunk */
         chk_store.contig.dset_addr=chunk_addr;

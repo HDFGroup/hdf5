@@ -67,7 +67,7 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
  *-------------------------------------------------------------------------
  */
 htri_t
-H5D_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags,const H5O_layout_t *layout)
+H5D_mpio_opt_possible( const H5D_t *dset, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags)
 {
     htri_t c1,c2;               /* Flags whether a selection is optimizable */
     htri_t ret_value=TRUE;
@@ -75,6 +75,7 @@ H5D_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *f
     FUNC_ENTER_NOAPI(H5D_mpio_opt_possible, FAIL);
 
     /* Check args */
+    assert(dset);
     assert(mem_space);
     assert(file_space);
 
@@ -120,10 +121,14 @@ H5D_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *f
         int mpi_code;               /* MPI return code */
         unsigned u;                 /* Local index variable */
 
+        /* Disallow collective I/O if there are any I/O filters on chunks */
+        if(dset->shared->dcpl_cache.pline.nused>0)
+            HGOTO_DONE(FALSE)
+
         /* Getting MPI communicator and rank */
-        if((comm = H5F_mpi_get_comm(file))==MPI_COMM_NULL)
+        if((comm = H5F_mpi_get_comm(dset->ent.file))==MPI_COMM_NULL)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
-        if((mpi_rank = H5F_mpi_get_rank(file))<0)
+        if((mpi_rank = H5F_mpi_get_rank(dset->ent.file))<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
 
       /* Currently collective chunking storage 
@@ -154,8 +159,8 @@ H5D_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *f
         if(H5S_SELECT_BOUNDS(file_space,startf,endf)==FAIL)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE,FAIL, "invalid check for single selection blocks");
 
-        for(u=0; u < layout->u.chunk.ndims; u++) 
-            chunk_dim[u] = layout->u.chunk.dim[u];
+        for(u=0; u < dset->shared->layout.u.chunk.ndims; u++) 
+            chunk_dim[u] = dset->shared->layout.u.chunk.dim[u];
 
         /* Case 1: check whether all hyperslab in this process is inside one chunk.
            Note: we don't handle when starting point is less than zero since that may cover

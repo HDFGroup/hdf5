@@ -2537,10 +2537,6 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set pipeline")
 
-    /* If MPI VFD is used, no filter support yet. */
-    if(IS_H5FD_MPI(dataset->ent.file) && pline.nused > 0)
-        HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel IO does not support filters yet")
-    
     /*
      * Get the raw data layout info.  It's actually stored in two locations:
      * the storage message of the dataset (dataset->storage) and certain

@@ -41,7 +41,7 @@ void *old_client_data;			/* previous error handler arg.*/
 /* FILENAME and filenames must have the same number of names.
  * Use PARATESTFILE in general and use a separated filename only if the file
  * created in one test is accessed by a different test.
- * filenames[0] is reserved as the file name for PARATESTFILE.
+ * FILENAME[0] is reserved as the file name for PARATESTFILE.
  */
 #define PARATESTFILE filenames[0]
 const char *FILENAME[2]={
@@ -334,6 +334,7 @@ int main(int argc, char **argv)
     int mpi_size, mpi_rank;				/* mpi variables */
     H5Ptest_param_t ndsets_params, ngroups_params;
     H5Ptest_param_t collngroups_params;
+    H5Ptest_param_t io_mode_confusion_params;
 
     /* Un-buffer the stdout and stderr */
     setbuf(stderr, NULL);
@@ -384,6 +385,11 @@ int main(int argc, char **argv)
     AddTest("eidsetw2", extend_writeInd2, NULL, 
 	    "extendible dataset independent write #2", PARATESTFILE);
 
+#ifdef H5_HAVE_FILTER_DEFLATE
+    AddTest("cmpdsetr", compress_readAll, NULL, 
+	    "compressed dataset collective read", PARATESTFILE);
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
     ndsets_params.name = PARATESTFILE;
     ndsets_params.count = ndatasets;
     AddTest("ndsetw", multiple_dset_write, NULL, 
@@ -431,6 +437,13 @@ int main(int argc, char **argv)
       AddTest("cchunk4", coll_chunk4,NULL,
 	      "collective to independent chunk io",PARATESTFILE);
     }
+
+    io_mode_confusion_params.name  = PARATESTFILE;
+    io_mode_confusion_params.count = 0; /* value not used */
+
+    AddTest("I/Omodeconf", io_mode_confusion, NULL, 
+	    "I/O mode confusion test -- hangs quickly on failure", 
+            &io_mode_confusion_params);
 
     /* Display testing information */
     TestInfo(argv[0]);

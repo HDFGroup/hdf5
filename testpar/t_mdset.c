@@ -12,8 +12,6 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* $Id$ */
-
 #include "testphdf5.h"
 
 #define DIM  2
@@ -1290,6 +1288,295 @@ void get_slab(hssize_t chunk_origin[],
     if(count != NULL) 
         count[0] = count[1] = 1;
 }
+
+/* 
+ * This function is based on bug demonstration code provided by Thomas
+ * Guignon (thomas.guignon@ifp.fr), and is intended to verify the 
+ * correctness of my fix for that bug.
+ *
+ * In essence, the bug appeared when at least one process attempted to 
+ * write a point selection -- for which collective I/O is not supported, 
+ * and at least one other attempted to write some other type of selection 
+ * for which collective I/O is supported.  
+ *
+ * Since the processes did not compare notes before performing the I/O, 
+ * some would attempt collective I/O while others performed independent
+ * I/O.  A hang resulted.
+ *
+ * This function reproduces this situation.  At present the test hangs
+ * on failure.
+ *                                         JRM - 9/13/04
+ *
+ * Changes:	None.
+ */
+
+#define N 4
+
+void io_mode_confusion(void)
+{
+    /*
+     * HDF5 APIs definitions
+     */
+    
+    const int   rank = 1;
+    const char *dataset_name = "IntArray";
+
+    hid_t       file_id, dset_id;         /* file and dataset identifiers */
+    hid_t       filespace, memspace;      /* file and memory dataspace */
+                                          /* identifiers               */
+    hsize_t     dimsf[1];                 /* dataset dimensions */
+    int         data[N] = {1};            /* pointer to data buffer to write */ 
+    hssize_t    select[N] = {0L,1L,2L,3L};
+    hssize_t    start[1];
+    hsize_t stride[1];
+    hsize_t count[1];
+    hsize_t block[1];
+    hid_t       plist_id;                 /* property list identifier */
+    int         i;
+    herr_t      status;
+
+
+    /*
+     * MPI variables
+     */
+
+    int mpi_size, mpi_rank;
+
+
+    /*
+     * test bed related variables
+     */
+
+    char *		fcn_name = "io_mode_confusion";
+    const hbool_t	verbose = FALSE;
+    H5Ptest_param_t *	pt;
+    char *		filename;
+
+
+    pt = (H5Ptest_param_t *) GetTestParameters();
+    filename = pt->name;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    /*
+     * Set up file access property list with parallel I/O access
+     */
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Setting up property list.\n", 
+                  mpi_rank, fcn_name);
+
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+
+    VRFY((plist_id != -1), "H5Pcreate() failed");
+
+    status = H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    VRFY(( status >= 0 ), "H5Pset_fapl_mpio() failed");
+
+
+    /*
+     * Create a new file collectively and release property list identifier.
+     */
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Creating new file.\n", mpi_rank, fcn_name);
+
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+
+    VRFY(( file_id >= 0 ), "H5Fcreate() failed");
+
+    status = H5Pclose(plist_id);
+
+    VRFY(( status >= 0 ), "H5Pclose() failed");
+
+
+    /*
+     * Create the dataspace for the dataset.
+     */
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Creating the dataspace for the dataset.\n",
+                  mpi_rank, fcn_name);
+
+    dimsf[0] = N;
+
+    filespace = H5Screate_simple(rank, dimsf, NULL);
+
+    VRFY(( filespace >= 0 ), "H5Screate_simple() failed.");
+
+
+    /*
+     * Create the dataset with default properties and close filespace.
+     */
+
+    if ( verbose )
+        HDfprintf(stdout,
+                  "%0d:%s: Creating the dataset, and closing filespace.\n",
+                  mpi_rank, fcn_name);
+
+    dset_id = H5Dcreate(file_id, dataset_name, H5T_NATIVE_INT, filespace,
+                        H5P_DEFAULT);
+
+    VRFY(( dset_id >= 0 ), "H5Dcreate() failed");
+
+    status = H5Sclose(filespace);
+
+    VRFY(( status >= 0 ), "H5Sclose() failed");
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling H5Screate_simple().\n", 
+                  mpi_rank, fcn_name);
+
+    memspace = H5Screate_simple(rank, dimsf, NULL);
+
+    VRFY(( memspace >= 0 ), "H5Screate_simple() failed.");
+
+
+    if( mpi_rank == 0 ) {
+     
+        if ( verbose )
+            HDfprintf(stdout, "%0d:%s: Calling H5Sselect_all(memspace).\n",
+                      mpi_rank, fcn_name);
+
+        status = H5Sselect_all(memspace);
+
+        VRFY(( status >= 0 ), "H5Sselect_all() failed");
+
+    } else {
+
+        if ( verbose )
+            HDfprintf(stdout, "%0d:%s: Calling H5Sselect_none(memspace).\n",
+                      mpi_rank, fcn_name);
+
+        status = H5Sselect_none(memspace);
+
+        VRFY(( status >= 0 ), "H5Sselect_none() failed");
+     
+    }
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling MPI_Barrier().\n", 
+                  mpi_rank, fcn_name);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling H5Dget_space().\n", 
+                  mpi_rank, fcn_name);
+
+    filespace = H5Dget_space(dset_id);
+
+    VRFY(( filespace >= 0 ), "H5Dget_space() failed");
+
+
+    start[0] = 0L;
+    stride[0] = 1;
+    count[0] = 1;
+    block[0] = N;
+
+    if ( mpi_rank == 0 ) {
+
+        /* select all */
+
+        if ( verbose )
+             HDfprintf(stdout,
+                       "%0d:%s: Calling H5Sselect_elements() -- set up hang?\n",
+                       mpi_rank, fcn_name);
+
+        status = H5Sselect_elements(filespace, H5S_SELECT_SET, N, 
+                                    (const hssize_t **)&select);
+
+        VRFY(( status >= 0 ), "H5Sselect_elements() failed");
+
+    } else {
+
+        /* select nothing */
+
+        if ( verbose )
+            HDfprintf(stdout, "%0d:%s: Calling H5Sselect_none().\n",
+                      mpi_rank, fcn_name);
+
+        status = H5Sselect_none(filespace);
+
+        VRFY(( status >= 0 ), "H5Sselect_none() failed");
+
+    }
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling MPI_Barrier().\n", 
+                  mpi_rank, fcn_name);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling H5Pcreate().\n", mpi_rank, fcn_name);
+
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+
+    VRFY(( plist_id != -1 ), "H5Pcreate() failed");
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling H5Pset_dxpl_mpio().\n", 
+                  mpi_rank, fcn_name);
+
+    status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
+
+    VRFY(( status >= 0 ), "H5Pset_dxpl_mpio() failed");
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Calling H5Dwrite() -- hang here?.\n",
+                  mpi_rank, fcn_name);
+
+    status = H5Dwrite(dset_id, H5T_NATIVE_INT, memspace, filespace,
+                      plist_id, data);
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Returned from H5Dwrite(), status=%d.\n", 
+                  mpi_rank, fcn_name, status);
+
+    VRFY(( status >= 0 ), "H5Dwrite() failed");
+
+    /*
+     * Close/release resources.
+     */
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Cleaning up from test.\n", 
+                  mpi_rank, fcn_name);
+
+    status = H5Dclose(dset_id);
+    VRFY(( status >= 0 ), "H5Dclose() failed");
+
+    status = H5Sclose(filespace);
+    VRFY(( status >= 0 ), "H5Dclose() failed");
+
+    status = H5Sclose(memspace);
+    VRFY(( status >= 0 ), "H5Sclose() failed");
+
+    status = H5Pclose(plist_id);
+    VRFY(( status >= 0 ), "H5Pclose() failed");
+
+    status = H5Fclose(file_id);
+    VRFY(( status >= 0 ), "H5Fclose() failed");
+
+
+    if ( verbose )
+        HDfprintf(stdout, "%0d:%s: Done.\n", mpi_rank);
+
+    return;
+
+} /* io_mode_confusion() */
+
+#undef N
 
 /*=============================================================================
  *                         End of t_mdset.c

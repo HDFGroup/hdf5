@@ -93,7 +93,7 @@ coll_chunk4(void)
   char *filename;
   int mpi_size;
   MPI_Comm comm = MPI_COMM_WORLD;
-   MPI_Comm_size(comm,&mpi_size); 
+  MPI_Comm_size(comm,&mpi_size);           
   filename = (char *) GetTestParameters();
   coll_chunktest(filename,mpi_size*2,BYROW_DISCONT);
 
@@ -339,17 +339,8 @@ ccslab_set(int mpi_rank, int mpi_size, hssize_t start[], hsize_t count[],
 	break;
     case BYROW_DISCONT:
 	/* Each process takes several disjoint blocks. */
-        /*
-	block[0] = 2;
-	block[1] = 2;
-	stride[0] = 3;
-	stride[1] = 6;
-	count[0] = 2;
-	count[1] = 3;
-        */
-        
-        block[0] = 1;
-        block[1] = 1;
+	block[0] = 1;
+	block[1] = 1;
         stride[0] = 3;
         stride[1] = 3;
         count[0]  = (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
