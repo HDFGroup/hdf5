@@ -463,9 +463,9 @@
 
 5.3.12. Threadsafe capability
 	The HDF5 library can be configured to be thread-safe (on a very
-	large scale) with the with the `--enable-threadsafe' flag to
-	configure. Read the file doc/TechNotes/ThreadSafeLibrary.html for
-	further details.
+	large scale) with the with the `--enable-threadsafe' and
+        '-with-pthread=INC,LIB' (or '--with-pthread=DIR') flags to configure.
+        Read the file doc/TechNotes/ThreadSafeLibrary.html for further details.
 
 5.3.13. Backward compatibility
 	The 1.8 version of the HDF5 library can be configured to operate
