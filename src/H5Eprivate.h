@@ -122,6 +122,7 @@ typedef struct H5E_t {
 /* Private global variables in H5E.c */
 extern hid_t H5E_thrdid_g; /* Thread-specific "global" error-handler ID */
 extern hbool_t install_atexit; /* Whether to install the atexit routine */
+extern const hbool_t H5E_clearable_g; /* Safe to call H5Eclear() on enter?*/
 
 herr_t H5E_close (H5E_t *estack);
 herr_t H5E_clear (H5E_t *estack);

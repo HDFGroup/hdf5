@@ -182,9 +182,6 @@ H5M_find_type(group_t type)
 
     FUNC_ENTER(H5M_find_type, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
     /*
      * Currently this uses a stright linear search, which can easily be changed
      * to a binary search when it becomes too slow.
@@ -227,8 +224,7 @@ H5Maccess(hid_t oid)
     /* Atom group for incoming object */
     group = H5A_group(oid);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -269,8 +265,7 @@ H5Mcopy(hid_t oid)
 
     FUNC_ENTER(H5Mcopy, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -314,8 +309,7 @@ H5Mfind_name(hid_t owner_id, group_t type, const char *name)
 
     FUNC_ENTER(H5Mfind_name, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
 #ifdef OLD_WAY
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
@@ -362,8 +356,7 @@ H5Mname_len(hid_t oid)
 
     FUNC_ENTER(H5Mname_len, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -404,8 +397,7 @@ H5Mget_name(hid_t oid, char *name)
 
     FUNC_ENTER(H5Mget_name, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -447,8 +439,7 @@ H5Mset_name(hid_t oid, const char *name)
 
     FUNC_ENTER(H5Mset_name, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -491,8 +482,7 @@ H5Msearch(hid_t oid, group_t type, const char *name)
 
     FUNC_ENTER(H5Msearch, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -534,8 +524,7 @@ H5Mindex(hid_t oid, group_t type, uint32 idx)
 
     FUNC_ENTER(H5Mindex, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -575,8 +564,7 @@ H5Mflush(hid_t oid)
 
     FUNC_ENTER(H5Mflush, FAIL); /* Insert function initialization code and variables */
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     group = H5A_group(oid); /* look up group for incoming object */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
@@ -619,8 +607,7 @@ H5Mdelete(hid_t oid)
 
     FUNC_ENTER(H5Mdelete, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -660,8 +647,7 @@ H5Mget_parent(hid_t oid)
 
     FUNC_ENTER(H5Mget_parent, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -702,8 +688,7 @@ H5Mget_file(hid_t oid)
 
     FUNC_ENTER(H5Mget_file, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 
@@ -744,8 +729,7 @@ H5Mclose(hid_t oid)
 
     FUNC_ENTER(H5Mclose, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (group <= BADGROUP || group >= MAXGROUP)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "bad group");
 

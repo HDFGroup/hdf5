@@ -347,14 +347,14 @@ H5Tcopy(hid_t type_id)
     hid_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Tcopy, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
 	NULL == (dt = H5A_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     }
-    /* copy */
+
+    /* Copy */
     if (NULL == (new_dt = H5T_copy(dt))) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't copy");
     }
@@ -389,9 +389,8 @@ H5Tclose(hid_t type_id)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tclose, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
 	NULL == (dt = H5A_object(type_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
@@ -505,7 +504,6 @@ H5Tget_class(hid_t type_id)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tget_class, H5T_NO_CLASS);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -540,7 +538,6 @@ H5Tget_size(hid_t type_id)
     size_t		    size;
 
     FUNC_ENTER(H5Tget_size, 0);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -588,7 +585,6 @@ H5Tset_size(hid_t type_id, size_t size)
     size_t		    prec, offset;
 
     FUNC_ENTER(H5Tset_size, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -685,7 +681,6 @@ H5Tget_order(hid_t type_id)
     H5T_order_t		    order;
 
     FUNC_ENTER(H5Tget_order, H5T_ORDER_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -722,7 +717,6 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_order, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -768,7 +762,6 @@ H5Tget_precision(hid_t type_id)
     size_t		    prec;
 
     FUNC_ENTER(H5Tget_precision, 0);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -819,7 +812,6 @@ H5Tset_precision(hid_t type_id, size_t prec)
     size_t		    offset, size;
 
     FUNC_ENTER(H5Tset_prec, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -926,7 +918,6 @@ H5Tget_offset(hid_t type_id)
     size_t		    offset;
 
     FUNC_ENTER(H5Tget_offset, 0);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -985,7 +976,6 @@ H5Tset_offset(hid_t type_id, size_t offset)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_offset, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1034,7 +1024,6 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tget_pad, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1044,9 +1033,9 @@ H5Tget_pad(hid_t type_id, H5T_pad_t *lsb /*out */ , H5T_pad_t *msb /*out */ )
     }
     /* Get values */
     if (lsb)
-	*lsb = (H5T_pad_t)dt->u.atomic.lsb_pad;
+	*lsb = dt->u.atomic.lsb_pad;
     if (msb)
-	*msb = (H5T_pad_t)dt->u.atomic.msb_pad;
+	*msb = dt->u.atomic.msb_pad;
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -1073,7 +1062,6 @@ H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_pad, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1116,7 +1104,6 @@ H5Tget_sign(hid_t type_id)
     H5T_sign_t		    sign;
 
     FUNC_ENTER(H5Tget_sign, H5T_SGN_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1153,7 +1140,6 @@ H5Tset_sign(hid_t type_id, H5T_sign_t sign)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_sign, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1202,7 +1188,6 @@ H5Tget_fields(hid_t type_id, size_t *spos /*out */ ,
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tget_fields, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1255,7 +1240,6 @@ H5Tset_fields(hid_t type_id, size_t spos, size_t epos, size_t esize,
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_fields, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1326,7 +1310,6 @@ H5Tget_ebias(hid_t type_id)
     size_t		    ebias;
 
     FUNC_ENTER(H5Tget_ebias, 0);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1363,7 +1346,6 @@ H5Tset_ebias(hid_t type_id, size_t ebias)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_ebias, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1404,7 +1386,6 @@ H5Tget_norm(hid_t type_id)
     H5T_norm_t		    norm;
 
     FUNC_ENTER(H5Tget_norm, H5T_NORM_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1442,7 +1423,6 @@ H5Tset_norm(hid_t type_id, H5T_norm_t norm)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_norm, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1488,7 +1468,6 @@ H5Tget_inpad(hid_t type_id)
     H5T_pad_t		    pad;
 
     FUNC_ENTER(H5Tget_inpad, H5T_PAD_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1498,7 +1477,7 @@ H5Tget_inpad(hid_t type_id)
 		      "not a floating-point data type");
     }
     /* pad */
-    pad = (H5T_pad_t)dt->u.atomic.u.f.pad;
+    pad = dt->u.atomic.u.f.pad;
 
     FUNC_LEAVE(pad);
 }
@@ -1528,7 +1507,6 @@ H5Tset_inpad(hid_t type_id, H5T_pad_t pad)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_inpad, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1574,7 +1552,6 @@ H5Tget_cset(hid_t type_id)
     H5T_cset_t		    cset;
 
     FUNC_ENTER(H5Tget_cset, H5T_CSET_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1613,7 +1590,6 @@ H5Tset_cset(hid_t type_id, H5T_cset_t cset)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_cset, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1659,7 +1635,6 @@ H5Tget_strpad(hid_t type_id)
     H5T_str_t		    strpad;
 
     FUNC_ENTER(H5Tget_strpad, H5T_STR_ERROR);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1699,7 +1674,6 @@ H5Tset_strpad(hid_t type_id, H5T_str_t strpad)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tset_strpad, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1744,7 +1718,6 @@ H5Tget_nmembers(hid_t type_id)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tget_num_members, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1782,7 +1755,6 @@ H5Tget_member_name(hid_t type_id, int membno)
     char		   *s = NULL;
 
     FUNC_ENTER(H5Tget_member_name, NULL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1824,7 +1796,6 @@ H5Tget_member_offset(hid_t type_id, int membno)
     size_t		    offset = 0;
 
     FUNC_ENTER(H5Tget_member_offset, 0);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1866,7 +1837,6 @@ H5Tget_member_dims(hid_t type_id, int membno,
     intn		    ndims, i;
 
     FUNC_ENTER(H5Tget_member_dims, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1915,7 +1885,6 @@ H5Tget_member_type(hid_t type_id, int membno)
     hid_t		    memb_type_id;
 
     FUNC_ENTER(H5Tget_member_type, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||
@@ -1974,7 +1943,6 @@ H5Tinsert(hid_t parent_id, const char *name, off_t offset, hid_t member_id)
     H5T_t		   *member = NULL;	/*the atomic member type	*/
 
     FUNC_ENTER(H5Tinsert, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(parent_id) ||
@@ -2022,7 +1990,6 @@ H5Tpack(hid_t type_id)
     H5T_t		   *dt = NULL;
 
     FUNC_ENTER(H5Tpack, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATATYPE != H5A_group(type_id) ||

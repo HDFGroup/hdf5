@@ -108,7 +108,6 @@ H5Pcreate_simple(int rank, size_t dims[])
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
-    H5ECLEAR;
 
     ds = H5MM_xcalloc(1, sizeof(H5P_t));
     ds->type = H5P_SIMPLE;
@@ -160,7 +159,6 @@ H5Pcreate(H5P_class_t type)
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
-    H5ECLEAR;
 
     ds = H5MM_xcalloc(1, sizeof(H5P_t));
     ds->type = type;
@@ -218,9 +216,8 @@ herr_t
 H5Pclose(hid_t space_id)
 {
     FUNC_ENTER(H5Pclose, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == H5A_object(space_id)) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
@@ -376,9 +373,8 @@ H5Pget_npoints(hid_t space_id)
     size_t                  ret_value = 0;
 
     FUNC_ENTER(H5Pget_npoints, 0);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a data space");
@@ -472,9 +468,8 @@ H5Pget_ndims(hid_t space_id)
     size_t                  ret_value = 0;
 
     FUNC_ENTER(H5Pget_ndims, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
@@ -559,9 +554,8 @@ H5Pget_dims(hid_t space_id, size_t dims[]/*out*/)
     size_t                  ret_value = 0;
 
     FUNC_ENTER(H5Pget_dims, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (H5_DATASPACE != H5A_group(space_id) ||
         NULL == (ds = H5A_object(space_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
@@ -834,9 +828,7 @@ H5P_is_simple(const H5P_t *sdim)
 
     FUNC_ENTER(H5P_is_simple, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
+    /* Check args and all the boring stuff. */
     assert(sdim);
     ret_value = sdim->type == H5P_SIMPLE ? TRUE : FALSE;      /* Currently all dataspaces are simple, but check anyway */
 
@@ -866,9 +858,7 @@ H5Pis_simple(hid_t sid)
 
     FUNC_ENTER(H5Pis_simple, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
+    /* Check args and all the boring stuff. */
     if ((space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
 
@@ -912,9 +902,6 @@ H5Pset_space(hid_t sid, int rank, const size_t *dims)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER(H5Pset_space, FAIL);
-
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
 
     /* Get the object */
     if ((space = H5A_object(sid)) == NULL)
@@ -1035,9 +1022,6 @@ H5Pset_hyperslab(hid_t sid, const intn *start, const intn *count, const intn *st
 
     FUNC_ENTER(H5Pset_hyperslab, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
-
     /* Get the object */
     if (H5_DATASPACE != H5A_group(sid) || (space = H5A_object(sid)) == NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a data space");
@@ -1116,7 +1100,6 @@ H5Pget_hyperslab (hid_t sid, int offset[]/*out*/, int size[]/*out*/,
     intn	ret_value = FAIL;
     
     FUNC_ENTER (H5Pget_hyperslab, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATASPACE!=H5A_group (sid) || NULL==(ds=H5A_object (sid))) {

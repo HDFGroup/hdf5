@@ -888,9 +888,8 @@ H5Ccopy(hid_t tid)
     group_t                 group;
 
     FUNC_ENTER(H5Ccopy, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     if (NULL == (tmpl = H5A_object(tid)) ||
         (type = H5Cget_class(tid)) < 0 ||
         (group = H5A_group(tid)) < 0) {

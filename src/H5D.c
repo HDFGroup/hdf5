@@ -169,9 +169,8 @@ H5Dcreate(hid_t file_id, const char *name, hid_t type_id, hid_t space_id,
     const H5D_create_t	   *create_parms = NULL;
 
     FUNC_ENTER(H5Dcreate, FAIL);
-    H5ECLEAR;
 
-    /* check arguments */
+    /* Check arguments */
     if (H5_FILE != H5A_group(file_id) ||
 	NULL == (f = H5A_object(file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
@@ -242,7 +241,6 @@ H5Dopen(hid_t file_id, const char *name)
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Dopen, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_FILE != H5A_group(file_id) ||
@@ -295,7 +293,6 @@ H5Dclose(hid_t dataset_id)
     H5D_t		   *dataset = NULL;	/* dataset object to release */
 
     FUNC_ENTER(H5Dclose, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_DATASET != H5A_group(dataset_id) ||
@@ -414,7 +411,6 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
-    H5ECLEAR;
 
     /* check arguments */
     if (H5_DATASET != H5A_group(dataset_id) ||
@@ -504,7 +500,6 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dwrite, FAIL);
-    H5ECLEAR;
 
     /* check arguments */
     if (H5_DATASET != H5A_group(dataset_id) ||

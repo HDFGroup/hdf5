@@ -22,8 +22,8 @@ typedef struct H5T_atomic_t {
     H5T_order_t         order;  /*byte order                                 */
     size_t              prec;   /*precision in bits                          */
     size_t              offset; /*bit position of lsb of value               */
-    intn                lsb_pad;/*type of lsb padding                        */
-    intn                msb_pad;/*type of msb padding                        */
+    H5T_pad_t          lsb_pad;/*type of lsb padding                        */
+    H5T_pad_t           msb_pad;/*type of msb padding                        */
     union {
         struct {
             H5T_sign_t  sign;   /*type of integer sign                       */
@@ -37,7 +37,7 @@ typedef struct H5T_atomic_t {
             size_t      mpos;   /*position of lsb of mantissa                */
             size_t      msize;  /*size of mantissa                           */
             H5T_norm_t  norm;   /*normalization                              */
-            intn        pad;    /*type of padding for internal bits          */
+            H5T_pad_t   pad;    /*type of padding for internal bits          */
         } f;                    /*floating-point types                       */
 
         struct {

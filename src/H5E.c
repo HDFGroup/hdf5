@@ -107,6 +107,7 @@ static intn             interface_initialize_g = FALSE;
 static herr_t           H5E_init_interface(void);
 static void             H5E_term_interface(void);
 
+const hbool_t		H5E_clearable_g = TRUE;
 hid_t                   H5E_thrdid_g = FAIL;    /* Thread-specific "global" error-handler ID */
 
 /*--------------------------------------------------------------------------
@@ -184,9 +185,8 @@ H5Ecreate(uintn initial_stack_nelmts)
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Ecreate, FAIL);
-    H5ECLEAR;
 
-    /* check args */
+    /* Check args */
     initial_stack_nelmts = MAX(10, MIN(initial_stack_nelmts, 1000));
 
     /* Allocate the stack header */
@@ -224,7 +224,6 @@ herr_t
 H5Eclose(hid_t estack_id)
 {
     FUNC_ENTER(H5Eclose, FAIL);
-    H5ECLEAR;
 
     /* check args */
     if (H5_ERR != H5A_group(estack_id)) {
@@ -329,7 +328,8 @@ DESCRIPTION
 herr_t
 H5Eclear(hid_t estack_id)
 {
-    H5E_t                  *estack = NULL;
+    H5E_t		*estack = NULL;
+    hbool_t		H5E_clearable_g = FALSE; /*override global*/
 
     FUNC_ENTER(H5Eclear, FAIL);
 
@@ -373,7 +373,8 @@ H5Eclear(hid_t estack_id)
 herr_t
 H5Eprint(hid_t estack_id, FILE * file)
 {
-    H5E_t                  *estack = NULL;
+    H5E_t               *estack = NULL;
+    hbool_t		H5E_clearable_g = FALSE; /*override global*/
 
     FUNC_ENTER(H5Eprint, FAIL);
     /*

@@ -302,8 +302,7 @@ H5version(uintn *majnum, uintn *minnum, uintn *relnum, uintn *patnum)
 
     FUNC_ENTER(H5version, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (majnum == NULL || minnum == NULL || relnum == NULL || patnum == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                     "null pointer argument");

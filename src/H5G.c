@@ -92,7 +92,6 @@ H5Gcreate(hid_t file_id, const char *name, size_t size_hint)
     hid_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Gcreate, FAIL);
-    H5ECLEAR;
 
     /* Check arguments */
     if (H5_FILE != H5A_group(file_id) ||
@@ -141,7 +140,6 @@ H5Gopen(hid_t file_id, const char *name)
     H5G_t		   *grp = NULL;
 
     FUNC_ENTER(H5Gopen, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_FILE != H5A_group(file_id) ||
@@ -187,7 +185,6 @@ H5Gclose(hid_t grp_id)
     H5G_t		   *grp = NULL;
 
     FUNC_ENTER(H5Gclose, FAIL);
-    H5ECLEAR;
 
     /* Check args */
     if (H5_GROUP != H5A_group(grp_id) ||
@@ -238,7 +235,6 @@ H5Gset(hid_t file_id, const char *name)
     H5G_t		   *grp;
 
     FUNC_ENTER(H5Gset, FAIL);
-    H5ECLEAR;
 
     /* Check/fix arguments */
     if (H5_FILE != H5A_group(file_id) ||
@@ -297,7 +293,6 @@ H5Gpush(hid_t file_id, const char *name)
     H5G_t		   *grp;
 
     FUNC_ENTER(H5Gpush, FAIL);
-    H5ECLEAR;
 
     /* Check arguments */
     if (H5_FILE != H5A_group(file_id) ||
@@ -357,7 +352,6 @@ H5Gpop(hid_t file_id)
     H5F_t		   *f = NULL;
 
     FUNC_ENTER(H5Gpop, FAIL);
-    H5ECLEAR;
 
     /* Check arguments */
     if (H5_FILE != H5A_group(file_id) ||

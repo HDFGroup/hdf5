@@ -233,7 +233,6 @@ H5Fget_create_template(hid_t fid)
     H5F_create_t           *tmpl = NULL;
 
     FUNC_ENTER(H5Fget_create_template, FAIL);
-    H5ECLEAR;
 
     /* check args */
     if (H5_FILE != H5A_group(fid)) {
@@ -360,8 +359,7 @@ H5Fis_hdf5(const char *filename)
 
     FUNC_ENTER(H5Fis_hdf5, FAIL);
 
-    /* Clear errors and check args and all the boring stuff. */
-    H5ECLEAR;
+    /* Check args and all the boring stuff. */
     if (filename == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no filename specified");
 
@@ -989,7 +987,6 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Fcreate, FAIL);
-    H5ECLEAR;
 
     /* Check/fix arguments */
     if (!filename || !*filename)
@@ -1082,7 +1079,6 @@ H5Fopen(const char *filename, uintn flags, hid_t access_temp)
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Fopen, FAIL);
-    H5ECLEAR;
 
     /* Check/fix arguments. */
     if (!filename || !*filename)
@@ -1295,7 +1291,6 @@ H5Fclose(hid_t fid)
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fclose, FAIL);
-    H5ECLEAR;
 
     /* Check/fix arguments. */
     if (H5_FILE != H5A_group(fid))

@@ -422,38 +422,53 @@ extern char            *strdup(const char *s);
 extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
 extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 
+#define PRINT(N,S) {							      \
+       write ((N), (S), strlen((S)));					      \
+       write ((N), "\n", 1);						      \
+}
+
 #define FUNC_ENTER(func_name,err) FUNC_ENTER_INIT(func_name,INTERFACE_INIT,err)
 
-#define FUNC_ENTER_INIT(func_name,interface_init_func,err) {                  \
-   CONSTR (FUNC, #func_name);                                                 \
-   PABLO_SAVE (ID_ ## func_name);                                             \
-                                                                              \
-   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);                                \
-                                                                              \
-   if (!library_initialize_g) {                                               \
-      library_initialize_g = TRUE;                                           \
-      if (H5_init_library()<0) {                                              \
-         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \
-                        "library initialization failed");                     \
-      }                                                                       \
-   }                                                                          \
-                                                                              \
-   if (!thread_initialize_g) {                                                \
-      thread_initialize_g = TRUE;                                            \
-      if (H5_init_thread()<0) {                                               \
-         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \
-                        "thread initialization failed");                      \
-      }                                                                       \
-   }                                                                          \
-                                                                              \
-   if (!interface_initialize_g) {                                             \
-      interface_initialize_g = TRUE;                                         \
-      if (interface_init_func &&                                              \
-          ((herr_t(*)(void))interface_init_func)()<0) {                       \
-         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,                          \
-                        "interface initialization failed");                   \
-      }                                                                       \
-   }                                                                          \
+#define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
+   CONSTR (FUNC, #func_name);						      \
+   PABLO_SAVE (ID_ ## func_name);					      \
+									      \
+   PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
+									      \
+   /* Initialize the library */						      \
+   if (!library_initialize_g) {						      \
+      library_initialize_g = TRUE;					      \
+      if (H5_init_library()<0) {					      \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+                        "library initialization failed");		      \
+      }									      \
+   }									      \
+									      \
+   /* Initialize this thread */						      \
+   if (!thread_initialize_g) {						      \
+      thread_initialize_g = TRUE;					      \
+      if (H5_init_thread()<0) {						      \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+                        "thread initialization failed");		      \
+      }									      \
+   }									      \
+									      \
+   /* Initialize this interface */					      \
+   if (!interface_initialize_g) {					      \
+      interface_initialize_g = TRUE;					      \
+      if (interface_init_func &&					      \
+          ((herr_t(*)(void))interface_init_func)()<0) {			      \
+         HRETURN_ERROR (H5E_FUNC, H5E_CANTINIT, err,			      \
+                        "interface initialization failed");		      \
+      }									      \
+   }									      \
+									      \
+   /* Clear thread error stack entering public functions */		      \
+   if (H5E_clearable_g && '_'!=#func_name[2] && '_'!=#func_name[3] &&	      \
+       (!#func_name[4] || '_'!=#func_name[4])) {			      \
+       PRINT (55, #func_name);						      \
+       H5Eclear (H5E_thrdid_g);						      \
+   }									      \
    {
 
 /*-------------------------------------------------------------------------

@@ -13,7 +13,10 @@
 ./config/conclude.in
 ./config/depend.in
 ./config/freebsd2.2.1
+./config/irix6.2
+./config/irix64
 ./config/linux
+./config/solaris2.5
 ./configure.in
 ./html/CodeReview.html
 ./html/Datasets.html
