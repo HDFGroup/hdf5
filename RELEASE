@@ -1,5 +1,108 @@
-Release information for hdf5-1.1.x
+Release information for hdf5-1.2.0
 ------------------------------------
+
+		     CHANGES SINCE VERSION 1.0.1
+
+Documentation
+-------------
+
+* More examples
+
+* Updated user guide, reference manual, and format specification.
+
+* Self-contained documentation for installations isolated from the
+  Internet.
+
+Configuration
+-------------
+
+* Better detection and support for MPI-IO.
+
+* Recognition of compilers with known code generation problems.
+
+* Support for various compilers on a single architecture (e.g., the
+  native compiler and the GNU compilers).
+
+* Ability to build from read-only media and with different compilers
+  and/or options concurrently.
+
+* Added a libhdf5.settings file which summarizes the configuration
+  information and is installed along with the library.
+
+* Builds a shared library on most systems that support it.
+
+* Support for Cray T3E and Windows/NT.
+
+Debugging
+---------
+
+* Improved control and redirection of debugging and tracing messages.
+
+Datatypes
+---------
+
+* Optimizations to compound datatype conversions and I/O operations.
+
+* Added nearly 100 optimized conversion functions for native datatypes 
+  including support for non-aligned data.
+
+* Added support for bitfield, opaque, and enumeration types.
+
+* Added distinctions between signed and unsigned char types to the
+  list of predefined native hdf5 datatypes.
+
+* Added HDF5 type definitions for C9x types like int32_t.
+
+* Application-defined type conversion functions can handle non-packed
+  data.
+
+* Changed the H5Tunregister() function to use wildcards when matching
+  conversion functions.  H5Tregister_hard() and H5Tregister_soft()
+  were combined into H5Tregister().
+
+* Support for variable-length datatypes (arrays of varying length per
+  dataset element). Variable length strings currently supported only
+  as variable length arrays of 1-byte integers.
+
+Data Spaces
+-----------
+
+* New query functions for selections.
+
+* I/O operations bypass the stripmining loop and go directly to
+  storage for certain contiguous selections in the absense of type
+  conversions.  In other cases the stripmining buffers are used more
+  effectively.
+
+* Reduced the number of I/O requests under certain circumstances,
+  improving performance on systems with high I/O latency.
+
+Persistent Pointers
+-------------------
+
+* Object (serial and parallel) and dataset region (serial only)
+  references are implemented.
+
+Parallel Support
+----------------
+
+Tools
+-----
+
+* Enhancements to the h5ls tool including the ability to list objects
+  from more than one file, to display raw hexadecimal data, to
+  show file addresses for raw data, to format output more reasonably,
+  to show object attributes, and to perform a recursive listing, 
+
+* Enhancements to h5dump similar to h5ls.
+
+* An hdf5 to hdf4 converter.
+
+  
+
+
+
+
 
 		    CHANGES SINCE THE Version 1.0.0 RELEASE
 
