@@ -26,6 +26,9 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const DSetCreatPropList DSetCreatPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
@@ -154,7 +157,7 @@ void DSetCreatPropList::setDeflate( int level ) const
 // Function:	DSetCreatPropList::setFillValue
 ///\brief	Sets a dataset fill value
 ///\param	fvalue_type - IN: Data type for the value passed via \a value
-///\param	value - IN: Pointer to buffer containing the fill value
+///\param	value       - IN: Pointer to buffer containing the fill value
 ///\exception	H5::PropListIException
 ///\par Description
 ///		The datatype may differ from that of the dataset, but it must
@@ -181,7 +184,7 @@ void DSetCreatPropList::setFillValue( const DataType& fvalue_type, const void* v
 // Function:	DSetCreatPropList::getFillValue
 ///\brief	Retrieves a dataset fill value
 ///\param	fvalue_type - IN: Data type for the value passed via \a value
-///\param	value - OUT: Pointer to buffer to hold the retrieved fill value
+///\param	value      - OUT: Pointer to buffer to hold the retrieved fill value
 ///\exception	H5::PropListIException
 ///\par Description
 ///		The fill value is returned through \a value pointer 
@@ -290,15 +293,15 @@ int DSetCreatPropList::getNfilters() const
 //--------------------------------------------------------------------------
 // Function:    DSetCreatPropList::getFilter
 ///\brief	Returns information about a filter in a pipeline
-///\param       filter_number - IN: Filter to get, range [0..N-1], where 
-///				N is returned by H5Pget_nfilters()
-///\param	flags     - OUT: General properties of the filter
-///\param	cd_nelmts - IN/OUT: Number of elements in \a cd_values /Number 
-///				of values defined by the filter
-///\param	cd_values - OUT: Array to hold the data; allocated by the user
-///\param	namelen   - OUT: Length of \a name
-///\param	name      - OUT: Name of the filter
-///\param   filter_config - OUT: Flags indicating whether filter can encode/decode
+///\param       filter_number  - IN: Filter to get, range [0..N-1], where 
+///				     N is returned by H5Pget_nfilters()
+///\param	flags         - OUT: General properties of the filter
+///\param	cd_nelmts  - IN/OUT: Number of elements in \a cd_values /Number 
+///				     of values defined by the filter
+///\param	cd_values     - OUT: Array to hold the data; allocated by the user
+///\param	namelen       - OUT: Length of \a name
+///\param	name          - OUT: Name of the filter
+///\param	filter_config - OUT: Flags indicating whether filter can encode/decode
 ///\return	Filter id
 ///\exception	H5::PropListIException
 ///\par Description
@@ -324,14 +327,14 @@ H5Z_filter_t DSetCreatPropList::getFilter(int filter_number, unsigned int &flags
 // Function:    DSetCreatPropList::getFilterById
 ///\brief	Returns information about a filter in a pipeline given the
 ///		filter id
-///\param       filter_id -  IN: Filter to get
-///\param	flags     - OUT: General properties of the filter
-///\param	cd_nelmts - IN/OUT: Number of elements in \a cd_values /Number 
-///				of values defined by the filter
-///\param	cd_values - OUT: Array to hold the data; allocated by the user
-///\param	namelen   -  IN: Length of \a name
-///\param	name      - OUT: Name of the filter
-///\param   filter_config - OUT: Flags indicating whether filter can encode/decode
+///\param       filter_id -      IN: Filter to get
+///\param	flags     -     OUT: General properties of the filter
+///\param	cd_nelmts -  IN/OUT: Number of elements in \a cd_values /Number 
+///				     of values defined by the filter
+///\param	cd_values -     OUT: Array to hold the data; allocated by the user
+///\param	namelen   -      IN: Length of \a name
+///\param	name      -     OUT: Name of the filter
+///\param	filter_config - OUT: Flags indicating whether filter can encode/decode
 ///\exception	H5::PropListIException
 //--------------------------------------------------------------------------
 void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id, unsigned int &flags, size_t &cd_nelmts,
@@ -569,12 +572,12 @@ int DSetCreatPropList::getExternalCount() const
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::getExternal
 ///\brief	Returns information about an external file
-///\param	idx    - IN: Index of the external file, ranges [0-(N-1)] and
-///				returned by getExternalCount()
+///\param	idx       - IN: Index of the external file, ranges [0-(N-1)] 
+///				and returned by \c getExternalCount()
 ///\param	name_size - IN: Maximum length of \a name
-///\param	name   - IN: Name of the external file
-///\param	offset - IN: Location to return an offset value
-///\param	size   - OUT: Location to return the size of the external file data
+///\param	name      - IN: Name of the external file
+///\param	offset    - IN: Location to return an offset value
+///\param	size     - OUT: Location to return the size of the external file data
 ///\exception   H5::PropListIException
 ///\par Description
 ///		The parameter \a idx ranges [0..N-1] where N is returned by

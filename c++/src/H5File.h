@@ -73,23 +73,24 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
         // Retrieves the file size of an opened file.
-        herr_t getFileSize(hsize_t *size) const;
+        haddr_t getFileSize() const;
 
-	// Reopens this file
+	// Reopens this file.
 	void reopen();
 
-	// Gets the creation property list of this file
+	// Gets the creation property list of this file.
 	FileCreatPropList getCreatePlist() const;
 
-	// Gets the access property list of this file
+	// Gets the access property list of this file.
 	FileAccPropList getAccessPlist() const;
 
-	// Throw file exception
+	// Throw file exception.
 	virtual void throwException(const string func_name, const string msg) const;
 
-	// Used by the API to appropriately close a file
+	// Used by the API to appropriately close a file.
 	void p_close() const;
 
+	// H5File destructor.
 	virtual ~H5File();
 
    private:

@@ -190,7 +190,7 @@ IdComponent::~IdComponent() {
 //--------------------------------------------------------------------------
 void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const
 {
-   void *ref;
+   void *ref=NULL;
    herr_t ret_value = H5Rcreate(ref, id, name, ref_type, space_id);
    if (ret_value < 0)
    {

@@ -28,6 +28,9 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const PropList PropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
@@ -559,8 +562,11 @@ PropList PropList::getClassParent() const
    return(pclass);
 }
 
-// The destructor of this instance calls the template resetIdComponent to
-// reset its identifier
+//--------------------------------------------------------------------------
+// Function:	PropList destructor
+///\brief	Properly terminates access to this property list.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 PropList::~PropList()
 {  
    // The property list id will be closed properly

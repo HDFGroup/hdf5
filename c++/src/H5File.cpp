@@ -484,22 +484,22 @@ hid_t H5File::getLocId() const
 
 //--------------------------------------------------------------------------
 // Function:	H5File::getFileSize
-///\brief	Retrieves the file size of the HDF5 file. This function 
-///             is called after an existing file is opened in order
-///		to learn the true size of the underlying file.
+///\brief	Retrieves the file size of the HDF5 file.
 ///\exception	H5::FileIException
+///\return	File size
+///\par Description
+///		This function is called after an existing file is opened in 
+///		order to learn the true size of the underlying file.
 // Programmer   Raymond Lu - June 24, 2004
 //--------------------------------------------------------------------------
 haddr_t H5File::getFileSize(void) const
 {
-   herr_t ret;
-   
-   ret = H5Fget_filesize(id, size);
-   if( ret < 0 )
+   haddr_t file_size = H5Fget_filesize(id);
+   if( file_size < 0 )
    {
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
-   return ret;
+   return(file_size);
 }
 
 //--------------------------------------------------------------------------

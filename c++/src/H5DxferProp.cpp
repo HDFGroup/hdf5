@@ -24,6 +24,9 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const DSetMemXferPropList DSetMemXferPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
@@ -44,7 +47,15 @@ DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
 //--------------------------------------------------------------------------
 DSetMemXferPropList::DSetMemXferPropList( const DSetMemXferPropList& orig ) : PropList( orig ) {}
 
-// Sets type conversion and background buffers
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setBuffer
+///\brief	Sets type conversion and background buffers.
+///\param	size  - IN: Size, in bytes, of the type conversion and background buffers
+///\param	tconv - IN: Pointer to application-allocated type conversion buffer
+///\param	bkg   - IN: Pointer to application-allocated background buffer
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
 {
    herr_t ret_value = H5Pset_buffer( id, size, tconv, bkg );
@@ -55,7 +66,16 @@ void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
    }
 }
 
-// Reads buffer settings
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getBuffer
+///\brief	Reads buffer settings.
+///\param	tconv - IN: Pointer to application-allocated type conversion buffer
+///\param	bkg   - IN: Pointer to application-allocated background buffer
+///\return	Buffer size, in bytes
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+
 size_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
 {
    size_t buffer_size = H5Pget_buffer( id, tconv, bkg );
@@ -67,7 +87,13 @@ size_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
    return( buffer_size );
 }
 
-// Sets the dataset transfer property list status to TRUE or FALSE
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setPreserve
+///\brief	Sets the dataset transfer property list status to true or false.
+///\param	status - IN: Status to set, true or false
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setPreserve( bool status ) const
 {
    herr_t ret_value = H5Pset_preserve( id, (hbool_t) status );
@@ -78,7 +104,13 @@ void DSetMemXferPropList::setPreserve( bool status ) const
    }
 }
 
-// Checks status of the dataset transfer property list
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getPreserve
+///\brief	Checks status of the dataset transfer property list.
+///\return	Status of the dataset transfer property list
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 bool DSetMemXferPropList::getPreserve() const
 {
    int ret_value = H5Pget_preserve( id );
@@ -93,7 +125,15 @@ bool DSetMemXferPropList::getPreserve() const
    }
 }
 
-// Sets B-tree split ratios for a dataset transfer property list 
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setBtreeRatios
+///\brief	Sets B-tree split ratios for a dataset transfer property list.
+///\param	left   - IN: B-tree split ratio for left-most nodes
+///\param	middle - IN: B-tree split ratio for right-most nodes and lone nodes
+///\param	right  - IN: B-tree split ratio for all other nodes
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setBtreeRatios( double left, double middle, double right ) const
 {
    herr_t ret_value = H5Pset_btree_ratios( id, left, middle, right );
@@ -104,7 +144,15 @@ void DSetMemXferPropList::setBtreeRatios( double left, double middle, double rig
    }
 }
 
-// Gets B-tree split ratios for a dataset transfer property list
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getBtreeRatios
+///\brief	Gets B-tree split ratios for a dataset transfer property list.
+///\param	left   - OUT: B-tree split ratio for left-most nodes
+///\param	middle - OUT: B-tree split ratio for right-most nodes and lone nodes
+///\param	right  - OUT: B-tree split ratio for all other nodes
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& right ) const
 {
    herr_t ret_value = H5Pget_btree_ratios( id, &left, &middle, &right );
@@ -115,8 +163,15 @@ void DSetMemXferPropList::getBtreeRatios( double& left, double& middle, double& 
    }
 }
 
-// Sets an exception handling callback for datatype conversion
-// for a dataset transfer property list
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setTypeConvCB
+///\brief	Sets an exception handling callback for datatype conversion
+///		for a dataset transfer property list.
+///\param	op        - IN: User's function
+///\param	user_data - IN: User's data
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t op, void *user_data) const
 {
    herr_t ret_value = H5Pset_type_conv_cb( id, op, user_data);
@@ -127,8 +182,14 @@ void DSetMemXferPropList::setTypeConvCB( H5T_conv_except_func_t op, void *user_d
    }
 }
 
-// Sets an exception handling callback for datatype conversion
-// for a dataset transfer property list
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getTypeConvCB
+///\brief	Gets the exception handling callback function and data.
+///\param	op        - IN: Retrieved user function
+///\param	user_data - IN: Retrieved user data
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user_data) const
 {
    herr_t ret_value = H5Pget_type_conv_cb( id, op, user_data);
@@ -139,7 +200,16 @@ void DSetMemXferPropList::getTypeConvCB( H5T_conv_except_func_t *op, void **user
    }
 }
 
-// Sets the memory manager for variable-length datatype allocation
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setVlenMemManager
+///\brief	Sets the memory manager for variable-length datatype allocation.
+///\param       alloc_func - IN: User's allocate routine
+///\param	alloc_info - IN: User's allocation parameters
+///\param	free_func  - IN: User's free routine
+///\param	free_info  - IN: User's free parameters
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* alloc_info, H5MM_free_t free_func, void* free_info ) const
 {
    herr_t ret_value = H5Pset_vlen_mem_manager( id, alloc_func, alloc_info, 
@@ -151,20 +221,28 @@ void DSetMemXferPropList::setVlenMemManager( H5MM_allocate_t alloc_func, void* a
    }
 }
 
-// alloc_func and free_func are set to NULL, indicating that system malloc and 
-// free are to be used
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::setVlenMemManager
+///\brief	Sets the memory manager for variable-length datatype 
+///		allocation - system \c malloc and \c free will be used.
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::setVlenMemManager() const
 {
    setVlenMemManager( NULL, NULL, NULL, NULL );
-   //herr_t ret_value = H5Pset_vlen_mem_manager( id, NULL, NULL, NULL, NULL );
-   //if( ret_value < 0 )
-   //{
-      //throw PropListIException("DSetMemXferPropList::setVlenMemManager",
-		//"H5Pset_vlen_mem_manager failed");
-   //}
 }
 
-// Gets the memory manager for variable-length datatype allocation 
+//--------------------------------------------------------------------------
+// Function:	DSetMemXferPropList::getVlenMemManager
+///\brief	Gets the memory manager for variable-length datatype allocation 
+///\param       alloc_func - OUT: User's allocate routine
+///\param	alloc_info - OUT: User's allocation parameters
+///\param	free_func  - OUT: User's free routine
+///\param	free_info  - OUT: User's free parameters
+///\exception	H5::PropListIException
+// Programmer:	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void** alloc_info, H5MM_free_t& free_func, void** free_info ) const
 {
    herr_t ret_value = H5Pget_vlen_mem_manager( id, &alloc_func, alloc_info, &free_func, free_info );

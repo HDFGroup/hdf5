@@ -24,6 +24,9 @@
 namespace H5 {
 #endif
 
+//--------------------------------------------------------------------------
+///\brief	Constant for default property
+//--------------------------------------------------------------------------
 const FileAccPropList FileAccPropList::DEFAULT( H5P_DEFAULT );
 
 //--------------------------------------------------------------------------
@@ -78,7 +81,7 @@ hid_t FileAccPropList::getDriver() const
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList::setDriver
 ///\brief	Set file driver for this property list
-///\param       new_driver_id   - IN: Name of property to check for
+///\param       new_driver_id   - IN: File driver
 ///\param       new_driver_info - IN: Struct containing the driver-specific properites
 ///\exception   H5::PropListIException
 ///\par Description

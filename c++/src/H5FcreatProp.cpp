@@ -231,9 +231,9 @@ unsigned FileCreatPropList::getIstorek() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    FileCreatPropList destructor
-///\brief       Properly terminates access to this file creation property list.
-// Programmer   Binh-Minh Ribler - 2000
+// Function:	FileCreatPropList destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FileCreatPropList::~FileCreatPropList() {}
 
