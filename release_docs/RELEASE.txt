@@ -74,6 +74,9 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Corrected bug in repeated calls to H5Pget_access_plist() which would
+            incorrectly manage reference counts of internal information and
+            eventually blow up.  QAK - 2003/09/02
         - Return rank of the array datatype on successful call to
             H5Tget_array_dims().  QAK - 2003/08/30
         - Corrected bug in H5Tdetect_class which was not correctly detecting

@@ -897,14 +897,18 @@ H5Fget_access_plist(hid_t file_id)
     if (H5F_acs_close(ret_value, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
 
+    /* Increment the reference count on the driver ID and insert it into the property list */
+    if(H5I_inc_ref(f->shared->lf->driver_id)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
 
+    /* Set the driver "info" in the property list */
     driver_info = H5FD_fapl_get(f->shared->lf);
-
     if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info")
 
+    /* Set the file close degree appropriately */
     if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
     } else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0) {
@@ -1793,6 +1797,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     haddr_t		stored_eoa;	/*relative end-of-addr in file	*/
     unsigned		tent_flags;	/*tentative flags		*/
     char		driver_name[9];	/*file driver name/version	*/
+    H5FD_class_t       *drvr;           /* File driver class info */
     hbool_t		driver_has_cmp;	/*`cmp' callback defined?	*/
     hsize_t             userblock_size = 0;
     unsigned            super_vers;     /* Superblock version # */
@@ -1819,7 +1824,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * it is the application's responsibility to never open the same file
      * more than once at a time.
      */
-    driver_has_cmp = H5FD_has_cmp(fapl_id);
+    if((drvr=H5FD_get_class(fapl_id))==NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
+    driver_has_cmp = (NULL!=drvr->cmp);
 
     /*
      * Opening a file is a two step process. First we try to open the file in

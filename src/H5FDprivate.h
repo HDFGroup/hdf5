@@ -34,8 +34,6 @@
 
 /* Macros */
 
-#define H5FD_has_cmp(id) (NULL!=H5FD_get_class(id)->cmp)
-
 /* Single macro to check for all file drivers that use MPI */
 #define IS_H5FD_MPI(file)  \
         (IS_H5FD_MPIO(file) || IS_H5FD_MPIPOSIX(file) || IS_H5FD_FPHDF5(file))
