@@ -28,6 +28,7 @@
      CHARACTER*80, DIMENSION(2) ::  attr_data  ! Attribute data
 
      INTEGER     ::   error ! Error flag
+     INTEGER, DIMENSION(7) :: data_dims
      
 
      !
@@ -71,7 +72,8 @@
      !
      ! Write the attribute data.
      !
-     CALL h5awrite_f(attr_id, atype_id, attr_data, error)
+     data_dims(1) = 2
+     CALL h5awrite_f(attr_id, atype_id, attr_data, data_dims, error)
      
      !
      ! Close the attribute. 

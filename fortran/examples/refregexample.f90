@@ -36,7 +36,8 @@
      INTEGER(HSSIZE_T) , DIMENSION(2,3) :: coord
      INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
      INTEGER :: i, j
-     INTEGER :: ref_size
+     INTEGER, DIMENSION(7) :: ref_size
+     INTEGER, DIMENSION(7) :: data_dims
      coord = reshape((/1,1,2,7,1,9/), (/2,3/))   ! Coordinates of selected points
      data = reshape ((/1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6/), (/2,9/))
      !
@@ -66,7 +67,9 @@
      !
      CALL h5dcreate_f(file_id, dsetnamev, H5T_NATIVE_INTEGER, space_id, &
                       dsetv_id, error)
-     CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, data, error)
+     data_dims(1) = 2
+     data_dims(2) = 9 
+     CALL h5dwrite_f(dsetv_id, H5T_NATIVE_INTEGER, data, data_dims, error)
      CALL h5dclose_f(dsetv_id, error)
      !
      ! Dataset with references
@@ -93,7 +96,7 @@
      !
      ! Write dataset with the references. 
      !
-     ref_size = size(ref)
+     ref_size(1) = size(ref)
      CALL h5dwrite_f(dsetr_id, H5T_STD_REF_DSETREG, ref, ref_size, error) 
      !
      ! Close all objects.
@@ -110,7 +113,7 @@
      !
      ! Read references to the dataset regions.
      !
-     ref_size = size(ref_out)
+     ref_size(1) = size(ref_out)
      CALL h5dread_f(dsetr_id, H5T_STD_REF_DSETREG, ref_out, ref_size, error) 
      ! 
      ! Dereference the first reference.
@@ -120,7 +123,7 @@
      !
      ! Read selected data from the dataset.
      !
-     CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+     CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                      mem_space_id = space_id, file_space_id = space_id)
           write(*,*) "Hypeslab selection"
           write(*,*)
@@ -139,7 +142,7 @@
      !
      ! Read selected data from the dataset.
      !
-     CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, error, &
+     CALL h5dread_f(dsetv_id, H5T_NATIVE_INTEGER, data_out, data_dims, error, &
                      mem_space_id = space_id, file_space_id = space_id)
           write(*,*) "Point selection"
           write(*,*)

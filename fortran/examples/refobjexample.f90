@@ -35,7 +35,8 @@
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref
      TYPE(hobj_ref_t_f), DIMENSION(4) ::  ref_out
      INTEGER, DIMENSION(5) :: data = (/1, 2, 3, 4, 5/)
-     INTEGER :: class, ref_size
+     INTEGER :: class
+     INTEGER, DIMENSION(7) :: data_dims, ref_size
      !
      !  Initialize FORTRAN interface. 
      !
@@ -91,7 +92,7 @@
      CALL h5rcreate_f(file_id, "/GROUP1/GROUP2", ref(2), error)
      CALL h5rcreate_f(file_id, dsetnamei, ref(3), error)
      CALL h5rcreate_f(file_id, "MyType", ref(4), error)
-     ref_size = size(ref)
+     ref_size(1) = size(ref)
      CALL h5dwrite_f(dsetr_id, H5T_STD_REF_OBJ, ref, ref_size, error)
      !
      ! Close the dataset
@@ -101,7 +102,7 @@
      ! Reopen the dataset with object references and read references to the buffer
      !
      CALL h5dopen_f(file_id, dsetnamer,dsetr_id,error)
-     ref_size = size(ref_out)
+     ref_size(1) = size(ref_out)
      CALL h5dread_f(dsetr_id, H5T_STD_REF_OBJ, ref_out, ref_size, error)
      !
      ! Dereference the third reference. We know that it is a dataset. On practice
@@ -112,7 +113,8 @@
      !
      ! Write data to the dataset.
      !
-     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, error)
+     data_dims(1) = size(data)
+     CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data, data_dims, error)
      if (error .eq. 0) write(*,*) "Data has been successfully written to the dataset "
      !
      ! Dereference the fourth reference. We know that it is a datatype. On practice

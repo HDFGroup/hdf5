@@ -50,6 +50,7 @@
 
      INTEGER :: error  ! Error flag
      LOGICAL :: status
+     INTEGER, DIMENSION(7) :: data_dims
 
 
    !
@@ -103,9 +104,11 @@
      !
      ! Write the datasets.
      !
-     CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, buf1, error)
+     data_dims(1) = 3
+     data_dims(2) = 4 
+     CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, buf1, data_dims, error)
 
-     CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, buf2, error)
+     CALL h5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, buf2, data_dims, error)
 
      !
      ! Close the dataspace for the datasets.
@@ -176,7 +179,8 @@
      !
      ! Write value into the selected points in dataset1.
      !
-     CALL H5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, val, error, &
+     data_dims(1) = 2
+     CALL H5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, val, data_dims, error, &
                     mem_space_id=memspace, file_space_id=dataspace1)
 
      !
@@ -187,7 +191,8 @@
      !
      ! Write value into the selected points in dataset2.
      !
-     CALL H5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, val, error, &
+     data_dims(1) = 2
+     CALL H5dwrite_f(dset2_id, H5T_NATIVE_INTEGER, val, data_dims, error, &
                     mem_space_id=memspace, file_space_id=dataspace2)
 
      !
@@ -237,7 +242,9 @@
      !
      ! Read dataset from the first file.
      !
-     CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, bufnew, error)
+     data_dims(1) = 3 
+     data_dims(2) = 4 
+     CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, bufnew, data_dims, error)
 
      !
      ! Display the data read from dataset "Copy1"
@@ -250,7 +257,7 @@
      !
      ! Read dataset from the second file.
      !
-     CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, bufnew, error)
+     CALL h5dread_f(dset2_id, H5T_NATIVE_INTEGER, bufnew, data_dims, error)
 
      !
      ! Display the data read from dataset "Copy2"
