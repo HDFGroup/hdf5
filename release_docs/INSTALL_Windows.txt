@@ -264,7 +264,8 @@ You can possibily test four versions of hdf5 library and tools. They are:
 	debug version
 	debug dll version
 
-NOTE: The hdf5ddll.dll and hdf5dll.dll should be placed into
+NOTE: hdf5ddll.dll and hdf5dll.dll should be placed into some place that
+the application can find, one suggestion is to use
 the C:\WINNT\system or C:\WINDOWS\system directory before using the dlls.
 
 We strongly suggest you to redirect your testing results into
