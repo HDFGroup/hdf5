@@ -1,6 +1,6 @@
 /*
- * Copyright © 1999 NCSA
- *                  All rights reserved.
+ * Copyright © 1999-2001 NCSA
+ *                       All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Monday, July 26, 1999
@@ -15,14 +15,14 @@
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file */
-#include <H5private.h>		/*library functions			*/
-#include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fpkg.h>		/*files					*/
-#include <H5FDprivate.h>	/*virtual file driver			*/
-#include <H5FLprivate.h>	/*Free Lists	  */
-#include <H5Iprivate.h>		/*interface abstraction layer		*/
-#include <H5MMprivate.h>	/*memory management			*/
-#include <H5Pprivate.h>		/*property lists			*/
+#include "H5private.h"		/*library functions			*/
+#include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"		/*files					*/
+#include "H5FDprivate.h"	/*virtual file driver			*/
+#include "H5FLprivate.h"	/*Free Lists	  */
+#include "H5Iprivate.h"		/*interface abstraction layer		*/
+#include "H5MMprivate.h"	/*memory management			*/
+#include "H5Pprivate.h"		/*property lists			*/
 
 /* Interface initialization */
 #define PABLO_MASK	H5FD_mask
@@ -789,8 +789,10 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->cls = driver;
     file->maxaddr = maxaddr;
     HDmemset(file->fl, 0, sizeof(file->fl));
-	file->def_meta_block_size = fapl->meta_block_size;
+    file->def_meta_block_size = fapl->meta_block_size;
     file->accum_loc = HADDR_UNDEF;
+    file->threshold = fapl->threshold;
+    file->alignment = fapl->alignment;
     
     /* Retrieve the VFL driver feature flags */
     if (H5FD_query(file, &(file->feature_flags))<0)
@@ -1155,6 +1157,8 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
  *              Wednesday, August  4, 1999
  *
  * Modifications:
+ *	Albert Cheng, 2001/05/01
+ *	Implement the allocation by alignment/threshold.
  *
  *-------------------------------------------------------------------------
  */
@@ -1171,6 +1175,12 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     assert(type>=0 && type<H5FD_MEM_NTYPES);
     assert(size>0);
     
+#ifdef H5F_DEBUG
+    if (H5DEBUG(F)) {
+	fprintf(H5DEBUG(F), "%s: alignment=%ld, threshold=%ld, size=%ld\n",
+	    FUNC, file->alignment, file->threshold, size);
+    }
+#endif
     /* Map the allocation request to a free list */
     if (H5FD_MEM_DEFAULT==file->cls->fl_map[type]) {
         mapped_type = type;
@@ -1179,41 +1189,134 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     }
 
     /*
-     * Try to satisfy the request from the free list. First try to find an
-     * exact match, otherwise use the best match. Only perform the search if
-     * the free list has the potential of satisfying the request.
+     * Try to satisfy the request from the free list.  Only perform the search
+     * if the free list has the potential of satisfying the request.
+     * Here, aligned requests are requests that are >= threshold and
+     * alignment > 1.
+     * For non-aligned request, first try to find an exact match, otherwise
+     * use the best match which is the smallest size that meets the requested
+     * size.
+     * For aligned address request, find a block in the following order
+     * of preferences:
+     *   1. block address is aligned and exact match in size;
+     *   2. block address is aligned with smallest size > requested size;
+     *   3. block address is not aligned with smallest size >= requested size.
      */
     if (mapped_type>=0 && (0==file->maxsize || size<=file->maxsize)) {
         H5FD_free_t *prev=NULL, *best=NULL;
         H5FD_free_t *cur = file->fl[mapped_type];
+	int	found_aligned = 0;
+	int	need_aligned;
+	hsize_t head;
 
+	need_aligned = file->alignment > 1 && size >= file->threshold;
         while (cur) {
             file->maxsize = MAX(file->maxsize, cur->size);
-            if (cur->size==size) {
-                ret_value = cur->addr;
-                if (prev)
-                    prev->next = cur->next;
-                else
-                    file->fl[mapped_type] = cur->next;
-                H5MM_xfree(cur);
-                if (size==file->maxsize)
-                    file->maxsize=0; /*unknown*/
-                HRETURN(ret_value);
-            } else if (cur->size>size && (!best || cur->size<best->size)) {
-                best = cur;
-            }
+	    if (need_aligned){
+		if ((head = cur->addr % file->alignment) == 0){
+		    /* got aligned address*/
+		    if (cur->size==size){
+			/* exact match */
+			ret_value = cur->addr;
+			if (prev)
+			    prev->next = cur->next;
+			else
+			    file->fl[mapped_type] = cur->next;
+			H5MM_xfree(cur);
+			if (size==file->maxsize)
+			    file->maxsize=0; /*unknown*/
+			HRETURN(ret_value);
+		    }
+		    if (cur->size>size){
+			if (!best || !found_aligned || cur->size<best->size) {
+			    best = cur;
+			    found_aligned = 1;
+			}
+		    }
+		}else{
+		    /* non-aligned address.
+		     * check to see if this block is big enough to skip
+		     * to the next aligned address and is still big enough
+		     * for the requested size.
+		     * the extra cur->size>head is for preventing unsigned
+		     * underflow.
+		     * (this can be improved by checking for an exact match
+		     * after excluding the head. Such match is as good as
+		     * the found_aligned case above.)
+		     */
+		    head = file->alignment - head;	/* actual head size */
+		    if (!found_aligned &&
+			cur->size > head && cur->size-head >= size &&
+			(!best || cur->size < best->size)){
+			best =cur;
+		    }
+		}
+	    }else{
+		/* !need_aligned */
+		if (cur->size==size) {
+		    ret_value = cur->addr;
+		    if (prev)
+			prev->next = cur->next;
+		    else
+			file->fl[mapped_type] = cur->next;
+		    H5MM_xfree(cur);
+		    if (size==file->maxsize)
+			file->maxsize=0; /*unknown*/
+		    HRETURN(ret_value);
+		} else if (cur->size>size && (!best || cur->size<best->size)) {
+		    best = cur;
+		}
+	    }
             prev = cur;
             cur = cur->next;
         }
         if (best) {
-            if (best->size==file->maxsize)
-                file->maxsize=0; /*unknown*/
-            ret_value = best->addr;
-            best->addr += size;
-            best->size -= size;
-            HRETURN(ret_value);
+	    if (best->size==file->maxsize)
+		file->maxsize=0; /*unknown*/
+	    if (!need_aligned || found_aligned){
+		/* free only tail */
+		ret_value = best->addr;
+		best->addr += size;
+		best->size -= size;
+		HRETURN(ret_value);
+	    }else{
+		/* split into 3 pieces.  Keep the the head and tail in */
+		/* the freelist. 				*/
+		H5FD_free_t *tmp = H5MM_malloc(sizeof(H5FD_free_t));
+
+		head = file->alignment - (best->addr % file->alignment);
+		ret_value = best->addr + head;
+#ifdef H5F_DEBUG
+		if (H5DEBUG(F)) {
+		    fprintf(H5DEBUG(F),
+		    "%s: 3 pieces, begin best->addr=%ld, best->size=%ld, "
+		    "head=%ld, size=%ld\n",
+		    FUNC, best->addr, best->size, head, size);
+		}
+#endif
+		assert(tmp);		/* bark in debug mode */
+		if (tmp){
+		    if (tmp->size = best->size - head - size){
+			tmp->addr = best->addr + head + size;
+			tmp->next = best->next;
+			best->next = tmp;
+		    }else{
+			/* no tail piece */
+			H5MM_xfree(tmp);
+		    }
+		}else{
+		    /* cannot keep the tail piece.  leak file memory. */
+		}
+		best->size = head;
+		HRETURN(ret_value);
+	    }
         }
     }
+#ifdef H5F_DEBUG
+    if (H5DEBUG(F)) {
+	fprintf(H5DEBUG(F), "%s: Could not allocate from freelists\n", FUNC);
+    }
+#endif
 
     /*
      * If the metadata aggregation feature is enabled for this VFL driver,
@@ -1275,6 +1378,8 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
  *              Friday, August 25, 2000
  *
  * Modifications:
+ *	Albert Cheng, 2001/05/01
+ *	Implement the allocation by alignment/threshold.
  *
  *-------------------------------------------------------------------------
  */
@@ -1301,7 +1406,35 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
                   "driver allocation request failed");
         }
     } else {
-        haddr_t eoa = (file->cls->get_eoa)(file);
+	hsize_t	wasted, tmpsize;
+        haddr_t oldeoa;
+	haddr_t eoa = (file->cls->get_eoa)(file);
+
+#ifdef H5F_DEBUG
+	if (file->alignment * file->threshold != 1 && H5DEBUG(F)) {
+	    fprintf(H5DEBUG(F),
+		"%s: alignment=%ld, threshold=%ld, size=%ld, Begin eoa=%ld\n",
+		FUNC, file->alignment, file->threshold, size, eoa);
+	}
+#endif
+	/* wasted is 0 if not exceeding threshold or eoa happens to be aligned*/
+	wasted = (size>=file->threshold) ? (eoa % file->alignment) : 0;
+	if (wasted){
+	    wasted = file->alignment - wasted;	/* actual waste */
+	    oldeoa = eoa;			/* save it for later freeing */
+	    /* advance eoa to the next alignment by allocating the wasted */
+	    if (H5F_addr_overflow(eoa, wasted) || eoa+wasted>file->maxaddr) {
+		HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+		      "file allocation request failed");
+	    }
+	    eoa += wasted;
+	    if ((file->cls->set_eoa)(file, eoa)<0) {
+		HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
+		      "file allocation request failed");
+	    }
+	}
+
+	/* allocate the aligned memory */
         if (H5F_addr_overflow(eoa, size) || eoa+size>file->maxaddr) {
             HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
                   "file allocation request failed");
@@ -1312,6 +1445,18 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
             HRETURN_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF,
                   "file allocation request failed");
         }
+
+	/* Free the wasted memory */
+	if (wasted)
+	    H5FDfree(file, type, oldeoa, wasted);
+
+#ifdef H5F_DEBUG
+	if (file->alignment * file->threshold != 1 && H5DEBUG(F)) {
+	    fprintf(H5DEBUG(F),
+		"%s: ret_value=%ld, wasted=%ld, Ended eoa=%ld\n",
+		FUNC, ret_value, wasted, eoa);
+	}
+#endif
     }
 
     FUNC_LEAVE(ret_value);
@@ -1414,9 +1559,7 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size)
         cur->size = size;
         cur->next = file->fl[mapped_type];
         file->fl[mapped_type] = cur;
-        if (file->maxsize && size>file->maxsize) {
-            file->maxsize = size;
-        }
+	file->maxsize = MAX(file->maxsize, size);
     } else if (file->cls->free) {
         if ((file->cls->free)(file, type, addr, size)<0) {
             HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
@@ -1526,7 +1669,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, haddr_t old_addr, hsize_t old_size,
                   "memory allocation failed");
         }
         if (H5FDread(file, type, H5P_DEFAULT, old_addr, old_size, buf)<0 ||
-                H5FDwrite(file, type, H5P_DEFAULT, new_addr, old_size, buf)) {
+                H5FDwrite(file, type, H5P_DEFAULT, new_addr, old_size, buf)<0) {
             H5FDfree(file, type, new_addr, new_size);
             H5MM_xfree(buf);
             HRETURN_ERROR(H5E_FILE, H5E_READERROR, HADDR_UNDEF,
