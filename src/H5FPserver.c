@@ -146,11 +146,10 @@ static H5FP_file_info  *H5FP_new_file_info_node(unsigned file_id);
 static H5FP_file_info  *H5FP_find_file_info(unsigned file_id);
 
     /* local file modification structure handling functions */
-static H5FP_mdata_mod  *H5FP_new_file_mod_node(unsigned rank,
-                                              H5FD_mem_t mem_type,
-                                              haddr_t addr,
-                                              unsigned md_size,
-                                              char *metadata);
+static H5FP_mdata_mod  *H5FP_new_file_mod_node(H5FD_mem_t mem_type,
+                                               haddr_t addr,
+                                               unsigned md_size,
+                                               char *metadata);
 static herr_t   H5FP_free_mod_node(H5FP_mdata_mod *info);
 
     /* local request handling functions */
@@ -499,8 +498,7 @@ H5FP_free_mod_node(H5FP_mdata_mod *info)
  * Modifications:
  */
 static H5FP_mdata_mod *
-H5FP_new_file_mod_node(unsigned UNUSED rank, H5FD_mem_t mem_type,
-                       haddr_t addr, unsigned md_size, char *metadata)
+H5FP_new_file_mod_node(H5FD_mem_t mem_type, haddr_t addr, unsigned md_size, char *metadata)
 {
     H5FP_mdata_mod *ret_value = NULL;
 
@@ -558,7 +556,7 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
         HGOTO_DONE(SUCCEED);
     }
     
-    if ((fm = H5FP_new_file_mod_node(rank, mem_type, addr, md_size, metadata)) != NULL) {
+    if ((fm = H5FP_new_file_mod_node(mem_type, addr, md_size, metadata)) != NULL) {
         if (!H5TB_dins(info->mod_tree, (void *)fm, NULL))
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert modification into tree");
@@ -1283,7 +1281,7 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
     r.addr = 0;
     r.status = H5FP_STATUS_MDATA_NOT_CACHED;
 
-    if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
+    if ((info = H5FP_find_file_info(req->file_id)) != NULL && info->num_mods) {
         H5FP_mdata_mod mod;     /* Used to find the correct modification */
         H5TB_NODE *node;
 

@@ -1058,7 +1058,7 @@ H5FD_fphdf5_set_eoa(H5FD_t *_file, haddr_t addr)
     if (!H5FD_fphdf5_is_sap(_file))
         /* Retrieve the EOA information */
         if (H5FP_request_set_eoa(_file, addr, &req_id, &status))
-            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTRECV, HADDR_UNDEF, "can't retrieve eoa information")
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTRECV, FAIL, "can't retrieve eoa information")
 
     file->eoa = addr;
 
@@ -1194,13 +1194,14 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size_t to int")
 
     /* Only look for MPI views for raw data transfers */
-    if(mem_type==H5FD_MEM_DRAW) {
+    if (mem_type == H5FD_MEM_DRAW) {
         H5P_genplist_t     *plist;
-        H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
+        H5FD_mpio_xfer_t    xfer_mode;  /* I/O tranfer mode */
 
         /* Obtain the data transfer properties */
         if ((plist = H5I_object(dxpl_id)) == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
         xfer_mode = H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
 
         /*
@@ -1209,11 +1210,11 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
          * allowed us to test that btype == ftype == MPI_BYTE (or even
          * MPI_TYPE_NULL, which could mean "use MPI_BYTE" by convention).
          */
-        if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
-            MPI_Datatype        file_type;
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+            MPI_Datatype    file_type;
 
             /* Remember that views are used */
-            use_view_this_time=TRUE;
+            use_view_this_time = TRUE;
 
             /* Prepare for a full-blown xfer using btype, ftype, and disp */
             if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
@@ -1265,8 +1266,7 @@ H5FD_fphdf5_read(H5FD_t *_file, H5FD_mem_t mem_type, hid_t dxpl_id,
                                          H5FD_mpio_native,  file->info)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mrc)
 
-        } /* end if */
-    else {
+    } else {
         /*
          * This is metadata - we want to try to read it from the SAP
          * first.
@@ -1283,7 +1283,15 @@ HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
 
         if (sap_status == H5FP_STATUS_OK) {
             /* WAH-HOO! We've found it! We can leave now */
-        } else if (sap_status != H5FP_STATUS_MDATA_NOT_CACHED) {
+        } else if (sap_status == H5FP_STATUS_MDATA_NOT_CACHED) {
+            /* Metadata isn't cached, so grab it from the file */
+            if ((mrc = MPI_File_read_at(file->f, mpi_off, buf, size_i,
+                                        MPI_BYTE, &status)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mrc)
+
+            if ((mrc = MPI_Get_count(&status, MPI_BYTE, &bytes_read)) != MPI_SUCCESS)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_count failed", mrc)
+        } else {
             /* FIXME: something bad happened */
 HDfprintf(stderr, "%s:%d: Metadata cache read failed!\n", FUNC, __LINE__);
         }
@@ -1424,11 +1432,11 @@ done:
  */
 herr_t
 H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist,
-    haddr_t addr, int size, const void *buf)
+                       haddr_t addr, int size, const void *buf)
 {
     H5FD_fphdf5_t      *file = (H5FD_fphdf5_t*)_file;
     MPI_Status          status;
-    MPI_Datatype        buf_type=MPI_BYTE;
+    MPI_Datatype        buf_type = MPI_BYTE;
     MPI_Offset          mpi_off;
     int                 mrc;
     int                 bytes_written;
@@ -1455,7 +1463,7 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
         H5FD_mpio_xfer_t    xfer_mode;   /* I/O tranfer mode */
 
         /* Obtain the data transfer properties */
-        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode = (H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
 
         /*
          * Set up for a fancy xfer using complex types, or single byte block.
@@ -1463,11 +1471,11 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
          * allowed us to test that btype == ftype == MPI_BYTE (or even
          * MPI_TYPE_NULL, which could mean "use MPI_BYTE" by convention).
          */
-        if(xfer_mode==H5FD_MPIO_COLLECTIVE) {
-            MPI_Datatype        file_type;
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+            MPI_Datatype    file_type;
 
             /* Remember that views are used */
-            use_view_this_time=TRUE;
+            use_view_this_time = TRUE;
 
             /* Prepare for a full-blown xfer using btype, ftype, and disp */
             if (H5P_get(plist, H5FD_FPHDF5_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
@@ -1491,18 +1499,17 @@ H5FD_fphdf5_write_real(H5FD_t *_file, H5FD_mem_t mem_type, H5P_genplist_t *plist
     } /* end if */
 
     /* Write the data. */
-    if(use_view_this_time) {
+    if (use_view_this_time) {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if ((mrc = MPI_File_write_at_all(file->f, mpi_off, (void*)buf,
                                          size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mrc)
-    } /* end if */
-    else {
+    } else {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
         if ((mrc = MPI_File_write_at(file->f, mpi_off, (void*)buf,
                                      size, buf_type, &status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mrc)
-    } /* end else */
+    }
 
     /* Reset the file view when we used MPI derived types */
     if (use_view_this_time)
