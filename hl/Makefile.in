@@ -11,6 +11,7 @@
 top_srcdir=@top_srcdir@
 top_builddir=..
 srcdir=@srcdir@
+@COMMENCE@
 
 
 # Subdirectories in build-order
@@ -88,7 +89,7 @@ distclean:
 	@@SETX@; for d in $(SUBDIRS); do		                      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM)  Makefile
+	-$(RM) Makefile
 
 maintainer-clean:
 	@echo "This target is intended for maintainers to use;"
