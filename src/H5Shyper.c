@@ -3512,6 +3512,8 @@ H5S_hyper_release (H5S_t *space)
     if(space->select.sel_info.hslab.diminfo!=NULL) {
         H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
         space->select.sel_info.hslab.diminfo = NULL;
+        H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
+        space->select.sel_info.hslab.app_diminfo = NULL;
     } /* end if */
 
     /* Release irregular hyperslab information */
@@ -3684,8 +3686,25 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
             new_diminfo[i].count = src->select.sel_info.hslab.diminfo[i].count;
             new_diminfo[i].block = src->select.sel_info.hslab.diminfo[i].block;
         } /* end for */
+        dst->select.sel_info.hslab.diminfo = new_diminfo;
+
+        /* Create the per-dimension selection info */
+        if((new_diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,src->extent.u.simple.rank,0))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension array");
+
+        /* Copy the per-dimension selection info */
+        for(i=0; i<src->extent.u.simple.rank; i++) {
+            new_diminfo[i].start = src->select.sel_info.hslab.app_diminfo[i].start;
+            new_diminfo[i].stride = src->select.sel_info.hslab.app_diminfo[i].stride;
+            new_diminfo[i].count = src->select.sel_info.hslab.app_diminfo[i].count;
+            new_diminfo[i].block = src->select.sel_info.hslab.app_diminfo[i].block;
+        } /* end for */
+        dst->select.sel_info.hslab.app_diminfo = new_diminfo;
     } /* end if */
-    dst->select.sel_info.hslab.diminfo = new_diminfo;
+    else {
+        dst->select.sel_info.hslab.diminfo = new_diminfo;
+        dst->select.sel_info.hslab.app_diminfo = new_diminfo;
+    } /* end else */
 
     /* Check if there is irregular hyperslab information to copy */
     if(src->select.sel_info.hslab.hyper_lst!=NULL) {
@@ -4515,6 +4534,9 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[/*space_id*/],
 		      const hsize_t block[/*space_id*/])
 {
+    hssize_t real_stride[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
+    hssize_t real_count[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
+    hssize_t real_block[H5O_LAYOUT_NDIMS]; /* Location of the block to add for strided selections */
     hsize_t *_stride=NULL;        /* Stride array */
     hsize_t *_block=NULL;        /* Block size array */
     int i;                      /* Counters */
@@ -4578,7 +4600,7 @@ for(i=0; i<space->extent.u.simple.rank; i++)
                 "can't release hyperslab");
         } /* end if */
 
-        /* Copy all the per-dimension selection info into the space descriptor */
+        /* Copy all the application per-dimension selection info into the space descriptor */
         if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
         } /* end if */
@@ -4587,6 +4609,34 @@ for(i=0; i<space->extent.u.simple.rank; i++)
             diminfo[i].stride = stride[i];
             diminfo[i].count = count[i];
             diminfo[i].block = block[i];
+        } /* end for */
+        space->select.sel_info.hslab.app_diminfo = diminfo;
+
+        /* Optimize the hyperslab selection to detect contiguously selected block/stride information */
+        /* Modify the stride, block & count for contiguous hyperslab selections */
+        for(i=0; i<space->extent.u.simple.rank; i++) {
+            /* contiguous hyperslabs have the block size equal to the stride */
+            if(stride[i]==block[i]) {
+                real_count[i]=1;
+                real_stride[i]=1;
+                real_block[i]=count[i]*block[i];
+            } /* end if */
+            else {
+                real_stride[i]=stride[i];
+                real_count[i]=count[i];
+                real_block[i]=block[i];
+            } /* end else */
+        } /* end for */
+
+        /* Copy all the per-dimension selection info into the space descriptor */
+        if((diminfo = H5FL_ARR_ALLOC(H5S_hyper_dim_t,space->extent.u.simple.rank,0))==NULL) {
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate per-dimension vector");
+        } /* end if */
+        for(i=0; i<space->extent.u.simple.rank; i++) {
+            diminfo[i].start = start[i];
+            diminfo[i].stride = real_stride[i];
+            diminfo[i].count = real_count[i];
+            diminfo[i].block = real_block[i];
         } /* end for */
         space->select.sel_info.hslab.diminfo = diminfo;
 
@@ -4630,6 +4680,10 @@ for(i=0; i<space->extent.u.simple.rank; i++)
                     /* Remove the 'diminfo' information, since we're adding to it */
                     H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.diminfo);
                     space->select.sel_info.hslab.diminfo = NULL;
+
+                    /* Remove the 'app_diminfo' information also, since we're adding to it */
+                    H5FL_ARR_FREE(H5S_hyper_dim_t,space->select.sel_info.hslab.app_diminfo);
+                    space->select.sel_info.hslab.app_diminfo = NULL;
 
                     /* Add in the new hyperslab information */
                     H5S_generate_hyperslab (space, op, start, stride, count, block);

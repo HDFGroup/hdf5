@@ -608,7 +608,7 @@ for(i=0; i<space->extent.u.simple.rank; i++)
 #endif /*QAK */
         /* Check each dimension */
         for(ret_value=1,i=0; i<space->extent.u.simple.rank; i++)
-            ret_value*=space->select.sel_info.hslab.diminfo[i].count;
+            ret_value*=space->select.sel_info.hslab.app_diminfo[i].count;
     } /* end if */
     else 
         ret_value = (hssize_t)space->select.sel_info.hslab.hyper_lst->count;
@@ -784,7 +784,11 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numbloc
         /* Set some convienence values */
         ndims=space->extent.u.simple.rank;
         fast_dim=ndims-1;
-        diminfo=space->select.sel_info.hslab.diminfo;
+        /*
+         * Use the "application dimension information" to pass back to the user
+         * the blocks they set, not the optimized, internal information.
+         */
+        diminfo=space->select.sel_info.hslab.app_diminfo;
 
         /* Build the tables of count sizes as well as the initial offset */
         for(i=0; i<ndims; i++) {

@@ -127,6 +127,13 @@ typedef struct {
 	 * for one hyperslab selection. Perhaps this might need to be
 	 * expanded into a list of arrays when the H5Sselect_hyperslab's
 	 * restriction to H5S_SELECT_SET is removed. */
+    H5S_hyper_dim_t *app_diminfo;/* ->[rank] of per-dim selection info */
+	/* 'diminfo' points to a [potentially] optimized version of the user's
+     * hyperslab information.  'app_diminfo' points to the actual parameters
+     * that the application used for setting the hyperslab selection.  These
+     * are only used for re-gurgitating the original values used to set the
+     * hyperslab to the application when it queries the hyperslab selection
+     * information. */
     H5S_hyper_list_t *hyper_lst; /* List of selected hyperslabs (order is not important) */
 } H5S_hyper_sel_t;
 
