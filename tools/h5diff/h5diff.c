@@ -53,14 +53,14 @@ typedef struct options_t
 
 int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name, 
                   const char *obj2_name, options_t options );
-void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
+int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
            options_t options, int type );
-void compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
+int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
               int nobjects1, info_t *info1,
               hid_t file2_id, const char *file2_name, const char *obj2_name, 
               int nobjects2, info_t *info2,
               options_t options );
-void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
+int match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
             hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
             options_t options );
 int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims, 
@@ -117,10 +117,10 @@ void usage(void)
  printf("[-r]              Print only what objects differ, not the differences\n");
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
- printf("[-p relative]     Print difference when it is greater than a relative error\n");
+ printf("[-p relative]     Print difference when it is greater than a relative limit\n");
  printf("\n");
  printf("Items in [] are optional\n");
- printf("[obj1] and [obj1] are HDF5 objects (datasets, groups or datatypes)\n");
+ printf("[obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)\n");
  printf("The 'count' value must be a positive integer\n");
  printf("The 'delta' and 'relative' values must be positive numbers\n");
  printf("The -d compare criteria is |a - b| > delta\n");
@@ -149,7 +149,8 @@ void usage(void)
  *
  * Purpose: H5diff main program
  *
- * Return: 
+ * Return: An  exit status of 0 means no differences were found, 1 means some 
+ *   differences were found.
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -177,6 +178,7 @@ int main(int argc, const char *argv[])
  const char *file2_name;
  const char *obj1_name  = NULL;
  const char *obj2_name  = NULL;
+ int        nfound=0, ret;
 
 /*-------------------------------------------------------------------------
  * print the command line options
@@ -330,10 +332,6 @@ int main(int argc, const char *argv[])
   
  }/*for*/
  
-
-
-
-
 /*-------------------------------------------------------------------------
  * get the number of objects in the files
  *-------------------------------------------------------------------------
@@ -362,8 +360,8 @@ int main(int argc, const char *argv[])
  
  if ( obj1_name )
  {
-  compare(file1_id,file1_name,obj1_name,nobjects1,info1,
-          file2_id,file2_name,obj2_name,nobjects2,info2,options);
+  nfound=compare(file1_id,file1_name,obj1_name,nobjects1,info1,
+                 file2_id,file2_name,obj2_name,nobjects2,info2,options);
  }
 
 /*-------------------------------------------------------------------------
@@ -373,8 +371,8 @@ int main(int argc, const char *argv[])
 
  else 
  {
-  match(file1_id,file1_name,nobjects1,info1,
-        file2_id,file2_name,nobjects2,info2,options);
+  nfound=match(file1_id,file1_name,nobjects1,info1,
+               file2_id,file2_name,nobjects2,info2,options);
  }
  
  /* close */
@@ -384,7 +382,8 @@ int main(int argc, const char *argv[])
  info_free(info1,nobjects1);
  info_free(info2,nobjects2);
  printf("\n");
- return 0;
+ ret= (nfound==0 ? 0 : 1 );
+ return ret;
  
 }
 
@@ -394,7 +393,7 @@ int main(int argc, const char *argv[])
  *
  * Purpose: check for valid input
  *
- * Return: 
+ * Return: 1 for ok, -1 for fail
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -432,7 +431,7 @@ int check_n_input( const char *str )
  *
  * Purpose: check for valid input
  *
- * Return: 
+ * Return: 1 for ok, -1 for fail
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -469,7 +468,7 @@ int check_f_input( const char *str )
  *
  * Purpose: print list of objects in file
  *
- * Return: 
+ * Return: void
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -517,7 +516,7 @@ void list( const char *filename, int nobjects, info_t *info )
  *
  * Purpose: do the compare criteria
  *
- * Return: 
+ * Return: strcmp value
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -546,7 +545,7 @@ int compare_object( char *obj1, char *obj2 )
  *  cosequential match algorithm and is described in 
  *  Folk, Michael; Zoellick, Bill. (1992). File Structures. Addison-Wesley.
  *
- * Return: 
+ * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -559,7 +558,7 @@ int compare_object( char *obj1, char *obj2 )
  *-------------------------------------------------------------------------
  */
 
-void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
+int match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1,
             hid_t file2_id, const char *file2_name, int nobjects2, info_t *info2,
             options_t options )
 {
@@ -572,6 +571,7 @@ void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1
  table_t  *table=NULL;
  unsigned long infile[2]; 
  char c1, c2;
+ int  nfound=0;
 
 /*-------------------------------------------------------------------------
  * build the list
@@ -655,12 +655,14 @@ void match( hid_t file1_id, const char *file1_name, int nobjects1, info_t *info1
  for (i = 0; i < table->nobjs; i++)
  {
   if ( table->objs[i].objno[0]==1 && table->objs[i].objno[1]==1 )
-   diff( file1_id, table->objs[i].objname, file2_id, table->objs[i].objname, options, 
-    table->objs[i].type );
+   nfound+=diff( file1_id, table->objs[i].objname, 
+                 file2_id, table->objs[i].objname, 
+                 options, table->objs[i].type );
  }
 
  /* free table */
  table_free(table);
+ return nfound;
 }
 
 
@@ -709,7 +711,7 @@ int get_index( const char *obj, int nobjects, info_t *info )
  *
  * Purpose: get objects form list, and check for the same type
  *
- * Return: 
+ * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -723,7 +725,7 @@ int get_index( const char *obj, int nobjects, info_t *info )
  */
 
 
-void compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
+int compare( hid_t file1_id, const char *file1_name, const char *obj1_name, 
               int nobjects1, info_t *info1,
               hid_t file2_id, const char *file2_name, const char *obj2_name, 
               int nobjects2, info_t *info2,
@@ -731,6 +733,7 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
 {
 
  int f1=0, f2=0;
+ int nfound=0;
 
  int i = get_index( obj1_name, nobjects1, info1 );
  int j = get_index( obj2_name, nobjects2, info2 );
@@ -746,7 +749,7 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
   f2=1;
  }
  if ( f1 || f2 )
-  return;
+  return -1;
 
   /* use the name with "/" first, as obtained by iterator function */
  obj1_name=info1[i].name;
@@ -759,11 +762,12 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
   printf("<%s> is of type %s and <%s> is of type %s\n", 
    obj1_name, get_type(info1[i].type), 
    obj2_name, get_type(info2[j].type) );
-  return;
+  return 0;
  }
   
- diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
- 
+ nfound=diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
+
+ return nfound;
 }
 
 
@@ -772,7 +776,7 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
  *
  * Purpose: switch between types and choose the diff function
  *
- * Return: 
+ * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -786,13 +790,15 @@ void compare( hid_t file1_id, const char *file1_name, const char *obj1_name,
  */
 
 
-void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
+int diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *obj2_name, 
            options_t options, int type )
 {
+ int nfound=0;
+
  switch ( type )
  {
  case H5G_DATASET:
-  diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
+  nfound=diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
   break;
   
  default:
@@ -804,6 +810,7 @@ void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *ob
  } 
  
  printf("\n");
+ return nfound;
 }
 
 /*-------------------------------------------------------------------------
@@ -812,7 +819,7 @@ void diff( hid_t file1_id, const char *obj1_name, hid_t file2_id, const char *ob
  * Purpose: check for comparable datasets and read into a compatible 
  *  memory type
  *
- * Return: Success: 0, Failure: -1
+ * Return: Number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -844,7 +851,7 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  H5T_class_t tclass1;
  H5T_class_t tclass2;
  int     i;
- int     nfound;
+ int     nfound=0; /* number of differences found */
  void    *edata;
  hid_t   (*func)(void*);
  const char *name1=NULL; /* relative names */
@@ -1160,7 +1167,7 @@ out:
  if ( m_type1!=-1 )   assert( (H5Tclose(m_type1)) >=0);
  if ( m_type2!=-1 )   assert( (H5Tclose(m_type2)) >=0);
  
- return 0;
+ return nfound;
 
 }
 
@@ -1172,7 +1179,7 @@ out:
  *
  * Purpose: compare array
  *
- * Return: 
+ * Return: number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
@@ -1738,7 +1745,6 @@ int array_diff( void *buf1, void *buf2, hsize_t tot_cnt, int rank, hsize_t *dims
   
  } /*switch*/
    
- 
  return nfound;
 }
 
