@@ -74,11 +74,11 @@ many different parameters to be easily manipulated.
     <li><a href="#Property-SetIstoreK">H5Pset_istore_k</a>
     <li><a href="#Property-GetIstoreK">H5Pget_istore_k</a>
     </ul>
-<br>&nbsp;
-<br>
-||&nbsp;&nbsp;&nbsp;<i>Available only in the 
-<br>&nbsp;&nbsp;&nbsp;&nbsp;
-parallel HDF5 library.</i>
+
+    <p><i>Variable-length Datatype Properties</i>
+    <ul>
+    <li><a href="#Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+    </ul>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -102,6 +102,12 @@ parallel HDF5 library.</i>
     <li><a href="#Property-SetSplit">H5Pset_split</a>
     <li><a href="#Property-GetSplit">H5Pget_split</a>
     </ul>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>
+||&nbsp;&nbsp;<i>Available only in the 
+parallel HDF5 library.</i>
 
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 
@@ -1992,7 +1998,7 @@ parallel HDF5 library.</i>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_deflate</code> sets the compression method for a 
         dataset creation property list to <code>H5D_COMPRESS_DEFLATE</code>
-        and the compression level to <code>level<>/code>, which should 
+        and the compression level to <code>level</code>, which should 
         be a value from zero to nine, inclusive.  
         Lower compression levels are faster but result in less compression.  
         This is the same algorithm as used by the GNU gzip program.
@@ -2034,6 +2040,61 @@ parallel HDF5 library.</i>
 </dl>
 
 -->
+
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> <code>alloc</code>,
+        <em>void</em> *<code>alloc_info</code>,
+        <em>H5MM_free_t</em> <code>free</code>,
+        <em>void</em> *<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_vlen_mem_manager</code> sets the memory manager for 
+        variable-length datatype allocation in <code>H5Dread</code> and <code>H5Treclaim_vlen</code>.
+        <p>
+        Setting the <code>alloc</code> and <code>free</code> parameters to 
+        non-NULL values invokes the user's custom memory management routines.  
+        Setting the <code>alloc</code> and <code>free</code> parameters 
+        to &nbsp; <code> NULL</code> invokes the system's &nbsp; <code> malloc</code> and 
+        <code>free</code> memory management routines.
+        <p>
+        The prototypes for these user-defined functions would appear as follows:
+        <dir>
+            <em>typedef void</em> *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
+                <em>void</em> *<code>alloc_info</code>) ;
+            <br>
+            <em>typedef void</em> (*<code>H5MM_free_t</code>)(<em>void</em> *<code>mem</code>, 
+                <em>void</em> *<code>free_info</code>) ;
+        </dir>
+        The <code>alloc_info</code> and <code>free_info</code> parameters 
+        can be used to pass along any required information to 
+        the user's memory management routines.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset transfer property list.
+        <dt><em>H5MM_allocate_t</em> <code>alloc</code>
+            <dd>IN: User's allocate routine, or &nbsp; <code> NULL</code> for system &nbsp; <code> malloc</code>. 
+        <dt><em>void</em> *<code>alloc_info</code>
+            <dd>IN: Extra parameter for user's allocation routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+        <dt><em>H5MM_free_t</em> <code>free</code>
+            <dd>IN: User's free routine, or &nbsp; <code> NULL</code> for system <code>free</code>. 
+        <dt><em>void</em> *<code>free_info</code>
+            <dd>IN: Extra parameter for user's free routine.  
+                Ignored if preceding parameter is &nbsp; <code> NULL</code>.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
 
 
 <hr>

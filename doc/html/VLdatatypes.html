@@ -153,16 +153,12 @@ in memory.
 
 Specifying how to manage memory for the VL datatype:
     The memory management method is determined by dataset transfer properties
-passed into the H5Dread/H5Dwrite with the dataset transfer property list.  There
-are currently two different memory managers defined:
-        H5T_VLEN_STDC_MEM_MANAGE - The standard C malloc/free pair is used to
-                allocate and free VL sequences.  This is the default method.
-        H5T_VLEN_USER_MEM_MANAGE - Calls to user provided memory management
-                routines are generated during I/O and memory reclamation.
-    These different methods can be chosen with the H5Pset_vlen_mem_manage_type()
+passed into the H5Dread/H5Dwrite with the dataset transfer property list.  
+    Either the system <code>malloc</code> and <code>free</code> calls  or
+user-defined substitutes can be used via the H5Pset_vlen_mem_manage_type()
 call, as follows:
         herr_t H5Pset_vlen_mem_manage_type(hid_t plist_id, H5T_vlen_mem_t type)
-    When user defined memory management is chosen, allocation and free routines
+    When user-defined memory management is chosen, allocation and free routines
 must also be provided with the H5Pset_vlen_mem_manage_routines() API call, as
 follows:
         herr_t H5Pset_vlen_mem_manager(hid_t plist_id,
