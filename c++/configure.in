@@ -232,7 +232,11 @@ namespace H5 {
 int fnord;
 }
 
-int main(void) { fnord = 37; return 0; } 
+int main(void) {
+	using namespace H5;
+	fnord = 37;
+	return 0;
+} 
 ], [
 echo yes
 ], [

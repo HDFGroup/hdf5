@@ -1835,10 +1835,14 @@ namespace H5 {
 int fnord;
 }
 
-int main(void) { fnord = 37; return 0; } 
+int main(void) {
+	using namespace H5;
+	fnord = 37;
+	return 0;
+} 
 
 EOF
-if { (eval echo configure:1842: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1846: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
 echo yes
@@ -1857,12 +1861,12 @@ fi
 
 
 echo $ac_n "checking if $CXX needs old style header files in includes""... $ac_c" 1>&6
-echo "configure:1861: checking if $CXX needs old style header files in includes" >&5
+echo "configure:1865: checking if $CXX needs old style header files in includes" >&5
 if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1866 "configure"
+#line 1870 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -1873,7 +1877,7 @@ extern "C" void exit(int);
 int main(void) { return 0; }
 
 EOF
-if { (eval echo configure:1877: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1881: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   
 echo no
@@ -1941,7 +1945,7 @@ rm -f confcache
 
 
 echo $ac_n "checking make""... $ac_c" 1>&6
-echo "configure:1945: checking make" >&5
+echo "configure:1949: checking make" >&5
 
 if test "`${MAKE-make} --version -f /dev/null 2>/dev/null |\
 	sed -n 1p|cut -c1-8`" = "GNU Make"; then
@@ -1958,7 +1962,7 @@ fi
 
 if test -z "$DEPEND"; then
    echo $ac_n "checking how to include a makefile""... $ac_c" 1>&6
-echo "configure:1962: checking how to include a makefile" >&5
+echo "configure:1966: checking how to include a makefile" >&5
 
       cat >makeinc <<EOF
 foo:
