@@ -572,6 +572,22 @@ dnl Checkpoint the cache
 AC_CACHE_SAVE
 
 dnl ----------------------------------------------------------------------
+dnl Fake --with-xxx option to allow us to create a help message for the
+dnl following --with-xxx options which can take either a =DIR or =INC,LIB
+dnl specifier.
+dnl
+AC_ARG_WITH(fnord,
+  [
+ For the following --with-xxx options, you can specify where the header
+ files and libraries are in two different ways:
+
+    --with-xxx=INC,LIB - Specify individually the include directory and
+                         library directory separated by a comma
+    --with-xxx=DIR     - Specify only the directory which contains the
+                         include/ and lib/ subdirectories
+  ],,)
+
+dnl ----------------------------------------------------------------------
 dnl Is HDF4 present?  If so then we can compile the hdf4 related tools.
 dnl The HDF4 software has 4 component libraries (df, mfhdf, z, jpeg)
 dnl and many header files.  Will just verify the presence of mfhdf.h
@@ -604,9 +620,7 @@ AC_SUBST(H4TOH5TEST) H4TOH5TEST=h4toh5test
 AC_SUBST(TESTH4TOH5) TESTH4TOH5='$(srcdir)/testh4toh5.sh'
 
 AC_ARG_WITH(hdf4,
-  [  --with-hdf4[=DIR]       Use the HDF4 library where DIR is the directory
-                          containing the include/ and lib/ subdirectories which
-                          have the HDF4 header files and libraries [default=no]],,
+  [  --with-hdf4[=DIR]       Use the HDF4 library [default=no]],,
   withval=no)
 
 case "$withval" in
