@@ -170,7 +170,7 @@ test_file_create(void)
 
     /* Create a new file with a non-standard file-creation template */
     tmpl1 = H5Pcreate(H5P_FILE_CREATE);
-    CHECK(tmpl1, FAIL, "H5Pnew");
+    CHECK(tmpl1, FAIL, "H5Pcreate");
 
     /* Set the new file-creation parameters */
     ret = H5Pset_userblock(tmpl1, F2_USERBLOCK_SIZE);
@@ -1214,6 +1214,87 @@ test_file_freespace(void)
 
 /****************************************************************
 **
+**  test_file_ishdf5(): low-level file test routine.  
+**      This test checks whether the H5Fis_hdf5() routine is working
+**      correctly in variuous situations.
+**
+*****************************************************************/
+static void 
+test_file_ishdf5(void)
+{
+    hid_t    file;      /* File opened with read-write permission */
+    hid_t    fcpl;      /* File creation property list */
+    int      fd;        /* File Descriptor */
+    ssize_t  nbytes;    /* Number of bytes written */
+    unsigned u;         /* Local index variable */
+    unsigned char buf[1024];    /* Buffer of data to write */
+    htri_t   status;    /* Whether a file is an HDF5 file */
+    herr_t   ret;
+ 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
+
+    /* Create a file */
+    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    status = H5Fis_hdf5(FILE1);
+    VERIFY(status, TRUE, "H5Fis_hdf5");
+
+
+    /* Create a file creation property list with a non-default user block size */
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(fcpl, FAIL, "H5Pcreate");
+
+    ret = H5Pset_userblock(fcpl, (hsize_t)2048);
+    CHECK(ret, FAIL, "H5Pset_userblock");
+
+    /* Create file with non-default user block */
+    file = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /* Release file-creation property list */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Verify that the file is an HDF5 file */
+    status = H5Fis_hdf5(FILE1);
+    VERIFY(status, TRUE, "H5Fis_hdf5");
+
+
+    /* Create non-HDF5 file and check it */
+    fd=HDopen(FILE1, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    CHECK(ret, FAIL, "HDopen");
+
+    /* Initialize information to write */
+    for(u=0; u<1024; u++)
+        buf[u]=(unsigned char)u;
+
+    /* Write some information */
+    nbytes = HDwrite(fd, buf, 1024);
+    VERIFY(nbytes, 1024, "HDwrite");
+
+    /* Close the file */
+    ret = HDclose(fd);
+    CHECK(ret, FAIL, "HDclose");
+
+    /* Verify that the file is not an HDF5 file */
+    status = H5Fis_hdf5(FILE1);
+    VERIFY(status, FALSE, "H5Fis_hdf5");
+
+} /* end test_file_ishdf5() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 ** 
 ****************************************************************/
@@ -1231,6 +1312,7 @@ test_file(void)
     test_get_file_id();         /* Test H5Iget_file_id */
     test_file_perm();           /* Test file access permissions */
     test_file_freespace();      /* Test file free space information */
+    test_file_ishdf5();         /* Test detecting HDF5 files correctly */
 }				/* test_file() */
 
 
