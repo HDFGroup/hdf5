@@ -20,7 +20,7 @@ ARCHIVES=$ARCHIVES_default
 # Where are the HDF4 library?
 # At NCSA, the standard place to find HDF4 software is in /usr/ncsa/.
 HDF4LIB_default="/usr/ncsa/include,/usr/ncsa/lib"
-HDF4LIB="--with-hdf4=$HDF4LIB_default"
+HDF4LIB=$HDF4LIB_default
 
 # What compression methods to use?
 METHODS="gzip bzip2"
@@ -40,6 +40,10 @@ while [ $# -gt 0 ] ; do
     case "$1" in
 	all)	
 	    cmd="all"
+	    ;;
+	checkout)
+	    cmdcheckout="checkout"
+	    cmd=""
 	    ;;
 	test)
 	    cmdtest="test"
@@ -61,9 +65,7 @@ while [ $# -gt 0 ] ; do
 		cmd="help"
 		break
 	    fi
-	    # an empty $1 resets HDF4LIB to "", disabling hdf4lib usage
 	    HDF4LIB="$1"
-	    HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
 	    ;;
 	archive)
 	    shift
@@ -87,9 +89,10 @@ done
 
 if [ "$cmd" = help ]; then
     set -
-    echo "Usage: $0 [all] [test] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
-    echo "    all:      Run all commands (test & release)"
+    echo "Usage: $0 [all] [checkout] [test] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
+    echo "    all:      Run all commands (checkout, test & release)"
     echo "              [Default is all]"
+    echo "    checkout: Run cvs checkout"
     echo "    test:     Run test"
     echo "    release:  Run release"
     echo "    help:     Print this message"
@@ -101,15 +104,24 @@ if [ "$cmd" = help ]; then
     echo "              [<arch_path> default as $ARCHIVES_default]"
     exit $errcode
 fi
-    
+
+# Setup the proper configure option (--with-hdf4) to use hdf4 library
+# provide HDF4LIB is non-empty.
+HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
+CONFIGURE="./configure $HDF4LIB"
+
 # Execute the requests
 snapshot=yes
 
-#
-# Test the HDF5 library
-if [ -n "$cmd" -o -n "$cmdtest" ]; then
-    CONFIGURE="./configure $HDF4LIB"
+# Show all settings right before execution.
+set
+exit 0
 
+
+#=============================
+# Run CVS checkout
+#=============================
+if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # Create a working directory.  Hopefully one is left over from last
     # time that still has the contents of the previous release.  But if
     # not, just create one and assume that a snapshot is necessary.
@@ -118,7 +130,13 @@ if [ -n "$cmd" -o -n "$cmdtest" ]; then
 
     # Check out the current version from CVS
     cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
+endif # Do CVS checkout
 
+
+#=============================
+# Run Test the HDF5 library
+#=============================
+if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
     # Compare it with the previous version.  Compare only files listed in
     # the MANIFEST plus the MANIFEST itself.
     if [ -d ${COMPARE}/previous ]; then
@@ -143,18 +161,19 @@ if [ -n "$cmd" -o -n "$cmdtest" ]; then
 	else
 	    snapshot=no
 	fi
-	(cd ${COMPARE}/current; make distclean)
     fi
-
 fi # Test the HDF5 library
 
-#
-# Release snapshot, update version, and commit to cvs and tag
-# Turn on exit on error in the sub-shell so that it does not
-# cvs commit if errors encounter here.
-if [ -n "$cmd" -o -n "$cmdrel" ]; then
+
+#=============================
+# Run Release snapshot, update version, and commit to cvs and tag
+#=============================
+if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
+	(cd ${COMPARE}/current; make distclean)
 	(
+	    # Turn on exit on error in the sub-shell so that it does not
+	    # cvs commit if errors encounter here.
 	    set -e
 	    cd ${COMPARE}/current
 	    cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
@@ -168,7 +187,6 @@ if [ -n "$cmd" -o -n "$cmdrel" ]; then
     # Replace the previous version with the current version.
     rm -rf ${COMPARE}/previous
     mv ${COMPARE}/current ${COMPARE}/previous
-
 fi #Release snapshot
 
 exit 0
