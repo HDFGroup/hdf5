@@ -124,7 +124,7 @@
 	named data type.
 
 	<br><br>
-      <dt><code>hbool_t H5Tcommitted (hid_t <em>type</em>)</code>
+      <dt><code>htri_t H5Tcommitted (hid_t <em>type</em>)</code>
       <dd>A type can be queried to determine if it is a named type or
 	a transient type.  If this function returns a positive value
 	then the type is named (that is, it has been committed perhaps 
@@ -148,7 +148,7 @@
 	immutable transient data type.
 
 	<br><br>
-      <dt><code>hbool_t H5Tequal (hid_t <em>type1</em>, hid_t
+      <dt><code>htri_t H5Tequal (hid_t <em>type1</em>, hid_t
 	  <em>type2</em>)</code>
       <dd>Determines if two types are equal.  If <em>type1</em> and
 	<em>type2</em> are the same then this function returns

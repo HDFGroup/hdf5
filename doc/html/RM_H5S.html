@@ -205,7 +205,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectElements">H5Sselect_elements</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
-        <em>dh5s_selopt_t</em> <code>op</code>,
+        <em>H5S_selopt_t</em> <code>op</code>,
         <em>const size_t</em> <code>num_elements</code>,
         <em>const hssize_t *</em><code>coord</code>[ ]
     )
@@ -248,7 +248,7 @@ of the <cite>HDF5 User's Guide.</cite>.
     <dl>
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>Identifier of the dataspace.
-        <dt><em>dh5s_selopt_t</em> <code>op</code>
+        <dt><em>H5S_selopt_t</em> <code>op</code>
             <dd>operator specifying how the new selection is to be 
                 combined with the existing selection for the dataspace.
         <dt><em>const size_t</em> <code>num_elements</code>
@@ -316,7 +316,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-SelectValid">H5Sselect_valid</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hbool_t</em> <code>H5Sselect_valid</code>(<em>hid_t</em> <code>space_id</code>)
+    <dd><em>htri_t</em> <code>H5Sselect_valid</code>(<em>hid_t</em> <code>space_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Verifies that the selection is within the extent of the dataspace.
 <dt><strong>Description:</strong>
@@ -365,7 +365,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Signature:</strong>
     <dd><em>hssize_t</em> <code>H5Sget_select_npoints</code>(<em>hid_t</em> <code>space_id</code>)
 <dt><strong>Purpose:</strong>
-    <dd>Determines the number of elements in a dataspace.
+    <dd>Determines the number of elements in a dataspace selection.
 <dt><strong>Description:</strong>
     <dd><code>H5Sget_select_npoints</code> determines the number of elements 
         in the current selection of a dataspace.
@@ -504,7 +504,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dl>
 <dt><strong>Name:</strong> <a name="Dataspace-IsSimple">H5Sis_simple</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hbool_t </em><code>H5Sis_simple</code>(<em>hid_t </em><code>space_id</code>)
+    <dd><em>htri_t </em><code>H5Sis_simple</code>(<em>hid_t </em><code>space_id</code>)
 <dt><strong>Purpose:</strong>
     <dd>Determines whether a dataspace is a simple dataspace.
 <dt><strong>Description:</strong>
@@ -635,7 +635,7 @@ of the <cite>HDF5 User's Guide.</cite>.
 <dt><strong>Name:</strong> <a name="Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
-        <em>h5s_selopt_t</em><code>op</code>,
+        <em>H5S_selopt_t</em><code>op</code>,
         <em>const hssize_t *</em><code>start</code>,
         <em>const hsize_t *</em><code>stride</code>
         <em>const hsize_t *</em><code>count</code>,
