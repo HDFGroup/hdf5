@@ -27,6 +27,8 @@
 	     /*** packages!                         ***/
 	     /*****************************************/
 
+/* Maximum size of boot-block */
+#define H5F_BOOTBLOCK_SIZE  1024
 
 
 #define H5F_SIZEOF_OFFSET(F) ((F)->file_create_parms.offset_size)

@@ -381,11 +381,11 @@ H5F_dest (hdf5_file_t *f)
  PURPOSE
     Create a new HDF5 file.
  USAGE
-    int32 H5Fcreate(filename, flags)
+    int32 H5Fcreate(filename, flags, create_temp, access_temp)
         const char *filename;   IN: Name of the file to create
         uintn flags;            IN: Flags to indicate various options.
-        hatom_t create_temp;    IN: File-creation template
-        hatom_t access_temp;    IN: File-access template
+        hatom_t create_temp;    IN: File-creation template ID
+        hatom_t access_temp;    IN: File-access template ID
  RETURNS
     Returns file ID on success, FAIL on failure
  DESCRIPTION
@@ -398,8 +398,21 @@ H5F_dest (hdf5_file_t *f)
             H5ACC_OVERWRITE - Truncate file, if it already exists. The file will
                 be truncated, erasing all data previously stored in the file.
         The more complex behaviors of a file's creation and access are
-    controlled through the file-creation and file-access templates.
-
+    controlled through the file-creation and file-access templates.  The value
+    of 0 for a template value indicates that the library should use the default
+    values for the appropriate template.  (Documented in the template module).
+    [Access templates are currently unused in this routine, although they will
+    be implemented in the future]
+ ERRORS
+    H5E_ARGS - H5E_BADVALUE     - Argument checking
+    H5E_FILE - H5E_FILEOPEN     - File already open
+             - H5E_FILEEXISTS   - File exists and no overwrite permission is given
+             - H5E_CANTCREATE   - Can't create new file
+    H5E_RESOURCE - H5E_NOSPACE  - Can't allocate space
+    H5E_ATOM - H5E_BADATOM      - Can't get the object for an atom
+             - H5E_CANTREGISTER - Can't register the new file atom
+    H5E_IO   - H5E_SEEKERROR    - Can't seek to correct offset for boot-block
+             - H5E_WRITEERROR   - Can't write data to file
  MODIFICATIONS:
     Robb Matzke, 18 Jul 1997
     File struct creation and destruction is through H5F_new() H5F_dest().
@@ -410,7 +423,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
-    uint8 temp_buf[2048], *p;       /* temporary buffer for encoding header */
+    uint8 temp_buf[H5F_BOOTBLOCK_SIZE], *p;  /* temporary buffer for encoding header */
     intn file_exists=0;             /* flag to indicate that file exists already */
     hatom_t ret_value = FAIL;
 
@@ -418,8 +431,10 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
-    if(filename==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL);
+    if(filename==NULL)  /* check for valid filename */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
+    if(flags&(~H5ACC_OVERWRITE)!=0)     /* check for valid flags */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
 
     /* See if this file is already open */
     if(H5Asearch_atom(H5_FILE,H5F_compare_filename,(const VOIDP)filename)!=NULL)
@@ -457,7 +472,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     new_file->smallobj_off=0;           /* Set the offset of the small-object heap */
     new_file->freespace_off=0;          /* Set the offset of the free-space info */
     /* Get the file-creation template & record it */
-    if(create_temp<=0)
+    if(create_temp==0)
         create_temp=H5C_get_default_atom(H5_TEMPLATE);
     if((f_create_parms=H5Aatom_object(create_temp))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
@@ -465,7 +480,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 
 #ifdef LATER
     /* Get the file-access template & record it */
-    if(access_temp<=0)
+    if(access_temp==0)
         access_temp=H5CPget_default_atom(H5_TEMPLATE);
     if((f_access_parms=H5Aatom_object(access_temp))==NULL)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
@@ -490,8 +505,8 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     *p++=f_create_parms->freespace_ver;    /* Encode Free-Space Info version # */
     *p++=f_create_parms->objectdir_ver;    /* Encode Object Directory Format version # */
     *p++=f_create_parms->sharedheader_ver; /* Encode Shared-Header Info version # */
-    *p++=(uint8)f_create_parms->offset_size; /* Encode the number of bytes for the offset */
-    *p++=(uint8)f_create_parms->length_size; /* Encode the number of bytes for the length */
+    *p++=f_create_parms->offset_size; /* Encode the number of bytes for the offset */
+    *p++=f_create_parms->length_size; /* Encode the number of bytes for the length */
     *p++=0;                         /* Encode the reserved byte :-) */
     UINT32ENCODE(p,f_create_parms->btree_page_size);    /* Encode the B-Tree page size */
     UINT32ENCODE(p,new_file->consist_flags);       /* Encode File-Consistancy flags */
@@ -502,10 +517,9 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
 				  H5F_SIZEOF_SIZE(new_file) +
 				  H5G_SIZEOF_ENTRY(new_file)));
     
-    /* Encode the (bogus) symbol-table entry */
-    if (H5G_encode (new_file, &p, new_file->root_sym)<0) {
+    /* Encode the uninitialized root symbol-table entry, by adding it to the boot block */
+    if (H5G_encode (new_file, &p, new_file->root_sym)<0)
        HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL);
-    }
 
     /* Write out the boot block */
     if(H5F_WRITE(new_file->file_handle,temp_buf,(size_t)(p-temp_buf))==FAIL)
@@ -526,7 +540,8 @@ done:
         H5F_CLOSE(f_handle);   /* close the file we opened */
 
       /* Check if we left a dangling file struct */
-      if (new_file) H5F_dest (new_file);
+      if (new_file)
+          H5F_dest (new_file);
     }
 
     /* Normal function cleanup */

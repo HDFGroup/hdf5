@@ -33,9 +33,9 @@ typedef struct {
     /* These object aren't ref. counted, I can't think of a good reason why you'd access each one more than once */
     /* uintn ref_count;            Reference count for number of times object is accessed */
     uintn userblock_size;       /* Size of the user block in the file in bytes */
-    uintn offset_size;          /* Number of bytes for offsets */
-    uintn length_size;          /* Number of bytes for lengths */
     uintn btree_page_size;      /* Number of bytes for B-Tree pages */
+    uint8 offset_size;          /* Number of bytes for offsets */
+    uint8 length_size;          /* Number of bytes for lengths */
     uint8 bootblock_ver;        /* Version # of the bootblock */
     uint8 smallobject_ver;      /* Version # of the small-object heap */
     uint8 freespace_ver;        /* Version # of the free-space information */
