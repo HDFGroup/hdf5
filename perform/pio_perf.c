@@ -1080,8 +1080,9 @@ parse_environment(void)
 		printf("MPI_Info_set failed\n");
 		ret_value = -1;
 	    }else{
+		/* will not print because debug option is not parsed yet? */
 		if (pio_debug_level>=4){
-		    printf("MPI_Info_set with %s=%s.\N", namep, valp);
+		    printf("MPI_Info_set with %s=%s.\n", namep, valp);
 		}
 	    }
 
