@@ -115,6 +115,8 @@ Library
     * Fixed bug in H5Gget_objinfo() which was not setting the 'fileno'
         of the H5G_stat_t struct.  QAK - 3/27/02
     * Fixed bug where variable-length string type doesn't behave as string.
+    * Added serial multi-gigabyte file size test.  "test/big -h" shows
+      the help page.  AKC - 2002/03/29
 
 
 Configuration
