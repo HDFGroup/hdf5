@@ -37,12 +37,12 @@
 # (We use csh here, but of course you can adapt to whatever shell you like.)
 
 # compile for MPI jobs
-#setenv CC "/usr/local/mpich-1.1.2+romio_lgfiles/bin/mpicc"
+setenv CC "/usr/local/mpich-1.1.2+romio_lgfiles/bin/mpicc"
 
 #
 # next 4 for IBM mpi
 #
-setenv CC /usr/lpp/ppe.poe/bin/mpcc_r
+#setenv CC /usr/lpp/ppe.poe/bin/mpcc_r
 
 #
 # for both
@@ -60,7 +60,7 @@ setenv MP_PROCS 1
 #  -bI:/usr/include/piofs/piofs.exp	this MPI-IO uses PIOFS file system
 #  -L/usr  /local/mpio/lib/ibm -lmpio	link to this MPI-IO lib
 #
-setenv CFLAGS "-D_LARGE_FILES $CFLAGS"
+#setenv CFLAGS "-D_LARGE_FILES $CFLAGS"
 
 # The configure/make process needs to be able to run some programs,
 # need to specify a processor pool.
