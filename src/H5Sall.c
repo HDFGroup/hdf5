@@ -19,7 +19,7 @@
 static intn             interface_initialize_g = 0;
 
 static herr_t H5S_all_init (const struct H5O_layout_t *layout,
-			    const H5S_t *space, H5S_sel_iter_t *iter);
+			    const H5S_t *space, H5S_sel_iter_t *iter, size_t *min_elem_out);
 static size_t H5S_all_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 			      size_t max);
 static size_t H5S_all_fgath (H5F_t *f, const struct H5O_layout_t *layout,
@@ -76,8 +76,13 @@ const H5S_mconv_t	H5S_ALL_MCONV[1] = {{
  */
 static herr_t
 H5S_all_init (const struct H5O_layout_t UNUSED *layout,
-	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
+	       const H5S_t *space, H5S_sel_iter_t *sel_iter, size_t *min_elem_out)
 {
+    hsize_t	hsize[H5O_LAYOUT_NDIMS];	/*size of hyperslab	*/
+    intn	space_ndims;			/*dimensionality of space*/
+    hsize_t	acc;				    /*accumulator		*/
+    intn	i;				/*counters		*/
+
     FUNC_ENTER (H5S_all_init, FAIL);
 
     /* Check args */
@@ -90,6 +95,19 @@ H5S_all_init (const struct H5O_layout_t UNUSED *layout,
 
     /* Start at the upper left location */
     sel_iter->all.offset=0;
+
+    /* Get the dimensions of the space, to set the min. # of elements */
+    if ((space_ndims=H5S_get_simple_extent_dims (space, hsize, NULL))<0) {
+        HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to retrieve hyperslab parameters");
+    }
+
+    /* Adjust the slowest varying dimension to account for strip mining */
+    for (i=1, acc=1; i<space_ndims; i++)
+        acc *= hsize[i];
+    
+    /* Set the minimum # of elements to output */
+    *min_elem_out=acc;
     
     FUNC_LEAVE (SUCCEED);
 }
@@ -471,8 +489,9 @@ H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
         }
 
         /* Adjust the slowest varying dimension to take care of strip mining */
-        for (i=1, acc=1; i<space_ndims; i++)
+        for (i=1, acc=1; i<space_ndims; i++) {
             acc *= hsize[i];
+        }
         assert (0==mem_iter->all.offset % acc);
         assert (0==nelmts % acc);
         mem_offset[0] += mem_iter->all.offset / acc;

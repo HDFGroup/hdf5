@@ -51,7 +51,7 @@ static size_t H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info);
 static size_t H5S_hyper_fwrite (intn dim,
 				H5S_hyper_fhyper_info_t *fhyper_info);
 static herr_t H5S_hyper_init (const struct H5O_layout_t *layout,
-			      const H5S_t *space, H5S_sel_iter_t *iter);
+			      const H5S_t *space, H5S_sel_iter_t *iter, size_t *min_elem_out);
 static size_t H5S_hyper_favail (const H5S_t *space, const H5S_sel_iter_t *iter,
 				size_t max);
 static size_t H5S_hyper_fgath (H5F_t *f, const struct H5O_layout_t *layout,
@@ -114,7 +114,7 @@ static const hssize_t	zero[H5O_LAYOUT_NDIMS]={0};		/* Array of zeros */
  */
 static herr_t
 H5S_hyper_init (const struct H5O_layout_t UNUSED *layout,
-	       const H5S_t *space, H5S_sel_iter_t *sel_iter)
+	       const H5S_t *space, H5S_sel_iter_t *sel_iter, size_t *min_elem_out)
 {
     FUNC_ENTER (H5S_hyper_init, FAIL);
 
@@ -160,7 +160,7 @@ H5S_hyper_favail (const H5S_t UNUSED *space,
     assert (sel_iter);
 
 #ifdef QAK
-    printf("%s: max=%d\n",FUNC,(int)max);
+    printf("%s: max=%u\n",FUNC,(unsigned)max);
 #endif /* QAK */
     FUNC_LEAVE (MIN(sel_iter->hyp.elmt_left,max));
 }   /* H5S_hyper_favail() */
@@ -464,9 +464,9 @@ H5S_hyper_block_cache (H5S_hyper_node_t *node,
 /* keep information for writing block later? */
     } /* end else */
     
-    /* Set up parameters for accessing block */
-    node->cinfo.left=node->cinfo.size;
-    node->cinfo.pos=node->cinfo.block;
+    /* Set up parameters for accessing block (starting the read and write information at the same point) */
+    node->cinfo.wleft=node->cinfo.rleft=node->cinfo.size;
+    node->cinfo.wpos=node->cinfo.rpos=node->cinfo.block;
 
     /* Set cached flag */
     node->cinfo.cached=1;
@@ -502,18 +502,18 @@ H5S_hyper_block_read (H5S_hyper_node_t *node, H5S_hyper_fhyper_info_t *fhyper_in
             permutations from the standard 'C' ordering!
     */
     HDmemcpy(fhyper_info->dst,
-	     node->cinfo.pos,
+	     node->cinfo.rpos,
 	     (size_t)(region_size*fhyper_info->elmt_size));
 
     /*
      * Decrement the number of elements left in block to read & move the
      * offset
      */
-    node->cinfo.pos+=region_size*fhyper_info->elmt_size;
-    node->cinfo.left-=region_size;
+    node->cinfo.rpos+=region_size*fhyper_info->elmt_size;
+    node->cinfo.rleft-=region_size;
 
     /* If we've read in all the elements from the block, throw it away */
-    if(node->cinfo.left==0) {
+    if(node->cinfo.rleft==0 && (node->cinfo.wleft==0 || node->cinfo.wleft==node->cinfo.size)) {
         /* Release the temporary buffer */
         H5TB_release_buf(node->cinfo.block_id);
 
@@ -557,7 +557,7 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
         !! NOTE !! This will need to be changed for different dimension
             permutations from the standard 'C' ordering!
     */
-    HDmemcpy(node->cinfo.pos,
+    HDmemcpy(node->cinfo.wpos,
 	     fhyper_info->src,
 	     (size_t)(region_size*fhyper_info->elmt_size));
 
@@ -565,11 +565,11 @@ H5S_hyper_block_write (H5S_hyper_node_t *node,
      * Decrement the number of elements left in block to read & move the
      * offset
      */
-    node->cinfo.pos+=region_size*fhyper_info->elmt_size;
-    node->cinfo.left-=region_size;
+    node->cinfo.wpos+=region_size*fhyper_info->elmt_size;
+    node->cinfo.wleft-=region_size;
 
     /* If we've read in all the elements from the block, throw it away */
-    if(node->cinfo.left==0) {
+    if(node->cinfo.wleft==0 && (node->cinfo.rleft==0 || node->cinfo.rleft==node->cinfo.size)) {
         /* Copy the location of the region in the file */
         HDmemcpy(file_offset,
 		 node->start,
@@ -697,7 +697,7 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
                     } /* end if */
 
 #ifdef QAK
-            printf("%s: check 2.2, i=%d\n",FUNC,(int)i);
+    printf("%s: check 2.2, i=%d\n",FUNC,(int)i);
 #endif /* QAK */
                     /* Fill in the region specific parts of the I/O request */
                     hsize[fhyper_info->space->extent.u.simple.rank-1]=region_size;
@@ -715,10 +715,9 @@ H5S_hyper_fread (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
 				       "read error");
                     }
 #ifdef QAK
-		    printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
-		    for(j=0; j<fhyper_info->space->extent.u.simple.rank; j++)
-			printf("%s: %d - pos=%d\n",
-			       FUNC,j,(int)fhyper_info->iter->hyp.pos[j]);
+    printf("%s: check 2.3, region #%d\n",FUNC,(int)i);
+    for(j=0; j<fhyper_info->space->extent.u.simple.rank; j++)
+    printf("%s: %d - pos=%d\n", FUNC,j,(int)fhyper_info->iter->hyp.pos[j]);
 #endif /* QAK */
                 } /* end else */
 
@@ -929,6 +928,11 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_fhyper_info_t *fhyper_info)
         regions=H5TB_buf_ptr(reg_id);
 #ifdef QAK
     printf("%s: check 1.1, regions=%p\n", FUNC,regions);
+	printf("%s: check 1.2, rank=%d\n",
+	       FUNC,(int)fhyper_info->space->extent.u.simple.rank);
+	for(i=0; i<num_regions; i++)
+	    printf("%s: check 2.1, region #%d: start=%d, end=%d\n",
+		   FUNC,i,(int)regions[i].start,(int)regions[i].end);
 #endif /* QAK */
 
         /* Check if this is the second to last dimension in dataset */
@@ -1875,9 +1879,6 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
     size_t elem_count;          /* Number of elements in hyperslab selection */
     intn i;     /* Counters */
     herr_t ret_value=SUCCEED;
-#ifdef QAK
-    extern int qak_debug;
-#endif /* QAK */
 
     FUNC_ENTER (H5S_hyper_add, FAIL);
 
@@ -1886,9 +1887,6 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
     assert (start);
     assert (end);
 
-#ifdef QAK
-    qak_debug=1;
-#endif /* QAK */
 
 #ifdef QAK
     printf("%s: check 1.0\n",FUNC);
@@ -1918,9 +1916,9 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *end)
     /* Initialize caching parameters */
     slab->cinfo.cached=0;
     slab->cinfo.size=elem_count;
-    slab->cinfo.left=0;
+    slab->cinfo.wleft=slab->cinfo.rleft=0;
     slab->cinfo.block_id=(-1);
-    slab->cinfo.block=slab->cinfo.pos=NULL;
+    slab->cinfo.block=slab->cinfo.wpos=slab->cinfo.rpos=NULL;
 
 #ifdef QAK
     printf("%s: check 3.0, lo_bounds=%p, hi_bounds=%p\n",

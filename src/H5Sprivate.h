@@ -78,11 +78,13 @@ typedef struct H5S_hyper_node_tag {
     hssize_t *end;      /* Pointer to a corner of a hyperslab furthest from the origin */
     struct {
         uintn cached;   /* Flag to indicate that the block is cached (during I/O only) */
-        size_t size;     /* Size of cached block (in elements) */
-        uintn left;     /* Elements left to access in block */
+        size_t size;    /* Size of cached block (in elements) */
+        uintn rleft;    /* Read elements left to access in block */
+        uintn wleft;    /* Write elements left to access in block */
         hid_t block_id; /* Temporary buffer ID */
         uint8_t *block; /* Pointer into temporary buffer for cache */
-        uint8_t *pos;   /* Pointer to current location within block */
+        uint8_t *rpos;  /* Pointer to current read location within block */
+        uint8_t *wpos;  /* Pointer to current write location within block */
     } cinfo;
     struct H5S_hyper_node_tag *next;  /* pointer to next hyperslab in list */
 } H5S_hyper_node_t;
@@ -182,7 +184,7 @@ typedef struct H5S_fconv_t {
     
     /* Initialize file element numbering information */
     herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
-		   H5S_sel_iter_t *iter);
+		   H5S_sel_iter_t *iter, size_t *min_elem_out);
 
     /* Determine optimal number of elements to transfer */
     size_t (*avail)(const H5S_t *file_space, const H5S_sel_iter_t *file_iter,
@@ -214,7 +216,7 @@ typedef struct H5S_mconv_t {
     
     /* Initialize memory element numbering information */
     herr_t (*init)(const struct H5O_layout_t *layout, const H5S_t *space,
-		   H5S_sel_iter_t *iter);
+		   H5S_sel_iter_t *iter, size_t *min_elem_out);
 
     /* Gather elements from app buffer to type conversion buffer */
     size_t (*gath)(const void *buf, size_t elmt_size,
