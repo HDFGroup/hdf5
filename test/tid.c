@@ -22,7 +22,7 @@ static int id_test(void)
 
 	testObj = malloc(7 * sizeof(int));
 
-		/* Try to register an ID with ficticious type #420 */
+		/* Try to register an ID with ficticious types */
 	H5E_BEGIN_TRY
 		arrayID = H5Iregister((H5I_type_t) 420, testObj);
 	H5E_END_TRY
@@ -31,6 +31,31 @@ static int id_test(void)
 	if(arrayID != H5I_INVALID_HID)
 		goto out;
 
+	H5E_BEGIN_TRY
+		arrayID = H5Iregister((H5I_type_t) -1, testObj);
+	H5E_END_TRY
+
+	VERIFY(arrayID, H5I_INVALID_HID, "H5Iregister");
+	if(arrayID != H5I_INVALID_HID)
+		goto out;
+
+                /* Try to access IDs with ficticious types */
+	H5E_BEGIN_TRY
+		testObj = H5Iobject_verify(100, (H5I_type_t) 0);
+	H5E_END_TRY
+
+	VERIFY(arrayID, NULL, "H5Iobject_verify");
+	if(testObj != NULL)
+		goto out;
+
+	H5E_BEGIN_TRY
+		testObj = H5Iobject_verify(700, (H5I_type_t) 700);
+	H5E_END_TRY
+
+	VERIFY(arrayID, NULL, "H5Iobject_verify");
+	if(testObj != NULL)
+		goto out;
+       
 		/* Register a type */
 	myType = H5Iregister_type(64, 0, (H5I_free_t) free );
 

@@ -957,7 +957,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Nathaniel Furrer
- *				James Laird
+ *		James Laird
  *		Friday, April 23, 2004
  *
  * Modifications:
@@ -966,19 +966,24 @@ done:
  */
 void *H5Iobject_verify(hid_t id, H5I_type_t id_type)
 {
-	void * ret_value;                      /* Return value */
+  void * ret_value;                      /* Return value */
 
-    FUNC_ENTER_API(H5Iobject_verify, NULL);
+  FUNC_ENTER_API(H5Iobject_verify, NULL);
 
-	if( H5I_IS_LIB_TYPE( id_type ) )
-	{
-		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type");
-	}
+  if( H5I_IS_LIB_TYPE( id_type ) )
+  {
+    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type");
+  }
 
-	ret_value = H5I_object_verify(id, id_type);
+  if(id_type < 1 || id_type >= H5I_next_type)
+  {
+    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "identifier has invalid type");
+  }
 
-	done:
-		FUNC_LEAVE_API(ret_value);
+  ret_value = H5I_object_verify(id, id_type);
+
+  done:
+    FUNC_LEAVE_API(ret_value);
 }
 
 
