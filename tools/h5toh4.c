@@ -17,6 +17,14 @@
 #include <fcntl.h>
 #include <h5tools.h>
 
+
+#if WIN32
+typedef unsigned int mode_t;
+#endif
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode)  (((mode)&0xF000) == S_IFDIR)
+#endif
 extern int PrintOptions_h5toh4(void);
 extern char *BuildFilename(char *h5_filename, char *h4_extension);
 extern int test_file(char *filename, int oflag, mode_t mode);
@@ -2297,7 +2305,6 @@ int test_dir(char *path)
 	}
 
 	return S_ISDIR(buf_ptr->st_mode);
-
 }
 
 /*****************************************************************************
