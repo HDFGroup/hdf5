@@ -1,0 +1,30 @@
+
+Instructions to build the HDF5 library, tests and tools on on Metrowerks Code Warrior.
+--------------------------------------------------------------------------------------
+
+
+As of version 1.4.2 of the HDF5 library, HDF5 is now supported on the Metrowerks 
+Code Warrior 6.0 compiler.
+
+These instructions assume you have some basic knowledge of the Code Warrior compiler.
+1. Open the project file hdf5.mcp (it is located in hdf5/proj/codewarrior)
+2. Building the library.
+	Select the hdf5 target and build (menu Projects-> Make or F7 key).
+3. Building all the targets (HDF5 library, test and tools).
+	Select the all target and build.
+4. Running the tests on a command line window
+	On a command line window, change directory to hdf5\test. Type 
+	Hdf5test debug
+	Or 
+	Hdf5test debug > myfile.txt
+	To redirect the output to a file called myfile.txt
+	The test and tools files are generated on the same directory as the ones compiled by 
+	using the Microsoft Visual Studio compiler.
+5. Enjoy.
+
+--------------------------------------------------------------------------------------
+The HDF Software development group
+We would like to thank Ron Liechty of the Metrowerks help support for all the help made during the development of this project
+
+
+
