@@ -1,4 +1,4 @@
-HDF5 version 1.4.2-post1 currently under development
+HDF5 version 1.4.3-snap0 currently under development
 ==============================================================================
 
 
@@ -38,6 +38,10 @@ New Features
     * Added perform programs to test the HDF5 library performance.  Programs
       are installed in directory perform/.
     * Improved performance of byte-swapping during data conversions.
+    * Changed prototype for H5Awrite from:
+        H5Awrite(hid_t attr_id, hid_t type_id, void *buf)
+      to:
+        H5Awrite(hid_t attr_id, hid_t type_id, const void *buf)
 
 
          
