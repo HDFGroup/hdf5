@@ -24,9 +24,10 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FDcore.h>		/*temporary in-memory files		  */
 #include <H5FDfamily.h>		/*family of files			  */
 #include <H5FDmpio.h>		/*MPI-2 I/O				  */
-#include <H5FDgass.h>           /*GASS I/O                                */
+#include <H5FDgass.h>       /*GASS I/O                                */
 #include <H5FDmulti.h>		/*multiple files partitioned by mem usage */
-#include <H5FDsec2.h>		/*Posix unbuffered I/O			  */
+#include <H5FDsec2.h>		/*Posix unbuffered I/O			*/
+#include <H5FDstdio.h>		/* Standard C buffered I/O		*/
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library functions			  */
@@ -203,6 +204,7 @@ H5F_init_interface(void)
     /* Register predefined file drivers */
     H5E_BEGIN_TRY {
 	if ((status=H5FD_SEC2)<0) goto end_registration;
+	if ((status=H5FD_STDIO)<0) goto end_registration;
 	if ((status=H5FD_FAMILY)<0) goto end_registration;
 #ifdef HAVE_GASS
 	if ((status=H5FD_GASS)<0) goto end_registration;
@@ -1941,7 +1943,7 @@ H5Fclose(hid_t file_id)
 	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
     }
     
- done:
+done:
     FUNC_LEAVE(ret_value < 0 ? FAIL : SUCCEED);
 }
 

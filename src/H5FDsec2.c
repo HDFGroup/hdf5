@@ -28,8 +28,10 @@
 
 
 
+#ifdef MAX
 #undef MAX
 #define MAX(X,Y)	((X)>(Y)?(X):(Y))
+#endif /* MAX */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SEC2_g = 0;
@@ -248,6 +250,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 	int results;   
 #endif
+
     /* Check arguments */
     if (!name || !*name) return NULL;
     if (0==maxaddr || HADDR_UNDEF==maxaddr) return NULL;
