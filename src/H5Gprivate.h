@@ -27,7 +27,7 @@
 #define H5G_NODE_MAGIC	"SNOD"	/*symbol table node magic number	*/
 #define H5G_NODE_SIZEOF_MAGIC 4 /*sizeof symbol node magic number	*/
 #define H5G_NODE_VERS	1	/*symbol table node version number	*/
-#define H5G_NODE_K	4	/*min degree.  max degree is twice this	*/
+#define H5G_NODE_K(F) ((F)->file_create_parms.sym_leaf_k)
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 #define H5G_SIZEOF_ENTRY(F)						      \
    (H5F_SIZEOF_OFFSET(F) +	/*offset of name into heap     		*/    \

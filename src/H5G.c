@@ -279,6 +279,7 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
    H5O_name_t	name;			/*object name message		*/
    H5G_entry_t	root;			/*old root entry		*/
    const char	*root_name=NULL;	/*name of old root object	*/
+   intn		nlinks;			/*number of links		*/
    
    FUNC_ENTER (H5G_mkroot, NULL, FAIL);
 
@@ -310,9 +311,19 @@ H5G_mkroot (hdf5_file_t *f, size_t size_hint)
    }
 
    /*
-    * Insert the old root object.
+    * Increase the link count for the root symbol table!
+    */
+   nlinks = H5O_link (f, f->root_sym->header, f->root_sym, 1);
+   assert (1==nlinks);
+
+   /*
+    * Insert the old root object.  It should already have a link count
+    * of 1.
     */
    if (root_name) {
+      nlinks = H5O_link (f, root.header, &root, 0);
+      assert (1==nlinks);
+	 
       if (H5G_stab_insert (f, f->root_sym, root_name, &root)) {
 	 /* can't insert old root object in new root directory */
 	 H5O_reset (H5O_NAME, &name);
@@ -472,6 +483,9 @@ H5G_find (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
  *		('/') since that is a special case.  If NAME is the root
  * 		symbol table entry, then this function will return failure.
  *
+ * 		Inserting an object entry into the symbol table increments
+ *		the link counter for that object.
+ *
  * Return:	Success:	SUCCEED with optional DIR_ENT initialized with
  *				the symbol table entry for the directory
  *				which contains the new ENT.
@@ -530,6 +544,11 @@ H5G_insert (hdf5_file_t *f, H5G_entry_t *cwd, H5G_entry_t *dir_ent,
 	 _comp[nchars] = '\0';
 	 rest = _comp;
       }
+   }
+
+   /* increment the link count */
+   if (H5O_link (f, ent->header, ent, 1)<0) {
+      HRETURN_ERROR (H5E_DIRECTORY, H5E_LINK, FAIL); /*can't increase linkage*/
    }
 
    /* insert entry into parent */
@@ -668,8 +687,12 @@ H5G_stab_new (hdf5_file_t *f, H5G_entry_t *self, size_t init)
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
 
-   /* Create symbol table object header with a single link */
-   if ((addr = H5O_new (f, 1, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
+   /*
+    * Create symbol table object header.  It has a zero link count
+    * since nothing refers to it yet.  The link count will be
+    * incremented if the object is added to the directory hierarchy.
+    */
+   if ((addr = H5O_new (f, 0, 4+2*H5F_SIZEOF_OFFSET(f)))<0) {
       HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
    }
    
@@ -839,6 +862,8 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
       HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
    }
 
+   /* update the name offset in the entry */
+   ent->name_off = udata.entry.name_off;
    FUNC_LEAVE (SUCCEED);
 }
 

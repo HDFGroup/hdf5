@@ -55,7 +55,18 @@
 #define HDF5_USERBLOCK_DEFAULT  0       /* Default to 0-byte sized user blocks */
 #define HDF5_OFFSETSIZE_DEFAULT 4       /* Default to 4-byte offsets */
 #define HDF5_LENGTHSIZE_DEFAULT 4       /* Default to 4-byte lengths */
-#define HDF5_BTREEPAGE_DEFAULT  1024    /* Default to 1024-byte B-tree pages */
+#define HDF5_SYM_LEAF_K_DEFAULT	4	/* Default 1/2 rank for symtab leaf nodes */
+#define HDF5_BTREE_K_DEFAULT	{					      \
+   16,					/* Symbol table internal nodes	*/    \
+    0,					/* unused			*/    \
+    0,					/* unused			*/    \
+    0,					/* unused			*/    \
+    0,					/* unused			*/    \
+    0,					/* unused			*/    \
+    0,					/* unused			*/    \
+    0					/* unused			*/    \
+}
+
 
 #endif /* HDF5LIMS_H */
 

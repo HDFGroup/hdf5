@@ -108,6 +108,7 @@ static const hdf_min_error_messages_t hdf_min_error_messages[] =
     {H5E_ALIGNMENT,	"Alignment error"},
     {H5E_BADMESG,	"Unrecognized message"},
     {H5E_COMPLEN,	"Name component is too long"},
+    {H5E_LINK,		"Link count failure"},
 };
 
 /* We use a stack to hold the errors plus we keep track of the function,

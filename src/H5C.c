@@ -36,6 +36,7 @@ static char RcsId[] = "@(#)$Revision$";
 
 /* private header files */
 #include "H5private.h"      /* Generic Functions */
+#include "H5Bprivate.h"	    /* B-tree subclass names */
 #include "H5Cprivate.h"     /* Template information */
 
 #define PABLO_MASK	H5C_mask
@@ -48,7 +49,8 @@ static intn interface_initialize_g = FALSE;
 /* Define the library's default file creation template (constants in hdf5lims.h) */
 const file_create_temp_t default_file_create={
     HDF5_USERBLOCK_DEFAULT,         /* Default user-block size */
-    HDF5_BTREEPAGE_DEFAULT,         /* Default B-tree page size */
+    HDF5_SYM_LEAF_K_DEFAULT,	    /* Default 1/2 rank for symtab leaf nodes */
+    HDF5_BTREE_K_DEFAULT,	    /* Default 1/2 rank for btree internal nodes */
     HDF5_OFFSETSIZE_DEFAULT,        /* Default offset size */
     HDF5_LENGTHSIZE_DEFAULT,        /* Default length size */
     HDF5_BOOTBLOCK_VERSION,         /* Current Boot-Block version # */
@@ -293,6 +295,11 @@ done:
  DESCRIPTION
         This function retrieves the value of a specific parameter from a
     template
+
+ MODIFICATIONS
+ 	Robb Matzke, 13 Aug 1997
+	Removed H5_BTREE_SIZE and replaced it with H5_SYM_LEAF_K and
+	H5_SYM_INTERN_K.
 --------------------------------------------------------------------------*/
 herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
 {
@@ -324,9 +331,13 @@ herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
             *(uintn *)buf=template->length_size;
             break;
 
-        case H5_BTREE_SIZE:
-            *(uintn *)buf=template->btree_page_size;
-            break;
+        case H5_SYM_LEAF_K:
+	    *(uintn *)buf=template->sym_leaf_k;
+	    break;
+
+        case H5_SYM_INTERN_K:
+	    *(uintn *)buf = template->btree_k[H5B_SNODE_ID];
+	    break;
 
         case H5_BOOTBLOCK_VER:
             *(uint8 *)buf=template->bootblock_ver;
@@ -377,11 +388,17 @@ done:
     SUCCEED/FAIL
  DESCRIPTION
         This function stores the value of a specific parameter for a template
+
+ MODIFICATIONS
+ 	Robb Matzke, 13 Aug 1997
+	Removed H5_BTREE_SIZE and replaced it with H5_SYM_LEAF_K and
+	H5_SYM_INTERN_K.
 --------------------------------------------------------------------------*/
 herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
 {
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
+    uintn val;
 
     FUNC_ENTER(H5Csetparm, H5C_init_interface, FAIL);
 
@@ -408,10 +425,22 @@ herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
             template->length_size=*(const uintn *)buf;
             break;
 
-        case H5_BTREE_SIZE:
-            template->btree_page_size=*(const uintn *)buf;
-            break;
+        case H5_SYM_LEAF_K:
+	    val = *(const uintn *)buf;
+	    if (val<2) {
+	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    }
+	    template->sym_leaf_k = val;
+	    break;
 
+        case H5_SYM_INTERN_K:
+	    val = *(const uintn *)buf;
+	    if (val<2) {
+	       HGOTO_ERROR (H5E_ARGS, H5E_BADRANGE, FAIL);
+	    }
+	    template->btree_k[H5B_SNODE_ID] = val;
+	    break;
+	    
         case H5_BOOTBLOCK_VER:
             template->bootblock_ver=*(const uint8 *)buf;
             break;

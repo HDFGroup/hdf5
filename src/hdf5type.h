@@ -33,7 +33,8 @@ typedef struct {
     /* These object aren't ref. counted, I can't think of a good reason why you'd access each one more than once */
     /* uintn ref_count;            Reference count for number of times object is accessed */
     uintn userblock_size;       /* Size of the user block in the file in bytes */
-    uintn btree_page_size;      /* Number of bytes for B-Tree pages */
+    uintn sym_leaf_k;		/* 1/2 rank for symbol table leaf nodes */
+    uintn btree_k[8];		/* 1/2 rank for btree internal nodes */
     uint8 offset_size;          /* Number of bytes for offsets */
     uint8 length_size;          /* Number of bytes for lengths */
     uint8 bootblock_ver;        /* Version # of the bootblock */
@@ -48,7 +49,8 @@ typedef enum {
     H5_USERBLOCK_SIZE,          /* (uintn) Size of the user block in the file in bytes */
     H5_OFFSET_SIZE,             /* (uintn) Number of bytes for offsets */
     H5_LENGTH_SIZE,             /* (uintn) Number of bytes for lengths */
-    H5_BTREE_SIZE,              /* (uintn) Number of bytes for B-Tree pages */
+    H5_SYM_LEAF_K,		/* (uintn) 1/2 rank for symbol table leaf nodes */
+    H5_SYM_INTERN_K,		/* (uintn) 1/2 rank for symbol table internal nodes */
     H5_BOOTBLOCK_VER,           /* (uint8) Version # of the boot-block format */
     H5_SMALLOBJECT_VER,         /* (uint8) Version # of the small-object heap format */
     H5_FREESPACE_VER,           /* (uint8) Version # of the free-space info format */

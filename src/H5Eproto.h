@@ -142,7 +142,8 @@ typedef enum
       H5E_BADMESG,	       /* Unrecognized message */
 
     /* Directory related errors */
-      H5E_COMPLEN	       /* Name component is too long */
+      H5E_COMPLEN,	       /* Name component is too long */
+      H5E_LINK		       /* Link count failure */
   }
 hdf_min_err_code_t;
 

@@ -99,7 +99,7 @@ H5O_new (hdf5_file_t *f, intn nlink, size_t size_hint)
 
    /* check args */
    assert (f);
-   assert (nlink>0);
+   assert (nlink>=0);
    if (size_hint<H5O_MIN_SIZE) size_hint = H5O_MIN_SIZE;
    H5O_ALIGN (size_hint, H5O_ALIGNMENT);
 
@@ -759,7 +759,7 @@ H5O_modify (hdf5_file_t *f, haddr_t addr, H5G_entry_t *ent,
    oh->dirty = TRUE;
 
    /* Copy into the symbol table entry */
-   if (1==oh->nlink && ent && type->cache) {
+   if (oh->nlink<=1 && ent && type->cache) {
       hbool_t modified = (type->cache)(ent, mesg);
       if (ent_modified) *ent_modified = modified;
    }

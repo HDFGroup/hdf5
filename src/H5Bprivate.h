@@ -29,21 +29,26 @@
     4 +				/*type, level, num entries		*/    \
     2*H5F_SIZEOF_OFFSET(F))	/*left and right sibling addresses	*/
 
+#define H5B_K(F,TYPE)		/*K value given file and Btree subclass	*/    \
+   ((F)->file_create_parms.btree_k[(TYPE)->id])
+
 #define H5B_ANCHOR_LT	0	/* left node is anchored, right is new	*/
 #define H5B_ANCHOR_RT	1	/* right node is anchored, left is new	*/
 
 typedef enum H5B_subid_t {
-   H5B_SUBTYPE_SNODE	=0	/*B-tree is for symbol table nodes	*/
+   H5B_SNODE_ID		=0	/*B-tree is for symbol table nodes	*/
 } H5B_subid_t;
    
 
 /*
  * Each class of object that can be pointed to by a B-link tree has a
- * variable of this type that contains class variables and methods.
+ * variable of this type that contains class variables and methods.  Each
+ * tree has a K (1/2 rank) value on a per-file basis.  The file_create_parms
+ * has an array of K values indexed by the `id' class field below.  The
+ * array is initialized with the HDF5_BTREE_K_DEFAULT macro.
  */
 typedef struct H5B_class_t {
    H5B_subid_t	id;		/*id as found in file			*/
-   intn		k;		/* max children is 2k			*/
    size_t	sizeof_nkey;	/*size of native (memory) key		*/
    size_t	(*get_sizeof_rkey)(hdf5_file_t*);
    haddr_t	(*new)(hdf5_file_t*,void*,void*,void*);

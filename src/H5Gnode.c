@@ -67,8 +67,7 @@ static const H5AC_class_t H5AC_SNODE[1] = {{
 
 /* H5G inherits B-tree like properties from H5B */
 const H5B_class_t H5B_SNODE[1] = {{
-   H5B_SUBTYPE_SNODE,				/*id			*/
-   16,						/*k			*/
+   H5B_SNODE_ID,				/*id			*/
    sizeof (H5G_node_key_t),			/*sizeof_nkey		*/
    H5G_node_sizeof_rkey,			/*get_sizeof_rkey	*/
    H5G_node_new,				/*new			*/
@@ -198,7 +197,7 @@ static size_t
 H5G_node_size (hdf5_file_t *f)
 {
    return H5G_NODE_SIZEOF_HDR(f) +
-      (2*H5G_NODE_K) * H5G_SIZEOF_ENTRY(f);
+      (2*H5G_NODE_K(f)) * H5G_SIZEOF_ENTRY(f);
 }
 
 
@@ -246,7 +245,7 @@ H5G_node_new (hdf5_file_t *f, void *_lt_key, void *_udata, void *_rt_key)
    }
 
    sym->dirty = 1;
-   sym->entry = H5MM_xcalloc (2 * H5G_NODE_K, sizeof(H5G_entry_t));
+   sym->entry = H5MM_xcalloc (2 * H5G_NODE_K(f), sizeof(H5G_entry_t));
    if (H5AC_set (f, H5AC_SNODE, addr, sym)<0) {
       H5MM_xfree (sym->entry);
       H5MM_xfree (sym);
@@ -373,7 +372,7 @@ H5G_node_load (hdf5_file_t *f, haddr_t addr, const void *_udata)
    size = H5G_node_size (f);
    buf = p = H5MM_xmalloc (size);
    sym = H5MM_xcalloc (1, sizeof(H5G_node_t));
-   sym->entry = H5MM_xcalloc (2*H5G_NODE_K, sizeof(H5G_entry_t));
+   sym->entry = H5MM_xcalloc (2*H5G_NODE_K(f), sizeof(H5G_entry_t));
    
    if (H5F_block_read (f, addr, size, buf)<0) {
       H5MM_xfree (sym->entry);
@@ -600,11 +599,13 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    H5G_node_ud1_t 	*udata = (H5G_node_ud1_t *)_udata;
    
    H5G_node_t		*sn;
-   H5G_entry_t 		ent[2*H5G_NODE_K];
+   H5G_entry_t 		*ent, _ent[128];
    haddr_t		new_node=0, offset;
    const char		*s;
    intn			idx=-1, nsyms, cmp=1;
    intn			lt=0, rt;		/*binary search cntrs	*/
+   hbool_t		malloced;
+   haddr_t		ret_value = FAIL;
 
    FUNC_ENTER (H5G_node_insert, NULL, FAIL);
 
@@ -617,6 +618,13 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    assert (md_key);
    assert (rt_key);
    assert (udata);
+   if (2*H5G_NODE_K(f)>NELMTS(_ent)) {
+      ent = H5MM_xmalloc (2*H5G_NODE_K(f) * sizeof(H5G_entry_t));
+      malloced = TRUE;
+   } else {
+      ent = _ent;
+      malloced = FALSE;
+   }
 
    /*
     * Symbol tables are always split so the new symbol table node is
@@ -631,7 +639,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * worry about the cached value disappearing.
     */
    if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
-      HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+      HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
    }
    HDmemcpy (ent, sn->entry, sn->nsyms * sizeof(H5G_entry_t));
    rt = nsyms = sn->nsyms;
@@ -643,10 +651,10 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
    while (lt<rt) {
       idx = (lt + rt) / 2;
       if (NULL==(s=H5H_peek (f, udata->heap, ent[idx].name_off))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_NOTFOUND, FAIL);
       }
       if (0==(cmp=HDstrcmp (udata->name, s))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*already present*/
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL); /*already present*/
       }
       if (cmp<0) {
 	 rt = idx;
@@ -662,9 +670,10 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
     * with the new heap address.
     */
    offset = H5H_insert (f, udata->heap, strlen(udata->name)+1, udata->name);
-   if (offset<0) HRETURN_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
+   udata->entry.name_off = offset;
+   if (offset<0) HGOTO_ERROR (H5E_SYM, H5E_CANTINSERT, FAIL);
 
-   if (nsyms>=2*H5G_NODE_K) {
+   if (nsyms>=2*H5G_NODE_K(f)) {
       /*
        * The node is full.  Split it into a left and right
        * node and return the address of the new right node (the
@@ -673,15 +682,15 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
       
       /* The left node */
       if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
       }
-      HDmemset (sn->entry+H5G_NODE_K, 0, H5G_NODE_K*sizeof(H5G_entry_t));
-      sn->nsyms = H5G_NODE_K;
+      HDmemset (sn->entry+H5G_NODE_K(f), 0, H5G_NODE_K(f)*sizeof(H5G_entry_t));
+      sn->nsyms = H5G_NODE_K(f);
       sn->dirty += 1;
       
-      if (idx<=H5G_NODE_K) {
+      if (idx<=H5G_NODE_K(f)) {
 	 memmove (sn->entry+idx+1, sn->entry+idx,
-		  (H5G_NODE_K-idx) * sizeof(H5G_entry_t));
+		  (H5G_NODE_K(f)-idx) * sizeof(H5G_entry_t));
 	 sn->entry[idx] = udata->entry;
 	 sn->entry[idx].name_off = offset;
 	 sn->nsyms += 1;
@@ -692,20 +701,20 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
 
       /* The right node */
       if ((new_node = H5G_node_new (f, NULL, NULL, NULL))<0) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
       if (NULL==(sn=H5AC_find (f, H5AC_SNODE, new_node, NULL))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
       }
-      HDmemcpy (sn->entry, ent+H5G_NODE_K,
-		H5G_NODE_K*sizeof(H5G_entry_t));
-      sn->nsyms = H5G_NODE_K;
+      HDmemcpy (sn->entry, ent+H5G_NODE_K(f),
+		H5G_NODE_K(f)*sizeof(H5G_entry_t));
+      sn->nsyms = H5G_NODE_K(f);
       sn->dirty += 1;
 
-      if (idx>H5G_NODE_K) {
-	 idx -= H5G_NODE_K;
+      if (idx>H5G_NODE_K(f)) {
+	 idx -= H5G_NODE_K(f);
 	 HDmemmove (sn->entry+idx+1, sn->entry+idx,
-		    (H5G_NODE_K-idx) * sizeof (H5G_entry_t));
+		    (H5G_NODE_K(f)-idx) * sizeof (H5G_entry_t));
 	 sn->entry[idx] = udata->entry;
 	 sn->entry[idx].name_off = offset;
 	 sn->nsyms += 1;
@@ -721,7 +730,7 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
        * Add the new symbol to the node.
        */
       if (NULL==(sn=H5AC_find (f, H5AC_SNODE, addr, NULL))) {
-	 HRETURN_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
+	 HGOTO_ERROR (H5E_SYM, H5E_CANTLOAD, FAIL);
       }
       sn->dirty += 1;
       HDmemmove (sn->entry+idx+1, sn->entry+idx,
@@ -735,8 +744,11 @@ H5G_node_insert (hdf5_file_t *f, haddr_t addr, intn *anchor,
 	 *rt_key_changed = TRUE;
       }
    }
+   HRETURN (new_node);
 
-   FUNC_LEAVE (new_node);
+done: /*error*/
+   if (malloced) ent = H5MM_xfree (ent);
+   FUNC_LEAVE (FAIL);
 }
 
 
@@ -890,7 +902,7 @@ H5G_node_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	    sn->dirty);
    fprintf (stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
 	    "Number of Symbols:",
-	    sn->nsyms, 2*H5G_NODE_K);
+	    sn->nsyms, 2*H5G_NODE_K(f));
 
    indent += 3;
    fwidth = MAX (0, fwidth-3);

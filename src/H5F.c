@@ -508,7 +508,8 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     *p++=f_create_parms->offset_size; /* Encode the number of bytes for the offset */
     *p++=f_create_parms->length_size; /* Encode the number of bytes for the length */
     *p++=0;                         /* Encode the reserved byte :-) */
-    UINT32ENCODE(p,f_create_parms->btree_page_size);    /* Encode the B-Tree page size */
+    UINT16ENCODE(p,f_create_parms->sym_leaf_k);	/*symbol table leaf node 1/2 rank */
+    UINT16ENCODE(p,f_create_parms->btree_k[H5B_SNODE_ID]);/*stab internal node 1/2 rank */
     UINT32ENCODE(p,new_file->consist_flags);       /* Encode File-Consistancy flags */
     H5F_encode_offset(new_file,p,new_file->smallobj_off);  /* Encode offset of global small-object heap */
     H5F_encode_offset(new_file,p,new_file->freespace_off);  /* Encode offset of global free-space heap */
@@ -686,7 +687,8 @@ hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
     new_file->file_create_parms.offset_size=*p++;   /* Decode the number of bytes for the offset */
     new_file->file_create_parms.length_size=*p++;   /* Decode the number of bytes for the length */
     p++;                         /* Decode the reserved byte :-) */
-    UINT32DECODE(p,new_file->file_create_parms.btree_page_size);    /* Decode the B-Tree page size */
+    UINT16DECODE (p, new_file->file_create_parms.sym_leaf_k); /*stab leaf 1/2 rank*/
+    UINT16DECODE (p, new_file->file_create_parms.btree_k[H5B_SNODE_ID]); /*stab internal 1/2 rank*/
     UINT32DECODE(p,new_file->consist_flags);       /* Decode File-Consistancy flags */
 
     /* Read the variable-size part of the boot-block */
@@ -931,8 +933,11 @@ H5F_debug (hdf5_file_t *f, haddr_t addr, FILE *stream, intn indent,
 	    "Size of file off_t type:",
 	    (unsigned)(f->file_create_parms.length_size));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
-	    "Bytes per B-tree page:",
-	    (unsigned)(f->file_create_parms.btree_page_size));
+	    "Symbol table leaf node 1/2 rank:",
+	    (unsigned)(f->file_create_parms.sym_leaf_k));
+   fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Symbol table internal node 1/2 rank:",
+	    (unsigned)(f->file_create_parms.btree_k[H5B_SNODE_ID]));
    fprintf (stream, "%*s%-*s %u\n", indent, "", fwidth,
 	    "Boot block version number:",
 	    (unsigned)(f->file_create_parms.bootblock_ver));
