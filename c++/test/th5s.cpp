@@ -21,7 +21,7 @@ using namespace H5;
 #endif  /* !H5_NO_NAMESPACE */
 
 #define TESTFILE   "th5s.h5"
-#define FILE   "th5s1.h5"
+#define DATAFILE   "th5s1.h5"
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -241,7 +241,7 @@ test_h5s_scalar_write(void)
     try
     {
 	// Create file
-	H5File fid1(FILE, H5F_ACC_TRUNC);
+	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
 
 	/* Create scalar dataspace */
 	DataSpace sid1(SPACE3_RANK, NULL);
@@ -302,7 +302,7 @@ test_h5s_scalar_read(void)
     try
     {
 	/* Create file */
-	H5File fid1(FILE, H5F_ACC_RDWR);
+	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
 	/* Create a dataset */
 	DataSet dataset = fid1.openDataSet("Dataset1");
@@ -357,7 +357,7 @@ test_h5s_compound_scalar_write(void)
     try
     {
 	/* Create file */
-	H5File fid1(FILE, H5F_ACC_TRUNC);
+	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
 
 	/* Create the compound datatype.  */
 	CompType tid1(sizeof(struct space4_struct));
@@ -420,21 +420,14 @@ test_h5s_compound_scalar_write(void)
 static void 
 test_h5s_compound_scalar_read(void)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;	    	/* Dataspace ID			*/
-    hid_t       	type;       	/* Datatype             	*/
-    unsigned		rank;		/* Logical rank of dataspace	*/
     hsize_t		tdims[4];	/* Dimension array to test with */
-    size_t		n;	 	/* Number of dataspace elements */
-    herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Compound Dataspace Reading\n"));
     try
     {
 	/* Create file */
-	H5File fid1(FILE, H5F_ACC_RDWR);
+	H5File fid1(DATAFILE, H5F_ACC_RDWR);
 
 	/* Create a dataset */
 	DataSet dataset = fid1.openDataSet("Dataset1");
@@ -524,6 +517,6 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    remove(FILE);
+    remove(DATAFILE);
 }
 
