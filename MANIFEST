@@ -554,8 +554,8 @@
 ./fortran/examples/selectele.f90
 
 ./fortran/src/Dependencies
-./fortran/src/H5f.c
-./fortran/src/H5ff.f90
+./fortran/src/H5_f.c
+./fortran/src/H5_ff.f90
 ./fortran/src/H5Af.c
 ./fortran/src/H5Aff.f90
 ./fortran/src/H5Df.c
