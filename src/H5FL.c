@@ -322,43 +322,54 @@ H5FL_gc(void)
      Can't report errors...
  EXAMPLES
  REVISION LOG
+        Robb Matzke, 2000-04-25
+        If a list cannot be freed because something is using it then return
+        zero (failure to free a list doesn't affect any other part of the
+        library). If some other layer frees something during its termination
+        it will return non-zero, which will cause this function to get called
+        again to reclaim this layer's memory.
 --------------------------------------------------------------------------*/
 static intn
 H5FL_term(void)
 {
     H5FL_gc_list_t *left;   /* pointer to garbage collection lists with work left */
     H5FL_gc_list_t *tmp;    /* Temporary pointer to a garbage collection node */
-    
-    /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
-    left=NULL;
-    while(H5FL_gc_head!=NULL) {
-        tmp=H5FL_gc_head->next;
+
+    if (interface_initialize_g) {
+        /* Free the nodes on the garbage collection list, keeping nodes with allocations outstanding */
+        left=NULL;
+        while(H5FL_gc_head!=NULL) {
+            tmp=H5FL_gc_head->next;
 
 #ifdef H5FL_DEBUG
-printf("H5FL_term: head->name=%s, head->allocated=%d\n", H5FL_gc_head->list->name,(int)H5FL_gc_head->list->allocated);
+            printf("H5FL_term: head->name=%s, head->allocated=%d\n", H5FL_gc_head->list->name,(int)H5FL_gc_head->list->allocated);
 #endif /* H5FL_DEBUG */
-        /* Check if the list has allocations outstanding */
-        if(H5FL_gc_head->list->allocated>0) {
-            /* Add free list to the list of nodes with allocations open still */
-            H5FL_gc_head->next=left;
-            left=H5FL_gc_head;
-        } /* end if */
-        /* No allocations left open for list, get rid of it */
-        else {
-            /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_gc_head->list->init=0;
+            /* Check if the list has allocations outstanding */
+            if(H5FL_gc_head->list->allocated>0) {
+                /* Add free list to the list of nodes with allocations open still */
+                H5FL_gc_head->next=left;
+                left=H5FL_gc_head;
+            } /* end if */
+            /* No allocations left open for list, get rid of it */
+            else {
+                /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
+                H5FL_gc_head->list->init=0;
 
-            /* Free the node from the garbage collection list */
-            H5MM_xfree(H5FL_gc_head);
-        } /* end else */
+                /* Free the node from the garbage collection list */
+                H5MM_xfree(H5FL_gc_head);
+            } /* end else */
 
-        H5FL_gc_head=tmp;
-    } /* end while */
+            H5FL_gc_head=tmp;
+        } /* end while */
 
-    /* Point to the list of nodes left with allocations open, if any */
-    H5FL_gc_head=left;
-    
-    return (H5FL_gc_head!=NULL ? 1 : 0);
+        /* Point to the list of nodes left with allocations open, if any */
+        H5FL_gc_head=left;
+        if (!left) interface_initialize_g = 0; /*this layer has reached its initial state*/
+    }
+
+    /* Terminating this layer never affects other layers; rather, other layers affect
+     * the termination of this layer. */
+    return 0;
 }
 
 

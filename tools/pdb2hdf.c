@@ -96,13 +96,11 @@ usage: %s [OPTIONS] [PDBFILE ...]\n\
 static void
 version(const char *arg0)
 {
-    char	*progname;
+    const char	*progname;
 
     if ((progname=strrchr(arg0, '/')) && progname[1]) progname++;
     else progname = arg0;
-    
-    printf("This is %s version %u.%u release %u\n",
-	   progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+    print_version(progname);
 }
 
 

@@ -425,7 +425,7 @@ static void test_iter_group_large(void)
     hsize_t		dims[] = {SPACE1_DIM1};
     herr_t		ret;		/* Generic return value		*/
     char gname[20];         /* Temporary group name */
-    iter_info names[NGROUPS+2]={0}; /* Names of objects in the root group */
+    iter_info names[NGROUPS+2]; /* Names of objects in the root group */
     iter_info *curr_name;        /* Pointer to the current name in the root group */
     int                 i;
 
@@ -435,6 +435,8 @@ static void test_iter_group_large(void)
         unsigned int b;
         float c;
     } s1_t;
+
+    memset(names, 0, sizeof names);
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));

@@ -665,7 +665,8 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
     }
 
     /* Perform data type conversion */
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf,
+                    H5P_DEFAULT)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }
@@ -830,7 +831,8 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         }
 
     /* Perform data type conversion.  */
-    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, tconv_buf, bkg_buf, H5P_DEFAULT)<0) {
+    if (H5T_convert(tpath, src_id, dst_id, nelmts, 0, 0, tconv_buf, bkg_buf,
+                    H5P_DEFAULT)<0) {
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL,
 		    "data type conversion failed");
     }

@@ -711,7 +711,6 @@ H5TB_rem(TBBT_NODE ** root, TBBT_NODE * node, void * *kp)
     H5FL_FREE(TBBT_NODE,leaf);
     H5TB_balance(root, par, side, -1);
 
-done:
     ((TBBT_TREE *) root)->count--;
 
     FUNC_LEAVE(data);
@@ -1388,14 +1387,21 @@ H5TB_balance(TBBT_NODE ** root, TBBT_NODE * ptr, intn side, intn added)
                       if (ptr->link[Other(side)] != NULL && ptr->link[Other(side)]->Parent == ptr)
                         {
                             ptr->flags |= (tbbt_flag)TBBT_HEAVY(Other(side));  /* Other side longer */
-                            if (ptr->Parent)
-                                if (ptr->Parent->Rchild == ptr)     /* we're the right child */
-                                    if (Heavy(ptr->Parent, RIGHT) && LeftCnt(ptr->Parent) == 1)
+                            if (ptr->Parent) {
+                                if (ptr->Parent->Rchild == ptr) {
+                                    /* we're the right child */
+                                    if (Heavy(ptr->Parent, RIGHT) && LeftCnt(ptr->Parent) == 1) {
                                         deeper = 0;
-                                    else
-                                        /* we're the left child */ if (Heavy(ptr->Parent, LEFT))
-                                        if (ptr->Parent->Rchild && !UnBal(ptr->Parent->Rchild))
-                                            deeper = 0;
+                                    } else {
+                                        /* we're the left child */
+                                        if (Heavy(ptr->Parent, LEFT)) {
+                                            if (ptr->Parent->Rchild && !UnBal(ptr->Parent->Rchild)) {
+                                                deeper = 0;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                   }
                 else

@@ -36,7 +36,7 @@ static hid_t H5FD_QAK_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
-    const char *logfile;			/* Log file name */
+    char *logfile;			/* Allocated log file name */
     intn verbosity;                 /* Verbosity of logging information */
 } H5FD_log_fapl_t;
 
@@ -247,7 +247,7 @@ H5FD_log_init(void)
  *		Thursday, February 19, 1998
  *
  * Modifications:
- *
+ *              We copy the LOGFILE value into our own access properties.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -257,12 +257,12 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, int verbosity)
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5FD_set_fapl_log, FAIL);
-    H5TRACE1("e","i",fapl_id);
+    H5TRACE3("e","isIs",fapl_id,logfile,verbosity);
     
     if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
         HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
 
-    fa.logfile=logfile;
+    fa.logfile = H5MM_strdup(logfile);
     fa.verbosity=verbosity;
     ret_value= H5Pset_driver(fapl_id, H5FD_QAK, &fa);
 
@@ -333,7 +333,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
     if(old_fa->logfile!=NULL)
         if (NULL==(new_fa->logfile=HDstrdup(old_fa->logfile)))
             HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                  "unable to allocate log file name");
+                          "unable to allocate log file name");
 
     FUNC_LEAVE(new_fa);
 } /* end H5FD_log_fapl_copy() */
@@ -363,8 +363,7 @@ H5FD_log_fapl_free(void *_fa)
     FUNC_ENTER(H5FD_log_fapl_free, FAIL);
 
     /* Free the fapl information */
-    if(fa->logfile)
-        H5MM_xfree((void *)fa->logfile);
+    H5MM_xfree(fa->logfile);
     H5MM_xfree(fa);
 
     FUNC_LEAVE(SUCCEED);
