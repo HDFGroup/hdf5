@@ -30,10 +30,10 @@ extern "C" {
 /* Parameters to use when retrieving file-creation template information */
 typedef enum {
     H5_USERBLOCK_SIZE,          /* (uintn) Size of the user block in the file in bytes */
-    H5_OFFSET_SIZE,             /* (uintn) Number of bytes for offsets */
-    H5_LENGTH_SIZE,             /* (uintn) Number of bytes for lengths */
-    H5_SYM_LEAF_K,		/* (uintn) 1/2 rank for symbol table leaf nodes */
-    H5_SYM_INTERN_K,		/* (uintn) 1/2 rank for symbol table internal nodes */
+    H5_OFFSET_SIZE,             /* (uint8) Number of bytes for offsets */
+    H5_LENGTH_SIZE,             /* (uint8) Number of bytes for lengths */
+    H5_SYM_LEAF_K,              /* (uintn) 1/2 rank for symbol table leaf nodes */
+    H5_SYM_INTERN_K,            /* (uintn) 1/2 rank for symbol table internal nodes */
     H5_BOOTBLOCK_VER,           /* (uint8) Version # of the boot-block format */
     H5_SMALLOBJECT_VER,         /* (uint8) Version # of the small-object heap format */
     H5_FREESPACE_VER,           /* (uint8) Version # of the free-space info format */
