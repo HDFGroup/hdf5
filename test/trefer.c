@@ -44,6 +44,14 @@ static char		RcsId[] = "$Revision$";
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
+/* Compound datatype */
+typedef struct s1_t {
+    unsigned int a;
+    unsigned int b;
+    float c;
+} s1_t;
+
+
 /****************************************************************
 **
 **  test_reference_obj(): Test basic H5R (reference) object reference code.
@@ -58,6 +66,7 @@ test_reference_obj(void)
                 dset2;      /* Dereferenced dataset ID */
     hid_t		group;      /* Group ID             */
     hid_t		sid1;       /* Dataspace ID			*/
+    hid_t		tid1;       /* Datatype ID			*/
     hsize_t		dims1[] = {SPACE1_DIM1};
     hobj_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
@@ -115,6 +124,28 @@ test_reference_obj(void)
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
+    /* Create a datatype to refer to */
+    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    CHECK(tid1, FAIL, "H5Tcreate");
+
+    /* Insert fields */
+    ret=H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret=H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret=H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* Save datatype for later */
+    ret=H5Tcommit (group, "Datatype1", tid1);
+    CHECK(ret, FAIL, "H5Tcommit");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close group */
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
@@ -123,21 +154,29 @@ test_reference_obj(void)
     dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dcreate");
 
-    /* Create references */
+    /* Create reference to dataset */
     ret = H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_object_type(dataset,&wbuf[0]);
-    VERIFY(ret, H5G_DATASET, "H5Rcreate");
+    VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
 
+    /* Create reference to dataset */
     ret = H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_object_type(dataset,&wbuf[1]);
-    VERIFY(ret, H5G_DATASET, "H5Rcreate");
+    VERIFY(ret, H5G_DATASET, "H5Rget_object_type");
 
+    /* Create reference to group */
     ret = H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
     CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_object_type(dataset,&wbuf[2]);
-    VERIFY(ret, H5G_GROUP, "H5Rcreate");
+    VERIFY(ret, H5G_GROUP, "H5Rget_object_type");
+
+    /* Create reference to named datatype */
+    ret = H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
+    CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_object_type(dataset,&wbuf[3]);
+    VERIFY(ret, H5G_TYPE, "H5Rget_object_type");
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
@@ -207,6 +246,25 @@ test_reference_obj(void)
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
 
+    /* Open datatype object */
+    tid1 = H5Rdereference(dataset,H5R_OBJECT,&rbuf[3]);
+    CHECK(tid1, FAIL, "H5Rdereference");
+
+    /* Verify correct datatype */
+    {
+        H5T_class_t tclass;
+
+        tclass= H5Tget_class(tid1);
+        VERIFY(tclass, H5T_COMPOUND, "H5Tget_class");
+
+        ret= H5Tget_nmembers(tid1);
+        VERIFY(ret, 3, "H5Tget_nmembers");
+    }
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
@@ -214,7 +272,6 @@ test_reference_obj(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-
 
     /* Free memory buffers */
     free(wbuf);
