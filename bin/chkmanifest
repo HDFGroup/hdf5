@@ -7,6 +7,9 @@
 verbose=yes
 MANIFEST=/tmp/H5_MANIFEST.$$
 
+# clean up $MANIFEST file when exits
+trap "rm -f $MANIFEST" 0
+
 # Copy the manifest file to get a list of file names.
 grep '^\.' MANIFEST | expand | cut -f1 -d' ' >$MANIFEST
 
@@ -21,7 +24,7 @@ done
 for cvs in `find . -type d -name CVS -print`; do
     path=`echo $cvs |sed 's/\/CVS//'`
     for file in `grep '^\/' $cvs/Entries |cut -d/ -f2`; do
-	if (grep $path/$file $MANIFEST >/dev/null); then
+	if (grep $path/$file$ $MANIFEST >/dev/null); then
 	    :
 	else
 	    echo "+ $path/$file"
