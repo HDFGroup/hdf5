@@ -5,9 +5,9 @@
 # the various compile modes.
 
 # Use Intel C compiler by default (if it's available).
-if test "X$CC" = "X" && which ecc > /dev/null; then
-    CC=ecc
-    CC_BASENAME=ecc
+if test "X$CC" = "X" && which icc > /dev/null; then
+    CC=icc
+    CC_BASENAME=icc
 fi
 
 #----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ fi
 # out.)
 
 case $CC_BASENAME in
-    ecc)
+    ecc|icc)
 	# Default to C99 standard.
 	CFLAGS="${CFLAGS:--std=c99}"
 	DEBUG_CFLAGS="-w2 -Wall -g -O0"
