@@ -28,13 +28,35 @@ default_mode="-DDOS386 $debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
 MPICH=""
 ROMIO="/usr/community/mpi-io/romio/current"
+
+# new version by Daniel Sands
+# /scratch/acheng/mpich-1.1.2 is a symbolic pointer.
+# It is set to different value in different machines because
+# Daniel Sands' $HOME path is different too.  *sigh*
+ROMIO="/scratch/acheng/mpich-1.1.2"
+if [ ! -d $ROMIO ]
+then
+    echo "ROMIO directory ($ROMIO) not found"
+    echo "Aborted"
+    exit 1
+fi
 mpi1_inc=""
 mpi1_lib=""
 mpio_inc="-I$ROMIO/include"
-mpio_lib="-L$ROMIO/lib/tflop"
+mpio_lib="-L$ROMIO/build/tflops/ptls/lib"
+
 
 MPI_INC="$mpi1_inc $mpio_inc"
 MPI_LIB="$mpi1_lib $mpio_lib"
+
+#for version 1.1 and later
+RUNSERIAL="yod -sz 1"
+export RUNSERIAL
+RUNPARALLEL="yod -sz 8"
+export RUNPARALLEL
+LIBS="-lmpich"
+export LIBS
+
 
 # Once these variables are set to the proper values for your installation,
 # you can run the configure program (i.e., ./configure tflop --enable-parallel=mpio)
@@ -48,4 +70,4 @@ MPI_LIB="$mpi1_lib $mpio_lib"
 CFLAGS="$default_mode" \
 CPPFLAGS=$MPI_INC \
 LDFLAGS=$MPI_LIB \
-./configure --enable-parallel tflop
+./configure --enable-parallel --disable-shared tflop 
