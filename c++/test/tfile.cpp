@@ -329,7 +329,7 @@ test_file_open(void)
 	// Get the file-creation parameters
 	hsize_t ublock = tmpl1.getUserblock();
 	verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
-	verify_val(ublock, F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
+	verify_val((long)ublock, (long)F2_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
     	size_t  parm1, parm2;		// file-creation parameters
 	tmpl1.getSizes( parm1, parm2);

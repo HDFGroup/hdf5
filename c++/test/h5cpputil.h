@@ -24,10 +24,7 @@
 #define _h5cpputil_h
 
 #ifndef H5_NO_NAMESPACE
-namespace H5 {
-#ifndef H5_NO_STD
-	    using namespace std;
-#endif  // H5_NO_STD
+using namespace H5;
 #endif
 
 #ifndef H5_NO_STD
@@ -64,9 +61,5 @@ class InvalidActionException : public Exception {
 	InvalidActionException();
 	virtual ~InvalidActionException();
 };
-
-#ifndef H5_NO_NAMESPACE
-}
-#endif
 
 #endif
