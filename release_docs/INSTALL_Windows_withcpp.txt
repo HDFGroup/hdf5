@@ -97,11 +97,18 @@ Testing libraries and tools
     1. See the file INSTALL_Windows.txt (STEP 2) for instruction on 
        testing the C HDF5 library and non-hdf4-related tools.
 
-    2. To test C++ HDF5 Library, run hdf5cpptest.bat in the
-       hdf5\c++\test directory at the command prompt as below:
+    2. To test C++ HDF5 Library, you first need to copy the appropriate
+       DLL files to the Windows system directory.
+
+         The system directory can usually be found under the path
+                C:\WINNT\system or C:\WINDOWS\system
+
+       You can now run hdf5cpptest.bat in the hdf5\c++\test directory 
+       at the command prompt as below:
 
 	hdf5cpptest release
 	hdf5cpptest release dll
 	hdf5cpptest debug
 	hdf5cpptest debug dll
 
+Please send mail to hdfhelp@ncsa.uiuc.edu for further assistance.
