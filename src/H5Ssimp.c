@@ -72,12 +72,12 @@ H5S_simp_init (const struct H5O_layout_t __unused__ *layout,
      */
     f_ndims = H5S_get_hyperslab (file_space, NULL, size, NULL);
     if (m_ndims!=f_ndims) {
-        nelmts = H5S_get_npoints (file_space);
+        nelmts = H5S_select_npoints (file_space);
         if (nelmts>desired_nelmts) {
             HRETURN_ERROR (H5E_IO, H5E_UNSUPPORTED, 0,
                    "strip mining not supported across dimensionalities");
         }
-        assert (nelmts==H5S_get_npoints (mem_space));
+        assert (nelmts==H5S_select_npoints (mem_space));
     } else {
         for (i=f_ndims-1, acc=1; i>0; --i) acc *= size[i];
         acc *= (desired_nelmts/acc);

@@ -310,7 +310,7 @@ done:
  PURPOSE
     Get the number of elements in current selection
  USAGE
-    herr_t H5Sselect_hyperslab(dsid)
+    hsize_t H5Sselect_npoints(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to query
  RETURNS
     The number of elements in selection on success, 0 on failure

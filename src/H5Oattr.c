@@ -125,7 +125,7 @@ H5O_attr_decode(H5F_t *f, const uint8 *p, H5O_shared_t __unused__ *sh)
     p+=attr->ds_size;
 
     /* Compute the size of the data */
-    attr->data_size=H5S_get_npoints(attr->ds)*H5T_get_size(attr->dt);
+    attr->data_size=H5S_extent_npoints(attr->ds)*H5T_get_size(attr->dt);
 
     /* Go get the data */
     if (NULL==(attr->data = H5MM_malloc(attr->data_size))) {

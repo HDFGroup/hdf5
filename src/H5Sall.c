@@ -43,7 +43,7 @@ H5S_all_init (const struct H5O_layout_t __unused__ *layout,
     assert (sel_iter);
 
     /* Initialize the number of elements to iterate over */
-    sel_iter->all.elmt_left=H5S_get_npoints(space);
+    sel_iter->all.elmt_left=H5S_extent_npoints(space);
 
     /* Start at the upper left location */
     sel_iter->all.offset=0;
