@@ -1,4 +1,4 @@
-HDF5 version 1.6.4-snap3 released on Sun Jan  2 18:24:47 CST 2005
+HDF5 version 1.6.4-snap4 released on Sun Jan 23 18:03:43 CST 2005
 ================================================================================
 
 
@@ -43,6 +43,8 @@ New Features
             adjustment.  The size can be increased and decreased(without
             cutting the last member).  No API change is involved.  SLU - 
             2004/10/1
+        - Removed PABLO support 
+                                2005/01/20 EIP 
 
     Parallel Library:
     -----------------
