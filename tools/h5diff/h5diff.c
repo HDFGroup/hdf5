@@ -82,7 +82,7 @@ int check_f_input( const char* );
 int get_index( const char *obj, int nobjects, info_t *info );
 int compare_object( char *obj1, char *obj2 );
 void usage(void);
-const char* basename(const char *name);
+const char* h5diff_basename(const char *name);
 const char* get_type(int type);
 const char* get_class(H5T_class_t tclass);
 void print_dims( int r, hsize_t *d );
@@ -1142,8 +1142,8 @@ int diff_dataset( hid_t file1_id, hid_t file2_id, const char *obj1_name,
  *-------------------------------------------------------------------------
  */
  printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
- name1=basename(obj1_name);
- name2=basename(obj2_name);
+ name1=h5diff_basename(obj1_name);
+ name2=h5diff_basename(obj2_name);
  nfound = array_diff(buf1,buf2,tot_cnt1,rank1,dims1,options,name1,name2,m_type1);
  printf("%d differences found\n", nfound );
 
@@ -2053,7 +2053,7 @@ void print_datatype(hid_t type)
 
 
 /*-------------------------------------------------------------------------
- * Function: basename
+ * Function: h5diff_basename
  *
  * Purpose: Returns a pointer to the last component absolute name 
  *
@@ -2067,7 +2067,7 @@ void print_datatype(hid_t type)
  */
 
 const char*
-basename(const char *name)
+h5diff_basename(const char *name)
 {
  size_t i;
  
