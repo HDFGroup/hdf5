@@ -51,8 +51,8 @@
      INTEGER(SIZE_T)     ::   type_sizer  ! Size of the real datatype
      INTEGER(SIZE_T)     ::   offset     ! Member's offset
      INTEGER(SIZE_T)     ::   offset_out     ! Member's offset
-     CHARACTER*2, DIMENSION(dimsize)      :: char_member
-     CHARACTER*2, DIMENSION(dimsize)      :: char_member_out ! Buffer to read data out
+     CHARACTER(LEN=2), DIMENSION(dimsize)      :: char_member
+     CHARACTER(LEN=2), DIMENSION(dimsize)      :: char_member_out ! Buffer to read data out
      INTEGER, DIMENSION(dimsize)          :: int_member
      INTEGER, DIMENSION(dimsize)          :: int_member_out
      DOUBLE PRECISION, DIMENSION(dimsize) :: double_member
@@ -62,7 +62,7 @@
      INTEGER :: i
      INTEGER :: class ! Datatype class              
      INTEGER :: num_members ! Number of members in the compound datatype
-     CHARACTER*256 :: member_name 
+     CHARACTER(LEN=256) :: member_name 
      INTEGER :: len ! Lenght of the name of the compound datatype member 
      LOGICAL :: flag
      INTEGER(HSIZE_T), DIMENSION(3) :: array_dims=(/2,3,4/)

@@ -26,10 +26,10 @@
      INTEGER :: identifier_total_error = 0
      INTEGER :: group_total_error = 0
      INTEGER :: error_total_error = 0
-     CHARACTER*8 error_string
-     CHARACTER*8 :: success = ' PASSED '
-     CHARACTER*8 :: failure = '*FAILED*'
-     CHARACTER*4 :: e_format ='(8a)'
+     CHARACTER(LEN=8) error_string
+     CHARACTER(LEN=8) :: success = ' PASSED '
+     CHARACTER(LEN=8) :: failure = '*FAILED*'
+     CHARACTER(LEN=4) :: e_format ='(8a)'
 
      CALL h5open_f(error) 
      write(*,*) '                       ==========================                            '

@@ -37,8 +37,8 @@
      INTEGER     ::   rank = 1 ! Datasets rank
      INTEGER     ::   error ! Error flag
      INTEGER(SIZE_T)   ::   namesize = 100 !size for symbolic object
-     CHARACTER*100 :: name !name to put symbolic object
-     CHARACTER*100 :: commentout !comment to the file
+     CHARACTER(LEN=100) :: name !name to put symbolic object
+     CHARACTER(LEN=100) :: commentout !comment to the file
      INTEGER     ::   nmembers
      INTEGER     :: obj_type
      INTEGER, DIMENSION(7) :: data_dims 
