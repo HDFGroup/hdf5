@@ -368,6 +368,7 @@ H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
  *		Monday, November 10, 1997
  *
  * Modifications:
+ *              rky 980828 Only p0 writes metadata to disk.
  *
  *-------------------------------------------------------------------------
  */
@@ -382,14 +383,18 @@ H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms)
     assert(lf && lf->type);
 
     /* Make sure the last block of the file has been allocated on disk */
+    /* rky 980828 NOTE
+     * Is this really necessary? Could this be eliminated for MPI-IO files? */
     H5F_addr_reset(&last_byte);
     if (addr_defined(&(lf->eof)) && H5F_addr_gt(&(lf->eof), &last_byte)) {
 	last_byte = lf->eof;
 	last_byte.offset -= 1;
 	if (H5F_low_read(lf, access_parms, H5D_XFER_DFLT, &last_byte,
 			 1, buf) >= 0) {
-	    H5F_low_write(lf, access_parms, H5D_XFER_DFLT, &last_byte,
-			  1, buf);
+#ifdef HAVE_PARALLEL
+	    H5F_mpio_tas_allsame( lf, TRUE );	/* only p0 will write */
+#endif /* HAVE_PARALLEL */
+	    H5F_low_write(lf, access_parms, H5D_XFER_DFLT, &last_byte, 1, buf);
 	}
     }
     /* Invoke the subclass the flush method */

@@ -296,6 +296,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t __unused__ op, void *_lt_key,
  *		Jun 23 1997
  *
  * Modifications:
+ *              rky 980828 Only p0 writes metadata to disk.
  *
  *-------------------------------------------------------------------------
  */
@@ -351,6 +352,9 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 	H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms);
 	HDmemset(p, 0, size - (p - buf));
 
+#ifdef HAVE_PARALLEL
+	H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+#endif /* HAVE_PARALLEL */
 	status = H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT, buf);
 	buf = H5MM_xfree(buf);
 	if (status < 0)

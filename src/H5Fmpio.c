@@ -69,6 +69,10 @@
 static hbool_t          interface_initialize_g = FALSE;	/* rky??? */
 #define INTERFACE_INIT  NULL
 
+/* Global var to allow elimination of redundant metadata writes
+ * to be controlled by the value of an environment variable. */
+hbool_t	H5_mpi_1_metawrite_g = FALSE;
+
 #define H5F_MPIO_DEV    0xfffe  /*pseudo dev for MPI-IO until we fix things */
 				/* Make sure this differs from H5F_CORE_DEV */
 
@@ -285,6 +289,7 @@ H5F_mpio_access(const char *name, const H5F_access_t *access_parms, int mode,
  *      rky, 11 Jun 1998
  *      Added H5F_mpio_Debug debug flags controlled by MPI_Info.
  *
+ *      rky 980828 Init flag controlling redundant metadata writes to disk.
  *-------------------------------------------------------------------------
  */
 static H5F_low_t *
@@ -351,6 +356,7 @@ H5F_mpio_open(const char *name, const H5F_access_t *access_parms, uintn flags,
 		       "memory allocation failed");
     }
     lf->u.mpio.f = fh;
+    H5F_mpio_tas_allsame( lf, FALSE );          /* initialize */
     H5F_addr_reset(&(lf->eof));
     mpierr = MPI_File_get_size( fh, &size );
     if (MPI_SUCCESS != mpierr) {
@@ -627,6 +633,45 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
 } /* H5F_mpio_read */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_mpio_tas_allsame
+ *
+ * Purpose:     Test and set the allsame parameter.
+ *
+ * Errors:	
+ *
+ * Return:      Success:        the old value of the allsame flag
+ *
+ *              Failure:        assert fails if access_parms is NULL.
+ *
+ * Programmer:  rky 980828
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval )
+{
+    hbool_t		oldval;
+
+    FUNC_ENTER(H5F_mpio_tas_allsame, FALSE);
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Entering H5F_mpio_tas_allsame, newval=%d\n", newval );
+#endif
+
+    assert(lf);
+    oldval = lf->u.mpio.allsame;
+    lf->u.mpio.allsame = newval;
+
+#ifdef H5Fmpio_DEBUG
+    if (H5F_mpio_Debug[(int)'t'])
+    	fprintf(stdout, "Leaving H5F_mpio_tas_allsame, oldval=%d\n", oldval );
+#endif
+    FUNC_LEAVE(oldval);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_mpio_write
  *
  * Purpose:     Depending on a field in access params, either:
@@ -636,6 +681,19 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
  *                to effect the transfer.
  *		  This can allow MPI to coalesce requests from
  *		  different processes (collective or independent).
+ *
+ *		rky 980828
+ *              If the allsame flag is set, we assume that all the procs
+ *		in the relevant MPI communicator will write identical data
+ *		at identical offsets in the file, so only proc 0 will write,
+ *		and all other procs will wait for p0 to finish.
+ *		This is useful for writing metadata, for example.
+ *		Note that we don't _check_ that the data is identical.
+ *		ALso, the mechanism we use to eliminate the redundant writes
+ *		is by requiring a call to H5F_mpio_tas_allsame before the write,
+ *		which is rather klugey.
+ *		Would it be better to pass a parameter to low-level writes
+ *		like H5F_block_write and H5F_low_write, instead?  Or...???
  *
  * Errors:
  *              IO        WRITEERROR    MPI_File_write_at failed. 
@@ -666,6 +724,9 @@ H5F_mpio_read(H5F_low_t *lf, H5F_access_t *access_parms,
  *	The guts of H5F_mpio_read and H5F_mpio_write
  *	should be replaced by a single dual-purpose routine.
  *
+ * 	rky, 980828
+ *	Added allsame parameter to make all but proc 0 skip the actual write.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -676,9 +737,10 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
     MPI_Offset  mpi_off, mpi_disp;
     MPI_Status  mpi_stat;
     MPI_Datatype buf_type, file_type;
-    int         mpierr, msglen, size_i, bytes_written;
+    int         mpierr, msglen, size_i, bytes_written, mpi_rank;
     int		use_types_this_time, used_types_last_time;
     char        mpierrmsg[MPI_MAX_ERROR_STRING];
+    hbool_t     allsame;
 
     FUNC_ENTER(H5F_mpio_write, FAIL);
 #ifdef H5Fmpio_DEBUG
@@ -706,6 +768,22 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
         fprintf(stdout, "in H5F_mpio_write  mpi_off=%lld  size_i=%d\n",
                 mpi_off, size_i );
 #endif
+
+    /* Only p0 will do the actual write if all procs in comm write same data */
+    allsame = H5F_mpio_tas_allsame( lf, FALSE );
+    if (allsame && H5_mpi_1_metawrite_g) {
+	mpierr = MPI_Comm_rank( access_parms->u.mpio.comm, &mpi_rank );
+	if (mpierr != MPI_SUCCESS)
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Comm_rank failed" );
+	if (mpi_rank != 0) {
+#ifdef H5Fmpio_DEBUG
+	    if (H5F_mpio_Debug[(int)'w']) {
+		fprintf(stdout, "  in H5F_mpio_write (write omitted)\n" );
+	    }
+#endif
+	    goto done;			/* skip the actual write */
+	}
+    }
 
     /* Set up for a fancy xfer using complex types, or single byte block.
      * We wouldn't need to rely on the use_types field
@@ -797,6 +875,7 @@ H5F_mpio_write(H5F_low_t *lf, H5F_access_t *access_parms,
 			"MPI_Get_count returned invalid count" );
     }
 
+    done:
 #ifdef H5Fmpio_DEBUG
     if (H5F_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Leaving H5F_mpio_write\n" );

@@ -392,6 +392,8 @@ typedef struct H5F_low_t {
 	/* MPI-IO */
 	struct {
 	    MPI_File	f;	/* MPI-IO file handle			*/
+	    hbool_t	allsame;/* all procs should write same data,    *
+				 * so only p0 will do the actual write  */
 	} mpio;
 #endif
 

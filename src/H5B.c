@@ -383,6 +383,7 @@ H5B_load(H5F_t *f, const haddr_t *addr, const void *_type, void *udata)
  *		Jun 23 1997
  *
  * Modifications:
+ *              rky 980828 Only p0 writes metadata to disk.
  *
  *-------------------------------------------------------------------------
  */
@@ -453,6 +454,9 @@ H5B_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5B_t *bt)
 	 * bother writing data for the child entries that don't exist or
 	 * for the final unchanged children.
 	 */
+#ifdef HAVE_PARALLEL
+	H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+#endif /* HAVE_PARALLEL */
 	if (H5F_block_write(f, addr, (hsize_t)size, H5D_XFER_DFLT,
 	    bt->page) < 0) {
 	    HRETURN_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL,

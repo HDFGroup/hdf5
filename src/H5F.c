@@ -47,6 +47,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>	/*core memory management		  */
 #include <H5Pprivate.h>		/*property lists			  */
 #include <H5Tprivate.h>		/*data types				  */
+#include <H5Fmpioprivate.h>     /*MPI-IO parallel stuff                   */
 
 #include <ctype.h>
 #include <sys/types.h>
@@ -137,6 +138,16 @@ H5F_init_interface(void)
     
     interface_initialize_g = TRUE;
     FUNC_ENTER(H5F_init_interface, FAIL);
+
+#ifdef HAVE_PARALLEL
+    {
+        /* Allow MPI buf-and-file-type optimizations? */
+        const char *s = getenv ("HDF5_MPI_1_METAWRITE");
+        if (s && isdigit(*s)) {
+            H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
+        }
+    }
+#endif
 
     /* Initialize the atom group for the file IDs */
     if (H5I_init_group(H5_FILE, H5I_FILEID_HASHSIZE, 0,
@@ -1416,6 +1427,7 @@ H5Fflush(hid_t object_id)
  *		Aug 29 1997
  *
  * Modifications:
+ *              rky 980828 Only p0 writes metadata to disk.
  *
  *-------------------------------------------------------------------------
  */
@@ -1481,6 +1493,9 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     }
     
     /* write the boot block to disk */
+#ifdef HAVE_PARALLEL
+    H5F_mpio_tas_allsame( f->shared->lf, TRUE );	/* only p0 will write */
+#endif
     if (H5F_low_write(f->shared->lf, f->shared->access_parms,
     		      H5D_XFER_DFLT,
 		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
