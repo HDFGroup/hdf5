@@ -92,6 +92,7 @@ int         pio_debug_level = 0;/* The debug level:
                                  *   1 - Minimal
                                  *   2 - Some more
                                  *   3 - Maximal
+                                 *   4 - Maximal & then some
                                  */
 
 /* local variables */
@@ -103,14 +104,20 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "hD:f:HP:p:X:x:md:F:i:o:rsta:T:cn";
+static const char *s_opts = "ha:A:cD:f:P:p:X:x:nd:F:i:o:stT:";
 #else
-static const char *s_opts = "hbD:f:HP:p:X:x:md:F:i:o:rsta:T:cn";
+static const char *s_opts = "ha:A:bcD:f:P:p:X:x:nd:F:i:o:stT:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
     { "he", no_arg, 'h' },
+    { "align", require_arg, 'a' },
+    { "alig", require_arg, 'a' },
+    { "ali", require_arg, 'a' },
+    { "al", require_arg, 'a' },
+    { "api", require_arg, 'A' },
+    { "ap", require_arg, 'A' },
 #if 0
     /* a sighting of the elusive binary option */
     { "binary", no_arg, 'b' },
@@ -119,6 +126,10 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "chunk", no_arg, 'c' },
+    { "chun", no_arg, 'c' },
+    { "chu", no_arg, 'c' },
+    { "ch", no_arg, 'c' },
     { "debug", require_arg, 'D' },
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
@@ -131,9 +142,6 @@ static struct long_options l_opts[] = {
     { "file", require_arg, 'f' },
     { "fil", require_arg, 'f' },
     { "fi", require_arg, 'f' },
-    { "hdf5", no_arg, 'H' },
-    { "hdf", no_arg, 'H' },
-    { "hd", no_arg, 'H' },
     { "max-num-processes", require_arg, 'P' },
     { "max-num-processe", require_arg, 'P' },
     { "max-num-process", require_arg, 'P' },
@@ -168,10 +176,12 @@ static struct long_options l_opts[] = {
     { "min-xfe", require_arg, 'x' },
     { "min-xf", require_arg, 'x' },
     { "min-x", require_arg, 'x' },
-    { "mpiio", no_arg, 'm' },
-    { "mpii", no_arg, 'm' },
-    { "mpi", no_arg, 'm' },
-    { "mp", no_arg, 'm' },
+    { "no-fill", no_arg, 'n' },
+    { "no-fil", no_arg, 'n' },
+    { "no-fi", no_arg, 'n' },
+    { "no-f", no_arg, 'n' },
+    { "no-", no_arg, 'n' },
+    { "no", no_arg, 'n' },
     { "num-dsets", require_arg, 'd' },
     { "num-dset", require_arg, 'd' },
     { "num-dse", require_arg, 'd' },
@@ -197,12 +207,6 @@ static struct long_options l_opts[] = {
     { "outp", require_arg, 'o' },
     { "out", require_arg, 'o' },
     { "ou", require_arg, 'o' },
-    { "raw", no_arg, 'r' },
-    { "ra", no_arg, 'r' },
-    { "align", require_arg, 'a' },
-    { "alig", require_arg, 'a' },
-    { "ali", require_arg, 'a' },
-    { "al", require_arg, 'a' },
     { "threshold", require_arg, 'T' },
     { "threshol", require_arg, 'T' },
     { "thresho", require_arg, 'T' },
@@ -211,16 +215,6 @@ static struct long_options l_opts[] = {
     { "thre", require_arg, 'T' },
     { "thr", require_arg, 'T' },
     { "th", require_arg, 'T' },
-    { "chunk", no_arg, 'c' },
-    { "chun", no_arg, 'c' },
-    { "chu", no_arg, 'c' },
-    { "ch", no_arg, 'c' },
-    { "no-fill", no_arg, 'n' },
-    { "no-fil", no_arg, 'n' },
-    { "no-fi", no_arg, 'n' },
-    { "no-f", no_arg, 'n' },
-    { "no-", no_arg, 'n' },
-    { "no", no_arg, 'n' },
     { NULL, 0, '\0' }
 };
 
@@ -946,6 +940,42 @@ parse_command_line(int argc, char *argv[])
         case 'a':
             cl_opts->h5_alignment = parse_size_directive(opt_arg);
             break;
+        case 'A':
+            cl_opts->io_types &= ~0x7;
+
+            {
+                const char *end = opt_arg;
+
+                while (end && *end != '\0') {
+                    char buf[10];
+                    int i;
+
+                    memset(buf, '\0', sizeof(buf));
+
+                    for (i = 0; *end != '\0' && *end != ','; ++end)
+                        if (isalnum(*end) && i < 10)
+                            buf[i++] = *end;
+
+                    if (!strcasecmp(buf, "phdf5")) {
+                        cl_opts->io_types |= PIO_HDF5;
+                    } else if (!strcasecmp(buf, "mpiio")) {
+                        cl_opts->io_types |= PIO_MPI;
+                    } else if (!strcasecmp(buf, "posix")) {
+                        cl_opts->io_types |= PIO_POSIX;
+                    } else {
+                        fprintf(stderr, "pio_perf: invalid --api option %s\n",
+                                buf);
+                        exit(1);
+                    }
+
+                    if (*end == '\0')
+                        break;
+
+                    end++;
+                }
+            }
+
+            break;
 #if 0
         case 'b':
             /* the future "binary" option */
@@ -958,21 +988,57 @@ parse_command_line(int argc, char *argv[])
             cl_opts->num_dsets = atoi(opt_arg);
             break;
         case 'D':
-	    switch (*opt_arg){		/* Debug sub-options */
-	    case 'r':       /* Turn on raw data throughput info */
-		cl_opts->print_raw = 1;
-		break;
-	    case 't':       /* Turn on time printing */
-		cl_opts->print_times = 1;
-		break;
-	    default:	    /* assume debug level */
-		pio_debug_level = atoi(opt_arg);
+            {
+                const char *end = opt_arg;
 
-		if (pio_debug_level > 4)
-		    pio_debug_level = 4;
-		else if (pio_debug_level < 0)
-		    pio_debug_level = 0;
-	    }
+                while (end && *end != '\0') {
+                    char buf[10];
+                    int i;
+
+                    memset(buf, '\0', sizeof(buf));
+
+                    for (i = 0; *end != '\0' && *end != ','; ++end)
+                        if (isalnum(*end) && i < 10)
+                            buf[i++] = *end;
+
+                    if (strlen(buf) > 1 || isdigit(buf[0])) {
+                        register int i;
+
+                        for (i = 0; i < 10 && buf[i] != '\0'; ++i)
+                            if (!isdigit(buf[i])) {
+                                fprintf(stderr, "pio_perf: invalid --debug option %s\n",
+                                        buf);
+                                exit(1);
+                            }
+
+                        pio_debug_level = atoi(buf);
+
+                        if (pio_debug_level > 4)
+                            pio_debug_level = 4;
+                        else if (pio_debug_level < 0)
+                            pio_debug_level = 0;
+                    } else {
+                        switch (*buf) {
+                        case 'r':
+                            /* Turn on raw data throughput info */
+                            cl_opts->print_raw = 1;
+                            break;
+                        case 't':
+                            /* Turn on time printing */
+                            cl_opts->print_times = 1;
+                            break;
+                        default:
+                            fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
+                            exit(1);
+                        }
+                    }
+
+                    if (*end == '\0')
+                        break;
+
+                    end++;
+                }
+            }
 
             break;
         case 'f':
@@ -981,16 +1047,8 @@ parse_command_line(int argc, char *argv[])
         case 'F':
             cl_opts->num_files = atoi(opt_arg);
             break;
-        case 'H':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_HDF5;
-            break;
         case 'i':
             cl_opts->num_iters = atoi(opt_arg);
-            break;
-        case 'm':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_MPI;
             break;
         case 'n':       /* Turn off writing fill values */
             cl_opts->h5_no_fill = 1;
@@ -1003,10 +1061,6 @@ parse_command_line(int argc, char *argv[])
             break;
         case 'P':
             cl_opts->max_num_procs = atoi(opt_arg);
-            break;
-        case 'r':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_POSIX;
             break;
         case 'T':
             cl_opts->h5_threshold = parse_size_directive(opt_arg);
@@ -1094,47 +1148,58 @@ usage(const char *prog)
 
     if (myrank == 0) {
         fflush(stdout);
-        fprintf(stdout, "usage: %s [OPTIONS]\n", prog);
-        fprintf(stdout, "  OPTIONS\n");
-        fprintf(stdout, "     -h, --help                  Print a usage message and exit\n");
-        fprintf(stdout, "     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
-        fprintf(stdout, "     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
-        fprintf(stdout, "     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
-        fprintf(stdout, "     -D N, --debug=N             Indicate the debugging level [default:0]\n");
-        fprintf(stdout, "     -D r                        Print raw data I/O throughput information [default: off]\n");
-        fprintf(stdout, "     -D t                        Print times as well as throughputs [default: off]\n");
-        fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
-        fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
-        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
-        fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
-        fprintf(stdout, "     -n, --no-fill               Don't write fill values to HDF5 dataset [default: off (i.e. write fill values)]\n");
-        fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
-        fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
-        fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        fprintf(stdout, "     -r, --raw                   Run raw (POSIX) performance test\n");
-        fprintf(stdout, "     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file [default: 1]\n");
-        fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
-        fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "  F - is a filename.\n");
-        fprintf(stdout, "  N - is an integer >=0.\n");
-        fprintf(stdout, "  S - is a size specifier, an integer >=0 followed by a size indicator:\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "          K - Kilobyte\n");
-        fprintf(stdout, "          M - Megabyte\n");
-        fprintf(stdout, "          G - Gigabyte\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "      Example: 37M = 37 Megabytes\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "  Debugging levels are:\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "    0 - None\n");
-        fprintf(stdout, "    1 - Minimal\n");
-        fprintf(stdout, "    2 - Not quite everything\n");
-        fprintf(stdout, "    3 - Everything\n");
-        fprintf(stdout, "    4 - Everything and the kitchen sink\n");
-        fprintf(stdout, "\n");
+        printf("usage: %s [OPTIONS]\n", prog);
+        printf("  OPTIONS\n");
+        printf("     -h, --help                  Print a usage message and exit\n");
+        printf("     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
+        printf("     -A AL, --api=AL             Which APIs to test [default: all of them]\n");
+#if 0
+        printf("     -b, --binary                The elusive binary option\n");
+#endif  /* 0 */
+        printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
+        printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
+        printf("     -D DL, --debug=DL           Indicate the debugging level\n");
+        printf("                                 [default: no debugging]\n");
+        printf("     -f S, --file-size=S         Size of a single file [default: 64M]\n");
+        printf("     -F N, --num-files=N         Number of files [default: 1]\n");
+        printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
+        printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
+        printf("                                 [default: off (i.e. write fill values)]\n");
+        printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
+        printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
+        printf("                                 [default: all MPI_COMM_WORLD processes ]\n");
+        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
+        printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
+        printf("                                 [default: 1]\n");
+        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
+        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
+        printf("\n");
+        printf("  F  - is a filename.\n");
+        printf("  N  - is an integer >=0.\n");
+        printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
+        printf("          K - Kilobyte\n");
+        printf("          M - Megabyte\n");
+        printf("          G - Gigabyte\n");
+        printf("\n");
+        printf("      Example: 37M = 37 Megabytes\n");
+        printf("\n");
+        printf("  AL - is an API list. Valid values are:\n");
+        printf("          phdf5 - Parallel HDF5\n");
+        printf("          mpiio - MPI-I/O\n");
+        printf("          posix - POSIX\n");
+        printf("\n");
+        printf("      Example: --api=mpiio,phdf5\n");
+        printf("\n");
+        printf("  DL - is a list of debugging flags. Valid values are:\n");
+        printf("          1 - Minimal\n");
+        printf("          2 - Not quite everything\n");
+        printf("          3 - Everything\n");
+        printf("          4 - Everything and the kitchen sink\n");
+        printf("          r - Raw data I/O throughput information\n");
+        printf("          t - Times as well as throughputs\n");
+        printf("\n");
+        printf("      Example: --debug=2,r,t\n");
+        printf("\n");
         fflush(stdout);
     }
 }
