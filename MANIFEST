@@ -10,13 +10,13 @@
 ./INSTALL_TFLOPS
 ./INSTALL_VFL
 ./INSTALL_parallel
-./INSTALL_Windows
-./HISTORY
+./INSTALL_Windows.txt
+./HISTORY.txt
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.in
 ./README
-./RELEASE
+./RELEASE.txt
 ./acconfig.h
 ./aclocal.m4
 ./configure
