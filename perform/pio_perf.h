@@ -31,6 +31,7 @@ typedef struct parameters_ {
     off_t	num_elmts;      /* Number of native ints in each dset   */
     int		num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
+    size_t      block_size;     /* interleaved block size               */
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     unsigned 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
@@ -64,6 +65,13 @@ extern int      pio_debug_level;    /* The debug level:
                                      *   3 - Maximal
                                      *   4 - Even More Debugging (timer stuff)
                                      */
+
+#define HDprint_rank(f)              /* print rank in MPI_COMM_WORLD */    \
+    HDfprintf(f, "%d: ", comm_world_rank_g);
+#define HDprint_size(f)              /* print size of MPI_COMM_WORLD */    \
+    HDfprintf(f, "%d", comm_world_nprocs_g);
+#define HDprint_rank_size(f)         /* print rank/size of MPI_COMM_WORLD */  \
+    HDfprintf(f, "%d/%d: ", comm_world_rank_g, comm_world_nprocs_g);
 
 #ifdef __cplusplus
 extern "C" {

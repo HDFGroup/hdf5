@@ -72,9 +72,9 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define PIO_POSIX           0x10
-#define PIO_MPI             0x20
-#define PIO_HDF5            0x40
+#define PIO_POSIX           0x1
+#define PIO_MPI             0x2
+#define PIO_HDF5            0x4
 
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
@@ -103,9 +103,9 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:cD:f:P:p:X:x:nd:F:i:o:stT:";
+static const char *s_opts = "ha:A:B:cD:f:P:p:X:x:nd:F:i:o:stT:";
 #else
-static const char *s_opts = "ha:A:bcD:f:P:p:X:x:nd:F:i:o:stT:";
+static const char *s_opts = "ha:A:bB:cD:f:P:p:X:x:nd:F:i:o:stT:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -125,6 +125,15 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "block-size", require_arg, 'B' },
+    { "block-siz", require_arg, 'B' },
+    { "block-si", require_arg, 'B' },
+    { "block-s", require_arg, 'B' },
+    { "block-", require_arg, 'B' },
+    { "block", require_arg, 'B' },
+    { "bloc", require_arg, 'B' },
+    { "blo", require_arg, 'B' },
+    { "bl", require_arg, 'B' },
     { "chunk", no_arg, 'c' },
     { "chun", no_arg, 'c' },
     { "chu", no_arg, 'c' },
@@ -227,6 +236,7 @@ struct options {
     int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
+    size_t block_size;          /* interleaved block size               */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
@@ -361,25 +371,11 @@ run_test_loop(struct options *opts)
     parameters parms;
     int num_procs;
     int doing_pio;      /* if this process is doing PIO */
-    int io_runs = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* default to run all tests */
-
-    if (opts->io_types & ~0x7) {
-        /* we want to run only a select subset of these tests */
-        io_runs = 0;
-
-        if (opts->io_types & PIO_HDF5)
-            io_runs |= PIO_HDF5;
-
-        if (opts->io_types & PIO_MPI)
-            io_runs |= PIO_MPI;
-
-        if (opts->io_types & PIO_POSIX)
-            io_runs |= PIO_POSIX;
-    }
 
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
+    parms.block_size = opts->block_size;
     parms.h5_align = opts->h5_alignment;
     parms.h5_thresh = opts->h5_threshold;
     parms.h5_use_chunks = opts->h5_use_chunks;
@@ -417,13 +413,13 @@ run_test_loop(struct options *opts)
                 output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
-                if (io_runs & PIO_POSIX)
+                if (opts->io_types & PIO_POSIX)
                     run_test(POSIXIO, parms, opts);
 
-                if (io_runs & PIO_MPI)
+                if (opts->io_types & PIO_MPI)
                     run_test(MPIO, parms, opts);
 
-                if (io_runs & PIO_HDF5)
+                if (opts->io_types & PIO_HDF5)
                     run_test(PHDF5, parms, opts);
 
                 /* Run the tests once if buf_size==0, but then break out */
@@ -965,6 +961,9 @@ report_parameters(struct options *opts)
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
 
+    HDfprintf(output, "rank %d: Interleaved block size=", rank);
+    recover_size_and_print((long_long)opts->block_size, "\n");
+
     {
         char *prefix = getenv("HDF5_PARAPREFIX");
 
@@ -1005,6 +1004,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
+    cl_opts->block_size = 0;	/* no interleaved I/O */
     cl_opts->print_times = 0;   /* Printing times is off by default */
     cl_opts->print_raw = 0;     /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment = 1;  /* No alignment for HDF5 objects by default */
@@ -1018,8 +1018,6 @@ parse_command_line(int argc, char *argv[])
             cl_opts->h5_alignment = parse_size_directive(opt_arg);
             break;
         case 'A':
-            cl_opts->io_types &= ~0x7;
-
             {
                 const char *end = opt_arg;
 
@@ -1058,6 +1056,9 @@ parse_command_line(int argc, char *argv[])
             /* the future "binary" option */
             break;
 #endif  /* 0 */
+        case 'B':
+            cl_opts->block_size = parse_size_directive(opt_arg);
+            break;
         case 'c':       /* Turn on chunked HDF5 dataset creation */
             cl_opts->h5_use_chunks = 1;
             break;
@@ -1164,9 +1165,8 @@ parse_command_line(int argc, char *argv[])
     }
 
     /* set default if none specified yet */
-    if (!cl_opts->io_types){
+    if (!cl_opts->io_types)
 	cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
-    }
 
     return cl_opts;
 }
@@ -1244,6 +1244,8 @@ usage(const char *prog)
 #if 0
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
+        printf("     -B S, --block-size=S        Interleaved block size\n");
+        printf("                                 [default: 0 no interleaved IO]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");

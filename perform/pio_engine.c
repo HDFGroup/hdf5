@@ -34,7 +34,7 @@
 /* Macro definitions */
 
 /* sizes of various items. these sizes won't change during program execution */
-#define ELMT_SIZE           ((int)sizeof(int))          /* we're doing ints */
+#define ELMT_SIZE           (sizeof(int))          /* we're doing ints */
 
 #define GOTOERROR(errcode)	{ ret_code = errcode; goto done; }
 #define GOTODONE		{ goto done; }
@@ -108,9 +108,9 @@ typedef union _file_descr {
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
 static herr_t do_write(results *res, file_descr *fd, parameters *parms,
-                    long ndsets, off_t nelmts, size_t buf_size, void *buffer);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer);
 static herr_t do_read(results *res, file_descr *fd, parameters *parms,
-                    long ndsets, off_t nelmts, size_t buf_size, void *buffer /*out*/);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/);
 static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
@@ -144,16 +144,12 @@ do_pio(parameters param)
     off_t       nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
     size_t      buf_size;               /*data buffer size in bytes     */
+    size_t      blk_size;       	/*interleaved I/O block size            */
 
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
 
     /* Sanity check parameters */
-
-    /* debug */
-    if (pio_debug_level>=4) {
-	h5_dump_info_object(h5_io_info_g);
-    }
 
     /* IO type */
     iot = param.io_type;
@@ -182,6 +178,7 @@ do_pio(parameters param)
     nelmts = param.num_elmts;       /* number of elements per dataset       */
     maxprocs = param.num_procs;     /* max number of mpi-processes to use   */
     buf_size = param.buf_size;
+    blk_size = param.block_size;    /* interleaved IO block size            */
 
     if (nfiles < 0 ) {
         fprintf(stderr,
@@ -204,31 +201,29 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-
-#if akcdebug
-/* debug*/
-fprintf(stderr, "nfiles=%d\n", nfiles);
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "maxprocs=%d\n", maxprocs);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
-fprintf(stderr, "total data size=%ld\n", ndsets*nelmts*sizeof(int));
-nfiles=MIN(3, nfiles);
-/*ndsets=MIN(5, ndsets);*/
-/*nelmts=MIN(1000, nelmts);*/
-buf_size=MIN(1024*1024, buf_size);
-/* DEBUG END */
-#endif
-
-    /* allocate data buffer */
-    if(buf_size>0) {
+    /* allocate transfer buffer */
+    if(buf_size<=0) {
+        HDfprintf(stderr,
+	    "Transfer buffer size (%Hd) must be > 0\n", (long_long)buf_size);
+	GOTOERROR(FAIL);
+    }else{
         buffer = malloc(buf_size);
 
         if (buffer == NULL){
-            fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
-                buf_size);
+            HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n",
+                (long_long)buf_size);
             GOTOERROR(FAIL);
         }
+    }
+
+    /* Should only need blk_size <= buf_size. */
+    /* More restrictive condition for easier implementation for now. */
+    if (blk_size > 0 && (buf_size % blk_size)){
+        HDfprintf(stderr,
+	    "Transfer buffer size (%Hd) must be a multiple of the "
+	    "interleaved I/O block size (%Hd)\n",
+	    (long_long)buf_size, (long_long)blk_size);
+        GOTOERROR(FAIL);
     }
 
     if (pio_debug_level >= 4) {
@@ -252,9 +247,6 @@ buf_size=MIN(1024*1024, buf_size);
 
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
-#if AKCDEBUG
-fprintf(stderr, "filename=%s\n", fname);
-#endif
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
         hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
@@ -262,7 +254,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
-        hrc = do_write(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+        hrc = do_write(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_write failed");
@@ -285,7 +277,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-        hrc = do_read(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+        hrc = do_read(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -448,7 +440,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
-         off_t nelmts, size_t buf_size, void *buffer)
+         off_t nelmts, size_t blk_size, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -456,29 +448,34 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     MPI_Offset	mpi_offset;
     MPI_Status	mpi_status;
     long        ndset;
-    off_t       nelmts_written;
-    size_t      nelmts_towrite;
+    off_t       nelmts_xfer;
+    size_t      nelmts_toxfer;
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
-    size_t      nelmts_in_buf;
+    size_t      nelmts_in_buf;  /*how many element the buffer holds     */
+    size_t      nelmts_in_blk;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
     hid_t       dcpl = -1;      /* Dataset creation property list       */
 
     /* HDF5 variables */
-    herr_t          hrc;                    /*HDF5 return code              */
-    hsize_t         h5dims[1];              /*dataset dim sizes             */
-    hid_t           h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t           h5ds_id = -1;           /*dataset handle                */
-
-#if AKCDEBUG
-fprintf(stderr, "In do_write\n");
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
+    herr_t      hrc;                    /*HDF5 return code              */
+    hsize_t     h5dims[1];              /*dataset dim sizes             */
+    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
+    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
+    hid_t       h5ds_id = -1;           /*dataset handle                */
+    hsize_t	h5mem_block[1];		/*memory space selection        */
+    hsize_t	h5mem_stride[1];
+    hsize_t	h5mem_count[1];
+    hssize_t	h5mem_start[1];
+#if 0
+    /* for future implementation */
+    hsize_t	h5dset_block[1];	/*dset space selection          */
+    hsize_t	h5dset_stride[1];
+    hsize_t	h5dset_count[1];
+    hssize_t	h5dset_start[1];
 #endif
 
     /* calculate dataset parameters. data type is always native C int */
@@ -570,48 +567,113 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             break;
         }
 
-        /* Calculate the first element and how many elements this process
-         * transfer.  First calculate the beginning element of this process 
-         * and the next process.  Count of elements is the difference between
-         * these two beginnings.  This way, it avoids any rounding errors.
-         */
-        elmts_begin = (long)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
+	/* There are two kinds of transfer patterns, contiguous and interleaved.
+	 * Let 0,1,2,...,n be data accessed by process 0,1,2,...,n
+	 *     where n is rank of the last process.
+	 * In contiguous pattern, data are accessed as
+	 *    000...111...222...nnn...
+	 * In interleaved pattern, data are accessed as
+	 *    012...n012...n...
+	 * These are all in the scope of one dataset.
+	 */
+	/* Calculate the total number of elements (elmts_count) to be
+	 * transferred by this process. It may be different for different
+	 * transfer pattern due to rounding to integral values.
+	 */
+	if (blk_size==0){
+	    /* Contiguous Pattern:
+	     * Calculate the beginning element of this process and the next.
+	     * elmts_count is the difference between these two beginnings.
+	     * This way, it eliminates any rounding errors.
+	     */
+	    elmts_begin = (off_t)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
 
-        if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
-            elmts_count = (long)((((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
-                            - (double)elmts_begin);
-        else
-            /* last process.  Take whatever are left */
-            elmts_count = nelmts - elmts_begin;
+	    /* Do not cast elmt_begin to other types, especially non-integral
+	     * types, else it may introduce rounding discrepency. */
+	    if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
+		elmts_count = (off_t)(((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
+				- elmts_begin;
+	    else
+		/* last process.  Take whatever are left */
+		elmts_count = nelmts - elmts_begin;
+	}else{
+	    /* Interleaved Pattern:
+	     * Each process takes blk_size of elements, starting with the first
+	     * process.  So, the last process may have fewer or even none.
+	     * Calculate the beginning element of this process and the next.
+	     * The elmnts_begin here marks only the beginning of the first
+	     * block accessed by this process.
+	     */
+	    /* Algorithm:
+	     * First allocate equal blocks per process, i.e. one block each
+	     * process for every block_size*nprocs.
+	     * If there is remaining unallocated, give a block each to process
+	     * starting at proc 0.  The last process may get a partial block.
+	     */ 
+	    off_t remain_nelmts, remain_begin;	/* unallocated remaining*/
 
-#if AKCDEBUG
-fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
-	pio_mpi_rank_g, elmts_begin, elmts_count);
-#endif
-    
-        nelmts_written = 0 ;
+	    nelmts_in_blk = blk_size/ELMT_SIZE;
+	    elmts_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
+
+	    /* must use integer calculation next */
+	    /* allocate equal blocks per process */
+	    elmts_count = (nelmts / (off_t)(nelmts_in_blk*pio_mpi_nprocs_g)) *
+			    (off_t)nelmts_in_blk;
+	    remain_nelmts = nelmts % ((off_t)(nelmts_in_blk*pio_mpi_nprocs_g));
+
+	    /* allocate any remaining */
+	    remain_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
+	    if (remain_nelmts > remain_begin){
+		/* it gets something */
+		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_blk)){
+		    /* one full block */
+		    elmts_count += nelmts_in_blk;
+		}else{
+		    /* only a partial block */
+		    elmts_count += remain_nelmts - remain_begin;
+		}
+	    }
+	}
+	/* debug */
+	if (pio_debug_level >= 4) {
+	    HDprint_rank(output);
+	    HDfprintf(output, "Debug(do_write): "
+		"nelmts_in_blk=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
+		(long_long)nelmts_in_blk, (long_long)elmts_begin,
+		(long_long)elmts_count);
+	}
+
+
+	/* The task is to transfer elmts_count elements, starting at
+	 * elmts_begin position, using transfer buffer of buf_size bytes.
+	 * If blk_size > 0, select blk_size at a time, in round robin
+	 * fashion, according to number of process. Otherwise, select
+	 * all elmt_count in contiguous.
+	 */
+        nelmts_xfer = 0 ;
 
         /* Start "raw data" write timer */
         set_time(res->timers, HDF5_RAW_WRITE_FIXED_DIMS, START);
 
-        while (nelmts_written < elmts_count){
-            nelmts_towrite = elmts_count - nelmts_written;
-
-            if ((elmts_count - nelmts_written) >= nelmts_in_buf) {
-                nelmts_towrite = nelmts_in_buf;
+        while (nelmts_xfer < elmts_count){
+	    /* transfer one buffer of data each round */
+	    /* Note: because size_t is unsigned, avoid expressions that */
+	    /* can be negative. */
+            if ((nelmts_xfer + (off_t)nelmts_in_buf) <= elmts_count) {
+                nelmts_toxfer = nelmts_in_buf;
             } else {
-                /* last write of a partial buffer */
-                nelmts_towrite = elmts_count - nelmts_written;
+                /* last transfer of a partial buffer */
+                nelmts_toxfer = elmts_count - nelmts_xfer;
             }
 
-#if AKCDEBUG
+#ifdef AKCDEBUG
             /*Prepare write data*/
             {
                 int *intptr = (int *)buffer;
                 register int i;
 
-                for (i = 0; i < nelmts_towrite; ++i)
-                    *intptr++ = nelmts_towrite + i;
+                for (i = 0; i < nelmts_toxfer; ++i)
+                    *intptr++ = nelmts_toxfer + i;
             }
 #endif
 
@@ -619,54 +681,87 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
             /* Calculate offset of write within a dataset/file */
             switch (parms->io_type) {
             case POSIXIO:
-		/* need to (off_t) the elmnts_begin expression because they */
-		/* may be of smaller sized integer types */
-                file_offset = dset_offset + (off_t)(elmts_begin + nelmts_written)*ELMT_SIZE;
+		if (blk_size==0){
+		    /* Contiguous pattern */
+		    /* need to (off_t) the elmnts_begin expression because they */
+		    /* may be of smaller sized integer types */
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
 
-#if AKCDEBUG
-HDfprintf(stderr, "proc %d: write %Hd bytes at file-offset %Hd\n",
-        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
-#endif
+		    /* only care if seek returns error */
+		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+		    VRFY((rc==0), "POSIXSEEK");
+		    /* check if all bytes are transferred */
+		    rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
+			POSIXWRITE(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
+		    VRFY((rc != 0), "POSIXWRITE");
+		}else{
+		    /* interleaved access pattern */
+		    char 	*buf_p=buffer;
+		    size_t	xferred=0;
+		    size_t	toxfer=0;
 
-		/* only care if seek returns error */
-                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
-                VRFY((rc==0), "POSIXSEEK");
-		/* check if all bytes are written */
-                rc = ((nelmts_towrite*ELMT_SIZE) ==
-		    POSIXWRITE(fd->posixfd, buffer, nelmts_towrite*ELMT_SIZE));
-                VRFY((rc != 0), "POSIXWRITE");
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+	if (pio_debug_level >= 4) {
+HDprint_rank(output);
+HDfprintf(output,
+"Debug(do_write): "
+"nelmts_toxfer=%Hd, nelmts_xfer=%Hd\n"
+,
+(long_long)nelmts_toxfer, (long_long)nelmts_xfer);
+}
+		    while (xferred < nelmts_toxfer){
+			if ((nelmts_toxfer - xferred) >= nelmts_in_blk)
+			    toxfer = nelmts_in_blk;
+			else
+			    toxfer = nelmts_toxfer - xferred;
+			/* Skip offset over blocks of other processes */
+			file_offset = dset_offset +
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*ELMT_SIZE;
+	if (pio_debug_level >= 4) {
+HDprint_rank(output);
+HDfprintf(output,
+"Debug(do_write): "
+"nelmts_toxfer=%Hd, nelmts_xfer=%Hd"
+", toxfer=%Hd, xferred=%Hd"
+", file_offset=%Hd"
+"\n",
+(long_long)nelmts_toxfer, (long_long)nelmts_xfer, 
+(long_long)toxfer, (long_long)xferred,
+(long_long)file_offset);
+}
+			/* only care if seek returns error */
+			rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+			VRFY((rc==0), "POSIXSEEK");
+			/* check if all bytes are written */
+			rc = ((ssize_t)(toxfer*ELMT_SIZE) ==
+			    POSIXWRITE(fd->posixfd, buf_p, toxfer*ELMT_SIZE));
+			VRFY((rc != 0), "POSIXWRITE");
+			xferred += toxfer;
+		    }
+		}
                 break;
 
             case MPIO:
-                mpi_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
-
-#if AKCDEBUG
-fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
-        pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, mpi_offset);
-#endif
-
+                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
                 mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
-                                        (int)(nelmts_towrite*ELMT_SIZE), MPI_CHAR,
+                                        (int)(nelmts_toxfer*ELMT_SIZE), MPI_CHAR,
                                         &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
                 break;
             case PHDF5:
                 /*set up the dset space id to select the segment to process */
                 {
-                    hsize_t block[1], stride[1], count[1];
-                    hssize_t start[1];
-                    
-                    start[0] = elmts_begin + nelmts_written;
-                    stride[0] = block[0] = nelmts_towrite;
-                    count[0] = 1;
+                    h5mem_start[0] = elmts_begin + nelmts_xfer;
+                    h5mem_stride[0] = h5mem_block[0] = nelmts_toxfer;
+                    h5mem_count[0] = 1;
                     hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                                              start, stride, count, block); 
+			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
 
                     /*setup the memory space id too.  Only start is different */
-                    start[0] = 0;
+                    h5mem_start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-                                              start, stride, count, block); 
+			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
                 }
 
@@ -677,7 +772,7 @@ fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
                 break;
             }
 
-            nelmts_written += nelmts_towrite;
+            nelmts_xfer += nelmts_toxfer;
         }
 
         /* Stop "raw data" write timer */
@@ -732,7 +827,7 @@ done:
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
-        off_t nelmts, size_t buf_size, void *buffer /*out*/)
+        off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -740,28 +835,33 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     MPI_Offset  mpi_offset;
     MPI_Status  mpi_status;
     long        ndset;
-    size_t      nelmts_toread;
-    off_t       nelmts_read;
+    off_t       nelmts_xfer;
+    size_t      nelmts_toxfer;
     char        dname[64];
     off_t       dset_offset;    /*dataset offset in a file              */
     off_t       file_offset;	/*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
-    size_t      nelmts_in_buf;
+    size_t      nelmts_in_buf;  /*how many element the buffer holds     */
+    size_t      nelmts_in_blk;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
 
     /* HDF5 variables */
-    herr_t      hrc;            /*HDF5 return code                      */
-    hsize_t     h5dims[1];      /*dataset dim sizes                     */
+    herr_t      hrc;            	/*HDF5 return code              */
+    hsize_t     h5dims[1];      	/*dataset dim sizes             */
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t       h5ds_id = -1;   /*dataset handle                        */
-
-#if AKCDEBUG
-fprintf(stderr, "In do_read\n");
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
+    hid_t       h5ds_id = -1;   	/*dataset handle                */
+    hsize_t	h5mem_block[1];		/*memory space selection        */
+    hsize_t	h5mem_stride[1];
+    hsize_t	h5mem_count[1];
+    hssize_t	h5mem_start[1];
+#if 0
+    /* for future implementation */
+    hsize_t	h5dset_block[1];	/*dset space selection          */
+    hsize_t	h5dset_stride[1];
+    hsize_t	h5dset_count[1];
+    hssize_t	h5dset_start[1];
 #endif
 
     /* calculate dataset parameters. data type is always native C int */
@@ -815,72 +915,174 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             break;
         }
 
-        /*
-         * Calculate the first element and how many elements this process
-         * transfer.  First calculate the beginning element of this process 
-         * and the next process.  Count of elements is the difference between
-         * these two beginnings.  This way, it avoids any rounding errors.
-         */
-        elmts_begin = (long)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
+	/* There are two kinds of transfer patterns, contiguous and interleaved.
+	 * Let 0,1,2,...,n be data accessed by process 0,1,2,...,n
+	 *     where n is rank of the last process.
+	 * In contiguous pattern, data are accessed as
+	 *    000...111...222...nnn...
+	 * In interleaved pattern, data are accessed as
+	 *    012...n012...n...
+	 * These are all in the scope of one dataset.
+	 */
+	/* Calculate the total number of elements (elmts_count) to be
+	 * transferred by this process. It may be different for different
+	 * transfer pattern due to rounding to integral values.
+	 */
+	if (blk_size==0){
+	    /* Contiguous Pattern:
+	     * Calculate the beginning element of this process and the next.
+	     * elmts_count is the difference between these two beginnings.
+	     * This way, it eliminates any rounding errors.
+	     */
+	    elmts_begin = (off_t)(((double)nelmts)/pio_mpi_nprocs_g*pio_mpi_rank_g);
 
-        if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
-            elmts_count = (long)((((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1)) -
-                                (double)elmts_begin);
-        else
-            /* last process.  Take whatever are left */
-            elmts_count = nelmts - elmts_begin;
+	    /* Do not cast elmt_begin to other types, especially non-integral
+	     * types, else it may introduce rounding discrepency. */
+	    if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
+		elmts_count = (off_t)(((double)nelmts) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
+				- elmts_begin;
+	    else
+		/* last process.  Take whatever are left */
+		elmts_count = nelmts - elmts_begin;
+	}else{
+	    /* Interleaved Pattern:
+	     * Each process takes blk_size of elements, starting with the first
+	     * process.  So, the last process may have fewer or even none.
+	     * Calculate the beginning element of this process and the next.
+	     * The elmnts_begin here marks only the beginning of the first
+	     * block accessed by this process.
+	     */
+	    /* Algorithm:
+	     * First allocate equal blocks per process, i.e. one block each
+	     * process for every block_size*nprocs.
+	     * If there is remaining unallocated, give a block each to process
+	     * starting at proc 0.  The last process may get a partial block.
+	     */ 
+	    off_t remain_nelmts, remain_begin;	/* unallocated remaining*/
 
-#if AKCDEBUG
-fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
-        pio_mpi_rank_g, elmts_begin, elmts_count);
-#endif
-    
-        nelmts_read = 0 ;
+	    nelmts_in_blk = blk_size/ELMT_SIZE;
+	    elmts_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
+
+	    /* must use integer calculation next */
+	    /* allocate equal blocks per process */
+	    elmts_count = (nelmts / (off_t)(nelmts_in_blk*pio_mpi_nprocs_g)) *
+			    (off_t)nelmts_in_blk;
+	    remain_nelmts = nelmts % ((off_t)(nelmts_in_blk*pio_mpi_nprocs_g));
+
+	    /* allocate any remaining */
+	    remain_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
+	    if (remain_nelmts > remain_begin){
+		/* it gets something */
+		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_blk)){
+		    /* one full block */
+		    elmts_count += nelmts_in_blk;
+		}else{
+		    /* only a partial block */
+		    elmts_count += remain_nelmts - remain_begin;
+		}
+	    }
+	}
+	/* debug */
+	if (pio_debug_level >= 4) {
+	    HDprint_rank(output);
+	    HDfprintf(output, "Debug(do_read): "
+		"nelmts_in_blk=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
+		(long_long)nelmts_in_blk, (long_long)elmts_begin,
+		(long_long)elmts_count);
+	}
+
+
+	/* The task is to transfer elmts_count elements, starting at
+	 * elmts_begin position, using transfer buffer of buf_size bytes.
+	 * If blk_size > 0, select blk_size at a time, in round robin
+	 * fashion, according to number of process. Otherwise, select
+	 * all elmt_count in contiguous.
+	 */
+        nelmts_xfer = 0 ;
 
         /* Start "raw data" read timer */
         set_time(res->timers, HDF5_RAW_READ_FIXED_DIMS, START);
 
-        while (nelmts_read < elmts_count){
-            nelmts_toread = elmts_count - nelmts_read;
-
-            if ((elmts_count - nelmts_read) >= nelmts_in_buf)
-                nelmts_toread = nelmts_in_buf;
-            else
-                /* last read of a partial buffer */
-                nelmts_toread = elmts_count - nelmts_read;
+        while (nelmts_xfer < elmts_count){
+	    /* transfer one buffer of data each round */
+	    /* Note: because size_t is unsigned, avoid expressions that */
+	    /* can be negative. */
+            if ((nelmts_xfer + (off_t)nelmts_in_buf) <= elmts_count) {
+                nelmts_toxfer = nelmts_in_buf;
+            } else {
+                /* last transfer of a partial buffer */
+                nelmts_toxfer = elmts_count - nelmts_xfer;
+            }
 
             /* read */
             /* Calculate offset of read within a dataset/file */
             switch (parms->io_type){
             case POSIXIO:
-		/* need to (off_t) the elmnts_begin expression because they */
-		/* may be of smaller sized integer types */
-                file_offset = dset_offset + (off_t)(elmts_begin + nelmts_read)*ELMT_SIZE;
+		if (blk_size==0){
+		    /* Contiguous pattern */
+		    /* need to (off_t) the elmnts_begin expression because they */
+		    /* may be of smaller sized integer types */
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
 
-#if AKCDEBUG
-HDfprintf(stderr, "proc %d: read %Hd bytes at file-offset %Hd\n",
-        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
-#endif
+		    /* only care if seek returns error */
+		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+		    VRFY((rc==0), "POSIXSEEK");
+		    /* check if all bytes are transferred */
+		    rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
+			POSIXREAD(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
+		    VRFY((rc != 0), "POSIXREAD");
+		}else{
+		    /* interleaved access pattern */
+		    char 	*buf_p=buffer;
+		    size_t	xferred=0;
+		    size_t	toxfer=0;
 
-		/* only care if seek returns error */
-                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
-                VRFY((rc==0), "POSIXSEEK");
-		/* check if all bytes are read */
-                rc = ((nelmts_toread*ELMT_SIZE) ==
-		    POSIXREAD(fd->posixfd, buffer, nelmts_toread*ELMT_SIZE));
-                VRFY((rc != 0), "POSIXREAD");
+		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*ELMT_SIZE;
+	if (pio_debug_level >= 4) {
+HDprint_rank(output);
+HDfprintf(output,
+"Debug(do_read): "
+"nelmts_toxfer=%Hd, nelmts_xfer=%Hd\n"
+,
+(long_long)nelmts_toxfer, (long_long)nelmts_xfer);
+}
+		    while (xferred < nelmts_toxfer){
+			if ((nelmts_toxfer - xferred) >= nelmts_in_blk)
+			    toxfer = nelmts_in_blk;
+			else
+			    toxfer = nelmts_toxfer - xferred;
+			/* Skip offset over blocks of other processes */
+			file_offset = dset_offset +
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*ELMT_SIZE;
+	if (pio_debug_level >= 4) {
+HDprint_rank(output);
+HDfprintf(output,
+"Debug(do_read):"
+"nelmts_toxfer=%Hd, nelmts_xfer=%Hd"
+", toxfer=%Hd, xferred=%Hd"
+", file_offset=%Hd"
+"\n",
+(long_long)nelmts_toxfer, (long_long)nelmts_xfer, 
+(long_long)toxfer, (long_long)xferred,
+(long_long)file_offset);
+}
+			/* only care if seek returns error */
+			rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+			VRFY((rc==0), "POSIXSEEK");
+			/* check if all bytes are transferred */
+			rc = ((ssize_t)(toxfer*ELMT_SIZE) ==
+			    POSIXREAD(fd->posixfd, buf_p, toxfer*ELMT_SIZE));
+			VRFY((rc != 0), "POSIXREAD");
+			xferred += toxfer;
+		    }
+		}
                 break;
 
             case MPIO:
-                mpi_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
-
-#if AKCDEBUG
-fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
-        pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, mpi_offset);
-#endif
+                mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*ELMT_SIZE;
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
-                                       (int)(nelmts_toread*ELMT_SIZE), MPI_CHAR,
+                                       (int)(nelmts_toxfer*ELMT_SIZE), MPI_CHAR,
                                        &mpi_status);
                 VRFY((mrc==MPI_SUCCESS), "MPIO_read");
                 break;
@@ -888,20 +1090,17 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
             case PHDF5:
                 /*set up the dset space id to select the segment to process */
                 {
-                    hsize_t block[1], stride[1], count[1];
-                    hssize_t start[1];
-                    
-                    start[0] = elmts_begin + nelmts_read;
-                    stride[0] = block[0] = nelmts_toread;
-                    count[0] = 1;
+                    h5mem_start[0] = elmts_begin + nelmts_xfer;
+                    h5mem_stride[0] = h5mem_block[0] = nelmts_toxfer;
+                    h5mem_count[0] = 1;
                     hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                                              start, stride, count, block); 
+			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
 
                     /*setup the memory space id too.  Only start is different */
-                    start[0] = 0;
+                    h5mem_start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-                                              start, stride, count, block); 
+			      h5mem_start, h5mem_stride, h5mem_count, h5mem_block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
                 }
 
@@ -912,19 +1111,20 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
                 break;
             }
 
-#if AKCDEBUG & 0
+#ifdef AKCDEBUG
             /*verify read data*/
             {
                 int *intptr = (int *)buffer;
                 register int i;
 
-                for (i = 0; i < nelmts_towrite; ++i)
+                for (i = 0; i < nelmts_toxfer; ++i)
                     /* TO BE IMPLEMENTED */
+		    #error "NOT IMPLEMENTED YET"
                     ;
             }
 #endif
 
-            nelmts_read += nelmts_toread;
+            nelmts_xfer += nelmts_toxfer;
         }
 
         /* Stop "raw data" read timer */
@@ -1254,9 +1454,6 @@ stop_data_shipping(int handle)
 
 #endif  /* H5_HAVE_GPFS */
 
-#ifndef TIME_MPI
-#define TIME_MPI
-#endif
 #ifdef TIME_MPI
 /* instrument the MPI_File_wrirte_xxx and read_xxx calls to measure
  * pure time spent in MPI_File code.
