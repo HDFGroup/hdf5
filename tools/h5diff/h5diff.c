@@ -6,6 +6,7 @@
 #include "hdf5.h"
 
 
+
 #ifndef FALSE
 #define FALSE	0
 #endif
@@ -16,6 +17,10 @@
 int do_test_files();
 int h5diff_dataset( hid_t file1_id, hid_t file2_id, const char *dset_name );
 void array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id );
+herr_t get_ndsets( hid_t loc_id, const char *group_name );
+herr_t count_dsets( hid_t loc_id, const char *name, void *op_data);
+
+
 
 
 
@@ -41,7 +46,7 @@ void array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id );
 void usage( const char *progname )
 {
 #define USAGE   "\
-  [-d dset]         Compare only the specified dataset(s)\n\
+  [-d dset]         The name of the dataset to compare\n\
   file1             File name of the first HDF5 file\n\
   file2             File name of the second HDF5 file\n"
 
@@ -83,6 +88,7 @@ int main(int argc, const char *argv[])
 	const char *dset_name = NULL;
 	hid_t      file1_id, file2_id; 
 	herr_t     status;
+	int        ndsets;
 
  do_test_files();
 
@@ -92,7 +98,7 @@ int main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
  
- if (argc < 2) {
+ if (argc < 4) {
   usage( progname );
   exit(EXIT_FAILURE);
  }
@@ -134,6 +140,9 @@ int main(int argc, const char *argv[])
  if ((file1_id=H5Fopen(file1_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ||
      (file2_id=H5Fopen(file2_name,H5F_ACC_RDONLY,H5P_DEFAULT))<0)
   exit(EXIT_FAILURE);
+
+ /* Get the number of datasets */
+	ndsets = get_ndsets( file1_id, "." );
 
  if ( dset_only )
 	{
@@ -236,8 +245,6 @@ int h5diff_dataset( hid_t file1_id, hid_t file2_id, const char *dset_name )
  *-------------------------------------------------------------------------
  */
 
-
-	printf("\n---------------------------\n");
  printf("Dataset Name: %s .... Comparing\n", dset_name);
 
 	if ( rank1 != rank2 )
@@ -383,6 +390,72 @@ void array_diff( void *buf1, void *buf2, hsize_t tot_cnt, hid_t type_id )
 
 
 
+/*-------------------------------------------------------------------------
+ * Function: get_ndsets
+ *
+ * Purpose:  Counts the number of datasets in the group GROUP_NAME
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: October 10, 2002
+ *
+ * Return:  
+ *     Success: The return value of the first operator that
+ *              returns non-zero, or zero if all members were
+ *              processed with no operator returning non-zero.
+ *
+ *     Failure: Negative if something goes wrong within the
+ *              library, or the negative value returned by one
+ *              of the operators.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t get_ndsets( hid_t loc_id, const char *group_name ) 
+{
+
+	int ndsets = 0;
+
+ if ( H5Giterate( loc_id, group_name, NULL, count_dsets, (void *)&ndsets ) < 0 )
+		return -1;
+
+ return ndsets;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: count_dsets
+ *
+ * Purpose: operator function used by get_ndsets
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: October 10, 2002
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t count_dsets( hid_t loc_id, const char *name, void *op_data)
+{
+
+	H5G_stat_t statbuf;
+
+	if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
+		return -1;
+
+	if ( statbuf.type == H5G_DATASET )
+		(*(int *)op_data)++;
+
+	/* Define a default zero value for return. This will cause the iterator to continue */
+ return 0;
+} 
+
+
+
 
 /*-------------------------------------------------------------------------
  * do some test files 
@@ -396,9 +469,9 @@ int do_test_files()
  hid_t   dataset_id;
  hid_t   space_id;  
  hsize_t dims1[1] = { 5 };
- int     data1[5] = {1,2,3,4,5};
+ int     data1[5] = {1,1,1,1,1};
 	hsize_t dims2[1] = { 5 };
- int     data2[5] = {6,7,8,9,10};
+ int     data2[5] = {1,1,1,2,2};
  herr_t  status;
 
 /*-------------------------------------------------------------------------
