@@ -92,19 +92,11 @@ object names.
 
 
 <br>
-<strong>The FORTRAN90 Interface:</strong>
-
+<strong>The FORTRAN90 Interfaces:</strong>
 <br>
-<font size=-1>
-<i>In general, each FORTRAN90 subroutine performs exactly the same task 
-as the corresponding C function.  The links below (electronic versions only) go to the C function 
-descriptions, which serve as general descriptions for both.  A button, 
-under <strong>Non-C API(s)</strong> at the end of the C function description,
-opens an external browser window displaying the FORTRAN90-specific 
-information.  You will probably want to adjust the size and location of 
-this external window so that both browser windows are visible and to 
-facilitate moving easily between them.</i>
-</font><br>
+In general, each FORTRAN90 subroutine performs exactly the same task 
+as the corresponding C function.  
+<br>
 
 <table border=0>
 <tr><td valign=top>
@@ -174,10 +166,23 @@ facilitate moving easily between them.</i>
     <dd>Returns the length of the name if successful,
         returning <code>0</code> (zero) if no name is associated with the identifier.
         Otherwise returns a negative value.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5i_FORTRAN.html#h5iget_name_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5iget_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: obj_id     ! Object identifier 
+  CHARACTER(LEN=*), INTENT(OUT) :: buf        ! Buffer to hold object name 
+  INTEGER(SIZE_T), INTENT(IN)   :: buf_size   ! Buffer size
+  INTEGER(SIZE_T), INTENT(OUT)  :: name_size  ! Name size
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success, and -1 on failure
+END SUBROUTINE h5iget_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -230,10 +235,29 @@ facilitate moving easily between them.</i>
 <dt><strong>Returns:</strong>
     <dd>Returns the object type if successful;
         otherwise <code>H5I_BADID</code>.
-<dt><strong>Non-C API(s):</strong>
-    <dd><a href="fortran/h5i_FORTRAN.html#h5iget_type_f" 
-        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
-        <!--
+<dt><strong>Fortran90 Interface:</strong> h5iget_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+  INTEGER, INTENT(OUT) :: type          !type of an object. 
+                                        !possible values are:
+                                        !H5I_FILE_F(1)
+                                        !H5I_GROUP_F(2)
+                                        !H5I_DATATYPE_F(3)
+                                        !H5I_DATASPACE_F(4)
+                                        !H5I_DATASET_F(5)
+                                        !H5I_ATTR_F(6)
+                                        !H5I_BADID_F(-1)
+  INTEGER, INTENT(OUT) :: hdferr        ! E rror code
+                                        ! 0 on success, and -1 on failure
+END SUBROUTINE h5iget_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
@@ -278,7 +302,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 October 2003");
+document.writeln("Last modified: 21 October 2003");
 -->
 </SCRIPT>
 
