@@ -240,6 +240,15 @@ case "$cc_vendor-$cc_version" in
     # Flags are set
     cc_flags_set=yes
     ;;
+
+  gcc-2.96*)
+    # -Wno-long-long to suppress the long long warnings since we want
+    # to use it though it is not in the C89 standard.
+    CFLAGS="$CFLAGS -Wno-long-long"
+
+    # Flags are set
+    cc_flags_set=yes
+    ;;
 esac
 
 # Clear cc info if no flags set
