@@ -20,15 +20,7 @@ fi
 
 case $CC_BASENAME in
     ecc|icc)
-	# CFLAGS must be set else configure set it to -g
-	CFLAGS="$CFLAGS"
-	DEBUG_CFLAGS="-g"
-	DEBUG_CPPFLAGS=
-	# ecc has -O2 as default
-	PROD_CFLAGS=""
-	PROD_CPPFLAGS=
-	PROFILE_CFLAGS=""	# ecc has no profile option
-	PROFILE_CPPFLAGS=
+	. $srcdir/config/intel-flags
 	;;
 
     gcc)
