@@ -2547,7 +2547,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #endif /* QAK */
 #endif /* QAK */
 	
-        if (H5T_BKG_YES==need_bkg) {
+        if (need_bkg) {
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
 #endif
@@ -2560,10 +2560,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d, min_e
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
-        } else if (need_bkg) {
-            assert((request_nelmts*dst_type_size)==(hsize_t)((size_t)(request_nelmts*dst_type_size))); /*check for overflow*/
-            HDmemset(bkg_buf, 0, (size_t)(request_nelmts*dst_type_size));
-        }
+        } /* end if */
 	
 #ifdef QAK
 	printf("%s: check 7.0\n",FUNC);
@@ -3058,7 +3055,7 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 	printf("%s: check 6.0, tconv_buf=%p, *tconv_buf=%p\n",FUNC,tconv_buf,*(char **)tconv_buf);
 #endif
 
-        if (H5T_BKG_YES==need_bkg) {
+        if (need_bkg) {
 #ifdef QAK
 	printf("%s: check 6.1, need_bkg=%d\n",FUNC,(int)need_bkg);
 #endif
@@ -3077,12 +3074,6 @@ printf("%s: check 2.0, src_type_size=%d, dst_type_size=%d, target_size=%d\n",FUN
 #endif
             if (n!=smine_nelmts)
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed");
-        } else if (need_bkg) {
-#ifdef QAK
-	printf("%s: check 6.2, need_bkg=%d\n",FUNC,(int)need_bkg);
-#endif
-            H5_CHECK_OVERFLOW(request_nelmts*dst_type_size,hsize_t,size_t);
-            HDmemset(bkg_buf, 0, (size_t)(request_nelmts*dst_type_size));
         } /* end if */
 	
         /*

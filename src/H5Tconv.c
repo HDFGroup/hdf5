@@ -1173,40 +1173,6 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_need_bkg
- *
- * Purpose:	Check whether the source or destination datatypes require a
- *		background buffer for the conversion.
- *
- *		Currently, only compound datatypes require a background buffer.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, November 29, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
-{
-    FUNC_ENTER (H5T_conv_need_bkg, FAIL);
-    
-    assert(src);
-    assert(dst);
-    assert(cdata);
-
-    /* Compound datatypes need a buffer */
-    if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
-        cdata->need_bkg = H5T_BKG_YES;
-
-    FUNC_LEAVE (SUCCEED);
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_conv_struct_init
  *
  * Purpose:	Initialize the `priv' field of `cdata' with conversion
@@ -1326,7 +1292,8 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     }
 
     /* Check if we need a background buffer */
-    H5T_conv_need_bkg (src, dst, cdata);
+    if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
+        cdata->need_bkg = H5T_BKG_YES;
 
     cdata->recalc = FALSE;
     FUNC_LEAVE (SUCCEED);
@@ -1438,7 +1405,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 	    HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
 	}
 	assert (priv);
-	assert (bkg && cdata->need_bkg>=H5T_BKG_TEMP);
+	assert (bkg && cdata->need_bkg);
 
 	if (cdata->recalc && H5T_conv_struct_init (src, dst, cdata)<0) {
 	    HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
@@ -1735,7 +1702,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	priv = (H5T_conv_struct_t *)(cdata->priv);
 	src2dst = priv->src2dst;
 	assert(priv);
-	assert(bkg && cdata->need_bkg>=H5T_BKG_TEMP);
+	assert(bkg && cdata->need_bkg);
 
 	/*
 	 * Insure that members are sorted.
