@@ -1,13 +1,15 @@
 <html>
   <head>
     <title>
-      HDF5 Disk-Format Specification
+      HDF5 Disk Format Specification
     </title>
   </head>
   <body bgcolor="#FFFFFF">
     <center><h1>HDF5: Disk Format Implementation</h1></center>
 
     <ol type=I>
+      <li><a href="#Intro">
+	  Introduction</a>
       <li><a href="#BootBlock">
 	  Disk Format Level 0 - File Signature and Boot Block</a>
       <li><a href="#ObjectDir">
@@ -24,7 +26,7 @@
 	  <li><a href="#GlobalHeap">
 	      Disk Format Level 1E - Global Heap</a>
 	  <li><a href="#FreeSpaceIndex">
-	      Disk Format Level 1F - Free-Space Index</a>
+	      Disk Format Level 1F - Free-space Index</a>
 	</ol>
       <li><a href="#DataObject">
 	  Disk Format Level 2 - Data Objects</a>
@@ -37,9 +39,9 @@
 	      <li><a href="#SimpleDataSpace">                   <!-- 0x0001 -->
 		  Name: Simple Data Space</a>
 	      <li><a href="#DataSpaceMessage">                  <!-- 0x0002 -->
-		  Name: Data-Space</a>
+		  Name: Dataspace</a>
 	      <li><a href="#DataTypeMessage">                   <!-- 0x0003 -->
-		  Name: Data-Type</a>
+		  Name: Datatype</a>
 	      <li><a href="#FillValueMessage">                  <!-- 0x0004 -->
 		  Name: Data Storage - Fill Value</a>
 	      <li><a href="#ReservedMessage_0005">              <!-- 0x0005 -->
@@ -61,7 +63,7 @@
 	      <li><a href="#NameMessage">                       <!-- 0x000d -->
 		  Name: Object Name</a>
 	      <li><a href="#ModifiedMessage">                   <!-- 0x000e -->
-		  Name: Object Modification Date & Time</a>
+		  Name: Object Modification Date and Time</a>
 	      <li><a href="#SharedMessage">                     <!-- 0x000f -->
 		  Name: Shared Object Message</a>
 	      <li><a href="#ContinuationMessage">               <!-- 0x0010 -->
@@ -77,68 +79,83 @@
     </ol>
 
 
-    <h2>Disk Format Implementation</h2>
+<br><br>
 
-    <P>The format of a HDF5 file on disk encompasses several
-      key ideas of the current HDF4 & AIO file formats as well as
-      addressing some short-comings therein.  The new format is
+
+    <h2>Introduction</h2>
+
+    <P>The format of an HDF5 file on disk encompasses several
+      key ideas of the current HDF4 and AIO file formats as well as
+      addressing some shortcomings therein.  The new format is
       more self-describing than the HDF4 format and is more
       uniformly applied to data objects in the file.
       
-    <P>An HDF5 file can be thought of as a directed graph.  
-      The nodes of this graph are the higher-level HDF5 objects, 
-      including groups, datasets, datatypes, and dataspaces.  
-      This document describes the lower-level data objects used by 
-      the HDF5 library to represent those higher-level objects and 
-      their properties.
+    <table align=left width=100>
+    <tr><td align=center>
+        <hr>
+        <img src="FF-IH_FileGroup.gif" alt="HDF5 Groups" hspace=15 vspace=15>
+    </td><td>&nbsp;</td></tr><tr><td align=center>
+        <strong>Figure 1:</strong> Relationships among the HDF5 root group, other groups, and objects
+        <hr>
+    </td><td>&nbsp;</td></tr>
+    </table>
 
-    <P>At the lowest level, an HDF5 file is made up of the following 
-      objects:
+
+    <P>An HDF5 file appears to the user as a directed graph.  
+      The nodes of this graph are the higher-level HDF5 objects
+      that are exposed by the HDF5 APIs:
+
       <ul>
-         <li>A bool block
+         <li>Groups
+         <li>Datasets
+         <li>Datatypes
+         <li>Dataspaces
+      </ul>
+
+    <P>At the lowest level, as information is actually written to the disk, 
+       an HDF5 file is made up of the following objects:
+      <ul>
+         <li>A boot block
          <li>B-tree nodes (containing either symbol nodes or raw data chunks)
          <li>Object headers
+
+    <table align=right width=95>
+    <tr><td>&nbsp;</td><td align=center>
+        <hr>
+        <img src="FF-IH_FileObject.gif" alt="HDF5 Objects" hspace=15 vspace=15>
+    </td></tr><tr><td>&nbsp;</td><td align=center>
+        <strong>Figure 2:</strong> HDF5 objects -- datasets, datatypes, or dataspaces
+        <hr>
+    </td></tr>
+    </table>
+
          <li>Collections
          <li>Local heaps
          <li>Free space
       </ul>
-      As indicated above, the HDF5 library uses and interprets these 
-      low-level objects to describe the high-level HDF5 objects that 
-      are revealed to the user, and to higher-level applications, 
-      through the HDF5 APIs.
+
+      The HDF5 library uses these lower-level objects to represent the
+      higher-level objects that are then presented to the user or 
+      to applications through the APIs.
+      For instance, a group is an object header that contains a message that
+      points to a local heap and to a B-tree which points to symbol nodes.
+      A dataset is an object header that contains messages that describe
+      data type, space, layout, filters, external files, fill value, etc
+      with the layout message pointing to either a raw data chunk or to a
+      B-tree that points to raw data chunks.
+
+
+    <h3>This Document</h3>
+
+    <p>This document describes the lower-level data objects;
+      the higher-level objects and their properties are described 
+      in the <a href="H5.user.html">HDF5 User's Guide</a>.
+
 
 <!--
 <blockquote>
 <pre>
 
----------- Edit from here... -------------
-
-
-Once you know about all these low-level objects you can build bigger
-and better things, which is what most people are interested in and
-which are the objects that the hdf5 library exposes in the API.  They
-are:
-
-    * Groups
-    * Datasets
-    * Datatypes
-    * Data spaces
-
-For instance, a group is an object header that contains a message that
-points to a local heap and to a B-tree which points to symbol nodes.
-A dataset is an object header that contains messages that describe
-data type, space, layout, filters, external files, fill value, etc
-with the layout message pointing to either a raw data chunk or to a
-B-tree that points to raw data chunks.
-
-Elena>    Would it be more logical to discuss things in this order?
-
-Elena>          Intro ( What is HDF5 file, etc.)
-Elena>          File Header  
-Elena>          File Body
-Elena>               Objects
-Elena>                   Object Header
-Elena>                   Object Header Message Data 
 Elena> NOTE: give reference to the detailed discussion of the B-trees
 Elena>       when needed. Right now we do not have specification (only general one)
 Elena>       for the Symbol Table B-trees and B-trees used to manage chunked datasets.
@@ -149,23 +166,6 @@ Elena>               Symbol Tables
 Elena>               Global heap
 Elena>               "Free-space object"
 
-That might be a good order for someone that's familiar with the API
-but if you're trying to get all the way down to the file format level
-it results in a lot of forward references in the documentation. It
-might be better to do a bottom-up documentation similar to the order I 
-used above:
-
-    * General file layout
-    * Boot block
-    * Format-level objects (B-trees, symbol nodes, object headers, etc).
-    * Object header messages
-    * High-level objects (datasets, groups, named types and spaces, etc)
-
-where "high-level objects" description mostly describes which object
-header messages are required, optional, mutually exclusive, etc. for
-each high-level object.
-
----------- ...to here. -------------
 
 </pre>
 </blockquote>
@@ -173,14 +173,14 @@ each high-level object.
 
 
 
-    <P>Three levels of information compose the file format.  The level
-      0 contains basic information for identifying and
-      "boot-strapping" the file.  Level 1 information is composed of
-      the object directory (stored as a B-tree) and is used as the
-      index for all the objects in the file.  The rest of the file is
-      composed of data-objects at level 2, with each object
-      partitioned into header (or "meta") information and data
-      information.
+    <P>Three levels of information comprise the file format.  
+      Level 0 contains basic information for identifying and
+      <em>boot-strapping</em> the file.  Level 1 information contains
+      the group information (stored as a B-tree) and is used as the
+      index for all the objects in the file.  Level 2 is the rest 
+      of the file and contains all of the data objects, with each object
+      partitioned into header information, also known as 
+      <em>meta information</em>, and data.
 
     <p>The sizes of various fields in the following layout tables are
       determined by looking at the number of columns the field spans
@@ -190,8 +190,14 @@ each high-level object.
       in the boot block, and (3) the size of size fields is determined
       by the <em>Size of Sizes</em> field in the boot block.
 
-    <h3><a name="BootBlock">
-	Disk Format: Level 0 - File Signature and Boot Block</a></h3>
+
+
+<br><br>
+<br><br>
+
+
+    <h2><a name="BootBlock">
+	Disk Format: Level 0 - File Signature and Boot Block</a></h2>
 
     <P>The boot block may begin at certain predefined offsets within
       the HDF5 file, allowing a block of unspecified content for
@@ -232,7 +238,7 @@ each high-level object.
 
 	<tr align=center>
 	  <td>Version # of Boot Block</td>
-	  <td>Version # of Global Free-Space Storage</td>
+	  <td>Version # of Global Free-space Storage</td>
 	  <td>Version # of Object Directory</td>
 	  <td>Reserved</td>
 	</tr>
@@ -258,7 +264,7 @@ each high-level object.
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Address of Global Free-Space Heap</td>
+	  <td colspan=4>Address of Global Free-space Heap</td>
 	</tr>
 
 	<tr align=center>
@@ -289,8 +295,8 @@ each high-level object.
 	    quickly identify a file as being an HDF5 file.  The
 	    constant value is designed to allow easy identification of
 	    an HDF5 file and to allow certain types of data corruption
-	    to be detected.  The file signature of a HDF5 file always
-	    contain the following values:
+	    to be detected.  The file signature of an HDF5 file always
+	    contains the following values:
 
 	    <br><br><center>
 	      <table border align=center cellpadding=4 width="80%">
@@ -333,13 +339,13 @@ each high-level object.
 	    </center>
 	    <br>
 
-	    This signature both identifies the file as a HDF5 file
+	    This signature both identifies the file as an HDF5 file
 	    and provides for immediate detection of common
 	    file-transfer problems. The first two bytes distinguish
 	    HDF5 files on systems that expect the first two bytes to
 	    identify the file type uniquely. The first byte is
 	    chosen as a non-ASCII value to reduce the probability
-	    that a text file may be misrecognized as a HDF5 file;
+	    that a text file may be misrecognized as an HDF5 file;
 	    also, it catches bad file transfers that clear bit
 	    7. Bytes two through four name the format. The CR-LF
 	    sequence catches bad file transfers that alter newline
@@ -360,11 +366,11 @@ each high-level object.
 	</tr>
 
 	<tr valign=top>
-	  <td>Version # of the Global Free-Space Storage</td>
+	  <td>Version # of the Global Free-space Heap</td>
 	  <td>This value is used to determine the format of the
-	    information in the Global Free-Space Heap.  Currently,
+	    information in the Global Free-space Heap.  Currently,
 	    this is implemented as a B-tree of length/offset pairs
-	    to locate free space in the file, but future advances in
+	    to locate free space in the file; future advances in
 	    the file-format could change the method of finding
 	    global free-space.  When the format of the information
 	    is changed, the version # is incremented to the next
@@ -387,7 +393,7 @@ each high-level object.
 	  <td>This value is used to determine the format of the
 	    information in a shared object header message, which is
 	    stored in the global small-data heap.  Since the format
-	    of the shared header messages differ from the private
+	    of the shared header messages differs from the private
 	    header messages, a version # is used to identify changes
 	    in the format.</td>
 	</tr>
@@ -425,15 +431,18 @@ each high-level object.
 	</tr>
 
 	<tr valign=top>
-	  <td>Bytes per B-Tree Page</td>
+	  <td>Bytes per B-tree Page</td>
 	  <td>This value contains the # of bytes used for symbol
-	    pairs per page of the B-Trees used in the file.  All
-	    B-Tree pages will have the same size per page.  <br>(For
-	    32-bit file offsets, 340 objects is the maximum per 4KB
-	    page, and for 64-bit file offset, 254 objects will fit
-	    per 4KB page.  In general, the equation is: <br> &lt;#
-	    of objects&gt; = FLOOR((&lt;page size&gt;-&lt;offset
-	    size&gt;)/(&lt;Symbol size&gt;+&lt;offset size&gt;))-1 )</td>
+	    pairs per page of the B-trees used in the file.  All
+	    B-tree pages will have the same size per page.  
+	    <br>
+	    (For 32-bit file offsets, 340 objects is the maximum 
+	    per 4KB page; for 64-bit file offset, 254 objects will fit
+	    per 4KB page.  In general, the equation is: 
+	    <br> 
+	    <code>&lt;<i># of objects</i>&gt;</code> = 
+	    <code>FLOOR((&lt;<i>page size</i>&gt; - &lt;<i>offset size</i>&gt;) /
+	   (&lt;<i>Symbol size</i>&gt; + &lt;<i>offset size</i>&gt;)) - 1 )</code></td>
 	</tr>
 
 	<tr valign=top>
@@ -441,11 +450,16 @@ each high-level object.
 	  <td>This value contains flags to indicate information
 	    about the consistency of the information contained
 	    within the file.  Currently, the following bit flags are
-	    defined: bit 0 set indicates that the file is opened for
-	    write-access and bit 1 set indicates that the file has
+	    defined: 
+	    <ul>
+	    <li>Bit 0 set indicates that the file is opened for
+	    write-access.
+	    <li>Bit 1 set indicates that the file has
 	    been verified for consistency and is guaranteed to be
 	    consistent with the format defined in this document.
-	    Bits 2-31 are reserved for future use.  Bit 0 should be
+	    <li>Bits 2-31 are reserved for future use.
+	    </ul>
+	    Bit 0 should be
 	    set as the first action when a file is opened for write
 	    access and should be cleared only as the final action
 	    when closing a file.  Bit 1 should be cleared during
@@ -457,24 +471,24 @@ each high-level object.
 	<tr valign=top>
 	  <td>Base Address</td>
 	  <td>This is the absolute file address of the first byte of
-	    the hdf5 data within the file.  Unless otherwise noted,
+	    the HDF5 data within the file.  Unless otherwise noted,
 	    all other file addresses are relative to this base
 	    address.</td>
 	</tr>
 
 	<tr valign=top>
-	  <td>Address of Global Free-Space Heap</td>
-	  <td>This value contains the relative address of the B-Tree
+	  <td>Address of Global Free-space Heap</td>
+	  <td>This value contains the relative address of the B-tree
 	    used to manage the blocks of data which are unused in the
 	    file currently.  The free-space heap is used to manage the
-	    blocks of bytes at the file-level which become unused with
+	    blocks of bytes at the file-level which become unused when
 	    objects are moved within the file.</td>
 	</tr>
 
 	<tr valign=top>
 	  <td>End of File Address</td>
 	  <td>This is the relative file address of the first byte past
-	    the end of all HDF5 data.  It is used to determine if a
+	    the end of all HDF5 data.  It is used to determine whether a
 	    file has been accidently truncated and as an address where
 	    file memory allocation can occur if the free list is not
 	    used.</td>
@@ -497,6 +511,14 @@ each high-level object.
       </table>
     </center>
 
+
+
+<br><br>
+<br><br>
+
+
+    <h2><a name="ObjectDir">
+	Disk Format: Level 1 - File Infrastructure</a></h2>
     <h3><a name="Btrees">Disk Format: Level 1A - B-link Trees</a></h3>
 
     <p>B-link trees allow flexible storage for objects which tend to grow
@@ -581,7 +603,7 @@ each high-level object.
 
 	<tr valign=top>
 	  <td>Node Signature</td>
-	  <td>The value ASCII 'TREE' is used to indicate the
+	  <td>The value ASCII <code>TREE</code> is used to indicate the
 	    beginning of a B-link tree node.  This gives file
 	    consistency checking utilities a better chance of
 	    reconstructing a damaged file.</td>
@@ -646,7 +668,7 @@ each high-level object.
 	  <td>Each tree has 2<em>K</em>+1 keys with 2<em>K</em>
 	    child pointers interleaved between the keys.  The number
 	    of keys and child pointers actually containing valid
-	    values is determined by the `Entries Used' field.  If
+	    values is determined by the <em>Entries Used</em> field.  If
 	    that field is <em>N</em> then the B-link tree contains
 	    <em>N</em> child pointers and <em>N</em>+1 keys.</td>
 	</tr>
@@ -733,7 +755,7 @@ each high-level object.
 
 	<tr valign=top>
 	  <td>Node Signature</td>
-	  <td>The value ASCII 'SNOD' is used to indicate the
+	  <td>The value ASCII <code>SNOD</code> is used to indicate the
 	    beginning of a symbol table node.  This gives file
 	    consistency checking utilities a better chance of
 	    reconstructing a damaged file.</td>
@@ -764,7 +786,7 @@ each high-level object.
     </center>
 
     <h3><a name="SymbolTableEntry">
-	Disk Format: Level 1C - Symbol-Table Entry </a></h3>
+	Disk Format: Level 1C - Symbol Table Entry </a></h3>
 
     <p>Each symbol table entry in a symbol table node is designed to allow
       for very fast browsing of commonly stored scientific objects.
@@ -795,7 +817,7 @@ each high-level object.
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4>Symbol-Type</td>
+	  <td colspan=4>Symbol Type</td>
 	</tr>
 
 	<tr align=center>
@@ -832,7 +854,7 @@ each high-level object.
 	</tr>
 
 	<tr valign=top>
-	  <td>Symbol-Type</td>
+	  <td>Symbol Type</td>
 	  <td>The symbol type is determined from the object header.
 	    It also determines the format for the scratch-pad space.
 	    The value zero indicates that no object header meta data
@@ -857,7 +879,7 @@ each high-level object.
 
 	      <dt><em>N</em>
 	      <dd>Other cache values can be defined later and
-	      libraries that don't understand the new values will
+	      libraries that do not understand the new values will
 	      still work properly.
 	    </dl>
 	  </td>
@@ -871,7 +893,7 @@ each high-level object.
 	</tr>
 
 	<tr valign=top>
-	  <td>Scratch-Pad Space</td>
+	  <td>Scratchpad Space</td>
 	  <td>This space is used for different purposes, depending
 	    on the value of the Symbol Type field. Any meta-data
 	    about a dataset object represented in the scratch-pad
@@ -896,7 +918,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <B>Symbol Table Scratch-Pad Format</B>
+	  <B>Symbol Table Scratchpad Format</B>
 	</caption>
 
 	<tr align=center>
@@ -939,7 +961,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <B>Symbolic Link Scratch-Pad Format</B>
+	  <B>Symbolic Link Scratchpad Format</B>
 	</caption>
 
 	<tr align=center>
@@ -977,8 +999,8 @@ each high-level object.
 
     <p>A heap is a collection of small heap objects.  Objects can be
       inserted and removed from the heap at any time and the address
-      of a heap doesn't change once the heap is created. Note: this
-      is the "local" version of the heap mostly intended for the
+      of a heap does not change once the heap is created. Note: this
+      is the <em>local</em> version of the heap, mostly intended for the
       storage of names in a symbol table. The storage of small
       objects in a global heap is described below.
 
@@ -1028,7 +1050,7 @@ each high-level object.
 
 	<tr valign=top>
 	  <td>Heap Signature</td>
-	  <td>The valid ASCII 'HEAP' is used to indicate the
+	  <td>The valid ASCII <code>HEAP</code> is used to indicate the
 	    beginning of a heap.  This gives file consistency
 	    checking utilities a better chance of reconstructing a
 	    damaged file.</td>
@@ -1073,7 +1095,7 @@ each high-level object.
     <ol type="A">
       <li>Repeated access to a heap object must be efficient without
 	resulting in repeated file I/O requests. Since global heap
-	objects will typically be shared among several datasets it's
+	objects will typically be shared among several datasets, it is
 	probable that the object will be accessed repeatedly.
 
 	<br><br>
@@ -1160,7 +1182,8 @@ each high-level object.
 	<tr valign=top>
 	  <td>Magic Number</td>
 	  <td>The magic number for global heap collections are the
-	    four bytes `G', `C', `O', `L'.</td>
+	    four bytes <code>G</code>, <code>C</code>, <code>O</code>, 
+	    and <code>L</code>.</td>
 	</tr>
 	  
 	<tr valign=top>
@@ -1241,7 +1264,7 @@ each high-level object.
 	  <td>Each object has a unique identification number within a
 	    collection.  The identification numbers are chosen so that
 	    new objects have the smallest value possible with the
-	    exception that the identifier `0' always refers to the
+	    exception that the identifier <code>0</code> always refers to the
 	    object which represents all free space within the
 	    collection.</td>
 	</tr>
@@ -1275,22 +1298,22 @@ each high-level object.
       </table>
     </center>
 
-    <h3><a name="FreeSpaceIndex">Disk Format: Level 1F - Free-Space
+    <h3><a name="FreeSpaceIndex">Disk Format: Level 1F - Free-space
 	Index (NOT FULLY DEFINED)</a></h3>
 
-    <p>The Free-Space Index is a collection of blocks of data,
+    <p>The Free-space Index is a collection of blocks of data,
       dispersed throughout the file, which are currently not used by
       any file objects.  The blocks of data are indexed by a B-tree of
       their length within the file.
 
-    <p>Each B-Tree page is composed of the following entries and
+    <p>Each B-tree page is composed of the following entries and
       B-tree management information, organized as follows:
 
     <p>
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=bottom>
-	  <B>HDF5 Free-Space Heap Page</B>
+	  <B>HDF5 Free-space Heap Page</B>
 	</caption>
 
 	<tr align=center>
@@ -1300,23 +1323,23 @@ each high-level object.
 	  <th width="25%">byte</th>
 
 	<tr align=center>
-	  <td colspan=4>Free-Space Heap Signature</td>
+	  <td colspan=4>Free-space Heap Signature</td>
 	<tr align=center>
-	  <td colspan=4>B-Tree Left-Link Offset</td>
+	  <td colspan=4>B-tree Left-link Offset</td>
 	<tr align=center>
-	  <td colspan=4><br>Length of Free-Block #1<br> <br></td>
+	  <td colspan=4><br>Length of Free-block #1<br> <br></td>
 	<tr align=center>
-	  <td colspan=4><br>Offset of Free-Block #1<br> <br></td>
+	  <td colspan=4><br>Offset of Free-block #1<br> <br></td>
 	<tr align=center>
 	  <td colspan=4>.<br>.<br>.<br></td>
 	<tr align=center>
-	  <td colspan=4><br>Length of Free-Block #n<br> <br></td>
+	  <td colspan=4><br>Length of Free-block #n<br> <br></td>
 	<tr align=center>
-	  <td colspan=4><br>Offset of Free-Block #n<br> <br></td>
+	  <td colspan=4><br>Offset of Free-block #n<br> <br></td>
 	<tr align=center>
 	  <td colspan=4>"High" Offset</td>
 	<tr align=center>
-	  <td colspan=4>Right-Link Offset</td>
+	  <td colspan=4>Right-link Offset</td>
       </table>
     </center>
 
@@ -1325,25 +1348,25 @@ each high-level object.
       <dt> The elements of the free-space heap page are described below:
       <dd>
 	<dl>
-	  <dt>Free-Space Heap Signature: (4 bytes)
-	  <dd>The value ASCII: 'FREE' is used to indicate the
-	    beginning of a free-space heap B-Tree page.  This gives
+	  <dt>Free-space Heap Signature: (4 bytes)
+	  <dd>The value ASCII: <code>FREE</code> is used to indicate the
+	    beginning of a free-space heap B-tree page.  This gives
 	    file consistency checking utilities a better chance of
 	    reconstructing a damaged file.
 
-	  <dt>B-Tree Left-Link Offset: (&lt;offset&gt; bytes)
+	  <dt>B-tree Left-link Offset: (&lt;offset&gt; bytes)
 	  <dd>This value is used to indicate the offset of all offsets
 	    in the B-link-tree which are smaller than the value of the
 	    offset in entry #1.  This value is also used to indicate a
 	    leaf node in the B-link-tree by being set to all ones.
 
-	  <dt>Length of Free-Block #n: (&lt;length&gt; bytes)
-	  <dd>This value indicates the length of an un-used block in
+	  <dt>Length of Free-block #n: (&lt;length&gt; bytes)
+	  <dd>This value indicates the length of an unused block in
 	    the file.
 
-	  <dt>Offset of Free-Block #n: (&lt;offset&gt; bytes)
+	  <dt>Offset of Free-block #n: (&lt;offset&gt; bytes)
 	  <dd>This value indicates the offset in the file of an
-	    un-used block in the file.
+	    unused block in the file.
 
 	  <dt>"High" Offset: (4-bytes)
 	  <dd>This offset is used as the upper bound on offsets
@@ -1358,11 +1381,17 @@ each high-level object.
     </dl>
 
     <p>The algorithms for searching and inserting objects in the
-      B-tree pages are described fully in the Lehman & Yao paper,
+      B-tree pages are described fully in the Lehman and Yao paper,
       which should be read to provide a full description of the
-      B-Tree's usage.
+      B-tree's usage.
 
-    <h3><a name="DataObject">Disk Format: Level 2 - Data Objects </a></h3>
+
+
+<br><br>
+<br><br>
+
+
+    <h2><a name="DataObject">Disk Format: Level 2 - Data Objects </a></h2>
 
     <p>Data objects contain the real information in the file.  These
       objects compose the scientific data and other information which
@@ -1413,7 +1442,7 @@ each high-level object.
 	  <td colspan=4>Object Reference Count</td>
 	</tr>
 	<tr align=center>
-	  <td colspan=4><br>Total Object-Header Size<br><br></td>
+	  <td colspan=4><br>Total Object Header Size<br><br></td>
 	</tr>
 	<tr align=center>
 	  <td colspan=2>Header Message Type #1</td>
@@ -1476,11 +1505,11 @@ each high-level object.
 	  <td>Object Reference Count</td>
 	  <td>This value specifies the number of references to this
 	    object within the current file.  References to the
-	    data-object from external files are not tracked.</td>
+	    data object from external files are not tracked.</td>
 	</tr>
 
 	<tr valign=top>
-	  <td>Total Object-Header Size</td>
+	  <td>Total Object Header Size</td>
 	  <td>This value specifies the total number of bytes of header
 	    message data following this length field for the current
 	    message as well as any continuation data located elsewhere
@@ -1549,7 +1578,7 @@ each high-level object.
     <P>The following is a list of currently defined header messages:
 
     <hr>
-    <h3><a name="NILMessage">Name: NIL</a></h3>
+    <h4><a name="NILMessage">Name: NIL</a></h4>
     <b>Type: </b>0x0000<br>
     <b>Length:</b> varies<br>
     <b>Status:</b> Optional, may be repeated.<br>
@@ -1562,12 +1591,12 @@ each high-level object.
 
 
     <hr>
-    <h3><a name="SimpleDataSpace">Name: Simple Data Space</a></h3>
+    <h4><a name="SimpleDataSpace">Name: Simple Dataspace</a></h4>
 
     <b>Type: </b>0x0001<br>
     <b>Length:</b> varies<br>
-    <b>Status:</b> One of the <em>Simple Data Space</em> or
-    <em>Data-Space</em> messages is required (but not both) and may
+    <b>Status:</b> One of the <em>Simple Dataspace</em> or
+    <em>Dataspace</em> messages is required (but not both) and may
     not be repeated.<br>
 
     <p>The <em>Simple Dimensionality</em> message describes the number
@@ -1575,7 +1604,7 @@ each high-level object.
       has.  This message is only used for datasets which have a
       simple, rectilinear grid layout, datasets requiring a more
       complex layout (irregularly or unstructured grids, etc) must use
-      the <em>Data-Space</em> message for expressing the space the
+      the <em>Dataspace</em> message for expressing the space the
       dataset inhabits.
 
     <p>
@@ -1693,8 +1722,8 @@ each high-level object.
 	of 30x24x3 slabs of data being written out in an unlimited
 	series every several minutes as timestep data (currently there
 	are five slabs).  The number of dimensions is 4.  The first
-	dimension size is 5 and it's maximum is &lt;UNLIMITED&gt;. The
-	second through fourth dimensions' size and maximum value are
+	dimension size is 5 and its maximum is &lt;UNLIMITED&gt;. The
+	second through fourth dimension's size and maximum value are
 	set to 3, 24, and 30 respectively.
 
       <dt>Example #3 
@@ -1708,19 +1737,19 @@ each high-level object.
     </dl>
 
     <hr>
-    <h3><a name="DataSpaceMessage">Name: Data-Space (Fiber Bundle?)</a></h3>
+    <h4><a name="DataSpaceMessage">Name: Dataspace (Fiber Bundle?)</a></h4>
     <b>Type: </b>0x0002<br>
     <b>Length:</b> varies<br>
 
     <b>Status:</b> One of the <em>Simple Dimensionality</em> or
-    <em>Data-Space</em> messages is required (but not both) and may
+    <em>Dataspace</em> messages is required (but not both) and may
     not be repeated.<br> <b>Purpose and Description:</b> The
-    <em>Data-Space</em> message describes space that the dataset is
+    <em>Dataspace</em> message describes space that the dataset is
     mapped onto in a more comprehensive way than the <em>Simple
     Dimensionality</em> message is capable of handling.  The
-    data-space of a dataset encompasses the type of coordinate system
+    dataspace of a dataset encompasses the type of coordinate system
     used to locate the dataset's elements as well as the structure and
-    regularity of the coordinate system.  The data-space also
+    regularity of the coordinate system.  The dataspace also
     describes the number of dimensions which the dataset inhabits as
     well as a possible higher dimensional space in which the dataset
     is located within.
@@ -1731,7 +1760,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=bottom>
-	  <B>HDF5 Data-Space Message Layout</B>
+	  <B>HDF5 Dataspace Message Layout</B>
 	</caption>
 
 	<tr align=center>
@@ -1762,7 +1791,7 @@ each high-level object.
 	    <center>
 	      <table border cellpadding=4 width="80%">
 		<caption align=bottom>
-		  <B>HDF5 Mesh-Type Layout</B>
+		  <B>HDF5 Mesh-type Layout</B>
 		</caption>
 
 		<tr align=center>
@@ -1781,7 +1810,7 @@ each high-level object.
 	    The following are the definitions of mesh-type bytes:
 	    <dl>
 	      <dt>Mesh Embedding
-	      <dd>This value indicates whether the dataset data-space
+	      <dd>This value indicates whether the dataset dataspace
 		is located within 
 		another dataspace or not:
 		<dl> <dl>
@@ -1789,8 +1818,8 @@ each high-level object.
 		    <dd>The dataset mesh is self-contained and is not
 		      embedded in another mesh. 
 		    <dt>&lt;EMBEDDED&gt;
-		    <dd>The dataset's data-space is located within
-		      another data-space, as 
+		    <dd>The dataset's dataspace is located within
+		      another dataspace, as 
 		      described in information below.
 		  </dl> </dl>
 	      <dt>Coordinate System
@@ -1818,7 +1847,7 @@ each high-level object.
 		    <dt>&lt;UNSTRUCTURED&gt;
 		    <dd>Grid-points locations in each dimension are
 		      explicitly defined and 
-		      may be of any numeric data-type.
+		      may be of any numeric datatype.
 		  </dl> </dl>
 	      <dt>Regularity
 	      <dd>This value defines the locations of the dataset
@@ -1843,7 +1872,7 @@ each high-level object.
 		<dt>&lt;CARTESIAN-UNSTRUCTURED-IRREGULAR&gt;
 	      </dl> </dl>
 	    All of the above grid types can be embedded within another
-	    data-space.
+	    dataspace.
 	    <br> <br>
 	  <dt>Logical Dimensionality: (unsigned 32-bit integer)
 	  <dd>This value is the number of dimensions that the dataset occupies.
@@ -1852,7 +1881,7 @@ each high-level object.
 	    <center>
 	      <table border cellpadding=4 width="80%">
 		<caption align=bottom>
-		  <B>HDF5 Data-Space Embedded Dimensionality Information</B>
+		  <B>HDF5 Dataspace Embedded Dimensionality Information</B>
 		</caption>
 
 		<tr align=center>
@@ -1886,22 +1915,22 @@ each high-level object.
 	    which is a subset of another 3-D space, etc.
 	  <dt>Embedded Dimension Size: (unsigned 32-bit integer)
 	  <dd>These values are the sizes of the dimensions of the
-	    embedded data-space 
+	    embedded dataspace 
 	    that the dataset is located within.
 	  <dt>Embedded Origin Location: (unsigned 32-bit integer)
 	  <dd>These values comprise the location of the dataset's
-	    origin within the embedded data-space. 
+	    origin within the embedded dataspace. 
 	</dl>
     </dl>
     [Comment: need some way to handle different orientations of the
-    dataset data-space 
-    within the embedded data-space]<br>
+    dataset dataspace 
+    within the embedded dataspace]<br>
 
     <P>
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=bottom>
-	  <B>HDF5 Data-Space Structured/Regular Grid Information</B>
+	  <B>HDF5 Dataspace Structured/Regular Grid Information</B>
 	</caption>
 
 	<tr align=center>
@@ -1949,7 +1978,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=bottom>
-	  <B>HDF5 Data-Space Structured/Irregular Grid Information</B>
+	  <B>HDF5 Dataspace Structured/Irregular Grid Information</B>
 	</caption>
 
 	<tr align=center>
@@ -1965,7 +1994,7 @@ each high-level object.
 	<tr align=center>
 	  <td colspan=4># of Grid Points in Dimension #n</td>
 	<tr align=center>
-	  <td colspan=4>Data-Type of Grid Point Locations</td>
+	  <td colspan=4>Datatype of Grid Point Locations</td>
 	<tr align=center>
 	  <td colspan=4>Location of Grid Points in Dimension #1</td>
 	<tr align=center>
@@ -1979,7 +2008,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=bottom>
-	  <B>HDF5 Data-Space Unstructured Grid Information</B>
+	  <B>HDF5 Dataspace Unstructured Grid Information</B>
 	</caption>
 
 	<tr align=center>
@@ -1991,7 +2020,7 @@ each high-level object.
 	<tr align=center>
 	  <td colspan=4># of Grid Points</td>
 	<tr align=center>
-	  <td colspan=4>Data-Type of Grid Point Locations</td>
+	  <td colspan=4>Datatype of Grid Point Locations</td>
 	<tr align=center>
 	  <td colspan=4>Grid Point Locations<br>.<br>.<br></td>
       </table>
@@ -2002,7 +2031,7 @@ each high-level object.
 
 
     <hr>
-    <h3><a name="DataTypeMessage">Name: Data Type</a></h3>
+    <h4><a name="DataTypeMessage">Name: Data Type</a></h4>
 
     <b>Type:</b> 0x0003<br>
     <b>Length:</b> variable<br>
@@ -2058,7 +2087,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <b>Bit Field for Fixed-Point Numbers (Class 0)</b>
+	  <b>Bit Field for Fixed-point Numbers (Class 0)</b>
 	</caption>
 
 	<tr align=center>
@@ -2097,7 +2126,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <b>Properties for Fixed-Point Numbers (Class 0)</b>
+	  <b>Properties for Fixed-point Numbers (Class 0)</b>
 	</caption>
 
 	<tr align=center>
@@ -2118,7 +2147,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <b>Bit Field for Floating-Point Numbers (Class 1)</b>
+	  <b>Bit Field for Floating-point Numbers (Class 1)</b>
 	</caption>
 
 	<tr align=center>
@@ -2174,7 +2203,7 @@ each high-level object.
     <center>
       <table border cellpadding=4 width="80%">
 	<caption align=top>
-	  <b>Properties for Floating-Point Numbers (Class 1)</b>
+	  <b>Properties for Floating-point Numbers (Class 1)</b>
 	</caption>
 
 	<tr align=center>
@@ -2453,7 +2482,7 @@ each high-level object.
       
 
     <hr>
-    <h3><a name="FillValueMessage">Name: Data Storage - Fill Value</a></h3>
+    <h4><a name="FillValueMessage">Name: Data Storage - Fill Value</a></h4>
     <b>Type:</b> 0x0004<br>
     <b>Length:</b> varies<br>
     <b>Status:</b> Optional, may not be repeated.<br>
@@ -2510,8 +2539,7 @@ each high-level object.
     </center>
 
     <hr>
-    <h3><a name="ReservedMessage_0005">Name: Reserved - Not Assigned
-	Yet</a></h3>
+    <h4><a name="ReservedMessage_0005">Name: Reserved - Not Assigned Yet</a></h4>
     <b>Type:</b> 0x0005<br>
     <b>Length:</b> N/A<br>
     <b>Status:</b> N/A<br>
@@ -2519,7 +2547,7 @@ each high-level object.
 
 
     <hr>
-    <h3><a name="CompactDataStorageMessage">Name: Data Storage - Compact</a></h3>
+    <h4><a name="CompactDataStorageMessage">Name: Data Storage - Compact</a></h4>
 
     <b>Type:</b> 0x0006<br>
     <b>Length:</b> varies<br>
@@ -2529,7 +2557,7 @@ each high-level object.
       stored within the current HDF file by including the actual 
       data within the header data for this message.  The data is
       stored internally in 
-      the "normal" format, i.e. in one chunk, un-compressed, etc.
+      the "normal" format, i.e. in one chunk, uncompressed, etc.
 
     <P>Note that one and only one of the "Data Storage" headers can be
       stored for each data object.
@@ -2542,8 +2570,8 @@ each high-level object.
     [very straightforward]
 
     <hr>
-    <h3><a name="ExternalFileListMessage">Name: Data Storage -
-	External Data Files</a></h3>
+    <h4><a name="ExternalFileListMessage">Name: Data Storage -
+	External Data Files</a></h4>
     <b>Type:</b> 0x0007<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may not be repeated.<BR>
@@ -2711,7 +2739,7 @@ each high-level object.
 
 
     <hr>
-    <h3><a name="LayoutMessage">Name: Data Storage - Layout</a></h3>
+    <h4><a name="LayoutMessage">Name: Data Storage - Layout</a></h4>
 
     <b>Type:</b> 0x0008<BR>
     <b>Length:</b> varies<BR>
@@ -2833,7 +2861,7 @@ each high-level object.
 
 
     <hr>
-    <h3><a name="ReservedMessage_0009">Name: Reserved - Not Assigned Yet</a></h3>
+    <h4><a name="ReservedMessage_0009">Name: Reserved - Not Assigned Yet</a></h4>
     <b>Type:</b> 0x0009<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
@@ -2841,7 +2869,7 @@ each high-level object.
     <b>Format of Data:</b> N/A
 
     <hr>
-    <h3><a name="ReservedMessage_000A">Name: Reserved - Not Assigned Yet</a></h3>
+    <h4><a name="ReservedMessage_000A">Name: Reserved - Not Assigned Yet</a></h4>
     <b>Type:</b> 0x000A<BR>
     <b>Length:</b> N/A<BR>
     <b>Status:</b> N/A<BR>
@@ -2849,7 +2877,7 @@ each high-level object.
     <b>Format of Data:</b> N/A
 
     <hr>
-    <h3><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h3>
+    <h4><a name="FilterMessage">Name: Data Storage - Filter Pipeline</a></h4>
     <b>Type:</b> 0x000B<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may not be repeated.
@@ -3031,7 +3059,7 @@ each high-level object.
     </center>
 
     <hr>
-    <h3><a name="AttributeMessage">Name: Attribute</a></h3>
+    <h4><a name="AttributeMessage">Name: Attribute</a></h4>
     <b>Type:</b> 0x000C<BR>
     <b>Length:</b> varies<BR>
     <b>Status:</b> Optional, may be repeated.<BR>
@@ -3164,7 +3192,7 @@ each high-level object.
     </center>
     
     <hr>
-    <h3><a name="NameMessage">Name: Object Name</a></h3>
+    <h4><a name="NameMessage">Name: Object Name</a></h4>
 
     <p><b>Type:</b> 0x000D<br>
       <b>Length:</b> varies<br>
@@ -3172,7 +3200,7 @@ each high-level object.
 
     <p><b>Purpose and Description:</b> The object name or comment is
       designed to be a short description of an object.  An object name
-      is a sequence of non-zero ('\0') ASCII characters with no other
+      is a sequence of non-zero (<code>\0</code>) ASCII characters with no other
       formatting included by the library.
 
     <p>
@@ -3211,8 +3239,7 @@ each high-level object.
     </center>
     
     <hr>
-    <h3><a name="ModifiedMessage">Name: Object Modification Date &amp;
-	Time</a></h3>
+    <h4><a name="ModifiedMessage">Name: Object Modification Date &amp; Time</a></h4>
 
     <p><b>Type:</b> 0x000E<br>
       <b>Length:</b> fixed<br>
@@ -3314,7 +3341,7 @@ each high-level object.
     </center>
     
     <hr>
-    <h3><a name="SharedMessage">Name: Shared Object Message</a></h3>
+    <h4><a name="SharedMessage">Name: Shared Object Message</a></h4>
     <b>Type:</b> 0x000F<br>
     <b>Length:</b> 4 Bytes<br>
     <b>Status:</b> Optional, may be repeated.
@@ -3411,7 +3438,7 @@ each high-level object.
 
 
 <hr>
-<h3><a name="ContinuationMessage">Name: Object Header Continuation</a></h3>
+<h4><a name="ContinuationMessage">Name: Object Header Continuation</a></h4>
 <b>Type:</b> 0x0010<BR>
 <b>Length:</b> fixed<BR>
 <b>Status:</b> Optional, may be repeated.<BR>
@@ -3460,7 +3487,7 @@ the file.
     [straightforward]
 
 <hr>
-<h3><a name="SymbolTableMessage">Name: Symbol Table Message</a></h3>
+<h4><a name="SymbolTableMessage">Name: Symbol Table Message</a></h4>
 <b>Type:</b> 0x0011<BR>
 <b>Length:</b> fixed<BR>
 <b>Status:</b> Required for symbol tables, may not be repeated.<BR>
@@ -3483,7 +3510,7 @@ name heap which are pointed to by this message.<BR>
 <th width="25%">byte</th>
 
 <tr align=center>
-<td colspan=4>B-Tree Address</td>
+<td colspan=4>B-tree Address</td>
 
 <tr align=center>
 <td colspan=4>Heap Address</td>
@@ -3576,9 +3603,8 @@ string indicating the first field included and a [pointer to the] string name
 for the last field).  
 Browse pointers are stored as an heap-ID (for the name in the file-heap)
 followed by a offset of the data object being referenced.
-<P>Data of a compound data-type is stored as a contiguous stream of the items
-in the structure, with each item formatted according to it's
-data-type.
+<P>Data of a compound datatype is stored as a contiguous stream of the items
+in the structure, with each item formatted according to its datatype.
 
 <hr>
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
