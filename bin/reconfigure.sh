@@ -1,4 +1,4 @@
-#! bin/sh
+#! /bin/sh
 # A simple script to reconfigure autotools for HDF5.
 # The autotools include a reconfigure script, but this script
 # has the paths of autoconf and automake hardcoded to work on HDF
