@@ -390,9 +390,9 @@ struct handler_t {
  */
 #if 0
     /* binary: not implemented yet */
-static const char *s_opts = "hbBHvVa:d:g:l:t:w:xD:o:s:T:c:k:";
+static const char *s_opts = "hbBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
 #else
-static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:T:c:k:";
+static const char *s_opts = "hBHvVa:d:g:l:t:w:xD:o:s:S:c:k:";
 #endif  /* 0 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
