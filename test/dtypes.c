@@ -2676,43 +2676,43 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		   "");
 	    switch (dst_type) {
 	    case INT_CHAR:
-		memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
+		memcpy(aligned, buf+j*sizeof(char), sizeof(signed char));
 		printf(" %29d\n", *((signed char*)aligned));
 		break;
 	    case INT_UCHAR:
-		memcpy(aligned, saved+j*sizeof(char), sizeof(unsigned char));
+		memcpy(aligned, buf+j*sizeof(char), sizeof(unsigned char));
 		printf(" %29u\n", *((unsigned char*)aligned));
 		break;
 	    case INT_SHORT:
-		memcpy(aligned, saved+j*sizeof(short), sizeof(short));
+		memcpy(aligned, buf+j*sizeof(short), sizeof(short));
 		printf(" %29d\n", *((short*)aligned));
 		break;
 	    case INT_USHORT:
-		memcpy(aligned, saved+j*sizeof(short), sizeof(unsigned short));
+		memcpy(aligned, buf+j*sizeof(short), sizeof(unsigned short));
 		printf(" %29u\n", *((unsigned short*)aligned));
 		break;
 	    case INT_INT:
-		memcpy(aligned, saved+j*sizeof(int), sizeof(int));
+		memcpy(aligned, buf+j*sizeof(int), sizeof(int));
 		printf(" %29d\n", *((int*)aligned));
 		break;
 	    case INT_UINT:
-		memcpy(aligned, saved+j*sizeof(unsigned), sizeof(unsigned));
+		memcpy(aligned, buf+j*sizeof(unsigned), sizeof(unsigned));
 		printf(" %29u\n", *((unsigned*)aligned));
 		break;
 	    case INT_LONG:
-		memcpy(aligned, saved+j*sizeof(long), sizeof(long));
+		memcpy(aligned, buf+j*sizeof(long), sizeof(long));
 		printf(" %29ld\n", *((long*)aligned));
 		break;
 	    case INT_ULONG:
-		memcpy(aligned, saved+j*sizeof(long), sizeof(unsigned long));
+		memcpy(aligned, buf+j*sizeof(long), sizeof(unsigned long));
 		printf(" %29lu\n", *((unsigned long*)aligned));
 		break;
 	    case INT_LLONG:
-		memcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
+		memcpy(aligned, buf+j*sizeof(long_long), sizeof(long_long));
 		printf(" %29"PRINTF_LL_WIDTH"d\n", *((long_long*)aligned));
 		break;
 	    case INT_ULLONG:
-		memcpy(aligned, saved+j*sizeof(long_long),
+		memcpy(aligned, buf+j*sizeof(long_long),
 		       sizeof(unsigned long_long));
 		printf(" %29"PRINTF_LL_WIDTH"u\n",
 		       *((unsigned long_long*)aligned));
