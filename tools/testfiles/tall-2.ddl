@@ -7,11 +7,11 @@ GROUP "/g1/g1.1" {
       DATATYPE { H5T_STD_I32BE }
       DATASPACE { SIMPLE ( 10, 10 ) / ( 10, 10 ) }
       ATTRIBUTE "attr1" {
-         DATATYPE { H5T_STD_I8LE }
+         DATATYPE { H5T_STD_I8BE }
          DATASPACE { SIMPLE ( 27 ) / ( 27 ) }
       }
       ATTRIBUTE "attr2" {
-         DATATYPE { H5T_STD_I8LE }
+         DATATYPE { H5T_STD_I8BE }
          DATASPACE { SIMPLE ( 27 ) / ( 27 ) }
       }
    }

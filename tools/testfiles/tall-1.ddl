@@ -4,7 +4,7 @@ Expected output for 'h5dump tall.h5'
 HDF5 "tall.h5" {
 GROUP "/" {
    ATTRIBUTE "attr1" {
-      DATATYPE { H5T_STD_I8LE }
+      DATATYPE { H5T_STD_I8BE }
       DATASPACE { SIMPLE ( 10 ) / ( 10 ) }
       DATA {
          97, 98, 99, 100, 101, 102, 103, 104, 105, 0
@@ -36,7 +36,7 @@ GROUP "/" {
                0, 1, 2, 3, 4, 5, 6, 7, 8, 9
             }
             ATTRIBUTE "attr1" {
-               DATATYPE { H5T_STD_I8LE }
+               DATATYPE { H5T_STD_I8BE }
                DATASPACE { SIMPLE ( 27 ) / ( 27 ) }
                DATA {
                   49, 115, 116, 32, 97, 116, 116, 114, 105, 98, 117, 116, 101, 
@@ -44,7 +44,7 @@ GROUP "/" {
                }
             }
             ATTRIBUTE "attr2" {
-               DATATYPE { H5T_STD_I8LE }
+               DATATYPE { H5T_STD_I8BE }
                DATASPACE { SIMPLE ( 27 ) / ( 27 ) }
                DATA {
                   50, 110, 100, 32, 97, 116, 116, 114, 105, 98, 117, 116, 101, 
