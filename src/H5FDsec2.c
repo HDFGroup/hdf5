@@ -807,7 +807,7 @@ H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
     assert(file);
 
     /* Extend the file to make sure it's large enough */
-    if (file->eoa>file->eof) {
+    if (file->eoa!=file->eof) {
 #ifdef WIN32
         /* Map the posix file handle to a Windows file handle */
         filehandle = _get_osfhandle(file->fd);
