@@ -103,7 +103,6 @@ typedef struct H5F_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     H5O_layout_t *layout;	/*the layout message			*/
-    double	split_ratios[3];/*B-tree node splitting ratios		*/
     H5O_pline_t	*pline;		/*filter pipeline message		*/
     hssize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     size_t	rd_count;	/*bytes remaining to be read		*/
@@ -976,7 +975,7 @@ H5F_istore_flush_entry(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache,
          * Create the chunk it if it doesn't exist, or reallocate the chunk if
          * its size changed.  Then write the data into the file.
          */
-        if (H5B_insert(f, dxpl_id, H5B_ISTORE, ent->layout->addr, ent->split_ratios, &udata)<0)
+        if (H5B_insert(f, dxpl_id, H5B_ISTORE, ent->layout->addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
         if (H5F_block_write(f, H5FD_MEM_DRAW, udata.addr, udata.key.nbytes, dxpl_id, buf)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file");
@@ -1514,8 +1513,6 @@ H5F_istore_lock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id, con
         ent->wr_count = chunk_size;
         ent->chunk = chunk;
         
-        HDmemcpy(&(ent->split_ratios),&dxpl_cache->btree_split_ratio,H5D_XFER_BTREE_SPLIT_RATIO_SIZE);
-        
         /* Add it to the cache */
         assert(NULL==rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
@@ -1654,8 +1651,6 @@ H5F_istore_unlock(H5F_t *f, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
             x.alloc_size = x.chunk_size;
             x.chunk = chunk;
 
-            HDmemcpy(&(x.split_ratios),&dxpl_cache->btree_split_ratio,H5D_XFER_BTREE_SPLIT_RATIO_SIZE);
-            
             H5F_istore_flush_entry (f, dxpl_cache, dxpl_id, &x, TRUE);
         } else {
             if(chunk)
@@ -2172,7 +2167,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     H5F_istore_ud1_t udata;	/* B-tree pass-through for creating chunk */
     void *chunk=NULL;           /* Chunk buffer for writing fill values */
     H5P_genplist_t *dx_plist;   /* Data xfer property list */
-    double	split_ratios[3];/* B-tree node splitting ratios		*/
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm	mpi_comm=MPI_COMM_NULL;	/* MPI communicator for file */
     int         mpi_rank=(-1);  /* This process's rank  */
@@ -2210,8 +2204,6 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     /* Get necessary properties from dataset transfer property list */
     if (NULL == (dx_plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-    if(H5P_get(dx_plist,H5D_XFER_BTREE_SPLIT_RATIO_NAME,split_ratios)<0)
-        HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "can't get B-tree split ratios");
     if(H5P_get(dx_plist,H5D_XFER_EDC_NAME,&edc)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get edc information");
     if(H5P_get(dx_plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
@@ -2328,7 +2320,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
                 udata.key.offset[u] = chunk_offset[u];
 
             /* Allocate the chunk with all processes */
-            if (H5B_insert(f, dxpl_id, H5B_ISTORE, layout->addr, split_ratios, &udata)<0)
+            if (H5B_insert(f, dxpl_id, H5B_ISTORE, layout->addr, &udata)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk");
 
             /* Check if fill values should be written to blocks */

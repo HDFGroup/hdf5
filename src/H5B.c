@@ -108,12 +108,14 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Bpkg.h"		/* B-link trees				*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"         /* Property lists                       */
 
 /* Local macros */
 #define H5B_SIZEOF_HDR(F)						      \
@@ -126,7 +128,6 @@
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 				   const H5B_class_t *type,
-				   const double split_ratios[],
 				   uint8_t *lt_key,
 				   hbool_t *lt_key_changed,
 				   uint8_t *md_key, void *udata,
@@ -142,8 +143,7 @@ static size_t H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
 			   size_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt,
 			haddr_t old_addr, unsigned idx,
-			const double split_ratios[], void *udata,
-			haddr_t *new_addr/*out*/);
+                        void *udata, haddr_t *new_addr/*out*/);
 static H5B_t * H5B_copy(const H5F_t *f, const H5B_t *old_bt);
 static herr_t H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf);
 static size_t H5B_size(H5F_t *f, H5B_t *bt);
@@ -475,6 +475,7 @@ H5B_serialize(H5F_t *f, H5B_t *bt, uint8_t *buf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5B_flush
@@ -794,13 +795,14 @@ done:
  */
 static herr_t
 H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr_t old_addr,
-	  unsigned idx, const double split_ratios[], void *udata,
-	  haddr_t *new_addr_p/*out*/)
+	  unsigned idx, void *udata, haddr_t *new_addr_p/*out*/)
 {
+    H5P_genplist_t *dx_plist;           /* Data transfer property list */
     H5B_t	*new_bt = NULL, *tmp_bt = NULL;
     unsigned	k;                      /* B-tree 'K' value for the maximum number of entries in node */
     unsigned	nleft, nright;          /* Number of keys in left & right halves */
     size_t	recsize = 0;
+    double      split_ratios[3];        /* B-tree split ratios */
     unsigned	u;                      /* Local index variable */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -819,6 +821,15 @@ H5B_split(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_t *old_bt, haddr
     assert(old_bt->nchildren == 2 * H5F_KVALUE(f, type));
     recsize = old_bt->sizeof_rkey + H5F_SIZEOF_ADDR(f);
     k = H5F_KVALUE(f, type);
+
+
+    /* Get the dataset transfer property list */
+    if (NULL == (dx_plist = H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    /* Get B-tree split ratios */
+    if(H5P_get(dx_plist, H5D_XFER_BTREE_SPLIT_RATIO_NAME, &split_ratios)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve B-tree split ratios")
 
 #ifdef H5B_DEBUG
     if (H5DEBUG(B)) {
@@ -1031,7 +1042,7 @@ done:
  */
 herr_t
 H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
-	   const double split_ratios[], void *udata)
+           void *udata)
 {
     /*
      * These are defined this way to satisfy alignment constraints.
@@ -1058,7 +1069,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     assert(type->sizeof_nkey <= sizeof _lt_key);
     assert(H5F_addr_defined(addr));
 
-    if ((my_ins = H5B_insert_helper(f, dxpl_id, addr, type, split_ratios, lt_key,
+    if ((my_ins = H5B_insert_helper(f, dxpl_id, addr, type, lt_key,
             &lt_key_changed, md_key, udata, rt_key, &rt_key_changed, &child/*out*/))<0 ||
             my_ins<0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to insert key")
@@ -1352,8 +1363,8 @@ H5B_insert_child(const H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  */
 static H5B_ins_t
 H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
-		  const double split_ratios[], uint8_t *lt_key,
-		  hbool_t *lt_key_changed, uint8_t *md_key, void *udata,
+                  uint8_t *lt_key, hbool_t *lt_key_changed,
+                  uint8_t *md_key, void *udata,
 		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
 {
@@ -1441,7 +1452,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	 */
 	if (H5B_decode_keys(f, bt, idx) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR, "unable to decode key")
-	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type, split_ratios,
+	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type,
                 bt->key[idx].nkey, lt_key_changed, md_key,
                 udata, bt->key[idx+1].nkey, rt_key_changed,
                 &child_addr/*out*/))<0)
@@ -1481,7 +1492,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	idx = bt->nchildren - 1;
 	if (H5B_decode_keys(f, bt, idx) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, H5B_INS_ERROR, "unable to decode key")
-	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type, split_ratios,
+	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type,
                 bt->key[idx].nkey, lt_key_changed, md_key, udata,
                 bt->key[idx+1].nkey, rt_key_changed, &child_addr/*out*/)) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "can't insert maximum subtree")
@@ -1528,7 +1539,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	 * Follow a branch out of this node to another subtree.
 	 */
 	assert(idx < bt->nchildren);
-	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type, split_ratios,
+	if ((my_ins = H5B_insert_helper(f, dxpl_id, bt->child[idx], type,
                 bt->key[idx].nkey, lt_key_changed, md_key, udata,
                 bt->key[idx+1].nkey, rt_key_changed, &child_addr/*out*/)) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR, "can't insert subtree")
@@ -1581,7 +1592,7 @@ H5B_insert_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	 * If this node is full then split it before inserting the new child.
 	 */
 	if (bt->nchildren == 2 * H5F_KVALUE(f, type)) {
-	    if (H5B_split(f, dxpl_id, type, bt, addr, idx, split_ratios, udata, new_node_p/*out*/)<0)
+	    if (H5B_split(f, dxpl_id, type, bt, addr, idx, udata, new_node_p/*out*/)<0)
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, H5B_INS_ERROR, "unable to split node")
 	    if (NULL == (twin = H5AC_protect(f, dxpl_id, H5AC_BT, *new_node_p, type, udata, H5AC_WRITE)))
 		HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, H5B_INS_ERROR, "unable to load node")
