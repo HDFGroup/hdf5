@@ -548,7 +548,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Check if we are doing any logging at all */
     if(file->fa.flags!=0) {
-        file->iosize=file->fa.buf_size;
+        file->iosize=fa->buf_size;
         if(file->fa.flags&H5FD_LOG_NUM_READ) {
             file->nread=H5MM_calloc(file->iosize);
             assert(file->nread);
