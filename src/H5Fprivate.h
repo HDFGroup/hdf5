@@ -211,6 +211,8 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 /* Check for file driver feature enabled */
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags&(FL))
+/* B-tree node raw page */
+#define H5F_RAW_PAGE(F)         ((F)->shared->raw_page)
 #else /* H5F_PACKAGE */
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
@@ -220,6 +222,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
+#define H5F_RAW_PAGE(F)         (H5F_raw_page(F))
 #endif /* H5F_PACKAGE */
 
 
@@ -414,6 +417,7 @@ H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nelmts(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
+H5_DLL void *H5F_raw_page(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

@@ -74,6 +74,7 @@ static herr_t H5G_node_clear(H5G_node_t *sym);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
+static void *H5G_node_get_page(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -113,6 +114,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,		/*id			*/
     sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
     H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
+    H5G_node_get_page,		/*get_page		*/
     H5G_node_create,		/*new			*/
     H5G_node_cmp2,		/*cmp2			*/
     H5G_node_cmp3,		/*cmp3			*/
@@ -133,11 +135,14 @@ static int interface_initialize_g = 0;
 /* Declare a free list to manage the H5G_node_t struct */
 H5FL_DEFINE_STATIC(H5G_node_t);
 
-/* Declare a free list to manage arrays of H5G_entry_t's */
+/* Declare a free list to manage sequences of H5G_entry_t's */
 H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
 
 /* Declare a free list to manage blocks of symbol node data */
 H5FL_BLK_DEFINE_STATIC(symbol_node);
+
+/* Declare a free list to manage the raw page information */
+H5FL_BLK_DEFINE_STATIC(grp_page);
 
 
 /*-------------------------------------------------------------------------
@@ -166,6 +171,34 @@ H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
 
     FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_get_page
+ *
+ * Purpose:	Returns the raw data page for the specified UDATA.
+ *
+ * Return:	Success:	Pointer to the raw B-tree page for this
+                                file's groups
+ *
+ *		Failure:	Can't fail
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, October  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5G_node_get_page(H5F_t *f, const void UNUSED *_udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_page);
+
+    assert(f);
+
+    FUNC_LEAVE_NOAPI(H5F_RAW_PAGE(f));
+} /* end H5G_node_get_page() */
 
 
 /*-------------------------------------------------------------------------
@@ -298,7 +331,7 @@ H5G_node_size(H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
 
     FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
-	(2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
+                     (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
 }
 
 
@@ -477,8 +510,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
 
         if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file");
-        if (buf)
-            H5FL_BLK_FREE(symbol_node,buf);
+        H5FL_BLK_FREE(symbol_node,buf);
 
         /* Reset the node's dirty flag */
         sym->cache_info.dirty = FALSE;
@@ -969,6 +1001,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *_lt_key,
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node");
 	if (NULL==(snrt=H5AC_find(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL)))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node");
+
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	snrt->nsyms = H5F_SYM_LEAF_K(f);
@@ -1287,6 +1320,7 @@ H5G_node_iterate (H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
             name = H5HL_peek (f, dxpl_id, bt_udata->ent->cache.stab.heap_addr, name_off[i]);
             assert (name);
             n = HDstrlen (name);
+
             if (n+1>sizeof(buf)) {
                 if (NULL==(s = H5MM_malloc (n+1)))
                     HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, H5B_ITER_ERROR, "memory allocation failed");
@@ -1347,8 +1381,9 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     /* Find the object node and add the number of symbol entries. */
     if (NULL == (sn = H5AC_find(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_ITER_ERROR, "unable to load symbol table node");
+
     *num_objs += sn->nsyms;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1405,7 +1440,7 @@ H5G_node_name(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
     }
 
     bt_udata->num_objs += sn->nsyms;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -1457,6 +1492,79 @@ H5G_node_type(H5F_t *f, hid_t dxpl_id, void UNUSED *_lt_key, haddr_t addr,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_init
+ *
+ * Purpose:	This function gets called during a file opening to initialize
+ *              global information about group B-tree nodes for file.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Jul  5, 2004
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_init(H5F_t *f)
+{
+    size_t		sizeof_rkey;    /* Single raw key size */
+    size_t              size;           /* Raw B-tree node size */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
+
+    /* Check arguments. */
+    assert(f);
+
+    /* Set up the "global" information for this file's groups */
+    sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
+    assert(sizeof_rkey);
+    size = H5B_nodesize(f, H5B_SNODE, NULL, sizeof_rkey);
+    assert(size);
+    if(NULL==(f->shared->raw_page=H5FL_BLK_MALLOC(grp_page,size)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_node_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_close
+ *
+ * Purpose:	This function gets called during a file close to shutdown
+ *              global information about group B-tree nodes for file.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Jul  5, 2004
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_close(const H5F_t *f)
+{
+    herr_t ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5G_node_close,FAIL)
+
+    /* Check arguments. */
+    assert(f);
+
+    /* Free the raw B-tree node buffer */
+    H5FL_BLK_FREE(grp_page,f->shared->raw_page);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_node_close */
 
 
 /*-------------------------------------------------------------------------
@@ -1537,4 +1645,3 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
-

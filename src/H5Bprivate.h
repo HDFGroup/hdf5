@@ -84,6 +84,7 @@ typedef struct H5B_class_t {
     H5B_subid_t id;					/*id as found in file*/
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     size_t	(*get_sizeof_rkey)(H5F_t*, const void*);    /*raw key size   */
+    void *	(*get_page)(H5F_t*, const void*);    /*raw disk page for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
     int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
@@ -111,6 +112,8 @@ typedef struct H5B_class_t {
 /*
  * Library prototypes.
  */
+H5_DLL size_t H5B_nodesize(const H5F_t *f, const H5B_class_t *type,
+			   size_t *total_nkey_size, size_t sizeof_rkey);
 H5_DLL herr_t H5B_create (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
 			   haddr_t *addr_p/*out*/);
 H5_DLL herr_t H5B_find (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
