@@ -116,7 +116,7 @@ __DLL__ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
                           H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5P_set(hid_t plist_id, const char *name, void *value);
 __DLL__ htri_t H5P_exist(H5P_genplist_t *plist, const char *name);
-__DLL__ herr_t H5P_get_size(H5P_genplist_t *plist, const char *name);
+__DLL__ herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size);
 __DLL__ herr_t H5P_get(hid_t plist_id, const char *name, void *value);
 __DLL__ herr_t H5P_remove(H5P_genplist_t *plist, const char *name);
 __DLL__ herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);

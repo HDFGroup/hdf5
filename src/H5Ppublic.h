@@ -94,7 +94,7 @@ __DLL__ herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
             H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 __DLL__ htri_t H5Pexist(hid_t plist_id, const char *name);
-__DLL__ herr_t H5Pget_size(hid_t plist_id, const char *name);
+__DLL__ herr_t H5Pget_size(hid_t plist_id, const char *name, size_t *size);
 __DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);

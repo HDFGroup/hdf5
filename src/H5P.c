@@ -4292,7 +4292,6 @@ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     H5P_prp_close_func_t prp_close)
 {
     H5P_genprop_t *new_prop=NULL;   /* Temporary property pointer */
-    H5P_genprop_t *tmp_prop;   /* Temporary property pointer */
     herr_t ret_value=FAIL;     /* return value */
 
     FUNC_ENTER (H5P_insert, FAIL);
@@ -4302,7 +4301,7 @@ herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     assert((size>0 && value!=NULL) || (size==0));
 
     /* Check for duplicate named properties */
-    if((tmp_prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))!=NULL)
+    if(H5P_find_prop(plist->props,plist->pclass->hashsize,name)!=NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists");
 
     /* Create property object from parameters */
@@ -4683,34 +4682,36 @@ done:
     herr_t H5P_get_size(plist, name)
         H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
+        size_t *size;           OUT: Size of property
  RETURNS
-    Success: Size of property value in bytes.
+    Success: non-negative value
     Failure: negative value
  DESCRIPTION
-        This routine returns the size of a property's value in bytes.  Zero-
-    sized properties are allowed and return 0.
+        This routine retrieves the size of a property's value in bytes.  Zero-
+    sized properties are allowed and return a value of 0.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5P_get_size(H5P_genplist_t *plist, const char *name)
+herr_t H5P_get_size(H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
-    herr_t ret_value=FAIL;      /* return value */
+    herr_t ret_value=SUCCEED;      /* return value */
 
     FUNC_ENTER (H5P_get_size, FAIL);
 
     assert(plist);
     assert(name);
+    assert(size);
 
     /* Find property */
     if((prop=H5P_find_prop(plist->props,plist->pclass->hashsize,name))==NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Get property size */
-    ret_value=prop->size;
+    *size=prop->size;
 
 done:
     FUNC_LEAVE (ret_value);
@@ -4726,19 +4727,20 @@ done:
     herr_t H5Pget_size(plist_id, name)
         hid_t plist_id;         IN: Property list to check
         const char *name;       IN: Name of property to query
+        size_t *size;           OUT: Size of property
  RETURNS
-    Success: Size of property value in bytes.
+    Success: non-negative value
     Failure: negative value
  DESCRIPTION
-        This routine returns the size of a property's value in bytes.  Zero-
-    sized properties are allowed and return 0.
+        This routine retrieves the size of a property's value in bytes.  Zero-
+    sized properties are allowed and return a value of 0.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Pget_size(hid_t plist_id, const char *name)
+herr_t H5Pget_size(hid_t plist_id, const char *name, size_t *size)
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
     herr_t ret_value=FAIL;     /* return value */
@@ -4750,9 +4752,11 @@ herr_t H5Pget_size(hid_t plist_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
+    if (size==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property size");
 
     /* Create the new property list class */
-    if ((ret_value=H5P_get_size(plist,name))<0)
+    if ((ret_value=H5P_get_size(plist,name,size))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query size in plist");
 
 done:
