@@ -117,9 +117,9 @@ static const char  *progname = "h5perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "ha:A:cCD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "ha:A:B:cCD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #else
-static const char *s_opts = "ha:A:bcCD:f:P:p:X:x:nd:F:i:Io:stT:w";
+static const char *s_opts = "ha:A:bBAPIs :cCD:f:P:p:X:x:nd:F:i:Io:stT:w";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -139,6 +139,15 @@ static struct long_options l_opts[] = {
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "block-size", require_arg, 'B' },
+    { "block-siz", require_arg, 'B' },
+    { "block-si", require_arg, 'B' },
+    { "block-s", require_arg, 'B' },
+    { "block-", require_arg, 'B' },
+    { "block", require_arg, 'B' },
+    { "bloc", require_arg, 'B' },
+    { "blo", require_arg, 'B' },
+    { "bl", require_arg, 'B' },
     { "chunk", no_arg, 'c' },
     { "chun", no_arg, 'c' },
     { "chu", no_arg, 'c' },
@@ -268,6 +277,7 @@ struct options {
     int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
+    size_t block_size;          /* interleaved block size               */
     unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
     unsigned collective;        /* Collective vs. independent I/O       */
     int print_times;       	/* print times as well as throughputs   */
@@ -410,6 +420,7 @@ run_test_loop(struct options *opts)
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
+    parms.block_size = opts->block_size;
     parms.interleaved = opts->interleaved;
     parms.collective = opts->collective;
     parms.h5_align = opts->h5_alignment;
@@ -1012,6 +1023,9 @@ report_parameters(struct options *opts)
     recover_size_and_print((long_long)opts->min_xfer_size, ":");
     recover_size_and_print((long_long)opts->max_xfer_size, "\n");
 
+    HDfprintf(output, "rank %d: Interleaved block size=", rank);
+    recover_size_and_print((long_long)opts->block_size, "\n");
+
     HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);
     if(opts->interleaved)
         HDfprintf(output, "Interleaved\n");
@@ -1064,6 +1078,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
+    cl_opts->block_size = 0;        /* no interleaved I/O */
     cl_opts->interleaved = 0;       /* Default to contiguous blocks in dataset */
     cl_opts->collective = 0;        /* Default to independent I/O access */
     cl_opts->print_times = FALSE;   /* Printing times is off by default */
@@ -1119,6 +1134,9 @@ parse_command_line(int argc, char *argv[])
             /* the future "binary" option */
             break;
 #endif  /* 0 */
+        case 'B':
+            cl_opts->block_size = parse_size_directive(opt_arg);
+            break;
         case 'c':
             /* Turn on chunked HDF5 dataset creation */
             cl_opts->h5_use_chunks = TRUE;
@@ -1318,8 +1336,12 @@ usage(const char *prog)
 #if 0
         printf("     -b, --binary                The elusive binary option\n");
 #endif  /* 0 */
+        printf("     -B S, --block-size=S        Interleaved block size\n");
+        printf("                                 [MPIO API not implemented yet]\n");
+        printf("                                 [default: 0 no interleaved IO]\n");
         printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
-        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs [default: off (i.e. independent I/O)]\n");
+        printf("     -C, --collective            Use collective I/O\n");
+        printf("                                 [default: off (i.e. independent I/O)]\n");
         printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");
         printf("                                 [default: no debugging]\n");
@@ -1328,11 +1350,11 @@ usage(const char *prog)
         printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
         printf("     -I --interleaved            Interleaved block I/O (see below for example)\n");
         printf("                                 [default: Contiguous block I/O]\n");
-#ifdef NOT_SUPPORTED_IN_V1_4
+#ifdef H5_HAVE_NOFILL
         printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
         printf("                                 (Supported in HDF5 library v1.5 only)\n");
         printf("                                 [default: off (i.e. write fill values)]\n");
-#endif /* NOT_SUPPORTED_IN_V1_4 */
+#endif
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
         printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
         printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
@@ -1362,9 +1384,9 @@ usage(const char *prog)
         printf("  Interleaved vs. Contiguous blocks:\n");
         printf("      For example, with a 4 process run,\n");
         printf("          Contiguous blocks are written to the file like so:\n");
-        printf("              1111222233334444\n");
+        printf("              111...222...333...444...\n");
         printf("          Interleaved blocks are written to the file like so:\n");
-        printf("              1234123412341234\n");
+        printf("              123412341234............\n");
         printf("\n");
         printf("  DL - is a list of debugging flags. Valid values are:\n");
         printf("          1 - Minimal\n");

@@ -37,8 +37,9 @@ typedef struct parameters_ {
     long	num_files;      /* Number of files to create            */
     long	num_dsets;      /* Number of datasets to create         */
     off_t	num_elmts;      /* Number of native ints in each dset   */
-    int 	num_iters;      /* Number of times to loop doing the IO */
+    int         num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
+    size_t      block_size;     /* interleaved block size               */
     unsigned    interleaved;    /* Interleaved vs. contiguous blocks    */
     unsigned    collective;     /* Collective vs. independent I/O       */
     hsize_t 	h5_align;       /* HDF5 object alignment                */

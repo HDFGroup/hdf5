@@ -121,9 +121,9 @@ typedef union _file_descr {
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
 static herr_t do_write(results *res, file_descr *fd, parameters *parms,
-    long ndsets, off_t nelmts, size_t buf_size, void *buffer);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer);
 static herr_t do_read(results *res, file_descr *fd, parameters *parms,
-    long ndsets, off_t nelmts, size_t buf_size, void *buffer /*out*/);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/);
 static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
@@ -162,6 +162,7 @@ do_pio(parameters param)
     off_t       nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
     size_t      buf_size;               /*data buffer size in bytes     */
+    size_t      blk_size;       	/*interleaved I/O block size    */
 
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
@@ -195,6 +196,7 @@ do_pio(parameters param)
     nelmts = param.num_elmts;       /* number of elements per dataset       */
     maxprocs = param.num_procs;     /* max number of mpi-processes to use   */
     buf_size = param.buf_size;
+    blk_size = param.block_size;    /* interleaved IO block size            */
 
     if (nfiles < 0 ) {
         fprintf(stderr,
@@ -232,6 +234,25 @@ do_pio(parameters param)
         }
     }
 
+    /* Should only need blk_size <= buf_size. */
+    /* More restrictive condition for easier implementation for now. */
+    if (blk_size > 0 ){
+	if ((buf_size % blk_size) != 0){
+	    HDfprintf(stderr,
+		"Transfer buffer size (%Hd) must be a multiple of the "
+		"interleaved I/O block size (%Hd)\n",
+		(long_long)buf_size, (long_long)blk_size);
+	    GOTOERROR(FAIL);
+	}
+	if ((nelmts % (buf_size/ELMT_SIZE)) != 0){
+	    HDfprintf(stderr,
+		"Dataset size (%Hd) must be a multiple of the "
+		"trasfer buffer size (%Hd)\n",
+		(long_long)nelmts, (long_long)buf_size);
+	    GOTOERROR(FAIL);
+	}
+    }
+
     if (pio_debug_level >= 4) {
         int myrank;
 
@@ -249,10 +270,11 @@ do_pio(parameters param)
         /* Open file for write */
         char base_name[256];
 
-        MPI_Barrier(pio_comm_g);
-
         sprintf(base_name, "#pio_tmp_%lu", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
+
+	/* Need barrier to make sure everyone starts at the same time */
+        MPI_Barrier(pio_comm_g);
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
         hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
@@ -260,7 +282,7 @@ do_pio(parameters param)
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
-        hrc = do_write(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+        hrc = do_write(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_write failed");
@@ -275,6 +297,10 @@ do_pio(parameters param)
             /*
              * Read performance measurement
              */
+	    /* Need barrier to make sure everyone is done writing and has
+	     * closed the file.  Also to make sure everyone starts reading
+	     * at the same time.
+	     */
             MPI_Barrier(pio_comm_g);
 
             /* Open file for read */
@@ -284,7 +310,7 @@ do_pio(parameters param)
             VRFY((hrc == SUCCESS), "do_fopen failed");
 
             set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-            hrc = do_read(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+            hrc = do_read(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
             set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
             VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -295,6 +321,8 @@ do_pio(parameters param)
             VRFY((hrc == SUCCESS), "do_fclose failed");
         }
 
+	/* Need barrier to make sure everyone is done with the file */
+	/* before it may be removed by do_cleanupfile */
         MPI_Barrier(pio_comm_g);
         do_cleanupfile(iot, fname);
     }
@@ -447,7 +475,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
-         off_t nelmts, size_t buf_size, void *buffer)
+         off_t nelmts, size_t blk_size, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -458,10 +486,11 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     off_t       nelmts_xfer;
     size_t      nelmts_toxfer;
     char        dname[64];
-    off_t       dset_offset=0;  /*dataset offset in a file              */
+    off_t       dset_offset=0;    /*dataset offset in a file              */
     off_t       file_offset;    /*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
     size_t      nelmts_in_buf;  /*how many element the buffer holds     */
+    size_t      nelmts_in_blk=0;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
 
@@ -471,7 +500,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t       h5ds_id = -1;           /*dataset handle                */
-    hsize_t	h5block[1];		/*dataspace selection           */
+    hsize_t	h5block[1];		/*dataspace selection        */
     hsize_t	h5stride[1];
     hsize_t	h5count[1];
     hssize_t	h5start[1];
@@ -521,7 +550,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 GOTOERROR(FAIL);
             } /* end if */
         } /* end if */
-    } /* end if */
+    }
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
 
@@ -574,7 +603,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             }
 
             hrc = H5Pclose(h5dcpl);
-            /* verifying the close of the dcpl */
+            /* verifying the close of the h5dcpl */
             if (hrc < 0) {
                 fprintf(stderr, "HDF5 Property List Close failed\n");
                 GOTOERROR(FAIL);
@@ -596,7 +625,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 	 * transferred by this process. It may be different for different
 	 * transfer pattern due to rounding to integral values.
 	 */
-	if (parms->interleaved==0) {
+	if (blk_size==0){
 	    /* Contiguous Pattern:
 	     * Calculate the beginning element of this process and the next.
 	     * elmts_count is the difference between these two beginnings.
@@ -612,12 +641,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 	    else
 		/* last process.  Take whatever are left */
 		elmts_count = nelmts - elmts_begin;
-	} /* end if */
-        else {
+	} /* Contiguous pattern */
+	else{
 	    /* Interleaved Pattern:
-	     * Each process takes buf_size of elements, starting with the first
+	     * Each process takes blk_size of elements, starting with the first
 	     * process.  So, the last process may have fewer or even none.
-	     * Calculate the beginning element of this process.
+	     * Calculate the beginning element of this process and the next.
 	     * The elmnts_begin here marks only the beginning of the first
 	     * block accessed by this process.
 	     */
@@ -629,40 +658,41 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 	     */ 
 	    off_t remain_nelmts, remain_begin;	/* unallocated remaining*/
 
-	    elmts_begin = (off_t)(nelmts_in_buf*pio_mpi_rank_g);
+	    nelmts_in_blk = blk_size/ELMT_SIZE;
+	    elmts_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
 
 	    /* must use integer calculation next */
 	    /* allocate equal blocks per process */
-	    elmts_count = (nelmts / (off_t)(nelmts_in_buf*pio_mpi_nprocs_g)) *
-			    (off_t)nelmts_in_buf;
-	    remain_nelmts = nelmts % (off_t)(nelmts_in_buf*pio_mpi_nprocs_g);
+	    elmts_count = (nelmts / (off_t)(nelmts_in_blk*pio_mpi_nprocs_g)) *
+			    (off_t)nelmts_in_blk;
+	    remain_nelmts = nelmts % ((off_t)(nelmts_in_blk*pio_mpi_nprocs_g));
 
 	    /* allocate any remaining */
-	    remain_begin = (off_t)(nelmts_in_buf*pio_mpi_rank_g);
+	    remain_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
 	    if (remain_nelmts > remain_begin){
 		/* it gets something */
-		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_buf)){
+		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_blk)){
 		    /* one full block */
-		    elmts_count += nelmts_in_buf;
+		    elmts_count += nelmts_in_blk;
 		}else{
 		    /* only a partial block */
 		    elmts_count += remain_nelmts - remain_begin;
 		}
 	    }
-	}
+	} /* Interleaved Pattern */
 	/* debug */
 	if (pio_debug_level >= 4) {
 	    HDprint_rank(output);
 	    HDfprintf(output, "Debug(do_write): "
-		"nelmts_in_buf=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
-		(long_long)nelmts_in_buf, (long_long)elmts_begin,
+		"nelmts_in_blk=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
+		(long_long)nelmts_in_blk, (long_long)elmts_begin,
 		(long_long)elmts_count);
 	}
 
 
 	/* The task is to transfer elmts_count elements, starting at
 	 * elmts_begin position, using transfer buffer of buf_size bytes.
-	 * If interleaved, select buf_size at a time, in round robin
+	 * If blk_size > 0, select blk_size at a time, in round robin
 	 * fashion, according to number of process. Otherwise, select
 	 * all elmt_count in contiguous.
 	 */
@@ -695,33 +725,69 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
             /* Calculate offset of write within a dataset/file */
             switch (parms->io_type) {
             case POSIXIO:
-		if (parms->interleaved==0) {
+		if (blk_size==0){
 		    /* Contiguous pattern */
 		    /* need to (off_t) the elmnts_begin expression because they */
 		    /* may be of smaller sized integer types */
 		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
-		} /* end if */
-                else {
-		    /* Interleaved access pattern */
-                    /* Skip offset over blocks of other processes */
-                    file_offset = dset_offset +
-                        (off_t)(elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g))*(off_t)ELMT_SIZE;
-		} /* end else */
 
-                /* only care if seek returns error */
-                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
-                VRFY((rc==0), "POSIXSEEK");
-                /* check if all bytes are written */
-                rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
-                    POSIXWRITE(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
-                VRFY((rc != 0), "POSIXWRITE");
+		    /* only care if seek returns error */
+		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+		    VRFY((rc==0), "POSIXSEEK");
+		    /* check if all bytes are transferred */
+		    rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
+			POSIXWRITE(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
+		    VRFY((rc != 0), "POSIXWRITE");
+		}else{
+		    /* interleaved access pattern */
+		    char 	*buf_p=buffer;
+		    size_t	xferred=0;
+		    size_t	toxfer=0;
+
+		    file_offset = dset_offset +
+			    (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
+		    if (pio_debug_level >= 4) {
+			HDprint_rank(output);
+			HDfprintf(output, "Debug(do_write): "
+			"nelmts_toxfer=%Hd, nelmts_xfer=%Hd\n",
+			(long_long)nelmts_toxfer, (long_long)nelmts_xfer);
+		    }
+		    while (xferred < nelmts_toxfer){
+			if ((nelmts_toxfer - xferred) >= nelmts_in_blk)
+			    toxfer = nelmts_in_blk;
+			else
+			    toxfer = nelmts_toxfer - xferred;
+			/* Skip offset over blocks of other processes */
+			file_offset = dset_offset +
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*(off_t)ELMT_SIZE;
+			if (pio_debug_level >= 4) {
+			    HDprint_rank(output);
+			    HDfprintf(output, "Debug(do_write): "
+			    "nelmts_toxfer=%Hd, nelmts_xfer=%Hd"
+			    ", toxfer=%Hd, xferred=%Hd"
+			    ", file_offset=%Hd"
+			    "\n",
+			    (long_long)nelmts_toxfer, (long_long)nelmts_xfer, 
+			    (long_long)toxfer, (long_long)xferred,
+			    (long_long)file_offset);
+			}
+			/* only care if seek returns error */
+			rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+			VRFY((rc==0), "POSIXSEEK");
+			/* check if all bytes are written */
+			rc = ((ssize_t)(toxfer*ELMT_SIZE) ==
+			    POSIXWRITE(fd->posixfd, buf_p, toxfer*ELMT_SIZE));
+			VRFY((rc != 0), "POSIXWRITE");
+			xferred += toxfer;
+		    }
+		}
                 break;
 
             case MPIO:
-		if (parms->interleaved==0){
+		if (blk_size==0) {
 		    /* Contiguous pattern */
-                    mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
-                } /* end if */
+		    mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
+                } /* Contiguous pattern */
                 else {
 		    /* Interleaved access pattern */
                     /* Skip offset over blocks of other processes */
@@ -743,30 +809,60 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
                 break;
 
             case PHDF5:
-                /* Set up the file dset space id to select the segment to process */
-                if (parms->interleaved==0){
-                    /* Contiguous pattern */
+                /*set up the dset space id to select the segment to process */
+		if (blk_size==0){
+		    /* Contiguous pattern */
+		    /* setup file selection */
                     h5start[0] = elmts_begin + nelmts_xfer;
-                } /* end if */
-                else {
-                    /* Interleaved access pattern */
-                    /* Skip offset over blocks of other processes */
-                    h5start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
-                } /* end else */
-                h5stride[0] = h5block[0] = nelmts_toxfer;
-                h5count[0] = 1;
-                hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                          h5start, h5stride, h5count, h5block); 
-                VRFY((hrc >= 0), "H5Sset_hyperslab");
+                    h5stride[0] = h5block[0] = nelmts_toxfer;
+                    h5count[0] = 1;
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-                /* Only need selection in memory dataset if it is smaller than the whole buffer */
-                if(nelmts_toxfer<nelmts_in_buf) {
-                    /* Setup the memory space id too.  Only start is different */
+                    /*setup the memory selection.  Only start is different */
                     h5start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-                              h5start, h5stride, h5count, h5block); 
+			      h5start, h5stride, h5count, h5block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
-                } /* end if */
+                } /* Contiguous pattern */
+		else {
+		    /* Interleaved access pattern */
+		    /* setup file selection */
+		    /* Select one block, stride over nproc*block. */
+		    /* Repeat what the xfer buffer can hold */
+		    if (pio_debug_level >= 4) {
+			HDprint_rank(output);
+			HDfprintf(output, "Debug(do_write/PHDF5): "
+			"elmts_begin=%Hd, nelmts_xfer=%Hd"
+			", nelmts_in_blk=%Hd, nelmts_in_buf=%Hd"
+			", pio_mpi_nprocs_g=%Hd"
+			"\n",
+			(long_long)elmts_begin, (long_long)nelmts_xfer, 
+			(long_long)nelmts_in_blk, (long_long)nelmts_in_buf,
+			(long_long)pio_mpi_nprocs_g);
+		    }
+                    h5start[0] = elmts_begin + nelmts_xfer*pio_mpi_nprocs_g;
+                    h5block[0] = nelmts_in_blk;
+                    h5stride[0] = nelmts_in_blk*pio_mpi_nprocs_g;
+		    /* this requires we always use full xfer buffer */
+                    h5count[0] = nelmts_in_buf/nelmts_in_blk;
+
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+
+                    /* Setup the memory selection. */
+		    /* Only start and stride are different. */
+		    /* Could just use H5S_ALL. */
+                    h5start[0] = 0;
+                    h5stride[0] = nelmts_in_blk;
+
+                    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+		}
+
 
                 /* set write time here */
                 hrc = H5Dwrite(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
@@ -830,7 +926,7 @@ done:
     }
 
     return ret_code;
-}
+}  /* do_write */
 
 /*
  * Function:    do_read
@@ -841,7 +937,7 @@ done:
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
-        off_t nelmts, size_t buf_size, void *buffer /*out*/)
+        off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -856,6 +952,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     off_t       file_offset;	/*file offset of the next transfer      */
     off_t       dset_size;      /*one dataset size in bytes             */
     size_t      nelmts_in_buf;  /*how many element the buffer holds     */
+    size_t      nelmts_in_blk=0;  /*how many element a block holds        */
     off_t       elmts_begin;    /*first elmt this process transfer      */
     off_t       elmts_count;    /*number of elmts this process transfer */
 
@@ -865,7 +962,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t       h5ds_id = -1;   	/*dataset handle                */
-    hsize_t	h5block[1];		/*dataspace selection        */
+    hsize_t	h5block[1];		/*dataspace selection           */
     hsize_t	h5stride[1];
     hsize_t	h5count[1];
     hssize_t	h5start[1];
@@ -951,7 +1048,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 	 * transferred by this process. It may be different for different
 	 * transfer pattern due to rounding to integral values.
 	 */
-	if (parms->interleaved==0) {
+	if (blk_size==0){
 	    /* Contiguous Pattern:
 	     * Calculate the beginning element of this process and the next.
 	     * elmts_count is the difference between these two beginnings.
@@ -967,12 +1064,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 	    else
 		/* last process.  Take whatever are left */
 		elmts_count = nelmts - elmts_begin;
-	} /* end if */
-        else {
+	}else{
 	    /* Interleaved Pattern:
-	     * Each process takes buf_size of elements, starting with the first
+	     * Each process takes blk_size of elements, starting with the first
 	     * process.  So, the last process may have fewer or even none.
-	     * Calculate the beginning element of this process.
+	     * Calculate the beginning element of this process and the next.
 	     * The elmnts_begin here marks only the beginning of the first
 	     * block accessed by this process.
 	     */
@@ -984,41 +1080,41 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 	     */ 
 	    off_t remain_nelmts, remain_begin;	/* unallocated remaining*/
 
-	    elmts_begin = (off_t)(nelmts_in_buf*pio_mpi_rank_g);
+	    nelmts_in_blk = blk_size/ELMT_SIZE;
+	    elmts_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
 
 	    /* must use integer calculation next */
 	    /* allocate equal blocks per process */
-	    elmts_count = (nelmts / (off_t)(nelmts_in_buf*pio_mpi_nprocs_g)) *
-			    (off_t)nelmts_in_buf;
-	    remain_nelmts = nelmts % ((off_t)(nelmts_in_buf*pio_mpi_nprocs_g));
+	    elmts_count = (nelmts / (off_t)(nelmts_in_blk*pio_mpi_nprocs_g)) *
+			    (off_t)nelmts_in_blk;
+	    remain_nelmts = nelmts % ((off_t)(nelmts_in_blk*pio_mpi_nprocs_g));
 
 	    /* allocate any remaining */
-	    remain_begin = (off_t)(nelmts_in_buf*pio_mpi_rank_g);
-	    if (remain_nelmts > remain_begin) {
+	    remain_begin = (off_t)(nelmts_in_blk*pio_mpi_rank_g);
+	    if (remain_nelmts > remain_begin){
 		/* it gets something */
-		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_buf)) {
+		if (remain_nelmts > (remain_begin+(off_t)nelmts_in_blk)){
 		    /* one full block */
-		    elmts_count += nelmts_in_buf;
-		} /* end if */
-                else {
+		    elmts_count += nelmts_in_blk;
+		}else{
 		    /* only a partial block */
 		    elmts_count += remain_nelmts - remain_begin;
-		} /* end else */
-	    } /* end if */
-	} /* end else */
+		}
+	    }
+	}
 	/* debug */
 	if (pio_debug_level >= 4) {
 	    HDprint_rank(output);
 	    HDfprintf(output, "Debug(do_read): "
-		"nelmts_in_buf=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
-		(long_long)nelmts_in_buf, (long_long)elmts_begin,
+		"nelmts_in_blk=%Hd, elmts_begin=%Hd, elmts_count=%Hd\n",
+		(long_long)nelmts_in_blk, (long_long)elmts_begin,
 		(long_long)elmts_count);
 	}
 
 
 	/* The task is to transfer elmts_count elements, starting at
 	 * elmts_begin position, using transfer buffer of buf_size bytes.
-	 * If interleaved, select buf_size at a time, in round robin
+	 * If blk_size > 0, select blk_size at a time, in round robin
 	 * fashion, according to number of process. Otherwise, select
 	 * all elmt_count in contiguous.
 	 */
@@ -1042,30 +1138,66 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             /* Calculate offset of read within a dataset/file */
             switch (parms->io_type){
             case POSIXIO:
-		if (parms->interleaved==0){
+		if (blk_size==0){
 		    /* Contiguous pattern */
 		    /* need to (off_t) the elmnts_begin expression because they */
 		    /* may be of smaller sized integer types */
 		    file_offset = dset_offset + (off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
-		} /* end if */
-                else {
-		    /* Interleaved access pattern */
-                    /* Skip offset over blocks of other processes */
-                    file_offset = dset_offset +
-                        (off_t)(elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g))*(off_t)ELMT_SIZE;
-		} /* end else */
 
-                /* only care if seek returns error */
-                rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
-                VRFY((rc==0), "POSIXSEEK");
-                /* check if all bytes are transferred */
-                rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
-                    POSIXREAD(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
-                VRFY((rc != 0), "POSIXREAD");
+		    /* only care if seek returns error */
+		    rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+		    VRFY((rc==0), "POSIXSEEK");
+		    /* check if all bytes are transferred */
+		    rc = ((ssize_t)(nelmts_toxfer*ELMT_SIZE) ==
+			POSIXREAD(fd->posixfd, buffer, nelmts_toxfer*ELMT_SIZE));
+		    VRFY((rc != 0), "POSIXREAD");
+		}else{
+		    /* interleaved access pattern */
+		    char 	*buf_p=buffer;
+		    size_t	xferred=0;
+		    size_t	toxfer=0;
+
+		    file_offset = dset_offset +
+			(off_t)(elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
+		    if (pio_debug_level >= 4) {
+			HDprint_rank(output);
+			HDfprintf(output, "Debug(do_read): "
+			"nelmts_toxfer=%Hd, nelmts_xfer=%Hd\n",
+			(long_long)nelmts_toxfer, (long_long)nelmts_xfer);
+		    }
+		    while (xferred < nelmts_toxfer){
+			if ((nelmts_toxfer - xferred) >= nelmts_in_blk)
+			    toxfer = nelmts_in_blk;
+			else
+			    toxfer = nelmts_toxfer - xferred;
+			/* Skip offset over blocks of other processes */
+			file_offset = dset_offset +
+			    (off_t)(elmts_begin + (nelmts_xfer+xferred)*pio_mpi_nprocs_g)*(off_t)ELMT_SIZE;
+			if (pio_debug_level >= 4) {
+			    HDprint_rank(output);
+			    HDfprintf(output, "Debug(do_read):"
+			    "nelmts_toxfer=%Hd, nelmts_xfer=%Hd"
+			    ", toxfer=%Hd, xferred=%Hd"
+			    ", file_offset=%Hd"
+			    "\n",
+			    (long_long)nelmts_toxfer, (long_long)nelmts_xfer, 
+			    (long_long)toxfer, (long_long)xferred,
+			    (long_long)file_offset);
+			}
+			/* only care if seek returns error */
+			rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
+			VRFY((rc==0), "POSIXSEEK");
+			/* check if all bytes are transferred */
+			rc = ((ssize_t)(toxfer*ELMT_SIZE) ==
+			    POSIXREAD(fd->posixfd, buf_p, toxfer*ELMT_SIZE));
+			VRFY((rc != 0), "POSIXREAD");
+			xferred += toxfer;
+		    }
+		}
                 break;
 
             case MPIO:
-		if (parms->interleaved==0){
+		if (blk_size==0) {
 		    /* Contiguous pattern */
                     mpi_offset = dset_offset + (elmts_begin + nelmts_xfer)*(off_t)ELMT_SIZE;
                 } /* end if */
@@ -1090,28 +1222,46 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
                 break;
 
             case PHDF5:
-                /* Set up the dset space id to select the segment to process */
-                if (parms->interleaved==0){
-                    /* Contiguous pattern */
+                /*set up the dset space id to select the segment to process */
+		if (blk_size==0) {
+		    /* Contiguous pattern */
+		    /* setup file selection */
                     h5start[0] = elmts_begin + nelmts_xfer;
-                } /* end if */
-                else {
-                    /* Interleaved access pattern */
-                    /* Skip offset over blocks of other processes */
-                    h5start[0] = elmts_begin + (nelmts_xfer*pio_mpi_nprocs_g);
-                } /* end else */
-                h5stride[0] = h5block[0] = nelmts_toxfer;
-                h5count[0] = 1;
-                hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-                          h5start, h5stride, h5count, h5block); 
-                VRFY((hrc >= 0), "H5Sset_hyperslab");
+                    h5stride[0] = h5block[0] = nelmts_toxfer;
+                    h5count[0] = 1;
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-                /* Only need selection in memory dataset if it is smaller than the whole buffer */
-                if(nelmts_toxfer<nelmts_in_buf) {
-                    /* Setup the memory space id too.  Only start is different */
+                    /*setup the memory selection.  Only start is different */
                     h5start[0] = 0;
                     hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-                              h5start, h5stride, h5count, h5block); 
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                } /* Contiguous pattern */
+		else {
+		    /* Interleaved access pattern */
+		    /* setup file selection */
+		    /* Select one block, stride over nproc*block. */
+		    /* Repeat what the xfer buffer can hold */
+                    h5start[0] = elmts_begin + nelmts_xfer*pio_mpi_nprocs_g;
+                    h5block[0] = nelmts_in_blk;
+                    h5stride[0] = nelmts_in_blk*pio_mpi_nprocs_g;
+		    /* this requires we always use full xfer buffer */
+                    h5count[0] = nelmts_in_buf/nelmts_in_blk;
+
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+
+                    /* Setup the memory selection. */
+		    /* Only start and stride are different. */
+		    /* Could just use H5S_ALL. */
+                    h5start[0] = 0;
+                    h5stride[0] = nelmts_in_blk;
+
+                    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
+			      h5start, h5stride, h5count, h5block); 
                     VRFY((hrc >= 0), "H5Sset_hyperslab");
                 } /* end if */
 
@@ -1203,7 +1353,7 @@ done:
     }
 
     return ret_code;
-}
+}  /* do_read */
 
 /*
  * Function:    do_fopen
