@@ -807,7 +807,7 @@ H5S_mpio_opt_possible( const H5S_t *mem_space, const H5S_t *file_space, const un
         HGOTO_DONE(FALSE);
 
     /* Dataset storage must be contiguous currently */
-    if ((sconv_flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS)
+    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS)
         HGOTO_DONE(FALSE);
 
     /* Parallel I/O conversion flag must be set */

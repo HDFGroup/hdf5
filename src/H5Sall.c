@@ -588,7 +588,7 @@ H5S_all_write(H5F_t *f, const struct H5O_layout_t *layout,
 {
     H5S_hyper_span_t *file_span=NULL,*mem_span=NULL;     /* Hyperslab span node */
     const char *buf=(const char*)_buf;  /* Get pointer to buffer */
-    hsize_t	mem_elmts,file_elmts;   /* Number of elements in each dimension of selection */
+    hsize_t	file_elmts;   /* Number of elements in each dimension of selection */
     hssize_t	file_off,mem_off;       /* Offset (in elements) of selection */
     hsize_t	mem_size[H5O_LAYOUT_NDIMS];     /* Size of memory buffer */
     hsize_t	size[H5O_LAYOUT_NDIMS];         /* Size of selection */
@@ -609,11 +609,9 @@ printf("%s: check 1.0\n",FUNC);
             case H5S_SEL_HYPERSLABS:
                 /* Check for a "regular" hyperslab selection */
                 if(mem_space->select.sel_info.hslab.diminfo != NULL) {
-                    mem_elmts=mem_space->select.sel_info.hslab.diminfo[u].block;
                     mem_off=mem_space->select.sel_info.hslab.diminfo[u].start;
                 } /* end if */
                 else {
-                    mem_elmts=(mem_span->high-mem_span->low)+1;
                     mem_off=mem_span->low;
                     mem_span=mem_span->down->head;
                 } /* end else */
@@ -621,12 +619,10 @@ printf("%s: check 1.0\n",FUNC);
                 break;
 
             case H5S_SEL_ALL:
-                mem_elmts=mem_space->extent.u.simple.size[u];
                 mem_off=0;
                 break;
 
             case H5S_SEL_POINTS:
-                mem_elmts=1;
                 mem_off=mem_space->select.sel_info.pnt_lst->head->pnt[u]
                             +mem_space->select.offset[u];
                 break;
