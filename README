@@ -1,4 +1,6 @@
-This is the hdf5-1.0.0a alpha release of the HDF5 library.
+This is hdf5-1.0.9a released on 1998-06-10 15:10 UTC
+Please refer to the INSTALL file for installation instructions.
+------------------------------------------------------------------------------
 
 This release is almost fully functional for the entire API defined in the
 documentation, see the RELEASE file in this directory for information

@@ -140,6 +140,17 @@ sub release (@) {
      (setver ($ver=$_) or die "cannot set version") if /\S/;
    }
 
+   # Update the README file to contain the new version and date
+   # information.
+   my $today = sprintf "19%02d-%02d-%02d %02d:%02d UTC", (gmtime)[5,4,3,2,1];
+   $_ = `cat README`;
+   s[^(This is hdf5-)\d+.\d+.\d+[a-z]( released on )(\d+-?){3} \d+:\d+ UTC]
+    [$1$ver$2$today]s;
+   system ("cp -p README README~");
+   open README, ">README" or die "unable to open README: $!\n";
+   print README;
+   close README;
+   
    # Move default top-level makefile into place.
    $status = system "cp Makefile.dist Makefile";
    die "cannot install default Makefile" if $status >> 8;

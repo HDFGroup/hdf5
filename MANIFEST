@@ -108,6 +108,17 @@
 ./doc/html/tracing.html
 ./doc/html/version.gif
 ./doc/html/version.obj
+./doc/src/Glossary.html
+./doc/src/RM_H5A.html
+./doc/src/RM_H5D.html
+./doc/src/RM_H5E.html
+./doc/src/RM_H5F.html
+./doc/src/RM_H5Front.html
+./doc/src/RM_H5G.html
+./doc/src/RM_H5P.html
+./doc/src/RM_H5S.html
+./doc/src/RM_H5T.html
+./doc/src/RM_H5Z.html
 ./doc/tgif/APIGrammar.obj
 ./doc/tgif/FileGrammar.obj
 ./doc/tgif/IOPipe.obj
