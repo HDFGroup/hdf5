@@ -841,7 +841,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
 #ifdef WIN32
    tempos = ftell(file->fp);
-   fseek(file->fp,tempos,SEEK_SET);
+   fseek(file->fp,(long)tempos,SEEK_SET);
 #endif
     /* Update EOF if necessary */
     if (file->pos>file->eof)

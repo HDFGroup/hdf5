@@ -794,7 +794,7 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
 
     /* Re-allocate the heap information in memory */
     if (NULL==(new_chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size+need)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "new heap allocation failed");
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed");
 
     /* Adjust the size of the heap */
     old_size=heap->size;

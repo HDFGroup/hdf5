@@ -184,7 +184,8 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Set "local" parameter for this dataset's "pixels-per-scanline" */
     /* (Use the chunk's fastest changing dimension size) */
-    cd_values[H5Z_SZIP_PARM_PPS]=dims[ndims-1];
+    assert(ndims>0);
+    H5_ASSIGN_OVERFLOW(cd_values[H5Z_SZIP_PARM_PPS],dims[ndims-1],hsize_t,unsigned);
 
     /* Get datatype's endianness order */
     if((dtype_order=H5Tget_order(type_id))==H5T_ORDER_ERROR)

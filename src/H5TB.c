@@ -204,12 +204,21 @@ H5TB_int_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 static int
 H5TB_hsize_cmp(const void *k1, const void *k2, int UNUSED cmparg)
 {
+    int ret_value;
+
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5TB_hsize_cmp);
 
     assert(k1);
     assert(k2);
 
-    FUNC_LEAVE_NOAPI(*(const hsize_t *)k1 - *(const hsize_t *)k2);
+    if(*(const hsize_t *)k1 < *(const hsize_t *)k2)
+        ret_value=-1;
+    else if(*(const hsize_t *)k1 > *(const hsize_t *)k2)
+        ret_value=1;
+    else
+        ret_value=0;
+
+    FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5TB_hsize_cmp() */
 
 

@@ -267,7 +267,7 @@ H5_DLL herr_t H5S_select_release(H5S_t *ds);
 H5_DLL herr_t H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
-H5_DLL herr_t H5S_select_serial_size(const H5S_t *space);
+H5_DLL hssize_t H5S_select_serial_size(const H5S_t *space);
 H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
 H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_single(const H5S_t *space);

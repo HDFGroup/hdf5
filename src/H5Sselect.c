@@ -234,7 +234,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+hssize_t
 H5S_select_serial_size(const H5S_t *space)
 {
     hssize_t ret_value;   /* Return value */

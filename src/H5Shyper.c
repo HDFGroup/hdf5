@@ -660,13 +660,13 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
             while(temp_dim>=0) {
                 if(temp_dim==fast_dim) {
                     size_t actual_elem;     /* Actual # of elements advanced on each iteration through loop */
-                    size_t block_elem;      /* Number of elements left in a block */
+                    hsize_t block_elem;     /* Number of elements left in a block */
 
                     /* Compute the number of elements left in block */
                     block_elem=tdiminfo[temp_dim].block-iter_offset[temp_dim];
 
                     /* Compute the number of actual elements to advance */
-                    actual_elem=MIN(nelem,block_elem);
+                    actual_elem=(size_t)MIN(nelem,block_elem);
 
                     /* Move the iterator over as many elements as possible */
                     iter_offset[temp_dim]+=actual_elem;
@@ -731,13 +731,13 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
                 /* Increment absolute position */
                 if(curr_dim==fast_dim) {
                     size_t actual_elem;     /* Actual # of elements advanced on each iteration through loop */
-                    size_t span_elem;       /* Number of elements left in a span */
+                    hsize_t span_elem;      /* Number of elements left in a span */
 
                     /* Compute the number of elements left in block */
                     span_elem=(curr_span->high-abs_arr[curr_dim])+1;
 
                     /* Compute the number of actual elements to advance */
-                    actual_elem=MIN(nelem,span_elem);
+                    actual_elem=(size_t)MIN(nelem,span_elem);
 
                     /* Move the iterator over as many elements as possible */
                     abs_arr[curr_dim]+=actual_elem;
@@ -1590,7 +1590,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 
     /* Allocate space for the hyperslab selection information */
     if((dst->select.sel_info.hslab=H5FL_MALLOC(H5S_hyper_sel_t))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab info");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info");
 
     /* Set temporary pointers */
     dst_hslab=dst->select.sel_info.hslab;

@@ -178,7 +178,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive");
         if (dim[i] != (dim[i]&0xffffffff))
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be less than 2^32");
-        real_dims[i]=dim[i]; /* Store user's chunk dimensions */
+        real_dims[i]=(size_t)dim[i]; /* Store user's chunk dimensions */
     } /* end for */
 
     layout = H5D_CHUNKED;

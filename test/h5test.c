@@ -773,7 +773,7 @@ h5_get_file_size(const char *filename)
 
     /* Get the file's statistics */
     if (HDstat(filename, &sb)>=0)
-        return(sb.st_size);
+        return((off_t)sb.st_size);
 
     return(0);
 } /* end get_file_size() */
