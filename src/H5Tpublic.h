@@ -383,22 +383,22 @@ __DLLVAR__ hid_t H5T_NATIVE_HERR_g;
 __DLLVAR__ hid_t H5T_NATIVE_HBOOL_g;
    
 /* Operations defined on all data types */
-__DLL__ hid_t H5Topen (hid_t loc_id, const char *name);
-__DLL__ hid_t H5Tcreate (H5T_class_t type, size_t size);
-__DLL__ hid_t H5Tcopy (hid_t type_id);
-__DLL__ herr_t H5Tclose (hid_t type_id);
-__DLL__ htri_t H5Tequal (hid_t type1_id, hid_t type2_id);
-__DLL__ herr_t H5Tlock (hid_t type_id);
-__DLL__ herr_t H5Tcommit (hid_t loc_id, const char *name, hid_t type_id);
-__DLL__ htri_t H5Tcommitted (hid_t type_id);
+__DLL__ hid_t H5Topen(hid_t loc_id, const char *name);
+__DLL__ hid_t H5Tcreate(H5T_class_t type, size_t size);
+__DLL__ hid_t H5Tcopy(hid_t type_id);
+__DLL__ herr_t H5Tclose(hid_t type_id);
+__DLL__ htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
+__DLL__ herr_t H5Tlock(hid_t type_id);
+__DLL__ herr_t H5Tcommit(hid_t loc_id, const char *name, hid_t type_id);
+__DLL__ htri_t H5Tcommitted(hid_t type_id);
 
 /* Operations defined on compound data types */
-__DLL__ herr_t H5Tinsert (hid_t parent_id, const char *name, size_t offset,
-                  hid_t member_id);
-__DLL__ herr_t H5Tinsert_array (hid_t parent_id, const char *name,
-				size_t offset, int ndims, const size_t dim[],
-				const int *perm, hid_t member_id);
-__DLL__ herr_t H5Tpack (hid_t type_id);
+__DLL__ herr_t H5Tinsert(hid_t parent_id, const char *name, size_t offset,
+			 hid_t member_id);
+__DLL__ herr_t H5Tinsert_array(hid_t parent_id, const char *name,
+			       size_t offset, int ndims, const size_t dim[],
+			       const int *perm, hid_t member_id);
+__DLL__ herr_t H5Tpack(hid_t type_id);
 
 /* Operations defined on enumeration data types */
 __DLL__ hid_t H5Tenum_create(hid_t base_id);
@@ -436,28 +436,28 @@ __DLL__ herr_t H5Tget_member_value(hid_t type_id, int membno,
 __DLL__ H5T_cset_t H5Tget_cset(hid_t type_id);
 
 /* Setting property values */
-__DLL__ herr_t H5Tset_size (hid_t type_id, size_t size);
-__DLL__ herr_t H5Tset_order (hid_t type_id, H5T_order_t order);
-__DLL__ herr_t H5Tset_precision (hid_t type_id, size_t prec);
-__DLL__ herr_t H5Tset_offset (hid_t type_id, size_t offset);
-__DLL__ herr_t H5Tset_pad (hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
-__DLL__ herr_t H5Tset_sign (hid_t type_id, H5T_sign_t sign);
-__DLL__ herr_t H5Tset_fields (hid_t type_id, size_t spos, size_t epos,
-			      size_t esize, size_t mpos, size_t msize);
-__DLL__ herr_t H5Tset_ebias (hid_t type_id, size_t ebias);
-__DLL__ herr_t H5Tset_norm (hid_t type_id, H5T_norm_t norm);
-__DLL__ herr_t H5Tset_inpad (hid_t type_id, H5T_pad_t pad);
-__DLL__ herr_t H5Tset_cset (hid_t type_id, H5T_cset_t cset);
-__DLL__ herr_t H5Tset_strpad (hid_t type_id, H5T_str_t strpad);
+__DLL__ herr_t H5Tset_size(hid_t type_id, size_t size);
+__DLL__ herr_t H5Tset_order(hid_t type_id, H5T_order_t order);
+__DLL__ herr_t H5Tset_precision(hid_t type_id, size_t prec);
+__DLL__ herr_t H5Tset_offset(hid_t type_id, size_t offset);
+__DLL__ herr_t H5Tset_pad(hid_t type_id, H5T_pad_t lsb, H5T_pad_t msb);
+__DLL__ herr_t H5Tset_sign(hid_t type_id, H5T_sign_t sign);
+__DLL__ herr_t H5Tset_fields(hid_t type_id, size_t spos, size_t epos,
+			     size_t esize, size_t mpos, size_t msize);
+__DLL__ herr_t H5Tset_ebias(hid_t type_id, size_t ebias);
+__DLL__ herr_t H5Tset_norm(hid_t type_id, H5T_norm_t norm);
+__DLL__ herr_t H5Tset_inpad(hid_t type_id, H5T_pad_t pad);
+__DLL__ herr_t H5Tset_cset(hid_t type_id, H5T_cset_t cset);
+__DLL__ herr_t H5Tset_strpad(hid_t type_id, H5T_str_t strpad);
 
 /* Type conversion database */
 __DLL__ herr_t H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id,
 			   hid_t dst_id, H5T_conv_t func);
-__DLL__ herr_t H5Tunregister (H5T_pers_t pers, const char *name, hid_t src_id,
-			      hid_t dst_id, H5T_conv_t func);
-__DLL__ H5T_conv_t H5Tfind (hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
-__DLL__ herr_t H5Tconvert (hid_t src_id, hid_t dst_id, size_t nelmts,
-			   void *buf, void *background);
+__DLL__ herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
+			     hid_t dst_id, H5T_conv_t func);
+__DLL__ H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
+__DLL__ herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
+			  void *buf, void *background);
 __DLL__ H5T_overflow_t H5Tget_overflow(void);
 __DLL__ herr_t H5Tset_overflow(H5T_overflow_t func);
 

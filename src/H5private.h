@@ -775,7 +775,8 @@ extern H5_debug_t		H5_debug_g;
 #define H5TRACE_RETURN(V)		   /*void*/
 #endif
 
-__DLL__ void H5_trace (hbool_t returning, const char *func, const char *type, ...);
+__DLL__ void H5_trace(hbool_t returning, const char *func, const char *type,
+		      ...);
 
 
 /*-------------------------------------------------------------------------

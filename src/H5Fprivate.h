@@ -404,13 +404,13 @@ typedef struct H5F_low_t {
 #ifndef H5F_LOW_DFLT
 #  define H5F_LOW_DFLT	H5F_LOW_SEC2	/* The default type	  */
 #endif
-__DLLVAR__ const H5F_low_class_t H5F_LOW_SEC2_g[];	/* Posix section 2	*/
-__DLLVAR__ const H5F_low_class_t H5F_LOW_STDIO_g[];	/* Posix stdio		*/
-__DLLVAR__ const H5F_low_class_t H5F_LOW_CORE_g[];	/* In-core temp file	*/
-__DLLVAR__ const H5F_low_class_t H5F_LOW_FAMILY_g[];/* File family		*/
-__DLLVAR__ const H5F_low_class_t H5F_LOW_SPLIT_g[];	/* Split meta/raw data	*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_SEC2_g[];  /*Posix section 2	 */
+__DLLVAR__ const H5F_low_class_t H5F_LOW_STDIO_g[]; /*Posix stdio	 */
+__DLLVAR__ const H5F_low_class_t H5F_LOW_CORE_g[];  /*In-core temp file	 */
+__DLLVAR__ const H5F_low_class_t H5F_LOW_FAMILY_g[];/*File family	 */
+__DLLVAR__ const H5F_low_class_t H5F_LOW_SPLIT_g[]; /*Split meta/raw data*/
 #ifdef HAVE_PARALLEL
-__DLLVAR__ const H5F_low_class_t H5F_LOW_MPIO_g[];	/* MPI-IO		*/
+__DLLVAR__ const H5F_low_class_t H5F_LOW_MPIO_g[];  /*MPI-IO		 */
 #endif
 
 /* The raw data chunk cache */
@@ -545,10 +545,12 @@ __DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);
-__DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p, uint8_t *l);
+__DLL__ herr_t H5F_close_all(void);
+__DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
+				       uint8_t *l);
 __DLL__ H5F_t *H5F_open(const char *name, uintn flags,
-		const H5F_create_t *create_parms,
-		const H5F_access_t *access_parms);
+			const H5F_create_t *create_parms,
+			const H5F_access_t *access_parms);
 __DLL__ herr_t H5F_close(H5F_t *f);
 __DLL__ herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
 			 intn indent, intn fwidth);
@@ -583,54 +585,58 @@ __DLL__ herr_t H5F_istore_init (H5F_t *f);
 __DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
 __DLL__ herr_t H5F_istore_dest (H5F_t *f);
 __DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
-__DLL__ herr_t H5F_istore_create(H5F_t *f, struct H5O_layout_t *layout /*in,out*/);
+__DLL__ herr_t H5F_istore_create(H5F_t *f,
+				 struct H5O_layout_t *layout/*in,out*/);
 __DLL__ herr_t H5F_istore_read(H5F_t *f, const struct H5D_xfer_t *xfer,
-		       const struct H5O_layout_t *layout,
-		       const struct H5O_pline_t *pline,
-		       const struct H5O_fill_t *fill,
-		       const hssize_t offset[], const hsize_t size[],
-		       void *buf /*out */ );
+			       const struct H5O_layout_t *layout,
+			       const struct H5O_pline_t *pline,
+			       const struct H5O_fill_t *fill,
+			       const hssize_t offset[], const hsize_t size[],
+			       void *buf/*out*/);
 __DLL__ herr_t H5F_istore_write(H5F_t *f, const struct H5D_xfer_t *xfer,
-			const struct H5O_layout_t *layout,
-			const struct H5O_pline_t *pline,
-			const struct H5O_fill_t *fill,
-			const hssize_t offset[], const hsize_t size[],
-			const void *buf);
+				const struct H5O_layout_t *layout,
+				const struct H5O_pline_t *pline,
+				const struct H5O_fill_t *fill,
+				const hssize_t offset[], const hsize_t size[],
+				const void *buf);
 __DLL__ herr_t H5F_istore_allocate (H5F_t *f,
-			    const struct H5O_layout_t *layout,
-			    const hsize_t *space_dim,
-			    const double split_ratios[], 
-			    const struct H5O_pline_t *pline,
-			    const struct H5O_fill_t *fill);
+				    const struct H5O_layout_t *layout,
+				    const hsize_t *space_dim,
+				    const double split_ratios[], 
+				    const struct H5O_pline_t *pline,
+				    const struct H5O_fill_t *fill);
 
 /* Functions that operate on contiguous storage wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, const haddr_t *addr, hsize_t size,
 			      const H5D_transfer_t xfer_mode, void *buf);
 __DLL__ herr_t H5F_block_write(H5F_t *f, const haddr_t *addr, hsize_t size,
-		       const H5D_transfer_t xfer_mode, const void *buf);
+			       const H5D_transfer_t xfer_mode,
+			       const void *buf);
 
 /* Functions that operate directly on low-level files */
 __DLL__ const H5F_low_class_t *H5F_low_class (H5F_driver_t driver);
 __DLL__ herr_t H5F_low_extend(H5F_low_t *lf, const H5F_access_t *access_parms,
-		      intn op, hsize_t size, haddr_t *addr/*out*/);
+			      intn op, hsize_t size, haddr_t *addr/*out*/);
 __DLL__ herr_t H5F_low_seteof(H5F_low_t *lf, const haddr_t *addr);
 __DLL__ intn H5F_low_alloc (H5F_low_t *lf, intn op, hsize_t alignment,
-		    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
-		    haddr_t *addr/*out*/);
+			    hsize_t threshold, hsize_t size, H5MF_free_t *blk,
+			    haddr_t *addr/*out*/);
 __DLL__ htri_t H5F_low_access(const H5F_low_class_t *type, const char *name,
-		      const H5F_access_t *access_parms, int mode,
-		      H5F_search_t *key);
+			      const H5F_access_t *access_parms, int mode,
+			      H5F_search_t *key);
 __DLL__ H5F_low_t *H5F_low_open(const H5F_low_class_t *type, const char *name,
-			const H5F_access_t *access_parms, uintn flags,
-			H5F_search_t *key);
-__DLL__ H5F_low_t *H5F_low_close(H5F_low_t *lf, const H5F_access_t *access_parms);
+				const H5F_access_t *access_parms, uintn flags,
+				H5F_search_t *key);
+__DLL__ H5F_low_t *H5F_low_close(H5F_low_t *lf,
+				 const H5F_access_t *access_parms);
 __DLL__ hsize_t H5F_low_size(H5F_low_t *lf, haddr_t *addr);
 __DLL__ herr_t H5F_low_read(H5F_low_t *lf, const H5F_access_t *access_parms,
-		    const H5D_transfer_t xfer_mode,
-		    const haddr_t *addr, size_t size, uint8_t *buf);
+			    const H5D_transfer_t xfer_mode,
+			    const haddr_t *addr, size_t size, uint8_t *buf);
 __DLL__ herr_t H5F_low_write(H5F_low_t *lf, const H5F_access_t *access_parms,
-		     const H5D_transfer_t xfer_mode,
-		     const haddr_t *addr, size_t size, const uint8_t *buf);
+			     const H5D_transfer_t xfer_mode,
+			     const haddr_t *addr, size_t size,
+			     const uint8_t *buf);
 __DLL__ herr_t H5F_low_flush(H5F_low_t *lf, const H5F_access_t *access_parms);
 
 /* Functions that operate on addresses */
@@ -658,9 +664,9 @@ __DLL__ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2]);
 
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL
-__DLL__ htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
-__DLL__ herr_t H5PC_Wait_for_left_neighbor( MPI_Comm comm );
-__DLL__ herr_t H5PC_Signal_right_neighbor( MPI_Comm comm );
+__DLL__ htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval);
+__DLL__ herr_t H5PC_Wait_for_left_neighbor(MPI_Comm comm);
+__DLL__ herr_t H5PC_Signal_right_neighbor(MPI_Comm comm);
 #endif /* HAVE_PARALLEL */
 
 #endif

@@ -148,11 +148,13 @@ H5_term_library(void)
      *	       because it's cache depends on almost all other meta object
      *	       packages and those packages depend on H5O which depends on H5F
      *	       (because H5F_close() can delay until all object headers are
-     *	       closed). We handle this cycle by closing the H5F interface,
-     *	       which flushes the cache of all files, breaking any cycles.
+     *	       closed). We handle this cycle by calling H5F_close() for all
+     *	       files, which flushes the meta data caches and updates the file
+     *	       boot block but doesn't actually finalize the close until all
+     *	       open objects are closed by the H5*_term_interface() functions
+     *	       below. Once that happens we can close the H5F interface.
      */
-    H5F_term_interface(-1);
-    H5F_term_interface(0);
+    H5F_close_all();
 
     /* Function			   What depends on it?			*/
     /*-------------------------   -------------------------------	*/
@@ -166,8 +168,8 @@ H5_term_library(void)
     H5S_term_interface(-1);	/*					*/
     H5T_native_close(-1);	/* D RA					*/
     H5T_term_interface(-1);	/* D RA					*/
-    H5F_term_interface(-1); 	/* G T					*/
     H5P_term_interface(-1);	/* D					*/
+    H5F_term_interface(-1); 	/* A D G S T				*/
     H5I_term_interface(-1);	/* A D F G P RA S T TB Z		*/
     /*------------------------- ---------------------------------	*/
 

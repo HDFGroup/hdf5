@@ -35,13 +35,16 @@
 #define H5V_ZERO        NULL
 
 __DLL__ hsize_t H5V_hyper_stride(intn n, const hsize_t *size,
-			 const hsize_t *total_size, const hssize_t *offset,
-			 hssize_t *stride);
+				 const hsize_t *total_size,
+				 const hssize_t *offset,
+				 hssize_t *stride);
 __DLL__ htri_t H5V_hyper_disjointp(intn n, const hssize_t *offset1,
-			   const hsize_t *size1, const hssize_t *offset2,
-			   const hsize_t *size2);
-__DLL__ htri_t H5V_hyper_eq(intn n, const hssize_t *offset1, const hsize_t *size1,
-		    const hssize_t *offset2, const hsize_t *size2);
+				   const hsize_t *size1,
+				   const hssize_t *offset2,
+				   const hsize_t *size2);
+__DLL__ htri_t H5V_hyper_eq(intn n, const hssize_t *offset1,
+			    const hsize_t *size1, const hssize_t *offset2,
+			    const hsize_t *size2);
 __DLL__ herr_t H5V_hyper_fill(intn n, const hsize_t *_size,
 			      const hsize_t *total_size,
 			      const hssize_t *offset, void *_dst,
@@ -52,19 +55,23 @@ __DLL__ herr_t H5V_hyper_copy(intn n, const hsize_t *size,
 			      const hsize_t *src_total_size,
 			      const hssize_t *src_offset, const void *_src);
 __DLL__ herr_t H5V_stride_fill(intn n, hsize_t elmt_size, const hsize_t *size,
-		       const hssize_t *stride, void *_dst, uintn fill_value);
+			       const hssize_t *stride, void *_dst,
+			       uintn fill_value);
 __DLL__ herr_t H5V_stride_copy(intn n, hsize_t elmt_size, const hsize_t *_size,
 			       const hssize_t *dst_stride, void *_dst,
 			       const hssize_t *src_stride, const void *_src);
 __DLL__ herr_t H5V_stride_copy2(hsize_t nelmts, hsize_t elmt_size, intn dst_n,
-			const hsize_t *dst_size, const hssize_t *dst_stride,
-			void *_dst, intn src_n, const hsize_t *src_size,
-			const hssize_t *src_stride, const void *_src);
-__DLL__ herr_t H5V_stride_optimize1(intn *np, hsize_t *elmt_size, hsize_t *size,
-			    hssize_t *stride1);
-__DLL__ herr_t H5V_stride_optimize2(intn *np, hsize_t *elmt_size, hsize_t *size,
-			    hssize_t *stride1, hssize_t *stride2);
-__DLL__ herr_t H5V_array_fill(void *_dst, const void *src, size_t size, size_t count);
+				const hsize_t *dst_size,
+				const hssize_t *dst_stride, void *_dst,
+				intn src_n, const hsize_t *src_size,
+				const hssize_t *src_stride, const void *_src);
+__DLL__ herr_t H5V_stride_optimize1(intn *np, hsize_t *elmt_size,
+				    hsize_t *size, hssize_t *stride1);
+__DLL__ herr_t H5V_stride_optimize2(intn *np, hsize_t *elmt_size,
+				    hsize_t *size, hssize_t *stride1,
+				    hssize_t *stride2);
+__DLL__ herr_t H5V_array_fill(void *_dst, const void *src, size_t size,
+			      size_t count);
 
 
 /*-------------------------------------------------------------------------

@@ -121,15 +121,18 @@ typedef struct H5B_t {
 /*
  * Library prototypes.
  */
-__DLL__ herr_t H5B_debug (H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
-		  intn fwidth, const H5B_class_t *type, void *udata);
-__DLL__ herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *);
-__DLL__ herr_t H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-		 void *udata);
-__DLL__ herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-		   const double split_ratios[], void *udata);
-__DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-		  void *udata);
-__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-		    void *udata);
+__DLL__ herr_t H5B_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
+			  intn indent, intn fwidth, const H5B_class_t *type,
+			  void *udata);
+__DLL__ herr_t H5B_create (H5F_t *f, const H5B_class_t *type, void *udata,
+			   haddr_t *);
+__DLL__ herr_t H5B_find (H5F_t *f, const H5B_class_t *type,
+			 const haddr_t *addr, void *udata);
+__DLL__ herr_t H5B_insert (H5F_t *f, const H5B_class_t *type,
+			   const haddr_t *addr, const double split_ratios[],
+			   void *udata);
+__DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type,
+			  const haddr_t *addr, void *udata);
+__DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type,
+			    const haddr_t *addr, void *udata);
 #endif

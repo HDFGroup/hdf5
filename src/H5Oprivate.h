@@ -151,7 +151,7 @@ typedef struct H5O_fill_t {
 #define H5O_EFL_ID		0x0007	/*external file list id		     */
 #define H5O_EFL_ALLOC		16	/*number of slots to alloc at once   */
 #define H5O_EFL_UNLIMITED	H5F_UNLIMITED /*max possible file size	     */
-__DLLVAR__ const H5O_class_t H5O_EFL[1];	/*external file list class	     */
+__DLLVAR__ const H5O_class_t H5O_EFL[1];/*external file list class	     */
 
 typedef struct H5O_efl_entry_t {
     size_t	name_offset;		/*offset of name within heap	     */
@@ -259,8 +259,8 @@ typedef struct H5O_cont_t {
 #define H5O_STAB_ID	0x0011
 __DLLVAR__ const H5O_class_t H5O_STAB[1];
 
-void *H5O_stab_fast (const H5G_cache_t *cache, const H5O_class_t *type,
-		     void *_mesg);
+__DLL__ void *H5O_stab_fast(const H5G_cache_t *cache, const H5O_class_t *type,
+			    void *_mesg);
 
 typedef struct H5O_stab_t {
     haddr_t	btree_addr;		/*address of B-tree		     */
@@ -268,34 +268,35 @@ typedef struct H5O_stab_t {
 } H5O_stab_t;
 
 /* General message operators */
-__DLL__ herr_t H5O_create (H5F_t *f, size_t size_hint,
-			   H5G_entry_t *ent/*out*/);
-__DLL__ herr_t H5O_open (H5G_entry_t *ent);
-__DLL__ herr_t H5O_close (H5G_entry_t *ent);
-__DLL__ intn H5O_link (H5G_entry_t *ent, intn adjust);
-__DLL__ intn H5O_count (H5G_entry_t *ent, const H5O_class_t *type);
-__DLL__ htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type, intn sequence);
-__DLL__ void *H5O_read (H5G_entry_t *ent, const H5O_class_t *type,
-			intn sequence, void *mesg);
-__DLL__ intn H5O_modify (H5G_entry_t *ent, const H5O_class_t *type,
-			 intn overwrite, uintn flags, const void *mesg);
+__DLL__ herr_t H5O_create(H5F_t *f, size_t size_hint,
+			  H5G_entry_t *ent/*out*/);
+__DLL__ herr_t H5O_open(H5G_entry_t *ent);
+__DLL__ herr_t H5O_close(H5G_entry_t *ent);
+__DLL__ intn H5O_link(H5G_entry_t *ent, intn adjust);
+__DLL__ intn H5O_count(H5G_entry_t *ent, const H5O_class_t *type);
+__DLL__ htri_t H5O_exists(H5G_entry_t *ent, const H5O_class_t *type,
+			  intn sequence);
+__DLL__ void *H5O_read(H5G_entry_t *ent, const H5O_class_t *type,
+		       intn sequence, void *mesg);
+__DLL__ intn H5O_modify(H5G_entry_t *ent, const H5O_class_t *type,
+			intn overwrite, uintn flags, const void *mesg);
 __DLL__ herr_t H5O_touch(H5G_entry_t *ent, hbool_t force);
-__DLL__ herr_t H5O_remove (H5G_entry_t *ent, const H5O_class_t *type,
-			   intn sequence);
-__DLL__ herr_t H5O_reset (const H5O_class_t *type, void *native);
-__DLL__ void *H5O_free (const H5O_class_t *type, void *mesg);
-__DLL__ void *H5O_copy (const H5O_class_t *type, const void *mesg, void *dst);
-__DLL__ herr_t H5O_share (H5F_t *f, const H5O_class_t *type, const void *mesg,
-		  H5HG_t *hobj/*out*/);
-__DLL__ herr_t H5O_debug (H5F_t *f, const haddr_t *addr, FILE * stream,
-			  intn indent, intn fwidth);
+__DLL__ herr_t H5O_remove(H5G_entry_t *ent, const H5O_class_t *type,
+			  intn sequence);
+__DLL__ herr_t H5O_reset(const H5O_class_t *type, void *native);
+__DLL__ void *H5O_free(const H5O_class_t *type, void *mesg);
+__DLL__ void *H5O_copy(const H5O_class_t *type, const void *mesg, void *dst);
+__DLL__ herr_t H5O_share(H5F_t *f, const H5O_class_t *type, const void *mesg,
+			 H5HG_t *hobj/*out*/);
+__DLL__ herr_t H5O_debug(H5F_t *f, const haddr_t *addr, FILE * stream,
+			 intn indent, intn fwidth);
 
 /* EFL operators */
-__DLL__ hsize_t H5O_efl_total_size (H5O_efl_t *efl);
-__DLL__ herr_t H5O_efl_read (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		     hsize_t size, uint8_t *buf);
-__DLL__ herr_t H5O_efl_write (H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
-		      hsize_t size, const uint8_t *buf);
+__DLL__ hsize_t H5O_efl_total_size(H5O_efl_t *efl);
+__DLL__ herr_t H5O_efl_read(H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+			    hsize_t size, uint8_t *buf);
+__DLL__ herr_t H5O_efl_write(H5F_t *f, const H5O_efl_t *efl, haddr_t *addr,
+			     hsize_t size, const uint8_t *buf);
 
 /* Fill value operators */
 __DLL__ herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type);

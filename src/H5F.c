@@ -244,6 +244,46 @@ H5F_term_interface(intn status)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5F_close_all
+ *
+ * Purpose:	Closes all open files. If a file has open object headers then
+ *		the underlying file is held open until all object headers are
+ *		closed for the file (see H5O_close()).
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, February 18, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_close_all(void)
+{
+    FUNC_ENTER(H5F_close_all, FAIL);
+
+    /*
+     * There is no way to call H5F_close() on all items in the group and
+     * remove the items from the group without destroying the group, so we do
+     * it in two steps: first destroy the group, then create a new empty
+     * group.
+     */
+    H5I_destroy_group(H5I_FILE);
+    if (H5I_init_group(H5I_FILE, H5I_FILEID_HASHSIZE, 0,
+		       (herr_t (*)(void*))H5F_close)<0) {
+	HRETURN_ERROR (H5E_FILE, H5E_CANTINIT, FAIL,
+		       "unable to initialize file group");
+    }
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+
 /*--------------------------------------------------------------------------
  NAME
        H5F_encode_length_unusual -- encode an unusual length size

@@ -101,13 +101,13 @@ extern "C" {
 #endif
 
 /* Functions in H5.c */
-__DLL__ herr_t H5open (void);
-__DLL__ herr_t H5close (void);
-__DLL__ herr_t H5dont_atexit (void);
-__DLL__ herr_t H5get_libversion (unsigned *majnum, unsigned *minnum,
-				 unsigned *relnum);
-__DLL__ herr_t H5check_version (unsigned majnum, unsigned minnum,
-				unsigned relnum);
+__DLL__ herr_t H5open(void);
+__DLL__ herr_t H5close(void);
+__DLL__ herr_t H5dont_atexit(void);
+__DLL__ herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
+				unsigned *relnum);
+__DLL__ herr_t H5check_version(unsigned majnum, unsigned minnum,
+			       unsigned relnum);
 
 #ifdef __cplusplus
 }
