@@ -1403,7 +1403,110 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
-} /* test_insert_level2_2internal_split() */
+} /* test_insert_level2_3internal_redistrib() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_insert_level2_3internal_split
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to make a level 2 B-tree and then adds enough more
+ *              records to force the left-most and right-most internal nodes to
+ *              split and more records to force a 3->4 node split of the
+ *              internal nodes.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, February 19, 2005
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_insert_level2_3internal_split(hid_t fapl)
+{
+    hid_t	file=-1;
+    char	filename[1024];
+    H5F_t	*f=NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    hsize_t     idx;                    /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Create the file to work on */
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) TEST_ERROR;
+	
+    /* Get a pointer to the internal file object */
+    if (NULL==(f=H5I_object(file))) {
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Create v2 B-tree 
+     */
+    if (H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /*
+     * Test inserting many records into v2 B-tree 
+     */
+    TESTING("B-tree insert: split 3 internals to 4 in level 2 B-tree");
+
+    /* Insert enough records to force root to split into 2 internal nodes */
+    /* Also forces right-most internal node to split */
+    for(u=0; u<(INSERT_SPLIT_ROOT_NREC*21); u++) {
+        record=u+(INSERT_SPLIT_ROOT_NREC*19)+28;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Force left-most internal node to split */
+    /* Force middle node to split */
+    for(u=0; u<INSERT_SPLIT_ROOT_NREC*19+28; u++) {
+        record=u;
+        if (H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record)<0) {
+            H5_FAILED();
+            H5Eprint_stack(H5E_DEFAULT, stdout);
+            goto error;
+        }
+    }
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx = 0;
+    if(H5B2_iterate(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, iter_cb, &idx)<0) {
+	H5_FAILED();
+	H5Eprint_stack(H5E_DEFAULT, stdout);
+	goto error;
+    }
+
+    /* Make certain that the index is correct */
+    if(idx != (INSERT_SPLIT_ROOT_NREC*40)+28) TEST_ERROR;
+
+    PASSED();
+
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_insert_level2_3internal_split() */
 
 
 /*-------------------------------------------------------------------------
@@ -1445,6 +1548,7 @@ main(void)
     nerrors += test_insert_level2_2internal_redistrib(fapl);
     nerrors += test_insert_level2_2internal_split(fapl);
     nerrors += test_insert_level2_3internal_redistrib(fapl);
+    nerrors += test_insert_level2_3internal_split(fapl);
 
     if (nerrors) goto error;
     puts("All v2 B-tree tests passed.");
