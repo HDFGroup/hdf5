@@ -143,53 +143,53 @@ static const dump_header standardformat = {
 };
 
 static const dump_header xmlformat = {
-	"xml",
-	"<FILE>",
-	"</FILE>",
-	"<BOOTBLOCK>",
-	"</BOOTBLOCK>",
-	"<GROUP>",
-	"</GROUP>",	
-	"<DATASET>",	
-	"</DATASET>",			
-	"<ATTRIBUTE>",
-	"</ATTRIBUTE>",	
-	"<DATASPACE>",	
-	"<DATATYPE>",
-	"</DATATYPE>",	
-	"</DATASPACE>",
-	"<DATA>",	
-	"</DATA>",
-	"<SOFTLINK>",
-	"</SOFTLINK>",
+	"xml", /*name*/
+	"<FILE>",         /*filebegin*/
+	"</FILE>",         /*fileend*/
+	"<BOOTBLOCK>",         /*bootblockbegin*/
+	"</BOOTBLOCK>",         /*bootblockend*/
+	"<GROUP>",         /*groupbegin*/
+	"</GROUP>",	         /*groupend*
+	"<DATASET>",	         /*datasetbegin*/
+	"</DATASET>",		/*datasetend*/	
+	"<ATTRIBUTE>",         /*attributebegin*/
+	"</ATTRIBUTE>",	          /*attributeend*/
+	"<DATATYPE>",          /*datatypeend*/
+	"</DATATYPE>",	          /*datatypeend*/
+	"<DATASPACE>",	          /*dataspacebegin*/
+	"</DATASPACE>",          /*dataspaceend*/
+	"<DATA>",	          /*databegin*/
+	"</DATA>",          /*dataend*/
+	"<SOFTLINK>",          /*softlinkbegin*/
+	"</SOFTLINK>",          /*softlinkend*/
 
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
+	"",          /*fileblockbegin*/
+	"",          /*fileblockend*/
+	"",          /*bootblockblockbegin*/
+	"",          /*bootblockblockend*/
+	"",          /*groupblockbegin*/
+	"",          /*groupblockend*/
+	"",          /*datasetblockbegin*/
+	"",          /*datasetblockend*/
+	"",          /*attributeblockbegin*/
+	"",          /*attributeblockend*/
+	"",          /*datatypeblockbegin*/
+	"",          /*datatypeblockend*/
+	"",          /*dataspaceblockbegin*/
+	"",          /*dataspaceblockend*/
+	"",          /*datablockbegin*/
+	"",          /*datablockend*/
+	"",          /*softlinkblockbegin*/
+	"",          /*softlinkblockend*/
 	"",				/*strblockbegin*/
 	"",				/*strblockend*/
 	"",				/*enumblockbegin*/
 	"",				/*enumblockend*/
 
-	"{",
-	"}",
-	"(",
-	")",
+	"{",           /*dataspacedescriptionbegin*/
+	"}",           /*dataspacedescriptionend*/
+	"(",           /*dataspacedimbegin*/
+	")",           /*dataspacedimend*/
 
 };
 
