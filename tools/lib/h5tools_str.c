@@ -26,8 +26,8 @@
 #include "H5private.h"
 #include "h5tools.h"            /*for h5dump_t structure    */
 #include "h5tools_str.h"        /*function prototypes       */
+#include "h5tools_ref.h"
 
-extern char* lookup_ref_path(hobj_ref_t ref);
 
 
 /*

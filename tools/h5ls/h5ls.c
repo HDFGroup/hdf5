@@ -2265,10 +2265,5 @@ main (int argc, const char *argv[])
     leave(0);
 }
 
-/* dummy function */
-char *
-lookup_ref_path(hobj_ref_t ref)
-{
- return NULL;
-}
+
 
