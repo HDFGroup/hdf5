@@ -713,12 +713,10 @@ test_filterqueue(void)
   TEST_ERROR;
  if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
   TEST_ERROR;
- if (h5repack_addfilter("dset1:GZIP 1",&pack_options)<0)
-  TEST_ERROR;
-#if 0
  if (h5repack_addfilter("dset1:SZIP 8",&pack_options)<0)
   TEST_ERROR;
-#endif
+ if (h5repack_addfilter("dset1:GZIP 1",&pack_options)<0)
+  TEST_ERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options)<0)
   TEST_ERROR;
  if (h5diff(FNAME4,FNAME4OUT,NULL,NULL,&diff_options) == 1)
@@ -745,7 +743,7 @@ error:
  *  Failure: non-zero
  *
  * Programmer: Pedro Vicente <pvn@ncsa.uiuc.edu>
- *             January, 5, 2004
+ *             January, 6, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -785,22 +783,7 @@ int main (void)
 
  /* test a copy with layout COMPA options */
  nerrors += test_layout_compact();
-
- /* test a copy with the shuffle filter */
- nerrors += test_filter_shuffle();
-
- /* test a copy with the checksum filter */
- nerrors += test_filter_checksum();
-
- /* test a copy with layout CHUNK options */
- nerrors += test_layout_chunked();
-
- /* test a copy with layout CONTI options */
- nerrors += test_layout_contiguous();
-
- /* test a copy with layout COMPA options */
- nerrors += test_layout_compact();
-
+ 
  /* test a copy with all available filters */
  nerrors += test_filterqueue();
 
@@ -815,8 +798,6 @@ error:
  puts("***** H5REPACK TESTS FAILED *****");
  return 1;
 
-
- return 0;
 }
 
 
