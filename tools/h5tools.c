@@ -105,11 +105,6 @@ extern int get_tableflag(table_t*, int);
 extern int set_tableflag(table_t*, int);
 extern char *get_objectname(table_t*, int);
 
-/* local functions */
-static void h5dump_simple_data(FILE *stream, const h5dump_t *info,
-        hid_t container, h5dump_context_t *ctx/*in,out*/, unsigned flags,
-        hsize_t nelmts, hid_t type, void *_mem);
-
 /*-------------------------------------------------------------------------
  * Function:	h5tools_init
  *
@@ -1086,6 +1081,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    H5Tclose(memb);
     } else if (H5T_VLEN==H5Tget_class(type)) {
 	    unsigned int i;
+	    hid_t space;
 
         /* Get the VL sequences's base datatype for each element */
         memb=H5Tget_super(type);
@@ -1129,6 +1125,15 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
  		h5dump_str_append(str, "%s", OPT(info->vlen_suf, ")"));
 
 	    H5Tclose(memb);
+
+        /* Create a datatype for reclaiming the memory */
+        space=H5Screate(H5S_SCALAR);
+
+        /* Reclaim the VL memory */
+        H5Dvlen_reclaim(type,space,H5P_DEFAULT,cp_vp);
+
+        /* Let the dataspace go */
+        H5Sclose(space);
     } else {
         /* All other types get printed as hexadecimal */
         unsigned int i;
