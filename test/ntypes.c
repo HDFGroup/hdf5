@@ -270,11 +270,11 @@ test_compound_dtype2(hid_t file)
     /* Initialize the dataset */
     for (i = n = 0, temp_point=points; i < 100; i++) {
 	for (j = 0; j < 200; j++,temp_point++) {
-	    points->c = 't';
-	    points->i = n++;
-	    points->st.c2 = i+j;
-	    points->st.l2 = (i*5+j*50)*n;
-	    points->l = (i*10+j*100)*n;
+	    temp_point->c = 't';
+	    temp_point->i = n++;
+	    temp_point->st.c2 = i+j;
+	    temp_point->st.l2 = (i*5+j*50)*n;
+	    temp_point->l = (i*10+j*100)*n;
 	}
     }
 
@@ -430,16 +430,24 @@ test_compound_dtype(hid_t file)
     hid_t               dtype, native_type, tid, tid2;
     int			i, j, n;
     hsize_t		dims[2];
-    s1	                points[100][200], check[100][200];
+    s1                  *temp_point, *temp_check;
+    s1	                *points, *check;
 
     TESTING("compound datatype");
 
+
+    /* Allocate space for the points & check arrays */
+    if((points=malloc(sizeof(s1)*100*200))==NULL)
+        TEST_ERROR;
+    if((check=calloc(sizeof(s1),100*200))==NULL)
+        TEST_ERROR;
+
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    (points[i][j]).c = 't';
-	    (points[i][j]).i = n++;
-	    (points[i][j]).l = (i*10+j*100)*n;
+    for (i = n = 0, temp_point=points; i < 100; i++) {
+	for (j = 0; j < 200; j++,temp_point++) {
+	    temp_point->c = 't';
+	    temp_point->i = n++;
+	    temp_point->l = (i*10+j*100)*n;
 	}
     }
 
@@ -498,11 +506,11 @@ test_compound_dtype(hid_t file)
 	TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    if ((points[i][j]).c != (check[i][j]).c ||
-	        (points[i][j]).i != (check[i][j]).i ||
-	        (points[i][j]).l != (check[i][j]).l ) {
+    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
+	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+	    if (temp_point->c != temp_check->c ||
+	        temp_point->i != temp_check->i ||
+	        temp_point->l != temp_check->l ) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
@@ -515,6 +523,11 @@ test_compound_dtype(hid_t file)
     H5Tclose(dtype);
     H5Tclose(native_type);
     H5Tclose(tid2);
+
+    /* Free memory for test data */
+    free(points);
+    free(check);
+
     PASSED();
     return 0;
 
@@ -552,17 +565,24 @@ test_compound_dtype3(hid_t file)
     hsize_t             array_dims[1]={5};
     int			i, j, k, n;
     hsize_t		dims[2];
-    s1	                points[100][200], check[100][200];
-
+    s1                  *temp_point, *temp_check;
+    s1 	                *points=NULL, *check=NULL;
+    
     TESTING("compound datatype");
 
+    /* Allocate space for the points & check arrays */
+    if((points=malloc(sizeof(s1)*100*200))==NULL)
+        TEST_ERROR;
+    if((check=calloc(sizeof(s1),100*200))==NULL)
+        TEST_ERROR;
+
     /* Initialize the dataset */
-    for (i = n = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	       (points[i][j]).c = 't';
-	       for (k = 0; k < 5; k++)
-	           (points[i][j]).a[k] = n++;
-	       (points[i][j]).l = (i*10+j*100)*n;
+    for (i = n = 0, temp_point=points; i < 100; i++) {
+	for (j = 0; j < 200; j++,temp_point++) {
+	    temp_point->c = 't';
+	    temp_point->l = (i*10+j*100)*n;
+	    for (k = 0; k < 5; k++)
+	        (temp_point->a)[k] = n++;
 	}
     }
 
@@ -628,10 +648,10 @@ test_compound_dtype3(hid_t file)
 	TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
-	    if ((points[i][j]).c != (check[i][j]).c ||
-	        (points[i][j]).l != (check[i][j]).l ) {
+    for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
+	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
+	    if (temp_point->c != temp_check->c ||
+	        temp_point->l != temp_check->l ) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
 		printf("    At index %d,%d\n", i, j);
@@ -639,7 +659,7 @@ test_compound_dtype3(hid_t file)
 	    }
 
 	    for (k = 0; k < 5; k++) {
-                if((points[i][j]).a[k] != (check[i][j]).a[k]) {
+                if(temp_point->a[k] != temp_check->a[k]) {
 		      H5_FAILED();
 		      printf("    Read different values than written.\n");
 		      printf("    At index %d,%d\n", i, j);
@@ -654,6 +674,11 @@ test_compound_dtype3(hid_t file)
     H5Tclose(native_type);
     H5Tclose(tid_m);
     H5Tclose(tid_m2);
+
+    /* Free memory for test data */
+    free(points);
+    free(check);
+
     PASSED();
     return 0;
 
