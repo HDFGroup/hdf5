@@ -20,7 +20,9 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
-using namespace std;
+#ifndef H5_NO_STD
+    using namespace std;
+#endif  // H5_NO_STD
 #endif
 
 class H5_DLLCPP Exception {

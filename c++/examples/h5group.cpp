@@ -21,7 +21,7 @@
 // the C version is used in this example.
 // 
 #include <string>
-#ifndef H5_NO_NAMESPACE
+#if !defined(H5_NO_NAMESPACE) && !defined(H5_NO_STD)
 using namespace std;
 #endif
 
