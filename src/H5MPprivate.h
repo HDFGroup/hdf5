@@ -136,6 +136,7 @@
 #define color_H5Gget_objtype_by_idx "red"
 
 #define color_H5Idec_ref "red"
+#define color_H5Iget_file_id "red"
 #define color_H5Iget_name "red"
 #define color_H5Iget_ref "red"
 #define color_H5Iget_type "red"
@@ -243,6 +244,7 @@
 #define color_H5FDwrite "red"
 #define color_H5FDflush "red"
 #define color_H5FDget_vfd_handle "red"
+#define color_H5Premove_filter "red"
 #define color_H5Pset_fapl_core "red"
 #define color_H5Pget_fapl_core "red"
 #define color_H5Pset_fapl_family "red"
