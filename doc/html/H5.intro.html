@@ -7,7 +7,6 @@
 <BODY LINK="#0000ff" VLINK="#800080">
 
 
-
 <!--
                          SOURCE FILE FOR THIS DOCUMENT
                      ../src/H5intro.doc  -- Microsoft Word
@@ -17,3329 +16,2680 @@
 -->
 
 
+<h1 ALIGN="CENTER">Introduction to HDF5 1.0 Beta</h1>
 
-
-<H1>Introduction to HDF5 1.0 Alpha2.0</H1>
-
-<FONT FACE="Times"><P>This is a brief introduction to the HDF5 data model 
-
-and programming model.  Being a <I>Getting Started</I> or <I>QuickStart</I> 
-
-document, this </FONT><I>Introduction to HDF5</I> <FONT FACE="Times">is 
-
-intended to provide enough information for you to develop a basic 
-
-understanding of how HDF5 works and is meant to be used. Knowledge of the 
-
-current version of HDF, will make it easier to follow the text, but it is 
-
-not required.  More complete information, of the sort you will need to 
-
-actually use HDF5, is available in the 
-<A HREF="index.html">HDF5 documentation</A>. </FONT>
-
-
-<FONT FACE="Times">.  Available documents include the following:</P>
-
-
+</FONT><FONT FACE="Times"><P>This is an introduction to the HDF5 data model and programming model.  Being a <I>Getting Started</I> or <I>QuickStart</I> document, this </FONT><I>Introduction to HDF5</I> <FONT FACE="Times">is intended to provide enough information for you to develop a basic understanding of how HDF5 works and is meant to be used. Knowledge of the current version of HDF will make it easier to follow the text, but it is not required.  More complete information of the sort you will need to actually use HDF5 is available in the HDF5 documentation at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/"><FONT FACE="Times">http://hdf.ncsa.uiuc.edu/nra/BigHDF/</FONT></A><FONT FACE="Times">.  Available documents include the following:
 
 <UL>
+</FONT><I><LI>HDF5 User’s Guide</I> at <A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/UG.html">http://hdf.ncsa.uiuc.edu/nra/BigHDF/UG.html</A>.  Where appropriate, this <I>Introduction</I> will refer to specific sections of the <I>User’s Guide.</LI>
+<LI>HDF5 Reference Manual</I> at <A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/RM.html">http://hdf.ncsa.uiuc.edu/nra/BigHDF/RM.html</A></LI></UL>
 
-</FONT>
-
-<I><LI><a href="H5.user.html">HDF5 User’s Guide</a></I>.
-
-Where appropriate, this <I>Introduction</I> will refer to specific sections 
-
-of the <I>User’s Guide</I>.</LI>
-
-<I><LI><a href="RM_H5Front.html">HDF5 Reference Manual</a></I>
-
-</LI></UL>
-
-
-
-<FONT FACE="Times"><P>Code examples, that have been tested and work with the 
-
-HDF5 library, are available in the source code tree when you install HDF5.</P>
-
-
+<FONT FACE="Times"><P>Code examples are available in the source code tree when you install HDF5.  
 
 <UL>
+</FONT><LI>The directory<FONT FACE="Courier" SIZE=2> hdf5/examples</FONT> contains the examples used in this document.</LI>
+<LI>The directory<FONT FACE="Courier" SIZE=2> hdf5/test</FONT> contains the development tests used by the HDF5 developers.  Since these codes are intended to fully exercise the system, they provide more diverse and sophisticated examples of what HDF5 can do.</LI></UL>
 
-</FONT><LI>The directory<FONT FACE="Courier New" SIZE=2> hdf5/examples</FONT> 
-
-contains the examples used in this document.</LI>
-
-<LI>The directory<FONT FACE="Courier" SIZE=2> hdf5/test</FONT> contains the 
-
-development tests used by the HDF5 developers.  Since these codes are intended 
-
-to fully exercise the system, they provide more diverse and sophisticated 
-
-examples of what HDF5 can do.</LI></UL>
-
-
-
-<H2>What is the HDF5 prototype?</H2>
-
-<FONT FACE="Times"><P>HDF5 is a new, experimental version of HDF that is 
-
-designed to address some of the limitations of the current version of 
-
-HDF (HDF4.x) and to address current and anticipated requirements of modern 
-
-systems and applications. </P>
-
-<P>This HDF5 prototype is not complete, but it should be sufficient show the 
-
-basic features of HDF5. We urge you to look at it and give us feedback on 
-
-what you like or do not like about it, and what features you would like to 
-
-see added to it.</P>
-
-<B><P>Why HDF5?</B> The development of HDF5 is motivated by a number of 
-
-limitations in the current HDF format, as well as limitations in the library. 
-
-Some of these limitations are:</P>
-
-
+<H2><A NAME="_Toc429885299">What is HDF5?</A></H2>
+<FONT FACE="Times"><P>HDF5 is a new, experimental version of HDF that is designed to address some of the limitations of the current version of HDF (HDF4.x) and to address current and anticipated requirements of modern systems and applications. 
+<P>We urge you to look at this new version of HDF and give us feedback on what you like or do not like about it, and what features you would like to see added to it.
+<B><P>Why HDF5?</B> The development of HDF5 is motivated by a number of limitations in the current HDF format, as well as limitations in the library. Some of these limitations are:
 
 <UL>
+</FONT><LI>A single file cannot store more than 20,000 complex objects, and a single file cannot be larger than 2 gigabytes </LI>
+<LI>The data models are less consistent than they should be, there are more object types than necessary, and datatypes are too restricted. </LI>
+<LI>The library source is old and overly complex, does not support parallel I/O effectively, and is difficult to use in threaded applications.</LI></UL>
 
-</FONT><LI>A single file cannot store more than 20,000 complex objects, and 
-
-a single file cannot be larger than 2 gigabytes </LI>
-
-<LI>The data models are less consistent than they should be, there are more 
-
-object types than necessary, and datatypes are too restricted. </LI>
-
-<LI>The library source is old and overly complex, does not support parallel I/O 
-
-effectively, and is difficult to use in threaded applications.</LI></UL>
-
-
-
-<FONT FACE="Times"><P>When complete HDF5 will include the following improvements.</P>
-
-
+<FONT FACE="Times"><P>HDF5 includes the following improvements.
 
 <UL>
+</FONT><LI>A new file format designed to address some of the deficiencies of HDF4.x, particularly the need to store larger files and more objects per file. </LI>
+<LI>A simpler, more comprehensive data model that includes only two basic structures: a multidimensional array of record structures, and a grouping structure. </LI>
+<LI>A simpler, better-engineered library and API, with improved support for parallel i/o, threads, and other requirements imposed by modern systems and applications.</LI></UL>
 
-</FONT><LI>A new file format designed to address some of the deficiencies of 
-
-HDF4.x, particularly the need to store larger files and more objects per file. </LI>
-
-<LI>A simpler, more comprehensive data model that includes only two basic 
-
-structures: a multidimensional array of record structures, and a grouping 
-
-structure. </LI>
-
-<LI>A simpler, better-engineered library and API, with improved support for 
-
-parallel i/o, threads, and other requirements imposed by modern systems and 
-
-applications.</LI></UL>
-
-
-
-<H2>Limitations of the current prototype</H2>
-
-<FONT FACE="Times"><P>The prototype release includes most of the <I>basic</I> 
-
-functionality that is planned for the HDF5 library. However, the library does 
-
-not implement all of the features detailed in the format and API specifications. 
-
-Here is a listing of some of the limitations of the current release: </P>
-
-
+<H2><A NAME="_Toc429885300">Limitations of the current release</A></H2>
+<FONT FACE="Times"><P>The beta release includes most of the basic functionality that is planned for the HDF5 library. However, the library does not implement all of the features detailed in the format and API specifications. Here is a listing of some of the limitations of the current release: 
 
 <UL>
+</FONT><LI>Data compression is supported, though only GZIP is implemented.  GZIP, or GNU Zip, is a compression function from the GNU Project.</LI>
+<LI>Some functions for manipulating dataspaces have not been implemented.</LI>
+<FONT FACE="Times"><LI>Some number types, including user-defined number types are not supported. </LI>
+</FONT><LI>Deletion (unlinking) and renaming objects is not yet  implemented.</LI>
+<LI>The library is not currently thread aware although we have planned for that possibility and intend eventually to implement it.</LI></UL>
 
-</FONT><LI>Data compression is supported, though only GZIP is implemented.  
-
-GZIP, or GNU Zip, is a compression function from the GNU Project.</LI>
-
-<LI>Some functions for manipulating datasets, dataspaces, and groups have not 
-
-been implemented.</LI>
-
-<FONT FACE="Times"><LI>Some number types, including user-defined number types 
-
-are not supported. Also number type conversion is limited.</LI></UL>
-
-
-This is the second alpha release of HDF5.  
-Highlights of the changes since the first alpha release include:
-<ul>
-<li> Compressed datasets are supported.
-<li> An improved Group API has been implemented.
-<li> Attributes are now supported for datasets.
-<li> A revised and improved Dataspace API has been implemented.
-<li> Datatype conversion support is improved, especially for floating-point types.
-<li> Support has been implemented for datasets and files over 2GB in size.
-<li> Dataset storage in external files is supported.
-<li> Support for parallel I/O of chunked datasets has been implemented.
-<li> (A more detailed listing appears in the file hdf5/RELEASE in the alpha code installation.)
-</ul>
-
-
-
-<p>
-See the <a href="RM_H5Front.html">HDF5 Reference Manual</a>
-
-
- for a complete listing of all routines that have been 
-
-implemented.</P>
-
-</FONT><H2>HDF5 file organization and data model.</H2>
-
-<FONT FACE="Times"><P>HDF5 files are organized in a hierarchical structure, 
-
-with two primary structures: "groups" and "datasets."</P>
-
-
+<H2><A NAME="_Toc429885301">Changes in the current release</A></H2>
+<P>A detailed listing of changes in HDF5 since the last release (HDF5 1.0 alpha 2.0) can be found in the file <CODE>hdf5/RELEASE </CODE>in the beta code installation.  Important changes include:
 
 <UL>
+<LI>Improvements have been made  in the Dataspace API</LI>
+<LI>The library has been changed to accommodate raw data  filters provided by application-defined modules.  Filters implemented so far include a GZIP data compression module, a checksumming module, and a very simple encryption module.</LI>
+<LI>All integer and floating point formats of supported machines have been implemented, including the `long double' type where applicable.  </LI>
+<LI>A string datatype has been added.</LI>
+<LI>All number type conversions have been  implemented except conversions between integer and floating point.</LI>
+<LI>New performance-enhancing features have been implemented.</LI></UL>
 
-</FONT><I><LI>HDF5 group: </I>a grouping structure containing instances of 
+<H2><A NAME="_Toc429885302">HDF5 file organization and data model.</A></H2>
+<FONT FACE="Times"><P>HDF5 files are organized in a hierarchical structure, with two primary structures: <I>groups</I> and <I>datasets</I>.
 
-zero or more groups or datasets, together with supporting metadata </LI>
+<UL>
+</FONT><I><LI>HDF5 group: </I>a grouping structure containing instances of zero or more groups or datasets, together with supporting metadata </LI>
+<I><LI>HD5F dataset:</I> a multidimensional array of data elements, together with supporting metadata. </LI></UL>
 
-<I><LI>HD5F dataset:</I> a multidimensional array of data elements, together 
-
-with supporting metadata. </LI></UL>
-
-
-
-<FONT FACE="Times"><P>Working with groups and group members is similar in 
-
-many ways to working with directories and files in UNIX. 
-
-As with UNIX directories and files, objects in an HDF5 file are often 
-
-described by giving their full path names. </P>
-
+<FONT FACE="Times"><P>Working with groups and group members is similar in many ways to working with directories and files in UNIX. As with UNIX directories and files, objects in an HDF5 file are often described by giving their full path names. 
 </FONT><CODE><DL>
-
 <DD>/</CODE> signifies the root group. </DD>
-
-<CODE><DD>/foo</CODE> signifies a member of the root group called 
-
-<CODE>foo</CODE>.</DD>
-
-<CODE><DD>/foo/zoo</CODE> signifies a member of the group <CODE>foo</CODE>, 
-
-which in turn is a member of the root group.</DD>
-
+<CODE><DD>/foo</CODE> signifies a member of the root group called <CODE>foo</CODE>.</DD>
+<CODE><DD>/foo/zoo</CODE> signifies a member of the group <CODE>foo</CODE>, which in turn is a member of the root group.</DD>
 </DL>
-
-<FONT FACE="Times"><P>Any HDF5 group, dataset, or named datatype may have an 
-
-associated <I>attribute list.</I> An HDF5 <I>attribute</I> is a user-defined 
-
-HDF5 structure that provides extra information about an HDF5 object. 
-
-Attributes are described in more detail below. </P>
-
-</FONT><H3>HDF5 Groups</H3>
-
-<FONT FACE="Times"><P>An<I> HDF5 group</I> is a structure containing zero or 
-
-more HDF5 objects. A group has two parts:</P>
-
-
+<FONT FACE="Times"><P>Any HDF5 group, dataset, or named datatype may have an associated <I>attribute list.</I> An HDF5 <I>attribute</I> is a user-defined HDF5 structure that provides extra information about an HDF5 object. Attributes are described in more detail below. 
+</FONT><H3><A NAME="_Toc429885303">HDF5 Groups</A></H3>
+<FONT FACE="Times"><P>An<I> HDF5 group</I> is a structure containing zero or more HDF5 objects. A group has two parts:
 
 <UL>
+</FONT><LI>A <I>group header</I>, which contains a group name and a list of group attributes. </LI>
+<LI>A group symbol table, which is a list of the HDF5 objects that belong to the group.</LI></UL>
 
-</FONT><LI>A <I>group header</I>, which contains a group name and a list of 
-
-group attributes. </LI>
-
-<LI>A group symbol table, which is a list of the HDF5 objects that belong to 
-
-the group.</LI></UL>
-
-
-
-<H3>HDF5 Datasets</H3>
-
-<FONT FACE="Times"><P>A dataset is stored in a file in two parts: a header 
-
-and a data array. </P>
-
-<P>The header contains information that is needed to interpret the array portion 
-
-of the dataset, as well as metadata, or pointers to metadata, that describes or 
-
-annotates the dataset. Header information includes the name of the object, its 
-
-dimensionality, its number-type, information about how the data itself is stored 
-
-on disk, and other information used by the library to speed up access to the 
-
-dataset or maintain the file's integrity.</P>
-
-<P>There are four essential classes of information in any header: <I>name</I>, 
-
-<I>datatype</I>, <I>dataspace</I>, and <I>storage layout</I>:</P>
-
-</FONT><B><DFN><P>Name.</B></DFN><FONT FACE="Times"> A dataset <I>name</I> is 
-
-a sequence of alphanumeric ASCII characters.</P>
-
-</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to 
-
-define many different kinds of <B>datatypes</B>. There are two basic categories 
-
-of data types: "atomic" types and "compound" types. Atomic types are those that 
-
-are not decomposed at the data type interface level, such as integers and floats. 
-
-Compound types are made up of atomic types. </P>
-
-<I><P>Atomic datatypes</I> include integers and floating-point numbers. Each 
-
-atomic type belongs to a particular class and has several properties: size, 
-
-order, precision, and offset. In this introduction, we consider only a few of 
-
-these properties.</P>
-
-<P>Atomic datatypes include integer, float, date and time, string, bit field, 
-
-and opaque. <I>(Note: Only integer and float classes are available in the 
-
-current implementation.)</P>
-
-</I><P>Properties of integer types include size, order (endian-ness), and 
-
-signed-ness (signed/unsigned).</P>
-
-<P>Properties of float types include the size and location of the exponent 
-
-and mantissa, and the location of the sign bit.</P>
-
-<P>The datatypes that are supported in the current implementation are: </P>
-
-
+<H3><A NAME="_Toc429885304">HDF5 Datasets</A></H3>
+<FONT FACE="Times"><P>A dataset is stored in a file in two parts: a header and a data array. 
+<P>The header contains information that is needed to interpret the array portion of the dataset, as well as metadata (or pointers to metadata) that describes or annotates the dataset. Header information includes the name of the object, its dimensionality, its number-type, information about how the data itself is stored on disk, and other information used by the library to speed up access to the dataset or maintain the file's integrity.
+<P>There are four essential classes of information in any header: <I>name</I>, <I>datatype</I>, <I>dataspace</I>, and <I>storage layout</I>:
+</FONT><B><DFN><P>Name.</B></DFN><FONT FACE="Times"> A dataset <I>name</I> is a sequence of alphanumeric ASCII characters.
+</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to define many different kinds of datatypes. There are two basic categories of datatypes: <I>atomic</I> types and <I>compound</I> types. Atomic types are those that are not decomposed at the data type interface level, such as integers and floats. Compound types are made up of atomic types. 
+<i>Named datatypes</i>, discussed later in this document, provide a 
+mechanism for sharing a datatype across datasets, ensuring that the 
+datatype is identical for each dataset.
+<I><P>Atomic datatypes</I> include integers and floating-point numbers. Each atomic type belongs to a particular class and has several properties: size, order, precision, and offset. In this introduction, we consider only a few of these properties.
+<P>Atomic datatypes include integer, float, date and time, string, bit field, and opaque. <I>(Note: Only integer, float and string  classes are available in the current implementation.)
+</I><P>Properties of integer types include size, order (endian-ness), and signed-ness (signed/unsigned).
+<P>Properties of float types include the size and location of the exponent and mantissa, and the location of the sign bit.
+<P>The datatypes that are supported in the current implementation are: 
 
 <UL>
+</FONT><LI>Integer datatypes: 8-bit, 16-bit, 32-bit, and 64-bit integers in both little and big-endian format. </LI>
+<LI>Floating-point numbers: IEEE 32-bit and 64-bit floating-point numbers in both little and big-endian format.</LI>
+<LI>Strings.</LI></UL>
 
-</FONT><LI>Integer datatypes: 8-bit, 16-bit, 32-bit, and 64-bit integers in 
-
-both little and big-endian format. </LI>
-
-<LI>Floating-point numbers: IEEE 32-bit and 64-bit floating-point numbers in 
-
-both little and big-endian format.</LI></UL>
-
-
-
-<FONT FACE="Times"><P>A <I>compound datatype</I> is one in which a collection 
-
-of simple datatypes are represented as a single unit, similar to a "struct" in C. 
-
-The parts of a compound datatype are called <I>members.</I> The members of a 
-
-compound datatype may be of any datatype, including another compound datatype. 
-
-It is possible to read members from a compound type without reading the whole 
-
-type.</P>
-
-<B><DFN><P>Dataspace.</B> </DFN>A dataset <I>dataspace </I>describes the 
-
-dimensionality of the dataset. The dimensions of a dataset can be fixed 
-
-(unchanging), or they may be <I>unlimited</I>, which means that they are 
-
-extendible (i.e. they can grow larger). </P>
-
-<P>Properties of a dataspace consist of the <I>rank </I>(number of dimensions) 
-
-of the data array, and the <I>actual sizes of the dimensions</I> of the array, 
-
-and the <I>maximum sizes of the dimensions </I>of the array. 
-
-For a fixed-dimension dataset, the actual size is the same as the maximum size 
-
-of a dimension. When a dimension is unlimited, the maximum size is set to the 
-
-</FONT>value <CODE>H5P_UNLIMITED</CODE>.<FONT FACE="Times"> (An example below 
-
-shows how to create extendible datasets.)</P>
-
-<P>A dataspace can also describe portions of a dataset, making it possible to 
-
-do partial I/O (hyperslab) operations.</P>
-
-<P>Since I/O operations have two end-points, the raw data transfer functions 
-
-require two dataspace arguments: one describes the application memory dataspace 
-
-or subset thereof, and the other describes the file dataspace or subset thereof.</P>
-
-<P>See <I><a href="Dataspaces.html">Dataspaces</a></I>
-
-</FONT>
-
-<FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.</P>
-
-</FONT><B><DFN><P>Storage layout.</B></DFN><FONT FACE="Times"> The HDF5 format 
-
-makes it possible to store data in a variety of ways. The default storage 
-
-layout format is <I>contiguous</I>, meaning that data is stored in the same 
-
-linear way that it is organized in memory. Two other storage layout formats 
-
-are currently defined for HDF5: <I>compact, </I>and<I> chunked. </I>In the 
-
-future, other storage layouts may be added.<I> </P>
-
-<P>Compact</I> storage is used when the amount of data is small and can be 
-
-stored directly in the object header. <I>(Note: Compact storage is not supported 
-
-in this prototype.)</I> </P>
-
-<I><P>Chunked</I> storage involves dividing the dataset into equal-sized "chunks" 
-
-that are stored separately. Chunking has three important benefits. </P>
-
+<FONT FACE="Times"><P>A <I>compound datatype</I> is one in which a collection of simple datatypes are represented as a single unit, similar to a <I>struct</I> in C. The parts of a compound datatype are called <I>members.</I> The members of a compound datatype may be of any datatype, including another compound datatype. It is possible to read members from a compound type without reading the whole type.
+<B><DFN><P>Dataspace.</B> </DFN>A dataset <I>dataspace </I>describes the dimensionality of the dataset. The dimensions of a dataset can be fixed (unchanging), or they may be <I>unlimited</I>, which means that they are extendible (i.e. they can grow larger). 
+<P>Properties of a dataspace consist of the <I>rank </I>(number of dimensions) of the data array, the <I>actual sizes of the dimensions</I> of the array, and the <I>maximum sizes of the dimensions </I>of the array. For a fixed-dimension dataset, the actual size is the same as the maximum size of a dimension. When a dimension is unlimited, the maximum size is set to the </FONT>value <CODE>H5P_UNLIMITED</CODE>.<FONT FACE="Times"> (An example below shows how to create extendible datasets.)
+<P>A dataspace can also describe portions of a dataset, making it possible to do partial I/O operations on  <I>selections</I>.  <I>Selection</I> is supported by the dataspace interface (H5S). Given an n-dimensional dataset, there are currently four ways to do partial selection: 
 <OL>
 
+</FONT><LI>Select a logically contiguous n-dimensional hyperslab.  </LI>
+<LI>Select a non-contiguous hyperslab consisting of elements or blocks of elements (hyperslabs) that are equally spaced.</LI>
+<LI>Select a list of independent points. </LI></OL>
 
+<FONT FACE="Times"><P>Since I/O operations have two end-points, the raw data transfer functions require two dataspace arguments: one describes the application memory dataspace or subset thereof, and the other describes the file dataspace or subset thereof.
+<P>See <I>Dataspaces</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/Dataspaces.html">http://hdf.ncsa.uiuc.edu/nra/BigHDF/Dataspaces.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+</FONT><B><DFN><P>Storage layout.</B></DFN><FONT FACE="Times"> The HDF5 format makes it possible to store data in a variety of ways. The default storage layout format is <I>contiguous</I>, meaning that data is stored in the same linear way that it is organized in memory. Two other storage layout formats are currently defined for HDF5: <I>compact, </I>and<I> chunked. </I>In the future, other storage layouts may be added.<I> 
+<P>Compact</I> storage is used when the amount of data is small and can be stored directly in the object header. <I>(Note: Compact storage is not supported in this release.)</I> 
+<I><P>Chunked</I> storage involves dividing the dataset into equal-sized "chunks" that are stored separately. Chunking has three important benefits. 
+<OL>
 
-<LI>It makes it possible to achieve good performance when accessing subsets of 
+<LI>It makes it possible to achieve good performance when accessing subsets of the datasets, even when the subset to be chosen is orthogonal to the normal storage order of the dataset. </LI>
+<LI>It makes it possible to compress large datasets and still achieve good performance when accessing subsets of the dataset. </LI>
+<LI>It makes it possible efficiently to extend the dimensions of a dataset in any direction.</LI></OL>
 
-the datasets, even when the subset to be chosen is orthogonal to the normal 
-
-storage order of the dataset. </LI>
-
-<LI>It makes it possible to compress large datasets and still achieve good 
-
-performance when accessing subsets of the dataset. </LI>
-
-<LI>It makes it possible efficiently to extend the dimensions of a dataset in 
-
-any direction.</LI></OL>
-
-
-
-<P>See <I><a href="Datasets.html">Datasets</a></I> </FONT>
-
-
-<FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.</P>
-
-</FONT><H3>HDF5 attributes</H3>
-
-<FONT FACE="Times"><P>The Attribute API (H5A) is primarily designed to easily 
-
-allow small datasets to be attached to primary datasets as metadata information. 
-
-Additional goals for the H5A interface include keeping storage requirement for 
-
-each attribute to a minimum and easily sharing attributes among datasets. </P>
-
-<P>Because attributes are intended to be small objects, large datasets intended 
-
-as additional information for a primary dataset should be stored as supplemental 
-
-datasets in a group with the primary dataset. Attributes can then be attached to 
-
-the group containing everything to indicate a particular type of dataset with 
-
-supplemental datasets is located in the group. How small is "small" is not 
-
-defined by the library and is up to the user's interpretation. </P>
-
-<P>Attributes are not seperate objects in the file, they are always contained 
-
-in the object header of the object they are attached to. The I/O functions 
-
-defined in the H5A interface are required to read or write attribute information, 
-
-not the H5D I/O routines. </P>
-
-<P>See <I><a href="Attributes.html">Attributes</a></I>
-
-</FONT>
-
-<FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.</P>
-
-</FONT><H2>The HDF5 Applications Programming Interface (API)</H2>
-
-<FONT FACE="Times"><P>The current HDF5 API is implemented only in C. The API 
-
-provides routines for creating HDF5 files, creating and writing groups, datasets, 
-
-and their attributes to HDF5 files, and reading groups, datasets and their 
-
-attributes from HDF5 files.</P>
-
-</FONT><H3>Naming conventions</H3>
-
-<FONT FACE="Times"><P>All C routines on the HDF 5 library begin with a prefix of 
-
-the form "H5*", where "*" is a single letter indicating the object on which the 
-
-operation is to be performed:</P>
-
-
+<P>See <I>Datasets</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/Datasets.html">http://hdf.ncsa.uiuc.edu/nra/BigHDF/Datasets.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+</FONT><H3><A NAME="_Toc429885305">HDF5 Attributes</A></H3>
+<I>Attributes </I>are small named datasets that are attached to primary datasets, groups, or named datatypes.  Attributes can be used to describe the nature and/or the intended usage of a dataset or group. An attribute has two parts: (1) a <I>name</I> and (2) a <I>value</I>.  The value part contains one or more data entries of the same data type. 
+<FONT FACE="Times"><P>The Attribute API (H5A) is used to read or write attribute information. When accessing attributes, they can be identified by name or by an <I>index value</I>.  The use of an index value makes it possible to iterate through all of the attributes associated with a given object.
+<P>The HDF5 format and I/O library are designed with the assumption that attributes are small datasets. They are always stored in the object header of the object they are attached to.  Because of this, large datasets should not be stored as attributes. How large is "large" is not defined by the library and is up to the user's interpretation. (Large datasets with metadata can be stored as supplemental datasets in a group with the primary dataset.) 
+<P>See <I>Attributes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/Attributes.html">http://hdf.ncsa.uiuc.edu/nra/BigHDF/Attributes.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+</FONT><H2><A NAME="_Toc429885306">The HDF5 Applications Programming Interface (API)</A></H2>
+<FONT FACE="Times"><P>The current HDF5 API is implemented only in C. The API provides routines for creating HDF5 files, creating and writing groups, datasets, and their attributes to HDF5 files, and reading groups, datasets and their attributes from HDF5 files.
+</FONT><H3><A NAME="_Toc429885307">Naming conventions</A></H3>
+<FONT FACE="Times"><P>All C routines in the HDF 5 library begin with a prefix of the form <B>H5*</B>, where <B>*</B> is a single letter indicating the object on which the operation is to be performed:
 
 <UL>
-
 </FONT><B><LI>H5F</B>: <B>F</B>ile-level access routines. <BR>
-
 Example: <CODE>H5Fopen</CODE>, which opens an HDF5 file. </LI>
-
-<B><LI>H5G</B>: <B>G</B>roup functions, for creating and operating on physical 
-
-groups of objects. <BR>
-
-Example: <CODE>H5Gset</CODE><FONT FACE="Courier">,</FONT>which sets the working 
-
-group to the specified group. </LI>
-
-<B><LI>H5T: </B>Data<B>T</B>ype functions, for creating and operating on simple 
-
-and compound datatypes to be used as the elements in data arrays.<B><BR>
-
-</B>Example: <CODE>H5Tcopy</CODE><FONT FACE="Courier">,</FONT>which creates a 
-
-copy of an existing data type. </LI>
-
-<B><LI>H5S: </B>Data<B>S</B>pace functions, which create and manipulate the 
-
-dataspace in which the elements of a data array are stored.<BR>
-
+<B><LI>H5G</B>: <B>G</B>roup functions, for creating and operating on physical groups of objects. <BR>
+Example: <CODE>H5Gset</CODE><FONT FACE="Courier">,</FONT>which sets the working group to the specified group. </LI>
+<B><LI>H5T: </B>Data<B>T</B>ype functions, for creating and operating on simple and compound datatypes to be used as the elements in data arrays.<B><BR>
+</B>Example: <CODE>H5Tcopy</CODE><FONT FACE="Courier">,</FONT>which creates a copy of an existing data type. </LI>
+<B><LI>H5S: </B>Data<B>S</B>pace functions, which create and manipulate the dataspace in which the elements of a data array are stored.<BR>
 Example: <CODE>H5Screate_simple</CODE>, which creates simple dataspaces. </LI>
-
-<B><LI>H5D: D</B>ataset functions, which manipulate the data within datasets and 
-
-determine how the data is to be stored in the file. <BR>
-
-Example: <CODE>H5Dread</CODE>, which reads all or part of a dataset into a 
-
-buffer in memory. </LI>
-
-<B><LI>H5P</B>: <B>P</B>roperty list functions, for manipulating object creation 
-
-and access properties. <BR>
-
-Example: <CODE>H5Pset_chunk</CODE>, which sets the number of dimensions and the 
-
-size of a chunk.</LI>
-
+<B><LI>H5D: D</B>ataset functions, which manipulate the data within datasets and determine how the data is to be stored in the file. <BR>
+Example: <CODE>H5Dread</CODE>, which reads all or part of a dataset into a buffer in memory. </LI>
+<B><LI>H5P</B>: <B>P</B>roperty list functions, for manipulating object creation and access properties. <BR>
+Example: <CODE>H5Pset_chunk</CODE>, which sets the number of dimensions and the size of a chunk.</LI>
 <B><LI>H5A</B>: <B>A</B>ttribute access and manipulating routines. <BR>
-
 Example: <CODE>H5Aget_name</CODE>, which retrieves name of an attribute.</LI>
-
 <B><LI>H5SZ</B>: <B>C</B>ompression registration routine. <BR>
-
-Example: <CODE>H5Zregister</CODE>, which registers new compression and 
-
-uncompression functions for use with the HDF5 library.</LI>
-
+Example: <CODE>H5Zregister</CODE>, which registers new compression and uncompression functions for use with the HDF5 library.</LI>
 <B><LI>H5E</B>: <B>E</B>rror handling routines. <BR>
-
 Example: <CODE>H5Eprint</CODE>, which prints the current error stack.</LI></UL>
 
-
-
-<H3>Include files </H3>
-
-<FONT FACE="Times"><P>There are a number definitions and declarations that 
-
-should be included with any HDF5 program. These definitions and declarations 
-
-are contained in several <I>include</I> files. The main include </FONT>file is 
-
-<CODE>hdf5.h</CODE>. This file<FONT FACE="Times"> includes all of the other 
-
-files that your program is likely to need. <I>Be sure to include hdf5.h in 
-
-any program that accesses HDF5.</P>
-
-</I></FONT><H3>Predefined atomic datatypes</H3>
-
-<P>The datatype interface provides a mechanism to describe the storage format 
-
-of individual data points of a data set and is designed to allow new features 
-
-to be easily added without disrupting applications that use the datatype 
-
-interface.  A dataset (the H5D interface) is composed of a collection or raw 
-
-data points of homogeneous type organized according to the dataspace (the H5S 
-
-interface).</P>
-
-<P>A <DFN>datatype</DFN> is a collection of data type properties, all of which 
-
-can be stored on disk, and which when taken as a whole, provide complete 
-
-information for data conversion to or from that data type.  The interface 
-
-provides functions to set and query properties of a data type.</P>
-
-<P>A <DFN>data point</DFN> is an instance of a <DFN>data type</DFN>, which 
-
-is an instance of a <DFN>type class</DFN>.  We have defined a set of type 
-
-classes and properties which can be extended at a later time.  The 
-
-<DFN>atomic type classes</DFN> are those which describe types which cannot 
-
-be decomposed at the data type interface  level; all other classes are 
-
-<DFN>compound</DFN>.</P>
-
-<P>To illustrate, let us consider a set of predefined atomic datatypes. 
-
-The library predefines a modest number of data types having names like
-
-<CODE> H5T_<I>arch</I>_<I>base</I></CODE> where <I><CODE>arch</I> </CODE>is 
-
-an architecture name and <I><CODE>base</I></CODE> is a programming type name.  
-
-New types can be derived from the predifined types by copying the predefined 
-
-type (see <CODE>H5Tcopy()</CODE>) and then modifying the result.</P>
-
-<P>The<CODE> NATIVE </CODE>architecture, for example, contains C-like data types 
-
-for the machine on which the library was compiled.  The types were actually 
-
-defined by running the<CODE> H5detect </CODE>program when the library was 
-
-compiled. In order to be portable, applications should almost always use this 
-
-architecture to describe things in memory.</P>
-
-<P>The <CODE>NATIVE</CODE> architecture has base names which do not follow the 
-
-same rules as the others.  Instead, native type names are similar to the C type 
-
-names.  Here are some examples:</P>
-
+<H3><A NAME="_Toc429885308">Include files</A> </H3>
+<FONT FACE="Times"><P>There are a number definitions and declarations that should be included with any HDF5 program. These definitions and declarations are contained in several <I>include</I> files. The main include </FONT>file is <CODE>hdf5.h</CODE>. This file<FONT FACE="Times"> includes all of the other files that your program is likely to need. <I>Be sure to include hdf5.h in any program that accesses HDF5.
+</I></FONT><H3><A NAME="_Toc429885309">Predefined atomic datatypes</A></H3>
+<P>A <i>datatype</i> is a collection of data type properties, all of which can be stored on disk, and which when taken as a whole, provide complete information for data conversion to or from that data type.  The datatype (H5D) interface  provides functions to set and query properties of a data type.
+<P>A <i>data point</i> is an instance of a <i>data type</i>, which is an instance of a <i>type class</i>.  We have defined a set of type classes and properties which can be extended at a later time.  The <i>atomic type classes</i> describe types that cannot be decomposed at the data type interface  level; all other classes are <i>compound</i>.
+<B><CODE><P>NATIVE </CODE>datatypes.</B>  Although it is possible to describe nearly any kind of atomic data type, most applications will use predefined datatypes that are supported by their compiler.  In HDF5 these are called "native" datatypes. <CODE>NATIVE </CODE> datatypes are C-like datatypes that are generally supported by the hardware of the machine on which the library was compiled. In order to be portable, applications should almost always use the <CODE>NATIVE </CODE>designation to describe data values in memory.
+<P>The <CODE>NATIVE</CODE> architecture has base names which do not follow the same rules as the others.  Instead, native type names are similar to the C type names.  Here are some examples:
 <P ALIGN="CENTER"><CENTER><TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=462>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
 <B><P ALIGN="CENTER">Example</B></TD>
-
 <TD WIDTH="51%" VALIGN="TOP">
-
 <B><P ALIGN="CENTER">Corresponding C Type</B></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_CHAR</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_CHAR</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <PRE>signed char</PRE></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_UCHAR</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_UCHAR</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>unsigned char</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_SHORT</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_SHORT</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>short</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_USHORT</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_USHORT</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>unsigned short</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_INT</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_INT</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>int</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_UINT</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_UINT</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>unsigned</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_LONG</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_LONG</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>long</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_ULONG</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_ULONG</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>unsigned long</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_LLONG</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_LLONG</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>long long</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_ULLONG</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_ULLONG</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>unsigned long long</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_FLOAT</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_FLOAT</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <PRE>float</PRE></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_DOUBLE</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_DOUBLE</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>double</FONT></TD>
-
 </TR>
-
 <TR><TD WIDTH="49%" VALIGN="TOP">
-
-<FONT FACE="Courier New" SIZE=2><P>H5T_NATIVE_LDOUBLE</FONT></TD>
-
+<FONT FACE="Courier" SIZE=2><P>H5T_NATIVE_LDOUBLE</FONT></TD>
 <TD WIDTH="51%" VALIGN="TOP">
-
 <FONT SIZE=2><P>long double</FONT></TD>
-
 </TR>
-
+<TR><TD WIDTH="49%" VALIGN="TOP">
+<CODE><P>H5T_NATIVE_HSIZE</CODE></TD>
+<TD WIDTH="51%" VALIGN="TOP">
+<CODE><P>hsize_t</CODE></TD>
+</TR>
+<TR><TD WIDTH="49%" VALIGN="TOP">
+<CODE><P>H5T_NATIVE_HSSIZE</CODE></TD>
+<TD WIDTH="51%" VALIGN="TOP">
+<CODE><P>hssize_t</CODE></TD>
+</TR>
+<TR><TD WIDTH="49%" VALIGN="TOP">
+<CODE><P>H5T_NATIVE_HERR</CODE></TD>
+<TD WIDTH="51%" VALIGN="TOP">
+<CODE><P>herr_t</CODE></TD>
+</TR>
+<TR><TD WIDTH="49%" VALIGN="TOP">
+<CODE><P>H5T_NATIVE_HBOOL</CODE></TD>
+<TD WIDTH="51%" VALIGN="TOP">
+<CODE><P>hbool_t</CODE></TD>
+</TR>
 </TABLE>
+</CENTER>
 
-</CENTER></P>
-
-
-
-<FONT FACE="Times"><P>See <I><a href="Datatypes.html">Datatypes</a></I> at 
-
-</FONT>
-
-in the<I> HDF User’s Guide</I> for further information.</P>
-
-</FONT><H3>Programming models</H3>
-
-<FONT FACE="Times"><P>In this section we describe how to program some basic 
-
-operations on files, including how to</P>
-
-
+<FONT FACE="Times"><P>See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/nra/BigHDF/Datatypes.html">http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+</FONT><B><P>Named datatypes.</B>  Normally each dataset has its own datatype, but sometimes we may want to share a datatype among several datasets.  This can be done using a <I>named </I>datatype. A named data type is stored in a file independent of any dataset, and referenced by all datasets that have that datatype. Named datatypes are discussed more fully in the <I>Datatypes</I> document referenced immediately above.
+<H3><A NAME="_Toc429885310">Programming models</A></H3>
+<FONT FACE="Times"><P>In this section we describe how to program some basic operations on files, including how to
 
 <UL>
+</FONT><LI>Create a file </LI>
+<LI>Create and initialize a dataset </LI>
+<LI>Discard objects when they are no longer needed </LI>
+<LI>Write a dataset to a new file </LI>
+<LI>Obtain information about a dataset </LI>
+<LI>Read a portion of a dataset </LI>
+<LI>Create and write compound datatypes </LI>
+<LI>Create and write extendible datasets </LI>
+<LI>Create and populate groups</LI>
+<LI>Work with attributes </LI></UL>
 
-</FONT><LI>create a file </LI>
-
-<LI>create and initialize a dataset </LI>
-
-<LI>discard objects when they are no longer needed </LI>
-
-<LI>write a dataset to a new file </LI>
-
-<LI>obtain information about a dataset </LI>
-
-<LI>read a portion of a dataset </LI>
-
-<LI>create and write compound datatypes </LI>
-
-<LI>create and write extendible datasets </LI>
-
-<LI>create and populate groups </LI></UL>
-
-
-
-<H4>How to create an HDF5 file</H4>
-
-<P>This programming model shows how to create a file and also how to close the 
-
-file.</P>
-
+<H4><A NAME="_Toc429885311">How to create an HDF5 file</A></H4>
+<P>This programming model shows how to create a file and also how to close the file.
 <OL>
-
-
 
 <LI>Create the file using <CODE>H5Fcreate</CODE>. Obtain a file identifier.</LI>
-
 <LI>Close the file with <CODE>H5Fclose</CODE>.</LI>
+</ol>
 
-<P>The following code fragment implements the specified model. If there is a 
-
-possibility that the file already exists, the user must add the flag 
-
-<CODE>H5ACC_TRUNC</CODE> to the access mode to overwrite the previous file's 
-
-information. </P>
-
-<CODE><PRE>hid_t       file;                          /* handle */
-
+<P>The following code fragment implements the specified model. If there is a possibility that the file already exists, the user must add the flag <CODE>H5ACC_TRUNC</CODE> to the access mode to overwrite the previous file's information. 
+<CODE><PRE>hid_t       file;                          /* identifier */
 /*
-
  * Create a new file using H5ACC_TRUNC access,
-
  * default file creation properties, and default file
-
  * access properties.
-
  * Then close the file.
-
  */
-
 file = H5Fcreate(FILE, H5ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
 status = H5Fclose(file); </PRE>
-
-</CODE>
-</OL>
-
-
-
-<H4>How to create and initialize the essential components of a dataset for 
-
-writing to a file.</H4>
-
-<P>Recall that datatypes and dimensionality (dataspace) are independent objects, 
-
-which are created separately from any dataset that they might be attached to. 
-
-Because of this the creation of a dataset requires, at a minimum, separate 
-
-definitions of datatype, dimensionality, and dataset. Hence, to create a dataset 
-
-the following steps need to be taken:</P>
-
+</CODE><DL>
+<DT>&nbsp;</DT>
+</DL>
+<H4><A NAME="_Toc429885312">How to create and initialize the essential components of a dataset for writing to a file.</A></H4>
+<P>Recall that datatypes and dimensionality (dataspace) are independent objects, which are created separately from any dataset that they might be attached to. Because of this the creation of a dataset requires, at a minimum, separate definitions of datatype, dimensionality, and dataset. Hence, to create a dataset the following steps need to be taken:
 <ol>
-<FONT FACE="Times"><LI VALUE=1>Create and initialize a dataspace for the 
-
-dataset to be written.</LI>
-
+<FONT FACE="Times"><LI VALUE=1>Create and initialize a dataspace for the dataset to be written.</LI>
 <LI>Define the datatype for the dataset to be written. </LI>
-
 <LI>Create and initialize the dataset itself.</LI></OL>
 
-
-
-</FONT><FONT FACE="Courier New"><P>&nbsp;</P>
-
-</FONT><FONT FACE="Times"><P>The following code illustrates the creation of 
-
-these three components of a dataset object.</P>
-
-</FONT><CODE><PRE>hid_t    dataset, datatype, dataspace;   /* declare handles */
-
-
+</FONT><FONT FACE="Times"><P>The following code illustrates the creation of these three components of a dataset object.
+</FONT><CODE><PRE>hid_t    dataset, datatype, dataspace;   /* declare identifiers */
 
 /* 
-
  * 1. Create dataspace: Describe the size of the array and 
-
  * create the data space for fixed size dataset. 
-
  */
-
 dimsf[0] = NX;
-
 dimsf[1] = NY;
-
 dataspace = H5Pcreate_simple(RANK, dimsf, NULL); 
-
 /*
-
 /* 
-
  * 2. Define datatype for the data in the file.
-
  * We will store little endian integer numbers.
-
  */
-
 datatype = H5Tcopy(H5T_NATIVE_INT);
-
 status = H5Tset_order(datatype, H5T_ORDER_LE);
-
 /*
-
  * 3. Create a new dataset within the file using defined 
-
  * dataspace and datatype and default dataset creation
-
  * properties.
-
  * NOTE: H5T_NATIVE_INT can be used as datatype if conversion
-
  * to little endian is not needed.
-
  */
-
 dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);</PRE>
-
-</CODE><H4>How to discard objects when they are no longer needed</H4>
-
-<FONT FACE="Times"><P>The type, dataspace and dataset objects should be released
-
-once they are no longer needed by a program. Since each is an independent object, 
-
-the must be released (or <I>closed</I>) separately. The following lines of code 
-
-close the type, dataspace, datasets, and file that were created in the preceding 
-
-section.</P>
-
-</FONT><CODE><P>H5Tclose(datatype);</P>
-
-<P>H5Dclose(dataset);</P>
-
-<P>H5Sclose(dataspace);</P>
-
-</CODE><H4>How to write a dataset to a new file</H4>
-
-<FONT FACE="Times"><P>Having defined the datatype, dataset, and dataspace 
-
-parameters, you write out the data with a call to 
-
-</FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.</P>
-
+</CODE><H4><A NAME="_Toc429885313">How to discard objects when they are no longer needed</A></H4>
+<FONT FACE="Times"><P>The datatype, dataspace and dataset objects should be released once they are no longer needed by a program. Since each is an independent object, the must be released (or <I>closed</I>) separately. The following lines of code close the datatype, dataspace, and datasets that were created in the preceding section.
+</FONT><CODE><P>H5Tclose(datatype);
+<P>H5Dclose(dataset);
+<P>H5Sclose(dataspace);
+</CODE><H4><A NAME="_Toc429885314">How to write a dataset to a new file</A></H4>
+<FONT FACE="Times"><P>Having defined the datatype, dataset, and dataspace parameters, you write out the data with a call to </FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.
 </FONT><CODE><PRE>/*
-
  * Write the data to the dataset using default transfer
-
  * properties.
-
  */
-
 status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-
                   H5P_DEFAULT, data);</PRE>
-
-</CODE><FONT FACE="Times"><P>The third and fourth parameters of 
-
-</FONT><CODE>H5Dwrite</CODE><FONT FACE="Times"> in the example describe the 
-
-dataspaces in memory and in the file, respectively. They are set to the value 
-
-</FONT><CODE>H5S_ALL</CODE><FONT FACE="Times"> to indicate that an entire 
-
-dataset is to be written. In a later section we look at how we would access 
-
-a portion of a dataset.</P>
-
-</FONT><P><A HREF="#CreateExample"><FONT FACE="Times">Example 1</FONT></A>
-
-<FONT FACE="Times"> contains a program that creates a file and a dataset, and 
-
-writes the dataset to the file. </P>
-
-<P>Reading is analogous to writing. If, in the previous example, we wish to 
-
-read an entire dataset, we would use the same basic calls with the same 
-
-parameters. Of course, the routine </FONT><CODE>H5Dread</CODE><FONT FACE="Times"> 
-
-would replace </FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.
-
-</FONT><FONT FACE="Times"> </P>
-
-</FONT><H4>Getting information about a dataset</H4>
-
-<FONT FACE="Times"><P>Although reading is analogous to writing, it is often 
-
-necessary to query a file to obtain information about a dataset. For instance, 
-
-we often need to know about the datatype associated with a dataset, as well 
-
-dataspace information (e.g. rank and dimensions). There are several "get" 
-
-routines for obtaining this information The following code segment illustrates 
-
-how we would get this kind of information: </P>
-
+</CODE><FONT FACE="Times"><P>The third and fourth parameters of </FONT><CODE>H5Dwrite</CODE><FONT FACE="Times"> in the example describe the dataspaces in memory and in the file, respectively. They are set to the value </FONT><CODE>H5S_ALL</CODE><FONT FACE="Times"> to indicate that an entire dataset is to be written. In a later section we look at how we would access a portion of a dataset.
+</FONT><P><A HREF="#CreateExample"><FONT FACE="Times">Example 1</FONT></A><FONT FACE="Times"> contains a program that creates a file and a dataset, and writes the dataset to the file. 
+<P>Reading is analogous to writing. If, in the previous example, we wish to read an entire dataset, we would use the same basic calls with the same parameters. Of course, the routine </FONT><CODE>H5Dread</CODE><FONT FACE="Times"> would replace </FONT><CODE>H5Dwrite</CODE><FONT FACE="Courier">.</FONT><FONT FACE="Times"> 
+</FONT><H4><A NAME="_Toc429885315">Getting information about a dataset</A></H4>
+<FONT FACE="Times"><P>Although reading is analogous to writing, it is often necessary to query a file to obtain information about a dataset. For instance, we often need to know about the datatype associated with a dataset, as well dataspace information (e.g. rank and dimensions). There are several "get" routines for obtaining this information The following code segment illustrates how we would get this kind of information: 
 </FONT><CODE><PRE>/*
-
- * Get datatype and dataspace handles and then query
-
+ * Get datatype and dataspace identifiers and then query
  * dataset class, order, size, rank and dimensions.
-
  */
 
-
-
-datatype  = H5Dget_type(dataset);     /* datatype handle */ 
-
+datatype  = H5Dget_type(dataset);     /* datatype identifier */ 
 class     = H5Tget_class(datatype);
-
 if (class == H5T_INTEGER) printf("Data set has INTEGER type \n");
-
 order     = H5Tget_order(datatype);
-
 if (order == H5T_ORDER_LE) printf("Little endian order \n");
 
-
-
 size  = H5Tget_size(datatype);
-
 printf(" Data size is %d \n", size);
 
-
-
-dataspace = H5Dget_space(dataset);    /* dataspace handle */
-
+dataspace = H5Dget_space(dataset);    /* dataspace identifier */
 rank      = H5Sextent_ndims(dataspace);
-
 status_n  = H5Sextent_dims(dataspace, dims_out);
-
 printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);</PRE>
-
-</CODE><H4>Reading a portion of a dataset</H4>
-
-<FONT FACE="Times"><P>In the previous discussion, we describe how to access an 
-
-entire dataset with one write (or read) operation. To read or write a 
-
-<I>portion</I> of a dataset, we need to provide more contextual information.</P>
-
-<P>Consider the following example. Suppose there is 500x600 dataset in a file, 
-
-and we wish to read from the dataset a 100x200 hyperslab located beginning at 
-
-element </FONT><CODE>&lt;200,200&gt;</CODE><FONT FACE="Times">. In addition, 
-
-suppose we wish to read the hyperslab into an 200x400 array in memory beginning 
-
-at element </FONT><CODE>&lt;0,0&gt;</CODE><FONT FACE="Times"> in memory. 
-
-Visually, the transfer looks something like this: </P>
-
-</FONT><P ALIGN="CENTER"><IMG SRC="dataset_p1.gif" WIDTH=417 HEIGHT=337></P>
-
-<FONT FACE="Times" SIZE=6><P ALIGN="CENTER">&nbsp;</P>
-
-</FONT><FONT FACE="Times"><P>As the example illustrates, whenever we read part 
-
-of a dataset from a file we must provide two dataspaces: the dataspace of the 
-
-object in the file as well as the dataspace of the object in memory into which 
-
-we read. There are dataspace routines (</FONT><CODE>H5S...</CODE>
-
-<FONT FACE="Times">) for doing this. </P>
-
-<P>For example, suppose we want to read a 3x4 hyperslab from a dataset in a 
-
-file beginning at the element </FONT><CODE>&lt;1,2&gt;</CODE><FONT FACE="Times"> 
-
-in the dataset. In order to do this, we must create a dataspace that describes 
-
-the overall rank and dimensions of the dataset in the file, as well as the 
-
-position and size of the hyperslab that we are extracting from that dataset. 
-
-The following code illustrates how this would be done. </P>
-
-</FONT><CODE><PRE>/* 
-
- * Get overall rank and dimensions of dataspace.
-
- */
-
-dataspace = H5Dget_space(dataset);    /* get dataspace handle */
-
-rank      = H5Pextent_ndims(dataspace);
-
-status_n  = H5Pextent_dims(dataspace, dims_out);
-
-
-
-/* 
-
- * Define hyperslab in the dataset. 
-
- */
-
-offset[0] = 1;
-
-offset[1] = 2;
-
-count[0]  = 3;
-
-count[1]  = 4;
-
-status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, count, NULL);</PRE>
-
-</CODE><FONT FACE="Times"><P>This describes the dataspace from which we wish 
-
-to read. We need to define the dataspace in memory analogously. Suppose, for 
-
-instance, that we have in memory a 3 dimensional 7x7x3 array into which we 
-
-wish to read the 3x4 hyperslab described above beginning at the element 
-
-</FONT><CODE>&lt;3,0,0&gt;</CODE><FONT FACE="Times">. Since the in-memory 
-
-dataspace has three dimensions, we have to describe the hyperslab as an array 
-
-with three dimensions, with the last dimension being 1: 
-
-</FONT><CODE>&lt;3,4,1&gt;</CODE><FONT FACE="Times">.</P>
-
-<P>Notice that now we must describe two things: the dimensions of the in-memory 
-
-array, and the size and position of the hyperslab that we wish to read in. 
-
-The following code illustrates how this would be done. </P>
-
-</FONT><CODE><PRE>/*
-
- * Define the memory dataspace.
-
- */
-
-dimsm[0] = 7;
-
-dimsm[1] = 7;
-
-dimsm[2] = 3;
-
-memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
-
-
-
-/* 
-
- * Define memory hyperslab. 
-
- */
-
-offset_out[0] = 3;
-
-offset_out[1] = 0;
-
-offset_out[2] = 0;
-
-count_out[0]  = 3;
-
-count_out[1]  = 4;
-
-count_out[2]  = 1;
-
-status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, count_out, NULL);
-
-
-
-/*</PRE>
-
-</CODE><P><A HREF="#CheckAndReadExample"><FONT FACE="Times">Example 2</FONT></A>
-
-<FONT FACE="Times"> contains a complete program that performs these operations.</P>
-
-</FONT><H4>Creating compound datatypes</H4>
-
-<B><P>Properties of compound datatypes. </B>A compound datatype is similar to 
-
-a struct in C or a common block in Fortran. It is a collection of one or more 
-
-atomic types or small arrays of such types. To create and use of a compound 
-
-datatype requires you need to refer to various <DFN>properties</DFN> of the 
-
-data compound datatype:</P>
-
-
+</CODE><H4><A NAME="_Toc429885316">Reading and writing a portion of a dataset</A></H4>
+<P>In the previous discussion, we describe how to access an entire dataset with one write (or read) operation. HDF5 also supports access to portions (or selections) of a dataset in one read/write operation. Currently selections are limited to hyperslabs and the lists of independent points. Both types of selection will be discussed in the following sections. Several sample cases of selection reading/writing are shown on the following figure.
+<B><P>&lt;&lt;&lt; Insert dataspace figure here.  (If you see this
+note, check the copy of this <i>Introduction</i> at
+<a href="http://hdf.ncsa.uiuc.edu/HDF5/H5.intro.html</a>http://hdf.ncsa.uiuc.edu/HDF5/H5.intro.html</a> to see the figure.) &gt;&gt;&gt;
+</B><P>In example (a) a single hyperslab is read from the midst of a 2-D array in a file and stored in the corner of a smaller 2-D array in memory.  In (b) a regular series of blocks is read from a 2-D array in the file and stored as a contiguous sequence of values at a certain offset in a 1-D array in memory.  In (c) a sequence of points with no regular pattern is read from a 2-D array in a file and stored as a sequence of points with no regular pattern in a 3-D array in memory. 
+<P>As these examples illustrate, whenever we perform partial read/write operations on the data, the following information must be provided: file dataspace, file dataspace selection, memory dataspace and memory dataspace selection. After the required information is specified, actual read/write operation on the portion of data is done in a single call to the HDF5 read/write functions H5Dread(write).
+<H5><A NAME="_Toc429885317">Selecting hyperslabs</A></H5>
+<FONT FACE="Times"><P>Hyperslabs are portions of datasets.  A hyperslab selection can be a logically contiguous collection of points in a dataspace, or it can be regular pattern of points or blocks in a dataspace.  The following picture illustrates a selection of regularly spaced 3x2 blocks in an 8x12 dataspace.</FONT>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=345>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+</TABLE>
+
+<FONT FACE="Times"><P>Four parameters are required to describe a completely general hyperslab.  Each parameter is an array whose rank is the same as that of the dataspace: 
 
 <UL>
-
-<LI>It is of class <DFN>compound</DFN><I>.</I> </LI>
-
-<LI>It has a fixed total <DFN>size</DFN>, in bytes. </LI>
-
-<LI>It consists of zero or more <DFN>members</DFN> (defined in any order) with 
-
-unique names and which occupy non-overlapping regions within the datum. </LI>
-
-<LI>Each member has its own <DFN>datatype</DFN>. </LI>
-
-<LI>Each member is referenced by an <DFN>index number</DFN> between zero and N-1, 
-
-where N is the number of members in the compound datatype. </LI>
-
-<LI>Each member has a <DFN>name</DFN> which is unique among its siblings in a 
-
-compound data type. </LI>
-
-<LI>Each member has a fixed <DFN>byte offset</DFN>, which is the first byte 
-
-(smallest byte address) of that member in a compound datatype. </LI>
-
-<LI>Each member can be a small array of up to four dimensions.</LI></UL>
-
-
-
-<FONT FACE="Times"><P>Properties of members of a compound data type are defined 
-
-when the member is added to the compound type and cannot be subsequently 
-
-modified.</P>
-
-<B><P>Defining compound datatypes. </B>Compound datatypes must be built out of 
-
-other datatypes. First, one creates an empty compound data type and specifies 
-
-its total size. Then members are added to the compound data type in any order.</P>
-
-<I><P>Member names. </I>Each member must have a descriptive name, which is the 
-
-key used to uniquely identify the member within the compound data type. A member 
-
-name in an HDF5 data type does not necessarily have to be the same as the name 
-
-of the corresponding member in the C struct in memory, although this is often 
-
-the case. Nor does one need to define all members of the C struct in the HDF5 
-
-compound data type (or vice versa). </P>
-
-<I><P>Offsets. </I>Usually a C struct will be defined to hold a data point in 
-
-memory, and the offsets of the members in memory will be the offsets of the 
-
-struct members from the beginning of an instance of the struct. The library 
-
-defines the macro to compute the offset of a member within a struct:</P>
-
-</FONT><CODE><P>HOFFSET(s,m)<FONT SIZE=5>. </FONT></CODE><FONT FACE="Times">This 
-
-macro computes the offset of member </FONT><FONT FACE="Courier"><EM>m</EM> 
-
-</FONT><FONT FACE="Times">within a struct variable <EM>s</EM>. </P>
-
-<P>Here is an example in which a compound data type is created to describe 
-
-complex numbers whose type is defined by the </FONT><CODE>complex_t</CODE>
-
-<FONT FACE="Times" SIZE=2> </FONT><FONT FACE="Times">struct. </P>
-
-</FONT><CODE><PRE>typedef struct {
-
-   double re;   /*real part */
-
-   double im;   /*imaginary part */
-
-} complex_t;
-
-
-
-complex_t tmp;  /*used only to compute offsets */
-
-hid_t complex_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
-
-H5Tinsert (complex_id, "real", HOFFSET(tmp,re),
-
-           H5T_NATIVE_DOUBLE);
-
-H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im),
-
-           H5T_NATIVE_DOUBLE);</PRE>
-
-</CODE><P><A HREF="#Compound">Example 3</A><FONT FACE="Times"> shows how to 
-
-create a compound data type, write an array that has the compound data type 
-
-to the file, and read back subsets of the members.</P>
-
-</FONT><H4>Creating and writing extendible datasets</H4>
-
-<FONT FACE="Times"><P>An <I>extendible</I> dataset is one whose dimensions 
-
-can grow. In HDF5, it is possible to define a dataset to have certain initial 
-
-dimensions, then later to increase the size of any of the initial dimensions. </P>
-
-<P>For example, you can create and store the following 3x3 HDF5 dataset:</P>
-
-</FONT><PRE>     1 1 1
-
-     1 1 1 
-
-     1 1 1 </PRE>
-
-<FONT FACE="Times"><P>then later to extend this into a 10x3 dataset by adding 
-
-7 rows, such as this:</P>
-
-</FONT><PRE>     1 1 1 
-
-     1 1 1 
-
-     1 1 1 
-
-     2 2 2
-
-     2 2 2
-
-     2 2 2
-
-     2 2 2
-
-     2 2 2
-
-     2 2 2
-
-     2 2 2</PRE>
-
-<FONT FACE="Times"><P>then further extend it to a 10x5 dataset by adding two 
-
-columns, such as this:</P>
-
-</FONT><PRE>     1 1 1 3 3 
-
-     1 1 1 3 3 
-
-     1 1 1 3 3 
-
-     2 2 2 3 3
-
-     2 2 2 3 3
-
-     2 2 2 3 3
-
-     2 2 2 3 3
-
-     2 2 2 3 3
-
-     2 2 2 3 3
-
-     2 2 2 3 3</PRE>
-
-<FONT FACE="Times"><P>The current version of HDF 5 requires you to use 
-
-<I>chunking</I> in order to define extendible datasets. Chunking makes 
-
-it possible to extend datasets efficiently, without having to reorganize 
-
-storage excessively. </P>
-
-<P>Three operations are required in order to write an extendible dataset:</P>
-
-<OL>
-
-
-
-<LI>Declare the dataspace of the dataset to have <I>unlimited dimensions</I> 
-
-for all dimensions that might eventually be extended.</LI>
-
-<LI>When creating the dataset, set the storage layout for the dataset to 
-
-<I>chunked</I>.</LI>
-
-<LI>Extend the size of the dataset.</LI></OL>
-
-
-
-<P>For example, suppose we wish to create a dataset similar to the one shown 
-
-above. We want to start with a 3x3 dataset, then later extend it in both 
-
-directions. </P>
-
-<B><P>Declaring unlimited dimensions. </B>We could declare the dataspace 
-
-to have unlimited dimensions with the following code, which uses the predefined 
-
-constant </FONT><CODE>H5S_UNLIMITED</CODE><FONT FACE="Times"> to specify 
-
-unlimited dimensions.</P>
-
-</FONT><PRE>hsize_t dims[2] = { 3, 3}; /* dataset dimensions
-
-at the creation time */ 
-
-hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-
-/*
-
-* 1. Create the data space with unlimited dimensions. 
-
-*/
-
-dataspace = H5Screate_simple(RANK, dims, maxdims); </PRE>
-
-<B><P>Enabling chunking.  </B>We can then modify the dataset storage layout 
-
-properties to enable chunking.  We do this using the routine 
-
-<CODE>H5Pset_chunk</CODE><FONT SIZE=4>:</P>
-
-</FONT><PRE>hid_t cparms; 
-
-hsize_t chunk_dims[2] ={2, 5};
-
+</FONT><CODE><LI>start</CODE>: a starting location for the hyperslab.  In the example <CODE>start</CODE> is (0,1). </LI>
+<CODE><LI>stride</CODE><I>:</I> the number of elements to separate each element or block to be selected.  In the example <CODE>stride</CODE><I> </I> is (4,3).  If the stride parameter is set to NULL, the stride size defaults to 1 in each dimension.</LI>
+<CODE><LI>count</CODE>:the number of elements or blocks to select along each dimension.  In the example, <CODE>count</CODE> is (2,4).</LI>
+<CODE><LI>block</CODE>: the size of the block selected from the dataspace.  In the example, <CODE>block</CODE> is (3,2).  If the block parameter is set to NULL, the block size defaults to a single element in each dimension, as if the block array was set to all 1s.</LI></UL>
+
+<B><P>In what order is data copied?  </B>When actual I/O is performed data values are copied by default from one dataspace to another in so-called row-major, or 'C' order.  That is, it is assumed that the first dimension varies slowest, the second next slowest, and so forth.  
+<p><B>Example without strides or blocks.</B> Suppose we want to read a 3x4 hyperslab from a dataset in a file beginning at the element <CODE>&lt;1,2&gt;</CODE><FONT FACE="Times"> in the dataset. In order to do this, we must create a dataspace that describes the overall rank and dimensions of the dataset in the file, as well as the position and size of the hyperslab that we are extracting from that dataset. The following code illustrates how this would be done. 
+</FONT><CODE><PRE>
 /* 
-
-* 2. Modify dataset creation properties to enable chunking.
-
-*/
-
-cparms = H5Pcreate (H5P_DATASET_CREATE);
-
-status = H5Pset_chunk( cparms, RANK, chunk_dims);
-
-</PRE>
-
-<B><P>Extending dataset size.  </B>Finally, when we want to extend the size of 
-
-the dataset, we invoke <CODE>H5Dextend </CODE>to extend the size of the dataset.  
-
-In the following example, we extend the dataset along the first dimension, by 
-
-seven rows, so that the new dimensions are <CODE>&lt;10,3&gt;</CODE>:</P>
-
-<PRE>/*
-
-* Extend the dataset. Dataset becomes 10 x 3.
-
-*/
-
-dims[0] = dims[0] + 7;
-
-size[0] = dims[0]; 
-
-size[1] = dims[1]; 
-
-status = H5Dextend (dataset, size);</PRE>
-
-<FONT FACE="Courier New" SIZE=2><P>&nbsp;</P>
-
-</FONT><P><A HREF="#CreateExtendWrite">Example 4</A> shows how to create a 3x3 
-
-extendible dataset, write the dataset, extend the dataset to 10x3, write the 
-
-dataset again, extend it again to 10x5, write the dataset again.</P>
-
-<P><A HREF="#ReadExtended">Example 5</A> shows how to read the data written by 
-
-Example 4.  </P>
-
-<H3>Working with groups in a file</H3>
-
-<P>Groups provide a mechanism for organizing datasets in an HDF5 file extendable 
-
-meaningful ways. The H5G API contains routines for working with groups. </P>
-
-<B><P>To create a group</B>, use <CODE>H5Gcreate</CODE>.  For example, the 
-
-following code creates two groups that are members of the root group.  They 
-
-are called <CODE>/IntData</CODE> and <CODE>/FloatData</CODE>.  The return value 
-
-(<CODE>dir</CODE>) is the group identifier.</P>
-
-<CODE><PRE>/*
-
-* Create two groups in a file.
-
-*/
-
-dir = H5Gcreate(file, "/IntData", 0);
-
-status = H5Gclose(dir);
-
-dir = H5Gcreate(file,"/FloatData", 0);
-
-status = H5Gclose(dir);</PRE>
-
-</CODE><P>The third parameter in <CODE>H5Gcreate</CODE> optionally specifies 
-
-how much file space to reserve to store the names that will appear in this group. 
-
-If a non-positive value is supplied then a default size is chosen.</P>
-
-<CODE><P>H5Gclose</CODE> closes the group and releases the group identifier.</P>
-
-<P>&nbsp;</P>
-
-<B><P>Creating an object in a particular group. </B>Except for single-object 
-
-HDF5 files, every object in an HDF5 file must belong to a group, and hence has 
-
-a path name. Hence, we put an object in a particular group by giving its path 
-
-name when we create it. For example, the following code creates a dataset 
-
-<CODE>IntArray</CODE> in the group <CODE>/IntData</CODE>:</P>
-
-<CODE><PRE>/*
-
- * Create dataset in the /IntData group by specifying full path.
-
+ * Define hyperslab in the dataset. 
  */
-
-dims[0] = 2;
-
-dims[1] = 3;
-
-dataspace = H5Pcreate_simple(2, dims, NULL);
-
-dataset = H5Dcreate(file, "/IntData/IntArray", H5T_NATIVE_INT, dataspace, H5C_DEFAULT); </PRE>
-
-</CODE><B><P>Changing the current group. </B>The HDF5 Group API supports the 
-
-idea of a <DFN>current group</DFN>. This is analogous to the 
-
-<DFN>current working directory</DFN> idea in UNIX. You can set the current 
-
-group in HDF5 with the routine <CODE>H5Gset</CODE>. The following code shows 
-
-how to set a current group, then create a certain dataset (<CODE>FloatData</CODE>) 
-
-in that group. </P>
-
-<CODE><PRE>/*
-
- * Set current group to /FloatData.
-
- */
-
-status = H5Gset (file, "/FloatData");
-
-
-
-/* 
-
- * Create two datasets
-
- */
-
-
-
-dims[0] = 5;
-
-dims[1] = 10;
-
-dataspace = H5Screate_simple(2, dims, NULL);
-
-dataset = H5Dcreate(file, "FloatArray", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT); </PRE>
-
-</CODE><P><A HREF="#CreateGroups">Example 6</A> shows how to create an 
-
-HDF5 file with two group, and to place some datasets within those groups.</P>
-
-<P>&nbsp;</P>
-
-<H3>&nbsp;</H3>
-
-<H3>Example code</H3>
-
-<H4><A NAME="CreateExample">Example 1: How to create a homogeneous 
-
-multi-dimensional dataset</A> and write it to a file.</H4>
-
-<P>This example creates a 2-dimensional HDF 5 dataset of little endian 
-
-32-bit integers.</P>
-
-<PRE><A NAME="CheckAndReadExample">
-
-/*  
-
- *  This example writes data to the HDF5 file.
-
- *  Data conversion is performed during write operation.  
-
- */
-
- 
-
-#include &lt;hdf5.h&gt;
-
-
-
-#define FILE        "SDS.h5"
-
-#define DATASETNAME "IntArray" 
-
-#define NX     5                      /* dataset dimensions */
-
-#define NY     6
-
-#define RANK   2
-
-
-
-main ()
-
-{
-
-   hid_t       file, dataset;         /* file and dataset handles */
-
-   hid_t       datatype, dataspace;   /* handles */
-
-   hsize_t     dimsf[2];              /* dataset dimensions */
-
-   herr_t      status;                             
-
-   int         data[NX][NY];          /* data to write */
-
-   int         i, j;
-
-
-
-/* 
-
- * Data  and output buffer initialization. 
-
- */
-
-
-
-for (j = 0; j &lt; NX; j++) {
-
-    for (i = 0; i &lt; NY; i++)
-
-        data[j][i] = i + j;
-
-}     
-
-                                       /*  0 1 2 3 4 5 
-
-                                           1 2 3 4 5 6
-
-                                           2 3 4 5 6 7
-
-                                           3 4 5 6 7 8
-
-                                           4 5 6 7 8 9   */
-
-
-
-/*
-
- * Create a new file using H5F_ACC_TRUNC access,
-
- * default file creation properties, and default file
-
- * access properties.
-
- */
-
-file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-
-
-/*
-
- * Describe the size of the array and create the data space for fixed
-
- * size dataset. 
-
- */
-
-dimsf[0] = NX;
-
-dimsf[1] = NY;
-
-dataspace = H5Screate_simple(RANK, dimsf, NULL); 
-
-
-
-/* 
-
- * Define datatype for the data in the file.
-
- * We will store little endian INT numbers.
-
- */
-
-datatype = H5Tcopy(H5T_NATIVE_INT);
-
-status = H5Tset_order(datatype, H5T_ORDER_LE);
-
-/*
-
- * Create a new dataset within the file using defined dataspace and
-
- * datatype and default dataset creation properties.
-
- */
-
-dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
-
-                    H5P_DEFAULT);
-
-
-
-/*
-
- * Write the data to the dataset using default transfer properties.
-
- */
-
-status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-
-                  H5P_DEFAULT, data);
-
-
-
-/*
-
- * Close/release resources.
-
- */
-
-H5Sclose(dataspace);
-
-H5Tclose(datatype);
-
-H5Dclose(dataset);
-
-H5Fclose(file);
-
- 
-
-}     </PRE>
-
-<FONT FACE="Courier New" SIZE=2><P>&nbsp;</P>
-
-</FONT><H4>Example 2.</A> How to read a hyperslab from file into memory.</H4>
-
-<P>This example reads a hyperslab from a 2-d HDF5 dataset into a 3-d dataset 
-
-in memory.</P>
-
-<PRE>
-
-/*  
-
- *   This example reads hyperslab from the SDS.h5 file 
-
- *   created by h5_write.c program into two-dimensional
-
- *   plane of the tree-dimensional array. 
-
- *   Information about dataset in the SDS.h5 file is obtained. 
-
- */
-
- 
-
-#include "hdf5.h"
-
-
-
-#define FILE        "SDS.h5"
-
-#define DATASETNAME "IntArray" 
-
-#define NX_SUB  3           /* hyperslab dimensions */ 
-
-#define NY_SUB  4 
-
-#define NX 7           /* output buffer dimensions */ 
-
-#define NY 7 
-
-#define NZ  3 
-
-#define RANK         2
-
-#define RANK_OUT     3
-
-
-
-main ()
-
-{
-
-   hid_t       file, dataset;         /* handles */
-
-   hid_t       datatype, dataspace;   
-
-   hid_t       memspace; 
-
-   H5T_class_t class;                 /* data type class */
-
-   H5T_order_t order;                 /* data order */
-
-   size_t      size;                  /* size of the data element
-
-                                         stored in file */ 
-
-   hsize_t     dimsm[3];              /* memory space dimensions */
-
-   hsize_t     dims_out[2];           /* dataset dimensions */      
-
-   herr_t      status;                             
-
-
-
-   int         data_out[NX][NY][NZ ]; /* output buffer */
-
-   
-
-   hsize_t      count[2];              /* size of the hyperslab in the file */
-
-   hsize_t      offset[2];             /* hyperslab offset in the file */
-
-   hsize_t      count_out[3];          /* size of the hyperslab in memory */
-
-   hsize_t      offset_out[3];         /* hyperslab offset in memory */
-
-   int          i, j, k, status_n, rank;
-
-
-
-for (j = 0; j &lt; NX; j++) {
-
-    for (i = 0; i &lt; NY; i++) {
-
-        for (k = 0; k &lt; NZ ; k++)
-
-            data_out[j][i][k] = 0;
-
-    }
-
-} 
-
- 
-
-/*
-
- * Open the file and the dataset.
-
- */
-
-file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-
-dataset = H5Dopen(file, DATASETNAME);
-
-
-
-/*
-
- * Get datatype and dataspace handles and then query
-
- * dataset class, order, size, rank and dimensions.
-
- */
-
-
-
-datatype  = H5Dget_type(dataset);     /* datatype handle */ 
-
-class     = H5Tget_class(datatype);
-
-if (class == H5T_INTEGER) printf("Data set has INTEGER type \n");
-
-order     = H5Tget_order(datatype);
-
-if (order == H5T_ORDER_LE) printf("Little endian order \n");
-
-
-
-size  = H5Tget_size(datatype);
-
-printf(" Data size is %d \n", size);
-
-
-
-dataspace = H5Dget_space(dataset);    /* dataspace handle */
-
-rank      = H5Sextent_ndims(dataspace);
-
-status_n  = H5Sextent_dims(dataspace, dims_out, NULL);
-
-printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);
-
-
-
-/* 
-
- * Define hyperslab in the datatset. 
-
- */
-
 offset[0] = 1;
-
 offset[1] = 2;
-
-count[0]  = NX_SUB;
-
-count[1]  = NY_SUB;
-
-status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, 
-
-                             count, NULL);
-
-
-
-/*
-
+count[0]  = 3;
+count[1]  = 4;
+status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, count, NULL);</PRE>
+</CODE><FONT FACE="Times"><P>This describes the dataspace from which we wish to read. We need to define the dataspace in memory analogously. Suppose, for instance, that we have in memory a 3 dimensional 7x7x3 array into which we wish to read the 3x4 hyperslab described above beginning at the element </FONT><CODE>&lt;3,0,0&gt;</CODE><FONT FACE="Times">. Since the in-memory dataspace has three dimensions, we have to describe the hyperslab as an array with three dimensions, with the last dimension being 1: </FONT><CODE>&lt;3,4,1&gt;</CODE><FONT FACE="Times">.
+<P>Notice that now we must describe two things: the dimensions of the in-memory array, and the size and position of the hyperslab that we wish to read in. The following code illustrates how this would be done. 
+</FONT><CODE><PRE>/*
  * Define the memory dataspace.
-
  */
-
-dimsm[0] = NX;
-
-dimsm[1] = NY;
-
-dimsm[2] = NZ ;
-
+dimsm[0] = 7;
+dimsm[1] = 7;
+dimsm[2] = 3;
 memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
 
+/* 
+ * Define memory hyperslab. 
+ */
+offset_out[0] = 3;
+offset_out[1] = 0;
+offset_out[2] = 0;
+count_out[0]  = 3;
+count_out[1]  = 4;
+count_out[2]  = 1;
+status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, count_out, NULL);
 
+/*</PRE>
+</CODE><P><A HREF="#CheckAndReadExample"><FONT FACE="Times">Example 2</FONT></A><FONT FACE="Times"> contains a complete program that performs these operations.
+<B><P>Example with strides and blocks</B>.  Consider the 8x12 dataspace described above, in which we selected eight 3x2 blocks.  Suppose we wish to fill these eight blocks </FONT>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=345>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>X</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+</TABLE>
+
+<P>This hyperslab has the following parameters:<FONT FACE="Times"> </FONT><CODE>start=(0,1), stride=(4,3), count=(2,4), block=(3,2).
+</CODE><FONT FACE="Times"><P>Suppose that the source dataspace in memory is this 49-element one dimensional array called </FONT><CODE>vector</CODE><FONT FACE="Times">:</FONT>
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=457>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>-1</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>1</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>2</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>3</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>4</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>5</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>6</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>7</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<FONT FACE="Courier"><CODE><P>... </FONT></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>47</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>48</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>-1</CODE></TD>
+</TR>
+</TABLE>
+
+<FONT FACE="Times"><P>The following code will write 48 elements from </FONT><CODE>vector</code> to our file dataset, starting with the second element in <code>vector</code>.
+<pre>
+/* Select hyperslab for the dataset in the file, using 3x2 blocks, (4,3) stride
+ * (2,4) count starting at the position (0,1).
+ */
+start[0]  = 0; start[1]  = 1;
+stride[0] = 4; stride[1] = 3;
+count[0]  = 2; count[1]  = 4;    
+block[0]  = 3; block[1]  = 2;
+ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block);
+
+/*
+ * Create dataspace for the first dataset.
+ */
+mid1 = H5Screate_simple(MSPACE1_RANK, dim1, NULL);
+
+/*
+ * Select hyperslab. 
+ * We will use 48 elements of the vector buffer starting at the second element.
+ * Selected elements are 1 2 3 . . . 48
+ */
+start[0]  = 1;
+stride[0] = 1;
+count[0]  = 48;
+block[0]  = 1;
+ret = H5Sselect_hyperslab(mid1, H5S_SELECT_SET, start, stride, count, block);
+ 
+/*
+ * Write selection from the vector buffer to the dataset in the file.
+ *
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, midd1, fid, H5P_DEFAULT, vector)
+</pre><CODE><P>&nbsp;
+</CODE><P>After these operations, the file dataspace will have the following values.
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=460>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>1</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>2</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>3</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>4</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>5</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>6</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>7</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>8</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>9</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>10</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>11</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>12</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>13</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>14</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>15</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>16</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>17</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>18</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>19</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>20</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>21</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>22</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>23</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>24</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>25</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>26</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>27</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>28</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>29</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>30</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>31</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>32</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>33</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>34</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>35</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>36</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>37</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>38</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>39</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>40</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>41</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>42</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>43</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>44</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>45</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>46</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>47</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>48</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+</TABLE>
+
+<P>Notice that the values are inserted in the file dataset in row-major order.
+<P><a href="#WriteSelected">Example 7</a> includes this code and other example code illustrating the use of hyperslab selection.
+<H5><A NAME="_Toc429885318">Selecting a list of independent points</A></H5>
+A hyperslab specifies a regular pattern of elements in a dataset.  It is also possible to specify a list of independent elements to read or write using the function <CODE>H5Sselect_elements</CODE>.  Suppose, for example, that we wish to write the values 53, 59, 61, 67 to the following elements of the 8x12 array used in the previous example: (0,0), (3,3), (3,5), and (5,6).  The following code selects the points:
+<pre>
+#define FSPACE_RANK      2    /* Dataset rank as it is stored in the file */
+#define NPOINTS          4    /* Number of points that will be selected 
+                                 and overwritten */ 
+#define MSPACE2_RANK     1    /* Rank of the second dataset in memory */ 
+#define MSPACE2_DIM      4    /* Dataset size in memory */ 
+
+&nbsp;
+hsize_t dim2[] = {MSPACE2_DIM};       /* Dimension size of the second 
+                                         dataset (in memory) */ 
+int     values[] = {53, 59, 61, 67};  /* New values to be written */
+hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+                                         from the file dataspace */ 
+
+/*
+ * Create dataspace for the second dataset.
+ */
+mid2 = H5Screate_simple(MSPACE2_RANK, dim2, NULL);
+
+/*
+ * Select sequence of NPOINTS points in the file dataspace.
+ */
+coord[0][0] = 0; coord[0][1] = 0;
+coord[1][0] = 3; coord[1][1] = 3;
+coord[2][0] = 3; coord[2][1] = 5;
+coord[3][0] = 5; coord[3][1] = 6;
+
+ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
+                         (const hssize_t **)coord);
+
+/*
+ * Write new selection of points to the dataset.
+ */
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);   
+</pre>
+
+<P>&nbsp;
+</FONT><P>After these operations, the file dataspace will have the following values:
+<TABLE BORDER CELLSPACING=1 CELLPADDING=7 WIDTH=460>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<B><CODE><P>53</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>1</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>2</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>3</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>4</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>5</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>6</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>7</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>8</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>9</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>10</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>11</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>12</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>13</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>14</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>15</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>16</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>17</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>18</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>19</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>20</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>21</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>22</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>23</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>24</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<B><CODE><P>59</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<B><CODE><P>61</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>25</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>26</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>27</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>28</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>29</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>30</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>31</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>32</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>33</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>34</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>35</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>36</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<B><CODE><P>67</B></CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>37</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>38</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>39</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>40</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>41</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>42</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>43</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>44</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>45</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>46</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>47</CODE></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1>
+<CODE><P>48</CODE></TD>
+</TR>
+<TR><TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+<TD WIDTH="8%" VALIGN="TOP" HEIGHT=1><P></TD>
+</TR>
+</TABLE>
+
+<P><A HREF="#CreateExample"><FONT FACE="Times">Example 7</FONT></A><FONT FACE="Times"> contains a complete program that performs these subsetting operations.
+</FONT><H4><A NAME="_Toc429885319">Creating compound datatypes</A></H4>
+<B><P>Properties of compound datatypes. </B>A compound datatype is similar to a struct in C or a common block in Fortran. It is a collection of one or more atomic types or small arrays of such types. To create and use of a compound datatype you need to refer to various <i>properties</i> of the data compound datatype:
+
+<UL>
+<LI>It is of class <i>compound</i><I>.</I> </LI>
+<LI>It has a fixed total <i>size</i>, in bytes. </LI>
+<LI>It consists of zero or more <i>members</i> (defined in any order) with unique names and which occupy non-overlapping regions within the datum. </LI>
+<LI>Each member has its own <i>datatype</i>. </LI>
+<LI>Each member is referenced by an <i>index number</i> between zero and N-1, where N is the number of members in the compound datatype. </LI>
+<LI>Each member has a <i>name</i> which is unique among its siblings in a compound data type. </LI>
+<LI>Each member has a fixed <i>byte offset</i>, which is the first byte (smallest byte address) of that member in a compound datatype. </LI>
+<LI>Each member can be a small array of up to four dimensions.</LI></UL>
+
+<FONT FACE="Times"><P>Properties of members of a compound data type are defined when the member is added to the compound type and cannot be subsequently modified.
+<B><P>Defining compound datatypes. </B>Compound datatypes must be built out of other datatypes. First, one creates an empty compound data type and specifies its total size. Then members are added to the compound data type in any order.
+<I><P>Member names. </I>Each member must have a descriptive name, which is the key used to uniquely identify the member within the compound data type. A member name in an HDF5 data type does not necessarily have to be the same as the name of the corresponding member in the C struct in memory, although this is often the case. Nor does one need to define all members of the C struct in the HDF5 compound data type (or vice versa). 
+<I><P>Offsets. </I>Usually a C struct will be defined to hold a data point in memory, and the offsets of the members in memory will be the offsets of the struct members from the beginning of an instance of the struct. The library defines the macro to compute the offset of a member within a struct:
+</FONT><CODE><br>&nbsp;&nbsp;HOFFSET(s,m)<FONT SIZE=5> </FONT></CODE>
+<br><FONT FACE="Times">This macro computes the offset of member </FONT><FONT FACE="Courier"><EM>m</EM> </FONT><FONT FACE="Times">within a struct variable <EM>s</EM>. 
+<P>Here is an example in which a compound data type is created to describe complex numbers whose type is defined by the </FONT><CODE>complex_t</CODE><FONT FACE="Times" SIZE=2> </FONT><FONT FACE="Times">struct. 
+</FONT><CODE><PRE>typedef struct {
+   double re;   /*real part */
+   double im;   /*imaginary part */
+} complex_t;
+
+complex_t tmp;  /*used only to compute offsets */
+hid_t complex_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
+H5Tinsert (complex_id, "real", HOFFSET(tmp,re),
+           H5T_NATIVE_DOUBLE);
+H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im),
+           H5T_NATIVE_DOUBLE);</PRE>
+</CODE><P><A HREF="#Compound">Example 3</A><FONT FACE="Times"> shows how to create a compound data type, write an array that has the compound data type to the file, and read back subsets of the members.
+</FONT><H4><A NAME="_Toc429885320">Creating and writing extendible datasets</A></H4>
+<FONT FACE="Times"><P>An <I>extendible</I> dataset is one whose dimensions can grow. In HDF5, it is possible to define a dataset to have certain initial dimensions, then later to increase the size of any of the initial dimensions. 
+<P>For example, you can create and store the following 3x3 HDF5 dataset:
+</FONT><PRE>     1 1 1
+     1 1 1 
+     1 1 1 </PRE>
+<FONT FACE="Times"><P>then later to extend this into a 10x3 dataset by adding 7 rows, such as this:
+</FONT><PRE>     1 1 1 
+     1 1 1 
+     1 1 1 
+     2 2 2
+     2 2 2
+     2 2 2
+     2 2 2
+     2 2 2
+     2 2 2
+     2 2 2</PRE>
+<FONT FACE="Times"><P>then further extend it to a 10x5 dataset by adding two columns, such as this:
+</FONT><PRE>     1 1 1 3 3 
+     1 1 1 3 3 
+     1 1 1 3 3 
+     2 2 2 3 3
+     2 2 2 3 3
+     2 2 2 3 3
+     2 2 2 3 3
+     2 2 2 3 3
+     2 2 2 3 3
+     2 2 2 3 3</PRE>
+<FONT FACE="Times"><P>The current version of HDF 5 requires you to use <I>chunking</I> in order to define extendible datasets. Chunking makes it possible to extend datasets efficiently, without having to reorganize storage excessively. 
+<P>Three operations are required in order to write an extendible dataset:
+<OL>
+
+<LI>Declare the dataspace of the dataset to have <I>unlimited dimensions</I> for all dimensions that might eventually be extended.</LI>
+<LI>When creating the dataset, set the storage layout for the dataset to <I>chunked</I>.</LI>
+<LI>Extend the size of the dataset.</LI></OL>
+
+<P>For example, suppose we wish to create a dataset similar to the one shown above. We want to start with a 3x3 dataset, then later extend it in both directions. 
+<B><P>Declaring unlimited dimensions. </B>We could declare the dataspace to have unlimited dimensions with the following code, which uses the predefined constant </FONT><CODE>H5S_UNLIMITED</CODE><FONT FACE="Times"> to specify unlimited dimensions.
+</FONT><PRE>hsize_t dims[2] = { 3, 3}; /* dataset dimensions
+at the creation time */ 
+hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+/*
+ * 1. Create the data space with unlimited dimensions. 
+ */
+dataspace = H5Screate_simple(RANK, dims, maxdims); </PRE>
+<B><P>Enabling chunking.  </B>We can then modify the dataset storage layout properties to enable chunking.  We do this using the routine <CODE>H5Pset_chunk</CODE><FONT SIZE=4>:
+</FONT><PRE>hid_t cparms; 
+hsize_t chunk_dims[2] ={2, 5};
+/* 
+* 2. Modify dataset creation properties to enable chunking.
+*/
+cparms = H5Pcreate (H5P_DATASET_CREATE);
+status = H5Pset_chunk( cparms, RANK, chunk_dims);
+</PRE>
+<B><P>Extending dataset size.  </B>Finally, when we want to extend the size of the dataset, we invoke <CODE>H5Dextend </CODE>to extend the size of the dataset.  In the following example, we extend the dataset along the first dimension, by seven rows, so that the new dimensions are <CODE>&lt;10,3&gt;</CODE>:
+<PRE>/*
+* Extend the dataset. Dataset becomes 10 x 3.
+*/
+dims[0] = dims[0] + 7;
+size[0] = dims[0]; 
+size[1] = dims[1]; 
+status = H5Dextend (dataset, size);</PRE>
+<FONT FACE="Courier" SIZE=2><P>&nbsp;
+</FONT><P><A HREF="#CreateExtendWrite">Example 4</A> shows how to create a 3x3 extendible dataset, write the dataset, extend the dataset to 10x3, write the dataset again, extend it again to 10x5, write the dataset again.
+<P><A HREF="#ReadExtended">Example 5</A> shows how to read the data written by Example 4.  
+<H4><A NAME="_Toc429885321">Working with groups in a file</A></H4>
+<P>Groups provide a mechanism for organizing datasets in an HDF5 file extendable meaningful ways. The H5G API contains routines for working with groups. 
+<B><P>Creating a group. </B>To create a group, use <CODE>H5Gcreate</CODE>.  For example, the following code creates two groups that are members of the root group.  They are called <CODE>/IntData</CODE> and <CODE>/FloatData</CODE>.  The return value (<CODE>dir</CODE>) is the group identifier.
+<CODE><PRE>/*
+* Create two groups in a file.
+*/
+dir = H5Gcreate(file, "/IntData", 0);
+status = H5Gclose(dir);
+dir = H5Gcreate(file,"/FloatData", 0);
+status = H5Gclose(dir);</PRE>
+</CODE><P>The third parameter in <CODE>H5Gcreate</CODE> optionally specifies how much file space to reserve to store the names that will appear in this group. If a non-positive value is supplied then a default size is chosen.
+<CODE><P>H5Gclose</CODE> closes the group and releases the group identifier.
+<P>&nbsp;
+<B><P>Creating an object in a particular group. </B>Except for single-object HDF5 files, every object in an HDF5 file must belong to a group, and hence has a path name. Hence, we put an object in a particular group by giving its path name when we create it. For example, the following code creates a dataset <CODE>IntArray</CODE> in the group <CODE>/IntData</CODE>:
+<CODE><PRE>/*
+ * Create dataset in the /IntData group by specifying full path.
+ */
+dims[0] = 2;
+dims[1] = 3;
+dataspace = H5Pcreate_simple(2, dims, NULL);
+dataset = H5Dcreate(file, "/IntData/IntArray", H5T_NATIVE_INT, dataspace, H5C_DEFAULT); </PRE>
+</CODE><B><P>Changing the current group. </B>The HDF5 Group API supports the idea of a <i>current group</i>. This is analogous to the <i>current working directory</i> idea in UNIX. You can set the current group in HDF5 with the routine <CODE>H5Gset</CODE>. The following code shows how to set a current group, then create a certain dataset (<CODE>FloatData</CODE>) in that group. 
+<CODE><PRE>/*
+ * Set current group to /FloatData.
+ */
+status = H5Gset (file, "/FloatData");
 
 /* 
-
- * Define memory hyperslab. 
-
+ * Create two datasets
  */
 
-offset_out[0] = 3;
-
-offset_out[1] = 0;
-
-offset_out[2] = 0;
-
-count_out[0]  = NX_SUB;
-
-count_out[1]  = NY_SUB;
-
-count_out[2]  = 1;
-
-status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
-
-                             count_out, NULL);
-
-
+dims[0] = 5;
+dims[1] = 10;
+dataspace = H5Screate_simple(2, dims, NULL);
+dataset = H5Dcreate(file, "FloatArray", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT); </PRE>
+</CODE><P><A HREF="#CreateGroups">Example 6</A> shows how to create an HDF5 file with two group, and to place some datasets within those groups.
+<H4><A NAME="_Toc429885322">Working with attributes</A></H4>
+<P>Think of an attribute as a small datasets that is attached to a normal dataset or group.  The H5A API contains routines for working with attributes.  Since attributes share many of the characteristics of datasets, the programming model for working with attributes is analogous in many ways to the model for working with datasets.  The primary differences are that an attribute must be attached to a dataset or a group, and subsetting operations cannot be performed on attributes.
+<B><P>To create an attribute </B>belonging to a particular dataset or group<B>, </B>first create a dataspace for the attribute (<CODE>H5Screate</CODE>), then create the attribute using <CODE>H5Acreate</CODE>.  For example, the following code creates an attribute called <CODE> Integer_attribute </CODE>that is a member of a dataset whose identifier is <CODE>dataset</CODE>. The attribute identifier is <CODE>attr2</CODE>.<CODE> H5Awrite</CODE> then sets the value of the attribute of that of  integer variable <CODE>point. H5Aclose <FONT FACE="Times">then releases the attribute identifier.
+</CODE>
+</FONT>
+<pre>
+int point = 1;                         /* Value of the scalar attribute */ 
 
 /*
-
- * Read data from hyperslab in the file into the hyperslab in 
-
- * memory and display.
-
+ * Create scalar attribute.
  */
+aid2  = H5Screate(H5S_SCALAR);
+attr2 = H5Acreate(dataset, "Integer attribute", H5T_NATIVE_INT, aid2,
+                  H5P_DEFAULT);
 
-status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
+/*
+ * Write scalar attribute.
+ */
+ret = H5Awrite(attr2, H5T_NATIVE_INT, &amp;point); 
 
-                 H5P_DEFAULT, data_out);
+/*
+ * Close attribute dataspace.
+ */
+ret = H5Sclose(aid2); 
+
+/*
+ * Close attribute.
+ */
+ret = H5Aclose(attr2); 
+</pre>
+<CODE><P>&nbsp;
+</CODE><B><P>To read a scalar attribute whose name and datatype are known</B>, first open the attribute using <CODE>H5Aopen_name</CODE>, then use H5Aread to get its value.  For example the following reads a scalar attribute called <CODE>Integer_attribute</CODE> whose datatype is a native integer, and whose parent dataset has the id <CODE>dataset</CODE>.
+<pre>
+/*
+ * Attach to the scalar attribute using attribute name, then read and 
+ * display its value.
+ */
+attr = H5Aopen_name(dataset,"Integer attribute");
+ret  = H5Aread(attr, H5T_NATIVE_INT, &amp;point_out);
+printf("The value of the attribute \"Integer attribute\" is %d \n", point_out); 
+ret =  H5Aclose(attr);
+</pre>
+</FONT><B><P>Reading an attribute whose characterstics are not known. </B>It may be necessary to query a<FONT FACE="Times"> file to obtain information about an attribute, namely its name, data type, rank and dimensions. The following code opens an attribute by its index value using </FONT><CODE>H5Aopen_index</CODE><FONT FACE="Times">, then reads in information about its datatype.
+</FONT>
+<pre>
+/*
+ * Attach to the string attribute using its index, then read and display the value.
+ */
+attr =  H5Aopen_idx(dataset, 2);
+atype = H5Tcopy(H5T_C_S1);
+        H5Tset_size(atype, 4);
+ret   = H5Aread(attr, atype, string_out);
+printf("The value of the attribute with the index 2 is %s \n", string_out);
+</pre>
+<code>
+</CODE><P>In practice, if the characteristics of attributes are not know, the code involved in accessing and processing the attribute can be quite complex.  For this reason, HDF5 includes a function called <CODE>H5Aiterate</CODE>, which applies a user-supplied function to each of a set of attributes.  The user-supplied function can contain the code that interprets, accesses and processes each attribute. 
+<p>
+<a href="#ReadWriteAttributes">Example 8</a> <A NAME="_Toc429885323">illustrates the use of the <FONT FACE="Courier">H5Aiterate</FONT> function, as well as the other attribute examples described above.</A> 
+
+
+<H3><A NAME="_Toc429885324">Example code</A></H3>
+<H4><A NAME="CreateExample"><A NAME="_Toc429885325">Example 1: How to create a homogeneous multi-dimensional dataset</A> and write it to a file.</A></H4>
+<P>This example creates a 2-dimensional HDF 5 dataset of little endian 32-bit integers.
+<PRE><A NAME="CheckAndReadExample">
+/*  
+ *  This example writes data to the HDF5 file.
+ *  Data conversion is performed during write operation.  
+ */
+ 
+#include &lt;hdf5.h&gt;
+
+#define FILE        "SDS.h5"
+#define DATASETNAME "IntArray" 
+#define NX     5                      /* dataset dimensions */
+#define NY     6
+#define RANK   2
+
+main ()
+{
+   hid_t       file, dataset;         /* file and dataset identifiers */
+   hid_t       datatype, dataspace;   /* identifiers */
+   hsize_t     dimsf[2];              /* dataset dimensions */
+   herr_t      status;                             
+   int         data[NX][NY];          /* data to write */
+   int         i, j;
+
+/* 
+ * Data  and output buffer initialization. 
+ */
 
 for (j = 0; j &lt; NX; j++) {
+    for (i = 0; i &lt; NY; i++)
+        data[j][i] = i + j;
+}     
+                                       /*  0 1 2 3 4 5 
+                                           1 2 3 4 5 6
+                                           2 3 4 5 6 7
+                                           3 4 5 6 7 8
+                                           4 5 6 7 8 9   */
 
+/*
+ * Create a new file using H5F_ACC_TRUNC access,
+ * default file creation properties, and default file
+ * access properties.
+ */
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+/*
+ * Describe the size of the array and create the data space for fixed
+ * size dataset. 
+ */
+dimsf[0] = NX;
+dimsf[1] = NY;
+dataspace = H5Screate_simple(RANK, dimsf, NULL); 
+
+/* 
+ * Define datatype for the data in the file.
+ * We will store little endian INT numbers.
+ */
+datatype = H5Tcopy(H5T_NATIVE_INT);
+status = H5Tset_order(datatype, H5T_ORDER_LE);
+/*
+ * Create a new dataset within the file using defined dataspace and
+ * datatype and default dataset creation properties.
+ */
+dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
+                    H5P_DEFAULT);
+
+/*
+ * Write the data to the dataset using default transfer properties.
+ */
+status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                  H5P_DEFAULT, data);
+
+/*
+ * Close/release resources.
+ */
+H5Sclose(dataspace);
+H5Tclose(datatype);
+H5Dclose(dataset);
+H5Fclose(file);
+ 
+}     </PRE>
+<FONT FACE="Courier" SIZE=2><P>&nbsp;
+</FONT><H4><A NAME="_Toc429885326">Example 2.</A> How to read a hyperslab from file into memory.</A></H4>
+<P>This example reads a hyperslab from a 2-d HDF5 dataset into a 3-d dataset in memory.
+<PRE>
+/*  
+ *   This example reads hyperslab from the SDS.h5 file 
+ *   created by h5_write.c program into two-dimensional
+ *   plane of the tree-dimensional array. 
+ *   Information about dataset in the SDS.h5 file is obtained. 
+ */
+ 
+#include "hdf5.h"
+
+#define FILE        "SDS.h5"
+#define DATASETNAME "IntArray" 
+#define NX_SUB  3           /* hyperslab dimensions */ 
+#define NY_SUB  4 
+#define NX 7           /* output buffer dimensions */ 
+#define NY 7 
+#define NZ  3 
+#define RANK         2
+#define RANK_OUT     3
+
+main ()
+{
+   hid_t       file, dataset;         /* identifiers */
+   hid_t       datatype, dataspace;   
+   hid_t       memspace; 
+   H5T_class_t class;                 /* data type class */
+   H5T_order_t order;                 /* data order */
+   size_t      size;                  /* size of the data element
+                                         stored in file */ 
+   hsize_t     dimsm[3];              /* memory space dimensions */
+   hsize_t     dims_out[2];           /* dataset dimensions */      
+   herr_t      status;                             
+
+   int         data_out[NX][NY][NZ ]; /* output buffer */
+   
+   hsize_t      count[2];              /* size of the hyperslab in the file */
+   hsize_t      offset[2];             /* hyperslab offset in the file */
+   hsize_t      count_out[3];          /* size of the hyperslab in memory */
+   hsize_t      offset_out[3];         /* hyperslab offset in memory */
+   int          i, j, k, status_n, rank;
+
+for (j = 0; j &lt; NX; j++) {
+    for (i = 0; i &lt; NY; i++) {
+        for (k = 0; k &lt; NZ ; k++)
+            data_out[j][i][k] = 0;
+    }
+} 
+ 
+/*
+ * Open the file and the dataset.
+ */
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+dataset = H5Dopen(file, DATASETNAME);
+
+/*
+ * Get datatype and dataspace identifiers and then query
+ * dataset class, order, size, rank and dimensions.
+ */
+
+datatype  = H5Dget_type(dataset);     /* datatype identifier */ 
+class     = H5Tget_class(datatype);
+if (class == H5T_INTEGER) printf("Data set has INTEGER type \n");
+order     = H5Tget_order(datatype);
+if (order == H5T_ORDER_LE) printf("Little endian order \n");
+
+size  = H5Tget_size(datatype);
+printf(" Data size is %d \n", size);
+
+dataspace = H5Dget_space(dataset);    /* dataspace identifier */
+rank      = H5Sextent_ndims(dataspace);
+status_n  = H5Sextent_dims(dataspace, dims_out, NULL);
+printf("rank %d, dimensions %d x %d \n", rank, dims_out[0], dims_out[1]);
+
+/* 
+ * Define hyperslab in the datatset. 
+ */
+offset[0] = 1;
+offset[1] = 2;
+count[0]  = NX_SUB;
+count[1]  = NY_SUB;
+status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, NULL, 
+                             count, NULL);
+
+/*
+ * Define the memory dataspace.
+ */
+dimsm[0] = NX;
+dimsm[1] = NY;
+dimsm[2] = NZ ;
+memspace = H5Screate_simple(RANK_OUT,dimsm,NULL);   
+
+/* 
+ * Define memory hyperslab. 
+ */
+offset_out[0] = 3;
+offset_out[1] = 0;
+offset_out[2] = 0;
+count_out[0]  = NX_SUB;
+count_out[1]  = NY_SUB;
+count_out[2]  = 1;
+status = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, offset_out, NULL, 
+                             count_out, NULL);
+
+/*
+ * Read data from hyperslab in the file into the hyperslab in 
+ * memory and display.
+ */
+status = H5Dread(dataset, H5T_NATIVE_INT, memspace, dataspace,
+                 H5P_DEFAULT, data_out);
+for (j = 0; j &lt; NX; j++) {
     for (i = 0; i &lt; NY; i++) printf("%d ", data_out[j][i][0]);
-
     printf("\n");
-
 }
-
                                          /*  0 0 0 0 0 0 0
-
                                              0 0 0 0 0 0 0
-
                                              0 0 0 0 0 0 0
-
                                              3 4 5 6 0 0 0  
-
                                              4 5 6 7 0 0 0
-
                                              5 6 7 8 0 0 0
-
                                              0 0 0 0 0 0 0 */
 
-
-
 /*
-
  * Close/release resources.
-
  */
-
 H5Tclose(datatype);
-
 H5Dclose(dataset);
-
 H5Sclose(dataspace);
-
 H5Sclose(memspace);
-
 H5Fclose(file);
 
-
-
 }     </PRE>
-
-<FONT FACE="Times" SIZE=2><P>&nbsp;</P>
-
-</FONT><H4><A NAME="Compound"></A>Example 3. Working with compound datatypes.</H4>
-
-<P>This example shows how to create a compound data type, write an array which 
-
-has the compound data type to the file, and read back subsets of fields.</P>
-
+<FONT FACE="Times" SIZE=2><P>&nbsp;
+</FONT><H4><A NAME="Compound"><A NAME="_Toc429885327"></A>Example 3. Working with compound datatypes.</A></H4>
+<P>This example shows how to create a compound data type, write an array which has the compound data type to the file, and read back subsets of fields.
 <PRE>
-
 /*
-
  * This example shows how to create a compound data type,
-
  * write an array which has the compound data type to the file,
-
  * and read back fields' subsets.
-
  */
-
-
 
 #include "hdf5.h"
 
-
-
 #define FILE          "SDScompound.h5"
-
 #define DATASETNAME   "ArrayOfStructures"
-
 #define LENGTH        10
-
 #define RANK          1
-
-
 
 main()
 
-
-
 {
 
-
-
    
-
 /* First structure  and dataset*/
-
 typedef struct s1_t {
-
     int    a;
-
     float  b;
-
     double c; 
-
 } s1_t;
-
 s1_t       s1[LENGTH];
-
 hid_t      s1_tid;     /* File datatype hadle */
 
-
-
 /* Second structure (subset of s1_t)  and dataset*/
-
 typedef struct s2_t {
-
     double c;
-
     int    a;
-
 } s2_t;
-
 s2_t       s2[LENGTH];
-
-hid_t      s2_tid;    /* Memory datatype handle */
-
-
+hid_t      s2_tid;    /* Memory datatype identifier */
 
 /* Third "structure" ( will be used to read float field of s1) */
-
-hid_t      s3_tid;   /* Memory datatype handle */
-
+hid_t      s3_tid;   /* Memory datatype identifier */
 float      s3[LENGTH];
 
-
-
 int        i;
-
-hid_t      file, datatype, dataset, space; /* Handles */
-
+hid_t      file, datatype, dataset, space; /* Identifiers */
 herr_t     status;
-
 hsize_t    dim[] = {LENGTH};   /* Dataspace dimensions */
 
 
-
-
-
 /*
-
  * Initialize the data
-
  */
-
    for (i = 0; i&lt; LENGTH; i++) {
-
         s1[i].a = i;
-
         s1[i].b = i*i;
-
         s1[i].c = 1./(i+1);
-
 }
 
-
-
 /*
-
  * Create the data space.
-
  */
-
 space = H5Screate_simple(RANK, dim, NULL);
 
-
-
 /*
-
  * Create the file.
-
  */
-
 file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-
-
 /*
-
  * Create the memory data type. 
-
  */
-
 s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
-
 H5Tinsert(s1_tid, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
-
 H5Tinsert(s1_tid, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
-
 H5Tinsert(s1_tid, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
 
-
-
 /* 
-
  * Create the dataset.
-
  */
-
 dataset = H5Dcreate(file, DATASETNAME, s1_tid, space, H5P_DEFAULT);
 
-
-
 /*
-
  * Wtite data to the dataset; 
-
  */
-
 status = H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
 
-
-
 /*
-
  * Release resources
-
  */
-
 H5Tclose(s1_tid);
-
 H5Sclose(space);
-
 H5Dclose(dataset);
-
 H5Fclose(file);
-
  
-
 /*
-
  * Open the file and the dataset.
-
  */
-
 file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-
  
-
 dataset = H5Dopen(file, DATASETNAME);
 
-
-
 /* 
-
  * Create a data type for s2
-
  */
-
 s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
 
-
-
 H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
-
 H5Tinsert(s2_tid, "a_name", HOFFSET(s2_t, a), H5T_NATIVE_INT);
 
-
-
 /*
-
  * Read two fields c and a from s1 dataset. Fields in the file
-
  * are found by their names "c_name" and "a_name".
-
  */
-
 status = H5Dread(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2);
 
-
-
 /*
-
  * Display the fields
-
  */
-
 printf("\n");
-
 printf("Field c : \n");
-
 for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s2[i].c);
-
 printf("\n");
 
-
-
 printf("\n");
-
 printf("Field a : \n");
-
 for( i = 0; i &lt; LENGTH; i++) printf("%d ", s2[i].a);
-
 printf("\n");
-
-
 
 /* 
-
  * Create a data type for s3.
-
  */
-
 s3_tid = H5Tcreate(H5T_COMPOUND, sizeof(float));
-
-
 
 status = H5Tinsert(s3_tid, "b_name", 0, H5T_NATIVE_FLOAT);
 
-
-
 /*
-
  * Read field b from s1 dataset. Field in the file is found by its name.
-
  */
-
 status = H5Dread(dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3);
 
-
-
 /*
-
  * Display the field
-
  */
-
 printf("\n");
-
 printf("Field b : \n");
-
 for( i = 0; i &lt; LENGTH; i++) printf("%.4f ", s3[i]);
-
 printf("\n");
-
-
 
 /*
-
  * Release resources
-
  */
-
 H5Tclose(s2_tid);
-
 H5Tclose(s3_tid);
-
 H5Dclose(dataset);
-
 H5Fclose(file);
-
 }</PRE>
-
-<FONT FACE="Times" SIZE=2><P>&nbsp;</P>
-
-</FONT><H4><A NAME="CreateExtendWrite"></A>Example 4. Creating and writing an extendible dataset.</H4>
-
-<P>This example shows how to create a 3x3 extendible dataset, to extend the 
-
-dataset to 10x3, then to extend it again to 10x5.</P>
-
+<FONT FACE="Times" SIZE=2><P>&nbsp;
+</FONT><H4><A NAME="CreateExtendWrite"><A NAME="_Toc429885328"></A>Example 4. Creating and writing an extendible dataset.</A></H4>
+<P>This example shows how to create a 3x3 extendible dataset, to extend the dataset to 10x3, then to extend it again to 10x5.
 <PRE>
-
 /*  
-
  *   This example shows how to work with extendible dataset.
-
  *   In the current version of the library dataset MUST be
-
  *   chunked.
-
  *   
-
  */
-
  
-
 #include "hdf5.h"
 
-
-
 #define FILE        "SDSextendible.h5"
-
 #define DATASETNAME "ExtendibleArray" 
-
 #define RANK         2
-
 #define NX     10
-
 #define NY     5 
 
-
-
 main ()
-
 {
-
-   hid_t       file;                          /* handles */
-
+   hid_t       file;                          /* identifiers */
    hid_t       datatype, dataspace, dataset;  
-
    hid_t       filespace;                   
-
    hid_t       cparms;                     
-
    hsize_t      dims[2]  = { 3, 3};            /* dataset dimensions
-
                                                  at the creation time  */ 
-
    hsize_t      dims1[2] = { 3, 3};            /* data1 dimensions */ 
-
    hsize_t      dims2[2] = { 7, 1};            /* data2 dimensions */  
-
    hsize_t      dims3[2] = { 2, 2};            /* data3 dimensions */ 
 
-
-
    hsize_t      maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-
    hsize_t      chunk_dims[2] ={2, 5};
-
    hsize_t      size[2];
-
    hssize_t     offset[2];
-
-
 
    herr_t      status;                             
 
-
-
    int         data1[3][3] = { 1, 1, 1,       /* data to write */
-
                                1, 1, 1,
-
                                1, 1, 1 };      
-
-
 
    int         data2[7]    = { 2, 2, 2, 2, 2, 2, 2};
 
-
-
    int         data3[2][2] = { 3, 3,
-
                                3, 3};
 
-
-
 /*
-
  * Create the data space with ulimited dimensions. 
-
  */
-
 dataspace = H5Screate_simple(RANK, dims, maxdims); 
 
-
-
 /*
-
  * Create a new file. If file exists its contents will be overwritten.
-
  */
-
 file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-
-
 /* 
-
  * Modify dataset creation properties, i.e. enable chunking.
-
  */
-
 cparms = H5Pcreate (H5P_DATASET_CREATE);
-
 status = H5Pset_chunk( cparms, RANK, chunk_dims);
 
-
-
 /*
-
  * Create a new dataset within the file using cparms
-
  * creation properties.
-
  */
-
 dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
-
                  cparms);
 
-
-
 /*
-
  * Extend the dataset. This call assures that dataset is at least 3 x 3.
-
  */
-
 size[0]   = 3; 
-
 size[1]   = 3; 
-
 status = H5Dextend (dataset, size);
 
-
-
 /*
-
  * Select a hyperslab.
-
  */
-
 filespace = H5Dget_space (dataset);
-
 offset[0] = 0;
-
 offset[1] = 0;
-
 status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
-
                              dims1, NULL);  
 
-
-
 /*
-
  * Write the data to the hyperslab.
-
  */
-
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-
                   H5P_DEFAULT, data1);
 
-
-
 /*
-
  * Extend the dataset. Dataset becomes 10 x 3.
-
  */
-
 dims[0]   = dims1[0] + dims2[0];
-
 size[0]   = dims[0];  
-
 size[1]   = dims[1]; 
-
 status = H5Dextend (dataset, size);
 
-
-
 /*
-
  * Select a hyperslab.
-
  */
-
 filespace = H5Dget_space (dataset);
-
 offset[0] = 3;
-
 offset[1] = 0;
-
 status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
-
                               dims2, NULL);  
 
-
-
 /*
-
  * Define memory space
-
  */
-
 dataspace = H5Screate_simple(RANK, dims2, NULL); 
 
-
-
 /*
-
  * Write the data to the hyperslab.
-
  */
-
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-
                   H5P_DEFAULT, data2);
 
-
-
 /*
-
  * Extend the dataset. Dataset becomes 10 x 5.
-
  */
-
 dims[1]   = dims1[1] + dims3[1];
-
 size[0]   = dims[0];  
-
 size[1]   = dims[1]; 
-
 status = H5Dextend (dataset, size);
 
-
-
 /*
-
  * Select a hyperslab
-
  */
-
 filespace = H5Dget_space (dataset);
-
 offset[0] = 0;
-
 offset[1] = 3;
-
 status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
-
                              dims3, NULL);  
 
-
-
 /*
-
  * Define memory space.
-
  */
-
 dataspace = H5Screate_simple(RANK, dims3, NULL); 
 
-
-
 /*
-
  * Write the data to the hyperslab.
-
  */
-
 status = H5Dwrite(dataset, H5T_NATIVE_INT, dataspace, filespace,
-
                   H5P_DEFAULT, data3);
 
-
-
 /*
-
  * Resulting dataset
-
  *                 
-
          3 3 3 2 2
-
          3 3 3 2 2
-
          3 3 3 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
          2 0 0 0 0
-
  */ 
-
 /*
-
  * Close/release resources.
-
  */
-
 H5Dclose(dataset);
-
 H5Sclose(dataspace);
-
 H5Sclose(filespace);
-
 H5Fclose(file);
 
-
-
 }     </PRE>
-
-<FONT FACE="Courier New" SIZE=2><P>&nbsp;</P>
-
-</FONT><H4><A NAME="ReadExtended"></A>Example 5. Reading data.</H4>
-
-<P>This example shows how to read information the chunked dataset written 
-
-by <A HREF="#CreateExtendWrite">Example 4</A>.</P>
-
+<FONT FACE="Courier" SIZE=2><P>&nbsp;
+</FONT><H4><A NAME="ReadExtended"><A NAME="_Toc429885329"></A>Example 5. Reading data.</A></H4>
+<P>This example shows how to read information the chunked dataset written by <A HREF="#CreateExtendWrite">Example 4</A>.
 <PRE>
-
 /*  
-
  *   This example shows how to read data from a chunked dataset.
-
  *   We will read from the file created by h5_extend_write.c 
-
  */
-
  
-
 #include "hdf5.h"
 
-
-
 #define FILE        "SDSextendible.h5"
-
 #define DATASETNAME "ExtendibleArray" 
-
 #define RANK         2
-
 #define RANKC        1
-
 #define NX           10
-
 #define NY           5 
 
-
-
 main ()
-
 {
-
-   hid_t       file;                        /* handles */
-
+   hid_t       file;                        /* identifiers */
    hid_t       datatype, dataset;  
-
    hid_t       filespace;                   
-
    hid_t       memspace;                  
-
    hid_t       cparms;                   
-
    H5T_class_t class;                       /* data type class */
-
    size_t      elem_size;                   /* size of the data element
-
                                                stored in file */ 
-
    hsize_t     dims[2];                     /* dataset and chunk dimensions */ 
-
    hsize_t     chunk_dims[2];
-
    hsize_t     col_dims[1];
-
    size_t      size[2];
-
    hsize_t     count[2];
-
    hsize_t     offset[2];
-
-
 
    herr_t      status, status_n;                             
 
-
-
    int         data_out[NX][NY];  /* buffer for dataset to be read */
-
    int         chunk_out[2][5];   /* buffer for chunk to be read */
-
    int         column[10];        /* buffer for column to be read */
-
    int         i, j, rank, rank_chunk;
 
-
-
  
-
 /*
-
  * Open the file and the dataset.
-
  */
-
 file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-
 dataset = H5Dopen(file, DATASETNAME);
-
  
-
 /*
-
  * Get dataset rank and dimension.
-
  */
-
  
-
-filespace = H5Dget_space(dataset);    /* Get filespace handle first. */
-
+filespace = H5Dget_space(dataset);    /* Get filespace identifier first. */
 rank      = H5Sextent_ndims(filespace);
-
 status_n  = H5Sextent_dims(filespace, dims, NULL);
-
 printf("dataset rank %d, dimensions %d x %d \n", rank, dims[0], dims[1]);
 
-
-
 /*
-
  * Get creation properties list.
-
  */
-
-cparms = H5Dget_create_plist(dataset); /* Get properties handle first. */
-
-
+cparms = H5Dget_create_plist(dataset); /* Get properties identifier first. */
 
 /* 
-
  * Check if dataset is chunked.
-
  */
-
  if (H5D_CHUNKED == H5Pget_layout(cparms))  {
 
-
-
 /*
-
  * Get chunking information: rank and dimensions
-
  */
-
 rank_chunk = H5Pget_chunk(cparms, 2, chunk_dims);
-
 printf("chunk rank %d, dimensions %d x %d \n", rank_chunk,
-
         chunk_dims[0], chunk_dims[1]);
-
 } 
-
  
-
 /*
-
  * Define the memory space to read dataset.
-
  */
-
 memspace = H5Screate_simple(RANK,dims,NULL);
-
  
-
 /*
-
  * Read dataset back and display.
-
  */
-
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-
                  H5P_DEFAULT, data_out);
-
     printf("\n");
-
     printf("Dataset: \n");
-
 for (j = 0; j &lt; dims[0]; j++) {
-
     for (i = 0; i &lt; dims[1]; i++) printf("%d ", data_out[j][i]);
-
     printf("\n");
-
 }     
 
-
-
 /*
-
             dataset rank 2, dimensions 10 x 5 
-
             chunk rank 2, dimensions 2 x 5 
 
-
-
             Dataset:
-
             1 1 1 3 3 
-
             1 1 1 3 3 
-
             1 1 1 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
             2 0 0 0 0 
-
 */
 
-
-
 /*
-
  * Read the third column from the dataset.
-
  * First define memory dataspace, then define hyperslab
-
  * and read it into column array.
-
  */
-
 col_dims[0] = 10;
-
 memspace =  H5Screate_simple(RANKC, col_dims, NULL);
 
-
-
 /*
-
  * Define the column (hyperslab) to read.
-
  */
-
 offset[0] = 0;
-
 offset[1] = 2;
-
 count[0]  = 10;
-
 count[1]  = 1;
-
 status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL,
-
                              count, NULL);
-
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-
                  H5P_DEFAULT, column);
-
 printf("\n");
-
 printf("Third column: \n");
-
 for (i = 0; i &lt; 10; i++) {
-
      printf("%d \n", column[i]);
-
 }
 
-
-
 /*
-
-
 
             Third column: 
-
             1 
-
             1 
-
             1 
-
             0 
-
             0 
-
             0 
-
             0 
-
             0 
-
             0 
-
             0 
-
 */
 
-
-
 /*
-
  * Define the memory space to read a chunk.
-
  */
-
 memspace = H5Screate_simple(rank_chunk,chunk_dims,NULL);
 
-
-
 /*
-
  * Define chunk in the file (hyperslab) to read.
-
  */
-
 offset[0] = 2;
-
 offset[1] = 0;
-
 count[0]  = chunk_dims[0];
-
 count[1]  = chunk_dims[1];
-
 status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, 
-
                               count, NULL);
 
-
-
 /*
-
  * Read chunk back and display.
-
  */
-
 status = H5Dread(dataset, H5T_NATIVE_INT, memspace, filespace,
-
                  H5P_DEFAULT, chunk_out);
-
     printf("\n");
-
     printf("Chunk: \n");
-
 for (j = 0; j &lt; chunk_dims[0]; j++) {
-
     for (i = 0; i &lt; chunk_dims[1]; i++) printf("%d ", chunk_out[j][i]);
-
     printf("\n");
-
 }     
-
 /*
-
          Chunk: 
-
          1 1 1 0 0 
-
          2 0 0 0 0 
-
 */
 
-
-
 /*
-
  * Close/release resources.
-
  */
-
 H5Pclose(cparms);
-
 H5Dclose(dataset);
-
 H5Sclose(filespace);
-
 H5Sclose(memspace);
-
 H5Fclose(file);
 
-
-
 }     </PRE>
-
-<FONT FACE="Courier New" SIZE=2><P>&nbsp;</P>
-
-</FONT><H4><A NAME="CreateGroups"></A>Example 6. Creating groups.</H4>
-
-<P>This example shows how to create an HDF5 file with two groups, and to 
-
-place some datasets within those groups.</P>
-
+<FONT FACE="Courier" SIZE=2><P>&nbsp;
+</FONT><H4><A NAME="CreateGroups"><A NAME="_Toc429885330"></A>Example 6. Creating groups.</A></H4>
+<P>This example shows how to create an HDF5 file with two groups, and to place some datasets within those groups.
 <PRE>
-
 /*
-
  * This example shows how to create groups within the file and    
-
  * datasets within the file and groups.
-
  */ 
-
-
-
 
 
 #include "hdf5.h"
 
 
-
-
-
 #define FILE    "DIR.h5"
-
 #define RANK    2
 
-
-
 main()
-
 {
 
-
-
    hid_t    file, dir;
-
    hid_t    dataset, dataspace;
 
-
-
    herr_t   status;
-
    hsize_t  dims[2];
-
    hsize_t  size[1];
 
-
-
 /*
-
  * Create a file.
-
  */
-
 file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-
-
 /*
-
  * Create two groups in a file.
-
  */
-
 dir = H5Gcreate(file, "/IntData", 0);
-
 status = H5Gclose(dir);
-
-
 
 dir = H5Gcreate(file,"/FloatData", 0);
-
 status = H5Gclose(dir);
 
-
-
 /* 
-
  * Create dataspace for the character string
-
  */
-
 size[0] = 80;
-
 dataspace = H5Screate_simple(1, size, NULL);
 
-
-
 /*
-
  * Create dataset "String" in the root group.  
-
  */
-
 dataset = H5Dcreate(file, "String", H5T_NATIVE_CHAR, dataspace, H5P_DEFAULT);
-
 H5Dclose(dataset);
 
-
-
 /*
-
  * Create dataset "String" in the /IntData group.  
-
  */
-
 dataset = H5Dcreate(file, "/IntData/String", H5T_NATIVE_CHAR, dataspace,
-
                     H5P_DEFAULT);
-
 H5Dclose(dataset);
 
-
-
 /*
-
  * Create dataset "String" in the /FloatData group.  
-
  */
-
 dataset = H5Dcreate(file, "/FloatData/String", H5T_NATIVE_CHAR, dataspace,
-
                     H5P_DEFAULT);
-
 H5Sclose(dataspace);
-
 H5Dclose(dataset);
 
-
-
 /*
-
  * Create IntArray dataset in the /IntData group by specifying full path.
-
  */
-
 dims[0] = 2;
-
 dims[1] = 3;
-
 dataspace = H5Screate_simple(RANK, dims, NULL);
-
 dataset = H5Dcreate(file, "/IntData/IntArray", H5T_NATIVE_INT, dataspace,
-
                     H5P_DEFAULT); 
-
 H5Sclose(dataspace);
-
 H5Dclose(dataset);
 
-
-
 /*
-
  * Set current group to /IntData and attach to the dataset String.
-
  */
-
-
 
 status = H5Gset (file, "/IntData");
-
 dataset = H5Dopen(file, "String");
-
 if (dataset &gt; 0) printf("String dataset in /IntData group is found\n"); 
-
 H5Dclose(dataset);
-
-
 
 /*
-
  * Set current group to /FloatData.
-
  */
-
 status = H5Gset (file, "/FloatData");
 
-
-
 /* 
-
  * Create two datasets FlatArray and DoubleArray.
-
  */
-
-
 
 dims[0] = 5;
-
 dims[1] = 10;
-
 dataspace = H5Screate_simple(RANK, dims, NULL);
-
 dataset = H5Dcreate(file, "FloatArray", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT); 
-
 H5Sclose(dataspace);
-
 H5Dclose(dataset);
-
-
 
 dims[0] = 4;
-
 dims[1] = 6;
-
 dataspace = H5Screate_simple(RANK, dims, NULL);
-
 dataset = H5Dcreate(file, "DoubleArray", H5T_NATIVE_DOUBLE, dataspace,
-
                     H5P_DEFAULT); 
-
 H5Sclose(dataspace);
-
 H5Dclose(dataset);
-
-
 
 /* 
-
  * Attach to /FloatData/String dataset.
-
  */
 
-
-
 dataset = H5Dopen(file, "/FloatData/String");
-
 if (dataset &gt; 0) printf("/FloatData/String dataset is found\n"); 
-
 H5Dclose(dataset);
-
 H5Fclose(file);
 
-
-
 }</PRE>
+<H4><A NAME="_Toc429885331"><A NAME="WriteSelected"></A>Example 7. Writing selected data from memory to a file.</A></H4>
+<P>This example shows how to use the selection capabilities of HDF5 to write selected data to a file.  It includes the examples discussed in the text.
 
+<pre>
+/* 
+ *  This program shows how the H5Sselect_hyperslab and H5Sselect_elements
+ *  functions are used to write selected data from memory to the file.
+ *  Program takes 48 elements from the linear buffer and writes them into
+ *  the matrix using 3x2 blocks, (4,3) stride and (2,4) count. 
+ *  Then four elements  of the matrix are overwritten with the new values and 
+ *  file is closed. Program reopens the file and reads and displays the result.
+ */ 
+ 
+#include &lt;hdf5.h&gt;
 
+#define FILE "Select.h5"
 
+#define MSPACE1_RANK     1          /* Rank of the first dataset in memory */
+#define MSPACE1_DIM      50         /* Dataset size in memory */ 
 
+#define MSPACE2_RANK     1          /* Rank of the second dataset in memory */ 
+#define MSPACE2_DIM      4          /* Dataset size in memory */ 
 
+#define FSPACE_RANK      2          /* Dataset rank as it is stored in the file */
+#define FSPACE_DIM1      8          /* Dimension sizes of the dataset as it is
+                                       stored in the file */
+#define FSPACE_DIM2      12 
 
+                                    /* We will read dataset back from the file
+                                       to the dataset in memory with these
+                                       dataspace parameters. */  
+#define MSPACE_RANK      2
+#define MSPACE_DIM1      8 
+#define MSPACE_DIM2      12 
+
+#define NPOINTS          4          /* Number of points that will be selected 
+                                       and overwritten */ 
+main ()
+{
+
+   hid_t   file, dataset;           /* File and dataset identifiers */
+   hid_t   mid1, mid2, fid, mid;    /* Dataspace identifiers */
+   hsize_t dim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset 
+                                       (in memory) */ 
+   hsize_t dim2[] = {MSPACE2_DIM};  /* Dimension size of the second dataset
+                                       (in memory */ 
+   hsize_t fdim[] = {FSPACE_DIM1, FSPACE_DIM2}; 
+                                    /* Dimension sizes of the dataset (on disk) */
+   hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; 
+                                    /* Dimension sizes when we 
+                                                   read data back */
+   hssize_t start[2]; /* Start of hyperslab */
+   hsize_t stride[2]; /* Stride of hyperslab */
+   hsize_t count[2];  /* Block count */
+   hsize_t block[2];  /* Block sizes */
+
+   hssize_t coord[NPOINTS][FSPACE_RANK]; /* Array to store selected points 
+                                            from the file dataspace */ 
+   herr_t  ret;
+   uint    i,j;
+   int     matrix[MSPACE_DIM1][MSPACE_DIM2];
+   int     vector[MSPACE1_DIM];
+   int     values[] = {53, 59, 61, 67};  /* New values to be written */
+/*
+ * Buffers' initialization.
+ */
+vector[0] = vector[MSPACE1_DIM - 1] = -1;
+for (i = 1; i &lt; MSPACE1_DIM - 1; i++) vector[i] = i;
+
+for (i = 0; i &lt; MSPACE_DIM1; i++) {
+    for (j = 0; j &lt; MSPACE_DIM2; j++)
+        matrix[i][j] = 0;
+}
+/*
+ * Create a file.
+ */
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+/* 
+ * Create dataspace for the dataset in the file.
+ */
+fid = H5Screate_simple(FSPACE_RANK, fdim, NULL);
+
+/*
+ * Create dataset and write it into the file.
+ */
+dataset = H5Dcreate(file, "Matrix in file", H5T_NATIVE_INT, fid, H5P_DEFAULT);
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, matrix);
+
+/*
+ * Select hyperslab for the dataset in the file, using 3x2 blocks, (4,3) stride
+ * (2,4) count starting at the position (0,1).
+ */
+start[0]  = 0; start[1]  = 1;
+stride[0] = 4; stride[1] = 3;
+count[0]  = 2; count[1]  = 4;    
+block[0]  = 3; block[1]  = 2;
+ret = H5Sselect_hyperslab(fid, H5S_SELECT_SET, start, stride, count, block);
+
+/*
+ * Create dataspace for the first dataset.
+ */
+mid1 = H5Screate_simple(MSPACE1_RANK, dim1, NULL);
+
+/*
+ * Select hyperslab. 
+ * We will use 48 elements of the vector buffer starting at the second element.
+ * Selected elements are 1 2 3 . . . 48
+ */
+start[0]  = 1;
+stride[0] = 1;
+count[0]  = 48;
+block[0]  = 1;
+ret = H5Sselect_hyperslab(mid1, H5S_SELECT_SET, start, stride, count, block);
+ 
+/*
+ * Write selection from the vector buffer to the dataset in the file.
+ *
+ * File dataset should look like this:       
+ *                    0  1  2  0  3  4  0  5  6  0  7  8 
+ *                    0  9 10  0 11 12  0 13 14  0 15 16
+ *                    0 17 18  0 19 20  0 21 22  0 23 24
+ *                    0  0  0  0  0  0  0  0  0  0  0  0
+ *                    0 25 26  0 27 28  0 29 30  0 31 32
+ *                    0 33 34  0 35 36  0 37 38  0 39 40
+ *                    0 41 42  0 43 44  0 45 46  0 47 48
+ *                    0  0  0  0  0  0  0  0  0  0  0  0
+ */
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid1, fid, H5P_DEFAULT, vector);
+
+/*
+ * Reset the selection for the file dataspace fid.
+ */
+ret = H5Sselect_none(fid);
+
+/*
+ * Create dataspace for the second dataset.
+ */
+mid2 = H5Screate_simple(MSPACE2_RANK, dim2, NULL);
+
+/*
+ * Select sequence of NPOINTS points in the file dataspace.
+ */
+coord[0][0] = 0; coord[0][1] = 0;
+coord[1][0] = 3; coord[1][1] = 3;
+coord[2][0] = 3; coord[2][1] = 5;
+coord[3][0] = 5; coord[3][1] = 6;
+
+ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, 
+                         (const hssize_t **)coord);
+
+/*
+ * Write new selection of points to the dataset.
+ */
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, mid2, fid, H5P_DEFAULT, values);   
+
+/*
+ * File dataset should look like this:     
+ *                   53  1  2  0  3  4  0  5  6  0  7  8 
+ *                    0  9 10  0 11 12  0 13 14  0 15 16
+ *                    0 17 18  0 19 20  0 21 22  0 23 24
+ *                    0  0  0 59  0 61  0  0  0  0  0  0
+ *                    0 25 26  0 27 28  0 29 30  0 31 32
+ *                    0 33 34  0 35 36 67 37 38  0 39 40
+ *                    0 41 42  0 43 44  0 45 46  0 47 48
+ *                    0  0  0  0  0  0  0  0  0  0  0  0
+ *                                        
+ */
+   
+/*
+ * Close memory file and memory dataspaces.
+ */
+ret = H5Sclose(mid1); 
+ret = H5Sclose(mid2); 
+ret = H5Sclose(fid); 
+ 
+/*
+ * Close dataset.
+ */
+ret = H5Dclose(dataset);
+
+/*
+ * Close the file.
+ */
+ret = H5Fclose(file);
+/*
+ * Open the file.
+ */
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+/*
+ * Open the dataset.
+ */
+dataset = dataset = H5Dopen(file,"Matrix in file");
+
+/*
+ * Read data back to the buffer matrix.
+ */
+ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+                  H5P_DEFAULT, matrix);
+
+/*
+ * Display the result.
+ */
+for (i=0; i &lt; MSPACE_DIM1; i++) {
+    for(j=0; j &lt; MSPACE_DIM2; j++) printf("%3d  ", matrix[i][j]);
+    printf("\n");
+}
+
+}
+</pre>
+
+<H4><A NAME="_Toc429885332"><A NAME="ReadWriteAttributes">Example 8</A>. Writing and reading attributes.</A></H4>
+<P>This example shows how to create HDF5 attributes, to attach them to a dataset, and to read through all of the attributes of a dataset. 
+
+<pre>
+/* 
+ *  This program illustrates the usage of the H5A Interface functions.
+ *  It creates and writes a dataset, and then creates and writes array,
+ *  scalar, and string attributes of the dataset. 
+ *  Program reopens the file, attaches to the scalar attribute using
+ *  attribute name and reads and displays its value. Then index of the
+ *  third attribute is used to read and display attribute values.
+ *  The H5Aiterate function is used to iterate through the dataset attributes,
+ *  and display their names. The function is also reads and displays the values 
+ *  of the array attribute. 
+ */ 
+ 
+#include &lt;hdf5.h&gt;
+
+#define FILE "Attributes.h5"
+
+#define RANK  1   /* Rank and size of the dataset  */ 
+#define SIZE  7
+
+#define ARANK  2   /* Rank and dimension sizes of the first dataset attribute */
+#define ADIM1  2
+#define ADIM2  3 
+#define ANAME  "Float attribute"      /* Name of the array attribute */
+#define ANAMES "Character attribute" /* Name of the string attribute */
+
+herr_t attr_info(hid_t loc_id, const char *name, void *opdata); 
+                                     /* Operator function */
+
+int main (void)
+{
+
+   hid_t   file, dataset;       /* File and dataset identifiers */
+   
+   hid_t   fid;                 /* Dataspace identifier */
+   hid_t   attr1, attr2, attr3; /* Attribute identifiers */
+   hid_t   attr;
+   hid_t   aid1, aid2, aid3;    /* Attribute dataspace identifiers */ 
+   hid_t   atype;               /* Attribute type */
+
+   hsize_t fdim[] = {SIZE};
+   hsize_t adim[] = {ADIM1, ADIM2};  /* Dimensions of the first attribute  */
+   
+   float matrix[ADIM1][ADIM2]; /* Attribute data */ 
+
+   herr_t  ret;                /* Return value */
+   uint    i,j;                /* Counters */
+   int     idx;                /* Attribute index */
+   char    string_out[80];     /* Buffer to read string attribute back */
+   int     point_out;          /* Buffer to read scalar attribute back */
+
+/*
+ * Data initialization.
+ */
+int vector[] = {1, 2, 3, 4, 5, 6, 7};  /* Dataset data */
+int point = 1;                         /* Value of the scalar attribute */ 
+char string[] = "ABCD";                /* Value of the string attribute */
+
+   
+for (i=0; i &lt; ADIM1; i++) {            /* Values of the array attribute */
+    for (j=0; j &lt; ADIM2; j++)
+        matrix[i][j] = -1.;
+}
+
+/*
+ * Create a file.
+ */
+file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+/* 
+ * Create the dataspace for the dataset in the file.
+ */
+fid = H5Screate(H5S_SIMPLE);
+ret = H5Sset_extent_simple(fid, RANK, fdim, NULL);
+
+/*
+ * Create the dataset in the file.
+ */
+dataset = H5Dcreate(file, "Dataset", H5T_NATIVE_INT, fid, H5P_DEFAULT);
+
+/*
+ * Write data to the dataset.
+ */
+ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT, vector);
+
+/*
+ * Create dataspace for the first attribute. 
+ */
+aid1 = H5Screate(H5S_SIMPLE);
+ret  = H5Sset_extent_simple(aid1, ARANK, adim, NULL);
+
+/*
+ * Create array attribute.
+ */
+attr1 = H5Acreate(dataset, ANAME, H5T_NATIVE_FLOAT, aid1, H5P_DEFAULT);
+
+/*
+ * Write array attribute.
+ */
+ret = H5Awrite(attr1, H5T_NATIVE_FLOAT, matrix);
+
+/*
+ * Create scalar attribute.
+ */
+aid2  = H5Screate(H5S_SCALAR);
+attr2 = H5Acreate(dataset, "Integer attribute", H5T_NATIVE_INT, aid2,
+                  H5P_DEFAULT);
+
+/*
+ * Write scalar attribute.
+ */
+ret = H5Awrite(attr2, H5T_NATIVE_INT, &amp;point); 
+
+/*
+ * Create string attribute.
+ */
+aid3  = H5Screate(H5S_SCALAR);
+atype = H5Tcopy(H5T_C_S1);
+        H5Tset_size(atype, 4);
+attr3 = H5Acreate(dataset, ANAMES, atype, aid3, H5P_DEFAULT);
+
+/*
+ * Write string attribute.
+ */
+ret = H5Awrite(attr3, atype, string); 
+
+/*
+ * Close attribute and file datapsaces.
+ */
+ret = H5Sclose(aid1); 
+ret = H5Sclose(aid2); 
+ret = H5Sclose(aid3); 
+ret = H5Sclose(fid); 
+
+/*
+ * Close the attributes.
+ */ 
+ret = H5Aclose(attr1);
+ret = H5Aclose(attr2);
+ret = H5Aclose(attr3);
+ 
+/*
+ * Close the dataset.
+ */
+ret = H5Dclose(dataset);
+
+/*
+ * Close the file.
+ */
+ret = H5Fclose(file);
+
+/*
+ * Reopen the file.
+ */
+file = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+/*
+ * Open the dataset.
+ */
+dataset = H5Dopen(file,"Dataset");
+
+/*
+ * Attach to the scalar attribute using attribute name, then read and 
+ * display its value.
+ */
+attr = H5Aopen_name(dataset,"Integer attribute");
+ret  = H5Aread(attr, H5T_NATIVE_INT, &amp;point_out);
+printf("The value of the attribute \"Integer attribute\" is %d \n", point_out); 
+ret =  H5Aclose(attr);
+
+/*
+ * Attach to the string attribute using its index, then read and display the value.
+ */
+attr = H5Aopen_idx(dataset, 2);
+atype = H5Tcopy(H5T_C_S1);
+        H5Tset_size(atype, 4);
+ret   = H5Aread(attr, atype, string_out);
+printf("The value of the attribute with the index 2 is %s \n", string_out);
+ret   = H5Aclose(attr);
+ret   = H5Tclose(atype);
+
+/*
+ * Get attribute info using iteration function. 
+ */
+idx = H5Aiterate(dataset, NULL, attr_info, NULL);
+
+/*
+ * Close the dataset and the file.
+ */
+H5Dclose(dataset);
+H5Fclose(file);
+return 0;  
+}
+
+/*
+ * Operator function.
+ */
+herr_t attr_info(hid_t loc_id, const char *name, void *opdata)
+{
+    hid_t attr, atype, aspace;  /* Attribute, datatype and dataspace identifiers */
+    int   rank;
+    hsize_t sdim[64]; 
+    herr_t ret;
+    int i;
+    size_t npoints;             /* Number of elements in the array attribute. */ 
+    float *float_array;         /* Pointer to the array attribute. */
+/*
+ * Open the attribute using its name.
+ */    
+    attr = H5Aopen_name(loc_id, name);
+
+/*
+ * Display attribute name.
+ */
+    printf("\n");
+    printf("Name : ");
+    puts(name);
+
+/* 
+ * Get attribute datatype, dataspace, rank, and dimensions.
+ */
+    atype = H5Aget_type(attr);
+    aspace = H5Aget_space(attr);
+    rank = H5Sextent_ndims(aspace);
+    ret = H5Sextent_dims(aspace, sdim, NULL);
+/*
+ *  Display rank and dimension sizes for the array attribute.
+ */
+
+    if(rank &gt; 0) {
+    printf("Rank : %d \n", rank); 
+    printf("Dimension sizes : ");
+    for (i=0; i&lt; rank; i++) printf("%d ", (int)sdim[i]);
+    printf("\n");
+    }
+
+/*
+ * Read array attribute and display its type and values.
+ */
+
+    if (H5T_FLOAT == H5Tget_class(atype)) {
+    printf("Type : FLOAT \n"); 
+    npoints = H5Sextent_npoints(aspace);
+    float_array = (float *)malloc(sizeof(float)*(int)npoints); 
+    ret = H5Aread(attr, atype, float_array);
+    printf("Values : ");
+    for( i = 0; i &lt; npoints; i++) printf("%f ", float_array[i]); 
+    printf("\n");
+    free(float_array);
+    }
+
+&nbsp;
+/*
+ * Release all identifiers.
+ */
+    H5Tclose(atype);
+    H5Sclose(aspace);
+    H5Aclose(attr);
+    return 0;
+}
+
+</pre>
+
+</FONT>
+
+<P>&nbsp;
 
 <hr>
-
 <address>
-
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
-
-<br>
-
-Last modified:  14 July 1998
-
 </address>
 
-<P>&nbsp;</P></BODY>
+Last modified:  11 September 1998
 
+  </body>
+
+</BODY>
 </HTML>
-
