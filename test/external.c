@@ -582,6 +582,7 @@ test_2 (hid_t fapl)
     hid_t	hs_space;		/*hyperslab data space		*/
     hssize_t	hs_start = 30;		/*hyperslab starting offset	*/
     hsize_t	hs_count = 25;		/*hyperslab size		*/
+	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};
 
     TESTING("read external dataset");
 
@@ -593,7 +594,9 @@ test_2 (hid_t fapl)
 	sprintf (filename, "extern_%lua.raw", (unsigned long)i+1);
 	fd = HDopen (filename, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
-	n = lseek (fd, (off_t)(i*10), SEEK_SET);
+/*	n = lseek (fd, (off_t)(i*10), SEEK_SET);
+*/
+	n = write(fd,temparray,i*10);
 	assert (n>=0 && (size_t)n==i*10);
 	n = write (fd, part, sizeof(part));
 	assert (n==sizeof(part));
@@ -606,8 +609,9 @@ test_2 (hid_t fapl)
      * output looks like.
      */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
-			H5P_DEFAULT, fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
     if (H5Gclose(grp)<0) goto error;
 
@@ -705,13 +709,15 @@ test_3 (hid_t fapl)
     hssize_t	hs_start=100;		/*hyperslab starting offset	*/
     hsize_t	hs_count=100;		/*hyperslab size		*/
     char	filename[1024];		/*file name			*/
+	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};
 
     TESTING("write external dataset");
 
     /* Create another file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
-			fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
 
     /* Create the external file list */
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
@@ -729,6 +735,8 @@ test_3 (hid_t fapl)
 	    printf("    cannot open %s: %s\n", filename, strerror(errno));
 	    goto error;
 	}
+	
+	write(fd, temparray, (i-1)*10);
 	close (fd);
     }
 
@@ -814,8 +822,9 @@ main (void)
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_DEBUG, H5P_DEFAULT,
-			fapl))<0) goto error;
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+	goto error;
+    }
     if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
     if (H5Gclose (grp)<0) goto error;
 
