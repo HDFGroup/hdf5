@@ -265,7 +265,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 	 */
 	if(HDstrcmp(found_attr.name,attr->name)==0) {
 	    H5O_reset (H5O_ATTR, &found_attr);
-	    HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, FAIL,
+	    HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, FAIL,
 			"attribute already exists");
 	}
 	H5O_reset (H5O_ATTR, &found_attr);

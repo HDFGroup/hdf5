@@ -116,6 +116,7 @@ typedef enum H5E_minor_t {
     H5E_NOSPACE,                /*no space available for allocation          */
     H5E_CANTCOPY,               /*unable to copy object                      */
     H5E_CANTFREE,               /*unable to free object                      */
+    H5E_ALREADYEXISTS,          /*Object already exists */
 
     /* File accessability errors */
     H5E_FILEEXISTS,             /*file already exists                        */
