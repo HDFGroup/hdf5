@@ -9,8 +9,8 @@
  *
  * This program contains two major parts.  Part 1 tests fixed dimension
  * datasets, for both independent and collective transfer modes.
- * Part 2 tests extendable datasets, for independent transfer mode
- * only.  Collective mode for extendable datasets are not supported yet.
+ * Part 2 tests extendible datasets, for independent transfer mode
+ * only.  Collective mode for extendible datasets are not supported yet.
  */
 
 #include <testphdf5.h>
@@ -760,11 +760,11 @@ dataset_readAll(char *filename)
 
 
 /*
- * Part 2--Independent read/write for extendable datasets.
+ * Part 2--Independent read/write for extendible datasets.
  */
 
 /*
- * Example of using the parallel HDF5 library to create two extendable
+ * Example of using the parallel HDF5 library to create two extendible
  * datasets in one HDF5 file with independent parallel MPIO access support.
  * The Datasets are of sizes (number-of-mpi-processes x DIM1) x DIM2.
  * Each process controls only a slab of size DIM1 x DIM2 within each
@@ -844,11 +844,11 @@ extend_writeInd(char *filename)
     sid = H5Screate_simple (RANK, dims, max_dims);
     VRFY((sid != FAIL), "H5Screate_simple succeeded");
 
-    /* create an extendable dataset collectively */
+    /* create an extendible dataset collectively */
     dataset1 = H5Dcreate(fid, DATASETNAME1, H5T_NATIVE_INT, sid, dataset_pl);
     VRFY((dataset1 != FAIL), "H5Dcreate succeeded");
 
-    /* create another extendable dataset collectively */
+    /* create another extendible dataset collectively */
     dataset2 = H5Dcreate(fid, DATASETNAME2, H5T_NATIVE_INT, sid, dataset_pl);
     VRFY((dataset2 != FAIL), "H5Dcreate succeeded");
 
@@ -915,7 +915,7 @@ extend_writeInd(char *filename)
     mem_dataspace = H5Screate_simple (RANK, count, NULL);
     VRFY((mem_dataspace != FAIL), "");
 
-#ifdef DISABLE
+#ifndef DISABLE
     /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
     /* Temporary turn off auto error reporting */
     H5Eget_auto(&old_func, &old_client_data);
@@ -974,7 +974,7 @@ extend_writeInd(char *filename)
     H5Fclose(fid);							    
 }
 
-/* Example of using the parallel HDF5 library to read an extendable dataset */
+/* Example of using the parallel HDF5 library to read an extendible dataset */
 void
 extend_readInd(char *filename)
 {
