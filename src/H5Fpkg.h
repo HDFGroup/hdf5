@@ -161,6 +161,7 @@ struct H5F_t {
 
 #ifdef H5_HAVE_PARALLEL
 __DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
+__DLLVAR__  hbool_t H5_mpiposix_1_metawrite_g;
 #endif /* H5_HAVE_PARALLEL */
 
 /* Private functions, not part of the publicly documented API */

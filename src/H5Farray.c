@@ -171,27 +171,29 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
 #ifdef H5_HAVE_PARALLEL
     {
-	/* Get the transfer mode */
 	H5FD_mpio_dxpl_t *dx;
         hid_t driver_id;            /* VFL driver ID */
 
-        /* Get the plist structure */
-        if(NULL == (plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+	/* Get the transfer mode for MPIO transfers */
+        if(IS_H5FD_MPIO(f)) {
+            /* Get the plist structure */
+            if(NULL == (plist = H5I_object(dxpl_id)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-        /* Get the driver ID */
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            /* Get the driver ID */
+            if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
-        /* Check if we are using the MPIO driver */
-        if(H5FD_MPIO==driver_id) {
-            /* Get the driver information */
-            if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+            /* Check if we are using the MPIO driver (for the DXPL) */
+            if(H5FD_MPIO==driver_id) {
+                /* Get the driver information */
+                if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
-            /* Check if we are not using independent I/O */
-            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
-                xfer_mode = dx->xfer_mode;
+                /* Check if we are not using independent I/O */
+                if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                    xfer_mode = dx->xfer_mode;
+            } /* end if */
         } /* end if */
     }
     
@@ -412,27 +414,29 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
 #ifdef H5_HAVE_PARALLEL
     {
-	/* Get the transfer mode */
 	H5FD_mpio_dxpl_t *dx;
         hid_t driver_id;            /* VFL driver ID */
 
-        /* Get the plist structure */
-        if(NULL == (plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+	/* Get the transfer mode for MPIO transfers */
+        if(IS_H5FD_MPIO(f)) {
+            /* Get the plist structure */
+            if(NULL == (plist = H5I_object(dxpl_id)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-        /* Get the driver ID */
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
+            /* Get the driver ID */
+            if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
+                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
 
-        /* Check if we are using the MPIO driver */
-        if(H5FD_MPIO==driver_id) {
-            /* Get the driver information */
-            if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
+            /* Check if we are using the MPIO driver (for the DXPL) */
+            if(H5FD_MPIO==driver_id) {
+                /* Get the driver information */
+                if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &dx)<0)
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver info");
 
-            /* Check if we are not using independent I/O */
-            if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
-                xfer_mode = dx->xfer_mode;
+                /* Check if we are not using independent I/O */
+                if(H5FD_MPIO_INDEPENDENT!=dx->xfer_mode)
+                    xfer_mode = dx->xfer_mode;
+            } /* end if */
         } /* end if */
     }
     

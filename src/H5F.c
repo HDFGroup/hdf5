@@ -22,6 +22,7 @@
 #include "H5FDcore.h"		/*temporary in-memory files		  */
 #include "H5FDfamily.h"		/*family of files			  */
 #include "H5FDmpio.h"		/*MPI-2 I/O				  */
+#include "H5FDmpiposix.h"	/*MPI-2 & posix I/O			  */
 #include "H5FDgass.h"           /*GASS I/O                                */
 #include "H5FDstream.h"         /*in-memory files streamed via sockets    */
 #include "H5FDsrb.h"            /*SRB I/O                                 */
@@ -215,7 +216,7 @@ H5F_init_interface(void)
         /* Allow MPI buf-and-file-type optimizations? */
         const char *s = HDgetenv ("HDF5_MPI_1_METAWRITE");
         if (s && HDisdigit(*s)) {
-            H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
+            H5_mpiposix_1_metawrite_g = H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
         }
     }
 #endif /* H5_HAVE_PARALLEL */
@@ -304,6 +305,7 @@ H5F_init_interface(void)
 	if ((status=H5FD_MULTI)<0) goto end_registration;
 #ifdef H5_HAVE_PARALLEL
 	if ((status=H5FD_MPIO)<0) goto end_registration;
+	if ((status=H5FD_MPIPOSIX)<0) goto end_registration;
 #endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_STREAM
 	if ((status=H5FD_STREAM)<0) goto end_registration;
@@ -2571,7 +2573,6 @@ H5F_close(H5F_t *f)
 {
     H5F_close_degree_t	fc_degree;      /* What action to take when closing the last file ID for a file */
     hid_t		*oid_list;      /* List of IDs still open */
-    unsigned		oid_count;      /* Number of IDs still open */
     unsigned		i;              /* Local index variable */
     unsigned	        closing=0;      /* Indicate that the file will be closed */
     herr_t	        ret_value = SUCCEED;    /* Return value */

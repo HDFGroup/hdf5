@@ -1611,7 +1611,7 @@ H5FD_real_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
         }
     } else {
 	hsize_t	wasted;
-        haddr_t oldeoa;
+        haddr_t oldeoa=0;
 	haddr_t eoa = (file->cls->get_eoa)(file);
 
 #ifdef H5F_DEBUG

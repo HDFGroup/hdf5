@@ -72,9 +72,9 @@ static haddr_t H5FD_mpio_get_eoa(H5FD_t *_file);
 static herr_t H5FD_mpio_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_mpio_get_eof(H5FD_t *_file);
 static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     size_t size, void *buf);
+            size_t size, void *buf);
 static herr_t H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      size_t size, const void *buf);
+            size_t size, const void *buf);
 static herr_t H5FD_mpio_flush(H5FD_t *_file, unsigned closing);
 
 /* MPIO-specific file access properties */
