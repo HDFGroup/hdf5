@@ -454,40 +454,6 @@ typedef long off_t;
 #   error "nothing appropriate for int64_t"
 #endif
 
-#if SIZEOF_UINT64_T>=8
-#elif SIZEOF_INT>=8
-    typedef unsigned uint64_t;
-#   undef SIZEOF_UINT64_T
-#   define SIZEOF_UINT64_T SIZEOF_INT
-#elif SIZEOF_LONG>=8
-    typedef unsigned long uint64_t;
-#   undef SIZEOF_UINT64_T
-#   define SIZEOF_UINT64_T SIZEOF_LONG
-#elif SIZEOF_LONG_LONG>=8
-    typedef unsigned long_long uint64_t;
-#   undef SIZEOF_UINT64_T
-#   define SIZEOF_UINT64_T SIZEOF_LONG_LONG
-#else
-#   error "nothing appropriate for uint64_t"
-#endif
-
-#if SIZEOF_FLOAT>=4
-typedef float float32;
-#elif SIZEOF_DOUBLE>=4
-typedef double float32;
-#else
-#   error "nothing appropriate for float32"
-#endif
-
-/* Bias float64 toward using double - QAK */
-#if SIZEOF_DOUBLE>=8
-typedef double float64;
-#elif SIZEOF_FLOAT>=8
-typedef float float64;
-#else
-#  error "nothing appropriate for float64"
-#endif
-
 /*
  * Define a type for generic integers.	Use this instead of `int' to
  * show that some thought went into the algorithm.
