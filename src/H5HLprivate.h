@@ -46,13 +46,6 @@
 
 #define H5HL_ALIGN(X)	(((X)+7)&(unsigned)(~0x07)) /*align on 8-byte boundary	*/
 
-#define H5HL_SIZEOF_HDR(F)						      \
-    H5HL_ALIGN(H5HL_SIZEOF_MAGIC +	/*heap signature		*/    \
-	       4 +			/*reserved			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*data size			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*free list head		*/    \
-	       H5F_SIZEOF_ADDR (F))	/*data address			*/
-
 #define H5HL_SIZEOF_FREE(F)						      \
     H5HL_ALIGN(H5F_SIZEOF_SIZE (F) +	/*ptr to next free block	*/    \
 	       H5F_SIZEOF_SIZE (F))	/*size of this free block	*/
@@ -69,6 +62,7 @@ H5_DLL size_t H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t size,
 H5_DLL herr_t H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size,
 			  const void *buf);
 H5_DLL herr_t H5HL_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size);
+H5_DLL herr_t H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 			  int fwidth);
 #endif
