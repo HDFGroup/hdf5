@@ -20,6 +20,8 @@
 /* operator functions */
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
+static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
+
 /* prototypes */
 static int test_simple(void);
 static int test_errors(void);
@@ -74,6 +76,7 @@ static int test_simple(void)
  hid_t   fid;                                              /* file ID */
  hid_t   did;                                              /* dataset ID */
  hid_t   dsid;                                             /* DS dataset ID */
+ hid_t   sid;                                              /* space ID */
  int     rank     = RANK;                                  /* rank of data dataset */
  int     rankds   = 1;                                     /* rank of DS dataset */
  hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
@@ -532,7 +535,7 @@ static int test_simple(void)
  * test 6: test iterate scales with a function verifiy_scale
  *-------------------------------------------------------------------------
  */ 
- TESTING2("iterate scales");
+ TESTING2("iterate scales (verify scale)");
 
  /* get the dataset id for "dset_a" */
  if ((did = H5Dopen(fid,"dset_a"))<0)
@@ -560,10 +563,11 @@ static int test_simple(void)
 
 
 /*-------------------------------------------------------------------------
- * test 6: test iterate scales with a function read_scale
+ * test 7: test iterate scales with a function read_scale
  *-------------------------------------------------------------------------
  */ 
- TESTING2("read scale values with iterate scales");
+ TESTING2("iterate scales (read scale values)");
+
 
  /* get the dataset id for "dset_a" */
  if ((did = H5Dopen(fid,"dset_a"))<0)
@@ -585,6 +589,162 @@ static int test_simple(void)
 
  /* close dataset ID of "dset_a" */
  if (H5Dclose(did)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * test 8: test iterate scales with a function match_dim_scale
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("iterate scales (verify the scale sizes match)");
+
+ /* get the dataset id for "dset_a" */
+ if ((did = H5Dopen(fid,"dset_a"))<0)
+  goto out;
+
+ /* get dataset space */
+ if ((sid = H5Dget_space(did))<0)
+  goto out;
+ 
+ /* get rank */
+ if ((rank=H5Sget_simple_extent_ndims(sid))<0)
+  goto out;
+
+ /* get dimensions of dataset */
+ if (H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+  goto out;
+
+ {
+  int match_size; /* does this scale size matches the dataset DIM size */
+  int idx=0;      /* scale index to start iterating, on return, index where iterator stoped */
+  
+  /* iterate trough all the dimensions  */
+  for(dim=0; dim<(unsigned)rank; dim++)
+  {
+   if ((match_size=H5DSiterate_scales(did,dim,&idx,match_dim_scale,NULL))<0)
+    goto out;
+   
+   /* "dset_a" was defined with all dimension scales size matching the size of its dimensions */
+   if (match_size==0)
+    goto out;
+
+   /* both "ds1" and "ds2" are the on the first index */
+   if (idx!=0)
+    goto out;
+  }
+ }
+
+ 
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
+  goto out;
+
+ PASSED();
+
+/*-------------------------------------------------------------------------
+ * test 9: test iterate scales with a function match_dim_scale
+ *-------------------------------------------------------------------------
+ */ 
+ TESTING2("iterate scales (verify the scale sizes do not match)");
+
+/*-------------------------------------------------------------------------
+ * create 3 datasets: 1 "data" dataset and dimension scales (some are empty)
+ *-------------------------------------------------------------------------
+ */  
+ if (H5LTmake_dataset_int(fid,"dset_d",rank,dims,buf)<0)
+  goto out;
+ if (H5LTmake_dataset_int(fid,"ds6_1_1",rankds,s1_dim,NULL)<0)
+  goto out;
+ if (H5LTmake_dataset_int(fid,"ds6_1_2",rankds,s1_dim,s1_wbuf)<0)
+  goto out;
+ if (H5LTmake_dataset_int(fid,"ds7_2_1",rankds,s2_dim,NULL)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * attach them
+ *-------------------------------------------------------------------------
+ */  
+ if ((did = H5Dopen(fid,"dset_d"))<0)
+  goto out;
+
+ if ((dsid = H5Dopen(fid,"ds6_1_1"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if ((dsid = H5Dopen(fid,"ds6_1_2"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+ if ((dsid = H5Dopen(fid,"ds7_2_1"))<0)
+  goto out;
+ if (H5DSattach_scale(did,dsid,1)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
+  goto out;
+
+ if (H5Dclose(did)<0)
+  goto out;
+
+/*-------------------------------------------------------------------------
+ * verify match
+ *-------------------------------------------------------------------------
+ */  
+ /* get the dataset id for "dset_d" */
+ if ((did = H5Dopen(fid,"dset_d"))<0)
+  goto out;
+
+ /* get dataset space */
+ if ((sid = H5Dget_space(did))<0)
+  goto out;
+ 
+ /* get rank */
+ if ((rank=H5Sget_simple_extent_ndims(sid))<0)
+  goto out;
+
+ /* get dimensions of dataset */
+ if (H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+  goto out;
+
+ {
+  int match_size; /* does this scale size matches the dataset DIM size */
+  int idx;        /* scale index to start iterating, on return, index where iterator stoped */
+  
+  /* iterate trough all the dimensions  */
+  for(dim=0; dim<(unsigned)rank; dim++)
+  {
+   /* always start at 1st scale */
+   idx=0;
+
+   if ((match_size=H5DSiterate_scales(did,dim,&idx,match_dim_scale,NULL))<0)
+    goto out;
+   
+    /* "dset_d" was defined with :
+        dim 0: 2 scales, first is empty
+        dim 1: 1 scale, empty */
+   switch(dim)
+   {
+   case 0: /* for DIM 0, we get a valid scale at IDX 1 */
+    if (match_size!=1 && idx!=1)
+     goto out;
+    break;
+   case 1: /* for DIM 1, we get no valid scales */
+    if (match_size!=0 && idx!=0)
+     goto out;
+   }/*switch*/
+  }/*for*/
+ }
+ 
+ /* close */
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Sclose(sid)<0)
   goto out;
 
  PASSED();
@@ -730,7 +890,7 @@ out:
  * Function: verifiy_scale
  *
  * Purpose: example operator function used by H5DSiterate_scales, used
- *  to veify that SCALE_ID refers to a valid DS dataset
+ *  to verify that SCALE_ID refers to a valid DS dataset
  *
  * Return: 
  * The return values from an operator are: 
@@ -745,9 +905,7 @@ out:
 
 static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
-
  /* define a default zero value for return. This will cause the iterator to continue */
-
  int ret = 0;  
   
  /* unused */
@@ -863,3 +1021,87 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor
   return FAIL;
 } 
 
+
+/*-------------------------------------------------------------------------
+ * Function: match_dim_scale
+ *
+ * Purpose: example operator function used by H5DSiterate_scales, used
+ *  to verify the the DSID scale size matches the dataset DIM size
+ *
+ * Return: 
+ * The return values from an operator are: 
+ * Zero causes the iterator to continue, returning zero when all group members have been processed. 
+ * Positive causes the iterator to immediately return that positive value, indicating 
+ *  short-circuit success. The iterator can be restarted at the next group member. 
+ * Negative causes the iterator to immediately return that value, indicating failure. 
+ *  The iterator can be restarted at the next group member. 
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data)
+{
+ int       ret = 0;              /* define a default zero value for return. This will cause the iterator to continue */
+ hid_t     sid;                  /* space ID */
+ hssize_t  nelmts;               /* size of a dimension scale array */
+ int       rank;                 /* rank of dataset */
+ hsize_t   dims[H5S_MAX_RANK];   /* dimensions of dataset */
+ hsize_t   storage_size;
+
+/*-------------------------------------------------------------------------
+ * get DID (dataset) space info
+ *-------------------------------------------------------------------------
+ */ 
+
+ /* get dataset space */
+ if ((sid = H5Dget_space(did))<0)
+  goto out;
+ 
+ /* get rank */
+ if ((rank=H5Sget_simple_extent_ndims(sid))<0)
+  goto out;
+
+ /* get dimensions of dataset */
+ if (H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+  goto out;
+
+ /* close the dataspace id */
+ if (H5Sclose(sid)<0)
+  goto out;
+ 
+/*-------------------------------------------------------------------------
+ * get DSID (scale) space info
+ *-------------------------------------------------------------------------
+ */ 
+ 
+ /* get the space for the scale */
+ if ((sid = H5Dget_space(dsid))<0)
+  goto out;
+ 
+ /* get size of the DS array */
+ if ((nelmts = H5Sget_simple_extent_npoints(sid))<0)
+  goto out;
+
+ /* close */
+ if (H5Sclose(sid)<0)
+  goto out;
+ 
+ /* the size of the DS array must match the dimension of the dataset */
+ if (nelmts == (hssize_t)dims[dim])
+  ret = 1;
+
+ /* if the scale is empty assume it cannot be used */
+ if ((storage_size=H5Dget_storage_size(dsid))<0)
+  goto out;
+
+ if (storage_size==0)
+  ret = 0;
+
+ return ret;
+ 
+out:
+ H5E_BEGIN_TRY {
+  H5Sclose(sid);
+ } H5E_END_TRY;
+ return FAIL;
+} 
