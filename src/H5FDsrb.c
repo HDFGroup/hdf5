@@ -201,6 +201,7 @@ H5Pset_fapl_srb(hid_t fapl_id, SRB_Info info)
     herr_t ret_value = FAIL;
 
     FUNC_ENTER(H5Pset_fapl_srb, FAIL);
+    /*NO TRACE*/
 
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");

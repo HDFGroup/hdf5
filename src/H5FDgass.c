@@ -233,6 +233,7 @@ H5Pset_fapl_gass(hid_t fapl_id, GASS_Info info)
     herr_t ret_value=FAIL;
     
     FUNC_ENTER(H5Pset_fapl_gass, FAIL);
+    /*NO TRACE*/
     
     /* Check arguments */
     if(TRUE!=H5P_isa_class(fapl_id,H5P_FILE_ACCESS) || NULL == (plist = H5I_object(fapl_id)))
