@@ -67,7 +67,7 @@ hid_t   ERR_MIN_GETNUM;
 #define SPACE2_DIM1	        10
 #define SPACE2_DIM2	        10
 
-herr_t custom_print_cb(int n, H5E_error_t *err_desc, void* client_data);
+herr_t custom_print_cb(unsigned n, H5E_error_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -112,7 +112,7 @@ test_error(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_CREATE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE, 
                 "H5Dcreate failed");
         goto error;
     }
@@ -120,27 +120,27 @@ test_error(hid_t file)
     /* Test enabling and disabling default printing */
     if (H5Eget_auto(H5E_DEFAULT, &old_func, &old_data)<0)
 	TEST_ERROR;
-    if (old_data != stderr) 
+    if (old_data != NULL) 
 	TEST_ERROR;
-    if (old_func != H5Eprint)
+    if (old_func != (H5E_auto_t)H5Eprint)
 	TEST_ERROR;
 
     if(H5Eset_auto(H5E_DEFAULT, NULL, NULL)<0)
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
-    /*if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)>=0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
+    if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)>=0) {
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite shouldn't succeed");
         goto error;
-    }*/
+    }
 
     if(H5Eset_auto(H5E_DEFAULT, old_func, old_data)<0)
         TEST_ERROR;
 
     /* Test saving and restoring the current error stack */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_MAJ_IO, ERR_MIN_WRITE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE, 
                 "H5Dwrite failed as supposed to");
         estack_id = H5Eget_current_stack();
         H5Dclose(dataset);
@@ -264,7 +264,7 @@ error_stack(void)
 
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK))==0) {
-        H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_MAJ_API, ERR_MIN_GETNUM, 
+        H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM, 
                 "Get number test failed, returned %d", err_num);
         goto error;
     } 
@@ -334,7 +334,7 @@ dump_error(hid_t estack)
  *-------------------------------------------------------------------------
  */
 herr_t 
-custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
+custom_print_cb(unsigned n, H5E_error_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
     char                maj[MSG_SIZE];
@@ -442,7 +442,7 @@ main(void)
     /* Test error stack */ 
     if(error_stack()<0) {
         /* Push an error onto error stack */
-        H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
+        H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK, 
                 "Error stack test failed");
         
         /* Delete an error from the top of error stack */
@@ -460,7 +460,7 @@ main(void)
 
     /* Test error API */
     if(test_error(file)<0) {
-        H5Epush(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, 
                 "Error test failed, %s", "it's wrong");
         estack_id = H5Eget_current_stack();
         H5Eprint(estack_id, stderr);
@@ -474,8 +474,7 @@ main(void)
     if(close_error()<0)
         TEST_ERROR ;
 
-    PASSED();
-    printf("All error API test based on native datatype test passed.\n");
+    printf("All error API tests passed.\n");
     return 0;
 
  error:
