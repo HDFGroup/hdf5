@@ -10,9 +10,9 @@ HDF5/H5 API Specification
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User's Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
@@ -62,6 +62,7 @@ and it users.
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#Library-GarbageCollect">H5garbage_collect</a>
     <li><a href="#Library-DontAtExit">H5dont_atexit</a>
 </ul>
 </td></tr>
@@ -104,6 +105,37 @@ and it users.
         application calls <code>exit</code>, but may be called earlier 
         in event of an emergency shutdown or out of desire to free all 
         resources used by the HDF5 library.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+</dl>
+
+
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-GarbageCollect">H5garbage_collect</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5garbage_collect</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Garbage collects on all free-lists of all types.
+<dt><strong>Description:</strong>
+    <dd><code>H5garbage_collect</code> walks through all the garbage 
+        collection routines of the library, freeing any unused memory. 
+        <p>
+        It is not required that <code>H5garbage_collect</code> be called 
+        at any particular time; it is only necessary in certain situations 
+        where the application has performed actions that cause the library 
+        to allocate many objects.  The application should call
+        <code>H5garbage_collect</code> if it eventually releases those 
+        objects and wants to reduce the memory used by the library from
+        the peak usage required.  
+        <p>
+        The library automatically garbage collects all the free lists 
+        when the application ends.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt>None.
@@ -217,9 +249,9 @@ and it users.
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
+<a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="H5.user.html">HDF5 User Guide</a>&nbsp;<br>
-<a href="index.html">Other HDF5 documents and links</a>&nbsp;<br>
+<a href="H5.user.html">HDF5 User's Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
