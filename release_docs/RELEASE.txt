@@ -117,6 +117,13 @@ New Features
 
     F90 API:
     --------
+        - added new subroutines:
+                h5fget_filesize_f
+                h5iget_file_id_f
+                h5premove_filter_f
+                h5zget_filter_info_f
+                                         EIP 2004/9/21
+ 
         - added new h5fget_name_f and h5fget_filesize_f subroutines
                                          EIP 2004/07/08
 
@@ -296,25 +303,27 @@ Documentation
            only want to build,test and install HDF5 in a quick way.
            INSTALL_Windows_From_Command_Line.txt is supposed to help users who
            would like to compile,test and install HDF5 in command line environment.
-        -  INSTALL_Windows_withcpp.txt and INSTALL_Windows_withF90.txt become
-           obsolete. Users should NOT refer to those documents anymore.
-        KY 2004/09/16
+        -  INSTALL_Windows_withcpp.txt and INSTALL_Windows_withF90.txt became
+           obsolete. Files are deleted from the release_docs directory.
+        KY 2004/09/16, EIP 2004/9/21
         
 
 
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.2
-                                  xlf 8.1.0.3
-    				  xlC 6.0.0.4
+    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.6
+                                  xlf 8.1.0.5
+    				  xlC 6.0.0.6
 				  xlc 5.0.2.5
 				  xlf 7.1.1.2
 				  xlC 5.0.2.5
 				  mpcc_r 5.0.2.5
 				  mpxlf_r 7.1.1.2
                                   poe 3.2.0.10
-    AIX 5.2                       xlc 6.0
+    AIX 5.2                       xlc 6.0.0.7
+                                  xlC 6.0.0.8
+                                  xlf 8.1.0.6
     Cray T90 sn7001 10.0.0md      Cray Standard C Version 6.4.0.3
                                   Cray Fortran Version 3.4.0.0
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.3
@@ -531,7 +540,6 @@ Known Problems
 * The Stream VFD was not tested yet under Windows. It is not supported
   in the TFLOPS machine.
 
-
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
   correctly with the -O option.  The test program works fine if it is
@@ -548,7 +556,7 @@ Known Problems
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
   from the site:
-  ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
+  ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/
 
 * On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
