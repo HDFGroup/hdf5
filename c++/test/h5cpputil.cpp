@@ -32,16 +32,8 @@
 #include "h5cpputil.h"
 
 #ifndef H5_NO_NAMESPACE
-namespace H5 {
-#ifndef H5_NO_STD
-	    using namespace std;
-#endif  // H5_NO_STD
+using namespace H5;
 #endif
-/*
-#ifndef H5_NO_STD
-using namespace std;
-#endif
-*/
 
 
 /*-------------------------------------------------------------------------
@@ -125,8 +117,4 @@ InvalidActionException::InvalidActionException(const string func_name, const str
 // Function:    InvalidActionException destructor
 //--------------------------------------------------------------------------
 InvalidActionException::~InvalidActionException() {}
-
-#ifndef H5_NO_NAMESPACE
-} // end namespace
-#endif
 
