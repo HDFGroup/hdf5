@@ -851,8 +851,9 @@ To build and test HDF5 C++ examples:
 
 To build and test HDF5 Fortran example:
 
-   1. Invoke Microsoft Visual C++, go to "File" and select
-      the "Open Workspace" option. 
+   1. Invoke Compaq visual Fortran or intel Fortran under Microsoft 
+      Visual studio development environment, go to "File" and select
+      the "Open Workspace" option.
 
       Then open the workspace
       c:\MyHDFstuff\hdf5\fortran\examples\allf90examples\allf90examples.dsw.
@@ -908,9 +909,6 @@ To build and test HDF5 Fortran example:
       f90examplesDBGDLL, in the c:\MyHDFstuff\fortran\examples directory
       and places all the executables in it.  Both the release and debug
       versions of the examples should be built before this step is done.
-
-   4. HDF5 Fortran examples test files will be provided in the coming
-      future.
 
 ************************************************************************
 
