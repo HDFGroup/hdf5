@@ -798,6 +798,7 @@ AC_ARG_WITH(Stream-VFD,
 case "$withval" in
    yes)
       AC_MSG_RESULT(yes)
+      AC_CHECK_HEADERS(netinet/tcp.h)
       AC_DEFINE(HAVE_STREAM)
       ;;
    *)
