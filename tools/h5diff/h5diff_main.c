@@ -201,7 +201,7 @@ int main(int argc, const char *argv[])
  
 
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
- printf("\n");
+ if (options.verbose) printf("\n");
  ret= (nfound==0 ? 0 : 1 );
  return ret;
  
