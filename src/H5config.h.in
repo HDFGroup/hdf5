@@ -1,5 +1,9 @@
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if your system can handle converting denormalized floating-point
+   values. */
+#undef CONVERT_DENORMAL_FLOAT
+
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
@@ -38,6 +42,12 @@
 
 /* Define if we want flexible parallel HDF5 support */
 #undef HAVE_FPHDF5
+
+/* Define to 1 if you have the `frexpf' function. */
+#undef HAVE_FREXPF
+
+/* Define to 1 if you have the `frexpl' function. */
+#undef HAVE_FREXPL
 
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64

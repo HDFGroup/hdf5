@@ -1647,7 +1647,7 @@ AC_MSG_RESULT([no]))
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(fork gethostname getpwuid getrusage)
+AC_CHECK_FUNCS(fork frexpf frexpl gethostname getpwuid getrusage)
 AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vsnprintf strdup system waitpid)
 
@@ -2361,6 +2361,23 @@ dnl
 if test 1 = 2; then
   AC_DEFINE([NO_SHARED_WRITING], [1],
             [Define if shared writing must be disabled (CodeWarrior only)])
+fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine can handle converting
+dnl denormalized floating-point values.
+dnl (This flag should be set for all machines, except for the Crays, where
+dnl the cache value is set in it's config file)
+dnl
+AC_MSG_CHECKING([if converting denormalized floating-point values is possible])
+AC_CACHE_VAL([hdf5_cv_convert_denormal_float], [hdf5_cv_convert_denormal_float=yes])
+
+if test ${hdf5_cv_convert_denormal_float} = "yes"; then
+  AC_DEFINE([CONVERT_DENORMAL_FLOAT], [1],
+            [Define if your system can handle converting denormalized floating-point values.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
 fi
 
 dnl ----------------------------------------------------------------------
