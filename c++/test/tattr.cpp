@@ -294,6 +294,8 @@ test_attr_rename(void)
 static void 
 test_attr_basic_read(void)
 {
+    int i, j;
+
     // Output message about test being performed
     MESSAGE(5, ("Testing Basic Attribute Reading Functions\n"));
 
@@ -316,7 +318,7 @@ test_attr_basic_read(void)
 	ds_attr.read(PredType::NATIVE_INT, &read_data1);
 
 	// Verify values read in
-	for(int i=0; i<ATTR1_DIM1; i++)
+	for(i=0; i<ATTR1_DIM1; i++)
             if(attr_data1[i]!=read_data1[i]) 
 		TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
 
@@ -340,8 +342,8 @@ test_attr_basic_read(void)
 	gr_attr.read(PredType::NATIVE_INT, read_data2);
 
 	// Verify values read in
-	for(int i=0; i<ATTR2_DIM1; i++)
-            for(int j=0; j<ATTR2_DIM2; j++)
+	for(i=0; i<ATTR2_DIM1; i++)
+            for(j=0; j<ATTR2_DIM2; j++)
         	if(attr_data2[i][j]!=read_data2[i][j]) {
 		    TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
 		}
