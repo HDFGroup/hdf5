@@ -47,15 +47,18 @@
 static void
 usage (const char *progname)
 {
-    fprintf (stderr, "usage: %s [-[b|m] N[g|m|k]] SRC DST\n", progname);
-    fprintf (stderr, "   -b N   The I/O block size, defaults to 1kB\n");
-    fprintf (stderr, "   -m N   The destination member size or 1GB\n");
-    fprintf (stderr, "   SRC    The name of the source file\n");
-    fprintf (stderr, "   DST	The name of the destination files\n");
-    fprintf (stderr, "Sizes may be suffixed with `g' for GB, `m' for MB or "
-	     "`k' for kB.\n");
-    fprintf (stderr, "File family names include an integer printf "
-	     "format such as `%%d'\n");
+    fprintf(stderr, "usage: %s [-v] [-V] [-[b|m] N[g|m|k]] SRC DST\n",
+	    progname);
+    fprintf(stderr, "   -v     Produce verbose output\n");
+    fprintf(stderr, "   -V     Print a version number and exit\n");
+    fprintf(stderr, "   -b N   The I/O block size, defaults to 1kB\n");
+    fprintf(stderr, "   -m N   The destination member size or 1GB\n");
+    fprintf(stderr, "   SRC    The name of the source file\n");
+    fprintf(stderr, "   DST	The name of the destination files\n");
+    fprintf(stderr, "Sizes may be suffixed with `g' for GB, `m' for MB or "
+	    "`k' for kB.\n");
+    fprintf(stderr, "File family names include an integer printf "
+	    "format such as `%%d'\n");
     exit (1);
 }
 
@@ -184,6 +187,10 @@ main (int argc, char *argv[])
 	if (!strcmp (argv[argno], "-v")) {
 	    verbose = TRUE;
 	    argno++;
+	} else if (!strcmp(argv[argno], "-V")) {
+	    printf("This is %s version %u.%u release %u\n",
+		   prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+	    exit(0);
 	} else if ('b'==argv[argno][1]) {
 	    blk_size = get_size (prog_name, &argno, argc, argv);
 	} else if ('m'==argv[argno][1]) {

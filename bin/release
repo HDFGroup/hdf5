@@ -15,40 +15,36 @@ use Cwd;
 $releases = "./releases";	# Directory for release tarballs
 
 ##############################################################################
-# Read version info, return an array (MAJOR,MINOR,RELEASE,PATCHLEVEL) or
-# a string "MAJOR.MINOR.RELEASE PATCHLEVEL"
+# Read version info, return an array (MAJOR,MINOR,RELEASE) or
+# a string "MAJOR.MINOR.RELEASE"
 #
 sub getver () {
    my @ver;
-
    open SRC, "./src/H5public.h" or die "cannot read HDF5 version";
    while (<SRC>) {
       $ver[0] = $1 if /define\s+H5_VERS_MAJOR\s+(\d+)/;
       $ver[1] = $1 if /define\s+H5_VERS_MINOR\s+(\d+)/;
       $ver[2] = $1 if /define\s+H5_VERS_RELEASE\s+(\d+)/;
-      $ver[3] = $1 if /define\s+H5_VERS_PATCH\s+(\d+)/;
    }
    close SRC;
-   wantarray ? @ver : "$ver[0].$ver[1].$ver[2]".chr(ord('a')+$ver[3]);
+   wantarray ? @ver : "$ver[0].$ver[1].$ver[2]";
 }
 
 ##############################################################################
 # Set version information.  Input is a string or an array.
 #
-sub setver ($;$$$) {
+sub setver ($;$$) {
    my @ver = @_;
    local $_;
 
    if ($ver[0]=~/\D/) {
-      @ver = $ver[0] =~ /^(\d+)\.(\d+)\.(\d+)([a-z])$/ or return "";
-      $ver[3] = ord($ver[3])-ord('a');
+      @ver = $ver[0] =~ /^(\d+)\.(\d+)\.(\d+)$/ or return "";
    }
 
    $_ = `cat ./src/H5public.h`;
    s/(define\s+H5_VERS_MAJOR\s+)(\d+)/$1$ver[0]/;
    s/(define\s+H5_VERS_MINOR\s+)(\d+)/$1$ver[1]/;
    s/(define\s+H5_VERS_RELEASE\s+)(\d+)/$1$ver[2]/;
-   s/(define\s+H5_VERS_PATCH\s+)(\d+)/$1$ver[3]/;
    open SRC, "> ./src/H5public.h" or return "";
    print SRC $_;
    close SRC;
@@ -144,7 +140,7 @@ sub release (@) {
    # information.
    my $today = sprintf "19%02d-%02d-%02d %02d:%02d UTC", (gmtime)[5,4,3,2,1];
    $_ = `cat README`;
-   s[^(This is hdf5-)\d+.\d+.\d+[a-z]( released on )(\d+-?){3} \d+:\d+ UTC]
+   s[^(This is hdf5-)\d+.\d+.\d+( released on )(\d+-?){3} \d+:\d+ UTC]
     [$1$ver$2$today]s;
    system ("cp -p README README~");
    open README, ">README" or die "unable to open README: $!\n";
@@ -214,9 +210,9 @@ sub release (@) {
 
    # Update version info
    if ($batch) {
-     my ($v1,$v2,$v3,$v4) = $ver =~ /^(\d+)\.(\d+)\.(\d+)([a-z])$/;
+     my ($v1,$v2,$v3) = $ver =~ /^(\d+)\.(\d+)\.(\d+)$/;
      $v3 += 1;
-     setver ($ver = "$v1.$v2.${v3}a") or die "cannot set version";
+     setver ($ver = "$v1.$v2.$v3") or die "cannot set version";
      print "Development version set to $ver\n";
    } else {
      print <<EOF;

@@ -304,11 +304,12 @@ H5dont_atexit(void)
  *
  * Purpose:	Returns the library version numbers through arguments. MAJNUM
  *		will be the major revision number of the library, MINNUM the
- *		minor revision number, RELNUM the release revision number,
- *		and PATNUM the patch revision number.
+ *		minor revision number, and RELNUM the release revision number.
  *
  * Note:	When printing an HDF5 version number it should be printed as
- *		`printf ("HDF5-%d.%d.%d%c", maj, min, rel, 'a'+patch)'.
+ *
+ * 		printf("%u.%u.%u", maj, min, rel)		or
+ *		printf("version %u.%u release %u", maj, min, rel)
  *
  * Return:	Success:	SUCCEED
  *
@@ -324,8 +325,7 @@ H5dont_atexit(void)
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum,
-	  unsigned *patnum)
+H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum)
 {
     herr_t                  ret_value = SUCCEED;
 
@@ -335,7 +335,6 @@ H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum,
     if (majnum) *majnum = H5_VERS_MAJOR;
     if (minnum) *minnum = H5_VERS_MINOR;
     if (relnum) *relnum = H5_VERS_RELEASE;
-    if (patnum) *patnum = H5_VERS_PATCH;
 
     FUNC_LEAVE(ret_value);
 }
@@ -362,22 +361,20 @@ H5version(unsigned *majnum, unsigned *minnum, unsigned *relnum,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum,
-	      unsigned patnum)
+H5vers_check (unsigned majnum, unsigned minnum, unsigned relnum)
 {
     /* Don't initialize the library quite yet */
     
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
-	H5_VERS_RELEASE!=relnum || H5_VERS_PATCH!=patnum) {
+	H5_VERS_RELEASE!=relnum) {
 	fputs ("Warning! The HDF5 header files included by this application "
 	       "do not match the\nversion used by the HDF5 library to which "
 	       "this application is linked. Data\ncorruption or segmentation "
 	       "faults would be likely if the application were\nallowed to "
 	       "continue.\n", stderr);
-	fprintf (stderr, "Headers are %u.%u.%u%c, library is %u.%u.%u%c\n",
-		 majnum, minnum, relnum, 'a'+patnum,
-		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-		 'a'+H5_VERS_PATCH);
+	fprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
+		 majnum, minnum, relnum, 
+		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	fputs ("Bye...\n", stderr);
 	abort ();
     }

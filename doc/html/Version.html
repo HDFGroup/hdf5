@@ -9,9 +9,9 @@
 
     <h2>1. Introduction</h2>
 
-    <p>The HDF5 version number is a set of three integer values and
-      one lower-case letter written as, for example,
-      <code>hdf5-1.2.0a</code>.
+    <p>The HDF5 version number is a set of three integer values
+      written as either <code>hdf5-1.2.3</code> or <code>hdf5 version
+      1.2 release 3</code>.
 
     <p>The <code>5</code> is part of the library name and will only
       change if the entire file format and library are redesigned
@@ -19,7 +19,7 @@
 
     <p>The <code>1</code> is the <em>major version number</em> and
       changes when there is an extensive change to the file format or
-      library.  Such a change will likely require files to be
+      library API.  Such a change will likely require files to be
       translated and applications to be modified.  This number is not
       expected to change frequently.
 
@@ -29,25 +29,17 @@
       library while odd numbers are reserved for developement
       versions.  See the diagram below for examples.
 
-    <p>The <code>0</code> is the <em>release number</em>.  For public
+    <p>The <code>3</code> is the <em>release number</em>.  For public
       versions of the library, the release number is incremented each
-      time a bug(s) is fixed and the fix is made available to the
-      public.  For development versions, the release number is
-      incremented automatically each time a CVS commit occurs anywhere 
-      in the source tree.
-
-    <p>The <code>a</code> is the <em>patch level</em> and is used only 
-      for public versions.  It's incremented only for very minor
-      changes that don't affect the usability of the library.  For
-      instance, fixing spelling errors, changing warning messages, or
-      updating documentation.
+      time a bug is fixed and the fix is made available to the public.
+      For development versions, the release number is incremented more 
+      often (perhaps almost daily).
 
     <h2>2. Abbreviated Versions</h2>
 
-    <p>It's often convenient to drop the patch level and release
-      number when referring to a version of the library, like saying
-      version 1.2 of HDF5.  The release number and patch level can be
-      any value in this case.
+    <p>It's often convenient to drop the release number when referring
+      to a version of the library, like saying version 1.2 of HDF5.
+      The release number can be any value in this case.
 
     <h2>3. Special Versions</h2>
 
@@ -57,6 +49,9 @@
       when the release number started to increase and development
       versions were made available to people outside the core HDF5
       development team.
+
+    <p>Version 1.0.23 was released mid-July as a second alpha
+      version.
 
     <p>Version 1.1.0 will be the first official beta release but the
       1.1 branch will also serve as a development branch since we're
@@ -95,14 +90,12 @@
       <dt><code>H5_VERS_MAJOR</code>
       <dt><code>H5_VERS_MINOR</code>
       <dt><code>H5_VERS_RELEASE</code>
-      <dt><code>H5_VERS_PATCH</code>
       <dd>These preprocessor constants are defined in the public
 	include file and determine the version of the include files.
 
 	<br><br>
       <dt><code>herr_t H5version (unsigned *<em>majnum</em>, unsigned
-	  *<em>minnum</em>, unsigned *<em>relnum</em>, unsigned
-	  *<em>patnum</em>)</code>
+	  *<em>minnum</em>, unsigned *<em>relnum</em>)</code>
       <dd>This function returns through its arguments the version
 	numbers for the library to which the application is linked.
 
@@ -120,8 +113,7 @@
 
 	<br><br>
       <dt><code>herr_t H5vers_check (unsigned <em>majnum</em>,
-	  unsigned <em>minnum</em>, unsigned <em>relnum</em>, unsigned 
-	  <em>patnum</em>)</code>
+	  unsigned <em>minnum</em>, unsigned <em>relnum</em>)</code>
       <dd>This function is called by the <code>H5check()</code> macro
 	with the include file version constants.  The function
 	compares its arguments to the result returned by
@@ -133,7 +125,7 @@
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Wed Apr 22 11:24:40 EDT 1998 -->
 <!-- hhmts start -->
-Last modified: Wed Apr 22 12:19:53 EDT 1998
+Last modified: Mon Jul 20 11:42:20 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

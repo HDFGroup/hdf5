@@ -45,7 +45,7 @@ usage: %s [OPTIONS] FILE [GROUP]\n\
    OPTIONS\n\
       -h, -?, --help   Print a usage message and exit\n\
       -v, --verbose    Generate more verbose output\n\
-      --version        Print version number and exit\n\
+      -V, --version    Print version number and exit\n\
    FILE\n\
       The file name may include a printf(3C) integer format such as\n\
       \"%%05d\" to open a file family.\n\
