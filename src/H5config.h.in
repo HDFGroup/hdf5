@@ -18,6 +18,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the <dmalloc.h> header file. */
+#undef HAVE_DMALLOC_H
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -71,6 +74,9 @@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #undef HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
+#undef HAVE_LIBDMALLOC
 
 /* Define to 1 if you have the `elf' library (-lelf). */
 #undef HAVE_LIBELF
@@ -464,6 +470,3 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #undef ssize_t
-
-/* Define if you have the <inttypes.h> header file.  */ 
-#undef HAVE_INTTYPES_H

@@ -156,6 +156,13 @@
 #endif
 
 /*
+ * dmalloc (debugging malloc) support
+ */
+#ifdef H5_HAVE_DMALLOC_H
+#include "dmalloc.h"
+#endif /* H5_HAVE_DMALLOC_H */
+
+/*
  * NT doesn't define SIGBUS, but since NT only runs on processors             
  * that do not have alignment constraints a SIGBUS would never be              
  * raised, so we just replace it with SIGILL (which also should               

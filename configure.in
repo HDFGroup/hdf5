@@ -623,6 +623,67 @@ AC_ARG_WITH(fnord,
   ],,)
 
 dnl ----------------------------------------------------------------------
+dnl Is the dmalloc present? It has a header file `dmalloc.h' and a library
+dnl `-ldmalloc' and their locations might be specified with the `--with-dmalloc'
+dnl command-line switch. The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
+dnl
+AC_ARG_WITH(dmalloc,
+  [  --with-dmalloc[=DIR]    Use dmalloc memory debugging aid (default=no)],,
+  withval=no)
+
+case $withval in
+  yes)
+    HAVE_DMALLOC="yes"
+    AC_CHECK_HEADERS(dmalloc.h)
+    AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, unset HAVE_DMALLOC)
+
+    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR(couldn't find dmalloc library)
+    fi
+    ;;
+  no)
+    HAVE_DMALLOC="no"
+    AC_MSG_CHECKING(for dmalloc library)
+    AC_MSG_RESULT(suppressed)
+    ;;
+  *)
+    HAVE_DMALLOC="yes"
+    case "$withval" in
+      *,*)
+        dmalloc_inc="`echo $withval |cut -f1 -d,`"
+        dmalloc_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          dmalloc_inc="$withval/include"
+          dmalloc_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+
+    if test -n "$dmalloc_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$dmalloc_inc"
+    fi
+
+    AC_CHECK_HEADERS(dmalloc.h,, CPPFLAGS="$saved_CPPFLAGS")
+
+    if test -n "$dmalloc_lib"; then
+      LDFLAGS="$LDFLAGS -L$dmalloc_lib"
+    fi
+
+    AC_CHECK_LIB(dmalloc, dmalloc_shutdown,, LDFLAGS="$saved_LDFLAGS"; unset HAVE_DMALLOC)
+
+    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR(couldn't find dmalloc library)
+    fi
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Is the GNU zlib present? It has a header file `zlib.h' and a library
 dnl `-lz' and their locations might be specified with the `--with-zlib'
 dnl command-line switch. The value is an include path and/or a library path.
@@ -1964,6 +2025,8 @@ IF_ENABLED_DISABLED "$STREAM_VFD"
 PRINT_N "                   Threadsafety"
 IF_ENABLED_DISABLED "$THREADSAFE"
 
-dnl Zlib compression depends on zlib.h header and compress2()
 PRINT_N "               Zlib-compression"
-IF_YES_NO "$ac_cv_header_zlib_h" "$ac_cv_func_compress2"
+IF_YES_NO "$HAVE_ZLIB"
+
+PRINT_N "                        dmalloc"
+IF_YES_NO "$HAVE_DMALLOC"
