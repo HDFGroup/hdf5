@@ -57,13 +57,13 @@ SUBDIRS=src test
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-.PHONY: all lib progs test install uninstall dep depend clean mostlyclean     \
-	distclean maintainer-clean
-
 all lib progs test install uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
+
+.PHONY: all lib progs test install uninstall dep depend clean mostlyclean     \
+	distclean maintainer-clean
 
 clean mostlyclean:
 	@@SETX@; for d in $(SUBDIRS); do				      \

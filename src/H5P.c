@@ -961,11 +961,11 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pselect_hyperslab
+    H5Pset_hyperslab
  PURPOSE
     Select a hyperslab from a simple dataspace
  USAGE
-    herr_t H5Pselect_hyperslab(sid, start, count, stride)
+    herr_t H5Pset_hyperslab(sid, start, count, stride)
         hid_t sid;            IN: Dataspace object to select hyperslab from
         const size_t *start;  IN: Starting location for hyperslab to select
         const size_t *count;  IN: Number of elements in hyperslab
@@ -982,14 +982,14 @@ H5Pset_space(hid_t sid, intn rank, const size_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Pselect_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size_t *stride)
+H5Pset_hyperslab(hid_t sid, const size_t *start, const size_t *count, const size_t *stride)
 {
     H5P_t                  *space = NULL;       /* dataspace to modify */
     size_t                 *tmp_stride=NULL;    /* temp. copy of stride */
     intn                    u;  /* local counting variable */
     herr_t                  ret_value = SUCCEED;
 
-    FUNC_ENTER(H5Pselect_hyperslab, FAIL);
+    FUNC_ENTER(H5Pset_hyperslab, FAIL);
 
     /* Clear errors and check args and all the boring stuff. */
     H5ECLEAR;
@@ -1006,15 +1006,16 @@ H5Pselect_hyperslab(hid_t sid, const size_t *start, const size_t *count, const s
 
     /* Set up stride values for later use */
     tmp_stride= H5MM_xmalloc(space->u.simple.rank*sizeof(size_t));
-    if(stride==NULL)
-        HDmemset(tmp_stride,1,space->u.simple.rank);
-    else
-        HDmemcpy(tmp_stride,stride,space->u.simple.rank);
+    for (u=0; u<space->u.simple.rank; u++) {
+	tmp_stride[u] = stride ? stride[u] : 1;
+    }
 
     /* Allocate space for the hyperslab information */
-    space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
-    space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
-    space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+    if (NULL==space->h.start) {
+	space->h.start= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+	space->h.count= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+	space->h.stride= H5MM_xcalloc(space->u.simple.rank,sizeof(size_t));
+    }
 
     /* Build hyperslab */
     for(u=0; u<space->u.simple.rank; u++)
@@ -1033,18 +1034,115 @@ H5Pselect_hyperslab(hid_t sid, const size_t *start, const size_t *count, const s
 done:
     if (ret_value == FAIL) {    /* Error condition cleanup */
         /* Free hyperslab arrays if we encounter an error */
-        if(space->h.start!=NULL)
-            H5MM_xfree(space->h.start);
-        if(space->h.count!=NULL)
-            H5MM_xfree(space->h.count);
-        if(space->h.stride!=NULL)
-            H5MM_xfree(space->h.stride);
+	H5MM_xfree(space->h.start);
+	H5MM_xfree(space->h.count);
+	H5MM_xfree(space->h.stride);
+	space->hslab_def = FALSE;
     }                           /* end if */
 
     /* Normal function cleanup */
     H5MM_xfree(tmp_stride);
     FUNC_LEAVE(ret_value);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_hyperslab
+ *
+ * Purpose:	Retrieves information about the hyperslab from a simple data
+ *		space.  If no hyperslab has been defined then the hyperslab
+ *		is the same as the entire array.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_hyperslab (hid_t sid, size_t offset[]/*out*/, size_t size[]/*out*/,
+		  size_t stride[]/*out*/)
+{
+    H5P_t	*ds = NULL;
+    
+    FUNC_ENTER (H5Pget_hyperslab, FAIL);
+    H5ECLEAR;
+
+    /* Check args */
+    if (H5_DATASPACE!=H5A_group (sid) || NULL==(ds=H5A_object (sid))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    }
+
+    /* Get hyperslab info */
+    if (H5P_get_hyperslab (ds, offset, size, stride)<0) {
+	HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+		       "unable to retrieve hyperslab information");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_hyperslab
+ *
+ * Purpose:	Retrieves information about the hyperslab from a simple data
+ *		space.  If no hyperslab has been defined then the hyperslab
+ *		is the same as the entire array.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, January 28, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_get_hyperslab (H5P_t *ds, size_t offset[]/*out*/, size_t size[]/*out*/,
+		   size_t stride[]/*out*/)
+{
+    intn		i;
+    
+    FUNC_ENTER (H5P_get_hyperslab, FAIL);
+
+    /* Check args */
+    assert (ds);
+    switch (ds->type) {
+    case H5P_SCALAR:
+	break;
+
+    case H5P_SIMPLE:
+	if (ds->hslab_def) {
+	    for (i=0; i<ds->u.simple.rank; i++) {
+		if (offset) offset[i] = ds->h.start[i];
+		if (size) size[i] = ds->h.count[i];
+		if (stride) stride[i] = ds->h.stride[i];
+	    }
+	} else {
+	    for (i=0; i<ds->u.simple.rank; i++) {
+		if (offset) offset[i] = 0;
+		if (size) size[i] = ds->u.simple.size[i];
+		if (stride) stride[i] = 1;
+	    }
+	}
+	break;
+
+    case H5P_COMPLEX:	/*fall through*/
+    default:
+	HRETURN_ERROR (H5E_DATASPACE, H5E_UNSUPPORTED, FAIL,
+		       "hyperslabs not supported for this type of space");
+    }
+
+    FUNC_LEAVE (SUCCEED);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5P_find

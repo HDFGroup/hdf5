@@ -772,7 +772,7 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
 
     if ((my_ins = H5B_insert_helper(f, addr, type, lt_key, &lt_key_changed,
                                     md_key, udata, rt_key, &rt_key_changed,
-                                    &child /*out */ )) < 0 || my_ins < 0) {
+                                    &child/*out*/ )) < 0 || my_ins < 0) {
         HRETURN_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL,
                       "unable to insert key");
     }
@@ -1094,9 +1094,9 @@ H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
                                           bt->key[idx].nkey, lt_key_changed,
                                           md_key, udata,
                                       bt->key[idx + 1].nkey, rt_key_changed,
-                                          &child_addr /*out */ )) < 0) {
+                                          &child_addr/*out*/)) < 0) {
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, H5B_INS_ERROR,
-                            "can't insert first leaf node");
+                            "unable to insert first leaf node");
             }
         } else {
             my_ins = H5B_INS_NOOP;

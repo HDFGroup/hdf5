@@ -753,11 +753,9 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     idx += cmp > 0 ? 1 : 0;
 
     /*
-     * Add the new name to the heap.  The caller will check if the
-     * heap address changed and update the symbol table object header
-     * with the new heap address.
+     * Add the new name to the heap.
      */
-    offset = H5H_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name) + 1,
+    offset = H5H_insert(f, &(bt_udata->heap_addr), HDstrlen(bt_udata->name)+1,
                         bt_udata->name);
     bt_udata->ent.name_off = offset;
     if (offset <= 0) {

@@ -99,7 +99,7 @@ typedef enum H5T_pad_t {
 typedef enum H5T_bkg_t {
     H5T_BKG_NONE	= 0, 	/*background buffer is not needed, send NULL */
     H5T_BKG_TEMP	= 1, 	/*bkg buffer used as temp storage only	     */
-    H5T_BKG_YES		= 2,	/*init bkg buf with data before conversion   */
+    H5T_BKG_YES		= 2	/*init bkg buf with data before conversion   */
 } H5T_bkg_t;
 
 /* Type conversion client data */
