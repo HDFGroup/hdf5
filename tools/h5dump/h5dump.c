@@ -1461,7 +1461,11 @@ dump_all(hid_t group, const char *name, void * op_data)
                         free(parentxid);
                         free(pointerxid);
                         free(t_tmp);
+#ifdef WIN32
+           /*             free(tx_tmp);*/
+#else
                         free(tx_tmp);
+#endif
                         free(t_prefix);
 		    }
 
