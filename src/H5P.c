@@ -5116,18 +5116,22 @@ static intn H5P_cmp_prop(H5P_genprop_t *prop1, H5P_genprop_t *prop2)
     /* Check if they both have the same 'create' callback */
     if(prop1->create==NULL && prop2->create!=NULL) HGOTO_DONE(-1);
     if(prop1->create!=NULL && prop2->create==NULL) HGOTO_DONE(1);
+    if(prop1->create!=prop2->create) HGOTO_DONE(-1);
 
     /* Check if they both have the same 'set' callback */
     if(prop1->set==NULL && prop2->set!=NULL) HGOTO_DONE(-1);
     if(prop1->set!=NULL && prop2->set==NULL) HGOTO_DONE(1);
+    if(prop1->set!=prop2->set) HGOTO_DONE(-1);
 
     /* Check if they both have the same 'get' callback */
     if(prop1->get==NULL && prop2->get!=NULL) HGOTO_DONE(-1);
     if(prop1->get!=NULL && prop2->get==NULL) HGOTO_DONE(1);
+    if(prop1->get!=prop2->get) HGOTO_DONE(-1);
 
     /* Check if they both have the same 'close' callback */
     if(prop1->close==NULL && prop2->close!=NULL) HGOTO_DONE(-1);
     if(prop1->close!=NULL && prop2->close==NULL) HGOTO_DONE(1);
+    if(prop1->close!=prop2->close) HGOTO_DONE(-1);
 
     /* Don't check the 'next' field, they must be equal by now */
 
@@ -5202,15 +5206,17 @@ static intn H5P_cmp_class(H5P_genclass_t *pclass1, H5P_genclass_t *pclass2)
     if(pclass1->deleted < pclass2->deleted) HGOTO_DONE(-1);
     if(pclass1->deleted > pclass2->deleted) HGOTO_DONE(1);
 
-    /* Check whether they have the same creation callback functions & data */
-    if(pclass1->create_func < pclass2->create_func) HGOTO_DONE(-1);
-    if(pclass1->create_func > pclass2->create_func) HGOTO_DONE(1);
+    /* Check whether they have creation callback functions & data */
+    if(pclass1->create_func==NULL && pclass2->create_func!=NULL) HGOTO_DONE(-1);
+    if(pclass1->create_func!=NULL && pclass2->create_func==NULL) HGOTO_DONE(1);
+    if(pclass1->create_func!=pclass2->create_func) HGOTO_DONE(-1);
     if(pclass1->create_data < pclass2->create_data) HGOTO_DONE(-1);
     if(pclass1->create_data > pclass2->create_data) HGOTO_DONE(1);
 
-    /* Check whether they have the same close callback functions & data */
-    if(pclass1->close_func < pclass2->close_func) HGOTO_DONE(-1);
-    if(pclass1->close_func > pclass2->close_func) HGOTO_DONE(1);
+    /* Check whether they have close callback functions & data */
+    if(pclass1->close_func==NULL && pclass2->close_func!=NULL) HGOTO_DONE(-1);
+    if(pclass1->close_func!=NULL && pclass2->close_func==NULL) HGOTO_DONE(1);
+    if(pclass1->close_func!=pclass2->close_func) HGOTO_DONE(-1);
     if(pclass1->close_data < pclass2->close_data) HGOTO_DONE(-1);
     if(pclass1->close_data > pclass2->close_data) HGOTO_DONE(1);
 
@@ -5370,6 +5376,280 @@ htri_t H5Pequal(hid_t id1, hid_t id2)
 done:
     FUNC_LEAVE (ret_value);
 }   /* H5Pequal() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_iterate_plist
+ PURPOSE
+    Internal routine to iterate over the properties in a property list
+ USAGE
+    herr_t H5P_iterate_plist(plist_id, idx, iter_func, iter_data)
+        hid_t plist_id;             IN: ID of property list to iterate over
+        int *idx;                   IN/OUT: Index of the property to begin with
+        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+                                        called with each property iterated over.
+        void *iter_data;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC if it was
+                non-zero, or zero if all properties have been processed.
+    Failure: negative value
+ DESCRIPTION
+    This routine iterates over the properties in the property object specified
+with PLIST_ID.  For each property in the object, the ITER_DATA and some
+additional information, specified below, are passed to the ITER_FUNC function.
+The iteration begins with the IDX property in the object and the next element
+to be processed by the operator is returned in IDX.  If IDX is NULL, then the
+iterator starts at the first property; since no stopping point is returned in
+this case, the iterator cannot be restarted if one of the calls to its operator
+returns non-zero. 
+
+The prototype for H5P_iterate_t is: 
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The operation receives the property list or class identifier for the object
+being iterated over, ID, the name of the current property within the object,
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+
+The return values from an operator are: 
+    Zero causes the iterator to continue, returning zero when all properties
+        have been processed. 
+    Positive causes the iterator to immediately return that positive value,
+        indicating short-circuit success. The iterator can be restarted at the
+        index of the next property. 
+    Negative causes the iterator to immediately return that value, indicating
+        failure. The iterator can be restarted at the index of the next
+        property.
+
+H5Piterate assumes that the properties in the object identified by ID remains
+unchanged through the iteration.  If the membership changes during the
+iteration, the function's behavior is undefined. 
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    uintn u;                    /* Local index variable */
+    int curr_idx=0;             /* Current iteration index */
+    int ret_value=0;            /* Return value */
+
+    FUNC_ENTER (H5P_iterate_plist, FAIL);
+
+    assert(idx);
+    assert(iter_func);
+
+    /* Get the property list object */
+    if (H5I_GENPROP_LST != H5I_get_type(plist_id) || NULL == (plist = H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Cycle through the properties and compare them also */
+    for(u=0; u<plist->pclass->hashsize && ret_value==0; u++) {
+        prop=plist->props[u];
+
+        /* Check the actual properties */
+        while(prop!=NULL && ret_value==0) {
+            /* Check if we are at the object to start iterating over */
+            if(curr_idx>=*idx)
+                ret_value=(*iter_func)(plist_id,prop->name,iter_data);
+
+            /* Increment the iteration index if iteration function succeeded */
+            if(ret_value==0)
+                curr_idx++;
+
+            /* Advance the pointer */
+            prop=prop->next;
+        } /* end while */
+    } /* end for */
+
+    /* Set the index we stopped at */
+    *idx=curr_idx;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_iterate_plist() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_iterate_pclass
+ PURPOSE
+    Internal routine to iterate over the properties in a property class
+ USAGE
+    herr_t H5P_iterate_pclass(pclass_id, idx, iter_func, iter_data)
+        hid_t pclass_id;            IN: ID of property class to iterate over
+        int *idx;                   IN/OUT: Index of the property to begin with
+        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+                                        called with each property iterated over.
+        void *iter_data;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC if it was
+                non-zero, or zero if all properties have been processed.
+    Failure: negative value
+ DESCRIPTION
+    This routine iterates over the properties in the property object specified
+with PCLASS_ID.  For each property in the object, the ITER_DATA and some
+additional information, specified below, are passed to the ITER_FUNC function.
+The iteration begins with the IDX property in the object and the next element
+to be processed by the operator is returned in IDX.  If IDX is NULL, then the
+iterator starts at the first property; since no stopping point is returned in
+this case, the iterator cannot be restarted if one of the calls to its operator
+returns non-zero. 
+
+The prototype for H5P_iterate_t is: 
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The operation receives the property list or class identifier for the object
+being iterated over, ID, the name of the current property within the object,
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+
+The return values from an operator are: 
+    Zero causes the iterator to continue, returning zero when all properties
+        have been processed. 
+    Positive causes the iterator to immediately return that positive value,
+        indicating short-circuit success. The iterator can be restarted at the
+        index of the next property. 
+    Negative causes the iterator to immediately return that value, indicating
+        failure. The iterator can be restarted at the index of the next
+        property.
+
+H5Piterate assumes that the properties in the object identified by ID remains
+unchanged through the iteration.  If the membership changes during the
+iteration, the function's behavior is undefined. 
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+{
+    H5P_genclass_t *pclass;     /* Property list pointer */
+    H5P_genprop_t *prop;        /* Temporary property pointer */
+    uintn u;                    /* Local index variable */
+    int curr_idx=0;             /* Current iteration index */
+    int ret_value=0;            /* Return value */
+
+    FUNC_ENTER (H5P_iterate_pclass, FAIL);
+
+    assert(idx);
+    assert(iter_func);
+
+    /* Get the property list object */
+    if (H5I_GENPROP_CLS != H5I_get_type(pclass_id) || NULL == (pclass = H5I_object(pclass_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+
+    /* Cycle through the properties and compare them also */
+    for(u=0; u<pclass->hashsize && ret_value==0; u++) {
+        prop=pclass->props[u];
+
+        /* Check the actual properties */
+        while(prop!=NULL && ret_value==0) {
+            /* Check if we are at the object to start iterating over */
+            if(curr_idx>=*idx)
+                ret_value=(*iter_func)(pclass_id,prop->name,iter_data);
+
+            /* Increment the iteration index if iteration function succeeded */
+            if(ret_value==0)
+                curr_idx++;
+
+            /* Advance the pointer */
+            prop=prop->next;
+        } /* end while */
+    } /* end for */
+
+    /* Set the index we stopped at */
+    *idx=curr_idx;
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5P_iterate_pclass() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Piterate
+ PURPOSE
+    Routine to iterate over the properties in a property list or class
+ USAGE
+    int H5Piterate(pclass_id, idx, iter_func, iter_data)
+        hid_t id;                   IN: ID of property object to iterate over
+        int *idx;                   IN/OUT: Index of the property to begin with
+        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+                                        called with each property iterated over.
+        void *iter_data;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC if it was
+                non-zero, or zero if all properties have been processed.
+    Failure: negative value
+ DESCRIPTION
+    This routine iterates over the properties in the property object specified
+with ID.  The properties in both property lists and classes may be iterated
+over with this function.  For each property in the object, the ITER_DATA and
+some additional information, specified below, are passed to the ITER_FUNC
+function.  The iteration begins with the IDX property in the object and the
+next element to be processed by the operator is returned in IDX.  If IDX is
+NULL, then the iterator starts at the first property; since no stopping point
+is returned in this case, the iterator cannot be restarted if one of the calls
+to its operator returns non-zero. 
+
+The prototype for H5P_iterate_t is: 
+    typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+The operation receives the property list or class identifier for the object
+being iterated over, ID, the name of the current property within the object,
+NAME, and the pointer to the operator data passed in to H5Piterate, ITER_DATA. 
+
+The return values from an operator are: 
+    Zero causes the iterator to continue, returning zero when all properties
+        have been processed. 
+    Positive causes the iterator to immediately return that positive value,
+        indicating short-circuit success. The iterator can be restarted at the
+        index of the next property. 
+    Negative causes the iterator to immediately return that value, indicating
+        failure. The iterator can be restarted at the index of the next
+        property.
+
+H5Piterate assumes that the properties in the object identified by ID remains
+unchanged through the iteration.  If the membership changes during the
+iteration, the function's behavior is undefined. 
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+{
+    int fake_idx=0;         /* Index when user doesn't provide one */
+    int ret_value=FAIL;     /* return value */
+
+    FUNC_ENTER (H5Piterate, FAIL);
+
+    /* Check arguments. */
+    if (H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
+    if (iter_func==NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration callback");
+
+    if (H5I_GENPROP_LST == H5I_get_type(id)) {
+        /* Iterate over a property list */
+        if ((ret_value=H5P_iterate_plist(id,(idx ? idx : &fake_idx),iter_func,iter_data))<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list");
+    } /* end if */
+    else 
+        if (H5I_GENPROP_CLS == H5I_get_type(id)) {
+            /* Iterate over a property class */
+            if ((ret_value=H5P_iterate_pclass(id,(idx ? idx : &fake_idx),iter_func,iter_data))<0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over class");
+        } /* end if */
+        else 
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
+
+done:
+    FUNC_LEAVE (ret_value);
+}   /* H5Piterate() */
 
 
 /*--------------------------------------------------------------------------

@@ -54,6 +54,9 @@ typedef herr_t (*H5P_prp_set_func_t)(hid_t prop_id, const char *name, void **val
 typedef herr_t (*H5P_prp_get_func_t)(hid_t prop_id, const char *name, void *value);
 typedef herr_t (*H5P_prp_close_func_t)(const char *name, void *value);
 
+/* Define property list iteration function type */
+typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data); 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -101,6 +104,8 @@ __DLL__ hid_t H5Pget_class_new(hid_t plist_id);
 __DLL__ hid_t H5Pget_class_parent(hid_t pclass_id);
 __DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
 __DLL__ htri_t H5Pequal(hid_t id1, hid_t id2);
+__DLL__ int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
+            void *iter_data);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);
 __DLL__ herr_t H5Pclose_list(hid_t plist_id);
