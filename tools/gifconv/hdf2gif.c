@@ -211,7 +211,7 @@ int main(int argc , char **argv)
          */
         if (ReadHDF(&Image, GlobalPalette, dim_sizes, HDFName,
                     image_name_arr[idx], pal_name_arr[idx]) < 0) {
-            fprintf(stderr , "Unable to read HDF file\n");
+            fprintf(stderr , "Unable to read image %s from HDF file %s\n",image_name_arr[idx],HDFName);
             return -1;
         }
 

@@ -44,9 +44,11 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
 {
     hid_t fHfile;       /* H5 file to open                              */
     hid_t dspace;       /* dataspace identifier for the the dataset     */
+    hid_t dtype;        /* datatype identifier for the the dataset     */
     hid_t dset;	        /* dataset identifier                           */
     hid_t pal_set;      /* dataset for palette                          */
     hid_t pal_space;    /* dataspace for palette                        */
+    hid_t pal_dtype;     /* datatype for palette                        */
     hsize_t datasize;	/* size of the image                            */
     int pal_exist = 0;  /* do we have a palette?                        */
 
@@ -74,6 +76,20 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         return -1;
     }
 
+    dtype = H5Dget_type(dset);
+    if (dtype < 0) {
+        fprintf(stderr , "Unable to open datatype\n");
+        return -1;
+    }
+    if (H5Tget_class(dtype) != H5T_INTEGER) {
+        fprintf(stderr , "Data is not integer. Cannot convert to GIF\n");
+        return -1;
+    }
+    if (H5Tget_size(dtype) != 1) {
+        fprintf(stderr , "Data is %d bytes per pixel. Cannot convert to GIF\n",H5Tget_size(dtype));
+        return -1;
+    }
+
     /* get the dataspace */
     if ((dspace = H5Dget_space(dset)) < 0) {
         fprintf(stderr , "Unable to get dataspace\n");
@@ -96,7 +112,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     }
 
     /* get the actual image */
-    if (H5Dread(dset , H5Dget_type(dset) , H5S_ALL , H5S_ALL , H5P_DEFAULT , *data) < 0) {
+    if (H5Dread(dset , H5Tget_native_type(dtype, H5T_DIR_ASCEND) , H5S_ALL , H5S_ALL , H5P_DEFAULT , *data) < 0) {
         fprintf(stderr , "Unable to read data \n");
         cleanup(*data);
         return -1;
@@ -115,6 +131,20 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             return -1;
         }
         
+        pal_dtype = H5Dget_type(pal_set);
+        if (dtype < 0) {
+            fprintf(stderr , "Unable to open palette datatype\n");
+            return -1;
+        }
+        if (H5Tget_class(pal_dtype) != H5T_INTEGER) {
+            fprintf(stderr , "Palette data is not integer. Cannot convert to GIF\n");
+            return -1;
+        }
+        if (H5Tget_size(pal_dtype) != 1) {
+            fprintf(stderr , "Palette data is %d bytes per pixel. Cannot convert to GIF\n",H5Tget_size(pal_dtype));
+            return -1;
+        }
+
         /* get the dataspace */
         if ((pal_space = H5Dget_space(pal_set)) < 0) {
             fprintf(stderr , "Unable to get dataspace\n");
@@ -147,7 +177,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         }
 
         /* get the actual palette */
-        if (H5Dread(pal_set , H5Dget_type(pal_set) , H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf) < 0) {
+        if (H5Dread(pal_set , H5Tget_native_type(pal_dtype, H5T_DIR_ASCEND) , H5S_ALL , H5S_ALL , H5P_DEFAULT , temp_buf) < 0) {
             fprintf(stderr , "Unable to read data \n");
             cleanup(*data);
             cleanup(temp_buf);
