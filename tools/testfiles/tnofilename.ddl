@@ -7,7 +7,7 @@ usage: h5dump [OPTIONS] file
      -B, --bootblock      Print the content of the boot block
      -H, --header         Print the header only; no data is displayed
      -i, --object-ids     Print the object ids
-     -r, --string         Print 1-bytes integer datasets as ASCII
+     -r, --string         Print 1-byte integer datasets as ASCII
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
