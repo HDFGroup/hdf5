@@ -73,13 +73,6 @@ int main(int argc, const char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
     MPI_Comm_size(MPI_COMM_WORLD, &g_nTasks);
 
-    if(g_nTasks < 2)
-    {
-	printf("Must have at least 2 tasks to run parallel diff\n");
-	MPI_Finalize();
-	exit(-1);
-    }
-
     /* Have the manager process the command-line */
     if(nID == 0)
     {
@@ -224,10 +217,14 @@ int main(int argc, const char *argv[])
 
 	}/*for*/
 
-	nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+	if(g_nTasks < 2)
+	    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+	else
+	    nfound = h5diff_parallel(fname1,fname2,objname1,objname2,&options);
 
 #ifdef H5_HAVE_PH5DIFF
-	MPI_Barrier(MPI_COMM_WORLD);
+	if(g_nTasks > 1)
+	    MPI_Barrier(MPI_COMM_WORLD);
 #endif
 
 	/*-------------------------------------------------------------------------

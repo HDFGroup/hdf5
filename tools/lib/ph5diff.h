@@ -34,7 +34,6 @@ int	g_nTasks;
 char    outBuff[OUTBUFF_SIZE];
 unsigned int	outBuffOffset;
 
-
 struct diff_args
 {
     char	name[256];
@@ -45,12 +44,9 @@ struct diff_args
 #ifdef H5_HAVE_PARALLEL
 #define H5_HAVE_PH5DIFF 1
 #endif 
-#ifdef H5_HAVE_PH5DIFF
-#define PARALLEL 	1
-#include <mpi.h>
 
-#else
-#define PARALLEL 	0
+#ifdef H5_HAVE_PH5DIFF
+#include <mpi.h>
 #endif
 
 
