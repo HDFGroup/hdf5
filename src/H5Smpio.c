@@ -155,6 +155,7 @@ H5S_mpio_hyper_type( const H5S_t *space, const size_t elmt_size,
     } d[H5S_MAX_RANK];
 
     int			i, err, new_rank, num_to_collapse;
+    herr_t		ret_value = SUCCEED;
     int			offset[H5S_MAX_RANK];
     int			max_xtent[H5S_MAX_RANK];
     H5S_hyper_dim_t	*diminfo;		/* [rank] */
@@ -437,7 +438,7 @@ done:
     HDfprintf(stdout, "Leave %s, count=%Hu  is_derived_type=%d\n",
 		FUNC, *count, *is_derived_type );
 #endif
-    FUNC_LEAVE (SUCCEED);
+    FUNC_LEAVE (ret_value);
 }
 
 
