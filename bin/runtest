@@ -125,10 +125,10 @@ REPORT_ERR()
 REPORT_RESULT()
 {
     if [ $retcode -eq 0 ]; then
-	echo "$TEST_TYPE tests succeeded in $HOSTNAME" | tee -a $SUCCEEDLOG
+	echo "PASSED: $TEST_TYPE tests for $HOSTNAME" | tee -a $PASSEDLOG
     else
 	# test failed.
-	REPORT_ERR "****$TEST_TYPE tests FAILED in $HOSTNAME****"
+	REPORT_ERR "****FAILED: $TEST_TYPE tests for $HOSTNAME****"
     fi
 }
 
@@ -483,7 +483,7 @@ done
 SNAPYARD=`cd $HOME/snapshots-hdf5${H5VERSTR} && /bin/pwd`
 # Log file basename
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
-SUCCEEDLOG=${SNAPYARD}/log/SUCCEED_LOG_${TODAY}
+PASSEDLOG=${SNAPYARD}/log/PASSED_LOG_${TODAY}
 FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
 CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
 CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
