@@ -640,6 +640,10 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	case "$RSH" in
 	    rsh|ssh)
 		PRINT $RSH $h -n $PROGNAME
+		# kludge: some how eirene and houdin can not have
+                # rsh connections too close.  wait a few seconds
+		test $h = houdin && echo "wait 10 sec for houdin" && sleep 10
+
 		# launch concurrent tests only if srcdir is used
 		if [ -n "$SRCDIR" ]; then
 		    $RSH $h -n $PROGNAME &
