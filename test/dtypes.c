@@ -4530,6 +4530,20 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             } /* end if */
 #endif /* end H5_ULONG_FP_BOTTOM_BIT_WORKS */
 
+/* For PGI compiler on Linux, during conversion from 'float' or 'double' to 
+ * 'unsigned long long', round-up happens when the fraction of float-point 
+ * value is greater than 0.5. So we allow the converted value to be off by 1.
+ */
+#ifndef H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS
+            if((src_type==FLT_FLOAT || src_type==FLT_DOUBLE) && dst_type==INT_ULLONG) {
+                unsigned long_long tmp_s, tmp_h;
+                HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long_long));
+                HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long_long));
+                if((tmp_s+1)==tmp_h)
+                    continue; /*no error*/
+            }
+#endif /*end H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS*/
+
 	    /* Print errors */
 	    if (0==fails_this_test++)
                 H5_FAILED();
@@ -4687,10 +4701,10 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		printf(" %29lu\n", *((unsigned long*)hw));
 		break;
 	    case INT_LLONG:
-		printf(" %29ld\n", *((long_long*)hw));
+		printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long_long*)hw));
 		break;
 	    case INT_ULLONG:
-		printf(" %29ld\n", *((unsigned long_long*)hw));
+		printf(" %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long_long*)hw));
 		break;
 	    case FLT_FLOAT:
 		printf(" %29f\n", *((float*)hw));
@@ -5664,11 +5678,9 @@ run_float_int_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_LLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_LLONG);
 
-
-#ifdef LATER
     nerrors += test_conv_int_float(name, H5T_NATIVE_FLOAT, H5T_NATIVE_ULLONG);
     nerrors += test_conv_int_float(name, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULLONG);
-#else /* LATER */
+#ifdef LATER
     {
         char		str[256];		/*hello string		*/
 

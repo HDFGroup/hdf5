@@ -505,6 +505,10 @@
    floating-point values. */
 #undef SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
 
+/* Define if your system can accurately convert unsigned long long values to
+   floating-point values. */
+#undef FP_TO_ULLONG_BOTTOM_BIT_WORKS
+
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
 #undef SYSTEM_SCOPE_THREADS
