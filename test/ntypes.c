@@ -28,6 +28,8 @@ const char *FILENAME[] = {
 
 #define DIM0    100
 #define DIM1    200
+#define DIM3    20
+
 
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 short	spoints2[DIM0][DIM1], scheck2[DIM0][DIM1];
@@ -2341,6 +2343,208 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_ninteger
+ *
+ * Purpose: Test the native integer function; made to check the case
+ * like the Cray SV1, where the size of short is 8 but precision is 32
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *  September 3, 2004
+ *
+ * Modifications:
+ *             
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ninteger(void)
+{
+    hid_t     fid1;                  /* file ID */
+    hid_t     fid2;                  /* file ID */
+    hid_t     did1;                  /* dataset ID */
+    hid_t     did2;                  /* dataset ID */
+    hid_t     sid1;                  /* dataspace ID */ 
+    hid_t     dcpl1;                 /* dataset creation property list ID */
+    hid_t     dcpl2;                 /* dataset creation property list ID */
+    hid_t     tid1;                  /* file datatype */
+    hid_t     tid2;                  /* file datatype */
+    hid_t     nid1;                  /* native datatype */
+    hid_t     nid2;                  /* native datatype */
+    size_t    prec1;                 /* precision */
+    size_t    prec2;                 /* precision */
+    hsize_t   dims[1]={DIM3};        /* dataspace dimensions */
+    size_t    nsize;                 /* size of native type */
+    hsize_t   nelmts;                /* number of elements in dataset */
+    int       rank=1;                /* rank of dataset */
+    int       buf[DIM3];
+    int       chk[DIM3];
+    int       i;
+   
+    for (i=0; i<DIM3; i++){
+     buf[i]=i;
+    }
+    
+    TESTING("native integer ");
+
+   /*-------------------------------------------------------------------------
+    * step1: create a file 
+    *-------------------------------------------------------------------------
+    */  
+    /* create a file using default properties */
+    if ((fid1=H5Fcreate("tstint1.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0) 
+     goto error;
+
+    /* create a data space */
+    if ((sid1 = H5Screate_simple(rank,dims,NULL))<0) goto error;
+
+    /* create dcpl  */
+    if((dcpl1 = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+   
+    /* create a dataset */
+    if ((did1 = H5Dcreate(fid1,"dset",H5T_NATIVE_INT,sid1,dcpl1)) <0) goto error;
+
+    /* write */
+    if(H5Dwrite(did1,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+     goto error;
+
+    /* close  */
+    if (H5Sclose (sid1)<0) goto error;
+    if (H5Pclose (dcpl1)<0) goto error;
+    if (H5Dclose (did1)<0) goto error;
+    if (H5Fclose (fid1)<0) goto error;
+
+   /*-------------------------------------------------------------------------
+    * step 2: open and create another file copying the data from file1
+    *-------------------------------------------------------------------------
+    */ 
+    
+     /* open */
+    if ((fid1=H5Fopen("tstint1.h5",H5F_ACC_RDONLY,H5P_DEFAULT))<0) 
+     goto error;
+
+    /* open dataset */
+    if ((did1=H5Dopen(fid1,"dset"))<0) 
+     goto error;
+    
+    if ((sid1=H5Dget_space(did1))<0) 
+     goto error;
+
+    /* get dcpl */
+    if ((dcpl1=H5Dget_create_plist(did1))<0) 
+     goto error;
+
+    /* get file datatype */
+    if ((tid1=H5Dget_type (did1))<0) 
+     goto error;
+
+    /* get native datatype */
+    if ((nid1=H5Tget_native_type(tid1,H5T_DIR_DEFAULT))<0)
+     goto error;
+
+    /* get size */
+    if ((nsize=H5Tget_size(nid1))==0)
+     goto error;
+
+    /* get rank */
+    if ((rank=H5Sget_simple_extent_ndims(sid1))<0)
+     goto error;
+    HDmemset(dims, 0, sizeof dims);
+
+    /* get dimension */
+    if (H5Sget_simple_extent_dims(sid1,dims,NULL)<0)
+     goto error;
+    nelmts=1;
+    for (i=0; i<rank; i++) 
+     nelmts*=dims[i];
+     
+    /* read */
+    if (H5Dread(did1,nid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,chk)<0)
+     goto error;
+
+    /* create a file using default properties */
+    if ((fid2=H5Fcreate("tstint2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0) 
+     goto error;
+
+    /* create a dataset using the native type */
+    if ((did2 = H5Dcreate(fid2,"dset",nid1,sid1,dcpl1)) <0) goto error;
+
+    /* write */
+    if(H5Dwrite(did2,nid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,chk)<0)
+     goto error;
+
+    /* get dcpl */
+    if ((dcpl2=H5Dget_create_plist(did2))<0) 
+     goto error;
+
+    /* get file datatype */
+    if ((tid2=H5Dget_type (did2))<0) 
+     goto error;
+
+    /* get native datatype */
+    if ((nid2=H5Tget_native_type(tid2,H5T_DIR_DEFAULT))<0)
+     goto error;
+
+    /* check */
+    if ((prec1=H5Tget_precision(nid1))!=(prec2=H5Tget_precision(nid2))) {
+     printf("    Precision differ.\n");
+     goto error;
+    }
+
+    /* compare dataset creation property lists */
+    if(H5Pequal(dcpl1,dcpl2)<=0) {
+     printf("    Property lists differ.\n");
+     goto error;
+    }
+
+    /* check */
+    for (i = 0; i < DIM3; i++) {
+     if (buf[i] != chk[i]) {
+      H5_FAILED();
+      printf("    Read different values than written.\n");
+      printf("    At index %d\n", i);
+      goto error;
+     }
+    }
+    
+    /* close  */
+    if (H5Sclose (sid1)<0) goto error;
+    if (H5Pclose (dcpl1)<0) goto error;
+    if (H5Pclose (dcpl2)<0) goto error;
+    if (H5Tclose (tid1)<0) goto error;
+    if (H5Tclose (tid2)<0) goto error;
+    if (H5Tclose (nid1)<0) goto error;
+    if (H5Tclose (nid2)<0) goto error;
+    if (H5Dclose (did1)<0) goto error;
+    if (H5Dclose (did2)<0) goto error;
+    if (H5Fclose (fid1)<0) goto error;
+    if (H5Fclose (fid2)<0) goto error;
+    
+    
+    PASSED();
+    return 0;
+    
+error:
+    H5E_BEGIN_TRY {
+     H5Pclose(dcpl1);
+     H5Pclose(dcpl2);
+     H5Tclose(tid1);
+     H5Tclose(tid2);
+     H5Tclose(nid1);
+     H5Tclose(nid2);
+     H5Dclose(did1);
+     H5Dclose(did2);
+     H5Sclose(sid1);
+     H5Fclose(fid1);
+     H5Fclose(fid2);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_ninteger() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test H5Tget_native_type for different datatype
@@ -2364,7 +2568,7 @@ main(void)
     
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
+	    goto error;
 
     nerrors += test_atomic_dtype(file)<0 	?1:0;
     nerrors += test_compound_dtype(file)<0 	?1:0;
@@ -2381,6 +2585,7 @@ main(void)
     nerrors += test_refer_dtype2(file)<0 	?1:0;
     nerrors += test_opaque_dtype(file)<0 	?1:0;
     nerrors += test_bitfield_dtype(file)<0 	?1:0;
+    nerrors += test_ninteger()<0  ?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
