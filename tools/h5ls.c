@@ -247,7 +247,7 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
 	    }
 	    break;
 	default:
-	    if (isprint(*s)) {
+	    if (isprint((int)*s)) {
 		if (stream) putc(*s, stream);
 		nprint++;
 	    } else {
@@ -1776,7 +1776,7 @@ get_width(void)
      * Try to get it from the COLUMNS environment variable first since it's
      * value is sometimes wrong.
      */
-    if ((s=getenv("COLUMNS")) && *s && isdigit(*s)) {
+    if ((s=getenv("COLUMNS")) && *s && isdigit((int)*s)) {
 	width = (int)strtol(s, NULL, 0);
     }
 

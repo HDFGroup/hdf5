@@ -105,7 +105,7 @@ get_size (const char *progname, int *argno, int argc, char *argv[])
     off_t	retval=-1;
     char	*suffix;
     
-    if (isdigit (argv[*argno][2])) {
+    if (isdigit ((int)(argv[*argno][2]))) {
 	retval = strtol (argv[*argno]+2, &suffix, 10);
 	(*argno)++;
     } else if (argv[*argno][2] || *argno+1>=argc) {

@@ -435,7 +435,7 @@ h5dump_escape(char *s/*in,out*/, size_t size, int escape_spaces)
 	    escape = escape_spaces ? "\\ " : NULL;
 	    break;
 	default:
-	    if (!isprint(*s)) {
+	    if (!isprint((int)*s)) {
 		sprintf(octal, "\\%03o", (unsigned char)(s[i]));
 		escape = octal;
 	    } else {
@@ -668,7 +668,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 	    h5dump_str_append(str, "\\t");
 	    break;
 	default:
-	    if (isprint(*((char*)vp))) {
+	    if (isprint((int)(*((char*)vp)))) {
 		h5dump_str_append(str, "%c", *((char*)vp));
 	    } else {
 		h5dump_str_append(str, "\\%03o", *((unsigned char*)vp));
@@ -736,7 +736,7 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 		h5dump_str_append(str, "\\t");
 		break;
 	    default:
-		if (isprint(((char*)vp)[i])) {
+		if (isprint((int)((char*)vp)[i])) {
 		    h5dump_str_append(str, "%c", ((char*)vp)[i]);
 		} else {
 		    h5dump_str_append(str, "\\%03o", ((unsigned char*)vp)[i]);
