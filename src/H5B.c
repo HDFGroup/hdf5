@@ -531,6 +531,7 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
      * Check arguments.
      */
     assert(bt);
+    assert(bt->rc_shared);
 
     H5FL_SEQ_FREE(haddr_t,bt->child);
     H5FL_BLK_FREE(native_block,bt->native);
