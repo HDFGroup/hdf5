@@ -114,7 +114,7 @@ ac_default_prefix=/usr/local
 ac_help="$ac_help
   --enable-fortran        Compile the Fortran interface [default=no]"
 ac_help="$ac_help
-  --enable-c++            Compile the C++ interface [default=no]"
+  --enable-cxx            Compile the C++ interface [default=no]"
 ac_help="$ac_help
   --enable-static-exec    Build only statically linked executables [default=no]"
 ac_help="$ac_help
@@ -1037,7 +1037,7 @@ fi
 
 CC_BASENAME="`echo $CC |cut -f1 -d' ' | xargs basename 2>/dev/null`"
 
-config_dirs=""
+ config_dirs=""
 
 echo $ac_n "checking if fortran interface enabled""... $ac_c" 1>&6
 echo "configure:1044: checking if fortran interface enabled" >&5
@@ -1061,9 +1061,9 @@ fi
 
 echo $ac_n "checking if c++ interface enabled""... $ac_c" 1>&6
 echo "configure:1064: checking if c++ interface enabled" >&5
-# Check whether --enable-c++ or --disable-c++ was given.
-if test "${enable_c+++set}" = set; then
-  enableval="$enable_c++"
+# Check whether --enable-cxx or --disable-cxx was given.
+if test "${enable_cxx+set}" = set; then
+  enableval="$enable_cxx"
   HDF_CXX=$enableval
 fi
 
@@ -9527,6 +9527,7 @@ s%@host_cpu@%$host_cpu%g
 s%@host_vendor@%$host_vendor%g
 s%@host_os@%$host_os%g
 s%@CC@%$CC%g
+s%@config_dirs@%$config_dirs%g
 s%@subdirs@%$subdirs%g
 s%@LT_STATIC_EXEC@%$LT_STATIC_EXEC%g
 s%@AR@%$AR%g

@@ -133,7 +133,7 @@ dnl
 AC_PROG_CC
 CC_BASENAME="`echo $CC |cut -f1 -d' ' | xargs basename 2>/dev/null`"
 
-config_dirs=""
+AC_SUBST(config_dirs) config_dirs=""
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
@@ -158,8 +158,8 @@ dnl ----------------------------------------------------------------------
 dnl Check if they would like the Fortran interface compiled
 dnl
 AC_MSG_CHECKING(if c++ interface enabled)
-AC_ARG_ENABLE(c++,
-   [  --enable-c++            Compile the C++ interface [default=no]],
+AC_ARG_ENABLE(cxx,
+   [  --enable-cxx            Compile the C++ interface [default=no]],
    HDF_CXX=$enableval)
 
 if test "X$HDF_CXX" = "Xyes"; then
