@@ -40,7 +40,7 @@ static herr_t H5R_create(void *ref, H5G_entry_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
 static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
-static int H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
+static H5G_obj_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref);
 
 
 /*--------------------------------------------------------------------------
@@ -631,7 +631,7 @@ done:
  PURPOSE
     Retrieves the type of object that an object reference points to
  USAGE
-    int H5R_get_obj_type(file, ref_type, ref)
+    H5G_obj_t H5R_get_obj_type(file, ref_type, ref)
         H5F_t *file;        IN: File the object being dereferenced is within
         H5R_type_t ref_type;    IN: Type of reference to query
         void *ref;          IN: Reference to query.
@@ -647,12 +647,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static int
+static H5G_obj_t
 H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, void *_ref)
 {
     H5G_entry_t ent;            /* Symbol table entry */
     uint8_t *p;                 /* Pointer to OID to store */
-    int ret_value;
+    H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_NOINIT(H5R_get_obj_type);
 

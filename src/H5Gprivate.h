@@ -142,7 +142,7 @@ H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
 H5_DLL H5G_t *H5G_open(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL H5G_t *H5G_open_oid(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
-H5_DLL int H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id);
+H5_DLL H5G_obj_t H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL herr_t H5G_get_objinfo(H5G_entry_t *loc, const char *name,
 			       hbool_t follow_link,
 			       H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);

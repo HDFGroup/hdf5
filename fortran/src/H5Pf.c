@@ -1556,7 +1556,7 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, h
      hid_t c_prp_id;
      herr_t ret;
      hsize_t c_bytes;
-     const char* c_name;
+     char* c_name;
      int c_namelen;
      off_t c_offset;
      c_bytes = (hsize_t) *bytes;

@@ -148,7 +148,7 @@ typedef enum {
  * is allocated dynamically.
  */
 typedef struct H5G_typeinfo_t {
-    int 	type;			        /*one of the public H5G_* types	     */
+    H5G_obj_t 	type;			        /*one of the public H5G_* types	     */
     htri_t	(*isa)(H5G_entry_t*, hid_t);	/*function to determine type	     */
     char	*desc;			        /*description of object type	     */
 } H5G_typeinfo_t;
@@ -182,7 +182,7 @@ static herr_t H5G_move(H5G_entry_t *src_loc, const char *src_name,
 static herr_t H5G_unlink(H5G_entry_t *loc, const char *name, hid_t dxpl_id);
 static herr_t H5G_get_num_objs(H5G_t *grp, hsize_t *num_objs, hid_t dxpl_id);
 static ssize_t H5G_get_objname_by_idx(H5G_t *grp, hsize_t idx, char* name, size_t size, hid_t dxpl_id);
-static int H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
+static H5G_obj_t H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id);
 static int H5G_replace_ent(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5G_traverse_slink(H5G_entry_t *grp_ent/*in,out*/,
                   H5G_entry_t *obj_ent/*in,out*/, int *nlinks/*in,out*/, hid_t dxpl_id);
@@ -190,7 +190,7 @@ static herr_t H5G_set_comment(H5G_entry_t *loc, const char *name,
 			       const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_entry_t *loc, const char *name,
 			     size_t bufsize, char *buf, hid_t dxpl_id);
-static herr_t H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t),
+static herr_t H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t),
 				 const char *desc);
 static H5G_t *H5G_rootof(H5F_t *f);
 
@@ -1039,7 +1039,7 @@ H5G_term_interface(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_register_type(int type, htri_t(*isa)(H5G_entry_t*, hid_t), const char *_desc)
+H5G_register_type(H5G_obj_t type, htri_t(*isa)(H5G_entry_t*, hid_t), const char *_desc)
 {
     char	*desc = NULL;
     size_t	i;
@@ -2343,12 +2343,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int
+H5G_obj_t
 H5G_get_type(H5G_entry_t *ent, hid_t dxpl_id)
 {
     htri_t	isa;
     size_t	i;
-    int         ret_value=H5G_UNKNOWN;       /* Return value */
+    H5G_obj_t   ret_value=H5G_UNKNOWN;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_type, H5G_UNKNOWN);
 
@@ -2566,11 +2566,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int 
+static H5G_obj_t 
 H5G_get_objtype_by_idx(H5G_t *grp, hsize_t idx, hid_t dxpl_id)
 {
-    int		        ret_value = H5G_UNKNOWN;
-    H5G_bt_ud3_t	udata;
+    H5G_bt_ud3_t    udata;                      /* User data for B-tree callback */
+    H5G_obj_t	    ret_value = H5G_UNKNOWN;    /* Return value */
     
     FUNC_ENTER_NOAPI(H5G_get_objtype_by_idx, FAIL);
     
