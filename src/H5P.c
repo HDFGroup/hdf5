@@ -136,19 +136,30 @@ H5Pcreate_simple(int rank, const size_t *dims, const size_t *maxdims)
 
     /* Create a new data space */
     ds = H5MM_xcalloc(1, sizeof(H5P_t));
-    ds->type = H5P_SIMPLE;
-    ds->hslab_def = FALSE;    /* no hyperslab defined currently */
+#ifdef LATER /* QAK */
+    if(rank>0)  /* for creating simple dataspace */
+      {
+#endif /* LATER */
+        ds->type = H5P_SIMPLE;
+        ds->hslab_def = FALSE;    /* no hyperslab defined currently */
 
-    /* Initialize rank and dimensions */
-    ds->u.simple.rank = rank;
+        /* Initialize rank and dimensions */
+        ds->u.simple.rank = rank;
 
-    ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(size_t));
-    HDmemcpy(ds->u.simple.size, dims, rank*sizeof(size_t));
+        ds->u.simple.size = H5MM_xcalloc(1, rank*sizeof(size_t));
+        HDmemcpy(ds->u.simple.size, dims, rank*sizeof(size_t));
 
-    if (maxdims) {
-	ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
-	HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(size_t));
-    }
+        if (maxdims) {
+        ds->u.simple.max = H5MM_xcalloc(1, rank*sizeof(size_t));
+        HDmemcpy (ds->u.simple.max, maxdims, rank*sizeof(size_t));
+        }
+#ifdef LATER /* QAK */
+      } /* end if */
+    else /* rank==0, for scalar data space */
+      {
+        ds->type = H5P_SCALAR;
+      } /* end else */
+#endif /* LATER */
     
     /* Register the new data space and get an ID for it */
     if ((ret_value = H5A_register(H5_DATASPACE, ds)) < 0) {
