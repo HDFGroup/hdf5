@@ -50,10 +50,12 @@ nh5acreate_c (hid_t_f *obj_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
      c_attr_id = H5Acreate(c_obj_id, c_name, c_type_id, c_space_id, c_crt_prp);
 
 
-     if (c_attr_id < 0) return ret_value;
+     if (c_attr_id < 0) goto DONE;
      *attr_id = (hid_t_f)c_attr_id;
-     HDfree(c_name);
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -90,10 +92,12 @@ nh5aopen_name_c (hid_t_f *obj_id, _fcd name, int_f *namelen, hid_t_f *attr_id)
      c_obj_id = *obj_id;
      c_attr_id = H5Aopen_name(c_obj_id, c_name);
 
-     if (c_attr_id < 0) return ret_value;
+     if (c_attr_id < 0) goto DONE;
      *attr_id = (hid_t_f)c_attr_id;
-     HDfree(c_name);
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -158,6 +162,68 @@ nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims)
      return ret_value;
 }      
 
+/*----------------------------------------------------------------------------
+ * Name:        h5awritec_c_b
+ * Purpose:     Call h5awrite_c_b to write a character  attribute
+ * Inputs:      attr_id - dataset identifier 
+ *              mem_type_id - memory datatype identifier
+ *              buf      - character data buffer
+ *              dims     - array to store dimensions sizes of buf; used only
+ *                         by Fortran routine.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5awrite_f call with
+ *                dims buffer being of INTEGER(HSIZE_T) type
+ *---------------------------------------------------------------------------*/
+int_f
+nh5awritec_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+     
+     /*
+      * Call h5awrite_c  function.
+      */
+     ret_value = nh5awrite_c_b(attr_id, mem_type_id, _fcdtocp(buf), dims);
+
+     return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5awrite_c_b
+ * Purpose:     Call H5Awrite to write a attribute 
+ * Inputs:      attr_id - attribute identifier 
+ *              mem_type_id - memory datatype identifier
+ *              buf      - data buffer
+ *              dims     - array to store dimensions sizes of buf; used only
+ *                         by Fortran routine.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5awrite_f call with
+ *                dims buffer being of INTEGER(HSIZE_T) type
+ *---------------------------------------------------------------------------*/
+int_f
+nh5awrite_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_attr_id;
+     hid_t c_mem_type_id;
+
+     /*
+      * Call H5Awrite function.
+      */
+     c_attr_id = *attr_id;
+     c_mem_type_id = *mem_type_id;
+     ret = H5Awrite(c_attr_id, c_mem_type_id, buf);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}      
+
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5areadc_c
@@ -219,6 +285,67 @@ nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, int_f *dims)
      ret_value = 0;
      return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5areadc_c_b
+ * Purpose:     Call h5aread_c_b to read character  attribute
+ * Inputs:      dset_id - dataset identifier 
+ *              mem_type_id - memory datatype identifier
+ *              dims     - array to store dimensions sizes of buf; used only
+ *                         by Fortran routine.
+ * Outputs:     buf      - character data buffer
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5aread_f call with
+ *                dims buffer being of INTEGER(HSIZE_T) type
+ *---------------------------------------------------------------------------*/
+int_f
+nh5areadc_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+     
+     /*
+      * Call h5aread_c  function.
+      */
+     ret_value = nh5aread_c_b(attr_id, mem_type_id, (_fcdtocp(buf)), dims);
+
+     return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5aread_c_b
+ * Purpose:     Call H5Aread to read an attribute 
+ * Inputs:      dset_id - dataset identifier 
+ *              mem_type_id - memory datatype identifier
+ *              dims     - array to store dimensions sizes of buf; used only
+ *                         by Fortran routine.
+ * Outputs:     buf      - data buffer
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, May 14, 2002
+ * Modifications: This function was added to accomodate h5awrite_f call with
+ *                dims buffer being of INTEGER(HSIZE_T) type
+ *---------------------------------------------------------------------------*/
+int_f
+nh5aread_c_b (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, hsize_t_f *dims)
+{
+     int ret_value = -1;
+     herr_t ret;
+     hid_t c_attr_id;
+     hid_t c_mem_type_id;
+
+     /*
+      * Call H5Aread function.
+      */
+     c_attr_id = *attr_id;
+     c_mem_type_id = *mem_type_id;
+     ret = H5Aread(c_attr_id, c_mem_type_id, buf);
+
+     if (ret < 0) return ret_value;
+     ret_value = 0;
+     return ret_value;
+}
+
 
 /*----------------------------------------------------------------------------
  * Name:        h5aclose_c
@@ -273,9 +400,11 @@ nh5adelete_c (hid_t_f *obj_id, _fcd name, int_f *namelen)
      c_obj_id = *obj_id;
      status = H5Adelete(c_obj_id, c_name);
 
-     if (status < 0) return ret_value;
-     HDfree(c_name);
+     if (status < 0) goto DONE;
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -434,13 +563,15 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
       */
      c_attr_id = *attr_id;
      c_size = H5Aget_name(c_attr_id, c_bufsize, c_buf);
-     if (c_size < 0) return ret_value;
+     if (c_size < 0) goto DONE;
 
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
       HD5packFstring(c_buf, _fcdtocp(buf), (int)c_bufsize);
-      HDfree(c_buf);
       ret_value = (int_f)c_size;
+
+DONE:
+      HDfree(c_buf);
       return ret_value;
 }

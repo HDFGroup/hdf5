@@ -161,7 +161,7 @@ nh5pset_preserve_c ( hid_t_f *prp_id , int_f *flag)
   hbool_t c_flag = 0;
 
   if (*flag > 0) c_flag = 1;
-  c_prp_id = *prp_id;
+  c_prp_id = (hid_t)*prp_id;
   status = H5Pset_preserve(c_prp_id, c_flag);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -188,7 +188,7 @@ nh5pget_preserve_c ( hid_t_f *prp_id , int_f *flag)
   herr_t status;
   int c_flag; 
 
-  c_prp_id = *prp_id;
+  c_prp_id = (hid_t)*prp_id;
   c_flag = H5Pget_preserve(c_prp_id);
   if ( c_flag < 0  ) ret_value = -1;
   *flag = (int_f)c_flag;
@@ -214,8 +214,8 @@ nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level)
   int c_level;
   herr_t status;
 
-  c_prp_id = *prp_id;
-  c_level = *level;
+  c_prp_id = (hid_t)*prp_id;
+  c_level = (int)*level;
   status = H5Pset_deflate(c_prp_id, c_level);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -256,11 +256,13 @@ nh5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims )
        c_dims[i] =  dims[*rank - i - 1];
   }
 
-  c_prp_id = *prp_id;
-  c_rank = *rank;
+  c_prp_id = (hid_t)*prp_id;
+  c_rank = (int)*rank;
   status = H5Pset_chunk(c_prp_id, c_rank, c_dims);
-  if (status < 0) return ret_value;
+  if (status < 0) goto DONE;
   ret_value = 0;
+
+DONE:
   HDfree (c_dims);
   return ret_value;
 }  
@@ -292,8 +294,8 @@ nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
   c_dims =  malloc(sizeof(hsize_t) * (*max_rank ));
   if (!c_dims) return ret_value;
 
-  c_prp_id = *prp_id;
-  c_max_rank = *max_rank;
+  c_prp_id = (hid_t)*prp_id;
+  c_max_rank = (int)*max_rank;
   rank = H5Pget_chunk(c_prp_id, c_max_rank, c_dims);
 
   /*
@@ -356,8 +358,8 @@ nh5pset_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
      /*
       * Call H5Pset_fill_value function.
       */
-     c_prp_id = *prp_id;
-     c_type_id = *type_id;
+     c_prp_id = (hid_t)*prp_id;
+     c_type_id = (int)*type_id;
      ret = H5Pset_fill_value(c_prp_id, c_type_id, fillvalue);
 
      if (ret < 0) return ret_value;
@@ -412,8 +414,8 @@ nh5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
      /*
       * Call H5Pget_fill_value function.
       */
-     c_prp_id = *prp_id;
-     c_type_id = *type_id;
+     c_prp_id = (hid_t)*prp_id;
+     c_type_id = (int)*type_id;
      ret = H5Pget_fill_value(c_prp_id, c_type_id, fillvalue);
 
      if (ret < 0) return ret_value;
@@ -452,12 +454,14 @@ nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab,
       */
      c_prp_id = *prp_id;
      ret = H5Pget_version(c_prp_id, &c_boot, &c_freelist, &c_stab, &c_shhdr);
-         *boot = (int_f)c_boot;
-         *freelist = (int_f)c_freelist;
-         *stab = (int_f)c_stab;
-         *shhdr = (int_f)c_shhdr;
      if (ret < 0) return ret_value;
+
+     *boot = (int_f)c_boot;
+     *freelist = (int_f)c_freelist;
+     *stab = (int_f)c_stab;
+     *shhdr = (int_f)c_shhdr;
      ret_value = 0;
+
      return ret_value;
 }      
 
@@ -484,12 +488,13 @@ nh5pget_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
      /*
       * Call H5Pget_userblock function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_userblock(c_prp_id, &c_size);
-
-         *size = (hsize_t_f)c_size;
      if (ret < 0) return ret_value;
+
+     *size = (hsize_t_f)c_size;
      ret_value = 0;
+
      return ret_value;
 }      
 
@@ -516,7 +521,7 @@ nh5pset_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
      /*
       * Call H5Pset_userblock function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_userblock(c_prp_id, c_size);
 
      if (ret < 0) return ret_value;
@@ -549,13 +554,14 @@ nh5pget_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size
      /*
       * Call H5Pget_sizes function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_sizes(c_prp_id, &c_sizeof_addr, &c_sizeof_size);
-
-         *sizeof_addr = (size_t_f)c_sizeof_addr;
-         *sizeof_size = (size_t_f)c_sizeof_size;
      if (ret < 0) return ret_value;
+
+     *sizeof_addr = (size_t_f)c_sizeof_addr;
+     *sizeof_size = (size_t_f)c_sizeof_size;
      ret_value = 0;
+
      return ret_value;
 }      
 
@@ -583,7 +589,7 @@ nh5pset_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size
      /*
       * Call H5Pset_sizes function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_sizes(c_prp_id, c_addr, c_size);
 
      if (ret < 0) return ret_value;
@@ -615,9 +621,9 @@ nh5pset_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
      /*
       * Call H5Pset_sym_k function.
       */
-     c_prp_id = *prp_id;
-     c_ik = *ik;
-     c_lk = *lk;
+     c_prp_id = (hid_t)*prp_id;
+     c_ik = (int)*ik;
+     c_lk = (int)*lk;
      ret = H5Pset_sym_k(c_prp_id, c_ik, c_lk);
 
      if (ret < 0) return ret_value;
@@ -654,7 +660,7 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
      /*
       * Call H5Pget_sym_k function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_sym_k(c_prp_id, &c_ik, &c_lk);
      *ik = (int_f)c_ik;
      *lk = (int_f)c_lk;
@@ -685,8 +691,8 @@ nh5pset_istore_k_c (hid_t_f *prp_id, int_f* ik)
      /*
       * Call H5Pset_istore_k function.
       */
-     c_prp_id = *prp_id;
-     c_ik = *ik;
+     c_prp_id = (hid_t)*prp_id;
+     c_ik = (int)*ik;
      ret = H5Pset_istore_k(c_prp_id, c_ik);
 
      if (ret < 0) return ret_value;
@@ -716,7 +722,7 @@ nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
      /*
       * Call H5Pget_istore_k function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_istore_k(c_prp_id, &c_ik);
      *ik = (int_f)c_ik;
      if (ret < 0) return ret_value;
@@ -775,7 +781,7 @@ nh5pset_fapl_stdio_c (hid_t_f *prp_id)
      /*
       * Call H5Pset_fapl_stdio function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_fapl_stdio(c_prp_id); 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -832,7 +838,7 @@ nh5pset_fapl_sec2_c (hid_t_f *prp_id)
      /*
       * Call H5Pset_fapl_sec2 function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_fapl_sec2(c_prp_id); 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -861,7 +867,7 @@ nh5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2)
      /*
       * Call H5Pget_fapl_sec2 function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_fapl_sec2(c_prp_id); 
      if (ret < 0) return ret_value;
      *sec2 = (int_f)ret;
@@ -960,7 +966,7 @@ nh5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
      /*
       * Call H5Pset_fapl_core function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_fapl_core(c_prp_id, c_increment, c_backing_store); 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -990,7 +996,7 @@ nh5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
      /*
       * Call H5Pset_fapl_core function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_fapl_core(c_prp_id, &c_increment, &c_backing_store); 
      if (ret < 0) return ret_value;
      *increment = (size_t_f)c_increment;
@@ -1025,7 +1031,7 @@ nh5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist
      /*
       * Call H5Pset_fapl_family function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_fapl_family(c_prp_id, c_memb_size, c_memb_plist); 
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -1056,7 +1062,7 @@ nh5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist
      /*
       * Call H5Pget_fapl_family function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_fapl_family(c_prp_id, &c_memb_size, &c_memb_plist); 
      if (ret < 0) return ret_value;
      *memb_size = (hsize_t_f)c_memb_size;
@@ -1098,9 +1104,9 @@ nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, int_f* rdcc_nelmts,  size_t_
      /*
       * Call H5Pset_cache function.
       */
-     c_prp_id = *prp_id;
-     c_mdc_nelmts = *mdc_nelmts;
-     c_rdcc_nelmts = *rdcc_nelmts;
+     c_prp_id = (hid_t)*prp_id;
+     c_mdc_nelmts = (int)*mdc_nelmts;
+     c_rdcc_nelmts = (int)*rdcc_nelmts;
      ret = H5Pset_cache(c_prp_id, c_mdc_nelmts, c_rdcc_nelmts, c_rdcc_nbytes, c_rdcc_w0  );
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -1137,7 +1143,7 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_
      /*
       * Call H5Pget_cache function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_cache(c_prp_id, &c_mdc_nelmts, &c_rdcc_nelmts, &c_rdcc_nbytes, &c_rdcc_w0);
      if (ret < 0) return ret_value;
      *mdc_nelmts = (int_f)c_mdc_nelmts;
@@ -1175,22 +1181,28 @@ nh5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* m
      herr_t ret = -1;
      char* c_meta_ext;
      char* c_raw_ext;
+
      c_meta_ext = (char *)HD5f2cstring(meta_ext, (int)*meta_len); 
      if (c_meta_ext == NULL) return ret_value;
      c_raw_ext = (char *)HD5f2cstring(raw_ext, (int)*raw_len); 
-     if (c_raw_ext == NULL) return ret_value;
+     if (c_raw_ext == NULL) { HDfree(c_meta_ext);
+                              return ret_value;
+                            }
 
      /*
       * Call H5Pset_fapl_split function.
       */
-     c_prp_id = *prp_id;
-     c_meta_plist = *meta_plist;
-     c_raw_plist = *raw_plist; 
+     c_prp_id = (hid_t)*prp_id;
+     c_meta_plist = (hid_t)*meta_plist;
+     c_raw_plist = (hid_t)*raw_plist; 
      ret = H5Pset_fapl_split(c_prp_id, c_meta_ext, c_meta_plist, c_raw_ext, c_raw_plist );
+
+     if (ret < 0) goto DONE;
+     ret_value = 0;
+
+DONE:
      HDfree(c_meta_ext);
      HDfree(c_raw_ext);
-     if (ret < 0) return ret_value;
-     ret_value = 0;
      return ret_value;
 }
 
@@ -1304,7 +1316,7 @@ nh5pget_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
      /*
       * Call H5Pget_gc_references function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_gc_references(c_prp_id, &c_gc_references);
      if (ret < 0) return ret_value;
      *gc_references = (int_f)c_gc_references;
@@ -1334,7 +1346,7 @@ nh5pset_layout_c (hid_t_f *prp_id, int_f* layout)
      /*
       * Call H5Pset_layout function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_layout(c_prp_id, c_layout);
 
      if (ret < 0) return ret_value;
@@ -1362,7 +1374,7 @@ nh5pget_layout_c (hid_t_f *prp_id, int_f* layout)
      /*
       * Call H5Pget_layout function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      c_layout = H5Pget_layout(c_prp_id);
      if (c_layout < 0) return ret_value;
      *layout = (int_f)c_layout;
@@ -1407,12 +1419,14 @@ nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nel
      /*
       * Call H5Pset_filter function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_filter(c_prp_id, c_filter, c_flags, c_cd_nelmts,c_cd_values );
 
-     if (ret < 0) return ret_value;
+     if (ret < 0) goto DONE;
      ret_value = 0;
-     free(c_cd_values);
+
+DONE:
+     HDfree(c_cd_values);
      return ret_value;
 }
 
@@ -1436,11 +1450,13 @@ nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
      /*
       * Call H5Pget_nfilters function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      c_nfilters = H5Pget_nfilters(c_prp_id);
      if (c_nfilters < 0) return ret_value;
+
      *nfilters = (int_f)c_nfilters;
      ret_value = 0;
+
      return ret_value;
 }
 
@@ -1483,28 +1499,33 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      if (!c_name) return ret_value;
 
      c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts));
-     if (!c_cd_values) return ret_value;
+     if (!c_cd_values) {HDfree(c_name);
+                        return ret_value;
+                       }
+                        
  
      /*
       * Call H5Pget_filter function.
       */
-     c_prp_id = *prp_id;
-     c_filter_number = *filter_number;
+     c_prp_id = (hid_t)*prp_id;
+     c_filter_number = (int)*filter_number;
      c_filter = H5Pget_filter(c_prp_id, c_filter_number, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name);
 
-     if (c_filter < 0) return ret_value;
+     if (c_filter < 0) goto DONE;
 
-     *filter_id = c_filter;
-     *cd_nelmts = c_cd_nelmts;
-     *flags = c_flags;
+     *filter_id = (int_f)c_filter;
+     *cd_nelmts = (size_t_f)c_cd_nelmts;
+     *flags = (int_f)c_flags;
      HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
  
      for (i = 0; i < c_cd_nelmts; i++)
           cd_values[i] = (int_f)c_cd_values[i];
     
+     ret_value = 0;
+
+DONE:
      HDfree(c_name);
      HDfree(c_cd_values);
-     ret_value = 0;
      return ret_value;
 } 
 
@@ -1530,26 +1551,28 @@ nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, h
      hid_t c_prp_id;
      herr_t ret;
      hsize_t c_bytes;
-     char* c_name;
+     const char* c_name;
      int c_namelen;
      off_t c_offset;
-
      c_bytes = (hsize_t) *bytes;
-     c_offset = (off_t)*offset;
+     c_offset = (off_t) *offset;
      
-     c_namelen = *namelen;
+     
+     c_namelen = (int)*namelen;
      c_name = (char *)HD5f2cstring(name, c_namelen); 
      if (c_name == NULL) return ret_value;
 
      /*
       * Call H5Pset_external function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_external(c_prp_id, c_name, c_offset, c_bytes);
-     HDfree(c_name);
 
-     if (ret < 0) return ret_value;
+     if (ret < 0) goto DONE;
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }
 
@@ -1573,7 +1596,7 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
      /*
       * Call H5Pget_external_count function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      c_count = H5Pget_external_count(c_prp_id);
      if (c_count < 0) return ret_value;
      *count = (int_f)c_count;
@@ -1597,7 +1620,7 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_external_c(hid_t_f *prp_id,int*idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes)
+nh5pget_external_c(hid_t_f *prp_id,int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes)
 {
      int ret_value = -1;
      hid_t c_prp_id;
@@ -1618,21 +1641,19 @@ nh5pget_external_c(hid_t_f *prp_id,int*idx, size_t_f* name_size, _fcd name, int_
      /*
       * Call H5Pget_external function.
       */
-     c_prp_id = *prp_id;
-     c_idx = *idx;
+     c_prp_id = (hid_t)*prp_id;
+     c_idx = (int)*idx;
      status = H5Pget_external(c_prp_id, c_idx, c_namelen, c_name, &c_offset, &size );
 
-     if (status < 0) {
-                      HDfree(c_name);
-                      return ret_value;
-     }
+     if (status < 0) goto DONE;
 
      *offset = (int_f)c_offset;
      *bytes = (hsize_t_f)size;
      HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
-    
-     HDfree(c_name);
      ret_value = 0;
+
+DONE:    
+     HDfree(c_name);
      return ret_value;
 } 
 
@@ -1653,7 +1674,6 @@ int_f
 nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
-#ifdef H5_WANT_H5_V1_4_COMPAT
      hid_t c_prp_id;
      herr_t ret;
      unsigned c_cache, c_limit;
@@ -1664,7 +1684,8 @@ nh5pset_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
      /*
       * Call H5Pset_hyper_cache function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
+#ifdef H5_WANT_H5_V1_4_COMPAT
      ret = H5Pset_hyper_cache(c_prp_id, c_cache, c_limit);
      if (ret < 0) return ret_value;
 #endif /* H5_WANT_H5_V1_4_COMPAT */
@@ -1689,14 +1710,14 @@ int_f
 nh5pget_hyper_cache_c(hid_t_f *prp_id, int_f * cache, int_f * limit)
 {
      int ret_value = -1;
-#ifdef H5_WANT_H5_V1_4_COMPAT
      hid_t c_prp_id;
      herr_t ret;
      unsigned c_cache, c_limit;
      /*
       * Call H5Pget__hyper_cache function.
       */
-     c_prp_id = *prp_id;
+#ifdef H5_WANT_H5_V1_4_COMPAT
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_hyper_cache(c_prp_id, &c_cache, &c_limit);
      if (ret < 0) return ret_value;
      *cache = (int_f)c_cache;
@@ -1736,7 +1757,7 @@ nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
      /*
       * Call H5Pset_btree_ratios function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pset_btree_ratios(c_prp_id, c_left, c_middle, c_right);
      if (ret < 0) return ret_value;
      ret_value = 0;
@@ -1768,7 +1789,7 @@ nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
      /*
       * Call H5Pget_btree_ratios function.
       */
-     c_prp_id = *prp_id;
+     c_prp_id = (hid_t)*prp_id;
      ret = H5Pget_btree_ratios(c_prp_id, &c_left, &c_middle, &c_right);
      *left = (real_f)c_left;
      *middle = (real_f)c_middle;

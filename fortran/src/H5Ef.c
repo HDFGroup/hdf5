@@ -51,17 +51,16 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   c_name = (char*)HD5f2cstring(name, c_namelen);
   if(c_name == NULL) return ret_val;
   file = fopen(c_name, "a");
-       if(!file) { HDfree(c_name);
-                   return ret_val;
-                 }
+       if(!file) goto DONE;
   /*
    * Call H5Eprint function.
    */
   status = H5Eprint(file);
+  if (status >=0 ) ret_val = 0;
   fclose(file);
+
+DONE:
   HDfree(c_name); 
-  if(status < 0) return ret_val;
-  ret_val = 0;
   return ret_val;
 }  
 
@@ -87,8 +86,7 @@ nh5eprint_c2()
    * Call H5Eprint function.
    */
   status = H5Eprint(NULL);
-  if(status < 0) return ret_val;
-  ret_val = 0;
+  if(status >= 0) ret_val = 0;
   return ret_val;
 }  
 

@@ -36,13 +36,15 @@ nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  
      if ( *size_hint == OBJECT_NAMELEN_DEFAULT_F ) 
      c_grp_id = H5Gcreate(c_loc_id, c_name, NULL);
      else {
-          c_size_hint = *size_hint; 
+          c_size_hint = (size_t)*size_hint; 
           c_grp_id = H5Gcreate(c_loc_id, c_name, c_size_hint);
      }
-     if (c_grp_id < 0) return ret_value;
+     if (c_grp_id < 0) goto DONE;
      *grp_id = (hid_t_f)c_grp_id;
-     HDfree(c_name);
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -80,10 +82,12 @@ nh5gopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
      c_loc_id = *loc_id;
      c_grp_id = H5Gopen(c_loc_id, c_name);
 
-     HDfree(c_name);
-     if (c_grp_id < 0) return ret_value;
-     *grp_id = (hid_t_f)c_grp_id;
+     if (c_grp_id < 0) goto DONE;
      ret_value = 0;
+     *grp_id = (hid_t_f)c_grp_id;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -127,7 +131,9 @@ nh5gget_obj_info_idx_c
       * Allocate buffer to hold name of the object
       */
      if (*obj_namelen) c_obj_name = (char *)HDmalloc(*obj_namelen + 1); 
-     if (c_obj_name == NULL) return ret_value;
+     if (c_obj_name == NULL) { HDfree(c_name);
+                               return ret_value;
+                             }
      /*
       * Call H5Gget_obj_info_idx function.
       */
@@ -135,41 +141,19 @@ nh5gget_obj_info_idx_c
       c_idx = *idx;
       c_ret_value = H5Gget_obj_info_idx(c_loc_id, c_name, c_idx, &c_obj_name, (size_t)*obj_namelen, &type);
 
-     if (c_ret_value < 0) {
-                            HDfree(c_obj_name);
-                            return ret_value;
-                          }
+     if (c_ret_value < 0) goto DONE;
+
      *obj_type = type;
-/*
-     switch (type) {
-     case H5G_LINK:
-          *obj_type = H5G_LINK_F;
-           break;
-
-     case H5G_GROUP:
-          *obj_type = H5G_GROUP_F;
-           break;
-
-     case H5G_DATASET:
-          *obj_type = H5G_DATASET_F;
-           break;
-
-     case H5G_TYPE:
-          *obj_type = H5G_TYPE_F;
-           break;
-     default:
-           return ret_value;
-     }
-*/
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
      c_obj_namelen = *obj_namelen;
      HD5packFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);        
-     if (c_obj_name) HDfree(c_obj_name);
-     if (c_name) HDfree(c_name);
-
      ret_value = 0;
+
+DONE:
+     HDfree(c_obj_name);
+     HDfree(c_name);
      return ret_value;
 }      
 
@@ -204,13 +188,15 @@ nh5gn_members_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
      /*
       * Call H5Gn_members function.
       */
-     c_loc_id = *loc_id;
+     c_loc_id = (hid_t)*loc_id;
      c_nmembers = H5Gn_members(c_loc_id, c_name);
 
-     HDfree(c_name);
-     if (c_nmembers < 0) return ret_value;
+     if (c_nmembers < 0) goto DONE;
      *nmembers = (int_f)c_nmembers;
      ret_value = 0;
+
+DONE:
+     HDfree(c_name);
      return ret_value;
 }      
 /*----------------------------------------------------------------------------
@@ -229,7 +215,7 @@ nh5gclose_c ( hid_t_f *grp_id )
   int ret_value = 0;
   hid_t c_grp_id;
   
-  c_grp_id = *grp_id;
+  c_grp_id = (hid_t)*grp_id;
   if ( H5Gclose(c_grp_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -266,20 +252,25 @@ nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_
   c_current_namelen =*current_namelen;
   c_new_namelen =*new_namelen;
   c_current_name = (char *)HD5f2cstring(current_name, c_current_namelen);
+  if (c_current_name == NULL) return ret_value;
+
   c_new_name = (char *)HD5f2cstring(new_name, c_new_namelen);
-  if((c_current_name == NULL)||(c_new_name == NULL)) 
-    return ret_value;
+  if(c_new_name == NULL) { HDfree(c_current_name); 
+                           return ret_value;
+                         }
   /*
    *  Call H5Glink function
    */
   c_loc_id = *loc_id;
   c_link_type = (H5G_link_t)*link_type;
   c_ret_value = H5Glink(c_loc_id, c_link_type, c_current_name, c_new_name);
-  if(c_current_name) HDfree(c_current_name);
-  if(c_new_name) HDfree(c_new_name);
-  if(c_ret_value < 0) return ret_value;
 
+  if(c_ret_value < 0) goto DONE;
   ret_value = 0;
+
+DONE:
+  HDfree(c_current_name);
+  HDfree(c_new_name);
   return ret_value ;
 }
 
@@ -311,11 +302,13 @@ nh5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
   /*
    *  Call H5Gunlink function
    */
-  c_loc_id = *loc_id;
+  c_loc_id = (hid_t)*loc_id;
   c_ret_value = H5Gunlink(c_loc_id, c_name);
-  if(c_name) HDfree(c_name);
-  if(c_ret_value < 0) return ret_value;
+  if(c_ret_value < 0) goto DONE;
   ret_value = 0;
+
+DONE:
+  HDfree(c_name);
   return ret_value ;
 }
 
@@ -347,19 +340,24 @@ nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, in
   c_src_namelen = *src_namelen;
   c_dst_namelen = *dst_namelen;
   c_src_name = (char *)HD5f2cstring(src_name, c_src_namelen);
+  if(c_src_name == NULL) return ret_value;
+
   c_dst_name = (char *)HD5f2cstring(dst_name, c_dst_namelen);
-  if((c_src_name == NULL)||(c_dst_name == NULL)) 
-    return ret_value;
+  if(c_dst_name == NULL) { HDfree(c_src_name); 
+                           return ret_value;
+                         }
   /*
    *  Call H5Gmove function
    */
-  c_loc_id = *loc_id;
+  c_loc_id = (hid_t)*loc_id;
   c_ret_value = H5Gmove(c_loc_id, c_src_name, c_dst_name);
-  if(c_src_name) HDfree(c_src_name);
-  if(c_dst_name) HDfree(c_dst_name);
-  if(c_ret_value < 0) return ret_value;
+  if(c_ret_value < 0) goto DONE;
 
   ret_value = 0;
+
+DONE:
+  HDfree(c_src_name);
+  HDfree(c_dst_name);
   return ret_value ;
 }
 
@@ -408,23 +406,20 @@ nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _f
    */
 
   c_size = (size_t)*size;
-  c_loc_id = *loc_id;
+  c_loc_id = (hid_t)*loc_id;
   c_ret_value = H5Gget_linkval(c_loc_id, c_name, c_size, c_value);
-  if(c_ret_value < 0) {
-                       if(c_value) HDfree(c_value);
-                       if(c_name) HDfree(c_name);
-                       return ret_value;
-                       }
+  if(c_ret_value < 0) goto DONE;
+                       
 
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
   HD5packFstring(c_value, _fcdtocp(value), (int)*size);
-
-  if(c_value) HDfree(c_value);
-  if(c_name) HDfree(c_name);
-
   ret_value = 0;
+
+DONE:
+  HDfree(c_value);
+  HDfree(c_name);
   return ret_value ;
 }
 
@@ -456,19 +451,23 @@ nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_
   c_namelen = *namelen;
   c_commentlen =*commentlen;
   c_name = (char *)HD5f2cstring(name, c_namelen);
+  if(c_name == NULL) return ret_value;
+
   c_comment = (char *)HD5f2cstring(comment, c_commentlen);
-  if((c_name == NULL)||(c_comment == NULL)) 
-    return ret_value;
+  if(c_comment == NULL) { HDfree (c_name);
+                          return ret_value;
+                        }
   /*
    *  Call H5Gset_comment function
    */
-  c_loc_id = *loc_id;
+  c_loc_id = (hid_t)*loc_id;
   c_ret_value = H5Gset_comment(c_loc_id, c_name, c_comment);
-  if(c_name) HDfree(c_name);
-  if(c_comment) HDfree(c_comment);
-  if(c_ret_value < 0) return ret_value;
-
+  if(c_ret_value < 0) goto DONE;
   ret_value = 0;
+
+DONE:
+  HDfree(c_name);
+  HDfree(c_comment);
   return ret_value ;
 }
 
@@ -520,20 +519,16 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
    */
   c_loc_id = *loc_id;
   c_ret_value = H5Gget_comment(c_loc_id, c_name, c_bufsize, c_comment);
-  if(c_ret_value < 0) {
-                       HDfree(c_name);
-                       HDfree(c_comment);
-                       return ret_value;
-                      }
+  if(c_ret_value < 0) goto DONE;
 
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
   HD5packFstring(c_comment, _fcdtocp(comment), (int)*bufsize);
-
-  if(c_name) HDfree(c_name);
-  if(c_comment) HDfree(c_comment);
-
   ret_value = 0;
+
+DONE:
+  HDfree(c_name);
+  HDfree(c_comment);
   return ret_value ;
 }
