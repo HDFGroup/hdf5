@@ -2154,7 +2154,8 @@ H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t si
                     H5_ASSIGN_OVERFLOW(tail_size,(file->accum_loc+file->accum_size)-tail_addr,haddr_t,size_t);
 
                     /* Write out the part of the accumulator after the block to free */
-                    if (H5FD_write(file, H5FD_MEM_DEFAULT, dxpl_id, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)
+                    /* (Use the driver's write call directly - to avoid looping back and writing to metadata accumulator) */
+                    if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, tail_addr, tail_size, file->meta_accum+(tail_addr-file->accum_loc))<0)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed");
                 } /* end if */
 

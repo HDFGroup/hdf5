@@ -1738,7 +1738,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	HDmemmove(bt->child,
 		  bt->child+1,
 		  bt->nchildren * sizeof(haddr_t));
-	for (i=0; i<bt->nchildren; i++) {
+	for (i=0; i<=bt->nchildren; i++) {
 	    bt->key[i].dirty = bt->key[i+1].dirty;
 	    if (bt->key[i+1].nkey) {
 		bt->key[i].nkey = bt->native + i*type->sizeof_nkey;
@@ -1787,7 +1787,7 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	HDmemmove(bt->child+idx,
 		  bt->child+idx+1,
 		  (bt->nchildren-idx) * sizeof(haddr_t));
-	for (i=idx; i<bt->nchildren; i++) {
+	for (i=idx; i<=bt->nchildren; i++) {
 	    bt->key[i].dirty = bt->key[i+1].dirty;
 	    if (bt->key[i+1].nkey) {
 		bt->key[i].nkey = bt->native + i*type->sizeof_nkey;

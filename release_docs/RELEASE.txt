@@ -35,6 +35,12 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Fixed error in B-tree deletion routine which could cause groups to be
+      corrupted when objects are removed from them.
+      QAK - 2003/04/11
+    * Fixed error in file space freeing code which could cause metadata to
+      fail to be written to the file.
+      QAK - 2003/04/11
     * -O caused errors in AIX 5.x platforms.  Removed it from
       --enable-production mode.  AKC - 2003/03/31
     * Corrected metadata caching bug in parallel I/O which could cause hangs

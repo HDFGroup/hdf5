@@ -24,10 +24,15 @@ const char *FILENAME[] = {
     "unlink",
     "new_move_a",
     "new_move_b",
+    "lunlink",
     NULL
 };
 
 #define THE_OBJECT	"/foo"
+
+/* Macros for test_create_unlink() */
+#define GROUPNAME       "Group"
+#define NGROUPS         1000
 
 
 /*-------------------------------------------------------------------------
@@ -453,6 +458,83 @@ check_new_move(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_create_unlink
+ *
+ * Purpose:     Creates and then unlinks a large number of objects
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, April 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int test_create_unlink(const char *msg, hid_t fapl)
+{
+    hid_t 	file, group;
+    unsigned u;
+    char 	groupname[1024];
+    char	filename[1024];
+
+    TESTING(msg);
+   
+    /* Create file */
+    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    {
+        H5_FAILED();
+        puts("    Creating file failed");
+        goto error;
+    }
+
+    /* Create a many groups to remove */
+    for(u=0; u<NGROUPS; u++) {
+        sprintf(groupname,"%s %u",GROUPNAME,u);
+        if((group = H5Gcreate (file, groupname, 0))<0)
+        {
+            H5_FAILED();
+            printf("group %s creation failed\n",groupname);
+            goto error;
+        }
+        if(H5Gclose (group)<0)
+        {
+            H5_FAILED();
+            printf("closing group %s failed\n",groupname);
+            goto error;
+        }
+    } /* end for */
+
+    /* Remove the all the groups */
+    for(u=0; u<NGROUPS; u++) {
+        sprintf(groupname,"%s %u",GROUPNAME,u);
+        if(H5Gunlink (file, groupname)<0)
+        {
+            H5_FAILED();
+            printf("Unlinking group %s failed\n",groupname);
+            goto error;
+        }
+    } /* end for */
+
+    /* Close file */
+    if(H5Fclose(file)<0)
+    {
+        H5_FAILED();
+        printf("Closing file failed\n");
+        goto error;
+    }
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+} /* end test_create_unlink() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test H5Gunlink()
@@ -471,9 +553,15 @@ check_new_move(void)
 int
 main(void)
 {
-    hid_t	fapl, file;
+    hid_t	fapl, fapl2, file;
     int		nerrors = 0;
     char	filename[1024];
+
+    /* Metadata cache parameters */
+    int mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
 
     /* Open */
     h5_reset();
@@ -482,6 +570,19 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
 
+    /* Make copy of regular fapl, to turn down the elements in the metadata cache */
+    if((fapl2=H5Pcopy(fapl))<0)
+        goto error;
+
+    /* Get FAPL cache settings */
+    if(H5Pget_cache(fapl2,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0)<0)
+        printf("H5Pget_cache failed\n");
+
+    /* Change FAPL cache settings */
+    mdc_nelmts=1;
+    if(H5Pset_cache(fapl2,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)<0)
+        printf("H5Pset_cache failed\n");
+
     /* Tests */
     nerrors += test_one(file);
     nerrors += test_many(file);
@@ -489,6 +590,11 @@ main(void)
     nerrors += test_rename(file);
     nerrors += test_new_move();
     nerrors += check_new_move();
+
+    /* Test creating & unlinking lots of objects with default FAPL */
+    nerrors += test_create_unlink("create and unlink large number of objects",fapl);
+    /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
+    nerrors += test_create_unlink("create and unlink large number of objects with small cache",fapl2);
  
     /* Close */
     if (H5Fclose(file)<0) goto error;
@@ -503,4 +609,3 @@ main(void)
     return 1;
 }
 
-    
