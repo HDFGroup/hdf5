@@ -395,7 +395,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                  * handled below. */
                 h5_stat_t buf;
 
-                if (stat(fullname, &buf) < 0)
+                if (HDstat(fullname, &buf) < 0)
                     /* The directory doesn't exist just yet */
                     if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST)
                         /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.

@@ -235,10 +235,9 @@ test_vlstrings_basic(void)
 static void test_vlstring_type(void)
 {
     hid_t               fid;           /* HDF5 File IDs                */
-    hid_t		tid_vlstr, str;
+    hid_t		tid_vlstr;
     H5T_cset_t		cset;
     H5T_str_t		pad;
-    size_t		size;
     herr_t              ret;
 
     /* Output message about test being performed */

@@ -101,7 +101,8 @@ test_h5s_basic(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Sget_simple_extent_npoints(sid1);
+   
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid1),hsize_t,size_t);
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3,
 	   "H5Sget_simple_extent_npoints");
@@ -118,7 +119,7 @@ test_h5s_basic(void)
     sid2 = H5Screate_simple(SPACE2_RANK, dims2, max2);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
-    n = H5Sget_simple_extent_npoints(sid2);
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid2),hsize_t,size_t);    
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, SPACE2_DIM1 * SPACE2_DIM2 * SPACE2_DIM3 * SPACE2_DIM4,
 	   "H5Sget_simple_extent_npoints");
@@ -219,8 +220,7 @@ test_h5s_scalar_write(void)
     /* Create scalar dataspace */
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
-
-    n = H5Sget_simple_extent_npoints(sid1);
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid1),hsize_t,size_t);    
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
@@ -286,7 +286,7 @@ test_h5s_scalar_read(void)
     sid1=H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
-    n = H5Sget_simple_extent_npoints(sid1);
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid1),hsize_t,size_t);    
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
@@ -363,7 +363,7 @@ test_h5s_compound_scalar_write(void)
     sid1 = H5Screate_simple(SPACE3_RANK, NULL, NULL);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
-    n = H5Sget_simple_extent_npoints(sid1);
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid1),hsize_t,size_t);    
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
@@ -427,7 +427,7 @@ test_h5s_compound_scalar_read(void)
     sid1=H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
-    n = H5Sget_simple_extent_npoints(sid1);
+    H5_ASSIGN_OVERFLOW(n,H5Sget_simple_extent_npoints(sid1),hsize_t,size_t);    
     CHECK(n, UFAIL, "H5Sget_simple_extent_npoints");
     VERIFY(n, 1, "H5Sget_simple_extent_npoints");
 
