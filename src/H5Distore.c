@@ -2401,7 +2401,7 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
     if(H5P_get(dx_plist,H5D_XFER_EDC_NAME,&edc)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get edc information");
     if(H5P_get(dx_plist,H5D_XFER_FILTER_CB_NAME,&cb_struct)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get filter callback struct");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get filter callback struct");
 
 #ifdef H5_HAVE_PARALLEL
     /* Retrieve up MPI parameters */
