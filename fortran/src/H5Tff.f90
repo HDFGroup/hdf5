@@ -3179,4 +3179,73 @@
           END SUBROUTINE h5tis_variable_str_f
 
 !----------------------------------------------------------------------
+! Name:		h5tget_member_class_f 
+!
+! Purpose:      Returns datatype class of compound datatype member.
+!
+! Inputs:  
+!		type_id	-  	- datartpe identifier
+!               member_no       - index of compound datatype member
+! Outputs:  
+!               class           - class type for compound dadtype member
+!                                 Can be one of the follwoing classes:
+!                                 H5T_NO_CLASS_F (error)
+!                                 H5T_INTEGER_F
+!                                 H5T_FLOAT_F
+!                                 H5T_TIME_F
+!                                 H5T_STRING_F
+!                                 H5T_BITFIELD_F
+!                                 H5T_OPAQUE_F
+!                                 H5T_COMPOUND_F
+!                                 H5T_REFERENCE_F
+!                                 H5T_ENUM_F
+!                                 H5T_VLEN_F
+!                                 H5T_ARRAY_F
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	Elena Pourmal
+!		April 6, 2005
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+          SUBROUTINE h5tget_member_class_f(type_id, member_no, class, hdferr) 
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_member_class_f
+!DEC$endif
+!
+
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            INTEGER, INTENT(IN)       :: member_no  ! Member number
+            INTEGER, INTENT(OUT)     :: class      ! Member class
+            INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+            INTERFACE
+              INTEGER FUNCTION h5tget_member_class_c(type_id, member_no, class) 
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !MS$ATTRIBUTES C,reference,alias:'_H5TGET_MEMBER_CLASS_C'::h5tget_member_class_c
+              !DEC$ ENDIF
+              INTEGER(HID_T), INTENT(IN) :: type_id
+              INTEGER, INTENT(IN)       :: member_no 
+              INTEGER, INTENT(OUT)     :: class    
+              END FUNCTION h5tget_member_class_c
+            END INTERFACE
+
+            hdferr = h5tget_member_class_c(type_id, member_no, class)
+ 
+          END SUBROUTINE h5tget_member_class_f
+
+!----------------------------------------------------------------------
       END MODULE H5T

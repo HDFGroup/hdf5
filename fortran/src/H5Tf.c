@@ -1633,3 +1633,33 @@ nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
   if ( status < 0  ) ret_value = -1;
   return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5tget_member_class_c
+ * Purpose:     Call H5Tget_member_class to detrmine ithe class of the compound
+ *		datatype member
+ * Inputs:      type_id - identifier of the dataspace 
+ *              member_no - member's index
+ * Outputs:     class - member's class
+ *              and negative on failure.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Wednesday, April 6, 2005
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *class )
+{
+  int ret_value = 0;
+  hid_t c_type_id;
+  unsigned c_member_no;
+  H5T_class_t c_class;
+
+  c_type_id = (hid_t)*type_id;
+  c_member_no = (unsigned)*member_no;
+  c_class = H5Tget_member_class(c_type_id, c_member_no);
+
+  if ( c_class == H5T_NO_CLASS  ) ret_value = -1;
+  *class = (int_f)c_class;
+  return ret_value;
+}

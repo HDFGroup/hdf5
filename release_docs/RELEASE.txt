@@ -174,7 +174,8 @@ New Features
 
     Fortran Library:
     ----------------
-         
+         - added missing h5tget_member_class_f function
+                                                 EIP 2005/04/06         
          - added new functions h5fget_name_f and h5fget_filesize_f 
                                                  EIP 2004/07/08
          - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter

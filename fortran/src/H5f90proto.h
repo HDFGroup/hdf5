@@ -301,6 +301,7 @@ H5_FCDLL int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tget_super_c               FC_FUNC_(h5tget_super_c, H5TGET_SUPER_C)
 #   define nh5tvlen_create_c               FC_FUNC_(h5tvlen_create_c, H5TVLEN_CREATE_C)
 #   define nh5tis_variable_str_c         FC_FUNC_(h5tis_variable_str_c, H5TIS_VARIABLE_STR_C)
+#   define nh5tget_member_class_c         FC_FUNC_(h5tget_member_class_c, H5TGET_MEMBER_CLASS_C)
 
 
 H5_FCDLL int_f nh5tcreate_c(int_f *class, size_t_f *size, hid_t_f *type_id);
@@ -358,6 +359,7 @@ H5_FCDLL int_f nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims);
 H5_FCDLL int_f nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 H5_FCDLL int_f nh5tvlen_create_c ( hid_t_f *type_id , hid_t_f *vltype_id);
 H5_FCDLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
+H5_FCDLL int_f nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *class );
 
 /* 
  * Functions from H5Pf.c
