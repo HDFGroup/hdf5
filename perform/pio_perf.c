@@ -959,13 +959,13 @@ usage(const char *prog)
         fprintf(stdout, "     -D N, --debug=N             Indicate the debugging level [default:0]\n");
         fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
         fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
-        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
+        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test only\n");
         fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
+        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test only\n");
         fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
         fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
         fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
+        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test only\n");
         fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
         fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
         fprintf(stdout, "\n");
