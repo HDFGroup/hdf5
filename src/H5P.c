@@ -2451,11 +2451,18 @@ hsize_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+<<<<<<< H5P.c
+    herr_t ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER (H5Pget_cache, FAIL);
+    H5TRACE3("h","ixx",plist_id,tconv,bkg);
+=======
     size_t size;                /* Type conversion buffer size */
     hsize_t ret_value=0;        /* Type conversion buffer size */
 
     FUNC_ENTER (H5Pget_buffer, 0);
     H5TRACE3("h","ixx",plist_id,tconv,bkg);
+>>>>>>> 1.183
 
     /* Check arguments */
     if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
