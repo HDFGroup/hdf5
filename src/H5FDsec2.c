@@ -235,8 +235,10 @@ H5Pset_fapl_sec2(hid_t fapl_id)
     FUNC_ENTER(H5Pset_fapl_sec2, FAIL);
     H5TRACE1("e","i",fapl_id);
     
-    if (H5P_FILE_ACCESS!=H5Pget_class(fapl_id))
-        HRETURN_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
+    if(H5I_GENPROP_LST != H5I_get_type(fapl_id) ||
+        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                      "not a file access property list");
 
     ret_value= H5Pset_driver(fapl_id, H5FD_SEC2, NULL);
 

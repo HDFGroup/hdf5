@@ -90,23 +90,15 @@ typedef struct H5P_genplist_tag {
     H5P_genprop_t *props[1];  /* Hash table of pointers to properties in the list */
 } H5P_genplist_t;
 
-typedef struct {
-    H5P_class_t cls;
-} H5P_t;
-
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5P_init(void);
-__DLL__ hid_t H5P_create(H5P_class_t_old type, H5P_t *plist);
-__DLL__ void *H5P_copy(H5P_class_t_old type, const void *src);
-__DLL__ hid_t H5P_copy_new(hid_t id);
-__DLL__ herr_t H5P_close(void *plist);
+__DLL__ hid_t H5P_copy(hid_t old_plist_id);
 __DLL__ herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
             H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
             H5P_prp_copy_func_t prp_copy, H5P_prp_close_func_t prp_close);
 __DLL__ herr_t H5P_get(hid_t plist_id, const char *name, void *value);
 __DLL__ herr_t H5P_set(hid_t plist_id, const char *name, const void *value);
-__DLL__ H5P_class_t_old H5P_get_class(hid_t tid);
 __DLL__ hid_t H5P_get_driver(hid_t plist_id);
 
 /* Private functions to "peek" at properties of a certain type */

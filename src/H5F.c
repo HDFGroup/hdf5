@@ -283,7 +283,7 @@ H5F_init_interface(void)
                      "can't insert property into class");
 
     /* Register the default file creation property list */
-    if((H5P_LST_FILE_CREATE_g = H5Pcreate_list(H5P_CLS_FILE_CREATE_g))<0)
+    if((H5P_LST_FILE_CREATE_g = H5Pcreate(H5P_CLS_FILE_CREATE_g))<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
                      "can't insert property into class");
 
@@ -381,7 +381,7 @@ H5F_init_interface(void)
 
     /* Register the default file access property list */
 
-    if((H5P_LST_FILE_ACCESS_g = H5Pcreate_list(H5P_CLS_FILE_ACCESS_g))<0)
+    if((H5P_LST_FILE_ACCESS_g = H5Pcreate(H5P_CLS_FILE_ACCESS_g))<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, 
                      "can't insert property into class");
 
@@ -397,7 +397,7 @@ H5F_init_interface(void)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,
                      "can't insert property into class"); 
     /* Register the default file mount property list */
-    if((H5P_LST_MOUNT_g = H5Pcreate_list(H5P_CLS_MOUNT_g))<0)
+    if((H5P_LST_MOUNT_g = H5Pcreate(H5P_CLS_MOUNT_g))<0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
                      "can't insert property into class");
 
@@ -750,7 +750,7 @@ H5Fget_create_plist(hid_t file_id)
     }
     
     /* Create the property list object to return */
-    if((ret_value=H5P_copy_new(file->shared->fcpl_id)) < 0) {
+    if((ret_value=H5Pcopy(file->shared->fcpl_id)) < 0) {
 	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
 		      "unable to copy file creation properties");
     }
@@ -784,7 +784,6 @@ hid_t
 H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5P_t	    	*plist=NULL;
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER(H5Fget_access_plist, FAIL);
@@ -796,7 +795,7 @@ H5Fget_access_plist(hid_t file_id)
     }
 
     /* Make a copy of the default file access property list */
-    if((ret_value=H5P_copy_new(H5P_LST_FILE_ACCESS_g)) < 0)
+    if((ret_value=H5Pcopy(H5P_LST_FILE_ACCESS_g)) < 0)
 	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, 
                       "can't copy file access property list");
 
@@ -1063,7 +1062,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
         if(H5I_GENPROP_LST != H5I_get_type(fcpl_id) ||
             TRUE != H5Pisa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
-        f->shared->fcpl_id = H5P_copy_new(fcpl_id);
+        f->shared->fcpl_id = H5Pcopy(fcpl_id);
 
 
         if(H5P_DEFAULT == fapl_id)
@@ -1214,7 +1213,7 @@ H5F_dest(H5F_t *f)
             if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id)) 
                 HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, 
                             "not a property list");
-            if((ret_value=H5Pclose_list(f->shared->fcpl_id)) < 0)
+            if((ret_value=H5Pclose(f->shared->fcpl_id)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, 
                             "can't close property list");
 

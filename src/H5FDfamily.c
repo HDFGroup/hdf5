@@ -185,8 +185,8 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id)
         TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
                       "not a file access property list");
-    if(H5P_DEFAULT != memb_fapl_id &&
-        TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
+    if(H5P_DEFAULT != memb_fapl_id && 
+        TRUE != H5Pisa_class(memb_fapl_id, H5P_FILE_ACCESS))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list");
 
     /*
@@ -241,7 +241,7 @@ H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size/*out*/,
     if (NULL==(fa=H5Pget_driver_info(fapl_id)))
         HRETURN_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info");
     if (memb_size) *memb_size = fa->memb_size;
-    if (memb_fapl_id) *memb_fapl_id = H5P_copy_new(fa->memb_fapl_id);
+    if (memb_fapl_id) *memb_fapl_id = H5Pcopy(fa->memb_fapl_id);
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -845,7 +845,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
-        assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));
+        assert(H5Pisa_class(dxpl_id, H5P_DATASET_XFER));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }
@@ -908,7 +908,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     if (H5P_DEFAULT!=dxpl_id && H5FD_FAMILY==H5P_get_driver(dxpl_id)) {
         H5FD_family_dxpl_t *dx = H5Pget_driver_info(dxpl_id);
 
-        assert(H5P_DATASET_XFER==H5Pget_class(dxpl_id));
+        assert(H5Pisa_class(dxpl_id, H5P_DATASET_XFER));
         assert(dx);
         memb_dxpl_id = dx->memb_dxpl_id;
     }

@@ -150,7 +150,7 @@ H5A_term_interface(void)
 --------------------------------------------------------------------------*/
 hid_t
 H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
-	  hid_t plist_id)
+	  hid_t UNUSED plist_id)
 {
     H5G_entry_t    	*ent = NULL;
     H5T_t		*type = NULL;
@@ -179,12 +179,6 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if (H5I_DATASPACE != H5I_get_type(space_id) ||
 	NULL == (space = H5I_object(space_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    }
-    if (H5P_DEFAULT!=plist_id &&
-	(H5P_DATASET_CREATE != H5P_get_class(plist_id) ||
-	 NULL == H5I_object(plist_id))) {
-	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-		      "not a dataset creation property list");
     }
 
     /* Go do the real work for attaching the attribute to the dataset */

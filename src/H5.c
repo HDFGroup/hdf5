@@ -2114,18 +2114,17 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    fprintf(out, "NULL");
 		}
 	    } else {
-                /* Before deleting the last of these old-style lists, convert */
-                /* this chunk of code to print the class of the property list */
-                /* using the generic property list classes - QAK */
-		H5P_class_t_old plist_class = va_arg (ap, H5P_class_t_old);
-		switch (plist_class) {
-                    case H5P_NO_CLASS_OLD:
-                        fprintf (out, "H5P_NO_CLASS");
-                        break;
-                    default:
-                        fprintf (out, "%ld", (long)plist_class);
-                        break;
-		}
+		hid_t pclass_id = va_arg (ap, hid_t);
+                char *class_name=NULL;
+
+                /* Get the class name and print it */
+                if((class_name=H5Pget_class_name(pclass_id))!=NULL) {
+		    fprintf (out, class_name);
+                    H5MM_xfree(class_name);
+                } /* end if */
+                else {
+		    fprintf (out, "%ld", (long)pclass_id);
+                } /* end else */
 	    }
 	    break;
 

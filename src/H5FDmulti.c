@@ -443,7 +443,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
 	 * All members of MEMB_FAPL must be either defaults or actual file
 	 * access property lists.
 	 */
-	if (H5P_DEFAULT!=memb_fapl[mmt] && H5P_FILE_ACCESS!=H5Pget_class(memb_fapl[mmt]))
+	if (H5P_DEFAULT!=memb_fapl[mmt] && TRUE!=H5Pisa_class(memb_fapl[mmt], H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "file resource type incorrect", -1);
 
 	/* All names must be defined */
@@ -572,13 +572,13 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
     H5Eclear();
 
     /* Check arguments */
-    if (H5P_DATASET_XFER!=H5Pget_class(dxpl_id))
+    if (TRUE!=H5Pisa_class(dxpl_id,  H5P_DATASET_XFER))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
     if (!memb_dxpl)
         H5Epush_ret(func, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1);
     for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=mt+1) {
 	if (H5P_DEFAULT!=memb_dxpl[mt] &&
-	    H5P_DATASET_XFER!=H5Pget_class(memb_dxpl[mt]))
+            TRUE!=H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
             H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1);
     }
 
@@ -617,7 +617,7 @@ H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
     /* Clear the error stack */
     H5Eclear();
 
-    if (H5P_FILE_ACCESS!=H5Pget_class(dxpl_id))
+    if (TRUE!=H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
         H5Epush_ret(func, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1);
     if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
         H5Epush_ret(func, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1);

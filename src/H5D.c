@@ -252,7 +252,7 @@ H5D_init_interface(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class");
 
     /* Register the default data transfer property list */
-    if ((H5P_LST_DATASET_XFER_g = H5Pcreate_list (H5P_CLS_DATASET_XFER_g))<0)
+    if ((H5P_LST_DATASET_XFER_g = H5Pcreate (H5P_CLS_DATASET_XFER_g))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list");
 
     /* =========Dataset Creation Property Class Initialization========== */
@@ -301,7 +301,7 @@ H5D_init_interface(void)
                    "can't insert property into class");
 
     /* Register the default data transfer property list */
-    if ((H5P_LST_DATASET_CREATE_g = H5Pcreate_list (H5P_CLS_DATASET_CREATE_g))<0)
+    if ((H5P_LST_DATASET_CREATE_g = H5Pcreate (H5P_CLS_DATASET_CREATE_g))<0)
         HRETURN_ERROR (H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list");
 
 done:
@@ -982,7 +982,7 @@ H5Dget_create_plist(hid_t dset_id)
 	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     }
     /* Copy the creation property list */
-    if((ret_value = H5P_copy_new(dset->dcpl_id)) < 0) {
+    if((ret_value = H5Pcopy(dset->dcpl_id)) < 0) {
         HRETURN_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, 
                       "unable to copy the creation property list");
     }
@@ -1291,7 +1291,7 @@ H5D_new(hid_t dcpl_id)
         TRUE != H5Pisa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list");
 
-    ret_value->dcpl_id = H5P_copy_new(dcpl_id);
+    ret_value->dcpl_id = H5Pcopy(dcpl_id);
     ret_value->ent.header = HADDR_UNDEF;
 
     /* Success */
@@ -1957,7 +1957,7 @@ H5D_close(H5D_t *dataset)
      * can do if one of these fails, so we just continue.
      */
     free_failed = (H5T_close(dataset->type) < 0 ||
-			H5Pclose_list(dataset->dcpl_id) < 0);
+			H5Pclose(dataset->dcpl_id) < 0);
 
     /* Close the dataset object */
     H5O_close(&(dataset->ent));
@@ -3654,7 +3654,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    if((vlen_bufsize.xfer_pid=H5Pcreate_list(H5P_DATASET_XFER))<0)
+    if((vlen_bufsize.xfer_pid=H5Pcreate(H5P_DATASET_XFER))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "no dataset xfer plists available");
 
     if(H5Pset_vlen_mem_manager(vlen_bufsize.xfer_pid,H5D_vlen_get_buf_size_alloc,&vlen_bufsize,NULL,NULL)<0)
@@ -3681,7 +3681,7 @@ done:
     if(vlen_bufsize.vl_tbuf!=NULL)
         H5FL_BLK_FREE(vlen_vl_buf,vlen_bufsize.vl_tbuf);
     if(vlen_bufsize.xfer_pid>0)
-        H5Pclose_list(vlen_bufsize.xfer_pid);
+        H5Pclose(vlen_bufsize.xfer_pid);
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_get_buf_size() */

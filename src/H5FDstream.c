@@ -269,7 +269,7 @@ herr_t H5Pset_fapl_stream (hid_t fapl_id, H5FD_stream_fapl_t *fapl)
   FUNC_ENTER (H5Pset_fapl_stream, FAIL);
   H5TRACE2 ("e", "ix", fapl_id, fapl);
 
-  if (H5P_FILE_ACCESS != H5Pget_class (fapl_id))
+  if ( TRUE!=H5Pisa_class(fapl_id, H5P_FILE_ACCESS) )
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
   }
@@ -322,7 +322,7 @@ herr_t H5Pget_fapl_stream(hid_t fapl_id, H5FD_stream_fapl_t *fapl /* out */)
   FUNC_ENTER (H5Pget_fapl_stream, FAIL);
   H5TRACE2("e","ix",fapl_id,fapl);
 
-  if (H5P_FILE_ACCESS != H5Pget_class (fapl_id))
+  if (TRUE!=H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
   {
     HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a fapl");
   }

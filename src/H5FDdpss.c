@@ -552,7 +552,6 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
     globus_result_t  globus_result;
 #ifdef COALESCE_READS
     static int count = 0;                 /* counter for single reads */
-    H5F_xfer_t *xfer_parms;               /*transfer property list*/
 #endif
 
     FUNC_ENTER (H5FD_dpss_read, FAIL);
@@ -579,15 +578,14 @@ H5FD_dpss_read (H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t ad
 #ifdef COALESCE_READS
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
-        xfer_parms = &H5F_xfer_dflt;
-    } else if (H5P_DATASET_XFER != H5P_get_class (dxpl_id) ||
-               NULL == (xfer_parms = H5I_object (dxpl_id))) {
-        HRETURN_ERROR (H5E_PLIST, H5E_BADTYPE, FAIL, "not a xfer");
-    }
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    if(H5I_GENPROP_LST != H5I_get_type(plist_id) ||
+            TRUE!=H5Pisa_class(dxpl_id,H5P_DATASET_XFER))
+        HRETURN_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get gather read");
 
-    if (xfer_parms->gather_reads) {
-        if (! count)
-            count = xfer_parms->gather_reads;
+    if(!count || H5P_get(dxpl_id, H5D_XFER_GATHER_READS_NAME, &count) < 0)
+        HRETURN_ERROR(H5E_S, H5E_BADTYPE, FAIL, "not xfer parms");
+
 #ifdef DEBUG
         fprintf (stdout, "H5FD_dpss_read: request would be queued\n");
 #endif

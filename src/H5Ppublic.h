@@ -36,23 +36,10 @@ typedef long off_t;
 #endif
 /*__MWERKS__*/
 
-/* Property list classes */
-typedef enum H5P_class_t_old {
-    H5P_NO_CLASS_OLD     = -1,  /*error return value                 */
-    H5P_NCLASSES_OLD            /*this must be last!                 */
-} H5P_class_t_old;
-
-/* This typedef should go in the v1.4 compat section when all the internal */
-/* property lists are switched to generic property lists - QAK */
+#ifdef H5_WANT_H5_V1_4_COMPAT
+/* Backward compatibility typedef... */
 typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
-/* hid_t aliases for old H5P_class_t enum values */
-/* These go away as each old-style property list is converted to a generic */
-/* property list -QAK */
-/* Also - merge/delete H5Pcreate and H5Pcreate_list */
-/*      - merge/delete H5Pget_class and H5Pget_class_new */
-/*      - merge/delete H5Pcopy and H5Pcopy_new */
-/*      - merge/delete H5Pclose and H5Pclose_list */
-__DLLVAR__ hid_t H5P_NO_CLASS;
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 /* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
  * changed to H5P_DATA_XFER on v1.3.0.  Then it was changed back to
@@ -86,7 +73,7 @@ extern "C" {
 /*
  * The library created property list classes
  */
-#define H5P_NO_CLASS_NEW   	(H5open(), H5P_CLS_NO_CLASS_g)
+#define H5P_NO_CLASS		   	(H5open(), H5P_CLS_NO_CLASS_g)
 #define H5P_NO_CLASS_HASH_SIZE   1  /* 1, not 0, otherwise allocations get weird */
 #define H5P_FILE_CREATE 		(H5open(), H5P_CLS_FILE_CREATE_g)
 #define H5P_FILE_CREATE_HASH_SIZE  	17
@@ -126,7 +113,7 @@ __DLL__ hid_t H5Pcreate_class(hid_t parent, const char *name, unsigned hashsize,
             H5P_cls_copy_func_t cls_copy, void *copy_data,
             H5P_cls_close_func_t cls_close, void *close_data);
 __DLL__ char *H5Pget_class_name(hid_t pclass_id);
-__DLL__ hid_t H5Pcreate_list(hid_t cls_id);
+__DLL__ hid_t H5Pcreate(hid_t cls_id);
 __DLL__ herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
             void *def_value, H5P_prp_create_func_t prp_create,
             H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
@@ -142,7 +129,7 @@ __DLL__ herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 __DLL__ htri_t H5Pexist(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 __DLL__ herr_t H5Pget_nprops(hid_t id, size_t *nprops);
-__DLL__ hid_t H5Pget_class_new(hid_t plist_id);
+__DLL__ hid_t H5Pget_class(hid_t plist_id);
 __DLL__ hid_t H5Pget_class_parent(hid_t pclass_id);
 __DLL__ herr_t H5Pget(hid_t plist_id, const char *name, void * value);
 __DLL__ htri_t H5Pequal(hid_t id1, hid_t id2);
@@ -152,12 +139,10 @@ __DLL__ int H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func,
 __DLL__ herr_t H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name);
 __DLL__ herr_t H5Premove(hid_t plist_id, const char *name);
 __DLL__ herr_t H5Punregister(hid_t pclass_id, const char *name);
-__DLL__ herr_t H5Pclose_list(hid_t plist_id);
 __DLL__ herr_t H5Pclose_class(hid_t plist_id);
 __DLL__ hid_t H5Pcreate(hid_t type);
 __DLL__ herr_t H5Pclose(hid_t plist_id);
 __DLL__ hid_t H5Pcopy(hid_t plist_id);
-__DLL__ hid_t H5Pget_class(hid_t plist_id);
 __DLL__ herr_t H5Pget_version(hid_t plist_id, int *boot/*out*/,
          int *freelist/*out*/, int *stab/*out*/,
          int *shhdr/*out*/);
