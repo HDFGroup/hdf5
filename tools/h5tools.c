@@ -863,13 +863,20 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 				     OPT(info->cmpd_sep,
 					 ", " OPTIONAL_LINE_BREAK));
 
-		/*put code to indent compound type elemnts here*/
-		if (ctx->indent_level >= 0) {
-			h5dump_str_append(str, "%s", OPT(info->line_pre, ""));
-		}
-		for (x=0; x < ctx->indent_level + 1; x++){
-			h5dump_str_append(str,"%s",OPT(info->line_indent,""));
-		}		
+            /* RPM 2000-10-31
+             * If the previous character is a line-feed (which is true when
+             * h5dump is running) then insert some white space for
+             * indentation. Be warned that column number calculations will be
+             * incorrect and that object indices at the beginning of the line
+             * will be missing (h5dump doesn't display them anyway).  */
+            if (ctx->indent_level >= 0 &&
+                str->len && '\n'==str->s[str->len-1]) {
+                h5dump_str_append(str, OPT(info->line_pre, ""), "");
+                for (x=0; x<ctx->indent_level+1; x++) {
+                    h5dump_str_append(str, "%s", OPT(info->line_indent, ""));
+                }
+            }
+            
 	    /* The name */
 	    name = H5Tget_member_name(type, j);
 	    h5dump_str_append(str, OPT(info->cmpd_name, ""), name);
@@ -916,17 +923,22 @@ h5dump_sprint(h5dump_str_t *str/*in,out*/, const h5dump_t *info,
 
 	}
 
+        /* RPM 2000-10-31
+         * If the previous character is a line feed (which is true when
+         * h5dump is running) then insert some white space for indentation.
+         * Be warned that column number calculations will be incorrect and
+         * that object indices at the beginning of the line will be missing
+         * (h5dump doesn't display them anyway). */
 	h5dump_str_append(str, "%s", OPT(info->cmpd_end, ""));
-
-	/*put code to indent compound type elemnts here*/
-	if (ctx->indent_level >= 0) {
-            h5dump_str_append(str, "%s", OPT(info->line_pre, ""));
-	}
-	for (x=0; x < ctx->indent_level; x++){
-            h5dump_str_append(str,"%s",OPT(info->line_indent,""));
-	}
-
-	h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));	
+        if (ctx->indent_level >= 0 &&
+            str->len && '\n'==str->s[str->len-1]) {
+            h5dump_str_append(str, OPT(info->line_pre, ""), "");
+            for (x=0; x<ctx->indent_level; x++) {
+                h5dump_str_append(str, "%s", OPT(info->line_indent, ""));
+            }
+        }
+	h5dump_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+        
     } else if (H5T_ENUM==H5Tget_class(type)) {
 	char enum_name[1024];
 	if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name)>=0) {
