@@ -892,3 +892,27 @@ out:
 
   return nfound;
 }
+
+
+#ifdef H5_HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function: phdiff_dismiss_workers
+ *
+ * Purpose: tell all workers to end.
+ *
+ * Return: none
+ *
+ * Programmer: Albert Cheng
+ *
+ * Date: Feb 6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+void phdiff_dismiss_workers(void)
+{
+    int i;
+
+    for(i=1; i<g_nTasks; i++)
+	MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+}
+#endif
