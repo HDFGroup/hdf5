@@ -258,9 +258,6 @@ H5P_create(H5P_class_t type, H5P_t *plist)
 herr_t
 H5Pclose(hid_t plist_id)
 {
-    H5P_class_t		type;
-    void		*plist = NULL;
-
     FUNC_ENTER(H5Pclose, FAIL);
     H5TRACE1("e","i",plist_id);
 
@@ -268,7 +265,7 @@ H5Pclose(hid_t plist_id)
     if (plist_id==H5P_DEFAULT)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
 		      "unable to close predefined object");
-    if ((type=H5P_get_class (plist_id))<0 || NULL==(plist=H5I_object (plist_id))) {
+    if (H5P_get_class (plist_id)<0) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     }
 	

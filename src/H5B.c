@@ -103,7 +103,7 @@
 /* PRIVATE PROTOTYPES */
 static H5B_ins_t H5B_insert_helper(H5F_t *f, const haddr_t *addr,
 				   const H5B_class_t *type,
-				   const float split_ratios[],
+				   const double split_ratios[],
 				   uint8_t *lt_key,
 				   hbool_t *lt_key_changed,
 				   uint8_t *md_key, void *udata,
@@ -124,7 +124,7 @@ static size_t H5B_nodesize(H5F_t *f, const H5B_class_t *type,
 			   size_t *total_nkey_size, size_t sizeof_rkey);
 static herr_t H5B_split(H5F_t *f, const H5B_class_t *type,
 			H5B_t *old_bt, const haddr_t *old_addr, intn idx,
-			const float split_ratios[], void *udata,
+			const double split_ratios[], void *udata,
 			haddr_t *new_addr/*out*/);
 static H5B_t * H5B_copy(H5F_t *f, const H5B_t *old_bt);
 #ifdef H5B_DEBUG
@@ -618,7 +618,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, const haddr_t *addr, void *udata)
  */
 static herr_t
 H5B_split(H5F_t *f, const H5B_class_t *type, H5B_t *old_bt,
-	  const haddr_t *old_addr, intn idx, const float split_ratios[],
+	  const haddr_t *old_addr, intn idx, const double split_ratios[],
 	  void *udata, haddr_t *new_addr/*out*/)
 {
     H5B_t	*new_bt = NULL, *tmp_bt = NULL;
@@ -854,7 +854,7 @@ H5B_decode_keys(H5F_t *f, H5B_t *bt, intn idx)
  */
 herr_t
 H5B_insert(H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-	   const float split_ratios[], void *udata)
+	   const double split_ratios[], void *udata)
 {
     /*
      * These are defined this way to satisfy alignment constraints.
@@ -1147,7 +1147,7 @@ H5B_insert_child(H5F_t *f, const H5B_class_t *type, H5B_t *bt,
  */
 static H5B_ins_t
 H5B_insert_helper(H5F_t *f, const haddr_t *addr, const H5B_class_t *type,
-		  const float split_ratios[], uint8_t *lt_key,
+		  const double split_ratios[], uint8_t *lt_key,
 		  hbool_t *lt_key_changed, uint8_t *md_key, void *udata,
 		  uint8_t *rt_key, hbool_t *rt_key_changed,
 		  haddr_t *new_node/*out*/)

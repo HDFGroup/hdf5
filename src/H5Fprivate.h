@@ -253,7 +253,7 @@ typedef struct H5F_access_t {
     intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
     intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
-    float	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
+    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     uintn	gc_ref;     /* Garbage-collect references? */
@@ -339,7 +339,7 @@ typedef struct H5F_xfer_t {
     void		*tconv_buf;	/*type conversion buffer or null     */
     void		*bkg_buf;	/*background buffer or null	     */
     H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    float		split_ratios[3];/*B-tree node splitting ratios	     */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
     uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
     uintn       	block_limit;    /*largest hyperslab block to cache   */
     H5D_transfer_t	xfer_mode;	/*independent or collective transfer */
@@ -671,7 +671,7 @@ __DLL__ herr_t H5F_istore_write(H5F_t *f, const struct H5F_xfer_t *xfer,
 __DLL__ herr_t H5F_istore_allocate (H5F_t *f,
 				    const struct H5O_layout_t *layout,
 				    const hsize_t *space_dim,
-				    const float split_ratios[], 
+				    const double split_ratios[], 
 				    const struct H5O_pline_t *pline,
 				    const struct H5O_fill_t *fill);
 __DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
