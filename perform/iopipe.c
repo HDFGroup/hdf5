@@ -7,7 +7,6 @@
  */
 
 /* See H5private.h for how to include headers */
-#undef NDEBUG
 #include "hdf5.h"
 
 #ifdef H5_HAVE_WINSOCK_H
@@ -16,36 +15,6 @@
 
 /*Winsock.h includes windows.h, due to the different value of
 WINVER, windows.h should be put before H5private.h. Kent yang 6/21/2001*/
-
-#include "H5private.h"
-
-#ifdef H5_STDC_HEADERS
-#   include <assert.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <string.h>
-#   include <stdlib.h>
-#endif
-
-#ifdef H5_HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
-#endif
-
-#if defined(H5_TIME_WITH_SYS_TIME)
-#   include <sys/time.h>
-#   include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#   include <sys/time.h>
-#else
-#   include <time.h>
-#endif
-
-#ifdef H5_HAVE_SYS_RESOURCE_H
-#   include <sys/resource.h>
-#endif
-
-
 
 #if defined (__MWERKS__)
 #ifdef H5_HAVE_SYS_TIMEB 
@@ -56,6 +25,7 @@ WINVER, windows.h should be put before H5private.h. Kent yang 6/21/2001*/
 #endif
 #endif /* __MWERKS__*/
 
+#include "H5private.h"
 
 #ifdef H5_HAVE_SYS_TIMEB 
 #include <sys/timeb.h>
@@ -347,7 +317,7 @@ printf("Before getrusage() call\n");
     for (i=0; i<nwrite; i++) {
 	putc (PROGRESS, stderr);
 	fflush (stderr);
-	offset = lseek (fd, 0, SEEK_SET);
+	offset = lseek (fd, (off_t)0, SEEK_SET);
 	assert (0==offset);
 	n = write (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
@@ -426,7 +396,7 @@ printf("Before getrusage() call\n");
     for (i=0; i<nread; i++) {
 	putc (PROGRESS, stderr);
 	fflush (stderr);
-	offset = lseek (fd, 0, SEEK_SET);
+	offset = lseek (fd, (off_t)0, SEEK_SET);
 	assert (0==offset);
 	n = read (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
