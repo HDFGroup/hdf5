@@ -17,10 +17,8 @@
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef WIN32
-#include <windows.h>
-#include <io.h>
-#endif
+
+
 
 #include "hdf5.h"
 

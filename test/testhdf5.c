@@ -140,9 +140,7 @@ main(int argc, char *argv[])
     int                     Cache = 1;
     uintn                   major, minor, release;
 
-#if defined __MWERKS__
-    argc = ccommand(&argv);
-#endif
+
 
 #if !(defined MAC || defined __MWERKS__ || defined SYMANTEC_C)
     /* Un-buffer the stdout and stderr */

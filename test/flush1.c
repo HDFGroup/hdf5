@@ -13,6 +13,14 @@
  */
 #include "h5test.h"
 
+
+#if defined __MWERKS__
+#include <abort_exit.h>
+# define EXIT(a) __exit(a)
+#else
+# define EXIT(a) _exit(a)
+#endif
+
 const char *FILENAME[] = {
     "flush",
     NULL

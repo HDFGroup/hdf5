@@ -207,7 +207,10 @@ test(fill_t fill_style, const double splits[],
     if ((mspace=H5Screate_simple(1, ch_size, ch_size))<0) goto error;
     if ((dset=H5Dcreate(file, "chunked", H5T_NATIVE_INT,
 			fspace, dcpl))<0) goto error;
+
+#if !defined( __MWERKS__)			
     if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;
+#endif  
 
     for (i=1; i<=cur_size[0]; i++) {
 
@@ -241,6 +244,10 @@ test(fill_t fill_style, const double splits[],
 	if (H5Dwrite(dset, H5T_NATIVE_INT, mspace, fspace, xfer, &i)<0) {
 	    goto error;
 	}
+
+#if defined( __MWERKS__)
+    if ((fd=open(FILE_NAME_1, O_RDONLY))<0) goto error;		
+#endif	 
 
 	/* Determine overhead */
 	if (verbose) {

@@ -207,7 +207,7 @@ test_tr1(hid_t file)
     if (H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE))<0) goto error;
     if (H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK))<0) goto error;
 
-#ifndef __WATCOMC__
+#if !defined (__WATCOMC__) || !defined(__MWERKS__)
     assert(sizeof(c_e1)==sizeof(int));
 #endif /* __WATCOMCC__ */
     if ((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1)))<0) goto error;

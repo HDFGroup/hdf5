@@ -13,7 +13,7 @@
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
 
-#if defined WIN32
+#if defined (WIN32) && !defined (__MWERKS__) 
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
@@ -145,7 +145,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, const uint8_t *p,
 	}
 	the_time -= tz.tz_minuteswest*60 - (tm.tm_isdst?3600:0);
     }
-#elif defined WIN32 
+#elif defined (WIN32) && !defined (__MWERKS__)
 	{
 
    struct timeb timebuffer;
