@@ -66,6 +66,8 @@ Support for new platforms, languages and compilers.
 =======================================
         - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran compiler
           version 8.1 Beta  
+          Use --disbale-shared --enable-static flags with configure when 
+          building HDF5 Fortran Library on MAC OSX.
 
 Bug Fixes since HDF5-1.6.1 release
 ==================================
