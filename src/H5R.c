@@ -739,7 +739,7 @@ H5Rget_obj_type(hid_t id, H5R_type_t ref_type, void *_ref)
     H5G_obj_t ret_value;
 
     FUNC_ENTER_API(H5Rget_obj_type, H5G_UNKNOWN);
-    H5TRACE3("Is","iRtx",id,ref_type,_ref);
+    H5TRACE3("Go","iRtx",id,ref_type,_ref);
 
     /* Check args */
     if (NULL == (loc = H5G_loc(id)))

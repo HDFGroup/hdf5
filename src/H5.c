@@ -1723,6 +1723,32 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 		break;
 		
+	    case 's':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5D_space_status_t space_status = va_arg(ap, H5D_space_status_t);
+		    switch (space_status) {
+		    case H5D_SPACE_STATUS_NOT_ALLOCATED:
+			fprintf (out, "H5D_SPACE_STATUS_NOT_ALLOCATED");
+			break;
+		    case H5D_SPACE_STATUS_PART_ALLOCATED:
+			fprintf (out, "H5D_SPACE_STATUS_PART_ALLOCATED");
+			break;
+		    case H5D_SPACE_STATUS_ALLOCATED:
+			fprintf (out, "H5D_SPACE_STATUS_ALLOCATED");
+			break;
+		    default:
+			fprintf (out, "%ld", (long)space_status);
+			break;
+		    }
+		}
+		break;
+		
 	    case 't':
 		if (ptr) {
 		    if (vp) {
@@ -1805,6 +1831,29 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 		break;
 
+	    case 't':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5E_type_t etype = va_arg (ap, H5E_type_t);
+		    switch (etype) {
+		    case H5E_MAJOR:
+			fprintf (out, "H5E_MAJOR");
+			break;
+		    case H5E_MINOR:
+			fprintf (out, "H5E_MINOR");
+			break;
+		    default:
+			fprintf (out, "%ld", (long)etype);
+			break;
+		    }
+		}
+		break;
+		
 	    default:
 		fprintf (out, "BADTYPE(E%c)", type[1]);
 		goto error;
@@ -1892,6 +1941,38 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			break;
 		    default:
 			fprintf (out, "%ld", (long)link_type);
+			break;
+		    }
+		}
+		break;
+
+	    case 'o':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5G_obj_t obj_type = va_arg (ap, H5G_obj_t);
+		    switch (obj_type) {
+		    case H5G_UNKNOWN:
+			fprintf (out, "H5G_UNKNOWN");
+			break;
+		    case H5G_LINK:
+			fprintf (out, "H5G_LINK");
+			break;
+		    case H5G_GROUP:
+			fprintf (out, "H5G_GROUP");
+			break;
+		    case H5G_DATASET:
+			fprintf (out, "H5G_DATASET");
+			break;
+		    case H5G_TYPE:
+			fprintf (out, "H5G_TYPE");
+			break;
+		    default:
+			fprintf (out, "%ld", (long)obj_type);
 			break;
 		    }
 		}
@@ -2853,6 +2934,19 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'Z':
 	    switch (type[1]) {
+                case 'c':
+                    if (ptr) {
+                        if (vp) {
+                            fprintf (out, "0x%lx", (unsigned long)vp);
+                        } else {
+                            fprintf(out, "NULL");
+                        }
+                    } else {
+                        H5Z_class_t *filter = va_arg (ap, H5Z_class_t*);
+                        fprintf (out, "0x%lx", (unsigned long)filter);
+                    }
+                    break;
+
                 case 'e':
                     if (ptr) {
                         if (vp) {

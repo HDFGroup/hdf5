@@ -295,7 +295,7 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_API(H5Tget_member_value, FAIL);
-    H5TRACE3("e","iIsx",type,membno,value);
+    H5TRACE3("e","iIux",type,membno,value);
 
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");

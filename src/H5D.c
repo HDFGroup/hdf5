@@ -963,6 +963,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     herr_t 	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Dget_space_status, FAIL)
+    H5TRACE2("e","i*Ds",dset_id,allocation);
 
     /* Check arguments */
     if(NULL==(dset=H5I_object_verify(dset_id, H5I_DATASET)))

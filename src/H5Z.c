@@ -213,6 +213,7 @@ H5Zregister(const H5Z_class_t *cls)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Zregister, FAIL)
+    H5TRACE1("e","Zc",cls);
 
     /* Check args */
     if (cls==NULL)

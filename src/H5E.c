@@ -672,6 +672,7 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
     hid_t       ret_value;      /* Return value */
     
     FUNC_ENTER_API(H5Ecreate_msg, FAIL)
+    H5TRACE3("i","iEts",class_id,msg_type,msg_str);
     
     /* Check arguments */
     if(msg_type!=H5E_MAJOR && msg_type!=H5E_MINOR)
@@ -864,6 +865,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     ssize_t      ret_value;     /* Return value */
 
     FUNC_ENTER_API(H5Eget_msg, FAIL)
+    H5TRACE4("Zs","i*Etsz",msg_id,type,msg_str,size);
     
     /* Get the message object */
     if((msg = H5I_object_verify(msg_id, H5I_ERROR_MSG))==NULL)

@@ -1244,12 +1244,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void** file_handle)
+H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
 {
     H5F_t               *file=NULL;
     herr_t              ret_value;
     
     FUNC_ENTER_API(H5Fget_vfd_handle, FAIL)
+    H5TRACE3("e","iix",file_id,fapl,file_handle);
 
     /* Check args */
     assert(file_handle);
@@ -4524,6 +4525,7 @@ H5Fget_freespace(hid_t file_id)
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Fget_freespace, FAIL)
+    H5TRACE1("Hs","i",file_id);
 
     /* Check args */
     if(NULL==(file=H5I_object_verify(file_id, H5I_FILE)))

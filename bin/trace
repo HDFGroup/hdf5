@@ -22,16 +22,21 @@ $Source = "";
                "H5D_fill_time_t"            => "Df",
                "H5D_fill_value_t"           => "DF",
                "H5D_layout_t"               => "Dl",
+               "H5D_space_status_t"         => "Ds",
                "H5FD_mpio_xfer_t"           => "Dt",
                "herr_t"                     => "e",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t*"               => "Ee",
+               "H5E_major_t"                => "i",
+               "H5E_minor_t"                => "i",
+               "H5E_type_t"                 => "Et",
                "H5F_close_degree_t"         => "Fd",
                "H5F_scope_t"                => "Fs",
                "H5FD_t*"                    => "x",
                "H5FD_class_t*"              => "x",
                "H5FD_stream_fapl_t*"        => "x",
                "H5G_link_t"                 => "Gl",
+               "H5G_obj_t"                  => "Go",
                "H5G_stat_t*"                => "Gs",
                "hsize_t"                    => "h",
                "hssize_t"                   => "Hs",
@@ -86,6 +91,7 @@ $Source = "";
                "H5Z_func_t"                 => "x",
                "H5Z_filter_func_t"          => "x",
                "size_t"                     => "z",
+               "H5Z_class_t*"               => "Zc",
                "H5Z_EDC_t"                  => "Ze",
                "H5Z_filter_t"               => "Zf",
                "ssize_t"                    => "Zs",
@@ -225,7 +231,7 @@ sub rewrite_func ($$$$$) {
     }
   } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
     # Replaced an H5TRACE macro
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*\(.*?\)[;])\n/"$1$2$trace"/es) {
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*\(.*?\);??)\n/"$1$2$trace"/es) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";

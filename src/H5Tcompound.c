@@ -99,7 +99,7 @@ H5Tget_member_offset(hid_t type_id, unsigned membno)
     size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_offset, 0);
-    H5TRACE2("z","iIs",type_id,membno);
+    H5TRACE2("z","iIu",type_id,membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
@@ -185,7 +185,7 @@ H5Tget_member_class(hid_t type_id, unsigned membno)
     H5T_class_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_member_class, H5T_NO_CLASS);
-    H5TRACE2("Tt","iIs",type_id,membno);
+    H5TRACE2("Tt","iIu",type_id,membno);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)

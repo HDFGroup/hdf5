@@ -559,7 +559,7 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     H5G_obj_t		ret_value;
     
     FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN);
-    H5TRACE2("Is","ih",loc_id,idx);
+    H5TRACE2("Go","ih",loc_id,idx);
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id)))
