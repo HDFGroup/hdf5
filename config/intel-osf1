@@ -9,7 +9,7 @@
 # This is for the ASCI RED TFLOPS machine
 
 # The default compiler is `cicc'
-if test "X-" =  "X-$CC"; then
+if test "X-" = "X-$CC"; then
     CC=cicc
     CC_BASENAME=cicc
 fi
