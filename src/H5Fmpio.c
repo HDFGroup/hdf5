@@ -32,6 +32,11 @@
  *
  *	H5F_mpio_read
  *		- always does independent read (not collective)
+ *		- One implementation of MPI/MPI-IO causes MPI_Get_count
+ *		  to return (incorrectly) a negative count.
+ *		  I added code to detect this, and a kludge to pretend
+ *		  that the number of bytes read is always equal to the number
+ *		  requested.  This kluge is activated by #ifdef MPI_KLUGE0202.
  *
  *	H5F_MPIOff_to_haddr and H5F_haddr_to_MPIOff
  *		- For now, we assume that MPI_Offset and haddr_t
@@ -345,12 +350,12 @@ H5F_mpio_close(H5F_low_t *lf)
 static herr_t
 H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 {
-    MPI_Offset              mpi_off, bytes_read;
+    MPI_Offset              mpi_off;
+    int                     size_i, bytes_read, n;
     MPI_Status              mpi_stat;
     int                     mpierr;
     char                    mpierrmsg[MPI_MAX_ERROR_STRING];
     int                     msglen;
-    size_t                  n, br;
 
     FUNC_ENTER(H5F_mpio_read, FAIL);
 #ifdef DEBUG_MPIO
@@ -363,10 +368,9 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 
     /* Read the data.  */
     mpi_off = H5F_haddr_to_MPIOff( *addr );
-    fprintf(stdout, "In H5F_mpio_read, before calling MPI_File_read_at\n" );
+    size_i = (int)size;
     mpierr = MPI_File_read_at( lf->u.mpio.f, mpi_off, (void*) buf,
-				(int) size, MPI_BYTE, &mpi_stat );
-    fprintf(stdout, "In H5F_mpio_read, after calling MPI_File_read_at\n" );
+				size_i, MPI_BYTE, &mpi_stat );
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
@@ -374,15 +378,36 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 
     /* How many bytes were actually read? */
     mpierr = MPI_Get_count( &mpi_stat, MPI_BYTE, &bytes_read );
+#ifdef DEBUG_MPIO
+    fprintf(stdout,
+	"In H5F_mpio_read after Get_count size_i=%d bytes_read=%d\n",
+	size_i, bytes_read );
+#endif
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
     }
 
+#ifdef MPI_KLUGE0202
+    /* KLUGE rky 980202 MPI_Get_count incorrectly returns negative count;
+       fake a complete read */
+    bytes_read = size_i;	/* KLUGE rky 980202 */
+#endif
+
+    if ((bytes_read<0) || (bytes_read > size_i)) {
+	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+			"MPI_Get_count returned invalid count" );
+    }
+
     /* read zeroes past the end of the file */
-    br = (size_t)bytes_read;
-    if ((n=(size-br)) > 0)
-        HDmemset( buf+br, 0, n);
+    if ((n=(size_i-bytes_read)) > 0) {
+#ifdef DEBUG_MPIO
+    fprintf(stdout,
+	"In H5F_mpio_read before HDmemset size_i=%d bytes_read=%d n=%d\n",
+	size_i, bytes_read, n );
+#endif
+        HDmemset( buf+bytes_read, 0, (size_t)n );
+    }
 
 #ifdef DEBUG_MPIO
     fprintf(stdout, "Leaving H5F_mpio_read\n" );
