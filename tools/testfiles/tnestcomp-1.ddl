@@ -6,12 +6,12 @@ GROUP "/" {
    DATASET "nested compound" {
       DATATYPE {
          {
-            H5T_IEEE_F64LE "re";
-            H5T_IEEE_F64LE "im";
+            H5T_IEEE_F64BE "re";
+            H5T_IEEE_F64BE "im";
          } "x";
          {
-            H5T_IEEE_F64LE "re";
-            H5T_IEEE_F64LE "im";
+            H5T_IEEE_F64BE "re";
+            H5T_IEEE_F64BE "im";
          } "y";
       } 
       DATASPACE { SIMPLE ( 5 ) / ( 5 ) } 
