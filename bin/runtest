@@ -188,6 +188,69 @@ CHECK_RSH()
 }
 
 
+# Wait for a file for at most number of minutes
+# $1--the file
+# $2--number of minutes
+# WAIT_STATUS set to:
+#	-1 if errors encountered
+#	0  if file found within time limit
+#	1  if file not found within time limit
+WAITFOR()
+{
+    wait_file=$1
+    nminutes=$2
+    if [ -z "$wait_file" -o ! "$nminutes" -ge 0 ]
+    then
+	echo "errors in argument of WAITFOR(): wait_file($1) or nminutes($2)"
+	WAIT_STATUS=-1
+	return
+    fi
+    while [ ! -f $wait_file ]; do
+	if [ $nminutes -gt 0 ]; then
+	    sleep 60			#sleep 1 minute
+	else
+	    WAIT_STATUS=1
+	    return
+	fi
+	nminutes=`expr $nminutes - 1`
+    done
+    WAIT_STATUS=0
+    return
+}
+
+
+# Wait till a file disappears for at most number of minutes.
+# Useful to wait till a lock is removed by another process.
+# $1--the file
+# $2--number of minutes
+# WAIT_STATUS set to:
+#	-1 if errors encountered
+#	0  if file disappears within time limit
+#	1  if file has not disappeared within time limit
+WAITTILL()
+{
+    wait_file=$1
+    nminutes=$2
+    if [ -z "$wait_file" -o ! "$nminutes" -ge 0 ]
+    then
+	echo "errors in argument of WAITTILL(): wait_file($1) or nminutes($2)"
+	WAIT_STATUS=-1
+	return
+    fi
+    while [ -f $wait_file ]; do
+	if [ $nminutes -gt 0 ]; then
+	    sleep 60			#sleep 1 minute
+	else
+	    WAIT_STATUS=1
+	    return
+	fi
+	nminutes=`expr $nminutes - 1`
+    done
+    WAIT_STATUS=0
+    return
+}
+
+
 # Run one snapshot test
 # $*--Types of test being run
 RUNSNAPTEST()
@@ -329,15 +392,17 @@ FLUSH_FILES()
 USAGE()
 {
 cat <<EOF
-Usage: runtest [-h] [-debug] [-r<version>] [-all] [<host> ...]
+Usage: runtest [-h] [-debug] [-r<version>] [-all] [-nocvs] [<host> ...]
     -h
 	print this help page
-    -r<version>
-	do runtest for <version>
     -debug
 	turn on debug mode
+    -r<version>
+	do runtest for <version>
     -all
 	launch tests for all pre-defined testing hosts
+    -nocvs
+	do not do cvs commands
     <host>
 	launch tests for <host>
     
@@ -384,6 +449,10 @@ while [ $# -gt 0 ]; do
 	-all)
 	    TESTHOST=$ALLHOSTS
 	    ;;
+	-nocvs)
+	    # do not do cvs commands
+	    NOCVS=nocvs
+	    ;;
 	-*) # Unknow option
 	    echo "Unknown option ($1)"
 	    USAGE
@@ -406,6 +475,7 @@ SNAPYARD=`cd $HOME/snapshots-hdf5${H5VERSTR} && /bin/pwd`
 LOGBASENAME=${SNAPYARD}/log/${HOSTNAME}
 FAILEDLOG=${SNAPYARD}/log/FAILED_LOG_${TODAY}
 CVSLOG=${SNAPYARD}/log/CVS_LOG_${TODAY}
+CVSLOG_LOCK=${SNAPYARD}/log/CVS_LOG_LOCK_${TODAY}
 # Snap Test Configuration file
 SNAPTESTCFG=${SNAPYARD}/snaptest.cfg
 
@@ -426,10 +496,16 @@ echo TEST_TYPES=$TEST_TYPES
 
 # Do a checkout if one has not been done today
 # Also check MANIFEST file
-if [ ! -f $CVSLOG ]; then
+echo NOCVS=$NOCVS
+if [ -z "$NOCVS" -a ! -f $CVSLOG ]; then
     echo Running CVS checkout with output saved in $CVSLOG
+exit -1
+    # Set CVS lock first
+    touch $CVSLOG_LOCK
     ($SNAPSHOT checkout ) >> $CVSLOG 2>&1
+    # Save error code and remove the lock
     errcode=$?
+    rm -f $CVSLOG_LOCK
     if [ $errcode -ne 0 ]; then
 	# test failed.
 	REPORT_ERR "****CVS checkout FAILED in $HOSTNAME****"
@@ -443,6 +519,20 @@ if [ ! -f $CVSLOG ]; then
 	REPORT_ERR "****MANIFEST check FAILED****"
     fi
     PRINT_BLANK
+else
+    # make sure the cvs update, if done by another host, has completed
+    WAITFOR $CVSLOG 30
+    if [ $WAIT_STATUS -ne 0 ]; then
+	errcode=$WAIT_STATUS
+	REPORT_ERR "****Time expired waiting CVS update to start****"
+	exit $errcode
+    fi
+    WAITTILL $CVSLOG_LOCK 10
+    if [ $WAIT_STATUS -ne 0 ]; then
+	errcode=$WAIT_STATUS
+	REPORT_ERR "****Time expired waiting CVS update to finish****"
+	exit $errcode
+    fi
 fi
 
 # we can use the version of script in SNAPYARD/current now
