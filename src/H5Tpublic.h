@@ -37,6 +37,23 @@
 #define H5T_BIGENDIAN       0
 #define H5T_LITTLEENDIAN    1
 
+/* Define the machine's architecture */
+/*
+WARNING!
+    This is _extremly_ crude is is only valid for very generic architectures,
+    anything with a wierd size of integer or wacky floating-point format will
+    _not_ work with this hack.  It needs to be replaced with Robb's much more
+    comprehensive code from H5detect.c. -QAK
+WARNING!
+*/
+#define H5T_ARCH_BIGENDIAN  0
+#define H5T_ARCH_LITTLEENDIAN  1
+#ifdef WORDS_BIGENDIAN
+#define H5T_ARCH_TYPE  H5T_ARCH_BIGENDIAN
+#else /* WORDS_BIGENDIAN */
+#define H5T_ARCH_TYPE  H5T_ARCH_LITTLEENDIAN
+#endif /* WORDS_BIGENDIAN */
+
 typedef struct {
     hatom_t base;           /* Basic datatype */
     uint8 len;              /* Length of base-type, in bytes */

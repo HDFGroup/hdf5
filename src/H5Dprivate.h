@@ -57,5 +57,7 @@ hatom_t H5D_access(hatom_t oid);
 hatom_t H5D_find_name(hatom_t owner_id, hobjtype_t type, const char *name);
 herr_t H5D_flush(hatom_t oid);
 herr_t H5D_release(hatom_t oid);
+/* in H5Dconv.c */
+herr_t H5D_convert_buf(void *dst,const void *src,uintn len,uintn size);
 
 #endif

@@ -387,6 +387,8 @@ done:
 herr_t H5Dread(hatom_t oid, hatom_t did, VOIDP buf)
 {
     H5D_dataset_t *dataset; /* dataset object to do I/O on */
+    void *readbuf;         /* pointer to buffer to write out */
+    uintn   free_buf=0;     /* if temporary conversion buffer needs to be free'd */
     uintn   toread;         /* number of bytes to read in */
     herr_t  ret_value = SUCCEED;
 
@@ -415,12 +417,24 @@ herr_t H5Dread(hatom_t oid, hatom_t did, VOIDP buf)
     else
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL);
 
-/* Check memory to disk datatype conversions, etc. */
-/* DO THIS! -QAK */
+    /* Check memory to disk datatype conversions, etc. */
+/* This is totally hacked up code, but I'm in a hurry. ;-/ -QAK */
+    if(dataset->type->dt.arch!=H5T_ARCH_TYPE)
+      {
+        if((readbuf=HDmalloc(toread))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+        free_buf=1;
+      } /* end if */
+    else
+        readbuf=buf;
+    
     
     /* Write the data out to disk */
-    if(H5F_block_read(dataset->file,dataset->data,toread,buf)==FAIL)
+    if(H5F_block_read(dataset->file,dataset->data,toread,readbuf)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL);
+    
+    if(free_buf!=0)
+        H5D_convert_buf(buf,readbuf,toread,dataset->type->dt.len);
 
 done:
   if(ret_value == FAIL)   
@@ -429,6 +443,8 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
+    if(free_buf!=0) /* check if we need to release the conversion buffer */
+        HDfree(readbuf);
 
     FUNC_LEAVE(ret_value);
 } /* end H5Dread() */
@@ -456,6 +472,8 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
 {
     H5D_dataset_t *dataset;         /* dataset object to do I/O on */
     uintn   towrite;        /* number of bytes to write out */
+    void *writebuf;         /* pointer to buffer to write out */
+    uintn   free_buf=0;     /* if temporary conversion buffer needs to be free'd */
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Dwrite, H5D_init_interface, FAIL);
@@ -488,11 +506,20 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
         if((dataset->data=H5MF_alloc(dataset->file,towrite))==FAIL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
 
-/* Check memory to disk datatype conversions, etc. */
-/* DO THIS! -QAK */
+    /* Check memory to disk datatype conversions, etc. */
+/* This is totally hacked up code, but I'm in a hurry. ;-/ -QAK */
+    if(dataset->type->dt.arch!=H5T_ARCH_TYPE)
+      {
+        if((writebuf=HDmalloc(towrite))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL);
+        H5D_convert_buf(writebuf,buf,towrite,dataset->type->dt.len);
+        free_buf=1;
+      } /* end if */
+    else
+        writebuf=buf;
     
     /* Write the data out to disk */
-    if(H5F_block_write(dataset->file,dataset->data,towrite,buf)==FAIL)
+    if(H5F_block_write(dataset->file,dataset->data,towrite,writebuf)==FAIL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL);
 
 done:
@@ -502,6 +529,8 @@ done:
     } /* end if */
 
     /* Normal function cleanup */
+    if(free_buf!=0) /* check if we need to release the conversion buffer */
+        HDfree(writebuf);
 
     FUNC_LEAVE(ret_value);
 } /* end H5Dwrite() */
