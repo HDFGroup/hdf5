@@ -35,13 +35,13 @@
 #define GOTOERROR(errcode)	{ ret_code = errcode; goto done; }
 #define GOTODONE		{ goto done; }
 #define ERRMSG(mesg) {                                                  \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                               \
+    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);                       \
     fprintf(stderr, "*** Assertion failed (%s) at line %4d in %s\n",    \
             mesg, (int)__LINE__, __FILE__);                             \
 }
 
 #define MSG(mesg) {                                     \
-    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);               \
+    fprintf(stderr, "Proc %d: ", pio_mpi_rank_g);       \
     fprintf(stderr, "(%s) at line %4d in %s\n",         \
             mesg, (int)__LINE__, __FILE__);             \
 }
@@ -93,13 +93,13 @@ enum {
 };
 
 /* Global variables */
-MPI_Comm	pio_comm_g;		/* Communicator to run the PIO       */
-int             pio_mpi_rank_g;   	/* MPI rank of pio_comm_g	     */
-int		pio_mpi_nprocs_g;	/* number of processes of pio_comm_g */
+MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
+int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
+int	        pio_mpi_nprocs_g;   /* number of processes of pio_comm_g    */
 
-static int	clean_file_g = -1;	/*whether to cleanup temporary test  */
-					/*files. -1 is not defined;	     */
-					/*0 is no cleanup; 1 is do cleanup   */
+static int	clean_file_g = -1;	/*whether to cleanup temporary test     */
+                                /*files. -1 is not defined;             */
+                                /*0 is no cleanup; 1 is do cleanup      */
 
 
 
@@ -152,7 +152,7 @@ results
 do_pio(parameters param)
 {
     /* return codes */
-    int		rc;             /*routine return code                   */
+    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     herr_t      ret_code = 0;   /*return code                           */
     results     res;
@@ -166,33 +166,34 @@ do_pio(parameters param)
     long        ndsets, nelmts;
     int         color;                  /*for communicator creation     */
     char        *buffer = NULL;         /*data buffer pointer           */
-    long	buf_size;		/*data buffer size in bytes     */
+    long        buf_size;               /*data buffer size in bytes     */
 
     /* HDF5 variables */
-    herr_t          hrc;                    /*HDF5 return code              */
+    herr_t          hrc;                /*HDF5 return code              */
 
     /* MPI variables */
     int             myrank, nprocs = 1;
 
     pio_comm_g = MPI_COMM_NULL;
 
-    /* parameters sanity check */
+    /* Sanity check parameters */
+
+    /* IO type */
     iot = param.io_type;
 
     switch (iot) {
     case MPIO:
-	fd.mpifd = MPI_FILE_NULL;
+        fd.mpifd = MPI_FILE_NULL;
         res.timers = pio_time_new(MPI_TIMER);
         break;
     case RAW:
-	fd.rawfd = -1;
-        res.timers = pio_time_new(SYS_TIMER);
-	break;
-    case PHDF5:
-	fd.h5fd = -1;
+        fd.rawfd = -1;
         res.timers = pio_time_new(SYS_TIMER);
         break;
-
+    case PHDF5:
+        fd.h5fd = -1;
+        res.timers = pio_time_new(SYS_TIMER);
+        break;
     default:
         /* unknown request */
         fprintf(stderr, "Unknown IO type request (%d)\n", iot);
@@ -202,7 +203,7 @@ do_pio(parameters param)
     nfiles = param.num_files;       /* number of files                      */
     ndsets = param.num_dsets;       /* number of datasets per file          */
     nelmts = param.num_elmts;       /* number of elements per dataset       */
-    maxprocs = param.max_num_procs; /* max number of mpi-processes to use   */
+    maxprocs = param.num_procs;     /* max number of mpi-processes to use   */
     buf_size = param.buf_size;
 
     if (nfiles < 0 ) {
@@ -295,7 +296,7 @@ buf_size=MIN(1024*1024, buf_size);
 
     for (nf = 1; nf <= nfiles; nf++) {
 	/*
-	 * Wirte performance measurement
+	 * Write performance measurement
 	 */
         /* Open file for write */
         char base_name[256];
@@ -329,15 +330,25 @@ fprintf(stderr, "filename=%s\n", fname);
 	 * Read performance measurement
 	 */
         /* Open file for read */
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fopen(iot, fname, &fd, PIO_READ);
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
+
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-	hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
-	        VRFY((hrc == SUCCESS), "do_read failed");
+        set_time(res.timers, HDF5_READ_FIXED_DIMS, START);
+        hrc = do_read(&fd, iot, ndsets, nelmts, buf_size, buffer);
+        set_time(res.timers, HDF5_READ_FIXED_DIMS, STOP);
+
+        VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, START);
         hrc = do_fclose(iot, &fd);
+        set_time(res.timers, HDF5_FILE_OPENCLOSE, STOP);
+
         VRFY((hrc == SUCCESS), "do_fclose failed");
+
         do_cleanupfile(iot, fname);
     }
 
@@ -349,26 +360,27 @@ done:
     /* no remove(fname) because that should have happened normally. */
     switch (iot) {
     case RAW:
-	if (fd.rawfd != -1)
-	    hrc = do_fclose(iot, &fd);
+        if (fd.rawfd != -1)
+            hrc = do_fclose(iot, &fd);
         break;
     case MPIO:
         if (fd.mpifd != MPI_FILE_NULL)
-	    hrc = do_fclose(iot, &fd);
+            hrc = do_fclose(iot, &fd);
         break;
     case PHDF5:
         if (fd.h5fd != -1)
-	    hrc = do_fclose(iot, &fd);
+            hrc = do_fclose(iot, &fd);
         break;
     }
 
     /* release MPI resources */
     if (pio_comm_g != MPI_COMM_NULL){
         mrc = MPI_Comm_free(&pio_comm_g);
-	if (mrc != MPI_SUCCESS) {
-	    fprintf(stderr, "MPI_Comm_free failed\n");
-	    ret_code = FAIL;
-	}
+
+        if (mrc != MPI_SUCCESS) {
+            fprintf(stderr, "MPI_Comm_free failed\n");
+            ret_code = FAIL;
+        }
     }
 
     /* release generic resources */
@@ -499,27 +511,27 @@ static herr_t
 do_write(file_descr *fd, iotype iot, long ndsets,
          long nelmts, long buf_size, void *buffer)
 {
-    int		ret_code = SUCCESS;
-    int		rc;             /*routine return code                   */
+    int         ret_code = SUCCESS;
+    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
     MPI_Offset	mpi_offset;
     MPI_Status	mpi_status;
-    long	ndset;
-    long	nelmts_towrite, nelmts_written;
-    char	dname[64];
-    off_t	dset_offset;          /*dataset offset in a file  */
-    off_t	file_offset;	    /*file offset of the next transfer */
-    long	dset_size;    /*one dataset size in bytes */
-    long	nelmts_in_buf;
-    long	elmts_begin;		/*first elmt this process transfer  */
-    long	elmts_count;		/*number of elmts this process transfer */
+    long        ndset;
+    long        nelmts_towrite, nelmts_written;
+    char        dname[64];
+    off_t       dset_offset;    /*dataset offset in a file              */
+    off_t       file_offset;    /*file offset of the next transfer      */
+    long        dset_size;      /*one dataset size in bytes             */
+    long        nelmts_in_buf;
+    long        elmts_begin;    /*first elmt this process transfer      */
+    long        elmts_count;    /*number of elmts this process transfer */
 
     /* HDF5 variables */
     herr_t          hrc;                    /*HDF5 return code              */
     hsize_t         h5dims[1];              /*dataset dim sizes             */
     hid_t           h5dset_space_id = -1;   /*dataset space ID              */
     hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t	    h5ds_id = -1;     /* dataset handle   */
+    hid_t           h5ds_id = -1;           /*dataset handle                */
 
 #if AKCDEBUG
 fprintf(stderr, "In do_write\n");
@@ -527,6 +539,7 @@ fprintf(stderr, "ndsets=%ld\n", ndsets);
 fprintf(stderr, "nelmts=%ld\n", nelmts);
 fprintf(stderr, "buffer size=%ld\n", buf_size);
 #endif
+
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * ELMT_SIZE;
     nelmts_in_buf = buf_size/ELMT_SIZE;
@@ -569,19 +582,19 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             break;
         }
 
-	/* Calculate the first element and how many elements this process
-	 * transfer.  First calculate the beginning element of this process 
-	 * and the next process.  Count of elements is the difference between
-	 * these two beginnings.  This way, it avoids any rounding errors.
-	 */
-	elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
-	if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1)){
-	    elmts_count = ((nelmts*1.0)/pio_mpi_nprocs_g*(pio_mpi_rank_g+1)) -
-			    elmts_begin;
-	}else{
-	    /* last process.  Take whatever are left */
-	    elmts_count = nelmts - elmts_begin;
-	}
+        /* Calculate the first element and how many elements this process
+         * transfer.  First calculate the beginning element of this process 
+         * and the next process.  Count of elements is the difference between
+         * these two beginnings.  This way, it avoids any rounding errors.
+         */
+        elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
+
+        if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
+            elmts_count = ((nelmts * 1.0) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1))
+                            - elmts_begin;
+        else
+            /* last process.  Take whatever are left */
+            elmts_count = nelmts - elmts_begin;
 
 #if AKCDEBUG
 fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
@@ -589,6 +602,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 #endif
     
         nelmts_written = 0 ;
+
         while (nelmts_written < elmts_count){
             nelmts_towrite = elmts_count - nelmts_written;
 
@@ -612,56 +626,60 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 
             /* Write */
             /* Calculate offset of write within a dataset/file */
-            switch (iot){
+            switch (iot) {
             case RAW:
-		file_offset = dset_offset +
-			    (elmts_begin + nelmts_written)*ELMT_SIZE;
+                file_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
+
 #if AKCDEBUG
 fprintf(stderr, "proc %d: writes %ld bytes at file-offset %ld\n",
-    pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, file_offset);
+        pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, file_offset);
 #endif
+
                 rc = RAWSEEK(fd->rawfd, file_offset);
-		VRFY((rc>=0), "RAWSEEK");
+                VRFY((rc>=0), "RAWSEEK");
                 rc = RAWWRITE(fd->rawfd, buffer, nelmts_towrite*ELMT_SIZE);
-		VRFY((rc==(nelmts_towrite*ELMT_SIZE)), "RAWWRITE");
+                VRFY((rc==(nelmts_towrite*ELMT_SIZE)), "RAWWRITE");
                 break;
 
             case MPIO:
-		mpi_offset = dset_offset +
-			    (elmts_begin + nelmts_written)*ELMT_SIZE;
+                mpi_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
+
 #if AKCDEBUG
 fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
-    pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, mpi_offset);
+        pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, mpi_offset);
 #endif
-		mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
-			nelmts_towrite*ELMT_SIZE, MPI_CHAR, &mpi_status);
-		VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
-		break;
+
+                mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
+                                        nelmts_towrite * ELMT_SIZE, MPI_CHAR,
+                                        &mpi_status);
+                VRFY((mrc==MPI_SUCCESS), "MPIO_WRITE");
+                break;
             case PHDF5:
-		/*set up the dset space id to select the segment to process */
-		{
-		    hsize_t block[1], stride[1], count[1];
-		    hssize_t start[1];
-		    
-		    start[0] = elmts_begin + nelmts_written;
-		    stride[0] = block[0] = nelmts_towrite;
-		    count[0] = 1;
-		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-				    start, stride, count, block); 
-		    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                /*set up the dset space id to select the segment to process */
+                {
+                    hsize_t block[1], stride[1], count[1];
+                    hssize_t start[1];
+                    
+                    start[0] = elmts_begin + nelmts_written;
+                    stride[0] = block[0] = nelmts_towrite;
+                    count[0] = 1;
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+                                              start, stride, count, block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-		    /*setup the memory space id too.  Only start is different */
-		    start[0] = 0;
-		    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-				    start, stride, count, block); 
-		    VRFY((hrc >= 0), "H5Sset_hyperslab");
-		}
-		MPI_Barrier(pio_comm_g);
+                    /*setup the memory space id too.  Only start is different */
+                    start[0] = 0;
+                    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
+                                              start, stride, count, block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                }
 
-		/* set write time here */
-		hrc = H5Dwrite(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
-			    h5dset_space_id, H5P_DEFAULT, buffer);
-		VRFY((hrc >= 0), "H5Dwrite");
+                MPI_Barrier(pio_comm_g);
+
+                /* set write time here */
+                hrc = H5Dwrite(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
+                               h5dset_space_id, H5P_DEFAULT, buffer);
+                VRFY((hrc >= 0), "H5Dwrite");
                 break;
             }
 
@@ -708,7 +726,6 @@ done:
     return ret_code;
 }
 
-
 /*
  * Function:    do_read
  * Purpose:     read the required amount of data from the file.
@@ -720,27 +737,27 @@ static herr_t
 do_read(file_descr *fd, iotype iot, long ndsets,
          long nelmts, long buf_size, void *buffer /*out*/)
 {
-    int		ret_code = SUCCESS;
-    int		rc;             /*routine return code                   */
+    int         ret_code = SUCCESS;
+    int         rc;             /*routine return code                   */
     int         mrc;            /*MPI return code                       */
-    MPI_Offset	mpi_offset;
-    MPI_Status	mpi_status;
-    long	ndset;
-    long	nelmts_toread, nelmts_read;
-    char	dname[64];
-    off_t	dset_offset;          /*dataset offset in a file  */
-    off_t	file_offset;	    /*file offset of the next transfer */
-    long	dset_size;    /*one dataset size in bytes */
-    long	nelmts_in_buf;
-    long	elmts_begin;		/*first elmt this process transfer  */
-    long	elmts_count;		/*number of elmts this process transfer */
+    MPI_Offset  mpi_offset;
+    MPI_Status  mpi_status;
+    long        ndset;
+    long        nelmts_toread, nelmts_read;
+    char        dname[64];
+    off_t       dset_offset;    /*dataset offset in a file              */
+    off_t       file_offset;	/*file offset of the next transfer      */
+    long        dset_size;      /*one dataset size in bytes             */
+    long        nelmts_in_buf;
+    long        elmts_begin;    /*first elmt this process transfer      */
+    long        elmts_count;    /*number of elmts this process transfer */
 
     /* HDF5 variables */
-    herr_t          hrc;                    /*HDF5 return code              */
-    hsize_t         h5dims[1];              /*dataset dim sizes             */
-    hid_t           h5dset_space_id = -1;   /*dataset space ID              */
-    hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
-    hid_t	    h5ds_id = -1;     /* dataset handle   */
+    herr_t      hrc;            /*HDF5 return code                      */
+    hsize_t     h5dims[1];      /*dataset dim sizes                     */
+    hid_t       h5dset_space_id = -1;   /*dataset space ID              */
+    hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
+    hid_t       h5ds_id = -1;   /*dataset handle                        */
 
 #if AKCDEBUG
 fprintf(stderr, "In do_read\n");
@@ -748,6 +765,7 @@ fprintf(stderr, "ndsets=%ld\n", ndsets);
 fprintf(stderr, "nelmts=%ld\n", nelmts);
 fprintf(stderr, "buffer size=%ld\n", buf_size);
 #endif
+
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * ELMT_SIZE;
     nelmts_in_buf = buf_size/ELMT_SIZE;
@@ -766,7 +784,6 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
     }
 
     for (ndset = 1; ndset <= ndsets; ++ndset) {
-
         /* Calculate dataset offset within a file */
 
         /* create dataset */
@@ -788,88 +805,94 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             break;
         }
 
-	/* Calculate the first element and how many elements this process
-	 * transfer.  First calculate the beginning element of this process 
-	 * and the next process.  Count of elements is the difference between
-	 * these two beginnings.  This way, it avoids any rounding errors.
-	 */
-	elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
-	if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1)){
-	    elmts_count = ((nelmts*1.0)/pio_mpi_nprocs_g*(pio_mpi_rank_g+1)) -
-			    elmts_begin;
-	}else{
-	    /* last process.  Take whatever are left */
-	    elmts_count = nelmts - elmts_begin;
-	}
+        /*
+         * Calculate the first element and how many elements this process
+         * transfer.  First calculate the beginning element of this process 
+         * and the next process.  Count of elements is the difference between
+         * these two beginnings.  This way, it avoids any rounding errors.
+         */
+        elmts_begin = (nelmts*1.0)/pio_mpi_nprocs_g*pio_mpi_rank_g;
+
+        if (pio_mpi_rank_g < (pio_mpi_nprocs_g - 1))
+            elmts_count = ((nelmts * 1.0) / pio_mpi_nprocs_g * (pio_mpi_rank_g + 1)) -
+                                elmts_begin;
+        else
+            /* last process.  Take whatever are left */
+            elmts_count = nelmts - elmts_begin;
 
 #if AKCDEBUG
 fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
-	pio_mpi_rank_g, elmts_begin, elmts_count);
+        pio_mpi_rank_g, elmts_begin, elmts_count);
 #endif
     
         nelmts_read = 0 ;
+
         while (nelmts_read < elmts_count){
             nelmts_toread = elmts_count - nelmts_read;
 
-            if (elmts_count - nelmts_read >= nelmts_in_buf) {
+            if (elmts_count - nelmts_read >= nelmts_in_buf)
                 nelmts_toread = nelmts_in_buf;
-            } else {
+            else
                 /* last read of a partial buffer */
                 nelmts_toread = elmts_count - nelmts_read;
-            }
 
             /* read */
             /* Calculate offset of read within a dataset/file */
             switch (iot){
             case RAW:
-		file_offset = dset_offset +
-			    (elmts_begin + nelmts_read)*ELMT_SIZE;
+                file_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
+
 #if AKCDEBUG
 fprintf(stderr, "proc %d: read %ld bytes at file-offset %ld\n",
-    pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, file_offset);
+        pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, file_offset);
 #endif
+
                 rc = RAWSEEK(fd->rawfd, file_offset);
-		VRFY((rc>=0), "RAWSEEK");
+                VRFY((rc>=0), "RAWSEEK");
                 rc = RAWREAD(fd->rawfd, buffer, nelmts_toread*ELMT_SIZE);
-		VRFY((rc==(nelmts_toread*ELMT_SIZE)), "RAWREAD");
+                VRFY((rc==(nelmts_toread*ELMT_SIZE)), "RAWREAD");
                 break;
 
             case MPIO:
-		mpi_offset = dset_offset +
-			    (elmts_begin + nelmts_read)*ELMT_SIZE;
+                mpi_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
+
 #if AKCDEBUG
 fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
     pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, mpi_offset);
 #endif
-		mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
-			nelmts_toread*ELMT_SIZE, MPI_CHAR, &mpi_status);
-		VRFY((mrc==MPI_SUCCESS), "MPIO_read");
-		break;
+
+                mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
+                                       nelmts_toread*ELMT_SIZE, MPI_CHAR,
+                                       &mpi_status);
+                VRFY((mrc==MPI_SUCCESS), "MPIO_read");
+                break;
+
             case PHDF5:
-		/*set up the dset space id to select the segment to process */
-		{
-		    hsize_t block[1], stride[1], count[1];
-		    hssize_t start[1];
-		    
-		    start[0] = elmts_begin + nelmts_read;
-		    stride[0] = block[0] = nelmts_toread;
-		    count[0] = 1;
-		    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
-				    start, stride, count, block); 
-		    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                /*set up the dset space id to select the segment to process */
+                {
+                    hsize_t block[1], stride[1], count[1];
+                    hssize_t start[1];
+                    
+                    start[0] = elmts_begin + nelmts_read;
+                    stride[0] = block[0] = nelmts_toread;
+                    count[0] = 1;
+                    hrc = H5Sselect_hyperslab(h5dset_space_id, H5S_SELECT_SET,
+                                              start, stride, count, block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
 
-		    /*setup the memory space id too.  Only start is different */
-		    start[0] = 0;
-		    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
-				    start, stride, count, block); 
-		    VRFY((hrc >= 0), "H5Sset_hyperslab");
-		}
-		MPI_Barrier(pio_comm_g);
+                    /*setup the memory space id too.  Only start is different */
+                    start[0] = 0;
+                    hrc = H5Sselect_hyperslab(h5mem_space_id, H5S_SELECT_SET,
+                                              start, stride, count, block); 
+                    VRFY((hrc >= 0), "H5Sset_hyperslab");
+                }
 
-		/* set read time here */
-		hrc = H5Dread(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
-			    h5dset_space_id, H5P_DEFAULT, buffer);
-		VRFY((hrc >= 0), "H5Dread");
+                MPI_Barrier(pio_comm_g);
+
+                /* set read time here */
+                hrc = H5Dread(h5ds_id, H5T_NATIVE_INT, h5mem_space_id,
+                              h5dset_space_id, H5P_DEFAULT, buffer);
+                VRFY((hrc >= 0), "H5Dread");
                 break;
             }
 
@@ -880,7 +903,7 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
                 register int i;
 
                 for (i = 0; i < nelmts_towrite; ++i)
-		    /* TO BE IMPLEMENTED */
+                    /* TO BE IMPLEMENTED */
                     ;
             }
 #endif
@@ -928,7 +951,6 @@ done:
     return ret_code;
 }
 
-
 /*
  * Function:    do_fopen
  * Purpose:     Open the specified file.
@@ -945,11 +967,10 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
     switch (iot) {
     case RAW:
-        if (flags & (PIO_CREATE | PIO_WRITE)) {
+        if (flags & (PIO_CREATE | PIO_WRITE))
             fd->rawfd = RAWCREATE(fname);
-        } else {
+        else
             fd->rawfd = RAWOPEN(fname, O_RDONLY);
-        }
 
         if (fd->rawfd < 0 ) {
             fprintf(stderr, "Raw File Open failed(%s)\n", fname);
@@ -960,30 +981,32 @@ do_fopen(iotype iot, char *fname, file_descr *fd /*out*/, int flags)
 
     case MPIO:
         if (flags & (PIO_CREATE | PIO_WRITE)) {
-	    MPI_File_delete(fname, MPI_INFO_NULL);
+            MPI_File_delete(fname, MPI_INFO_NULL);
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_CREATE | MPI_MODE_RDWR,
                                 MPI_INFO_NULL, &fd->mpifd);
-	    if (mrc != MPI_SUCCESS) {
-		fprintf(stderr, "MPI File Open failed(%s)\n", fname);
-		GOTOERROR(FAIL);
-	    }
-	    /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
-	    /*filesize , set size to 0 explicitedly.	*/
-	    mrc = MPI_File_set_size(fd->mpifd, 0);
-	    if (mrc != MPI_SUCCESS) {
-		fprintf(stderr, "MPI_File_set_size failed\n");
-		GOTOERROR(FAIL);
-	    }
 
+            if (mrc != MPI_SUCCESS) {
+                fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                GOTOERROR(FAIL);
+            }
+
+            /*since MPI_File_open with MPI_MODE_CREATE does not truncate  */
+            /*filesize , set size to 0 explicitedly.	*/
+            mrc = MPI_File_set_size(fd->mpifd, 0);
+
+            if (mrc != MPI_SUCCESS) {
+                fprintf(stderr, "MPI_File_set_size failed\n");
+                GOTOERROR(FAIL);
+            }
         } else {
             mrc = MPI_File_open(pio_comm_g, fname, MPI_MODE_RDONLY,
                                 MPI_INFO_NULL, &fd->mpifd);
-	    if (mrc != MPI_SUCCESS) {
-		fprintf(stderr, "MPI File Open failed(%s)\n", fname);
-		GOTOERROR(FAIL);
-	    }
-        }
 
+            if (mrc != MPI_SUCCESS) {
+                fprintf(stderr, "MPI File Open failed(%s)\n", fname);
+                GOTOERROR(FAIL);
+            }
+        }
 
         break;
 
@@ -1095,21 +1118,21 @@ static void
 do_cleanupfile(iotype iot, char *fname)
 {
     if (pio_mpi_rank_g != 0)
-	return;
+        return;
     
     if (clean_file_g == -1)
-	clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
+        clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
     
     if (clean_file_g){
-	switch (iot){
-	case RAW:
-	    remove(fname);
-	    break;
-	case MPIO:
-	case PHDF5:
-	    MPI_File_delete(fname, MPI_INFO_NULL);
-	    break;
-	}
+        switch (iot){
+        case RAW:
+            remove(fname);
+            break;
+        case MPIO:
+        case PHDF5:
+            MPI_File_delete(fname, MPI_INFO_NULL);
+            break;
+        }
     }
 }
 #endif /* H5_HAVE_PARALLEL */
