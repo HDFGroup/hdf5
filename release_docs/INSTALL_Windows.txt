@@ -428,37 +428,37 @@ STEP 1: Building HDF5 libraries and tools
                hdf5_f90cstubdll.lib- the HDF5 C and Fortran stub DLL
                                      export library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_cstubdll\debug - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_cstubdll\debug - 
           
                libtest_cstubddll.dll- the HDF5 Fortran test C and
                                       Fortran stub DLL
                libtest_cstubddll.lib- the HDF5 Fortran test C and
                                       Fortran stub DLL export library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_cstubdll\release - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_cstubdll\release - 
           
                libtest_cstubdll.dll- the HDF5 Fortran test C and
                                      Fortran stub DLL
                libtest_cstubdll.lib- the HDF5 Fortran test C and
                                      Fortran stub DLL export library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_fortran\debug - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\debug - 
           
                libtest_fortrand.lib- the HDF5 Fortran test static
                                      library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_fortran\release - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\release - 
           
                libtest_fortran.lib- the HDF5 Fortran test static
                                     library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_fortrandll\debug - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortrandll\debug - 
           
                libtest_fortranddll.dll- the HDF5 Fortran test DLL
                libtest_fortranddll.lib- the HDF5 Fortran test DLL
                                         export library
 
-            c:\MyHDFstuff\hdf5\proj\libtest_fortran\release - 
+            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\release - 
           
                libtest_fortrandll.dll- the HDF5 Fortran test DLL
                libtest_fortrandll.lib- the HDF5 Fortran test DLL
