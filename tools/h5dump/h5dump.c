@@ -1122,7 +1122,7 @@ dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
 	    dump_oid(attr_id);
 
 	if (display_data || display_attr_data)
-	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, 0);
+	    dump_data(attr_id, ATTRIBUTE_DATA, NULL, display_ai);
 
 	H5Tclose(type);
 	H5Sclose(space);
@@ -1888,8 +1888,18 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     int         depth;
     int         stdindent = COL;	/* should be 3 */
 
+   
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
+    /* print the matrix indices */
+    outputformat->pindex=pindex;
+    if (outputformat->pindex)
+    {
+     outputformat->idx_fmt   = "(%s): ";
+     outputformat->idx_n_fmt = "%lu";
+     outputformat->idx_sep   = ",";
+     outputformat->line_pre  = "%s";
+    }
 
     indent += COL;
 
@@ -1948,19 +1958,6 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
             outputformat = &string_dataformat;
         }
 
-
-  /* print the matrix indices */
- outputformat->pindex=pindex;
- if (outputformat->pindex)
- {
-  outputformat->idx_fmt = "(%s):";
-  outputformat->idx_n_fmt = "%lu";
-  outputformat->idx_sep = ",";
-  outputformat->line_pre  = "        %s ";
-  outputformat->line_1st  = "        %s ";
-  outputformat->line_cont = "        %s ";
-  depth=0;
- }
 
 	status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
         H5Tclose(f_type);

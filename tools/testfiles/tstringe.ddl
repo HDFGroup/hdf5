@@ -11,7 +11,7 @@ DATASET "string" {
       }
    DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
    DATA {
-        (0): "quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"
+   (0): "quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"
    }
 }
 }

@@ -408,6 +408,10 @@ h5tools_ncols(const char *s)
  *      Robb Matzke, 1999-09-29
  *	If a new prefix is printed then the current element number is set back
  *	to zero.
+ *      pvn, 2004-06-30
+ * Added support for printing array indices: 
+ *  the indentation is printed before the prefix (printed one indentation
+ *  level before) 
  *-------------------------------------------------------------------------
  */
 static void
@@ -415,6 +419,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
                       h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
+    h5tools_str_t str; /*temporary for indentation */
     size_t templength = 0;
     int i, indentlevel = 0;
 	
@@ -422,12 +427,13 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 	return;
  
     memset(&prefix, 0, sizeof(h5tools_str_t));
+    memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-	fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-	fputs(OPT(info->line_sep, ""), stream);
+	    fputs(OPT(info->line_suf, ""), stream);
+     putc('\n', stream);
+	    fputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -447,6 +453,14 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 	indentlevel = ctx->default_indent_level;
     }
 
+    /* when printing array indices, print the indentation before the prefix
+       the prefix is printed one indentation level before */
+    if (info->pindex) {
+     for (i = 0; i < indentlevel-1; i++){
+      fputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+     }
+    }
+
     if (elmtno == 0 && secnum == 0 && info->line_1st)
         fputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
     else if (secnum && info->line_cont)
@@ -457,7 +471,9 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++){
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+        /*we already made the indent for the array indices case */
+        if (!info->pindex)
+         fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
         templength += h5tools_str_len(&prefix);
     }
 
@@ -467,6 +483,7 @@ h5tools_simple_prefix(FILE *stream, const h5dump_t *info,
 
     /* Free string */
     h5tools_str_close(&prefix);
+    h5tools_str_close(&str);
 }
 
 /*-------------------------------------------------------------------------
