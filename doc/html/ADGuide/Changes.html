@@ -119,25 +119,36 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 	  <dt>Fortran subroutines:
           <dd>The following Fortran90 subroutines are new for Release 1.6.3 
 	      and are documented in the 
-              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference 
+                    Manual</cite></a>.
               <table border="0">
               <tr>
-                <td align="left" valign="top">New Fortran90 subroutines corresponding 
-                    to the new C functions listed above:<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<code>new_fortran_function_here</code><br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5zget_filter_info_f</code>
-                    </td>
+                <td align="left" valign="top" colspan="2">New Fortran90 
+                    subroutines corresponding to the new C functions 
+                    listed above:<br>
+                </td>
+              </tr><tr>
+                <td align="left" valign="top">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5fget_name_f</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5fget_filesize_f</code>
+                </td>
                 <td align="left" valign="top"> 
-                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5iget_file_id_f</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5premove_filter_f</code><br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>h5zget_filter_info_f</code>
+                </td>
               </tr>
               </table>    
 
               <table border="0">
               <tr>
-                <td align="left" valign="top">New Fortran90 subroutines corresponding   
-                    to C functions from prior releases:<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;<code>new_fortran_function_here</code><br>
+                <td align="left" valign="top">New Fortran90 subroutines 
+                    corresponding to C functions from prior releases:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;None<br>
+<!--
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>new_fortran_here</code><br>
                     &nbsp;&nbsp;&nbsp;&nbsp;<code>last_new_fortran_here</code>
+-->
                     </td>
                 <td align="left" valign="top"> 
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -1675,7 +1686,7 @@ V1.4.0
 Describes HDF5 Release 1.6.3, September 2004
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 14 September 2004 
+Last modified: 21 September 2004 
 <!-- hhmts end -->
 
 </body>
