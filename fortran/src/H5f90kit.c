@@ -69,12 +69,12 @@ HD5f2cstring(_fcd fdesc, int len)
     return cstr;
 }   /* HD5f2cstring */
 
-/* ---------------------------- HDpackFstring ----------------------------- */
+/* ---------------------------- HD5packFstring ----------------------------- */
 /*
 NAME
-   HDpackFstring -- convert a C string into a Fortran string
+   HD5packFstring -- convert a C string into a Fortran string
 USAGE
-   int HDpackFstring(src, dest, len)
+   int HD5packFstring(src, dest, len)
    char * src;          IN:  source string
    char * dest;         OUT: destination
    int   len;          IN:  length of string
@@ -90,7 +90,7 @@ DESCRIPTION
 
 ---------------------------------------------------------------------------*/
 int 
-HDpackFstring(char *src, char *dest, int len)
+HD5packFstring(char *src, char *dest, int len)
 {
     int        sofar;
 
@@ -101,5 +101,5 @@ HDpackFstring(char *src, char *dest, int len)
         *dest++ = ' ';
 
     return 0;
-}	/* HDpackFstring */
+}	/* HD5packFstring */
 

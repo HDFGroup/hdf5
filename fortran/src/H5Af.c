@@ -439,7 +439,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-      HDpackFstring(c_buf, _fcdtocp(buf), (int)c_bufsize);
+      HD5packFstring(c_buf, _fcdtocp(buf), (int)c_bufsize);
       HDfree(c_buf);
       ret_value = (int_f)c_size;
       return ret_value;

@@ -1245,8 +1245,8 @@ nh5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, h
      if (ret < 0) return ret_value;
      *meta_plist = c_meta_plist;
      *raw_plist = c_raw_plist;
-     HDpackFstring(c_meta_ext, _fcdtocp(meta_ext), strlen(c_meta_ext));  
-     HDpackFstring(c_raw_ext, _fcdtocp(raw_ext), strlen(c_raw_ext));  
+     HD5packFstring(c_meta_ext, _fcdtocp(meta_ext), strlen(c_meta_ext));  
+     HD5packFstring(c_raw_ext, _fcdtocp(raw_ext), strlen(c_raw_ext));  
     
      ret_value = 0;
      return ret_value;
@@ -1500,7 +1500,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
      *filter_id = c_filter;
      *cd_nelmts = c_cd_nelmts;
      *flags = c_flags;
-     HDpackFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
  
      for (i = 0; i < c_cd_nelmts; i++)
           cd_values[i] = (int_f)c_cd_values[i];
@@ -1632,7 +1632,7 @@ nh5pget_external_c(hid_t_f *prp_id,int*idx, size_t_f* name_size, _fcd name, int_
 
      *offset = (int_f)c_offset;
      *bytes = (hsize_t_f)size;
-     HDpackFstring(c_name, _fcdtocp(name), strlen(c_name)); 
+     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name)); 
     
      HDfree(c_name);
      ret_value = 0;

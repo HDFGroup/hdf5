@@ -165,7 +165,7 @@ nh5gget_obj_info_idx_c
       * Convert C name to FORTRAN and place it in the given buffer
       */
      c_obj_namelen = *obj_namelen;
-     HDpackFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);        
+     HD5packFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);        
      if (c_obj_name) HDfree(c_obj_name);
      if (c_name) HDfree(c_name);
 
@@ -419,7 +419,7 @@ nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _f
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
-  HDpackFstring(c_value, _fcdtocp(value), (int)*size);
+  HD5packFstring(c_value, _fcdtocp(value), (int)*size);
 
   if(c_value) HDfree(c_value);
   if(c_name) HDfree(c_name);
@@ -529,7 +529,7 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
   /*
    *  Convert C name to FORTRAN and place it in the given buffer
    */
-  HDpackFstring(c_comment, _fcdtocp(comment), (int)*bufsize);
+  HD5packFstring(c_comment, _fcdtocp(comment), (int)*bufsize);
 
   if(c_name) HDfree(c_name);
   if(c_comment) HDfree(c_comment);

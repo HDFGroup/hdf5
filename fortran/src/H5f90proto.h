@@ -4,7 +4,7 @@
 #include "H5Git.h"
 __DLL__ int HD5c2fstr(char *str, int len);
 __DLL__ char * HD5f2cstring (_fcd fdesc, int len);
-__DLL__ int HDpackFstring(char *src, char *dest, int len);
+__DLL__ int HD5packFstring(char *src, char *dest, int len);
 
 /*
  *  Functions from H5Ff.c
