@@ -1,9 +1,11 @@
 #! /usr/local/bin/perl -w
 require 5.003;
+use Cwd;
 
-$hdr = "../src/H5public.h";
-$bak = "../src/H5public.h~";
-$tmp = "../src/H5public.$$";
+($cwd)=(cwd()=~m#(.*?hdf5)/.*#)
+$hdr = "$cwd/src/H5public.h";
+$bak = "$cwd/src/H5public.h~";
+$tmp = "$cwd/src/H5public.$$";
 
 # Open files
 open OLD, $hdr or die "cannot read $hdr";
