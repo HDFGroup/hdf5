@@ -456,11 +456,15 @@ static struct long_options l_opts[] = {
     { "datatyp", require_arg, 't' },
     { "dataty", require_arg, 't' },
     { "datat", require_arg, 't' },
-    { "family", require_arg, 'f' },
-    { "famil", require_arg, 'f' },
-    { "fami", require_arg, 'f' },
-    { "fam", require_arg, 'f' },
-    { "fa", require_arg, 'f' },
+    { "filedriver", require_arg, 'f' },
+    { "filedrive", require_arg, 'f' },
+    { "filedriv", require_arg, 'f' },
+    { "filedri", require_arg, 'f' },
+    { "filedr", require_arg, 'f' },
+    { "filed", require_arg, 'f' },
+    { "file", require_arg, 'f' },
+    { "fil", require_arg, 'f' },
+    { "fi", require_arg, 'f' },
     { "group", require_arg, 'g' },
     { "grou", require_arg, 'g' },
     { "gro", require_arg, 'g' },
@@ -592,22 +596,22 @@ usage(const char *prog)
     fflush(stdout);
     fprintf(stdout, "\
 usage: %s [OPTIONS] file\n\
-   OPTIONS\n\
-      -h, --help          Print a usage message and exit\n\
-      -B, --bootblock     Print the content of the boot block\n\
-      -H, --header        Print the header only; no data is displayed\n\
-      -i, --object-ids    Print the object ids\n\
-      -V, --version       Print version number and exit\n\
-      -a P, --attribute=P Print the specified attribute\n\
-      -d P, --dataset=P   Print the specified dataset\n\
-      -f D, --family=D    Specify which driver to open the file with\n\
-      -g P, --group=P     Print the specified group and all members\n\
-      -l P, --soft-link=P Print the value(s) of the specified soft link\n\
-      -o F, --output=F    Output raw data into file F\n\
-      -t P, --datatype=P  Print the specified named data type\n\
-      -w N, --width=N     Set the number of columns of output\n\
-      -x, --xml           Output in XML\n\
-      -D U, --xml-dtd=U   Use the DTD at U\n\
+  OPTIONS\n\
+     -h, --help           Print a usage message and exit\n\
+     -B, --bootblock      Print the content of the boot block\n\
+     -H, --header         Print the header only; no data is displayed\n\
+     -i, --object-ids     Print the object ids\n\
+     -V, --version        Print version number and exit\n\
+     -a P, --attribute=P  Print the specified attribute\n\
+     -d P, --dataset=P    Print the specified dataset\n\
+     -f D, --filedriver=D Specify which driver to open the file with\n\
+     -g P, --group=P      Print the specified group and all members\n\
+     -l P, --soft-link=P  Print the value(s) of the specified soft link\n\
+     -o F, --output=F     Output raw data into file F\n\
+     -t P, --datatype=P   Print the specified named data type\n\
+     -w N, --width=N      Set the number of columns of output\n\
+     -x, --xml            Output in XML\n\
+     -D U, --xml-dtd=U    Use the DTD at U\n\
 \n\
  Subsetting is available by using the following options with a dataset\n\
  attribute. Subsetting is done by selecting a hyperslab from the data.\n\
