@@ -1,0 +1,36 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 2001 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/TechNotes
+
+TRACE=perl $(top_srcdir)/bin/trace
+
+# Temporary files
+MOSTLYCLEAN=
+
+# Public doc files (to be installed)...
+PUB_DOCS=BigDataSmMach.html ChStudy_1000x1000.gif ChStudy_250x250.gif      \
+         ChStudy_499x499.gif ChStudy_5000x1000.gif ChStudy_500x500.gif     \
+         ChStudy_p1.gif ChunkingStudy.html CodeReview.html                 \
+         ExternalFiles.html FreeLists.html H4-H5Compat.html HeapMgmt.html  \
+         IOPipe.html LibMaint.html MemoryMgmt.html MoveDStruct.html        \
+         NamingScheme.html ObjectHeader.html RawDStorage.html              \
+         SWControls.html SymbolTables.html ThreadSafeLibrary.html VFL.html \
+         VFLfunc.html Version.html openmp-hdf5.c openmp-hdf5.html          \
+         pipe1.gif pipe2.gif pipe3.gif pipe4.gif pipe5.gif version.gif
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=ChStudy_p1.obj pipe1.obj pipe2.obj pipe3.obj pipe4.obj pipe5.obj
+
+@CONCLUDE@

@@ -1,0 +1,28 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 2001 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+top_srcdir=@top_srcdir@
+top_builddir=../../..
+srcdir=@srcdir@
+VPATH=.:@srcdir@
+@COMMENCE@
+
+# Subdirectories in build-order (not including `examples')
+SUBDIRS=
+DOCDIR=$(docdir)/hdf5/Graphics
+
+TRACE=perl $(top_srcdir)/bin/trace
+
+# Temporary files
+MOSTLYCLEAN=
+
+# Public doc files (to be installed)...
+PUB_DOCS=C++.gif FORTRAN.gif Java.gif OtherAPIs.gif
+
+# Other doc files (not to be installed)...
+PRIVATE_DOCS=
+
+@CONCLUDE@
