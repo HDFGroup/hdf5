@@ -71,7 +71,10 @@
  *
  *-------------------------------------------------------------------------
  */
+
 #define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 
 /* Packages needed by this file... */
 #include <H5private.h>
@@ -79,6 +82,7 @@
 #include <H5Bprivate.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
+#include <H5Fpkg.h>         /*file access                             */
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>

@@ -13,6 +13,7 @@
  *		pointed-to message and the pointed-to message is stored in
  *		the global heap.
  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>

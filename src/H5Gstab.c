@@ -7,9 +7,11 @@
  *
  */
 #define H5G_PACKAGE
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Fpkg.h>         /*file access                             */
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>
 #include <H5MMprivate.h>

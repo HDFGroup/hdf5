@@ -22,6 +22,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Bprivate.h>		/* B-tree subclass names	  	*/
 #include <H5Dprivate.h>		/* Datasets				*/
 #include <H5Eprivate.h>		/* Error handling		  	*/
+#include <H5Fprivate.h>		/* Files		  	*/
 #include <H5FDprivate.h>	/* File drivers				*/
 #include <H5FLprivate.h>	/* Free Lists	  */
 #include <H5MMprivate.h>	/* Memory management			*/
@@ -317,7 +318,7 @@ H5Pcreate(H5P_class_t type)
             src = &H5D_create_dflt;
             break;
         case H5P_DATA_XFER:
-            src = &H5F_xfer_dflt;
+            src = &H5D_xfer_dflt;
             break;
         case H5P_MOUNT:
             src = &H5F_mount_dflt;
@@ -442,7 +443,7 @@ H5P_close(void *_plist)
 {
     H5P_t           *plist=(H5P_t *)_plist;
     H5F_access_t	*fa_list = &(plist->u.faccess);
-    H5F_xfer_t		*dx_list = &(plist->u.dxfer);
+    H5D_xfer_t		*dx_list = &(plist->u.dxfer);
     H5D_create_t	*dc_list = &(plist->u.dcreate);
     
     FUNC_ENTER (H5P_close, FAIL);
@@ -657,7 +658,7 @@ H5P_copy (H5P_class_t type, const void *src)
     const H5D_create_t	*dc_src = NULL;
     H5D_create_t	*dc_dst = NULL;
     H5F_access_t	*fa_dst = NULL;
-    H5F_xfer_t		*dx_dst = NULL;
+    H5D_xfer_t		*dx_dst = NULL;
     
     FUNC_ENTER (H5P_copy, NULL);
     
@@ -676,7 +677,7 @@ H5P_copy (H5P_class_t type, const void *src)
             break;
 
         case H5P_DATA_XFER:
-            size = sizeof(H5F_xfer_t);
+            size = sizeof(H5D_xfer_t);
             break;
 
         case H5P_MOUNT:
@@ -740,7 +741,7 @@ H5P_copy (H5P_class_t type, const void *src)
             break;
         
         case H5P_DATA_XFER:
-            dx_dst = (H5F_xfer_t*)dst;
+            dx_dst = (H5D_xfer_t*)dst;
 
             if (dx_dst->driver_id>=0) {
                 H5I_inc_ref(dx_dst->driver_id);
@@ -1662,7 +1663,7 @@ herr_t
 H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info)
 {
     H5F_access_t	*fapl=NULL;
-    H5F_xfer_t		*dxpl=NULL;
+    H5D_xfer_t		*dxpl=NULL;
     
     FUNC_ENTER(H5Pset_driver, FAIL);
     H5TRACE3("e","iix",plist_id,driver_id,driver_info);
@@ -1741,7 +1742,7 @@ hid_t
 H5Pget_driver(hid_t plist_id)
 {
     H5F_access_t	*fapl=NULL;
-    H5F_xfer_t		*dxpl=NULL;
+    H5D_xfer_t		*dxpl=NULL;
     hid_t		ret_value=-1;
 
     FUNC_ENTER (H5Pget_driver, FAIL);
@@ -1792,7 +1793,7 @@ void *
 H5Pget_driver_info(hid_t plist_id)
 {
     H5F_access_t	*fapl=NULL;
-    H5F_xfer_t		*dxpl=NULL;
+    H5D_xfer_t		*dxpl=NULL;
     void		*ret_value=NULL;
 
     FUNC_ENTER(H5Pget_driver_info, NULL);
@@ -1953,7 +1954,7 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
 herr_t
 H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_buffer, FAIL);
     H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
@@ -1997,7 +1998,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
 size_t
 H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_buffer, 0);
     H5TRACE3("z","ixx",plist_id,tconv,bkg);
@@ -2045,7 +2046,7 @@ H5Pget_buffer(hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
 herr_t
 H5Pset_hyper_cache(hid_t plist_id, unsigned cache, unsigned limit)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_hyper_cache, FAIL);
     H5TRACE3("e","iIuIu",plist_id,cache,limit);
@@ -2083,7 +2084,7 @@ herr_t
 H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 		   unsigned *limit/*out*/)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_hyper_cache, FAIL);
     H5TRACE3("e","ixx",plist_id,cache,limit);
@@ -2126,7 +2127,7 @@ H5Pget_hyper_cache(hid_t plist_id, unsigned *cache/*out*/,
 herr_t
 H5Pset_preserve(hid_t plist_id, hbool_t status)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
     H5TRACE2("e","ib",plist_id,status);
@@ -2164,7 +2165,7 @@ H5Pset_preserve(hid_t plist_id, hbool_t status)
 int
 H5Pget_preserve(hid_t plist_id)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_preserve, FAIL);
     H5TRACE1("Is","i",plist_id);
@@ -2483,7 +2484,7 @@ herr_t
 H5Pget_btree_ratios(hid_t plist_id, double *left/*out*/, double *middle/*out*/,
 		    double *right/*out*/)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","ixxx",plist_id,left,middle,right);
@@ -2533,7 +2534,7 @@ herr_t
 H5Pset_btree_ratios(hid_t plist_id, double left, double middle,
 		    double right)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pget_btree_ratios, FAIL);
     H5TRACE4("e","iddd",plist_id,left,middle,right);
@@ -2840,7 +2841,7 @@ herr_t
 H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc_func,
         void *alloc_info, H5MM_free_t free_func, void *free_info)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER(H5Pset_vlen_mem_manager, FAIL);
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);
@@ -2882,7 +2883,7 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
 			H5MM_free_t *free_func/*out*/,
 			void **free_info/*out*/)
 {
-    H5F_xfer_t		*plist = NULL;
+    H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER(H5Pget_vlen_mem_manager, FAIL);
     H5TRACE5("e","ixxxx",plist_id,alloc_func,alloc_info,free_func,free_info);

@@ -16,11 +16,13 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>		/* Generic Functions */
 #include <H5Iprivate.h>		/* ID Functions */
 #include <H5Dprivate.h>		/* Datasets */
 #include <H5Eprivate.h>		/* Error handling */
-#include <H5Fprivate.h>		/* Files */
+#include <H5Fpkg.h>		/* Files */
 #include <H5Gprivate.h>		/* Groups */
 #include <H5HGprivate.h>    /* Global Heaps */
 #include <H5MMprivate.h>    /* Memory Management */

@@ -17,6 +17,7 @@
  *
  *-------------------------------------------------------------------------
  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
@@ -85,7 +86,7 @@ H5O_cont_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 		       "memory allocation failed");
     }
     H5F_addr_decode(f, &p, &(cont->addr));
-    H5F_decode_length(f, p, cont->size);
+    H5F_DECODE_LENGTH(f, p, cont->size);
 
     FUNC_LEAVE((void *) cont);
 }
@@ -119,7 +120,7 @@ H5O_cont_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 
     /* encode */
     H5F_addr_encode(f, &p, cont->addr);
-    H5F_encode_length(f, p, cont->size);
+    H5F_ENCODE_LENGTH(f, p, cont->size);
 
     FUNC_LEAVE(SUCCEED);
 }

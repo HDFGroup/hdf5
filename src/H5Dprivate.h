@@ -22,6 +22,7 @@
 #include <H5private.h>
 #include <H5Fprivate.h>		/*for the H5F_t type			     */
 #include <H5Gprivate.h>		/*symbol tables				     */
+#include <H5MMpublic.h>		/*for H5MM_allocate_t and H5MM_free_t types  */
 #include <H5Oprivate.h>		/*object Headers			     */
 #include <H5Sprivate.h>		/*for the H5S_t type			     */
 #include <H5Tprivate.h>		/*for the H5T_t type			     */
@@ -50,9 +51,32 @@ typedef struct H5D_create_t {
     H5O_pline_t		pline;		/*data filter pipeline		     */
 } H5D_create_t;
 
+/* Data transfer property list */
+typedef struct H5D_xfer_t {
+    size_t		buf_size;	/*max temp buffer size		     */
+    void		*tconv_buf;	/*type conversion buffer or null     */
+    void		*bkg_buf;	/*background buffer or null	     */
+    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
+    double		split_ratios[3];/*B-tree node splitting ratios	     */
+    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
+    uintn       	block_limit;    /*largest hyperslab block to cache   */
+    H5MM_allocate_t 	vlen_alloc; 	/*VL datatype allocation function    */
+    void		*alloc_info;    /*VL datatype allocation information */
+    H5MM_free_t		vlen_free;      /*VL datatype free function	     */
+    void		*free_info;	/*VL datatype free information	     */
+    hid_t		driver_id;	/*File driver ID		     */
+    void		*driver_info;	/*File driver specific information   */
+#ifdef COALESCE_READS
+    uintn               gather_reads;   /*coalesce single reads into a read  */
+                                        /*transaction                        */
+#endif
+} H5D_xfer_t;
+
 typedef struct H5D_t H5D_t;
 
+/* library variables */
 __DLLVAR__ const H5D_create_t H5D_create_dflt;
+__DLLVAR__ H5D_xfer_t H5D_xfer_dflt;
 
 /* Functions defined in H5D.c */
 __DLL__ herr_t H5D_init(void);

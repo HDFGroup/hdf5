@@ -15,6 +15,7 @@
 #include <H5private.h>		/*library functions			*/
 #include <H5Eprivate.h>		/*error handling			*/
 #include <H5Fprivate.h>		/*files					*/
+#include <H5FDprivate.h>	/*file driver				  */
 #include <H5FDsec2.h>       /* Sec2 file driver */
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MMprivate.h>    /* Memory allocation */

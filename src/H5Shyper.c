@@ -7,14 +7,18 @@
  *
  * Purpose:	Hyperslab selection data space I/O functions.
  */
+
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+
 #include <H5private.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
+#include <H5Fprivate.h>
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>
 #include <H5MMprivate.h>
 #include <H5Pprivate.h>
-#include <H5Sprivate.h>
+#include <H5Spkg.h>
 #include <H5Vprivate.h>
 
 /* Interface initialization */
@@ -585,13 +589,13 @@ H5S_hyper_fread (intn dim, H5S_hyper_io_info_t *io_info)
     size_t i;                   /* Counters */
     intn j;
     size_t num_read=0;          /* Number of elements read */
-    const H5F_xfer_t *xfer_parms;/* Data transfer property list */
+    const H5D_xfer_t *xfer_parms;/* Data transfer property list */
 
     FUNC_ENTER (H5S_hyper_fread, 0);
 
     assert(io_info);
     if (H5P_DEFAULT==io_info->dxpl_id) {
-	xfer_parms = &H5F_xfer_dflt;
+	xfer_parms = &H5D_xfer_dflt;
     } else {
 	xfer_parms = H5I_object(io_info->dxpl_id);
 	assert(xfer_parms);
@@ -934,17 +938,19 @@ H5S_hyper_fread_opt (H5F_t *f, const struct H5O_layout_t *layout,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
 {
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];        /* Hyperslab size */
-    hssize_t zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset on disk */
+    hsize_t	slab[H5O_LAYOUT_NDIMS];         /* Hyperslab size */
     hsize_t	tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary block count */
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     uint8_t	*buf=(uint8_t *)_buf;   /* Alias for pointer arithmetic */
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
+    hsize_t	acc;	/* Accumulator */
+    size_t	buf_off;  /* Buffer offset for copying memory */
     intn i;         /* Counters */
     intn   	ndims;      /* Number of dimensions of dataset */
     uintn actual_read;      /* The actual number of elements to read in */
+    uintn actual_bytes;     /* The actual number of bytes to copy */
     size_t num_read=0;      /* Number of elements read */
 
     FUNC_ENTER (H5S_hyper_fread_opt, 0);
@@ -965,15 +971,13 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
 
     /* Set the rank of the fastest changing dimension */
     fast_dim=file_space->extent.u.simple.rank-1;
-
-    /* Set up the hyperslab and 'zero' arrays */
     ndims=file_space->extent.u.simple.rank;
-    /* initialize hyperslab size and offset in memory buffer */
-    for(i=0; i<(ndims+1); i++) {
-        hsize[i]=1;     /* hyperslab size is 1, except for last element */
-        zero[i]=0;      /* memory offset is 0 */
+
+    /* initialize row sizes for each dimension */
+    for(i=(ndims-1),acc=1; i>=0; i--) {
+        slab[i]=acc*elmt_size;
+        acc*=file_space->extent.u.simple.size[i];
     } /* end for */
-    hsize[ndims] = elmt_size;
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
@@ -987,9 +991,7 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Make certain that we don't read too many */
         actual_read=MIN(leftover,nelmts);
-
-        /* Set the hyperslab size in the fastest changing dimension to read in */
-        hsize[fast_dim]=actual_read;
+        actual_bytes=actual_read*elmt_size;
 
         /* Copy the location of the point to get */
         HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
@@ -999,9 +1001,13 @@ printf("%s: Check 1.0\n",FUNC);
         for(i=0; i<ndims; i++)
             offset[i] += file_space->select.offset[i];
 
-        /* Read in the rest of the sequence, if possible */
-        if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize,
-             hsize, zero, offset, buf/*out*/)<0) {
+        /* Compute the initial buffer offset */
+        for(i=0,buf_off=0; i<ndims; i++)
+            buf_off+=offset[i]*slab[i];
+
+        /* Read in the rest of the sequence */
+        if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+            elmt_size, actual_bytes, 0, buf_off, buf/*out*/)<0) {
             HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
         }
 
@@ -1053,9 +1059,15 @@ printf("%s: Check 2.0\n",FUNC);
             tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
+        /* Compute the initial buffer offset */
+        for(i=0,buf_off=0; i<ndims; i++)
+            buf_off+=offset[i]*slab[i];
+
         /* Set the number of elements to read each time */
         actual_read=file_space->select.sel_info.hslab.diminfo[fast_dim].block;
-        hsize[fast_dim]=actual_read;
+
+        /* Set the number of actual bytes */
+        actual_bytes=actual_read*elmt_size;
 #ifdef QAK
 printf("%s: actual_read=%d\n",FUNC,(int)actual_read);
 for(i=0; i<file_space->extent.u.simple.rank; i++)
@@ -1071,7 +1083,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Check if we are running out of room in the buffer */
             if((actual_read+num_read)>nelmts) {
                 actual_read=nelmts-num_read;
-                hsize[fast_dim]=actual_read;
+                actual_bytes=actual_read*elmt_size;
             } /* end if */
 
 #ifdef QAK
@@ -1080,9 +1092,9 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: tmp_count[%d]=%d, offset[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)offset[i]);
 #endif /* QAK */
 
-            /* Read in the sequence, if possible */
-            if (H5F_arr_read(f, dxpl_id, layout, pline, fill, efl, hsize,
-                 hsize, zero, offset, buf/*out*/)<0) {
+            /* Read in the sequence */
+            if (H5F_seq_read(f, dxpl_id, layout, pline, fill, efl, file_space,
+                elmt_size, actual_bytes, 0, buf_off, buf/*out*/)<0) {
                 HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
             }
 
@@ -1103,10 +1115,12 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Check for partial block read! */
                     if(actual_read<file_space->select.sel_info.hslab.diminfo[fast_dim].block) {
                         offset[temp_dim]+=actual_read;
+                        buf_off+=actual_bytes;
                         break;
                     } /* end if */
                     else {
                         offset[temp_dim]+=file_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
+                        buf_off+=slab[temp_dim]*file_space->select.sel_info.hslab.diminfo[temp_dim].stride;
                         tmp_count[temp_dim]++;
                     } /* end else */
 
@@ -1116,11 +1130,16 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
                         offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+
+                        /* Re-compute the initial buffer offset */
+                        for(i=0,buf_off=0; i<ndims; i++)
+                            buf_off+=offset[i]*slab[i];
                     } /* end else */
                 } /* end if */
                 else {
                     /* Move to the next row in the curent dimension */
                     offset[temp_dim]++;
+                    buf_off+=slab[temp_dim];
                     tmp_block[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
@@ -1129,6 +1148,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     else {
                         /* Move to the next block in the current dimension */
                         offset[temp_dim]+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block);
+                        buf_off+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
                         tmp_block[temp_dim]=0;
                         tmp_count[temp_dim]++;
 
@@ -1139,6 +1159,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                             tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
                             tmp_block[temp_dim]=0;
                             offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+
+                            /* Re-compute the initial buffer offset */
+                            for(i=0,buf_off=0; i<ndims; i++)
+                                buf_off+=offset[i]*slab[i];
                         }
                     } /* end else */
                 } /* end else */
@@ -1273,13 +1297,13 @@ H5S_hyper_fwrite (intn dim, H5S_hyper_io_info_t *io_info)
     size_t i;                   /* Counters */
     intn j;
     size_t num_written=0;          /* Number of elements read */
-    const H5F_xfer_t *xfer_parms;	/* Data transfer properties */
+    const H5D_xfer_t *xfer_parms;	/* Data transfer properties */
 
     FUNC_ENTER (H5S_hyper_fwrite, 0);
 
     assert(io_info);
     if (H5P_DEFAULT==io_info->dxpl_id) {
-	xfer_parms = &H5F_xfer_dflt;
+	xfer_parms = &H5D_xfer_dflt;
     } else {
 	xfer_parms = H5I_object(io_info->dxpl_id);
 	assert(xfer_parms);
@@ -1434,18 +1458,20 @@ H5S_hyper_fwrite_opt (H5F_t *f, const struct H5O_layout_t *layout,
 		 const H5S_t *file_space, H5S_sel_iter_t *file_iter,
 		 size_t nelmts, hid_t dxpl_id, const void *_buf)
 {
-    hsize_t	hsize[H5O_LAYOUT_NDIMS];        /* Hyperslab size */
-    hssize_t zero[H5O_LAYOUT_NDIMS];		/*zero			*/
     hssize_t offset[H5O_LAYOUT_NDIMS];      /* Offset on disk */
+    hsize_t	slab[H5O_LAYOUT_NDIMS];         /* Hyperslab size */
     hsize_t	tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary block count */
     hsize_t	tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block offset */
     const uint8_t	*buf=(const uint8_t *)_buf;   /* Alias for pointer arithmetic */
     intn fast_dim;  /* Rank of the fastest changing dimension for the dataspace */
     intn temp_dim;  /* Temporary rank holder */
+    hsize_t	acc;	/* Accumulator */
+    size_t	buf_off;  /* Buffer offset for copying memory */
     intn i;         /* Counters */
     intn   	ndims;      /* Number of dimensions of dataset */
-    uintn actual_write;      /* The actual number of elements to read in */
-    size_t num_write=0;      /* Number of elements read */
+    uintn actual_write;     /* The actual number of elements to read in */
+    uintn actual_bytes;     /* The actual number of bytes to copy */
+    size_t num_write=0;     /* Number of elements read */
 
     FUNC_ENTER (H5S_hyper_fwrite_opt, 0);
 
@@ -1465,15 +1491,13 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
 
     /* Set the rank of the fastest changing dimension */
     fast_dim=file_space->extent.u.simple.rank-1;
-
-    /* Set up the hyperslab and 'zero' arrays */
     ndims=file_space->extent.u.simple.rank;
-    /* initialize hyperslab size and offset in memory buffer */
-    for(i=0; i<(int)(ndims+1); i++) {
-        hsize[i]=1;     /* hyperslab size is 1, except for last element */
-        zero[i]=0;      /* memory offset is 0 */
+
+    /* initialize row sizes for each dimension */
+    for(i=(ndims-1),acc=1; i>=0; i--) {
+        slab[i]=acc*elmt_size;
+        acc*=file_space->extent.u.simple.size[i];
     } /* end for */
-    hsize[ndims] = elmt_size;
 
     /* Check if we stopped in the middle of a sequence of elements */
     if((file_iter->hyp.pos[fast_dim]-file_space->select.sel_info.hslab.diminfo[fast_dim].start)%file_space->select.sel_info.hslab.diminfo[fast_dim].stride!=0) {
@@ -1487,9 +1511,7 @@ printf("%s: Check 1.0\n",FUNC);
 
         /* Make certain that we don't write too many */
         actual_write=MIN(leftover,nelmts);
-
-        /* Set the hyperslab size in the fastest changing dimension to write in */
-        hsize[fast_dim]=actual_write;
+        actual_bytes=actual_write*elmt_size;
 
         /* Copy the location of the point to get */
         HDmemcpy(offset, file_iter->hyp.pos,ndims*sizeof(hssize_t));
@@ -1499,10 +1521,14 @@ printf("%s: Check 1.0\n",FUNC);
         for(i=0; i<ndims; i++)
             offset[i] += file_space->select.offset[i];
 
-        /* Read in the rest of the sequence, if possible */
-        if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, hsize,
-             hsize, zero, offset, buf)<0) {
-            HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "write error");
+        /* Compute the initial buffer offset */
+        for(i=0,buf_off=0; i<ndims; i++)
+            buf_off+=offset[i]*slab[i];
+
+        /* Read in the rest of the sequence */
+        if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+            elmt_size, actual_bytes, 0, buf_off, buf)<0) {
+            HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
         }
 
         /* Increment the offset of the buffer */
@@ -1553,9 +1579,15 @@ printf("%s: Check 2.0\n",FUNC);
             tmp_block[i] = (file_iter->hyp.pos[i]-file_space->select.sel_info.hslab.diminfo[i].start)/file_space->select.sel_info.hslab.diminfo[i].stride;
         } /* end for */
 
+        /* Compute the initial buffer offset */
+        for(i=0,buf_off=0; i<ndims; i++)
+            buf_off+=offset[i]*slab[i];
+
         /* Set the number of elements to write each time */
         actual_write=file_space->select.sel_info.hslab.diminfo[fast_dim].block;
-        hsize[fast_dim]=actual_write;
+
+        /* Set the number of actual bytes */
+        actual_bytes=actual_write*elmt_size;
 #ifdef QAK
 printf("%s: actual_write=%d\n",FUNC,(int)actual_write);
 for(i=0; i<file_space->extent.u.simple.rank; i++)
@@ -1571,7 +1603,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
             /* Check if we are running out of room in the buffer */
             if((actual_write+num_write)>nelmts) {
                 actual_write=nelmts-num_write;
-                hsize[fast_dim]=actual_write;
+                actual_bytes=actual_write*elmt_size;
             } /* end if */
 
 #ifdef QAK
@@ -1580,10 +1612,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
     printf("%s: tmp_count[%d]=%d, offset[%d]=%d\n",FUNC,(int)i,(int)tmp_count[i],(int)i,(int)offset[i]);
 #endif /* QAK */
 
-            /* Read in the sequence, if possible */
-            if (H5F_arr_write(f, dxpl_id, layout, pline, fill, efl, hsize,
-                 hsize, zero, offset, buf)<0) {
-                HRETURN_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "write error");
+            /* Read in the sequence */
+            if (H5F_seq_write(f, dxpl_id, layout, pline, fill, efl, file_space,
+                elmt_size, actual_bytes, 0, buf_off, buf)<0) {
+                HRETURN_ERROR(H5E_DATASPACE, H5E_WRITEERROR, 0, "write error");
             }
 
             /* Increment the offset of the buffer */
@@ -1603,10 +1635,12 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     /* Check for partial block write! */
                     if(actual_write<file_space->select.sel_info.hslab.diminfo[fast_dim].block) {
                         offset[temp_dim]+=actual_write;
+                        buf_off+=actual_bytes;
                         break;
                     } /* end if */
                     else {
                         offset[temp_dim]+=file_space->select.sel_info.hslab.diminfo[temp_dim].stride;    /* reset the offset in the fastest dimension */
+                        buf_off+=slab[temp_dim]*file_space->select.sel_info.hslab.diminfo[temp_dim].stride;
                         tmp_count[temp_dim]++;
                     } /* end else */
 
@@ -1616,11 +1650,16 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     else {
                         tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
                         offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+
+                        /* Re-compute the initial buffer offset */
+                        for(i=0,buf_off=0; i<ndims; i++)
+                            buf_off+=offset[i]*slab[i];
                     } /* end else */
                 } /* end if */
                 else {
                     /* Move to the next row in the curent dimension */
                     offset[temp_dim]++;
+                    buf_off+=slab[temp_dim];
                     tmp_block[temp_dim]++;
 
                     /* If this block is still in the range of blocks to output for the dimension, break out of loop */
@@ -1629,6 +1668,7 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                     else {
                         /* Move to the next block in the current dimension */
                         offset[temp_dim]+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block);
+                        buf_off+=(file_space->select.sel_info.hslab.diminfo[temp_dim].stride-file_space->select.sel_info.hslab.diminfo[temp_dim].block)*slab[temp_dim];
                         tmp_block[temp_dim]=0;
                         tmp_count[temp_dim]++;
 
@@ -1639,6 +1679,10 @@ for(i=0; i<file_space->extent.u.simple.rank; i++)
                             tmp_count[temp_dim]=0; /* reset back to the beginning of the line */
                             tmp_block[temp_dim]=0;
                             offset[temp_dim]=file_space->select.sel_info.hslab.diminfo[temp_dim].start+file_space->select.offset[temp_dim];
+
+                            /* Re-compute the initial buffer offset */
+                            for(i=0,buf_off=0; i<ndims; i++)
+                                buf_off+=offset[i]*slab[i];
                         }
                     } /* end else */
                 } /* end else */
@@ -1922,7 +1966,7 @@ H5S_hyper_mread_opt (const void *_buf, size_t elmt_size,
     uintn actual_bytes;     /* The actual number of bytes to copy */
     size_t num_read=0;      /* Number of elements read */
 
-    FUNC_ENTER (H5S_hyper_fread_opt, 0);
+    FUNC_ENTER (H5S_hyper_mread_opt, 0);
 
 #ifdef QAK
 printf("%s: Called!\n",FUNC);

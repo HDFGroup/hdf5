@@ -18,13 +18,14 @@
  *-------------------------------------------------------------------------
  */
 #define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library				*/
 #include <H5ACprivate.h>	/*cache					*/
 #include <H5Bprivate.h>		/*B-link trees				*/
 #include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*file access				*/
+#include <H5Fpkg.h>		/*file access				*/
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gpkg.h>		/*me					*/
 #include <H5HLprivate.h>	/*local heap				*/
@@ -159,7 +160,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
     assert(raw);
     assert(key);
 
-    H5F_decode_length(f, raw, key->offset);
+    H5F_DECODE_LENGTH(f, raw, key->offset);
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -191,7 +192,7 @@ H5G_node_encode_key(H5F_t *f, H5B_t UNUSED *bt, uint8_t *raw, void *_key)
     assert(raw);
     assert(key);
 
-    H5F_encode_length(f, raw, key->offset);
+    H5F_ENCODE_LENGTH(f, raw, key->offset);
 
     FUNC_LEAVE(SUCCEED);
 }

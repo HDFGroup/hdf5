@@ -76,6 +76,32 @@ const H5D_create_t	H5D_create_dflt = {
     {0, 0, NULL} 		/* No filters in pipeline		*/
 };
 
+/* Default data transfer property list */
+/* Not const anymore because some of the VFL drivers modify this struct - QAK */
+H5D_xfer_t	H5D_xfer_dflt = {
+    1024*1024,			/*Temporary buffer size			    */
+    NULL,			/*Type conversion buffer or NULL	    */
+    NULL, 			/*Background buffer or NULL		    */
+    H5T_BKG_NO,			/*Type of background buffer needed	    */
+    {0.1, 0.5, 0.9},		/*B-tree node splitting ratios		    */
+#ifndef H5_HAVE_PARALLEL
+    1,				/*Cache the hyperslab blocks		    */
+#else
+    0,				/*Don't cache the hyperslab blocks	    */
+#endif /* H5_HAVE_PARALLEL */
+    0,              		/*No limit on hyperslab block size to cache */
+    NULL,                   	/*Use malloc() for VL data allocations	    */
+    NULL,                   	/*No information needed for malloc() calls  */
+    NULL,                   	/*Use free() for VL data frees		    */
+    NULL,                   	/*No information needed for free() calls    */
+    -2,				/*See H5Pget_driver()			    */
+    NULL,			/*No file driver-specific information yet   */
+#ifdef COALESCE_READS
+    0,                          /*coalesce single reads into a read         */
+                                /*transaction                               */
+#endif
+};
+
 /* Interface initialization? */
 static intn interface_initialize_g = 0;
 #define INTERFACE_INIT H5D_init_interface
@@ -1407,7 +1433,7 @@ H5D_open_oid(H5G_entry_t *ent)
      * This is especially important for parallel I/O where the B-tree must
      * be fully populated before I/O can happen.
      */
-    if ((dataset->ent.file->intent & H5F_ACC_RDWR) &&
+    if ((H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR) &&
 	H5D_CHUNKED==dataset->layout.type) {
         if (H5D_init_storage(dataset, space)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
@@ -1526,7 +1552,7 @@ herr_t
 H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
-    const H5F_xfer_t	   *xfer_parms = NULL;
+    const H5D_xfer_t	   *xfer_parms = NULL;
     hssize_t    	nelmts;			/*number of elements	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1566,7 +1592,7 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
-        xfer_parms = &H5F_xfer_dflt;
+        xfer_parms = &H5D_xfer_dflt;
     } else if (H5P_DATA_XFER != H5P_get_class(dxpl_id) ||
 	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
@@ -1902,7 +1928,7 @@ herr_t
 H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
-    const H5F_xfer_t	   *xfer_parms = NULL;
+    const H5D_xfer_t	   *xfer_parms = NULL;
     hssize_t		nelmts;			/*total number of elmts	*/
     size_t		smine_start;		/*strip mine start loc	*/
     size_t		n, smine_nelmts;	/*elements per strip	*/
@@ -1967,13 +1993,13 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     /* Get the dataset transfer property list */
     if (H5P_DEFAULT == dxpl_id) {
-        xfer_parms = &H5F_xfer_dflt;
+        xfer_parms = &H5D_xfer_dflt;
     } else if (H5P_DATA_XFER != H5P_get_class(dxpl_id) ||
 	       NULL == (xfer_parms = H5I_object(dxpl_id))) {
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
     }
 
-    if (0==(dataset->ent.file->intent & H5F_ACC_RDWR)) {
+    if (0==(H5F_get_intent(dataset->ent.file) & H5F_ACC_RDWR)) {
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
 		    "no write intent on file");
     }
@@ -2768,8 +2794,8 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
-    H5F_xfer_t	   tmp_xfer_parms;      /* Temporary copy of the default xfer parms */
-    H5F_xfer_t	   *xfer_parms = NULL;  /* xfer parms as iterator op_data */
+    H5D_xfer_t	   tmp_xfer_parms;      /* Temporary copy of the default xfer parms */
+    H5D_xfer_t	   *xfer_parms = NULL;  /* xfer parms as iterator op_data */
     herr_t ret_value=FAIL;
 
     FUNC_ENTER(H5Dvlen_reclaim, FAIL);
@@ -2784,7 +2810,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 
     /* Retrieve dataset transfer property list */
     if (H5P_DEFAULT == plist_id) {
-        HDmemcpy(&tmp_xfer_parms,&H5F_xfer_dflt,sizeof(H5F_xfer_t));
+        HDmemcpy(&tmp_xfer_parms,&H5D_xfer_dflt,sizeof(H5D_xfer_t));
         xfer_parms = &tmp_xfer_parms;
     } else if (H5P_DATA_XFER != H5P_get_class(plist_id) ||
 	       NULL == (xfer_parms = H5I_object(plist_id))) {

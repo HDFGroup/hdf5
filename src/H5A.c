@@ -17,6 +17,7 @@ static char		RcsId[] = "$Revision$";
 /* $Id$ */
 
 #define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	*/
 
 /* Private header files */
 #include <H5private.h>		/* Generic Functions			*/
@@ -29,6 +30,7 @@ static char		RcsId[] = "$Revision$";
 #include <H5MMprivate.h>	/* Memory management			*/
 #include <H5Pprivate.h>		/* Property lists			*/
 #include <H5Oprivate.h>     	/* Object Headers       		*/
+#include <H5Spkg.h>		    /* Data-space functions			  */
 #include <H5Apkg.h>		/* Attributes				*/
 
 #define PABLO_MASK	H5A_mask
@@ -254,8 +256,7 @@ H5A_create(const H5G_entry_t *ent, const char *name, const H5T_t *type,
 
     /* Compute the internal sizes */
     attr->dt_size=(H5O_DTYPE[0].raw_size)(attr->ent.file,type);
-    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,
-					    &(space->extent.u.simple));
+    attr->ds_size=(H5O_SDSPACE[0].raw_size)(attr->ent.file,&(space->extent.u.simple));
     attr->data_size=H5S_get_simple_extent_npoints(space)*H5T_get_size(type);
 
     /* Hold the symbol table entry (and file) open */

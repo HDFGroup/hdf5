@@ -24,9 +24,12 @@
  *		for a new object based on object size, amount of free space
  *		in the collection, and temporal locality.
  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>		/*library		  		*/
 #include <H5ACprivate.h>	/*caching				*/
 #include <H5Eprivate.h>		/*error handling			*/
+#include <H5Fpkg.h>         /*file access                             */
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5HGprivate.h>	/*global heaps				*/
 #include <H5MFprivate.h>	/*file memory management		*/
@@ -150,7 +153,7 @@ printf("%s: size=%d\n",FUNC,(int)size);
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
     *p++ = 0; /*reserved*/
-    H5F_encode_length (f, p, size);
+    H5F_ENCODE_LENGTH (f, p, size);
 
     /*
      * Padding so free space object is aligned. If malloc returned memory
@@ -171,7 +174,7 @@ printf("%s: heap->obj[0].size=%d, size=%d\n",FUNC,(int)heap->obj[0].size,(int)si
     UINT16ENCODE(p, 0);	/*object ID*/
     UINT16ENCODE(p, 0);	/*reference count*/
     UINT32ENCODE(p, 0); /*reserved*/
-    H5F_encode_length (f, p, heap->obj[0].size);
+    H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
     HDmemset (p, 0, (size_t)((heap->chunk+heap->size) - p));
 
     /* Add the heap to the cache */
@@ -276,7 +279,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     p += 3;
 
     /* Size */
-    H5F_decode_length (f, p, heap->size);
+    H5F_DECODE_LENGTH (f, p, heap->size);
     assert (heap->size>=H5HG_MINSIZE);
 
     /*
@@ -322,7 +325,7 @@ H5HG_load (H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	    assert (NULL==heap->obj[idx].begin);
 	    UINT16DECODE (p, heap->obj[idx].nrefs);
 	    p += 4; /*reserved*/
-	    H5F_decode_length (f, p, heap->obj[idx].size);
+	    H5F_DECODE_LENGTH (f, p, heap->obj[idx].size);
 	    heap->obj[idx].begin = begin;
 	    /*
 	     * The total storage size includes the size of the object header
@@ -490,7 +493,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
     UINT16ENCODE(p, idx);
     UINT16ENCODE(p, 0); /*nrefs*/
     UINT32ENCODE(p, 0); /*reserved*/
-    H5F_encode_length (f, p, size);
+    H5F_ENCODE_LENGTH (f, p, size);
 
     /* Fix the free space object */
     if (need==heap->obj[0].size) {
@@ -517,7 +520,7 @@ H5HG_alloc (H5F_t *f, H5HG_heap_t *heap, int cwfsno, size_t size)
 	UINT16ENCODE(p, 0);	/*id*/
 	UINT16ENCODE(p, 0);	/*nrefs*/
 	UINT32ENCODE(p, 0);	/*reserved*/
-	H5F_encode_length (f, p, heap->obj[0].size);
+	H5F_ENCODE_LENGTH (f, p, heap->obj[0].size);
 	assert(H5HG_ISALIGNED(heap->obj[0].size));
 		
     } else {
@@ -884,7 +887,7 @@ H5HG_remove (H5F_t *f, H5HG_t *hobj)
 	UINT16ENCODE(p, 0); /*id*/
 	UINT16ENCODE(p, 0); /*nrefs*/
 	UINT32ENCODE(p, 0); /*reserved*/
-	H5F_encode_length (f, p, need);
+	H5F_ENCODE_LENGTH (f, p, need);
     }
     HDmemset (heap->obj+hobj->idx, 0, sizeof(H5HG_obj_t));
     heap->dirty = 1;

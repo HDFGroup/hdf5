@@ -6,9 +6,11 @@
  *             Friday, September 19, 1997
  */
 #define H5G_PACKAGE
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Fpkg.h>
 #include <H5Gpkg.h>
 #include <H5HLprivate.h>
 #include <H5MMprivate.h>
@@ -161,7 +163,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     ent->file = f;
 
     /* decode header */
-    H5F_decode_length(f, *pp, ent->name_off);
+    H5F_DECODE_LENGTH(f, *pp, ent->name_off);
     H5F_addr_decode(f, pp, &(ent->header));
     UINT32DECODE(*pp, tmp);
     *pp += 4; /*reserved*/
@@ -273,7 +275,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 
     if (ent) {
         /* encode header */
-        H5F_encode_length(f, *pp, ent->name_off);
+        H5F_ENCODE_LENGTH(f, *pp, ent->name_off);
         H5F_addr_encode(f, pp, ent->header);
         UINT32ENCODE(*pp, ent->type);
 	UINT32ENCODE(*pp, 0); /*reserved*/
@@ -297,7 +299,7 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
             HDabort();
         }
     } else {
-        H5F_encode_length(f, *pp, 0);
+        H5F_ENCODE_LENGTH(f, *pp, 0);
         H5F_addr_encode(f, pp, HADDR_UNDEF);
         UINT32ENCODE(*pp, H5G_NOTHING_CACHED);
 	UINT32ENCODE(*pp, 0); /*reserved*/

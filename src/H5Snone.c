@@ -7,10 +7,13 @@
  *
  * Purpose:	"None" selection data space I/O functions.
  */
+
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5Iprivate.h>
-#include <H5Sprivate.h>
+#include <H5Spkg.h>
 #include <H5Vprivate.h>
 #include <H5Dprivate.h>
 

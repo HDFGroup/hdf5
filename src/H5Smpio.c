@@ -10,10 +10,12 @@
  *		I didn't make them portable.
  */
 
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5FDprivate.h>
-#include <H5Sprivate.h>
+#include <H5Spkg.h>
 
 #include <H5FDmpio.h>		/*the MPIO file driver			*/
 

@@ -29,10 +29,13 @@
  *		entries near the front of the list to make room for the new
  *		entry which is added to the end of the list.
  */
+
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
-#include <H5Fprivate.h>
+#include <H5Fpkg.h>
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>
 #include <H5MFprivate.h>
@@ -1498,8 +1501,8 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	ent->chunk = chunk;
 	
 	{
-	    H5F_xfer_t *dxpl;
-	    dxpl = (H5P_DEFAULT==dxpl_id) ? &H5F_xfer_dflt : (H5F_xfer_t *)H5I_object(dxpl_id);
+	    H5D_xfer_t *dxpl;
+	    dxpl = (H5P_DEFAULT==dxpl_id) ? &H5D_xfer_dflt : (H5D_xfer_t *)H5I_object(dxpl_id);
 	    ent->split_ratios[0] = dxpl->split_ratios[0];
 	    ent->split_ratios[1] = dxpl->split_ratios[1];
 	    ent->split_ratios[2] = dxpl->split_ratios[2];
@@ -1640,8 +1643,8 @@ H5F_istore_unlock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 	    x.alloc_size = x.chunk_size;
 	    x.chunk = chunk;
 	    {
-		H5F_xfer_t *dxpl;
-		dxpl = (H5P_DEFAULT==dxpl_id) ? &H5F_xfer_dflt : (H5F_xfer_t *)H5I_object(dxpl_id);
+		H5D_xfer_t *dxpl;
+		dxpl = (H5P_DEFAULT==dxpl_id) ? &H5D_xfer_dflt : (H5D_xfer_t *)H5I_object(dxpl_id);
 		x.split_ratios[0] = dxpl->split_ratios[0];
 		x.split_ratios[1] = dxpl->split_ratios[1];
 		x.split_ratios[2] = dxpl->split_ratios[2];

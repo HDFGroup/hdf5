@@ -89,7 +89,7 @@ typedef struct {
         H5F_create_t fcreate;   /* File creation properties */
         H5F_access_t faccess;   /* File access properties */
         H5D_create_t dcreate;   /* Dataset creation properties */
-        H5F_xfer_t dxfer;       /* Data transfer properties */
+        H5D_xfer_t dxfer;       /* Data transfer properties */
         H5F_mprop_t mount;      /* Mounting properties */
     } u;
     H5P_class_t class;          /* Property list class */

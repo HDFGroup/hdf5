@@ -86,12 +86,15 @@
  *
  *-------------------------------------------------------------------------
  */
+
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 /* private headers */
 #include <H5private.h>		/*library				*/
 #include <H5ACprivate.h>	/*cache					*/
 #include <H5Bprivate.h>		/*B-link trees				*/
 #include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*file access				*/
+#include <H5Fpkg.h>		/*file access				*/
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5MFprivate.h>	/*file memory management		*/
 #include <H5MMprivate.h>	/*core memory management		*/

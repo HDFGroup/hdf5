@@ -11,9 +11,12 @@
  *      H5F_seg_read/write.
  *
  */
+
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
-#include <H5Fprivate.h>
+#include <H5Fpkg.h>
 #include <H5FDprivate.h>	/*file driver				  */
 #include <H5MMprivate.h>
 
@@ -244,8 +247,8 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                         f->shared->sieve_size=0;
                     } /* end if */
 
-                    /* Write directly from the user's buffer */
-                    if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0) {
+                    /* Write directly to the user's buffer */
+                    if (H5F_block_write(f, type, addr, size, dxpl_id, buf)<0) {
                         HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                   "block write failed");
                     }
@@ -293,7 +296,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
         else {
             /* Check if we can actually hold the I/O request in the sieve buffer */
             if(size>f->shared->sieve_buf_size) {
-                if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0) {
+                if (H5F_block_write(f, type, addr, size, dxpl_id, buf)<0) {
                     HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                               "block write failed");
                 }
@@ -330,7 +333,7 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
         } /* end else */
     } /* end if */
     else {
-        if (H5F_block_write(f, H5FD_MEM_DRAW, addr, size, dxpl_id, buf)<0) {
+        if (H5F_block_write(f, type, addr, size, dxpl_id, buf)<0) {
             HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                       "block write failed");
         }

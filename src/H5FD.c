@@ -12,10 +12,12 @@
  *		layer.
  */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 /* Packages needed by this file */
 #include <H5private.h>		/*library functions			*/
 #include <H5Eprivate.h>		/*error handling			*/
-#include <H5Fprivate.h>		/*files					*/
+#include <H5Fpkg.h>		/*files					*/
 #include <H5FDprivate.h>	/*virtual file driver			*/
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Iprivate.h>		/*interface abstraction layer		*/
@@ -282,7 +284,7 @@ H5FD_get_class(hid_t id)
 {
     H5FD_class_t	*ret_value=NULL;
     H5F_access_t	*fapl=NULL;
-    H5F_xfer_t		*dxpl=NULL;
+    H5D_xfer_t		*dxpl=NULL;
     
     FUNC_ENTER(H5FD_get_class, NULL);
 

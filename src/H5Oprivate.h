@@ -25,7 +25,7 @@
 #include <H5Gprivate.h>
 #include <H5HGprivate.h>
 #include <H5Tprivate.h>
-#include <H5Sprivate.h>
+#include <H5Spublic.h>
 #include <H5Zprivate.h>
 
 /*
@@ -125,7 +125,7 @@ __DLLVAR__ const H5O_class_t H5O_NULL[1];
 #define H5O_SDSPACE_ID	0x0001
 __DLLVAR__ const H5O_class_t H5O_SDSPACE[1];
 
-/* operates on an H5S_simple_t struct */
+/* operates on an H5S_t struct */
 
 /*
  * Data Type Message.

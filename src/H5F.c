@@ -20,6 +20,8 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 /* Predefined file drivers */
 #include <H5FDcore.h>		/*temporary in-memory files		  */
 #include <H5FDfamily.h>		/*family of files			  */
@@ -41,7 +43,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Iprivate.h>		/*object IDs				  */
 #include <H5ACprivate.h>	/*cache					  */
 #include <H5Eprivate.h>		/*error handling			  */
-#include <H5Fprivate.h>         /*file access                             */
+#include <H5Fpkg.h>         /*file access                             */
 #include <H5FDprivate.h>	/*file driver				  */
 #include <H5Gprivate.h>		/*symbol tables				  */
 #include <H5MMprivate.h>	/*core memory management		  */
@@ -79,32 +81,6 @@ const H5F_create_t	H5F_create_dflt = {
  * by H5F_init_interface().
  */
 H5F_access_t H5F_access_dflt;
-
-/* Default data transfer property list */
-/* Not const anymore before some of the VFL drivers modify this struct - QAK */
-H5F_xfer_t	H5F_xfer_dflt = {
-    1024*1024,			/*Temporary buffer size			    */
-    NULL,			/*Type conversion buffer or NULL	    */
-    NULL, 			/*Background buffer or NULL		    */
-    H5T_BKG_NO,			/*Type of background buffer needed	    */
-    {0.1, 0.5, 0.9},		/*B-tree node splitting ratios		    */
-#ifndef H5_HAVE_PARALLEL
-    1,				/*Cache the hyperslab blocks		    */
-#else
-    0,				/*Don't cache the hyperslab blocks	    */
-#endif /* H5_HAVE_PARALLEL */
-    0,              		/*No limit on hyperslab block size to cache */
-    NULL,                   	/*Use malloc() for VL data allocations	    */
-    NULL,                   	/*No information needed for malloc() calls  */
-    NULL,                   	/*Use free() for VL data frees		    */
-    NULL,                   	/*No information needed for free() calls    */
-    -2,				/*See H5Pget_driver()			    */
-    NULL,			/*No file driver-specific information yet   */
-#ifdef COALESCE_READS
-    0,                          /*coalesce single reads into a read         */
-                                /*transaction                               */
-#endif
-};
 
 /*
  * Define the default mount property list.
@@ -2446,6 +2422,87 @@ H5Freopen(hid_t file_id)
 	H5F_close(new_file);
     }
     FUNC_LEAVE(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_intent
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'intent' flags
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	'intent' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		September 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+uintn
+H5F_get_intent(H5F_t *f)
+{
+    FUNC_ENTER(H5F_get_intent, 0);
+
+    assert(f);
+
+    FUNC_LEAVE(f->intent);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_sizeof_addr
+ *
+ * Purpose:	Quick and dirty routine to retrieve the size of the file's size_t
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	'sizeof_addr' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		September 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5F_sizeof_addr(H5F_t *f)
+{
+    FUNC_ENTER(H5F_sizeof_addr, 0);
+
+    assert(f);
+
+    FUNC_LEAVE((f)->shared->fcpl->sizeof_addr)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_sizeof_size
+ *
+ * Purpose:	Quick and dirty routine to retrieve the size of the file's off_t
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	'sizeof_size' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *		September 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5F_sizeof_size(H5F_t *f)
+{
+    FUNC_ENTER(H5F_sizeof_size, 0);
+
+    assert(f);
+
+    FUNC_LEAVE((f)->shared->fcpl->sizeof_addr)
 }
 
 

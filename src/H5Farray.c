@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 1998 Spizella Software
- *                    All rights reserved.
+ * Copyright (C) 1998 NCSA
+ *		      All rights reserved.
  *
- * Programmer:  Robb Matzke <robb@arborea.spizella.com>
+ * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Thursday, January 15, 1998
  *
  * Purpose:	Provides I/O facilities for multi-dimensional arrays of bytes
@@ -11,10 +11,13 @@
  *		dimension.  For example, a 10x20 array of int would
  *		translate to a 10x20x4 array of bytes at this level.
  */
+
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>
 #include <H5Dprivate.h>
 #include <H5Eprivate.h>
-#include <H5Fprivate.h>
+#include <H5Fpkg.h>
 #include <H5FDprivate.h>	/*file driver				  */
 #include <H5Iprivate.h>
 #include <H5MFprivate.h>
@@ -140,7 +143,6 @@ H5F_arr_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*stride dimensionality	*/
     haddr_t	addr;				/*address in file	*/
-    haddr_t	eof;		        /*end of file address		*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL
@@ -409,7 +411,6 @@ H5F_arr_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     size_t	nelmts, z;			/*number of elements	*/
     intn	ndims;				/*dimensionality	*/
     haddr_t	addr;				/*address in file	*/
-    haddr_t	eof;		        /*end of file address		*/
     intn	i, j;				/*counters		*/
     hbool_t	carray;				/*carry for subtraction	*/
 #ifdef H5_HAVE_PARALLEL

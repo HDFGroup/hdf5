@@ -18,10 +18,12 @@
  *
  *-------------------------------------------------------------------------
  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>			/*library		  	*/
 #include <H5ACprivate.h>		/*cache				*/
 #include <H5Eprivate.h>			/*error handling	  	*/
-#include <H5Fprivate.h>			/*file access                   */
+#include <H5Fpkg.h>			/*file access                   */
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5HLprivate.h>		/*self				*/
 #include <H5MFprivate.h>		/*file memory management	*/
@@ -239,11 +241,11 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
     p += 4;
 
     /* heap data size */
-    H5F_decode_length(f, p, heap->disk_alloc);
+    H5F_DECODE_LENGTH(f, p, heap->disk_alloc);
     heap->mem_alloc = heap->disk_alloc;
 
     /* free list head */
-    H5F_decode_length(f, p, free_block);
+    H5F_DECODE_LENGTH(f, p, free_block);
     if (free_block != H5HL_FREE_NULL && free_block >= heap->disk_alloc) {
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
 		    "bad heap free list");
@@ -281,8 +283,8 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 	if (!heap->freelist) heap->freelist = fl;
 
 	p = heap->chunk + H5HL_SIZEOF_HDR(f) + free_block;
-	H5F_decode_length(f, p, free_block);
-	H5F_decode_length(f, p, fl->size);
+	H5F_DECODE_LENGTH(f, p, free_block);
+	H5F_DECODE_LENGTH(f, p, fl->size);
 
 	if (fl->offset + fl->size > heap->disk_alloc) {
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL,
@@ -366,8 +368,8 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	*p++ = 0;	/*reserved*/
 	*p++ = 0;	/*reserved*/
 	*p++ = 0;	/*reserved*/
-	H5F_encode_length(f, p, heap->mem_alloc);
-	H5F_encode_length(f, p, fl ? fl->offset : H5HL_FREE_NULL);
+	H5F_ENCODE_LENGTH(f, p, heap->mem_alloc);
+	H5F_ENCODE_LENGTH(f, p, fl ? fl->offset : H5HL_FREE_NULL);
 	H5F_addr_encode(f, &p, heap->addr);
 
 	/*
@@ -377,11 +379,11 @@ H5HL_flush(H5F_t *f, hbool_t destroy, haddr_t addr, H5HL_t *heap)
 	    assert (fl->offset == H5HL_ALIGN (fl->offset));
 	    p = heap->chunk + H5HL_SIZEOF_HDR(f) + fl->offset;
 	    if (fl->next) {
-		H5F_encode_length(f, p, fl->next->offset);
+		H5F_ENCODE_LENGTH(f, p, fl->next->offset);
 	    } else {
-		H5F_encode_length(f, p, H5HL_FREE_NULL);
+		H5F_ENCODE_LENGTH(f, p, H5HL_FREE_NULL);
 	    }
-	    H5F_encode_length(f, p, fl->size);
+	    H5F_ENCODE_LENGTH(f, p, fl->size);
 	    fl = fl->next;
 	}
 

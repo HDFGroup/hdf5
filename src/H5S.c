@@ -16,6 +16,8 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+
 #define _H5S_IN_H5S_C
 #include <H5private.h>		/* Generic Functions			  */
 #include <H5Iprivate.h>		/* ID Functions		  */
@@ -23,7 +25,7 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5FLprivate.h>	/* Free Lists	  */
 #include <H5MMprivate.h>	/* Memory Management functions		  */
 #include <H5Oprivate.h>		/* object headers		  */
-#include <H5Sprivate.h>		/* Data-space functions			  */
+#include <H5Spkg.h>		    /* Data-space functions			  */
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
@@ -1722,6 +1724,40 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     if (ret_value<0 && space) H5S_close(space);
     FUNC_LEAVE(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_get_simple_extent_type
+ *
+ * Purpose:	Internal function for retrieving the type of extent for a dataspace object
+ *
+ * Return:	Success:	The class of the dataspace object
+ *
+ *		Failure:	N5S_NO_CLASS
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, September 28, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_class_t
+H5S_get_simple_extent_type(const H5S_t *space)
+{
+    H5S_class_t	ret_value = H5S_NO_CLASS;
+
+    FUNC_ENTER(H5S_get_simple_extent_type, H5S_NO_CLASS);
+
+    assert(space);
+
+    ret_value=space->extent.type;
+    
+    FUNC_LEAVE(ret_value);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Sget_simple_extent_type
@@ -1755,7 +1791,7 @@ H5Sget_simple_extent_type(hid_t sid)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, H5S_NO_CLASS, "not a dataspace");
     }
 
-    ret_value=space->extent.type;
+    ret_value=H5S_get_simple_extent_type(space);
     
     FUNC_LEAVE(ret_value);
 }

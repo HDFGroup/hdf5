@@ -16,7 +16,8 @@ static char             RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
-#define H5A_PACKAGE             /*prevent warning from including H5Tpkg.h */
+#define H5A_PACKAGE         /*prevent warning from including H5Tpkg.h */
+#define H5S_PACKAGE		    /*suppress error about including H5Spkg	  */
 
 #include <H5private.h>
 #include <H5Eprivate.h>
@@ -25,6 +26,7 @@ static char             RcsId[] = "@(#)$Revision$";
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
 #include <H5Apkg.h>
+#include <H5Spkg.h>         /* Data spaces */
 
 #define PABLO_MASK      H5O_attr_mask
 

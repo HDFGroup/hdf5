@@ -25,6 +25,7 @@
 #include <H5Ipublic.h>
 #include <H5Dpublic.h>
 #include <H5Fpublic.h>
+#include <H5MMpublic.h>
 #include <H5Zpublic.h>
 
 /* Property list classes */

@@ -5,8 +5,11 @@
  * Programmer: Robb Matzke <matzke@llnl.gov>
  *	       Tuesday, November 25, 1997
  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
+#include <H5Fpkg.h>
 #include <H5HLprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
@@ -116,16 +119,16 @@ H5O_efl_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
     }
     for (i=0; i<mesg->nused; i++) {
 	/* Name */
-	H5F_decode_length (f, p, mesg->slot[i].name_offset);
+	H5F_DECODE_LENGTH (f, p, mesg->slot[i].name_offset);
 	s = H5HL_peek(f, mesg->heap_addr, mesg->slot[i].name_offset);
 	assert (s && *s);
 	mesg->slot[i].name = H5MM_xstrdup (s);
 	
 	/* File offset */
-	H5F_decode_length (f, p, mesg->slot[i].offset);
+	H5F_DECODE_LENGTH (f, p, mesg->slot[i].offset);
 
 	/* Size */
-	H5F_decode_length (f, p, mesg->slot[i].size);
+	H5F_DECODE_LENGTH (f, p, mesg->slot[i].size);
 	assert (mesg->slot[i].size>0);
     }
 
@@ -191,9 +194,9 @@ H5O_efl_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 	 * created.
 	 */
 	assert(mesg->slot[i].name_offset);
-	H5F_encode_length (f, p, mesg->slot[i].name_offset);
-	H5F_encode_length (f, p, mesg->slot[i].offset);
-	H5F_encode_length (f, p, mesg->slot[i].size);
+	H5F_ENCODE_LENGTH (f, p, mesg->slot[i].name_offset);
+	H5F_ENCODE_LENGTH (f, p, mesg->slot[i].offset);
+	H5F_ENCODE_LENGTH (f, p, mesg->slot[i].size);
     }
 
     FUNC_LEAVE(SUCCEED);

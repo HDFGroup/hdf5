@@ -1823,8 +1823,8 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			/*Save the rank of simple data spaces for arrays*/
 			{
 			    H5S_t *space = H5I_object(obj);
-			    if (H5S_SIMPLE==space->extent.type) {
-				asize[argno] = space->extent.u.simple.rank;
+			    if (H5S_SIMPLE==H5S_get_simple_extent_type(space)) {
+				asize[argno] = H5S_get_simple_extent_ndims(space);
 			    }
 			}
 			break;

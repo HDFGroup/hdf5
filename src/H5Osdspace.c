@@ -16,12 +16,15 @@ static char		RcsId[] = "@(#)$Revision$";
 
 /* $Id$ */
 
+#define H5S_PACKAGE		/*prevent warning from including H5Spkg.h */
+
 #include <H5private.h>
 #include <H5Eprivate.h>
 #include <H5FLprivate.h>	/*Free Lists	  */
 #include <H5Gprivate.h>
 #include <H5MMprivate.h>
 #include <H5Oprivate.h>
+#include <H5Spkg.h>
 
 #define PABLO_MASK	H5O_sdspace_mask
 
@@ -125,7 +128,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 			     "memory allocation failed");
 	    }
 	    for (u = 0; u < sdim->rank; u++) {
-		H5F_decode_length (f, p, sdim->size[u]);
+		H5F_DECODE_LENGTH (f, p, sdim->size[u]);
 	    }
 	    if (flags & H5S_VALID_MAX) {
 		if (NULL==(sdim->max=H5FL_ARR_ALLOC(hsize_t,sdim->rank,0))) {
@@ -133,7 +136,7 @@ H5O_sdspace_decode(H5F_t *f, const uint8_t *p, H5O_shared_t UNUSED *sh)
 				 "memory allocation failed");
 		}
 		for (u = 0; u < sdim->rank; u++) {
-		    H5F_decode_length (f, p, sdim->max[u]);
+		    H5F_DECODE_LENGTH (f, p, sdim->max[u]);
 		}
 	    }
 #ifdef LATER
@@ -212,11 +215,11 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *mesg)
 
     if (sdim->rank > 0) {
 	for (u = 0; u < sdim->rank; u++) {
-	    H5F_encode_length (f, p, sdim->size[u]);
+	    H5F_ENCODE_LENGTH (f, p, sdim->size[u]);
 	}
 	if (flags & H5S_VALID_MAX) {
 	    for (u = 0; u < sdim->rank; u++) {
-		H5F_encode_length (f, p, sdim->max[u]);
+		H5F_ENCODE_LENGTH (f, p, sdim->max[u]);
 	    }
 	}
 #ifdef LATER
@@ -313,7 +316,7 @@ H5O_sdspace_copy(const void *mesg, void *dest)
 static size_t
 H5O_sdspace_size(H5F_t *f, const void *mesg)
 {
-    const H5S_simple_t	   *sdim = (const H5S_simple_t *) mesg;
+    const H5S_simple_t	   *space = (const H5S_simple_t *) mesg;
     
     /*
      * All dimensionality messages are at least 8 bytes long.
@@ -323,14 +326,14 @@ H5O_sdspace_size(H5F_t *f, const void *mesg)
     FUNC_ENTER(H5O_sdspace_size, 0);
 
     /* add in the dimension sizes */
-    ret_value += sdim->rank * H5F_SIZEOF_SIZE (f);
+    ret_value += space->rank * H5F_SIZEOF_SIZE (f);
 
     /* add in the space for the maximum dimensions, if they are present */
-    ret_value += sdim->max ? sdim->rank * H5F_SIZEOF_SIZE (f) : 0;
+    ret_value += space->max ? space->rank * H5F_SIZEOF_SIZE (f) : 0;
 
 #ifdef LATER
     /* add in the space for the dimension permutations, if they are present */
-    ret_value += sdim->perm ? sdim->rank * 4 : 0;
+    ret_value += space->perm ? space->rank * 4 : 0;
 #endif
 
     FUNC_LEAVE(ret_value);

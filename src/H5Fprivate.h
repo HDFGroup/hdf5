@@ -18,46 +18,13 @@
 
 #ifndef _H5Fprivate_H
 #define _H5Fprivate_H
+
 #include <H5Fpublic.h>
 
 /* This is a near top-level header! Try not to include much! */
-#include <H5private.h>
 #include <H5FDpublic.h>		/*file drivers				     */
-#include <H5MMpublic.h>		/*for H5MM_allocate_t and H5MM_free_t types  */
 
-/*
- * Feature: Define this constant to be non-zero if you want to enable code
- *	    that minimizes the number of calls to lseek().  This has a huge
- *	    performance benefit on some systems.  Set this constant to zero
- *	    on the compiler command line to disable that optimization.
- */
-#ifndef H5F_OPT_SEEK
-#  define H5F_OPT_SEEK 1
-#endif
-
-/*
- * Feature: Define this constant on the compiler command-line if you want to
- *	    see some debugging messages on the debug stream.
- */
-#ifdef NDEBUG
-#  undef H5F_DEBUG
-#endif
-
-/* Maximum size of boot-block buffer */
-#define H5F_BOOTBLOCK_SIZE  1024
-
-/* Define the HDF5 file signature */
-#define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
-#define H5F_SIGNATURE_LEN 8
-
-/* size of size_t and off_t as they exist on disk */
-#define H5F_SIZEOF_ADDR(F)	((F)->shared->fcpl->sizeof_addr)
-#define H5F_SIZEOF_SIZE(F)	((F)->shared->fcpl->sizeof_size)
-
-/*
- * Private file open flags.
- */
-#define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
+typedef struct H5F_t H5F_t;
 
 /*
  * Encode and decode macros for file meta-data.
@@ -218,16 +185,74 @@
  */
 #define NBYTEDECODE(s, d, n) {	 HDmemcpy(d,s,n); p+=n }
 
-/*
- * Macros that check for overflows.  These are somewhat dangerous to fiddle
- * with.
- */
-#if (SIZEOF_SIZE_T >= SIZEOF_OFF_T)
-#   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
-    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
-#else
-#   define H5F_OVERFLOW_SIZET2OFFT(X) 0
-#endif
+/* Address-related macros */
+#define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
+				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
+				 (X)+(haddr_t)(Z)<(X))
+#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
+#define H5F_addr_defined(X)	(X!=HADDR_UNDEF)
+#define H5F_addr_eq(X,Y)	((X)!=HADDR_UNDEF &&			      \
+				 (Y)!=HADDR_UNDEF &&			      \
+				 (X)==(Y))
+#define H5F_addr_ne(X,Y)	(!H5F_addr_eq((X),(Y)))
+#define H5F_addr_lt(X,Y) 	((X)!=HADDR_UNDEF &&			      \
+				 (Y)!=HADDR_UNDEF &&			      \
+				 (X)<(Y))
+#define H5F_addr_le(X,Y)	((X)!=HADDR_UNDEF &&			      \
+				 (Y)!=HADDR_UNDEF &&			      \
+				 (X)<=(Y))
+#define H5F_addr_gt(X,Y)	((X)!=HADDR_UNDEF &&			      \
+				 (Y)!=HADDR_UNDEF &&			      \
+				 (X)>(Y))
+#define H5F_addr_ge(X,Y)	((X)!=HADDR_UNDEF &&			      \
+				 (Y)!=HADDR_UNDEF &&			      \
+				 (X)>=(Y))
+#define H5F_addr_cmp(X,Y)	(H5F_addr_eq(X,Y)?0:			      \
+				 (H5F_addr_lt(X, Y)?-1:1))
+#define H5F_addr_pow2(N)	((haddr_t)1<<(N))
+
+/* size of size_t and off_t as they exist on disk */
+#ifdef H5F_PACKAGE
+#define H5F_SIZEOF_ADDR(F)	((F)->shared->fcpl->sizeof_addr)
+#define H5F_SIZEOF_SIZE(F)	((F)->shared->fcpl->sizeof_size)
+#else /* H5F_PACKAGE */
+#define H5F_SIZEOF_ADDR(F)	(H5F_sizeof_addr(F))
+#define H5F_SIZEOF_SIZE(F)	(H5F_sizeof_size(F))
+#endif /* H5F_PACKAGE */
+__DLL__ size_t H5F_sizeof_addr(H5F_t *f);
+__DLL__ size_t H5F_sizeof_size(H5F_t *f);
+
+/* Macros to encode/decode offset/length's for storing in the file */
+#ifdef NOT_YET
+#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
+    : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
+    : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
+    : H5FPencode_unusual_offset(f,&(p),(uint8_t*)&(o)))
+#else /* NOT_YET */
+#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) {		      \
+    case 4: UINT32ENCODE(p,o); break;					      \
+    case 8: UINT64ENCODE(p,o); break;					      \
+    case 2: UINT16ENCODE(p,o); break;					      \
+}
+#endif /* NOT_YET */
+
+#define H5F_DECODE_OFFSET(f,p,o) switch (H5F_SIZEOF_ADDR (f)) {	\
+   case 4: UINT32DECODE (p, o);	break;							\
+   case 8: UINT64DECODE (p, o);	break;							\
+   case 2: UINT16DECODE (p, o);	break;							\
+}
+
+#define H5F_ENCODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {   \
+   case 4: UINT32ENCODE(p,l); break;					      \
+   case 8: UINT64ENCODE(p,l); break;					      \
+   case 2: UINT16ENCODE(p,l); break;					      \
+}
+
+#define H5F_DECODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {   \
+   case 4: UINT32DECODE(p,l); break;					      \
+   case 8: UINT64DECODE(p,l); break;					      \
+   case 2: UINT16DECODE(p,l); break;					      \
+}
 
 /*
  * File-creation property list.
@@ -261,164 +286,15 @@ typedef struct H5F_access_t {
     void	*driver_info;	/* File driver specific information	*/
 } H5F_access_t;
 
-/* Data transfer property list */
-typedef struct H5F_xfer_t {
-    size_t		buf_size;	/*max temp buffer size		     */
-    void		*tconv_buf;	/*type conversion buffer or null     */
-    void		*bkg_buf;	/*background buffer or null	     */
-    H5T_bkg_t		need_bkg;	/*type of background buffer needed   */
-    double		split_ratios[3];/*B-tree node splitting ratios	     */
-    uintn       	cache_hyper;    /*cache hyperslab blocks during I/O? */
-    uintn       	block_limit;    /*largest hyperslab block to cache   */
-    H5MM_allocate_t 	vlen_alloc; 	/*VL datatype allocation function    */
-    void		*alloc_info;    /*VL datatype allocation information */
-    H5MM_free_t		vlen_free;      /*VL datatype free function	     */
-    void		*free_info;	/*VL datatype free information	     */
-    hid_t		driver_id;	/*File driver ID		     */
-    void		*driver_info;	/*File driver specific information   */
-#ifdef COALESCE_READS
-    uintn               gather_reads;   /*coalesce single reads into a read  */
-                                        /*transaction                        */
-#endif
-} H5F_xfer_t;
-
-/* The raw data chunk cache */
-typedef struct H5F_rdcc_t {
-    uintn		ninits;	/* Number of chunk creations		*/
-    uintn		nhits;	/* Number of cache hits			*/
-    uintn		nmisses;/* Number of cache misses		*/
-    uintn		nflushes;/* Number of cache flushes		*/
-    size_t		nbytes;	/* Current cached raw data in bytes	*/
-    intn		nslots;	/* Number of chunk slots allocated	*/
-    struct H5F_rdcc_ent_t *head; /* Head of doubly linked list		*/
-    struct H5F_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
-    intn		nused;	/* Number of chunk slots in use		*/
-    struct H5F_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
-} H5F_rdcc_t;
-
-/*
- * Define the structure to store the file information for HDF5 files. One of
- * these structures is allocated per file, not per H5Fopen(). That is, set of
- * H5F_t structs can all point to the same H5F_file_t struct. The `nrefs'
- * count in this struct indicates the number of H5F_t structs which are
- * pointing to this struct.
- */
-typedef struct H5F_file_t {
-    uintn	flags;		/* Access Permissions for file		*/
-    H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
-    uintn	nrefs;		/* Ref count for times file is opened	*/
-    uint32_t	consist_flags;	/* File Consistency Flags		*/
-    haddr_t	boot_addr;	/* Absolute address of boot block	*/
-    haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
-    haddr_t	freespace_addr;	/* Relative address of free-space info	*/
-    haddr_t	driver_addr;	/* File driver information block address*/
-    struct H5AC_t *cache;	/* The object cache			*/
-    H5F_create_t *fcpl;		/* File-creation property list		*/
-                            /* This actually ends up being a pointer to a */
-                            /* H5P_t type, which is returned from H5P_copy */
-                            /* But that's ok because we only access it like */
-                            /* a H5F_create_t until we pass it back to */
-                            /* H5P_close to release it - QAK */
-    intn	mdc_nelmts;	/* Size of meta data cache (elements)	*/
-    intn	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
-    size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
-    double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
-    hsize_t	threshold;	/* Threshold for alignment		*/
-    hsize_t	alignment;	/* Alignment				*/
-    uintn	gc_ref;		/* Garbage-collect references?		*/
-    struct H5G_t *root_grp;	/* Open root group			*/
-    intn	ncwfs;		/* Num entries on cwfs list		*/
-    struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
-
-    /* Data Sieve Buffering fields */
-    unsigned char *sieve_buf;  /* Buffer to hold data sieve buffer */
-    haddr_t sieve_loc;      /* File location (offset) of the data sieve buffer */
-    hsize_t sieve_size;     /* Size of the data sieve buffer used (in bytes) */
-    hsize_t sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */
-    unsigned sieve_dirty;   /* Flag to indicate that the data sieve buffer is dirty */
-
-    H5F_rdcc_t	rdcc;		/* Raw data chunk cache			*/
-} H5F_file_t;
-
 /* Mount property list */
 typedef struct H5F_mprop_t {
     hbool_t		local;	/* Are absolute symlinks local to file?	*/
 } H5F_mprop_t;
 
-/* A record of the mount table */
-typedef struct H5F_mount_t {
-    struct H5G_t	*group;	/* Mount point group held open		*/
-    struct H5F_t	*file;	/* File mounted at that point		*/
-} H5F_mount_t;
-    
-/*
- * The mount table describes what files are attached to (mounted on) the file
- * to which this table belongs.
- */
-typedef struct H5F_mtab_t {
-    struct H5F_t	*parent;/* Parent file				*/
-    uintn		nmounts;/* Number of children which are mounted	*/
-    uintn		nalloc;	/* Number of mount slots allocated	*/
-    H5F_mount_t		*child;	/* An array of mount records		*/
-} H5F_mtab_t;
-
-/*
- * This is the top-level file descriptor.  One of these structures is
- * allocated every time H5Fopen() is called although they may contain pointers
- * to shared H5F_file_t structs. The reference count (nrefs) indicates the
- * number of times the file has been opened (the application can only open a
- * file once explicitly, but the library can open the file a second time to
- * indicate that the file is mounted on some other file).
- */
-typedef struct H5F_t {
-    uintn		nrefs;		/* Reference count		*/
-    uintn		intent;		/* The flags passed to H5F_open()*/
-    char		*name;		/* Name used to open file	*/
-    H5F_file_t		*shared;	/* The shared file info		*/
-    uintn		nopen_objs;	/* Number of open object headers*/
-    hid_t		closing;	/* H5I_FILE_CLOSING ID or zero	*/
-    H5F_mtab_t		mtab;		/* File mount table		*/
-} H5F_t;
-
-#ifdef NOT_YET
-#define H5F_ENCODE_OFFSET(f,p,o) (H5F_SIZEOF_ADDR(f)==4 ? UINT32ENCODE(p,o) \
-    : H5F_SIZEOF_ADDR(f)==8 ? UINT64ENCODE(p,o) \
-    : H5F_SIZEOF_ADDR(f)==2 ? UINT16ENCODE(p,o) \
-    : H5FPencode_unusual_offset(f,&(p),(uint8_t*)&(o)))
-#else /* NOT_YET */
-#define H5F_ENCODE_OFFSET(f,p,o) switch(H5F_SIZEOF_ADDR(f)) {		      \
-    case 4: UINT32ENCODE(p,o); break;					      \
-    case 8: UINT64ENCODE(p,o); break;					      \
-    case 2: UINT16ENCODE(p,o); break;					      \
-}
-#endif /* NOT_YET */
-
-#define H5F_DECODE_OFFSET(f,p,o)					      \
-   switch (H5F_SIZEOF_ADDR (f)) {					      \
-   case 4:								      \
-      UINT32DECODE (p, o);						      \
-      break;								      \
-   case 8:								      \
-      UINT64DECODE (p, o);						      \
-      break;								      \
-   case 2:								      \
-      UINT16DECODE (p, o);						      \
-      break;								      \
-   }
-
-#define H5F_encode_length(f,p,l)					      \
-   switch(H5F_SIZEOF_SIZE(f)) {						      \
-   case 4: UINT32ENCODE(p,l); break;					      \
-   case 8: UINT64ENCODE(p,l); break;					      \
-   case 2: UINT16ENCODE(p,l); break;					      \
-}
-
-#define H5F_decode_length(f,p,l)					      \
-   switch(H5F_SIZEOF_SIZE(f)) {						      \
-   case 4: UINT32DECODE(p,l); break;					      \
-   case 8: UINT64DECODE(p,l); break;					      \
-   case 2: UINT16DECODE(p,l); break;					      \
-}
+/* library variables */
+__DLLVAR__ const H5F_create_t H5F_create_dflt;
+__DLLVAR__ H5F_access_t H5F_access_dflt;
+__DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
 
 /* Forward declarations for prototypes arguments */
 struct H5O_layout_t;
@@ -426,31 +302,11 @@ struct H5O_efl_t;
 struct H5O_pline_t;
 struct H5O_fill_t;
 struct H5G_entry_t;
-
-/* library variables */
-__DLLVAR__ const H5F_create_t H5F_create_dflt;
-__DLLVAR__ H5F_access_t H5F_access_dflt;
-__DLLVAR__ H5F_xfer_t H5F_xfer_dflt;
-__DLLVAR__ const H5F_mprop_t H5F_mount_dflt;
-
-#ifdef H5_HAVE_PARALLEL
-__DLLVAR__  hbool_t H5_mpi_1_metawrite_g;
-#endif /* H5_HAVE_PARALLEL */
+struct H5S_t;
 
 /* Private functions, not part of the publicly documented API */
 __DLL__ herr_t H5F_init(void);
-__DLL__ void H5F_encode_length_unusual(const H5F_t *f, uint8_t **p,
-				       uint8_t *l);
-__DLL__ H5F_t *H5F_open(const char *name, uintn flags, hid_t fcpl_id, 
-			hid_t fapl_id);
-__DLL__ herr_t H5F_close(H5F_t *f);
-__DLL__ herr_t H5F_close_all(void);
-__DLL__ herr_t H5F_flush_all(hbool_t invalidate);
-__DLL__ herr_t H5F_debug(H5F_t *f, haddr_t addr, FILE * stream,
-			 intn indent, intn fwidth);
-__DLL__ herr_t H5F_istore_debug(H5F_t *f, haddr_t addr, FILE * stream,
-				intn indent, intn fwidth, int ndims);
-__DLL__ herr_t H5F_mountpoint(struct H5G_entry_t *find/*in,out*/);
+__DLL__ uintn H5F_get_intent(H5F_t *f);
 
 /* Functions that operate on array storage */
 __DLL__ herr_t H5F_arr_create(H5F_t *f,
@@ -474,81 +330,38 @@ __DLL__ herr_t H5F_arr_write (H5F_t *f, hid_t dxpl_id,
 			      const hssize_t mem_offset[],
 			      const hssize_t file_offset[], const void *_buf);
 
-/* Functions that operate on indexed storage */
-__DLL__ herr_t H5F_istore_init (H5F_t *f);
-__DLL__ herr_t H5F_istore_flush (H5F_t *f, hbool_t preempt);
-__DLL__ herr_t H5F_istore_dest (H5F_t *f);
-__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t addr);
-__DLL__ herr_t H5F_istore_stats (H5F_t *f, hbool_t headers);
-__DLL__ herr_t H5F_istore_create(H5F_t *f,
-				 struct H5O_layout_t *layout/*in,out*/);
-__DLL__ herr_t H5F_istore_read(H5F_t *f, hid_t dxpl_id,
-			       const struct H5O_layout_t *layout,
-			       const struct H5O_pline_t *pline,
-			       const struct H5O_fill_t *fill,
-			       const hssize_t offset[], const hsize_t size[],
-			       void *buf/*out*/);
-__DLL__ herr_t H5F_istore_write(H5F_t *f, hid_t dxpl_id,
-				const struct H5O_layout_t *layout,
-				const struct H5O_pline_t *pline,
-				const struct H5O_fill_t *fill,
-				const hssize_t offset[], const hsize_t size[],
-				const void *buf);
-__DLL__ herr_t H5F_istore_allocate (H5F_t *f, hid_t dxpl_id,
-				    const struct H5O_layout_t *layout,
-				    const hsize_t *space_dim,
-				    const struct H5O_pline_t *pline,
-				    const struct H5O_fill_t *fill);
-__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
-				     haddr_t addr);
-
-/* Functions that operate on contiguous storage wrt boot block */
-__DLL__ herr_t H5F_contig_read(H5F_t *f, haddr_t addr, hsize_t size,
-                hid_t dxpl_id, void *_buf/*out*/);
-__DLL__ herr_t H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
-                  hsize_t size, hid_t dxpl_id, const void *buf);
-
 /* Functions that operate on blocks of bytes wrt boot block */
 __DLL__ herr_t H5F_block_read(H5F_t *f, haddr_t addr, hsize_t size,
 			      hid_t dxpl_id, void *buf/*out*/);
 __DLL__ herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr,
                   hsize_t size, hid_t dxpl_id, const void *buf);
 
-/* Address-related macros and functions */
-#define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
-				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
-				 (X)+(haddr_t)(Z)<(X))
-#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
-#define H5F_addr_defined(X)	(X!=HADDR_UNDEF)
-#define H5F_addr_eq(X,Y)	((X)!=HADDR_UNDEF &&			      \
-				 (Y)!=HADDR_UNDEF &&			      \
-				 (X)==(Y))
-#define H5F_addr_ne(X,Y)	(!H5F_addr_eq((X),(Y)))
-#define H5F_addr_lt(X,Y) 	((X)!=HADDR_UNDEF &&			      \
-				 (Y)!=HADDR_UNDEF &&			      \
-				 (X)<(Y))
-#define H5F_addr_le(X,Y)	((X)!=HADDR_UNDEF &&			      \
-				 (Y)!=HADDR_UNDEF &&			      \
-				 (X)<=(Y))
-#define H5F_addr_gt(X,Y)	((X)!=HADDR_UNDEF &&			      \
-				 (Y)!=HADDR_UNDEF &&			      \
-				 (X)>(Y))
-#define H5F_addr_ge(X,Y)	((X)!=HADDR_UNDEF &&			      \
-				 (Y)!=HADDR_UNDEF &&			      \
-				 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)	(H5F_addr_eq(X,Y)?0:			      \
-				 (H5F_addr_lt(X, Y)?-1:1))
-#define H5F_addr_pow2(N)	((haddr_t)1<<(N))
+/* Functions that operate on byte sequences */
+__DLL__ herr_t H5F_seq_read(H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
+        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
+        hssize_t mem_offset, hssize_t file_offset, void *_buf/*out*/);
+__DLL__ herr_t H5F_seq_write (H5F_t *f, hid_t dxpl_id,
+        const struct H5O_layout_t *layout, const struct H5O_pline_t *pline,
+        const struct H5O_fill_t *fill, const struct H5O_efl_t *efl,
+        const struct H5S_t *file_space, size_t elmt_size, hsize_t seq_len,
+        hssize_t mem_offset, hssize_t file_offset, const void *_buf);
 
+
+/* Functions that operate on indexed storage */
+__DLL__ hsize_t H5F_istore_allocated(H5F_t *f, int ndims, haddr_t addr);
+__DLL__ herr_t H5F_istore_dump_btree(H5F_t *f, FILE *stream, int ndims,
+				     haddr_t addr);
+
+/* Functions for allocation/releasing chunks */
+__DLL__ void * H5F_istore_chunk_free(void *chunk);
+
+/* Address-related functions */
 __DLL__ void H5F_addr_encode(H5F_t *, uint8_t**/*in,out*/, haddr_t);
 __DLL__ void H5F_addr_decode(H5F_t *, const uint8_t**/*in,out*/,
 			     haddr_t*/*out*/);
 __DLL__ herr_t H5F_addr_pack(H5F_t UNUSED *f, haddr_t *addr_p/*out*/,
 			     const unsigned long objno[2]);
-
-/* Functions for allocation/releasing chunks */
-__DLL__ void * H5F_istore_chunk_alloc(size_t chunk_size);
-__DLL__ void * H5F_istore_chunk_free(void *chunk);
-__DLL__ void * H5F_istore_chunk_realloc(void *chunk, size_t new_size);
 
 #endif

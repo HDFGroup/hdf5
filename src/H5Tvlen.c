@@ -206,7 +206,7 @@ herr_t H5T_vlen_seq_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_seq_mem_write(const H5F_xfer_t *xfer_parms, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_seq_mem_write(const H5D_xfer_t *xfer_parms, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len=seq_len*base_size;
@@ -308,7 +308,7 @@ herr_t H5T_vlen_str_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t l
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_str_mem_write(const H5F_xfer_t *xfer_parms, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_str_mem_write(const H5D_xfer_t *xfer_parms, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     char **s=(char **)vl_addr;   /* Pointer to the user's hvl_t information */
     size_t len=seq_len*base_size;
@@ -421,7 +421,7 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_write(const H5F_xfer_t UNUSED *xfer_parms, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
+herr_t H5T_vlen_disk_write(const H5D_xfer_t UNUSED *xfer_parms, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
@@ -576,7 +576,7 @@ done:
 herr_t 
 H5T_vlen_reclaim(void *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t UNUSED *point, void *op_data)
 {
-    H5F_xfer_t	   *xfer_parms = (H5F_xfer_t *)op_data; /* Dataset transfer plist from iterator */
+    H5D_xfer_t	   *xfer_parms = (H5D_xfer_t *)op_data; /* Dataset transfer plist from iterator */
     H5T_t	*dt = NULL;
     herr_t ret_value = FAIL;
 
