@@ -1779,6 +1779,8 @@ H5G_loc (hid_t loc_id)
 #ifndef NDEBUG
     case H5I_TEMPLATE_MAX:
 #endif
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
 	HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
 		      "unable to get symbol table entry of property list");
 
