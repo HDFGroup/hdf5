@@ -441,16 +441,15 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, const uint8 *p, H5O_shared_t *sh)
+H5O_dtype_decode(H5F_t __unused__ *f, const uint8 *p,
+		 H5O_shared_t __unused__ *sh)
 {
     H5T_t                  *dt = NULL;
 
     FUNC_ENTER(H5O_dtype_decode, NULL);
 
     /* check args */
-    assert(f);
     assert(p);
-    assert (!sh);
 
     dt = H5MM_xcalloc(1, sizeof(H5T_t));
     H5F_addr_undef (&(dt->ent.header));
@@ -646,12 +645,12 @@ H5O_dtype_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_get_share (H5F_t *f, const void *_mesg, H5O_shared_t *sh/*out*/)
+H5O_dtype_get_share (H5F_t __unused__ *f, const void *_mesg,
+		     H5O_shared_t *sh/*out*/)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     
     FUNC_ENTER (H5O_dtype_get_share, FAIL);
-    assert (f);
     assert (dt);
     assert (sh);
 
@@ -685,12 +684,12 @@ H5O_dtype_get_share (H5F_t *f, const void *_mesg, H5O_shared_t *sh/*out*/)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_set_share (H5F_t *f, void *_mesg/*in,out*/, const H5O_shared_t *sh)
+H5O_dtype_set_share (H5F_t __unused__ *f, void *_mesg/*in,out*/,
+		     const H5O_shared_t *sh)
 {
     H5T_t	*dt = (H5T_t *)_mesg;
     
     FUNC_ENTER (H5O_dtype_set_share, FAIL);
-    assert (f);
     assert (dt);
     assert (sh);
     assert (!sh->in_gh);

@@ -165,13 +165,14 @@ typedef enum H5E_direction_t {
 
 /* Error stack traversal callback function */
 typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
+typedef herr_t (*H5E_auto_t)(void *client_data);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-herr_t H5Eset_auto (herr_t (*func)(void*client_data), void *client_data);
-herr_t H5Eget_auto (herr_t (**func)(void*client_data), void **client_data);
+herr_t H5Eset_auto (H5E_auto_t func, void *client_data);
+herr_t H5Eget_auto (H5E_auto_t *func, void **client_data);
 herr_t H5Eclear (void);
 herr_t H5Eprint (FILE *stream);
 herr_t H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data);

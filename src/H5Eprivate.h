@@ -38,10 +38,11 @@
  */
 #define HRETURN_ERROR(maj, min, ret_val, str) {				      \
    HERROR (maj, min, str);						      \
+   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   H5TRACE_RETURN(ret_val);						      \
    if (H5_IS_API(FUNC) && H5E_auto_g) {					      \
        (H5E_auto_g)(H5E_auto_data_g);					      \
    }									      \
-   PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
    return (ret_val);							      \
 }
 
@@ -52,6 +53,7 @@
  */
 #define HRETURN(ret_val) {						      \
    PABLO_TRACE_OFF (PABLO_MASK, pablo_func_id);				      \
+   H5TRACE_RETURN(ret_val);						      \
    return (ret_val);							      \
 }
 
@@ -64,6 +66,7 @@
  */
 #define HGOTO_ERROR(maj, min, ret_val, str) {				      \
    HERROR (maj, min,  str);						      \
+   H5TRACE_RETURN(ret_val);						      \
    if (H5_IS_API(FUNC) && H5E_auto_g) {					      \
        (H5E_auto_g)(H5E_auto_data_g);					      \
    }									      \

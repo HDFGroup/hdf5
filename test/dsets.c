@@ -694,7 +694,7 @@ test_compression(hid_t file)
 static herr_t
 test_multiopen (hid_t file)
 {
-    hid_t		dcpl, space, dset1, dset2;
+    hid_t		dcpl=-1, space=-1, dset1=-1, dset2=-1;
     hsize_t		cur_size[1] = {10};
     static hsize_t	max_size[1] = {H5S_UNLIMITED};
     hsize_t		tmp_size[1];

@@ -196,6 +196,7 @@ H5Zregister (H5Z_method_t method, const char *name, H5Z_func_t cfunc,
 	     H5Z_func_t ufunc)
 {
     FUNC_ENTER (H5Zregister, FAIL);
+    H5TRACE4("e","Zmsxx",method,name,cfunc,ufunc);
 
     /* Check args */
     if (method<0 || method>H5Z_USERDEF_MAX) {

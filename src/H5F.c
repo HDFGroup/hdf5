@@ -250,13 +250,14 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_create_template(hid_t fid)
+H5Fget_create_template (hid_t fid)
 {
     H5F_t		*file = NULL;
     hid_t		ret_value = FAIL;
     H5F_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Fget_create_template, FAIL);
+    H5TRACE1("i","i",fid);
 
     /* check args */
     if (H5_FILE != H5I_group(fid) || NULL==(file=H5I_object (fid))) {
@@ -307,6 +308,7 @@ H5Fget_access_template (hid_t file_id)
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER (H5Fget_access_template, FAIL);
+    H5TRACE1("i","i",file_id);
 
     /* Check args */
     if (H5_FILE!=H5I_group (file_id) || NULL==(f=H5I_object (file_id))) {
@@ -396,7 +398,7 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
     while (H5F_addr_lt(addr, &max_addr)) {
 	if (H5F_low_read(f_handle, access_parms, H5D_XFER_DFLT, addr,
 			 H5F_SIGNATURE_LEN, buf) < 0) {
-	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't read file");
+	    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read file");
 	}
 	if (!HDmemcmp(buf, H5F_SIGNATURE, H5F_SIGNATURE_LEN))
 	    break;
@@ -431,8 +433,8 @@ H5F_locate_signature(H5F_low_t *f_handle, const H5F_access_t *access_parms,
  DESCRIPTION
     This function determines if a file is an HDF5 format file.
 --------------------------------------------------------------------------*/
-hbool_t 
-H5Fis_hdf5(const char *filename)
+hbool_t
+H5Fis_hdf5 (const char *filename)
 {
     H5F_low_t	*f_handle = NULL;	/* file handle */
     haddr_t	addr;		       /* Address of file signature & header */
@@ -440,6 +442,7 @@ H5Fis_hdf5(const char *filename)
     const H5F_low_class_t *type = NULL;
 
     FUNC_ENTER(H5Fis_hdf5, FAIL);
+    H5TRACE1("b","s",filename);
 
     /* Check args and all the boring stuff. */
     if (filename == NULL) {
@@ -779,13 +782,13 @@ H5F_open(const char *name, uintn flags,
 	    /* Truncate existing file */
 	    if (0 == (flags & H5F_ACC_RDWR)) {
 		HRETURN_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
-			      "can't truncate without write intent");
+			      "unable to truncate without write intent");
 	    }
 	    fd = H5F_low_open(type, name, access_parms,
 			      H5F_ACC_RDWR | H5F_ACC_TRUNC, NULL);
 	    if (!fd) {
 		HRETURN_ERROR(H5E_FILE, H5E_CANTCREATE, NULL,
-			      "can't truncate file");
+			      "unable to truncate file");
 	    }
 	    f = H5F_new(NULL, create_parms, access_parms);
 	    f->shared->key = search;
@@ -809,7 +812,7 @@ H5F_open(const char *name, uintn flags,
     } else if (flags & H5F_ACC_CREAT) {
 	if (0 == (flags & H5F_ACC_RDWR)) {
 	    HRETURN_ERROR(H5E_FILE, H5E_BADVALUE, NULL,
-			  "can't create file without write intent");
+			  "unable to create file without write intent");
 	}
 #ifdef HAVE_PARALLEL
 	/*
@@ -830,7 +833,7 @@ H5F_open(const char *name, uintn flags,
 #endif /*HAVE_PARALLEL*/
 	if (!fd) {
 	    HRETURN_ERROR(H5E_FILE, H5E_CANTCREATE, NULL,
-			  "can't create file");
+			  "unable to create file");
 	}
 	f = H5F_new(NULL, create_parms, access_parms);
 	f->shared->key = search;
@@ -883,7 +886,7 @@ H5F_open(const char *name, uintn flags,
 	f->shared->consist_flags = 0x03;
 	if (H5F_flush(f, FALSE) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-			"can't write file boot block");
+			"unable to write file boot block");
 	}
 
     } else if (1 == f->shared->nrefs) {
@@ -891,11 +894,13 @@ H5F_open(const char *name, uintn flags,
 	if (H5F_locate_signature(f->shared->lf,
 				 f->shared->access_parms,
 				 &(f->shared->boot_addr)) < 0) {
-	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "can't find signature");
+	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
+			"unable to find signature");
 	}
 	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
 			 &(f->shared->boot_addr), fixed_size, buf) < 0) {
-	    HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "can't read boot block");
+	    HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL,
+			"unable to read boot block");
 	}
 	
 	/*
@@ -975,7 +980,7 @@ H5F_open(const char *name, uintn flags,
 	if (H5F_low_read(f->shared->lf, access_parms, H5D_XFER_DFLT,
 			 &addr1, variable_size, buf) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL,
-			"can't read boot block");
+			"unable to read boot block");
 	}
 	p = buf;
 	H5F_addr_decode(f, &p, &(f->shared->base_addr));
@@ -983,7 +988,7 @@ H5F_open(const char *name, uintn flags,
 	H5F_addr_decode(f, &p, &(f->shared->hdf5_eof));
 	if (H5G_ent_decode(f, &p, &root_ent) < 0) {
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-			"can't read root symbol entry");
+			"unable to read root symbol entry");
 	}
 	if (H5G_mkroot (f, &root_ent)<0) {
 	    HGOTO_ERROR (H5E_FILE, H5E_CANTOPENFILE, NULL,
@@ -1094,8 +1099,8 @@ H5F_open(const char *name, uintn flags,
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
-H5Fcreate(const char *filename, uintn flags, hid_t create_id,
+hid_t
+H5Fcreate (const char *filename, unsigned flags, hid_t create_id,
 	  hid_t access_id)
 {
     
@@ -1110,6 +1115,7 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
     hid_t		  ret_value = FAIL;
 
     FUNC_ENTER(H5Fcreate, FAIL);
+    H5TRACE4("i","sIuii",filename,flags,create_id,access_id);
 
     /* Check/fix arguments */
     if (!filename || !*filename) {
@@ -1207,8 +1213,8 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_id,
  *
  *-------------------------------------------------------------------------
  */
-hid_t 
-H5Fopen(const char *filename, uintn flags, hid_t access_id)
+hid_t
+H5Fopen (const char *filename, unsigned flags, hid_t access_id)
 {
     H5F_t		*new_file = NULL;	/* file struct for new file */
     const H5F_access_t	*access_parms;		/* pointer to the file access
@@ -1218,6 +1224,7 @@ H5Fopen(const char *filename, uintn flags, hid_t access_id)
     hid_t		  ret_value = FAIL;
 
     FUNC_ENTER(H5Fopen, FAIL);
+    H5TRACE3("i","sIui",filename,flags,access_id);
 
     /* Check/fix arguments. */
     if (!filename || !*filename) {
@@ -1237,12 +1244,13 @@ H5Fopen(const char *filename, uintn flags, hid_t access_id)
 
     /* Open the file */
     if (NULL==(new_file=H5F_open(filename, flags, NULL, access_parms))) {
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cant open file");
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file");
     }
 
     /* Get an atom for the file */
     if ((ret_value = H5I_register(H5_FILE, new_file)) < 0) {
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't atomize file");
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		    "unable to atomize file handle");
     }
 
  done:
@@ -1339,7 +1347,7 @@ H5F_flush(H5F_t *f, hbool_t invalidate)
     if (H5F_low_write(f->shared->lf, f->shared->access_parms,
     		      H5D_XFER_DFLT,
 		      &(f->shared->boot_addr), (size_t)(p-buf), buf)<0) {
-	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't write header");
+	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write header");
     }
     
     /* Flush file buffers to disk */
@@ -1462,19 +1470,20 @@ H5F_close(H5F_t *f)
     The file boot block is flushed to disk since it's contents may have
     changed.
 --------------------------------------------------------------------------*/
-herr_t 
-H5Fclose(hid_t fid)
+herr_t
+H5Fclose (hid_t fid)
 {
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Fclose, FAIL);
+    H5TRACE1("e","i",fid);
 
     /* Check/fix arguments. */
     if (H5_FILE != H5I_group(fid)) {
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file atom");
     }
     if (NULL == H5I_object(fid)) {
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize file");
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to unatomize file");
     }
 
     /*

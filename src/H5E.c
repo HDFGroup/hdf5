@@ -157,9 +157,10 @@ void *H5E_auto_data_g = stderr;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eset_auto (herr_t (*func)(void*client_data), void *client_data)
+H5Eset_auto (H5E_auto_t func, void *client_data)
 {
     FUNC_ENTER (H5Eset_auto, FAIL);
+    H5TRACE2("e","xx",func,client_data);
     
     H5E_auto_g = func;
     H5E_auto_data_g = client_data;
@@ -187,9 +188,10 @@ H5Eset_auto (herr_t (*func)(void*client_data), void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto (herr_t (**func)(void*), void **client_data)
+H5Eget_auto (H5E_auto_t *func, void **client_data)
 {
     FUNC_ENTER (H5Eget_auto, FAIL);
+    H5TRACE2("e","*x*x",func,client_data);
 
     if (func) *func = H5E_auto_g;
     if (client_data) *client_data = H5E_auto_data_g;
@@ -220,6 +222,7 @@ herr_t
 H5Eclear (void)
 {
     FUNC_ENTER (H5Eclear, FAIL);
+    H5TRACE0("e", "");
     /* FUNC_ENTER() does all the work */
     FUNC_LEAVE (SUCCEED);
 }
@@ -252,6 +255,7 @@ H5Eprint (FILE *stream)
     herr_t	status = FAIL;
     
     FUNC_ENTER (H5Eprint, FAIL);
+    /*NO TRACE*/
     
     if (!stream) stream = stderr;
     fprintf (stream, "HDF5-DIAG: Error detected in thread 0.");
@@ -288,6 +292,7 @@ H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
     herr_t	status = FAIL;
 
     FUNC_ENTER (H5Ewalk, FAIL);
+    H5TRACE3("e","Edxx",direction,func,client_data);
     status = H5E_walk (direction, func, client_data);
     FUNC_LEAVE (status);
 }
@@ -329,12 +334,14 @@ H5Ewalk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Ewalk_cb(int n, H5E_error_t *err_desc, void *client_data)
+H5Ewalk_cb (int n, H5E_error_t *err_desc, void *client_data)
 {
     FILE		*stream = (FILE *)client_data;
     const char		*maj_str = NULL;
     const char		*min_str = NULL;
     const int		indent = 2;
+
+    /*NO TRACE*/
 
     /* Check arguments */
     assert (err_desc);

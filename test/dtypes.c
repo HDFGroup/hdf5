@@ -227,7 +227,7 @@ static herr_t
 test_transient (void)
 {
     static hsize_t	ds_size[2] = {10, 20};
-    hid_t		file, type, space, dset, t2;
+    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1;
     
     printf ("%-70s", "Testing transient data types");
     if ((file=H5Fcreate (FILE_NAME_1, H5F_ACC_TRUNC|H5F_ACC_DEBUG,
@@ -342,7 +342,7 @@ test_transient (void)
 static herr_t
 test_named (void)
 {
-    hid_t		file, type, space, dset, t2, attr1;
+    hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, attr1=-1;
     herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
     

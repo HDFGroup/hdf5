@@ -958,7 +958,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
     H5F_rdcc_ent_t	*ent = NULL;
     intn		i, j, found = -1;
     H5F_istore_ud1_t	udata;			/*B-tree pass-through	*/
-    size_t		chunk_size;		/*size of a chunk	*/
+    size_t		chunk_size=0;		/*size of a chunk	*/
     herr_t		status;			/*func return status	*/
     void		*chunk=NULL;		/*the uncompressed chunk*/
     void		*temp=NULL;		/*temporary chunk buffer*/
@@ -1052,6 +1052,7 @@ H5F_istore_lock (H5F_t *f, const H5O_layout_t *layout,
 	}
     }
 
+    assert (chunk_size>0);
     if (found<0 && chunk_size<=f->shared->access_parms->rdcc_nbytes) {
 	/*
 	 * Add the chunk to the beginning of the cache after pruning the cache

@@ -753,7 +753,7 @@ H5F_addr_zerop(const haddr_t *addr)
 void
 H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
 {
-    uint		    i;
+    uintn		    i;
     haddr_t		    tmp;
 
     assert(f);
@@ -797,7 +797,7 @@ H5F_addr_encode(H5F_t *f, uint8 **pp, const haddr_t *addr)
 void
 H5F_addr_decode(H5F_t *f, const uint8 **pp, haddr_t *addr/*out*/)
 {
-    uint		    i;
+    uintn		    i;
     haddr_t		    tmp;
     uint8		    c;
     hbool_t		    all_zero = TRUE;

@@ -461,8 +461,65 @@ int64 HDstrtoll (const char *s, const char **rest, int base);
 /*
  * And now for a couple non-Posix functions...
  */
-extern char            *strdup(const char *s);
+extern char *strdup(const char *s);
 #define HDstrdup(S)             strdup(S)
+
+/*-------------------------------------------------------------------------
+ * Purpose:	These macros are inserted automatically just after the
+ *		FUNC_ENTER() macro of API functions and are used to trace
+ *		application program execution. Unless H5_DEBUG_API has been
+ *		defined they are no-ops.
+ *
+ * Arguments:	R	- Return type encoded as a string
+ *		T	- Argument types encoded as a string
+ *		A0-An	- Arguments.  The number at the end of the macro name
+ *		          indicates the number of arguments.
+ *
+ * Programmer:	Robb Matzke
+ *
+ * Modifications:
+ *------------------------------------------------------------------------- 
+ */
+#ifdef H5_DEBUG_API
+#define H5TRACE_DECL			  const char *RTYPE=NULL
+#define H5TRACE0(R,T)			  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T)
+#define H5TRACE1(R,T,A0)		  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0)
+#define H5TRACE2(R,T,A0,A1)		  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1)
+#define H5TRACE3(R,T,A0,A1,A2)	  	  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
+                                                   #A2,A2)
+#define H5TRACE4(R,T,A0,A1,A2,A3)	  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
+                                                   #A2,A2,#A3,A3)
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
+                                                   #A2,A2,#A3,A3,#A4,A4)
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	  RTYPE=R;			      \
+                                          H5_trace(0,FUNC,T,#A0,A0,#A1,A1,    \
+                                                   #A2,A2,#A3,A3,#A4,A4,      \
+                                                   #A5,A5)
+#define H5TRACE_RETURN(V)		  if (RTYPE) {			      \
+                                             H5_trace(1,NULL,RTYPE,NULL,V);   \
+                                             RTYPE=NULL;		      \
+                                          }
+#else
+#define H5TRACE_DECL			  /*void*/
+#define H5TRACE0(R,T)			  /*void*/
+#define H5TRACE1(R,T,A0)		  /*void*/
+#define H5TRACE2(R,T,A0,A1)		  /*void*/
+#define H5TRACE3(R,T,A0,A1,A2)		  /*void*/
+#define H5TRACE4(R,T,A0,A1,A2,A3)	  /*void*/
+#define H5TRACE5(R,T,A0,A1,A2,A3,A4)	  /*void*/
+#define H5TRACE6(R,T,A0,A1,A2,A3,A4,A5)	  /*void*/
+#define H5TRACE_RETURN(V)		  /*void*/
+#endif
+
+extern FILE *H5_trace_g;
+void H5_trace (hbool_t returning, const char *func, const char *type, ...);
+
 
 /*-------------------------------------------------------------------------
  * Purpose:     Register function entry for library initialization and code
@@ -508,16 +565,12 @@ extern char            *strdup(const char *s);
  *      function comes from the `INTERFACE_INIT' constant which must be
  *      defined in every source file.
  *
+ * 	Robb Matzke, 17 Jun 1998
+ *	Added auto variable RTYPE which is initialized by the tracing macros.
  *-------------------------------------------------------------------------
  */
 extern hbool_t library_initialize_g;   /*good thing C's lazy about extern! */
 extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
-
-/* Print S on file N followed by a newline */
-#define H5_PRINT(N,S) {							      \
-       write ((N), (S), strlen((S)));					      \
-       write ((N), "\n", 1);						      \
-}
 
 /* Is `S' the name of an API function? */
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
@@ -526,6 +579,7 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 
 #define FUNC_ENTER_INIT(func_name,interface_init_func,err) {		      \
    CONSTR (FUNC, #func_name);						      \
+   H5TRACE_DECL;							      \
    PABLO_SAVE (ID_ ## func_name);					      \
 									      \
    PABLO_TRACE_ON (PABLO_MASK, pablo_func_id);				      \
@@ -560,7 +614,6 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
 									      \
    /* Clear thread error stack entering public functions */		      \
    if (H5E_clearable_g && H5_IS_API (FUNC)) {		                      \
-       H5_PRINT (55, #func_name);					      \
        H5E_clear ();							      \
    }									      \
    {
@@ -581,6 +634,7 @@ extern hbool_t thread_initialize_g;    /*don't decl interface_initialize_g */
  *-------------------------------------------------------------------------
  */
 #define FUNC_LEAVE(return_value) HRETURN(return_value)}}
+
 
 /*
  * The FUNC_ENTER() and FUNC_LEAVE() macros make calls to Pablo functions

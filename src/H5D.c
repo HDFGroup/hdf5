@@ -178,7 +178,7 @@ H5D_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+H5Dcreate (hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t create_parms_id)
 {
     H5G_t		   *loc = NULL;
@@ -189,6 +189,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5D_create_t	   *create_parms = NULL;
 
     FUNC_ENTER(H5Dcreate, FAIL);
+    H5TRACE5("i","isiii",loc_id,name,type_id,space_id,create_parms_id);
 
     /* Check arguments */
     if (NULL == (loc = H5G_loc(loc_id))) {
@@ -252,13 +253,14 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dopen(hid_t loc_id, const char *name)
+H5Dopen (hid_t loc_id, const char *name)
 {
     H5G_t	*loc = NULL;		/*location holding the dataset	*/
     H5D_t	*dataset = NULL;	/*the dataset			*/
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Dopen, FAIL);
+    H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
     if (NULL == (loc = H5G_loc(loc_id))) {
@@ -305,11 +307,12 @@ H5Dopen(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dclose(hid_t dataset_id)
+H5Dclose (hid_t dataset_id)
 {
     H5D_t		   *dataset = NULL;	/* dataset object to release */
 
     FUNC_ENTER(H5Dclose, FAIL);
+    H5TRACE1("e","i",dataset_id);
 
     /* Check args */
     if (H5_DATASET != H5I_group(dataset_id) ||
@@ -355,6 +358,7 @@ H5Dget_space (hid_t dataset_id)
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_space, FAIL);
+    H5TRACE1("i","i",dataset_id);
 
     /* Check args */
     if (H5_DATASET!=H5I_group (dataset_id) ||
@@ -411,6 +415,7 @@ H5Dget_type (hid_t dataset_id)
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_type, FAIL);
+    H5TRACE1("i","i",dataset_id);
 
     /* Check args */
     if (H5_DATASET!=H5I_group (dataset_id) ||
@@ -466,6 +471,7 @@ H5Dget_create_plist (hid_t dataset_id)
     hid_t		ret_value = FAIL;
     
     FUNC_ENTER (H5Dget_create_plist, FAIL);
+    H5TRACE1("i","i",dataset_id);
 
     /* Check args */
     if (H5_DATASET!=H5I_group (dataset_id) ||
@@ -534,7 +540,7 @@ H5Dget_create_plist (hid_t dataset_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5Dread (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t xfer_parms_id, void *buf/*out*/)
 {
     H5D_t		   *dataset = NULL;
@@ -544,6 +550,8 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dread, FAIL);
+    H5TRACE5("e","iiiii",dataset_id,mem_type_id,mem_space_id,file_space_id,
+             xfer_parms_id);
 
     /* check arguments */
     if (H5_DATASET != H5I_group(dataset_id) ||
@@ -623,7 +631,7 @@ H5Dread(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
+H5Dwrite (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t xfer_parms_id, const void *buf)
 {
     H5D_t		   *dataset = NULL;
@@ -633,6 +641,8 @@ H5Dwrite(hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
     const H5D_xfer_t	   *xfer_parms = NULL;
 
     FUNC_ENTER(H5Dwrite, FAIL);
+    H5TRACE6("e","iiiiix",dataset_id,mem_type_id,mem_space_id,file_space_id,
+             xfer_parms_id,buf);
 
     /* check arguments */
     if (H5_DATASET != H5I_group(dataset_id) ||
@@ -698,6 +708,7 @@ H5Dextend (hid_t dataset_id, const hsize_t *size)
     H5D_t	*dataset = NULL;
     
     FUNC_ENTER (H5Dextend, FAIL);
+    H5TRACE2("e","i*h",dataset_id,size);
 
     /* Check args */
     if (H5_DATASET!=H5I_group (dataset_id) ||

@@ -839,8 +839,6 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	     * should copy the value to the true destination buffer.
 	     */
 	    if (d==dbuf) HDmemcpy (dp, d, dst->size);
-		
-	next:
 	    sp += direction * src->size;
 	    dp += direction * dst->size;
 	}

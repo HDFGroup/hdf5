@@ -108,13 +108,14 @@ H5S_term_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
+H5Screate_simple (int rank, const hsize_t *dims, const hsize_t *maxdims)
 {
     H5S_t	*ds = NULL;
     hid_t	ret_value = FAIL;
     int		i;
 
     FUNC_ENTER(H5Screate, FAIL);
+    H5TRACE3("i","Is*h*h",rank,dims,maxdims);
 
     /* Check arguments */
     if (rank<0) {
@@ -190,9 +191,10 @@ H5Screate_simple(int rank, const hsize_t *dims, const hsize_t *maxdims)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Sclose(hid_t space_id)
+H5Sclose (hid_t space_id)
 {
     FUNC_ENTER(H5Sclose, FAIL);
+    H5TRACE1("e","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) ||
@@ -311,6 +313,7 @@ H5Scopy (hid_t space_id)
     hid_t	ret_value = FAIL;
     
     FUNC_ENTER (H5Scopy, FAIL);
+    H5TRACE1("i","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE!=H5I_group (space_id) ||
@@ -419,12 +422,13 @@ H5S_copy(const H5S_t *src)
  *-------------------------------------------------------------------------
  */
 hsize_t
-H5Sget_npoints(hid_t space_id)
+H5Sget_npoints (hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     hsize_t		    ret_value = 0;
 
     FUNC_ENTER(H5Sget_npoints, 0);
+    H5TRACE1("h","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) ||
@@ -583,12 +587,13 @@ H5S_get_npoints_max(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_ndims(hid_t space_id)
+H5Sget_ndims (hid_t space_id)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
     FUNC_ENTER(H5Sget_ndims, FAIL);
+    H5TRACE1("Is","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) ||
@@ -668,12 +673,13 @@ H5S_get_ndims(const H5S_t *ds)
  *-------------------------------------------------------------------------
  */
 int
-H5Sget_dims(hid_t space_id, hsize_t dims[]/*out*/)
+H5Sget_dims (hid_t space_id, hsize_t dims[]/*out*/)
 {
     H5S_t		   *ds = NULL;
     intn		   ret_value = 0;
 
     FUNC_ENTER(H5Sget_dims, FAIL);
+    H5TRACE1("Is","i",space_id);
 
     /* Check args */
     if (H5_DATASPACE != H5I_group(space_id) ||
@@ -974,13 +980,14 @@ H5S_is_simple(const H5S_t *sdim)
 	This function determines the if a dataspace is "simple". ie. if it
     has orthogonal, evenly spaced dimensions.
 --------------------------------------------------------------------------*/
-hbool_t 
-H5Sis_simple(hid_t sid)
+hbool_t
+H5Sis_simple (hid_t sid)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     hbool_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Sis_simple, FAIL);
+    H5TRACE1("b","i",sid);
 
     /* Check args and all the boring stuff. */
     if ((space = H5I_object(sid)) == NULL)
@@ -1019,13 +1026,14 @@ H5Sis_simple(hid_t sid)
     be unlimited in size.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_space(hid_t sid, int rank, const hsize_t *dims)
+H5Sset_space (hid_t sid, int rank, const hsize_t *dims)
 {
     H5S_t		   *space = NULL;	/* dataspace to modify */
     intn		    u;	/* local counting variable */
     herr_t		    ret_value = SUCCEED;
 
     FUNC_ENTER(H5Sset_space, FAIL);
+    H5TRACE3("e","iIs*h",sid,rank,dims);
 
     /* Check args */
     if ((space = H5I_object(sid)) == NULL) {
@@ -1117,7 +1125,7 @@ H5Sset_space(hid_t sid, int rank, const hsize_t *dims)
     datasets which extend in arbitrary directions.
 --------------------------------------------------------------------------*/
 herr_t
-H5Sset_hyperslab(hid_t sid, const hssize_t *start, const hsize_t *count,
+H5Sset_hyperslab (hid_t sid, const hssize_t *start, const hsize_t *count,
 		 const hsize_t *stride)
 {
     H5S_t	*space = NULL;		/* dataspace to modify */
@@ -1126,6 +1134,7 @@ H5Sset_hyperslab(hid_t sid, const hssize_t *start, const hsize_t *count,
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER(H5Sset_hyperslab, FAIL);
+    H5TRACE4("e","i*Hs*h*h",sid,start,count,stride);
 
     /* Get the object */
     if (H5_DATASPACE != H5I_group(sid) || (space = H5I_object(sid)) == NULL) {
@@ -1212,6 +1221,7 @@ H5Sget_hyperslab (hid_t sid, hssize_t offset[]/*out*/, hsize_t size[]/*out*/,
     intn	ret_value = FAIL;
     
     FUNC_ENTER (H5Sget_hyperslab, FAIL);
+    H5TRACE1("Is","i",sid);
 
     /* Check args */
     if (H5_DATASPACE!=H5I_group (sid) || NULL==(ds=H5I_object (sid))) {

@@ -1,0 +1,201 @@
+#!/usr/bin/perl -w
+require 5.003;
+$Source = "";
+
+##############################################################################
+# A map from type name to type letter.  We use this map for two reasons:
+#  1. We want the debugging stuff in the source code to be as unobtrusive as
+#     possible, which means as compact as possible.
+#  2. It's easier (faster) to parse these one and two-letter types in the C
+#     functions that display debugging results.
+#
+# All type strings are one or two characters.  One-character strings
+# are always lower case and should be used for common types.
+# Two-character strings begin with an upper-case letter which is
+# usually the same as the package name.
+#
+%TypeString = ("hbool_t"                   => "b",
+               "double"                    => "d",
+               "H5D_layout_t"              => "Dl",
+               "H5D_transfer_t"            => "Dt",
+               "herr_t"                    => "e",
+               "H5E_direction_t"           => "Ed",
+               "H5E_error_t*"              => "Ee",
+               "H5G_link_t"                => "Gl",
+               "H5G_stat_t*"               => "Gs",
+               "hsize_t"                   => "h",
+               "hssize_t"                  => "Hs",
+               "hid_t"                     => "i",
+               "int"                       => "Is",
+               "unsigned"                  => "Iu",
+               "unsigned int"              => "Iu",
+               "MPI_Comm"                  => "Mc",
+               "MPI_Info"                  => "Mi",
+               "off_t"                     => "o",
+               "H5P_class_t"               => "p",
+               "char*"                     => "s",
+               "H5T_cset_t",               => "Tc",
+               "H5T_norm_t"                => "Tn",
+               "H5T_order_t"               => "To",
+               "H5T_pad_t"                 => "Tp",
+               "H5T_sign_t"                => "Ts",
+               "H5T_class_t"               => "Tt",
+               "H5T_str_t"                 => "Tz",
+               "void*"                     => "x",
+               "FILE*"                     => "x",
+               "H5A_operator_t"            => "x",
+	       "H5E_auto_t"                => "x",
+               "H5E_walk_t"                => "x",
+               "H5G_iterate_t"             => "x",
+               "H5T_conv_t"                => "x",
+               "H5Z_func_t"                => "x",
+               "size_t"                    => "z",
+               "H5Z_method_t"              => "Zm",
+               "ssize_t"                   => "Zs",
+              );
+
+##############################################################################
+# Print an error message.
+#
+sub errmesg ($$@) {
+  my ($file, $func, @mesg) = @_;
+  my ($mesg) = join "", @mesg;
+  my ($lineno) = 1;
+  if ($Source =~ /(.*?\n)($func)/s) {
+    local $_ = $1;
+    $lineno = tr/\n/\n/;
+  }
+
+  print "$file: in function \`$func\':\n";
+  print "$file:$lineno: $mesg\n";
+}
+
+##############################################################################
+# Given a C data type return the type string that goes with it.
+#
+sub argstring ($$$) {
+  my ($file, $func, $atype) = @_;
+  my ($ptr, $tstr) = (0,"!");
+
+  # Normalize the data type by removing redundant white space,
+  # certain type qualifiers, and indirection.
+  $atype =~ s/^\bconst\b//;
+  $atype =~ s/\b__unused__\b//g;
+  $atype =~ s/\s+/ /g;
+  $ptr = length $1 if  $atype =~ s/(\*+)//;
+  $atype =~ s/^\s+//;
+  $atype =~ s/\s+$//;
+  
+  if ($ptr>0 && exists $TypeString{"$atype*"}) {
+    --$ptr;
+    $tstr = $TypeString{"$atype*"};
+  } elsif (!exists $TypeString{$atype}) {
+    errmesg $file, $func, "unknown type \`$atype", '*'x$ptr, "\'";
+  } else {
+    $tstr = $TypeString{$atype};
+  }
+  return ("*" x $ptr) . $tstr;
+}
+
+##############################################################################
+# Given information about an API function, rewrite that function with
+# updated tracing information.
+#
+sub rewrite_func ($$$$$) {
+  my ($file, $type, $name, $args, $body) = @_;
+  my ($arg,$trace);
+  my (@arg_name, @arg_str);
+  local $_;
+
+  # Parse return value
+  my $rettype = argstring $file, $name, $type;
+  goto error if $rettype =~ /!/;
+
+  # Parse arguments
+  if ($args eq "void") {
+    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
+  } else {
+    my @args = split /,[\s\n]*/, $args;
+    for $arg (@args) {
+      unless ($arg=~/^(([a-z_A-Z]\w*\s+)+\**)
+	      ([a-z_A-Z]\w*)(\[\])?
+	      (\s*\/\*\s*(in|out|in,\s*out)\s*\*\/)?\s*$/x) {
+	errmesg $file, $name, "unable to parse \`$arg\'";
+	goto error;
+      } else {
+	my ($atype, $aname, $array, $adir) = ($1, $3, $4, $6);
+	$adir ||= "in";
+	next if $adir eq "out";
+	$atype =~ s/\s+$//;
+	$atype .= "*" if $array;
+	push @arg_name, $aname;
+	push @arg_str, argstring $file, $name, $atype;
+      }
+    }
+    $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\",\"";
+    $trace .= join("", @arg_str) . "\"";
+    my $len = 4 + length $trace;
+    for (@arg_name) {
+      if ($len + length >= 78) {
+	$trace .= ",\n             $_";
+	$len = 13 + length;
+      } else {
+	$trace .= ",$_";
+	$len += 1 + length;
+      }
+    }
+    $trace .= ");\n";
+  }
+  goto error if grep {/!/} @arg_str;
+
+  # The H5TRACE() statement
+  if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
+    if ($body =~ /\s*H5TRACE\d+\s*\(/) {
+      errmesg $file, $name, "warning: trace info was not updated";
+    } else {
+      errmesg $file, $name, "warning: trace info was not inserted";
+    }
+  } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
+    # Replaced an H5TRACE macro
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\s*\([ \t]*?\);)\n/"$1$2$trace"/es) {
+    # Added an H5TRACE macro after a FUNC_ENTER macro.
+  } else {
+    errmesg $file, $name, "unable to insert tracing information";
+    goto error;
+  }
+
+  
+ error:
+  return "\n$type\n$name ($args)$body";
+}
+
+##############################################################################
+# Process each source file, rewriting API functions with updated
+# tracing information.
+#
+my $total_api = 0;
+for $file (@ARGV) {
+  # Snarf up the entire file
+  open SOURCE, $file or die "$file: $!\n";
+  $Source = join "", <SOURCE>;
+  close SOURCE;
+
+  # Make modifications
+  my $original = $Source;
+  my $napi = $Source =~ s/\n([a-z]\w*(\s+[a-z]\w*)*)\s*\n #type
+                            (H5[A-Z]{1,2}[^_A-Z]\w*)      #name
+                            \s*\((.*?)\)                  #args
+                            (.*?\n\}[^\n]*)               #body
+                         /rewrite_func($file,$1,$3,$4,$5)/segx;
+  $total_api += $napi;
+  
+  # If the source changed then print out the new version
+  if ($original ne $Source) {
+    printf "%s: instrumented %d API function%s\n", 
+           $file, $napi, 1==$napi?"":"s";
+    rename $file, "$file~" or die "unable to make backup";
+    open SOURCE, ">$file" or die "unable to modify source";
+    print SOURCE $Source;
+    close SOURCE;
+  }
+}

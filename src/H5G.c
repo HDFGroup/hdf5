@@ -125,13 +125,14 @@ static void H5G_term_interface(void);
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
+H5Gcreate (hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_t		   *loc = NULL;
     H5G_t		   *grp = NULL;
     hid_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Gcreate, FAIL);
+    H5TRACE3("i","isz",loc_id,name,size_hint);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {
@@ -174,13 +175,14 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gopen(hid_t loc_id, const char *name)
+H5Gopen (hid_t loc_id, const char *name)
 {
     hid_t	ret_value = FAIL;
     H5G_t	*grp = NULL;
     H5G_t	*loc = NULL;
 
     FUNC_ENTER(H5Gopen, FAIL);
+    H5TRACE2("i","is",loc_id,name);
 
     /* Check args */
     if (NULL==(loc=H5G_loc(loc_id))) {
@@ -222,9 +224,10 @@ H5Gopen(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gclose(hid_t grp_id)
+H5Gclose (hid_t grp_id)
 {
     FUNC_ENTER(H5Gclose, FAIL);
+    H5TRACE1("e","i",grp_id);
 
     /* Check args */
     if (H5_GROUP != H5I_group(grp_id) ||
@@ -272,12 +275,13 @@ H5Gclose(hid_t grp_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gset(hid_t loc_id, const char *name)
+H5Gset (hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
     H5G_t	*loc = NULL;
 
     FUNC_ENTER(H5Gset, FAIL);
+    H5TRACE2("e","is",loc_id,name);
 
     /* Check/fix arguments */
     if (NULL==(loc=H5G_loc(loc_id))) {
@@ -332,12 +336,13 @@ H5Gset(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gpush(hid_t loc_id, const char *name)
+H5Gpush (hid_t loc_id, const char *name)
 {
     H5G_t	*grp = NULL;
     H5G_t	*loc = NULL;
 
     FUNC_ENTER(H5Gpush, FAIL);
+    H5TRACE2("e","is",loc_id,name);
 
     /* Check arguments */
     if (NULL == (loc = H5G_loc(loc_id))) {
@@ -396,11 +401,12 @@ H5Gpush(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gpop(hid_t loc_id)
+H5Gpop (hid_t loc_id)
 {
     H5G_t	*loc = NULL;
 
     FUNC_ENTER(H5Gpop, FAIL);
+    H5TRACE1("e","i",loc_id);
 
     /* Check arguments */
     if (NULL == (loc = H5G_loc(loc_id))) {
@@ -452,6 +458,7 @@ H5Giterate (hid_t loc_id, const char *name, int *idx,
     H5G_t		*loc = NULL;
     
     FUNC_ENTER (H5Giterate, FAIL);
+    H5TRACE5("e","is*Isxx",loc_id,name,idx,op,op_data);
 
     /* Check args */
     if (NULL==(loc=H5G_loc (loc_id))) {
@@ -518,6 +525,7 @@ H5Gmove (hid_t __unused__ loc_id, const char __unused__ *src,
 	 const char __unused__ *dst)
 {
     FUNC_ENTER (H5Gmove, FAIL);
+    H5TRACE3("e","iss",loc_id,src,dst);
 
     HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
 		   "unable to rename object (not implemented yet)");
@@ -561,6 +569,7 @@ H5Glink (hid_t loc_id, H5G_link_t type, const char *cur_name,
     H5G_t	*loc = NULL;
     
     FUNC_ENTER (H5Glink, FAIL);
+    H5TRACE4("e","iGlss",loc_id,type,cur_name,new_name);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {
@@ -610,6 +619,7 @@ herr_t
 H5Gunlink (hid_t __unused__ loc_id, const char __unused__ *name)
 {
     FUNC_ENTER (H5Gunlink, FAIL);
+    H5TRACE2("e","is",loc_id,name);
 
     HRETURN_ERROR (H5E_SYM, H5E_UNSUPPORTED, FAIL,
 		   "unable to unlink name (not implemented yet)");
@@ -644,6 +654,7 @@ H5Gstat (hid_t loc_id, const char *name, hbool_t follow_link,
     H5G_t	*loc = NULL;
     
     FUNC_ENTER (H5Gstat, FAIL);
+    H5TRACE3("e","isb",loc_id,name,follow_link);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {
@@ -686,6 +697,7 @@ H5Gget_linkval (hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
     H5G_t	*loc = NULL;
     
     FUNC_ENTER (H5Gget_linkval, FAIL);
+    H5TRACE3("e","isz",loc_id,name,size);
 
     /* Check arguments */
     if (NULL==(loc=H5G_loc (loc_id))) {

@@ -5,6 +5,7 @@
 #
 # 
 @COMMENCE@
+TRACE=perl ../bin/trace
 
 # Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. @CPPFLAGS@

@@ -324,10 +324,10 @@ H5O_attr_reset(void *_mesg)
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_attr_debug(H5F_t __unused__ *f, const void __unused__ *mesg, FILE __unused__ * stream,
-                intn __unused__ indent, intn __unused__ fwidth)
+H5O_attr_debug(H5F_t __unused__ *f, const void __unused__ *mesg,
+	       FILE __unused__ * stream, intn __unused__ indent,
+	       intn __unused__ fwidth)
 {
-    const H5A_t            *attr = (const H5A_t *) mesg;
 #ifdef LATER
     const char             *s;
     char                    buf[256];
@@ -338,7 +338,6 @@ H5O_attr_debug(H5F_t __unused__ *f, const void __unused__ *mesg, FILE __unused__
 
     /* check args */
     assert(f);
-    assert(attr);
     assert(stream);
     assert(indent >= 0);
     assert(fwidth >= 0);

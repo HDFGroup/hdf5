@@ -39,7 +39,6 @@ typedef enum {
     H5_DATATYPE,                /*group ID for Datatype objects              */
     H5_DATASPACE,               /*group ID for Dataspace objects             */
     H5_DATASET,                 /*group ID for Dataset objects               */
-    H5_DIRECTORY,               /*group ID for Directory objects             */
     H5_ATTR,                    /*group ID for Attribute objects             */
     MAXGROUP               /*highest group in group_t (Invalid as true group)*/
 } H5I_group_t;

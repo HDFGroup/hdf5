@@ -17,6 +17,7 @@
 ./bin/errors
 ./bin/install-sh
 ./bin/release
+./bin/trace
 ./bin/versinc
 ./config/BlankForm
 ./config/alpha-dec
@@ -110,6 +111,7 @@
 ./html/study_p1.gif
 ./html/study_p1.obj
 ./html/symtab
+./html/tracing.html
 ./html/version.gif
 ./html/version.obj
 ./src/.distdep

@@ -150,8 +150,8 @@ H5A_term_interface(void)
  *	
 --------------------------------------------------------------------------*/
 hid_t
-H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
-    hid_t create_plist)
+H5Acreate (hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
+	  hid_t create_plist)
 {
     void           	*obj = NULL;
     H5G_entry_t    	*ent = NULL;
@@ -161,6 +161,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t datatype, hid_t dataspace,
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Acreate, FAIL);
+    H5TRACE5("i","isiii",loc_id,name,datatype,dataspace,create_plist);
 
     /* check arguments */
     if (NULL==(obj=H5I_object (loc_id))) {
@@ -399,7 +400,7 @@ H5A_get_index(H5G_entry_t *ent, const char *name)
  *	The LOC_ID can also be a named (committed) data type.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen_name(hid_t loc_id, const char *name)
+H5Aopen_name (hid_t loc_id, const char *name)
 {
     H5G_entry_t    	*ent = NULL;   /*Symtab entry of object to attribute*/
     void           	*obj = NULL;
@@ -407,6 +408,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aopen_name, FAIL);
+    H5TRACE2("i","is",loc_id,name);
 
     /* check arguments */
     if(NULL == (obj = H5I_object(loc_id))) {
@@ -475,13 +477,14 @@ H5Aopen_name(hid_t loc_id, const char *name)
  *	
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen_idx(hid_t loc_id, unsigned idx)
+H5Aopen_idx (hid_t loc_id, unsigned idx)
 {
     H5G_entry_t	*ent = NULL;	/*Symtab entry of object to attribute */
     void        *obj = NULL;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Aopen_idx, FAIL);
+    H5TRACE2("i","iIu",loc_id,idx);
 
     /* check arguments */
     if(NULL == (obj = H5I_object(loc_id))) {
@@ -595,13 +598,14 @@ done:
         This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Awrite(hid_t attr_id, hid_t mem_dt, void *buf)
+H5Awrite (hid_t attr_id, hid_t mem_dt, void *buf)
 {
     H5A_t		   *attr = NULL;
     const H5T_t    *mem_type = NULL;
     herr_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Awrite, FAIL);
+    H5TRACE3("e","iix",attr_id,mem_dt,buf);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
@@ -762,13 +766,14 @@ done:
         This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aread(hid_t attr_id, hid_t mem_dt, void *buf)
+H5Aread (hid_t attr_id, hid_t mem_dt, void *buf)
 {
     H5A_t		   *attr = NULL;
     const H5T_t    *mem_type = NULL;
     herr_t		    ret_value = FAIL;
 
     FUNC_ENTER(H5Aread, FAIL);
+    H5TRACE3("e","iix",attr_id,mem_dt,buf);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
@@ -913,13 +918,14 @@ done:
     or resource leaks will develop.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aget_space(hid_t attr_id)
+H5Aget_space (hid_t attr_id)
 {
     H5A_t	*attr = NULL;
     H5S_t	*dst = NULL;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_space, FAIL);
+    H5TRACE1("i","i",attr_id);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
@@ -969,13 +975,14 @@ H5Aget_space(hid_t attr_id)
  *	then the data type is closed.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aget_type(hid_t attr_id)
+H5Aget_type (hid_t attr_id)
 {
     H5A_t		   *attr = NULL;
     H5T_t	*dst = NULL;
     hid_t		        ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_type, FAIL);
+    H5TRACE1("i","i",attr_id);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
@@ -1033,13 +1040,14 @@ H5Aget_type(hid_t attr_id)
     properly terminate the string.
 --------------------------------------------------------------------------*/
 size_t
-H5Aget_name(hid_t attr_id, char *buf, size_t buf_size)
+H5Aget_name (hid_t attr_id, char *buf, size_t buf_size)
 {
     H5A_t		*attr = NULL;
     size_t              copy_len=0;
     size_t		ret_value = FAIL;
 
     FUNC_ENTER(H5Aget_name, FAIL);
+    H5TRACE3("z","isz",attr_id,buf,buf_size);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) ||
@@ -1088,13 +1096,14 @@ H5Aget_name(hid_t attr_id, char *buf, size_t buf_size)
  *	The LOC_ID can also be a named (committed) data type.
 --------------------------------------------------------------------------*/
 int
-H5Anum_attrs(hid_t loc_id)
+H5Anum_attrs (hid_t loc_id)
 {
     H5G_entry_t    	*ent = NULL;	/*symtab ent of object to attribute */
     void           	*obj = NULL;
     int			ret_value = 0;
 
     FUNC_ENTER(H5Anum_attrs, FAIL);
+    H5TRACE1("Is","i",loc_id);
 
     /* check arguments */
     if(NULL == (obj = H5I_object(loc_id))) {
@@ -1172,7 +1181,7 @@ H5Anum_attrs(hid_t loc_id)
  *	
 --------------------------------------------------------------------------*/
 int
-H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
+H5Aiterate (hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 {
     H5G_entry_t		*ent = NULL;	/*symtab ent of object to attribute */
     void           	*obj = NULL;
@@ -1181,6 +1190,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     intn		idx;
 
     FUNC_ENTER(H5Aiterate, FAIL);
+    H5TRACE4("Is","i*Iuxx",loc_id,attr_num,op,op_data);
 
     /* check arguments */
     if(NULL == (obj = H5I_object(loc_id))) {
@@ -1259,7 +1269,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
  *	
 --------------------------------------------------------------------------*/
 herr_t
-H5Adelete(hid_t loc_id, const char *name)
+H5Adelete (hid_t loc_id, const char *name)
 {
     H5A_t       found_attr;
     H5G_entry_t	*ent = NULL;		/*symtab ent of object to attribute */
@@ -1268,6 +1278,7 @@ H5Adelete(hid_t loc_id, const char *name)
     herr_t	ret_value = FAIL;
 
     FUNC_ENTER(H5Aopen_name, FAIL);
+    H5TRACE2("e","is",loc_id,name);
 
     /* check arguments */
     if(NULL == (obj = H5I_object(loc_id))) {
@@ -1342,9 +1353,10 @@ H5Adelete(hid_t loc_id, const char *name)
     attribute ID will result in undefined behavior.
 --------------------------------------------------------------------------*/
 herr_t
-H5Aclose(hid_t attr_id)
+H5Aclose (hid_t attr_id)
 {
     FUNC_ENTER(H5Aclose, FAIL);
+    H5TRACE1("e","i",attr_id);
 
     /* check arguments */
     if (H5_ATTR != H5I_group(attr_id) || NULL == H5I_object(attr_id)) {

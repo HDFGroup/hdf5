@@ -146,12 +146,13 @@ H5P_term_interface(void)
  *  lists.
 --------------------------------------------------------------------------*/
 hid_t
-H5Pcreate(H5P_class_t type)
+H5Pcreate (H5P_class_t type)
 {
     hid_t		    ret_value = FAIL;
     void		   *tmpl = NULL;
 
     FUNC_ENTER(H5Pcreate, FAIL);
+    H5TRACE1("i","p",type);
 
     /* Allocate a new property list and initialize it with default values */
     switch (type) {
@@ -241,12 +242,13 @@ H5P_create(H5P_class_t type, void *tmpl)
 	This function releases access to a property list object
 --------------------------------------------------------------------------*/
 herr_t
-H5Pclose(hid_t tid)
+H5Pclose (hid_t tid)
 {
     H5P_class_t		type;
     void		*tmpl = NULL;
 
     FUNC_ENTER(H5Pclose, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if ((type=H5Pget_class (tid))<0 ||
@@ -413,12 +415,13 @@ H5Pget_class(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
+H5Pget_version (hid_t tid, int *boot/*out*/, int *freelist/*out*/,
 	       int *stab/*out*/, int *shhdr/*out*/)
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pget_version, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -453,12 +456,13 @@ H5Pget_version(hid_t tid, int *boot/*out*/, int *freelist/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_userblock(hid_t tid, hsize_t size)
+H5Pset_userblock (hid_t tid, hsize_t size)
 {
     uintn		    i;
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_userblock, FAIL);
+    H5TRACE2("e","ih",tid,size);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -498,11 +502,12 @@ H5Pset_userblock(hid_t tid, hsize_t size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_userblock(hid_t tid, hsize_t *size)
+H5Pget_userblock (hid_t tid, hsize_t *size)
 {
     H5F_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Pget_userblock, FAIL);
+    H5TRACE2("e","i*h",tid,size);
 
     /* Check args */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -551,6 +556,7 @@ H5Pset_alignment (hid_t fapl_id, hsize_t threshold, hsize_t alignment)
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_alignment, FAIL);
+    H5TRACE3("e","ihh",fapl_id,threshold,alignment);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5Pget_class (fapl_id) ||
@@ -596,6 +602,7 @@ H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
     H5F_access_t	*fapl = NULL;
 
     FUNC_ENTER (H5Pget_alignment, FAIL);
+    H5TRACE1("e","i",fapl_id);
 
     /* Check args */
     if (H5P_FILE_ACCESS != H5Pget_class (fapl_id) ||
@@ -631,11 +638,12 @@ H5Pget_alignment (hid_t fapl_id, hsize_t *threshold/*out*/,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
+H5Pset_sizes (hid_t tid, size_t sizeof_addr, size_t sizeof_size)
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_sizeof_addr, FAIL);
+    H5TRACE3("e","izz",tid,sizeof_addr,sizeof_size);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -685,12 +693,13 @@ H5Pset_sizes(hid_t tid, size_t sizeof_addr, size_t sizeof_size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sizes(hid_t tid,
+H5Pget_sizes (hid_t tid,
 	     size_t *sizeof_addr /*out */ , size_t *sizeof_size /*out */ )
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pget_sizes, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check args */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -737,11 +746,12 @@ H5Pget_sizes(hid_t tid,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_sym_k(hid_t tid, int ik, int lk)
+H5Pset_sym_k (hid_t tid, int ik, int lk)
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
+    H5TRACE3("e","iIsIs",tid,ik,lk);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -779,11 +789,12 @@ H5Pset_sym_k(hid_t tid, int ik, int lk)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
+H5Pget_sym_k (hid_t tid, int *ik /*out */ , int *lk /*out */ )
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pget_sym_k, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -819,11 +830,12 @@ H5Pget_sym_k(hid_t tid, int *ik /*out */ , int *lk /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_istore_k(hid_t tid, int ik)
+H5Pset_istore_k (hid_t tid, int ik)
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_istore_k, FAIL);
+    H5TRACE2("e","iIs",tid,ik);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -860,11 +872,12 @@ H5Pset_istore_k(hid_t tid, int ik)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k(hid_t tid, int *ik /*out */ )
+H5Pget_istore_k (hid_t tid, int *ik /*out */ )
 {
     H5F_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pget_istore_k, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_CREATE != H5Pget_class(tid) ||
@@ -896,11 +909,12 @@ H5Pget_istore_k(hid_t tid, int *ik /*out */ )
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_layout(hid_t tid, H5D_layout_t layout)
+H5Pset_layout (hid_t tid, H5D_layout_t layout)
 {
     H5D_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_layout, FAIL);
+    H5TRACE2("e","iDl",tid,layout);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
@@ -972,12 +986,13 @@ H5Pget_layout(hid_t tid)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_chunk(hid_t tid, int ndims, const hsize_t dim[])
+H5Pset_chunk (hid_t tid, int ndims, const hsize_t dim[])
 {
     int			    i;
     H5D_create_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_chunk, FAIL);
+    H5TRACE3("e","iIs*h",tid,ndims,dim);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
@@ -1034,12 +1049,13 @@ H5Pset_chunk(hid_t tid, int ndims, const hsize_t dim[])
  *-------------------------------------------------------------------------
  */
 int
-H5Pget_chunk(hid_t tid, int max_ndims, hsize_t dim[]/*out*/)
+H5Pget_chunk (hid_t tid, int max_ndims, hsize_t dim[]/*out*/)
 {
     int			i;
     H5D_create_t	*tmpl = NULL;
 
     FUNC_ENTER(H5Pget_chunk, FAIL);
+    H5TRACE2("Is","iIs",tid,max_ndims);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(tid) ||
@@ -1094,6 +1110,7 @@ H5Pset_external (hid_t plist_id, const char *name, off_t offset, hsize_t size)
     H5D_create_t	*plist = NULL;
 
     FUNC_ENTER(H5Pset_external, FAIL);
+    H5TRACE4("e","isoh",plist_id,name,offset,size);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
@@ -1168,6 +1185,7 @@ H5Pget_external_count (hid_t plist_id)
     H5D_create_t	*plist = NULL;
     
     FUNC_ENTER (H5Pget_external_count, FAIL);
+    H5TRACE1("Is","i",plist_id);
     
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
@@ -1216,6 +1234,7 @@ H5Pget_external (hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
     H5D_create_t	*plist = NULL;
     
     FUNC_ENTER (H5Pget_external, FAIL);
+    H5TRACE3("e","iIsz",plist_id,idx,name_size);
     
     /* Check arguments */
     if (H5P_DATASET_CREATE != H5Pget_class(plist_id) ||
@@ -1298,6 +1317,7 @@ H5Pset_stdio (hid_t tid)
     H5F_access_t	*tmpl = NULL;
     
     FUNC_ENTER (H5Pset_stdio, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -1338,6 +1358,7 @@ H5Pget_stdio (hid_t tid)
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_stdio, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -1378,6 +1399,7 @@ H5Pset_sec2 (hid_t tid)
     H5F_access_t	*tmpl = NULL;
     
     FUNC_ENTER (H5Pset_sec2, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -1418,6 +1440,7 @@ H5Pget_sec2 (hid_t tid)
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_sec2, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -1462,6 +1485,7 @@ H5Pset_core (hid_t tid, size_t increment)
     H5F_access_t	*tmpl = NULL;
     
     FUNC_ENTER (H5Pset_core, FAIL);
+    H5TRACE2("e","iz",tid,increment);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -1509,6 +1533,7 @@ H5Pget_core (hid_t tid, size_t *increment/*out*/)
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_core, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -1556,6 +1581,7 @@ H5Pset_split (hid_t tid, const char *meta_ext, hid_t meta_tid,
     H5F_access_t	*raw_tmpl = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_split, FAIL);
+    H5TRACE5("e","isisi",tid,meta_ext,meta_tid,raw_ext,raw_tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -1623,6 +1649,7 @@ H5Pget_split (hid_t tid, size_t meta_ext_size, char *meta_ext/*out*/,
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_split, FAIL);
+    H5TRACE3("e","izz",tid,meta_ext_size,raw_ext_size);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -1701,6 +1728,7 @@ H5Pset_family (hid_t tid, hsize_t memb_size, hid_t memb_tid)
     H5F_access_t	*memb_tmpl = &H5F_access_dflt;
     
     FUNC_ENTER (H5Pset_family, FAIL);
+    H5TRACE3("e","ihi",tid,memb_size,memb_tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -1757,6 +1785,7 @@ H5Pget_family (hid_t tid, hsize_t *memb_size/*out*/, hid_t *memb_tid/*out*/)
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_family, FAIL);
+    H5TRACE1("e","i",tid);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -1815,6 +1844,7 @@ H5Pset_cache (hid_t tid, int mdc_nelmts, size_t rdcc_nbytes,
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pset_cache, FAIL);
+    H5TRACE4("e","iIszd",tid,mdc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5Pget_class (tid) ||
@@ -1867,6 +1897,7 @@ H5Pget_cache (hid_t tid, int *mdc_nelmts, size_t *rdcc_nbytes,
     H5F_access_t	*fapl = NULL;
     
     FUNC_ENTER (H5Pget_cache, FAIL);
+    H5TRACE4("e","i*Is*z*d",tid,mdc_nelmts,rdcc_nbytes,rdcc_w0);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS!=H5Pget_class (tid) ||
@@ -1919,6 +1950,7 @@ H5Pset_buffer (hid_t plist_id, size_t size, void *tconv, void *bkg)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_buffer, FAIL);
+    H5TRACE4("e","izxx",plist_id,size,tconv,bkg);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
@@ -1962,6 +1994,7 @@ H5Pget_buffer (hid_t plist_id, void **tconv/*out*/, void **bkg/*out*/)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pget_buffer, 0);
+    H5TRACE1("z","i",plist_id);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
@@ -2004,6 +2037,7 @@ H5Pset_preserve (hid_t plist_id, hbool_t status)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
+    H5TRACE2("e","ib",plist_id,status);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
@@ -2041,6 +2075,7 @@ H5Pget_preserve (hid_t plist_id)
     H5D_xfer_t		*plist = NULL;
     
     FUNC_ENTER (H5Pset_preserve, FAIL);
+    H5TRACE1("Is","i",plist_id);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class (plist_id) ||
@@ -2085,6 +2120,7 @@ H5Pset_compression (hid_t plist_id, H5Z_method_t method, unsigned int flags,
     H5D_create_t	*plist = NULL;
     
     FUNC_ENTER (H5Pset_compression, FAIL);
+    H5TRACE5("e","iZmIuzx",plist_id,method,flags,cd_size,client_data);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
@@ -2187,6 +2223,7 @@ H5Pset_deflate (hid_t plist_id, int level)
     H5D_create_t	*plist = NULL;
     
     FUNC_ENTER (H5Pset_deflate, FAIL);
+    H5TRACE2("e","iIs",plist_id,level);
 
     /* Check arguments */
     if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
@@ -2234,6 +2271,7 @@ H5Pget_deflate (hid_t plist_id)
     H5D_create_t	*plist = NULL;
     
     FUNC_ENTER (H5Pget_deflate, FAIL);
+    H5TRACE1("Is","i",plist_id);
     
     /* Check arguments */
     if (H5P_DATASET_CREATE!=H5Pget_class (plist_id) ||
@@ -2309,6 +2347,7 @@ H5Pset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info)
     H5F_access_t	   *tmpl = NULL;
 
     FUNC_ENTER(H5Pset_mpi, FAIL);
+    H5TRACE3("e","iMcMi",tid,comm,info);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class(tid) ||
@@ -2363,6 +2402,7 @@ H5Pget_mpi (hid_t tid, MPI_Comm *comm, MPI_Info *info)
     H5F_access_t	*tmpl = NULL;
 
     FUNC_ENTER (H5Pget_mpi, FAIL);
+    H5TRACE3("e","i*Mc*Mi",tid,comm,info);
 
     /* Check arguments */
     if (H5P_FILE_ACCESS != H5Pget_class (tid) ||
@@ -2424,6 +2464,7 @@ H5Pset_xfer (hid_t tid, H5D_transfer_t data_xfer_mode)
     H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER(H5Pset_xfer, FAIL);
+    H5TRACE2("e","iDt",tid,data_xfer_mode);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class(tid) ||
@@ -2473,6 +2514,7 @@ H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
     H5D_xfer_t		*plist = NULL;
 
     FUNC_ENTER (H5Pget_xfer, FAIL);
+    H5TRACE2("e","i*Dt",tid,data_xfer_mode);
 
     /* Check arguments */
     if (H5P_DATASET_XFER != H5Pget_class(tid) ||
@@ -2512,7 +2554,7 @@ H5Pget_xfer (hid_t tid, H5D_transfer_t *data_xfer_mode)
  * parameter settings.
 --------------------------------------------------------------------------*/
 hid_t
-H5Pcopy(hid_t tid)
+H5Pcopy (hid_t tid)
 {
     const void		   *tmpl = NULL;
     void		   *new_tmpl = NULL;
@@ -2521,6 +2563,7 @@ H5Pcopy(hid_t tid)
     H5I_group_t		    group;
 
     FUNC_ENTER(H5Pcopy, FAIL);
+    H5TRACE1("i","i",tid);
 
     /* Check args */
     if (NULL == (tmpl = H5I_object(tid)) ||
