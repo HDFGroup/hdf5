@@ -3799,7 +3799,7 @@ H5Tenum_nameof(hid_t type, void *value, char *name/*out*/, size_t size)
     H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tenum_nameof, FAIL);
-    H5TRACE4("i","ixxz",type,value,name,size);
+    H5TRACE4("e","ixxz",type,value,name,size);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type) ||
@@ -3849,7 +3849,7 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     H5T_t	*dt = NULL;
 
     FUNC_ENTER(H5Tenum_valueof, FAIL);
-    H5TRACE3("i","isx",type,name,value);
+    H5TRACE3("e","isx",type,name,value);
 
     /* Check args */
     if (H5I_DATATYPE!=H5I_get_type(type) ||

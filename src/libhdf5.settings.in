@@ -11,8 +11,8 @@ Libraries:		@STATIC_SHARED@
 Parallel support:	@PARALLEL@
 Installation point:	@prefix@
 Compiler:		@CC_VERSION@
-Compiler switches:	@CFLAGS@
-Extra libraries:	@LIBS@
+Compiler switches:	@CFLAGS@ @CPPFLAGS@
+Extra libraries:	@LDFLAGS@ @LIBS@
 Archiver:		@AR@
 Ranlib:			@RANLIB@
 Debugged Packages:	@DEBUG_PKG@
