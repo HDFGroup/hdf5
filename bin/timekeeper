@@ -20,7 +20,7 @@
 # Created Date: 2004/12/23
 
 # variable initialization
-waitperiod=300		# default to 5 hours
+waitperiod=`expr 3600 \* 5`		# default to 5 hours
 debugtimelimit=
 debugflag=		# no debug
 
