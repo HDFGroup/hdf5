@@ -372,7 +372,7 @@ dnl The reason we need to check for so many libs because globus is not
 dnl quite modular yet.  Globus folks plan to reduce the library dependencies.
 dnl
 AC_SUBST(GASS)
-sASS=yes
+GASS=yes
 AC_SUBST(TESTGASS)
 TESTGASS='$(srcdir)/testgass'
 

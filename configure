@@ -4460,7 +4460,7 @@ fi
 esac
 
 
-sASS=yes
+GASS=yes
 
 TESTGASS='$(srcdir)/testgass'
 
