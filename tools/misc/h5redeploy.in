@@ -116,7 +116,7 @@ for x in $h5tools; do
     fi
 done
 
-if [ -z $foundtools ]; then
+if [ -z "$foundtools" ]; then
     ERROR "found no tools to modify"
     exit 1
 fi
