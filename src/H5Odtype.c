@@ -267,6 +267,9 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                             H5MM_xfree(dt->u.compnd.memb);
                             HRETURN_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to create array datatype");
                         }
+
+                        /* Close the base type for the array */
+                        H5T_close(temp_type);
                         
                         /* Make the array type the type that is set for the field */
                         temp_type=array_dt;
