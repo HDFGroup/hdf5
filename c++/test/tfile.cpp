@@ -337,8 +337,9 @@ test_file_size(void)
 	H5File fid( FILE4, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
         // Get file size
-        haddr_t file_size = fid.getFileSize();
-        CHECK(file_size, FAIL, "H5File::getFileSize");
+        hsize_t file_size;
+        herr_t ret = fid.getFileSize(&file_size);
+        CHECK(ret, FAIL, "H5File::getFileSize");
 
         // Check if file size is reasonable.  It's supposed to be 2KB now.
         if(file_size<1*KB || file_size>4*KB)
