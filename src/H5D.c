@@ -1316,7 +1316,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Dget_space
+ * Function:	H5Dget_space 
  *
  * Purpose:	Returns a copy of the file data space for a dataset.
  *
@@ -2146,6 +2146,7 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
 
     /* Initialize the shared dataset space */
     if(NULL == (new_dset->shared = H5D_new(dcpl_id,TRUE,has_vl_type)))
+        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /*
      * Set the dataset's checked_filters flag to enable writing.
@@ -2231,9 +2232,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &new_dset->shared->efl) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list")
 
-        /* Get the dataset's data storage method */
-        if(H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, &(new_dset->shared->layout.type)) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout")
+        /* Set the dataset's data storage method */
+        new_dset->shared->layout.type=dcpl_layout;
     } /* end if */
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
@@ -2273,16 +2273,16 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                     }
 
                     /* Set the I/O functions for this layout type */
-                    new_dset->shared->layout.readvv=H5O_efl_readvv;
-                    new_dset->shared->layout.writevv=H5O_efl_writevv;
+                    new_dset->shared->io_ops.readvv=H5D_efl_readvv;
+                    new_dset->shared->io_ops.writevv=H5D_efl_writevv;
                 } /* end if */
                 else {
                     if (ndims>0 && max_dim[0]>dim[0])
                         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, NULL, "extendible contiguous non-external dataset")
 
                     /* Set the I/O functions for this layout type */
-                    new_dset->shared->layout.readvv=H5D_contig_readvv;
-                    new_dset->shared->layout.writevv=H5D_contig_writevv;
+                    new_dset->shared->io_ops.readvv=H5D_contig_readvv;
+                    new_dset->shared->io_ops.writevv=H5D_contig_writevv;
                 } /* end else */
 
                 /* Compute the total size of a chunk */
@@ -2332,8 +2332,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                     new_dset->shared->layout.u.chunk.size *= new_dset->shared->layout.u.chunk.dim[u];
 
                 /* Set the I/O functions for this layout type */
-                new_dset->shared->layout.readvv=H5D_istore_readvv;
-                new_dset->shared->layout.writevv=H5D_istore_writevv;
+                new_dset->shared->io_ops.readvv=H5D_istore_readvv;
+                new_dset->shared->io_ops.writevv=H5D_istore_writevv;
 
                 /* Initialize the chunk cache for the dataset */
                 if(H5D_istore_init(file,new_dset)<0)
@@ -2365,8 +2365,8 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
 
                 /* Set the I/O functions for this layout type */
-                new_dset->shared->layout.readvv=H5D_compact_readvv;
-                new_dset->shared->layout.writevv=H5D_compact_writevv;
+                new_dset->shared->io_ops.readvv=H5D_compact_readvv;
+                new_dset->shared->io_ops.writevv=H5D_compact_writevv;
             } /* end case */
             break;
 
@@ -2605,10 +2605,10 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
     assert (ent);
     
     /* Allocate the dataset structure */
-    /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
     if(NULL==(dataset=H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
     if(NULL==(dataset->shared = H5D_new(H5P_DATASET_CREATE_DEFAULT,FALSE,FALSE)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -2671,8 +2671,8 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             } /* end if */
 
             /* Set the I/O functions for this layout type */
-            dataset->shared->layout.readvv=H5D_contig_readvv;
-            dataset->shared->layout.writevv=H5D_contig_writevv;
+            dataset->shared->io_ops.readvv=H5D_contig_readvv;
+            dataset->shared->io_ops.writevv=H5D_contig_writevv;
             break;
 
         case H5D_CHUNKED:
@@ -2697,14 +2697,14 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             }
 
             /* Set the I/O functions for this layout type */
-            dataset->shared->layout.readvv=H5D_istore_readvv;
-            dataset->shared->layout.writevv=H5D_istore_writevv;
+            dataset->shared->io_ops.readvv=H5D_istore_readvv;
+            dataset->shared->io_ops.writevv=H5D_istore_writevv;
             break;
             
         case H5D_COMPACT:
             /* Set the I/O functions for this layout type */
-            dataset->shared->layout.readvv=H5D_compact_readvv;
-            dataset->shared->layout.writevv=H5D_compact_writevv;
+            dataset->shared->io_ops.readvv=H5D_compact_readvv;
+            dataset->shared->io_ops.writevv=H5D_compact_writevv;
             break;
 
         default:
@@ -2782,8 +2782,8 @@ H5D_open_oid(const H5G_entry_t *ent, hid_t dxpl_id)
             	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set external file list")
 
             /* Override the I/O functions for this layout type */
-            dataset->shared->layout.readvv=H5O_efl_readvv;
-            dataset->shared->layout.writevv=H5O_efl_writevv;
+            dataset->shared->io_ops.readvv=H5D_efl_readvv;
+            dataset->shared->io_ops.writevv=H5D_efl_writevv;
         } /* end if */
     } /* end if */
 
@@ -2863,7 +2863,7 @@ H5D_close(H5D_t *dataset)
     FUNC_ENTER_NOAPI(H5D_close, FAIL)
 
     /* check args */
-    assert(dataset && dataset->ent.file);
+    assert(dataset && dataset->ent.file && dataset->shared);
     assert(dataset->shared->fo_count >0);
 
     /* Dump debugging info */
@@ -2903,7 +2903,7 @@ H5D_close(H5D_t *dataset)
                 /* Free the buffer for the raw data for compact datasets */
                 dataset->shared->layout.u.compact.buf=H5MM_xfree(dataset->shared->layout.u.compact.buf);
                 break;
-            
+
             default:
                 assert ("not implemented yet" && 0);
 #ifdef NDEBUG

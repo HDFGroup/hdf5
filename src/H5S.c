@@ -43,24 +43,17 @@ static htri_t H5S_is_simple(const H5S_t *sdim);
 static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
 
-#ifdef H5_HAVE_PARALLEL
-htri_t H5S_get_collective_io_consensus(const H5F_t *file,
-                                       const htri_t local_opinion,
-                                       const unsigned flags);
-#endif /* H5_HAVE_PARALLEL */
-
-
 #ifdef H5S_DEBUG
 /* Names of the selection names, for debugging */
 static const char *H5S_sel_names[]={
     "none", "point", "hyperslab", "all"
 };
-#endif /* H5S_DEBUG */
 
 /* The path table, variable length */
-static H5S_conv_t		**H5S_conv_g = NULL;
-static size_t			H5S_aconv_g = 0;	/*entries allocated*/
-static size_t			H5S_nconv_g = 0;	/*entries used*/
+static H5S_iostats_t		**H5S_iostats_g = NULL;
+static size_t			H5S_aiostats_g = 0;	/*entries allocated*/
+static size_t			H5S_niostats_g = 0;	/*entries used*/
+#endif /* H5S_DEBUG */
 
 #ifdef H5_HAVE_PARALLEL
 /* Global vars whose value can be set from environment variable also */
@@ -138,14 +131,13 @@ done:
 int
 H5S_term_interface(void)
 {
-    size_t	i;
     int	n=0;
-    
 #ifdef H5S_DEBUG
+    size_t	i;
     int		j, nprints=0;
-    H5S_conv_t	*path=NULL;
+    H5S_iostats_t	*path=NULL;
     char	buf[256];
-#endif
+#endif /* H5S_DEBUG */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface);
 
@@ -158,8 +150,8 @@ H5S_term_interface(void)
 	     * Print statistics about each conversion path.
 	     */
 	    if (H5DEBUG(S)) {
-		for (i=0; i<H5S_nconv_g; i++) {
-		    path = H5S_conv_g[i];
+		for (i=0; i<H5S_niostats_g; i++) {
+		    path = H5S_iostats_g[i];
 		    for (j=0; j<2; j++) {
 			if (0==path->stats[j].gath_ncalls &&
 			    0==path->stats[j].scat_ncalls &&
@@ -268,16 +260,18 @@ H5S_term_interface(void)
 		    }
 		}
 	    }
-#endif
+#endif /* H5S_DEBUG */
 
 	    /* Free data types */
 	    H5I_dec_type_ref(H5I_DATASPACE);
 
+#ifdef H5S_DEBUG
 	    /* Clear/free conversion table */
-	    for (i=0; i<H5S_nconv_g; i++)
-                H5MM_xfree(H5S_conv_g[i]);
-	    H5S_conv_g = H5MM_xfree(H5S_conv_g);
-	    H5S_nconv_g = H5S_aconv_g = 0;
+	    for (i=0; i<H5S_niostats_g; i++)
+                H5MM_xfree(H5S_iostats_g[i]);
+	    H5S_iostats_g = H5MM_xfree(H5S_iostats_g);
+	    H5S_niostats_g = H5S_aiostats_g = 0;
+#endif /* H5S_DEBUG */
 
 	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
@@ -1401,103 +1395,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5S_get_collective_io_consensus
- *
- * Purpose:     Compare notes with all other processes involved in this I/O
- *              and see if all are go for collective I/O.
- *
- *              If all are, return TRUE.
- *
- *              If any process can't manage collective I/O, then collective
- *              I/O is impossible, and we return FALSE.
- *
- *              If the flags indicate that collective I/O is impossible,
- *              skip the interprocess communication and just return FALSE.
- *
- *              In any error is detected, return FAIL.
- *
- * Return:      Success:        TRUE or FALSE
- *
- *              Failure:        FAIL
- *
- * Programmer:  JRM -- 8/30/04
- *
- * Modifications:
- *
- *      None.
- *
- *-------------------------------------------------------------------------
- */
-
-#ifdef H5_HAVE_PARALLEL
-htri_t
-H5S_get_collective_io_consensus(const H5F_t *file,
-                                const htri_t local_opinion,
-                                const unsigned flags)
-{
-    htri_t      ret_value = FAIL;       /* will update if successful */
-    MPI_Comm    comm;
-    int         int_local_opinion;
-    int         consensus;
-    int         mpi_result;
-
-    FUNC_ENTER_NOAPI(H5S_get_collective_io_consensus, NULL);
-
-    HDassert ( ( local_opinion == TRUE ) || ( local_opinion == FALSE ) );
-
-    /* Don't do the interprocess communication unless the Parallel I/O
-     * conversion flag is set -- there may not be other processes to
-     * talk to.
-     */
-    if ( ! ( flags & flags&H5S_CONV_PAR_IO_POSSIBLE ) ) {
-
-        HGOTO_DONE(FALSE);
-    }
-
-    comm = H5F_mpi_get_comm(file);
-
-    if ( comm == MPI_COMM_NULL )
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, \
-                    "can't retrieve MPI communicator")
-
-    if ( local_opinion == TRUE ) {
-
-        int_local_opinion = 1;
-
-    } else {
-
-        int_local_opinion = 0;
-    }
-
-    mpi_result = MPI_Allreduce((void *)(&int_local_opinion),
-                               (void *)(&consensus),
-                               1,
-                               MPI_INT,
-                               MPI_LAND,
-                               comm);
-
-    if ( mpi_result != MPI_SUCCESS )
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_result)
-
-    if ( consensus ) {
-
-        ret_value = TRUE;
-
-    } else {
-
-        ret_value = FALSE;
-    }
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value);
-
-} /* H5S_get_collective_io_consensus() */
-
-#endif /* H5_HAVE_PARALLEL */
-
+#ifdef H5S_DEBUG
 
 /*-------------------------------------------------------------------------
  * Function:	H5S_find
@@ -1527,41 +1425,18 @@ done:
  *	along with other data whose scope is the conversion path (like path
  *	statistics).
  *
- *      John Mainzer, 8/30/04
- *      Modified code to check with all other processes that have the
- *      file open before OKing collective I/O.
+ *	John Mainzer, 8/30/04
+ *	Modified code to check with all other processes that have the 
+ *	file open before OKing collective I/O.
  *
  *-------------------------------------------------------------------------
  */
-H5S_conv_t *
-H5S_find (const H5F_t 
-#ifndef H5_HAVE_PARALLEL
-UNUSED
-#endif/* H5_HAVE_PARALLEL*/
-*file,
-const H5S_t *mem_space, const H5S_t *file_space, unsigned
-#ifndef H5_HAVE_PARALLEL
-UNUSED
-#endif /* H5_HAVE_PARALLEL */
-flags, hbool_t
-#ifndef H5_HAVE_PARALLEL
-UNUSED
-#endif /* H5_HAVE_PARALLEL */
-*use_par_opt_io,
-#ifndef H5_HAVE_PARALLEL
-UNUSED
-#endif
-const H5O_layout_t *layout
-
-)
+H5S_iostats_t *
+H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 {
-    H5S_conv_t	*path=NULL;  /* Space conversion path */
-#ifdef H5_HAVE_PARALLEL
-    htri_t opt;         /* Flag whether a selection is optimizable */
-#endif /* H5_HAVE_PARALLEL */
-    size_t	i;      /* Index variable */
-    H5S_conv_t *ret_value;   /* Return value */
-
+    H5S_iostats_t	*path=NULL;  /* Space conversion path */
+    size_t	u;      /* Index variable */
+    H5S_iostats_t *ret_value;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5S_find, NULL);
 
@@ -1577,47 +1452,10 @@ const H5O_layout_t *layout
      * Is this path already present in the data space conversion path table?
      * If so then return a pointer to that entry.
      */
-    for (i=0; i<H5S_nconv_g; i++) {
-        if (H5S_conv_g[i]->ftype==H5S_GET_SELECT_TYPE(file_space) &&
-                H5S_conv_g[i]->mtype==H5S_GET_SELECT_TYPE(mem_space)) {
-
-#ifdef H5_HAVE_PARALLEL
-            /*
-             * Check if we can set direct MPI-IO read/write functions
-             */
-            opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
-            if(opt==FAIL)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
-
-            opt = H5S_get_collective_io_consensus(file, opt, flags);
-
-            if ( opt == FAIL )
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
-                            "check for collective I/O consensus failed.");
-
-            /* Check if we can use the optimized parallel I/O routines */
-            if(opt==TRUE) {
-                /* Set the pointers to the MPI-specific routines */
-                H5S_conv_g[i]->read = H5D_mpio_spaces_read;
-                H5S_conv_g[i]->write = H5D_mpio_spaces_write;
-
-                /* Indicate that the I/O will be parallel */
-                *use_par_opt_io=TRUE;
-            } /* end if */
-            else {
-                /* Indicate that the I/O will _NOT_ be parallel */
-                *use_par_opt_io=FALSE;
-
-#endif /* H5_HAVE_PARALLEL */
-                H5S_conv_g[i]->read = H5S_select_read;
-                H5S_conv_g[i]->write = H5S_select_write;
-#ifdef H5_HAVE_PARALLEL
-            } /* end else */
-#endif /* H5_HAVE_PARALLEL */
-
-            HGOTO_DONE(H5S_conv_g[i]);
-        }
-    }
+    for (u=0; u<H5S_niostats_g; u++)
+        if (H5S_iostats_g[u]->ftype==H5S_GET_SELECT_TYPE(file_space) &&
+                H5S_iostats_g[u]->mtype==H5S_GET_SELECT_TYPE(mem_space))
+            HGOTO_DONE(H5S_iostats_g[u]);
     
     /*
      * The path wasn't found.  Create a new path.
@@ -1629,53 +1467,19 @@ const H5O_layout_t *layout
     path->ftype = H5S_GET_SELECT_TYPE(file_space);
     path->mtype = H5S_GET_SELECT_TYPE(mem_space);
 
-#ifdef H5_HAVE_PARALLEL
-    /*
-     * Check if we can set direct MPI-IO read/write functions
-     */
-    opt=H5S_mpio_opt_possible(file,mem_space,file_space,flags,layout);
-    if(opt==FAIL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
-
-    opt = H5S_get_collective_io_consensus(file, opt, flags);
-
-    if ( opt == FAIL )
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
-                    "check for collective I/O consensus failed.");
-
-    /* Check if we can use the optimized parallel I/O routines */
-    if(opt==TRUE) {
-        /* Set the pointers to the MPI-specific routines */
-        path->read = H5D_mpio_spaces_read;
-        path->write = H5D_mpio_spaces_write;
-
-        /* Indicate that the I/O will be parallel */
-        *use_par_opt_io=TRUE;
-    } /* end if */
-    else {
-        /* Indicate that the I/O will _NOT_ be parallel */
-        *use_par_opt_io=FALSE;
-
-#endif /* H5_HAVE_PARALLEL */
-        path->read = H5S_select_read;
-        path->write = H5S_select_write;
-#ifdef H5_HAVE_PARALLEL
-    } /* end else */
-#endif /* H5_HAVE_PARALLEL */
-    
     /*
      * Add the new path to the table.
      */
-    if (H5S_nconv_g>=H5S_aconv_g) {
-        size_t n = MAX(10, 2*H5S_aconv_g);
-        H5S_conv_t **p = H5MM_realloc(H5S_conv_g, n*sizeof(H5S_conv_g[0]));
+    if (H5S_niostats_g>=H5S_aiostats_g) {
+        size_t n = MAX(10, 2*H5S_aiostats_g);
+        H5S_iostats_t **p = H5MM_realloc(H5S_iostats_g, n*sizeof(H5S_iostats_g[0]));
 
         if (NULL==p)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table");
-        H5S_aconv_g = n;
-        H5S_conv_g = p;
+        H5S_aiostats_g = n;
+        H5S_iostats_g = p;
     } /* end if */
-    H5S_conv_g[H5S_nconv_g++] = path;
+    H5S_iostats_g[H5S_niostats_g++] = path;
 
     /* Set the return value */
     ret_value=path;
@@ -1687,7 +1491,8 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5S_find() */
+#endif /* H5S_DEBUG */
 
 
 /*-------------------------------------------------------------------------

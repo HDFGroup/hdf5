@@ -71,23 +71,6 @@
 #define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
 
 /*
- * Macros that check for overflows.  These are somewhat dangerous to fiddle
- * with.
- */
-#if (H5_SIZEOF_SIZE_T >= H5_SIZEOF_OFF_T)
-#   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
-    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
-#else
-#   define H5F_OVERFLOW_SIZET2OFFT(X) 0
-#endif
-#if (H5_SIZEOF_HSIZE_T >= H5_SIZEOF_OFF_T)
-#   define H5F_OVERFLOW_HSIZET2OFFT(X)					      \
-    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(off_t)-1)))
-#else
-#   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
-#endif
-    
-/*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
  * H5F_t structs can all point to the same H5F_file_t struct. The `nrefs'

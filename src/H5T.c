@@ -29,17 +29,17 @@
 /* (Put before include files to avoid problems with inline functions) */
 #define PABLO_MASK	H5T_mask
 
-#include "H5private.h"          /*generic functions			*/
-#include "H5Dprivate.h"         /*datasets (for H5Tcopy)		*/
-#include "H5Eprivate.h"         /*error handling			*/
+#include "H5private.h"		/*generic functions			*/
+#include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
+#include "H5Eprivate.h"		/*error handling			*/
 #include "H5Fpkg.h"             /* File                 		*/
-#include "H5FLprivate.h"        /* Free Lists				*/
-#include "H5FOprivate.h"        /* File objects                 */
-#include "H5Gprivate.h"         /*groups				  */
-#include "H5Iprivate.h"         /*ID functions		   		  */
-#include "H5MMprivate.h"        /*memory management			  */
-#include "H5Pprivate.h"         /* Property Lists			  */
-#include "H5Tpkg.h"             /*data-type functions			  */
+#include "H5FLprivate.h"	/* Free Lists				*/
+#include "H5FOprivate.h"    /* File objects                 */
+#include "H5Gprivate.h"		/*groups				  */
+#include "H5Iprivate.h"		/*ID functions		   		  */
+#include "H5MMprivate.h"	/*memory management			  */
+#include "H5Pprivate.h"		/* Property Lists			  */
+#include "H5Tpkg.h"		/*data-type functions			  */
 
 /* Check for header needed for SGI floating-point code */
 #ifdef H5_HAVE_SYS_FPU_H
@@ -1520,10 +1520,9 @@ H5Topen(hid_t loc_id, const char *name)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named data type");
 
 done:
-    if(ret_value<0) {
+    if(ret_value<0)
         if(type!=NULL)
-            H5T_close (type);
-    } /* end if */
+            H5T_close(type);
 
     FUNC_LEAVE_API(ret_value);
 }
@@ -2808,7 +2807,7 @@ H5T_create(H5T_class_t type, size_t size)
         case H5T_COMPOUND:
             if (NULL==(dt = H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-           if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
+            if (NULL==(dt->shared = H5FL_CALLOC(H5T_shared_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
 
@@ -2956,6 +2955,8 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
     }
     else
     {
+        shared_fo->fo_count++;
+
         if(NULL == (dt = H5FL_CALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
@@ -2964,8 +2965,6 @@ H5T_open (H5G_entry_t *ent, hid_t dxpl_id)
         /* Shallow copy (take ownership) of the group entry object */
         if(H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW)<0)
             HGOTO_ERROR (H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy group entry")
-
-        shared_fo->fo_count++;
     }
 
     ret_value = dt;
@@ -2978,6 +2977,8 @@ done:
             }
             H5FL_FREE(H5T_t, dt);
         }
+        if(shared_fo)
+            shared_fo->fo_count--;
     }
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -3015,16 +3016,17 @@ H5T_open_oid (H5G_entry_t *ent, hid_t dxpl_id)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     if (H5O_open (ent)<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named data type");
     /* The fourth argument to H5O_read is dt because we've already CALLOC'ed memory for it */
     if (NULL==(dt=H5O_read (ent, H5O_DTYPE_ID, 0, dt, dxpl_id)))
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
+	HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header");
 
     /* Mark the type as named and open */
     dt->shared->state = H5T_STATE_OPEN;
+
     /* Shallow copy (take ownership) of the group entry object */
     H5G_ent_copy(&(dt->ent),ent,H5G_COPY_SHALLOW);
-		
+
     /* Set return value */
     ret_value=dt;
 
@@ -3098,7 +3100,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     new_dt->ent = old_dt->ent;
     *(new_dt->shared) = *(old_dt->shared);
     new_dt->shared->fo_count = 1;
-					
+
     /* Copy parent information */
     if (new_dt->shared->parent)
         new_dt->shared->parent = H5T_copy(new_dt->shared->parent, method);
@@ -3265,7 +3267,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     /* Deep copy of the symbol table entry */
     if (H5G_ent_copy(&(new_dt->ent), &(old_dt->ent),H5G_COPY_DEEP)<0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy entry");
-					
+
     /* Set return value */
     ret_value=new_dt;
     
@@ -3331,7 +3333,7 @@ done:
  * Function:	H5T_free
  *
  * Purpose:	Frees all memory associated with a datatype, but does not
- *              free the H5T_t or H5D_shared_t structures (which should
+ *              free the H5T_t or H5T_shared_t structures (which should
  *              be done in H5T_close).
  *
  * Return:	Non-negative on success/Negative on failure
@@ -3359,10 +3361,11 @@ H5T_free(H5T_t *dt)
      */
     if (H5T_STATE_OPEN==dt->shared->state) {
         assert (H5F_addr_defined(dt->ent.header));
+        /* Remove the datatype from the list of opened objects in the file */
         if(H5FO_delete(dt->ent.file, H5AC_dxpl_id, dt->ent.header)<0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
         if (H5O_close(&(dt->ent))<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header");
         dt->shared->state = H5T_STATE_NAMED;
     }
 
@@ -3456,6 +3459,9 @@ H5T_close(H5T_t *dt)
         /* Free the ID to name info since we're not calling H5T_free*/
         H5G_free_ent_name(&(dt->ent));
     }
+
+    /* Free the datatype struct */
+    H5FL_FREE(H5T_t,dt);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3552,7 +3558,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                     if((num_membs = H5T_get_nmembers(dt))<0)    
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get number of members");
 
-                    for(i=0; i<num_membs; i++) {
+                    for(i=0; i<(unsigned)num_membs; i++) {
                         memb_offset = H5T_get_member_offset(dt, i);
                         if(memb_offset > max_offset) {
                             max_offset = memb_offset;
@@ -4883,8 +4889,15 @@ H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
 		       "----------", "-----", "-----", "----",
 		       "------", "-------", "---------");
 	}
-	nbytes = MAX (H5T_get_size (path->src),
-		      H5T_get_size (path->dst));
+        if(path->src && path->dst)
+            nbytes = MAX (H5T_get_size (path->src),
+                          H5T_get_size (path->dst));
+        else if(path->src)
+            nbytes = H5T_get_size (path->src);
+        else if(path->dst)
+            nbytes = H5T_get_size (path->dst);
+        else
+            nbytes = 0;
 	nbytes *= path->stats.nelmts;
 	H5_bandwidth(bandwidth, (double)nbytes,
 		     path->stats.timer.etime);

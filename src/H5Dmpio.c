@@ -47,6 +47,179 @@ H5D_mpio_spaces_xfer(H5D_io_info_t *io_info, size_t elmt_size,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_mpio_opt_possible
+ *
+ * Purpose:	Checks if an direct I/O transfer is possible between memory and
+ *                  the file.
+ *
+ * Return:	Success:        Non-negative: TRUE or FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 3, 2002
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5D_mpio_opt_possible( const H5F_t *file, const H5S_t *mem_space, const H5S_t *file_space, const unsigned flags,const H5O_layout_t *layout)
+{
+    htri_t c1,c2;               /* Flags whether a selection is optimizable */
+    htri_t ret_value=TRUE;
+
+    FUNC_ENTER_NOAPI(H5D_mpio_opt_possible, FAIL);
+
+    /* Check args */
+    assert(mem_space);
+    assert(file_space);
+
+    /* Parallel I/O conversion flag must be set, if it is not collective IO, go to false. */
+    if(!(flags&H5S_CONV_PAR_IO_POSSIBLE))
+        HGOTO_DONE(FALSE);
+
+    /* Check whether these are both simple or scalar dataspaces */
+    if (!((H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space))
+            && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space))))
+        HGOTO_DONE(FALSE);
+
+    /* Check whether both selections are "regular" */
+    c1=H5S_SELECT_IS_REGULAR(file_space);
+    c2=H5S_SELECT_IS_REGULAR(mem_space);
+    if(c1==FAIL || c2==FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
+    if(c1==FALSE || c2==FALSE)
+        HGOTO_DONE(FALSE);
+
+    /* Can't currently handle point selections */
+    if (H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(mem_space) || H5S_SEL_POINTS==H5S_GET_SELECT_TYPE(file_space))
+        HGOTO_DONE(FALSE);
+
+    /* Dataset storage must be contiguous or chunked */
+    if ((flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CONTIGUOUS && 
+            (flags&H5S_CONV_STORAGE_MASK)!=H5S_CONV_STORAGE_CHUNKED)
+        HGOTO_DONE(FALSE);
+
+    if ((flags&H5S_CONV_STORAGE_MASK)==H5S_CONV_STORAGE_CHUNKED) {
+        hsize_t chunk_dim[H5O_LAYOUT_NDIMS];        /* Chunk dimensions */
+        hssize_t startf[H5S_MAX_RANK],      /* Selection start bounds */
+            endf[H5S_MAX_RANK];     /* Selection end bounds */
+        unsigned dim_rankf;         /* Number of dimensions of file dataspace */
+        int pcheck_hyper,check_hyper,   /* Flags for checking if selection is in one chunk */
+            tnum_chunkf,            /* Number of chunks selection overlaps */
+            max_chunkf,             /* Maximum number of chunks selection overlaps */
+            min_chunkf,             /* Minimum number of chunks selection overlaps */
+            num_chunks_same;        /* Flag indicating whether all processes have the same # of chunks to operate on */
+        unsigned dim_chunks;        /* Temporary number of chunks in a dimension */
+        MPI_Comm comm;              /* MPI communicator for file */
+        int mpi_rank;               /* Rank in MPI communicator */
+        int mpi_code;               /* MPI return code */
+        unsigned u;                 /* Local index variable */
+
+        /* Getting MPI communicator and rank */
+        if((comm = H5F_mpi_get_comm(file))==MPI_COMM_NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
+        if((mpi_rank = H5F_mpi_get_rank(file))<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI rank")
+
+      /* Currently collective chunking storage 
+	 inside HDF5 is supported for either one of the following two cases:
+	 1. All the hyperslabs for one process is inside one chunk.
+	 2. For single hyperslab selection, the number of chunks that covered 
+	    the single selection for all processes should be equal. 
+	    KY, 2004/7/14
+      */
+
+      /* Quincey, please read.
+	 This is maybe redundant, I think only when both memory and file space be SCALAR
+	 space, the collective IO can work. Otherwise, SELECT_POINT will be reached,collective
+	 IO shouldn't work.
+	 Please clarify and correct the code on the following,
+         Quincey said that it was probably okay if only one data space is SCALAR, 
+         Still keep the code here until we added more tests later.
+	 Kent */
+        if(H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR ==H5S_GET_EXTENT_TYPE(file_space)) {
+            if(!(H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space) && H5S_SCALAR ==H5S_GET_EXTENT_TYPE(file_space)))
+                HGOTO_DONE(FALSE)
+            else
+                HGOTO_DONE(TRUE)
+        } /* end if */
+
+        dim_rankf = H5S_GET_EXTENT_NDIMS(file_space);
+
+        if(H5S_SELECT_BOUNDS(file_space,startf,endf)==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE,FAIL, "invalid check for single selection blocks");
+
+        for(u=0; u < layout->u.chunk.ndims; u++) 
+            chunk_dim[u] = layout->u.chunk.dim[u];
+
+        /* Case 1: check whether all hyperslab in this process is inside one chunk.
+           Note: we don't handle when starting point is less than zero since that may cover
+           two chunks. */
+
+        /*for file space checking*/
+        pcheck_hyper = 1;
+        for (u=0; u<dim_rankf; u++)
+            if(endf[u]/chunk_dim[u]!=startf[u]/chunk_dim[u]) {
+                pcheck_hyper = 0;
+                break;
+            }
+      
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&pcheck_hyper,&check_hyper,1,MPI_INT,MPI_LAND,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&check_hyper,1,MPI_INT,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        /*if check_hyper is true, condition for collective IO case is fulfilled, no
+         need to do further test. */
+        if(check_hyper)
+            HGOTO_DONE(TRUE); 
+    
+      /* Case 2:Check whether the number of chunks that covered the single hyperslab is the same.
+	 If not,no collective chunk IO. 
+	 KY, 2004/7/14
+      */
+	 
+        c1 = H5S_SELECT_IS_SINGLE(file_space);
+        c2 = H5S_SELECT_IS_SINGLE(mem_space);
+
+        if(c1==FAIL || c2 ==FAIL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for single selection blocks");
+        if(c1==FALSE || c2 ==FALSE)
+            HGOTO_DONE(FALSE);
+
+        /* Compute the number of chunks covered by the selection on this process */
+        tnum_chunkf = 1;
+        for (u=0; u<dim_rankf; u++) {
+            dim_chunks = (endf[u]/chunk_dim[u]-startf[u]/chunk_dim[u])+1;
+            tnum_chunkf = dim_chunks*tnum_chunkf;
+        }
+
+        /* Determine the minimum and maximum # of chunks for all processes */
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,&max_chunkf,1,MPI_INT,MPI_MAX,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code= MPI_Reduce(&tnum_chunkf,&min_chunkf,1,MPI_INT,MPI_MIN,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Reduce failed", mpi_code)
+  
+        /* Let the rank==0 process determine if the same number of chunks will be operated on by all processes */
+        if(mpi_rank == 0)
+            num_chunks_same = (max_chunkf==min_chunkf);
+                    
+        /* Broadcast the flag indicating the number of chunks are the same */
+        if (MPI_SUCCESS != (mpi_code= MPI_Bcast(&num_chunks_same,1,MPI_INT,0,comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        /* Can't handle case when number of chunks is different (yet) */
+        if(!num_chunks_same)
+            HGOTO_DONE(FALSE);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* H5D_mpio_opt_possible() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_mpio_spaces_xfer
  *
  * Purpose:	Use MPI-IO to transfer data efficiently
@@ -209,7 +382,6 @@ done:
  */
 herr_t
 H5D_mpio_spaces_read(H5D_io_info_t *io_info,
-    H5O_layout_readvv_func_t UNUSED op,
     size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     void *buf/*out*/)
@@ -247,7 +419,6 @@ H5D_mpio_spaces_read(H5D_io_info_t *io_info,
  */
 herr_t
 H5D_mpio_spaces_write(H5D_io_info_t *io_info,
-    H5O_layout_writevv_func_t UNUSED op,
     size_t UNUSED nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
     const void *buf)
