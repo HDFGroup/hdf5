@@ -80,22 +80,22 @@ static herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 static herr_t 
 H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist, 
-            H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode, 
+            H5P_genplist_t *dx_plist, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
 H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
-            H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode, 
+            H5P_genplist_t *dx_plist, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, const void *buf);
 static herr_t
 H5D_chunk_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
             const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist, 
-            H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode, 
+            H5P_genplist_t *dx_plist, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, void *buf/*out*/);
 static herr_t
 H5D_chunk_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
-            H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode, 
+            H5P_genplist_t *dx_plist, hid_t dxpl_id,
             hid_t src_id, hid_t dst_id, const void *buf);
 #ifdef H5_HAVE_PARALLEL
 static herr_t 
@@ -513,7 +513,10 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
     hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t	*sconv=NULL;	        /*space conversion funcs*/
-    H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;	/*xfer_mode for this request */
+#ifdef H5_HAVE_PARALLEL
+    H5FD_mpio_xfer_t xfer_mode;         /*xfer_mode for this request */
+    hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+#endif /*H5_HAVE_PARALLEL*/
     H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
@@ -637,19 +640,35 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
         HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from file to memory data space");
 
+#ifdef H5_HAVE_PARALLEL
+    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
+#endif /*H5_HAVE_PARALLEL*/
+
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, dc_plist, 
-                        dx_plist, dxpl_id, xfer_mode, src_id, dst_id, buf)<0)
+                dx_plist, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     } /* end if */
     else {
         if(H5D_chunk_read(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, dc_plist, 
-                        dx_plist, dxpl_id, xfer_mode, src_id, dst_id, buf)<0)
+                dx_plist, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
     } /* end else */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* restore xfer_mode due to the kludge */
+    if (xfer_mode_changed) {
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D))
+	    fprintf (H5DEBUG(D), "H5D: xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
+#endif
+	xfer_mode = H5FD_MPIO_COLLECTIVE;
+        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
+    } /* end if */
+#endif /*H5_HAVE_PARALLEL*/
     if (src_id >= 0)
         H5I_dec_ref(src_id);
     if (dst_id >= 0)
@@ -712,7 +731,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     H5T_path_t	*tpath = NULL;		/*type conversion info	*/
     hid_t	src_id = -1, dst_id = -1;/*temporary type atoms */
     H5S_conv_t	*sconv=NULL;		/*space conversion funcs*/
-    H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;	/*xfer_mode for this request */
+#ifdef H5_HAVE_PARALLEL
+    H5FD_mpio_xfer_t xfer_mode;         /*xfer_mode for this request */
+    hbool_t     xfer_mode_changed=FALSE;    /* Whether the transfer mode was changed */
+#endif /*H5_HAVE_PARALLEL*/
     H5P_genplist_t *dx_plist=NULL;      /* Data transfer property list */
     H5P_genplist_t *dc_plist;           /* Dataset creation roperty list */
     unsigned	sconv_flags=0;	        /* Flags for the space conversion */
@@ -835,15 +857,19 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     if (NULL==(sconv=H5S_find(mem_space, file_space, sconv_flags)))
 	HGOTO_ERROR (H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert from memory to file data space");
         
+#ifdef H5_HAVE_PARALLEL
+    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
+#endif /*H5_HAVE_PARALLEL*/
+
     /* Determine correct I/O routine to invoke */
     if(dataset->layout.type!=H5D_CHUNKED) {
         if(H5D_contig_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, dc_plist,
-                        dx_plist, dxpl_id, xfer_mode, src_id, dst_id, buf)<0)
+                dx_plist, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     } /* end if */
     else {
         if(H5D_chunk_write(nelmts, dataset, mem_type, mem_space, file_space, tpath, sconv, dc_plist,
-                        dx_plist, dxpl_id, xfer_mode, src_id, dst_id, buf)<0)
+                dx_plist, dxpl_id, src_id, dst_id, buf)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
     } /* end else */
 
@@ -863,6 +889,18 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif /* OLD_WAY */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* restore xfer_mode due to the kludge */
+    if (xfer_mode_changed) {
+#ifdef H5D_DEBUG
+	if (H5DEBUG(D))
+	    fprintf (H5DEBUG(D), "H5D: xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
+#endif
+	xfer_mode = H5FD_MPIO_COLLECTIVE;
+        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode")
+    } /* end if */
+#endif /*H5_HAVE_PARALLEL*/
     if (src_id >= 0)
         H5I_dec_ref(src_id);
     if (dst_id >= 0)
@@ -891,11 +929,7 @@ done:
 static herr_t 
 H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist, 
-    H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t
-#ifndef H5_HAVE_PARALLEL
-    UNUSED
-#endif /*H5_HAVE_PARALLEL*/
-    xfer_mode, 
+    H5P_genplist_t *dx_plist, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
     herr_t      status;                 /*function return status*/     
@@ -917,9 +951,6 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
-#ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE; /* Whether the transfer mode was changed */
-#endif /*H5_HAVE_PARALLEL*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOINIT(H5D_contig_read);
@@ -956,10 +987,6 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
      * This is the general case(type conversion).
      */
 
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
-   
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(dataset->type);
     dst_type_size = H5T_get_size(mem_type);
@@ -1084,18 +1111,6 @@ H5D_contig_read(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S
     } /* end for */
 
 done:
-#ifdef H5_HAVE_PARALLEL
-    /* restore xfer_mode due to the kludge */
-    if (xfer_mode_changed) {
-#ifdef H5D_DEBUG
-	if (H5DEBUG(D))
-	    fprintf (H5DEBUG(D), "H5D: dx->xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
-#endif
-	xfer_mode = H5FD_MPIO_COLLECTIVE;
-        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
     if(file_iter_init)
         H5S_select_iter_release(&file_iter);
@@ -1133,11 +1148,7 @@ done:
 static herr_t
 H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
-    H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t
-#ifndef H5_HAVE_PARALLEL
-    UNUSED
-#endif /*H5_HAVE_PARALLEL*/
-    xfer_mode, 
+    H5P_genplist_t *dx_plist, hid_t dxpl_id,
     hid_t src_id, hid_t dst_id, const void *buf)
 {
     herr_t      status;                 /*function return status*/     
@@ -1159,9 +1170,6 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     hsize_t	n, smine_nelmts;	/*elements per strip	*/
-#ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE; /* Whether the transfer mode was changed */
-#endif /*H5_HAVE_PARALLEL*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOINIT(H5D_contig_write);
@@ -1194,10 +1202,6 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     /*
      * This is the general case.
      */
-
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Compute element sizes and other parameters */
     src_type_size = H5T_get_size(mem_type);
@@ -1325,18 +1329,6 @@ H5D_contig_write(hsize_t nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5
     } /* end for */
 
 done:
-#ifdef H5_HAVE_PARALLEL
-    /* restore xfer_mode due to the kludge */
-    if (xfer_mode_changed) {
-#ifdef H5D_DEBUG
-	if (H5DEBUG(D))
-	    fprintf (H5DEBUG(D), "H5D: dx->xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
-#endif
-	xfer_mode = H5FD_MPIO_COLLECTIVE;
-        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
     /* Release selection iterators */
     if(file_iter_init)
         H5S_select_iter_release(&file_iter);
@@ -1378,11 +1370,8 @@ UNUSED
 #endif /* NDEBUG */
     nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist, 
-    H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t
-#ifndef H5_HAVE_PARALLEL
-    UNUSED
-#endif /*H5_HAVE_PARALLEL*/
-    xfer_mode, hid_t src_id, hid_t dst_id, void *buf/*out*/)
+    H5P_genplist_t *dx_plist, hid_t dxpl_id, 
+    hid_t src_id, hid_t dst_id, void *buf/*out*/)
 {
     fm_map      fm;                     /* File<->memory mapping */
     H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
@@ -1407,17 +1396,10 @@ UNUSED
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-#ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE; /* Whether the transfer mode was changed */
-#endif /*H5_HAVE_PARALLEL*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOINIT(H5D_chunk_read);
     
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
-
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping");
@@ -1640,19 +1622,6 @@ UNUSED
     } /* end while */
      
 done:
-#ifdef H5_HAVE_PARALLEL
-    /* restore xfer_mode due to the kludge */
-    if (xfer_mode_changed) {
-#ifdef H5D_DEBUG
-	if (H5DEBUG(D))
-	    fprintf (H5DEBUG(D), "H5D: dx->xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
-#endif
-	xfer_mode = H5FD_MPIO_COLLECTIVE;
-        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
-
     assert(dx_plist);
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
@@ -1698,11 +1667,8 @@ UNUSED
 #endif /* NDEBUG */
 nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     const H5S_t *file_space, H5T_path_t *tpath, H5S_conv_t *sconv, H5P_genplist_t *dc_plist,
-    H5P_genplist_t *dx_plist, hid_t dxpl_id, H5FD_mpio_xfer_t
-#ifndef H5_HAVE_PARALLEL
-    UNUSED
-#endif /*H5_HAVE_PARALLEL*/
-    xfer_mode, hid_t src_id, hid_t dst_id, const void *buf)
+    H5P_genplist_t *dx_plist, hid_t dxpl_id,
+    hid_t src_id, hid_t dst_id, const void *buf)
 {
     fm_map      fm;                     /* File<->memory mapping */
     H5TB_NODE   *chunk_node;           /* Current node in chunk TBBT */
@@ -1727,16 +1693,9 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-#ifdef H5_HAVE_PARALLEL
-    hbool_t     xfer_mode_changed=FALSE; /* Whether the transfer mode was changed */
-#endif /*H5_HAVE_PARALLEL*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOINIT(H5D_chunk_write);
-    
-#ifdef H5_HAVE_PARALLEL
-    H5D_io_assist_mpio(dx_plist, xfer_mode, &xfer_mode_changed);
-#endif /*H5_HAVE_PARALLEL*/
     
 #ifdef QAK
 {
@@ -2003,19 +1962,6 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     } /* end while */
 
 done:
-#ifdef H5_HAVE_PARALLEL
-    /* restore xfer_mode due to the kludge */
-    if (xfer_mode_changed) {
-#ifdef H5D_DEBUG
-	if (H5DEBUG(D))
-	    fprintf (H5DEBUG(D), "H5D: dx->xfer_mode was COLLECTIVE, restored to INDEPENDENT\n");
-#endif
-	xfer_mode = H5FD_MPIO_COLLECTIVE;
-        if(H5P_set (dx_plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set transfer mode");
-    } /* end if */
-#endif /*H5_HAVE_PARALLEL*/
-
     assert(dx_plist);
     if (tconv_buf && NULL==H5P_peek_voidp(dx_plist,H5D_XFER_TCONV_BUF_NAME))
         H5FL_BLK_FREE(type_conv,tconv_buf);
