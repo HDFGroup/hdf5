@@ -3444,11 +3444,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_encode(unsigned char *buf, void *obj, hid_t type_id)
+H5O_encode(H5F_t *f, unsigned char *buf, void *obj, unsigned type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
-    size_t              extent_size;      /* size of the message*/
-    H5F_t               f;                /* fake file structure*/
     herr_t 	        ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_encode,FAIL);
@@ -3458,23 +3456,10 @@ H5O_encode(unsigned char *buf, void *obj, hid_t type_id)
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
-    if(type_id == H5O_SDSPACE_ID) {
-        /* Fake file structure, needed for space encoding and decoding. */
-        f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
-        f.shared->sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;
-       
-        /* Encode this "size of size" */ 
-        *buf = H5F_CRT_OBJ_BYTE_NUM_DEF;
-        buf++;
-    }
-    
     /* Encode */    
-    if ((type->encode)(&f, buf, obj)<0)
+    if ((type->encode)(f, buf, obj)<0)
         HGOTO_ERROR (H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode message");
 
-    if(type_id == H5O_SDSPACE_ID)
-        H5MM_free(f.shared);
-        
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -3499,10 +3484,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void*
-H5O_decode(unsigned char *buf, unsigned type_id)
+H5O_decode(H5F_t *f, unsigned char *buf, unsigned type_id)
 {
     const H5O_class_t   *type;            /* Actual H5O class type for the ID */
-    H5F_t               f;                /* fake file structure*/
     void 	        *ret_value=NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_decode,NULL);
@@ -3512,22 +3496,9 @@ H5O_decode(unsigned char *buf, unsigned type_id)
     type=message_type_g[type_id];    /* map the type ID to the actual type object */
     assert(type);
 
-    if(type_id == H5O_SDSPACE_ID) {
-        /* Fake file structure, needed for space encoding and decoding. */
-        f.shared = (H5F_file_t*)H5MM_calloc(sizeof(H5F_file_t));
-
-        /* Decode the "size of size", needed for space encoding and decoding */
-        f.shared->sizeof_size = *buf;
-        buf++;
-    }
-
     /* decode */
-    if((ret_value = (type->decode)(&f, 0, buf, NULL))==NULL)
+    if((ret_value = (type->decode)(f, 0, buf, NULL))==NULL)
         HGOTO_ERROR (H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message");
-
-    if(type_id == H5O_SDSPACE_ID) {
-        H5MM_free(f.shared);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -108,7 +108,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p, H5O_shared_
     FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_decode);
 
     /* check args */
-    /*assert(f);*/
+    assert(f);
     assert(p);
     assert (!sh);
 

@@ -32,13 +32,12 @@
 #include "H5private.h"		/*generic functions			*/
 #include "H5Dprivate.h"		/*datasets (for H5Tcopy)		*/
 #include "H5Eprivate.h"		/*error handling			*/
+#include "H5Fpkg.h"	        /* File                 		*/
 #include "H5FLprivate.h"	/* Free Lists				*/
-#include "H5Fprivate.h"	        /* File                 		*/
 #include "H5Gprivate.h"		/*groups				  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */
-#include "H5Fpkg.h"		/*file functions			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
 /* Check for header needed for SGI floating-point code */
@@ -2661,7 +2660,7 @@ done:
 herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
-    size_t      buf_size = 0;
+    size_t      buf_size;
     H5F_t       f;
     herr_t      ret_value = SUCCEED;
 
@@ -2677,7 +2676,7 @@ H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_DONE(ret_value);
     }
 
-    if(H5O_encode(buf, obj, H5O_DTYPE_ID)<0)
+    if(H5O_encode(&f, buf, obj, H5O_DTYPE_ID)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode object");
 
 done:
@@ -2706,16 +2705,12 @@ done:
 H5T_t*
 H5T_decode(unsigned char *buf)
 {
-    H5T_t       *dt;
     H5T_t       *ret_value;
 
     FUNC_ENTER_NOAPI(H5T_decode, NULL);
 
-    if((dt = H5O_decode(buf, H5O_DTYPE_ID))==NULL)
+    if((ret_value = H5O_decode(NULL, buf, H5O_DTYPE_ID))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
-
-    /* Set return value */
-    ret_value=dt;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

@@ -148,14 +148,14 @@ H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Check the pixels per block against the 'scanline' size */
     if(scanline<cd_values[H5Z_SZIP_PARM_PPB]) {
 
-    /* Get number of elements for the dataspace;  use 
-       total number of elements in the chunk to define the new 'scanline' size */
-    if ((npoints=H5Sget_simple_extent_npoints(space_id))<0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
-    if(npoints<cd_values[H5Z_SZIP_PARM_PPB])
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "pixels per block greater than total number of elements in the chunk")         
-    scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
-    goto done;
+        /* Get number of elements for the dataspace;  use 
+           total number of elements in the chunk to define the new 'scanline' size */
+        if ((npoints=H5Sget_simple_extent_npoints(space_id))<0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+        if(npoints<cd_values[H5Z_SZIP_PARM_PPB])
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FALSE, "pixels per block greater than total number of elements in the chunk")         
+        scanline = MIN((cd_values[H5Z_SZIP_PARM_PPB] * SZ_MAX_BLOCKS_PER_SCANLINE), npoints);
+        HGOTO_DONE(TRUE);
 
     }
 
