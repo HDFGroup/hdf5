@@ -112,3 +112,8 @@ DUMP tall-3.ddl -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
 
 # test for loop detection
 DUMP tloop-1.ddl tloop.h5
+
+if test "0" = "$nerrors"; then
+	echo "All h5dump tests passed."
+fi
+

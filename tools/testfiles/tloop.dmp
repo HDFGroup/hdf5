@@ -1,0 +1,53 @@
+File name: testfiles/tloop.hdf 
+
+
+Vgroup:0
+     tag = 1965; reference = 2;
+     name = /; class = HDF5;
+     number of entries = 2;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 3;
+	number of entries = 1;
+	name = g1; class = HDF5
+   number of attributes = 0 
+     #1 (Vgroup)
+	tag = 1965;reference = 4;
+	number of entries = 1;
+	name = g1.1; class = HDF5
+   number of attributes = 0 
+
+
+Vgroup:1
+     tag = 1965; reference = 3;
+     name = g1; class = HDF5;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 4;
+	number of entries = 1;
+	name = g1.1; class = HDF5
+   number of attributes = 0 
+
+
+Vgroup:2
+     tag = 1965; reference = 4;
+     name = g1.1; class = HDF5;
+     number of entries = 1;
+   number of attributes = 0 
+Entries:-
+     #0 (Vgroup)
+	tag = 1965;reference = 3;
+	number of entries = 1;
+	name = g1; class = HDF5
+   number of attributes = 0 
+
+
+Graphical representation of the file:-
+(vg#: vgroup;   vd: vdata)
+
+File name: testfiles/tloop.hdf 
+
+File name: testfiles/tloop.hdf 

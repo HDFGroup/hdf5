@@ -22,10 +22,10 @@ TESTING()
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
-# expected output is given as the first argument to this function and
-# the actual output file is calculated by replacing the `.ddl' with
-# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
-# non-zero value.
+# expected output is given by adding a `.dmp' extension to the root of
+# the first argument to this function and the actual output file is
+# calculated by replacing the `.dmp' with `.tmp'.  The actual output
+# is not removed if $HDF5_NOCLEANUP has a value.
 CONVERT()
 {
     # Run h5toh4 convert.
@@ -48,7 +48,11 @@ CONVERT()
 	    	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
 	    	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-		$H4DUMP dumpvg $h4file > $actual
+		if test "testfiles/tloop.hdf" = "$h4file"; then
+			$H4DUMP dumpvg $h4file | head -50 > $actual
+		else
+			$H4DUMP dumpvg $h4file > $actual
+		fi
 
 		$H4DUMP dumpvd $h4file >> $actual
 
@@ -67,9 +71,9 @@ CONVERT()
 			if test "passed" = "$multirun"; then
 				echo "*FAILED*"
 				echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
+				nerrors="`expr $nerrors + 1`"
 				multirun=failed
 			fi
-			nerrors="`expr $nerrors + 1`"
 			test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
     		fi
 
@@ -77,6 +81,7 @@ CONVERT()
     		rm -f $expect-norm $actual-norm
     		if [ X = ${HDF5_NOCLEANUP:-X} ]; then
 			rm -f $actual
+			rm -f $h4file
     		fi
 	done
 	if test "passed" = "$multirun"; then
@@ -98,10 +103,12 @@ CONVERT()
 	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
 	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-	$H4DUMP dumpvg $h4file > $actual
-
+	if test "testfiles/tloop.hdf" = "$h4file"; then
+		$H4DUMP dumpvg $h4file | head -50 > $actual
+	else
+		$H4DUMP dumpvg $h4file > $actual
+	fi
 	$H4DUMP dumpvd $h4file >> $actual
-
 	$H4DUMP dumpsds $h4file >> $actual
 
 
@@ -125,6 +132,7 @@ CONVERT()
 	rm -f $expect-norm $actual-norm
 	if [ X = ${HDF5_NOCLEANUP:-X} ]; then
 		rm -f $actual
+		rm -f $h4file
 	fi
 	;;
 
@@ -168,6 +176,9 @@ CONVERT tcompound.h5
 # test for converting all H5 objects at in same file.
 CONVERT tall.h5
 
+# tests for converting H5 objects with loops.
+CONVERT tloop.h5
+
 # test for converting extendable H5 datasets to H4 SDS's.
 CONVERT tdset2.h5
 
@@ -190,6 +201,7 @@ CONVERT tslink.h5 tslink.hdf
 CONVERT thlink.h5 thlink.hdf
 CONVERT tcompound.h5 tcompound.hdf
 CONVERT tall.h5 tall.hdf
+CONVERT tloop.h5 tloop.hdf
 CONVERT tdset2.h5 tdset2.hdf
 CONVERT tcompound2.h5 tcompound2.hdf
 CONVERT tmany.h5 tmany.hdf
@@ -199,7 +211,10 @@ CONVERT tmany.h5 tmany.hdf
 #
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
 CONVERT -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5
-CONVERT -m tcompound.h5 tall.h5
+CONVERT -m tcompound.h5 tall.h5 tloop.h5
 CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5
-$RM ./testfiles/*.hdf ./testfiles/*.tmp
+
+if test "0" = "$nerrors"; then
+	echo "All h5toh4 tests passed."
+fi
 
