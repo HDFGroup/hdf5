@@ -284,6 +284,9 @@ h5_fileaccess(void)
     if (!strcmp(name, "sec2")) {
 	/* Unix read() and write() system calls */
 	if (H5Pset_fapl_sec2(fapl)<0) return -1;
+    } else if (!strcmp(name, "stdio")) {
+	/* Standard C fread() and fwrite() system calls */
+	if (H5Pset_fapl_stdio(fapl)<0) return -1;
     } else if (!strcmp(name, "core")) {
 	/* In-core temporary file with 1MB increment */
 	if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
