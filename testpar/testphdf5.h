@@ -4,6 +4,7 @@
 #define PHDF5TEST_H
 
 #include <assert.h>
+#include <string.h>
 #include <hdf5.h>
 #include <mpi.h>
 #include <mpio.h>
