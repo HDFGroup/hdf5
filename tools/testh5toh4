@@ -1,262 +1,198 @@
-#! /bin/sh
-# Test scripts for h5toh4.
-# See the USAGE function for command usage.
+#!/bin/sh
 
+h5toh4=h5toh4		# a relative name
+cmp='cmp -s'
+diff='diff -c'
 
-# Definitions of commands and variables
-CMD='../h5toh4'
 RM='rm -f'
 SED='sed '
 H4DUMP='hdp'
-DIFF=diff
-CMP='cmp -s'
-nerrors=0		# number of errors (0)
-quitonerr=0		# quit on error (not)
-noclean=0		# no cleaning temp. files (yes)
-only=""			# dumper sub-command to test only
-except=""		# dumper sub-command to test not
 
+nerrors=0
+verbose=yes
 
-# Definitions of functions/shorthands
-#
-
-# Print Usage of the command
-USAGE()
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+TESTING()
 {
-    echo "Usage: $0 [-help] [-noclean] [-quit] [-except <command>] [-only <command>]"
-    echo "    -help: display help information"
-    echo "    -noclean: do not clean away temporary files"
-    echo "    -quit: quit immediately if any test fails"
-    echo "    -except: skip one specific command"
-    echo "    -only: test one specific command"
-    echo "<command> can be one of {list, dumpsds, dumprig, dumpvd, dumpvg, dumpgr}"
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\n'
 }
 
-# Print message with formats according to message level ($1)
-MESG()
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+CONVERT()
 {
-    level=$1
-    shift
-    case $level in
-	0)
-	    echo '============================='
-	    echo $*
-	    echo '============================='
-	    ;;
-	3)
-	    echo '-----------------------------'
-	    echo $*
-	    echo '-----------------------------'
-	    ;;
-	6)
-	    echo "*** Arguments are $* ***"
-	    ;;
-	*)
-		echo "MESG(): Unknown level ($level)"
-	    exit 1
-	    ;;
-    esac
-
-}
-
-
-# Run the test to produce an output file which is then
-# compared with the expected ($1) output.
-# Note that this can be used to produce the expected
-# output files by replace "$output" with "$expected"
-# in the run-the-test commands.
-TEST()
-{
-    # shift
-    # print a id banner
-    MESG 6 $@
-    # run the test
-    ( 
-		echo "#############################"
-		echo "'$CMD $@'" 
-		echo "#############################"
-		cd testfiles
-        $CMD "$@"
-		cd ..
+    # Run h5toh4 convert.
+    TESTING $h5toh4 $@
+    (
+	cd testfiles
+        ../$h5toh4 "$@" 2>/dev/null
     ) 
 
-	case "$1" in
+    case "$1" in
 
     "-m")
 
-		shift
-		for i in $@
-		do
-			h4file=testfiles/`echo $i | $SED -e s/\.h5/.hdf/g`
+	shift
+	for i in $@
+	do
+		h4file=testfiles/`echo $i | $SED -e s/\.h5/.hdf/g`
 
-		    	output=`echo $h4file | $SED -e s/\.hdf/.tmp/`
-		    	expected=`echo $h4file | $SED -e s/\.hdf/.dmp/`
+	    	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
+	    	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-			$H4DUMP dumpvg $h4file > $output
+		$H4DUMP dumpvg $h4file > $actual
 
-			$H4DUMP dumpvd $h4file >> $output
+		$H4DUMP dumpvd $h4file >> $actual
 
-			$H4DUMP dumpsds $h4file >> $output
+		$H4DUMP dumpsds $h4file >> $actual
 
+    		# Results. We normalize the result to account for different output 
+    		# widths.  That is, the test should succeed if the only
+    		# differences are in white space. We have to do this the hard way
+    		# because diff isn't always smart enough.
+    		tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
+    		tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
 
-    		$CMP $expected $output
-    		if [ $? -ne 0 ]
-    		then
-				echo $DIFF $expected $output
-				$DIFF $expected $output
-				echo "   <<< FAILED >>>"
-				nerrors=`expr $nerrors + 1`
-				if [ $quitonerr -gt 0 ]; 
-				then
-	    			FINISH
-				fi
+    		if $cmp $expect-norm $actual-norm; then
+			echo " PASSED"
+    		else
+			echo "*FAILED*"
+			echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
+			nerrors="`expr $nerrors + 1`"
+			test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
     		fi
 
-		done
+    		# Clean up output file
+    		rm -f $expect-norm $actual-norm
+    		if [ X = ${HDF5_NOCLEANUP:-X} ]; then
+			rm -f $actual
+    		fi
+	done
 
-		;;
+	;;
 
 
     * )
 
-   		if [ $# -eq 1 ]
-		then 
-			h4file=testfiles/`echo $1 | $SED -e s/\.h5/.hdf/`
-		else
-			h4file=testfiles/$2
-		fi
+   	if [ $# -eq 1 ]
+	then 
+		h4file=testfiles/`echo $1 | $SED -e s/\.h5/.hdf/`
+	else
+		h4file=testfiles/$2
+	fi
 
-	    output=`echo $h4file | $SED -e s/\.hdf/.tmp/`
-	    expected=`echo $h4file | $SED -e s/\.hdf/.dmp/`
+	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
+	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
 
-		$H4DUMP dumpvg $h4file > $output
+	$H4DUMP dumpvg $h4file > $actual
 
-		$H4DUMP dumpvd $h4file >> $output
+	$H4DUMP dumpvd $h4file >> $actual
 
-		$H4DUMP dumpsds $h4file >> $output
+	$H4DUMP dumpsds $h4file >> $actual
 
-    	$CMP $expected $output
-    	if [ $? -ne 0 ]
-    	then
-			echo $DIFF $expected $output
-			$DIFF $expected $output
-			echo "   <<< FAILED >>>"
-			nerrors=`expr $nerrors + 1`
-			if [ $quitonerr -gt 0 ]; 
-			then
-	    		FINISH
-			fi
-    	fi
 
-		;;
+	# Results. We normalize the result to account for different output 
+	# widths.  That is, the test should succeed if the only
+	# differences are in white space. We have to do this the hard way
+	# because diff isn't always smart enough.
+	tr '\n' ' ' <$actual |tr -s ' \t' |fold >$actual-norm
+	tr '\n' ' ' <$expect |tr -s ' \t' |fold >$expect-norm
+
+	if $cmp $expect-norm $actual-norm; then
+		echo " PASSED"
+	else
+		echo "*FAILED*"
+		echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
+		nerrors="`expr $nerrors + 1`"
+		test yes = "$verbose" && $diff $expect $actual |sed 's/^/    /'
+	fi
+
+	# Clean up output file
+	rm -f $expect-norm $actual-norm
+	if [ X = ${HDF5_NOCLEANUP:-X} ]; then
+		rm -f $actual
+	fi
+	;;
+
     esac
 
 }
 
 
-# Report the result and exit
-FINISH()
-{
-    if [ $nerrors -eq 0 ]
-    then
-	MESG 0 "All h5toh4 tests passed"
-    else
-	MESG 0 "h5toh4 tests failed: $nerrors"
-    fi
-    exit $nerrors
-}
 
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
 
-#===============
-# Main Body
-#===============
-
-# parse arguments
-while [ $# -gt 0 ]
-do
-    case "$1" in
-	"-quit")
-	    quitonerr=1
-	    ;;
-	"-noclean")
-	    noclean=1
-	    ;;
-	"-help")
-	    USAGE
-	    exit 0
-	    ;;
-	"-only")
-	    shift
-	    case "$1" in
-    		"h5toh4")
-		    only="$1"
-		    ;;
-		*)
-		    echo "Unknown command: $1"
-		    USAGE
-		    exit 1
-		    ;;
-	    esac
-	    ;;
-	"-except")
-	    shift
-	    case "$1" in
-    		"h5toh4")
-		    except="$1"
-		    ;;
-		*)
-		    echo "Unknown command: $1"
-		    USAGE
-		    exit 1
-		    ;;
-	    esac
-	    ;;
-	* )
-	    echo "Unknow option: $1"
-	    USAGE
-	    exit 1
-	    ;;
-    esac
-    shift
-done
-
-# Print a beginning banner
-MESG 0 "Running h5toh4 tests"
-
-# Test command list
-TestCmd=h5toh4
-TestName="Test command $TestCmd"
-if [ "$except" != $TestCmd -a \( -z "$only" -o "$only" = $TestCmd \) ]
-then
-MESG 3 "$TestName"
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
-TEST tgroup.h5
-TEST tdset.h5
-TEST tattr.h5
-TEST tslink.h5
-TEST thlink.h5
-TEST tall.h5
-TEST tdset2.h5
-TEST tcompound2.h5
-TEST tmany.h5
+
+#
+# The HDF4 filenames are created based upon the HDF5 filenames
+# without the extension.
+#
+
+# test for converting H5 groups to H4 Vgroups.
+CONVERT tgroup.h5
+
+# test for converting H5 datasets to H4 SDS's.
+CONVERT tdset.h5
+
+# test for converting H5 attributes to H4 attributes.
+CONVERT tattr.h5
+
+# test for converting H5 soft links.
+CONVERT tslink.h5
+
+# test for converting H5 hard links.
+CONVERT thlink.h5
+
+# test for converting H5 compound data type to H4 Vdata.
+CONVERT tcompound.h5
+
+# test for converting all H5 objects at in same file.
+CONVERT tall.h5
+
+# test for converting extendable H5 datasets to H4 SDS's.
+CONVERT tdset2.h5
+
+# test for converting extendable H5 datasets with compound data type to H4 Vdata.
+CONVERT tcompound2.h5
+
+# tests for converting H5 objects from many different pathways.
+CONVERT tmany.h5
+
+#
+# The test for conversion are the same as above with the only difference
+# being that the HDF4 filenames are given explicitly.
+#
+
 $RM ./testfiles/*.tmp
-TEST tgroup.h5 tgroup.hdf
-TEST tdset.h5 tdset.hdf
-TEST tattr.h5 tattr.hdf
-TEST tslink.h5 tslink.hdf
-TEST thlink.h5 thlink.hdf
-TEST tcompound.h5 tcompound.hdf
-TEST tall.h5 tall.hdf
-TEST tdset2.h5 tdset2.hdf
-TEST tcompound2.h5 tcompound2.hdf
-TEST tmany.h5 tmany.hdf
+CONVERT tgroup.h5 tgroup.hdf
+CONVERT tdset.h5 tdset.hdf
+CONVERT tattr.h5 tattr.hdf
+CONVERT tslink.h5 tslink.hdf
+CONVERT thlink.h5 thlink.hdf
+CONVERT tcompound.h5 tcompound.hdf
+CONVERT tall.h5 tall.hdf
+CONVERT tdset2.h5 tdset2.hdf
+CONVERT tcompound2.h5 tcompound2.hdf
+CONVERT tmany.h5 tmany.hdf
+#
+# Again, the test for conversion are the same as the first set of test.
+# Here, multiple conversion are done on HDF5 files at one time.
+#
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
-TEST -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5 tcompound.h5 tall.h5
-TEST -m tdset2.h5 tcompound2.h5 tmany.h5
+CONVERT -m tgroup.h5 tdset.h5 tattr.h5 tslink.h5 thlink.h5
+CONVERT -m tcompound.h5 tall.h5
+CONVERT -m tdset2.h5 tcompound2.h5 tmany.h5
 $RM ./testfiles/*.hdf ./testfiles/*.tmp
-else
-MESG 3 "$TestName <<<SKIPPED>>>"
-fi
 
-# End of test
-FINISH
