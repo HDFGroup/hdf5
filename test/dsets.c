@@ -74,6 +74,8 @@ const char *FILENAME[] = {
 #define DSET_SET_LOCAL_NAME	"set_local"
 #define DSET_SET_LOCAL_NAME_2	"set_local_2"
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
+#define DSET_NBIT_NAME           "nbit"
+#define DSET_NBIT_FLOAT_NAME     "nbit_float"
 #define DSET_COMPARE_DCPL_NAME	"compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
 
@@ -2497,6 +2499,256 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_nbit_simple
+ *
+ * Purpose:     Tests the simple version of nbit filter
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Xiaowen Wu
+ *              Wednesday, , 2004 Dec. 23th
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_nbit_simple(hid_t file, char *fname)
+{
+#ifdef H5_HAVE_FILTER_NBIT
+    hid_t               dataset, datatype, space, dc;
+    const hsize_t       size[2] = {10, 20};
+    const hsize_t       chunk_size[2] = {10, 20};
+    int                 orig_data[10][20];
+    int                 new_data[10][20];
+    size_t              precision, offset;
+    hsize_t             i, j;
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("nbit simple (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Define data type (integer), and set precision, offset, order */
+    datatype = H5Tcopy(H5T_NATIVE_INT);
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
+    precision = 24;
+    if(H5Tset_precision(datatype,precision)<0) goto error;
+    offset = 0;
+    if(H5Tset_offset(datatype,offset)<0) goto error;
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_nbit(dc)<0) goto error; 
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, fname, datatype,
+                             space,dc))<0) goto error;
+
+    for (i= 0;i< 10; i++)
+      for (j = 0; j < 20; j++)
+        orig_data[i][j] = ((long long int)random() % (long long int)pow(2, precision)) << offset;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit simple (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+
+    if (H5Dclose(dataset)<0) goto error;
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit simple (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if ((dataset = H5Dopen(file, fname))<0) goto error;
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<size[0]; i++) {
+        for (j=0; j<size[1]; j++) {
+            if (new_data[i][j] != orig_data[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n",
+                       (unsigned long)i, (unsigned long)j);
+                goto error;
+            }
+                /*printf("    orig: %08x  new: %08x\n", orig_data[i][j], new_data[i][j]);*/
+        }
+    }
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    return 0;
+
+error:
+    return -1;
+}
+
+
+static herr_t
+test_nbit_float(hid_t file, char *fname)
+{
+/* assume unsigned int and float has the same number of bytes */
+#ifdef H5_HAVE_FILTER_NBIT
+    hid_t               dataset, datatype, space, dc;
+    const hsize_t       size[2] = {10, 20};
+    const hsize_t       chunk_size[2] = {10, 20};
+    float               orig_data[10][20];
+    float               new_data[10][20];
+    int                 ival;
+    float               *pfval;
+    size_t              precision, offset;
+    hsize_t             i, j;
+#else /* H5_HAVE_FILTER_NBIT */
+    const char          *not_supported= "    Nbit is not enabled.";
+#endif /* H5_HAVE_FILTER_NBIT */
+
+    TESTING("nbit float (setup)");
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Define data type (integer), and set precision, offset, order */
+    datatype = H5Tcopy(H5T_NATIVE_FLOAT);
+    if(H5Tset_order(datatype, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_fields(datatype, 28, 25, 3, 5, 19)<0) goto error; 
+/*    if(H5Tset_fields(datatype, 31, 23, 8, 0, 23)<0) goto error; */
+    precision = 24;
+    if(H5Tset_precision(datatype,precision)<0) goto error;
+    offset = 8;
+    if(H5Tset_offset(datatype,offset)<0) goto error; 
+
+    /* Create the data space */
+    if ((space = H5Screate_simple(2, size, NULL))<0) goto error;
+
+    /* Use nbit filter  */
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk(dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_nbit(dc)<0) goto error;
+
+    /* Create the dataset */
+    if ((dataset = H5Dcreate(file, fname, datatype,
+                             space,dc))<0) goto error;
+
+    for (i= 0;i< 10; i++)
+      for (j = 0; j < 20; j++) {
+        ival = ((long long int)random() % (long long int)pow(2, precision)) << offset;
+        pfval = (float *)(&ival);
+        orig_data[i][j] = *pfval;
+    }
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+   /*----------------------------------------------------------------------
+     * STEP 1: Test nbit by setting up a chunked dataset and writing
+     * to it.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit float (write)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    if (H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                 orig_data)<0)
+        goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    /*----------------------------------------------------------------------
+     * STEP 2: Try to read the data we just wrote.
+     *----------------------------------------------------------------------
+     */
+    TESTING("nbit float (read)");
+
+#ifdef H5_HAVE_FILTER_NBIT
+    /* Read the dataset back */
+    if (H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+                new_data)<0)
+        goto error;
+
+    /* Check that the values read are the same as the values written */
+    for (i=0; i<size[0]; i++) {
+        for (j=0; j<size[1]; j++) {
+            if (*((int *)&new_data[i][j]) != *((int *)&orig_data[i][j])) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n",
+                       (unsigned long)i, (unsigned long)j);
+                printf("    orig: %f  new: %f\n", orig_data[i][j], new_data[i][j]);
+                goto error; 
+            }
+        }
+    }
+
+
+    /*----------------------------------------------------------------------
+     * Cleanup
+     *----------------------------------------------------------------------
+     */
+    if (H5Tclose(datatype)<0) goto error;
+    if (H5Pclose (dc)<0) goto error;
+    if (H5Dclose(dataset)<0) goto error;
+
+    PASSED();
+#else
+    SKIPPED();
+    puts(not_supported);
+#endif
+
+    return 0;
+
+error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_multiopen
  *
  * Purpose:	Tests that a bug no longer exists.  If a dataset is opened
@@ -3901,7 +4153,7 @@ main(void)
     fapl = h5_fileaccess();
     
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    HDsrandom((unsigned long)HDtime(NULL)); 
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
@@ -3928,6 +4180,8 @@ main(void)
     nerrors += test_tconv(file)<0	?1:0; 
     nerrors += test_filters(file)<0	?1:0;
     nerrors += test_onebyte_shuffle(file)<0 ?1:0;
+/*    nerrors += test_nbit_simple(file, "dataset1")<0        ?1:0; 
+    nerrors += test_nbit_float(file, "float1")<0         ?1:0; */ 
     nerrors += test_multiopen (file)<0	?1:0;
     nerrors += test_types(file)<0       ?1:0;
     nerrors += test_userblock_offset(fapl)<0     ?1:0;
