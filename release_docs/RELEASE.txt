@@ -110,6 +110,8 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Corrected error where dataset region references were written in an
+          incorrect way on Cray machines.  PVN & QAK - 2004/09/13
         - The H5Tget_native_type now determines the native type for integers
           based on the precision. This is to avoid cases of wrongly converting        
           an int to a short in machines that have a short of 8 bytes but with
@@ -216,6 +218,8 @@ Platforms Tested
 				  mpcc_r 5.0.2.5
 				  mpxlf_r 7.1.1.2
                                   poe 3.2.0.10
+    Cray T90 sn7001 10.0.0md      Cray Standard C Version 6.4.0.3
+                                  Cray Fortran Version 3.4.0.0
     Cray T3E sn6606 2.0.6.08      Cray Standard C Version 6.6.0.3
                                   Cray Fortran Version 3.6.0.3
     Cray SV1 sn9617 10.0.1.2      Cray Standard C Version 6.6.0.3.6
