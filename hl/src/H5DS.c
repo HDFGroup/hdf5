@@ -34,7 +34,7 @@
  *-------------------------------------------------------------------------
  */
 
-herr_t H5DSset_scale(hid_t did, 
+herr_t H5DSset_scale(hid_t dsid, 
                      char *dimname) 
 {  
  int has_dimlist;
@@ -45,7 +45,7 @@ herr_t H5DSset_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
  /* get ID type */
- if ((it = H5Iget_type(did))<0)
+ if ((it = H5Iget_type(dsid))<0)
   return FAIL;
 
  if (H5I_DATASET!=it)
@@ -56,8 +56,8 @@ herr_t H5DSset_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
- if ((has_dimlist = H5LT_find_attribute(did,DIMENSION_LIST))<0)
+ /* try to find the attribute "DIMENSION_LIST"  */
+ if ((has_dimlist = H5LT_find_attribute(dsid,DIMENSION_LIST))<0)
   return FAIL;
 
  if (has_dimlist == 1)
@@ -68,12 +68,12 @@ herr_t H5DSset_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
  
- if (H5LT_set_attribute_string(did,"CLASS",DIMENSION_SCALE_CLASS)<0)
+ if (H5LT_set_attribute_string(dsid,"CLASS",DIMENSION_SCALE_CLASS)<0)
   return FAIL;
 
  if (dimname!=NULL)
  {
-  if (H5LT_set_attribute_string(did,"NAME",dimname)<0)
+  if (H5LT_set_attribute_string(dsid,"NAME",dimname)<0)
    return FAIL;
  }
 
@@ -1028,8 +1028,8 @@ out:
  */
 
 herr_t H5DSset_label(hid_t did, 
-                     char *label,
-                     unsigned int idx)
+                     unsigned int idx,
+                     char *label)
 {  
  int           has_labels;
  hid_t         sid;                /* space ID */
@@ -1135,9 +1135,6 @@ herr_t H5DSset_label(hid_t did,
   
   if ((tid = H5Aget_type(aid))<0)
    goto out;
-
-  if ((sid = H5Aget_space(aid))<0)
-   goto out;
  
   /* allocate and initialize */
   buf = (char **)malloc((size_t)rank * sizeof(char *));
@@ -1149,22 +1146,14 @@ herr_t H5DSset_label(hid_t did,
   if (H5Aread(aid,tid,buf)<0)
    goto out;
 
-  for(i=0; i<(unsigned int)rank; i++)
-  {
-   if (idx == i )
-   {
-    /* store the label information in the required index */
-    buf[idx] = label;
-   }
-  }
+  /* store the label information in the required index */
+  buf[idx] = label;
   
   /* write the attribute with the new references */
   if (H5Awrite(aid,tid,buf)<0)
    goto out;
   
   /* close */
-  if (H5Sclose(sid)<0)
-   goto out;
   if (H5Tclose(tid)<0) 
    goto out;
   if (H5Aclose(aid)<0)
@@ -1189,8 +1178,12 @@ out:
  * Function: H5DSget_label
  *
  * Purpose: get a label for dimension IDX 
+ *   Up to 'size' characters are stored in 'label' followed by a '\0' string
+ *   terminator.  If the label is longer than 'size'-1,
+ *   the string terminator is stored in the last position of the buffer to
+ *   properly terminate the string.
  *
- * Return: Success: SUCCESS, Failure: FAIL
+ * Return: 0 if no label found, size of label if found, Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -1202,9 +1195,10 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5DSget_label(hid_t did, 
-                     char *label,
-                     unsigned int idx)
+ssize_t H5DSget_label(hid_t did, 
+                      unsigned int idx,
+                      char *label,
+                      size_t size)
 {  
  int             has_labels;
  hid_t           sid;                /* space ID */
@@ -1213,7 +1207,8 @@ herr_t H5DSget_label(hid_t did,
  int             rank;               /* rank of dataset */
  char            **buf=NULL;         /* buffer to store in the attribute */
  H5I_type_t      it;                 /* ID type */
- unsigned int    i;
+ size_t          nbytes;
+ size_t          copy_len;
 
 /*-------------------------------------------------------------------------
  * parameter checking
@@ -1235,8 +1230,13 @@ herr_t H5DSget_label(hid_t did,
  if ((has_labels = H5LT_find_attribute(did,DIMENSION_LABELS))<0)
   return FAIL;
 
+ /* return 0 and NULL for label if no label found */
  if (has_labels == 0)
-  return FAIL;
+ {
+  if (label)
+   label=NULL;
+  return 0;
+ }
 
  /* get dataset space */
  if ((sid = H5Dget_space(did))<0)
@@ -1251,7 +1251,7 @@ herr_t H5DSget_label(hid_t did,
   goto out;
 
 /*-------------------------------------------------------------------------
- * make the attribute and insert label
+ * open the attribute and read label
  *-------------------------------------------------------------------------
  */
 
@@ -1261,9 +1261,6 @@ herr_t H5DSget_label(hid_t did,
    goto out;
   
   if ((tid = H5Aget_type(aid))<0)
-   goto out;
-
-  if ((sid = H5Aget_space(aid))<0)
    goto out;
  
   /* allocate and initialize */
@@ -1275,19 +1272,22 @@ herr_t H5DSget_label(hid_t did,
   /* read */
   if (H5Aread(aid,tid,buf)<0)
    goto out;
-
-  for(i=0; i<(unsigned int)rank; i++)
-  {
-   if (idx == i )
-   {
-    /* store the label information in the required index */
-    strcpy(label,buf[idx]);
-   }
+  
+  /* get the real string length */
+  nbytes = HDstrlen(buf[idx]);
+ 
+  /* compute the string length which will fit into the user's buffer */
+  copy_len = MIN(size-1, nbytes);
+  
+  /* copy all/some of the name */
+  if( label && copy_len>0) {
+   HDmemcpy(label, buf[idx], copy_len);
+   
+   /* terminate the string */
+   label[copy_len]='\0';
   }
  
   /* close */
-  if (H5Sclose(sid)<0)
-   goto out;
   if (H5Tclose(tid)<0) 
    goto out;
   if (H5Aclose(aid)<0)
@@ -1296,8 +1296,7 @@ herr_t H5DSget_label(hid_t did,
    free(buf);
  }
 
-
- return SUCCESS;
+ return (ssize_t) nbytes;
 
  /* error zone, gracefully close */
 out:
@@ -1314,9 +1313,13 @@ out:
 /*-------------------------------------------------------------------------
  * Function: H5DSget_scale_name
  *
- * Purpose: get the name of a DS
+ * Purpose: get the scale name of DID
+ *   Up to 'size' characters are stored in 'name' followed by a '\0' string
+ *   terminator.  If the name is longer than 'size'-1,
+ *   the string terminator is stored in the last position of the buffer to
+ *   properly terminate the string.
  *
- * Return: Success: SUCCESS, Failure: FAIL
+ * Return: size of name if found, Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -1337,7 +1340,8 @@ ssize_t H5DSget_scale_name(hid_t did,
  hid_t      tid;      /* attribute type ID */
  hid_t      sid;      /* space ID  */
  H5I_type_t it;       /* ID type */
- size_t     len;
+ size_t     nbytes;
+ size_t     copy_len;
  int        has_name;
  char       *buf=NULL;
 
@@ -1384,11 +1388,11 @@ ssize_t H5DSget_scale_name(hid_t did,
   goto out;
 
  /* get the size */
- if ((len = H5Tget_size(tid))<0)
+ if ((nbytes = H5Tget_size(tid))<0)
   goto out;
 
  /* allocate a temporary buffer */
- buf = (char*)malloc(len * sizeof(char));
+ buf = (char*)malloc(nbytes * sizeof(char));
  if (buf == NULL)
   goto out;
  
@@ -1396,13 +1400,16 @@ ssize_t H5DSget_scale_name(hid_t did,
  if (H5Aread(aid,tid,buf)<0)
   goto out;
 
- /* compute the string length which will fit into the user's buffer, copy all/some of the name */
- if(name) 
- {
-  HDstrncpy(name, buf, MIN(len+1,size));
-  if(len >= size)
-   name[size-1]='\0';
- } /* end if */
+ /* compute the string length which will fit into the user's buffer */
+ copy_len = MIN(size-1, nbytes);
+ 
+ /* copy all/some of the name */
+ if (name && copy_len>0) {
+  HDmemcpy(name, buf, copy_len);
+  
+  /* terminate the string */
+  name[copy_len]='\0';
+ }
  
  /* close */
  if (H5Tclose(tid)<0)
@@ -1417,8 +1424,7 @@ ssize_t H5DSget_scale_name(hid_t did,
   buf=NULL;
  }
 
-
- return (ssize_t) len;
+ return (ssize_t) nbytes;
 
  /* error zone, gracefully close */
 out:
