@@ -2127,6 +2127,142 @@ test_select_hyper_union(void)
 
 /****************************************************************
 **
+**  test_select_hyper_union_stagger(): Test basic H5S (dataspace) selection code.
+**      Tests unions of staggered hyperslabs
+** 
+****************************************************************/
+static void 
+test_select_hyper_union_stagger(void)
+{
+    hid_t file_id;      /* File ID */
+    hid_t dset_id;      /* Dataset ID */
+    hid_t dataspace;    /* File dataspace ID */
+    hid_t memspace;     /* Memory dataspace ID */
+    hsize_t dimsm[2]={7,7}; /* Memory array dimensions */
+    hsize_t dimsf[2]={6,5}; /* File array dimensions */
+    hsize_t count[2]={3,1}; /* 1st Hyperslab size */
+    hsize_t count2[2]={3,1}; /* 2nd Hyperslab size */
+    hsize_t count3[2]={2,1}; /* 3rd Hyperslab size */
+    hssize_t offset[2]={0,0}; /* 1st Hyperslab offset */
+    hssize_t offset2[2]={2,1}; /* 2nd Hyperslab offset */
+    hssize_t offset3[2]={4,2}; /* 3rd Hyperslab offset */
+    hsize_t count_out[2]={4,2}; /* Hyperslab size in memory */
+    hssize_t offset_out[2]={0,3}; /* Hyperslab offset in memory */
+    int data[6][5];     /* Data to write */
+    int data_out[7][7]; /* Data read in */
+    int input_loc[8][2]={{0,0},
+                         {1,0},
+                         {2,0},
+                         {2,1},
+                         {3,1},
+                         {4,1},
+                         {4,2},
+                         {5,2}};
+    int output_loc[8][2]={{0,3},
+                         {0,4},
+                         {1,3},
+                         {1,4},
+                         {2,3},
+                         {2,4},
+                         {3,3},
+                         {3,4}};
+    int dsetrank=2;     /* File Dataset rank */
+    int memrank=2;      /* Memory Dataset rank */
+    int rank;
+    int i,j;            /* Local counting variables */
+    herr_t error;
+    hsize_t stride[2]={1,1};
+    hsize_t block[2]={1,1};
+
+    /* Initialize data to write */
+    for(i=0; i<6; i++)
+        for(j=0; j<5; j++)
+           data[i][j] = j*10 + i;
+
+    /* Create file */
+    file_id=H5Fcreate(FILENAME,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create File Dataspace */
+    dataspace=H5Screate_simple(dsetrank,dimsf,NULL);
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /* Create File Dataset */
+    dset_id=H5Dcreate(file_id,"IntArray",H5T_NATIVE_INT,dataspace,H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate");
+
+    /* Write File Dataset */
+    error=H5Dwrite(dset_id,H5T_NATIVE_INT,dataspace,dataspace,H5P_DEFAULT,data);
+    CHECK(error, FAIL, "H5Dwrite");
+
+    /* Close things */
+    error=H5Sclose(dataspace);
+    CHECK(error, FAIL, "H5Sclose");
+    error=H5Dclose(dset_id);
+    CHECK(error, FAIL, "H5Dclose");
+    error=H5Fclose(file_id);
+    CHECK(error, FAIL, "H5Fclose");
+
+    /* Initialize intput buffer */
+    memset(data_out,0,7*7*sizeof(int));
+
+    /* Open file */
+    file_id=H5Fopen(FILENAME,H5F_ACC_RDONLY,H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+
+    /* Open dataset */
+    dset_id=H5Dopen(file_id,"IntArray");
+    CHECK(dset_id, FAIL, "H5Dopen");
+
+    /* Get the dataspace */
+    dataspace=H5Dget_space(dset_id);
+    CHECK(dataspace, FAIL, "H5Dget_space");
+
+    /* Select the hyperslabs */
+    error=H5Sselect_hyperslab(dataspace,H5S_SELECT_SET,offset,stride,count,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+    error=H5Sselect_hyperslab(dataspace,H5S_SELECT_OR,offset2,stride,count2,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+    error=H5Sselect_hyperslab(dataspace,H5S_SELECT_OR,offset3,stride,count3,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+
+    /* Create Memory Dataspace */
+    memspace=H5Screate_simple(memrank,dimsm,NULL);
+    CHECK(memspace, FAIL, "H5Screate_simple");
+
+    /* Select hyperslab in memory */
+    error=H5Sselect_hyperslab(memspace,H5S_SELECT_SET,offset_out,stride,count_out,block);
+    CHECK(error, FAIL, "H5Sselect_hyperslab");
+    
+    /* Read File Dataset */
+    error=H5Dread(dset_id,H5T_NATIVE_INT,memspace,dataspace,H5P_DEFAULT,data_out);
+    CHECK(error, FAIL, "H5Dread");
+
+    /* Verify input data */
+    for(i=0; i<8; i++) {
+        if(data[input_loc[i][0]][input_loc[i][1]]!=data_out[output_loc[i][0]][output_loc[i][1]]) {
+            printf("input data #%d is wrong!\n",i);
+            printf("input_loc=[%d][%d]\n",input_loc[i][0],input_loc[i][1]);
+            printf("output_loc=[%d][%d]\n",output_loc[i][0],output_loc[i][1]);
+            printf("data=%d\n",data[input_loc[i][0]][input_loc[i][1]]);
+            printf("data_out=%d\n",data_out[output_loc[i][0]][output_loc[i][1]]);
+            num_errs++;
+        } /* end if */
+    } /* end for */
+
+    /* Close things */
+    error=H5Sclose(dataspace);
+    CHECK(error, FAIL, "H5Sclose");
+    error=H5Sclose(memspace);
+    CHECK(error, FAIL, "H5Sclose");
+    error=H5Dclose(dset_id);
+    CHECK(error, FAIL, "H5Dclose");
+    error=H5Fclose(file_id);
+    CHECK(error, FAIL, "H5Fclose");
+}
+
+/****************************************************************
+**
 **  test_select_hyper_union_3d(): Test basic H5S (dataspace) selection code.
 **      Tests unions of hyperslabs in 3-D
 ** 
@@ -2340,6 +2476,7 @@ test_select(void)
     test_select_hyper_offset(); /* Test selection offset code with hyperslabs */
     test_select_point_offset(); /* Test selection offset code with elements */
     test_select_hyper_union();  /* Test hyperslab union code */
+    test_select_hyper_union_stagger();  /* Test hyperslab union code for staggered slabs */
     test_select_hyper_union_3d();  /* Test hyperslab union code for 3-D dataset */
 
 }   /* test_select() */
