@@ -1626,14 +1626,11 @@ static void display_string
                  } else {
                      indentation(indent+COL);     
 					 printf("%s\"", out_buf);
- //                    strncpy(out_buf, tempstr.s, x);
 					 memset(out_buf, '\0', NCOLS); 
 					 temp = copy_atomic_char(out_buf,tempstr.s,tempstr.len,x);
                      out_buf[x] = '\0';
 					 printf("%s\" //\n", out_buf);
 					 x = temp;
-//					 out_buf[0] = '\"';
-//					 strncpy(out_buf+1, tempstr.s + temp, tempstr.len - temp);
                  }
              }
 
@@ -1708,7 +1705,6 @@ static void display_string
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
                   } else {
 					 strcpy(out_buf, "\"");
-//					 strcat(out_buf, "\"");
                      strcat (out_buf, tempstr.s+x+j*y);
                      strcat(out_buf, "\",");
                      if ((int)strlen(out_buf) < (NCOLS-indent-COL)) strcat(out_buf, " "); 
@@ -2140,3 +2136,4 @@ int copy_atomic_char(char* output, char* input, int numchar, int freespace){
 	if (x == 0) x = FAIL;
 	return(x);
 }
+
