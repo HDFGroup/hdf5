@@ -3268,12 +3268,12 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
      */
     opt=H5D_mpio_opt_possible(dset,mem_space,file_space,flags);
     if(opt==FAIL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, "invalid check for direct IO dataspace ");
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ");
 
     opt = H5D_get_collective_io_consensus(dset->ent.file, opt, flags);
 
     if ( opt == FAIL )
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL, \
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, \
                     "check for collective I/O consensus failed.");
 
     /* Check if we can use the optimized parallel I/O routines */
