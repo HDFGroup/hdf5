@@ -22,7 +22,7 @@ static int check_n_input( const char* );
 static int check_f_input( const char* );
 void h5diff_exit(int status);
 #ifdef H5_HAVE_PARALLEL
-static void ph5diff_worker( void );
+static void ph5diff_worker(int );
 #endif
 
 /*-------------------------------------------------------------------------
@@ -55,11 +55,11 @@ static void ph5diff_worker( void );
  *-------------------------------------------------------------------------
  */
 
-    int	       nID = 0;
 
 int main(int argc, const char *argv[])
 {
     int        i;
+    int	       nID = 0;
     const char *s = NULL;
     const char *fname1 = NULL;
     const char *fname2 = NULL;
@@ -72,6 +72,7 @@ int main(int argc, const char *argv[])
 #ifdef H5_HAVE_PARALLEL
     MPI_Status Status;
     outBuffOffset = 0;
+
 #endif
 
     /* See what we were called as to determine whether to run serial or parallel version
@@ -99,6 +100,12 @@ int main(int argc, const char *argv[])
     }
     else
 	g_nTasks = 1;
+
+    if(g_Parallel && (g_nTasks == 1))
+    {
+	printf("Need at least 2 tasks to run parallel diff\n");
+	h5diff_exit(1);
+    }
 
     /* Have the manager process the command-line */
     if(nID == 0)
@@ -288,12 +295,15 @@ int main(int argc, const char *argv[])
 	ret= (nfound==0 ? 0 : 1 );
 	if (options.err_stat)
 	    ret=-1;
-	return ret;
+	if(g_Parallel)
+	    return 0;
+	else
+	    return ret;
     }
 #ifdef H5_HAVE_PARALLEL
     /* All other tasks become workers and wait for assignments. */
     else
-	ph5diff_worker();
+	ph5diff_worker(nID);
 #endif
 }
 
@@ -315,13 +325,12 @@ int main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 static void
-ph5diff_worker(void)
+ph5diff_worker(int nID)
 {	
     struct diff_args args;
     hid_t file1_id, file2_id;	
     char	filenames[2][1024];
     hsize_t    nfound=0;
-    int	       nID;
     MPI_Status Status;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &nID);
