@@ -131,7 +131,41 @@ extern char *hdfRecordPointer;
 #define FAMILY_MISC      	0270
 #define FAMILY_HDFPROCNAME     	0300
 
+#define mpiOpenBeginID             900800
+#define mpiOpenEndID               900801
+
+#define mpiCloseBeginID            900802
+#define mpiCloseEndID              900803
+
+#define mpiSetSizeBeginID          900806
+#define mpiSetSizeEndID            900807
+
+#define mpiGetSizeBeginID          900810
+#define mpiGetSizeEndID            900811
+
+#define mpiSetViewBeginID          900816
+#define mpiSetViewEndID            900817
+
+#define mpiGetViewBeginID          900818
+#define mpiGetViewEndID            900819
+
+#define mpiReadAtBeginID           900820
+#define mpiReadAtEndID             900821
+
+#define mpiReadAtAllBeginID        900822
+#define mpiReadAtAllEndID          900823
+
+#define mpiWriteAtBeginID          900824
+#define mpiWriteAtEndID            900825
+
+#define mpiWriteAtAllBeginID       900826
+#define mpiWriteAtAllEndID         900827
+
+#define mpiSyncBeginID             900856
+#define mpiSyncEndID               900857
+
 typedef struct {
+        long numBytes;
         long setID;
         char *setName;
 } HDFsetInfo ;

@@ -102,13 +102,52 @@
 /*======================================================================*
 // Enumeration of time fields in an HDFrec_t below			*
 //======================================================================*/
-enum TimeFields { HDF_, MPI, Malloc, AllIO, Open, Close, Read, Write, ARead,
-                  AWrite, Seek, Wait, Misc, nTallyFields };
+enum TimeFields { HDF_, 
+                  MPI, 
+                  Malloc, 
+                  AllIO, 
+                  Open,
+                  Close,
+                  Read,
+                  Write,
+                  Aread,
+                  Awrite,
+                  Seek,
+                  Wait,
+                  Misc,
+                  MPIOread,
+                  MPIOreadAll,
+                  MPIOwrite,
+                  MPIOwriteAll,
+                  MPIOiRead,
+                  MPIOiWrite,
+                  MPIOother,
+                  nTallyFields,
+                  MPIOreadTrans,
+                  MPIOreadAllTrans,
+                  MPIOwriteTrans,
+                  MPIOwriteAllTrans
+                };
 /*======================================================================*
 // Enumeration of byte fields in an HDFrec_t below			*
 //======================================================================*/
-enum ByteFields{ MallocBytes, ReadBytes, WriteBytes, AReadBytes, AWriteBytes,
-                 nByteFields };
+enum ByteFields{ MallocBytes,
+                 ReadBytes,
+                 WriteBytes,
+                 AreadBytes,
+                 AwriteBytes,
+                 MPIOreadBytesReq,
+                 MPIOreadBytesTrans,
+                 MPIOwriteBytesReq,
+                 MPIOwriteBytesTrans,
+                 MPIOreadAllBytesReq,
+                 MPIOreadAllBytesTrans,
+                 MPIOwriteAllBytesReq,
+                 MPIOwriteAllBytesTrans,
+                 MPIOiReadBytesReq,
+                 MPIOiWriteBytesReq,
+                 nByteFields,
+                 nHistFields = AwriteBytes+1 };
 /*======================================================================*
 // Definition of first and last IO event.         	 		*
 //======================================================================*/
@@ -121,16 +160,16 @@ int BktLim[] = { 1, 4*ONEK, 64*ONEK, 256*ONEK, INT_MAX } ;
 // Definition of structure used to account activity in an HDF call	*
 //======================================================================*/
 typedef struct {
-  	int     nCalls;   		/* number of proc calls		*/
-  	CLOCK   lastCall;		/* time of last call		*/
-  	CLOCK   incDur;			/* inclusive duration		*/
-  	CLOCK   excDur;			/* exclusive duration		*/
-	CLOCK   times[nTallyFields];	/* Tally op/calls times		*/
-	int     counts[nTallyFields];	/* Tally op/calls counts	*/
-	int     bytes[nByteFields];	/* Tally bytes transferred	*/
-	int     Hists[nByteFields][nBkts];  /* Historgrams		*/
-	long	hdfID;			/* data set ID			*/
-	long	xRef;			/* data set cross reference	*/
+  	int   nCalls;   		/* number of proc calls		*/
+  	CLOCK lastCall;			/* time of last call		*/
+  	CLOCK incDur;			/* inclusive duration		*/
+  	CLOCK excDur;			/* exclusive duration		*/
+	CLOCK times[nTallyFields];	/* Tally op/calls times		*/
+	int counts[nTallyFields];	/* Tally op/calls counts	*/
+	int bytes[nByteFields];		/* Tally bytes transferred	*/
+	int Hists[nHistFields][nBkts];  /* Historgrams			*/
+	long hdfID;			/* data set ID			*/
+	long xRef;			/* data set cross reference	*/
 } HDFrec_t;
 /*======================================================================*
 // Node used to maintain linked lists of HDF procedure activity.       	*

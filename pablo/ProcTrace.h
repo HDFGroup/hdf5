@@ -97,6 +97,7 @@ NO_TRACE,
 NUM_HDF_IDS
 } ;
 
+#define SUPPRESS_MPIO_TRACE 2
 #define ID_HDF_Last_Entry ID_ALLHDF
 
 void HDFinitTrace( const char *, int trace_id, ... ); 

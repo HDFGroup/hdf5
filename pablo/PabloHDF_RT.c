@@ -142,8 +142,8 @@
 
 #include "HDFrecord_RT.h"
 
-#ifdef HAVE_PARALLEL
-#include "mpio.h"
+#ifdef H5_HAVE_PARALLEL
+#include "mpi.h"
 #include "MPIO_EventArgs.h"
 #endif
 
@@ -230,7 +230,7 @@ extern char *hdfRecordPointer;
 //======================================================================*/
 void HDFinitTrace_RT( char *fileName, int OUTSW )
 {
-#ifdef  HAVE_PARALLEL
+#ifdef  H5_HAVE_PARALLEL
 	int myNode;
 #endif
 	int error;
@@ -241,7 +241,7 @@ void HDFinitTrace_RT( char *fileName, int OUTSW )
 	   exit(-1);
 	}
 	FileName = ( char * ) malloc ( strlen( fileName ) + 10 );
-#ifdef  HAVE_PARALLEL
+#ifdef  H5_HAVE_PARALLEL
 	/*==============================================================*
 	// Here the library was built to linked with the MPI and MPIO	*
 	// libraries.  However, the use may chose not to run with MPI.	*
@@ -259,11 +259,11 @@ void HDFinitTrace_RT( char *fileName, int OUTSW )
 	}
 #else
 	/*==============================================================*
-	// In the non-parallel case, set the trace file name and 	*
+      case, set the trace file name and 	*
 	// initialize the trace library.				*
 	//==============================================================*/
 	strcpy( FileName, fileName ) ;
-#endif	/* HAVE_PARALLEL */
+#endif	/* H5_HAVE_PARALLEL */
         setTraceFileName(FileName);
         basicLibraryInit( );         
 }
@@ -280,7 +280,6 @@ void HDFendTrace_RT( int OUTSW )
 	int j, numSetIDs;
 	HDFnode_t *P;
 	char **Names;
-/*	char* mapFile;*/
 
 	HDFfinalTimeStamp();
 	/*==============================================================*
@@ -391,27 +390,40 @@ int initHDFProcTrace_RT( void )
 //======================================================================*/
 void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen ) 
 {
-	CLOCK	seconds;
+   CLOCK	seconds;
 
-	seconds = getClock();
+   seconds = getClock();
 
-	if ( isBeginIOEvent ( eventType ) || eventType == ID_malloc ) {
-	   BeginIOEventRecord ( eventType, seconds, dataPtr ) ;
-	} else if ( isEndIOEvent( eventType )  || eventType == -ID_malloc) {
-	   EndIOEventRecord ( eventType, seconds, dataPtr );
-	} else if ( isBeginHDFEvent( eventType ) ) { 
-	   BeginHDFEventRecord ( eventType , seconds ) ;
-	} else if ( isEndHDFEvent( eventType ) ) {
-	   EndHDFEventRecord ( seconds, dataPtr );
-#ifdef  HAVE_PARALLEL
-	} else if ( isBeginMPIOEvent( eventType ) ) { 
-	   BeginMPIOEventRecord ( eventType, seconds, dataPtr, dataLen ) ;
-	} else if ( isEndMPIOEvent( eventType ) ) {
-	   EndMPIOEventRecord ( eventType, seconds, dataPtr, dataLen );
-#endif  /* HAVE_PARALLEL */
-	} else {
-	   fprintf(stderr,"eventType %d, dataLen = %u\n",eventType,dataLen);
-	} 
+   if ( isBeginIOEvent ( eventType ) || eventType == ID_malloc ) 
+   {
+      BeginIOEventRecord ( eventType, seconds, dataPtr ) ;
+   } 
+   else if ( isEndIOEvent( eventType )  || eventType == -ID_malloc) 
+   {
+      EndIOEventRecord ( eventType, seconds, dataPtr );
+   } 
+   else if ( isBeginHDFEvent( eventType ) ) 
+   { 
+      BeginHDFEventRecord ( eventType , seconds ) ;
+   } 
+   else if ( isEndHDFEvent( eventType ) ) 
+   {
+      EndHDFEventRecord ( seconds, dataPtr );
+#ifdef  H5_HAVE_PARALLEL
+   } 
+   else if ( isBeginMPIOEvent( eventType ) ) 
+   { 
+      BeginMPIOEventRecord ( eventType, seconds, dataPtr, dataLen ) ;
+   } 
+   else if ( isEndMPIOEvent( eventType ) ) 
+   {
+      EndMPIOEventRecord ( eventType, seconds, dataPtr, dataLen );
+#endif  /* H5_HAVE_PARALLEL */
+   } 
+   else 
+   {
+      fprintf(stderr,"eventType %d, dataLen = %u\n",eventType,dataLen);
+   } 
 }
 /*======================================================================* 
 // BeginIOEventRecord:                                               	*
@@ -420,41 +432,48 @@ void HDFtraceEvent_RT( int eventType, char *dataPtr, unsigned dataLen )
 //======================================================================*/ 
 void BeginIOEventRecord ( int eventType, CLOCK seconds, void *dataPtr  )
 {
-	char *name;
-	/*==============================================================*
-	// save the time value temporarily in top of stack		*
-	// When the end record is received, the duration can be 	*
-	// computed.							*
-	//==============================================================*/
-	CallStack->lastIOtime = seconds;
-	/*==============================================================*
-	// get the ID or name of the file accessed from the structure	*
-	// passed as dataPtr.  						*
-	//==============================================================*/
-	switch ( eventType )
-	{
-		case fopenBeginID:
-		case openBeginID:
-		   name = (char *)(dataPtr) + 2*sizeof(int);
-  	   	   strcpy( openName, name );
-		   break;
-		case fcloseBeginID:
-		case closeBeginID:
-	   	   CallStack->record.hdfID = *( long *)dataPtr;
-		   break;
-		case readBeginID:
-		case freadBeginID:
-		case writeBeginID:
-		case fwriteBeginID:
-		case lseekBeginID:
-		case fseekBeginID:
-		case fsetposBeginID:
-		case rewindBeginID:
-	   	   CallStack->record.hdfID = *(int *)dataPtr;
-		   break;
-		default:
-		   break;
-	}
+   char *name;
+   /*===================================================================*
+   // save the time value temporarily in top of stack			*
+   // When the end record is received, the duration can be computed.	*
+   //===================================================================*/
+   CallStack->lastIOtime = seconds;
+   /*===================================================================*
+   // get the ID or name of the file accessed from the structure	*
+   // passed as dataPtr.  						*
+   //===================================================================*/
+   switch ( eventType )
+   {
+      case fopenBeginID:
+      case openBeginID:
+      {
+         name = (char *)(dataPtr) + 2*sizeof(int);
+         strcpy( openName, name );
+	 break;
+      }
+      case fcloseBeginID:
+      case closeBeginID:
+      {
+         CallStack->record.hdfID = *( long *)dataPtr;
+	 break;
+      }
+      case readBeginID:
+      case freadBeginID:
+      case writeBeginID:
+      case fwriteBeginID:
+      case lseekBeginID:
+      case fseekBeginID:
+      case fsetposBeginID:
+      case rewindBeginID:
+      {
+         CallStack->record.hdfID = *(int *)dataPtr;
+	 break;
+      }
+      default:
+      {
+         break;
+      }
+   }
 }
 /*======================================================================* 
 // EndIOEventRecord:							*
@@ -465,44 +484,50 @@ void BeginIOEventRecord ( int eventType, CLOCK seconds, void *dataPtr  )
 //======================================================================*/ 
 void EndIOEventRecord ( int eventType, CLOCK secs, void *dataPtr )
 {
-	CLOCK incDur;
-	int i, Field, ByteField, bytes;
-
-	incDur = clockSubtract(secs,CallStack->lastIOtime) ;
-	Field = getHDFFieldIndex( eventType ) ;
-        CallStack->record.times[Field] 
-            = clockAdd ( CallStack->record.times[Field] , incDur ) ;
-        ++CallStack->record.counts[Field];
-	ByteField = getHDFByteFieldIndex( Field ) ;
-	switch ( eventType ) 
-	{
-		case readEndID:
-		case freadEndID:
-		case writeEndID:
-		case fwriteEndID:
-		case -ID_malloc:
-	   	   bytes = *((int *)dataPtr);
-	      	   CallStack->record.bytes[ByteField] += bytes;
-	           /*====================================================
-		   // update histogram					*
-	           //===================================================*/
-                   i = -1;
-                   while ( bytes >= BktLim[i+1] ) ++i  ;
-                   if ( i >= 0 ) ++CallStack->record.Hists[ByteField][i];
-		   break;
-		case fopenEndID:
-		case openEndID:
-		   openInfo.setName = openName;
-		   openInfo.setID = (int)(*((long *)dataPtr));
-		   CallStack->record.hdfID = openInfo.setID;
-	           HDFrecordFileName ( &openInfo );
-		   break;
-		default:
-		   break;
-	}
+   CLOCK incDur;
+   int i, Field, ByteField, bytes;
+   
+   incDur = clockSubtract(secs,CallStack->lastIOtime) ;
+   Field = getHDFFieldIndex( eventType ) ;
+   CallStack->record.times[Field] 
+   = clockAdd ( CallStack->record.times[Field] , incDur ) ;
+   ++CallStack->record.counts[Field];
+   ByteField = getHDFByteFieldIndex( Field ) ;
+   switch ( eventType ) 
+   {
+      case readEndID:
+      case freadEndID:
+      case writeEndID:
+      case fwriteEndID:
+      case -ID_malloc:
+      {
+         bytes = *((int *)dataPtr);
+         CallStack->record.bytes[ByteField] += bytes;
+         /*======================================================
+         // update histogram					*
+         //=====================================================*/
+         i = -1;
+         while ( bytes >= BktLim[i+1] ) ++i  ;
+         if ( i >= 0 ) ++CallStack->record.Hists[ByteField][i];
+         break;
+      }
+      case fopenEndID:
+      case openEndID:
+      {
+         openInfo.setName = openName;
+         openInfo.setID = (int)(*((long *)dataPtr));
+         CallStack->record.hdfID = openInfo.setID;
+         HDFrecordFileName ( &openInfo );
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
 			
 }
-#ifdef HAVE_PARALLEL
+#ifdef H5_HAVE_PARALLEL
 /*======================================================================*
 // BeginMPIOEventRecord:                                               	*
 //  This routine simply records the time in the record on the top of 	*
@@ -510,141 +535,97 @@ void EndIOEventRecord ( int eventType, CLOCK secs, void *dataPtr )
 //======================================================================*/ 
 void BeginMPIOEventRecord( int eventType, 
 	                   CLOCK seconds, 
-	                   void *dataPtr,
+	                   void *data,
 	                   int dataLen )
 {
-	/*==============================================================*
-	// save the time value temporarily in top of stack		*
-	// When the end record is received, the duration can be 	*
-	// computed.							*
-	//==============================================================*/
-	CallStack->lastIOtime = seconds;
-	/*==============================================================*
-	// get useful info from the structure pointed to by dataPtr.	*
-	// in most cases, this is the file ID.  For mpiOpen, it is the	*
-	// name of the file.  For mpiDelete, no information is of any	*
-	// use.								*
-	//==============================================================*/
-        if ( dataLen == 0 ) return;
-	switch ( eventType ) 
-	{
-	   case HDFmpiGetSizeID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetSizeBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetGroupID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetGroupBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetAmodeID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetAmodeBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetViewID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetViewBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetPositionID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetPositionBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetByteOffsetID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetByteOffsetBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetTypeExtentID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetTypeExtentBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiGetAtomicityID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiGetAtomicityBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiOpenID:
-	      strcpy( openName,
-		     ((struct mpiOpenBeginArgs *)dataPtr)->fileName);
-	      break;
-	   case HDFmpiCloseID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiCloseBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiDeleteID:
-	      break;
-	   case HDFmpiSetSizeID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiSetSizeBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiPreallocateID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiPreallocateBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiSetViewID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiSetViewBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiReadAtID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiReadAtBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiReadAtAllID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiReadAtAllBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiWriteAtID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiWriteAtBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiWriteAtAllID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiWriteAtAllBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiIreadAtID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiIreadAtBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiIwriteAtID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiIwriteAtBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiReadID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiReadBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiReadAllID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiReadAllBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiWriteID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiWriteBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiWriteAllID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiWriteAllBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiIreadID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiIreadBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiIwriteID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiIwriteBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiSeekID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiSeekBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiSetAtomicityID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiSetAtomicityBeginArgs *)dataPtr)->fileID;
-	      break;
-	   case HDFmpiSyncID:
-	      CallStack->record.hdfID 
-		 = ((struct mpiSyncBeginArgs *)dataPtr)->fileID;
-	      break;
-	   default:
-	      break;
-	}
+   HDFsetInfo *dataPtr;
+   dataPtr = (HDFsetInfo *)data;
+   /*==============================================================*
+   // save the time value temporarily in top of stack		*
+   // When the end record is received, the duration can be 	*
+   // computed.							*
+   //==============================================================*/
+   CallStack->lastIOtime = seconds;
+   /*==============================================================*
+   // get useful info from the structure pointed to by dataPtr.	*
+      cases, this is the file ID.  For mpiOpen, it is the	*
+   // name of the file.  For mpiDelete, no information is of any	*
+   // use.								*
+   //==============================================================*/
+   if ( dataLen == 0 ) return;
+   CallStack->record.hdfID = dataPtr->setID; 
+   switch ( eventType ) 
+   {
+      case HDFmpiOpenID:
+      {
+         strcpy( openName, dataPtr->setName );
+         break;
+      }
+      case HDFmpiReadAtID:
+      {
+         CallStack->record.bytes[MPIOreadBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiReadAtAllID:
+      {
+         CallStack->record.bytes[MPIOreadAllBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiWriteAtID:
+      {
+         CallStack->record.bytes[MPIOwriteBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiWriteAtAllID:
+      {
+         CallStack->record.bytes[MPIOwriteAllBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiIreadAtID:
+      {
+         CallStack->record.bytes[MPIOiReadBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiIwriteAtID:
+      {
+         CallStack->record.bytes[MPIOiWriteBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiReadID:
+      {
+         CallStack->record.bytes[MPIOreadBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiReadAllID:
+      {
+         CallStack->record.bytes[MPIOreadAllBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiWriteID:
+      {
+         CallStack->record.bytes[MPIOwriteBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiWriteAllID:
+      {
+         CallStack->record.bytes[MPIOwriteAllBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiIreadID:
+      {
+         CallStack->record.bytes[MPIOiReadBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      case HDFmpiIwriteID:
+      {
+         CallStack->record.bytes[MPIOiWriteBytesReq] += dataPtr->numBytes;
+         break;
+      }
+      default:
+      {
+         break;
+      }
+   }
 }
 /*======================================================================*
 // EndMPIOEventRecord:							*
@@ -654,27 +635,136 @@ void BeginMPIOEventRecord( int eventType,
 //======================================================================*/ 
 void EndMPIOEventRecord ( int eventType, 
 	                  CLOCK secs, 
-	                  void *dataPtr,
+	                  void *data,
 	                  int dataLen )
 {
-	CLOCK incDur;
+   CLOCK incDur;
 
-	incDur = clockSubtract(secs,CallStack->lastIOtime) ;
-        CallStack->record.times[MPI] 
-           = clockAdd ( CallStack->record.times[MPI], incDur );
-        ++CallStack->record.counts[MPI];
-	if ( eventType == -HDFmpiOpenID && dataLen != 0 ) {
-	   /*===========================================================*
-	   // complete the file information for the case of a file 	*
-	   // open and record the information.				*
-	   //===========================================================*/
-	   openInfo.setName = openName;
-	   openInfo.setID = ((struct mpiOpenEndArgs *)dataPtr)->fileID;
-	   CallStack->record.hdfID = openInfo.setID;
-	   HDFrecordFileName ( &openInfo );
-	}
+   HDFsetInfo* dataPtr;
+   incDur = clockSubtract(secs,CallStack->lastIOtime) ;
+   CallStack->record.times[MPI] 
+          = clockAdd ( CallStack->record.times[MPI], incDur );
+   ++CallStack->record.counts[MPI];
+   if ( dataLen == 0 ) 
+   {
+      return;
+   }
+   dataPtr = (HDFsetInfo *)data;
+   switch ( eventType ) 
+   {
+      case -HDFmpiOpenID:
+      {
+         /*===========================================================*
+         // open and record the information.			      *
+         //===========================================================*/
+	 openInfo.setName = openName;
+	 openInfo.setID = dataPtr->setID;
+	 CallStack->record.hdfID = openInfo.setID;
+	 HDFrecordFileName ( &openInfo );
+         break;
+      }
+      case -HDFmpiReadAtID:
+      {
+         ++CallStack->record.counts[MPIOread] ;
+         CallStack->record.times[MPIOread] 
+          = clockAdd ( CallStack->record.times[MPIOread], incDur );
+         CallStack->record.bytes[MPIOreadBytesTrans] += dataPtr->numBytes; 
+         break;
+      }
+      case -HDFmpiReadAtAllID:
+      {
+         ++CallStack->record.counts[MPIOreadAll] ;
+         CallStack->record.times[MPIOreadAll] 
+          = clockAdd ( CallStack->record.times[MPIOreadAll], incDur );
+         CallStack->record.bytes[MPIOreadAllBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiWriteAtID:
+      {
+         ++CallStack->record.counts[MPIOwrite] ;
+         CallStack->record.times[MPIOwrite] 
+          = clockAdd ( CallStack->record.times[MPIOwrite], incDur );
+         CallStack->record.bytes[MPIOwriteBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiWriteAtAllID:
+      {
+         ++CallStack->record.counts[MPIOwriteAll] ;
+         CallStack->record.times[MPIOwriteAll] 
+          = clockAdd ( CallStack->record.times[MPIOwriteAll], incDur );
+         CallStack->record.bytes[MPIOwriteAllBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiIreadAtID:
+      {
+         ++CallStack->record.counts[MPIOiRead] ;
+         CallStack->record.times[MPIOiRead] 
+             = clockAdd ( CallStack->record.times[MPIOiRead], incDur );
+         break;
+      }
+      case -HDFmpiIwriteAtID:
+      {
+         ++CallStack->record.counts[MPIOiWrite] ;
+         CallStack->record.times[MPIOiWrite] 
+             = clockAdd ( CallStack->record.times[MPIOiWrite], incDur );
+         break;
+      }
+      case -HDFmpiReadID:
+      {
+         ++CallStack->record.counts[MPIOread] ;
+         CallStack->record.times[MPIOread] 
+          = clockAdd ( CallStack->record.times[MPIOread], incDur );
+         CallStack->record.bytes[MPIOreadBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiReadAllID:
+      {
+         ++CallStack->record.counts[MPIOreadAll] ;
+         CallStack->record.times[MPIOreadAll] 
+          = clockAdd ( CallStack->record.times[MPIOreadAll], incDur );
+         CallStack->record.bytes[MPIOreadAllBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiWriteID:
+      {
+         ++CallStack->record.counts[MPIOwrite] ;
+         CallStack->record.times[MPIOwrite] 
+          = clockAdd ( CallStack->record.times[MPIOwrite], incDur );
+         CallStack->record.bytes[MPIOwriteBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiWriteAllID:
+      {
+         ++CallStack->record.counts[MPIOwriteAll] ;
+         CallStack->record.times[MPIOwriteAll] 
+          = clockAdd ( CallStack->record.times[MPIOwriteAll], incDur );
+         CallStack->record.bytes[MPIOwriteAllBytesTrans] += dataPtr->numBytes;
+         break;
+      }
+      case -HDFmpiIreadID:
+      {
+         ++CallStack->record.counts[MPIOiRead] ;
+         CallStack->record.times[MPIOiRead] 
+          = clockAdd ( CallStack->record.times[MPIOiRead], incDur );
+         break;
+      }
+      case -HDFmpiIwriteID:
+      {
+         ++CallStack->record.counts[MPIOiWrite] ;
+         CallStack->record.times[MPIOiWrite] 
+          = clockAdd ( CallStack->record.times[MPIOiWrite], incDur );
+         break;
+      }
+      default:
+      {
+         ++CallStack->record.counts[MPIOother] ;
+         CallStack->record.times[MPIOother] 
+          = clockAdd ( CallStack->record.times[MPIOiWrite], incDur );
+         break;
+      }
+   }
 }
-#endif /* HAVE_PARALLEL */
+#endif /* H5_HAVE_PARALLEL */
 /*======================================================================*
 //   BeginHDFEventRecord:						* 
 // 	This function puts a trace record on the stack corresponding to	*
@@ -1015,8 +1105,8 @@ void HDFSummarySDDF( HDFnode_t *P, int procIndex )
 	                 + nTallyFields*sizeof(int) 	 /* count array */
 	                 + sizeof(int)			 /* array len   */
 	                 + nByteFields*sizeof(int) 	 /* bytes array */
-	                 + nByteFields*sizeof(int)	 /* array lens  */
-	                 + nByteFields*nBkts*sizeof(int) /* byte hist   */
+	                 + nHistFields*sizeof(int)     	 /* array lens  */
+	                 + nHistFields*nBkts*sizeof(int) /* byte hist   */
 	                 + sizeof(int)                   /* nodeID      */
 	                 + sizeof(int) ;                 /* Name len    */
 	Header.packetTag = HDF_SUMMARY_FAMILY +
@@ -1137,7 +1227,7 @@ void HDFrecordSum ( HDFrec_t *S, HDFrec_t *T )
         for ( j = 0; j < nByteFields; ++j ) {
            S->bytes[j] += T->bytes[j] ;
         }
-        for ( j = 0; j < nByteFields; ++j ) {
+        for ( j = 0; j < nHistFields; ++j ) {
            for ( i = 0; i < nBkts; ++i ) {
               S->Hists[j][i] += T->Hists[j][i] ;
            }
@@ -1149,105 +1239,137 @@ void HDFrecordSum ( HDFrec_t *S, HDFrec_t *T )
 //======================================================================*/
 int getHDFFieldIndex( int eventID )
 {
-	int result = -1;
-	switch ( eventID )
-	{
-	        case ID_malloc:
-	        case -ID_malloc:
-			result = Malloc;
-			break;
-		case openBeginID:
-		case openEndID:
-		case fopenBeginID:
-		case fopenEndID:
-			result = Open;
-			break;
-		case closeBeginID:
-		case closeEndID:
-		case fcloseBeginID:
-		case fcloseEndID:
-			result = Close;
-			break;
-		case readBeginID:
-		case readEndID:
-		case freadBeginID:
-		case freadEndID:
-			result = Read;
-			break;
-		case lseekBeginID:
-		case lseekEndID:
-		case fseekBeginID:
-		case fseekEndID:
-			result = Seek;
-			break;
-		case writeBeginID:
-		case writeEndID:
-		case fwriteBeginID:
-		case fwriteEndID:
-			result = Write;
-			break;
-		case fflushBeginID:
-		case fflushEndID:
-		case flushBeginID:
-		case flushEndID:
-			result = Misc;
-			break;
-		case rewindBeginID:
-		case rewindEndID:
-		case fsetposBeginID:
-		case fsetposEndID:
-			result = Misc;
-			break;
+   int result = -1;
+   switch ( eventID )
+   {
+      case ID_malloc:
+      case -ID_malloc:
+      {
+         result = Malloc;
+         break;
+      }
+      case openBeginID:
+      case openEndID:
+      case fopenBeginID:
+      case fopenEndID:
+      {
+         result = Open;
+         break;
+      }
+      case closeBeginID:
+      case closeEndID:
+      case fcloseBeginID:
+      case fcloseEndID:
+      {
+         result = Close;
+         break;
+      }
+      case readBeginID:
+      case readEndID:
+      case freadBeginID:
+      case freadEndID:
+      {
+         result = Read;
+         break;
+      }
+      case lseekBeginID:
+      case lseekEndID:
+      case fseekBeginID:
+      case fseekEndID:
+      {
+         result = Seek;
+         break;
+      }
+      case writeBeginID:
+      case writeEndID:
+      case fwriteBeginID:
+      case fwriteEndID:
+      {
+         result = Write;
+         break;
+      }
+      case fflushBeginID:
+      case fflushEndID:
+      case flushBeginID:
+      case flushEndID:
+      {
+         result = Misc;
+         break;
+      }
+      case rewindBeginID:
+      case rewindEndID:
+      case fsetposBeginID:
+      case fsetposEndID:
+      {
+         result = Misc;
+         break;
+      }
 #ifdef	creadBeginID
-		case creadBeginID:
-		case creadEndID:
-		case creadvBeginID:
-		case creadvEndID:
-			result = Read;
- 			break;
-		case cwriteBeginID:
-		case cwriteEndID:
-		case cwritevBeginID:
-		case cwritevEndID:
-			result = Write;
- 			break;
-		case ireadBeginID:
-		case ireadEndID:
-		case ireadvBeginID:
-		case ireadvEndID:
-			result = ARead;
- 			break;
-		case iwriteBeginID:
-		case iwriteEndID:
-		case iwritevBeginID:
-		case iwritevEndID:
-			result = AWrite;
- 			break;
-		case iowaitBeginID:
-		case iowaitEndID:
-			result = Wait;
- 			break;
-		case iodoneBeginID:
-		case iodoneEndID:
-			result = Misc;
- 			break;
-		case gopenBeginID:
-		case gopenEndID:
-			result = Open;
- 			break;
-		case iomodeBeginID:
-		case iomodeEndID:
-		case setiomodeBeginID:
-		case setiomodeEndID:
-		case lsizeBeginID:
-		case lsizeEndID:
-		case forflushBeginID:
-		case forflushEndID:
-			result = Misc;
- 			break;
+      case creadBeginID:
+      case creadEndID:
+      case creadvBeginID:
+      case creadvEndID:
+      {
+         result = Read;
+         break;
+      }
+      case cwriteBeginID:
+      case cwriteEndID:
+      case cwritevBeginID:
+      case cwritevEndID:
+      {
+         result = Write;
+         break;
+      }
+      case ireadBeginID:
+      case ireadEndID:
+      case ireadvBeginID:
+      case ireadvEndID:
+      {
+         result = Aread;
+         break;
+      }
+      case iwriteBeginID:
+      case iwriteEndID:
+      case iwritevBeginID:
+      case iwritevEndID:
+      {
+         result = Awrite;
+         break;
+      }
+      case iowaitBeginID:
+      case iowaitEndID:
+      {
+         result = Wait;
+         break;
+      }
+      case iodoneBeginID:
+      case iodoneEndID:
+      {
+         result = Misc;
+         break;
+      }
+      case gopenBeginID:
+      case gopenEndID:
+      {
+         result = Open;
+         break;
+      }
+      case iomodeBeginID:
+      case iomodeEndID:
+      case setiomodeBeginID:
+      case setiomodeEndID:
+      case lsizeBeginID:
+      case lsizeEndID:
+      case forflushBeginID:
+      case forflushEndID:
+      {
+         result = Misc;
+         break;
+      }
 #endif	
-	}
-	return result;
+   }
+   return result;
 }
 /*======================================================================*
 // This routine determines the field index in the bytes array of the 	*
@@ -1257,29 +1379,91 @@ int getHDFFieldIndex( int eventID )
 //======================================================================*/
 int getHDFByteFieldIndex( int Operation ) 
 {
-	int result;
-	switch ( Operation )
-	{
-		case Malloc:
-	 		result = MallocBytes;
-			break;
-		case Read:
-	 		result = ReadBytes;
-			break;
-		case Write:
-	 		result = WriteBytes;
-			break;
-		case ARead:
-	 		result = AReadBytes;
-			break;
-		case AWrite:
-	 		result = AWriteBytes;
-			break;
-		default:
-			result = -1;
-			break;
-	}
-	return result;
+   int result;
+   switch ( Operation )
+   {
+      case Malloc:
+      {
+         result = MallocBytes;
+         break;
+      }
+      case Read:
+      {
+         result = ReadBytes;
+         break;
+      }
+      case Write:
+      {
+         result = WriteBytes;
+         break;
+      }
+      case Aread:
+      {
+         result = AreadBytes;
+         break;
+      }
+      case Awrite:
+      {
+         result = AwriteBytes;
+         break;
+      }
+      case MPIOread:
+      {
+         result = MPIOreadBytesReq;
+         break;
+      }
+      case MPIOwrite:
+      {
+         result = MPIOwriteBytesReq;
+         break;
+      }
+      case MPIOreadAll:
+      {
+         result = MPIOreadAllBytesReq;
+         break;
+      }
+      case MPIOwriteAll:
+      {
+         result = MPIOwriteAllBytesReq;
+         break;
+      }
+      case MPIOiRead:
+      {
+         result = MPIOiReadBytesReq;
+         break;
+      }
+      case MPIOiWrite:
+      {
+         result = MPIOiWriteBytesReq;
+         break;
+      }
+      case MPIOreadTrans:
+      {
+         result = MPIOreadBytesTrans;
+         break;
+      }
+      case MPIOwriteTrans:
+      {
+         result = MPIOwriteBytesTrans;
+         break;
+      }
+      case MPIOreadAllTrans:
+      {
+         result = MPIOreadAllBytesTrans;
+         break;
+      }
+      case MPIOwriteAllTrans:
+      {
+         result = MPIOwriteAllBytesTrans;
+         break;
+      }
+      default:
+      {
+         result = -1;
+         break;
+      }
+   }
+   return result;
 }
 /*======================================================================*
 // This routine writes the SDDF packet descriptors for the HDF summary	*
@@ -1365,12 +1549,12 @@ void _hdfDescriptorRT( char *recordName, char *recordDescription,
                      "Write Histogram",
 	             "Historgram of size Write Requests",
 		     INTEGER, 1 );
-    WRITE_HDF_FIELD( "ARead Histogram",
-                     "ARead Histogram",
+    WRITE_HDF_FIELD( "Aread Histogram",
+                     "Aread Histogram",
 	             "Historgram of size Asynch Read Requests",
 		     INTEGER, 1 );
-    WRITE_HDF_FIELD( "AWrite Histogram",
-                     "AWrite Histogram",
+    WRITE_HDF_FIELD( "Awrite Histogram",
+                     "Awrite Histogram",
 	             "Historgram of size Asynch Write Requests",
 		     INTEGER, 1 );
     WRITE_HDF_FIELD( "Processor Number", 
