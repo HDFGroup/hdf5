@@ -1016,16 +1016,13 @@ int test_report( int nerrors )
  *		Friday, January 5, 2001
  *
  * Modifications:
+ *	Nov 12, 01:
+ *		- moved h5_cleanup to outside of try block because
+ *		  dataset.h5 cannot be removed until "file" is out of
+ *		  scope and dataset.h5 is closed. 
  *
  *-------------------------------------------------------------------------
  */
-static hid_t tempid = H5T_STD_B8LE;
-// the following statement caused seg. fault, need to check into - BMR
-//static PredType temp = PredType::STD_B8LE;
-// because PredType::STD_B8LE was not defined yet, so ref_counter is nil
-// and it'll fail when the ref_counter is being incremented
-// this can be a problem; must check ref_counter before increment or decrement
-
 int
 main(void)
 {
@@ -1034,19 +1031,9 @@ main(void)
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
     
-#if 0
-/* BMR: leave paralell stuff out!  */
-    {
-	// Turn off raw data cache
-	int mdc_nelmts;
- (H5Pget_cache(fapl_id, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
- (H5Pset_cache(fapl_id, mdc_nelmts, 0, 0, 0.0)<0) goto error;
-    }
-#endif
-    
     char        filename[1024];
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
-    
+
     int		nerrors=0;	// keep track of number of failures occurr
     try 
     {
@@ -1057,9 +1044,9 @@ main(void)
 
 	// Use the file access template id to create a file access prop.
 	// list object to pass in H5File::H5File
-	FileAccPropList* fapl = new FileAccPropList(fapl_id);
+	FileAccPropList fapl(fapl_id);
 
-	H5File file( filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, *fapl );
+	H5File file( filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
        
 	/* Cause the library to emit initial messages */
 	Group grp = file.createGroup( "emit diagnostics", 0);
@@ -1072,25 +1059,18 @@ main(void)
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
 
-	// BMR: this is a very unattractive workaround approach, but I used
-	// it for now, since I want to use already existing utility code from
-	// the C tests.  h5_cleanup calls H5Pclose to close the fapl_id while
-	// the object 'fapl' is still opened.  So, I dynamically allocated
-	// 'fapl' then deleted it before h5_cleanup, but after incrementing
-	// 'fapl's ref counter so that the prop list id will not be closed
-	// when 'fapl' is destroyed.  Why did I need to create a 
-	// FileCreatPropList object while I already had the prop list id?  
-	// Because I need to pass it into the constructor H5File::H5File.  
-	// We're trying to avoid introducing id's into the C++ API.
-	fapl->incRefCount();
-	delete fapl;
-	h5_cleanup(FILENAME, fapl_id);
+	// increment the ref count of this property list so that the 
+	// property list id won't be closed when fapl goes out of scope.
+	// This is a bad hack, but I want to use existing routine h5_cleanup!
+	fapl.incRefCount();
+    }
+    catch (Exception E) 
+    {
 	return( test_report( nerrors ));
-   }
-   catch (Exception E) 
-   {
-	return( test_report( nerrors ));
-   }
+    }
+    /* use C test utility routine to clean up data files */
+    h5_cleanup(FILENAME, fapl_id);
+
+    /* print out dsets test results */
+    return( test_report( nerrors ));
 }
-
-
