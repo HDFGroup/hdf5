@@ -70,6 +70,8 @@ New Features
      ``make install-doc'' command. The documentation is installed in the
      $(prefix)/doc directory where $(prefix) is the prefix specified by
      the (optional) ``--prefix'' flag during configuration.
+   * HDF5 can operate correctly in the OpenMP environment in a limited way.
+     Check doc/html/TechNotes/openmp-hdf5.html for details.
 
 h4toh5 Utility 
 ==============
