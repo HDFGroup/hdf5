@@ -86,8 +86,9 @@ typedef struct H5FD_mpiposix_t {
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
     haddr_t	pos;		/* Current file I/O position	        */
-    hsize_t	naccess;	/* Number of (write) accesses to file   */
     int		op;		/* Last file I/O operation		*/
+    hsize_t	naccess;	/* Number of (write) accesses to file   */
+    size_t      blksize;        /* Block size of file system            */
 #ifndef WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
@@ -677,6 +678,7 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Set the general file information */
     file->fd = fd;
     file->eof = sb.st_size;
+    file->blksize = sb.st_blksize;
 
     /* Set the MPI information */
     file->comm = fa->comm;
