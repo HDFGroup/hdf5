@@ -234,8 +234,8 @@ H5F_compare_filename (const VOIDP _obj, const VOIDP _key)
     Get an atom for a copy of the file-creation template for this file
 
  USAGE
-    hatom_t H5Fget_create_template(fid)
-        hatom_t fid;    IN: File ID
+    hid_t H5Fget_create_template(fid)
+        hid_t fid;    IN: File ID
 
  ERRORS
     ATOM      BADATOM       Can't get file struct. 
@@ -249,10 +249,10 @@ H5F_compare_filename (const VOIDP _obj, const VOIDP _key)
         This function returns an atom with a copy of the template parameters
     used to create a file.
 --------------------------------------------------------------------------*/
-hatom_t H5Fget_create_template(hatom_t fid)
+hid_t H5Fget_create_template(hid_t fid)
 {
     hdf5_file_t *file=NULL;         /* file struct for file to close */
-    hatom_t ret_value = FAIL;
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Fget_create_template, H5F_init_interface, FAIL);
 
@@ -456,8 +456,8 @@ H5F_dest (hdf5_file_t *f)
     int32 H5Fcreate(filename, flags, create_temp, access_temp)
         const char *filename;   IN: Name of the file to create
         uintn flags;            IN: Flags to indicate various options.
-        hatom_t create_temp;    IN: File-creation template ID
-        hatom_t access_temp;    IN: File-access template ID
+        hid_t create_temp;    IN: File-creation template ID
+        hid_t access_temp;    IN: File-access template ID
 
  ERRORS
     ARGS      BADVALUE      Invalid file name. 
@@ -500,13 +500,13 @@ H5F_dest (hdf5_file_t *f)
     Robb Matzke, 29 Aug 1997
     Moved creation of the boot block to H5F_flush().
 --------------------------------------------------------------------------*/
-hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_t access_temp)
+hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_temp, hid_t access_temp)
 {
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
     intn file_exists=0;             /* flag to indicate that file exists already */
-    hatom_t ret_value = FAIL;
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER(H5Fcreate, H5F_init_interface, FAIL);
 
@@ -607,10 +607,10 @@ done:
     Open an existing HDF5 file.
 
  USAGE
-    hatom_t H5Fopen(filename, flags, access_temp)
+    hid_t H5Fopen(filename, flags, access_temp)
         const char *filename;   IN: Name of the file to create
         uintn flags;            IN: Flags to indicate various options.
-        hatom_t access_temp;    IN: File-access template
+        hid_t access_temp;    IN: File-access template
 
  ERRORS
     ARGS      BADRANGE      Invalid file name. 
@@ -647,16 +647,16 @@ done:
     File struct creation and destruction is through H5F_new() H5F_dest().
     Reading the root symbol table entry is done with H5G_decode().
 --------------------------------------------------------------------------*/
-hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_temp)
+hid_t H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 {
     hdf5_file_t *new_file=NULL;     /* file struct for new file */
     hdf_file_t f_handle=H5F_INVALID_FILE;  /* file handle */
-    hatom_t create_temp;            /* file-creation template ID */
+    hid_t create_temp;            /* file-creation template ID */
     const file_create_temp_t *f_create_parms;    /* pointer to the parameters to use when creating the file */
     uint8 temp_buf[2048], *p;       /* temporary buffer for encoding header */
     haddr_t curr_off=0;          /* The current offset to check in the file */
     size_t file_len=0;          /* The length of the file we are checking */
-    hatom_t ret_value = FAIL;
+    hid_t ret_value = FAIL;
     size_t	variable_size;	/*size of the variable part of the bb */
 
     FUNC_ENTER(H5Fopen, H5F_init_interface, FAIL);
@@ -819,7 +819,7 @@ done:
 
  USAGE
     herr_t H5Fclose(fid, invalidate)
-        hatom_t fid;      	IN: File ID of file to close.
+        hid_t fid;      	IN: File ID of file to close.
         hbool_t invalidate;	IN: Invalidate all of the cache?
 
  ERRORS
@@ -838,7 +838,7 @@ done:
  MODIFICATIONS:
 --------------------------------------------------------------------------*/
 herr_t
-H5Fflush (hatom_t fid, hbool_t invalidate)
+H5Fflush (hid_t fid, hbool_t invalidate)
 {
    hdf5_file_t	*file = NULL;
 
@@ -978,7 +978,7 @@ H5F_flush (hdf5_file_t *f, hbool_t invalidate)
     The file boot block is flushed to disk since it's contents may have
     changed.
 --------------------------------------------------------------------------*/
-herr_t H5Fclose(hatom_t fid)
+herr_t H5Fclose(hid_t fid)
 {
     hdf5_file_t *file=NULL;         /* file struct for file to close */
     herr_t        ret_value = SUCCEED;

@@ -115,8 +115,8 @@ void H5D_term_interface (void)
  PURPOSE
     Create a new HDF5 dataset object
  USAGE
-    hatom_t H5D_create(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file which owns this object
+    hid_t H5D_create(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file which owns this object
         hobjtype_t type;        IN: Type of object to create
         const char *name;       IN: Name of the object
  RETURNS
@@ -125,10 +125,10 @@ void H5D_term_interface (void)
     This function actually creates a dataset object in a file (of course,
     output might not happen for some time).
 --------------------------------------------------------------------------*/
-hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name)
 {
     H5D_t *new_dset;        /* new dataset object to create */
-    hatom_t ret_value = SUCCEED;
+    hid_t ret_value = SUCCEED;
     hdf5_file_t *file = NULL;
     
     FUNC_ENTER(H5D_create, H5D_init_interface, FAIL);
@@ -179,7 +179,7 @@ done:
     Get the OID for accessing an existing HDF5 dataset object
  USAGE
     hoid_t H5D_find_name(grp_id, type, name)
-        hatom_t grp_id;         IN: Atom for directory to search for dataset
+        hid_t grp_id;         IN: Atom for directory to search for dataset
         hobjtype_t type;        IN: Type of object to search for (dataset in
  	                        this case)
         const char *name;       IN: Name of the object to search for
@@ -188,11 +188,11 @@ done:
  DESCRIPTION
         This function finds for a dataset by name in a directory.
 --------------------------------------------------------------------------*/
-hatom_t H5D_find_name(hatom_t grp_id, hobjtype_t type, const char *name)
+hid_t H5D_find_name(hid_t grp_id, hobjtype_t type, const char *name)
 {
     hdf5_file_t *file;          /* Pointer to the file-store of this object */
     H5D_t	*dset = NULL;	/* The dataset				    */
-    hatom_t ret_value = SUCCEED;
+    hid_t ret_value = SUCCEED;
     H5O_std_store_t store;
 
     FUNC_ENTER(H5D_find_name, H5D_init_interface, FAIL);
@@ -266,15 +266,15 @@ done:
     Set the type and dimensionality of a dataset.
  USAGE
     herr_t H5Dset_info(oid)
-        hatom_t oid;       IN: Dataset object to modify
-        hatom_t tid;       IN: Datatype object to use as node element
-        hatom_t did;       IN: Dimensionality object to use as dataspace
+        hid_t oid;       IN: Dataset object to modify
+        hid_t tid;       IN: Datatype object to use as node element
+        hid_t did;       IN: Dimensionality object to use as dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function sets the datatype and dataspace of a dataset.
 --------------------------------------------------------------------------*/
-herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did)
+herr_t H5Dset_info(hid_t oid, hid_t tid, hid_t did)
 {
     H5D_t	*dataset = NULL;         /* dataset object to modify */
     herr_t      ret_value = SUCCEED;
@@ -318,9 +318,9 @@ done:
     Get the type and dimensionality of a dataset.
  USAGE
     herr_t H5Dget_info(oid, tid, sid)
-        hatom_t oid;       IN: Dataset object to query
-        hatom_t *tid;      OUT: Datatype object to use as node element
-        hatom_t *sid;      OUT: Dimensionality object to use as dataspace
+        hid_t oid;       IN: Dataset object to query
+        hid_t *tid;      OUT: Datatype object to use as node element
+        hid_t *sid;      OUT: Dimensionality object to use as dataspace
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -328,7 +328,7 @@ done:
     existing dataset.  H5Mendaccess must be called to release the datatype and
     dataspace returned from this function.
 --------------------------------------------------------------------------*/
-herr_t H5Dget_info(hatom_t oid, hatom_t *tid, hatom_t *sid)
+herr_t H5Dget_info(hid_t oid, hid_t *tid, hid_t *sid)
 {
     H5D_t 	  *dataset;         /* dataset object to query */
     herr_t        ret_value = SUCCEED;
@@ -372,8 +372,8 @@ done:
     Read data from a dataset
  USAGE
     herr_t H5Dread(oid)
-        hatom_t oid;       IN: Dataset to read
-        hatom_t did;       IN: Dimensionality object to use as dataspace for I/O
+        hid_t oid;       IN: Dataset to read
+        hid_t did;       IN: Dimensionality object to use as dataspace for I/O
         VOIDP buf;         IN: Buffer to fill with data from the file
  RETURNS
     SUCCEED/FAIL
@@ -384,7 +384,7 @@ done:
     to be written out.  (For datasets which have a scalar dataspace for the
     entire dataset, this is somewhat redundant.... :-)
 --------------------------------------------------------------------------*/
-herr_t H5Dread(hatom_t oid, hatom_t did, VOIDP buf)
+herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf)
 {
     H5D_t *dataset; /* dataset object to do I/O on */
     void *readbuf=NULL;     /* pointer to buffer to write out */
@@ -456,8 +456,8 @@ done:
     Write data for a dataset
  USAGE
     herr_t H5Dwrite(oid)
-        hatom_t oid;       IN: Dataset object to modify
-        hatom_t did;       IN: Dimensionality object to use as dataspace for I/O
+        hid_t oid;       IN: Dataset object to modify
+        hid_t did;       IN: Dimensionality object to use as dataspace for I/O
         VOIDP buf;         IN: Buffer with data to write to the file
  RETURNS
     SUCCEED/FAIL
@@ -468,7 +468,7 @@ done:
     to be written out.  (For datasets which have a scalar dataspace for the
     entire dataset, this is somewhat redundant.... :-)
 --------------------------------------------------------------------------*/
-herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
+herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf)
 {
     H5D_t *dataset;         /* dataset object to do I/O on */
     uintn   towrite;        /* number of bytes to write out */
@@ -544,7 +544,7 @@ done:
     Flush an an HDF5 dataset object to disk.
  USAGE
     herr_t H5D_flush(oid)
-        hatom_t oid;       IN: Object to flush to disk
+        hid_t oid;       IN: Object to flush to disk
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -553,7 +553,7 @@ done:
     any changes on disk)  This function is primarily called from H5Mflush, but
     internal library routines may call it also.
 --------------------------------------------------------------------------*/
-herr_t H5D_flush(hatom_t oid)
+herr_t H5D_flush(hid_t oid)
 {
     H5D_t 	*dataset;         /* dataset object to release */
     herr_t	ret_value = SUCCEED;
@@ -635,13 +635,13 @@ done:
     Release access to an HDF5 dataset object.
  USAGE
     herr_t H5D_release(oid)
-        hatom_t oid;       IN: Object to release access to
+        hid_t oid;       IN: Object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function releases a dataset from active use by a user.
 --------------------------------------------------------------------------*/
-herr_t H5D_release(hatom_t oid)
+herr_t H5D_release(hid_t oid)
 {
     H5D_t 	*dataset;         /* dataset object to release */
     herr_t      ret_value = SUCCEED;

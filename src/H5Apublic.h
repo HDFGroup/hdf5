@@ -36,7 +36,7 @@ typedef enum {
 } group_t;
 
 /* Type of atoms to return to users */
-typedef int32 hatom_t;
+typedef int32 hid_t;
 
 /* Type of the function to compare objects & keys */
 typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
@@ -46,11 +46,11 @@ typedef intn (*H5Asearch_func_t)(const VOIDP obj, const VOIDP key);
 #define GROUP_MASK  0x0F
 
 /* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
-#define ATOM_BITS   ((sizeof(hatom_t)*8)-GROUP_BITS)
+#define ATOM_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
 #define ATOM_MASK   0x0FFFFFFF
 
 /* Combine a Group number and an atom index into an atom */
-#define MAKE_ATOM(g,i)      ((((hatom_t)(g)&GROUP_MASK)<<((sizeof(hatom_t)*8)-GROUP_BITS))|((hatom_t)(i)&ATOM_MASK))
+#define MAKE_ATOM(g,i)      ((((hid_t)(g)&GROUP_MASK)<<((sizeof(hid_t)*8)-GROUP_BITS))|((hid_t)(i)&ATOM_MASK))
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,7 +108,7 @@ intn H5Adestroy_group(group_t grp       /* IN: Group to destroy */
     Returns atom if successful and FAIL otherwise
 
 *******************************************************************************/
-hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
+hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
     const VOIDP object                    /* IN: Object to attach to atom */
 );
 
@@ -123,7 +123,7 @@ hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in
     Returns object ptr if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
+VOIDP H5Aatom_object(hid_t atm   /* IN: Atom to retrieve object for */
 );
 
 /******************************************************************************
@@ -137,7 +137,7 @@ VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
     Returns group if successful and FAIL otherwise
 
 *******************************************************************************/
-group_t H5Aatom_group(hatom_t atm   /* IN: Atom to retrieve group for */
+group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
 );
 
 /******************************************************************************
@@ -151,7 +151,7 @@ group_t H5Aatom_group(hatom_t atm   /* IN: Atom to retrieve group for */
     Returns atom's object if successful and FAIL otherwise
 
 *******************************************************************************/
-VOIDP H5Aremove_atom(hatom_t atm   /* IN: Atom to remove */
+VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
 );
 
 /******************************************************************************
@@ -185,7 +185,7 @@ VOIDP H5Asearch_atom(group_t grp,        /* IN: Group to search for the object i
     Returns BTRUE/BFALSE/BFAIL
 
 *******************************************************************************/
-intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
+intn H5Ais_reserved(hid_t atm      /* IN: Group to search for the object in */
 );
 
 /******************************************************************************

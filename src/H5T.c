@@ -108,8 +108,8 @@ void H5T_term_interface (void)
  PURPOSE
     Create a new HDF5 data-type object
  USAGE
-    hatom_t H5T_create(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file which owns this object
+    hid_t H5T_create(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file which owns this object
         hobjtype_t type;        IN: Type of object to create
         const char *name;       IN: Name of the object
  RETURNS
@@ -117,10 +117,10 @@ void H5T_term_interface (void)
  DESCRIPTION
         This function actually creates the data-type object.
 --------------------------------------------------------------------------*/
-hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5T_create(hid_t owner_id, hobjtype_t type, const char *name)
 {
     h5_datatype_t *new_dt;            /* new data-type object to create */
-    hatom_t ret_value = SUCCEED;
+    hid_t ret_value = SUCCEED;
 
     FUNC_ENTER(H5T_create, H5T_init_interface, FAIL);
 
@@ -158,7 +158,7 @@ done:
     Return the number of fields in a compound datatype
  USAGE
     uint32 H5Tget_num_fields(tid)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
  RETURNS
     The number of fields in a compound datatype on success, UFAIL on failure
  DESCRIPTION
@@ -166,7 +166,7 @@ done:
     datatype.  UFAIL is returned on an error or if an atomic datatype is
     queried, otherwise the number of fields is returned.
 --------------------------------------------------------------------------*/
-uint32 H5Tget_num_fields(hatom_t tid)
+uint32 H5Tget_num_fields(hid_t tid)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     uint32        ret_value = UFAIL;
@@ -209,7 +209,7 @@ done:
     Check if a field in a compound datatype is atomic
  USAGE
     hbool_t H5Tis_field_atomic(tid, fidx)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
         uintn fidx;             IN: Index of the field to query
  RETURNS
     BFAIL/BTRUE/BFALSE
@@ -218,7 +218,7 @@ done:
     BTRUE is returned if the datatype is atomic (i.e. not compound), BFALSE is
     returned if the datatype is compound, BFAIL on error.
 --------------------------------------------------------------------------*/
-hbool_t H5Tis_field_atomic(hatom_t tid, uintn fidx)
+hbool_t H5Tis_field_atomic(hid_t tid, uintn fidx)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     hbool_t        ret_value = BTRUE;
@@ -308,7 +308,7 @@ done:
     Check if a datatype is atomic (API)
  USAGE
     hbool_t H5Tis_atomic(tid)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
  RETURNS
     BFAIL/BTRUE/BFALSE
  DESCRIPTION
@@ -316,7 +316,7 @@ done:
     is returned if the datatype is atomic (i.e. not compound), BFALSE is
     returned if the datatype is compound, BFAIL on error.
 --------------------------------------------------------------------------*/
-hbool_t H5Tis_atomic(hatom_t tid)
+hbool_t H5Tis_atomic(hid_t tid)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     hbool_t        ret_value = BTRUE;
@@ -353,8 +353,8 @@ done:
     Set the base type of a user-defined datatype 
  USAGE
     herr_t H5Tset_type(tid, base, len, arch)
-        hatom_t tid;            IN: Datatype object to modify
-        hatom_t base;           IN: Base type to set the datatype to
+        hid_t tid;            IN: Datatype object to modify
+        hid_t base;           IN: Base type to set the datatype to
         uint8 len;              IN: Length of the object in bytes
         uint8 arch;             IN: Architecture format to store type with
  RETURNS
@@ -365,7 +365,7 @@ done:
     type) or is a compound type (like a C structure).  If the datatype is set
     to a compound type, the 'len' argument is not used.
 --------------------------------------------------------------------------*/
-herr_t H5Tset_type(hatom_t tid,hatom_t base,uint8 len,uint8 arch)
+herr_t H5Tset_type(hid_t tid,hid_t base,uint8 len,uint8 arch)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;
@@ -406,8 +406,8 @@ done:
     Get the base type of a datatype 
  USAGE
     herr_t H5Tget_type(tid, base, len, arch)
-        hatom_t tid;            IN: Datatype object to modify
-        hatom_t *base;          IN: Base type of the datatype
+        hid_t tid;            IN: Datatype object to modify
+        hid_t *base;          IN: Base type of the datatype
         uint8 *len;             IN: Length of the object in bytes
         uint8 *arch;            IN: Architecture format type stored with
  RETURNS
@@ -418,7 +418,7 @@ done:
     type) or is a compound type (like a C structure).  If the datatype is 
     to a compound type, the 'len' argument is not used.
 --------------------------------------------------------------------------*/
-herr_t H5Tget_type(hatom_t tid,hatom_t *base,uint8 *len,uint8 *arch)
+herr_t H5Tget_type(hid_t tid,hid_t *base,uint8 *len,uint8 *arch)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;
@@ -462,14 +462,14 @@ done:
     Add a field to a compound datatype
  USAGE
     herr_t H5Tadd_field(tid, name, base, len, arch, space)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
         const char *fidx;       IN: Field name
-        hatom_t base;           IN: Field's base type, either an atom ID for
+        hid_t base;           IN: Field's base type, either an atom ID for
                                     an existing compound type, or an atomic
                                     base type
         uint8 len;              IN: Length of an atomic base type
         uint8 arch;             IN: Architecture format of an atomic base type
-        hatom_t space;          IN: The dimensionality of the field to add
+        hid_t space;          IN: The dimensionality of the field to add
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -479,7 +479,7 @@ done:
     (to indicate a scalar field) or the atom of a datatype for more complex
     dimensionality fields.
 --------------------------------------------------------------------------*/
-herr_t H5Tadd_field(hatom_t tid, const char *name, hatom_t base, uint8 len, uint8 arch, hatom_t space)
+herr_t H5Tadd_field(hid_t tid, const char *name, hid_t base, uint8 len, uint8 arch, hid_t space)
 {
     h5_field_info_t *new_field; /* pointer to new field to add */
     h5_datatype_t *dt;          /* data-type object to manipulate */
@@ -636,7 +636,7 @@ done:
     Determine the size of a datatype
  USAGE
     uintn H5Tsize(tid, mem_flag)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
         hbool_t mem_flag;       IN: Whether the memory or disk size is desired
  RETURNS
     The size of the datatype on success or UFAIL on failure.
@@ -645,7 +645,7 @@ done:
     on disk or in memory, depending on the mem_flag.  Setting the mem_flag to
     BTRUE returns the size in memory, BFALSE returns the size on disk.
 --------------------------------------------------------------------------*/
-uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
+uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
 {
     uintn ret_value = UFAIL;
 
@@ -713,7 +713,7 @@ done:
     Determine the size of a datatype
  USAGE
     herr_t H5Tget_fields(tid, field_list)
-        hatom_t tid;            IN: Datatype object to query
+        hid_t tid;            IN: Datatype object to query
         hoid_t *field_list;     IN: Array to store list of fields
  RETURNS
     SUCCEED/FAIL
@@ -722,7 +722,7 @@ done:
     datatype.  Atomic fields are returned in the list of OIDs, but have special
     OID values which cannot be further dereferenced.
 --------------------------------------------------------------------------*/
-herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list)
+herr_t H5Tget_fields(hid_t tid, hid_t *field_list)
 {
     herr_t ret_value = FAIL;
 
@@ -753,13 +753,13 @@ done:
     Release access to an HDF5 datatype object.
  USAGE
     herr_t H5T_release(oid)
-        hatom_t oid;       IN: Object to release access to
+        hid_t oid;       IN: Object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function releases a datatype from active use by a user.
 --------------------------------------------------------------------------*/
-herr_t H5T_release(hatom_t oid)
+herr_t H5T_release(hid_t oid)
 {
     h5_datatype_t *dt;         /* new data-type object to create */
     herr_t        ret_value = SUCCEED;

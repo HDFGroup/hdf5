@@ -76,14 +76,14 @@ float64 data2[SPACE2_DIM1][SPACE2_DIM2][SPACE2_DIM3][SPACE2_DIM4]=
 ****************************************************************/
 static void test_h5d_basic_write(void)
 {
-    hatom_t fid1;   /* HDF5 File IDs */
-    hatom_t did1;   /* Dataset ID */
-    hatom_t tid1;   /* Datatype ID */
-    hatom_t sid1;   /* Dataspace ID */
+    hid_t fid1;   /* HDF5 File IDs */
+    hid_t did1;   /* Dataset ID */
+    hid_t tid1;   /* Datatype ID */
+    hid_t sid1;   /* Dataspace ID */
     uint32 dims1[]={SPACE1_DIM1,SPACE1_DIM2,SPACE1_DIM3};   /* dataspace dim sizes */
-    hatom_t did2;   /* Dataset ID */
-    hatom_t tid2;   /* Datatype ID */
-    hatom_t sid2;   /* Dataspace ID */
+    hid_t did2;   /* Dataset ID */
+    hid_t tid2;   /* Datatype ID */
+    hid_t sid2;   /* Dataspace ID */
     uint32 dims2[]={SPACE2_DIM1,SPACE2_DIM2,SPACE2_DIM3,SPACE2_DIM4};   /* dataspace dim sizes */
     herr_t ret;         /* Generic return value */
 
@@ -166,16 +166,16 @@ static void test_h5d_basic_write(void)
 ****************************************************************/
 static void test_h5d_basic_read(void)
 {
-    hatom_t fid1;   /* HDF5 File IDs */
+    hid_t fid1;   /* HDF5 File IDs */
 #if 0
-    hatom_t oid1;   /* Dataset OID */
+    hid_t oid1;   /* Dataset OID */
 #endif
-    hatom_t did1;   /* Dataset ID */
-    hatom_t tid1;   /* Datatype ID */
-    hatom_t sid1;   /* Dataspace ID */
+    hid_t did1;   /* Dataset ID */
+    hid_t tid1;   /* Datatype ID */
+    hid_t sid1;   /* Dataspace ID */
     void *buf;      /* space for the buffer read */
     uint32 buf_size;    /* size of the buffer to read */
-    hatom_t type;   /* Datatype's base type */
+    hid_t type;   /* Datatype's base type */
     uint8 len, arch;    /* Datatype's length and architecture */
     uintn n;            /* number of dataspace elements */
     herr_t ret;         /* Generic return value */

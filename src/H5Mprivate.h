@@ -30,20 +30,20 @@
 typedef struct meta_func_t
   {
     hobjtype_t type;            /* Object type this interface is for */
-    hatom_t (*create) (hatom_t , hobjtype_t, const char *);   /* Object creation function */
-    hatom_t (*access) (hatom_t );   /* Object access function */
-    hatom_t (*copy) (hatom_t );     /* Object copy function */
-    hatom_t (*find_name) (hatom_t , hobjtype_t, const char *); /* Find first object */
-    uint32  (*name_len) (hatom_t );     /* Get length of object name */
-    herr_t  (*get_name) (hatom_t , char *);     /* Get object name */
-    herr_t  (*set_name) (hatom_t , const char *);   /* Set object name */
-    hatom_t (*search) (hatom_t , hobjtype_t, const char *); /* Search for list of objects */
-    hatom_t (*index) (hatom_t , hobjtype_t, uint32);    /* Get the OID for the n'th object */
-    herr_t  (*flush) (hatom_t );    /* Flush the object to disk */
-    herr_t  (*delete) (hatom_t );   /* Delete an object from file */
-    hatom_t (*get_parent) (hatom_t );   /* Get the parent object of an object */
-    hatom_t (*get_file) (hatom_t ); /* Get the file ID of an object */
-    herr_t  (*release) (hatom_t );  /* End access to an object */
+    hid_t (*create) (hid_t , hobjtype_t, const char *);   /* Object creation function */
+    hid_t (*access) (hid_t );   /* Object access function */
+    hid_t (*copy) (hid_t );     /* Object copy function */
+    hid_t (*find_name) (hid_t , hobjtype_t, const char *); /* Find first object */
+    uint32  (*name_len) (hid_t );     /* Get length of object name */
+    herr_t  (*get_name) (hid_t , char *);     /* Get object name */
+    herr_t  (*set_name) (hid_t , const char *);   /* Set object name */
+    hid_t (*search) (hid_t , hobjtype_t, const char *); /* Search for list of objects */
+    hid_t (*index) (hid_t , hobjtype_t, uint32);    /* Get the OID for the n'th object */
+    herr_t  (*flush) (hid_t );    /* Flush the object to disk */
+    herr_t  (*delete) (hid_t );   /* Delete an object from file */
+    hid_t (*get_parent) (hid_t );   /* Get the parent object of an object */
+    hid_t (*get_file) (hid_t ); /* Get the file ID of an object */
+    herr_t  (*release) (hid_t );  /* End access to an object */
   }
 meta_func_t;
 

@@ -55,8 +55,8 @@ static char RcsId[] = "$Revision$";
 ****************************************************************/
 static void test_h5p_basic(void)
 {
-    hatom_t fid1;   /* HDF5 File IDs */
-    hatom_t sid1,sid2;   /* Dataspace ID */
+    hid_t fid1;   /* HDF5 File IDs */
+    hid_t sid1,sid2;   /* Dataspace ID */
     uint32 dims1[]={SPACE1_DIM1,SPACE1_DIM2,SPACE1_DIM3},   /* dataspace dim sizes */
         dims2[]={SPACE2_DIM1,SPACE2_DIM2,SPACE2_DIM3,SPACE2_DIM4};
     uintn n;            /* number of dataspace elements */

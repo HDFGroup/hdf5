@@ -49,7 +49,7 @@
 static void
 test_1 (void)
 {
-   hatom_t	fid;
+   hid_t	fid;
    hdf5_file_t	*f;
    H5G_entry_t	*obj1=NULL, *obj2=NULL;
    H5G_entry_t	ent1, dir_ent;
@@ -223,7 +223,7 @@ test_1 (void)
 static void
 test_2 (void)
 {
-   hatom_t	fid;
+   hid_t	fid;
    hdf5_file_t	*f;
    H5G_entry_t	cwd, sub;
    H5G_entry_t	*obj1=NULL;

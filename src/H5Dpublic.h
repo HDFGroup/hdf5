@@ -28,10 +28,10 @@ extern "C" {
 #endif
 
 /* Functions in H5D.c */
-herr_t H5Dset_info(hatom_t oid, hatom_t tid, hatom_t did);
-herr_t H5Dget_info(hatom_t oid, hatom_t *tid, hatom_t *sid);
-herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf);
-herr_t H5Dread(hatom_t oid, hatom_t did, VOIDP buf);
+herr_t H5Dset_info(hid_t oid, hid_t tid, hid_t did);
+herr_t H5Dget_info(hid_t oid, hid_t *tid, hid_t *sid);
+herr_t H5Dwrite(hid_t oid, hid_t did, VOIDP buf);
+herr_t H5Dread(hid_t oid, hid_t did, VOIDP buf);
 void H5D_term_interface (void);
 
 #ifdef __cplusplus

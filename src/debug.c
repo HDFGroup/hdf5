@@ -45,7 +45,7 @@
 int
 main (int argc, char *argv[])
 {
-   hatom_t	fid;
+   hid_t	fid;
    hdf5_file_t	*f;
    haddr_t	addr = 0;
    uint8	sig[16];

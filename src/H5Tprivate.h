@@ -32,7 +32,7 @@ typedef struct {
     uintn name_off;     /* Offset of name in global small-data heap */
     uintn struct_off;   /* Offset of field within structure */
     h5_atomic_type_t dt;  /* Datatype of the field */
-    hatom_t dim_id;     /* dimensionality ID of the field */
+    hid_t dim_id;     /* dimensionality ID of the field */
   } h5_field_info_t;
 
 /* Structure for storing information about a compound datatype */
@@ -51,9 +51,9 @@ typedef struct {
   } h5_datatype_t;
 
 /* Private functions */
-hatom_t H5T_create(hatom_t owner_id, hobjtype_t type, const char *name);
+hid_t H5T_create(hid_t owner_id, hobjtype_t type, const char *name);
 hbool_t H5T_is_atomic(h5_datatype_t *type);
 uintn H5T_size(h5_datatype_t *dt, hbool_t mem_flag);
-herr_t H5T_release(hatom_t oid);
+herr_t H5T_release(hid_t oid);
 
 #endif

@@ -74,7 +74,7 @@ static int interface_initialize_g = FALSE;
 
 #ifdef ATOMS_ARE_CACHED
 /* Array of pointers to atomic groups */
-static hatom_t atom_id_cache[ATOM_CACHE_SIZE]={-1,-1,-1,-1};
+static hid_t atom_id_cache[ATOM_CACHE_SIZE]={-1,-1,-1,-1};
 static VOIDP atom_obj_cache[ATOM_CACHE_SIZE]={NULL};
 #endif
 
@@ -85,7 +85,7 @@ static atom_group_t *atom_group_list[MAXGROUP]={NULL};
 static atom_info_t *atom_free_list=NULL;
 
 /*--------------------- Local function prototypes ---------------------------*/
-static atom_info_t *H5A_find_atom(hatom_t atm);
+static atom_info_t *H5A_find_atom(hid_t atm);
 static atom_info_t *H5A_get_atom_node(void);
 static herr_t H5A_release_atom_node(atom_info_t *atm);
 static herr_t H5A_init_interface(void);
@@ -273,15 +273,15 @@ done:
     Returns atom if successful and FAIL otherwise
 
 *******************************************************************************/
-hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
+hid_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in */
     const VOIDP object                    /* IN: Object to attach to atom */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
     atom_info_t *atm_ptr=NULL;      /* ptr to the new atom */
-    hatom_t atm_id;                  /* new atom ID */
+    hid_t atm_id;                  /* new atom ID */
     uintn hash_loc;                 /* new item's hash table location */
-    hatom_t ret_value=SUCCEED;
+    hid_t ret_value=SUCCEED;
 
     FUNC_ENTER (H5Aregister_atom, H5A_init_interface, FAIL);
 
@@ -324,7 +324,7 @@ hatom_t H5Aregister_atom(group_t grp,     /* IN: Group to register the object in
             grp_ptr->nextid=grp_ptr->reserved;    /* re-start the ID counter */
           } /* end if */
         do {
-            hatom_t next_atom=MAKE_ATOM(grp,grp_ptr->nextid);      /* new atom to check for */
+            hid_t next_atom=MAKE_ATOM(grp,grp_ptr->nextid);      /* new atom to check for */
             atom_info_t *curr_atm;  /* ptr to the current atom */
 
             curr_atm=grp_ptr->atom_list[(uintn)ATOM_TO_LOC(grp_ptr->nextid,grp_ptr->hash_size)];
@@ -368,7 +368,7 @@ done:
     Returns object ptr if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
+VOIDP H5Aatom_object(hid_t atm   /* IN: Atom to retrieve object for */
 )
 {
 #ifdef ATOMS_ARE_CACHED
@@ -387,7 +387,7 @@ VOIDP H5Aatom_object(hatom_t atm   /* IN: Atom to retrieve object for */
             ret_value=atom_obj_cache[i];
             if(i>0)
               { /* Implement a simple "move forward" caching scheme */
-                hatom_t t_atom=atom_id_cache[i-1];
+                hid_t t_atom=atom_id_cache[i-1];
                 VOIDP  t_obj=atom_obj_cache[i-1];
 
                 atom_id_cache[i-1]=atom_id_cache[i];
@@ -428,7 +428,7 @@ done:
     Returns group if successful and BADGROUP otherwise
 
 *******************************************************************************/
-group_t H5Aatom_group(hatom_t atm   /* IN: Atom to retrieve group for */
+group_t H5Aatom_group(hid_t atm   /* IN: Atom to retrieve group for */
 )
 {
     group_t ret_value=BADGROUP;
@@ -460,7 +460,7 @@ done:
     Returns atom's object if successful and NULL otherwise
 
 *******************************************************************************/
-VOIDP H5Aremove_atom(hatom_t atm   /* IN: Atom to remove */
+VOIDP H5Aremove_atom(hid_t atm   /* IN: Atom to remove */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
@@ -601,7 +601,7 @@ done:
     Returns BTRUE/BFALSE/BFAIL
 
 *******************************************************************************/
-intn H5Ais_reserved(hatom_t atm      /* IN: Group to search for the object in */
+intn H5Ais_reserved(hid_t atm      /* IN: Group to search for the object in */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */
@@ -645,7 +645,7 @@ done:
     Returns atom ptr if successful and NULL otherwise
 
 *******************************************************************************/
-static atom_info_t *H5A_find_atom(hatom_t atm   /* IN: Atom to retrieve atom for */
+static atom_info_t *H5A_find_atom(hid_t atm   /* IN: Atom to retrieve atom for */
 )
 {
     atom_group_t *grp_ptr=NULL;     /* ptr to the atomic group */

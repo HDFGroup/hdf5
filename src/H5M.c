@@ -208,8 +208,8 @@ done:
  PURPOSE
     Create a new HDF5 object.
  USAGE
-    hatom_t H5Mcreate(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file which owns this object
+    hid_t H5Mcreate(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file which owns this object
         hobjtype_t type;        IN: Type of object to create
         const char *name;       IN: Name of the object
  RETURNS
@@ -218,10 +218,10 @@ done:
         This function re-directs the object's creation into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mcreate(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5Mcreate(hid_t owner_id, hobjtype_t type, const char *name)
 {
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Mcreate, H5M_init_interface, FAIL);
 
@@ -252,19 +252,19 @@ done:
  PURPOSE
     Start access to an existing HDF5 object.
  USAGE
-    hatom_t H5Maccess(owner_id)
-        hatom_t oid;       IN: OID of the object to access.
+    hid_t H5Maccess(owner_id)
+        hid_t oid;       IN: OID of the object to access.
  RETURNS
     Returns ID (atom) on success, FAIL on failure
  DESCRIPTION
         This function re-directs the object's access into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Maccess(hatom_t oid)
+hid_t H5Maccess(hid_t oid)
 {
     group_t 	   group;
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Maccess, H5M_init_interface, FAIL);
 
@@ -298,15 +298,15 @@ done:
  PURPOSE
     Copy an HDF5 object.
  USAGE
-    hatom_t H5Mcopy(oid)
-        hatom_t oid;       IN: Object to copy
+    hid_t H5Mcopy(oid)
+        hid_t oid;       IN: Object to copy
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's copy into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mcopy(hatom_t oid)
+hid_t H5Mcopy(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -341,8 +341,8 @@ done:
  PURPOSE
     Find an HDF5 object by name.
  USAGE
-    hatom_t H5Mfind_name(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file in which to search
+    hid_t H5Mfind_name(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file in which to search
         hobjtype_t type;        IN: Type of object to search names of
         const char *name;       IN: Name of the object to search for
  RETURNS
@@ -351,13 +351,13 @@ done:
         This function re-directs the object's "find name" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mfind_name(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5Mfind_name(hid_t owner_id, hobjtype_t type, const char *name)
 {
 #ifdef OLD_WAY
     group_t group=H5Aatom_group(owner_id);   /* Atom group for incoming object */
 #endif /* OLD_WAY */
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Mfind_name, H5M_init_interface, FAIL);
 
@@ -396,14 +396,14 @@ done:
     Determine the length of the name of an HDF5 object.
  USAGE
     uint32 H5Mname_len(oid)
-        hatom_t oid;       IN: Object to get name's length
+        hid_t oid;       IN: Object to get name's length
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's "name length" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-uint32 H5Mname_len(hatom_t oid)
+uint32 H5Mname_len(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -439,7 +439,7 @@ done:
     Get the name of an HDF5 object.
  USAGE
     herr_t H5Mget_name(oid, name)
-        hatom_t oid;            IN: Object to retreive name of
+        hid_t oid;            IN: Object to retreive name of
         char *name;             OUT: Buffer to place object's name in
  RETURNS
     SUCCEED/FAIL
@@ -447,11 +447,11 @@ done:
         This function re-directs the object's "get name" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-herr_t H5Mget_name(hatom_t oid, char *name)
+herr_t H5Mget_name(hid_t oid, char *name)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Mget_name, H5M_init_interface, FAIL);
 
@@ -483,7 +483,7 @@ done:
     Set the name of an HDF5 object.
  USAGE
     herr_t H5Mget_name(oid, name)
-        hatom_t oid;            IN: Object to set name of
+        hid_t oid;            IN: Object to set name of
         const char *name;       IN: Name to use for object
  RETURNS
     SUCCEED/FAIL
@@ -491,11 +491,11 @@ done:
         This function re-directs the object's "set name" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-herr_t H5Mset_name(hatom_t oid, const char *name)
+herr_t H5Mset_name(hid_t oid, const char *name)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Mset_name, H5M_init_interface, FAIL);
 
@@ -526,8 +526,8 @@ done:
  PURPOSE
     Wildcard search for an HDF5 object by name.
  USAGE
-    hatom_t H5Mfind_name(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file in which to search
+    hid_t H5Mfind_name(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file in which to search
         hobjtype_t type;        IN: Type of object to search names of
         const char *name;       IN: Name of the object to search for
  RETURNS
@@ -536,11 +536,11 @@ done:
         This function re-directs the object's "search" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Msearch(hatom_t oid, hobjtype_t type, const char *name)
+hid_t H5Msearch(hid_t oid, hobjtype_t type, const char *name)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Msearch, H5M_init_interface, FAIL);
 
@@ -571,8 +571,8 @@ done:
  PURPOSE
     Get an HDF5 object by index.
  USAGE
-    hatom_t H5Mindex(oid, type, idx)
-        hatom_t oid;            IN: Group/file in which to find items
+    hid_t H5Mindex(oid, type, idx)
+        hid_t oid;            IN: Group/file in which to find items
         hobjtype_t type;        IN: Type of object to get
         uint32 idx;             IN: Index of the object to get
  RETURNS
@@ -581,11 +581,11 @@ done:
         This function re-directs the object's "index" into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mindex(hatom_t oid, hobjtype_t type, uint32 idx)
+hid_t H5Mindex(hid_t oid, hobjtype_t type, uint32 idx)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
-    hatom_t        ret_value = SUCCEED;
+    hid_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Mindex, H5M_init_interface, FAIL);
 
@@ -616,15 +616,15 @@ done:
  PURPOSE
     Flush an HDF5 object out to a file.
  USAGE
-    hatom_t H5Mflush(oid)
-        hatom_t oid;       IN: Object to flush
+    hid_t H5Mflush(oid)
+        hid_t oid;       IN: Object to flush
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's flush into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mflush(hatom_t oid)
+hid_t H5Mflush(hid_t oid)
 {
     group_t group;   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -662,7 +662,7 @@ done:
     Delete an HDF5 object from a file.
  USAGE
     herr_t H5Mdelete(oid)
-        hatom_t oid;       IN: Object to delete
+        hid_t oid;       IN: Object to delete
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
@@ -670,7 +670,7 @@ done:
     interface, as defined by the function pointers in hdf5fptr.h.  Deleting
     an object implicitly ends access to it.
 --------------------------------------------------------------------------*/
-herr_t H5Mdelete(hatom_t oid)
+herr_t H5Mdelete(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -705,15 +705,15 @@ done:
  PURPOSE
     Get the parent ID an HDF5 object.
  USAGE
-    hatom_t H5Mget_parent(oid)
-        hatom_t oid;       IN: Object to query
+    hid_t H5Mget_parent(oid)
+        hid_t oid;       IN: Object to query
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's query into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mget_parent(hatom_t oid)
+hid_t H5Mget_parent(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -748,15 +748,15 @@ done:
  PURPOSE
     Get the file ID an HDF5 object.
  USAGE
-    hatom_t H5Mget_file(oid)
-        hatom_t oid;       IN: Object to query
+    hid_t H5Mget_file(oid)
+        hid_t oid;       IN: Object to query
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's query into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-hatom_t H5Mget_file(hatom_t oid)
+hid_t H5Mget_file(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */
@@ -792,14 +792,14 @@ done:
     Release access to an HDF5 object.
  USAGE
     herr_t H5Mrelease(oid)
-        hatom_t oid;       IN: Object to release access to
+        hid_t oid;       IN: Object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function re-directs the object's release into the appropriate
     interface, as defined by the function pointers in hdf5fptr.h
 --------------------------------------------------------------------------*/
-herr_t H5Mrelease(hatom_t oid)
+herr_t H5Mrelease(hid_t oid)
 {
     group_t group=H5Aatom_group(oid);   /* Atom group for incoming object */
     intn i;         /* local counting variable */

@@ -41,19 +41,19 @@
 #endif
 
 /* Map an atom to a Group number */
-#define ATOM_TO_GROUP(a)    ((group_t)((((hatom_t)(a))>>((sizeof(hatom_t)*8)-GROUP_BITS))&GROUP_MASK))
+#define ATOM_TO_GROUP(a)    ((group_t)((((hid_t)(a))>>((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
 
 #ifdef HASH_SIZE_POWER_2
 /*
  * Map an atom to a hash location (assumes s is a power of 2 and smaller
  * than the ATOM_MASK constant).
  */
-#  define ATOM_TO_LOC(a,s)    ((hatom_t)(a)&((s)-1))
+#  define ATOM_TO_LOC(a,s)    ((hid_t)(a)&((s)-1))
 #else
 /*
  * Map an atom to a hash location.
  */
-#  define ATOM_TO_LOC(a,s)    (((hatom_t)(a)&ATOM_MASK)%(s))
+#  define ATOM_TO_LOC(a,s)    (((hid_t)(a)&ATOM_MASK)%(s))
 #endif
 
 /* Default sizes of the hash-tables for various atom groups */
@@ -67,7 +67,7 @@
 
 /* Atom information structure used */
 typedef struct atom_info_struct_tag {
-    hatom_t id;              /* atom ID for this info */
+    hid_t id;              /* atom ID for this info */
     VOIDP *obj_ptr;         /* pointer associated with the atom */
     struct atom_info_struct_tag *next;   /* link to next atom (in case of hash-clash) */
   }atom_info_t;

@@ -43,7 +43,7 @@ void
 test_heap (void)
 {
    int		i, j;
-   hatom_t	fid;
+   hid_t	fid;
    hdf5_file_t	*f;
    off_t	heap;
    char		buf[NOBJS+8];

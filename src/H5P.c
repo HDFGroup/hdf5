@@ -97,8 +97,8 @@ void H5P_term_interface (void)
  PURPOSE
     Create a new HDF5 dimensionality object
  USAGE
-    hatom_t H5P_create(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file which owns this object
+    hid_t H5P_create(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file which owns this object
         hobjtype_t type;        IN: Type of object to create
         const char *name;       IN: Name of the object
  RETURNS
@@ -106,10 +106,10 @@ void H5P_term_interface (void)
  DESCRIPTION
         This function actually creates the dimensionality object.
 --------------------------------------------------------------------------*/
-hatom_t H5P_create(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5P_create(hid_t owner_id, hobjtype_t type, const char *name)
 {
     H5P_dim_t *new_dim;               /* new dimensionality object to create */
-    hatom_t ret_value = SUCCEED;
+    hid_t ret_value = SUCCEED;
 
     FUNC_ENTER(H5P_create, H5P_init_interface, FAIL);
 
@@ -229,7 +229,7 @@ done:
     Determine the size of a dataspace
  USAGE
     herr_t H5Pset_space(sid, rank, dims)
-        hatom_t sid;            IN: Dataspace object to query
+        hid_t sid;            IN: Dataspace object to query
         uint32 rank;            IN: # of dimensions for the dataspace
         uint32 *dims;           IN: Size of each dimension for the dataspace
  RETURNS
@@ -243,7 +243,7 @@ done:
     expand.  Currently, only the first dimension in the array (the slowest) may
     be unlimited in size.
 --------------------------------------------------------------------------*/
-herr_t H5Pset_space(hatom_t sid, uint32 rank, uint32 *dims)
+herr_t H5Pset_space(hid_t sid, uint32 rank, uint32 *dims)
 {
     H5P_dim_t *space=NULL;      /* dataspace to modify */
     uintn u;                    /* local counting variable */
@@ -395,7 +395,7 @@ done:
     Return the number of elements in a dataspace
  USAGE
     uintn H5Pnelem(sid)
-        hatom_t sid;            IN: Dataspace object to query
+        hid_t sid;            IN: Dataspace object to query
  RETURNS
     The number of elements in a dataspace on success, UFAIL on failure
  DESCRIPTION
@@ -404,7 +404,7 @@ done:
     2, 3 and 4 would have 24 elements.
     UFAIL is returned on an error, otherwise the number of elements is returned.
 --------------------------------------------------------------------------*/
-uintn H5Pnelem(hatom_t sid)
+uintn H5Pnelem(hid_t sid)
 {
     H5P_dim_t *space=NULL;      /* dataspace to modify */
     uintn        ret_value = UFAIL;
@@ -442,13 +442,13 @@ done:
     Release access to an HDF5 dimensionality object.
  USAGE
     herr_t H5P_release(oid)
-        hatom_t oid;       IN: Object to release access to
+        hid_t oid;       IN: Object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function releases a dimensionality from active use by a user.
 --------------------------------------------------------------------------*/
-herr_t H5P_release(hatom_t oid)
+herr_t H5P_release(hid_t oid)
 {
     H5P_dim_t *dim;         /* dimensionality object to release */
     herr_t        ret_value = SUCCEED;

@@ -55,7 +55,7 @@ WARNING!
 #endif /* WORDS_BIGENDIAN */
 
 typedef struct {
-    hatom_t base;           /* Basic datatype */
+    hid_t base;           /* Basic datatype */
     uint8 len;              /* Length of base-type, in bytes */
     uint8 arch;             /* Architecture of the base-type */
  } h5_atomic_type_t;
@@ -65,15 +65,15 @@ extern "C" {
 #endif
 
 /* Functions in H5T.c */
-uint32 H5Tget_num_fields(hatom_t tid);
-hbool_t H5Tis_field_atomic(hatom_t tid,uintn fidx);
-hbool_t H5Tis_atomic(hatom_t tid);
-herr_t H5Tset_type(hatom_t tid,hatom_t base,uint8 len,uint8 arch);
-herr_t H5Tget_type(hatom_t tid,hatom_t *base,uint8 *len,uint8 *arch);
-uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
-herr_t H5Tadd_field (hatom_t tid, const char *name, hatom_t base, uint8 len,
-		     uint8 arch, hatom_t space);
-herr_t H5Tget_fields(hatom_t tid, hatom_t *field_list);
+uint32 H5Tget_num_fields(hid_t tid);
+hbool_t H5Tis_field_atomic(hid_t tid,uintn fidx);
+hbool_t H5Tis_atomic(hid_t tid);
+herr_t H5Tset_type(hid_t tid,hid_t base,uint8 len,uint8 arch);
+herr_t H5Tget_type(hid_t tid,hid_t *base,uint8 *len,uint8 *arch);
+uintn H5Tsize(hid_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
+herr_t H5Tadd_field (hid_t tid, const char *name, hid_t base, uint8 len,
+		     uint8 arch, hid_t space);
+herr_t H5Tget_fields(hid_t tid, hid_t *field_list);
 void H5T_term_interface (void);
 
 #ifdef __cplusplus

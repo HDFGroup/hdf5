@@ -59,7 +59,7 @@ const file_create_temp_t default_file_create={
     HDF5_OBJECTDIR_VERSION,     /* Current Object Directory info version # */
     HDF5_SHAREDHEADER_VERSION   /* Current Shared-Header format version # */
 };
-static hatom_t default_file_id=FAIL;   /* Atom for the default file-creation template */
+static hid_t default_file_id=FAIL;   /* Atom for the default file-creation template */
 
 /*--------------------- Local function prototypes ----------------------------*/
 static herr_t H5C_init_interface(void);
@@ -118,7 +118,7 @@ void H5C_term_interface (void)
  PURPOSE
     Retrive an atom for a default HDF5 template.
  USAGE
-    hatom_t H5C_create(type)
+    hid_t H5C_create(type)
         hobjtype_t type;        IN: Type of object to retrieve default template of
  RETURNS
     Returns template ID (atom) of the default object for a template type on
@@ -132,9 +132,9 @@ void H5C_term_interface (void)
     The `FUNC' auto variable was changed from `H5C_create' to
     `H5C_get_default_atom'.
 --------------------------------------------------------------------------*/
-hatom_t H5C_get_default_atom(hobjtype_t type)
+hid_t H5C_get_default_atom(hobjtype_t type)
 {
-    hatom_t        ret_value = FAIL;
+    hid_t        ret_value = FAIL;
 
     FUNC_ENTER(H5C_get_default_atom, H5C_init_interface, FAIL);
 
@@ -174,7 +174,7 @@ done:
     Initialize a new HDF5 template with a copy of an existing template.
  USAGE
     herr_t H5C_init(dst_atm, src)
-        hatom_t dst_atm;               IN: Atom for the template to initialize
+        hid_t dst_atm;               IN: Atom for the template to initialize
         file_create_temp_t *src;       IN: Template to use to initialize with
  RETURNS
     SUCCEED/FAIL
@@ -182,7 +182,7 @@ done:
         This function copies the contents of the source template into the
     newly created destination template.
 --------------------------------------------------------------------------*/
-herr_t H5C_init(hatom_t dst_atm, const file_create_temp_t *src)
+herr_t H5C_init(hid_t dst_atm, const file_create_temp_t *src)
 {
     file_create_temp_t *dst;    /* destination template */
     herr_t ret_value = SUCCEED;   /* return value */
@@ -218,8 +218,8 @@ done:
  PURPOSE
     Create a new HDF5 template.
  USAGE
-    hatom_t H5C_create(owner_id, type, name)
-        hatom_t owner_id;       IN: Group/file which owns this template
+    hid_t H5C_create(owner_id, type, name)
+        hid_t owner_id;       IN: Group/file which owns this template
         hobjtype_t type;        IN: Type of template to create
         const char *name;       IN: Name of the template to create
  RETURNS
@@ -228,9 +228,9 @@ done:
         This is the primary function for creating different HDF5 templates.
     Currently the name of template is not used and may be NULL.
 --------------------------------------------------------------------------*/
-hatom_t H5C_create(hatom_t owner_id, hobjtype_t type, const char *name)
+hid_t H5C_create(hid_t owner_id, hobjtype_t type, const char *name)
 {
-    hatom_t ret_value = FAIL;   /* atom for template object to return */
+    hid_t ret_value = FAIL;   /* atom for template object to return */
 
     FUNC_ENTER(H5C_create, H5C_init_interface, FAIL);
 
@@ -272,13 +272,13 @@ done:
     Release access to a template object.
  USAGE
     herr_t H5C_release(oid)
-        hatom_t oid;       IN: Template object to release access to
+        hid_t oid;       IN: Template object to release access to
  RETURNS
     SUCCEED/FAIL
  DESCRIPTION
         This function releases access to a template object
 --------------------------------------------------------------------------*/
-herr_t H5C_release(hatom_t oid)
+herr_t H5C_release(hid_t oid)
 {
     file_create_temp_t *template;     /* template to destroy */
     herr_t        ret_value = SUCCEED;
@@ -311,7 +311,7 @@ done:
     Get a parameter from a template
  USAGE
     herr_t H5Cgetparm(tid, parm, buf)
-        hatom_t tid;        IN: Template object to retrieve parameter from
+        hid_t tid;        IN: Template object to retrieve parameter from
         file_create_param_t parm;   IN: Paramter to retrieve
         VOIDP buf;          OUT: Pointer to buffer to store parameter in
  RETURNS
@@ -325,7 +325,7 @@ done:
 	Removed H5_BTREE_SIZE and replaced it with H5_SYM_LEAF_K and
 	H5_SYM_INTERN_K.
 --------------------------------------------------------------------------*/
-herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf)
+herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf)
 {
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
@@ -408,7 +408,7 @@ done:
     Set a parameter from a template
  USAGE
     herr_t H5Csetparm(tid, parm, buf)
-        hatom_t tid;        IN: Template object to store parameter in
+        hid_t tid;        IN: Template object to store parameter in
         file_create_param_t parm;   IN: Parameter to store
         const VOIDP buf;    IN: Pointer to parameter buffer
  RETURNS
@@ -431,7 +431,7 @@ done:
 	Robb Matzke, 15 Sep 1997
 	Fixed the power-of-two test to work with any size integer.
 --------------------------------------------------------------------------*/
-herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf)
+herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf)
 {
     file_create_temp_t *template;    /* template to query */
     herr_t ret_value = SUCCEED;
@@ -537,15 +537,15 @@ done:
  PURPOSE
     Copy a template
  USAGE
-    hatom_t H5C_copy(tid)
-        hatom_t tid;        IN: Template object to copy
+    hid_t H5C_copy(tid)
+        hid_t tid;        IN: Template object to copy
  RETURNS
     Returns template ID (atom) on success, FAIL on failure
  DESCRIPTION
     This function creates a new copy of a template with all the same parameter
     settings.
 --------------------------------------------------------------------------*/
-hatom_t H5C_copy(hatom_t tid)
+hid_t H5C_copy(hid_t tid)
 {
     file_create_temp_t *template, *new_template;    /* template to query */
     herr_t ret_value = SUCCEED;

@@ -50,9 +50,9 @@ static char RcsId[] = "$Revision$";
 ****************************************************************/
 static void test_h5t_basic(void)
 {
-    hatom_t fid1;   /* HDF5 File IDs */
-    hatom_t tid1,tid2;   /* Datatype ID */
-    hatom_t type;   /* Datatype's base type */
+    hid_t fid1;   /* HDF5 File IDs */
+    hid_t tid1,tid2;   /* Datatype ID */
+    hid_t type;   /* Datatype's base type */
     uint8 len, arch;    /* Datatype's length and architecture */
     herr_t ret;         /* Generic return value */
 

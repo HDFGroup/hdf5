@@ -43,10 +43,10 @@
     0					/* unused			*/    \
 }
 
-hatom_t H5C_create(hatom_t owner_id, hobjtype_t type, const char *name);
-hatom_t H5C_copy(hatom_t tid);
-herr_t H5C_release(hatom_t oid);
-hatom_t H5C_get_default_atom(hobjtype_t type);
-herr_t H5C_init(hatom_t dst_atm, const file_create_temp_t *src);
+hid_t H5C_create(hid_t owner_id, hobjtype_t type, const char *name);
+hid_t H5C_copy(hid_t tid);
+herr_t H5C_release(hid_t oid);
+hid_t H5C_get_default_atom(hobjtype_t type);
+herr_t H5C_init(hid_t dst_atm, const file_create_temp_t *src);
 
 #endif

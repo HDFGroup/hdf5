@@ -45,8 +45,8 @@ typedef enum {
 typedef group_t hobjtype_t;     /* Map the object in the "meta" interface to atom groups */
 
 /* Functions in H5C.c */
-herr_t H5Cgetparm(hatom_t tid, file_create_param_t parm, VOIDP buf);
-herr_t H5Csetparm(hatom_t tid, file_create_param_t parm, const VOIDP buf);
+herr_t H5Cgetparm(hid_t tid, file_create_param_t parm, VOIDP buf);
+herr_t H5Csetparm(hid_t tid, file_create_param_t parm, const VOIDP buf);
 void H5C_term_interface (void);
 
 #ifdef __cplusplus

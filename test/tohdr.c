@@ -47,7 +47,7 @@
 void
 test_ohdr (void)
 {
-   hatom_t	fid;
+   hid_t	fid;
    hdf5_file_t	*f;
    haddr_t	oh;
    H5O_stab_t	stab, ro;

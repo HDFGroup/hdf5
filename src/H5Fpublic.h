@@ -33,11 +33,11 @@ extern "C" {
 
 /* Functions in H5F.c */
 hbool_t H5Fis_hdf5(const char *filename);
-hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_template, hatom_t access_template);
-hatom_t H5Fopen(const char *filename, uintn flags, hatom_t access_template);
-herr_t H5Fclose(hatom_t fid);
-herr_t H5Fflush (hatom_t fid, hbool_t invalidate);
-hatom_t H5Fget_create_template(hatom_t fid);
+hid_t H5Fcreate(const char *filename, uintn flags, hid_t create_template, hid_t access_template);
+hid_t H5Fopen(const char *filename, uintn flags, hid_t access_template);
+herr_t H5Fclose(hid_t fid);
+herr_t H5Fflush (hid_t fid, hbool_t invalidate);
+hid_t H5Fget_create_template(hid_t fid);
 void H5F_term_interface (void);
 
 #ifdef __cplusplus

@@ -34,11 +34,11 @@
 #define H5D_MINHDR_SIZE 512
 
 /*-----------------_-- Local function prototypes ----------------------------*/
-hatom_t H5D_create(hatom_t owner_id, hobjtype_t type, const char *name);
-hatom_t H5D_access_by_name (hatom_t owner_id,  const char *name); 
-hatom_t H5D_find_name(hatom_t owner_id, hobjtype_t type, const char *name);
-herr_t H5D_flush(hatom_t oid);
-herr_t H5D_release(hatom_t oid);
+hid_t H5D_create(hid_t owner_id, hobjtype_t type, const char *name);
+hid_t H5D_access_by_name (hid_t owner_id,  const char *name); 
+hid_t H5D_find_name(hid_t owner_id, hobjtype_t type, const char *name);
+herr_t H5D_flush(hid_t oid);
+herr_t H5D_release(hid_t oid);
 /* in H5Dconv.c */
 herr_t H5D_convert_buf(void *dst,const void *src,uintn len,uintn size);
 
