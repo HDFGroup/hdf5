@@ -130,7 +130,7 @@
             endif
 
             ! Delete all filters
-            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_NONE_F, error)
+            CALL h5premove_filter_f(crtpr_id, H5Z_FILTER_ALL_F, error)
                   CALL check("h5premove_filter_f", error, total_error) 
 
             ! Verify the correct number of filters now

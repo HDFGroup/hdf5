@@ -29,6 +29,7 @@
 typedef int H5Z_filter_t;
 #define H5Z_FILTER_ERROR	(-1)	/*no filter			*/
 #define H5Z_FILTER_NONE		0	/*reserved indefinitely		*/
+#define H5Z_FILTER_ALL	 	0	/*symbol to remove all filters in H5Premove_filter		*/
 #define H5Z_FILTER_DEFLATE	1 	/*deflation like gzip	     	*/
 #define H5Z_FILTER_SHUFFLE      2       /*shuffle the data              */
 #define H5Z_FILTER_FLETCHER32   3       /*fletcher32 checksum of EDC       */

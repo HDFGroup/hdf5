@@ -3166,7 +3166,7 @@ test_filter_delete(hid_t file)
     *---------------------------------------------------------------------- 
     */
     /* delete all filters */
-    if (H5Premove_filter(dcpl1,H5Z_FILTER_NONE)<0) goto error; 
+    if (H5Premove_filter(dcpl1,H5Z_FILTER_ALL)<0) goto error; 
 
     /* get information about filters */
     if ((nfilters = H5Pget_nfilters(dcpl1))<0) goto error; 

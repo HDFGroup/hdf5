@@ -1209,7 +1209,7 @@ SUBROUTINE
         <center>
         <table width=75%>
         <tr valign=top align=left><td>
-            <code>H5Z_FILTER_NONE</code> 
+            <code>H5Z_FILTER_ALL</code> 
             </td><td>
             Removes all filters from the permanent filter pipeline.
         </td></tr>
@@ -1266,7 +1266,7 @@ SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
   INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
                                             ! Valid values are:
                                             !
-                                            ! H5Z_FILTER_NONE_F
+                                            ! H5Z_FILTER_ALL_F
                                             ! H5Z_FILTER_DEFLATE_F
                                             ! H5Z_FILTER_SHUFFLE_F
                                             ! H5Z_FILTER_FLETCHER32_F

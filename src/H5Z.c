@@ -1117,7 +1117,7 @@ H5Z_delete(H5O_pline_t *pline, H5Z_filter_t filter)
         HGOTO_DONE(SUCCEED)
 
     /* Delete all filters */
-    if (H5Z_FILTER_NONE==filter) {
+    if (H5Z_FILTER_ALL==filter) {
         if(H5O_reset(H5O_PLINE_ID, pline)<0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFREE, FAIL, "can't release pipeline info")
     } /* end if */

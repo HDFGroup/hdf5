@@ -205,7 +205,7 @@ int apply_filters(hid_t dcpl_id,
  */
 
  if (nfilters) {
-  if (H5Premove_filter(dcpl_id,H5Z_FILTER_NONE)<0) 
+  if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
    return -1;
  }
 
