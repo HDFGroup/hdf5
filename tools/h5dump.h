@@ -29,7 +29,6 @@
 #define BEGIN		"{"
 #define END		"}"
 
-#define ATTRIBUTE_DATA	0
 
 
 #define H5DUMP_MAX_RANK	H5S_MAX_RANK

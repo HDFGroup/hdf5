@@ -251,7 +251,11 @@ typedef enum {
 /*
 	taken from h5dump.h
   */
+
+#define ATTRIBUTE_DATA 0
 #define DATASET_DATA	1
+#define ENUM_DATA 2
+
 
 #define COL 3
 extern int indent;
