@@ -34,6 +34,10 @@
 #   Robb Matzke, 1999-07-16
 #   The SunOS 5.6 sed *must* have slashes as delimiters. I changed things like
 #   `sed s+/CVS++' to `sed 's/\/CVS//'
+#
+#   Albert Cheng, 1999-10-26
+#   Moved the MANIFEST checking to a separate command file so that
+#   it can be invoked individually.
 
 # Defaults
 DEST=releases
@@ -76,49 +80,9 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
-# Copy the manifest file to get a list of file names.
-MANIFEST=/tmp/H5_MANIFEST.$$
-grep '^\.' MANIFEST | expand | cut -f1 -d' ' >$MANIFEST
-
-# Check that all the files in MANIFEST exist and that (if this is a
-# CVS checkout) that all the CVS-managed files appear in the
-# MANIFEST.
-test "$verbose" && echo "   Checking manifest..." 1>&2
-test -f $MANIFEST || exit 1
-for file in `cat $MANIFEST`; do
-    if [ ! -f $file ]; then
-       echo "- $file"
-       fail=yes
-    fi
-done
-for cvs in `find . -type d -name CVS -print`; do
-    path=`echo $cvs |sed 's/\/CVS//`
-    for file in `grep '^\/' $cvs/Entries |cut -d/ -f2`; do
-	if (grep $path/$file $MANIFEST >/dev/null); then
-	    :
-	else
-	    echo "+ $path/$file"
-	    fail=yes
-	fi
-    done
-done
-# for file in ./Changes `sh -c 'svf ls' 2>/dev/null`; do
-#     if (grep $file $MANIFEST >/dev/null); then
-# 	:
-#     elif [ $file = ./Changes ]; then
-#         :
-#     else
-# 	echo "+ $file"
-# 	fail=yes
-#     fi
-# done
-
+# Check the validity of the MANIFEST file.
+bin/chkmanifest || fail=yes
 if [ "X$fail" = "Xyes" ]; then
-    cat 1>&2 <<EOF
-The MANIFEST is out of date. Files marked with a minus sign (-) no
-longer exist; files marked with a plus sign (+) are CVS-managed but do
-not appear in the MANIFEST.  Please remedy the situation and try again.
-EOF
     if [ $check = yes ]; then
         exit 1
     else
@@ -127,6 +91,7 @@ EOF
 fi
 
 # Create a manifest that contains only files for distribution.
+MANIFEST=/tmp/H5_MANIFEST.$$
 grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
 
 # Prepare the source tree for a release.
@@ -145,6 +110,8 @@ test "$verbose" && echo "   Running tar..." 1>&2
 )
 
 # Compress
+# Make sure new files are of the right access mode
+umask 0133
 for comp in $methods; do
     case $comp in
 	tar)

@@ -10,7 +10,7 @@ MANIFEST=/tmp/H5_MANIFEST.$$
 # Copy the manifest file to get a list of file names.
 grep '^\.' MANIFEST | expand | cut -f1 -d' ' >$MANIFEST
 
-test "$verbose" && echo "   Checking manifest..." 1>&2
+test "$verbose" && echo "   Checking MANIFEST..." 1>&2
 test -f $MANIFEST || exit 1
 for file in `cat $MANIFEST`; do
     if [ ! -f $file ]; then
@@ -39,4 +39,5 @@ EOF
     exit 1
 fi
 
+test "$verbose" && echo "   The MANIFEST is up to date." 1>&2
 exit 0

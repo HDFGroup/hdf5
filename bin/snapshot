@@ -26,6 +26,9 @@ HDF4LIB=$HDF4LIB_default
 # What compression methods to use?
 METHODS="gzip bzip2"
 
+# Use User's MAKE if set.  Else use generic make.
+MAKE=${MAKE:-make}
+
 # Make sure cvs would work
 if [ -z "$CVSROOT" ]; then
     echo "Where is the CVS repository?" 1>&2
@@ -35,6 +38,7 @@ fi
 #
 # Command options
 cmd="all"
+test_opt=""
 errcode=0
 echo '$#=' $# '$*="' $* '"'
 while [ $# -gt 0 ] ; do
@@ -50,8 +54,26 @@ while [ $# -gt 0 ] ; do
 	    cmdtest="test"
 	    cmd=""
 	    ;;
+	srcdir)
+	    #use srcdir option for test
+	    srcdir="yes"
+	    ;;
+	srcdirname)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "srcdirname <dir> missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    SRCDIRNAME="$1"
+	    ;;
 	release)
 	    cmdrel="release"
+	    cmd=""
+	    ;;
+	clean | distclean)
+	    cmdclean="$1"
 	    cmd=""
 	    ;;
 	help)
@@ -78,6 +100,16 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    ARCHIVES="$1"
 	    ;;
+	op-configure)
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "op-configure option missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    OP_CONFIGURE="$OP_CONFIGURE $1"
+	    ;;
 	*)
 	    echo "Unkown option $1"
 	    errcode=1
@@ -90,31 +122,51 @@ done
 
 if [ "$cmd" = help ]; then
     set -
-    echo "Usage: $0 [all] [checkout] [test] [release] [help] [hdf4 <hdf4lib_path>] [archive <arch_path> ]"
-    echo "    all:      Run all commands (checkout, test & release)"
-    echo "              [Default is all]"
-    echo "    checkout: Run cvs checkout"
-    echo "    test:     Run test"
-    echo "    release:  Run release"
-    echo "    help:     Print this message"
-    echo "    hdf4 <hdf4lib_path>:"
-    echo "              Use <hdf4lib_path> as the HDF4LIB locations"
-    echo "              [Default is $HDF4LIB_default]"
-    echo "    archive <arch_path>: "
-    echo "              Use <arch_path> as the release ARCHIVE area"
-    echo "              [<arch_path> default as $ARCHIVES_default]"
+    cat <<EOF
+Usage: $0 [all] [checkout] [test] [srcdir] [release] [help]
+          [hdf4 <hdf4lib_path>] [archive <arch_path>] [dir <dir>]
+	  [op-configure <option>]
+    all:      Run all commands (checkout, test & release)
+              [Default is all]
+    checkout: Run cvs checkout
+    test:     Run test
+    release:  Run release
+    clean:    Run make clean
+    distclean:Run make distclean
+    srcdir:   Use srcdir option (does not imply other commands)
+              "snapshot srcdir" is equivalent to "snapshot srcdir all"
+              "snapshot srcdir checkout" is equivalent to "snapshot checkout"
+    srcdirname <dir>:
+              Use <dir> as the srcdir testing directory if srcdir is choosen.
+              If <dir> starts with '-', it is append to the default name
+              E.g., "snapshot srcdir srcdirname -xx" uses hostname-xx
+              [Default is hostname]
+    help:     Print this message
+    hdf4 <hdf4lib_path>:
+              Use <hdf4lib_path> as the HDF4LIB locations
+              [Default is $HDF4LIB_default]
+    archive <arch_path>:
+              Use <arch_path> as the release ARCHIVE area
+              [Default is $ARCHIVES_default]
+    op-configure <option>:
+              Pass <option> to the configure command
+              E.g., "snapshot op-configure --enable-parallel"
+                  configures for parallel mode
+EOF
     exit $errcode
 fi
 
 # Setup the proper configure option (--with-hdf4) to use hdf4 library
 # provide HDF4LIB is non-empty.
 HDF4LIB=${HDF4LIB:+"--with-hdf4="$HDF4LIB}
-CONFIGURE="./configure $HDF4LIB"
+CONFIGURE="./configure $HDF4LIB $OP_CONFIGURE"
 
 # Execute the requests
 snapshot=yes
 
-COMPARE=${HOME}/hdf5-snapshots
+BASEDIR=${HOME}/hdf5-snapshots
+CURRENT=${BASEDIR}/current
+PREVIOUS=${BASEDIR}/previous
 
 #=============================
 # Run CVS checkout
@@ -123,10 +175,10 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # Create a working directory.  Hopefully one is left over from last
     # time that still has the contents of the previous release.  But if
     # not, just create one and assume that a snapshot is necessary.
-    test -d ${COMPARE} || mkdir -p ${COMPARE} || exit 1
+    test -d ${BASEDIR} || mkdir -p ${BASEDIR} || exit 1
 
     # Check out the current version from CVS
-    cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
+    cvs -Q co -d ${CURRENT} hdf5 || exit 1
 fi # Do CVS checkout
 
 
@@ -134,15 +186,40 @@ fi # Do CVS checkout
 # Run Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
+    # setup if srcdir is used.
+    if [ -z "$srcdir" ]; then
+	TESTDIR=${CURRENT}
+    else
+	#create TESTDIR if not exist yet
+	case "$SRCDIRNAME" in
+	"")
+	    SRCDIRNAME=`hostname`
+	    ;;
+	-*)
+	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    ;;
+	esac
+	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
+	test -d ${TESTDIR} || mkdir ${TESTDIR}
+    fi
+    # Make sure current version exists and is clean
+    if [ -d ${TESTDIR} ]; then
+	(cd ${TESTDIR} && ${MAKE} distclean)
+    else
+	errcode=$?
+        snapshot=no
+        exit $errcode
+    fi
+
     # Compare it with the previous version.  Compare only files listed in
     # the MANIFEST plus the MANIFEST itself.
-    if [ -d ${COMPARE}/previous ]; then
-	if (diff -c ${COMPARE}/previous/MANIFEST ${COMPARE}/current/MANIFEST); then
+    if [ -d ${PREVIOUS} ]; then
+	if (diff -c ${PREVIOUS}/MANIFEST ${CURRENT}/MANIFEST); then
 	    snapshot=no
-	    for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
+	    for src in `grep '^\.' ${CURRENT}/MANIFEST|expand|cut -f1 -d' '`; do
 		diff -I H5_VERS_RELEASE -I " released on " \
 		    -I " currently under development" \
-		    ${COMPARE}/previous/$src ${COMPARE}/current/$src || \
+		    ${PREVIOUS}/$src ${CURRENT}/$src || \
 		    snapshot=yes
 		    # Don't break because we want to see all the diffs.
 	    done
@@ -151,9 +228,9 @@ if [ "$cmd" = "all" -o -n "$cmdtest" ]; then
 
     # Make sure all the serial tests work.
     if [ "$snapshot" = "yes" ]; then
-	if (cd ${COMPARE}/current; \
-	    ${CONFIGURE}; \
-	    make _test); then
+	if (cd ${TESTDIR}; \
+	    ${srcdir:+${CURRENT}/}${CONFIGURE}; \
+	    ${MAKE} check); then
 	    :
 	else
 	    errcode=$?
@@ -169,12 +246,12 @@ fi # Test the HDF5 library
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     if [ "$snapshot" = "yes" ]; then
-	(cd ${COMPARE}/current; make distclean)
+	(cd ${CURRENT}; ${MAKE} distclean)
 	(
 	    # Turn on exit on error in the sub-shell so that it does not
 	    # cvs commit if errors encounter here.
 	    set -e
-	    cd ${COMPARE}/current
+	    cd ${CURRENT}
 	    bin/release -d $ARCHIVES $METHODS
 	    RELEASE_VERSION="`perl bin/h5vers -v`"
 	    perl bin/h5vers -i
@@ -184,8 +261,40 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
     fi
 
     # Replace the previous version with the current version.
-    rm -rf ${COMPARE}/previous
-    mv ${COMPARE}/current ${COMPARE}/previous
+    # Should check if the errcode of the release process but there
+    # are other failures after release was done (e.g. h5vers or cvs failures)
+    # that should allow the replacement to occure.
+    rm -rf ${PREVIOUS}
+    mv ${CURRENT} ${PREVIOUS}
 fi #Release snapshot
+
+
+#=============================
+# Clean the test area.  Default is no clean.
+#=============================
+if [ -n "$cmdclean" ]; then
+    # setup if srcdir is used.
+    if [ -z "$srcdir" ]; then
+	TESTDIR=${CURRENT}
+    else
+	case "$SRCDIRNAME" in
+	"")
+	    SRCDIRNAME=`hostname`
+	    ;;
+	-*)
+	    SRCDIRNAME="`hostname`$SRCDIRNAME"
+	    ;;
+	esac
+	TESTDIR=${BASEDIR}/TestDir/${SRCDIRNAME}
+    fi
+    # Make sure current version exists and is clean
+    if [ -d ${TESTDIR} ]; then
+	(cd ${TESTDIR} && ${MAKE} $cmdclean )
+    else
+	errcode=$?
+        snapshot=no
+        exit $errcode
+    fi
+fi # Clean the Test directory
 
 exit $errcode
