@@ -2404,7 +2404,11 @@ H5D_free_fchunk_info(void *_fchunk_info)
 
     assert(fchunk_info);
 
+    /* Close the chunk's dataspace */
     H5S_close(fchunk_info->space);
+
+    /* Free the actual chunk info */
+    H5FL_FREE(H5D_fchunk_info_t,fchunk_info);
 
     FUNC_LEAVE_NOAPI_VOID;
 }   /* H5D_free_fchunk_info() */
@@ -2437,7 +2441,11 @@ H5D_free_mchunk_info(void *_mchunk_info)
 
     assert(mchunk_info);
 
+    /* Close the chunk's dataspace */
     H5S_close(mchunk_info->space);
+
+    /* Free the actual chunk info */
+    H5FL_FREE(H5D_mchunk_info_t,mchunk_info);
 
     FUNC_LEAVE_NOAPI_VOID;
 }   /* H5D_free_mchunk_info() */
