@@ -3,6 +3,9 @@ Release information for hdf5-1.1.x
 
 		    CHANGES SINCE THE Version 1.0.0 RELEASE
 
+* [Improvement]: configure sets up the Makefile in the parallel tests
+  suit (testpar/) correctly.  (Tested for O2K only.)
+
 * [Bug-Fix]: Configure failed for all IRIX versions other than 6.3.
   It now configures correctly for all IRIX 6.x version.
 
