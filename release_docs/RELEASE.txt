@@ -58,6 +58,9 @@ New Features
     * Can use just enable-threadsafe if the C compiler has builtin pthreads
       support.
     * The H5Dumper can now dump comments associated with groups. -WCW 01-05-02
+    * Added support to read/write portions of chunks directly, if they are
+      uncompressed and too large to cache.  This should speed up I/O on chunked
+      datasets for a few more cases.  -QAK, 1/31/02
 
 
 Bug Fixes since HDF5-1.4.2 Release
