@@ -1511,13 +1511,6 @@ UNUSED
 			   H5S_SCALAR==file_space->extent.type));
 
     /*
-     * We can't do conversion if the source and destination select a
-     * different number of data points.
-     */
-    if ((*mem_space->select.get_npoints)(mem_space) != (*file_space->select.get_npoints) (file_space))
-        HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, NULL, "memory and file data spaces are different sizes");
-
-    /*
      * Is this path already present in the data space conversion path table?
      * If so then return a pointer to that entry.
      */
