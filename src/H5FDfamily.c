@@ -864,9 +864,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     int			i;
     haddr_t		sub;
     size_t		req;
-#ifndef NDEBUG
     hsize_t             tempreq;
-#endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER_NOAPI(H5FD_family_read, FAIL);
@@ -891,13 +889,13 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 
         sub = addr % file->memb_size;
 
-#ifndef NDEBUG
+	/* This check is for mainly for IA32 architecture whose size_t's size
+	 * is 4 bytes, to prevent overflow when user application is trying to 
+	 * write files bigger than 4GB. */
         tempreq = file->memb_size-sub;
-        H5_CHECK_OVERFLOW(tempreq,hsize_t,size_t);
+  	if(tempreq > SIZET_MAX)
+	    tempreq = SIZET_MAX;
         req = MIN(size, (size_t)tempreq);
-#else /* NDEBUG */
-        req = MIN(size, (size_t)(file->memb_size-sub));
-#endif /* NDEBUG */
 
         assert(i<file->nmembs);
 
@@ -942,9 +940,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
     int			i;
     haddr_t		sub;
     size_t		req;
-#ifndef NDEBUG
     hsize_t             tempreq;
-#endif /* NDEBUG */
     H5P_genplist_t *plist;      /* Property list pointer */
 
     FUNC_ENTER_NOAPI(H5FD_family_write, FAIL);
@@ -969,13 +965,13 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 
         sub = addr % file->memb_size;
 
-#ifndef NDEBUG
+        /* This check is for mainly for IA32 architecture whose size_t's size
+         * is 4 bytes, to prevent overflow when user application is trying to 
+         * write files bigger than 4GB. */
         tempreq = file->memb_size-sub;
-        H5_CHECK_OVERFLOW(tempreq,hsize_t,size_t);
+	if(tempreq > SIZET_MAX)
+	    tempreq = SIZET_MAX;
         req = MIN(size, (size_t)tempreq);
-#else /* NDEBUG */
-        req = MIN(size, (size_t)(file->memb_size-sub));
-#endif /* NDEBUG */
 
         assert(i<file->nmembs);
 
