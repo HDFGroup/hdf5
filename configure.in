@@ -16,6 +16,13 @@ AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
 
 dnl ----------------------------------------------------------------------
+dnl Dump all shell variables values.
+dnl
+AC_MSG_CHECKING(shell variables initial values)
+set >&5
+AC_MSG_RESULT(done)
+
+dnl ----------------------------------------------------------------------
 dnl Check that the cache file was build on the same host as what we're
 dnl running on now.
 dnl
