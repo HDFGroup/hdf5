@@ -1485,7 +1485,7 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
     FUNC_ENTER_NOINIT(H5FP_sap_handle_alloc_request);
 
     sap_alloc.req_id = req->req_id;
-    sap_alloc.file_id = info->file_id;
+    sap_alloc.file_id = req->file_id;
     sap_alloc.status = H5FP_STATUS_OK;
     sap_alloc.mem_type = req->mem_type;
 
