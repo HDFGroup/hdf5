@@ -489,10 +489,11 @@ herr_t H5T_vlen_disk_write(hid_t UNUSED plist_id, H5F_t *f, void *vl_addr, void 
     /* Get the length of the sequence and heap object ID from background data.
      * Free heap object for old data.  */
     if(bg!=NULL) {
+	HDmemset(&bg_hobjid,0,sizeof(H5HG_t));
         UINT32DECODE(bg, bg_seq_len);
 
         /* Free heap object for old data */
-        if(bg_seq_len!=0) {
+        if(bg_seq_len>0) {
             /* Get heap information */
             H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
             INT32DECODE(bg, bg_hobjid.idx);

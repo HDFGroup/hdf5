@@ -2178,11 +2178,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs     */
     uint8_t 	**dptr;		        /*pointer to correct destination pointer*/
     uint8_t	*bg_ptr=NULL;		/*background buf traversal pointer   */
-    uint8_t	*bg=NULL;		
-    H5HG_t	bg_hobjid;
+    H5HG_t	bg_hobjid, parent_hobjid;
     size_t	src_delta, dst_delta, bkg_delta;/*source & destination stride*/
     hssize_t 	seq_len;                /*the number of elements in the current sequence*/
-    hsize_t	bg_seq_len=0;
+    hsize_t	bg_seq_len=0, parent_seq_len=0;
     size_t	src_base_size, dst_base_size;/*source & destination base size*/
     size_t	src_size, dst_size;     /*source & destination total size in bytes*/
     void	*conv_buf=NULL;     	/*temporary conversion buffer 	     */
@@ -2191,7 +2190,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     size_t	tmp_buf_size=0;	        /*size of temporary bkg buffer	     */
     uint8_t	dbuf[64],*dbuf_ptr=dbuf;/*temp destination buffer	     */
     int	        direction;		/*direction of traversal	     */
+    int         nested=0;               /*flag of nested VL case             */
     hsize_t	elmtno;			/*element number counter	     */
+    hsize_t     i;
 
     FUNC_ENTER_NOAPI(H5T_conv_vlen, FAIL);
 
@@ -2241,16 +2242,14 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
             if (src->size==dst->size || buf_stride>0) {
                 olap = nelmts;
                 sp = dp = (uint8_t*)_buf;
-                if(_bkg!=NULL)
-                    bg_ptr  = (uint8_t*)_bkg;
+                bg_ptr  = (uint8_t*)_bkg;
                 direction = 1;
             } else if (src->size>=dst->size) {
                 /* potentially this uses the destination buffer 1 extra
                  * time, but its faster that floating-point calcs */
                 olap = ((dst->size)/(src->size-dst->size))+1;
                 sp = dp = (uint8_t*)_buf;
-                if(_bkg!=NULL)
-                    bg_ptr  = (uint8_t*)_bkg;
+                bg_ptr  = (uint8_t*)_bkg;
                 direction = 1;
             } else {
                 /* potentially this uses the destination buffer 1 extra
@@ -2309,14 +2308,16 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 if ((tmp_buf=H5FL_BLK_ALLOC(vlen_seq,tmp_buf_size,1))==NULL)
                     HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
             } /* end if */
+    
+            /* Set the flag for nested VL case */
+            if(dst->u.vlen.f!=NULL && H5T_detect_class(dst->parent,H5T_VLEN) && bg_ptr!=NULL)
+                nested=1;
 
             for (elmtno=0; elmtno<nelmts; elmtno++) {
                 s = sp;
                 d = *dptr;
-                if(bg_ptr!=NULL)
-                    bg = bg_ptr;
 
-                /* Get length of sequences in bytes */
+                /* Get length of element sequences */
                 seq_len=(*(src->u.vlen.getlen))(src->u.vlen.f,s);
                 assert(seq_len>=0);
                 H5_CHECK_OVERFLOW(seq_len,hssize_t,size_t);
@@ -2345,15 +2346,23 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                     tmp_buf_size=conv_buf_size;
                     if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,tmp_buf_size))==NULL)
                         HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
-		    HDmemset(tmp_buf,0,tmp_buf_size);	
                 } /* end if */
 
 		/* If we are writing and there is a nested VL type, read 
 		 * the sequence into the background buffer */
-		if(dst->u.vlen.f!=NULL && H5T_detect_class(dst->parent,H5T_VLEN) 		    && bg!=NULL) {
-                    uint8_t *tmp=bg;
+		if(nested) {
+                    uint8_t *tmp=bg_ptr;
 		    UINT32DECODE(tmp, bg_seq_len);
 		    if(bg_seq_len>0) {
+			if(tmp_buf_size<bg_seq_len*MAX(src_base_size,
+			    dst_base_size)) {
+			    tmp_buf_size=bg_seq_len*MAX(src_base_size,
+			    		 	dst_base_size);
+                    	    if((tmp_buf=H5FL_BLK_REALLOC(vlen_seq,tmp_buf,
+				tmp_buf_size))==NULL)
+                        	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, 
+				"memory allocation failed for type conversion");
+                        }
 			H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp,
 					&(bg_hobjid.addr));
 		    	INT32DECODE(tmp, bg_hobjid.idx);
@@ -2361,6 +2370,10 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 			    HRETURN_ERROR (H5E_DATATYPE, H5E_READERROR, FAIL, 
 			    "can't read VL sequence into background buffer");
 		    } /* end if */
+
+                    /* If the sequence gets shorter, pad out the original sequence with zeros */
+                    if(bg_seq_len<seq_len)
+                        HDmemset((uint8_t *)tmp_buf+dst_base_size*bg_seq_len,0,(seq_len-bg_seq_len)*dst_base_size);
 		} /* end if */
 
                 /* Convert VL sequence */
@@ -2370,10 +2383,25 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                                   "datatype conversion failed");
 
                 /* Write sequence to destination location */
-                if((*(dst->u.vlen.write))(dset_xfer_plist,dst->u.vlen.f,d,conv_buf, bg, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
+                if((*(dst->u.vlen.write))(dset_xfer_plist,dst->u.vlen.f,d,conv_buf, bg_ptr, (hsize_t)seq_len,(hsize_t)dst_base_size)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL,
                                   "can't write VL data");
 
+                /* For nested VL case, free leftover heap objects from the deeper level if the length of new data elements is shorted than the old data elements.*/
+                if(nested && seq_len<bg_seq_len) {
+                    uint8_t *tmp_p=tmp_buf;
+		    tmp_p += seq_len*dst_base_size;
+                    for(i=0; i<(bg_seq_len-seq_len); i++) {
+                        UINT32DECODE(tmp_p, parent_seq_len);
+                        if(parent_seq_len>0) {
+                            H5F_addr_decode(dst->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));
+                            INT32DECODE(tmp_p, parent_hobjid.idx);
+                            if(H5HG_remove(dst->u.vlen.f, &parent_hobjid)<0)
+                                HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to remove heap object");
+                        }
+                    }
+                }
+                
                 /*
                  * If we had used a temporary buffer for the destination
                  * then we should copy the value to the true destination
