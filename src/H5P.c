@@ -453,7 +453,7 @@ H5P_close(void *_plist)
         HRETURN (SUCCEED);
 
     /* Some property lists may need to do special things */
-    switch (plist->class) {
+    switch (plist->cls) {
         case H5P_FILE_ACCESS:
             if (fa_list->driver_id>=0) {
                 H5FD_fapl_free(fa_list->driver_id, fa_list->driver_info);
@@ -699,7 +699,7 @@ H5P_copy (H5P_class_t type, const void *src)
     HDmemcpy(dst, src, size);
 
     /* Set the type of the property list */
-    dst->class=type;
+    dst->cls=type;
 
     /* Deep-copy pointers */
     switch (type) {
