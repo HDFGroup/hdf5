@@ -1,4 +1,4 @@
-HDF5 version 1.7.24 currently under development
+HDF5 version 1.7.24-fph5_alpha2 currently under development
 ================================================================================
 
 

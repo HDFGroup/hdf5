@@ -1,4 +1,4 @@
-HDF5 version 1.7.23 released on Sun Apr 25 04:09:03 CDT 2004
+HDF5 version 1.7.24-fph5_alpha1 released on Thu May  6 09:30:47 CDT 2004
 ================================================================================
 
 
@@ -42,6 +42,10 @@ New Features
 
     Library:
     --------
+        - New exception handler for datatype conversion is put in to 
+            replace the old overflow callback function.  This exception
+            handler is set through H5Pset_type_conv_cb function.
+            SLU - 2004/4/27
         - Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
 	    will suppress all library version mismatch warning messages.
 	    AKC - 2004/4/14
