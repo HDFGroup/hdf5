@@ -293,6 +293,16 @@ printf("%s: partial_size=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)partial_
                     /* Correct the coords array */
                     coords[i]=0;
                     coords[i-1]++;
+
+                    /* Carry the coord array correction up the array, if the dimension is finished */
+                    while(i>0 && coords[i-1]==(hssize_t)dset_dims[i-1]) {
+                        i--;
+                        coords[i]=0;
+                        if(i>0) {
+                            coords[i-1]++;
+                            assert(coords[i-1]<=(hssize_t)dset_dims[i-1]);
+                        } /* end if */
+                    } /* end while */
                 } /* end if */
             } /* end for */
 #ifdef QAK
@@ -736,6 +746,16 @@ printf("%s: partial_size=%lu, hslab_size[%d]=%ld\n",FUNC,(unsigned long)partial_
                     /* Correct the coords array */
                     coords[i]=0;
                     coords[i-1]++;
+
+                    /* Carry the coord array correction up the array, if the dimension is finished */
+                    while(i>0 && coords[i-1]==(hssize_t)dset_dims[i-1]) {
+                        i--;
+                        coords[i]=0;
+                        if(i>0) {
+                            coords[i-1]++;
+                            assert(coords[i-1]<=(hssize_t)dset_dims[i-1]);
+                        } /* end if */
+                    } /* end while */
                 } /* end if */
             } /* end for */
 #ifdef QAK
