@@ -27,6 +27,7 @@ static char RcsId[] = "@(#)$Revision$";
        H5Tis_field_atomic -- Check if a field is atomic
        H5Tis_atomic/H5T_is_atomic -- Check if a datatype is atomic
        H5Tset_type        -- Set the base type of a user-defined datatype
+       H5Tget_type        -- Get the base type of a datatype
        H5Tadd_field       -- Add a field to a compound datatype
        H5Tsize            -- Determine the size of a datatype
 
@@ -263,7 +264,9 @@ hbool_t H5T_is_atomic(h5_datatype_t *type)
     if(H5T_COMPOUND==type->dt.base)
         ret_value=BFALSE;
 
+#ifdef LATER
 done:
+#endif /* LATER */
   if(ret_value == BFAIL)
     { /* Error condition cleanup */
 
@@ -369,6 +372,62 @@ done:
 
     FUNC_LEAVE(ret_value);
 } /* end H5Tset_type() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Tget_type
+ PURPOSE
+    Get the base type of a datatype 
+ USAGE
+    herr_t H5Tget_type(tid, base, len, arch)
+        hatom_t tid;            IN: Datatype object to modify
+        hatom_t *base;          IN: Base type of the datatype
+        uint8 *len;             IN: Length of the object in bytes
+        uint8 *arch;            IN: Architecture format type stored with
+ RETURNS
+    SUCCEED/FAIL
+ DESCRIPTION
+        This function gets the basic type of a user-defined datatype.  Each
+    datatype is either an atomic type (i.e. has no further divisions of the
+    type) or is a compound type (like a C structure).  If the datatype is 
+    to a compound type, the 'len' argument is not used.
+--------------------------------------------------------------------------*/
+herr_t H5Tget_type(hatom_t tid,hatom_t *base,uint8 *len,uint8 *arch)
+{
+    h5_datatype_t *dt;         /* new data-type object to create */
+    herr_t        ret_value = SUCCEED;
+
+    FUNC_ENTER(H5Tget_type, H5T_init_interface, FAIL);
+
+    /* Clear errors and check args and all the boring stuff. */
+    H5ECLEAR;
+    if(H5Aatom_group(tid)!=H5_DATATYPE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL);
+
+    /* Go get the object */
+    if((dt=H5Aatom_object(tid))==NULL)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+    if(dt->dt.base==0)
+        HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
+    
+    /* Set the basic datatype information */
+    if(base!=NULL)
+        *base=dt->dt.base;
+    if(len!=NULL)
+        *len=dt->dt.len;
+    if(arch!=NULL)
+        *arch=dt->dt.arch;
+
+done:
+  if(ret_value == FAIL)   
+    { /* Error condition cleanup */
+
+    } /* end if */
+
+    /* Normal function cleanup */
+
+    FUNC_LEAVE(ret_value);
+} /* end H5Tget_type() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -515,14 +574,15 @@ uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
       } /* end if */
     else
       {
-        if(tid==H5T_COMPOUND)
+        h5_datatype_t *dt;  /* datatype pointer */
+
+        /* Go get the object */
+        if((dt=H5Aatom_object(tid))==NULL)
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
+
+        if(dt->dt.base==H5T_COMPOUND)
           {
             intn i;             /* local counting variable */
-            h5_datatype_t *dt;  /* datatype pointer */
-
-            /* Go get the object */
-            if((dt=H5Aatom_object(tid))==NULL)
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);
 
             /* Check the base type of the datatype */
             if(H5T_COMPOUND!=dt->dt.base)
@@ -537,6 +597,36 @@ uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag)
                 ret_value+=H5Tsize(dt->ci->flist[i].dt.base, dt->ci->flist[i].dt.len,
                         dt->ci->flist[i].dt.arch,mem_flag)*H5Pnelem(dt->ci->flist[i].dim_id);
           } /* end if */
+        else
+          { /* Simple, user-defined datatypes */
+            switch(dt->dt.base)
+              {
+                case H5T_CHAR:
+                case H5T_INT:
+                case H5T_FLOAT:     /* All three of thes types use the length as the number of bytes */
+                    ret_value=dt->dt.len;
+                    break;
+
+                case H5T_DATE:
+                    ret_value=8;    /* Number of characters for ISO 8601 format */
+                    break;
+
+                case H5T_TIME:
+                    ret_value=6;    /* Number of characters for ISO 8601 format */
+                    break;
+
+                case H5T_SPTR:
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
+                    break;
+
+                case H5T_PPTR:
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, UFAIL);
+                    break;
+
+                default:
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, UFAIL);
+              } /* end switch */
+          } /* end else */
       } /* end else */
 
 done:

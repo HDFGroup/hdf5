@@ -23,7 +23,7 @@
 #include <H5public.h>
 #include <H5Apublic.h>
 
-/* Define atomic datatypes */
+/* Define atomic datatype bases */
 #define H5T_CHAR    MAKE_ATOM(H5_DATATYPE,0)
 #define H5T_INT     MAKE_ATOM(H5_DATATYPE,1)
 #define H5T_FLOAT   MAKE_ATOM(H5_DATATYPE,2)
@@ -32,6 +32,10 @@
 #define H5T_SPTR    MAKE_ATOM(H5_DATATYPE,5)
 #define H5T_PPTR    MAKE_ATOM(H5_DATATYPE,6)
 #define H5T_COMPOUND MAKE_ATOM(H5_DATATYPE,7)
+
+/* Define atomic datatype architectures */
+#define H5T_BIGENDIAN       0
+#define H5T_LITTLEENDIAN    1
 
 typedef struct {
     hatom_t base;           /* Basic datatype */
@@ -48,6 +52,7 @@ uint32 H5Tget_num_fields(hatom_t tid);
 hbool_t H5Tis_field_atomic(hatom_t tid,uintn fidx);
 hbool_t H5Tis_atomic(hatom_t tid);
 herr_t H5Tset_type(hatom_t tid,hatom_t base,uint8 len,uint8 arch);
+herr_t H5Tget_type(hatom_t tid,hatom_t *base,uint8 *len,uint8 *arch);
 uintn H5Tsize(hatom_t tid, uint8 len, uint8 arch, hbool_t mem_flag);
 herr_t H5Tadd_field (hatom_t tid, const char *name, hatom_t base, uint8 len,
 		     uint8 arch, hatom_t space);
