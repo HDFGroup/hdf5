@@ -39,16 +39,16 @@ $(srcdir)/Dependencies: .depend
 	            echo Building dependencies for $$dep;		      \
 	            obj=`basename $$dep .c`.lo;				      \
 	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
-	            $(TRACE) $$dep;					      \
-	            $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
-                        sed 's% $(srcdir)/% $$(srcdir)/%g' |		      \
-                        sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |	      \
+	            $(TRACE) $$dep;                                           \
+	            $(CC) -MM -MG $(CPPFLAGS) $$dep 2>/dev/null |             \
+                        sed 's% $(srcdir)/% $$(srcdir)/%g' |                  \
+                        sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |          \
                         sed 's% $(top_builddir)/% $$(top_builddir)/%g' |      \
 	                sed 's/\.o/.lo/' >>$@;				      \
 	            ;;							      \
 	      esac;							      \
 	   fi;								      \
-	done;
+	done
 
 -include .depend
 
