@@ -76,7 +76,7 @@ to specific objects and data regions in an HDF5 file.
 * Functions labelled with an asterisk (*) are provided only for 
 backwards compatibility with HDF5 Releases 1.4.<i>x</i>.  
 See further notes in the description of each function.
-<br>
+<p>
 
 <i>Alphabetical Listing</i>
 
@@ -91,7 +91,7 @@ See further notes in the description of each function.
     
     <td valign="top">
       <li><a href="#Reference-GetObjType">H5Rget_obj_type</a>
-      <li><a href="#Reference-GetObjectType">H5Rget_object_type</a>
+      <li><a href="#Reference-GetObjectType">H5Rget_object_type</a> *
     </td>
     
     <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -309,7 +309,8 @@ facilitate moving easily between them.</i>
         <code>H5Rget_obj_type</code> 
         returns the type of the referenced object.
 	<p>
-	Valid object reference types, to pass in as <code>ref</code>, include the following:
+	Valid object reference types, to pass in as <code>ref_type</code>, 
+	include the following:
 	<table border="0">
 	<tr align=left valign=top><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
 	<code>H5R_OBJECT</code></td><td>
@@ -375,14 +376,15 @@ facilitate moving easily between them.</i>
     <dd>Retrieves the type of object that an object reference points to.
 <dt><strong>Description:</strong>
     <dd>[<strong>NOTE:</strong>
+        <span class="1_4_compat">
         This function is provided only to enable backward compatibility
         with HDF5 Releases 1.4.<i>x</i>. 
-	This function is enabled only if the HDF5 library is compiled 
+	This function is enabled only if the HDF5 library is configured 
 	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code> and is not
 	enabled in the binaries distributed by NCSA.
 	This function has been replaced in Release 1.6 by the function 
-	<a href="#Reference-GetObyType"><code>H5Rget_object_type</code></a>
-	and will eventually be deleted from the HDF5 distribution.]
+	<a href="#Reference-GetObjType"><code>H5Rget_obj_type</code></a>
+	and will eventually be deleted from the HDF5 distribution.</span>]
         <p>
 	</p>Given a reference to an object <code>ref</code>, 
         <code>H5Rget_object_type</code> returns the 
