@@ -84,7 +84,7 @@ herr_t H5V_array_fill(void *_dst, const void *src, size_t size, size_t count);
  *
  *-------------------------------------------------------------------------
  */
-static inline hsize_t __unused__
+static __inline__ hsize_t __unused__
 H5V_vector_reduce_product(intn n, const hsize_t *v)
 {
     size_t                  ans = 1;
@@ -111,7 +111,7 @@ H5V_vector_reduce_product(intn n, const hsize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static inline hbool_t __unused__
+static __inline__ hbool_t __unused__
 H5V_vector_zerop_u(intn n, const hsize_t *v)
 {
     if (!v) return TRUE;
@@ -138,7 +138,7 @@ H5V_vector_zerop_u(intn n, const hsize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static inline hbool_t __unused__
+static __inline__ hbool_t __unused__
 H5V_vector_zerop_s(intn n, const hssize_t *v)
 {
     if (!v) return TRUE;
@@ -167,7 +167,7 @@ H5V_vector_zerop_s(intn n, const hssize_t *v)
  *
  *-------------------------------------------------------------------------
  */
-static inline intn __unused__
+static __inline__ intn __unused__
 H5V_vector_cmp_u (intn n, const hsize_t *v1, const hsize_t *v2)
 {
     if (v1 == v2) return 0;
@@ -200,7 +200,7 @@ H5V_vector_cmp_u (intn n, const hsize_t *v1, const hsize_t *v2)
  *
  *-------------------------------------------------------------------------
  */
-static inline intn __unused__
+static __inline__ intn __unused__
 H5V_vector_cmp_s (intn n, const hssize_t *v1, const hssize_t *v2)
 {
     if (v1 == v2) return 0;
@@ -228,7 +228,7 @@ H5V_vector_cmp_s (intn n, const hssize_t *v1, const hssize_t *v2)
  *
  *-------------------------------------------------------------------------
  */
-static inline void __unused__
+static __inline__ void __unused__
 H5V_vector_inc(intn n, hsize_t *v1, const hsize_t *v2)
 {
     while (n--) *v1++ += *v2++;
