@@ -23,11 +23,11 @@ RANLIB=:
 # Always turn off these loader warnings:
 #      84:  a library is not used
 #
-CFLAGS="$CFLAGS -fullwarn -ansi -64 -woff 1174,1429,1209,1196 -Wl,-woff,84"
+CFLAGS="$CFLAGS -ansi -64 -woff 1174,1429,1209,1196 -Wl,-woff,84"
 #CPPFLAGS="$CPPFLAGS -I."
 
 # What compiler flags should be used for code development?
-DEBUG_CFLAGS=-g
+DEBUG_CFLAGS="-g -fullwarn"
 DEBUG_CPPFLAGS=
 
 # What compiler flags should be used for building a production
