@@ -402,7 +402,7 @@ dnl Check for system libraries.
 dnl
 AC_CHECK_LIB(m,ceil)
 
-if test `uname` = "SunOS"; then
+if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
    dnl ...for Solaris and hdf4
    AC_CHECK_LIB(nsl, xdr_int)
 fi
