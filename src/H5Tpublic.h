@@ -64,22 +64,55 @@ typedef enum H5T_norm_t {
     /*H5T_NORM_NONE must be last */
 } H5T_norm_t;
 
-/* Character set to use for text strings */
+/*
+ * Character set to use for text strings.  Do not change these values since
+ * they appear in HDF5 files!
+ */
 typedef enum H5T_cset_t {
     H5T_CSET_ERROR       = -1,  /*error                                      */
     H5T_CSET_ASCII       = 0,   /*US ASCII                                   */
-
-    H5T_NCSET            = 1    /*this must be last!                         */
+    H5T_CSET_RESERVED_1  = 1,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_2  = 2,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_3  = 3,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_4  = 4,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_5  = 5,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_6  = 6,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_7  = 7,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_8  = 8,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_9  = 9,   /*reserved for later use		     */
+    H5T_CSET_RESERVED_10 = 10,  /*reserved for later use		     */
+    H5T_CSET_RESERVED_11 = 11,  /*reserved for later use		     */
+    H5T_CSET_RESERVED_12 = 12,  /*reserved for later use		     */
+    H5T_CSET_RESERVED_13 = 13,  /*reserved for later use		     */
+    H5T_CSET_RESERVED_14 = 14,  /*reserved for later use		     */
+    H5T_CSET_RESERVED_15 = 15   /*reserved for later use		     */
 } H5T_cset_t;
+#define H5T_NCSET 1    		/*Number of character sets actually defined  */
 
-/* Type of padding to use in character strings */
+/*
+ * Type of padding to use in character strings.  Do not change these values
+ * since they appear in HDF5 files!
+ */
 typedef enum H5T_str_t {
     H5T_STR_ERROR        = -1,  /*error                                      */
-    H5T_STR_NULL         = 0,   /*pad with null term like in C               */
-    H5T_STR_SPACE        = 1,   /*pad with spaces like in Fortran            */
-
-    H5T_NSTR             = 2    /*this must be last!                         */
+    H5T_STR_NULLTERM     = 0,   /*null terminate like in C                   */
+    H5T_STR_NULLPAD      = 1,   /*pad with nulls                             */
+    H5T_STR_SPACEPAD     = 2,   /*pad with spaces like in Fortran            */
+    H5T_STR_RESERVED_3   = 3,   /*reserved for later use		     */
+    H5T_STR_RESERVED_4   = 4,   /*reserved for later use		     */
+    H5T_STR_RESERVED_5   = 5,   /*reserved for later use		     */
+    H5T_STR_RESERVED_6   = 6,   /*reserved for later use		     */
+    H5T_STR_RESERVED_7   = 7,   /*reserved for later use		     */
+    H5T_STR_RESERVED_8   = 8,   /*reserved for later use		     */
+    H5T_STR_RESERVED_9   = 9,   /*reserved for later use		     */
+    H5T_STR_RESERVED_10  = 10,  /*reserved for later use		     */
+    H5T_STR_RESERVED_11  = 11,  /*reserved for later use		     */
+    H5T_STR_RESERVED_12  = 12,  /*reserved for later use		     */
+    H5T_STR_RESERVED_13  = 13,  /*reserved for later use		     */
+    H5T_STR_RESERVED_14  = 14,  /*reserved for later use		     */
+    H5T_STR_RESERVED_15  = 15   /*reserved for later use		     */
 } H5T_str_t;
+#define H5T_NSTR 3		/*num H5T_str_t types actually defined	     */
 
 /* Type of padding to use in other atomic types */
 typedef enum H5T_pad_t {

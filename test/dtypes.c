@@ -681,6 +681,343 @@ test_named (void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	mkstr
+ *
+ * Purpose:	Create a new string data type
+ *
+ * Return:	Success:	New type
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+mkstr(size_t len, H5T_str_t strpad)
+{
+    hid_t	t;
+
+    if ((t=H5Tcopy(H5T_C_S1))<0) return -1;
+    if (H5Tset_size(t, len)<0) return -1;
+    if (H5Tset_strpad(t, strpad)<0) return -1;
+    return t;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_str_1
+ *
+ * Purpose:	Test string conversions
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_conv_str_1(void)
+{
+    char	*buf=NULL;
+    hid_t	src_type, dst_type;
+
+    printf("%-70s", "Testing string conversions");
+    fflush(stdout);
+
+    /*
+     * Convert a null-terminated string to a shorter and longer null
+     * terminated string.
+     */
+    src_type = mkstr(10, H5T_STR_NULLTERM);
+    dst_type = mkstr(5, H5T_STR_NULLTERM);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
+	puts("*FAILED*");
+	puts("   Truncated C-string test failed");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   Extended C-string test failed");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+
+    /*
+     * Convert a null padded string to a shorter and then longer string.
+     */
+    src_type = mkstr(10, H5T_STR_NULLPAD);
+    dst_type = mkstr(5, H5T_STR_NULLPAD);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghijabcdefghij", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   Truncated C buffer test failed");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   Extended C buffer test failed");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+
+    /*
+     * Convert a space-padded string to a shorter and then longer string.
+     */
+    src_type = mkstr(10, H5T_STR_SPACEPAD);
+    dst_type = mkstr(5, H5T_STR_SPACEPAD);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghijabcdefghij", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdeabcdeabcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   Truncated Fortran-string test failed");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcde     abcde     ", 20)) {
+	puts("*FAILED*");
+	puts("   Extended Fortran-string test failed");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+
+    /*
+     * What happens if a null-terminated string is not null terminated?  If
+     * the conversion is to an identical string then nothing happens but if
+     * the destination is a different size or type of string then the right
+     * thing should happen.
+     */
+    src_type = mkstr(10, H5T_STR_NULLTERM);
+    dst_type = mkstr(10, H5T_STR_NULLTERM);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghijabcdefghij", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   Non-terminated string test 1");
+	goto error;
+    }
+    H5Tclose(dst_type);
+    dst_type = mkstr(5, H5T_STR_NULLTERM);
+    memcpy(buf, "abcdefghijabcdefghij", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd\0abcd\0abcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   Non-terminated string test 2");
+	goto error;
+    }
+    memcpy(buf, "abcdeabcdexxxxxxxxxx", 20);
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   Non-terminated string test 2");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+    
+    /*
+     * Test C string to Fortran and vice versa.
+     */
+    src_type = mkstr(10, H5T_STR_NULLTERM);
+    dst_type = mkstr(10, H5T_STR_SPACEPAD);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghi\0abcdefghi\0", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdefghi abcdefghi ", 20)) {
+	puts("*FAILED*");
+	puts("   C string to Fortran test 1");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdefghi\0abcdefghi\0", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C string test 1");
+	goto error;
+    }
+    H5Tclose(dst_type);
+    dst_type = mkstr(5, H5T_STR_SPACEPAD);
+    memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   C string to Fortran test 2");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C string test 2");
+	goto error;
+    }
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+    src_type = mkstr(5, H5T_STR_NULLTERM);
+    dst_type = mkstr(10, H5T_STR_SPACEPAD);
+    memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd      abcd      ", 20)) {
+	puts("*FAILED*");
+	puts("   C string to Fortran test 3");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C string test 3");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+    
+    /*
+     * Test C buffer to Fortran and vice versa.
+     */
+    src_type = mkstr(10, H5T_STR_NULLPAD);
+    dst_type = mkstr(10, H5T_STR_SPACEPAD);
+    buf = calloc(2, 10);
+    memcpy(buf, "abcdefghijabcdefghij", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   C buffer to Fortran test 1");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdefghijabcdefghij", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C buffer test 1");
+	goto error;
+    }
+    H5Tclose(dst_type);
+    dst_type = mkstr(5, H5T_STR_SPACEPAD);
+    memcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   C buffer to Fortran test 2");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C buffer test 2");
+	goto error;
+    }
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+    src_type = mkstr(5, H5T_STR_NULLPAD);
+    dst_type = mkstr(10, H5T_STR_SPACEPAD);
+    memcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd      abcd      ", 20)) {
+	puts("*FAILED*");
+	puts("   C buffer to Fortran test 3");
+	goto error;
+    }
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL)<0) goto error;
+    if (memcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
+	puts("*FAILED*");
+	puts("   Fortran to C buffer test 3");
+	goto error;
+    }
+    free(buf);
+    H5Tclose(src_type);
+    H5Tclose(dst_type);
+
+    puts(" PASSED");
+    return 0;
+
+ error:
+    return -1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_conv_str_2
+ *
+ * Purpose:	Tests C-to-Fortran and Fortran-to-C string conversion speed.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, August 10, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_conv_str_2(void)
+{
+    char		*buf=NULL, s[80];
+    hid_t		c_type, f_type;
+    const size_t	nelmts = 200000, ntests=5;
+    size_t		i, j, nchars;
+    herr_t		ret_value = -1;
+
+    /*
+     * Initialize types and buffer.
+     */
+    c_type = mkstr(8, H5T_STR_NULLPAD);
+    f_type = mkstr(8, H5T_STR_SPACEPAD);
+    buf = calloc(nelmts, 8);
+    for (i=0; i<nelmts; i++) {
+	nchars = rand() % 8;
+	for (j=0; j<nchars; j++) {
+	    buf[i*8+j] = 'a' + rand()%26;
+	}
+	while (j<nchars) buf[i*8+j++] = '\0';
+    }
+
+    /* Do the conversions */
+    for (i=0; i<ntests; i++) {
+	sprintf(s, "Testing random string conversion speed (test %d/%d)",
+		(int)(i+1), (int)ntests);
+	printf("%-70s", s);
+	fflush(stdout);
+	
+	if (H5Tconvert(c_type, f_type, nelmts, buf, NULL)<0) goto error;
+	if (H5Tconvert(f_type, c_type, nelmts, buf, NULL)<0) goto error;
+	puts(" PASSED");
+    }
+    ret_value = 0;
+
+ error:
+    if (buf) free(buf);
+    return ret_value;
+}
+
+    
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_conv_int
  *
  * Purpose:	Test atomic number conversions.
@@ -1310,6 +1647,8 @@ main(void)
     nerrors += test_compound()<0 ? 1 : 0;
     nerrors += test_transient ()<0 ? 1 : 0;
     nerrors += test_named ()<0 ? 1 : 0;
+    nerrors += test_conv_str_1()<0 ? 1 : 0;
+    nerrors += test_conv_str_2()<0 ? 1 : 0;
     nerrors += test_conv_int ()<0 ? 1 : 0;
 
     /* Does floating point overflow generate a SIGFPE? */

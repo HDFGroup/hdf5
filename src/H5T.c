@@ -534,7 +534,7 @@ H5T_init_interface(void)
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
-    dt->u.atomic.u.s.pad = H5T_STR_NULL;
+    dt->u.atomic.u.s.pad = H5T_STR_NULLTERM;
     if ((H5T_C_S1_g = H5I_register(H5_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "can't initialize H5T layer");
@@ -560,7 +560,7 @@ H5T_init_interface(void)
     dt->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->u.atomic.u.s.cset = H5T_CSET_ASCII;
-    dt->u.atomic.u.s.pad = H5T_STR_SPACE;
+    dt->u.atomic.u.s.pad = H5T_STR_SPACEPAD;
     if ((H5T_FORTRAN_S1_g = H5I_register(H5_DATATYPE, dt)) < 0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "can't initialize H5T layer");
@@ -570,22 +570,23 @@ H5T_init_interface(void)
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
-    if (H5Tregister_soft ("i_i", H5T_INTEGER, H5T_INTEGER,
-			  H5T_conv_i_i) < 0) {
+    if (H5Tregister_soft ("i_i", H5T_INTEGER, H5T_INTEGER, H5T_conv_i_i)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
-    if (H5Tregister_soft ("f_f", H5T_FLOAT, H5T_FLOAT,
-			  H5T_conv_f_f) < 0) {
+    if (H5Tregister_soft ("f_f", H5T_FLOAT, H5T_FLOAT, H5T_conv_f_f)<0) {
 	HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		       "unable to register conversion function");
     }
-    if (H5Tregister_soft("ibo", H5T_INTEGER, H5T_INTEGER,
-			 H5T_conv_order) < 0) {
+    if (H5Tregister_soft("s_s", H5T_STRING, H5T_STRING, H5T_conv_s_s)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
-    if (H5Tregister_soft("fbo", H5T_FLOAT, H5T_FLOAT, H5T_conv_order) < 0) {
+    if (H5Tregister_soft("ibo", H5T_INTEGER, H5T_INTEGER, H5T_conv_order)<0) {
+	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
+		      "unable to register conversion function");
+    }
+    if (H5Tregister_soft("fbo", H5T_FLOAT, H5T_FLOAT, H5T_conv_order)<0) {
 	HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
 		      "unable to register conversion function");
     }
@@ -1503,8 +1504,7 @@ H5Tget_precision (hid_t type_id)
  *		and then the size is increased to insure that significant
  *		bits do not "hang over" the edge of the data type.
  *
- *		Changing the precision of an H5T_STRING automatically changes
- *		the size as well.  The precision must be a multiple of 8.
+ *		The precision property of strings is read-only.
  *
  *		When decreasing the precision of a floating point type, set
  *		the locations and sizes of the sign, mantissa, and exponent
@@ -1564,13 +1564,8 @@ H5Tset_precision (hid_t type_id, size_t prec)
 	break;
 
     case H5T_STRING:
-	if (prec % 8) {
-	    HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-			  "precision for this type must be a multiple of 8");
-	}
-	offset = 0;
-	size = prec / 8;
-	break;
+	HRETURN_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
+		      "precision for this type is read-only");
 
     case H5T_FLOAT:
 	/*
@@ -2423,6 +2418,16 @@ H5Tget_strpad (hid_t type_id)
  *		programming language: C usually null terminates strings while
  *		Fortran left-justifies and space-pads strings.	This property
  *		defines the storage mechanism for the string.
+ *
+ *		When converting from a long string to a short string if the
+ *		short string is H5T_STR_NULLPAD or H5T_STR_SPACEPAD then the
+ *		string is simply truncated; otherwise if the short string is
+ *		H5T_STR_NULLTERM it will be truncated and a null terminator
+ *		is appended.
+ *
+ *		When converting from a short string to a long string, the
+ *		long string is padded on the end by appending nulls or
+ *		spaces.
  *
  * Return:	Success:	SUCCEED
  *
@@ -4245,17 +4250,17 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2)
 	    break;
 
 	case H5T_STRING:
-	    if (dt1->u.atomic.u.s.cset < dt1->u.atomic.u.s.cset) {
+	    if (dt1->u.atomic.u.s.cset < dt2->u.atomic.u.s.cset) {
 		HGOTO_DONE(-1);
 	    }
-	    if (dt1->u.atomic.u.s.cset > dt1->u.atomic.u.s.cset) {
+	    if (dt1->u.atomic.u.s.cset > dt2->u.atomic.u.s.cset) {
 		HGOTO_DONE(1);
 	    }
 
-	    if (dt1->u.atomic.u.s.pad < dt1->u.atomic.u.s.pad) {
+	    if (dt1->u.atomic.u.s.pad < dt2->u.atomic.u.s.pad) {
 		HGOTO_DONE(-1);
 	    }
-	    if (dt1->u.atomic.u.s.pad > dt1->u.atomic.u.s.pad) {
+	    if (dt1->u.atomic.u.s.pad > dt2->u.atomic.u.s.pad) {
 		HGOTO_DONE(1);
 	    }
 

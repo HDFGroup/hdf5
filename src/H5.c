@@ -1987,19 +1987,22 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			fprintf(out, "NULL");
 		    }
 		} else {
-		    H5T_str_t str = va_arg (ap, H5T_str_t);
+		    H5T_str_t str = va_arg(ap, H5T_str_t);
 		    switch (str) {
 		    case H5T_STR_ERROR:
-			fprintf (out, "H5T_STR_ERROR");
+			fprintf(out, "H5T_STR_ERROR");
 			break;
-		    case H5T_STR_NULL:
-			fprintf (out, "H5T_STR_NULL");
+		    case H5T_STR_NULLTERM:
+			fprintf(out, "H5T_STR_NULLTERM");
 			break;
-		    case H5T_STR_SPACE:
-			fprintf (out, "H5T_STR_SPACE");
+		    case H5T_STR_NULLPAD:
+			fprintf(out, "H5T_STR_NULLPAD");
+			break;
+		    case H5T_STR_SPACEPAD:
+			fprintf(out, "H5T_STR_SPACEPAD");
 			break;
 		    default:
-			fprintf (out, "%ld", (long)str);
+			fprintf(out, "%ld", (long)str);
 			break;
 		    }
 		}

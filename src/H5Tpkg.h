@@ -133,6 +133,8 @@ herr_t H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *_buf, void __unused__ *bkg);
 herr_t H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, void *_buf, void __unused__ *bkg);
+herr_t H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+		     size_t nelmts, void *_buf, void __unused__ *bkg);
 herr_t H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			      size_t nelmts, void *buf, void __unused__ *bkg);
 herr_t H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,

@@ -32,24 +32,44 @@ if [ -z "$CVSROOT" ]; then
 fi
 cvs -Q co -d ${COMPARE}/current hdf5 || exit 1
 
-# Compare it with the previous version.
+# Compare it with the previous version.  Compare only files listed in
+# the MANIFEST plus the MANIFEST itself.
 if [ -d ${COMPARE}/previous ]; then
-    if (diff -r -I H5_VERS_RELEASE -I " released on " --exclude CVS \
-	    ${COMPARE}/previous ${COMPARE}/current); then
-	update=no
+    if (diff ${COMPARE}/{previous,current}/MANIFEST); then
+	for src in `cat ${COMPARE}/current/MANIFEST`; do
+	    if (diff -I H5_VERS_RELEASE -I " released on " \
+		${COMPARE}/{previous,current}/$src); then
+		snapshot=no
+	    else
+		snapshot=yes
+		break
+	    fi
+	done
     else
-        update=yes
+	snapshot=yes
     fi
 else
-    update=yes
+    snapshot=yes
+fi
+
+# Make sure all the serial tests work.
+if [ "$snapshot" = "yes" ]; then
+    if (cd ${COMPARE}/current; make _test); then
+	:
+    else
+	snapshot=no
+    fi
+    (cd ${COMPARE}/current; make distclean)
 fi
 
 # Release snapshot, update version, and commit to cvs
-if [ "$update" = "yes" ]; then
-   (cd ${COMPARE}/current; \
-	./bin/release -d $ARCHIVES $METHODS; \
-	./bin/h5vers -i; \
-	cvs -Q commit -m Snapshot )
+if [ "$snapshot" = "yes" ]; then
+    (
+	cd ${COMPARE}/current
+	./bin/release -d $ARCHIVES $METHODS
+	./bin/h5vers -i
+	cvs -Q commit -m Snapshot
+    )
 fi
 
 # Replace the previous version with the current version.

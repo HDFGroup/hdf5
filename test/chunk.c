@@ -7,13 +7,8 @@
  *
  * Purpose:	Checks the effect of various I/O request sizes and raw data
  *		cache sizes.  Performance depends on the amount of data read
- *		from disk, and we use a trick to get that number: a
- *		compress/uncompress pair that counts the amount of data read.
- *		Since the data itself is not important, the compression just
- *		removes a byte and uncompression adds some byte of arbitrary
- *		value.  The change in size is necessary or the library will
- *		not store the data as compressed and thus not call the
- *		uncompression method.
+ *		from disk and we use a filter to get that number.
+
  */
 #include <assert.h>
 #include <hdf5.h>
@@ -34,7 +29,7 @@
 #define LINESPOINTS	"lines"
 #define CH_SIZE		100		/*squared in terms of bytes    	*/
 #define DS_SIZE		20		/*squared in terms of chunks	*/
-#define ZMETHNO		H5Z_USERDEF_MIN
+#define FILTER_COUNTER	305
 #define READ		0
 #define WRITE		1
 #define MIN(X,Y)	((X)<(Y)?(X):(Y))
@@ -62,9 +57,9 @@ static hid_t	fapl_g = -1;
 
 
 /*-------------------------------------------------------------------------
- * Function:	count_c
+ * Function:	counter
  *
- * Purpose:	A bogus compression method that just removes the last byte.
+ * Purpose:	Count number of bytes but don't do anything.
  *
  * Return:	Success:	src_nbytes-1
  *
@@ -78,41 +73,12 @@ static hid_t	fapl_g = -1;
  *-------------------------------------------------------------------------
  */
 static size_t
-count_c (unsigned int __unused__ flags, size_t __unused__ cd_size,
-	 const void __unused__ *client_data, size_t src_nbytes,
-	 const void *src, size_t __unused__ dst_nbytes, void *dst/*out*/)
+counter (unsigned __unused__ flags, size_t __unused__ cd_nelmts,
+	 const unsigned __unused__ *cd_values, size_t nbytes,
+	 size_t __unused__ *buf_size, void __unused__ **buf)
 {
-    memcpy (dst, src, src_nbytes-1);
-    nio_g += src_nbytes;
-    return src_nbytes-1;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	count_u
- *
- * Purpose:	A bogus unompress method that just adds a zero to the end.
- *
- * Return:	Success:	src_nbytes+1
- *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 14, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static size_t
-count_u (unsigned int __unused__ flags, size_t __unused__ cd_size,
-	 const void __unused__ *client_data, size_t src_nbytes,
-	 const void *src, size_t __unused__ dst_nbytes, void *dst/*out*/)
-{
-    memcpy (dst, src, src_nbytes);
-    ((char*)dst)[src_nbytes] = 0;
-    nio_g += src_nbytes+1;
-    return src_nbytes+1;
+    nio_g += nbytes;
+    return nbytes;
 }
 
 
@@ -151,8 +117,8 @@ create_dataset (void)
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
     size[0] = size[1] = CH_SIZE;
     H5Pset_chunk (dcpl, 2, size);
-    H5Zregister (ZMETHNO, "counter", count_c, count_u);
-    H5Pset_compression (dcpl, ZMETHNO, 0, 0, NULL);
+    H5Zregister (FILTER_COUNTER, "counter", counter);
+    H5Pset_filter (dcpl, FILTER_COUNTER, 0, 0, NULL);
         
     /* The dataset */
     dset = H5Dcreate (file, "dset", H5T_NATIVE_CHAR, space, dcpl);
@@ -214,7 +180,8 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
 	    hs_offset[1] = j;
 	    hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-j);
 	    mem_space = H5Screate_simple (2, hs_size, hs_size);
-	    H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
+	    H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset,
+				 NULL, hs_size, NULL);
 
 	    if (READ==op) {
 		H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
@@ -274,7 +241,8 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
 	hs_offset[0] = hs_offset[1] = i;
 	hs_size[0] = hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-i);
 	mem_space = H5Screate_simple (2, hs_size, hs_size);
-	H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
+	H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL,
+			     hs_size, NULL);
 	if (READ==op) {
 	    H5Dread (dset, H5T_NATIVE_CHAR, mem_space, file_space,
 		     H5P_DEFAULT, buf);

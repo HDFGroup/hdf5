@@ -1978,13 +1978,13 @@
 	  <th width="90%">Meaning</th>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>0</td>
 	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
 	    otherwise, byte order is big endian.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>1, 2</td>
 	  <td><b>Padding type.</b>  Bit 1 is the lo_pad type and bit 2
 	    is the hi_pad type.  If a datum has unused bits at either
@@ -1992,13 +1992,13 @@
 	    locations.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>3</td>
 	  <td><b>Signed.</b> If this bit is set then the fixed-point
 	    number is in 2's complement form.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>4-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
@@ -2038,13 +2038,13 @@
 	  <th width="90%">Meaning</th>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>0</td>
 	  <td><b>Byte Order.</b> If zero, byte order is little-endian;
 	    otherwise, byte order is big endian.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>1, 2, 3</td>
 	  <td><b>Padding type.</b>  Bit 1 is the low bits pad type, bit 2
 	    is the high bits pad type, and bit 3 is the internal bits
@@ -2053,7 +2053,7 @@
 	    1, 2, or 3 is copied to those locations.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>4-5</td>
 	  <td><b>Normalization.</b> The value can be 0 if there is no
 	    normalization, 1 if the most significant bit of the
@@ -2063,18 +2063,18 @@
 	    appear in this field.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>6-7</td>
 	  <td>Reserved (zero).</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>8-15</td>
 	  <td><b>Sign.</b> This is the bit position of the sign
 	    bit.</td>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>16-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
@@ -2114,6 +2114,67 @@
       </table>
     </center>
 
+   <p>
+    <center>
+      <table border cellpadding=4 width="80%">
+	<caption align=top>
+	  <b>Bit Field for Strings (Class 3)</b>
+	</caption>
+
+	<tr align=center>
+	  <th width="10%">Bits</th>
+	  <th width="90%">Meaning</th>
+	</tr>
+
+	<tr valign=top>
+	  <td>0-3</td>
+	  <td><b>Padding type.</b>  This four-bit value determines the
+	    type of padding to use for the string.  The values are:
+
+	    <dl>
+	      <dt><code>0</code> Null terminate.
+	      <dd>A zero byte marks the end of the string and is
+		guaranteed to be present after converting a long
+		string to a short string.  When converting a short
+		string to a long string the value is padded with
+		additional null characters as necessary.
+		
+		<br><br>
+	      <dt><code>1</code> Null pad.
+	      <dd>Null characters are added to the end of the value
+		during conversions from short values to long values
+		but conversion in the opposite direction simply
+		truncates the value.
+
+		<br><br>
+	      <dt><code>2</code> Space pad.
+	      <dd>Space characters are added to the end of the value
+		during conversions from short values to long values
+		but conversion in the opposite direction simply
+		truncates the value.  This is the Fortran
+		representation of the string.
+
+		<br><br>
+	      <dt><code>3-15</code> Reserved.
+	      <dd>These values are reserved for future use.
+	    </dl>
+	</tr>
+
+	<tr valign=top>
+	  <td>4-7</td>
+	  <td><b>Character Set.</b>  The character set to use for
+	    encoding the string.  The only character set supported is
+	    the 8-bit ASCII (zero) so no translations have been defined
+	    yet.</td>
+	</tr>
+
+	<tr valign=top>
+	  <td>8-23</td>
+	  <td>Reserved (zero).</td>
+	</tr>
+      </table>
+    </center>
+
     <p>
     <center>
       <table border cellpadding=4 width="80%">
@@ -2126,7 +2187,7 @@
 	  <th width="90%">Meaning</th>
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>0-15</td>
 	  <td><b>Number of Members.</b> This field contains the number
 	    of members defined for the compound data type.  The member
@@ -2134,7 +2195,7 @@
 	    type message.
 	</tr>
 
-	<tr>
+	<tr valign=top>
 	  <td>15-23</td>
 	  <td>Reserved (zero).</td>
 	</tr>
@@ -3292,7 +3353,7 @@ data-type.
 <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- hhmts start -->
-Last modified: Tue Aug  4 10:04:40 EDT 1998
+Last modified: Fri Aug  7 11:04:44 EDT 1998
 <!-- hhmts end -->
 </body>
 </html>

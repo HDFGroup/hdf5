@@ -159,8 +159,8 @@
 	type may fail if the precesion must be decremented and the
 	data type is of the <code>H5T_OPAQUE</code> class or the
 	<code>H5T_FLOAT</code> bit fields would extend beyond the
-	significant part of the type.  Increasing the size of an
-	<code>H5T_STRING</code> automatically increases the precision
+	significant part of the type.  Adjusting the size of an
+	<code>H5T_STRING</code> automatically adjusts the precision
 	as well.  On error, <code>H5Tget_size()</code> returns zero
 	which is never a valid size.
 
@@ -388,9 +388,33 @@
 	programming language: C usually null terminates strings while
 	Fortran left-justifies and space-pads strings.  This property
 	defines the storage mechanism and can be
-	<code>H5T_STR_NULL</code> for C-style strings or
-	<code>H5T_STR_SPACE</code> for Fortran-style
-	strings. <code>H5Tget_strpad()</code> returns
+
+	<p>
+	<dl>
+	  <dt><code>H5T_STR_NULLTERM</code>
+	  <dd>A C-style string which is guaranteed to be null
+	    terminated.  When converting  from a longer string the
+	    value will be truncated and then a null character
+	    appended.
+
+	    <br><br>
+	  <dt><code>H5T_STR_NULLPAD</code>
+	  <dd>A C-style string which is padded with null characters
+	    but not necessarily null terminated.  Conversion from a
+	    long string to a shorter <code>H5T_STR_NULLPAD</code>
+	    string will truncate but not null terminate.  Conversion
+	    from a short value to a longer value will append null
+	    characters as with <code>H5T_STR_NULLTERM</code>.
+
+	    <br><br>
+	  <dt><code>H5T_STR_SPACEPAD</code>
+	  <dd>A Fortran-style string which is padded with space
+	    characters.  This is the same as
+	    <code>H5T_STR_NULLPAD</code> except the padding character
+	    is a space instead of a null.
+	</dl>
+
+	<p><code>H5Tget_strpad()</code> returns
 	<code>H5T_STR_ERROR</code> on failure, a negative value (all
 	successful return values are non-negative).
     </dl>
@@ -1364,7 +1388,7 @@ H5Tregister_soft ("cus2be", H5T_INTEGER, H5T_INTEGER, cray_ushort2be);
     <address><a href="mailto:koziol@ncsa.uiuc.edu">Quincey Koziol</a></address>
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified: Thu Jun 18 13:59:12 EDT 1998
+Last modified: Fri Aug  7 10:24:52 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

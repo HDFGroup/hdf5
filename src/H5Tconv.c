@@ -1321,6 +1321,234 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_s_s
+ *
+ * Purpose:	Convert one fixed-length string type to another.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, August  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+	      void *buf, void __unused__ *bkg)
+{
+    H5T_t	*src=NULL;		/*source data type		*/
+    H5T_t	*dst=NULL;		/*destination data type		*/
+    intn	direction;		/*direction of traversal	*/
+    size_t	elmtno;			/*element number		*/
+    size_t	olap;			/*num overlapping elements	*/
+    size_t	nchars;			/*number of characters copied	*/
+    uint8	*s, *sp, *d, *dp;	/*src and dst traversal pointers*/
+    uint8	*dbuf=NULL;		/*temp buf for overlap convers.	*/
+    herr_t	ret_value=FAIL;		/*return value			*/
+    
+    FUNC_ENTER(H5T_conv_s_s, FAIL);
+
+    switch (cdata->command) {
+    case H5T_CONV_INIT:
+	if (H5_DATATYPE!=H5I_group(src_id) ||
+	    NULL==(src=H5I_object(src_id)) ||
+	    H5_DATATYPE!=H5I_group(dst_id) ||
+	    NULL==(dst=H5I_object(dst_id))) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+	if (8*src->size != src->u.atomic.prec ||
+	    8*dst->size != dst->u.atomic.prec) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad precision");
+	}
+	if (0 != src->u.atomic.offset ||
+	    0 != dst->u.atomic.offset) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad offset");
+	}
+	if (H5T_CSET_ASCII != src->u.atomic.u.s.cset ||
+	    H5T_CSET_ASCII != dst->u.atomic.u.s.cset) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character set");
+	}
+	if (src->u.atomic.u.s.pad<0 || src->u.atomic.u.s.pad>=H5T_NPAD ||
+	    dst->u.atomic.u.s.pad<0 || dst->u.atomic.u.s.pad>=H5T_NPAD) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad character padding");
+	}
+	cdata->need_bkg = H5T_BKG_NO;
+	break;
+
+    case H5T_CONV_FREE:
+	break;
+
+    case H5T_CONV_CONV:
+	/* Get the data types */
+	if (H5_DATATYPE!=H5I_group(src_id) ||
+	    NULL==(src=H5I_object(src_id)) ||
+	    H5_DATATYPE!=H5I_group(dst_id) ||
+	    NULL==(dst=H5I_object(dst_id))) {
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+	}
+
+	/*
+	 * Do we process the values from beginning to end or vice versa? Also,
+	 * how many of the elements have the source and destination areas
+	 * overlapping?
+	 */
+	if (src->size==dst->size) {
+	    /*
+	     * When the source and destination are the same size we can do
+	     * all the conversions in place.
+	     */
+	    sp = dp = (uint8*)buf;
+	    direction = 1;
+	    olap = 0;
+	} else if (src->size>=dst->size) {
+	    sp = dp = (uint8*)buf;
+	    direction = 1;
+	    olap = (size_t)(ceil((double)(src->size)/
+				 (double)(src->size-dst->size))-1);
+	} else {
+	    sp = (uint8*)buf + (nelmts-1) * src->size;
+	    dp = (uint8*)buf + (nelmts-1) * dst->size;
+	    direction = -1;
+	    olap = (size_t)(ceil((double)(dst->size)/
+				 (double)(dst->size-src->size))-1);
+	}
+
+	/* Allocate the overlap buffer */
+	if (NULL==(dbuf=H5MM_malloc(dst->size))) {
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+			"memory allocation failed for string conversion");
+	}
+	
+	/* The conversion loop. */
+	for (elmtno=0; elmtno<nelmts; elmtno++) {
+
+	    /*
+	     * If the source and destination buffers overlap then use a
+	     * temporary buffer fot eh destination.
+	     */
+	    if (direction>0) {
+		s = sp;
+		d = elmtno<olap ? dbuf : dp;
+	    } else {
+		s = sp;
+		d = elmtno >= nelmts-olap ? dbuf : dp;
+	    }
+#ifndef NDEBUG
+	    /* I don't quite trust the overlap calculations yet --rpm */
+	    if (src->size==dst->size) {
+		assert(s==d);
+	    } else if (d==dbuf) {
+		assert((dp>=sp && dp<sp+src->size) ||
+		       (sp>=dp && sp<dp+dst->size));
+	    } else {
+		assert((dp<sp && dp+dst->size<=sp) ||
+		       (sp<dp && sp+src->size<=dp));
+	    }
+#endif
+	    
+	    /* Copy characters from source to destination */
+	    switch (src->u.atomic.u.s.pad) {
+	    case H5T_STR_NULLTERM:
+		for (nchars=0;
+		     nchars<dst->size && nchars<src->size && s[nchars];
+		     nchars++) {
+		    d[nchars] = s[nchars];
+		}
+		break;
+
+	    case H5T_STR_NULLPAD:
+		for (nchars=0;
+		     nchars<dst->size && nchars<src->size && s[nchars];
+		     nchars++) {
+		    d[nchars] = s[nchars];
+		}
+		break;
+
+	    case H5T_STR_SPACEPAD:
+		nchars = src->size;
+		while (nchars>0 && ' '==s[nchars-1]) --nchars;
+		nchars = MIN(dst->size, nchars);
+		memcpy(d, s, nchars);
+		break;
+
+	    case H5T_STR_RESERVED_3:
+	    case H5T_STR_RESERVED_4:
+	    case H5T_STR_RESERVED_5:
+	    case H5T_STR_RESERVED_6:
+	    case H5T_STR_RESERVED_7:
+	    case H5T_STR_RESERVED_8:
+	    case H5T_STR_RESERVED_9:
+	    case H5T_STR_RESERVED_10:
+	    case H5T_STR_RESERVED_11:
+	    case H5T_STR_RESERVED_12:
+	    case H5T_STR_RESERVED_13:
+	    case H5T_STR_RESERVED_14:
+	    case H5T_STR_RESERVED_15:
+	    case H5T_STR_ERROR:
+		HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			    "source string padding method not supported");
+	    }
+
+	    /* Terminate or pad the destination */
+	    switch (dst->u.atomic.u.s.pad) {
+	    case H5T_STR_NULLTERM:
+		while (nchars<dst->size) d[nchars++] = '\0';
+		d[dst->size-1] = '\0';
+		break;
+		
+	    case H5T_STR_NULLPAD:
+		while (nchars<dst->size) d[nchars++] = '\0';
+		break;
+		
+	    case H5T_STR_SPACEPAD:
+		while (nchars<dst->size) d[nchars++] = ' ';
+		break;
+
+	    case H5T_STR_RESERVED_3:
+	    case H5T_STR_RESERVED_4:
+	    case H5T_STR_RESERVED_5:
+	    case H5T_STR_RESERVED_6:
+	    case H5T_STR_RESERVED_7:
+	    case H5T_STR_RESERVED_8:
+	    case H5T_STR_RESERVED_9:
+	    case H5T_STR_RESERVED_10:
+	    case H5T_STR_RESERVED_11:
+	    case H5T_STR_RESERVED_12:
+	    case H5T_STR_RESERVED_13:
+	    case H5T_STR_RESERVED_14:
+	    case H5T_STR_RESERVED_15:
+	    case H5T_STR_ERROR:
+		HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+			    "destination string padding method not supported");
+	    }
+
+	    /*
+	     * If we used a temporary buffer for the destination then we
+	     * should copy the value to the true destination buffer.
+	     */
+	    if (d==dbuf) HDmemcpy(dp, d, dst->size);
+	    sp += direction * src->size;
+	    dp += direction * dst->size;
+	}
+	break;
+
+    default:
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
+		      "unknown converson command");
+    }
+    ret_value = SUCCEED;
+
+ done:
+    H5MM_xfree(dbuf);
+    FUNC_LEAVE(ret_value);
+}
+	
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_float_double
  *
  * Purpose:	Convert native `float' to native `double' using hardware.
