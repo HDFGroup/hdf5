@@ -580,13 +580,13 @@
 
 
           SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, &
+                                               hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5pset_fill_value_integer
 !DEC$endif
 !
-                                               hdferr) 
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
