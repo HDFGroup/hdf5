@@ -48,6 +48,7 @@ const H5O_class_t H5O_SHARED[1] = {{
     H5O_shared_size,	    	/*size method				*/
     NULL,		    	/*no reset method			*/
     NULL,		        /*no free method			*/
+    NULL,		        /* file delete method		*/
     NULL,			/*get share method			*/
     NULL, 			/*set share method			*/
     H5O_shared_debug,	    	/*debug method				*/

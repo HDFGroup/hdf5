@@ -2406,10 +2406,11 @@ H5D_close(H5D_t *dataset)
     } /* end if */
 
     /* Remove the dataset from the list of opened objects in the file */
-    if(H5FO_delete(dataset->ent.file,dataset->ent.header)<0)
+    if(H5FO_delete(dataset->ent.file, H5AC_dxpl_id, dataset->ent.header)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects");
 
     /* Close the dataset object */
+    /* (This closes the file, if this is the last object open) */
     H5O_close(&(dataset->ent));
 
     /*
@@ -4441,7 +4442,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D_flush
  *
- * Purpose:     Flush any compact datasets cached in memory
+ * Purpose:     Flush any dataset information cached in memory
  *
  * Return:	Success:	Non-negative
  *		Failure:	Negative
@@ -4451,7 +4452,7 @@ done:
  *
  * Date:        August 14, 2002
  *
- * Comments:    Private function
+ * Comments:    Just flushing the compact data information currently.
  *
  * Modifications:
  *

@@ -52,8 +52,9 @@ const H5O_class_t H5O_CONT[1] = {{
     H5O_cont_encode,        	/*encode message                */
     NULL,                   	/*no copy method                */
     NULL,                   	/*no size method                */
-    NULL,                   	/*default reset method          */
-    NULL,		            /* default free method			*/
+    NULL,                   	/*reset method			*/
+    NULL,		        /* free method			*/
+    NULL,		        /* file delete method		*/
     NULL, 		    	/*get share method		*/
     NULL,		    	/*set share method		*/
     H5O_cont_debug,         	/*debugging                     */

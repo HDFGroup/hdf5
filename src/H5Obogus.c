@@ -57,6 +57,7 @@ const H5O_class_t H5O_BOGUS[1] = {{
     H5O_bogus_size,          	/*raw message size              */
     NULL,         	        /*free internal memory          */
     NULL,		        /*free method			*/
+    NULL,		        /* file delete method		*/
     NULL,		    	/*get share method		*/
     NULL,			/*set share method		*/
     H5O_bogus_debug,         	/*debug the message             */

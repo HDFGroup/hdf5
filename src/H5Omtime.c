@@ -57,6 +57,7 @@ const H5O_class_t H5O_MTIME[1] = {{
     H5O_mtime_size,		/*raw message size		*/
     H5O_mtime_reset,		/* reset method			*/
     H5O_mtime_free,		/* free method			*/
+    NULL,		        /* file delete method		*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     H5O_mtime_debug,		/*debug the message		*/
@@ -74,6 +75,7 @@ const H5O_class_t H5O_MTIME_NEW[1] = {{
     H5O_mtime_new_size,		/*raw message size		*/
     H5O_mtime_reset,		/* reset method			*/
     H5O_mtime_free,		/* free method			*/
+    NULL,		        /* file delete method		*/
     NULL,			/*get share method		*/
     NULL,			/*set share method		*/
     H5O_mtime_debug,		/*debug the message		*/
