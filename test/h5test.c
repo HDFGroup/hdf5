@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2001 National Center for Supercomputing Applications
+ * Copyright (c) 1998-2002 National Center for Supercomputing Applications
  *                         All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -60,6 +60,9 @@
 #endif
 #endif
 char	*paraprefix = NULL;	/* for command line option para-prefix */
+#ifdef H5_HAVE_PARALLEL
+MPI_Info    pio_info_g=MPI_INFO_NULL;/* MPI INFO object to run the PIO  */
+#endif
 
 /*
  * These are the letters that are appended to the file name when generating
@@ -578,3 +581,81 @@ h5_show_hostname(void)
     WSACleanup();
 #endif
 }
+
+
+#ifdef H5_HAVE_PARALLEL
+/*
+ * Function:    h5_set_info_object
+ * Purpose:     Process environment variables setting to set up MPI Info object.
+ * Return:      0 if all is fine; otherwise non-zero.
+ * Programmer:  Albert Cheng, 2002/05/21.
+ * Modifications:
+ */
+int
+h5_set_info_object(void)
+{
+    char	*envp;			/* environment pointer */
+    char	*namep, *valp;		/* name, value pointers */
+    int		ret_value=0;
+
+    /* handle any MPI INFO hints via $HDF5_MPI_INFO */
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+	envp = HDstrdup(envp);
+
+	/* create an INFO object if not created yet */
+	if (pio_info_g==MPI_INFO_NULL)
+	    MPI_Info_create (&pio_info_g);
+
+	/* parse only one setting.  Need to extend it to handle multiple */
+	/* settings.  LATER */
+	namep=envp;
+	valp=HDstrchr(namep, '=');
+	if (valp != NULL){
+	    /* change '=' to NULL, move valp down one */
+	    *valp++ = NULL;
+	    if (MPI_SUCCESS!=MPI_Info_set(pio_info_g, namep, valp)){
+		printf("MPI_Info_set failed\n");
+		ret_value = -1;
+	    }
+
+	}
+    }
+
+    if (envp)
+	HDfree(envp);
+    return(ret_value);
+}
+
+
+/*
+ * Function:    h5_dump_info_object
+ * Purpose:     Display content of an MPI Info object
+ * Return:      void
+ * Programmer:  Albert Cheng 2002/05/21
+ * Modifications:
+ */
+void
+h5_dump_info_object(MPI_Info info)
+{
+    char	key[MPI_MAX_INFO_KEY+1];
+    char	value[MPI_MAX_INFO_VAL+1];
+    int  	flag;
+    int		i, nkeys;
+
+    printf("Dumping MPI Info Object(%d) (up to %d bytes per item):\n", info,
+	MPI_MAX_INFO_VAL);
+    if (info==MPI_INFO_NULL){
+	printf("object is MPI_INFO_NULL\n");
+    }
+    else {
+	MPI_Info_get_nkeys(info, &nkeys);
+	printf("object has %d items\n", nkeys);
+	for (i=0; i<nkeys; i++){
+	    MPI_Info_get_nthkey(info, i, key);
+	    MPI_Info_get(info, key, MPI_MAX_INFO_VAL, value, &flag);
+	    printf("%s=%s\n", key, value);
+	}
+
+    }
+}
+#endif	/* H5_HAVE_PARALLEL */
