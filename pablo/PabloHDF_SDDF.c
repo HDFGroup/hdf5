@@ -226,6 +226,7 @@ void HDFinitTrace_SDDF( char *traceFileName, uint32 procTraceMask )
 	//==============================================================*/
 #ifdef HAVE_PARALLEL
 	int myNode;
+	char *buff;
 	/*===============================================================
 	// in the parallel case, initialize MPI-IO tracing.  This will	*
 	// initialize the traceFileName and set the I/O tracing 	*
