@@ -355,28 +355,126 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 
 
         <p>
-        <dt><u>Fortran functions:</u>
-        <dt><code>function</code>
+        <dt><u>Fortran subroutines:</u>
+        <dt><code>subroutine</code>
           <dd><code>
               syntax
               </code>
 
-        <dt><code>function</code>
+        <dt><code>subroutine</code>
           <dd><code>
               syntax
               </code>
 
 
         <p>
-        <dt><u>C++ functions:</u>
-        <dt><code>function</code>
+        <dt><u>C++ wrappers:</u>
+        <dt><code>FileCreatPropList::getVersion</code>
           <dd><code>
-              syntax
+            void FileCreatPropList::getVersion(
+            <font color="red">unsigned& super</font>, 
+            <font color="red">unsigned& freelist</font>, 
+            <br>
+            <font color="red">unsigned& stab</font>, 
+            <font color="red">unsigned& shhdr</font>) const
               </code>
 
-        <dt><code>function</code>
+<!--
+        <dt><code>FileCreatPropList::setSymk</code>
           <dd><code>
-              syntax
+            void FileCreatPropList::setSymk( int ik, int lk ) const
+              </code>
+-->
+
+        <dt><code>FileCreatPropList::setSymk</code>
+          <dd><code>
+            void FileCreatPropList::setSymk( 
+            <font color="red">unsigned ik</font>, unsigned lk ) const
+              </code>
+
+<!--
+        <dt><code>FileCreatPropList::getSymk</code>
+          <dd><code>
+            void FileCreatPropList::getSymk( int& ik, int& lk ) const
+              </code>
+-->
+
+        <dt><code>FileCreatPropList::getSymk</code>
+          <dd><code>
+            void FileCreatPropList::getSymk( 
+            <font color="red">unsigned& ik</font>, unsigned& lk ) const
+              </code>
+
+        <dt><code>FileCreatPropList::setIstorek</code>
+          <dd><code>
+            void FileCreatPropList::setIstorek( 
+            <font color="red">unsigned ik</font> ) const
+              </code>
+
+        <dt><code>FileCreatPropList::getIstorek</code>
+          <dd><code>
+            <font color="red">unsigned</font> 
+            FileCreatPropList::getIstorek() const
+              </code>
+
+        <dt><code>DSetCreatPropList::getExternal</code>
+          <dd><code>
+            void DSetCreatPropList::getExternal( 
+            <font color="red">unsigned idx</font>, 
+            size_t name_size, 
+            <br>
+            char* name, off_t& offset, hsize_t& size ) const
+              </code>
+
+        <dt><code>DSetCreatPropList::getFilter</code>
+          <dd><code>
+            H5Z_filter_t DSetCreatPropList::getFilter(
+            <font color="red">ine filter_number</font>, 
+            <br>
+            unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values, 
+            <br>
+            size_t namelen, char name[] ) const
+              </code>
+
+        <dt><code>DataSpace::selectHyperslab</code>
+          <dd><code>
+            void DataSpace::selectHyperslab( H5S_seloper_t op, 
+            const hsize_t *count, 
+            <br>
+            <font color="red">const hsize_t *start</font>, 
+            const hsize_t *stride, const hsize_t *block ) const
+              </code>
+
+        <dt><code>DataSpace::selectElements</code>
+          <dd><code>
+            void DataSpace::selectElements( H5S_seloper_t op, 
+            <br>
+            const size_t num_elements, 
+            <font color="red">const hsize_t *coord[ ]</font> ) const
+              </code>
+
+        <dt><code>CompType::getMemberName</code>
+          <dd><code>
+            string CompType::getMemberName( 
+            <font color="red">unsigned member_num</font> ) const
+              </code>
+
+        <dt><code>CompType::getMemberOffset</code>
+          <dd><code>
+            size_t CompType::getMemberOffset( 
+            <font color="red">unsigned member_num</font> ) const
+              </code>
+
+        <dt><code>CompType::getMemberClass</code>
+          <dd><code>
+            H5T_class_t CompType::getMemberClass( 
+            <font color="red">unsigned member_num</font> ) const
+              </code>
+
+        <dt><code>EnumType::getMemberValue</code>
+          <dd><code>
+            void EnumType::getMemberValue( 
+            <font color="red">unsigned member_no</font>, void *value ) const
               </code>
 
 
@@ -410,8 +508,8 @@ transition from the HDF5 Release 1.6.3 to Release 1.6.4.
 -->
         </dl>
         <p>
-        <cite>(This list of functions with changed syntax was added 
-          on 30 March 2005, shortly after Release 1.6.4.)</cite>
+        <cite>(These lists of syntax changes were added 
+          on 31 March 2005, shortly after Release 1.6.4.)</cite>
 
 
     <h3>Deleted Constants</h3>
@@ -2107,7 +2205,7 @@ Describes HDF5 Release 1.6.4, March 2005
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 30 March 2005 
+Last modified: 31 March 2005 
 <!-- hhmts end -->
 
 </body>
