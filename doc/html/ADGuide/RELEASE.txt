@@ -1,4 +1,4 @@
-HDF5 version 1.6.2-post4 released on Sun May 16 04:45:31 CDT 2004
+HDF5 version 1.6.2-post5 released on Sun Jun  6 20:56:44 CDT 2004
 ================================================================================
 
 
@@ -64,12 +64,16 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Opaque datatype with no tag failed for some operations.  Fixed.
+          SLU - 2004/6/3
 	- Fixed dtypes "sw long double -> double" failure in QSC class
 	  machines.  AKC - 2004/4/16
 
 
     Configuration
     -------------
+        - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
+	  is used with optimization NOT off.  AKC - 2004/05/20
 
     Performance
     -------------
