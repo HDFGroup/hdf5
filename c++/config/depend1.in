@@ -34,15 +34,19 @@ $(srcdir)/Dependencies: .depend
 	@touch .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \
-	      echo Building dependencies for $$dep;			      \
-	      obj=`basename $$dep .c`.lo;				      \
-	      sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;	      \
-	      $(TRACE) $$dep;						      \
-	      $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |		      \
-                  sed 's% $(srcdir)/% $$(srcdir)/%g' |                        \
-                  sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |                \
-                  sed 's% $(top_builddir)/% $$(top_builddir)/%g' |            \
-	          sed 's/\.o/.lo/' >>$@;	      			      \
+	      case "$$dep" in						      \
+	         *.C)							      \
+	            echo Building dependencies for $$dep;		      \
+	            obj=`basename $$dep .C`.lo;				      \
+	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
+	            $(TRACE) $$dep;					      \
+	            $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
+                        sed 's% $(srcdir)/% $$(srcdir)/%g' |		      \
+                        sed 's% $(top_srcdir)/% $$(top_srcdir)/%g' |	      \
+                        sed 's% $(top_builddir)/% $$(top_builddir)/%g' |      \
+	                sed 's/\.o/.lo/' >>$@;				      \
+	            ;;							      \
+	      esac;							      \
 	   fi;								      \
 	done;
 
