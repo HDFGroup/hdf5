@@ -1388,45 +1388,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_fill_value_defined
- *
- * Purpose:	Check if fill value is defined.  Internal version of function
- * 
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:  Raymond Lu
- *              Wednesday, January 16, 2002
- *
- * Modifications:
- *              
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5P_fill_value_defined(H5P_genplist_t *plist, H5D_fill_value_t *status)
-{
-    herr_t		ret_value = SUCCEED;
-    H5O_fill_t		fill;
-
-    FUNC_ENTER_NOAPI(H5P_fill_value_defined, FAIL);
-
-    assert(plist);
-    assert(status);
-
-    /* Get the fill value struct */
-    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
-
-    /* Get the fill-value status */
-    if(H5P_is_fill_value_defined(&fill, status) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5P_fill_value_defined() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5Pfill_value_defined
  *
  * Purpose:	Check if fill value is defined.
@@ -1445,6 +1406,7 @@ herr_t
 H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
 {
     H5P_genplist_t 	*plist;
+    H5O_fill_t		fill;
     herr_t		ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Pfill_value_defined, FAIL);
@@ -1456,9 +1418,13 @@ H5Pfill_value_defined(hid_t plist_id, H5D_fill_value_t *status)
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* Call the internal function */
-    if(H5P_fill_value_defined(plist, status) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value info"); 
+    /* Get the fill value struct */
+    if(H5P_get(plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value"); 
+
+    /* Get the fill-value status */
+    if(H5P_is_fill_value_defined(&fill, status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't check fill value status"); 
 
 done:
     FUNC_LEAVE_API(ret_value);

@@ -21,7 +21,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5HLprivate.h"	/* Local heaps				*/
@@ -3235,6 +3234,7 @@ done:
 herr_t
 H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 {
+    H5T_vlen_alloc_info_t vl_alloc_info; /* VL allocation info */
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
@@ -3253,8 +3253,12 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
         if (TRUE!=H5P_isa_class(plist_id,H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
+    /* Get the allocation info */
+    if(H5T_vlen_get_alloc_info(plist_id,&vl_alloc_info)<0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info");
+
     /* Call H5Diterate with args, etc. */
-    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&plist_id);
+    ret_value=H5Diterate(buf,type_id,space_id,H5T_vlen_reclaim,&vl_alloc_info);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3538,7 +3542,6 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     int                     rank;	/* Dataspace # of dimensions */
     herr_t                  ret_value = SUCCEED;        /* Return value */
     H5S_t                  *space = NULL;
-    H5P_genplist_t         *plist;
     int                     u;
     unsigned                shrink = 0;         /* Flag to indicate a dimension has shrank */
     unsigned                expand = 0;         /* Flag to indicate a dimension has grown */
@@ -3599,16 +3602,23 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
       *-------------------------------------------------------------------------
       */
         if(shrink && H5D_CHUNKED == dset->layout.type) {
+            H5P_genplist_t         *plist;
+            H5D_dxpl_cache_t    dxpl_cache;     /* Cached data transfer properties */
+    
             /* Get the dataset creation property list */
             if(NULL == (plist = H5I_object(dset->dcpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list")
 
+            /* Fill the DXPL cache values for later use */
+            if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
             /* Remove excess chunks */
-            if(H5F_istore_prune_by_extent(dset->ent.file, dxpl_id, &dset->layout, space) < 0)
+            if(H5F_istore_prune_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, &dset->layout, space) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
 
             /* Reset the elements outsize the new dimensions, but in existing chunks */
-            if(H5F_istore_initialize_by_extent(dset->ent.file, dxpl_id, &dset->layout, plist, space) < 0)
+            if(H5F_istore_initialize_by_extent(dset->ent.file, &dxpl_cache, dxpl_id, &dset->layout, plist, space) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
         } /* end if */
     } /* end if */

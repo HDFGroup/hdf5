@@ -32,6 +32,9 @@
 
 /* Macros */
 
+/* Forward declarations for prototype arguments */
+struct H5P_genplist_t;
+
 /* Prototypes */
 H5_DLL int H5FD_term_interface(void);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);

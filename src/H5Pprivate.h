@@ -60,8 +60,6 @@ H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         void *free_info);
 H5_DLL herr_t H5P_is_fill_value_defined(const struct H5O_fill_t *fill,
         H5D_fill_value_t *status);
-H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
-        H5D_fill_value_t *status);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);

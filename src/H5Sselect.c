@@ -56,50 +56,6 @@ H5FL_BLK_EXTERN(type_elem);
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_get_vector_size
- PURPOSE
-    Gets the size of the I/O vector
- USAGE
-    ssize_t H5S_get_vector_size(dxpl_id)
-        hid_t dxpl_id;          IN: The dataset transfer property list to query
- RETURNS
-    Non-negative number of entries in I/O vector on success, negative on failure
- DESCRIPTION
-    Retrieves the number of I/O vector entries to use for a given dataset
-    transfer.  If the default dataset property list is used, the default
-    number of I/O vectors is returned.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static ssize_t
-H5S_get_vector_size(hid_t dxpl_id)
-{
-    ssize_t ret_value;        /* return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5S_get_vector_size);
-
-    if(dxpl_id==H5P_DATASET_XFER_DEFAULT) {
-        ret_value=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
-    } /* end if */
-    else {
-        H5P_genplist_t *dx_plist;   /* Dataset transfer property list */
-
-        /* Get the hyperslab vector size */
-        if(NULL == (dx_plist = H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list");
-        if (H5P_get(dx_plist,H5D_XFER_HYPER_VECTOR_SIZE_NAME,&ret_value)<0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value");
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}   /* H5S_get_vector_size() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5S_select_offset
  PURPOSE
     Set the selection offset for a datapace
@@ -945,10 +901,8 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     assert(space);
     assert(op);
 
-    /* Get the hyperslab vector size */
-    /* (from the default data transfer property list, for now) */
-    if((vector_size=H5S_get_vector_size(H5P_DATASET_XFER_DEFAULT))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    /* Get the (default) hyperslab vector size */
+    vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1388,10 +1342,8 @@ H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "fill value buffer allocation failed");
     } /* end if */
 
-    /* Get the hyperslab vector size */
-    /* (from the default data transfer property list, for now) */
-    if((vector_size=H5S_get_vector_size(H5P_DATASET_XFER_DEFAULT))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    /* Get the (default) hyperslab vector size */
+    vector_size=H5D_XFER_HYPER_VECTOR_SIZE_DEF;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1473,9 +1425,10 @@ done:
  */
 herr_t
 H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
-    H5P_genplist_t *dc_plist, const H5D_storage_t *store, 
+    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
     size_t elmt_size, const H5S_t *space, H5S_sel_iter_t *iter, 
-    hsize_t nelmts, hid_t dxpl_id, const void *_buf)
+    hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
     hsize_t *off=NULL;             /* Array to store sequence offsets */
@@ -1504,8 +1457,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
 
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1528,7 +1480,7 @@ H5S_select_fscat (H5F_t *f, struct H5O_layout_t *layout,
         mem_off=0;
 
         /* Write sequence list out */
-        if (H5F_seq_writevv(f, dxpl_id, layout, dc_plist, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if (H5F_seq_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -1573,9 +1525,10 @@ done:
  */
 hsize_t
 H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
-    H5P_genplist_t *dc_plist, const H5D_storage_t *store, 
+    const H5D_dcpl_cache_t *dcpl_cache, const H5D_storage_t *store, 
     size_t elmt_size, const H5S_t *space, H5S_sel_iter_t *iter, 
-    hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
+    hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, void *_buf/*out*/)
 {
     uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
     hsize_t *off=NULL;          /* Array to store sequence offsets */
@@ -1603,8 +1556,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
     assert (_buf);
 
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1627,7 +1579,7 @@ H5S_select_fgath (H5F_t *f, const struct H5O_layout_t *layout,
         mem_off=0;
 
         /* Read sequence list in */
-        if (H5F_seq_readvv(f, dxpl_id, layout, dc_plist, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
+        if (H5F_seq_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store, nseq, &dset_curr_seq, len, off, 1, &mem_curr_seq, &mem_len, &mem_off, buf)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
@@ -1666,7 +1618,8 @@ done:
  */
 herr_t
 H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
-    H5S_sel_iter_t *iter, hsize_t nelmts, hid_t dxpl_id, void *_buf/*out*/)
+    H5S_sel_iter_t *iter, hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+    void *_buf/*out*/)
 {
     uint8_t *buf=(uint8_t *)_buf;   /* Get local copies for address arithmetic */
     const uint8_t *tscat_buf=(const uint8_t *)_tscat_buf;
@@ -1691,8 +1644,7 @@ H5S_select_mscat (const void *_tscat_buf, size_t elmt_size, const H5S_t *space,
     assert (buf);
 
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1755,7 +1707,8 @@ done:
  */
 hsize_t
 H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
-    H5S_sel_iter_t *iter, hsize_t nelmts, hid_t dxpl_id, void *_tgath_buf/*out*/)
+    H5S_sel_iter_t *iter, hsize_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
+    void *_tgath_buf/*out*/)
 {
     const uint8_t *buf=(const uint8_t *)_buf;   /* Get local copies for address arithmetic */
     uint8_t *tgath_buf=(uint8_t *)_tgath_buf;
@@ -1780,8 +1733,7 @@ H5S_select_mgath (const void *_buf, size_t elmt_size, const H5S_t *space,
     assert (tgath_buf);
 
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1838,9 +1790,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
+H5S_select_read(H5F_t *f, const H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
     const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/)
+    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
@@ -1880,8 +1833,7 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     mem_iter_init=1;	/* Memory selection iteration info has been initialized */
 
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((mem_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -1936,7 +1888,7 @@ HDfprintf(stderr,"%s: file_off[%Zu]=%Hu, file_len[%Zu]=%Zu\n",FUNC,curr_file_seq
 HDfprintf(stderr,"%s: mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,curr_mem_seq,mem_off[curr_mem_seq],curr_mem_seq,mem_len[curr_mem_seq]);
 #endif /* QAK */
         /* Read file sequences into current memory sequence */
-        if ((tmp_file_len=H5F_seq_readvv(f, dxpl_id, layout, dc_plist, store,
+        if ((tmp_file_len=H5F_seq_readvv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)
@@ -1987,9 +1939,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
+H5S_select_write(H5F_t *f, H5O_layout_t *layout, const H5D_dcpl_cache_t *dcpl_cache,
     const H5D_storage_t *store, size_t elmt_size, const H5S_t *file_space,
-    const H5S_t *mem_space, hid_t dxpl_id, const void *buf/*out*/)
+    const H5S_t *mem_space, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+    const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
     hbool_t mem_iter_init=0;    /* Memory selection iteration info has been initialized */
@@ -2028,8 +1981,7 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
     
     /* Get the hyperslab vector size */
-    if((vector_size=H5S_get_vector_size(dxpl_id))<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get I/O vector size");
+    vector_size=dxpl_cache->vec_size;
 
     /* Allocate the vector I/O arrays */
     if((mem_len = H5FL_ARR_MALLOC(size_t,(size_t)vector_size))==NULL)
@@ -2127,7 +2079,7 @@ for(u=curr_mem_seq; u<mem_nseq; u++)
 }
 #endif /* QAK */
         /* Write memory sequences into file sequences */
-        if ((tmp_file_len=H5F_seq_writevv(f, dxpl_id, layout, dc_plist, store,
+        if ((tmp_file_len=H5F_seq_writevv(f, dxpl_cache, dxpl_id, layout, dcpl_cache, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
                 buf))<0)

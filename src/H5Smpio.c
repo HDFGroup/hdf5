@@ -623,9 +623,9 @@ done:
  */
 static herr_t
 H5S_mpio_spaces_xfer(H5F_t *f, const H5O_layout_t *layout, size_t elmt_size,
-                     const H5S_t *file_space, const H5S_t *mem_space,
-		     hid_t dxpl_id, void *_buf /*out*/,
-		     hbool_t do_write )
+     const H5S_t *file_space, const H5S_t *mem_space,
+     hid_t dxpl_id, void *_buf /*out*/,
+     hbool_t do_write )
 {
     haddr_t	 addr;                  /* Address of dataset (or selection) within file */
     size_t	 mpi_buf_count, mpi_file_count;       /* Number of "objects" to transfer */
@@ -740,17 +740,16 @@ done:
  */
 herr_t
 H5S_mpio_spaces_read(H5F_t *f, const H5O_layout_t *layout,
-    H5P_genplist_t UNUSED *dc_plist, const H5D_storage_t UNUSED *store, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space, hid_t dxpl_id,
-    void *buf/*out*/)
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
+    hid_t dxpl_id, void *buf/*out*/)
 {
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_read, FAIL);
 
-    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size,
-				     file_space, mem_space, dxpl_id,
-				     buf, 0/*read*/);
+    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size, file_space,
+        mem_space, dxpl_id, buf, 0/*read*/);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -779,17 +778,17 @@ done:
  */
 herr_t
 H5S_mpio_spaces_write(H5F_t *f, H5O_layout_t *layout,
-    H5P_genplist_t UNUSED *dc_plist, const H5D_storage_t UNUSED *store, size_t elmt_size,
-    const H5S_t *file_space, const H5S_t *mem_space, hid_t dxpl_id,
-    const void *buf)
+    const H5D_dcpl_cache_t UNUSED *dcpl_cache, const H5D_storage_t UNUSED *store, size_t elmt_size,
+    const H5S_t *file_space, const H5S_t *mem_space, const H5D_dxpl_cache_t UNUSED *dxpl_cache,
+    hid_t dxpl_id, const void *buf)
 {
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI(H5S_mpio_spaces_write, FAIL);
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size,
-         file_space, mem_space, dxpl_id, (void*)buf, 1/*write*/);
+    ret_value = H5S_mpio_spaces_xfer(f, layout, elmt_size, file_space,
+        mem_space, dxpl_id, (void*)buf, 1/*write*/);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

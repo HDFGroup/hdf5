@@ -22,6 +22,7 @@
 #include "H5Dpublic.h"
 
 /* Private headers needed by this file */
+#include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /*
@@ -126,7 +127,7 @@
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
 /* Definitions for EDC property */
-#define H5D_XFER_EDC_NAME       "error-detecting"
+#define H5D_XFER_EDC_NAME       "err_detect"
 #define H5D_XFER_EDC_SIZE       sizeof(H5Z_EDC_t)
 #define H5D_XFER_EDC_DEF        H5Z_ENABLE_EDC
 /* Definitions for filter callback function property */
@@ -147,6 +148,28 @@ typedef union H5D_storage_t {
     hssize_t    *chunk_coords;  /* chunk's coordinates in file chunks */
 } H5D_storage_t;
 
+/* Typedef for cached dataset transfer property list information */
+typedef struct H5D_dxpl_cache_t {
+    size_t max_temp_buf;        /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) */
+    void *tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
+    void *bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
+    H5T_bkg_t bkgr_buf_type;    /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
+    double btree_split_ratio[3];/* B-tree split ratios (H5D_XFER_BTREE_SPLIT_RATIO_NAME) */
+    size_t vec_size;            /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
+#ifdef H5_HAVE_PARALLEL
+    H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
+#endif /*H5_HAVE_PARALLEL*/
+    H5Z_EDC_t err_detect;       /* Error detection info (H5D_XFER_EDC_NAME) */
+    H5Z_cb_t filter_cb;         /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
+} H5D_dxpl_cache_t;
+
+/* Typedef for cached dataset creation property list information */
+typedef struct H5D_dcpl_cache_t {
+    H5O_pline_t pline;          /* I/O pipeline info (H5D_CRT_DATA_PIPELINE_NAME) */
+    H5O_fill_t fill;            /* Fill value info (H5D_CRT_FILL_VALUE_NAME) */
+    H5D_fill_time_t fill_time;  /* Fill time (H5D_CRT_FILL_TIME_NAME) */
+} H5D_dcpl_cache_t;
+
 /* Library-private functions defined in H5D package */
 H5_DLL herr_t H5D_init(void);
 H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
@@ -161,5 +184,6 @@ H5_DLL herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id,
                              void *copy_data);
 H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 
 #endif
