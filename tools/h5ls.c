@@ -1203,6 +1203,7 @@ list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
 	    info.line_cont = "                ";
 	    
 	} else {
+	    printf("        Data:\n");
 	    info.idx_fmt = "(%s)";
 	    info.line_pre  = "            %s ";
 	    info.line_cont = "            %s  ";
