@@ -35,6 +35,8 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * Partially fixed space allocation inefficiencies in the file by
+      improving our algorithms for re-using freed space.  QAK - 2002/08/27
     * Fixed data corruption problem which could occur when fill values were
       written to a contiguously stored dataset in parallel.  QAK - 2002/08/27
     * Fixed metadata corruption problem which could occur when many objects
