@@ -1,5 +1,6 @@
 #! /usr/local/bin/perl -w
 require 5.003;
+use Cwd;
 
 # Builds a release.  Arguments are zero or more of the words.
 #
@@ -60,7 +61,7 @@ sub setver ($;$$$) {
 #
 sub release (@) {
    my @types = @_;
-   my ($ver, $status);
+   my ($ver, $status, $created_symlink);
    local $_;
 
    # Make sure the version number is correct.
@@ -79,16 +80,32 @@ sub release (@) {
    $status = system "cp Makefile.dist Makefile";
    die "cannot install default Makefile" if $status >> 8;
 
-   # Make sure release directory exists and create a name.
+   # Make sure release directory exists
    (mkdir $releases, 0777 or die "cannot create $releases")
        unless -d $releases;
    die "no manifest" unless -r "MANIFEST";
-   my $name = "$releases/hdf-$ver";
 
-   # Build the releases
+   # We build the release from above the root of the source tree so the
+   # hdf5 directory appears as part of the name in the tar file. We create
+   # a temporary symlink called something like `hdf-5.0.0a' that points to
+   # our current working directory.
+   $_ = cwd;
+   my ($parent,$root) = m%(.*)/(.*)$% or die "cannot split directory";
+   if ($root ne "hdf-$ver" && ! -e "../hdf-$ver") {
+      symlink $root, "../hdf-$ver" or die "cannot create link";
+      $created_symlink = 1;
+   }
+   my $name = "$root/$releases/hdf-$ver";
+
+   # Build the releases.
    @types = ("gzip") unless @types;
    @types = qw/tar gzip compress bzip2/ if 1==@types && "all" eq $types[0];
-   my $filelist = 'Makefile `cat MANIFEST`';
+   $_ = `cat MANIFEST`;
+   s/^\.\///mg;
+   @filelist = ("Makefile", split /\s*\n/, $_);
+   $filelist = join " ", map {"hdf-$ver/$_"} @filelist;
+
+   chdir ".." or die;
    for (@types) {
       print "Compressing with $_...\n";
 
@@ -114,6 +131,11 @@ sub release (@) {
    } continue {
       print STDERR "$_ failed\n" if $status >> 8;
    }
+   chdir $root or die;
+
+   # Remove the temporary symlink we created above.
+   unlink "../hdf-$ver" if $created_symlink;
+   
 
    # Update version info
    print <<EOF;
