@@ -15,6 +15,7 @@
 	3. Quick installation
 	3.1. TFLOPS
 	3.2. Windows
+        3.3. Certain Virtual File Layer(VFL)
 
 	4. HDF5 dependencies
 	4.1. Zlib
@@ -114,6 +115,11 @@
 3.2. Windows
 	Users of Microsoft Windows should see the INSTALL_Windows.txt
 	for detailed instructions.
+
+3.3. Certain Virtual File Layer(VFL)
+        If users want to install with special Virtual File Layer(VFL),
+        please go to read INSTALL_VFL file.  SRB and Globus-GASS have 
+        been documented. 
 
 4. HDF5 dependencies
 4.1. Zlib
