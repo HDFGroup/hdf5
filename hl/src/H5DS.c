@@ -185,6 +185,10 @@ herr_t H5DSattach_scale(hid_t did,
  if ((rank=H5Sget_simple_extent_ndims(sid))<0)
   goto out;
 
+ /* scalar rank */
+ if (rank==0)
+  rank=1;
+
  /* close dataset space */
  if (H5Sclose(sid)<0)
   return FAIL;
@@ -1331,7 +1335,7 @@ out:
  *   the string terminator is stored in the last position of the buffer to
  *   properly terminate the string.
  *
- * Return: size of name if found, Failure: FAIL
+ * Return: size of name if found, zero if not found,  Failure: FAIL
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -1381,7 +1385,7 @@ ssize_t H5DSget_scale_name(hid_t did,
   return FAIL;
 
  if (has_name == 0)
-  return FAIL;
+  return 0;
 
 /*-------------------------------------------------------------------------
  * open the attribute
@@ -1400,7 +1404,7 @@ ssize_t H5DSget_scale_name(hid_t did,
   goto out;
 
  /* get the size */
- if ((nbytes = H5Tget_size(tid))<0)
+ if ((nbytes = H5Tget_size(tid))==0)
   goto out;
 
  /* allocate a temporary buffer */

@@ -63,7 +63,10 @@ static int test_iterators(void);
 #define DIM0_LABEL   "Latitude"
 #define DIM1_LABEL   "Longitude"
 
-
+#define FILE1 "test_ds1.h5"
+#define FILE2 "test_ds2.h5"
+#define FILE3 "test_ds3.h5"
+#define FILE4 "test_ds4.h5"
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -152,7 +155,7 @@ static int test_simple(void)
  */  
 
  /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds1.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if ((fid=H5Fcreate(FILE1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
 	
 /*-------------------------------------------------------------------------
@@ -850,7 +853,7 @@ static int test_simple(void)
  if ((gid=H5Gcreate(fid,"grp",0))<0) 
   goto out;
  
-  /* create the data space for the dataset */
+ /* create the data space for the dataset */
  if ((sid=H5Screate_simple(rank,dims,NULL))<0)
   goto out;
 
@@ -1721,7 +1724,7 @@ static int test_errors(void)
  */  
 
  /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if ((fid=H5Fcreate(FILE2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
  if ((gid=H5Gcreate(fid,"grp",0))<0) 
@@ -2099,7 +2102,7 @@ static int test_iterators(void)
  */  
 
  /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds4.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if ((fid=H5Fcreate(FILE3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
  if ((gid=H5Gcreate(fid,"grp",0))<0) 
@@ -2270,11 +2273,16 @@ static int test_rank(void)
  hid_t   did;                                              /* dataset ID */
  hid_t   dsid;                                             /* scale ID */
  hid_t   sid;                                              /* space ID */
- int     rank     = 3;                                     /* rank of data dataset */
- hsize_t dims[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};       /* size of data dataset */
+ hid_t   sidds;                                            /* space ID */
+ hsize_t dims1[1]  = {DIM1_SIZE};                          /* size of data dataset */
+ hsize_t dims2[2]  = {DIM1_SIZE,DIM2_SIZE};                /* size of data dataset */
+ hsize_t dims3[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};      /* size of data dataset */
+ hsize_t dimss[2]  = {1,1};                                /* size of data dataset */
  char    name[30];                                         /* dataset name buffer */
  char    names[30];                                        /* dataset scale name buffer */
  char    namel[30];                                        /* dataset label name buffer */
+ int     bufi[1]={2};
+ float   buff[1]={1};
  int     i;
   
  printf("Testing ranks\n");
@@ -2285,20 +2293,24 @@ static int test_rank(void)
  */  
 
  /* create a file using default properties */
- if ((fid=H5Fcreate("test_ds3.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if ((fid=H5Fcreate(FILE4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  
- /* make a dataset */
- if (H5LTmake_dataset_int(fid,"dset_a",rank,dims,NULL)<0)
+ /* make a dataset a 3D data dataset */
+ if (H5LTmake_dataset_int(fid,"dset_a",3,dims3,NULL)<0)
   goto out;
 
- /* make scale datasets  */
- for (i=0; i<rank; i++) 
- {
-  sprintf(name,"ds_a_%d",i);
-  if (H5LTmake_dataset_int(fid,name,(rank-i),&dims[i],NULL)<0)
-   goto out;
- }
+ /* make a 1D scale dataset  */
+ if (H5LTmake_dataset_int(fid,"ds_a_0",1,dims1,NULL)<0)
+  goto out;
+
+ /* make a 2D scale dataset  */
+ if (H5LTmake_dataset_int(fid,"ds_a_1",2,dims2,NULL)<0)
+  goto out;
+
+ /* make a 3D scale dataset  */
+ if (H5LTmake_dataset_int(fid,"ds_a_2",3,dims3,NULL)<0)
+  goto out;
 
  
 /*-------------------------------------------------------------------------
@@ -2311,7 +2323,7 @@ static int test_rank(void)
  if ((did = H5Dopen(fid,"dset_a"))<0)
   goto out;
  
- for (i=0; i<rank; i++) 
+ for (i=0; i<3; i++) 
  {
   sprintf(name,"ds_a_%d",i);
   if((dsid = H5Dopen(fid,name))<0)
@@ -2340,7 +2352,7 @@ static int test_rank(void)
  if ((did = H5Dopen(fid,"dset_a"))<0)
   goto out;
  
- for (i=0; i<rank; i++) 
+ for (i=0; i<3; i++) 
  {
   sprintf(name,"ds_a_%d",i);
   if((dsid = H5Dopen(fid,name))<0)
@@ -2369,7 +2381,7 @@ static int test_rank(void)
  if ((did = H5Dopen(fid,"dset_a"))<0)
   goto out;
  
- for (i=0; i<rank; i++) 
+ for (i=0; i<3; i++) 
  {
   sprintf(name,"ds_a_%d",i);
   if((dsid = H5Dopen(fid,name))<0)
@@ -2399,10 +2411,6 @@ static int test_rank(void)
  
  PASSED();
 
-
-
-
-
 /*-------------------------------------------------------------------------
  * attach a scalar scale 
  *-------------------------------------------------------------------------
@@ -2410,14 +2418,39 @@ static int test_rank(void)
 
  TESTING2("attach a scalar scale");
    
- if ((sid = H5Screate(H5S_SCALAR))<0)
+ /* create the data space for the dataset */
+ if ((sid=H5Screate_simple(2,dimss,NULL))<0)
   goto out;
- 
+ /* create a dataset of rank 2 */
+ if ((did=H5Dcreate(fid,"dset_b",H5T_NATIVE_INT,sid,H5P_DEFAULT))<0)
+  goto out;
+ /* create a scalar space */
+ if ((sidds = H5Screate(H5S_SCALAR))<0)
+  goto out;
+ /* create a dataset of scalar rank for the scale */
+ if ((dsid=H5Dcreate(fid,"ds_b_1",H5T_NATIVE_FLOAT,sidds,H5P_DEFAULT))<0)
+  goto out;
+ /* write */
+ if(H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,bufi)<0)
+  goto out;
+ if(H5Dwrite(dsid,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buff)<0)
+  goto out;
+ /* attach */
+ if(H5DSattach_scale(did,dsid,0)<0)
+  goto out;
+ if(H5DSattach_scale(did,dsid,1)<0)
+  goto out;
+ /* close */
  if (H5Sclose(sid)<0)
+  goto out;
+ if (H5Sclose(sidds)<0)
+  goto out;
+ if (H5Dclose(did)<0)
+  goto out;
+ if (H5Dclose(dsid)<0)
   goto out;
  
  PASSED();
-
 
 
 
