@@ -517,6 +517,7 @@ h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
     hid_t		f_space;		/*file data space	*/
     int			ndims;			/*dimensionality	*/
     hsize_t		elmtno, i;		/*counters		*/
+    int			carry;			/*counter carry value	*/
     hssize_t		zero[8];		/*vector of zeros	*/
 
     /* Print info */
@@ -645,6 +646,16 @@ h5dump_simple(hid_t oid, hid_t p_type, int obj_data)
 
         default: break;
         }
+	
+	/* Calculate the next hyperslab offset */
+	for (i=ndims, carry=1; i>0 && carry; --i) {
+	    hs_offset[i-1] += hs_size[i-1];
+	    if (hs_offset[i-1]==(hssize_t)p_max_idx[i-1]) {
+		hs_offset[i-1] = p_min_idx[i-1];
+	    } else {
+		carry = 0;
+	    }
+	}
     }
 
     H5Sclose(sm_space);
