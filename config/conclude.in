@@ -51,14 +51,14 @@ check test _test: tests
 	done;								      \
 	test $$test = dummy || false
 	@if test -n "$(TEST_PROGS_PARA)"; then				      \
-	    echo "****NOTE****";					      \
+	    echo "**** Hint ****";					      \
 	    echo "Parallel test files reside in the current directory"	      \
 	         "by default.";						      \
 	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";	      \
 	    echo "    HDF5_PARAPREFIX=/PFS/user/me";			      \
 	    echo "    export HDF5_PARAPREFIX";				      \
 	    echo "    make check";					      \
-	    echo "****end of NOTE****";					      \
+	    echo "**** end of Hint ****";				      \
 	fi
 	@for test in $(TEST_PROGS_PARA) dummy; do                             \
 	   if test $$test != dummy; then				      \
