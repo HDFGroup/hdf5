@@ -1640,6 +1640,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 		"collective access for MPIO driver only");
 #endif
 
+#ifdef QAK
+printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)nelmts);
+#endif /* QAK */
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
@@ -1686,6 +1689,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
 #endif /*H5_HAVE_PARALLEL*/
 
+#ifdef QAK
+printf("%s: check 1.1, \n",FUNC);
+#endif /* QAK */
     /*
      * If there is no type conversion then try reading directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
@@ -1701,33 +1707,36 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 			       mem_space, dxpl_id, buf/*out*/,
 			       &must_convert);
         if (status<0) {
-	    /* Supports only no conversion, type or space, for now. */
-	    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
+            /* Supports only no conversion, type or space, for now. */
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL,
 		        "optimized read failed");
-	}
-	if (must_convert) {
-	    /* sconv->read cannot do a direct transfer;
-	     * fall through and xfer the data in the more roundabout way */
-	} else {
-	    /* direct xfer accomplished successfully */
+        }
+        if (must_convert) {
+            /* sconv->read cannot do a direct transfer;
+             * fall through and xfer the data in the more roundabout way */
+        } else {
+            /* direct xfer accomplished successfully */
 #ifdef H5S_DEBUG
-	    H5_timer_end(&(sconv->stats[1].read_timer), &timer);
-	    sconv->stats[1].read_nbytes += nelmts *
-					   H5T_get_size(dataset->type);
-	    sconv->stats[1].read_ncalls++;
+            H5_timer_end(&(sconv->stats[1].read_timer), &timer);
+            sconv->stats[1].read_nbytes += nelmts *
+                           H5T_get_size(dataset->type);
+            sconv->stats[1].read_ncalls++;
 #endif
-	    goto succeed;
-	}
+            goto succeed;
+        }
 #ifdef H5D_DEBUG
-	if (H5DEBUG(D)) {
-	    fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
-		     "optimized for this case (using general method "
-		     "instead)\n");
-	}
+        if (H5DEBUG(D)) {
+            fprintf (H5DEBUG(D), "H5D: data space conversion could not be "
+                 "optimized for this case (using general method "
+                 "instead)\n");
+        }
 #endif
         H5E_clear ();
     }
 	
+#ifdef QAK
+printf("%s: check 1.2, \n",FUNC);
+#endif /* QAK */
 #ifdef H5_HAVE_PARALLEL
     /* The following may not handle a collective call correctly
      * since it does not ensure all processes can handle the read

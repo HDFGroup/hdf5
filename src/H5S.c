@@ -1523,10 +1523,26 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
      * If so then return a pointer to that entry.
      */
     for (i=0; i<H5S_nconv_g; i++) {
-	if (H5S_conv_g[i]->f->type==file_space->select.type &&
-	    H5S_conv_g[i]->m->type==mem_space->select.type) {
-	    HRETURN(H5S_conv_g[i]);
-	}
+        if (H5S_conv_g[i]->f->type==file_space->select.type &&
+            H5S_conv_g[i]->m->type==mem_space->select.type) {
+            /*
+             * Initialize direct read/write functions
+             */
+            c1=H5S_select_contiguous(file_space);
+            c2=H5S_select_contiguous(mem_space);
+            if(c1==FAIL || c2==FAIL)
+                HRETURN_ERROR(H5E_DATASPACE, H5E_BADRANGE, NULL,
+                      "invalid check for contiguous dataspace ");
+
+            if (c1==TRUE && c2==TRUE) {
+                H5S_conv_g[i]->read = H5S_all_read;
+                H5S_conv_g[i]->write = H5S_all_write;
+            }
+            else 
+                H5S_conv_g[i]->read = H5S_conv_g[i]->write = NULL;
+
+            HRETURN(H5S_conv_g[i]);
+        }
     }
     
     /*
@@ -1534,8 +1550,8 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
      * path?
      */
     if (NULL==H5S_fconv_g[file_space->select.type] ||
-	NULL==H5S_mconv_g[mem_space->select.type]) {
-	HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, NULL,
+            NULL==H5S_mconv_g[mem_space->select.type]) {
+        HRETURN_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, NULL,
 		      "unable to convert between data space selections");
     }
 
@@ -1543,7 +1559,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
      * Create a new path.
      */
     if (NULL==(path = H5MM_calloc(sizeof(*path)))) {
-	HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
 		      "memory allocation failed for data space conversion "
 		      "path");
     }
@@ -1560,23 +1576,24 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
 		      "invalid check for contiguous dataspace ");
 
     if (c1==TRUE && c2==TRUE) {
-	path->read = H5S_all_read;
-	path->write = H5S_all_write;
+        path->read = H5S_all_read;
+        path->write = H5S_all_write;
     }
     
     /*
      * Add the new path to the table.
      */
     if (H5S_nconv_g>=H5S_aconv_g) {
-	size_t n = MAX(10, 2*H5S_aconv_g);
-	H5S_conv_t **p = H5MM_realloc(H5S_conv_g, n*sizeof(H5S_conv_g[0]));
-	if (NULL==p) {
-	    HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-			  "memory allocation failed for data space conversion "
-			  "path table");
-	}
-	H5S_aconv_g = n;
-	H5S_conv_g = p;
+        size_t n = MAX(10, 2*H5S_aconv_g);
+        H5S_conv_t **p = H5MM_realloc(H5S_conv_g, n*sizeof(H5S_conv_g[0]));
+
+        if (NULL==p) {
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
+                  "memory allocation failed for data space conversion "
+                  "path table");
+        }
+        H5S_aconv_g = n;
+        H5S_conv_g = p;
     }
     H5S_conv_g[H5S_nconv_g++] = path;
 

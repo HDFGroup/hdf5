@@ -572,6 +572,9 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     FUNC_ENTER(H5S_all_read, FAIL);
     *must_convert = TRUE;
 
+#ifdef QAK
+printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
     /* Check whether we can handle this */
     if (H5S_SIMPLE!=mem_space->extent.type)
         goto fall_through;
@@ -674,6 +677,9 @@ H5S_all_read(H5F_t *f, const H5O_layout_t *layout, const H5O_pline_t *pline,
     file_offset[i] = 0;
     mem_offset[i] = 0;
 
+#ifdef QAK
+printf("%s: check 2.0\n",FUNC);
+#endif /* QAK */
     /* Read data from the file */
     if (H5F_arr_read(f, dxpl_id, layout, pline, NULL, efl, size,
 		     size, mem_offset, file_offset, buf/*out*/)<0) {

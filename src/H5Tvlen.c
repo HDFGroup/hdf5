@@ -217,18 +217,26 @@ herr_t H5T_vlen_seq_mem_write(const H5D_xfer_t *xfer_parms, H5F_t UNUSED *f, voi
     assert(vl);
     assert(buf);
 
-    /* Use the user's memory allocation routine is one is defined */
-    if(xfer_parms->vlen_alloc!=NULL) {
-        if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
-      } /* end if */
-    else {  /* Default to system malloc */
-        if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
-      } /* end else */
-    vl->len=seq_len;
+    if(seq_len!=0) {
+        /* Use the user's memory allocation routine is one is defined */
+        if(xfer_parms->vlen_alloc!=NULL) {
+            if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+          } /* end if */
+        else {  /* Default to system malloc */
+            if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
+                HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+          } /* end else */
 
-    HDmemcpy(vl->p,buf,len);
+        /* Copy the data into the newly allocated buffer */
+        HDmemcpy(vl->p,buf,len);
+
+    } /* end if */
+    else
+        vl->p=NULL;
+
+    /* Set the sequence length */
+    vl->len=seq_len;
 
     FUNC_LEAVE (SUCCEED);
 }   /* end H5T_vlen_seq_mem_write() */
@@ -395,13 +403,16 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
     /* Get the length of the sequence */
     UINT32DECODE(vl, seq_len); /* Not used */
     
-    /* Get the heap information */
-    H5F_addr_decode(f,(const uint8_t **)&vl,&(hobjid.addr));
-    INT32DECODE(vl,hobjid.idx);
+    /* Check if this sequence actually has any data */
+    if(seq_len!=0) {
+        /* Get the heap information */
+        H5F_addr_decode(f,(const uint8_t **)&vl,&(hobjid.addr));
+        INT32DECODE(vl,hobjid.idx);
 
-    /* Read the VL information from disk */
-    if(H5HG_read(f,&hobjid,buf)==NULL)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information");
+        /* Read the VL information from disk */
+        if(H5HG_read(f,&hobjid,buf)==NULL)
+            HRETURN_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read VL information");
+    } /* end if */
 
     FUNC_LEAVE (SUCCEED);
 }   /* end H5T_vlen_disk_read() */
@@ -437,9 +448,14 @@ herr_t H5T_vlen_disk_write(const H5D_xfer_t UNUSED *xfer_parms, H5F_t *f, void *
     /* Set the length of the sequence */
     UINT32ENCODE(vl, seq_len);
     
-    /* Write the VL information to disk (allocates space also) */
-    if(H5HG_insert(f,len,buf,&hobjid)<0)
-        HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
+    /* Check if this sequence actually has any data */
+    if(seq_len!=0) {
+        /* Write the VL information to disk (allocates space also) */
+        if(H5HG_insert(f,len,buf,&hobjid)<0)
+            HRETURN_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "Unable to write VL information");
+    } /* end if */
+    else
+        HDmemset(&hobjid,0,sizeof(H5HG_t));
 
     /* Get the heap information */
     H5F_addr_encode(f,&vl,hobjid.addr);
@@ -518,25 +534,27 @@ H5T_vlen_reclaim_recurse(void *elem, H5T_t *dt, H5MM_free_t free_func, void *fre
             if(dt->u.vlen.type==H5T_VLEN_SEQUENCE) {
                 hvl_t *vl=(hvl_t *)elem;    /* Temp. ptr to the vl info */
 
-                /* Recurse if it's VL or compound */
-                if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
-                    void *off;     /* offset of field */
+                /* Check if there is anything actually in this sequence */
+                if(vl->len!=0) {
+                    /* Recurse if it's VL or compound */
+                    if(dt->parent->type==H5T_COMPOUND || dt->parent->type==H5T_VLEN || dt->parent->type==H5T_ARRAY) {
+                        void *off;     /* offset of field */
 
-                    /* Calculate the offset of each array element and recurse on it */
-                    while(vl->len>0) {
-                        off=((uint8_t *)vl->p)+(vl->len-1)*dt->parent->size;
-                        if(H5T_vlen_reclaim_recurse(off,dt->parent,free_func,free_info)<0)
-                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free VL element");
-                        vl->len--;
-                    } /* end while */
+                        /* Calculate the offset of each array element and recurse on it */
+                        while(vl->len>0) {
+                            off=((uint8_t *)vl->p)+(vl->len-1)*dt->parent->size;
+                            if(H5T_vlen_reclaim_recurse(off,dt->parent,free_func,free_info)<0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free VL element");
+                            vl->len--;
+                        } /* end while */
+                    } /* end if */
+
+                    /* Free the VL sequence */
+                    if(free_func!=NULL)
+                        (*free_func)(vl->p,free_info);
+                    else
+                        H5MM_xfree(vl->p);
                 } /* end if */
-
-                /* Free the VL sequence */
-                if(free_func!=NULL)
-                    (*free_func)(vl->p,free_info);
-                else {
-                    H5MM_xfree(vl->p);
-                }
             } else if(dt->u.vlen.type==H5T_VLEN_STRING) {
                 /* Free the VL string */
                 if(free_func!=NULL)
