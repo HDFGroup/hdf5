@@ -82,6 +82,7 @@
 FILE       *output;             /* output file                          */
 int         comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 int         comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
+MPI_Info    pio_info_g=MPI_INFO_NULL;/* MPI INFO object to run the PIO  */
 MPI_Comm    pio_comm_g;         /* Communicator to run the PIO          */
 int         pio_mpi_rank_g;     /* MPI rank of pio_comm_g               */
 int         pio_mpi_nprocs_g;   /* Number of processes of pio_comm_g    */
@@ -233,6 +234,7 @@ static int destroy_comm_world(void);
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
+static int parse_environment(void);
 
 /*
  * Function:    main
@@ -282,6 +284,7 @@ main(int argc, char **argv)
 
     pio_comm_g = MPI_COMM_WORLD;
 
+    parse_environment();
     opts = parse_command_line(argc, argv);
 
     if (!opts) {
@@ -1039,6 +1042,55 @@ usage(const char *prog)
         fprintf(stdout, "\n");
         fflush(stdout);
     }
+}
+
+/*
+ * Function:    parse_environment
+ * Purpose:     Process all environment variables setting.
+ * Return:      0 if all is fine; otherwise non-zero.
+ * Programmer:  Albert Cheng, 15 May 2002.
+ * Modifications:
+ */
+static int
+parse_environment(void)
+{
+    char	*envp;			/* environment pointer */
+    char	*envendp;		/* end of environment string */
+    char	*namep, *valp;		/* name, value pointers */
+    int		mpi_err;
+    int		ret_value=0;
+
+    /* handle any MPI INFO hints via $HDF5_MPI_INFO */
+    if ((envp = getenv("HDF5_MPI_INFO")) != NULL){
+	envp = HDstrdup(envp);
+	envendp = HDstrchr(envp, NULL);		/* remember end of string */
+
+	/* create an INFO object if not created yet */
+	if (pio_info_g==MPI_INFO_NULL)
+	    MPI_Info_create (&pio_info_g);
+
+	/* parse only one setting.  Need to extend it to handle multiple */
+	/* settings.  LATER */
+	namep=envp;
+	valp=HDstrchr(namep, '=');
+	if (valp != NULL){
+	    /* change '=' to NULL, move valp down one */
+	    *valp++ = NULL;
+	    if (MPI_SUCCESS!=MPI_Info_set(pio_info_g, namep, valp)){
+		printf("MPI_Info_set failed\n");
+		ret_value = -1;
+	    }else{
+		if (pio_debug_level>=4){
+		    printf("MPI_Info_set with %s=%s.\N", namep, valp);
+		}
+	    }
+
+	}
+    }
+
+    if (envp)
+	HDfree(envp);
+    return(ret_value);
 }
 
 #else /* H5_HAVE_PARALLEL */
