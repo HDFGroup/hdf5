@@ -63,14 +63,19 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
 
 /*
  * These macros are for the bodies of functions that convert buffers of one
- * integer type to another using hardware.  They all start with `H5T_CONV_'
- * and end with two letters that represent the source and destination types,
- * respectively. The letters `s' and `S' refer to signed values while the
- * letters `u' and `U' refer to unsigned values. The letter which is
- * capitalized indicates that the corresponding type (source or destination)
- * is at least as large as the other type.  Certain conversions may
- * experience overflow conditions which arise when the source value has a
- * magnitude that cannot be represented by the destination type.
+ * atomic type to another using hardware.
+ *
+ * They all start with `H5T_CONV_' and end with two letters that represent the
+ * source and destination types, respectively. The letters `s' and `S' refer to
+ * signed integers while the letters `u' and `U' refer to unsigned integers, and
+ * the letters `f' and `F' refer to floating-point values.
+ *
+ * The letter which is capitalized indicates that the corresponding type
+ * (source or destination) is at least as large as the other type.
+ *
+ * Certain conversions may experience overflow conditions which arise when the
+ * source value has a magnitude that cannot be represented by the destination
+ * type.
  *
  * Suffix	Description
  * ------	-----------
@@ -116,6 +121,14 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  *		occurs when the source magnitude is too large for the
  *		destination.
  *
+ * fF:		Floating-point values to floating-point values where the
+ *              destination is at least as wide as the source.	 This case
+ *              cannot generate overflows.
+ *
+ * Ff:		Floating-point values to floating-point values the source is at
+ *		least as large as the destination.  Overflows can occur when
+ *		the destination is narrower than the source.
+ *
  * The macros take a subset of these arguments in the order listed here:
  *
  * CDATA:	A pointer to the H5T_cdata_t structure that was passed to the
@@ -148,41 +161,73 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
  * is invoked inside the H5T_CONV "template" macro by "gluing" it together,
  * which allows the core conversion macro to be invoked as necessary.
  * 
+ * The generic "core" macros are: (others are specific to particular conversion)
+ * 
+ * Suffix	Description
+ * ------	-----------
+ * xX:		Generic Conversion where the destination is at least as
+ *              wide as the source.  This case cannot generate overflows.
+ *
+ * Xx:		Generic signed conversion where the source is at least as large
+ *              as the destination.  Overflows can occur when the destination is
+ *              narrower than the source.
+ *
+ * SU:		Generic signed to unsigned conversion where the source is 
+ *              the same size or smaller than the destination.  Overflow occurs
+ *		when the source value is negative.
+ *
+ * Ux:		Generic conversion for the `Us', `Uu' & `us' cases
+ *		Overflow occurs when the source magnitude is too large for the
+ *		destination.
+ *
  */
-#define H5T_CONV_sS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+#define H5T_CONV_xX_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_Xx_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (DT)(D_MAX)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else if (*((ST*)S) < (D_MIN)) {					      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MIN);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_SU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S)<0) {							      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = 0;						      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
+}
+
+#define H5T_CONV_Ux_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
+    if (*((ST*)S) > (D_MAX)) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
+            *((DT*)D) = (D_MAX);					      \
+    } else								      \
+        *((DT*)D) = (DT)(*((ST*)S));					      \
 }
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
-}
-
-#define H5T_CONV_sU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S)<0) {							      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-            *((DT*)D) = 0;						      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
+    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_uS_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {						      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
-        }								      \
-    } else {								      \
+    } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
 }
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -190,51 +235,26 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
-#define H5T_CONV_uU_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
-}
-
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
-}
-
-#define H5T_CONV_Ss_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (DT)(D_MAX)) {					      \
-        if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-    	*((DT*)D) = (D_MAX);						      \
-        }								      \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
-        if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-    	*((DT*)D) = (D_MIN);						      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ss, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_Su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
     if (*((ST*)S) < 0) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = 0;						      \
-        }								      \
     } else if (sizeof(ST)>sizeof(DT) && *((ST*)S)>(ST)(D_MAX)) {	      \
         /*sign vs. unsign ok in previous line*/				      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
+        if (!H5T_overflow_g || (H5T_overflow_g)(src_id, dst_id, S, D)<0)      \
             *((DT*)D) = (D_MAX);					      \
-        }								      \
-    } else {								      \
+    } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
 }
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -242,98 +262,34 @@ H5FL_BLK_DEFINE_STATIC(array_seq);
     H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
-#define H5T_CONV_Us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-            *((DT*)D) = (D_MAX);					      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
-}
-
 #define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
-}
-
-#define H5T_CONV_Uu_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-            *((DT*)D) = (D_MAX);					      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Uu, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
-}
-
-#define H5T_CONV_su_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) < 0) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-            *((DT*)D) = 0;						      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
-}
-
-#define H5T_CONV_us_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (D_MAX)) {						      \
-        if (!H5T_overflow_g ||						      \
-            (H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-            *((DT*)D) = (D_MAX);					      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_SU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
-}
-
-#define H5T_CONV_fF_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    *((DT*)D) = (DT)(*((ST*)S));					      \
+    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 #define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_fF, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
-}
-
-#define H5T_CONV_Ff_CORE(S,D,STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {		      \
-    if (*((ST*)S) > (DT)(D_MAX)) {					      \
-        if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-    	*((DT*)D) = (D_MAX);						      \
-        }								      \
-    } else if (*((ST*)S) < (D_MIN)) {					      \
-        if (!H5T_overflow_g ||						      \
-    	(H5T_overflow_g)(src_id, dst_id, S, D)<0) {			      \
-    	*((DT*)D) = (D_MIN);						      \
-        }								      \
-    } else {								      \
-        *((DT*)D) = (DT)(*((ST*)S));					      \
-    }									      \
+    H5T_CONV(H5T_CONV_xX, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, nelmts-1)	      \
 }
 
 #define H5T_CONV_Ff(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ff, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
+    H5T_CONV(H5T_CONV_Xx, double, STYPE, DTYPE, ST, DT, D_MIN, D_MAX, 0)	      \
 }
 
 /* The main part of every integer hardware conversion macro */
