@@ -232,8 +232,9 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
                 results res;
 
                 parms.buf_size = j;
-                parms.num_dsets = ONE_GB / j;
-                parms.num_elmts = (max_size * j) / sizeof(int);
+                parms.num_dsets = MAX_HDF5_BUF_SIZE / j;
+                parms.num_dsets = (parms.num_dsets ? parms.num_dsets : 1);
+                parms.num_elmts = max_size / (parms.num_dsets * sizeof(int));
 
                 print_indent(output, TAB_SPACE * 2);
                 fprintf(output,
@@ -244,7 +245,7 @@ run_test_loop(FILE *output, int max_num_procs, long max_size)
                 res = do_pio(parms); 
 
                 print_indent(output, TAB_SPACE * 3);
-                fprintf(output, "Write Results = %f MB/s\n",
+                fprintf(output, "Write Results = %.2f MB/s\n",
                         MB_PER_SEC(parms.num_dsets * parms.num_elmts * sizeof(int),
                                    get_time(res.timers, HDF5_WRITE_FIXED_DIMS)));
 
@@ -283,7 +284,7 @@ usage(const char *prog)
     fprintf(stdout, "usage: %s [OPTIONS]\n", prog);
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
-    fprintf(stdout, "     -m #, --max-size=#   Maximum size of file in gigabytes [default: 2]\n");
+    fprintf(stdout, "     -m #, --max-size=#   Maximum size of file in megabytes [default: 512]\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  F - is a filename.\n");
@@ -305,7 +306,7 @@ parse_command_line(int argc, char *argv[])
     struct options *cl_opts;
 
     cl_opts = (struct options *)calloc(1, sizeof(struct options));
-    cl_opts->max_size = 2;
+    cl_opts->max_size = 512 * ONE_MB;
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
@@ -315,7 +316,7 @@ parse_command_line(int argc, char *argv[])
             break;
 #endif  /* 0 */
         case 'm':
-            cl_opts->max_size = atol(opt_arg);
+            cl_opts->max_size = atol(opt_arg) * ONE_MB;
             break;
         case 'o':
             cl_opts->output_file = opt_arg;
