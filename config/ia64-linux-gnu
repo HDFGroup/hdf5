@@ -121,7 +121,7 @@ case $CXX_BASENAME in
 
     *)
 	# Default to C99 standard.
-	CXXFLAGS="${CXXFLAGS:-std=c99}"
+	CXXFLAGS="${CXXFLAGS:--std=c99}"
 	DEBUG_CXXFLAGS="-g -w2 -Wall"
 	DEBUG_CPPFLAGS=
 	PROD_CXXFLAGS=""     #Default optimization O2 is used
