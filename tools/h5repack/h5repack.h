@@ -21,10 +21,6 @@
 #include "h5diff.h"
 #include "h5tools.h"
 
-#if 0
-#define CHECK_SZIP
-#endif
-
 
 #define H5FOPENERROR "unable to open file"
 
@@ -327,60 +323,6 @@ int make_attr(hid_t loc_id,
                void *buf);
 
 
-
-/*-------------------------------------------------------------------------
- * check SZIP parameters
- *-------------------------------------------------------------------------
- */
-
-#if defined (CHECK_SZIP)
-
-int check_szip_params( unsigned bits_per_pixel, 
-                       unsigned pixels_per_block, 
-                       unsigned pixels_per_scanline, 
-                       hsize_t image_pixels);
-
-int check_szip(hid_t type_id,   /* dataset datatype */
-               int rank,        /* chunk rank */
-               hsize_t *dims,   /* chunk dims */
-               unsigned szip_options_mask /*IN*/,
-               unsigned *szip_pixels_per_block /*IN,OUT*/,
-               pack_opt_t *options);
-
-
-
-typedef struct 
-{
- int compression_mode;
- int options_mask;
- unsigned bits_per_pixel;
- unsigned pixels_per_block;
- unsigned pixels_per_scanline;
- hsize_t pixels;
-
-}szip_comp_t;  
-
-/* for SZIP */
-#if !defined (NN_OPTION_MASK)
-#define NN_OPTION_MASK				 32
-#endif
-#if !defined (RAW_OPTION_MASK)
-#define RAW_OPTION_MASK				128
-#endif
-#if !defined (MAX_BLOCKS_PER_SCANLINE)
-#define MAX_BLOCKS_PER_SCANLINE		128
-#endif
-#if !defined (MAX_PIXELS_PER_BLOCK)
-#define MAX_PIXELS_PER_BLOCK	 	 32
-#endif
-#if !defined (MAX_PIXELS_PER_SCANLINE)
-#define MAX_PIXELS_PER_SCANLINE     (MAX_BLOCKS_PER_SCANLINE)*(MAX_PIXELS_PER_BLOCK)
-#endif
-#if !defined (NN_MODE)
-#define NN_MODE	1
-#endif
-
-#endif /* CHECK_SZIP */
 
 
 #endif  /* H5REPACK_H__ */

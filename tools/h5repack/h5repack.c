@@ -243,6 +243,7 @@ int h5repack_addlayout(const char* str,
 static int check_options(pack_opt_t *options)
 {
  int   i, k, j, has_cp=0, has_ck=0;
+ char  slayout[30];
 
 /*-------------------------------------------------------------------------
  * objects to layout
@@ -252,7 +253,19 @@ static int check_options(pack_opt_t *options)
  {
   printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
-   printf(" Apply layout to all\n ");
+   switch (options->layout_g)
+   {
+   case H5D_COMPACT:
+    strcpy(slayout,"compact");
+    break;
+   case H5D_CONTIGUOUS:
+    strcpy(slayout,"contiguous");
+    break;
+   case H5D_CHUNKED:
+    strcpy(slayout,"chunked");
+    break;
+   }
+   printf(" Apply %s layout to all\n", slayout);
    if (H5D_CHUNKED==options->layout_g) {
     printf("with dimension [");
     for ( j = 0; j < options->chunk_g.rank; j++)  
@@ -336,56 +349,6 @@ static int check_options(pack_opt_t *options)
 
    has_cp=1;
 
-#if defined (CHECK_SZIP)
-  
-   /*check for invalid combination of options */
-   switch (pack.filter[j].filtn)
-   {
-   default:
-    break;
-   case H5Z_FILTER_SZIP:
-    {
-     
-    unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
-    unsigned szip_pixels_per_block;
-
-    szip_pixels_per_block=pack.filter[j].cd_values[0];
-
-    if (pack.filter[j].szip_coding==0)
-     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
-    else 
-     szip_options_mask=H5_SZIP_EC_OPTION_MASK;
-    
-    /* check szip parameters */
-    if ( pack.chunk.rank!=-1 /* 
-                             it means a layout was not input, so there is no 
-                             case to try to check it
-                             */
-     && check_szip(0, /* do not test size */
-     pack.chunk.rank,
-     pack.chunk.chunk_lengths,
-     szip_options_mask,
-     &szip_pixels_per_block,
-     options)==0)
-    {
-     /* Return: 1=can apply the filter
-                0=cannot apply the filter 
-        Reset this object filter info 
-      */
-
-     options->op_tbl->objs[i].filter[j].filtn=-1;
-     options->op_tbl->objs[i].chunk.rank=-1;
-     printf(" Object <%s> cannot be filtered\n",name);
-
-
-    }
-     
-    }
-    break;
-   } /* switch */
-
-#endif
-
   } /* j */
  } /* i */
  
@@ -394,6 +357,8 @@ static int check_options(pack_opt_t *options)
    is present with other objects\n");
   return -1;
  }
+ 
+
  return 0;
 }
 
