@@ -909,8 +909,8 @@
 ./tools/talign.c
 ./tools/testh5dump.sh
 ./tools/testh5ls.sh
-./tools/testh5toh4
-./tools/testh4toh5
+./tools/testh5toh4.sh
+./tools/testh4toh5.sh
 
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
