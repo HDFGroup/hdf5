@@ -34,16 +34,18 @@ typedef enum H5P_class_t {
     H5P_FILE_CREATE      = 0,   /*file creation properties           */
     H5P_FILE_ACCESS      = 1,   /*file access properties             */
     H5P_DATASET_CREATE   = 2,   /*dataset creation properties        */
-    H5P_DATASET_XFER     = 3,   /*data transfer properties	         */
-    H5P_MOUNT		     = 4,	/*file mounting properties		     */
-
+    H5P_DATASET_XFER     = 3,   /*data transfer properties	     */
+    H5P_MOUNT		 = 4,	/*file mounting properties	     */
     H5P_NCLASSES         = 5    /*this must be last!                 */
 } H5P_class_t;
 
-#if defined(WANT_H5_V1_2_COMPAT) || defined(H5_WANT_H5_V1_2_COMPAT)
-/* Alias for the previous H5P_DATA_XFER property list */
+/* H5P_DATASET_XFER was the name from the beginning through 1.2.  It was
+ * changed to H5P_DATA_XFER on v1.3.0.  Then it was changed back to
+ * H5P_DATASET_XFER right before the release of v1.4.0-beta2.
+ * Define an alias here to help applications that had ported to v1.3.
+ * Should be removed in later version.
+ */
 #define H5P_DATA_XFER H5P_DATASET_XFER
-#endif /* WANT_H5_V1_2_COMPAT */
 
 /* Define property list class callback function pointer types */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
