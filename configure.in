@@ -1933,48 +1933,50 @@ if test -n "$PARALLEL"; then
     RUNPARALLEL=""
   fi
 
-  dnl Check whether MPI_Get_count actually works correctly on this
-  dnl platform.
-  AC_MSG_CHECKING(whether a MPI_Get_count works correctly)
-  AC_TRY_RUN([
-#include <mpi.h>
+dnl Block the MPI_Get_count code since it does not work
+dnl   dnl Check whether MPI_Get_count actually works correctly on this
+dnl   dnl platform.
+dnl   AC_MSG_CHECKING(whether a MPI_Get_count works correctly)
+dnl   AC_TRY_RUN([
+dnl #include <mpi.h>
+dnl 
+dnl int main(int argc, char **argv)
+dnl {
+dnl     MPI_Status mpi_stat;
+dnl     int bytes_read = 0, ret;
+dnl 
+dnl     MPI_Init(&argc, &argv);
+dnl     memset(&mpi_stat, 0, sizeof(MPI_Status)); /* zero out status */
+dnl     ret = MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read);
+dnl     MPI_Finalize();
+dnl 
+dnl     /* this returns TRUE if bytes_read is 0...the shell thinks that the
+dnl      * program fails, but we want it to fail of course so switch the
+dnl      * "true"/"false" parts of the TRY_RUN macro */
+dnl     return bytes_read == 0;
+dnl }
+dnl   ],
+dnl   AC_MSG_RESULT(no),
+dnl   AC_MSG_RESULT(yes)
+dnl   CPPFLAGS="$CPPFLAGS -DMPI_GET_COUNT_WORKS",AC_MSG_RESULT(no))
+dnl 
 
-int main(int argc, char **argv)
-{
-    MPI_Status mpi_stat;
-    int bytes_read = 0, ret;
-
-    MPI_Init(&argc, &argv);
-    memset(&mpi_stat, 0, sizeof(MPI_Status)); /* zero out status */
-    ret = MPI_Get_count(&mpi_stat, MPI_BYTE, &bytes_read);
-    MPI_Finalize();
-
-    /* this returns TRUE if bytes_read is 0...the shell thinks that the
-     * program fails, but we want it to fail of course so switch the
-     * "true"/"false" parts of the TRY_RUN macro */
-    return bytes_read == 0;
-}
-  ],
-  AC_MSG_RESULT(no),
-  AC_MSG_RESULT(yes)
-  CPPFLAGS="$CPPFLAGS -DMPI_GET_COUNT_WORKS",AC_MSG_RESULT(no))
-
-dnl ----------------------------------------------------------------------
-dnl Check if they would like the "Flexible parallel" functions compiled in
-dnl
-dnl  AC_MSG_CHECKING([if Flexible Parallel HDF5 interface enabled])
-dnl  AC_ARG_ENABLE([fphdf5],
-dnl                [AC_HELP_STRING([--enable-fphdf5],
-dnl                                [Enable the Flexible Parallel HDF5
-dnl                                 interface])],
-dnl                [FPHDF5=$enableval])
-dnl  if test "X$FPHDF5" = "Xyes"; then
-dnl    AC_DEFINE(HAVE_FPHDF5, 1,
-dnl              [Define if we want flexible parallel HDF5 support])
-dnl    AC_MSG_RESULT(yes)
-dnl  else
-dnl    AC_MSG_RESULT(no)
-dnl  fi
+dnl  ----------------------------------------------------------------------
+dnl  Check if they would like the "Flexible parallel" functions compiled in
+dnl 
+dnl   AC_MSG_CHECKING([if Flexible Parallel HDF5 interface enabled])
+dnl   AC_ARG_ENABLE([fphdf5],
+dnl                 [AC_HELP_STRING([--enable-fphdf5],
+dnl                                 [Enable the Flexible Parallel HDF5
+dnl                                  interface])],
+dnl                 [FPHDF5=$enableval])
+dnl   if test "X$FPHDF5" = "Xyes"; then
+dnl     AC_DEFINE(HAVE_FPHDF5, 1,
+dnl               [Define if we want flexible parallel HDF5 support])
+dnl     AC_MSG_RESULT(yes)
+dnl   else
+dnl     AC_MSG_RESULT(no)
+dnl   fi
 fi
 
 dnl ----------------------------------------------------------------------
