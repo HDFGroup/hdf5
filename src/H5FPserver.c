@@ -454,6 +454,12 @@ H5FP_remove_object_lock_from_list(H5FP_file_info *info,
  * Return:      <0, 0, or >0
  * Programmer:  Bill Wendling, 27. August, 2002
  * Modifications:
+ *		Altered the function to use the H5F_addr_cmp() macro
+ *		from H5Fprivate.  This has the effect of reversing 
+ *		the direction of the comparison.  This in turn 
+ *		should make the next and less tree primitives 
+ *		behave as expected.
+ *						JRM - 3/22/04
  */
 static int
 H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
@@ -463,7 +469,7 @@ H5FP_file_mod_cmp(H5FP_mdata_mod *k1,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FP_file_mod_cmp);
     assert(k1);
     assert(k2);
-    FUNC_LEAVE_NOAPI(k2->addr - k1->addr);
+    FUNC_LEAVE_NOAPI(H5F_addr_cmp((k1->addr), (k2->addr)));
 }
 
 /*
@@ -517,6 +523,410 @@ done:
 }
 
 /*
+ * Function:	H5FP_merge_mod_node_with_next
+ *
+ * Purpose:	Given a node in a mod tree which overlaps with the next
+ *		node in the tree, merge the two.  Where the two nodes
+ *		overlap, use the data from the supplied node.
+ *
+ *		WARNING!!!
+ *
+ *		This function calls H5TB_rem(), which may not delete the 
+ *		node specified in its parameter list -- if the target node 
+ *		is internal, it may swap data with a leaf node and delete
+ *		the leaf instead.
+ *
+ *		This implies that any pointer into the supplied tree may 
+ *		be invalid after this functions returns.  Thus the calling 
+ *		function must re-aquire the address of *node_ptr (and any
+ *		other nodes in *tree_ptr) after this function returns if 
+ *		it needs to do anything further with the node.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:	JRM - 3/18/04
+ *
+ * Modifications:
+ *
+ *		None.
+ */
+static herr_t
+H5FP_merge_mod_node_with_next(H5TB_TREE *tree_ptr, H5TB_NODE *node_ptr)
+{
+    int i;
+    int j;
+    int offset;
+    herr_t ret_value;
+    H5TB_NODE *next_node_ptr;
+    H5FP_mdata_mod *mod_ptr;
+    H5FP_mdata_mod *next_mod_ptr;
+    H5FP_mdata_mod *key_ptr;
+    unsigned combined_md_size;
+    char *combined_metadata_ptr;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_merge_mod_node_with_next);
+
+    ret_value = SUCCEED;
+
+    /* check parameters & do some initializations in passing */
+    if ( ( tree_ptr == NULL ) ||
+         ( node_ptr == NULL ) ||
+         ( (mod_ptr = (H5FP_mdata_mod *)(node_ptr->data)) == NULL ) ||
+         ( (next_node_ptr = H5TB_next(node_ptr)) == NULL ) ||
+         ( (next_mod_ptr = next_node_ptr->data) == NULL ) ||
+         ( mod_ptr->addr >= next_mod_ptr->addr ) ||
+         ( (mod_ptr->addr + mod_ptr->md_size) <= next_mod_ptr->addr ) ) {
+        HGOTO_ERROR(H5E_FPHDF5, H5E_BADVALUE, FAIL, 
+                    "One or more bad params detected on entry.");
+    }
+
+    if ( (mod_ptr->addr + mod_ptr->md_size) <
+         (next_mod_ptr->addr + next_mod_ptr->md_size) ) {
+        /* The next node address range is not completely subsumed in 
+         * that of the current node.  Must allocate a new buffer, and
+         * copy over the contents of the two buffers.  Where the buffers
+         * overlap, give precidence to the data from *node_ptr
+         */
+        combined_md_size = (next_mod_ptr->addr + next_mod_ptr->md_size) -
+                           (mod_ptr->addr);
+
+        combined_metadata_ptr = 
+            (char *)H5MM_malloc((size_t)(combined_md_size + 1));
+
+        if ( combined_metadata_ptr == NULL ) {
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, 
+                        "can't allocate buffer for combined node.");
+        }
+
+        i = 0; /* this is the index into the combined buffer */
+
+        for ( j = 0; j < mod_ptr->md_size; j++ ) {
+            combined_metadata_ptr[i++] = (mod_ptr->metadata)[j];
+        }
+
+        offset = (int)((mod_ptr->addr + mod_ptr->md_size) - next_mod_ptr->addr);
+        
+        for ( j = offset; j < next_mod_ptr->md_size; j++ ) {
+            combined_metadata_ptr[i++] = (next_mod_ptr->metadata)[j];
+        }
+
+        HDassert(i == combined_md_size);
+
+        combined_metadata_ptr[i] = (char)0;
+
+        HDfree(mod_ptr->metadata);
+        mod_ptr->metadata = combined_metadata_ptr;
+        mod_ptr->md_size = combined_md_size;
+    }
+
+    /* We have copied metadata from the next node into the current node
+     * if this was necessary.  All that remains is to delete the next
+     * node from the tree and free it.
+     */
+
+    H5TB_rem(&(tree_ptr->root), next_node_ptr, (void **)(&key_ptr));
+
+    /* WARNING!!!
+     *
+     * node_ptr or any other pointer to a node in *tree_ptr may be invalid 
+     * at this point.  Find the associated data in the tree again if you 
+     * have any further need of it.
+     */
+
+    HDassert(key_ptr == next_mod_ptr);
+    H5FP_free_mod_node(next_mod_ptr);
+    
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5FP_merge_mod_node_with_next() */
+
+/*
+ * Function:	H5FP_merge_mod_node_with_prev
+ *
+ * Purpose:	Given a node in a mod tree which overlaps with the previous
+ *		node in the tree, merge the two.  Where the two nodes
+ *		overlap, use the data from the supplied node.
+ *
+ *		WARNING!!!
+ *
+ *		This function calls H5TB_rem() to delete node_ptr from 
+ *		the tree pointed to by tree_ptr.  H5TB_rem() may not delete 
+ *		the node specified in its parameter list -- if the target 
+ *		node is internal, it may swap data with a leaf node and 
+ *		delete the leaf instead.
+ *
+ *		This implies that any pointer into the supplied tree may 
+ *		be invalid after this functions returns.  Thus the calling 
+ *		function must re-aquire the address of any node in *tree_ptr
+ *		after this function returns if it needs to do anything 
+ *		further with the node in question.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:	JRM - 3/19/04
+ *
+ * Modifications:
+ *
+ *		None.
+ */
+static herr_t
+H5FP_merge_mod_node_with_prev(H5TB_TREE *tree_ptr, H5TB_NODE *node_ptr)
+{
+    int i;
+    int j;
+    int limit;
+    herr_t ret_value;
+    H5TB_NODE *prev_node_ptr;
+    H5FP_mdata_mod *mod_ptr;
+    H5FP_mdata_mod *prev_mod_ptr;
+    H5FP_mdata_mod *key_ptr;
+    unsigned combined_md_size;
+    char *combined_metadata_ptr;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_merge_mod_node_with_prev);
+
+    ret_value = SUCCEED;
+
+    /* check parameters & do some initializations in passing */
+    if ( ( tree_ptr == NULL ) ||
+         ( node_ptr == NULL ) ||
+         ( (mod_ptr = (H5FP_mdata_mod *)(node_ptr->data)) == NULL ) ||
+         ( (prev_node_ptr = H5TB_prev(node_ptr)) == NULL ) ||
+         ( (prev_mod_ptr = (H5FP_mdata_mod *)(prev_node_ptr->data)) == NULL ) ||
+         ( mod_ptr->addr <= prev_mod_ptr->addr ) ||
+         ( (prev_mod_ptr->addr + prev_mod_ptr->md_size) <= mod_ptr->addr ) ) {
+        HGOTO_ERROR(H5E_FPHDF5, H5E_BADVALUE, FAIL, 
+                    "One or more bad params detected on entry.");
+    }
+
+    if ( (prev_mod_ptr->addr + prev_mod_ptr->md_size) <
+         (mod_ptr->addr + mod_ptr->md_size) ) {
+        /* The node address range is not completely subsumed in 
+         * that of the previous node.  Must allocate a new buffer, and
+         * copy over the contents of the two buffers.  Where the buffers
+         * overlap, give precidence to the data from *node_ptr
+         */
+        combined_md_size = (mod_ptr->addr + mod_ptr->md_size) -
+                           (prev_mod_ptr->addr);
+
+        combined_metadata_ptr = 
+            (char *)H5MM_malloc((size_t)(combined_md_size + 1));
+
+        if ( combined_metadata_ptr == NULL ) {
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, 
+                        "can't allocate buffer for combined node.");
+        }
+
+        i = 0; /* this is the index into the combined buffer */
+
+        limit = (int)(mod_ptr->addr - prev_mod_ptr->addr);
+
+        HDassert(limit > 0 );
+
+        for ( j = 0; j < limit; j++ ) {
+            combined_metadata_ptr[i++] = (prev_mod_ptr->metadata)[j];
+        }
+
+        for ( j = 0; j < (int)(mod_ptr->md_size); j++ ) {
+            combined_metadata_ptr[i++] = (mod_ptr->metadata)[j];
+        }
+
+        HDassert(i == combined_md_size);
+
+        combined_metadata_ptr[i] = (char)0;
+
+        HDfree(prev_mod_ptr->metadata);
+        prev_mod_ptr->metadata = combined_metadata_ptr;
+        prev_mod_ptr->md_size = combined_md_size;
+    } else { /* supplied node is completely inside previous node */
+        /* no need to allocate a new buffer.  Just copy data from
+         * mod_ptr->metadata to the appropriate locations in 
+         * prev_mod_ptr->metadata.
+         */
+
+        i = (int)(mod_ptr->addr - prev_mod_ptr->addr);
+
+        for ( j = 0; j < (int)(mod_ptr->md_size); j++ ) {
+            (prev_mod_ptr->metadata)[i++] = (mod_ptr->metadata)[j];
+        }
+
+        HDassert(i <= prev_mod_ptr->md_size);
+    }
+
+    /* We have copied metadata from the current node into the previous 
+     * node.  All that remains is to delete the current node from the 
+     * tree and free it.
+     */
+
+    H5TB_rem(&(tree_ptr->root), node_ptr, (void **)(&key_ptr));
+
+    /* WARNING!!!
+     *
+     * Any pointer to a node in *tree_ptr may be invalid now as a result
+     * of the above call to H5TB_rem().  Find the associated data in the 
+     * tree again if you have any further need of it.
+     */
+
+    HDassert(key_ptr == mod_ptr);
+    H5FP_free_mod_node(mod_ptr);
+    
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5FP_merge_mod_node_with_prev() */
+
+/*
+ * Function:	H5FP_mod_node_overlaps_with_next
+ *
+ * Purpose:	Given a node in a mod tree, see if there is an overlap 
+ *		between the address range of the supplied node, and that 
+ *		of the next node in the tree (if any).  
+ *
+ * Return:	TRUE if there is an overlap, and FALSE if there
+ *		isn't.
+ *
+ * Programmer:	JRM - 3/18/04
+ *
+ * Modifications:
+ *
+ *		None.
+ */
+static hbool_t
+H5FP_mod_node_overlaps_with_next(H5TB_NODE *node_ptr)
+{
+    hbool_t ret_value;
+    H5TB_NODE *next_node_ptr;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_mod_node_overlaps_with_next);
+
+    ret_value = FALSE;
+
+    HDassert(node_ptr != NULL);
+
+    next_node_ptr = H5TB_next(node_ptr);
+
+    if ( next_node_ptr != NULL ) {
+        if ( ( ((H5FP_mdata_mod *)(node_ptr->data))->addr > 100000 ) ||
+             ( (int)(((H5FP_mdata_mod *)(node_ptr->data))->md_size) > 1024 ) ) {
+            HDfprintf(stdout, "%s: addr = %a, size = %d, mem_type = %d.\n",
+                      "H5FP_mod_node_overlaps_with_next(2)",
+                      (haddr_t)(((H5FP_mdata_mod *)(node_ptr->data))->addr),
+                      (int)(((H5FP_mdata_mod *)(node_ptr->data))->md_size),
+                      (int)(((H5FP_mdata_mod *)(node_ptr->data))->mem_type));
+        }
+
+        if ( (((H5FP_mdata_mod *)(node_ptr->data))->addr)
+             >= 
+             (((H5FP_mdata_mod *)(next_node_ptr->data))->addr)
+           ) {
+            HDfprintf(stdout, "%s: addr,len = %a,%d, next_addr,len =  %a,%d.\n",
+                     "H5FP_mod_node_overlaps_with_next",
+                     (((H5FP_mdata_mod *)(node_ptr->data))->addr),
+                     (int)(((H5FP_mdata_mod *)(node_ptr->data))->md_size),
+                     (((H5FP_mdata_mod *)(next_node_ptr->data))->addr),
+                     (int)(((H5FP_mdata_mod *)(next_node_ptr->data))->md_size));
+
+            HDassert((((H5FP_mdata_mod *)(node_ptr->data))->addr) 
+                     <
+                     (((H5FP_mdata_mod *)(next_node_ptr->data))->addr)
+                    );
+        }
+        if ( ( (((H5FP_mdata_mod *)(node_ptr->data))->addr)
+               +
+               (((H5FP_mdata_mod *)(node_ptr->data))->md_size)
+             ) 
+             >
+             (((H5FP_mdata_mod *)(next_node_ptr->data))->addr)
+           ) {
+#if 0 
+            /* This is useful debugging code -- keep it around for
+             * a while.                     JRM -- 4/13/03
+             */
+            HDfprintf(stdout, 
+               "H5FP_mod_node_overlaps_with_next: addr = %a, next_addr = %a.\n",
+               (((H5FP_mdata_mod *)(node_ptr->data))->addr),
+               (((H5FP_mdata_mod *)(next_node_ptr->data))->addr));
+#endif
+            ret_value = TRUE;
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5FP_mod_node_overlaps_with_next() */
+
+/*
+ * Function:	H5FP_mod_node_overlaps_with_prev
+ *
+ * Purpose:	Givena node in a mod tree, see if there is an overlap 
+ *		between the address range of the supplied node, and that 
+ *		of the previous node in the tree (if any).  
+ *
+ * Return:	TRUE if there is an overlap, and FALSE if there
+ *		isn't.
+ *
+ * Programmer:	JRM - 3/18/04
+ *
+ * Modifications:
+ *
+ *		None.
+ */
+static hbool_t
+H5FP_mod_node_overlaps_with_prev(H5TB_NODE *node_ptr)
+{
+    hbool_t ret_value;
+    H5TB_NODE *prev_node_ptr;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5FP_mod_node_overlaps_with_prev);
+
+    ret_value = FALSE;
+
+    HDassert(node_ptr != NULL);
+
+    prev_node_ptr = H5TB_prev(node_ptr);
+
+
+    if ( prev_node_ptr != NULL )
+    {
+        HDassert((((H5FP_mdata_mod *)(node_ptr->data))->addr) 
+                 >
+                 (((H5FP_mdata_mod *)(prev_node_ptr->data))->addr)
+                );
+
+        if ( ( (((H5FP_mdata_mod *)(prev_node_ptr->data))->addr)
+               +
+               (((H5FP_mdata_mod *)(prev_node_ptr->data))->md_size)
+             ) 
+             >
+             (((H5FP_mdata_mod *)(node_ptr->data))->addr)
+           ) {
+#if 0 
+            /* This is useful debugging code -- keep it around for
+             * a while.                        JRM - 4/13/04
+             */
+            HDfprintf(stdout, 
+               "H5FP_mod_node_overlaps_with_prev: addr = %a, prev_addr = %a.\n",
+               (((H5FP_mdata_mod *)(node_ptr->data))->addr),
+               (((H5FP_mdata_mod *)(prev_node_ptr->data))->addr));
+#endif
+            ret_value = TRUE;
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value);
+
+} /* H5FP_mod_node_overlaps_with_prev() */
+
+/*
  * Function:    H5FP_add_file_mod_to_list
  * Purpose:     Add a metadata write to a file ID. If the metadata is
  *              already in the cache, then we just replace it with the
@@ -526,12 +936,17 @@ done:
  *              Failure:    FAIL
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
+ *		Re-worked code to merge overlapping metadata changes,
+ *		and to avoid discarding metadata if the supplied metadata
+ *		is smaller than that already in the mod list.
+ *						JRM -- 3/29/04
  */
 static herr_t
 H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type, 
                           haddr_t addr, unsigned md_size,
                           char *metadata)
 {
+    int i;
     H5FP_mdata_mod *fm, mod;
     H5TB_NODE *node;
     herr_t ret_value = FAIL;
@@ -542,7 +957,14 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
     assert(info);
 
     mod.addr = addr;    /* This is the key field for the TBBT */
-
+#if 0
+    /* This is useful debugging code -- keep it around for a 
+     * while.                         JRM -- 4/13/04
+     */
+    HDfprintf(stdout, 
+              "H5FP_add_file_mod_to_list: Adding chunk at %a of length %d.\n", 
+              addr, (int)md_size);
+#endif 
     if ((node = H5TB_dfind(info->mod_tree, (void *)&mod, NULL)) != NULL) {
         /*
          * The metadata is in the cache already. All we have to do is
@@ -550,18 +972,89 @@ H5FP_add_file_mod_to_list(H5FP_file_info *info, H5FD_mem_t mem_type,
          * The only things to change is the metadata and its size.
          */
         fm = (H5FP_mdata_mod *)node->data;
-        HDfree(fm->metadata);
-        fm->metadata = metadata;
-        fm->md_size = md_size;
+
+        if ( fm->md_size > md_size ) {
+            for ( i = 0; i < md_size; i++ )
+            {
+                (fm->metadata)[i] = metadata[i];
+            }
+            HDfree(metadata);
+        } else if ( fm->md_size < md_size ) {
+            HDfree(fm->metadata);
+            fm->metadata = metadata;
+            fm->md_size = md_size;
+
+            while ( H5FP_mod_node_overlaps_with_next(node) ) {
+                if ( H5FP_merge_mod_node_with_next(info->mod_tree, node)
+                     == FAIL ) {
+                    /* Need to define better errors here. -- JRM */
+                    HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCHANGE, FAIL, 
+                    "Can't merge with next.");
+                } else {
+                    (info->num_mods)--; /* since we just merged */
+
+                    /* H5FP_merge_mod_node_with_next() contains a call
+                     * to H5TB_rem(), which may clobber node.  Hence we
+                     * must look it up again before proceeding.
+                     */
+                    node = H5TB_dfind(info->mod_tree, (void *)&mod, NULL);
+                    HDassert(node != NULL);
+                    HDassert(node->data == fm);
+                    HDassert(node->key == fm);
+                }
+            }
+        } else { /* fm->md_size == md_size */ 
+            HDfree(fm->metadata);
+            fm->metadata = metadata;
+        }
+
         HGOTO_DONE(SUCCEED);
     }
     
-    if ((fm = H5FP_new_file_mod_node(mem_type, addr, md_size, metadata)) != NULL) {
-        if (!H5TB_dins(info->mod_tree, (void *)fm, NULL))
+    if ( (fm = H5FP_new_file_mod_node(mem_type, addr, md_size, metadata)) 
+         != NULL) {
+        if ( (node = H5TB_dins(info->mod_tree, (void *)fm, NULL)) == NULL ) {
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert modification into tree");
+        }
 
-        ++info->num_mods;
+        (info->num_mods)++;
+
+        /* merge with next as required */
+        while ( H5FP_mod_node_overlaps_with_next(node) ) {
+            if ( H5FP_merge_mod_node_with_next(info->mod_tree, node) == FAIL ) {
+                /* Need to define better errors here. -- JRM */
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCHANGE, FAIL, 
+                "Can't merge new node with next.");
+            } else {
+                (info->num_mods)--; /* since we just merged */
+
+                /* H5FP_merge_mod_node_with_next() contains a call
+                 * to H5TB_rem(), which may clobber node.  Hence we
+                 * must look it up again before proceeding.
+                 */
+                node = H5TB_dfind(info->mod_tree, (void *)&mod, NULL);
+                HDassert(node != NULL);
+                HDassert(node->data == fm);
+                HDassert(node->key == fm);
+            }
+        }
+
+        /* if the tree was valid to begin with, we must merge with at
+         * most one previous node.  
+         */
+        if ( H5FP_mod_node_overlaps_with_prev(node) ) {
+            if ( H5FP_merge_mod_node_with_prev(info->mod_tree, node) == FAIL ) {
+                /* Need to define better errors here. -- JRM */
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTCHANGE, FAIL, 
+                "Can't merge new node with prev.");
+            }
+            /* H5FP_merge_mod_node_with_prev() calls H5TB_rem() to delete
+             * node after it merges with the previous node.  Thus node is
+             * invalid at this point. 
+             */
+        }
+
         HGOTO_DONE(SUCCEED);
     }
 
@@ -1274,6 +1767,12 @@ H5FP_sap_handle_read_request(H5FP_request_t *req)
     int mrc;
 
     FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_read_request);
+#if 0 
+    /* More useful debugging code to keep for a time.  JRM - 4/13/04 */
+    HDfprintf(stdout, 
+              "H5FP_sap_handle_read_request: req->addr = %a.\n", 
+              req->addr);
+#endif
 
     r.req_id = req->req_id;
     r.file_id = req->file_id;
@@ -1356,7 +1855,12 @@ H5FP_sap_handle_write_request(H5FP_request_t *req, char *mdata, unsigned md_size
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5FP_sap_handle_write_request);
-
+#if 0
+    /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+    HDfprintf(stdout, 
+              "H5FP_sap_handle_write_request: addr = %a, md_size = %d.\n", 
+              (haddr_t)(req->addr), (int)md_size);
+#endif
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         if (info->num_mods >= H5FP_MDATA_CACHE_HIGHWATER_MARK) {
             /*
@@ -1544,14 +2048,26 @@ H5FP_sap_handle_alloc_request(H5FP_request_t *req)
         sap_alloc.eoa = HADDR_UNDEF;
         sap_alloc.status = H5FP_STATUS_CANT_ALLOC;
     }
-
+#if 0 
+    /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+    HDfprintf(stdout, 
+              "%s: req_size = %d, req_type = %d, addr = %a, eoa = %a, status = %d, rp_rank = %d.\n",
+              "H5FP_sap_handle_alloc_request",
+              (int)(req->meta_block_size),
+              (int)(req->mem_type),
+              sap_alloc.addr,
+              sap_alloc.eoa,
+              (int)(sap_alloc.status),
+              (int)(req->proc_rank));
+#endif
 done:
     if ((mrc = MPI_Send(&sap_alloc, 1, H5FP_alloc, (int)req->proc_rank,
                         H5FP_TAG_ALLOC, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_DONE_ERROR(FAIL, "MPI_Send failed", mrc);
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+
+} /* H5FP_sap_handle_alloc_request() */
 
 /*
  * Function:    H5FP_sap_handle_free_request
@@ -1577,6 +2093,17 @@ H5FP_sap_handle_free_request(H5FP_request_t *req)
     sap_alloc.status = H5FP_STATUS_OK;
     sap_alloc.mem_type = req->mem_type;
 
+#if 0
+    /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+    HDfprintf(stdout, 
+        "%s: addr = %a, block_size = %a, mem_type = %d, rp_rank = %d.\n",
+              "H5FP_sap_handle_free_request",
+              req->addr,
+              req->meta_block_size,
+              (int)(req->mem_type),
+              (int)(req->proc_rank));
+#endif
+
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
         if (H5FD_free((H5FD_t*)&info->file, req->mem_type, H5P_DEFAULT,
                       req->addr, req->meta_block_size) != SUCCEED) {
@@ -1599,7 +2126,8 @@ done:
         HMPI_DONE_ERROR(FAIL, "MPI_Send failed", mrc);
 
     FUNC_LEAVE_NOAPI(ret_value);
-}
+
+} /* H5FP_sap_handle_free_request() */
 
 /*
  * Function:    H5FP_sap_handle_get_eoa_request
@@ -1623,10 +2151,25 @@ H5FP_sap_handle_get_eoa_request(H5FP_request_t *req)
     sap_eoa.file_id = req->file_id;
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
+
+#if 0
+        /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+        HDfprintf(stdout, "%s: eoa = %a, rp_rank = %d.\n",
+                  "H5FP_sap_handle_get_eoa_request",
+                  ((H5FD_fphdf5_t*)&info->file)->eoa,
+                  (int)(req->proc_rank));
+#endif
+
         /* Get the EOA. */
         sap_eoa.eoa = ((H5FD_fphdf5_t*)&info->file)->eoa;
         sap_eoa.status = H5FP_STATUS_OK;
     } else {
+#if 1
+        /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+        HDfprintf(stdout, "%s: function failed. rp_rank = %d.\n",
+                  "H5FP_sap_handle_get_eoa_request",
+                  (int)(req->proc_rank));
+#endif
         sap_eoa.eoa = HADDR_UNDEF;
         sap_eoa.status = H5FP_STATUS_CANT_ALLOC;
         ret_value = FAIL;
@@ -1660,10 +2203,41 @@ H5FP_sap_handle_set_eoa_request(H5FP_request_t *req)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FP_sap_handle_set_eoa_request);
 
     if ((info = H5FP_find_file_info(req->file_id)) != NULL) {
+
+#if 0 
+    /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+    if ( req->addr < ((H5FD_fphdf5_t*)&info->file)->eoa ) {
+        HDfprintf(stdout, 
+                  "%s: old eoa = %a, new eoa = %a, rp_rank = %d. %s\n",
+                  "H5FP_sap_handle_set_eoa_request",
+                  ((H5FD_fphdf5_t*)&info->file)->eoa,
+                  req->addr,
+                  (int)(req->proc_rank),
+                  "<---- eoa reduced!!! -------");
+    }
+#if 0
+    else {
+        HDfprintf(stdout, 
+                  "%s: old eoa = %a, new eoa = %a, rp_rank = %d.\n",
+                  "H5FP_sap_handle_set_eoa_request",
+                  ((H5FD_fphdf5_t*)&info->file)->eoa,
+                  req->addr,
+                  (int)(req->proc_rank));
+    }
+#endif 
+#endif
+
         /* Get the EOA. */
         ((H5FD_fphdf5_t*)&info->file)->eoa = req->addr;
         exit_state = H5FP_STATUS_OK;
     } else {
+#if 1
+    /* Debugging code -- lets keep it for a time.  JRM -- 4/13/04 */
+    HDfprintf(stdout, 
+              "%s: Function failed -- Couldn't get info.  new eoa = %a.\n",
+              "H5FP_sap_handle_set_eoa_request",
+              req->addr);
+#endif
         exit_state = H5FP_STATUS_CANT_ALLOC;
         ret_value = FAIL;
     }

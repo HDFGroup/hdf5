@@ -1518,6 +1518,10 @@ done:
  *      Bill Wendling, 2003/02/19
  *      Added support for FPHDF5.
  *
+ *	John Mainzer, 2004/04/13
+ *	Moved much of the FPHDF5 specific code into H5FP_client_alloc(),
+ *      and re-worked it to get rid of a race condition on the eoa.
+ *
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -1540,51 +1544,16 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
      * is the SAP executing this code, then skip the send to the SAP and
      * try to do the actual allocations.
      */
-    if (H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file)) {
-        unsigned        req_id = 0;
-        unsigned        capt_only = 0;
-        H5FP_status_t   status = H5FP_STATUS_OK;
-        H5P_genplist_t *plist;
-        H5FP_alloc_t    fp_alloc;
+    if ( H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file) ) {
+        haddr_t addr;
 
-        /* Get the data xfer property list */
-        if ((plist = H5I_object(dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, HADDR_UNDEF, "not a dataset transfer list")
-
-        if (H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0)
-            if (H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, HADDR_UNDEF, "can't retrieve FPHDF5 property")
-
-        HDmemset(&fp_alloc, 0, sizeof(fp_alloc));
-
-        /*
-         * If the captain is the only one who should allocate resources,
-         * then do just that...
-         */
-        if (!capt_only || H5FD_fphdf5_is_captain(file)) {
-            /* Send the request to the SAP */
-            if (H5FP_request_allocate(file, type, size, &fp_alloc.addr,
-                                      &fp_alloc.eoa, &req_id, &status) != SUCCEED)
-                /* FIXME: Should we check the "status" variable here? */
-                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
-                            "server couldn't allocate from file")
+        if ( (addr = H5FP_client_alloc(file, type, dxpl_id, size)) 
+             == HADDR_UNDEF) {
+            HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF, 
+                        "allocation failed.")
+        } else {
+            HGOTO_DONE(addr)
         }
-
-        if (capt_only) {
-            int mrc;
-
-            if ((mrc = MPI_Bcast(&fp_alloc, 1, H5FP_alloc,
-                                 (int)H5FP_capt_barrier_rank,
-                                 H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
-                HMPI_GOTO_ERROR(HADDR_UNDEF, "MPI_Bcast failed", mrc);
-        }
-
-
-        /* Set the EOA for all processes. This doesn't fail. */
-        file->cls->set_eoa(file, fp_alloc.eoa);
-
-        /* We've succeeded -- return the value */
-        HGOTO_DONE(fp_alloc.addr)
     }
 #endif  /* H5_HAVE_FPHDF5 */
 

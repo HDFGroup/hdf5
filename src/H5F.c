@@ -1957,22 +1957,50 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
                 if (H5F_read_superblock(file, dxpl_id, &root_ent, super_info.addr,
                                         buf, (size_t)super_info.size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
+	    }
 
+            /* The following barrier ensures that all set eoa operations 
+             * associated with creating the superblock are complete before 
+             * we attempt any allocations.
+             *                                    JRM - 4/13/04
+             */
+            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS )
+            {
+                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
+            }
+
+            if (!H5FD_fphdf5_is_captain(lf)) {
                 if (H5G_mkroot(file, dxpl_id, &root_ent) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
-            } /* end if */
+            }
 
             /* All clients free the buffer used for broadcasting the superblock */
             buf = H5MM_xfree (buf);
         } /* end if */
 #endif  /* H5_HAVE_FPHDF5 */
     } else if (1 == shared->nrefs) {
+#ifdef H5_HAVE_FPHDF5
+        int mrc;                    /*MPI return code */
+#endif  /* H5_HAVE_FPHDF5 */
+
 	/* Read the superblock if it hasn't been read before. */
 	if (HADDR_UNDEF == (shared->super_addr = H5F_locate_signature(lf,dxpl_id)))
 	    HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, NULL, "unable to find file signature")
 
         if (H5F_read_superblock(file, dxpl_id, &root_ent, shared->super_addr, NULL, 0) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
+
+#ifdef H5_HAVE_FPHDF5 
+        if (H5FD_is_fphdf5_driver(lf)) {
+            /* reading the superblock generates lots of set_eoa calls.  To avoid 
+             * race conditions with allocations, make sure that everyone is done 
+             * reading the superblock before we proceed.
+             */
+            if ( (mrc = MPI_Barrier(H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS ) {
+                HMPI_GOTO_ERROR(NULL, "MPI_Barrier failed", mrc)
+            }
+        }
+#endif  /* H5_HAVE_FPHDF5 */
 
 	/* Make sure we can open the root group */
 	if (H5G_mkroot(file, dxpl_id, &root_ent) < 0)

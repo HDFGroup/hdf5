@@ -45,6 +45,7 @@ static int interface_initialize_g = 0;
 static unsigned H5FP_gen_request_id(void);
 static herr_t H5FP_dump_to_file(H5FD_t *file, hid_t dxpl_id);
 
+
 /*
  *===----------------------------------------------------------------------===
  *                    Public Library (non-API) Functions
@@ -332,7 +333,27 @@ H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, hid_t dxpl_id,
         HDmemset(*buf, '\0', size);
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if (size < sap_read.md_size) {
+        /* the following code is a bit odd and doubtless needs a bit
+         * of explanation.  I certainly stumbled over it the first 
+         * time I read it.
+         *
+         * For reasons unknown, read requests sent to the SAP only
+         * include a base address, not a length.  Thus the SAP sends
+         * along the largest contiguous chunk it has starting at the
+         * specified address.
+         *
+         * If the chunk is bigger than we want, we just copy over what
+         * we want, and discard the rest.
+         *
+         * If it is just the right size, we receive it in the provided
+         * buffer.
+         *
+         * if it is too small to fulfil our request, we scream and die.
+         *
+         *					JRM - 4/13/04
+         */
+        if (size < sap_read.md_size) 
+        {
             char *mdata;
 
             if (H5FP_read_metadata(&mdata, (int)sap_read.md_size, (int)H5FP_sap_rank) == FAIL) {
@@ -347,8 +368,11 @@ HDfprintf(stderr, "Metadata Read Failed!!!!\n");
                                 H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
                 HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
         } else {
-HDfprintf(stderr, "Buffer not big enough to hold metadata!!!!\n");
-assert(0);
+	    HDfprintf(stdout, 
+                    "H5FP_request_read_metadata: size = %d > md_size = %d.\n",
+                    (int)size, (int)(sap_read.md_size));
+            HDfprintf(stdout, "Mssg received from SAP is too small!!!!\n");
+            assert(0);
         }
 
         break;
@@ -628,6 +652,110 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
+/*
+ * Function:    H5FP_client_alloc
+ * Purpose:     Handle the client side of an allocation in the FP case.
+ *		In essence, this is simply a matter of referring the 
+ *		request to the SAP, and then returning the reply.
+ *
+ *		A modified version of this code used to live in H5FD_alloc(),
+ *		but I move it here to encapsulate it and generally tidy up.
+ *		
+ *		One can argue that we should all be done in an alloc 
+ *		routine in H5FDfdhdf5.c, but this invlves a smaller 
+ *		change to the code, and thus a smaller loss if I missed 
+ *		a major gotcha.  If things go well, and we don't heave
+ *		the current implementation of FP, I'll probably go that
+ *		route eventually.
+ * Return:      Success:    The format address of the new file memory.
+ *              Failure:    The undefined address HADDR_UNDEF
+ * Programmer:  JRM - 4/7/04
+ * Modifications:
+ */
+haddr_t
+H5FP_client_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+{
+    haddr_t         ret_value = HADDR_UNDEF;
+    unsigned        req_id = 0;
+    unsigned        capt_only = 0;
+    H5FP_status_t   status = H5FP_STATUS_OK;
+    H5P_genplist_t *plist;
+    H5FP_alloc_t    fp_alloc;
+
+    FUNC_ENTER_NOAPI(H5FP_client_alloc, HADDR_UNDEF)
+
+    /* check args */
+    HDassert(file);
+    HDassert(file->cls);
+    HDassert(type >= 0 && type < H5FD_MEM_NTYPES);
+    HDassert(size > 0);
+
+    /* verify that we are running FP and we are not the SAP.  */
+    HDassert(H5FD_is_fphdf5_driver(file) && !H5FD_fphdf5_is_sap(file));
+
+    /* Get the data xfer property list */
+    if ( (plist = H5I_object(dxpl_id)) == NULL ) {
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, HADDR_UNDEF, "not a dataset transfer list")
+    }
+
+    if ( H5P_exist_plist(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY) > 0 ) {
+        if ( H5P_get(plist, H5FD_FPHDF5_CAPTN_ALLOC_ONLY, &capt_only) < 0 ) {
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, HADDR_UNDEF, "can't retrieve FPHDF5 property")
+        }
+    }
+
+    HDmemset(&fp_alloc, 0, sizeof(fp_alloc));
+
+    /*
+     * If the captain is the only one who should allocate resources,
+     * then do just that...
+     */
+    if ( !capt_only || H5FD_fphdf5_is_captain(file) ) {
+        /* Send the request to the SAP */
+        if ( H5FP_request_allocate(file, type, size, &fp_alloc.addr,
+                                   &fp_alloc.eoa, &req_id, &status) 
+             != SUCCEED ) {
+                HGOTO_ERROR(H5E_FPHDF5, H5E_CANTALLOC, HADDR_UNDEF,
+                            "server couldn't allocate from file")
+        }
+    }
+
+    /* It should be impossible for this assertion to fail, but then 
+     * that is what assertions are for.
+     */
+    HDassert(status == H5FP_STATUS_OK);
+
+    if ( capt_only ) {
+        int mrc;
+
+        if ( (mrc = MPI_Bcast(&fp_alloc, 1, H5FP_alloc,
+                              (int)H5FP_capt_barrier_rank,
+                              H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS ) {
+            HMPI_GOTO_ERROR(HADDR_UNDEF, "MPI_Bcast failed", mrc);
+        }
+    }
+
+    /* we used to send the eoa to the sap here, but that is silly,
+     * as the sap already knows, and it is possible that another 
+     * interleaving allocation will result in a corrupted eoa.
+     *
+     *                                     JRM - 4/7/04
+     */
+
+    /* We've succeeded -- return the value */
+    HGOTO_DONE(fp_alloc.addr)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5FP_client_alloc() */
+
+
+/* This function is now called only by H5FP_client_alloc() above.  
+ * Should we make it a private function only accessible from this
+ * file?                                 JRM - 4/8/04
+ */
 /*
  * Function:    H5FP_request_allocate
  * Purpose:     Request an allocation of space from the SAP.
@@ -739,8 +867,17 @@ H5FP_request_free(H5FD_t *file, H5FD_mem_t mem_type, haddr_t addr, hsize_t size,
     if (sap_alloc.status != H5FP_STATUS_OK)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't free space on server");
 
+#if 0 /* JRM */
+    /* the set_eoa call just sends the eoa we received from the SAP back
+     * -- with obvious race condition problems if there are interleaving
+     * calls.  Thus I am commenting this call out for now, and will delete
+     * it in time if I can't find a reason for it.
+     *
+     *                                        JRM -- 4/7/04
+     */
     /* Set the EOA for all processes. This call doesn't fail. */
     file->cls->set_eoa(file, sap_alloc.eoa);
+#endif /* JRM */
     *status = H5FP_STATUS_OK;
 
 done:
@@ -834,6 +971,24 @@ H5FP_request_set_eoa(H5FD_t *file, haddr_t eoa, unsigned *req_id, H5FP_status_t 
     req.proc_rank = H5FD_mpi_get_rank(file);
     req.addr = eoa;
 
+#if 0 
+    /* This is useful debugging code -- lets keep for a while. 
+     *                                     JRM -- 4/13/04
+     */
+    /* dump stack each time we set the eoa */
+    {
+        int mpi_rank;
+
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+        HDfprintf(stdout, 
+                  "%d: %s: setting eoa: last eoa = %a, new eoa = %a.\n",
+                  mpi_rank, "H5FP_request_set_eoa", last_eoa_received, eoa);
+        H5FS_print(stdout);
+
+    }
+#endif
+
     if ((mrc = MPI_Send(&req, 1, H5FP_request, (int)H5FP_sap_rank,
                         H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
@@ -903,8 +1058,20 @@ H5FP_request_update_eoma_eosda(H5FD_t *file, unsigned *req_id, H5FP_status_t *st
                          H5FP_SAP_BARRIER_COMM)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed!", mrc);
 
+#if 0 
+    /* The following set_eoa just parrots back to the SAP the eoa
+     * we just received from it.  While I don't think it is a problem
+     * in this case, there are obvious potentials for race conditions,
+     * and I don't see that it does anything useful.
+     *
+     * Thus I am commenting it out for now.  I'll delete it completely
+     * as soon as I am sure that it serves no purpose whatsoever.
+     *
+     *                                         JRM - 4/8/04
+     */
     /* Set the EOA for all processes. This doesn't fail. */
     file->cls->set_eoa(file, sap_eoa.eoa);
+#endif
     *status = H5FP_STATUS_OK;
 
 done:

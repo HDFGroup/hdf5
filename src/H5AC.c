@@ -1283,17 +1283,27 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         if (H5FP_request_lock(H5FD_fphdf5_file_id(lf), addr,
                               rw == H5AC_WRITE ? H5FP_LOCK_WRITE : H5FP_LOCK_READ,
                               TRUE, &req_id, &status) < 0) {
+#if 0
+            HDfprintf(stdout, "H5AC_protect: Lock failed.\n");
             /*
              * FIXME: Check the status variable. If the lock is got
              * by some other process, we can loop and wait or bail
              * out of this function
              */
-HDfprintf(stderr, "Couldn't get lock for metadata at address %a\n", addr);
+	    HDfprintf(stderr, "Couldn't get lock for metadata at address %a\n", addr);
+#endif /* 0 */
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTLOCK, NULL, "can't lock data on SAP!")
         }
 
         /* Load a thing from the SAP. */
         if (NULL == (thing = type->load(f, dxpl_id, addr, udata1, udata2))) {
+#if 0
+            HDfprintf(stdout, 
+                      "%s: Load failed. addr = %a, type->id = %d.\n", 
+                      "H5AC_protect",
+                      addr,
+                      (int)(type->id));
+#endif /* 0 */
             HCOMMON_ERROR(H5E_CACHE, H5E_CANTLOAD, "unable to load object")
 
             if (H5FP_request_release_lock(H5FD_fphdf5_file_id(lf), addr,
