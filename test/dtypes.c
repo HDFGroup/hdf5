@@ -3625,10 +3625,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	src_type_name = "unsigned long";
 	src_type = INT_ULONG;
     } else if (H5Tequal(src, H5T_NATIVE_LLONG)) {
-	src_type_name = "long_long";
+	src_type_name = "long long";
 	src_type = INT_LLONG;
     } else if (H5Tequal(src, H5T_NATIVE_ULLONG)) {
-	src_type_name = "unsigned long_long";
+	src_type_name = "unsigned long long";
 	src_type = INT_ULLONG;
     } else {
 	src_type_name = "UNKNOWN";
@@ -3660,10 +3660,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	dst_type_name = "unsigned long";
 	dst_type = INT_ULONG;
     } else if (H5Tequal(dst, H5T_NATIVE_LLONG)) {
-	dst_type_name = "long_long";
+	dst_type_name = "long long";
 	dst_type = INT_LLONG;
     } else if (H5Tequal(dst, H5T_NATIVE_ULLONG)) {
-	dst_type_name = "unsigned long_long";
+	dst_type_name = "unsigned long long";
 	dst_type = INT_ULLONG;
     } else {
 	dst_type_name = "UNKNOWN";
@@ -5195,10 +5195,10 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	src_type_name = "unsigned long";
 	src_type = INT_ULONG;
     } else if (H5Tequal(src, H5T_NATIVE_LLONG)) {
-	src_type_name = "long_long";
+	src_type_name = "long long";
 	src_type = INT_LLONG;
     } else if (H5Tequal(src, H5T_NATIVE_ULLONG)) {
-	src_type_name = "unsigned long_long";
+	src_type_name = "unsigned long long";
 	src_type = INT_ULLONG;
     } else if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
 	src_type_name = "float";
@@ -5242,10 +5242,10 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	dst_type_name = "unsigned long";
 	dst_type = INT_ULONG;
     } else if (H5Tequal(dst, H5T_NATIVE_LLONG)) {
-	dst_type_name = "long_long";
+	dst_type_name = "long long";
 	dst_type = INT_LLONG;
     } else if (H5Tequal(dst, H5T_NATIVE_ULLONG)) {
-	dst_type_name = "unsigned long_long";
+	dst_type_name = "unsigned long long";
 	dst_type = INT_ULLONG;
     } else if (H5Tequal(dst, H5T_NATIVE_FLOAT)) {
 	dst_type_name = "float";
@@ -5319,6 +5319,12 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 #ifdef SHOW_OVERFLOWS
     noverflows_g = 0;
 #endif
+
+    /* This is for some Linux systems where long double has the size
+     * 12 bytes but precision is 10 bytes.  The 2 unused bytes may 
+     * have garbage causing wrong value comparison.
+     */
+    HDmemset(&hw_ldouble, 0, sizeof(long double));
 
     /* Create a dataset transfer property list and datatype conversion 
      * exception handler function and pass in fill value.  This is mainly
@@ -5832,7 +5838,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 #endif /* end H5_ULONG_FP_BOTTOM_BIT_WORKS */
 
 /* For PGI compiler on Linux, during conversion from 'float' or 'double' to 
- * 'unsigned long_long', round-up happens when the fraction of float-point 
+ * 'unsigned long long', round-up happens when the fraction of float-point 
  * value is greater than 0.5. So we allow the converted value to be off by 1.
  */
 #ifndef H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS
@@ -6347,13 +6353,13 @@ run_int_float_conv(const char *name)
         char		str[256];		/*hello string		*/
 
         sprintf(str, "Testing random %s %s -> %s conversions",
-                name, "unsigned long_long", "float");
+                name, "unsigned long long", "float");
         printf("%-70s", str);
         SKIPPED();
         HDputs("    Test skipped due to compiler not handling conversion.");
 
         sprintf(str, "Testing random %s %s -> %s conversions",
-                name, "unsigned long_long", "double");
+                name, "unsigned long long", "double");
         printf("%-70s", str);
         SKIPPED();
         HDputs("    Test skipped due to compiler not handling conversion.");
@@ -6383,7 +6389,7 @@ run_int_float_conv(const char *name)
             char		str[256];		/*hello string		*/
 
             sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "unsigned long_long", "long double");
+                    name, "unsigned long long", "long double");
             printf("%-70s", str);
             SKIPPED();
             HDputs("    Test skipped due to compiler not handling conversion.");
@@ -6464,13 +6470,13 @@ run_float_int_conv(const char *name)
         char		str[256];		/*hello string		*/
 
         sprintf(str, "Testing random %s %s -> %s conversions",
-                name, "float", "unsigned long_long");
+                name, "float", "unsigned long long");
         printf("%-70s", str);
         SKIPPED();
         HDputs("    Test skipped due to hardware conversion error.");
 
         sprintf(str, "Testing random %s %s -> %s conversions",
-                name, "double", "unsigned long_long");
+                name, "double", "unsigned long long");
         printf("%-70s", str);
         SKIPPED();
         HDputs("    Test skipped due to hardware conversion error.");
@@ -6501,7 +6507,7 @@ run_float_int_conv(const char *name)
             char		str[256];		/*string		*/
 
             sprintf(str, "Testing random %s %s -> %s conversions",
-                    name, "long double", "unsigned long_long");
+                    name, "long double", "unsigned long long");
             printf("%-70s", str);
             SKIPPED();
             HDputs("    Test skipped due to hardware conversion error.");
