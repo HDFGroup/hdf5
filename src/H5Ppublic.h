@@ -171,12 +171,12 @@ __DLL__ herr_t H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext
 __DLL__ herr_t H5Pset_family(hid_t plist_id, hsize_t memb_size, hid_t memb_plist_id);
 __DLL__ herr_t H5Pget_family(hid_t plist_id, hsize_t *memb_size/*out*/,
 	       hid_t *memb_plist_id/*out*/);
-#ifdef HAVE_PARALLEL
+#if defined(HAVE_PARALLEL) || defined(H5_HAVE_PARALLEL)
 __DLL__ herr_t H5Pset_mpi(hid_t plist_id, MPI_Comm comm, MPI_Info info);
 __DLL__ herr_t H5Pget_mpi(hid_t plist_id, MPI_Comm *comm, MPI_Info *info);
 __DLL__ herr_t H5Pset_xfer(hid_t plist_id, H5D_transfer_t data_xfer_mode);
 __DLL__ herr_t H5Pget_xfer(hid_t plist_id, H5D_transfer_t *data_xfer_mode);
-#endif /*HAVE_PARALLEL*/
+#endif /*H5_HAVE_PARALLEL*/
 #else /* WANT_H5_V1_2_COMPAT */
 __DLL__ hid_t H5Pget_driver(hid_t plist_id);
 #endif /* WANT_H5_V1_2_COMPAT */
