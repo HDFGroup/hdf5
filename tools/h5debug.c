@@ -23,11 +23,10 @@
 #include <H5HGprivate.h>
 #include <H5HLprivate.h>
 #include <H5Oprivate.h>
-#include <h5tools.h>
+
 /* File drivers */
-#ifdef VERSION13
 #include <H5FDfamily.h>
-#endif
+
 
 #define INDENT  3
 #define VCOL    50
@@ -55,30 +54,17 @@ main(int argc, char *argv[])
 {
     hid_t	fid, plist=H5P_DEFAULT;
     H5F_t       *f;
-#if defined VERSION13
     haddr_t     addr=0, extra=0;
-#elif defined VERSION12
-	haddr_t *addr,*extra;
-#endif
     uint8_t     sig[16];
     intn        i, ndims;
     herr_t      status = SUCCEED;
-
-#if defined VERSION12
-	addr = malloc(sizeof(haddr_t));
-	extra = malloc(sizeof(haddr_t));
-	addr->offset = 0;
-	extra->offset = 0;
-#endif
 
     /*
      * Open the file and get the file descriptor.
      */
     if (strchr (argv[1], '%')) {
 	plist = H5Pcreate (H5P_FILE_ACCESS);
-#if defined VERSION13
 	H5Pset_fapl_family (plist, 0, H5P_DEFAULT);
-#endif
     }
     if ((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, plist)) < 0) {
         fprintf(stderr, "cannot open file\n");
@@ -94,24 +80,15 @@ main(int argc, char *argv[])
      */
     if (argc > 2) {
         printf("New address: %s\n", argv[2]);
-#if defined VERSION13
         addr = HDstrtoll(argv[2], NULL, 0);
-#elif defined VERSION12
-        addr->offset = HDstrtoll(argv[2], NULL, 0);
-#endif
     }
     if (argc > 3) {
-#if defined VERSION13
         extra = HDstrtoll(argv[3], NULL, 0);
-#elif defined VERSION12
-        extra->offset = HDstrtoll(argv[3], NULL, 0);
-#endif
     }
     /*
      * Read the signature at the specified file position.
      */
     HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
-
     if (H5F_block_read(f, addr, (hsize_t)sizeof(sig), H5P_DEFAULT, sig)<0) {
         fprintf(stderr, "cannot read signature\n");
         HDexit(3);
