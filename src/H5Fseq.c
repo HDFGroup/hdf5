@@ -253,7 +253,7 @@ printf("%s: Need to get hyperslab, seq_len=%ld, coords[%d]=%ld\n",FUNC,(long)seq
                     /* Build the partial hyperslab information */
                     for(j=0; j<ndims; j++) {
                         if(i==j)
-                            hslab_size[j]=MIN(seq_len,dset_dims[i]-coords[i]);
+                            hslab_size[j]=MIN(seq_len/down_size[i],dset_dims[i]-coords[i]);
                         else
                             if(j>i)
                                 hslab_size[j]=dset_dims[j];
@@ -687,7 +687,7 @@ printf("%s: Need to get hyperslab, seq_len=%ld, coords[%d]=%ld\n",FUNC,(long)seq
                     /* Build the partial hyperslab information */
                     for(j=0; j<ndims; j++) {
                         if(i==j)
-                            hslab_size[j]=MIN(seq_len,dset_dims[i]-coords[i]);
+                            hslab_size[j]=MIN(seq_len/down_size[i],dset_dims[i]-coords[i]);
                         else
                             if(j>i)
                                 hslab_size[j]=dset_dims[j];
