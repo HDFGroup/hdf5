@@ -1,4 +1,4 @@
-HDF5 version 1.5.50 released on Sat Apr 12 04:27:55 CDT 2003
+HDF5 version 1.5.51 released on Sat Apr 26 05:00:45 CDT 2003
 ================================================================================
 
 
@@ -35,6 +35,10 @@ Bug Fixes since HDF5-1.4.0
 
 Library
 -------
+    * The library now correctly reuses space when objects are deleted in the
+      file.  This should be handled correctly for every situation, except
+      datasets with variable-length datatypes are not returning the space they
+      use in the global heap currently. QAK - 2003/04/13
     * Fixed error in B-tree deletion routine which could cause groups to be
       corrupted when objects are removed from them.
       QAK - 2003/04/11
@@ -201,7 +205,9 @@ Library
 Configuration
 -------------
 
-    * When using gcc 3.x, we use -std=gnu99 instead of -ansi for compiling.
+    * Included the both the examples of fortran and c++ "make check-install"
+      testing. This tests the correctness of the h5fc command. AKC - 2003/04/22
+    * When using gcc 3.x, we use -std=c99 instead of -ansi for compiling.
       QAK - 2003/04/11
     * IA64 platform has its own configure setting and use Intel Compilers as
       the default compilers (were gcc and pgf90 before.)  This also eliminated
@@ -277,6 +283,10 @@ Documentation
 New Features
 ============
 
+    * Added a new utility "h5fc". It can be used to compile easily Fortran
+      programs which use HDF5. It automatically uses the compiler the HDF5
+      library was built with and links in any libraries HDF5 requires.
+      BW - 2003/04/10
     * Added new dataset creation property list functions for working with
       I/O filters: H5Pmodify_filter, H5Pget_filter_by_id and
       H5Pall_filters_avail.  Also changed H5Zregister to use new method
