@@ -403,26 +403,24 @@ H5I_clear_group(H5I_type_t grp)
      * counts. Ignore the return value from from the free method and remove
      * object from group regardless.
      */
-    if (grp_ptr->free_func) {
-	for (i=0; i<grp_ptr->hash_size; i++) {
-	    for (cur=grp_ptr->id_list[i]; cur; cur=next) {
-		/* Free the object regardless of reference count */
-		if ((grp_ptr->free_func)(cur->obj_ptr)<0) {
+    for (i=0; i<grp_ptr->hash_size; i++) {
+	for (cur=grp_ptr->id_list[i]; cur; cur=next) {
+	    /* Free the object regardless of reference count */
+	    if (grp_ptr->free_func && (grp_ptr->free_func)(cur->obj_ptr)<0) {
 #if H5I_DEBUG
-		    if (H5DEBUG(I)) {
-			fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
-				"failure ignored\n", (int)grp,
-				(unsigned long)(cur->obj_ptr));
-		    }
-#endif /*H5I_DEBUG*/
+		if (H5DEBUG(I)) {
+		    fprintf(H5DEBUG(I), "H5I: free grp=%d obj=0x%08lx "
+			    "failure ignored\n", (int)grp,
+			    (unsigned long)(cur->obj_ptr));
 		}
-		    
-		/* Add ID struct to free list */
-		next = cur->next;
-		H5I_release_id_node(cur);
+#endif /*H5I_DEBUG*/
 	    }
-	    grp_ptr->id_list[i]=NULL;
+		    
+	    /* Add ID struct to free list */
+	    next = cur->next;
+	    H5I_release_id_node(cur);
 	}
+	grp_ptr->id_list[i]=NULL;
     }
     
   done:

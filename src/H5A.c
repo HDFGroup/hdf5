@@ -640,6 +640,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, void *buf)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
+    HDmemset(bkg_buf, 0, buf_size);
 
     /* Copy the user's data into the buffer for conversion */
     HDmemcpy(tconv_buf,buf,src_type_size*nelmts);
@@ -807,6 +808,7 @@ H5A_read(H5A_t *attr, const H5T_t *mem_type, void *buf)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
                  "memory allocation failed");
         }
+	HDmemset(bkg_buf, 0, buf_size);
 
         /* Copy the attribute data into the buffer for conversion */
         HDmemcpy(tconv_buf,attr->data,src_type_size*nelmts);

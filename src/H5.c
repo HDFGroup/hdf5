@@ -167,7 +167,7 @@ H5_term_library(void)
     } while (pending && ntries++<100);
     if (pending) {
 	fprintf(stderr, "HDF5: infinite loop closing library\n");
-	fprintf(stderr, "      %s\n", loop);
+	fprintf(stderr, "      %s...\n", loop);
     }
     
     /* Mark library as closed */

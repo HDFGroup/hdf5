@@ -1720,7 +1720,9 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	    if (n!=smine_nelmts) {
                 HGOTO_ERROR (H5E_IO, H5E_READERROR, FAIL, "mem gather failed");
             }
-        }
+        } else if (need_bkg) {
+	    HDmemset(bkg_buf, 0, request_nelmts*dst_type_size);
+	}
 	
 #ifdef QAK
 	printf("%s: check 7.0\n",FUNC);
@@ -2084,8 +2086,10 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			     "file gather failed");
             }
-        }
-
+        } else if (need_bkg) {
+	    HDmemset(bkg_buf, 0, request_nelmts*dst_type_size);
+	}
+	
         /*
          * Perform data type conversion.
          */
