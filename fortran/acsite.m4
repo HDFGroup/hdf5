@@ -77,7 +77,7 @@ AC_DEFUN(AC_LANG_FORTRAN9X, [
 define([AC_LANG], [FORTRAN9X])
 ac_ext=f90
 ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&AC_FD_CC'
-ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS 1>&AC_FD_CC'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&AC_FD_CC'
 cross_compiling=$ac_cv_prog_f9x_cross
 ])
 
