@@ -78,10 +78,6 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters");
 
-    /* Check that no parameters are currently set */
-    if(cd_nelmts!=H5Z_SHUFFLE_USER_NPARMS)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADVALUE, FAIL, "incorrect # of shuffle parameters");
-
     /* Set "local" parameter for this dataset */
     if((cd_values[H5Z_SHUFFLE_PARM_SIZE]=(unsigned)H5Tget_size(type_id))==0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size");
