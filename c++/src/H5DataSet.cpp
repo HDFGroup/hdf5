@@ -102,7 +102,7 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
    //{
       //throw DataSetIException();
    //}
-   return (-1);
+   return (0);
 }
 
 // Reclaims VL datatype memory buffers. 
