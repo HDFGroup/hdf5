@@ -166,6 +166,10 @@
           INTEGER     :: i, j    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(7) :: data_dims_b
           INTEGER, DIMENSION(7) :: data_dims
+          INTEGER :: mdc_nelmts
+          INTEGER :: rdcc_nelmts
+          INTEGER(SIZE_T) :: rdcc_nbytes
+          REAL :: rdcc_w0
           memb_fapl = H5P_DEFAULT_F
           memb_map = H5FD_MEM_SUPER_F
           memb_addr = 0.
@@ -214,6 +218,20 @@
           CALL h5pget_fapl_multi_f(fapl, memb_map_out, memb_fapl_out, memb_name_out, &
                                    memb_addr_out, relax_out, error)
               CALL check("h5pget_fapl_multi_f", error, total_error)
+          !
+          ! Let's check h5pget(set)cache_f APIs here for now 
+          !
+          CALL h5pget_cache_f(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
+                              rdcc_w0, error)
+               CALL check("h5pget_cache_f", error, total_error)
+ 
+          ! Set cache to some number
+          !
+          rdcc_nbytes = 1024*1024
+          CALL h5pset_cache_f(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
+                              rdcc_w0, error)
+               CALL check("h5pset_cache_f", error, total_error)
+ 
           CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = fapl)
               CALL check("h5fcreate_f", error, total_error)
 
