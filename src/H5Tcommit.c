@@ -160,7 +160,10 @@ H5T_commit (H5G_entry_t *loc, const char *name, H5T_t *type, hid_t dxpl_id)
 done:
     if (ret_value<0) {
 	if ((type->state==H5T_STATE_TRANSIENT || type->state==H5T_STATE_RDONLY) && H5F_addr_defined(type->ent.header)) {
-	    H5O_close(&(type->ent));
+	    if(H5O_close(&(type->ent))<0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header");
+            if(H5O_delete(file, dxpl_id,type->ent.header)<0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header");
 	    type->ent.header = HADDR_UNDEF;
 	}
     }

@@ -1678,9 +1678,10 @@ done:
 static H5G_t *
 H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
 {
-    H5G_t	*grp = NULL;		/*new group			*/
-    H5F_t       *file;                  /* File new group will be in    */
-    H5G_t	*ret_value;		/* Return value */
+    H5G_t	*grp = NULL;	/*new group			*/
+    H5F_t       *file;          /* File new group will be in    */
+    unsigned    stab_init=0;    /* Flag to indicate that the symbol stable was created successfully */
+    H5G_t	*ret_value;	/* Return value */
 
     FUNC_ENTER_NOAPI(H5G_create, NULL);
 
@@ -1699,6 +1700,7 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
     /* Create the group entry */
     if (H5G_stab_create(file, dxpl_id, size_hint, &(grp->ent)/*out*/) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
+    stab_init=1;    /* Indicate that the symbol table information is valid */
     
     /* insert child name into parent */
     if(H5G_insert(loc,name,&(grp->ent), dxpl_id)<0)
@@ -1711,6 +1713,13 @@ H5G_create(H5G_entry_t *loc, const char *name, size_t size_hint, hid_t dxpl_id)
 
 done:
     if(ret_value==NULL) {
+        /* Check if we need to release the file-oriented symbol table info */
+        if(stab_init) {
+            if(H5O_close(&(grp->ent))<0)
+                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release object header");
+            if(H5O_delete(file, dxpl_id,grp->ent.header)<0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header");
+        } /* end if */
         if(grp!=NULL)
             H5FL_FREE(H5G_t,grp);
     } /* end if */
