@@ -56,6 +56,18 @@ static herr_t H5S_hyper_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 static herr_t H5S_hyper_iter_next_block(H5S_sel_iter_t *sel_iter);
 static herr_t H5S_hyper_iter_release(H5S_sel_iter_t *sel_iter);
 
+/* Static variables */
+static const hsize_t _stride[H5O_LAYOUT_NDIMS]={        /* Default stride array */
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,1};
+static const hsize_t _block[H5O_LAYOUT_NDIMS]={         /* Default block size array */
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,
+    1,1,1,1, 1,1,1,1,1};
+
 /* Declare a free list to manage the H5S_hyper_span_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_span_t);
 
@@ -5429,9 +5441,9 @@ done:
 static herr_t
 H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hssize_t start[],
-		      const hsize_t _stride[],
-		      const hsize_t _count[],
-		      const hsize_t _block[])
+		      const hsize_t t_stride[],
+		      const hsize_t t_count[],
+		      const hsize_t t_block[])
 {
     hsize_t stride[H5O_LAYOUT_NDIMS];   /* Optimized stride information */
     hsize_t count[H5O_LAYOUT_NDIMS];    /* Optimized count information */
@@ -5451,27 +5463,27 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(space);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     assert(start);
-    assert(_stride);
-    assert(_count);
-    assert(_block);
+    assert(t_stride);
+    assert(t_count);
+    assert(t_block);
     
     /* Optimize hyperslab selection to merge contiguous blocks */
     for(u=0; u<space->extent.u.simple.rank; u++) {
         /* contiguous hyperslabs have the block size equal to the stride */
-        if(_stride[u]==_block[u]) {
+        if(t_stride[u]==t_block[u]) {
             count[u]=1;
             stride[u]=1;
-            block[u]=_block[u]*_count[u];
+            block[u]=t_block[u]*t_count[u];
         }
         else {
-            if(_count[u]==1)
+            if(t_count[u]==1)
                 stride[u]=1;
             else {
-                assert(_stride[u]>_block[u]);
-                stride[u]=_stride[u];
+                assert(t_stride[u]>t_block[u]);
+                stride[u]=t_stride[u];
             } /* end else */
-            count[u]=_count[u];
-            block[u]=_block[u];
+            count[u]=t_count[u];
+            block[u]=t_block[u];
         } /* end if */
     } /* end for */
 
@@ -5693,8 +5705,6 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 		      const hsize_t count[],
 		      const hsize_t *block)
 {
-    hsize_t _stride[H5O_LAYOUT_NDIMS];      /* Stride array */
-    hsize_t _block[H5O_LAYOUT_NDIMS];       /* Block size array */
     unsigned u;                    /* Counters */
     H5S_hyper_dim_t *diminfo; /* per-dimension info for the selection */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -5707,21 +5717,13 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     assert(count);
     assert(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID);
     
-    /* Fill in the correct stride values */
-    if(stride==NULL) {
-        hsize_t fill=1;
-
-        H5V_array_fill(_stride,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
+    /* Point to the correct stride values */
+    if(stride==NULL)
         stride = _stride;
-    }
 
-    /* Fill in the correct block values */
-    if(block==NULL) {
-        hsize_t fill=1;
-
-        H5V_array_fill(_block,&fill,sizeof(hssize_t),space->extent.u.simple.rank);
+    /* Point to the correct block values */
+    if(block==NULL)
         block = _block;
-    }
 
     /* Fixup operation for non-hyperslab selections */
     switch(space->select.type) {
