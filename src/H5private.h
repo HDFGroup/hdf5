@@ -92,15 +92,10 @@
 /*
  * System information. These are needed on the DEC Alpha to turn off fixing
  * of unaligned accesses by the operating system during detection of
- * alignment constraints in H5detect.c:main(). The <sys/param.h> must be
- * included before <sys/proc.h> on FreeBSD even though we never use anything
- * from either header file on that system.
+ * alignment constraints in H5detect.c:main().
  */
 #ifdef HAVE_SYS_SYSINFO_H
 #   include <sys/sysinfo.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#   include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_PROC_H
 #   include <sys/proc.h>

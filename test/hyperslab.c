@@ -81,14 +81,14 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 
     for (i=0; i<nx; i++) {
 	if (nz>1) {
-	    printf("i=%d:\n", i);
+	    printf("i=%lu:\n", (unsigned long)i);
 	} else {
-	    printf("%03d:", i);
+	    printf("%03lu:", (unsigned long)i);
 	}
 
 	for (j=0; j<ny; j++) {
 	    if (nz>1)
-		printf("%03d:", j);
+		printf("%03lu:", (unsigned long)j);
 	    for (k=0; k<nz; k++) {
 		printf(" %3d", *array++);
 	    }
@@ -253,9 +253,16 @@ test_fill(size_t nx, size_t ny, size_t nz,
 					 */
 					AT();
 					printf("   acc != ref_value\n");
-					printf("   i=%d, j=%d, k=%d, "
-					   "dx=%d, dy=%d, dz=%d, fill=%d\n",
-					   i, j, k, dx, dy, dz, fill_value);
+					printf("   i=%lu, j=%lu, k=%lu, "
+					       "dx=%lu, dy=%lu, dz=%lu, "
+					       "fill=%d\n",
+					       (unsigned long)i,
+					       (unsigned long)j,
+					       (unsigned long)k,
+					       (unsigned long)dx,
+					       (unsigned long)dy,
+					       (unsigned long)dz,
+					       fill_value);
 					print_ref(nx, ny, nz);
 					printf("\n   Result is:\n");
 					print_array(dst, nx, ny, nz);

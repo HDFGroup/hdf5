@@ -1,3 +1,4 @@
+
 dnl Process this file with autoconf to produce configure.
 dnl
 dnl Copyright (C) 1997 National Center for Supercomputing Applications.
@@ -143,10 +144,16 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 dnl Unix
 AC_CHECK_HEADERS(sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h)
-AC_CHECK_HEADERS(stddef.h sys/sysinfo.h sys/proc.h sys/param.h)
+AC_CHECK_HEADERS(stddef.h)
 dnl Windows
 AC_CHECK_HEADERS(io.h winsock.h sys/timeb.h)
 
+dnl The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC Alpha
+dnl to turn off UAC fixing. We do *not* attempt to locate these files on
+dnl other systems because there are too many problems with including them.
+if test "$host_vendor-$host_cpu" = "dec-alpha"; then
+    AC_CHECK_HEADERS(sys/sysinfo.h sys/proc.h)
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.

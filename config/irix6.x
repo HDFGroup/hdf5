@@ -25,7 +25,11 @@ case "X-$CC_BASENAME" in
 	;;
 
     *)
-        CFLAGS="$CFLAGS -ansi"
+        # Do *not* use -ansi because it prevents hdf5 from being able
+        # to read modification dates from the file. On some systems it
+        # can also result in compile errors in system header files
+        # since hdf5 includes a couple non-ANSI header files.
+        #CFLAGS="$CFLAGS -ansi"
 
 	# Always turn off these compiler warnings:
 	#    1174:  function declared but not used

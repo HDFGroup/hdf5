@@ -53,14 +53,14 @@ print_array(uint8_t *array, size_t nx, size_t ny, size_t nz)
 
     for (i = 0; i < nx; i++) {
 	if (nz > 1) {
-	    printf("i=%d:\n", i);
+	    printf("i=%lu:\n", (unsigned long)i);
 	} else {
-	    printf("%03d:", i);
+	    printf("%03lu:", (unsigned long)i);
 	}
 
 	for (j = 0; j < ny; j++) {
 	    if (nz > 1)
-		printf("%03d:", j);
+		printf("%03lu:", (unsigned long)j);
 	    for (k = 0; k < nz; k++) {
 		printf(" %3d", *array++);
 	    }

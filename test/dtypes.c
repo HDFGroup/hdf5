@@ -2088,7 +2088,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<src_size; k++) {
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size, k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)),
+		   "");
 	    switch (src_type) {
 	    case INT_CHAR:
 		memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
@@ -2141,7 +2142,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size, k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
+		   "");
 	    switch (dst_type) {
 	    case INT_CHAR:
 		memcpy(aligned, saved+j*sizeof(char), sizeof(signed char));
@@ -2193,7 +2195,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", hw[ENDIAN(dst_size, k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
+		   "");
 	    switch (dst_type) {
 	    case INT_CHAR:
 		printf(" %29d\n", *((signed char*)hw));
@@ -2656,7 +2659,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<src_size; k++) {
 		printf(" %02x", saved[j*src_size+ENDIAN(src_size,k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)dst_size-(ssize_t)src_size)),
+		   "");
 	    if (FLT_FLOAT==src_type) {
 		float x;
 		memcpy(&x, (float*)saved+j, sizeof(float));
@@ -2677,7 +2681,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", buf[j*dst_size+ENDIAN(dst_size,k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
+		   "");
 	    if (FLT_FLOAT==dst_type) {
 		float x;
 		memcpy(&x, (float*)buf+j, sizeof(float));
@@ -2698,7 +2703,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<dst_size; k++) {
 		printf(" %02x", hw[ENDIAN(dst_size,k)]);
 	    }
-	    printf("%*s", 3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size), "");
+	    printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)),
+		   "");
 	    if (FLT_FLOAT==dst_type) {
 		printf(" %29.20e\n", hw_f);
 	    } else if (FLT_DOUBLE==dst_type) {

@@ -4918,7 +4918,7 @@ H5T_conv_i32le_f64le (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	     * element of the buffer) then the source and destination areas
 	     * overlap so we need to use a temp buf for the destination.
 	     */
-	    if (s==buf) d = tmp;
+	    if ((void*)s==buf) d = tmp;
 
 	    /* Convert the integer to a sign and magnitude */
 	    switch (src->u.atomic.u.i.sign) {

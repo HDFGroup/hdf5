@@ -99,6 +99,13 @@ Step 2. Configure.
 	RANLIB	  Name of the `ranlib' program or `:' if none.
 	MAKE	  Name of the `make' program (GNU make is preferred)
 
+    * The default compiler is `cc -n32' on Irix6.x platforms and `cc -64' on
+      Irix64 platforms. To use an alternate compiler (such as `cc -o32')
+      specify the name and compiler selection switch with the CC environment
+      variable:
+
+	$ CC='cc -o32' ./configure ......
+
     * This version of HDF5 is normally built with various debugging code
       enabled.  To turn it off add the `--disable-debug' switch to the
       configure command. Even if debugging support is compiled into the
