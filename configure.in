@@ -1631,23 +1631,6 @@ case "X-$enable_parallel" in
     fi
     ;;
 
-  X-mpich)
-    dnl For normal mpich installation the compiler, mpicc, should know
-    dnl where the MPI and MPI-IO header files are located and know which
-    dnl extra libraries need to be linked and will supply appropriate
-    dnl flags to the underlying compiler.
-    AC_MSG_RESULT(mpich)
-    AC_MSG_WARN(*** Why aren't you using an mpicc compiler? ***)
-
-    dnl Apparently mpicc isn't installed correctly so configure must search
-    dnl for the header files and libraries. Actually we only have to search
-    dnl for the libraries in order to get the onto the link line, the user
-    dnl will have already told us about the locations. Fail if something
-    dnl is missing.
-    PARALLEL=mpich
-    AC_CHECK_LIB(mpich,MPI_Init,,AC_MSG_ERROR(no mpich library))
-    ;;
-
   *)
     AC_MSG_RESULT(error)
     AC_MSG_ERROR(\'$enable_parallel\' is not a valid parallel search type)
