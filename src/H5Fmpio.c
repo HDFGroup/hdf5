@@ -403,10 +403,6 @@ H5F_mpio_read(H5F_low_t *lf, const H5F_access_t *access_parms,
     fprintf(stdout, "Entering H5F_mpio_read\n" );
 #endif
 
-    /* Check empty read */
-    if (0 == size)
-        HRETURN(SUCCEED);
-
     /* numeric conversion of offset and size  */
     if (SUCCEED != H5F_haddr_to_MPIOff( *addr, &mpi_off )) {
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
@@ -518,10 +514,6 @@ H5F_mpio_write(H5F_low_t *lf, const H5F_access_t *access_parms,
 #ifdef H5F_MPIO_DEBUG
     fprintf(stdout, "Entering H5F_mpio_write\n" );
 #endif
-
-    /* Check empty write */
-    if (0 == size)
-        HRETURN(SUCCEED);
 
     /* numeric conversion of offset and size  */
     if (SUCCEED != H5F_haddr_to_MPIOff( *addr, &mpi_off )) {

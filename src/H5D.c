@@ -1170,7 +1170,6 @@ H5D_read(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (0==nelmts) HRETURN (SUCCEED);
     if (NULL == (tconv_func = H5T_find(dataset->type, mem_type,
 				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
@@ -1466,7 +1465,6 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");
     }
-    if (0==nelmts) HRETURN (SUCCEED);
     if (NULL == (tconv_func = H5T_find(mem_type, dataset->type,
 				       xfer_parms->need_bkg, &cdata))) {
 	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL,
