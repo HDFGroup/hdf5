@@ -7099,9 +7099,6 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
     size_t nelmts;      /* Starting number of elements */
     size_t io_left;     /* The number of elements left in I/O operation */
     size_t start_io_left; /* The initial number of elements left in I/O operation */
-#ifndef NO_DUFFS_DEVICE
-    size_t duffs_index; /* Counting index for Duff's device */
-#endif /* NO_DUFFS_DEVICE */
 
     FUNC_ENTER_NOINIT (H5S_hyper_get_seq_list_opt);
 
@@ -7346,118 +7343,55 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space,H5S_sel_iter_t *iter,
 
         /* Read in data until an entire sequence can't be written out any longer */
         while(curr_rows>0) {
+
+#define DUFF_GUTS							      \
+    /* Store the sequence information */				      \
+    off[curr_seq]=loc;							      \
+    len[curr_seq]=actual_bytes;						      \
+									      \
+    /* Increment sequence count */					      \
+    curr_seq++;								      \
+									      \
+    /* Increment information to reflect block just processed */		      \
+    loc+=fast_dim_buf_off;
+
 #ifdef NO_DUFFS_DEVICE
             /* Loop over all the blocks in the fastest changing dimension */
             while(fast_dim_count>0) {
-                /* Store the sequence information */
-                off[curr_seq]=loc;
-                len[curr_seq]=actual_bytes;
-
-                /* Increment sequence count */
-                curr_seq++;
-
-                /* Increment information to reflect block just processed */
-                loc+=fast_dim_buf_off;
+                DUFF_GUTS
 
                 /* Decrement number of blocks */
                 fast_dim_count--;
             } /* end while */
 #else /* NO_DUFFS_DEVICE */
-            duffs_index = (fast_dim_count + 7) / 8;
-            switch (fast_dim_count % 8) {
-                case 0:
-                    do
-                      {
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
+            {
+                size_t duffs_index; /* Counting index for Duff's device */
 
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 7:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 6:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 5:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 4:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 3:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 2:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                case 1:
-                        /* Store the sequence information */
-                        off[curr_seq]=loc;
-                        len[curr_seq]=actual_bytes;
-
-                        /* Increment sequence count */
-                        curr_seq++;
-
-                        /* Increment information to reflect block just processed */
-                        loc+=fast_dim_buf_off;
-
-                  } while (--duffs_index > 0);
-            } /* end switch */
+                duffs_index = (fast_dim_count + 7) / 8;
+                switch (fast_dim_count % 8) {
+                    case 0:
+                        do
+                          {
+                            DUFF_GUTS
+                    case 7:
+                            DUFF_GUTS
+                    case 6:
+                            DUFF_GUTS
+                    case 5:
+                            DUFF_GUTS
+                    case 4:
+                            DUFF_GUTS
+                    case 3:
+                            DUFF_GUTS
+                    case 2:
+                            DUFF_GUTS
+                    case 1:
+                            DUFF_GUTS
+                      } while (--duffs_index > 0);
+                } /* end switch */
+            }
 #endif /* NO_DUFFS_DEVICE */
+#undef DUFF_GUTS
 
             /* Increment offset in destination buffer */
             loc += wrap[fast_dim];
