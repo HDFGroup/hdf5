@@ -25,7 +25,10 @@ OL.upperroman { list-style-type: upper-roman }
 <TH>Test case
 </TH>
 
-<TH>Test file
+<TH>Test source file
+</TH>
+
+<TH>Test method
 </TH>
 
 <TH>Expected test results
@@ -41,7 +44,25 @@ OL.upperroman { list-style-type: upper-roman }
 <TD>dsets.c
 </TD>
 
+<TD>
+<OL>
+<LI>Create chunked dataset
+<LI>Query dataset offset
+</OL>
+</TD>
+
 <TD>FAIL
+</TD>
+
+<TD>
+<P>Because dataset is stored in chunks that are indexed by a B-tree, there is
+no single piece of data to query the offset of.
+</P>
+<P>It may be possible in the future to
+enhance this function by querying the offset of a particular chunk (or chunks),
+but that has limited use because chunks could be compressed, etc. with an I/O
+filter.
+</P>
 </TD>
 
 </TR>
@@ -53,7 +74,26 @@ OL.upperroman { list-style-type: upper-roman }
 <TD>dsets.c
 </TD>
 
+<TD>
+<OL>
+<LI>Create chunked dataset
+<LI>Query dataset offset
+</OL>
+</TD>
+
 <TD>FAIL
+</TD>
+
+<TD>
+<P>Because dataset is stored in the object header of the dataset, there is
+no separate piece of data to query the offset of.
+</P>
+<P>It may be possible in the future to get the offset of the data in the object
+header, but this is problematic due to the fact that the messages in the object
+header can get relocated in the file when changes (like adding attributes, etc.)
+are made to the dataset, invalidating the address given to the user.
+filter.
+</P>
 </TD>
 
 </TR>
@@ -65,11 +105,21 @@ OL.upperroman { list-style-type: upper-roman }
 <TD>dsets.c
 </TD>
 
-<TD><P>Succeed in getting the proper address and be able to verify
+<TD>
+<OL>
+<LI>Create file with 0 sized user-block (the default)
+<LI>Create contigous dataset
+<LI>Query dataset offset
+</OL>
+</TD>
+
+<TD>
+<P>Succeed in getting the proper address and be able to verify
 that the data at that address in the file is what was written out.
 </P>
 <P>When data storage allocation is "late" (the default), querying the offset
-should fail.</P>
+should fail if performed before data is written to the dataset.
+</P>
 </TD>
 
 <TD>Needs additional test to verify that the data written out is located at the
@@ -85,11 +135,21 @@ correct offset in the file.
 <TD>dsets.c
 </TD>
 
-<TD><P>Succeed in getting the proper address and be able to verify
+<TD>
+<OL>
+<LI>Create file with non-0 sized user-block
+<LI>Create contigous dataset
+<LI>Query dataset offset
+</OL>
+</TD>
+
+<TD>
+<P>Succeed in getting the proper address and be able to verify
 that the data at that address in the file is what was written out.
 </P>
 <P>When data storage allocation is "late" (the default), querying the offset
-should fail.</P>
+should fail if performed before data is written to the dataset.
+</P>
 </TD>
 
 <TD>Needs test for this case.
@@ -104,12 +164,27 @@ should fail.</P>
 <TD>external.c
 </TD>
 
+<TD>
+<OL>
+<LI>Create contigous dataset with external storage
+<LI>Query dataset offset
+</OL>
+</TD>
+
 <TD>FAIL
+</TD>
+
+<TD>
+<P>In theory, it's easy to return the offset of the data in the external file,
+but this wasn't done because it would be too easy for users to assume that the
+offset returned was in the HDF5 file instead of the external file.
+</P>
 </TD>
 
 </TR>
 
 </TABLE>
+<BR>
 
 <LI><H3><U>Parallel Review:</U></H3>
 <P>The H5Dget_offset() function is not tested in parallel.  Currently, there
