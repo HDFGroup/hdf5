@@ -91,6 +91,10 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
+        written to the file and then subsequently queried with the
+        H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
+        of H5S_SCALAR. EIP - 2002/06/04
     * Clear symbol table node "dirty" flag when flushing symbol tables to
         disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
     * Fixed bug where an object's header could get corrupted in certain

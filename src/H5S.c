@@ -1160,10 +1160,15 @@ H5S_read(H5G_entry_t *ent)
 		       "memory allocation failed");
     }
     
-    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple))) {
-        ds->extent.type = H5S_SIMPLE;
-    } else {
-        ds->extent.type = H5S_SCALAR;
+    if (H5O_read(ent, H5O_SDSPACE, 0, &(ds->extent.u.simple)) == NULL) {
+	  HRETURN_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL,
+			"unable to load dataspace info from dataset header");
+    }
+
+    if(ds->extent.u.simple.rank != 0) {
+         ds->extent.type = H5S_SIMPLE;
+     } else {
+         ds->extent.type = H5S_SCALAR;
     }
 
     /* Default to entire dataspace being selected */
@@ -1273,7 +1278,9 @@ H5S_is_simple(const H5S_t *sdim)
 
     /* Check args and all the boring stuff. */
     assert(sdim);
-    ret_value = sdim->extent.type == H5S_SIMPLE ? TRUE : FALSE;
+    ret_value = (sdim->extent.type == H5S_SIMPLE ||
+	  sdim->extent.type == H5S_SCALAR) ? TRUE : FALSE;
+ 
 
     FUNC_LEAVE(ret_value);
 }
@@ -1512,7 +1519,7 @@ H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
     assert (mem_space && (H5S_SIMPLE==mem_space->extent.type ||
 			  H5S_SCALAR==mem_space->extent.type));
     assert (file_space && (H5S_SIMPLE==file_space->extent.type ||
-			   H5S_SCALAR==mem_space->extent.type));
+			   H5S_SCALAR==file_space->extent.type));
 
     /*
      * We can't do conversion if the source and destination select a
