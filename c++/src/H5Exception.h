@@ -52,7 +52,7 @@ class H5_DLLCPP Exception {
 	const char* getCFuncName() const;	// function name as a char string 
 
 	// Turns on the automatic error printing.
-	static void setAutoPrint( H5E_auto_t func, void* client_data);
+	static void setAutoPrint( H5E_auto_t& func, void* client_data);
 
 	// Turns off the automatic error printing.
 	static void dontPrint();

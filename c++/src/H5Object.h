@@ -74,11 +74,7 @@ class H5_DLLCPP H5Object : public IdComponent {
 	void removeAttr( const char* name ) const;
 	void removeAttr( const string& name ) const;
 
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const;
-
-	// Creates a reference to a dataset region in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	// Noop destructor
 	virtual ~H5Object();
 
    protected:

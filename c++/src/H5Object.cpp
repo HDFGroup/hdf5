@@ -287,53 +287,6 @@ void H5Object::flush(H5F_scope_t scope ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::Reference
-///\brief	Creates a reference to an Hdf5 object or to a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\param	dataspace - IN: Dataspace with selection
-///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-///\return	A reference
-///\exception	H5::ReferenceIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* H5Object::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
-{
-   void *ref;
-   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, dataspace.getId());
-   if (ret_value < 0)
-   {
-      throw AttributeIException("H5Object::Reference", 
-		"H5Rcreate failed");
-   }
-   return(ref);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Object::Reference
-///\brief       This is an overloaded function, provided for your convenience.
-///             It differs from the above function in that it only creates
-///             a reference to an Hdf5 object, not to a dataset region.
-///\param	name - IN: Name of the object to be referenced
-///\return	A reference
-///\exception	H5::ReferenceIException
-///\par Description
-//		This function passes H5R_OBJECT and -1 to the C API H5Rcreate
-//		to create a reference to the named object.  The next function
-//		will create a reference to a dataset region.
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* H5Object::Reference(const char* name) const
-{
-   void *ref;
-   herr_t ret_value = H5Rcreate(ref, id, name, H5R_OBJECT, -1);
-   if (ret_value < 0)
-   {
-      throw AttributeIException("H5Object::Reference", 
-		"H5Rcreate failed");
-   }
-   return(ref);
-}
-//--------------------------------------------------------------------------
 // Function:	H5Object destructor
 ///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
