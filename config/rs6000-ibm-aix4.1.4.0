@@ -3,37 +3,8 @@
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
+#
+# See BlankForm in this directory for details.
 
-
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
-
-# What must *always* be present for things to compile correctly?
-#CFLAGS="$CFLAGS -ansi"
-#CPPFLAGS="$CPPFLAGS -I."
-
-# What compiler flags should be used for code development?
-DEBUG_CFLAGS=
-DEBUG_CPPFLAGS=
-
-# What compiler flags should be used for building a production
-# library?
-PROD_CFLAGS=
-PROD_CPPFLAGS=
-
-# What compiler flags enable code profiling?
-PROFILE_CFLAGS=
-PROFILE_CPPFLAGS=
-
-
-#----------------------------------------------------------------------------
-# Values for overriding configuration tests when cross compiling.
-# This includes compiling on some machines where the serial front end
-# compiles for a parallel back end.
-
-# Set this to `yes' or `no' depending on whether the target is big
-# endian or little endian.
+# Cross compiling defaults
 ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
-

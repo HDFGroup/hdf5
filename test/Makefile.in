@@ -6,8 +6,10 @@
 # 
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags.
+# Add include directory to the C preprocessor flags and the hdf5
+# library to the library list.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
+LIBS=../src/libhdf5.a @LIBS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -52,78 +54,79 @@ timings _timings: $(TIMINGS)
 	   fi;								      \
 	done;
 
-# How to build the programs...
+# How to build the tests...  They all depend on the hdf5 library.
+$(TESTS): ../src/libhdf5.a
 TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o trefer.o tselect.o tstab.o th5s.o
-testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
+testhdf5: $(TESTHDF5_OBJ)
+	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) $(LDFLAGS) $(LIBS)
 
-gheap: gheap.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ gheap.o ../src/libhdf5.a $(LIBS)
+gheap: gheap.o
+	$(CC) $(CFLAGS) -o $@ gheap.o $(LDFLAGS) $(LIBS)
 
-dsets: dsets.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ dsets.o ../src/libhdf5.a $(LIBS)
+dsets: dsets.o
+	$(CC) $(CFLAGS) -o $@ dsets.o $(LDFLAGS) $(LIBS)
 
-bittests: bittests.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ bittests.o ../src/libhdf5.a $(LIBS)
+bittests: bittests.o
+	$(CC) $(CFLAGS) -o $@ bittests.o $(LDFLAGS) $(LIBS)
 
-dtypes: dtypes.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ dtypes.o ../src/libhdf5.a $(LIBS)
+dtypes: dtypes.o
+	$(CC) $(CFLAGS) -o $@ dtypes.o $(LDFLAGS) $(LIBS)
 
-hyperslab: hyperslab.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ hyperslab.o ../src/libhdf5.a $(LIBS)
+hyperslab: hyperslab.o
+	$(CC) $(CFLAGS) -o $@ hyperslab.o $(LDFLAGS) $(LIBS)
 
-istore: istore.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ istore.o ../src/libhdf5.a $(LIBS)
+istore: istore.o
+	$(CC) $(CFLAGS) -o $@ istore.o $(LDFLAGS) $(LIBS)
 
-cmpd_dset: cmpd_dset.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ cmpd_dset.o ../src/libhdf5.a $(LIBS)
+cmpd_dset: cmpd_dset.o
+	$(CC) $(CFLAGS) -o $@ cmpd_dset.o $(LDFLAGS) $(LIBS)
 
-extend: extend.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ extend.o ../src/libhdf5.a $(LIBS)
+extend: extend.o
+	$(CC) $(CFLAGS) -o $@ extend.o $(LDFLAGS) $(LIBS)
 
-external: external.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ external.o ../src/libhdf5.a $(LIBS)
+external: external.o
+	$(CC) $(CFLAGS) -o $@ external.o $(LDFLAGS) $(LIBS)
 
-shtype: shtype.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ shtype.o ../src/libhdf5.a $(LIBS)
+shtype: shtype.o
+	$(CC) $(CFLAGS) -o $@ shtype.o $(LDFLAGS) $(LIBS)
 
-iopipe: iopipe.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ iopipe.o ../src/libhdf5.a $(LIBS)
+iopipe: iopipe.o
+	$(CC) $(CFLAGS) -o $@ iopipe.o $(LDFLAGS) $(LIBS)
 
-grptime: grptime.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ grptime.o ../src/libhdf5.a $(LIBS)
+grptime: grptime.o
+	$(CC) $(CFLAGS) -o $@ grptime.o $(LDFLAGS) $(LIBS)
 
-big: big.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ big.o ../src/libhdf5.a $(LIBS)
+big: big.o
+	$(CC) $(CFLAGS) -o $@ big.o $(LDFLAGS) $(LIBS)
 
-links: links.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ links.o ../src/libhdf5.a $(LIBS)
+links: links.o
+	$(CC) $(CFLAGS) -o $@ links.o $(LDFLAGS) $(LIBS)
 
-chunk: chunk.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ chunk.o ../src/libhdf5.a $(LIBS)
+chunk: chunk.o
+	$(CC) $(CFLAGS) -o $@ chunk.o $(LDFLAGS) $(LIBS)
 
-mtime: mtime.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ mtime.o ../src/libhdf5.a $(LIBS)
+mtime: mtime.o
+	$(CC) $(CFLAGS) -o $@ mtime.o $(LDFLAGS) $(LIBS)
 
-ragged: ragged.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ ragged.o ../src/libhdf5.a $(LIBS)
+ragged: ragged.o
+	$(CC) $(CFLAGS) -o $@ ragged.o $(LDFLAGS) $(LIBS)
 
-unlink: unlink.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ unlink.o ../src/libhdf5.a $(LIBS)
+unlink: unlink.o
+	$(CC) $(CFLAGS) -o $@ unlink.o $(LDFLAGS) $(LIBS)
 
-overhead: overhead.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ overhead.o ../src/libhdf5.a $(LIBS)
+overhead: overhead.o
+	$(CC) $(CFLAGS) -o $@ overhead.o $(LDFLAGS) $(LIBS)
 
-fillval: fillval.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ fillval.o ../src/libhdf5.a $(LIBS)
+fillval: fillval.o
+	$(CC) $(CFLAGS) -o $@ fillval.o $(LDFLAGS) $(LIBS)
 
-mount: mount.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ mount.o ../src/libhdf5.a $(LIBS)
+mount: mount.o
+	$(CC) $(CFLAGS) -o $@ mount.o $(LDFLAGS) $(LIBS)
 
-flush1: flush1.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ flush1.o ../src/libhdf5.a $(LIBS)
+flush1: flush1.o
+	$(CC) $(CFLAGS) -o $@ flush1.o $(LDFLAGS) $(LIBS)
 
-flush2: flush2.o ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ flush2.o ../src/libhdf5.a $(LIBS)
+flush2: flush2.o
+	$(CC) $(CFLAGS) -o $@ flush2.o $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

@@ -3,68 +3,20 @@
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
-
-
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
-#----------------------------------------------------------------------------
-
-
-# Choosing a C Compiler
-# ---------------------
 #
-# Configre will use the value of environment variable `CC' if it is
-# set.  If not then configure checks for a working GNU `gcc' followed
-# by other common compiler names.  If a default compiler is desired
-# then uncomment the following line, replacing `gcc' with the name of
-# the default compiler.
-
-#CC=${CC:-gcc}
+# See BlankForm in this directory for detailed information.
 
 
 
+# The default compiler is `cc'
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
 
-# C Compiler and Preprocessor Flags
-# ---------------------------------
-#
-# Flags that end with `_CFLAGS' are always passed to the compiler.
-# Flags that end with `_CPPFLAGS' are passed to the compiler when
-# compiling but not when linking.
-#
-# DEBUG_CFLAGS		Flags to pass to the compiler to create a
-# DEBUG_CPPFLAGS	library suitable for use with debugging
-#			tools. Usually this list will exclude
-#			optimization switches (like `-O') and include
-#			switches that turn on symbolic debugging
-#			support (like `-g').
-#
-# PROD_CFLAGS		Flags to pass to the compiler to create a
-# PROD_CPPFLAGS		production version of the library.  These
-#			usualy exclude symbolic debugging switches
-#			(like `-g') and include optimization switches
-#			(like `-O').
-#
-# PROFILE_CFLAGS	Flags to pass to the compiler to create a
-# PROFILE_CPPFLAGS	library suitable for performance testing (like 
-# 			`-pg').  This may or may not include debugging 
-# 			or production flags.
-#			
-# CFLAGS		Flags can be added to this variable which
-#			might already be partially initialized.  These 
-#			flags will always be passed to the compiler
-#			and should include switches to turn on full
-#			warnings.  HDF5 attempts to be ANSI and Posix
-#			compliant and employ good programming
-#			practices resulting in few if any
-#			warnings. Note: warning flags do not have to
-#			be added to this variable if the compiler is
-#			the GNU gcc compiler or a descendent of gcc.
-#
-
-case "$CC" in
-    *gcc*)
+# Compiler flags
+case "X-$CC_BASENAME" in
+    X-gcc)
 	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
@@ -84,21 +36,3 @@ case "$CC" in
 	PROFILE_CPPFLAGS=
 	;;
 esac
-
-
-
-# Overriding Configure Tests
-# --------------------------
-#
-# Values for overriding configuration tests when cross compiling.
-# This includes compiling on some machines where the serial front end
-# compiles for a parallel back end.
-
-# Set this to `yes' or `no' depending on whether the target is big
-# endian or little endian.
-#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
-
-# Set this to the width required by printf() to print type `long
-# long'.  For instance, if the format would be `%lld' then set it to
-# `ll' or if the format would be `%qd' set it to `q'.
-#hdf5_cv_printf_ll=${hdf5_cv_printf_ll='ll'}

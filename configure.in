@@ -28,8 +28,6 @@ elif test $hdf5_cv_host != $host; then
    AC_MSG_ERROR(config.cache file is invalid)
 fi
 
-
-
 dnl ----------------------------------------------------------------------
 dnl Source any special files that we need.  These files normally aren't
 dnl present but can be used by the maintainers to fine tune things like
@@ -44,6 +42,7 @@ dnl	OS
 dnl	VENDOR
 dnl	CPU
 dnl
+
 AC_MSG_CHECKING(for host config file)
 host_config="none"
 for f in $host \
@@ -60,14 +59,15 @@ for f in $host \
 done
 AC_MSG_RESULT($host_config)
 if test $host_config != "none"; then
+   CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
    . $host_config
 fi
-
 
 dnl ----------------------------------------------------------------------
 dnl Check for programs.
 dnl
 AC_PROG_CC
+CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_RANLIB
@@ -98,7 +98,7 @@ dnl Production flags?
 dnl
 AC_MSG_CHECKING(for production mode)
 AC_ARG_ENABLE(production,
-  [--enable-production=yes|no  Determines how to run the compiler.])
+  [  --enable-production     Determines how to run the compiler.])
 
 case "X-$enableval" in
    X-yes)
@@ -121,27 +121,27 @@ case "X-$enableval" in
       ;;
 esac
 
-
 dnl ----------------------------------------------------------------------
-dnl Check for libraries.
+dnl Check for system libraries.
 dnl
 AC_CHECK_LIB(m, ceil)
 AC_CHECK_LIB(coug, main)	dnl ...for ASCI/Red
-AC_CHECK_LIB(z, compress2)
+AC_CHECK_LIB(jpeg,main)		dnl ...required for linking hdf4 apps
 
 dnl ----------------------------------------------------------------------
-dnl Check for header files.
+dnl Check for system header files.
 dnl
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(io.h sys/resource.h sys/time.h unistd.h winsock.h zlib.h)
+AC_CHECK_HEADERS(io.h sys/resource.h sys/time.h unistd.h winsock.h)
 AC_CHECK_HEADERS(sys/ioctl.h sys/stat.h)
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.
 dnl
 AC_TYPE_OFF_T
-AC_TYPE_SIZE_T
+AC_CHECK_TYPE(size_t, unsigned long)
+AC_CHECK_TYPE(ssize_t, long)
 AC_C_BIGENDIAN
 AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(int, 4)
@@ -158,12 +158,12 @@ EOF
 AC_CHECK_SIZEOF(off_t, 4)
 
 AC_ARG_ENABLE(hsizet,
-  [--disable-hsizet          Datasets can normally be larger than memory
-                             and/or files but some compilers are unable to
-                             handle this (including versions of GCC before
-                             2.8.0).  Disabling the feature causes dataset
-                             sizes to be restricted to the size of core memory,
-                             or 'size_t'.],
+  [  --disable-hsizet        Datasets can normally be larger than memory
+                          and/or files but some compilers are unable to
+                          handle this (including versions of GCC before
+                          2.8.0).  Disabling the feature causes dataset
+                          sizes to be restricted to the size of core memory,
+                          or 'size_t'.],
   HSIZET=$enableval)
 AC_MSG_CHECKING(for sizeof hsize_t and hssize_t)
 case $HSIZET in
@@ -175,6 +175,94 @@ case $HSIZET in
         AC_DEFINE(HAVE_LARGE_HSIZET)
 	;;
 esac
+
+dnl ----------------------------------------------------------------------
+dnl Is the GNU zlib present?  It has a header file `zlib.h' and a library
+dnl `-lz' and their locations might be specified with the `--enable-zlib'
+dnl command-line switch.  The value is an include path and/or a library path.
+dnl If the library path is specified then it must be preceded by a comma.
+dnl
+
+AC_ARG_WITH(zlib,[  --with-zlib=INC,LIB     Use the GNU zlib compression],
+            ,withval=yes)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(zlib.h)
+	AC_CHECK_LIB(z, compress2)
+	;;
+    no)
+	AC_MSG_CHECKING(for GNU zlib)
+	AC_MSG_RESULT(suppressed)
+	;;
+    *)
+	zlib_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$zlib_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$zlib_inc"
+	    AC_CHECK_HEADERS(zlib.h,,CPPFLAGS="$saved_CPPFLAGS")
+        else
+	    AC_CHECK_HEADERS(zlib.h)
+	fi
+
+	zlib_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$zlb_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$zlib_lib"
+	    AC_CHECK_LIB(z, compress2,,LDFLAGS="$saved_LDFLAGS")
+	else
+	    AC_CHECK_LIB(z, compress2)
+	fi
+	;;
+esac
+	
+dnl ----------------------------------------------------------------------
+dnl Is HDF4 present?  If so then we can compile the h5toh4 converter. We
+dnl assume h5toh4 can be compiled and then prove otherwise when we don't find
+dnl a header file or library.
+dnl
+AC_SUBST(H5TOH4)
+H5TOH4=h5toh4
+AC_SUBST(TESTH5TOH4)
+TESTH5TOH4=testh5toh4
+
+AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=yes)
+case $withval in
+    yes)
+	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	;;
+    no)
+	AC_MSG_CHECKING(for HDF4)
+	AC_MSG_RESULT(suppressed)
+	unset H5TOH4 TESTH5TOH4
+	;;
+    *)
+	hdf4_inc="`echo $withval |cut -f1 -d,`"
+	if test "X" != "$hdf4_inc"; then
+	    saved_CPPFLAGS="$CPPFLAGS"
+	    CPPFLAGS="$CPPFLAGS -I$hdf4_inc"
+	    AC_CHECK_HEADERS(mfhdf.h,,
+	        CPPFLAGS="$saved_CPPFLAGS"
+	        unset H5TOH4 TESTH5TOH4
+            )
+	else
+	    AC_CHECK_HEADERS(mfhdf.h)
+	fi
+	
+	hdf4_lib="`echo $withval |cut -f2 -d, -s`"
+	if test "X" != "$hdf4_lib"; then
+	    saved_LDFLAGS="$LDFLAGS"
+	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
+	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
+	else
+	    AC_CHECK_LIB(mfhdf,main)
+	    AC_CHECK_LIB(df,main)
+	fi
+	;;
+esac
+
 
 dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
@@ -309,7 +397,7 @@ dnl Turn on debugging by setting compiler flags
 dnl
 AC_MSG_CHECKING(for debug flags)
 AC_ARG_ENABLE(debug,
-  [--enable-debug=all        Turn on debugging in all packages.  One may also
+  [  --enable-debug[=all]    Turn on debugging in all packages.  One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no.  The default
                           is most packages.],
@@ -343,7 +431,7 @@ dnl Enable tracing of the API
 dnl
 AC_MSG_CHECKING(for API tracing);
 AC_ARG_ENABLE(trace,
-  [--disable-trace           Disable API tracing capability],
+  [  --disable-trace         Disable API tracing capability],
   TRACE=$enableval)
 
 if test X = "X$TRACE" -o Xyes = "X$TRACE"; then
@@ -355,39 +443,51 @@ else
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Check for parallel support
+dnl Check for parallel support.  If the base name of the compiler is `mpicc'
+dnl then assume parallel support is `mpio' unless specified otherwise by
+dnl the user.
 dnl
 AC_ARG_ENABLE(parallel,
-  --enable-parallel=mpio    Enable parallel support with MPIO,
+  [  --enable-parallel=mpio  Enable parallel support with MPIO],
   PARALLEL=$enableval)
 AC_MSG_CHECKING(for parallel support);
-AC_SUBST(RUNTEST)
+AC_SUBST(RUNSERIAL)
+AC_SUBST(RUNPARALLEL)
+
+if test "mpicc" = "$CC_BASENAME" -a "X-" = "X-$PARALLEL"; then
+    PARALLEL=mpio
+fi
 
 case "X-$PARALLEL" in
 
-   X-|X-no)
-      # Parallel support is not enabled
-      AC_MSG_RESULT(disabled)
-      ;;
+    X-|X-no)
+        # Parallel support is not enabled
+        AC_MSG_RESULT(disabled)
+        ;;
 
-   X-mpio|X-yes)
-      # Use MPIO.  Define HAVE_PARALLEL in src/H5config.h (comes from
-      # ./acconfig.h) and augment the include and library search paths
-      # (it doesn't hurt to have extra paths).  Then check for header
-      # files and libraries. Some extra source files are added to the
-      # list also so we don't have to ifdef out the whole file.
-      AC_MSG_RESULT(mpio)
-      AC_DEFINE(HAVE_PARALLEL)
-      CPPFLAGS="$CPPFLAGS $MPI_INC"
-      CFLAGS="$CFLAGS $MPI_LIB"
-      RUNTEST="$RUNTEST"
-      AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
-      AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
-      ;;
+    X-mpio|X-yes)
+        # Use MPIO.  Define HAVE_PARALLEL in src/H5config.h (comes from
+        # ./acconfig.h) and augment the include and library search paths
+        # (it doesn't hurt to have extra paths).  Then check for header
+        # files and libraries. Some extra source files are added to the
+        # list also so we don't have to ifdef out the whole file.
+        AC_MSG_RESULT(mpio)
+        AC_DEFINE(HAVE_PARALLEL)
+        AC_CHECK_LIB(mpi,main)  dnl Replace `main' with some function
+        AC_CHECK_LIB(mpio,main) dnl Replace `main' with some function
+	if test "X-" = "X-$RUNSERIAL" -o "X-none" = "X-$RUNSERIAL"; then
+	    RUNSERIAL=
+	fi
+	if test "X-" = "X-$RUNPARALLEL"; then
+	    RUNPARALLEL="mpirun -np 2"
+	elif test "X-none" = "X-$RUNPARALLEL"; then
+	    RUNPARALLEL=
+	fi
+        ;;
 
-   *)
-      AC_MSG_ERROR(unknown parallel support: $PARALLEL)
-      ;;
+    *)
+        AC_MSG_ERROR(unknown parallel support: $PARALLEL)
+        ;;
 esac
         
 
@@ -432,4 +532,5 @@ dnl before we generate them or the Makefiles.
 touch ./config/stamp1 ./config/stamp2
 
 AC_OUTPUT(config/depend config/commence config/conclude \
-          Makefile src/Makefile pablo/Makefile test/Makefile tools/Makefile examples/Makefile)
+          Makefile src/Makefile pablo/Makefile test/Makefile \
+          testpar/Makefile tools/Makefile examples/Makefile)

@@ -3,69 +3,73 @@
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
+#
+# See BlankForm in this directory for details.
 
-
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
-CC=${CC:-gcc}
-case `$CC -v 2>&1 |tail -1 |sed 's/gcc version //'` in
-   2.7.*)
-       echo "  +------------------------------------------------+"
-       echo "  | You have an old version of gcc. Please upgrade |"
-       echo "  | to 2.8.1 or better.  Continuing anyway, but    |"
-       echo "  | code generation may be wrong on some platforms.|"
-       echo "  +------------------------------------------------+"
-       sleep 5
-       CCVENDOR=gcc
-       ;;
-   2.8.*)
-       CFLAGS="$CFLAGS -Wsign-compare"
-       CCVENDOR=gcc
-       ;;
-   egcs-*)
-       CFLAGS="$CFLAGS -Wsign-compare"
-       CCVENDOR=egcs
-       ;;
-   pgcc-*)
-       CFLAGS="$CFLAGS -Wsign-compare"
-       CCVENDOR=pgcc
-       ;;
-esac
-
-# What must *always* be present for things to compile correctly?
-CFLAGS="$CFLAGS -ansi"
-
-# What compiler flags should be used for code development?
-DEBUG_CFLAGS="-g -fverbose-asm"
-DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-
-# What compiler flags should be used for building a production
-# library?
-if [ "gcc" = "$CCVENDOR" ]; then
-    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O3 -finline-functions -malign-double -fomit-frame-pointer -fschedule-insns2"
-    PROD_CPPFLAGS=
-elif [ "egcs" = "$CCVENDOR" ]; then
-    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O6 -malign-double"
-    PROD_CPPFLAGS=
-elif [ "pgcc" = "$CCVENDOR" ]; then
-    PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O6 -malign-double"
-    PROD_CPPFLAGS=
-else
-    PROD_CFLAGS=
-    PROD_CPPFLAGS=
+# The default compiler is `gcc'.
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
 fi
 
-# What compiler flags enable code profiling?
-PROFILE_CFLAGS=-pg
-PROFILE_CPPFLAGS=
+ARCH="-mcpu=pentiumpro -march=pentiumpro -malign-double"
+NOFP="-fomit-frame-pointer"
 
-#----------------------------------------------------------------------------
-# Values for overriding configuration tests when cross compiling.
-# This includes compiling on some machines where the serial front end
-# compiles for a parallel back end.
+# Compiler flags.  We use `-v' to get the version number because it almost
+# always works on Linux systems.
+case `$CC -v 2>&1 |grep 'gcc version' |sed 's/.*gcc version //'` in
+    2.7.*)
+        echo "  +------------------------------------------------+"
+        echo "  | You have an old version of gcc. Please upgrade |"
+        echo "  | to 2.8.1 or better.  Continuing anyway, but    |"
+        echo "  | code generation may be wrong on some platforms.|"
+        echo "  +------------------------------------------------+"
+        sleep 5
+	CFLAGS="$CFLAGS -ansi"
+	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2"
+	PROD_CPPFLAGS=
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
 
-# Set this to `yes' or `no' depending on whether the target is big
-# endian or little endian.
-#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
+    2.8.*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O3 $NOFP -finline-functions -fschedule-insns2"
+	PROD_CPPFLAGS=
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    egcs-*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O6 $NOFP"
+	PROD_CPPFLAGS=
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    pgcc-*)
+	CFLAGS="$CFLAGS -Wsign-compare"
+	PROD_CFLAGS="$ARCH -O6 $NOFP"
+	PROD_CPPFLAGS=
+	DEBUG_CFLAGS="-g -fverbose-asm"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+
+    *)
+	PROD_CFLAGS=-O
+	PROD_CPPFLAGS=
+	DEBUG_CFLAGS="-g"
+	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+	PROFILE_CFLAGS=-pg
+	PROFILE_CPPFLAGS=
+	;;
+esac

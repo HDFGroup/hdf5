@@ -86,6 +86,18 @@ Step 2. Configure.
       Debugging.html file.  To disable tracing support add
       `--disable-trace' to the configure command.
 
+    * Configure will look for the GNU zlib (a compression library) in
+      the standard places for your environment.  If it's installed in
+      a non-standard place then absolute path names can be specified
+      with `--with-zlib=INCDIR,LIBDIR' for the include file and/or
+      library. To prevent detection of zlib use `--without-zlib'.
+
+    * The HDF5-to-HDF4 conversion tool requires the HDF4 library and
+      header files which are auto-detected by configure.  If they are
+      in a non-standard place then absolute path names can be specified
+      with `--with-hdf4=INCDIR,LIBDIR' for the include file and/or
+      library. To prevent detection of hdf4 use `--without-hdf4'.
+
     * Old versions of gcc (<2.8.0) may experience register allocation
       problems on some architectures.  If this happens then the
       `--disable-hsizet' can be given but the resulting library will
@@ -169,10 +181,11 @@ Step 5. Install public files.
 	    ./tools/libh5tools.a
 
 	Some tools:
-	    ./tools/h5ls
-	    ./tools/h5repart
-	    ./tools/h5dump
-	    ./tools/h5debug
+	    ./tools/h5ls	(list file contents)
+	    ./tools/h5dump	(dump file contents)
+	    ./tools/h5repart	(repartition file families)
+	    ./tools/h5toh4	(hdf5 to hdf4 file converter)
+	    ./tools/h5debug	(low-level file debugging)
 	    ./tools/h5import	(a demo)
 
 Step 6. Subscribe to mailing lists.

@@ -3,21 +3,27 @@
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
+#
+# See BlankForm in this directory for details.
 
+# The default compiler is `cicc'
+if test "X-" =  "X-$CC"; then
+    CC=cicc
+    CC_BASENAME=cicc
+fi
 
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
+# The default archiver is `xar'
+AR="${AR:-xar}
 
-# Sometimes a particular compiler must be used.  If that's the case
-# then uncomment the following line.  Otherwise the main configure
-# script will try to detect the compiler automatically.
-CC=cicc
-AR=xar
+# There is no ranlib
 RANLIB=:
-LIBS="-L./ -L../ -lnoop_stubs"
-RUNTEST="yod -sz 1"
+
+# Additional libraries
+LDFLAGS="-L./ -L../ -lnoop_stubs"
+
+# How to run serial and parallel test programs
+RUNSERIAL="yod -sz 1"
+RUNPARALLEL="yod -sz 8"
 
 # What must *always* be present for things to compile correctly?
 CFLAGS="$CFLAGS -DDOS386"
@@ -36,15 +42,6 @@ PROD_CPPFLAGS=
 PROFILE_CFLAGS=-pg
 PROFILE_CPPFLAGS=
 
-
-#----------------------------------------------------------------------------
-# Values for overriding configuration tests when cross compiling.
-# This includes compiling on some machines where the serial front end
-# compiles for a parallel back end.
-
-# Set this to `yes' or `no' depending on whether the target is big
-# endian or little endian.
-#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
 
 # Set this to the width required by printf() to print type `long
 # long'.  For instance, if the format would be `%lld' then set it to

@@ -15,15 +15,22 @@
 # Choosing a C Compiler
 # ---------------------
 #
-# Configre will use the value of environment variable `CC' if it is
-# set.  If not then configure checks for a working GNU `gcc' followed
-# by other common compiler names.  If a default compiler is desired
-# then uncomment the following line, replacing `gcc' with the name of
-# the default compiler.
+# The user should be able to specify the compiler by setting the CC
+# environment variable to the name of the compiler and any switches it 
+# requires for proper operation.  If CC is unset then this script may
+# set it.  If CC is unset by time this script completes then configure 
+# will try `gcc' and `cc' in that order (perhaps some others too).
+#
+# Note: Code later in this file may depend on the value of $CC_BASENAME
+#       in order to distinguish between different compilers when
+#       deciding which compiler command-line switches to use.  This
+#       variable is set based on the incoming value of $CC and is only
+#       used within this file.
 
-#CC=${CC:-gcc}
-
-
+if test "X-" =  "X-$CC"; then
+    CC="/some/default/compiler/named/foo -ansi"
+    CC_BASENAME=foo
+fi
 
 
 # C Compiler and Preprocessor Flags
@@ -60,24 +67,30 @@
 #			practices resulting in few if any
 #			warnings.
 #
-# Note:			Warning flags do not have to be added to CFLAGS
+#			Warning flags do not have to be added to CFLAGS
 #			variable if the compiler is the GNU gcc
-#			compiler or a descendent of gcc.
+#			compiler or a descendent of gcc such as EGCS or PGCC.
 #
-# Note:			The CFLAGS should contains *something* or else 
+#			The CFLAGS should contains *something* or else 
 #			configure will probably add `-g'.  For most
 #			systems this isn't a problem but some systems
 #			will disable optimizations in favor of the
 #			`-g'.
 #			
 #
+# These flags should be set according to the compiler being used.
+# There are two ways to check the compiler.  You can try using `-v' or 
+# `--version' to see if the compiler will print a version string.  You 
+# can use the value of $CC_BASENAME which is the base name of the
+# first word in $CC (note that the value of CC may have changed
+# above).
 
-case "$CC" in
-    *gcc*)
+case $CC_BASENAME in
+    gcc)
 	CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
 	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
-	PROD_CFLAGS="-mcpu=pentiumpro -march=pentiumpro -O3 -finline-functions -malign-double -fomit-frame-pointer -fschedule-insns2"
+	PROD_CFLAGS="-O3 -fomit-frame-pointer"
 	PROD_CPPFLAGS=
 	PROFILE_CFLAGS="-pg"
 	PROFILE_CPPFLAGS=

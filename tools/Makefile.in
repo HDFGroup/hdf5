@@ -6,18 +6,20 @@
 # 
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags.
+# Add include directory to the C preprocessor flags, add the -lh5tools to the
+# libraries.
 CPPFLAGS=-I../src -I. @CPPFLAGS@
+LIBS=../src/libhdf5.a libh5tools.a @LIBS@
 
 # Tools test targets.
 # Use /bin/sh to use because the test is actually a shell script file.
 TESTS=testh5dump
 RUNTEST=/bin/sh
 
-# These are our main targets:
-PROGS=h5debug h5import h5ls h5repart h5dump
+# These are our main targets: library, programs, and tests
 LIB=libh5tools.a
-LIBS=../src/libhdf5.a libh5tools.a @LIBS@
+PROGS=h5debug h5import h5ls h5repart h5dump @H5TOH4@
+TESTS=@TESTH5TOH4@
 
 # Source and object files for the library.
 LIB_SRC=h5tools.c
@@ -28,26 +30,39 @@ PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c h5dump.c h5dumputil.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 PRIVATE_HDR=h5tools.h
 
+# Source and object files for the tests
+TEST_SRC=testh5toh4.c
+TEST_OBJ=$(TEST_SRC:.c=.o)
+
 # Programs have to be built before they can be tested!
 test _test: $(PROGS)
 
-# How to build the programs...
-h5debug: h5debug.o $(LIB) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ h5debug.o $(LIBS)
+# How to build the programs... They all depend on the hdf5 library and
+# the tools library compiled in this directory.
+$(PROGS): ../src/libhdf5.a $(LIB)
 
-h5import: h5import.o $(LIB) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ h5import.o $(LIBS)
+h5debug: h5debug.o
+	$(CC) $(CFLAGS) -o $@ h5debug.o $(LDFLAGS) $(LIBS)
 
-h5ls: h5ls.o $(LIB) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ h5ls.o $(LIBS)
+h5import: h5import.o
+	$(CC) $(CFLAGS) -o $@ h5import.o $(LDFLAGS) $(LIBS)
 
-h5repart: h5repart.o $(LIB) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ h5repart.o $(LIBS)
+h5ls: h5ls.o
+	$(CC) $(CFLAGS) -o $@ h5ls.o $(LDFLAGS) $(LIBS)
 
-h5dump: h5dump.o h5dumputil.o $(LIB) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIBS)
+h5repart: h5repart.o
+	$(CC) $(CFLAGS) -o $@ h5repart.o $(LDFLAGS) $(LIBS)
 
+h5dump: h5dump.o h5dumputil.o
+	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LDFLAGS) $(LIBS)
+
+# How to build the tests.  The testh5dump is a shell script that we
+# copy from its permanent home to a temporary name because `make
+# clean' will remove the temporary name.
 testh5dump: testh5dump.sh
 	cp testh5dump.sh $@
+
+testh5toh4: testh5toh4.o
+	$(CC) $(CFLAGS) -o $@ testh5toh4 $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

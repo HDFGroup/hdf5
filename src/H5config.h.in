@@ -155,6 +155,9 @@
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
+/* Define if you have the <mfhdf.h> header file.  */
+#undef HAVE_MFHDF_H
+
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
 
@@ -179,8 +182,17 @@
 /* Define if you have the coug library (-lcoug).  */
 #undef HAVE_LIBCOUG
 
+/* Define if you have the df library (-ldf).  */
+#undef HAVE_LIBDF
+
+/* Define if you have the jpeg library (-ljpeg).  */
+#undef HAVE_LIBJPEG
+
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
+
+/* Define if you have the mfhdf library (-lmfhdf).  */
+#undef HAVE_LIBMFHDF
 
 /* Define if you have the mpi library (-lmpi).  */
 #undef HAVE_LIBMPI

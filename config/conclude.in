@@ -96,11 +96,6 @@ maintainer-clean: distclean
 	$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
 # Implicit rules
-.c.a:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
-	$(AR) -rc $@ $*.o
-	$(RM) $*.o
-
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 

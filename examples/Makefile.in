@@ -6,8 +6,10 @@
 # 
 @COMMENCE@
 
-# Add include directory to the C preprocessor flags.
+# Add include directory to the C preprocessor flags and the hdf5 library
+# to the library list.
 CPPFLAGS=-I. -I../src @CPPFLAGS@
+LIBS=../src/libhdf5.a @LIBS@
 
 # These are the programs that `make all' will build, `make install'
 # will copy to the binaries directory, and `make uninstall' will
@@ -29,59 +31,31 @@ PROG_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c \
 	 h5_read.c h5_write.c h5_select.c h5_attribute.c
 PROG_OBJ=$(PROG_SRC:.c=.o)
 
-# List the source files for each individual program.  Most programs
-# will have only one source file, but some might have more. We use
-# these variables instead of listing the object files directly in the
-# rules that build the executable so that we don't have to ever
-# duplicate a list of names.
-CHUNK_READ_SRC=h5_chunk_read.c
-CHUNK_READ_OBJ=$(CHUNK_READ_SRC:.c=.o)
 
-COMPOUND_SRC=h5_compound.c
-COMPOUND_OBJ=$(COMPOUND_SRC:.c=.o)
+# How to build the programs... they all depend on the hdf5 library
+$(PROGS): ../src/libhdf5.a
+h5_chunk_read: h5_chunk_read.o
+	$(CC) $(CFLAGS) -o $@ h5_chunk_read.o $(LDFLAGS) $(LIBS)
 
-EXTEND_WRITE_SRC=h5_extend_write.c
-EXTEND_WRITE_OBJ=$(EXTEND_WRITE_SRC:.c=.o)
+h5_compound: h5_compound.o
+	$(CC) $(CFLAGS) -o $@ h5_compound.o $(LDFLAGS) $(LIBS)
 
-GROUP_SRC=h5_group.c
-GROUP_OBJ=$(GROUP_SRC:.c=.o)
+h5_extend_write: h5_extend_write.o
+	$(CC) $(CFLAGS) -o $@ h5_extend_write.o $(LDFLAGS) $(LIBS)
 
-READ_SRC=h5_read.c
-READ_OBJ=$(READ_SRC:.c=.o)
+h5_group: h5_group.o
+	$(CC) $(CFLAGS) -o $@ h5_group.o $(LDFLAGS) $(LIBS)
 
-WRITE_SRC=h5_write.c
-WRITE_OBJ=$(WRITE_SRC:.c=.o)
+h5_write: h5_write.o
+	$(CC) $(CFLAGS) -o $@ h5_write.o $(LDFLAGS) $(LIBS)
 
-SELECT_SRC=h5_select.c
-SELECT_OBJ=$(SELECT_SRC:.c=.o)
+h5_read: h5_read.o
+	$(CC) $(CFLAGS) -o $@ h5_read.o $(LDFLAGS) $(LIBS)
 
+h5_select: h5_select.o
+	$(CC) $(CFLAGS) -o $@ h5_select.o $(LDFLAGS) $(LIBS)
 
-ATTRIBUTE_SRC=h5_attribute.c
-ATTRIBUTE_OBJ=$(ATTRIBUTE_SRC:.c=.o)
-
-# How to build the programs...
-h5_chunk_read: $(CHUNK_READ_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(CHUNK_READ_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_compound: $(COMPOUND_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(COMPOUND_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_extend_write: $(EXTEND_WRITE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(EXTEND_WRITE_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_group: $(GROUP_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(GROUP_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_write: $(WRITE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(WRITE_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_read: $(READ_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(READ_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_select: $(SELECT_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(SELECT_OBJ) ../src/libhdf5.a $(LIBS)
-
-h5_attribute: $(ATTRIBUTE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(ATTRIBUTE_OBJ) ../src/libhdf5.a $(LIBS)
+h5_attribute: h5_attribute.o
+	$(CC) $(CFLAGS) -o $@ h5_attribute.o $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

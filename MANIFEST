@@ -341,6 +341,7 @@
 ./test/tstab.c
 ./test/unlink.c
 
+./testpar/Makefile.in
 ./testpar/Makefile.ascired
 ./testpar/Makefile.ibmsp
 ./testpar/Makefile.irix64

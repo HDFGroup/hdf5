@@ -4,25 +4,18 @@
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
 #
-# Modifications:
-#	Robb Matzke, 1998-08-31
-#	Removed `-ansi' from the CFLAGS because it caused sigaction()
-#	to not be compiled.
+# See BlankForm in this directory for details
 
-
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
-
-# Sometimes a particular compiler must be used.  If that's the case
-# then uncomment the following line.  Otherwise the main configure
-# script will try to detect the compiler automatically.
-CC=${CC:-cc}
+# The default compiler is `cc' and there is no ranlib.
+if test "X-" =  "X-$CC"; then
+    CC=cc
+    CC_BASENAME=cc
+fi
 RANLIB=:
 
-case $CC in
-    *gcc*)
+# Compiler flags
+case "X-$CC_BASENAME" in
+    X-gcc)
 	CFLAGS="$CFLAGS -ansi"
 	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"

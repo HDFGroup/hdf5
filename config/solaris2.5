@@ -3,18 +3,18 @@
 # This file is part of the HDF5 build script.  It is processed shortly
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
+#
+# See BlankForm in this directory for details
 
+# The default compiler is `gcc'
+if test "X-" =  "X-$CC"; then
+    CC=gcc
+    CC_BASENAME=gcc
+fi
 
-#----------------------------------------------------------------------------
-# Compiler flags. The CPPFLAGS values should not include package debug
-# flags like `-DH5G_DEBUG' since these are added with the
-# `--enable-debug' switch of configure.
-
-# We use gcc unless something else is specified.
-CC=${CC:-gcc}
-
-case $CC in
-    *gcc*)
+# Compiler flags
+case "X-$CC_BASENAME" in
+    X-gcc)
 	CFLAGS="$CFLAGS -ansi"
 	DEBUG_CFLAGS="-g -fverbose-asm"
 	DEBUG_CPPFLAGS="-DH5F_LOW_DFLT=H5F_LOW_SEC2"
@@ -34,12 +34,3 @@ case $CC in
 	PROFILE_CPPFLAGS=
 	;;
 esac
-
-#----------------------------------------------------------------------------
-# Values for overriding configuration tests when cross compiling.
-# This includes compiling on some machines where the serial front end
-# compiles for a parallel back end.
-
-# Set this to `yes' or `no' depending on whether the target is big
-# endian or little endian.
-#ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}
