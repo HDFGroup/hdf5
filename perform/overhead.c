@@ -189,7 +189,7 @@ test(fill_t fill_style, const double splits[],
     int		j;
     h5_stat_t	sb;
 
-    if (!had) had = calloc(cur_size[0], sizeof(int));
+    if (!had) had = calloc((size_t)cur_size[0], sizeof(int));
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) goto error;
     if (!use_rdcc) {
 	if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL)<0) goto error;
@@ -231,7 +231,7 @@ test(fill_t fill_style, const double splits[],
 	    hs_start[0] = i%2 ? i/2 : cur_size[0]-i/2;
 	    break;
 	case FILL_OUTWARD:
-	    j = (cur_size[0]-i)+1;
+	    j = ((size_t)cur_size[0]-i)+1;
 	    hs_start[0] = j%2 ? j/2 : cur_size[0]-j/2;
 	    break;
 	case FILL_RANDOM:

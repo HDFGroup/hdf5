@@ -165,7 +165,7 @@ static double
 test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
 {
     hid_t	file, dset, mem_space, file_space;
-    signed char	*buf = calloc (1, SQUARE(io_size));
+    signed char	*buf = calloc (1, (size_t)(SQUARE(io_size)));
     hsize_t	i, j, hs_size[2];
     hssize_t	hs_offset[2];
     int		mdc_nelmts, rdcc_nelmts;
@@ -179,7 +179,7 @@ test_rowmaj (int op, hsize_t cache_size, hsize_t io_size)
     rdcc_nelmts = RM_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*SQUARE (CH_SIZE), w0);
+		  cache_size*(size_t)(SQUARE (CH_SIZE)), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
@@ -243,7 +243,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
     hssize_t	hs_offset[2];
-    signed char	*buf = calloc (1, SQUARE (io_size));
+    signed char	*buf = calloc (1, (size_t)(SQUARE (io_size)));
     int		mdc_nelmts, rdcc_nelmts;
     double	w0;
 
@@ -255,7 +255,7 @@ test_diag (int op, hsize_t cache_size, hsize_t io_size, hsize_t offset)
     rdcc_nelmts = DIAG_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*SQUARE (CH_SIZE), w0);
+		  cache_size*(size_t)(SQUARE (CH_SIZE)), w0);
     file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen (file, "dset");
     file_space = H5Dget_space (dset);
