@@ -196,11 +196,9 @@ test_1 (void)
    CHECK_I (status, "H5G_find");
    VERIFY (ent2.header, ent.header, "H5G_find");
 
-#if 0 /* H5O_remove() is not implemented yet */
    /* the first object should not have a name message */
    status_ptr = H5O_read (f, ent.header, &ent, H5O_NAME, 0, &name_mesg);
    VERIFY (status_ptr, NULL, "H5O_read [didn't fail but should have]");
-#endif
 
    /* close the file */
    H5Fclose (fid);

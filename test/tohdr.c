@@ -163,9 +163,12 @@ test_ohdr (void)
       VERIFY (status, 42+i, "H5O_modify");
       H5AC_flush (f, NULL, 0, TRUE);
    }
-      
 
-   
+   /*
+    * Delete all symbol table messages.
+    */
+   status = H5O_remove (f, oh, NULL, NULL, H5O_STAB, H5O_ALL);
+   CHECK_I (status, "H5O_remove");
 
    /* close the file */
    H5Fclose (fid);
