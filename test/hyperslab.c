@@ -602,7 +602,7 @@ test_multifill(size_t nx)
     hssize_t		    src_stride;
     hssize_t		    dst_stride;
     char		    s[64];
-
+	
     struct a_struct {
 	int			left;
 	double			mid;
@@ -613,8 +613,16 @@ test_multifill(size_t nx)
     fflush(stdout);
 
     /* Initialize the source and destination */
+#ifndef WIN32
     src = H5MM_malloc(nx * sizeof(*src));
     dst = H5MM_malloc(nx * sizeof(*dst));
+#else
+/*
+	to match the HDfree I plan on using to free this memory
+  */
+	src = malloc(nx * sizeof(*src));
+    dst = malloc(nx * sizeof(*dst));
+#endif
     for (i = 0; i < nx; i++) {
 	src[i].left = 1111111;
 	src[i].mid = 12345.6789;
@@ -677,10 +685,18 @@ test_multifill(size_t nx)
 	    goto error;
 	}
     }
-
+	
     puts(" PASSED");
+#ifndef WIN32
     H5MM_xfree(src);
     H5MM_xfree(dst);
+#else
+/*
+	The above calls to H5MM_xfree crash on NT but using free does not. 
+*/
+  	HDfree(src);
+	HDfree(dst);
+#endif
     return SUCCEED;
 
   error:
