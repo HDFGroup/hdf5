@@ -293,6 +293,12 @@ RUNSNAPTEST()
 		SNAPCMD_OPT="$SNAPCMD_OPT $1 $2"
 		shift
 		;;
+	    op-snapshot)
+		# option for snapshot
+		shift
+		SNAPCMD_OPT="$SNAPCMD_OPT $1"
+		shift
+		;;
 	    setenv)
 		# set environment variable
 		shift
@@ -390,6 +396,7 @@ RUNSNAPTEST()
 #    -n32		-n32 mode.  Apply to 64/32 bit OS such as IRIX64.
 #    parallel		parallel mode.
 #    op-configure <option>	configure option
+#    op-snapshot <option>	snapshot option
 #    --*		configure option
 #    setenv <name> <value>	set environment variable <name> to <value>
 #    skip		skip this test
