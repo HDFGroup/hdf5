@@ -70,14 +70,16 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         A tool for converting an HDF5 file to an HDF4 file
     <li><a href="#Tools-H4toh5">h4toh5</a> -- 
         A tool for converting an HDF4 file to an HDF5 file
+    <li><a href="#Tools-H5CC">h5cc</a> --
+        A tool for compiling HDF5 programs
     <li><a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html/">Java-based tools for HDF5</a> -- 
         <em>(at <code>http://hdf.ncsa.uiuc.edu/java-hdf5-html/</code>)</em>
         <br>
-        Java-based tools for viewing, manipulating, and generating HDF5 files
-        (distributed separately)
+        Java-based tools for viewing, manipulating, and generating HDF5
+        files (distributed separately)
         <br>
-        Includes <code>H5view</code>, <code>H5gen</code>,
-        Java HDF5 Interface (JHI5), and HDF5 VisAD Data Adapter
+        Includes <code>H5view</code>, <code>H5gen</code>, Java HDF5
+        Interface (JHI5), and HDF5 VisAD Data Adapter
 </ul>
 </td></tr>
 </table>
@@ -817,6 +819,94 @@ to convert files from HDF4 format to HDF5 format and vice versa.
 -->
 </dl>
 
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H5CC">h5cc</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5cc
+        [</code><em>OPTIONS</em><code>]</code> <em>&lt;compile line&gt;</em>
+<dt><strong>Purpose:</strong>
+    <dd>Helper script to compile HDF5 applications.
+<dt><strong>Description:</strong>
+    <dd><p>
+        <code>h5cc</code> can be used in much the same way MPIch is used
+        to compile HDF5 program. It takes care of specifying where the
+        HDF5 header files and libraries are on the commandline.
+        </p>
+
+        <p>
+        <code>h5cc</code> supercedes all other compiler scripts in that
+        if you've used them to compile the HDF5 library, then
+        <code>h5cc</code> also uses those scripts. For examples, when
+        compiling an MPIch program, you use the <code>mpicc</code>
+        script. If you've built HDF5 using MPIch, then <code>h5cc</code>
+        uses the MPIch program for compilation.
+        </p>
+
+        <p>
+        Some programs use HDF5 in only a few modules. It isn't necessary
+        to use <code>h5cc</code> to compile those modules which don't use
+        HDF5. In fact, since <code>h5cc</code> is only a convenience
+        script, you are still able to compile HDF5 modules in the normal
+        way. In that case, you will have to specify the HDF5 libraries
+        and include paths yourself.
+        </p>
+
+        <p>
+        An example of how to use HDF5 to compile the program
+        <code>hdf_prog</code> which consists of modules
+        <code>prog1.c</code> and <code>prog2.c</code> and uses the HDF5
+        shared library:
+
+        <pre>
+        # h5cc -c prog1.c
+        # h5cc -c prog2.c
+        # h5cc -shlib -o hdf_prog prog1.o prog2.o
+        </pre>
+    <p>
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-help</code>
+            <dd>Prints a help message.
+        <dt><code>-echo</code>
+            <dd>Show all the shell commands executed.
+        <dt><code>-prefix=DIR</code>
+            <dd>Use the directory DIR to find HDF5 lib/ and include/
+                subdirectories [default: prefix specified when
+                configuring HDF5].
+        <dt><code>-show</code>
+            <dd>Show the commands without executing them.
+        <dt><code>-shlib</code>
+            <dd>Compile using shared HDF5 libraries.
+        <dt><code>-noshlib</code>
+            <dd>Compile using static HDF5 libraries [default].
+        <dt><em>&lt;compile line&gt;</em>
+            <dd>The normal compile line options for your compiler. h5cc
+                uses the same compiler you used to compile HDF5. Check
+                with your compiler's manual for more information on which
+                options are needed.
+    </dl>
+    <p>
+<dt><strong>Environment Variables:</strong>
+<br>
+    When set, these environment variables override some of the built-in
+    defaults of <code>h5cc</code>.
+
+    <dl>
+        <dt><code>HDF5_CC</code>
+            <dd>Use a different C compiler.
+        <dt><code>HDF5_CLINKER</code>
+            <dd>Use a different linker.
+        <dt><code>HDF5_USE_SHLIB=[yes|no]</code>
+            <dd>Use shared version of the HDF5 library [default: no].
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+ -->
+</dl>
 
 <!--                     Template, next 40 lines            -->
 <!--                     Template, next 40 lines            -->
@@ -904,7 +994,7 @@ Tools&nbsp;&nbsp;
 <a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a>
 
 <br>
-Last modified:  06 August 2001
+Last modified:  13. September 2001
 
 
 
