@@ -310,17 +310,18 @@ RUNSNAPTEST()
     done
     [ $retcode -ne 0 ] && errcode=$retcode && return $retcode
 
-    # Track down the HDF4 software
-    ans=`$SNAPYARD/current/bin/locate_hdf4`
-    H4_SW=`echo $ans | cut -f1 -d' '`
-    H4_BIN=`echo $ans | cut -f2 -s -d' '`
-    if [ -n "$H4_SW" ]; then
-	SNAPCMD_OPT="$SNAPCMD_OPT hdf4 $H4_SW"
+    # Track down the zlib software
+    ans=`$SNAPYARD/current/bin/locate_sw zlib`
+    if [ $? = 0 ]; then
+	Z_INC=`echo $ans | cut -f1 -d,`
+	Z_LIB=`echo $ans | cut -f2 -d,`
+	SNAPCMD_OPT="$SNAPCMD_OPT zlib $Z_INC,$Z_LIB"
+    else
+	# cannot locate zlib software.
+	# continue the test, maybe configure can find it.
+	:
     fi
-    if [ -n "$H4_BIN" ]; then
-	PATH=${PATH}:${H4_BIN}
-    fi
-	
+
     if [ -n "${SRCDIRNAME}" ]; then
 	SNAPCMD_OPT="$SNAPCMD_OPT srcdirname ${SRCDIRNAME}"
     fi
