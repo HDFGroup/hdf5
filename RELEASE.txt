@@ -68,6 +68,10 @@ Bug Fixes since HDF5-1.4.0 Release
      slower I/O than necessary.
    * Fixed bug where non-aligned hyperslab I/O on chunked datasets was
      causing errors during I/O
+   * The RCSID string in H5public.h was causing the C++ compiling problem
+     because when it was included multiple times, C++ did not like multiple
+     definitions of the same static variable.  All occurance of RCSID
+     definition are removed since we have not used it consistently before.
 
 
 Documentation
