@@ -117,6 +117,7 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static herr_t H5I_init_interface(void);
 static H5I_id_info_t *H5I_find_id(hid_t id);
+static hid_t H5I_get_file_id(hid_t obj_id);
 static int H5I_get_ref(hid_t id);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t grp);

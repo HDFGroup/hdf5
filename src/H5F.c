@@ -4498,3 +4498,4 @@ H5F_get_id(H5F_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
+
