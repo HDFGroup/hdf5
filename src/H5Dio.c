@@ -65,9 +65,10 @@ typedef struct fm_map {
     H5TB_TREE *fsel;            /* TBBT containing file dataspaces for all chunks */
     H5TB_TREE *msel;            /* TBBT containing memory dataspaces for all chunks */
     hsize_t last_index;         /* Index of last chunk operated on */
-    H5S_t *last_fchunk;         /* Pointer to last file chunk's dataspace */
+    H5S_t *file_space;          /* Pointer to the file dataspace */
+    H5S_t *mem_space;           /* Pointer to the memory dataspace */
+    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
     H5S_t *last_mchunk;         /* Pointer to last memory chunk's dataspace */
-    H5S_t *fchunk_tmpl;         /* Dataspace template for new file chunks */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
     unsigned f_ndims;           /* Number of dimensions for file dataspace */
     H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
@@ -120,7 +121,9 @@ static void H5D_free_fchunk_info(void *fchunk_info);
 static void H5D_free_mchunk_info(void *mchunk_info);
 static herr_t H5D_chunk_coords_assist(hssize_t *coords, size_t ndims,
     hsize_t chunks[], hsize_t chunk_idx);
-static herr_t H5D_chunk_cb(void *elem, hid_t type_id, hsize_t ndims,
+static herr_t H5D_create_chunk_file_map(fm_map *fm);
+static herr_t H5D_create_chunk_mem_map(fm_map *fm);
+static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, hsize_t ndims,
     hssize_t *coords, void *fm);
 static herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
@@ -1837,9 +1840,27 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 
     FUNC_ENTER_NOINIT(H5D_chunk_write);
     
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping");
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - After creating chunk map, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
    
     /*
      * If there is no type conversion then write directly from the
@@ -1849,6 +1870,15 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #ifdef H5S_DEBUG
 	H5_timer_begin(&timer);
 #endif
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Performing optimized I/O, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
         /* Get first node in chunk trees */
         fchunk_node=H5TB_first(fm.fsel->root);
         mchunk_node=H5TB_first(fm.msel->root);
@@ -1896,6 +1926,15 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
              */
             assert((fchunk_node && mchunk_node) || (!fchunk_node && !mchunk_node));
         } /* end while */
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Done performing optimized I/O, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
         
 #ifdef H5S_DEBUG
 	H5_timer_end(&(sconv->stats[0].write_timer), &timer);
@@ -1906,6 +1945,13 @@ nelmts, H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	/* direct xfer accomplished successfully */
 	HGOTO_DONE(SUCCEED);
     } /* end if */
+#ifdef QAK
+{
+    int mpi_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    HDfprintf(stderr,"%s: rank=%d - Performing NON-optimized I/O\n",FUNC,mpi_rank);
+}
+#endif /* QAK */
    
     /*
      * This is the general case(type conversion).
@@ -2242,14 +2288,13 @@ static herr_t
 H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_space, 
             const H5S_t *mem_space, fm_map *fm)
 {
-    H5S_t *tmp_fspace=NULL,     /* Temporary file dataspace */
-        *tmp_mspace=NULL;       /* Temporary memory dataspace */
+    H5S_t *tmp_mspace=NULL;     /* Temporary memory dataspace */
     hid_t f_tid=(-1);           /* Temporary copy of file datatype for iteration */
     size_t elmt_size;           /* Memory datatype size */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
-    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* Dimensionality of file dataspace */
+    hsize_t offset[H5O_LAYOUT_NDIMS];   /* Offset of selection for chunk */
     hsize_t nchunks, last_nchunks;      /* Number of chunks in dataset */
     H5TB_NODE *curr_node;       /* Current node in TBBT */
     char bogus;                         /* "bogus" buffer to pass to selection iterator */
@@ -2257,6 +2302,15 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     herr_t	ret_value = SUCCEED;	/*return value		*/
      
     FUNC_ENTER_NOINIT(H5D_create_chunk_map);
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
 
     /* Initialize fm_map structure */
     HDmemset(fm, 0, sizeof(fm_map));
@@ -2264,34 +2318,29 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     /* Get layout for dataset */
     fm->layout = &(dataset->layout);
     
-    /* Create a file space of a chunk's size, instead of whole file space*/
-    if(NULL==(tmp_fspace=H5S_create_simple((dataset->layout.ndims-1),dataset->layout.dim,NULL)))
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-
     /*make a copy of mem_space*/
     if((tmp_mspace = H5S_copy(mem_space))==NULL)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
  
-    /*de-select the file space and mem space copies*/
-    if(H5S_select_none(tmp_fspace)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select file space");
-    if(H5S_select_none(tmp_mspace)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space");
-
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims=f_ndims=dataset->layout.ndims-1;
     if((sm_ndims = H5S_get_simple_extent_ndims(tmp_mspace))<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number");
     fm->m_ndims=sm_ndims;
 
-    if(H5S_get_simple_extent_dims(file_space, f_dims, NULL)<0)
+    /* De-select the mem space copy */
+    if(H5S_select_none(tmp_mspace)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space");
+
+    if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
 
     /* Decide the number of chunks in each dimension*/
     last_nchunks=0;
     nchunks=1;
     for(u=0; u<f_ndims; u++) {
-        fm->chunks[u] = ((f_dims[u]+dataset->layout.dim[u])-1) / dataset->layout.dim[u];
+        /* Round up to the next integer # of chunks, to accomodate partial chunks */
+        fm->chunks[u] = ((fm->f_dims[u]+dataset->layout.dim[u])-1) / dataset->layout.dim[u];
 
         /* Track total number of chunks in dataset */
         nchunks *= fm->chunks[u];
@@ -2312,28 +2361,47 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
     if((fm->msel=H5TB_fast_dmake(H5TB_FAST_HSIZE_COMPARE))==NULL)
         HGOTO_ERROR(H5E_DATASET,H5E_CANTMAKETREE,FAIL,"can't create TBBT for memory chunk selections");
 
-   /* Save chunk template information */
-   fm->fchunk_tmpl=tmp_fspace;
-   fm->mchunk_tmpl=tmp_mspace;
+    /* Save chunk template information */
+    fm->mchunk_tmpl=tmp_mspace;
 
-   /* Initialize "last chunk" information */
-   fm->last_index=(hsize_t)-1;
-   fm->last_fchunk=fm->last_mchunk=NULL;
+    /* Initialize "last chunk" information */
+    fm->last_index=(hsize_t)-1;
+    fm->last_mchunk=NULL;
+
+    /* Copy the file dataspace */
+    if((fm->file_space = H5S_copy(file_space))==NULL)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file dataspace");
+    if(H5S_hyper_convert(fm->file_space)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees");
+
+    /* Copy the memory dataspace */
+    if((fm->mem_space = H5S_copy(mem_space))==NULL)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory dataspace");
+    if(H5S_hyper_convert(fm->mem_space)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees");
    
-    /* Create temporary datatypes for selection iteration */
-    if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
-        HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
-    
-    /* Create selection iterator for memory selection */
-    if((elmt_size=H5T_get_size(mem_type))==0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
-    if (H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    iter_init=1;	/* Selection iteration info has been initialized */
-
-    /* Build the file & memory selection for each chunk */
-    if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_cb, fm)<0)
-        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to iterate file space");
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Before creating chunk selections, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
+    /* Build the file selection for each chunk */
+    if(H5D_create_chunk_file_map(fm)<0)
+        HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections");
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - After creating file chunk selections, time=%f\n",FUNC,mpi_rank,time);
+    HDfprintf(stderr,"%s: rank=%d - H5S_select_shape_same=%d\n",FUNC,mpi_rank,H5S_select_shape_same(file_space,mem_space));
+}
+#endif /* QAK */
 
     /* Clean file chunks' hyperslab span "scratch" information */
     curr_node=H5TB_first(fm->fsel->root);
@@ -2352,34 +2420,64 @@ H5D_create_chunk_map(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_sp
         curr_node=H5TB_next(curr_node);
     } /* end while */
 
-    /* Clean memory chunks' hyperslab span "scratch" information */
-    curr_node=H5TB_first(fm->msel->root);
-    while(curr_node) {
-        H5D_mchunk_info_t *chunk_info;   /* Pointer chunk information */
+    /* Build the memory selection for each chunk */
+    if(H5S_select_shape_same(file_space,mem_space)==TRUE) {
+        /* If the selections are the same shape, use the file chunk information
+         * to generate the memory chunk information quickly.
+         */
+        if(H5D_create_chunk_mem_map(fm)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections");
+    } /* end if */
+    else {
+        /* Create temporary datatypes for selection iteration */
+        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->type, H5T_COPY_ALL)))<0)
+            HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype");
+        
+        /* Create selection iterator for memory selection */
+        if((elmt_size=H5T_get_size(mem_type))==0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
+        if (H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
+        iter_init=1;	/* Selection iteration info has been initialized */
 
-        /* Get pointer to chunk's information */
-        chunk_info=curr_node->data;
-        assert(chunk_info);
+        /* Spaces aren't the same shape, iterate over the memory selection directly */
+        if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_mem_cb, fm)<0)
+            HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections");
 
-        /* Clean hyperslab span's "scratch" information */
-        if(H5S_hyper_reset_scratch(chunk_info->space)<0)
-            HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info");
+        /* Clean memory chunks' hyperslab span "scratch" information */
+        curr_node=H5TB_first(fm->msel->root);
+        while(curr_node) {
+            H5D_mchunk_info_t *chunk_info;   /* Pointer chunk information */
 
-        /* Get the next chunk node in the TBBT */
-        curr_node=H5TB_next(curr_node);
-    } /* end while */
+            /* Get pointer to chunk's information */
+            chunk_info=curr_node->data;
+            assert(chunk_info);
+
+            /* Clean hyperslab span's "scratch" information */
+            if(H5S_hyper_reset_scratch(chunk_info->space)<0)
+                HGOTO_ERROR (H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info");
+
+            /* Get the next chunk node in the TBBT */
+            curr_node=H5TB_next(curr_node);
+        } /* end while */
+    } /* end else */
+
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - After creating chunk selections, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
 
 done:
     /* Release the [potentially partially built] chunk mapping information if an error occurs */
     if(ret_value<0) {
-        if(tmp_fspace && !fm->fchunk_tmpl) {
-            if(H5S_close(tmp_fspace)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file chunk dataspace template");
-        } /* end if */
-
         if(tmp_mspace && !fm->mchunk_tmpl) {
             if(H5S_close(tmp_mspace)<0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template");
         } /* end if */
 
         if (H5D_destroy_chunk_map(fm)<0)
@@ -2393,6 +2491,15 @@ done:
     if(f_tid!=(-1))
         H5Tclose(f_tid);
    
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Leaving, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5D_create_chunk_map() */
 
@@ -2500,10 +2607,15 @@ H5D_destroy_chunk_map(fm_map *fm)
     if(fm->msel)
         H5TB_dfree(fm->msel,H5D_free_mchunk_info,NULL);
 
-    /* Free the file chunk dataspace template */
-    if(fm->fchunk_tmpl)
-        if(H5S_close(fm->fchunk_tmpl)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file chunk dataspace template");
+    /* Free the file dataspace */
+    if(fm->file_space)
+        if(H5S_close(fm->file_space)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace");
+
+    /* Free the memory dataspace */
+    if(fm->mem_space)
+        if(H5S_close(fm->mem_space)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory dataspace");
 
     /* Free the memory chunk dataspace template */
     if(fm->mchunk_tmpl)
@@ -2516,10 +2628,338 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_cb
+ * Function:	H5D_create_chunk_file_map
+ *
+ * Purpose:	Create all chunk selections in file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, May 29, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5D_create_chunk_file_map(fm_map *fm)
+{
+    H5S_t       *tmp_fspace=NULL;           /* Temporary file dataspace */
+    hssize_t    sel_points;                 /* Number of elements in file selection */
+    hsize_t     sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t     sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hssize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
+    hssize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
+    hsize_t     count[H5O_LAYOUT_NDIMS];    /* Hyperslab count information */
+    hsize_t     chunk_index;                /* Index of chunk */
+    int         curr_dim;                   /* Current dimension to increment */
+    unsigned    u;                          /* Local index variable */
+    herr_t	ret_value = SUCCEED;        /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5D_create_chunk_file_map);
+
+    /* Make a copy of file dataspace */
+    if((tmp_fspace = H5S_copy(fm->file_space))==NULL)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+
+    /* Get number of elements selected in file */
+    if((sel_points=H5S_get_select_npoints(tmp_fspace))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements");
+
+    /* Get offset of first block in file selection */
+    if(H5S_get_select_bounds(tmp_fspace, sel_start, sel_end)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info");
+
+    /* Set initial chunk location & hyperslab size */
+    for(u=0; u<fm->f_ndims; u++) {
+        start_coords[u]=(sel_start[u]/fm->layout->dim[u])*fm->layout->dim[u];
+        coords[u]=start_coords[u];
+        count[u]=fm->layout->dim[u];
+    } /* end for */
+
+    /* Select initial chunk as hyperslab */
+    if(H5S_select_hyperslab(tmp_fspace,H5S_SELECT_SET,coords,NULL,count,NULL)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't create hyperslab selection");
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
+
+    /* Iterate through each chunk in the dataset */
+    while(1) {
+        /* Check for intersection of temporary chunk and file selection */
+        if(H5S_hyper_intersect(tmp_fspace,fm->file_space)==TRUE) {
+            H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
+            H5D_fchunk_info_t *new_fchunk_info; /* File chunk information to insert into tree */
+            hssize_t    chunk_points;           /* Number of elements in chunk selection */
+
+            /* Create "temporary" chunk for selection operations (copy file space) */
+            if((tmp_fchunk = H5S_copy(fm->file_space))==NULL)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+
+            /* "AND" temporary chunk and current chunk */
+            if(H5S_select_hyperslab(tmp_fchunk,H5S_SELECT_AND,coords,NULL,count,NULL)<0) {
+                H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't create chunk selection");
+            } /* end if */
+            
+            /* Resize chunk's dataspace dimensions to size of chunk */
+            if(H5S_set_extent_real(tmp_fchunk,count)<0) {
+                H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk dimensions");
+            } /* end if */
+
+            /* Move selection back to have correct offset in chunk */
+            if(H5S_hyper_adjust(tmp_fchunk,coords)<0) {
+                H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection");
+            } /* end if */
+
+            /* Add temporary chunk to the list of file chunks */
+
+            /* Allocate the file & memory chunk information */
+            if (NULL==(new_fchunk_info = H5FL_MALLOC (H5D_fchunk_info_t))) {
+                H5S_close(tmp_fchunk);
+                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate file chunk info");
+            } /* end if */
+
+            /* Initialize the file chunk information */
+
+            /* Set the chunk index */
+            new_fchunk_info->index=chunk_index;
+
+            /* Set the file chunk dataspace */
+            new_fchunk_info->space=tmp_fchunk;
+
+            /* Compute the chunk's coordinates */
+            H5D_chunk_coords_assist(new_fchunk_info->coords, fm->f_ndims, fm->chunks, chunk_index);
+
+            /* Insert the new file chunk into the TBBT tree */
+            if(H5TB_dins(fm->fsel,new_fchunk_info,new_fchunk_info)==NULL) {
+                H5D_free_fchunk_info(new_fchunk_info);
+                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert file chunk into TBBT");
+            } /* end if */
+
+            /* Get number of elements selected in chunk */
+            if((chunk_points=H5S_get_select_npoints(tmp_fchunk))<0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements");
+
+            /* Decrement # of points left in file selection */
+            sel_points-=chunk_points;
+
+            /* Leave if we are done */
+            if(sel_points==0)
+                HGOTO_DONE(SUCCEED);
+            assert(sel_points>0);
+        } /* end if */
+
+        /* Increment chunk index */
+        chunk_index++;
+
+        /* Set current increment dimension */
+        curr_dim=fm->f_ndims-1;
+
+        /* Increment chunk location in fastest changing dimension */
+        coords[curr_dim]+=count[curr_dim];
+
+        /* Bring chunk location back into bounds, if necessary */
+        if(coords[curr_dim]>sel_end[curr_dim]) {
+            do {
+                /* Reset current dimension's location to 0 */
+                coords[curr_dim]=start_coords[curr_dim];
+
+                /* Decrement current dimension */
+                curr_dim--;
+
+                /* Increment chunk location in current dimension */
+                coords[curr_dim]+=count[curr_dim];
+            } while(coords[curr_dim]>sel_end[curr_dim]);
+
+            /* Re-Calculate the index of this chunk */
+            if(H5V_chunk_index(fm->f_ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
+        } /* end if */
+
+        /* Move template chunk's offset to current location of chunk */
+        if(H5S_hyper_move(tmp_fspace,coords)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't move chunk selection");
+    } /* end while */
+
+done:
+    if(tmp_fspace)
+        if(H5S_close(tmp_fspace)<0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release file dataspace copy");
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5D_create_chunk_file_map() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_create_chunk_mem_map
+ *
+ * Purpose:	Create all chunk selections in memory by copying the file
+ *              chunk selections and adjusting their offsets to be correct
+ *              for the memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, May 29, 2003
+ *
+ * Assumptions: That the file and memory selections are the same shape.
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5D_create_chunk_mem_map(fm_map *fm)
+{
+    H5TB_NODE *curr_node;                   /* Current node in TBBT */
+    hsize_t file_off[H5O_LAYOUT_NDIMS*2];   /* Offset of first block in file selection */
+    hsize_t mem_off[H5O_LAYOUT_NDIMS*2];    /* Offset of first block in memory selection */
+    hssize_t adjust[H5O_LAYOUT_NDIMS];      /* Adjustment to make to all file chunks */
+    hssize_t chunk_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
+    unsigned    u;                          /* Local index variable */
+    herr_t	ret_value = SUCCEED;        /* Return value */
+    
+    FUNC_ENTER_NOINIT(H5D_create_chunk_mem_map);
+#ifdef QAK
+{
+    hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
+
+    if(H5S_get_simple_extent_dims(fm->mem_space, mem_dims, NULL)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
+
+    HDfprintf(stderr,"%s: mem_dims={",FUNC);
+    for(u=0; u<fm->m_ndims; u++)
+        HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
+}
+#endif /* QAK */
+
+    /* Get offset of first block in file selection */
+    if(H5S_get_select_hyper_blocklist(fm->file_space, 0, 1, file_off)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info");
+
+    /* Get offset of first block in memory selection */
+    if(H5S_get_select_hyper_blocklist(fm->mem_space, 0, 1, mem_off)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection block info");
+
+    /* Calculate the adjustment for memory selection from file selection */
+    assert(fm->m_ndims==fm->f_ndims);
+    for(u=0; u<fm->f_ndims; u++)
+        adjust[u]=file_off[u]-mem_off[u];
+#ifdef QAK
+{
+    int mpi_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    if(mpi_rank==1) {
+        HDfprintf(stderr,"%s: rank=%d - adjust={",FUNC,mpi_rank);
+        for(u=0; u<fm->f_ndims; u++)
+            HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+    } /* end if */
+}
+#endif /* QAK */
+#ifdef QAK
+HDfprintf(stderr,"%s: adjust={",FUNC);
+for(u=0; u<fm->f_ndims; u++)
+    HDfprintf(stderr,"%Hd%s",adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+#endif /* QAK */
+
+    /* Iterate over each chunk in the file chunk list */
+    curr_node=H5TB_first(fm->fsel->root);
+    while(curr_node) {
+        H5D_fchunk_info_t *fchunk_info;   /* Pointer to file chunk information */
+        H5D_mchunk_info_t *mchunk_info;   /* Pointer to memory chunk information */
+
+        /* Get pointer to chunk's information */
+        fchunk_info=curr_node->data;
+        assert(fchunk_info);
+
+        /* Allocate space for the memory chunk information */
+        if (NULL==(mchunk_info = H5FL_MALLOC (H5D_mchunk_info_t)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate memory chunk info");
+
+        /* Copy the information */
+
+        /* Set the chunk index */
+        mchunk_info->index=fchunk_info->index;
+
+        /* Copy the memory dataspace */
+        if((mchunk_info->space = H5S_copy(fm->mem_space))==NULL)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space");
+
+        /* Release the current selection */
+        if(H5S_select_release(mchunk_info->space)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection");
+
+        /* Copy the file chunk's selection */
+        if(H5S_select_copy(mchunk_info->space,fchunk_info->space)<0)
+            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection");
+
+        /* Compensate for the chunk offset */
+        for(u=0; u<fm->f_ndims; u++)
+            chunk_adjust[u]=adjust[u]-(fchunk_info->coords[u]*fm->layout->dim[u]);
+#ifdef QAK
+{
+    int mpi_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    if(mpi_rank==1) {
+        HDfprintf(stderr,"%s: rank=%d - Before adjusting memory selection\n",FUNC,mpi_rank);
+        HDfprintf(stderr,"%s: rank=%d - chunk_adjust={",FUNC,mpi_rank);
+        for(u=0; u<fm->f_ndims; u++)
+            HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+    } /* end if */
+}
+#endif /* QAK */
+#ifdef QAK
+HDfprintf(stderr,"%s: Before adjusting memory selection\n",FUNC);
+HDfprintf(stderr,"%s: chunk_adjust={",FUNC);
+for(u=0; u<fm->f_ndims; u++)
+    HDfprintf(stderr,"%Hd%s",chunk_adjust[u],(u<(fm->f_ndims-1) ? ", " : "}\n"));
+#endif /* QAK */
+        /* Adjust the selection */
+        if(H5S_hyper_adjust(mchunk_info->space,chunk_adjust)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection");
+#ifdef QAK
+{
+    int mpi_rank;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    if(mpi_rank==1)
+        HDfprintf(stderr,"%s: rank=%d - After adjusting memory selection\n",FUNC,mpi_rank);
+}
+#endif /* QAK */
+#ifdef QAK
+HDfprintf(stderr,"%s: After adjusting memory selection\n",FUNC);
+
+{
+    hsize_t mem_dims[H5O_LAYOUT_NDIMS];   /* Dimensions of memory space */
+
+    if(H5S_get_simple_extent_dims(mchunk_info->space, mem_dims, NULL)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
+
+    HDfprintf(stderr,"%s: mem_dims={",FUNC);
+    for(u=0; u<fm->m_ndims; u++)
+        HDfprintf(stderr,"%Hd%s",mem_dims[u],(u<(fm->m_ndims-1) ? ", " : "}\n"));
+}
+#endif /* QAK */
+        /* Insert the new memory chunk into the TBBT tree */
+        if(H5TB_dins(fm->msel,mchunk_info,mchunk_info)==NULL)
+            HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert memory chunk into TBBT");
+
+        /* Get the next chunk node in the TBBT */
+        curr_node=H5TB_next(curr_node);
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5D_create_chunk_mem_map() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_mem_cb
  *
  * Purpose:	Callback routine for file selection iterator.  Used when
- *              creating selections in memory and each chunk for each chunk.
+ *              creating selections in memory for each chunk.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2533,54 +2973,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5D_chunk_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_t *coords, void *_fm)
+H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, hsize_t ndims, hssize_t *coords, void *_fm)
 {
     fm_map      *fm = (fm_map*)_fm;             /* File<->memory chunk mapping info */
-    H5S_t       *fspace;                        /* File chunk's dataspace */
     H5S_t       *mspace;                        /* Memory chunk's dataspace */
-    hssize_t    coords_in_chunk[H5O_LAYOUT_NDIMS];      /* Coordinates of element in chunk */
     hssize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
     hsize_t     chunk_index;                    /* Chunk index */
     hsize_t     u;                              /* Local index variables */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
     
-    FUNC_ENTER_NOINIT(H5D_chunk_cb);
-#ifdef QAK
-{
-    unsigned u;
-    HDfprintf(stderr,"%s: coords={",FUNC);
-    for(u=0; u<ndims; u++)
-        HDfprintf(stderr,"%Hd%s",coords[u],(u<(ndims-1)?", ":"}\n"));
-}
-#endif /* QAK */
+    FUNC_ENTER_NOINIT(H5D_chunk_mem_cb);
 
     /* Calculate the index of this chunk */
     if(H5V_chunk_index((unsigned)ndims,coords,fm->layout->dim,fm->chunks,fm->down_chunks,&chunk_index)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index");
-#ifdef QAK
-HDfprintf(stderr,"%s: chunk_index=%Hu\n",FUNC,chunk_index);
-#endif /* QAK */
-
-    /*convert coords from relative to whole file space to relative to its chunk space, 
-     *pass into H5S_select_hyperslab.*/
-    for(u=0; u<ndims; u++) 
-        coords_in_chunk[u] = coords[u] % fm->layout->dim[u];
-    
-#ifdef QAK
-{
-    unsigned u;
-    HDfprintf(stderr,"%s: coords_in_chunk={",FUNC);
-    for(u=0; u<ndims; u++)
-        HDfprintf(stderr,"%Hd%s",coords_in_chunk[u],(u<(ndims-1)?", ":"}\n"));
-}
-#endif /* QAK */
 
     /* Find correct chunk in file & memory TBBTs */
     if(chunk_index==fm->last_index) {
         /* If the chunk index is the same as the last chunk index we used,
          * get the cached spaces to operate on.
          */
-        fspace=fm->last_fchunk;
         mspace=fm->last_mchunk;
     } /* end if */
     else {
@@ -2589,47 +3001,21 @@ HDfprintf(stderr,"%s: chunk_index=%Hu\n",FUNC,chunk_index);
          * find the chunk in the tree.
          */
         /* Get the chunk node from the TBBT */
-        if((chunk_node=H5TB_dfind(fm->fsel,&chunk_index,NULL))!=NULL) {
+        if((chunk_node=H5TB_dfind(fm->msel,&chunk_index,NULL))!=NULL) {
             /* We found the correct chunk already in the tree */
 
-            /* Get the file space information from the node */
-            fspace=((H5D_fchunk_info_t *)(chunk_node->data))->space;
-
-            /* Look up the memory space information for the chunk */
-            if((chunk_node=H5TB_dfind(fm->msel,&chunk_index,NULL))==NULL)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't find memory chunk info");
-
-            /* Get the file space information from the node */
+            /* Get the memory space information from the node */
             mspace=((H5D_mchunk_info_t *)(chunk_node->data))->space;
         } /* end if */
         else {
-            H5D_fchunk_info_t *new_fchunk_info; /* File chunk information to insert into tree */
             H5D_mchunk_info_t *new_mchunk_info; /* Memory chunk information to insert into tree */
 
             /* The correct chunk is not already in the tree, create a new node */
             /* in both the file and memory chunk trees */
 
-            /* Allocate the file & memory chunk information */
-            if (NULL==(new_fchunk_info = H5FL_MALLOC (H5D_fchunk_info_t)))
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate file chunk info");
+            /* Allocate the memory chunk information */
             if (NULL==(new_mchunk_info = H5FL_MALLOC (H5D_mchunk_info_t)))
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate memory chunk info");
-
-            /* Initialize the file chunk information */
-
-            /* Set the chunk index */
-            new_fchunk_info->index=chunk_index;
-
-            /* Copy the template file chunk dataspace */
-            if((new_fchunk_info->space = H5S_copy(fm->fchunk_tmpl))==NULL)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space");
-
-            /* Compute the chunk's coordinates */
-            H5D_chunk_coords_assist(new_fchunk_info->coords, fm->f_ndims, fm->chunks, chunk_index);
-
-            /* Insert the new file chunk into the TBBT tree */
-            if(H5TB_dins(fm->fsel,new_fchunk_info,new_fchunk_info)==NULL)
-                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert file chunk into TBBT");
 
             /* Initialize the memory chunk information */
 
@@ -2645,32 +3031,18 @@ HDfprintf(stderr,"%s: chunk_index=%Hu\n",FUNC,chunk_index);
                 HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert memory chunk into TBBT");
 
             /* Get the dataspaces for use in this routine */
-            fspace=new_fchunk_info->space;
             mspace=new_mchunk_info->space;
         } /* end else */
 
         /* Update the "last chunk seen" information */
         fm->last_index=chunk_index;
-        fm->last_fchunk=fspace;
         fm->last_mchunk=mspace;
     } /* end else */
-
-    /* Add point to file selection for chunk */
-    if(H5S_hyper_add_span_element(fspace, fm->f_ndims, coords_in_chunk)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element");
 
     /* Get coordinates of selection iterator for memory */
     if(H5S_select_iter_coords(&fm->mem_iter,coords_in_mem)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator coordinates");
 
-#ifdef QAK
-{
-    unsigned u;
-    HDfprintf(stderr,"%s: coords_in_mem={",FUNC);
-    for(u=0; u<fm->m_ndims; u++)
-        HDfprintf(stderr,"%Hd%s",coords_in_mem[u],(u<(fm->m_ndims-1)?", ":"}\n"));
-}
-#endif /* QAK */
     /* Add point to memory selection for chunk */
     if(H5S_hyper_add_span_element(mspace, fm->m_ndims, coords_in_mem)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element");
@@ -2681,4 +3053,4 @@ HDfprintf(stderr,"%s: chunk_index=%Hu\n",FUNC,chunk_index);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5D_chunk_cb() */
+} /* end H5D_chunk_mem_cb() */

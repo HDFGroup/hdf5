@@ -92,6 +92,50 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_select_offset
+ PURPOSE
+    Set the selection offset for a datapace
+ USAGE
+    herr_t H5S_select_offset(space, offset)
+        H5S_t *space;	        IN/OUT: Dataspace object to set selection offset
+        const hssize_t *offset; IN: Offset to position the selection at
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Sets the selection offset for the dataspace
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Only works for simple dataspaces currently
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_offset(H5S_t *space, const hssize_t *offset)
+{
+    herr_t ret_value=SUCCEED;     /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_offset, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(offset);
+
+    /* Allocate space for new offset */
+    if(space->select.offset==NULL) {
+        if (NULL==(space->select.offset = H5FL_ARR_MALLOC(hssize_t,space->extent.u.simple.rank)))
+            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    }
+
+    /* Copy the offset over */
+    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_select_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_copy
  PURPOSE
     Copy a selection from one dataspace to another
@@ -171,6 +215,41 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_select_release
+ *
+ * Purpose:	Releases all memory associated with a dataspace selection.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, May 30, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_select_release(H5S_t *ds)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_select_release, FAIL);
+
+    assert(ds);
+
+    /* If there was a previous offset for the selection, release it */
+    if(ds->select.offset!=NULL)
+        ds->select.offset=H5FL_ARR_FREE(hssize_t,ds->select.offset);
+
+    /* Call the selection type's release function */
+    (*ds->select.release)(ds);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* end H5S_select_release() */
 
 
 /*--------------------------------------------------------------------------
@@ -423,11 +502,57 @@ H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-    ret_value = (*space->select.bounds)(space,start,end);
+    ret_value = H5S_get_select_bounds(space,start,end);
 
 done:
     FUNC_LEAVE_API(ret_value);
 }   /* H5Sget_select_bounds() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_bounds
+ PURPOSE
+    Gets the bounding box containing the selection.
+ USAGE
+    herr_t H5S_get_select_bounds(space, start, end)
+        H5S_t *space;           IN: Dataspace ID of selection to query
+        hsize_t *start;         OUT: Starting coordinate of bounding box
+        hsize_t *end;           OUT: Opposite coordinate of bounding box
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the bounding box containing the current selection and places
+    it into the user's buffers.  The start and end buffers must be large
+    enough to hold the dataspace rank number of coordinates.  The bounding box
+    exactly contains the selection, ie. if a 2-D element selection is currently
+    defined with the following points: (4,5), (6,8) (10,7), the bounding box
+    with be (4, 5), (10, 8).  Calling this function on a "none" selection
+    returns fail.
+        The bounding box calculations _does_ include the current offset of the
+    selection within the dataspace extent.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
+{
+    herr_t ret_value;        /* return value */
+
+    FUNC_ENTER_NOAPI(H5S_get_select_bounds, FAIL);
+
+    /* Check args */
+    assert(space);
+    assert(start);
+    assert(end);
+
+    ret_value = (*space->select.bounds)(space,start,end);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}   /* H5S_get_select_bounds() */
 
 
 /*--------------------------------------------------------------------------
@@ -1578,6 +1703,12 @@ H5S_select_read(H5F_t *f, const H5O_layout_t *layout, H5P_genplist_t *dc_plist,
             curr_mem_seq=0;
         } /* end if */
 
+#ifdef QAK
+HDfprintf(stderr,"%s: curr_file_seq=%Zu, file_nseq=%Zu\n",FUNC,curr_file_seq,file_nseq);
+HDfprintf(stderr,"%s: curr_mem_seq=%Zu, mem_nseq=%Zu\n",FUNC,curr_mem_seq,mem_nseq);
+HDfprintf(stderr,"%s: file_off[%Zu]=%Hu, file_len[%Zu]=%Zu\n",FUNC,curr_file_seq,file_off[curr_file_seq],curr_file_seq,file_len[curr_file_seq]);
+HDfprintf(stderr,"%s: mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,curr_mem_seq,mem_off[curr_mem_seq],curr_mem_seq,mem_len[curr_mem_seq]);
+#endif /* QAK */
         /* Read file sequences into current memory sequence */
         if ((tmp_file_len=H5F_seq_readvv(f, dxpl_id, layout, dc_plist, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
@@ -1654,6 +1785,15 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_write, FAIL);
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Entering, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
 
     /* Check args */
     assert(f);
@@ -1721,6 +1861,31 @@ H5S_select_write(H5F_t *f, H5O_layout_t *layout, H5P_genplist_t *dc_plist,
             curr_mem_seq=0;
         } /* end if */
 
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - time=%f\n",FUNC,mpi_rank,time);
+    HDfprintf(stderr,"%s: rank=%d - curr_file_seq=%Zu, file_nseq=%Zu\n",FUNC,mpi_rank,curr_file_seq,file_nseq);
+    HDfprintf(stderr,"%s: rank=%d - curr_mem_seq=%Zu, mem_nseq=%Zu\n",FUNC,mpi_rank,curr_mem_seq,mem_nseq);
+    HDfprintf(stderr,"%s: rank=%d - file_off[%Zu]=%Hu, file_len[%Zu]=%Zu\n",FUNC,mpi_rank,curr_file_seq,file_off[curr_file_seq],curr_file_seq,file_len[curr_file_seq]);
+    HDfprintf(stderr,"%s: rank=%d - mem_off[%Zu]=%Hu, mem_len[%Zu]=%Zu\n",FUNC,mpi_rank,curr_mem_seq,mem_off[curr_mem_seq],curr_mem_seq,mem_len[curr_mem_seq]);
+}
+#endif /* QAK */
+#ifdef QAK
+{
+    unsigned u;
+
+HDfprintf(stderr,"%s: curr_file_seq=%Zu, file_nseq=%Zu\n",FUNC,curr_file_seq,file_nseq);
+HDfprintf(stderr,"%s: curr_mem_seq=%Zu, mem_nseq=%Zu\n",FUNC,curr_mem_seq,mem_nseq);
+for(u=curr_file_seq; u<file_nseq; u++)
+    HDfprintf(stderr,"%s: file_off[%u]=%Hu, file_len[%u]=%Zu\n",FUNC,u,file_off[u],u,file_len[u]);
+for(u=curr_mem_seq; u<mem_nseq; u++)
+    HDfprintf(stderr,"%s: mem_off[%u]=%Hu, mem_len[%u]=%Zu\n",FUNC,u,mem_off[u],u,mem_len[u]);
+}
+#endif /* QAK */
         /* Write memory sequences into file sequences */
         if ((tmp_file_len=H5F_seq_writevv(f, dxpl_id, layout, dc_plist, store,
                 file_nseq, &curr_file_seq, file_len, file_off,
@@ -1754,6 +1919,15 @@ done:
         H5FL_ARR_FREE(size_t,mem_len);
     if(mem_off!=NULL)
         H5FL_ARR_FREE(hsize_t,mem_off);
+#ifdef QAK
+{
+    int mpi_rank;
+    double time;
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    time = MPI_Wtime();
+    HDfprintf(stderr,"%s: rank=%d - Leaving, time=%f\n",FUNC,mpi_rank,time);
+}
+#endif /* QAK */
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5S_select_write() */
 

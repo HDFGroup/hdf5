@@ -454,12 +454,8 @@ H5S_close(H5S_t *ds)
 
     assert(ds);
 
-    /* If there was a previous offset for the selection, release it */
-    if(ds->select.offset!=NULL)
-        ds->select.offset=H5FL_ARR_FREE(hssize_t,ds->select.offset);
-
     /* Release selection (this should come before the extent release) */
-    (*ds->select.release)(ds);
+    H5S_select_release(ds);
 
     /* Release extent */
     H5S_extent_release(ds);
@@ -1913,14 +1909,9 @@ H5Soffset_simple(hid_t space_id, const hssize_t *offset)
     if (offset == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no offset specified");
 
-    /* Allocate space for new offset */
-    if(space->select.offset==NULL) {
-        if (NULL==(space->select.offset = H5FL_ARR_MALLOC(hssize_t,space->extent.u.simple.rank)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    }
-
-    /* Copy the offset over */
-    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.u.simple.rank);
+    /* Set the selection offset */
+    if(H5S_select_offset(space,offset)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set offset");
 
 done:
     FUNC_LEAVE_API(ret_value);
@@ -1964,20 +1955,52 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     } /* end for */
 
     /* Update */
-    if (ret_value) {
-        hsize_t nelem;  /* Number of elements in extent */
-
-        /* Change the dataspace size & re-compute the number of elements in the extent */
-        for (u=0, nelem=1; u < space->extent.u.simple.rank; u++ ) {
-            space->extent.u.simple.size[u] = size[u];
-            nelem*=space->extent.u.simple.size[u];
-        } /* end for */
-        space->extent.nelem = nelem;
-    } /* end if */
+    if (ret_value)
+        H5S_set_extent_real(space,size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5S_set_extent_real
+ *
+ * Purpose: Modify the dimensions of a data space. Based on H5S_extend
+ *
+ * Return: Success: Non-negative
+ *
+ * Failure: Negative
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: March 13, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_set_extent_real( H5S_t *space, const hsize_t *size )
+{
+    hsize_t nelem;      /* Number of elements in extent */
+    unsigned u;         /* Local index variable */
+    herr_t ret_value=SUCCEED;   /* Return value */
+       
+    FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL );
+
+    /* Check args */
+    assert(space && H5S_SIMPLE==space->extent.type );
+    assert(size);
+
+    /* Change the dataspace size & re-compute the number of elements in the extent */
+    for (u=0, nelem=1; u < space->extent.u.simple.rank; u++ ) {
+        space->extent.u.simple.size[u] = size[u];
+        nelem*=space->extent.u.simple.size[u];
+    } /* end for */
+    space->extent.nelem = nelem;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5S_set_extent_real() */
 
 
 /*-------------------------------------------------------------------------

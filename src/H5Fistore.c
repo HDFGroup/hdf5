@@ -1743,7 +1743,19 @@ H5F_istore_readvv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         chunk_coords_in_elmts[u] = chunk_coords[u] * (hssize_t)(layout->dim[u]);
 
     /* Get the address of this chunk on disk */
+#ifdef QAK
+HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
+for(u=0; u<layout->ndims; u++)
+    HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
+#endif /* QAK */
     chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts);
+#ifdef QAK
+HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,chunk_size);
+HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
+HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
+HDfprintf(stderr,"%s: mem_len_arr[%Zu]=%Zu\n",FUNC,*mem_curr_seq,mem_len_arr[*mem_curr_seq]);
+HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_arr[*mem_curr_seq]);
+#endif /* QAK */
 
     /*
      * If the chunk is too large to load into the cache and it has no
@@ -1850,7 +1862,19 @@ H5F_istore_writevv(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
         chunk_coords_in_elmts[u] = chunk_coords[u] * (hssize_t)(layout->dim[u]);
 
     /* Get the address of this chunk on disk */
+#ifdef QAK
+HDfprintf(stderr,"%s: chunk_coords_in_elmts={",FUNC);
+for(u=0; u<layout->ndims; u++)
+    HDfprintf(stderr,"%Hd%s",chunk_coords_in_elmts[u],(u<(layout->ndims-1) ? ", " : "}\n"));
+#endif /* QAK */
     chunk_addr=H5F_istore_get_addr(f, dxpl_id, layout, chunk_coords_in_elmts);
+#ifdef QAK
+HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Hu\n",FUNC,chunk_addr,chunk_size);
+HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
+HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
+HDfprintf(stderr,"%s: mem_len_arr[%Zu]=%Zu\n",FUNC,*mem_curr_seq,mem_len_arr[*mem_curr_seq]);
+HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_arr[*mem_curr_seq]);
+#endif /* QAK */
 
     /*
      * If the chunk is too large to load into the cache and it has no
