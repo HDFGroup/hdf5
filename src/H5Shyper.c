@@ -66,9 +66,6 @@ static herr_t H5S_hyper_free_span (H5S_hyper_span_t *span);
 static H5S_hyper_span_info_t *H5S_hyper_copy_span (H5S_hyper_span_info_t *spans);
 static herr_t H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value);
 static herr_t H5S_hyper_span_precompute (H5S_hyper_span_info_t *spans, size_t elmt_size);
-static herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
-                const hsize_t stride[], const hsize_t count[],
-                const hsize_t block[]);
 
 const H5S_fconv_t	H5S_HYPER_FCONV[1] = {{
     "hslab",	 				/*name			*/

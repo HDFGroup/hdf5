@@ -196,6 +196,8 @@ __DLL__ hsize_t H5S_get_npoints_max(const H5S_t *ds);
 __DLL__ int H5S_get_simple_extent_ndims(const H5S_t *ds);
 __DLL__ int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
 					hsize_t max_dims[]/*out*/);
+__DLL__ herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
+		       const hsize_t *max);
 __DLL__ herr_t H5S_modify(struct H5G_entry_t *ent, const H5S_t *space);
 __DLL__ H5S_t *H5S_read(struct H5G_entry_t *ent);
 __DLL__ int H5S_cmp(const H5S_t *ds1, const H5S_t *ds2);
@@ -208,7 +210,7 @@ __DLL__ herr_t H5S_extent_release(H5S_t *space);
 __DLL__ herr_t H5S_select_release(H5S_t *space);
 __DLL__ hssize_t H5S_get_select_npoints(const H5S_t *space);
 __DLL__ int H5S_extend(H5S_t *space, const hsize_t *size);
-__DLL__ int H5S_set_extend(H5S_t *space, const hsize_t *size);
+__DLL__ int H5S_set_extent(H5S_t *space, const hsize_t *size);
 __DLL__ htri_t H5S_select_valid(const H5S_t *space);
 __DLL__ herr_t H5S_debug(H5F_t *f, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
@@ -225,6 +227,12 @@ __DLL__ herr_t H5S_sel_iter_release(const H5S_t *space,
 				    H5S_sel_iter_t *sel_iter);
 __DLL__ herr_t H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space,
                                     void *buf);
+
+/* Needed for internal use of selections in H5Fistore code */
+__DLL__ herr_t H5S_select_all(H5S_t *space);
+__DLL__ herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hssize_t start[],
+                const hsize_t stride[], const hsize_t count[],
+                const hsize_t block[]);
 
 #ifdef H5_HAVE_PARALLEL
 

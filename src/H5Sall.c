@@ -46,7 +46,6 @@ static hsize_t H5S_all_mgath (const void *_buf, size_t elmt_size,
 static herr_t H5S_all_mscat (const void *_tconv_buf, size_t elmt_size,
 			     const H5S_t *mem_space, H5S_sel_iter_t *mem_iter,
 			     hsize_t nelmts, void *_buf/*out*/);
-static herr_t H5S_select_all(H5S_t *space);
 
 const H5S_fconv_t	H5S_ALL_FCONV[1] = {{
     "all", 					/*name			*/
@@ -904,7 +903,8 @@ H5S_all_bounds(H5S_t *space, hsize_t *start, hsize_t *end)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t H5S_select_all (H5S_t *space)
+herr_t
+H5S_select_all (H5S_t *space)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 

@@ -27,6 +27,8 @@
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5Zprivate.h"		/* Data filters				*/
 
+/*#define H5D_DEBUG*/
+
 /*
  * The MPIO driver is needed because there are kludges in this file and
  * places where we check for things that aren't handled by this driver.
@@ -39,10 +41,6 @@
 #endif
 
 #define PABLO_MASK	H5D_mask
-
-
-/* forward declarations */
-static herr_t H5D_update_chunk( H5D_t *dataset );
 
 /*
  * A dataset is the following struct.
@@ -3681,6 +3679,208 @@ done:
     FUNC_LEAVE (ret_value);
 }   /* H5Dfill() */
 
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5Dset_extent
+ *
+ * Purpose: Modifies the dimensions of a dataset, based on H5Dextend. 
+	*  Can change to a lower dimension.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *             Robb Matzke
+ *
+ * Date: April 9, 2002
+ *
+ * Comments: Public function, calls private H5D_set_extent
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+herr_t H5Dset_extent( hid_t dset_id, const hsize_t *size )
+{
+ H5D_t *dset = NULL;
+ 
+ FUNC_ENTER( H5Dset_extent, FAIL );
+ 
+ /* Check args */
+ if ( H5I_DATASET != H5I_get_type( dset_id ) || NULL == ( dset = H5I_object( dset_id ))) 
+ {
+  HRETURN_ERROR( H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset" );
+ }
+ if ( !size ) 
+ {
+  HRETURN_ERROR( H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified" );
+ }
+ 
+ /* Private function */
+ if ( H5D_set_extent ( dset, size ) < 0 ) 
+ {
+  HRETURN_ERROR( H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset");
+ }
+ 
+ FUNC_LEAVE (SUCCEED);
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_set_extent
+ *
+ * Purpose: Based in H5D_extend, allows change to a lower dimension, 
+ *  calls H5S_set_extent and H5F_istore_prune_by_extent instead
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *             Robb Matzke
+ *
+ * Date: April 9, 2002
+ *
+ * Comments: Private function
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5D_set_extent( H5D_t *dset, const hsize_t *size )
+{
+    hsize_t curr_dims[H5O_LAYOUT_NDIMS];	/* Current dimension sizes */
+    int rank;					/* Dataspace # of dimensions */
+ herr_t changed;
+ herr_t ret_value = FAIL;
+ H5S_t *space = NULL;
+ H5P_genplist_t *plist;
+	H5O_fill_t fill;
+ H5O_pline_t pline;
+ unsigned u;
+ int shrink = 0;
+ 
+ FUNC_ENTER( H5D_set_extent, FAIL );
+ 
+ /* Check args */
+ assert( dset );
+ assert( size );
+ 
+ /*-------------------------------------------------------------------------
+  * Get the data space
+  *-------------------------------------------------------------------------
+  */ 
+ 
+ if ( NULL == ( space = H5S_read (&(dset->ent))))
+ {
+  HGOTO_ERROR( H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space info from dset header");
+ }
+ 
+ /*-------------------------------------------------------------------------
+  * Check if we are shrinking in any of the dimensions
+  *-------------------------------------------------------------------------
+  */
+    if((rank=H5S_get_simple_extent_dims(space, curr_dims, NULL))<0)
+	  HGOTO_ERROR( H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
+ 
+ for ( u = 0; u < rank; u++ ) 
+ {
+  if ( size[u] < curr_dims[u] )
+  {
+   shrink = 1;
+   break;
+  }
+ }
+ 
+ /*-------------------------------------------------------------------------
+  * Modify the size of the data space
+  *-------------------------------------------------------------------------
+  */
+ 
+ if ( ( changed = H5S_set_extent( space, size )) < 0 )
+ {
+  HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
+ }
+ 
+ /*-------------------------------------------------------------------------
+  * Modify the dataset storage if changed space
+  *-------------------------------------------------------------------------
+  */
+ 
+ if ( changed > 0 )
+ {
+  /* Save the new dataspace in the file if necessary */
+  if ( H5S_modify ( &(dset->ent ), space ) < 0 )
+  {
+   HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace");
+  }
+  
+  /* Initialize the new parts of the dset */
+  if ( NULL == ( plist = H5I_object( dset->dcpl_id )))
+  {
+   HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset creation property list");
+  }
+  if( H5P_get( plist, H5D_CRT_FILL_VALUE_NAME, &fill ) < 0 )
+  {
+   HGOTO_ERROR( H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value" );
+  }
+  if( H5D_CONTIGUOUS == dset->layout.type && fill.buf ) 
+  {
+   HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to select fill value region"); 
+  }
+  if ( H5D_init_storage( dset, space ) < 0 )
+  {
+   HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dset with fill value");
+  }
+  
+ } /* end if changed */
+ 
+ 
+ /*-------------------------------------------------------------------------
+  * Remove chunk information in the case of chunked datasets
+  * This removal takes place only in case we are shrinking the dateset
+  *-------------------------------------------------------------------------
+  */
+ 
+ if ( changed > 0 && shrink && H5D_CHUNKED == dset->layout.type )
+ {
+  
+#if defined (PVN)
+  H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr);
+#endif
+
+  if ( H5F_istore_prune_by_extent( dset->ent.file, &dset->layout, space ) < 0 )
+  {
+   HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ");
+  }
+  
+#if defined (PVN)
+  H5F_istore_dump_btree(dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr);
+#endif  
+  
+  if( H5P_get( plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+  {
+   HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get pipeline");
+  }
+	
+
+  if ( H5F_istore_initialize_by_extent( dset->ent.file, &dset->layout, &pline, &fill, space ) < 0 )
+  {
+   HRETURN_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ");
+  }
+ 
+ }
+ 
+ ret_value = SUCCEED;
+ 
+done:
+  if(space)
+     H5S_close( space );
+ FUNC_LEAVE( ret_value );
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Ddebug
@@ -3723,185 +3923,5 @@ H5Ddebug(hid_t dset_id, unsigned UNUSED flags)
     }
     
     FUNC_LEAVE(SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5Dset_extend
- *
- * Purpose: Modifies the dimensions of a dataset, based on H5Dextend
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *             Robb Matzke
- *
- * Date: March 13, 2002
- *
- * Comments: Public function, calls private H5D_set_extend
- *
- * Modifications:
- *
- *
- *-------------------------------------------------------------------------
- */
-
-
-herr_t H5Dset_extend( hid_t dset_id, const hsize_t *size )
-{
- H5D_t *dset = NULL;
- 
- FUNC_ENTER( H5Dset_extend, FAIL );
- H5TRACE2( "e", "i*h", dset_id, size );
-
- /* Check args */
- if ( H5I_DATASET != H5I_get_type( dset_id ) || NULL == ( dset = H5I_object( dset_id ))) 
- {
-  HRETURN_ERROR( H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset" );
- }
- if ( !size ) 
- {
-  HRETURN_ERROR( H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified" );
- }
-
- /* Modify size */
- if ( H5D_set_extend (dset, size) < 0 ) 
- {
-  HRETURN_ERROR( H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset");
- }
-
- FUNC_LEAVE (SUCCEED);
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_set_extend
- *
- * Purpose: Same as H5D_extend, allows change to a lower dimension, calls H5S_modify
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *             Robb Matzke
- *
- * Date: March 13, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5D_set_extend( H5D_t *dataset, const hsize_t *size )
-{
- herr_t changed;
- herr_t ret_value = FAIL;
- H5S_t *space = NULL;
- H5O_fill_t fill;
- H5P_genplist_t *plist;
-
- FUNC_ENTER( H5D_set_extend, FAIL );
-
- /* Check args */
- assert( dataset );
- assert( size );
-
-/*
- * NOTE: Restrictions on extensions were checked when the dataset was
- * created. All extensions are allowed here since none should be
- * able to muck things up.
- */
-
- /* Increase the size of the data space */
- if ( NULL == ( space = H5S_read (&(dataset->ent))))
-  HGOTO_ERROR( H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data space info from dataset header");
- 
- if ( ( changed = H5S_set_extend( space, size )) < 0 )
-  HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
-
- if ( changed > 0 )
- {
-  /* Save the new dataspace in the file if necessary */
-  if ( H5S_modify ( &(dataset->ent ), space ) < 0 )
-   HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace");
-
-  /* Initialize the new parts of the dataset */
-#ifdef LATER
-  if ( H5S_select_all( space ) < 0 || H5S_select_hyperslab( space, H5S_SELECT_DIFF, zero, NULL, old_dims, NULL ) < 0 )
-   HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to select new extents for fill value");
-#else
-
- /*
-  * We don't have the H5S_SELECT_DIFF operator yet.  We really only
-  * need it for contiguous datasets because the chunked datasets will
-  * either fill on demand during I/O or attempt a fill of all chunks.
-  */
-  
-  if ( NULL == ( plist = H5I_object(dataset->dcpl_id )))
-   HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list");
-  if( H5P_get( plist, H5D_CRT_FILL_VALUE_NAME, &fill ) < 0 )
-   HGOTO_ERROR( H5E_DATASET, H5E_CANTGET, FAIL, "can't get fill value" );
-  if( H5D_CONTIGUOUS == dataset->layout.type && fill.buf ) 
-   HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to select fill value region"); 
-#endif
-
-  if ( H5D_init_storage( dataset, space ) < 0 )
-   HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value");
-
-
- /* Update chunk information */
- if ( H5D_CHUNKED == dataset->layout.type )
- {
-
-		if ( H5D_update_chunk( dataset ) < 0 )
-			goto done;
-
-
-	}
-
-
- } /* end if changed */
-
-
- ret_value = SUCCEED;
-
-done:
- H5S_close( space );
- FUNC_LEAVE( ret_value );
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: H5D_update_chunk
- *
- * Purpose: 
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Implementation: Pedro Vicente, pvn@ncsa.uiuc.edu
- *             Algorithm: Robb Matzke
- *
- * Date: March 13, 2002
- *
- * Comments: 
- *
- * Modifications:
- *
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5D_update_chunk( H5D_t *dset )
-{
-
-	H5F_istore_dump_btree( dset->ent.file, stdout, dset->layout.ndims, dset->layout.addr );
-
- return 0;
-
 }
 

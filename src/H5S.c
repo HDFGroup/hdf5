@@ -24,8 +24,6 @@
 #include "H5Spkg.h"		    /* Data-space functions			  */
 
 /* Local static function prototypes */
-herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank, const hsize_t *dims,
-		       const hsize_t *max);
 
 /* Interface initialization */
 #define PABLO_MASK	H5S_mask
@@ -1979,7 +1977,7 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 
 
 /*-------------------------------------------------------------------------
- * Function: H5S_set_extend
+ * Function: H5S_set_extent
  *
  * Purpose: Modify the dimensions of a data space. Based on H5S_extend
  *
@@ -1994,12 +1992,12 @@ H5S_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
  *-------------------------------------------------------------------------
  */
 
-int H5S_set_extend( H5S_t *space, const hsize_t *size )
+int H5S_set_extent( H5S_t *space, const hsize_t *size )
 {
  int ret_value = 0;
  unsigned u;
     
- FUNC_ENTER( H5S_set_extend, FAIL );
+ FUNC_ENTER( H5S_set_extent, FAIL );
 
  /* Check args */
  assert( space && H5S_SIMPLE==space->extent.type );

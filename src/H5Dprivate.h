@@ -155,7 +155,6 @@ __DLL__ herr_t H5D_write(H5D_t *dataset, const H5T_t *mem_type,
 			 const H5S_t *mem_space, const H5S_t *file_space,
 			 hid_t dset_xfer_plist, const void *buf);
 __DLL__ herr_t H5D_extend(H5D_t *dataset, const hsize_t *size);
-__DLL__ herr_t H5D_set_extend(H5D_t *dataset, const hsize_t *size);
 __DLL__ H5G_entry_t *H5D_entof(H5D_t *dataset);
 __DLL__ H5T_t *H5D_typeof(H5D_t *dset);
 __DLL__ H5S_t *H5D_get_space(H5D_t *dset);
@@ -172,5 +171,8 @@ __DLL__ herr_t H5D_xfer_create(hid_t dxpl_id, void *create_data);
 __DLL__ herr_t H5D_xfer_copy(hid_t new_plist_id, hid_t old_plist_id, 
                              void *copy_data);
 __DLL__ herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
+/*pvn*/
+__DLL__ herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size);
+
 
 #endif

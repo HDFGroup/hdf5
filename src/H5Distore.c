@@ -42,6 +42,7 @@
 #include "H5MMprivate.h"
 #include "H5Oprivate.h"
 #include "H5Pprivate.h"         /* Property lists */
+#include "H5Sprivate.h"         /* Dataspaces */
 #include "H5Vprivate.h"
 
 /* MPIO driver needed for special checks */
@@ -70,7 +71,8 @@
  *	    the disk block size, chunks are aligned on disk block boundaries,
  *	    and the operating system can also eliminate a read operation.
  */
-/* #define H5F_ISTORE_DEBUG */
+
+/*#define H5F_ISTORE_DEBUG */
 
 /* Interface initialization */
 #define PABLO_MASK	H5Fistore_mask
@@ -106,7 +108,7 @@ typedef H5F_rdcc_ent_t *H5F_rdcc_ent_ptr_t; /* For free lists */
 static size_t H5F_istore_sizeof_rkey(H5F_t *f, const void *_udata);
 static herr_t H5F_istore_new_node(H5F_t *f, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
-				  haddr_t*/*out*/);
+				  haddr_t *addr_p /*out*/);
 static int H5F_istore_cmp2(H5F_t *f, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static int H5F_istore_cmp3(H5F_t *f, void *_lt_key, void *_udata,
@@ -128,6 +130,15 @@ static herr_t H5F_istore_debug_key(FILE *stream, int indent, int fwidth,
 				   const void *key, const void *udata);
 static haddr_t H5F_istore_get_addr(H5F_t *f, const H5O_layout_t *layout,
 				  const hssize_t offset[]);
+
+static herr_t H5F_istore_prune_extent( H5F_t *f, void *left_key, haddr_t addr, 
+																																       void *_udata, hsize_t *size );
+static H5B_ins_t H5F_istore_remove( H5F_t *f, haddr_t addr,
+                  void *_lt_key            /*in,out*/,
+                  hbool_t *lt_key_changed  /*out*/,
+                  void UNUSED *_udata      /*in,out*/,
+                  void UNUSED *_rt_key     /*in,out*/,
+                  hbool_t *rt_key_changed  /*out*/);
 
 /*
  * B-tree key.	A key contains the minimum logical N-dimensional address and
@@ -169,11 +180,15 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5F_istore_insert,				/*insert		*/
     FALSE,					/*follow min branch?	*/
     FALSE,					/*follow max branch?	*/
-    NULL,					/*remove		*/
+   	/*pvn*/
+    /*NULL,*/					/*remove		*/
+				H5F_istore_remove,     /*remove		*/
     H5F_istore_iterate,				/*iterator		*/
     H5F_istore_decode_key,			/*decode		*/
     H5F_istore_encode_key,			/*encode		*/
     H5F_istore_debug_key,			/*debug			*/
+				/*pvn*/
+				H5F_istore_prune_extent,	  	  /*remove chunks, upon H5Dset_extend call			*/
 }};
 
 #define H5F_HASH_DIVISOR 8     /* Attempt to spread out the hashing */
@@ -1052,52 +1067,71 @@ done:
  * Programmer:  Robb Matzke
  *              Thursday, May 21, 1998
  *
- * Modifications:
+ * Modifications: Pedro Vicente, March 28, 2002
+	*  Added flush parameter that switches the call to H5F_istore_flush_entry 
+	*  The call with FALSE is used by the H5F_istore_prune_by_extent function
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
-{
-    H5F_rdcc_t          *rdcc = &(f->shared->rdcc);
-    
-    FUNC_ENTER (H5F_istore_preempt, FAIL);
+	
+ static herr_t
+  H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent, hbool_t flush )
+ {
+  H5F_rdcc_t *rdcc = &(f->shared->rdcc);
+  
+  FUNC_ENTER (H5F_istore_preempt, FAIL);
+  
+  assert(f);
+  assert(ent);
+  assert(!ent->locked);
+  assert(ent->idx<rdcc->nslots);
+  
+  if ( flush )
+  {
+   
+   /* Flush */
+   if (H5F_istore_flush_entry(f, ent, TRUE)<0) {
+    HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+     "cannot flush indexed storage buffer");
+   }
+  }
+  
+  else
+  {
+   
+   /* Reset, but do not free or remove from list */
+   ent->layout = H5O_free(H5O_LAYOUT, ent->layout);
+   ent->pline = H5O_free(H5O_PLINE, ent->pline);
+   if(ent->chunk!=NULL)
+    ent->chunk = H5F_istore_chunk_free(ent->chunk);
+   
+  }
+  
+  /* Unlink from list */
+  if (ent->prev) {
+   ent->prev->next = ent->next;
+  } else {
+   rdcc->head = ent->next;
+  }
+  if (ent->next) {
+   ent->next->prev = ent->prev;
+  } else {
+   rdcc->tail = ent->prev;
+  }
+  ent->prev = ent->next = NULL;
+  
+  /* Remove from cache */
+  rdcc->slot[ent->idx] = NULL;
+  ent->idx = UINT_MAX;
+  rdcc->nbytes -= ent->chunk_size;
+  --rdcc->nused;
+  
+  /* Free */
+  H5FL_FREE(H5F_rdcc_ent_t, ent);
+  
+  FUNC_LEAVE (SUCCEED);
+ }
 
-    assert(f);
-    assert(ent);
-    assert(!ent->locked);
-    assert(ent->idx<rdcc->nslots);
-
-    /* Flush */
-    if (H5F_istore_flush_entry(f, ent, TRUE)<0) {
-        HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                      "cannot flush indexed storage buffer");
-    }
-
-    /* Unlink from list */
-    if (ent->prev) {
-	ent->prev->next = ent->next;
-    } else {
-	rdcc->head = ent->next;
-    }
-    if (ent->next) {
-	ent->next->prev = ent->prev;
-    } else {
-	rdcc->tail = ent->prev;
-    }
-    ent->prev = ent->next = NULL;
-
-    /* Remove from cache */
-    rdcc->slot[ent->idx] = NULL;
-    ent->idx = UINT_MAX;
-    rdcc->nbytes -= ent->chunk_size;
-    --rdcc->nused;
-
-    /* Free */
-    H5FL_FREE(H5F_rdcc_ent_t, ent);
-
-    FUNC_LEAVE (SUCCEED);
-}
 
 
 /*-------------------------------------------------------------------------
@@ -1112,6 +1146,8 @@ H5F_istore_preempt (H5F_t *f, H5F_rdcc_ent_t *ent)
  *              Thursday, May 21, 1998
  *
  * Modifications:
+	*  Pedro Vicente, March 28, 2002
+	*  Added TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1127,7 +1163,7 @@ H5F_istore_flush (H5F_t *f, hbool_t preempt)
     for (ent=rdcc->head; ent; ent=next) {
 	next = ent->next;
 	if (preempt) {
-	    if (H5F_istore_preempt(f, ent)<0) {
+	    if (H5F_istore_preempt(f, ent, TRUE )<0) {
 		nerrors++;
 	    }
 	} else {
@@ -1157,6 +1193,8 @@ H5F_istore_flush (H5F_t *f, hbool_t preempt)
  *              Thursday, May 21, 1998
  *
  * Modifications:
+	*  Pedro Vicente, March 28, 2002
+	*  Added TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1175,7 +1213,7 @@ H5F_istore_dest (H5F_t *f)
 	HDfflush(stderr);
 #endif
 	next = ent->next;
-	if (H5F_istore_preempt(f, ent)<0) {
+	if (H5F_istore_preempt(f, ent, TRUE )<0) {
 	    nerrors++;
 	}
     }
@@ -1203,6 +1241,8 @@ H5F_istore_dest (H5F_t *f)
  *              Thursday, May 21, 1998
  *
  * Modifications:
+	*  Pedro Vicente, March 28, 2002
+	*  Added TRUE parameter to the call to H5F_istore_preempt
  *
  *-------------------------------------------------------------------------
  */
@@ -1280,7 +1320,7 @@ H5F_istore_prune (H5F_t *f, size_t size)
 		    if (p[j]==cur) p[j] = NULL;
 		    if (n[j]==cur) n[j] = cur->next;
 		}
-		if (H5F_istore_preempt(f, cur)<0) nerrors++;
+		if (H5F_istore_preempt(f, cur, TRUE)<0) nerrors++;
 	    }
 	}
 	
@@ -1326,6 +1366,9 @@ H5F_istore_prune (H5F_t *f, size_t size)
  *		Robb Matzke, 1999-08-02
  *		The split ratios are passed in as part of the data transfer
  *		property list.
+ *
+	*  Pedro Vicente, March 28, 2002
+	*  Added TRUE parameter to the call to H5F_istore_preempt
  *-------------------------------------------------------------------------
  */
 static void *
@@ -1477,7 +1520,7 @@ H5F_istore_lock(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
             }
             fprintf(stderr, "}\n");
 #endif
-            if (H5F_istore_preempt(f, ent)<0) {
+            if (H5F_istore_preempt(f, ent, TRUE)<0) {
                 HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL,
                     "unable to preempt chunk from cache");
             }
@@ -2457,3 +2500,500 @@ H5F_istore_allocate(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout,
 
     FUNC_LEAVE(SUCCEED);
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_istore_prune_by_extent
+ *
+ * Purpose: This function searches for chunks that are no longer necessary both in the
+ *  raw data cache and in the B-tree. 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Algorithm: Robb Matzke
+ *
+ * Date: March 27, 2002
+ *
+ * The algorithm is:
+ *
+ *  For chunks that are no longer necessary:
+ *
+ *  1. Search in the raw data cache for each chunk 
+ *  2. If found then preempt it from the cache
+ *  3. Search in the B-tree for each chunk 
+ *  4. If found then remove it from the B-tree and deallocate file storage for the chunk
+ *
+ * This example shows a 2d dataset of 90x90 with a chunk size of 20x20. 
+ *
+ *
+ *     0         20        40        60        80    90   100
+ *    0 +---------+---------+---------+---------+-----+...+
+ *      |:::::X::::::::::::::         :         :     |   :
+ *      |:::::::X::::::::::::         :         :     |   :   Key
+ *      |::::::::::X:::::::::         :         :     |   :   --------
+ *      |::::::::::::X:::::::         :         :     |   :  +-+ Dataset
+ *    20+::::::::::::::::::::.........:.........:.....+...:  | | Extent
+ *      |         :::::X:::::         :         :     |   :  +-+
+ *      |         :::::::::::         :         :     |   :
+ *      |         :::::::::::         :         :     |   :  ... Chunk
+ *      |         :::::::X:::         :         :     |   :  : : Boundary
+ *    40+.........:::::::::::.........:.........:.....+...:  :.:
+ *      |         :         :         :         :     |   :
+ *      |         :         :         :         :     |   :  ... Allocated
+ *      |         :         :         :         :     |   :  ::: & Filled
+ *      |         :         :         :         :     |   :  ::: Chunk
+ *    60+.........:.........:.........:.........:.....+...:
+ *      |         :         :::::::X:::         :     |   :   X  Element
+ *      |         :         :::::::::::         :     |   :      Written
+ *      |         :         :::::::::::         :     |   :
+ *      |         :         :::::::::::         :     |   :
+ *    80+.........:.........:::::::::::.........:.....+...:   O  Fill Val
+ *      |         :         :         :::::::::::     |   :      Explicitly
+ *      |         :         :         ::::::X::::     |   :      Written    
+ *    90+---------+---------+---------+---------+-----+   :
+ *      :         :         :         :::::::::::         :
+ *   100:.........:.........:.........:::::::::::.........:
+ *
+ *
+ * We have 25 total chunks for this dataset, 5 of which have space
+ * allocated in the file because they were written to one or more
+ * elements. These five chunks (and only these five) also have entries in
+ * the storage B-tree for this dataset.
+ *
+ * Now lets say we want to shrink the dataset down to 70x70:
+ *
+ *
+ *      0         20        40        60   70   80    90   100
+ *    0 +---------+---------+---------+----+----+-----+...+
+ *      |:::::X::::::::::::::         :    |    :     |   :
+ *      |:::::::X::::::::::::         :    |    :     |   :    Key           
+ *      |::::::::::X:::::::::         :    |    :     |   :    --------      
+ *      |::::::::::::X:::::::         :    |    :     |   :   +-+ Dataset    
+ *    20+::::::::::::::::::::.........:....+....:.....|...:   | | Extent     
+ *      |         :::::X:::::         :    |    :     |   :   +-+            
+ *      |         :::::::::::         :    |    :     |   :                  
+ *      |         :::::::::::         :    |    :     |   :   ... Chunk      
+ *      |         :::::::X:::         :    |    :     |   :   : : Boundary   
+ *    40+.........:::::::::::.........:....+....:.....|...:   :.:            
+ *      |         :         :         :    |    :     |   :                  
+ *      |         :         :         :    |    :     |   :   ... Allocated  
+ *      |         :         :         :    |    :     |   :   ::: & Filled   
+ *      |         :         :         :    |    :     |   :   ::: Chunk      
+ *    60+.........:.........:.........:....+....:.....|...:                  
+ *      |         :         :::::::X:::    |    :     |   :    X  Element    
+ *      |         :         :::::::::::    |    :     |   :       Written    
+ *      +---------+---------+---------+----+    :     |   :                  
+ *      |         :         :::::::::::         :     |   :                  
+ *    80+.........:.........:::::::::X:.........:.....|...:    O  Fill Val   
+ *      |         :         :         :::::::::::     |   :       Explicitly 
+ *      |         :         :         ::::::X::::     |   :       Written    
+ *    90+---------+---------+---------+---------+-----+   :
+ *      :         :         :         :::::::::::         :
+ *   100:.........:.........:.........:::::::::::.........:
+ *
+ *
+ * That means that the nine chunks along the bottom and right side should
+ * no longer exist. Of those nine chunks, (0,80), (20,80), (40,80),
+ * (60,80), (80,80), (80,60), (80,40), (80,20), and (80,0), one is actually allocated 
+ * that needs to be released.
+ * To release the chunks, we traverse the B-tree to obtain a list of unused
+ * allocated chunks, and then call H5B_remove() for each chunk.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5F_istore_prune_by_extent( H5F_t *f, H5O_layout_t *layout, H5S_t *space  )
+{
+ H5F_rdcc_t *rdcc = &(f->shared->rdcc);      /*raw data chunk cache*/
+ H5F_rdcc_ent_t *ent = NULL, *next = NULL;   /*cache entry  */
+ unsigned  u;                                /*counters  */
+ int found = 0;                              /*remove this entry  */
+ H5F_istore_ud1_t udata;                     /*B-tree pass-through */
+ hsize_t curr_dims[H5O_LAYOUT_NDIMS];        /*current dataspace dimensions */
+ 
+ FUNC_ENTER( H5F_istore_prune_by_extent, FAIL );
+ 
+ /* Check args */
+ assert(f);
+ assert(layout && H5D_CHUNKED==layout->type);
+ assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+ assert(H5F_addr_defined(layout->addr));
+ assert(space);
+ 
+ /* Go get the rank & dimensions */
+ if(H5S_get_simple_extent_dims(space, curr_dims, NULL)<0)
+  HRETURN_ERROR( H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
+ 
+ 
+ /*-------------------------------------------------------------------------
+  * Figure out what chunks are no longer in use for the specified extent 
+  * and release them from the linked list raw data cache
+  *-------------------------------------------------------------------------
+  */
+ 
+ for ( ent = rdcc->head; ent; ent=next ) 
+ {
+  next = ent->next;
+  
+  found = 0;
+  for ( u = 0; u < ent->layout->ndims-1; u++ ) 
+  {
+   if ( (hsize_t)ent->offset[u] > curr_dims[u] )
+   {
+    found = 1;
+    break;
+   }
+  } 
+  
+  if ( found ) 
+  {
+#if defined (H5F_ISTORE_DEBUG)
+   HDfputs("cache:remove:[", stdout);
+   for ( u = 0; u < ent->layout->ndims-1; u++) 
+   {
+    HDfprintf( stdout, "%s%Hd", u?", ":"", ent->offset[u]);
+   }
+   HDfputs("]\n", stdout );
+#endif
+   
+   /* Preempt the entry from the cache, but do not flush it to disk */
+   if ( H5F_istore_preempt( f, ent, FALSE ) < 0 ) 
+   {
+    HRETURN_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to preempt chunk");
+   }
+   
+  }
+  
+ }
+ 
+/*-------------------------------------------------------------------------
+ * Check if there are any chunks on the B-tree
+ *-------------------------------------------------------------------------
+ */
+ 
+ HDmemset(&udata, 0, sizeof udata);
+ udata.stream = stdout;
+ udata.mesg.addr = layout->addr;
+ udata.mesg.ndims = layout->ndims;
+ for ( u = 0; u < udata.mesg.ndims; u++ ) 
+ {
+  udata.mesg.dim[u] = layout->dim[u];
+ }
+ 
+ if ( H5B_prune_by_extent( f, H5B_ISTORE, layout->addr, &udata, curr_dims ) < 0 ) 
+ {
+  HRETURN_ERROR( H5E_IO, H5E_CANTINIT, 0, "unable to iterate over B-tree" );
+ }
+
+ FUNC_LEAVE( SUCCEED );
+ 
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_istore_prune_extent
+ *
+ * Purpose: Search for chunks that are no longer necessary in the B-tree. 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: March 26, 2002
+ *
+ * Comments: Called by H5B_prune_by_extent, part of H5B_ISTORE
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t H5F_istore_prune_extent( H5F_t *f, void *_lt_key, haddr_t addr, void *_udata, 
+                                      hsize_t *size )
+{
+ H5F_istore_ud1_t *bt_udata = (H5F_istore_ud1_t *)_udata;
+ H5F_istore_key_t *lt_key = (H5F_istore_key_t *)_lt_key;
+ unsigned  u;
+ int found = 0;
+ H5F_istore_ud1_t udata;
+
+	/* The LT_KEY is the left key (the onethat describes the chunk). It points to a chunk of 
+	   storage that contains the beginning of the logical address space represented by UDATA.
+	 */
+ 
+ FUNC_ENTER( H5F_istore_prune_extent, FAIL );
+ 
+ /* Figure out what chunks are no longer in use for the specified extent and release them */
+ 
+ for ( u = 0; u < bt_udata->mesg.ndims-1; u++ ) 
+ {
+  if ( (hsize_t)lt_key->offset[u] > size[u] )
+  {
+   found = 1;
+   break;
+  }
+ }
+ 
+ if ( found ) 
+ {
+  
+#if defined (H5F_ISTORE_DEBUG)
+  HDfputs("b-tree:remove:[", bt_udata->stream);
+  for ( u = 0; u < bt_udata->mesg.ndims-1; u++) 
+  {
+   HDfprintf(bt_udata->stream, "%s%Hd", u?", ":"", lt_key->offset[u]);
+  }
+  HDfputs("]\n", bt_udata->stream);
+#endif
+  
+  HDmemset( &udata, 0, sizeof udata );
+  udata.key = *lt_key;
+  udata.mesg = bt_udata->mesg;
+  
+  /* Remove */
+  if ( H5B_remove( f, H5B_ISTORE, addr, &udata ) < 0 ) 
+  {
+   HRETURN_ERROR( H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove entry" );
+  }
+ }
+ 
+ FUNC_LEAVE( SUCCEED );
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_istore_remove
+ *
+ * Purpose: Removes chunks that are no longer necessary in the B-tree. 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Robb Matzke
+ *             Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: March 28, 2002
+ *
+ * Comments: Part of H5B_ISTORE
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static H5B_ins_t H5F_istore_remove( H5F_t *f,
+                                   haddr_t addr,
+                                   void *_lt_key            /*in,out*/,
+                                   hbool_t *lt_key_changed  /*out*/,
+                                   void UNUSED *_udata      /*in,out*/,
+                                   void UNUSED *_rt_key     /*in,out*/,
+                                   hbool_t *rt_key_changed  /*out*/)
+{
+ H5F_istore_key_t *lt_key = (H5F_istore_key_t*)_lt_key;
+ H5FD_free(f->shared->lf, H5FD_MEM_DRAW, addr, lt_key->nbytes);
+ *lt_key_changed = FALSE;
+ *rt_key_changed = FALSE;
+ return H5B_INS_REMOVE;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5F_istore_initialize_by_extent
+ *
+ * Purpose:  This function searches for chunks that have to be initialized with the fill
+ *   value both in the raw data cache and in the B-tree. 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: April 4, 2002
+ *
+ * Comments: 
+ *
+ * (See the example of H5F_istore_prune_by_extent)
+ * Next, there are seven chunks where the database extent boundary is
+ * within the chunk. We find those seven just like we did with the previous nine.
+ * Fot the ones that are allocated we initialize the part that lies outside the boundary 
+ * with the fill value.
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+herr_t H5F_istore_initialize_by_extent( H5F_t *f, H5O_layout_t *layout, H5O_pline_t *pline, 
+                                       H5O_fill_t *fill, H5S_t *space )
+{
+ hid_t dxpl_id;                               /*dataset transfer property list*/
+ uint8_t  *chunk = NULL;                      /*the file chunk	*/
+ unsigned idx_hint = 0;                       /*input value for H5F_istore_lock*/
+ hssize_t chunk_offset[H5O_LAYOUT_NDIMS];     /*logical location of the chunks */
+ hsize_t idx_cur[H5O_LAYOUT_NDIMS];           /*multi-dimensional counters */
+ hsize_t idx_min[H5O_LAYOUT_NDIMS];
+ hsize_t idx_max[H5O_LAYOUT_NDIMS];
+ hsize_t sub_size[H5O_LAYOUT_NDIMS];
+ hsize_t naccessed;                           /*bytes accessed in chunk */
+ hsize_t elm_size;                            /*size of an element in bytes */
+ hsize_t end_chunk;                           /*chunk position counter */
+ hssize_t start[H5O_LAYOUT_NDIMS];            /*starting location of hyperslab */
+ hsize_t count[H5O_LAYOUT_NDIMS];             /*element count of hyperslab */
+ hsize_t size[H5O_LAYOUT_NDIMS];              /*current size of dimensions */
+ H5S_t *space_chunk=NULL;                     /*dataspace for a chunk */
+ hsize_t curr_dims[H5O_LAYOUT_NDIMS];         /*current dataspace dimensions */
+ int rank;                                    /*current # of dimensions */
+	int  i, carry;                               /*counters  */     
+	unsigned  u;
+ int found = 0;                               /*initialize this entry  */
+
+ FUNC_ENTER( H5F_istore_initialize_by_extent, FAIL );
+ 
+ /* Check args */
+ assert(f);
+ assert(layout && H5D_CHUNKED==layout->type);
+ assert(layout->ndims>0 && layout->ndims<=H5O_LAYOUT_NDIMS);
+ assert(H5F_addr_defined(layout->addr));
+ assert(space);
+ assert(pline);
+ assert(fill);
+ 
+ HDmemset( start, 0, sizeof(start) );
+ HDmemset( count, 0, sizeof(count) );
+ 
+ /* Go get the rank & dimensions */
+ if((rank=H5S_get_simple_extent_dims(space, curr_dims, NULL))<0)
+  HRETURN_ERROR( H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
+ 
+ for ( i = 0; i < rank; i++ ) 
+ {
+  size[i] = curr_dims[i];
+ }
+ size[i] = layout->dim[i];
+ elm_size = size[i];
+ 
+ /* Default dataset transfer property list */
+ dxpl_id = H5P_DATASET_XFER_DEFAULT;
+ 
+ /* Create a data space for a chunk & set the extent */
+ if(NULL==(space_chunk=H5S_create(H5S_SIMPLE))) {
+  HRETURN_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL,
+   "can't create simple dataspace");
+ }
+ if(H5S_set_extent_simple(space_chunk,(unsigned)rank,layout->dim,NULL)<0) {
+  HRETURN_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL,
+   "can't set dimensions");
+ }
+ 
+/*
+ * Set up multi-dimensional counters (idx_min, idx_max, and idx_cur) and
+ * loop through the chunks copying each chunk from the application to the
+ * chunk cache.
+ */
+ for ( u = 0; u < layout->ndims; u++) 
+ {
+  idx_min[u] = 0;
+  idx_max[u] = (size[u]-1) / layout->dim[u] + 1;
+  idx_cur[u] = idx_min[u];
+ }
+ 
+ /* Loop over all chunks */
+ while ( 1 ) 
+ {
+  
+  for ( u = 0, naccessed=1; u < layout->ndims; u++ ) 
+  {
+   /* The location and size of the chunk being accessed */
+   chunk_offset[u] = idx_cur[u] * (hssize_t)(layout->dim[u]);
+   sub_size[u] = MIN((idx_cur[u]+1)*layout->dim[u],size[u]) - chunk_offset[u];
+   naccessed *= sub_size[u];
+  }
+  
+  /* 
+   Figure out what chunks have to be initialized. These are the chunks where the database 
+   extent boundary is within the chunk
+  */
+  
+  for ( u = 0, found = 0; u < layout->ndims-1; u++ ) 
+  {
+   end_chunk = chunk_offset[u] + layout->dim[u];
+   if ( end_chunk > size[u] )
+   {
+    found = 1;
+    break;
+   }
+  }
+  
+  if ( found ) 
+  {
+   
+   if (NULL==(chunk=H5F_istore_lock( f, dxpl_id, layout, pline, fill, chunk_offset, FALSE, &idx_hint)))
+   {
+    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk");
+   }
+   
+   if ( H5S_select_all( space_chunk ) < 0 )
+   {
+    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to select space");
+   }
+   
+   for ( i = 0; i < rank; i++ ) 
+   {
+    count[i] = MIN( (idx_cur[i]+1)*layout->dim[i], size[i]-chunk_offset[i] );
+   }
+   
+#if defined (H5F_ISTORE_DEBUG)
+   HDfputs("cache:initialize:offset:[", stdout);
+   for ( u = 0; u < layout->ndims-1; u++) 
+   {
+    HDfprintf( stdout, "%s%Hd", u?", ":"", chunk_offset[u]);
+   }
+   HDfputs("]", stdout );
+   HDfputs(":count:[", stdout);
+   for ( u = 0; u < layout->ndims-1; u++) 
+   {
+    HDfprintf( stdout, "%s%Hd", u?", ":"", count[u]);
+   }
+   HDfputs("]\n", stdout );
+#endif
+   
+   if ( H5S_select_hyperslab( space_chunk, H5S_SELECT_NOTB, start, NULL, count, NULL)<0)
+   {
+    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to select hyperslab");
+   }
+   
+   /* Fill the selection in the memory buffer */
+   if ( H5S_select_fill( fill->buf, fill->size, space_chunk, chunk ) < 0 )
+   {
+    HRETURN_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed");
+   }
+   
+   if (H5F_istore_unlock(f, dxpl_id, layout, pline, TRUE, chunk_offset, &idx_hint, chunk, (size_t)naccessed)<0)
+   {
+    HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk");
+   }
+   
+  } /*found*/
+  
+  
+  /* Increment indices */
+  for ( i = layout->ndims-1, carry=1; i >= 0 && carry; --i) 
+  {
+   if (++idx_cur[i] >= idx_max[i])
+    idx_cur[i] = idx_min[i];
+   else
+    carry = 0;
+  }
+  if (carry)
+   break;
+  
+ }
+ 
+ 
+ if(space_chunk)
+  H5S_close( space_chunk);
+ 
+ FUNC_LEAVE( SUCCEED );
+}
+

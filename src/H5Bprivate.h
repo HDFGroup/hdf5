@@ -87,6 +87,13 @@ typedef struct H5B_class_t {
     herr_t	(*decode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*encode)(H5F_t*, struct H5B_t*, uint8_t*, void*);
     herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
+
+				/*pvn */
+
+						/* iterate through the leaf nodes, removing chunks upon H5Dset_extend request */
+    herr_t	(*prune_extent)( H5F_t *f, void *_lt_key, haddr_t addr, 
+					void *_udata, hsize_t *size );
+
 } H5B_class_t;
 
 /*
@@ -132,5 +139,8 @@ __DLL__ herr_t H5B_remove(H5F_t *f, const H5B_class_t *type, haddr_t addr,
 __DLL__ herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, haddr_t addr,
 			    void *udata);
 __DLL__ int    H5B_Kvalue(H5F_t *f, const H5B_class_t *type);
+__DLL__ herr_t H5B_prune_by_extent( H5F_t *f, const H5B_class_t *type, haddr_t addr, 
+																																			 void *udata, hsize_t *size );
+
 
 #endif
