@@ -11,13 +11,15 @@
 @COMMENCE@
 
 # Subdirectories in build-order
-SUBDIRS=src test
+SUBDIRS=src test tools
 
 ##############################################################################
 #			    T A R G E T S
 #
-# all:		Build libraries, header files, and programs in the various
-#		subdirectories but do not install them.
+# all:		Build libraries, header files, tests, and programs in the
+#		various subdirectories but does not run tests or install the
+#		library, header files, or programs.  The components can be
+#		built individually with the targets lib, progs, and tests.
 #
 # test:		Test the uninstalled library to make sure it works.
 #
@@ -57,7 +59,7 @@ SUBDIRS=src test
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-lib progs test _test install uninstall TAGS dep depend:
+lib progs tests test _test install uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done

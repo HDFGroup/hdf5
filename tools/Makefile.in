@@ -1,0 +1,32 @@
+# HDF5 Library Makefile(.in)
+#
+# Copyright (C) 1997 National Center for Supercomputing Applications.
+#                    All rights reserved.
+#
+# 
+@COMMENCE@
+
+# Add include directory to the C preprocessor flags.
+CPPFLAGS=-I../src @CPPFLAGS@
+
+# These are our main targets:
+PROGS=h5debug h5import h5ls h5repart
+
+# Source and object files for programs...
+PROG_SRC=h5debug.c h5import.c h5ls.c h5repart.c
+PROG_OBJ=$(PROG_SRC:.c=.o)
+
+# How to build the programs...
+h5debug: h5debug.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ h5debug.o ../src/libhdf5.a $(LIBS)
+
+h5import: h5import.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ h5import.o ../src/libhdf5.a $(LIBS)
+
+h5ls: h5ls.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ h5ls.o ../src/libhdf5.a $(LIBS)
+
+h5repart: h5repart.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ h5repart.o ../src/libhdf5.a $(LIBS)
+
+@CONCLUDE@

@@ -10,9 +10,8 @@ TRACE=perl ../bin/trace
 # Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. @CPPFLAGS@
 
-# These are our main targets:
+# This is our main target:
 LIB=libhdf5.a
-PROGS=debug h5ls h5repart
 
 # Source and object files for the library (lexicographically)...
 LIB_SRC=H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcore.c \
@@ -27,10 +26,6 @@ LIB_OBJ=$(LIB_SRC:.c=.o)
 
 # Temporary files
 MOSTLYCLEAN=H5detect.o H5detect H5Tinit.o H5Tinit.c
-
-# Source and object files for programs...
-PROG_SRC=debug.c h5ls.c h5repart.c
-PROG_OBJ=$(PROG_SRC:.c=.o)
 
 # Public header files (to be installed)...
 PUB_HDR=H5public.h H5Apublic.h H5ACpublic.h H5Bpublic.h H5Dpublic.h \
@@ -52,15 +47,5 @@ H5Tinit.c: H5detect
 # no $(LIB) in the action below since that's being made now.
 H5detect: H5detect.o
 	$(CC) $(CFLAGS) -o $@ H5detect.o $(LIBS)
-
-# How to build the programs...
-debug: debug.o $(LIB)
-	$(CC) $(CFLAGS) -o $@ debug.o $(LIB) $(LIBS)
-
-h5ls: h5ls.o $(LIB)
-	$(CC) $(CFLAGS) -o $@ h5ls.o $(LIB) $(LIBS)
-
-h5repart: h5repart.o $(LIB)
-	$(CC) $(CFLAGS) -o $@ h5repart.o $(LIB) $(LIBS)
 
 @CONCLUDE@

@@ -33,8 +33,8 @@ bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
 
-# The default is to build the programs which in turn builds the lib.
-all: progs
+# The default is to build the library and/or programs
+all: lib tests progs
 
 # The following rules insure that the Makefile is up-to-date by rerunning
 # various autoconf components (although not all versions of make assume

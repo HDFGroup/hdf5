@@ -27,7 +27,7 @@ dep depend: .distdep
 	touch .distdep
 	-perl -p $(ROOT)/bin/distdep .depend >.distdep
 
-.depend: $(LIB_SRC) $(PROG_SRC)
+.depend: $(LIB_SRC) $(TEST_SRC) $(PROG_SRC)
 	@touch .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \

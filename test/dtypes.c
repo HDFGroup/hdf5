@@ -62,7 +62,9 @@ static int noverflows_g = 0;
  * signal. Therefore, if the following constant is defined then tests that
  * might raise SIGFPE are executed in a child process.
  */
-#define HANDLE_SIGFPE
+#if defined(HAVE_FORK) && defined(HAVE_WAITPID)
+#   define HANDLE_SIGFPE
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -79,15 +81,17 @@ static int noverflows_g = 0;
  *
  *-------------------------------------------------------------------------
  */
-#ifdef HANDLE_SIGFPE
 static void
 fpe_handler(int __unused__ signo)
 {
     puts(" -SKIP-");
     puts("   Test skipped due to SIGFPE from probable overflow.");
+#ifndef HANDLE_SIGFPE
+    puts("   Remaining tests could not be run.");
+    puts("   Please turn off SIGFPE on overflows and try again.");
+#endif
     exit(255);
 }
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -870,12 +874,13 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    return 1;
 	}
     }
+#endif
 
     /*
-     * The remainder of this function is executed only by the child.
+     * The remainder of this function is executed only by the child if
+     * HANDLE_SIGFPE is defined.
      */
     signal(SIGFPE,fpe_handler);
-#endif
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {

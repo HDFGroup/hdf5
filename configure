@@ -1873,7 +1873,7 @@ EOF
 esac
 
 
-for ac_func in getpwuid gethostname system getrusage
+for ac_func in getpwuid gethostname system getrusage fork waitpid
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1880: checking for $ac_func" >&5
@@ -2512,7 +2512,7 @@ ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
 trap 'rm -fr `echo "config/depend config/commence config/conclude \
-          Makefile src/Makefile test/Makefile examples/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+          Makefile src/Makefile test/Makefile tools/Makefile examples/Makefile src/H5config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2607,7 +2607,7 @@ EOF
 cat >> $CONFIG_STATUS <<EOF
 
 CONFIG_FILES=\${CONFIG_FILES-"config/depend config/commence config/conclude \
-          Makefile src/Makefile test/Makefile examples/Makefile"}
+          Makefile src/Makefile test/Makefile tools/Makefile examples/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

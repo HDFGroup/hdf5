@@ -227,9 +227,6 @@
 ./src/H5private.h
 ./src/H5public.h
 ./src/Makefile.in
-./src/debug.c
-./src/h5ls.c
-./src/h5repart.c
 ./src/hdf5.h
 ./test/.distdep
 ./test/Makefile.in
@@ -263,3 +260,8 @@
 ./testpar/t_file.c
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
+./tools/Makefile.in
+./tools/h5debug.c
+./tools/h5import.c
+./tools/h5ls.c
+./tools/h5repart.c

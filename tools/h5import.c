@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 1998 NCSA
+ *                    All rights reserved.
+ *
+ * Programmer:  Robb Matzke <matzke@llnl.gov>
+ *              Thursday, June 11, 1998
+ *
+ * Purpose:	Create an hdf5 file with a 1d dataset of uint8.
+ */
+#include <fcntl.h>
+#include <hdf5.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
+
+
+/*-------------------------------------------------------------------------
+ * Function:	usage
+ *
+ * Purpose:	Print a usage message and exit with non-zero status
+ *
+ * Return:	never returns
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 11, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+usage (const char *argv0)
+{
+    fprintf (stderr, "Usage: %s -f HDF5-FILE FILES...\n", argv0);
+    exit (1);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	main
+ *
+ * Purpose:	
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, June 11, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+main (int argc, char *argv[])
+{
+    hid_t	file, space, dset;
+    const char	*output_name, *dset_name;
+    int		argno, fd=-1;
+    hsize_t	size[1];
+    struct stat sb;
+
+    /* Parse arguments */
+    if (argc<4) usage (argv[0]);
+    if (strcmp (argv[1], "-f")) usage (argv[0]);
+    output_name = argv[2];
+
+    /* create the file */
+    H5E_BEGIN_TRY {
+	if ((file = H5Fcreate (output_name, H5F_ACC_EXCL,
+			       H5P_DEFAULT, H5P_DEFAULT))<0 &&
+	    (file = H5Fopen (output_name, H5F_ACC_RDWR, H5P_DEFAULT)<0)) {
+	    fprintf (stderr, "%s: unable to create or open hdf5 file\n",
+		     output_name);
+	    exit (1);
+	}
+    } H5E_END_TRY;
+    
+    /* process files from command-line */
+    for (argno=3;  argno<argc; argno++) {
+
+	/* Open the file */
+	if ((dset_name=strrchr (argv[argno], '/'))) dset_name++;
+	else dset_name = argv[argno];
+	fprintf (stderr, "%s\n", dset_name);
+	if ((fd=open (argv[argno], O_RDONLY))<0) {
+	    perror (argv[argno]);
+	    goto next;
+	}
+	if (fstat (fd, &sb)<0) {
+	    perror (argv[argno]);
+	    goto next;
+	}
+
+	/* Data space */
+	size[0] = sb.st_size;
+	if ((space = H5Screate_simple (1, size, size))<0) goto next;
+
+	/* Dataset */
+	if ((dset=H5Dcreate (file, dset_name, H5T_NATIVE_CHAR,
+			     space, H5P_DEFAULT))<0) goto next;
+
+	
+	
+    next:
+	if (fd>=0) close (fd);
+	fd = -1;
+	H5E_BEGIN_TRY {
+	    H5Sclose (space);
+	    H5Dclose (dset);
+	} H5E_END_TRY;
+    }
+
+    /* Close the file */
+    H5Fclose (file);
+    return 0;
+}

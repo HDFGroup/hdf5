@@ -61,6 +61,9 @@
 /* The number of bytes in a size_t.  */
 #undef SIZEOF_SIZE_T
 
+/* Define if you have the fork function.  */
+#undef HAVE_FORK
+
 /* Define if you have the fseek64 function.  */
 #undef HAVE_FSEEK64
 
@@ -78,6 +81,9 @@
 
 /* Define if you have the system function.  */
 #undef HAVE_SYSTEM
+
+/* Define if you have the waitpid function.  */
+#undef HAVE_WAITPID
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H

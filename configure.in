@@ -178,7 +178,7 @@ esac
 dnl ----------------------------------------------------------------------
 dnl Check for functions.
 dnl
-AC_CHECK_FUNCS(getpwuid gethostname system getrusage)
+AC_CHECK_FUNCS(getpwuid gethostname system getrusage fork waitpid)
 
 AC_TRY_COMPILE([#include<sys/types.h>],
 	       [off64_t n = 0;],
@@ -355,4 +355,4 @@ dnl before we generate them or the Makefiles.
 touch ./config/stamp1 ./config/stamp2
 
 AC_OUTPUT(config/depend config/commence config/conclude \
-          Makefile src/Makefile test/Makefile examples/Makefile)
+          Makefile src/Makefile test/Makefile tools/Makefile examples/Makefile)

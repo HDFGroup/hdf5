@@ -11,8 +11,6 @@ CPPFLAGS=-I. -I../src @CPPFLAGS@
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
-PROGS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
-      external shtype iopipe big links chunk
 TESTS=testhdf5 gheap hyperslab istore bittests dtypes dsets cmpd_dset extend \
       external shtype links
 TIMINGS=iopipe chunk
@@ -26,62 +24,14 @@ MOSTLYCLEAN=cmpd_dset.h5 dataset.h5 extend.h5 istore.h5 tfile1.h5 tfile2.h5  \
 	    gheap1.h5 gheap2.h5 gheap3.h5 gheap4.h5 shtype0.h5 shtype1.h5    \
 	    shtype2a.h5 shtype2b.h5 shtype3.h5 links.h5 chunk.h5
 
-# Source and object files for programs...  The PROG_SRC list contains all the
+# Source and object files for programs...  The TEST_SRC list contains all the
 # source files and is used for things like dependencies, archiving, etc.  The
 # other source lists are for the individual tests, the files of which may
 # overlap with other tests.
-PROG_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c \
+TEST_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c \
 	dtypes.c hyperslab.c istore.c dsets.c cmpd_dset.c extend.c external.c \
 	iopipe.c gheap.c shtype.c big.c links.c chunk.c bittests.c
-PROG_OBJ=$(PROG_SRC:.c=.o)
-
-TESTHDF5_SRC=testhdf5.c tattr.c tfile.c theap.c tmeta.c tohdr.c tstab.c th5s.c
-TESTHDF5_OBJ=$(TESTHDF5_SRC:.c=.o)
-
-GHEAP_SRC=gheap.c
-GHEAP_OBJ=$(GHEAP_SRC:.c=.o)
-
-DSETS_SRC=dsets.c
-DSETS_OBJ=$(DSETS_SRC:.c=.o)
-
-BITTESTS_SRC=bittests.c
-BITTESTS_OBJ=$(BITTESTS_SRC:.c=.o)
-
-DTYPES_SRC=dtypes.c
-DTYPES_OBJ=$(DTYPES_SRC:.c=.o)
-
-HYPERSLAB_SRC=hyperslab.c
-HYPERSLAB_OBJ=$(HYPERSLAB_SRC:.c=.o)
-
-ISTORE_SRC=istore.c
-ISTORE_OBJ=$(ISTORE_SRC:.c=.o)
-
-CMPD_DSET_SRC=cmpd_dset.c
-CMPD_DSET_OBJ=$(CMPD_DSET_SRC:.c=.o)
-
-EXTEND_SRC=extend.c
-EXTEND_OBJ=$(EXTEND_SRC:.c=.o)
-
-EXTERNAL_SRC=external.c
-EXTERNAL_OBJ=$(EXTERNAL_SRC:.c=.o)
-
-GRPTIME_SRC=grptime.c
-GRPTIME_OBJ=$(GRPTIME_SRC:.c=.o)
-
-SHTYPE_SRC=shtype.c
-SHTYPE_OBJ=$(SHTYPE_SRC:.c=.o)
-
-IOPIPE_SRC=iopipe.c
-IOPIPE_OBJ=$(IOPIPE_SRC:.c=.o)
-
-BIG_SRC=big.c
-BIG_OBJ=$(BIG_SRC:.c=.o)
-
-LINKS_SRC=links.c
-LINKS_OBJ=$(LINKS_SRC:.c=.o)
-
-CHUNK_SRC=chunk.c
-CHUNK_OBJ=$(CHUNK_SRC:.c=.o)
+TEST_OBJ=$(PROG_SRC:.c=.o)
 
 # Private header files (not to be installed)...
 PRIVATE_HDR=testhdf5.h
@@ -97,52 +47,53 @@ timings _timings: $(TIMINGS)
 	done;
 
 # How to build the programs...
+TESTHDF5_OBJ=testhdf5.o tattr.o tfile.o theap.o tmeta.o tohdr.o tstab.o th5s.o
 testhdf5: $(TESTHDF5_OBJ) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ $(TESTHDF5_OBJ) ../src/libhdf5.a $(LIBS)
 
-gheap: $(GHEAP_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(GHEAP_OBJ) ../src/libhdf5.a $(LIBS)
+gheap: gheap.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ gheap.o ../src/libhdf5.a $(LIBS)
 
-dsets: $(DSETS_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(DSETS_OBJ) ../src/libhdf5.a $(LIBS)
+dsets: dsets.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ dsets.o ../src/libhdf5.a $(LIBS)
 
-bittests: $(BITTESTS_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(BITTESTS_OBJ) ../src/libhdf5.a $(LIBS)
+bittests: bittests.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ bittests.o ../src/libhdf5.a $(LIBS)
 
-dtypes: $(DTYPES_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(DTYPES_OBJ) ../src/libhdf5.a $(LIBS)
+dtypes: dtypes.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ dtypes.o ../src/libhdf5.a $(LIBS)
 
-hyperslab: $(HYPERSLAB_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(HYPERSLAB_OBJ) ../src/libhdf5.a $(LIBS)
+hyperslab: hyperslab.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ hyperslab.o ../src/libhdf5.a $(LIBS)
 
-istore: $(ISTORE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(ISTORE_OBJ) ../src/libhdf5.a $(LIBS)
+istore: istore.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ istore.o ../src/libhdf5.a $(LIBS)
 
-cmpd_dset: $(CMPD_DSET_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(CMPD_DSET_OBJ) ../src/libhdf5.a $(LIBS)
+cmpd_dset: cmpd_dset.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ cmpd_dset.o ../src/libhdf5.a $(LIBS)
 
-extend: $(EXTEND_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(EXTEND_OBJ) ../src/libhdf5.a $(LIBS)
+extend: extend.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ extend.o ../src/libhdf5.a $(LIBS)
 
-external: $(EXTERNAL_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(EXTERNAL_OBJ) ../src/libhdf5.a $(LIBS)
+external: external.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ external.o ../src/libhdf5.a $(LIBS)
 
-shtype: $(SHTYPE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(SHTYPE_OBJ) ../src/libhdf5.a $(LIBS)
+shtype: shtype.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ shtype.o ../src/libhdf5.a $(LIBS)
 
-iopipe: $(IOPIPE_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(IOPIPE_OBJ) ../src/libhdf5.a $(LIBS)
+iopipe: iopipe.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ iopipe.o ../src/libhdf5.a $(LIBS)
 
-grptime: $(GRPTIME_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(GRPTIME_OBJ) ../src/libhdf5.a $(LIBS)
+grptime: grptime.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ grptime.o ../src/libhdf5.a $(LIBS)
 
-big: $(BIG_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(BIG_OBJ) ../src/libhdf5.a $(LIBS)
+big: big.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ big.o ../src/libhdf5.a $(LIBS)
 
-links: $(LINKS_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(LINKS_OBJ) ../src/libhdf5.a $(LIBS)
+links: links.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ links.o ../src/libhdf5.a $(LIBS)
 
-chunk: $(CHUNK_OBJ) ../src/libhdf5.a
-	$(CC) $(CFLAGS) -o $@ $(CHUNK_OBJ) ../src/libhdf5.a $(LIBS)
+chunk: chunk.o ../src/libhdf5.a
+	$(CC) $(CFLAGS) -o $@ chunk.o ../src/libhdf5.a $(LIBS)
 
 @CONCLUDE@
