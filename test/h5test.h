@@ -1,5 +1,5 @@
 /*
- * Copyright © 1998 NCSA
+ * Copyright (c) 1998-2002 NCSA
  *                  All rights reserved.
  *
  * Programmer:  Robb Matzke <matzke@llnl.gov>
@@ -59,6 +59,7 @@ char *h5_fixname(const char *base_name, hid_t fapl, char *fullname,
 hid_t h5_fileaccess(void);
 void h5_no_hwconv(void);
 void h5_reset(void);
+void h5_show_hostname(void);
 
 #ifdef __cplusplus
 }

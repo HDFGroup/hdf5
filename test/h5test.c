@@ -503,3 +503,47 @@ h5_no_hwconv(void)
 {
     H5Tunregister(H5T_PERS_HARD, NULL, -1, -1, NULL);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	h5_show_hostname
+ *
+ * Purpose:	Show hostname.  Show process ID if in MPI environment.
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *              2002/04/22
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_show_hostname(void)
+{
+    char	hostname[80];
+
+    /* try show the process or thread id in multiple processes cases*/
+#ifdef H5_HAVE_PARALLEL
+    {   
+	int mpi_rank, mpi_initialized;
+
+	MPI_Initialized(&mpi_initialized);
+	if (mpi_initialized){
+	    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+	    printf("MPI-process %d.", mpi_rank);
+	}else
+	    printf("thread 0.");
+    }
+#elif defined(H5_HAVE_THREADSAFE)
+    printf("thread %d.", (int)pthread_self());
+#else
+    printf("thread 0.");
+#endif
+    if (gethostname(hostname, 80) < 0){
+	printf(" gethostname failed\n");
+    }
+    else
+	printf(" hostname=%s\n", hostname);
+}
