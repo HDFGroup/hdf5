@@ -100,17 +100,102 @@ H5V_stride_optimize2(intn *np/*in,out*/, hsize_t *elmt_size/*in,out*/,
     /*
      * Combine adjacent memory accesses
      */
-    while (*np &&
-	   stride1[*np-1] > 0 &&
-	   (hsize_t)(stride1[*np-1]) == *elmt_size &&
-	   stride2[*np-1] > 0 &&
-	   (hsize_t)(stride2[*np-1]) == *elmt_size) {
-	*elmt_size *= size[*np-1];
-	if (--*np) {
-	    stride1[*np-1] += size[*np] * stride1[*np];
-	    stride2[*np-1] += size[*np] * stride2[*np];
-	}
-    }
+
+    /* Unroll loop for common cases */
+    switch(*np) {
+        case 1: /* For 0-D datasets (dunno if this ever gets used...) */
+            if((hsize_t)(stride1[0]) == *elmt_size &&
+                   (hsize_t)(stride2[0]) == *elmt_size) {
+                *elmt_size *= size[0];
+                --*np;  /* *np decrements to a value of 0 now */
+            } /* end if */
+            break;
+
+        case 2: /* For 1-D datasets */
+            if((hsize_t)(stride1[1]) == *elmt_size &&
+                   (hsize_t)(stride2[1]) == *elmt_size) {
+                *elmt_size *= size[1];
+                --*np;  /* *np decrements to a value of 1 now */
+                stride1[0] += size[1] * stride1[1];
+                stride2[0] += size[1] * stride2[1];
+
+                if((hsize_t)(stride1[0]) == *elmt_size &&
+                       (hsize_t)(stride2[0]) == *elmt_size) {
+                    *elmt_size *= size[0];
+                    --*np;  /* *np decrements to a value of 0 now */
+                } /* end if */
+            } /* end if */
+            break;
+
+        case 3: /* For 2-D datasets */
+            if((hsize_t)(stride1[2]) == *elmt_size &&
+                   (hsize_t)(stride2[2]) == *elmt_size) {
+                *elmt_size *= size[2];
+                --*np;  /* *np decrements to a value of 2 now */
+                stride1[1] += size[2] * stride1[2];
+                stride2[1] += size[2] * stride2[2];
+
+                if((hsize_t)(stride1[1]) == *elmt_size &&
+                       (hsize_t)(stride2[1]) == *elmt_size) {
+                    *elmt_size *= size[1];
+                    --*np;  /* *np decrements to a value of 1 now */
+                    stride1[0] += size[1] * stride1[1];
+                    stride2[0] += size[1] * stride2[1];
+
+                    if((hsize_t)(stride1[0]) == *elmt_size &&
+                           (hsize_t)(stride2[0]) == *elmt_size) {
+                        *elmt_size *= size[0];
+                        --*np;  /* *np decrements to a value of 0 now */
+                    } /* end if */
+                } /* end if */
+            } /* end if */
+            break;
+
+        case 4: /* For 3-D datasets */
+            if((hsize_t)(stride1[3]) == *elmt_size &&
+                   (hsize_t)(stride2[3]) == *elmt_size) {
+                *elmt_size *= size[3];
+                --*np;  /* *np decrements to a value of 3 now */
+                stride1[2] += size[3] * stride1[3];
+                stride2[2] += size[3] * stride2[3];
+
+                if((hsize_t)(stride1[2]) == *elmt_size &&
+                       (hsize_t)(stride2[2]) == *elmt_size) {
+                    *elmt_size *= size[2];
+                    --*np;  /* *np decrements to a value of 2 now */
+                    stride1[1] += size[2] * stride1[2];
+                    stride2[1] += size[2] * stride2[2];
+
+                    if((hsize_t)(stride1[1]) == *elmt_size &&
+                           (hsize_t)(stride2[1]) == *elmt_size) {
+                        *elmt_size *= size[1];
+                        --*np;  /* *np decrements to a value of 1 now */
+                        stride1[0] += size[1] * stride1[1];
+                        stride2[0] += size[1] * stride2[1];
+
+                        if((hsize_t)(stride1[0]) == *elmt_size &&
+                               (hsize_t)(stride2[0]) == *elmt_size) {
+                            *elmt_size *= size[0];
+                            --*np;  /* *np decrements to a value of 0 now */
+                        } /* end if */
+                    } /* end if */
+                } /* end if */
+            } /* end if */
+            break;
+
+        default:
+            while (*np &&
+                   (hsize_t)(stride1[*np-1]) == *elmt_size &&
+                   (hsize_t)(stride2[*np-1]) == *elmt_size) {
+                *elmt_size *= size[*np-1];
+                if (--*np) {
+                    stride1[*np-1] += size[*np] * stride1[*np];
+                    stride2[*np-1] += size[*np] * stride2[*np];
+                }
+            }
+            break;
+    } /* end switch */
+
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -151,6 +236,7 @@ H5V_hyper_stride(intn n, const hsize_t *size,
 {
     hsize_t	    skip;	/*starting point byte offset		*/
     hsize_t	    acc;	/*accumulator				*/
+    hsize_t     tmp;
     int		    i;		/*counter				*/
 
     FUNC_ENTER(H5V_hyper_stride, (HDabort(), 0));
@@ -164,14 +250,60 @@ H5V_hyper_stride(intn n, const hsize_t *size,
     stride[n-1] = 1;
     skip = offset ? offset[n-1] : 0;
 
-    /* others */
-    for (i=n-2, acc=1; i>=0; --i) {
-        hsize_t tmp = acc * (total_size[i+1] - size[i+1]);
-        assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
-        stride[i] = (hssize_t)tmp; /*overflow checked*/
-        acc *= total_size[i+1];
-        skip += acc * (offset ? offset[i] : 0);
-    }
+    switch(n) {
+        case 2: /* 1-D dataset */
+            tmp = total_size[1] - size[1];
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[0] = (hssize_t)tmp; /*overflow checked*/
+            acc = total_size[1];
+            skip += acc * (offset ? offset[0] : 0);
+            break;
+
+        case 3: /* 2-D dataset */
+            tmp = total_size[2] - size[2];
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[1] = (hssize_t)tmp; /*overflow checked*/
+            acc = total_size[2];
+            skip += acc * (offset ? offset[1] : 0);
+
+            tmp = acc * (total_size[1] - size[1]);
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[0] = (hssize_t)tmp; /*overflow checked*/
+            acc *= total_size[1];
+            skip += acc * (offset ? offset[0] : 0);
+            break;
+
+        case 4: /* 3-D dataset */
+            tmp = total_size[3] - size[3];
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[2] = (hssize_t)tmp; /*overflow checked*/
+            acc = total_size[3];
+            skip += acc * (offset ? offset[2] : 0);
+
+            tmp = acc * (total_size[2] - size[2]);
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[1] = (hssize_t)tmp; /*overflow checked*/
+            acc *= total_size[2];
+            skip += acc * (offset ? offset[1] : 0);
+
+            tmp = acc * (total_size[1] - size[1]);
+            assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+            stride[0] = (hssize_t)tmp; /*overflow checked*/
+            acc *= total_size[1];
+            skip += acc * (offset ? offset[0] : 0);
+            break;
+
+        default:
+            /* others */
+            for (i=n-2, acc=1; i>=0; --i) {
+                hsize_t tmp = acc * (total_size[i+1] - size[i+1]);
+                assert (tmp<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                stride[i] = (hssize_t)tmp; /*overflow checked*/
+                acc *= total_size[i+1];
+                skip += acc * (offset ? offset[i] : 0);
+            }
+            break;
+    } /* end switch */
 
     FUNC_LEAVE(skip);
 }
@@ -381,6 +513,8 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
     hssize_t	dst_stride[H5V_HYPER_NDIMS];	/*dest stride info	*/
     hsize_t	dst_start, src_start;		/*offset to start at	*/
     hsize_t	elmt_size = 1;			/*element size in bytes */
+    hsize_t tmp1;
+    hsize_t tmp2;
     herr_t	status;				/*return status		*/
 #ifndef NDEBUG		
     intn	i;
@@ -423,19 +557,96 @@ H5V_hyper_copy(intn n, const hsize_t *_size,
         dst_start = dst_offset ? dst_offset[n-1] : 0;
         src_start = src_offset ? src_offset[n-1] : 0;
 
-        /* others */
-        for (ii=n-2, dst_acc=1, src_acc=1; ii>=0; --ii) {
-            hsize_t tmp1 = dst_acc * (dst_size[ii+1] - size[ii+1]);
-            hsize_t tmp2 = src_acc * (src_size[ii+1] - size[ii+1]);
-            assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
-            assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
-            dst_stride[ii] = (hssize_t)tmp1; /*overflow checked*/
-            src_stride[ii] = (hssize_t)tmp2; /*overflow checked*/
-            dst_acc *= dst_size[ii+1];
-            src_acc *= src_size[ii+1];
-            dst_start += dst_acc * (dst_offset ? dst_offset[ii] : 0);
-            src_start += src_acc * (src_offset ? src_offset[ii] : 0);
-        }
+        /* Unroll loop for common cases */
+        switch(n) {
+            case 2:
+                tmp1 = (dst_size[1] - size[1]);
+                tmp2 = (src_size[1] - size[1]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[0] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[0] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc = dst_size[1];
+                src_acc = src_size[1];
+                dst_start += dst_acc * (dst_offset ? dst_offset[0] : 0);
+                src_start += src_acc * (src_offset ? src_offset[0] : 0);
+                break;
+
+            case 3:
+                tmp1 = (dst_size[2] - size[2]);
+                tmp2 = (src_size[2] - size[2]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[1] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[1] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc = dst_size[2];
+                src_acc = src_size[2];
+                dst_start += dst_acc * (dst_offset ? dst_offset[1] : 0);
+                src_start += src_acc * (src_offset ? src_offset[1] : 0);
+
+                tmp1 = dst_acc * (dst_size[1] - size[1]);
+                tmp2 = src_acc * (src_size[1] - size[1]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[0] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[0] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc *= dst_size[1];
+                src_acc *= src_size[1];
+                dst_start += dst_acc * (dst_offset ? dst_offset[0] : 0);
+                src_start += src_acc * (src_offset ? src_offset[0] : 0);
+                break;
+
+            case 4:
+                tmp1 = (dst_size[3] - size[3]);
+                tmp2 = (src_size[3] - size[3]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[2] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[2] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc = dst_size[3];
+                src_acc = src_size[3];
+                dst_start += dst_acc * (dst_offset ? dst_offset[2] : 0);
+                src_start += src_acc * (src_offset ? src_offset[2] : 0);
+
+                tmp1 = dst_acc * (dst_size[2] - size[2]);
+                tmp2 = src_acc * (src_size[2] - size[2]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[1] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[1] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc *= dst_size[2];
+                src_acc *= src_size[2];
+                dst_start += dst_acc * (dst_offset ? dst_offset[1] : 0);
+                src_start += src_acc * (src_offset ? src_offset[1] : 0);
+
+                tmp1 = dst_acc * (dst_size[1] - size[1]);
+                tmp2 = src_acc * (src_size[1] - size[1]);
+                assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                dst_stride[0] = (hssize_t)tmp1; /*overflow checked*/
+                src_stride[0] = (hssize_t)tmp2; /*overflow checked*/
+                dst_acc *= dst_size[1];
+                src_acc *= src_size[1];
+                dst_start += dst_acc * (dst_offset ? dst_offset[0] : 0);
+                src_start += src_acc * (src_offset ? src_offset[0] : 0);
+                break;
+
+            default:
+                /* others */
+                for (ii=n-2, dst_acc=1, src_acc=1; ii>=0; --ii) {
+                    hsize_t tmp1 = dst_acc * (dst_size[ii+1] - size[ii+1]);
+                    hsize_t tmp2 = src_acc * (src_size[ii+1] - size[ii+1]);
+                    assert (tmp1<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                    assert (tmp2<((hsize_t)1<<(8*sizeof(hssize_t)-1)));
+                    dst_stride[ii] = (hssize_t)tmp1; /*overflow checked*/
+                    src_stride[ii] = (hssize_t)tmp2; /*overflow checked*/
+                    dst_acc *= dst_size[ii+1];
+                    src_acc *= src_size[ii+1];
+                    dst_start += dst_acc * (dst_offset ? dst_offset[ii] : 0);
+                    src_start += src_acc * (src_offset ? src_offset[ii] : 0);
+                }
+                break;
+        } /* end switch */
     }
 #endif /* NO_INLINED_CODE */
 
