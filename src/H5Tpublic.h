@@ -167,6 +167,21 @@ typedef enum H5T_direction_t {
     H5T_DIR_DESCEND     = 2     /*in descendent order                        */
 } H5T_direction_t;
 
+/* The exception type passed into the conversion callback function */
+typedef enum H5T_conv_except_t {
+    H5T_CONV_EXCEPT_RANGE_HI       = 0,   /*source value is greater than destination's range */
+    H5T_CONV_EXCEPT_RANGE_LOW      = 1,   /*source value is less than destination's range    */
+    H5T_CONV_EXCEPT_PRECISION      = 2,   /*source value loses precision in destination      */
+    H5T_CONV_EXCEPT_TRUNCATE       = 3   /*source value is truncated in destination         */
+} H5T_conv_except_t;
+
+/* The return value from conversion callback function H5T_conv_except_func_t */
+typedef enum H5T_conv_ret_t {
+    H5T_CONV_ABORT      = -1,   /*abort conversion                           */
+    H5T_CONV_UNHANDLED  = 0,    /*callback function failed to handle the exception      */
+    H5T_CONV_HANDLED    = 1     /*callback function handled the exception successfully  */
+} H5T_conv_ret_t;
+
 /* Variable Length Datatype struct in memory */
 /* (This is only used for VL sequences, not VL strings, which are stored in char *'s) */
 typedef struct {
@@ -186,18 +201,17 @@ typedef herr_t (*H5T_conv_t) (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
       hsize_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf,
       void *bkg, hid_t dset_xfer_plist);
 
-/*
- * If an error occurs during a datatype conversion then the function
- * registered with H5Tset_overflow() is called.  It's arguments are the
- * source and destination datatypes, a buffer which has the source value,
- * and a buffer to receive an optional result for the overflow conversion.
- * If the overflow handler chooses a value for the result it should return
- * non-negative; otherwise the hdf5 library will choose an appropriate
- * result.
+/* Exception handler.  If an exception like overflow happenes during conversion,
+ * this function is called if it's registered through H5Tset_type_conv_cb.
  */
-typedef herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
-				 void *src_buf, void *dst_buf);
+typedef H5T_conv_ret_t (*H5T_conv_except_func_t)(int except_type, hid_t src_id, 
+            hid_t dst_id, void *src_buf, void *dst_buf, void *user_data);
 
+/* Structure for conversion callback property */
+typedef struct H5T_conv_cb_t {
+    H5T_conv_except_func_t      func;
+    void*                       user_data;
+} H5T_conv_cb_t;
 
 /* When this header is included from H5Tprivate.h, don't make calls to H5open() */
 #undef H5OPEN
@@ -567,8 +581,6 @@ H5_DLL herr_t H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id,
 H5_DLL H5T_conv_t H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata);
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
-H5_DLL H5T_overflow_t H5Tget_overflow(void);
-H5_DLL herr_t H5Tset_overflow(H5T_overflow_t func);
 
 #ifdef __cplusplus
 }

@@ -137,6 +137,10 @@
 #define H5D_XFER_FILTER_CB_NAME       "filter_cb"
 #define H5D_XFER_FILTER_CB_SIZE       sizeof(H5Z_cb_t)
 #define H5D_XFER_FILTER_CB_DEF        {NULL,NULL}
+/* Definitions for type conversion callback function property */
+#define H5D_XFER_CONV_CB_NAME       "type_conv_cb"
+#define H5D_XFER_CONV_CB_SIZE       sizeof(H5T_conv_cb_t)
+#define H5D_XFER_CONV_CB_DEF        {NULL,NULL}
 
 /****************************/
 /* Library Private Typedefs */

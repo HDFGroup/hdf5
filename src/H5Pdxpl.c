@@ -348,6 +348,91 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Pset_type_conv_cb
+ *
+ * Purpose:     Sets user's callback function for dataset transfer property
+ *              list.  This callback function defines what user wants to do
+ *              if there's exception during datatype conversion.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              April 15, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t *op, void *operate_data)
+{
+    H5P_genplist_t      *plist;      /* Property list pointer */
+    herr_t              ret_value=SUCCEED;   /* return value */
+    H5T_conv_cb_t       cb_struct;
+    
+    FUNC_ENTER_API(H5Pset_type_conv_cb, FAIL);
+    H5TRACE3("e","ixx",plist_id,op,operate_data);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    cb_struct.func = op;
+    cb_struct.user_data = operate_data;
+    
+    if (H5P_set(plist,H5D_XFER_CONV_CB_NAME,&cb_struct)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_type_conv_cb
+ *
+ * Purpose:     Gets callback function for dataset transfer property
+ *              list.  This callback function defines what user wants to do
+ *              if there's exception during datatype conversion.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              April 15, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_type_conv_cb(hid_t plist_id, H5T_conv_except_func_t **op, void **operate_data)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5T_conv_cb_t       cb_struct;
+    herr_t              ret_value=SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(H5Pget_type_conv_cb, FAIL);
+    H5TRACE3("e","ixx",plist_id,op,operate_data);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Get property */
+    if (H5P_get(plist,H5D_XFER_CONV_CB_NAME,&cb_struct)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value");
+
+    /* Assign return value */
+    *op = cb_struct.func;
+    *operate_data = cb_struct.user_data;
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pget_btree_ratios
  *
  * Purpose:	Queries B-tree split ratios.  See H5Pset_btree_ratios().

@@ -171,6 +171,46 @@ overflow_handler(hid_t UNUSED src_id, hid_t UNUSED dst_id,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	except_func
+ *
+ * Purpose:	Gets called for all data type conversion exceptions.
+ *
+ * Return:	H5T_CONV_ABORT:	        -1
+ *
+ *              H5T_CONV_UNHANDLED      0
+ *
+ *              H5T_CONV_HANDLED        1
+ *
+ * Programmer:	Raymond Lu
+ *              April 19, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_conv_ret_t 
+except_func(int except_type, hid_t src_id, hid_t dst_id, void *src_buf,
+		 void *dst_buf, void *user_data)
+{
+    H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
+
+    if(except_type == H5T_CONV_EXCEPT_RANGE_HI) 
+        /*only test integer case*/
+        *(int*)dst_buf = *(int*)user_data;
+    else if(except_type == H5T_CONV_EXCEPT_RANGE_LOW)
+        /*only test integer case*/
+        *(int*)dst_buf = *(int*)user_data;
+    else if(except_type == H5T_CONV_EXCEPT_TRUNCATE) {
+        ret = H5T_CONV_UNHANDLED; 
+    } else if(except_type == H5T_CONV_EXCEPT_PRECISION) {
+        ret = H5T_CONV_UNHANDLED; 
+    }
+
+    return ret;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	some_dummy_func
  *
  * Purpose:	A dummy function to help check for overflow.
@@ -3796,6 +3836,11 @@ test_conv_int_2(void)
 static int
 test_conv_int_float(const char *name, hid_t src, hid_t dst)
 {
+    hid_t               dxpl_id;                /*dataset transfer property list*/
+    int                 fill_value=9;           /*fill value for conversion exception*/
+    H5T_conv_except_func_t   op;                /*returned callback function for conversion exception*/
+    void                *user_data;             /*returned pointer to user data passed in to the callback*/
+    hbool_t             except_set = FALSE;     /*whether user's exception handling is set*/
     const size_t	ntests=NTESTS;		/*number of tests	*/
     const size_t	nelmts=NTESTELEM;	/*num values per test	*/
     const size_t	max_fails=40;		/*max number of failures*/
@@ -3974,6 +4019,31 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
     noverflows_g = 0;
 #endif
 
+    /* Create a dataset transfer property list and datatype conversion 
+     * exception handler function and pass in fill value.  This is mainly
+     * for NetCDF compatibility, which requests fill in fill value when
+     * conversion exception happens.  We only test (unsigned) int - float 
+     * and float - (unsigned) int conversions, which should cover more cases.
+     */
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0)
+        goto error;
+
+    if((src_type == INT_INT && dst_type == FLT_FLOAT) || 
+            (src_type == INT_UINT && dst_type == FLT_FLOAT) || 
+            (src_type == FLT_FLOAT && dst_type == INT_UINT) ||
+            (src_type == FLT_FLOAT && dst_type == INT_INT)) {
+        if(H5Pset_type_conv_cb(dxpl_id, except_func, &fill_value)<0)
+            goto error;
+        else
+            except_set = TRUE;
+
+        if(H5Pget_type_conv_cb(dxpl_id, &op, &user_data)<0)
+            goto error;
+
+        if(op != except_func || *(int*)user_data != fill_value)
+            goto error;
+    } 
+    
     /* The tests */
     for (i=0; i<ntests; i++) {
 	if (ntests>1) {
@@ -3996,7 +4066,7 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
             buf[j] = saved[j] = HDrand();
 
 	/* Perform the conversion */
-	if (H5Tconvert(src, dst, (hsize_t)nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(src, dst, (hsize_t)nelmts, buf, NULL, dxpl_id)<0)
             goto error;
 
 	/* Check the results from the library against hardware */
@@ -4347,10 +4417,14 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 	    for (k=0; k<dst_size; k++)
 		dst_bits[dst_size-(k+1)] = buf[j*dst_size+ENDIAN(dst_size, k)];
 
-	    /*
+	    /*          Test library's default overflow handling:
 	     * Hardware usually doesn't handle overflows too gracefully. The
 	     * hardware conversion result during overflows is usually garbage
 	     * so we must handle those cases differetly when checking results.
+             *
+             *          Test user's exception handler when overflows:  
+             * Try to follow the except_func callback function to check if the 
+             * desired value was set.
 	     */
             if ((FLT_FLOAT==src_type || FLT_DOUBLE==src_type || FLT_LDOUBLE==src_type)
                     && (INT_CHAR==dst_type || INT_SHORT==dst_type || INT_INT==dst_type 
@@ -4362,9 +4436,15 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                      * the destination.  The destination should be set to the
                      * maximum possible value: 0x7f...f
                      */
-                    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0)
-                        continue; /*no error*/
+                    if(!except_set) {
+                        if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0)
+                            continue; /*no error*/
+                    } else {
+                        /* fill_value is small so we know only the 1st byte is set */
+                        if (dst_bits[0] == fill_value)
+                            continue; /*no error*/
+                    }
                 } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
                         overflows(src_bits, src_type, src_size, dst_nbits-1)) {
                     /*
@@ -4372,9 +4452,14 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                      * the destination. The destination should be set to the
                      * smallest possible value: 0x80...0
                      */
-                    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-                            H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 1)<0)
-                        continue; /*no error*/
+                    if(!except_set) {
+                        if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                                H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 1)<0)
+                            continue; /*no error*/
+                    } else {
+                        if (dst_bits[0] == fill_value)
+                            continue; /*no error*/
+                    }
                 }
             }
 
@@ -4387,16 +4472,26 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
                      * The source is negative if the most significant bit is
                      * set.  The destination is zero if all bits are zero.
                      */
-                    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
-                        continue; /*no error*/
+                    if(!except_set) {
+                        if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
+                            continue; /*no error*/
+                    } else {
+                        if (dst_bits[0] == fill_value)
+                            continue; /*no error*/
+                    }
                 } else if (overflows(src_bits, src_type, src_size, dst_nbits)) {
                     /*
                      * The source is a value with a magnitude too large for
                      * the destination.  The destination should be the
                      * largest possible value: 0xff...f
                      */
-                    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
-                        continue; /*no error*/
+                    if(!except_set) {
+                        if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0)
+                            continue; /*no error*/
+                    } else {
+                        if (dst_bits[0] == fill_value)
+                            continue; /*no error*/
+                    }
                 }
             }
 
@@ -4610,10 +4705,13 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 /*-------------------------------------------------------------------------
  * Function:	overflows
  *
- * Purpose:	return the index of the most significant digit in a bit
- *              vector.
+ * Purpose:	When convert from float or double to any integer type, 
+ *              check if overflow occurs.  
+ *              
  *
- * Return:	index
+ * Return:	TRUE:           overflow happens
+ *
+ *              FALSE:          no overflow
  *
  * Programmer:	Raymond Lu
  *              Monday, Nov 17, 2003

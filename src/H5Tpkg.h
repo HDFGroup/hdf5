@@ -235,9 +235,6 @@ typedef enum H5T_sdir_t {
 /* The native endianess of the platform */
 H5_DLLVAR H5T_order_t H5T_native_order_g;
 
-/* The overflow handler */
-H5_DLLVAR H5T_overflow_t H5T_overflow_g;
-
 /*
  * Alignment information for native types. A value of N indicates that the
  * data must be aligned on an address ADDR such that 0 == ADDR mod N. When

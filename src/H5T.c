@@ -244,9 +244,6 @@ static struct {
 /* The native endianess of the platform */
 H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 
-/* The overflow handler */
-H5T_overflow_t H5T_overflow_g = NULL;
-
 /* Declare the free list for H5T_t's */
 H5FL_DEFINE(H5T_t);
 
@@ -2547,78 +2544,6 @@ H5Tconvert(hid_t src_id, hid_t dst_id, hsize_t nelmts, void *buf,
 done:
     FUNC_LEAVE_API(ret_value);
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tget_overflow
- *
- * Purpose:	Returns a pointer to the current global overflow function.
- *		This is an application-defined function that is called
- *		whenever a data type conversion causes an overflow.
- *
- * Return:	Success:	Ptr to an application-defined function.
- *
- *		Failure:	NULL (this can happen if no overflow handling
- *				function is registered).
- *
- * Programmer:	Robb Matzke
- *              Tuesday, July  7, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5T_overflow_t
-H5Tget_overflow(void)
-{
-    H5T_overflow_t      ret_value;       /* Return value */
-
-    FUNC_ENTER_API(H5Tget_overflow, NULL);
-    H5TRACE0("x","");
-
-    if (NULL==H5T_overflow_g)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_UNINITIALIZED, NULL, "no overflow handling function is registered");
-
-    /* Set return value */
-    ret_value=H5T_overflow_g;
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Tset_overflow
- *
- * Purpose:	Sets the overflow handler to be the specified function.  FUNC
- *		will be called for all data type conversions that result in
- *		an overflow.  See the definition of `H5T_overflow_t' for
- *		documentation of arguments and return values.  The NULL
- *		pointer may be passed to remove the overflow handler.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Tuesday, July  7, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Tset_overflow(H5T_overflow_t func)
-{
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_API(H5Tset_overflow, FAIL);
-    H5TRACE1("e","x",func);
-
-    H5T_overflow_g = func;
-
-done:
-    FUNC_LEAVE_API(ret_value);
-}
-
 
 /*-------------------------------------------------------------------------
  * API functions are above; library-private functions are below...

@@ -27,6 +27,7 @@
 #include "H5Ipublic.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
+#include "H5Tpublic.h"
 #include "H5FDpublic.h"
 #include "H5MMpublic.h"
 #include "H5Zpublic.h"
@@ -300,7 +301,8 @@ H5_DLL herr_t H5Pget_hyper_vector_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
-
+H5_DLL herr_t H5Pset_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, void* operate_data);
+H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t **op, void** operate_data);
 
 #ifdef __cplusplus
 }

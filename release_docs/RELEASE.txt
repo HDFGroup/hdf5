@@ -42,6 +42,10 @@ New Features
 
     Library:
     --------
+        - New exception handler for datatype conversion is put in to 
+            replace the old overflow callback function.  This exception
+            handler is set through H5Pset_type_conv_cb function.
+            SLU - 2004/4/27
         - Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
 	    will suppress all library version mismatch warning messages.
 	    AKC - 2004/4/14
