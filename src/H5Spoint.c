@@ -663,6 +663,10 @@ H5S_point_release (H5S_t *space)
         curr=next;
     } /* end while */
     
+    /* Free & reset the point list header */
+    H5MM_xfree(space->select.sel_info.pnt_lst);
+    space->select.sel_info.pnt_lst=NULL;
+
     /* Reset the number of elements in the selection */
     space->select.num_elem=0;
     
