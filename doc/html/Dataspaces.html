@@ -6,6 +6,22 @@
 <body bgcolor="#FFFFFF">
 
 
+<!--   Note to Developers:                                            -->
+<!--   The following H5S functions were originally documented in this -->
+<!--   file and are in the HDF5 design.  However, they have not been  -->
+<!--   implemented and are not on the current development schedule.   -->
+<!--   So as to cease confusing the user, the relevant sections have  -->
+<!--   been commented out of this file.                               -->
+<!--     H5Sopen            H5Sselect_op       H5Ssubspace            -->
+<!--     H5Scommit          H5Sselect_order    H5Ssubspace_name       -->
+<!--     H5Sis_subspace                        H5Ssubspace_location   -->
+<!--     H5Slock                                                      -->
+<!--   The corresponding list of these same functions in the          -->
+<!--   Ref Manual, pointing to this document for a description, has   -->
+<!--   similarly been commented out.                                  -->
+<!--                                    - - -  F Baker, 7 May 2002    -->
+
+
 <hr>
 <center>
 <table border=0 width=98%>
@@ -241,6 +257,7 @@ types currently supported are H5S_SCALAR and H5S_SIMPLE;
 others are planned to be added later.  
 </DD>
 
+<!-- Unimplemented function
 <DT>
 <TT>hid_t H5Sopen(hid_t <I>location</I>, const char *<I>name</I>)</TT></DT>
 
@@ -250,6 +267,7 @@ The <I>location</I> argument is a file or group ID and <I>name</I> is
 an absolute or relative path to the permanent dataspace.  The dataspace ID which
 is returned is a handle to a permanent dataspace which can't be modified.
 </DD>
+-->
 
 <DT>
 <TT>hid_t H5Scopy (hid_t <I>space</I>)</TT></DT>
@@ -259,6 +277,7 @@ is returned is a handle to a permanent dataspace which can't be modified.
 dataspace <I>space</I>.
 </DD>
 
+<!-- Unimplemented function
 <DT>
 <TT>hid_t H5Ssubspace (hid_t <I>space</I>)</TT></DT>
 
@@ -273,7 +292,9 @@ contiguous areas) are allowed.  A subspace is not "simplified" or reduced in
 the number of dimensions used if the selection is "flat" in one dimension, they
 always have the same number of dimensions as their parent dataspace.
 </DD>
+-->
 
+<!-- Unimplemented function
 <DT>
 <TT>herr_t H5Scommit (hid_t <I>location</I>, const char *<I>name</I>, hid_t <I>space</I>)</TT></DT>
 
@@ -283,6 +304,7 @@ by <I>location</I>.  <I>Location</I> may be either a file or group handle
 and <I>name</I> is an absolute or relative path to the location to store the
 dataspace.  After this call, the dataspace is permanent and can't be modified.
 </DD>
+-->
 
 <DT>
 <TT>herr_t H5Sclose (hid_t <I>space</I>)</TT></DT>
@@ -387,8 +409,14 @@ an I/O transfer is performed (and checked during calls to H5Sselect_valid).
 Selections have an iteration order for the points selected, which can be any
 permutation of the dimensions involved (defaulting to 'C' array order) or a
 specific order for the selected points, for selections composed of single array
-elements with H5Sselect_elements.  Selections can also be copied or combined
-together in various ways with H5Sselect_op.  Further methods of selecting
+elements with H5Sselect_elements.  
+
+<!-- Unimplemented function
+Selections can also be copied or combined
+together in various ways with H5Sselect_op.  
+-->
+
+Further methods of selecting
 portions of a dataspace may be added in the future.
 
 <DL>
@@ -495,6 +523,7 @@ This function resets the selection region for the <I>space</I>
 dataspace not to include any elements.
 </DD>
 
+<!-- Unimplemented function
 <DT>
 <TT>herr_t H5Sselect_op (hid_t <I>space1</I>, h5s_seloper_t <I>op</I>,
     hid_t <I>space2</I>)</TT></DT>
@@ -523,7 +552,9 @@ operations for <I>op</I> are:
 </DL>
 
 </DD>
+-->
 
+<!-- Unimplemented function
 <DT>
 <TT>herr_t H5Sselect_order (hid_t <I>space</I>,
         hsize_t <I>perm_vector</I>[])</TT></DT>
@@ -541,6 +572,7 @@ the elements of the <I>perm_vector</I> as [0, 1, 2], for FORTRAN order they
 would be [2, 1, 0].  Other orderings, such as [1, 2, 0] are also possible, but
 may execute slower.
 </DD>
+-->
 
 <DT>
 <TT>htri_t H5Sselect_valid (hid_t <I>space</I>)</TT></DT>
@@ -574,10 +606,14 @@ for the dataspace is reset to 0.
 
 </DL>
 
+<!-- Inappropriate header until "Unimplemented functions" reinstated.
 <H2> 5. Misc. Dataspace Operations</H2>
+-->
+<H2> 5. Convenience Dataspace Operation</H2>
 
 <DL>
 
+<!-- Unimplemented function
 <DT>
 <TT>herr_t H5Slock (hid_t <I>space</I>)</TT></DT>
 
@@ -585,6 +621,7 @@ for the dataspace is reset to 0.
 Locks the dataspace so that it cannot be modified or closed.  When the library
 exits, the dataspace will be unlocked and closed.
 </DD>
+-->
 
 <DT>
 <TT>hid_t H5Screate_simple(int <I>rank</I>, const hsize_t *<I>current_size</I>,
@@ -596,6 +633,7 @@ and set it's extent in one call.  It is equivalent to calling H5Screate
 and H5Sset_extent_simple() in two steps.
 </DD>
 
+<!-- Unimplemented function
 <DT>
 <TT>int H5Sis_subspace(hid_t <I>space</I>)</TT></DT>
 
@@ -603,7 +641,9 @@ and H5Sset_extent_simple() in two steps.
     This function returns positive if <I>space</I> is located within another
 dataspace, zero if it is not, and negative on a failure.
 </DD>
+-->
 
+<!-- Unimplemented function
 <DT>
 <TT>char *H5Ssubspace_name(hid_t <I>space</I>)</TT></DT>
 
@@ -613,7 +653,9 @@ is located within.  If <I>space</I> is not located within another dataspace,
 or an error occurs, NULL is returned.  The application is responsible for
 freeing the string returned.
 </DD>
+-->
 
+<!-- Unimplemented function
 <DT>
 <TT>herr_t H5Ssubspace_location(hid_t <I>space</I>, hsize_t *<I>loc</I>)</TT></DT>
 
@@ -625,6 +667,7 @@ If <I>space</I> is not located within another dataspace
 or an error occurs, a negative value is returned, otherwise a non-negative value
 is returned.
 </DD>
+-->
 
 </DL>
 
@@ -677,7 +720,7 @@ is returned.
 
 <!-- Created: Thu Dec  4 14:57:32 EST 1997 -->
 <!-- hhmts start -->
-Last modified:  5 July 2001
+Last modified:  7 May 2002
 <!-- hhmts end -->
 
 <br>
