@@ -62,7 +62,7 @@ void parallel_print(const char* format, ...)
 		/* Delete the characters that were written to outBuff since they will be written to the overflow_file */
 		memset(outBuff+outBuffOffset, 0, OUTBUFF_SIZE - outBuffOffset); 
 		
-		overflow_file = tmpfile(); 
+		overflow_file = HDtmpfile(); 
 		if(overflow_file == NULL)
 		    printf("Warning: Could not create overflow file.  Output may be truncated.\n");
 		else
