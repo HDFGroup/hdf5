@@ -18,7 +18,7 @@ fi
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
     CFLAGS="-erroff=%none -DBSD_COMP"
-    DEBUG_CFLAGS=-g -xildoff
+    DEBUG_CFLAGS="-g -xildoff"
     DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O -s"
     PROD_CPPFLAGS=
