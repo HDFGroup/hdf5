@@ -97,9 +97,3 @@ case "X-$CXX" in
     PROFILE_CPPFLAGS=
     ;;
 esac
-
-# Set flag to avoid conversion from 'long double' to integers because of 
-# HP-UX's compiler problems.  For HP-UX 11.00, the compiler has 'floating exception'
-# when converting 'long double' to all integers except 'unsigned long long'.
-# Other HP-UX systems are unknown yet. (1/8/05 - SLU)
-hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='no'}
