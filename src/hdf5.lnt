@@ -3,6 +3,7 @@
 -esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free)
 -esym(534, H5I_clear_group, H5I_destroy_group)
 -esym(534, H5MM_xfree)
+-esym(534, H5TB_dfree)
 -esym(534, H5V_array_fill)
 
 // Turn off warnings about not using the inlined H5V* functions:

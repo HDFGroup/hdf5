@@ -128,7 +128,7 @@ typedef struct H5S_conv_t {
     
     /* Read from file to application w/o intermediate scratch buffer */
     herr_t (*read)(H5F_t *f, const struct H5O_layout_t *layout,
-           H5P_genplist_t *dc_plist, const H5D_storage_t *store,
+           H5P_genplist_t *dc_plist, const union H5D_storage_t *store,
            size_t elmt_size, const H5S_t *file_space,
            const H5S_t *mem_space, hid_t dxpl_id, void *buf/*out*/);
 
