@@ -147,8 +147,8 @@ $(top_builddir)/config.status: $(top_srcdir)/configure $(STAMP1)
 reconfigure: $(MAKEFILE_PARTS) $(STAMP2)
 	-cd $(top_builddir); CONFIG_HEADERS= ./config.status
 	@for sub in @subdirs@ dummy; do					\
-	  if test $$test != dummy; then					\
-	    -cd $$test; $(MAKE) reconfigure;				\
+	  if test $$sub != dummy; then					\
+	    -cd $$sub; $(MAKE) reconfigure;				\
 	  fi;								\
 	done;
 
