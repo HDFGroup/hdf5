@@ -91,11 +91,11 @@ fi
 
 # Architecture-specific flags
 case "$host_os-$host_cpu" in
-    # FreeBSD sets the information from "hostname -m" to the general machine
+    # FreeBSD sets the information from "uname -m" to the general machine
     # architecture, not the specific CPU for the machine, so even our
     # Pentium II Xeon server is set to "i386".  Once we know we are on a FreeBSD
     # machine, use the "sysctl" command to get the CPU hardware model.
-    freebsd*)
+    freebsd*-i386)
         host_cpu_model=`sysctl -n hw.model`
         case "$host_cpu_model" in
             # Hmm.. this might not catch Celerons, but it won't hurt them either...
