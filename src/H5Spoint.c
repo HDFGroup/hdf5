@@ -687,15 +687,18 @@ H5S_point_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_hyper_npoints (const H5S_t *space)
+H5S_point_npoints (const H5S_t *space)
 {
-    FUNC_ENTER (H5S_hyper_npoints, 0);
+    FUNC_ENTER (H5S_point_npoints, 0);
 
     /* Check args */
     assert (space);
 
+#ifdef QAK
+    printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)space->select.num_elem);
+#endif /* QAK */
     FUNC_LEAVE (space->select.num_elem);
-}   /* H5S_hyper_npoints() */
+}   /* H5S_point_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME

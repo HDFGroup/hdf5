@@ -1668,6 +1668,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * enough value in xfer_parms since turning off data type conversion also
      * turns off background preservation.
      */
+#ifdef QAK
+    printf("%s: check 0.5, nelmts=%d, mem_space->rank=%d\n",FUNC,(int)nelmts,mem_space->extent.u.simple.rank);
+#endif /* QAK */
     if (nelmts!=H5S_select_npoints (file_space)) {
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,
 		     "src and dest data spaces have different sizes");

@@ -195,8 +195,12 @@ H5S_select_release (H5S_t *space)
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
+        default:
             break;
     } /* end switch() */
+
+    /* Reset type of selection to "all" */
+    space->select.type=H5S_SEL_ALL;
 
     FUNC_LEAVE (ret_value);
 }   /* H5S_select_release() */
@@ -287,19 +291,6 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
         block=(hsize_t *)_block;
     } /* end else */
 
-    /* Copy all the per-dimension selection info into the space descriptor */
-    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                "can't allocate per-dimension vector");
-    } /* end if */
-    for(i=0; i<space->extent.u.simple.rank; i++) {
-	diminfo[i].start = start[i];
-	diminfo[i].stride = stride[i];
-	diminfo[i].count = count[i];
-	diminfo[i].block = block[i];
-    } /* end for */
-    space->select.sel_info.hyper.diminfo = diminfo;
-
     /*
      * Check for overlapping blocks (remove when real block-merging algorithm
      * is in place).
@@ -334,6 +325,19 @@ H5Sselect_hyperslab (hid_t space_id, H5S_seloper_t op,
                 "can't release hyperslab");
         } /* end if */
     } /* end if */
+
+    /* Copy all the per-dimension selection info into the space descriptor */
+    if((diminfo = H5MM_malloc(sizeof(H5S_hyper_dim_t)*space->extent.u.simple.rank))==NULL) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                "can't allocate per-dimension vector");
+    } /* end if */
+    for(i=0; i<space->extent.u.simple.rank; i++) {
+	diminfo[i].start = start[i];
+	diminfo[i].stride = stride[i];
+	diminfo[i].count = count[i];
+	diminfo[i].block = block[i];
+    } /* end for */
+    space->select.sel_info.hyper.diminfo = diminfo;
 
 #ifdef QAK
     printf("%s: check 2.0\n",FUNC);
@@ -671,6 +675,7 @@ H5S_select_npoints (const H5S_t *space)
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
+        default:
             ret_value=0;
             break;
     } /* end switch */
@@ -718,6 +723,7 @@ H5S_sel_iter_release (const H5S_t *space, H5S_sel_iter_t *sel_iter)
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
+        default:
             break;
     } /* end switch() */
 
@@ -804,6 +810,7 @@ H5S_select_valid (const H5S_t *space)
 
         case H5S_SEL_ALL:            /* Entire extent selected */
         case H5S_SEL_NONE:           /* Nothing selected */
+        default:
             ret_value=TRUE;
             break;
     } /* end switch */

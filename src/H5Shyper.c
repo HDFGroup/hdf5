@@ -300,6 +300,7 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
 	printf("%s: check 2.0.5, lo_bounds[%d][%d].bound=%d\n",FUNC,
         (int)dim,(int)i,(int)lo_bounds[dim][i].bound);
 #endif /* QAK */
+
         for (/*void*/;
              i<bound_count && pos[dim]>=lo_bounds[dim][i].bound+offset[dim];
 	     i++) {
@@ -1553,10 +1554,10 @@ H5S_hyper_add (H5S_t *space, const hssize_t *start, const hsize_t *size)
 #endif /* QAK */
     /* Increase size of boundary arrays for dataspace's selection */
     for(i=0; i<space->extent.u.simple.rank; i++) {
-#ifdef QAK
-	printf("%s: check 3.1, i=%d\n",FUNC,(int)i);
-#endif /* QAK */
         tmp=space->select.sel_info.hyper.hyper_lst->lo_bounds[i];
+#ifdef QAK
+	printf("%s: check 3.1, i=%d, space->sel_info.count=%d, tmp=%p\n",FUNC,(int)i, space->select.sel_info.hyper.hyper_lst->count,tmp);
+#endif /* QAK */
         if((space->select.sel_info.hyper.hyper_lst->lo_bounds[i]=H5MM_realloc(tmp,sizeof(H5S_hyper_bound_t)*(space->select.sel_info.hyper.hyper_lst->count+1)))==NULL) {
             space->select.sel_info.hyper.hyper_lst->lo_bounds[i]=tmp;
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -1765,18 +1766,15 @@ H5S_hyper_release (H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 hsize_t
-H5S_point_npoints (const H5S_t *space)
+H5S_hyper_npoints (const H5S_t *space)
 {
-    FUNC_ENTER (H5S_point_npoints, 0);
+    FUNC_ENTER (H5S_hyper_npoints, 0);
 
     /* Check args */
     assert (space);
 
-#ifdef QAK
-    printf("%s: check 1.0, nelmts=%d\n",FUNC,(int)space->select.num_elem);
-#endif /* QAK */
     FUNC_LEAVE (space->select.num_elem);
-}   /* H5S_point_npoints() */
+}   /* H5S_hyper_npoints() */
 
 /*--------------------------------------------------------------------------
  NAME
