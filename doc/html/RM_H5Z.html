@@ -116,29 +116,46 @@ as the corresponding C function.
 HDF5 supports a filter pipeline that provides the capability for standard 
 and customized raw data processing during I/O operations.  
 HDF5 is distributed with a small set of standard filters such as 
-compression (gzip and a shuffling algorithm) and 
+compression (gzip, SZIP, and a shuffling algorithm) and 
 error checking (Fletcher32 checksum).
 For further flexibility, the library allows a 
 user application to extend the pipeline through the 
 creation and registration of customized filters.
 <p>
-As mentioned above, one set of filters distributed with HDF5 provides 
-built-in methods for raw data compression.  
 The flexibility of the filter pipeline implementation enables the 
 definition of additional filters by a user application.
-A filter<br>
-&nbsp;&mdash;&nbsp;
-    is associated with a dataset when the dataset is created,<br>
-&nbsp;&mdash;&nbsp;
-    can be used only with chunked data (ie., datasets stored in the
-    <code>H5D_CHUNKED</code> storage layout), and<br>
-&nbsp;&mdash;&nbsp;
-    is applied independently to each chunk of the dataset.
+A filter
+  <ul>
+    <li>is associated with a dataset when the dataset is created,<br>
+    <li>can be used only with chunked data<br>
+    (i.e., datasets stored in the <code>H5D_CHUNKED</code> 
+    storage layout), and
+    <li>is applied independently to each chunk of the dataset.
+  </ul>
 <p>
 The HDF5 library does not support filters for contiguous datasets 
 because of the difficulty of implementing random access for partial I/O. 
 Compact dataset filters are not supported because it would not produce 
 significant results.
+<p>
+Filter identifiers for the filters distributed with the HDF5 Library
+are as follows:
+<table align=center border=0>
+  <tr valign=top align=left>
+  <td>
+    <code>H5Z_FILTER_DEFLATE</code></td><td>The gzip compression,
+          or deflation, filter
+  </td></tr><tr><td>
+    <code>H5Z_FILTER_SZIP</code></td><td>The SZIP compression filter
+  </td></tr><tr><td>
+    <code>H5Z_FILTER_SHUFFLE</code></td><td>The shuffle algorithm filter
+  </td></tr><tr><td>
+    <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code></td><td>The Fletcher32 checksum,
+          or error checking, filter
+  </td></tr>
+</table>
+Custom filters that have been registered with the library will have
+additional unique identifiers.
 <p>
 See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a> 
 in the <cite>HDF5 User's Guide</cite> for further information regarding 
@@ -161,6 +178,8 @@ data compression.
     <dl>
         <dt><em>H5Z_filter_t</em> <code>filter</code>
             <dd>IN: Filter identifier.
+              See the introduction to this section of the reference manual
+              for a list of filter identifiers</td></tr>
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -175,8 +194,9 @@ SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
                                      !    H5Z_FILTER_DEFLATE_F
                                      !    H5Z_FILTER_SHUFFLE_F
                                      !    H5Z_FILTER_FLETCHER32_F
+                                     !    H5Z_FILTER_SZIP_F
   LOGICAL, INTENT(OUT) :: status     ! Flag indicating whether 
-                                     ! filter is availble: 
+                                     ! filter is available: 
                                      !    .TRUE.
                                      !    .FALSE.
 END SUBROUTINE h5zfilter_avail_f
@@ -423,6 +443,8 @@ END SUBROUTINE h5zfilter_avail_f
     <dl>
         <dt><em>H5Z_filter_t</em> <code>filter</code>
             <dd>IN: Identifier of the filter to be unregistered.
+                See the introduction to this section of the reference manual
+                for a list of filter identifiers
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -436,6 +458,7 @@ SUBROUTINE h5zunregister_f(filter, hdferr)
                                   !    H5Z_FILTER_DEFLATE_F
                                   !    H5Z_FILTER_SHUFFLE_F
                                   !    H5Z_FILTER_FLETCHER32_F
+                                  !    H5Z_FILTER_SZIP_F
   INTEGER, INTENT(OUT) :: hdferr  ! Error code
                                   ! 0 on success, and -1 on failure
 END SUBROUTINE h5zunregister_f
@@ -490,7 +513,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified:  24 October 2003");
+document.writeln("Last modified:  1 July 2004");
 -->
 </SCRIPT>
  
