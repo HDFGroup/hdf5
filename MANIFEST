@@ -67,7 +67,6 @@
 
 ./doc/Makefile.in
 ./doc/html/Attributes.html
-./doc/html/Big.html
 ./doc/html/Caching.html
 ./doc/html/Chunking.html
 ./doc/html/Chunk_f1.gif
@@ -79,8 +78,6 @@
 ./doc/html/Chunk_f5.gif
 ./doc/html/Chunk_f6.gif
 ./doc/html/Chunk_f6.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/CodeReview.html		_DO_NOT_DISTRIBUTE_
-./doc/html/Coding.html
 ./doc/html/Copyright.html
 ./doc/html/Datasets.html
 ./doc/html/Dataspaces.html
@@ -90,7 +87,6 @@
 ./doc/html/EnumMap.gif
 ./doc/html/Environment.html
 ./doc/html/Errors.html
-./doc/html/ExternalFiles.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/FF-IH_FileGroup.gif
 ./doc/html/FF-IH_FileObject.gif
 ./doc/html/Files.html
@@ -112,13 +108,9 @@
 ./doc/html/IH_map4.gif
 ./doc/html/IH_mapFoot.gif
 ./doc/html/IH_mapHead.gif
-./doc/html/IOPipe.html
-./doc/html/Lib_Maint.html		_DO_NOT_DISTRIBUTE_
 ./doc/html/Makefile.in
-./doc/html/MemoryManagement.html	_DO_NOT_DISTRIBUTE_
 ./doc/html/MountingFiles.html
 ./doc/html/NCSAfooterlogo.gif
-./doc/html/ObjectHeader.txt		_DO_NOT_DISTRIBUTE_
 ./doc/html/PaletteExample1.gif
 ./doc/html/Palettes.fm.anc.gif
 ./doc/html/Palettes.html
@@ -142,6 +134,35 @@
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
+
+./doc/html/TechNotes.html
+./doc/html/TechNotes/BigDataSmMach.html
+./doc/html/TechNotes/CodeReview.html
+./doc/html/TechNotes/ExternalFiles.html
+./doc/html/TechNotes/H4-H5Compat.html
+./doc/html/TechNotes/HeapMgmt.html
+./doc/html/TechNotes/IOPipe.html
+./doc/html/TechNotes/LibMaint.html
+./doc/html/TechNotes/MemoryMgmt.html
+./doc/html/TechNotes/MoveDStruct.html
+./doc/html/TechNotes/NamingScheme.html
+./doc/html/TechNotes/ObjectHeader.html
+./doc/html/TechNotes/RawDStorage.html
+./doc/html/TechNotes/SymbolTables.html
+./doc/html/TechNotes/Version.html
+./doc/html/TechNotes/pipe1.gif
+./doc/html/TechNotes/pipe1.obj          _DO_NOT_DISTRIBUTE_
+./doc/html/TechNotes/pipe2.gif
+./doc/html/TechNotes/pipe2.obj          _DO_NOT_DISTRIBUTE_
+./doc/html/TechNotes/pipe3.gif
+./doc/html/TechNotes/pipe3.obj          _DO_NOT_DISTRIBUTE_
+./doc/html/TechNotes/pipe4.gif
+./doc/html/TechNotes/pipe4.obj          _DO_NOT_DISTRIBUTE_
+./doc/html/TechNotes/pipe5.gif
+./doc/html/TechNotes/pipe5.obj          _DO_NOT_DISTRIBUTE_
+./doc/html/TechNotes/version.gif
+./doc/html/TechNotes/version.obj        _DO_NOT_DISTRIBUTE_
+
 ./doc/html/Tools.html
 
 ./doc/html/Tutor/Contents.html
@@ -240,10 +261,8 @@
 ./doc/html/Tutor/title.html
 ./doc/html/Tutor/util.html
 
-./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/compat.html
 ./doc/html/dataset_p1.gif
 ./doc/html/dataset_p1.obj
 ./doc/html/extern1.gif
@@ -261,25 +280,9 @@
 ./doc/html/ph5design.html
 ./doc/html/ph5example.c
 ./doc/html/ph5implement.txt
-./doc/html/pipe1.gif
-./doc/html/pipe1.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/pipe2.gif
-./doc/html/pipe2.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/pipe3.gif
-./doc/html/pipe3.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/pipe4.gif
-./doc/html/pipe4.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/pipe5.gif
-./doc/html/pipe5.obj			_DO_NOT_DISTRIBUTE_
-./doc/html/heap.txt			_DO_NOT_DISTRIBUTE_
 ./doc/html/index.html
-./doc/html/move.html			_DO_NOT_DISTRIBUTE_
 ./doc/html/review1.html			_DO_NOT_DISTRIBUTE_
 ./doc/html/review1a.html		_DO_NOT_DISTRIBUTE_
-./doc/html/storage.html			_DO_NOT_DISTRIBUTE_
-./doc/html/symtab			_DO_NOT_DISTRIBUTE_
-./doc/html/version.gif
-./doc/html/version.obj			_DO_NOT_DISTRIBUTE_
 ./doc/src/Copyright.html		_DO_NOT_DISTRIBUTE_
 ./doc/src/Glossary.html			_DO_NOT_DISTRIBUTE_
 ./doc/src/H5.intro.doc			_DO_NOT_DISTRIBUTE_
