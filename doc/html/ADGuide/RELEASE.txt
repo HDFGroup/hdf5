@@ -1,4 +1,4 @@
-HDF5 version 1.4.4-snap5 released on Tue May 28 09:01:34 CDT 2002
+HDF5 version 1.4.4-pre3 released on Wed Jun 19 15:37:34 CDT 2002
 ==============================================================================
 
 
@@ -42,6 +42,14 @@ New Features
   =========
     o General
     --------- 
+      * Added internal "small data" aggregation, which can reduce the number of
+        actual I/O calls made, improving performance.  QAK - 2002/06/05
+      * Improved internal metadata aggregation, which can reduce the number of
+        actual I/O calls made, improving performance.  Additionally, this can
+        reduce the size of files produced.  QAK - 2002/06/04
+      * Improved internal metadata caching, which can reduce the number of
+        actual I/O calls made by a substantial amount, improving
+        performance.  QAK - 2002/06/03
       * Fill-value's forward-compatibility with 1.5 was added.  SLU -
 	2002/04/11
       * A new query function H5Tget_member_index has been added for compound
@@ -52,17 +60,33 @@ New Features
  
     o APIs
     ------
-      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were overloaded
-        with "dims" argument to be assumed size array of type INTEGER(HSIZE_T). We 
-        recommend to use the subroutines with the new type. Module subroutines that
-        accept "dims" as INTEGER array of size 7 will be depricated in 1.6 release.
-        EIP - 2002/05/06
+      * F90 subroutines h5dwrite_f, h5dread_f, h5awrite_f and h5aread_f were
+        overloaded with "dims" argument to be assumed size array of type
+        INTEGER(HSIZE_T). We recommend to use the subroutines with the new type.
+        Module subroutines that accept "dims" as INTEGER array of size 7 will
+        be deprecated in 1.6 release.  EIP - 2002/05/06
  
     o Performance
     -------------
 
   o Parallel Library
   ==================
+    * Added environment variable flag to control whether creating MPI derived
+      typed is preferred or not.  This can affect performance, depending on
+      which way the MPI-I/O library is optimized for.  The default is set to
+      prefer MPI derived types for collective raw data transfers, setting the
+      HDF5_MPI_PREFER_DERIVED_TYPES environment variable to "0" (i.e.:
+      "setenv HDF5_MPI_PREFER_DERIVED_TYPES 0") changes the preference to avoid
+      using then whenever possible.  QAK - 2002/06/19
+    * Changed MPI I/O routines to avoid creating MPI derived types (and thus
+      needing to set the file view) for contiguous selections within datasets,
+      which should result in some performance improvement for those types of
+      selections.  QAK - 2002/06/18
+    * Enable MPI type support for collective I/O to be enabled by default.
+      This can be disabled by setting the HDF5_MPI_OPT_TYPES environment
+      variable to the value "0".  QAK - 2002/06/14
+    * Allow chunks in chunked datasets to be cached when parallel file is
+      opened for read-only access (bug #709).  QAK - 2002/06/10
     * Changed method for allocating chunked dataset blocks to only allocate
       blocks that don't already exist, instead of attempting to create all the
       blocks all the time.  This improves performance for chunked
@@ -85,6 +109,30 @@ New Features
 
 Bug Fixes since HDF5-1.4.3 Release
 ==================================
+    * Fixed bug in chunking routines where they were using internal allocation
+        free routines, instead of malloc/free, preventing user filters from
+        working correctly.  Chunks are now allocated/freed with malloc/free and
+        so should the chunks in user filters.  QAK 2002/06/18
+    * Fixed bug where regular hyperslab selection could get incorrectly
+        transferred when the number of elements in a row did not fit evenly
+        into the buffer provided.  QAK 2002/06/12
+    * Fixed bug (#499) which allowed an "empty" compound or enumerated datatype
+        (one with no members) to be used to create a dataset or committed to a
+        file.  QAK - 2002/06/11
+    * Fixed bug (#777) which allowed a compound datatype to be inserted into
+        itself.  QAK - 2002/06/10
+    * Fixed bug (#789) where creating 1-D dataset region reference caused the
+        library to go into infinite loop.  QAK - 2002/06/10
+    * Fixed bug (#699, fix provided by a user) where a scalar dataspace was
+        written to the file and then subsequently queried with the
+        H5Sget_simple_extent_type function, type was reported H5S_SIMPLE instead
+        of H5S_SCALAR. EIP - 2002/06/04
+    * Clear symbol table node "dirty" flag when flushing symbol tables to
+        disk, to reduce I/O calls made & improve performance.  QAK - 2002/06/03
+    * Fixed bug where an object's header could get corrupted in certain
+        obscure situations where many objects were created in the
+        file.  QAK - 2002/05/31
+        was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where read/write intent in file IDs created with H5Freopen
         was not being kept the same as the original file.  QAK - 2002/05/14
     * Fixed bug where selection offsets were not being used when iterating
@@ -158,7 +206,7 @@ Platforms Tested
                                           Patch 109503-07 2001/08/11
                                   Sun WorkShop 6 update 1 C++ 5.2 Patch
                                         109508-04 2001/07/11
-    TFLOPS r1.0.4 v4.0.8 i386     pgcc Rel 3.1-4i with mpich-1.2.1 with
+    TFLOPS r1.0.4 v4.2.2 i386     pgcc Rel 3.1-4i with mpich-1.2.3 with
                                           local modifications
     IA-32 Linux 2.2.10smpx        cc Intel 5.0.1
                                   egcs-2.91.66
@@ -201,7 +249,7 @@ Supported Configuration Features Summary
     DECOSF         y  n         y    n         y     y          y     y
     T3E            y  y         y    y         n     n          y     y
     SV1            y  n         y    n         n     n          y     y
-    TFLOPS         y  y (1)     n    n         n     n          y     y (4)
+    TFLOPS         n  y (1)     n    n         n     n          y     y (4)
     AIX-4.3 SP2    y  y         y    y         n     n          y     n
     AIX-4.3 SP3    y  y         y    y         y     n          y     n
     Win2000        y  n         y    n         y (6) y          y     y
