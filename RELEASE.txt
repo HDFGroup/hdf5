@@ -402,9 +402,17 @@ Known Problems
 
   The --enable-static-exec configure flag also fails to correctly compile
   on Linux platforms using the gcc-2.95.2 compiler.
+
+  The compilation fails if configured with --enable-static-exec on IRIX 6.5.
+
+  The executable files in hdf5/bin are dynamic-linked for IRIX64 6.5(64 and
+  n32 modes) and IRIX 6.5, even though they are compiled with static library.
   
   It is suggested that you don't use this option on these platforms
   during configuration.
+
+* testhdf5 got bus error with configuration options --prefix and --with-hdf4
+  on IRIX 6.5.
 
 * With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
