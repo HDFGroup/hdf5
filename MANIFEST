@@ -1376,7 +1376,6 @@
 ./tools/testfiles/h5diff_01.txt
 ./tools/testfiles/h5diff_02.txt
 ./tools/testfiles/h5diff_031.txt
-./tools/testfiles/h5diff_032.txt
 ./tools/testfiles/h5diff_033.txt
 ./tools/testfiles/h5diff_0410.txt
 ./tools/testfiles/h5diff_041.txt
