@@ -498,7 +498,10 @@
 
 	    $ make install prefix=NEW_DIR
 
-	where NEW_DIR is the new directory you wish to install HDF5.
+	where NEW_DIR is the new directory you wish to install HDF5. If
+	you do this, you should also modify the installed "bin/h5cc"
+	script. Change the "prefix=..." line to reflect the value of
+	NEW_DIR.
 
 	The library can be used without installing it by pointing the
 	compiler at the `src' directory for both include files and
