@@ -142,6 +142,10 @@ Supported Configuration Features Summary
 Known Problems
 ==============
 
+    * The h5dump tests may fail to match the expected output in some
+      platforms (e.g. SP2 parallel) where the error messages directed
+      to "stderr" do not appear in the "right order" with output from
+      stdout.  This is not an error.
     * The --enable-static-exec configure flag fails to compile for HP-UX
       11.00 platforms.
 
