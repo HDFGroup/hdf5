@@ -145,7 +145,8 @@ enough_room(hid_t fapl)
  done:
     for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
 	HDsnprintf(name, sizeof name, filename, i);
-	close(fd[i]);
+	if(close(fd[i])<0)
+            ret_value=0;
 	unlink(name);
     }
     
