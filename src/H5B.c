@@ -2054,7 +2054,7 @@ H5B_copy(H5F_t *f, const H5B_t *old_bt)
     H5B_t		*ret_value = NULL;
     hsize_t		total_native_keysize;
     hsize_t		size;
-    intn                nkeys;
+    uintn               nkeys;
     uintn		u;
 
     FUNC_ENTER(H5B_copy, NULL);
