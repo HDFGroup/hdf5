@@ -195,7 +195,7 @@ void *tts_error_thread(void UNUSED *arg)
 #ifdef H5_WANT_H5_V1_6_COMPAT
     H5Eset_auto(old_error_cb, old_error_client_data);
 #else /*H5_WANT_H5_V1_6_COMPAT*/
-    H5Eset_auto(H5E_DEFAULT, old_error_cb, old_error_client_data);
+    H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
 
     return NULL;
