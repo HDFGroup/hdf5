@@ -85,40 +85,65 @@ done:
  *
  * Purpose:
  *              Gets data transform expression. 
- *
  * 
  * Return:      Returns a non-negative value if successful; otherwise returns a negative value. 
  * 
+ * Comments:
+ *  If `expression' is non-NULL then write up to `size' bytes into that
+ *  buffer and always return the length of the transform name.
+ *  Otherwise `size' is ignored and the function does not store the expression,
+ *  just returning the number of characters required to store the expression.
+ *  If an error occurs then the buffer pointed to by `expression' (NULL or non-NULL)
+ *  is unchanged and the function returns a negative value.
+ *  If a zero is returned for the name's length, then there is no name
+ *  associated with the ID.
  * 
  * Programmer:	Leon Arber
  *              August 27, 2004
  * 
  * Modifications:
- *
+ *		October 20, 2004 LA: Changed API to use size and return ssize_t
  *-------------------------------------------------------------------------
  */
-herr_t H5Pget_data_transform(hid_t plist_id, char** expression)
+ssize_t H5Pget_data_transform(hid_t plist_id, char* expression /*out*/, size_t size)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop=NULL;    /* New data xform property */
-    herr_t ret_value=SUCCEED;   /* return value */
+    ssize_t 	ret_value;   /* return value */
+
+    size_t	len;
+    char*	pexp;
 
   
     FUNC_ENTER_API(H5Pget_data_transform, FAIL);
 
-    /* Check arguments */
-    if (expression == NULL)
-	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "expression cannot be NULL");
- 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop)<0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression");
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Error getting data transform expression");
 
+    if(NULL == data_xform_prop)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Cannot get a data transform that has not been set");
+    
     /* Get the data transform string */
-    *expression = H5Z_xform_extract_xform_str(data_xform_prop); 
+    pexp = H5Z_xform_extract_xform_str(data_xform_prop); 
+
+    if(!pexp)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Failed to retrieve transform expression");
+    
+    len = HDstrlen(pexp);
+    if(expression)
+    {
+	/* sanity check */
+	if(size > len)
+	    size = len;
+	
+	HDstrncpy(expression, pexp, size);
+    }
+    
+    ret_value = (ssize_t)len;
     
 done:
     if(ret_value<0) {

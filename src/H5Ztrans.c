@@ -1005,10 +1005,8 @@ done:
 static    herr_t
 H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_type, H5Z_result* res)
 {
-
     H5Z_result resl, resr;
     herr_t ret_value = SUCCEED;
-
 
     FUNC_ENTER_NOAPI(H5Z_xform_eval_full, FAIL);
 
@@ -1048,6 +1046,7 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 	 * 2.  Figure out what type of data we're going to be manipulating
 	 * 3.  Do the operation on the data. */
 
+	
 	switch (tree->type) {
 	    case H5Z_XFORM_PLUS:  
 		H5Z_XFORM_TYPE_OP(resl, resr, array_type, +=, array_size)
@@ -1390,7 +1389,7 @@ H5Z_xform_create(const char *expr)
     
      /* we generate the parse tree right here and store a poitner to its root in the property. */
     if((data_xform_prop->parse_root = H5Z_xform_parse(expr, data_xform_prop->dat_val_pointers))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform parse tree")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression")
 
     /* Assign return value */
     ret_value=data_xform_prop;
@@ -1590,18 +1589,16 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
 {
     char* ret_value;
 
-    FUNC_ENTER_NOAPI(H5Z_xform_extract_xform_str, NULL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5Z_xform_extract_xform_str)
 
     /* There should be no way that these can be NULL since the function
      * that calls this one checks to make sure they aren't before
      * pasing them */
     assert(exp);
     assert(data_xform_prop);
+  
+    ret_value = data_xform_prop->xform_exp;
 
-    if( (ret_value = H5MM_strdup(data_xform_prop->xform_exp)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform string")
-
-done:
     FUNC_LEAVE_NOAPI(ret_value)  
 } /* H5Z_xform_extract_xform_str() */
 
