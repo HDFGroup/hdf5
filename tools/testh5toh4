@@ -139,7 +139,7 @@ CONVERT()
 
 	    if [ $outfile = "tloop" -a $H4DUMPVER -lt 413 ]
 	    then
-		echo "*-SKIP-*"
+		echo " -SKIP-"
 		result="skipped"
 		touch $expect_out $actual_out	# fake them
 	    else

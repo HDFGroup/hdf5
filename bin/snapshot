@@ -47,6 +47,7 @@ if [ -d ${COMPARE}/previous ]; then
         snapshot=no
 	for src in `grep '^\.' ${COMPARE}/current/MANIFEST|expand|cut -f1 -d' '`; do
 	    diff -I H5_VERS_RELEASE -I " released on " \
+                -I " currently under development" \
 		${COMPARE}/previous/$src ${COMPARE}/current/$src || \
 		snapshot=yes
 		# Don't break because we want to see all the diffs.
@@ -72,8 +73,9 @@ if [ "$snapshot" = "yes" ]; then
 	cd ${COMPARE}/current
 	cvs -Q tag hdf5-`perl -w bin/h5vers |tr . _`
 	bin/release -d $ARCHIVES $METHODS
+	RELEASE_VERSION="`perl -w bin/h5vers -v`"
 	perl -w bin/h5vers -i
-	cvs -Q commit -m Snapshot
+	cvs -Q commit -m "Snapshot $RELEASE_VERSION"
     )
 fi
 

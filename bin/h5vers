@@ -36,6 +36,11 @@ require 5.003;
 #
 # If a file is specified then that file is used instead of
 # ./H5public.h or ./src/H5public.h.
+#
+# If the version number is changed (either `-s' or `-i' was used on
+# the command line) then the first line of the README file one
+# directory above the H5public.h file is also modified so it looks
+# something like: This is hdf5-1.2.3 currently under development.
 ##############################################################################
 
 sub getvers {
@@ -108,13 +113,17 @@ while ($_ = shift) {
 }
 die "mutually exclusive options given\n" if $set && $inc;
 
-# Determine file to use
+# Determine file to use as H5public.h and README. The README file is
+# always in the directory above H5public.h
 unless ($file) {
   for (@files) {
     ($file=$_,last) if -f $_;
   }
 }
 die "unable to read file: $file\n" unless -r $file;
+$README = $file;
+$README =~ s/[^\/]*$/..\/README/;
+die "unable to read file: $README\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -148,6 +157,8 @@ if ($set) {
 } elsif ($inc) {
   die "unknown increment field: $inc\n";
 } else {
+  # Nothing to do but print result
+  $README = "";
   @newver = @curver;
 }
 
@@ -166,6 +177,18 @@ if ($newver[0]!=$curver[0] ||
   rename $file, "$file~" or die "unable to save backup file\n";
   open FILE, ">$file" or die "unable to open $file but backup saved!\n";
   print FILE $contents;
+  close FILE;
+}
+
+# Update the README file
+if ($README) {
+  open FILE, $README or die "$README: $!\n";
+  @contents = <FILE>;
+  close FILE;
+  $contents[0] = sprintf("This is hdf5-%d.%d.%d currently under development\n",
+			 @newver);
+  open FILE, ">$README" or die "$README: $!\n";
+  print FILE @contents;
   close FILE;
 }
 
