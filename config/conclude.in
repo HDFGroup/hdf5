@@ -46,7 +46,13 @@ check test _test: tests
 	@for test in $(TEST_PROGS) dummy; do                                  \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
-	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then			      \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";	      \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then			      \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";		      \
+	      else							      \
+	         echo "Testing $$test $(TEST_FLAGS)";			      \
+	      fi;                                                             \
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
 		 $(RUNTEST) ./$$test $(TEST_FLAGS) ||			      \
@@ -69,7 +75,13 @@ check test _test: tests
 	@for test in $(TEST_PROGS_PARA) dummy; do                             \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
-	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then			      \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";	      \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then			      \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";		      \
+	      else							      \
+	         echo "Testing $$test $(TEST_FLAGS)";			      \
+	      fi;                                                             \
 	      echo "============================";			      \
 	      srcdir="$(srcdir)"					      \
 		 $(RUNPARALLEL) ./$$test $(TEST_FLAGS) ||		      \
@@ -82,7 +94,13 @@ check test _test: tests
 	@for test in $(TEST_SCRIPTS) dummy; do                                \
 	   if test $$test != dummy; then				      \
 	      echo "============================";			      \
-	      echo "Testing $$test $(TEST_FLAGS)";			      \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then			      \
+	         echo "Fortran API: Testing $$test $(TEST_FLAGS)";	      \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then			      \
+	         echo "C++ API: Testing $$test $(TEST_FLAGS)";		      \
+	      else							      \
+	         echo "Testing $$test $(TEST_FLAGS)";			      \
+	      fi;                                                             \
 	      echo "============================";			      \
 	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
 	         srcdir="$(srcdir)"					      \
