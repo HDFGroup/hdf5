@@ -1361,7 +1361,7 @@ H5Pset_sym_k(hid_t plist_id, int ik, unsigned lk)
     int btree_k[H5B_NUM_BTREE_ID];
 
     FUNC_ENTER(H5Pset_sym_k, FAIL);
-    H5TRACE3("e","iIsIs",plist_id,ik,lk);
+    H5TRACE3("e","iIsIu",plist_id,ik,lk);
 
     /* Check arguments */
     if(H5I_GENPROP_LST != H5I_get_type(plist_id))
