@@ -1299,6 +1299,69 @@ FORTRAN Datatype API -- h5t
           END SUBROUTINE h5tget_super_f
 </pre>
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tarray_create_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tarray_create_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: base_id ! Identifier of array base datatype
+            INTEGER, INTENT(IN)        ::  rank   ! Rank of the array
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims !Sizes of each array dimension
+
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! Identifier of the array datatype
+            INTEGER, INTENT(OUT)        :: hdferr  ! Error code
+          END SUBROUTINE h5tarray_create_f
+</pre>
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_array_ndims_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_array_ndims_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Identifier of the array datatype
+            INTEGER, INTENT(OUT)       ::  ndims   ! Number of array dimensions
+            INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+          END SUBROUTINE h5tget_array_ndims_f
+</pre>
+
+
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5tget_array_dims_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5tget_array_dims_f</strong>
+<pre>
+ 
+           SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: type_id                ! Identifier of the array datatype
+            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) ::  dims ! Buffer to store array datatype
+            INTEGER, INTENT(OUT)       :: hdferr                 ! Error code
+          END SUBROUTINE h5tget_array_dims_f
+</pre>
 
 </dl>
 
@@ -1313,7 +1376,7 @@ FORTRAN Datatype API -- h5t
 Describes HDF5 Release 1.5, Unreleased Development Branch
 </address><!-- #EndLibraryItem -->
 
-Last modified:  19 March 2003
+Last modified:  5 June 2003
 
 </body>
 </html>
