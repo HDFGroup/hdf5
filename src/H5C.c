@@ -141,13 +141,14 @@ H5Ccreate(H5C_class_t type)
     /* Allocate a new template and initialize it with default values */
     switch (type) {
     case H5C_FILE_CREATE:
-        tmpl = H5MM_xmalloc(sizeof(H5F_create_t));
+	tmpl = H5MM_xmalloc(sizeof(H5F_create_t));
         memcpy(tmpl, &H5F_create_dflt, sizeof(H5F_create_t));
         break;
 
     case H5C_FILE_ACCESS:
-        HRETURN_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL,
-                      "not implemented yet");
+        tmpl = H5MM_xmalloc(sizeof(H5F_access_t));
+        memcpy(tmpl, &H5F_access_dflt, sizeof(H5F_access_t));
+        break;
 
     case H5C_DATASET_CREATE:
         tmpl = H5MM_xmalloc(sizeof(H5D_create_t));
@@ -233,6 +234,9 @@ H5Cclose(hid_t tid)
     if (NULL == (tmpl = H5A_remove(tid))) {
         HRETURN_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to remove atom");
     }
+#ifdef LATER
+    /* this is for file access template too.  Need to free the COMM and INFO objects too. */
+#endif 
     H5MM_xfree(tmpl);
 
     FUNC_LEAVE(SUCCEED);
@@ -853,6 +857,69 @@ H5Cget_chunk(hid_t tid, int max_ndims, size_t dim[] /*out */ )
 
     FUNC_LEAVE(tmpl->chunk_ndims);
 }
+
+#ifdef HAVE_PARALLEL
+/*-------------------------------------------------------------------------
+ * Function:    H5Cset_mpi
+ *
+ * Purpose:     Sets the access mode for MPIO call and store the user supplied
+ *		communicator and info.
+ *
+ * Return:      Success:        SUCCEED
+ *
+ *              Failure:        FAIL
+ *
+ * Programmer:  Albert Cheng
+ *              Feb 3, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode)
+{
+    int                     i;
+    H5F_access_t           *tmpl = NULL;
+    MPI_Comm		    lcomm;
+    int			    mrc;		/* MPI return code */
+
+    FUNC_ENTER(H5Cset_mpi, FAIL);
+
+    /* Check arguments */
+    if (H5C_FILE_ACCESS != H5Cget_class(tid) ||
+        NULL == (tmpl = H5A_object(tid))) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                      "not a file access template");
+    }
+    switch (access_mode){
+    case H5ACC_INDEPENDENT:
+	    /* fall through to next case */
+    case H5ACC_COLLECTIVE:
+	    tmpl->access_mode = access_mode;
+	    break;
+
+    default:
+            HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+	                          "unknown access_mode");
+    }
+
+    /* store a duplicate copy of comm so that user may freely modify comm after this */
+    /* call.  */
+#ifdef LATER
+    /* need to verify comm and info contain sensible information */
+    /* need to duplicate info too but don't know a quick way to do it now. */
+#endif
+    if ((mrc = MPI_Comm_dup(comm, &lcomm) != MPI_SUCCESS))
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                      "failure to duplicate communicator");
+    tmpl->comm = comm;
+    tmpl->info = info;
+
+    FUNC_LEAVE(SUCCEED);
+}
+
+#endif /*HAVE_PARALLEL*/
 
 /*--------------------------------------------------------------------------
  NAME

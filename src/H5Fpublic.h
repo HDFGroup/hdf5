@@ -24,6 +24,11 @@
 #define H5ACC_DEFAULT       0x0000/*use in H5Fopen & H5Fcreate to open a file with default access*/
 #define H5ACC_WRITE         0x0001/*use in H5Fopen to open a file with write access*/
 #define H5ACC_OVERWRITE     0x0002/*use in H5Fcreate truncate an existing file*/
+#ifdef HAVE_PARALLEL
+#define H5ACC_INDEPENDENT   0x0010/*use in H5Cset_mpi for MPI independent access*/
+#define H5ACC_COLLECTIVE    0x0011/*use in H5Cset_mpi for MPI collective access*/
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {

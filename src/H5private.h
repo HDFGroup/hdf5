@@ -46,6 +46,15 @@
 #  include <unistd.h>
 #endif
 
+#ifdef HAVE_PARALLEL
+/*
+ * MPIO headers
+ */
+#  include <mpi.h>
+#  include <mpio.h>
+#endif
+
+
 /*
  * Pablo support files.
  */

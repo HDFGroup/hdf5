@@ -61,6 +61,10 @@ herr_t H5Cset_layout (hid_t tid, H5D_layout_t layout);
 H5D_layout_t H5Cget_layout (hid_t tid);
 herr_t H5Cset_chunk (hid_t tid, int ndims, const size_t dim[]);
 int H5Cget_chunk (hid_t tid, int max_ndims, size_t dim[]/*out*/);
+#ifdef HAVE_PARALLEL
+herr_t H5Cset_mpi (hid_t tid, MPI_Comm comm, MPI_Info info, uintn access_mode);
+/* herr_t H5Cget_mpi (hid_t tid, int *ik); */  /* not defined yet */
+#endif
 
 #ifdef __cplusplus
 }

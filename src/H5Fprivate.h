@@ -22,7 +22,7 @@
 
 /* This is a near top-level header! Try not to include much! */
 #include <H5private.h>
-#ifdef PHDF5
+#ifdef HAVE_PARALLEL
 #ifndef MPI_SUCCESS
 #include <mpi.h>
 #include <mpio.h>
@@ -231,6 +231,17 @@ typedef struct H5F_create_t {
 } H5F_create_t;
 
 /*
+ * File-access template.
+ */
+typedef struct H5F_access_t {
+    uintn	access_mode;	/* file access mode                     */
+#ifdef HAVE_PARALLEL
+    MPI_Comm    comm;           /* communicator for file access         */
+    MPI_Info    info;           /* optional info for MPI-IO             */
+#endif /*HAVE_PARALLEL*/
+} H5F_access_t;
+
+/*
  * These things make a file unique.
  */
 typedef struct H5F_search_t {
@@ -304,7 +315,7 @@ typedef struct H5F_low_t {
 	    size_t	alloc;	/* Current size of MEM buffer		*/
 	} core;
 
-#ifdef PHDF5
+#ifdef HAVE_PARALLEL
 	/* MPI-IO */
 	struct {
 	    MPI_File	f;	/* MPI-IO file handle			*/
@@ -323,10 +334,8 @@ extern const H5F_low_class_t H5F_LOW_STDIO[];	/* Posix stdio		*/
 extern const H5F_low_class_t H5F_LOW_CORE[];	/* In-core temp file	*/
 extern const H5F_low_class_t H5F_LOW_FAM[];	/* File family		*/
 extern const H5F_low_class_t H5F_LOW_SPLIT[];	/* Split meta/raw data	*/
-#ifdef PHDF5
+#ifdef HAVE_PARALLEL
   extern const H5F_low_class_t H5F_LOW_MPIO[];	/* MPI-IO		*/
-# undef  H5F_LOW_DFLT
-# define H5F_LOW_DFLT	H5F_LOW_MPIO	        /* The default type     */
 #endif
 
 /*
@@ -346,8 +355,8 @@ typedef struct H5F_file_t {
     haddr_t	hdf5_eof;	/* Relative addr of end of all hdf5 data*/
     struct H5AC_t *cache;	/* The object cache			*/
     H5F_create_t create_parms;	/* File-creation template		*/
-#ifdef LATER
-    file_access_temp_t file_access_parms; /* File-access template	*/
+#ifdef HAVE_PARALLEL
+    H5F_access_t access_parms;  /* File-access template	*/
 #endif
     struct H5G_entry_t *root_ent; /* Root symbol table entry		*/
 } H5F_file_t;
@@ -414,11 +423,12 @@ struct H5O_layout_t;		/*forward decl for prototype arguments */
 
 /* library variables */
 extern const H5F_create_t H5F_create_dflt;
+extern const H5F_access_t H5F_access_dflt;
 
 /* Private functions, not part of the publicly documented API */
 void H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l);
 H5F_t *H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
-		const H5F_create_t *create_parms);
+		const H5F_create_t *create_parms, const H5F_access_t *access_parms);
 herr_t H5F_close(H5F_t *f);
 herr_t H5F_debug(H5F_t *f, const haddr_t *addr, FILE * stream, intn indent,
 		 intn fwidth);

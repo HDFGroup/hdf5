@@ -76,6 +76,23 @@ static meta_func_t      meta_func_arr[] =
         NULL,                   /* File-Creation Template GetFile */
         H5Cclose                /* File-Creation Template Release */
     },
+    {                           /* Template object meta-functions (defined in H5C.c) */
+        H5_TEMPLATE_1,          /* File-Access Template Type ID */
+        NULL,                   /* File-Access Template Create */
+        NULL,                   /* File-Access Template Access */
+        H5Ccopy,                /* File-Access Template Copy */
+        NULL,                   /* File-Access Template FindName */
+        NULL,                   /* File-Access Template NameLen */
+        NULL,                   /* File-Access Template GetName */
+        NULL,                   /* File-Access Template SetName */
+        NULL,                   /* File-Access Template Search */
+        NULL,                   /* File-Access Template Index */
+        NULL,                   /* File-Access Template Flush */
+        NULL,                   /* File-Access Template Delete */
+        NULL,                   /* File-Access Template GetParent */
+        NULL,                   /* File-Access Template GetFile */
+        H5Cclose                /* File-Access Template Release */
+    },
     {                           /* Datatype object meta-functions (defined in H5T.c) */
         H5_DATATYPE,            /* Datatype Type ID */
         NULL,                   /* Datatype Create */

@@ -127,7 +127,7 @@ ino_t mpio_inode_num = 0;      /* fake "inode" number */
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
+H5F_mpio_access(const char *name, int mode, H5F_search_t *key /*out */ )
 {
     hbool_t		   ret_val = FALSE;
     MPI_File		   fh;
@@ -150,24 +150,25 @@ H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
 		   break;
 	case W_OK: mpi_mode = MPI_MODE_WRONLY;
 		   break;
-	default:   HRETURN_ERROR(H5E_IO, H5E_ARGS, FAIL,
+	default:   HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                           "invalid mode parameter");
     }
 
-    mpierr = MPI_File_open( MPI_COMM_SELF, name, mpi_mode, MPI_INFO_NULL, &fh );
+    /* (char*) name is okay since MPI_File_open will not change it. */
+    mpierr = MPI_File_open( MPI_COMM_SELF, (char*) name, mpi_mode, MPI_INFO_NULL, &fh );
     if (mpierr == MPI_SUCCESS) {
 	mpierr = MPI_File_close( &fh );
     	if (mpierr != MPI_SUCCESS)
-	    HRETURN_ERROR(H5E_IO, H5E_ARGS, FAIL, "MPI_File_open failed");
+	    HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "MPI_File_close failed");
 	ret_val = TRUE;
     } else if (mode == F_OK) {
 	/* to see if it exists, this time try to open for write */
-	mpierr = MPI_File_open( MPI_COMM_SELF, name, MPI_MODE_WRONLY,
+	mpierr = MPI_File_open( MPI_COMM_SELF, (char*)name, MPI_MODE_WRONLY,
 				MPI_INFO_NULL, &fh );
 	if (mpierr == MPI_SUCCESS) {
 	    mpierr = MPI_File_close( &fh );
 	    if (mpierr != MPI_SUCCESS)
-		HRETURN_ERROR(H5E_IO, H5E_INTERNAL, FAIL, "MPI_File_close failed");
+		HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "MPI_File_close failed");
 	    ret_val = TRUE;
 	}
     }
@@ -214,7 +215,7 @@ H5F_mpio_access(char *name, int mode, H5F_search_t *key /*out */ )
  *-------------------------------------------------------------------------
  */
 static H5F_low_t       *
-H5F_mpio_open(char *name, uintn flags, H5F_search_t *key /*out */ )
+H5F_mpio_open(const char *name, uintn flags, H5F_search_t *key /*out */ )
 {
     H5F_low_t              *lf = NULL;
     MPI_File                fh;
@@ -234,7 +235,7 @@ H5F_mpio_open(char *name, uintn flags, H5F_search_t *key /*out */ )
     if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
     if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
 
-    mpierr = MPI_File_open(MPI_COMM_WORLD, name, mpi_amode, MPI_INFO_NULL, &fh);
+    mpierr = MPI_File_open(MPI_COMM_WORLD, (char*)name, mpi_amode, MPI_INFO_NULL, &fh);
     if (mpierr != MPI_SUCCESS) {
         MPI_Error_string( mpierr, mpierrmsg, &msglen );
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, mpierrmsg );
@@ -391,6 +392,7 @@ H5F_mpio_read(H5F_low_t *lf, const haddr_t *addr, size_t size, uint8 *buf)
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, mpierrmsg );
     }
 
+#define MPI_KLUGE0202
 #ifdef MPI_KLUGE0202
     /* KLUGE rky 980202 MPI_Get_count incorrectly returns negative count;
        fake a complete read */

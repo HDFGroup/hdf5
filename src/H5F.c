@@ -77,13 +77,25 @@ const H5F_create_t      H5F_create_dflt = {
         0,                      /* unused                               */
         0,                      /* unused                               */
     },
-    sizeof(size_t),             /* Default offset size */
-    sizeof(size_t),             /* Default length size */
+    4,             /* Default offset size */
+    4,             /* Default length size */
     HDF5_BOOTBLOCK_VERSION,     /* Current Boot-Block version # */
     HDF5_SMALLOBJECT_VERSION,   /* Current Small-Object heap version # */
     HDF5_FREESPACE_VERSION,     /* Current Free-Space info version # */
     HDF5_OBJECTDIR_VERSION,     /* Current Object Directory info version # */
     HDF5_SHAREDHEADER_VERSION,  /* Current Shared-Header format version # */
+};
+
+/*
+ * Define the default file access template.
+ */
+const H5F_access_t      H5F_access_dflt =
+{
+    H5ACC_DEFAULT,       	/* Default file access mode             */
+#ifdef HAVE_PARALLEL
+    MPI_COMM_NULL,              /* Default is not using MPIO            */
+    MPI_INFO_NULL,              /* Default no info                      */
+#endif
 };
 
 /* Interface initialization */
@@ -557,7 +569,7 @@ H5F_dest(H5F_t *f)
  */
 H5F_t                  *
 H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
-         const H5F_create_t *create_parms)
+         const H5F_create_t *create_parms, const H5F_access_t *access_parms)
 {
     H5F_t                  *f = NULL;   /*return value                  */
     H5F_t                  *ret_value = NULL;   /*a copy of `f'                 */
@@ -623,7 +635,7 @@ H5F_open(const H5F_low_class_t *type, const char *name, uintn flags,
                 fprintf(stderr, "HDF5-DIAG: opening a split file\n");
 #endif
                 fullname[s - name] = '\0';
-                f = H5F_open(H5F_LOW_SPLIT, fullname, flags, create_parms);
+                f = H5F_open(H5F_LOW_SPLIT, fullname, flags, create_parms, access_parms);
                 HRETURN(f);
             }
         }
@@ -984,6 +996,11 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
     const H5F_create_t     *create_parms;       /* pointer to the parameters to
                                                    * use when creating the file
                                                  */
+    const H5F_access_t     *access_parms;       /* pointer to the file access
+    						 * parameters to use when creating
+						 * the file
+                                                 */
+    const H5F_low_class_t        *type;		/* File type */
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Fcreate, FAIL);
@@ -1001,19 +1018,35 @@ H5Fcreate(const char *filename, uintn flags, hid_t create_temp,
     } else if (NULL == (create_parms = H5A_object(create_temp))) {
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize template");
     }
-#ifdef LATER
     if (access_temp <= 0) {
         access_parms = &H5F_access_dflt;
     } else if (NULL == (access_parms = H5A_object(access_temp))) {
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);       /*can't unatomize template */
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize template");
     }
+    /* figure out what kind of file I/O to use. */
+    /* Currently, MPIO is the only alternative than default I/O */
+    switch (access_parms->access_mode){
+    case H5ACC_DEFAULT:
+	type = H5F_LOW_DFLT;
+	break;
+#ifdef HAVE_PARALLEL
+    case H5ACC_INDEPENDENT:
+	type = H5F_LOW_MPIO;
+	break;
+    case H5ACC_COLLECTIVE:
+	/* not implemented yet */
+	/* type = H5F_LOW_MPIO; */
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid file access mode");
 #endif
-
+    default:
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid file access mode");
+    }
+	
     /*
      * Create a new file or truncate an existing file.
      */
-    if (NULL == (new_file = H5F_open(H5F_LOW_DFLT, filename, flags,
-                                     create_parms))) {
+    if (NULL == (new_file = H5F_open(type, filename, flags,
+                                     create_parms, access_parms))) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't create file");
     }
     /* Get an atom for the file */
@@ -1076,6 +1109,11 @@ hid_t
 H5Fopen(const char *filename, uintn flags, hid_t access_temp)
 {
     H5F_t                  *new_file = NULL;    /* file struct for new file */
+    const H5F_access_t     *access_parms;       /* pointer to the file access
+    						 * parameters to use when creating
+						 * the file
+                                                 */
+    const H5F_low_class_t        *type;		/* File type */
     hid_t                   ret_value = FAIL;
 
     FUNC_ENTER(H5Fopen, FAIL);
@@ -1085,15 +1123,32 @@ H5Fopen(const char *filename, uintn flags, hid_t access_temp)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid file name");
     flags = flags & H5ACC_WRITE ? H5F_ACC_WRITE : 0;
 
-#ifdef LATER
-    if (access_temp <= 0)
-        access_temp = H5CPget_default_atom(H5_TEMPLATE);
-    if (NULL == (f_access_parms = H5A_object(access_temp)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL);       /*can't unatomize template */
+    if (access_temp <= 0) {
+        access_parms = &H5F_access_dflt;
+    } else if (NULL == (access_parms = H5A_object(access_temp))) {
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't unatomize template");
+    }
+    /* figure out what kind of file I/O to use. */
+    /* Currently, MPIO is the only alternative than default I/O */
+    switch (access_parms->access_mode){
+    case H5ACC_DEFAULT:
+	type = H5F_LOW_DFLT;
+	break;
+#ifdef HAVE_PARALLEL
+    case H5ACC_INDEPENDENT:
+	type = H5F_LOW_MPIO;
+	break;
+    case H5ACC_COLLECTIVE:
+	/* not implemented yet */
+	/* type = H5F_LOW_MPIO; */
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid file access mode");
 #endif
+    default:
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid file access mode");
+    }
 
     /* Open the file */
-    if (NULL == (new_file = H5F_open(H5F_LOW_DFLT, filename, flags, NULL))) {
+    if (NULL == (new_file = H5F_open(type, filename, flags, NULL, access_parms))) {
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cant open file");
     }
     /* Get an atom for the file */
