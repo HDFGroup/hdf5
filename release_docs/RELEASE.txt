@@ -205,6 +205,8 @@ Library
 Configuration
 -------------
 
+    * Included the fortran/examples in the "make check-install" testing. This
+      tests the correctness of the h5fc command. AKC - 2003/04/21
     * When using gcc 3.x, we use -std=gnu99 instead of -ansi for compiling.
       QAK - 2003/04/11
     * IA64 platform has its own configure setting and use Intel Compilers as
@@ -233,6 +235,7 @@ Configuration
 Tools
 -----
 
+    * Added fortran compiling command h5fc.  BW - 2003/04/10 
     * Added a -force option to h5redeploy.  AKC - 2003/03/04 
     * The VL string bug(data and datatype cannot be shown) in h5dump is fixed.
       -SLU - 2002/11/18
