@@ -871,6 +871,8 @@
 ./src/H5FDgass.h
 ./src/H5FDlog.c
 ./src/H5FDlog.h
+./src/H5FDmpi.c
+./src/H5FDmpi.h
 ./src/H5FDmpio.c
 ./src/H5FDmpio.h
 ./src/H5FDmpiposix.c
