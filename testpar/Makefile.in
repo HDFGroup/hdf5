@@ -36,7 +36,10 @@ TEST_SCRIPTS=testph5.sh
 PROGS=$(TEST_PROGS_PARA) testphdf5
 
 ## Temporary files
-MOSTLYCLEAN=ParaEg[123].h5f
+## MPItest.h5 is from t_mpi
+## Para*.h5 are from testphdf
+## *.clog are from MPE option
+MOSTLYCLEAN=MPItest.h5 Para*.h5 *.clog
 DISTCLEAN=go Makefile testph5.sh
 
 ## Test source files
