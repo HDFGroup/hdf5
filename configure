@@ -3213,7 +3213,7 @@ esac
 
 H5TOH4=h5toh4
 
-TESTH5TOH4='$srcdir/testh5toh4'
+TESTH5TOH4='$(srcdir)/testh5toh4'
 
 # Check whether --with-hdf4 or --without-hdf4 was given.
 if test "${with_hdf4+set}" = set; then
