@@ -2251,7 +2251,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
     }
     
 #ifdef QAK
-    printf("%s: check 3.0, request_nelmts=%d\n",FUNC,(int)request_nelmts);
+    printf("%s: check 3.0, request_nelmts=%d, tpath->cdata.need_bkg=%d\n",FUNC,(int)request_nelmts,(int)tpath->cdata.need_bkg);
 #endif
 
     /*
@@ -2336,32 +2336,38 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 #endif
 
         if (H5T_BKG_YES==need_bkg) {
+#ifdef QAK
+	printf("%s: check 6.1, need_bkg=%d\n",FUNC,(int)need_bkg);
+#endif
 #ifdef H5S_DEBUG
-	    H5_timer_begin(&timer);
+            H5_timer_begin(&timer);
 #endif
             n = (sconv->f->gath)(dataset->ent.file, &(dataset->layout),
-				 &(dataset->create_parms->pline),
-				 &(dataset->create_parms->fill),
-				 &(dataset->create_parms->efl), dst_type_size,
-				 file_space, &bkg_iter, smine_nelmts,
-				 dxpl_id, bkg_buf/*out*/);
+                     &(dataset->create_parms->pline),
+                     &(dataset->create_parms->fill),
+                     &(dataset->create_parms->efl), dst_type_size,
+                     file_space, &bkg_iter, smine_nelmts,
+                     dxpl_id, bkg_buf/*out*/);
 #ifdef H5S_DEBUG
-	    H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
-	    sconv->stats[0].bkg_nbytes += n * dst_type_size;
-	    sconv->stats[0].bkg_ncalls++;
+            H5_timer_end(&(sconv->stats[0].bkg_timer), &timer);
+            sconv->stats[0].bkg_nbytes += n * dst_type_size;
+            sconv->stats[0].bkg_ncalls++;
 #endif
-	    if (n!=smine_nelmts) {
+            if (n!=smine_nelmts) {
                 HGOTO_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
-			     "file gather failed");
+                     "file gather failed");
             }
         } else if (need_bkg) {
-	    HDmemset(bkg_buf, 0, request_nelmts*dst_type_size);
-	}
+#ifdef QAK
+	printf("%s: check 6.2, need_bkg=%d\n",FUNC,(int)need_bkg);
+#endif
+            HDmemset(bkg_buf, 0, request_nelmts*dst_type_size);
+        }
 	
         /*
          * Perform data type conversion.
          */
-	if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf,
+        if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, 0, 0, tconv_buf,
 			bkg_buf, dxpl_id)<0) {
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                 "data type conversion failed");
@@ -2374,9 +2380,9 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
          * Scatter the data out to the file.
          */
 #ifdef H5S_DEBUG
-	H5_timer_begin(&timer);
+        H5_timer_begin(&timer);
 #endif
-	status = (sconv->f->scat)(dataset->ent.file, &(dataset->layout),
+        status = (sconv->f->scat)(dataset->ent.file, &(dataset->layout),
 				  &(dataset->create_parms->pline),
 				  &(dataset->create_parms->fill),
 				  &(dataset->create_parms->efl), dst_type_size,
@@ -2386,11 +2392,11 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
 	printf("%s: check 6.35\n",FUNC);
 #endif
 #ifdef H5S_DEBUG
-	H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
-	sconv->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
-	sconv->stats[0].scat_ncalls++;
+        H5_timer_end(&(sconv->stats[0].scat_timer), &timer);
+        sconv->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
+        sconv->stats[0].scat_ncalls++;
 #endif
-	if (status<0) {
+        if (status<0) {
             HGOTO_ERROR (H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed");
         }
     }
@@ -2403,7 +2409,7 @@ H5D_write(H5D_t *dataset, const H5T_t *mem_type, const H5S_t *mem_space,
      * writing to a dataset doesn't necessarily change the object header.
      */
     if (H5O_touch(&(dataset->ent), FALSE)<0) {
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
 		    "unable to update modification time");
     }
 

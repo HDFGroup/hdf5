@@ -805,7 +805,7 @@ H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     assert(cdata);
 
     if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
-        cdata->need_bkg = H5T_BKG_TEMP;
+        cdata->need_bkg = H5T_BKG_YES;
 
     FUNC_LEAVE (SUCCEED);
 }
