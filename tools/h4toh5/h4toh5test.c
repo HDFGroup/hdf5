@@ -2865,14 +2865,27 @@ int test_vghl() {
 /* the structure of the hdf5 file is as follows:
             root
             /  \
-           gc  ga<--
-           /    \  |
-          gd    gb--
-          /
-	 ge
+        |-->gc  ga
+        |   /    \ 
+        |  gd    gb
+        |  /
+        -ge
 
      This file includes vdata,image and sds.          
 
+1)
+          GROUP       MEMBERS
+     ga: name groupA: groupB and one Image
+     gb: name groupB: one SDS
+     gc: name groupA: groupD
+     gd: name groupD: groupE one SDS and one Image
+     ge: name groupE: groupC(named groupA)
+
+2)  Independent Vdata,SDS, images
+    SDS: sds2 (the same name as another SDS)
+    Image: Image_1
+    Vdata: Example Vdata
+    
 */
 int test_vgall() {
 
