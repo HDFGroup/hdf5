@@ -72,7 +72,7 @@ test_reference_obj(void)
     hobj_ref_t      *wbuf,      /* buffer to write to disk */
                *rbuf,       /* buffer read from disk */
                *tbuf;       /* temp. buffer read from disk */
-    uint32_t   *tu32;      /* Temporary pointer to uint32 data */
+    uintn      *tu32;      /* Temporary pointer to uint32 data */
     intn        i;          /* counting variables */
     const char *write_comment="Foo!"; /* Comments for group */
     char read_comment[10];
@@ -82,9 +82,9 @@ test_reference_obj(void)
     MESSAGE(5, ("Testing Object Reference Functions\n"));
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    rbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    tbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    wbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
+    rbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
+    tbuf=malloc(MAX(sizeof(uintn),sizeof(hobj_ref_t))*SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -103,14 +103,14 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Gset_comment");
 
     /* Create a dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32LE,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate(group,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    for(tu32=(uint32_t *)wbuf,i=0; i<SPACE1_DIM1; i++)
+    for(tu32=(uintn *)wbuf,i=0; i<SPACE1_DIM1; i++)
         *tu32++=i*3;
 
     /* Write selection to disk */
-    ret=H5Dwrite(dataset,H5T_STD_U32LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    ret=H5Dwrite(dataset,H5T_NATIVE_UINT,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -219,10 +219,10 @@ test_reference_obj(void)
     VERIFY(ret, 4, "H5Sget_simple_extent_npoints");
 
     /* Read from disk */
-    ret=H5Dread(dset2,H5T_STD_U32LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,tbuf);
+    ret=H5Dread(dset2,H5T_NATIVE_UINT,H5S_ALL,H5S_ALL,H5P_DEFAULT,tbuf);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(tu32=(uint32_t *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
+    for(tu32=(uintn *)tbuf,i=0; i<SPACE1_DIM1; i++,tu32++)
         VERIFY(*tu32, (uint32_t)(i*3), "Data");
 
     /* Close dereferenced Dataset */

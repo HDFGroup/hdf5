@@ -1925,6 +1925,8 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     endian = H5Tget_order(H5T_NATIVE_INT);
     src_size = H5Tget_size(src);
     dst_size = H5Tget_size(dst);
+    src_nbits = H5Tget_precision(src); /* not 8*src_size, esp on J90 - QAK */
+    dst_nbits = H5Tget_precision(dst); /* not 8*dst_size, esp on J90 - QAK */
     buf = aligned_malloc(nelmts*MAX(src_size, dst_size));
     saved = aligned_malloc(nelmts*MAX(src_size, dst_size));
     aligned = malloc(sizeof(long_long));
@@ -2492,9 +2494,12 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		}
 	    }
 
+        /* Make certain that there isn't some weird number of destination bits */
+        assert(dst_nbits%8==0);
+
 	    /* Are the two results the same */
-	    for (k=0; k<dst_size; k++) {
-		if (buf[j*dst_size+k]!=hw[k]) break;
+        for (k=(dst_size-(dst_nbits/8)); k<dst_size; k++) {
+            if (buf[j*dst_size+k]!=hw[k]) break;
 	    }
 	    if (k==dst_size) continue; /*no error*/
 
@@ -2504,13 +2509,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * certain things.  These routines have already been tested by
 	     * the `bittests' program.
 	     */
-	    src_nbits = 8*src_size;
 	    for (k=0; k<src_size; k++) {
 		src_bits[src_size-(k+1)] = saved[j*src_size+
 						 ENDIAN(src_size, k)];
 	    }
 	    
-	    dst_nbits = 8*dst_size;
 	    for (k=0; k<dst_size; k++) {
 		dst_bits[dst_size-(k+1)] = buf[j*dst_size+
 					       ENDIAN(dst_size, k)];
@@ -2522,94 +2525,110 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 	     * hardware conversion result during overflows is usually garbage
 	     * so we must handle those cases differetly when checking results.
 	     */
-	    if (H5T_SGN_2==H5Tget_sign(src) &&
-		H5T_SGN_2==H5Tget_sign(dst)) {
-		if (src_size>dst_size &&
-		    0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
-		    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
-				 H5T_BIT_MSB, 1)>=0) {
-		    /*
-		     * Source is positive and the magnitude is too large for
-		     * the destination.  The destination should be set to the
-		     * maximum possible value: 0x7f...f
-		     */
-		    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-			H5T_bit_find(dst_bits, 0, dst_nbits-1,
-				     H5T_BIT_LSB, 0)<0) {
-			continue; /*no error*/
-		    }
-		} else if (src_size>dst_size &&
-			   1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
-			   H5T_bit_find(src_bits, 0, src_nbits-1, H5T_BIT_MSB,
-					0)+1>=(ssize_t)dst_nbits) {
-		    /*
-		     * Source is negative but the magnitude is too large for
-		     * the destination. The destination should be set to the
-		     * smallest possible value: 0x80...0
-		     */
-		    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-			H5T_bit_find(dst_bits, 0, dst_nbits-1,
-				     H5T_BIT_LSB, 1)<0) {
-			continue; /*no error*/
-		    }
-		}
-		
-	    } else if (H5T_SGN_2==H5Tget_sign(src) &&
-		       H5T_SGN_NONE==H5Tget_sign(dst)) {
-		if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
-		    /*
-		     * The source is negative so the result should be zero.
-		     * The source is negative if the most significant bit is
-		     * set.  The destination is zero if all bits are zero.
-		     */
-		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
-			continue; /*no error*/
-		} else if (src_size>dst_size &&
-			   H5T_bit_find(src_bits, dst_nbits-1,
-					src_nbits-dst_nbits, H5T_BIT_LSB,
-					1)>=0) {
-		    /*
-		     * The source is a value with a magnitude too large for
-		     * the destination.  The destination should be the
-		     * largest possible value: 0xff...f
-		     */
-		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB,
-				     0)<0) {
-			continue; /*no error*/
-		    }
-		}
-		
-	    } else if (H5T_SGN_NONE==H5Tget_sign(src) &&
-		       H5T_SGN_2==H5Tget_sign(dst)) {
-		if (src_size>=dst_size &&
-		    H5T_bit_find(src_bits, dst_nbits-1,
-				 (src_nbits-dst_nbits)+1, H5T_BIT_LSB, 1)>=0) {
-		    /*
-		     * The source value has a magnitude that is larger than
-		     * the destination can handle.  The destination should be
-		     * set to the largest possible positive value: 0x7f...f
-		     */
-		    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
-			H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB,
-				     0)<0) {
-			continue; /*no error*/
-		    }
-		}
-		
+	    if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+            if (src_nbits>dst_nbits) {
+                if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+                    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits),
+                        H5T_BIT_MSB, 1)>=0) {
+                    /*
+                     * Source is positive and the magnitude is too large for
+                     * the destination.  The destination should be set to the
+                     * maximum possible value: 0x7f...f
+                     */
+                    if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                            H5T_bit_find(dst_bits, 0, dst_nbits-1,
+                                 H5T_BIT_LSB, 0)<0) {
+                        continue; /*no error*/
+                    }
+                } else if (1==H5T_bit_get_d(src_bits, src_nbits-1, 1) &&
+                   H5T_bit_find(src_bits, 0, src_nbits-1, H5T_BIT_MSB,
+                        0)+1>=(ssize_t)dst_nbits) {
+                    /*
+                     * Source is negative but the magnitude is too large for
+                     * the destination. The destination should be set to the
+                     * smallest possible value: 0x80...0
+                     */
+                    if (1==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                            H5T_bit_find(dst_bits, 0, dst_nbits-1,
+                                 H5T_BIT_LSB, 1)<0) {
+                        continue; /*no error*/
+                    }
+                }
+            } else if(src_nbits<dst_nbits) {
+                /* Source is smaller than the destination */
+                if(0==H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
+                    /*
+                     * Source is positive, so the excess bits in the
+                     * destination should be set to 0's.
+                     */
+                    if (0==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
+                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits,
+                                 H5T_BIT_LSB, 1)<0) {
+                        continue; /*no error*/
+                    }
+                } else {
+                    /*
+                     * Source is negative, so the excess bits in the
+                     * destination should be set to 1's.
+                     */
+                    if (1==H5T_bit_get_d(dst_bits, src_nbits-1, 1) &&
+                            H5T_bit_find(dst_bits, src_nbits, dst_nbits-src_nbits,
+                                 H5T_BIT_LSB, 0)<0) {
+                        continue; /*no error*/
+                    }
+                }
+            }
+	    } else if (H5T_SGN_2==H5Tget_sign(src) && H5T_SGN_NONE==H5Tget_sign(dst)) {
+            if (H5T_bit_get_d(src_bits, src_nbits-1, 1)) {
+                /*
+                 * The source is negative so the result should be zero.
+                 * The source is negative if the most significant bit is
+                 * set.  The destination is zero if all bits are zero.
+                 */
+                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 1)<0)
+                    continue; /*no error*/
+            } else if (src_nbits>dst_nbits &&
+                   H5T_bit_find(src_bits, dst_nbits-1,
+                        src_nbits-dst_nbits, H5T_BIT_LSB,
+                        1)>=0) {
+                /*
+                 * The source is a value with a magnitude too large for
+                 * the destination.  The destination should be the
+                 * largest possible value: 0xff...f
+                 */
+                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0) {
+                    continue; /*no error*/
+                }
+            }
+            
+	    } else if (H5T_SGN_NONE==H5Tget_sign(src) && H5T_SGN_2==H5Tget_sign(dst)) {
+            if (src_nbits>=dst_nbits &&
+                    H5T_bit_find(src_bits, dst_nbits-1, (src_nbits-dst_nbits)+1,
+                        H5T_BIT_LSB, 1)>=0) {
+                /*
+                 * The source value has a magnitude that is larger than
+                 * the destination can handle.  The destination should be
+                 * set to the largest possible positive value: 0x7f...f
+                 */
+                if (0==H5T_bit_get_d(dst_bits, dst_nbits-1, 1) &&
+                        H5T_bit_find(dst_bits, 0, dst_nbits-1, H5T_BIT_LSB, 0)<0) {
+                    continue; /*no error*/
+                }
+            }
+            
 	    } else {
-		if (src_size>dst_size &&
-		    H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
-				 H5T_BIT_LSB, 1)>=0) {
-		    /*
-		     * The unsigned source has a value which is too large for
-		     * the unsigned destination.  The destination should be
-		     * set to the largest possible value: 0xff...f
-		     */
-		    if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB,
-				     0)<0) {
-			continue; /*no error*/
-		    }
-		}
+            if (src_nbits>dst_nbits &&
+                H5T_bit_find(src_bits, dst_nbits, src_nbits-dst_nbits,
+                     H5T_BIT_LSB, 1)>=0) {
+                /*
+                 * The unsigned source has a value which is too large for
+                 * the unsigned destination.  The destination should be
+                 * set to the largest possible value: 0xff...f
+                 */
+                if (H5T_bit_find(dst_bits, 0, dst_nbits, H5T_BIT_LSB, 0)<0) {
+                    continue; /*no error*/
+                }
+            }
 	    }
 
 	    /* Print errors */
@@ -2633,12 +2652,12 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 		break;
 	    case INT_SHORT:
 		memcpy(aligned, saved+j*sizeof(short), sizeof(short));
-		printf(" %29d\n", *((short*)aligned));
+		printf(" %29hd\n", *((short*)aligned));
 		break;
 	    case INT_USHORT:
 		memcpy(aligned, saved+j*sizeof(short),
 		       sizeof(unsigned short));
-		printf(" %29u\n", *((unsigned short*)aligned));
+		printf(" %29hu\n", *((unsigned short*)aligned));
 		break;
 	    case INT_INT:
 		memcpy(aligned, saved+j*sizeof(int), sizeof(int));
@@ -3029,7 +3048,8 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
     }
 
     /* Sanity checks */
-    assert(sizeof(float)!=sizeof(double));
+    if(sizeof(float)==sizeof(double))
+        puts("Sizeof(float)==sizeof(double) - some tests may not be sensible.");
     if (FLT_OTHER==src_type || FLT_OTHER==dst_type) {
 	sprintf(str, "Testing random %s %s -> %s conversions",
 		name, src_type_name, dst_type_name);

@@ -166,7 +166,7 @@ dnl Check for system libraries.
 dnl
 AC_CHECK_LIB(m,ceil)
 AC_CHECK_LIB(nsl,xdr_int)	dnl ...for Solaris and hdf4
-AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
+dnl AC_CHECK_LIB(coug,main)		dnl ...for ASCI/Red
 
 dnl ----------------------------------------------------------------------
 dnl Check for system header files.
@@ -287,10 +287,10 @@ AC_ARG_WITH(hdf4,[  --with-hdf4=INC,LIB     Use the HDF4 library],,withval=[/usr
 case $withval in
     yes)
 	AC_CHECK_HEADERS(mfhdf.h,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
-	AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
+	AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
 	;;
     no)
 	AC_MSG_CHECKING(for HDF4)
@@ -314,15 +314,15 @@ case $withval in
 	if test "X" != "$hdf4_lib"; then
 	    saved_LDFLAGS="$LDFLAGS"
 	    LDFLAGS="$LDFLAGS -L$hdf4_lib"
-	    AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(df,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(mfhdf,main,,unset H5TOH4 TESTH5TOH4)
+        AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
+        AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+        AC_CHECK_LIB(df,Hstartaccess,,unset H5TOH4 TESTH5TOH4)
+        AC_CHECK_LIB(mfhdf,SDstart,,unset H5TOH4 TESTH5TOH4)
 	else
-	    AC_CHECK_LIB(z,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(jpeg,main,,unset H5TOH4 TESTH5TOH4)
-	    AC_CHECK_LIB(df,main)
-	    AC_CHECK_LIB(mfhdf,main)
+	    AC_CHECK_LIB(z,deflate,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(jpeg,jpeg_start_compress,,unset H5TOH4 TESTH5TOH4)
+	    AC_CHECK_LIB(df,Hstartaccess)
+	    AC_CHECK_LIB(mfhdf,SDstart)
 	fi
 	;;
 esac

@@ -265,8 +265,8 @@ static intn interface_initialize_g = 0;
 /* The first part of every integer hardware conversion macro */
 #define CI_BEGIN(STYPE,DTYPE,ST,DT,STRT) {				      \
     size_t	elmtno;			/*element number		*/    \
-    uint8_t	*src, *s;		/*source buffer			*/    \
-    uint8_t	*dst, *d;		/*destination buffer		*/    \
+    void	*src, *s;		/*source buffer			*/    \
+    void	*dst, *d;		/*destination buffer		*/    \
     H5T_t	*st, *dt;		/*data type descriptors		*/    \
     long_long	aligned;		/*largest integer type, aligned	*/    \
     hbool_t	s_mv, d_mv;		/*move data to align it?	*/    \
@@ -348,8 +348,8 @@ static intn interface_initialize_g = 0;
             if (d_mv) HDmemcpy(dst, &aligned, dt_size);			      \
 									      \
 	    /* Advance pointers */					      \
-	    src += direction * s_stride;				      \
-	    dst += direction * d_stride;				      \
+	    src = (char *)src + direction * s_stride;				      \
+	    dst = (char *)dst + direction * d_stride;				      \
         }								      \
         break;								      \
 									      \
