@@ -140,13 +140,13 @@ enough_room(hid_t fapl)
     /* Create files */
     for (i=0; i<NELMTS(fd); i++) {
 	HDsnprintf(name, sizeof name, filename, i);
-	if ((fd[i]=open(name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
+	if ((fd[i]=HDopen(name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 	    goto done;
 	}
-	if ((off_t)size != lseek(fd[i], (off_t)size, SEEK_SET)) {
+	if ((off_t)size != HDlseek(fd[i], (off_t)size, SEEK_SET)) {
 	    goto done;
 	}
-	if (1!=write(fd[i], "X", 1)) {
+	if (1!=HDwrite(fd[i], "X", 1)) {
 	    goto done;
 	}
     }
@@ -155,9 +155,9 @@ enough_room(hid_t fapl)
  done:
     for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
 	HDsnprintf(name, sizeof name, filename, i);
-	if(close(fd[i])<0)
+	if(HDclose(fd[i])<0)
             ret_value=0;
-	unlink(name);
+	HDunlink(name);
     }
     
     return ret_value;
