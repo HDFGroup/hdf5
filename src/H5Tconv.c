@@ -2003,14 +2003,12 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	} else if (src->size>=dst->size) {
 	    sp = dp = (uint8_t*)buf;
 	    direction = 1;
-	    olap = (size_t)(HDceil((double)(src->size)/
-				   (double)(src->size-dst->size))-1);
+	    olap = HDceil((double)(dst->size)/(double)(src->size-dst->size));
 	} else {
 	    sp = (uint8_t*)buf + (nelmts-1) * src->size;
 	    dp = (uint8_t*)buf + (nelmts-1) * dst->size;
 	    direction = -1;
-	    olap = (size_t)(HDceil((double)(dst->size)/
-				   (double)(dst->size-src->size))-1);
+	    olap = HDceil((double)(src->size)/(double)(dst->size-src->size));
 	}
 
 	/* Allocate the overlap buffer */
@@ -2031,7 +2029,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		d = elmtno<olap ? dbuf : dp;
 	    } else {
 		s = sp;
-		d = elmtno >= nelmts-olap ? dbuf : dp;
+		d = elmtno+olap >= nelmts ? dbuf : dp;
 	    }
 #ifndef NDEBUG
 	    /* I don't quite trust the overlap calculations yet --rpm */
