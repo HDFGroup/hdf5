@@ -8399,14 +8399,13 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     int	direction;		/*forward or backward traversal	*/
     hsize_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
-    hsize_t	olap;			/*num overlapping elements	*/
     ssize_t	bitno;			/*bit number			*/
+    hsize_t	olap;			/*num overlapping elements	*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
     hssize_t	expo;			/*source exponent		*/
-    hssize_t	mant;			/*source mantissa		*/
     hssize_t    sign;                   /*source sign bit value         */
     uint8_t     *int_buf;               /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
@@ -8597,37 +8596,19 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 } else 
                     msize = src.u.f.msize;
 
-                /* Keep the print commands for future debugging */
-                /*fprintf(stderr, "expo=%ld     ", expo);
-                fprintf(stderr, "src.u.f.msize=%d      ", src.u.f.msize);
-                fprintf(stderr, "mant=0x%016x\n", mant);*/
-              
                 /* 
                  * Shift mantissa part by exponent minus mantissa size(right shift), 
                  * or by mantissa size minus exponent(left shift).
                  */
-                H5T_bit_shift(int_buf, expo - src.u.f.msize, buf_size);
-
-                /*fprintf(stderr, "int_buf=");
-                for(i=0; i<buf_size; i++)
-                        fprintf(stderr, "%02x ", int_buf[i]);
-                fprintf(stderr, "\n");*/
+                H5T_bit_shift(int_buf, (expo-src.u.f.msize), buf_size);
 
                 /* Convert to integer representation if negative. 
                  * equivalent to ~(value - 1).
                  */
                 if(sign) {
                     H5T_bit_dec(int_buf, 0, 8*buf_size);
-                        /*fprintf(stderr, "decremented int_buf=");
-                        for(i=0; i<buf_size; i++)
-                            fprintf(stderr, "%02x ", int_buf[i]);
-                        fprintf(stderr, "\n");*/
 
                     H5T_bit_neg(int_buf, 0, 8*buf_size);
-                        /*fprintf(stderr, "negated int_buf=");
-                        for(i=0; i<buf_size; i++)
-                            fprintf(stderr, "%02x ", int_buf[i]);
-                        fprintf(stderr, "\n");*/
                 }
                 
                 /*
@@ -8636,7 +8617,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                  */
                 sfirst = H5T_bit_find(int_buf, 0, 8*buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
-                /*fprintf(stderr, "      first=%d\n", first);*/
                 
                 if(sfirst < 0) {
                     /*
@@ -8682,11 +8662,6 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                         }
                     }
                 }
-
-                /*fprintf(stderr, "dst.offset=%d, d=0x", dst.offset);
-                for(i=0; i<dst.prec/8; i++)
-                   fprintf(stderr, "%02x ", d[i]);
-                fprintf(stderr, "\n");*/
 
             padding:
                 /*
@@ -8776,20 +8751,18 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
     hsize_t	elmtno;			/*element number		*/
     size_t	half_size;		/*half the type size		*/
     hsize_t	olap;			/*num overlapping elements	*/
-    ssize_t	bitno;			/*bit number			*/
     uint8_t	*s, *sp, *d, *dp;	/*source and dest traversal ptrs*/
     uint8_t	dbuf[64];		/*temp destination buffer	*/
 
     /* Conversion-related variables */
     hsize_t	expo;			/*destiny exponent		*/
     hsize_t	expo_max;		/*maximal possible exponent value       */
-    /*hsize_t     sign = 0;*/               /*source sign bit value         */
-    /*hsize_t     is_max_neg = 0;*/         /*source is maximal negative value*/
-    /*hsize_t     do_round = 0;*/           /*whether there is roundup      */
-    /*hsize_t     trailing = 0;*/           /*whether there is trailing after 1st roundup bit*/
+    hsize_t     sign = 0;               /*source sign bit value         */
+    hsize_t     is_max_neg = 0;         /*source is maximal negative value*/
+    hsize_t     do_round = 0;           /*whether there is roundup      */
+    hsize_t     trailing = 0;           /*whether there is trailing after 1st roundup bit*/
     uint8_t     *int_buf;               /*buffer for temporary value    */ 
     size_t      buf_size;               /*buffer size for temporary value */
-    size_t      msize;                  /*mantissa size after restored implied 1  */
     size_t	i;			/*miscellaneous counters	*/
     size_t	first;                  /*first bit(MSB) in an integer  */
     ssize_t	sfirst;			/*a signed version of `first'	*/
@@ -8856,10 +8829,11 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
 
             /* The conversion loop */
             for (elmtno=0; elmtno<nelmts; elmtno++) {
-                hsize_t     sign = 0;               /*source sign bit value         */
-                hsize_t     is_max_neg = 0;         /*source is maximal negative value*/
-                hsize_t     do_round = 0;           /*whether there is roundup      */
-                hsize_t     trailing = 0;           /*whether there is trailing after 1st roundup bit*/
+                /* Make sure these variables are reset to 0. */
+                sign = 0;               /*source sign bit value         */
+                is_max_neg = 0;         /*source is maximal negative value*/
+                do_round = 0;           /*whether there is roundup      */
+                trailing = 0;           /*whether there is trailing after 1st roundup bit*/
 
                 /*
                  * If the source and destination buffers overlap then use a
@@ -8903,18 +8877,6 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, hsize_t nelmts,
                 /* Copy source into a temporary buffer */
                 H5T_bit_copy(int_buf, 0, s, src.offset, src.prec);
 
-
-/* For debug */
-/*HDmemset(int_buf, 0, buf_size);
-H5T_bit_set(int_buf, 0, src.prec, 1);*/
-
-/*fprintf(stderr, "\n no. %d int_buf=0x ", elmtno);
-for(i=0; i<buf_size; i++)
-    	fprintf(stderr, "%02x ", int_buf[i]);*/
-/*fprintf(stderr, "\n     s=0x ");
-for(i=0; i<buf_size-1; i++)
-    	fprintf(stderr, "%02x ", s[i]);*/
-
                 /*
                  * Find the sign bit value of the source.
                  */
@@ -8932,7 +8894,6 @@ for(i=0; i<buf_size-1; i++)
                         is_max_neg = 1;    
                 } else if(H5T_SGN_NONE == src.u.i.sign)
                     sfirst = H5T_bit_find(int_buf, 0, src.prec, H5T_BIT_MSB, TRUE);
-/*fprintf(stderr, "\n     is_max_neg=%d", is_max_neg);*/
 
                 /* Handle special cases here.  Integer is zero */
                 if(!sign && sfirst < 0)
@@ -8955,25 +8916,17 @@ for(i=0; i<buf_size-1; i++)
                         sfirst = src.prec-1;
                         is_max_neg = 0;
                     }
-/*fprintf(stderr, "\n     after negate int_buf=0x ");
-for(i=0; i<buf_size; i++)
-    fprintf(stderr, "%02x ", int_buf[i]);*/
 
                     /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of 
                      * sign bit to 0 in the temporary buffer because they're all negated from the previous
 		     * step. */
                     H5T_bit_set(int_buf, src.prec, buf_size*8-src.prec, 0);
-/*fprintf(stderr, "\n     after bits in front of sign off int_buf=0x ");
-for(i=0; i<buf_size; i++)
-    fprintf(stderr, "%02x ", int_buf[i]);*/
 
                     /* Set sign bit in destiny */
                     H5T_bit_set_d(d, dst.u.f.sign, 1, sign);
                 }
 
                 first = (size_t)sfirst;
-/*fprintf(stderr, "\n     first=%d", first);*/
-
                 
                 /*
                  * Calculate the true destination exponent by adjusting according to
@@ -8988,16 +8941,10 @@ for(i=0; i<buf_size; i++)
                     HDabort();
                 }
 
-/*fprintf(stderr, "\n     expo=%d,", expo); 
-fprintf(stderr, "\n     expo_max=%d,", expo_max);*/
-
                 /* Handle mantissa part here */
                 if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     /* Imply first bit */
                     H5T_bit_set(int_buf, first, 1, 0);
-/*fprintf(stderr, "\n     after 1st bit implied int_buf=0x ");
-for(i=0; i<buf_size; i++)
-    fprintf(stderr, "%02x ", int_buf[i]);*/
        		} else if (H5T_NORM_NONE==src.u.f.norm) {
 		    first++;
 		}

@@ -547,48 +547,6 @@ H5T_bit_inc(uint8_t *buf, size_t start, size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_bit_dec2
- *
- * Purpose:	decrement part of a bit field by 1.
- *              At this moment, START is always 0 and SIZE is a multiply 
- *              of 8(in bit).  This is different from H5T_bit_inc.
- *
- * Return:	void
- *
- *
- * Programmer:	Raymond Lu
- *              Wednesday, Jan 28, 2004
- *
- * Modifications:
- *
- * 		Need to generalize it to handle random START and SIZE like
- *              H5T_bit_inc. 
- *
- *              Older algorithm.  Take it out!!!
- *
- *-------------------------------------------------------------------------
- */
-void
-H5T_bit_dec2(uint8_t *buf, size_t start, size_t size)
-{
-    size_t	idx;
-
-    assert(buf);
-    assert(size);
-    assert(start==0);
-
-    for(idx=0; idx < size/8; idx++) {
-        if(buf[idx] != 0x00) {
-            buf[idx] -= 1; 
-            break;
-        } else if(buf[idx]==0x00) {
-            buf[idx] -= 1; 
-        }
-    }
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_bit_dec
  *
  * Purpose:	decrement part of a bit field by substracting 1.  The bit 
