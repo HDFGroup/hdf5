@@ -64,7 +64,7 @@
      !
      ! Initialize FORTRAN interface.
      !
-     CALL h5init_fortran_f(error)
+     CALL h5open_f(error)
      !
      ! Set dataset transfer property to preserve partially initialized fields
      ! during write/read to/from dataset with compound datatype.
@@ -208,7 +208,7 @@
      !
      ! Close FORTRAN interface.
      !
-     CALL h5close_fortran_f(error)
+     CALL h5close_f(error)
 
      END PROGRAM COMPOUNDEXAMPLE 
      

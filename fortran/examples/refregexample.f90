@@ -42,7 +42,7 @@
      !
      !  Initialize FORTRAN interface.
      !
-     CALL h5init_fortran_f(error)
+     CALL h5open_f(error)
      !
      !  Create a new file.
      !
@@ -155,7 +155,7 @@
      !
      ! Close FORTRAN interface.
      !
-     CALL h5close_fortran_f(error) 
+     CALL h5close_f(error) 
 
      END PROGRAM REG_REFERENCE 
 

@@ -35,7 +35,7 @@
      !
      ! Initialize FORTRAN interface.
      !
-     CALL h5init_fortran_f(error) 
+     CALL h5open_f(error) 
 
      !
      ! Open an existing file.
@@ -70,7 +70,7 @@
      !
      ! Close FORTRAN interface.
      !
-     CALL h5close_fortran_f(error)
+     CALL h5close_f(error)
 
      END PROGRAM RWDSETEXAMPLE 
 
