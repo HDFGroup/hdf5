@@ -29353,6 +29353,8 @@ echo $ECHO_N "checking for Stream Virtual File Driver support... $ECHO_C" >&6
 if test "${enable_stream_vfd+set}" = set; then
   enableval="$enable_stream_vfd"
   STREAM_VFD=$enableval
+else
+  STREAM_VFD=yes
 fi;
 
 if test "$STREAM_VFD" = "yes"; then
