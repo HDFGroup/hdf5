@@ -35,9 +35,9 @@ $(srcdir)/Dependencies: .depend
 	@for dep in $? dummy; do					      \
 	   if [ $$dep != "dummy" ]; then				      \
 	      case "$$dep" in						      \
-	         *.C)							      \
+	         *.cpp)							      \
 	            echo Building dependencies for $$dep;		      \
-	            obj=`basename $$dep .C`.lo;				      \
+	            obj=`basename $$dep .cpp`.lo;			      \
 	            sed '\%^'"$$obj"':%,\%[^\\]$$%d' <$@ >$@- && mv $@- $@;   \
 	            $(TRACE) $$dep;					      \
 	            $(CC) -M -MG $(CPPFLAGS) $$dep 2>/dev/null |	      \
