@@ -260,13 +260,13 @@ Expected output for 'h5dump --xml tmany.h5'
          </Dataset>
       </Group>
       <Group Name="g1.2" OBJ-XID="/g1/g1.2" Parents="/g1" >
-         <Dataset Name="link1" OBJ-XID="/g1/g1.2" Parents="/g1/g1.2">
+         <Dataset Name="link1" OBJ-XID="/g1/g1.2/link1" Parents="/g1/g1.2">
             <DatasetPtr OBJ-XID="/g1/g1.1/dset1"/>
          </Dataset>
       </Group>
    </Group>
    <Group Name="g2" OBJ-XID="/g2" Parents="/" >
-      <SoftLink LinkName="slink2" Target="/g1" TargetObj="/g1" OBJ-XID="slink2" Source="/g2"/>
+      <SoftLink LinkName="slink2" Target="/g1" TargetObj="/g2/g1" OBJ-XID="/g2/slink2" Source="/g2"/>
    </Group>
    <Group Name="g3" OBJ-XID="/g3" Parents="/" >
       <Dataset Name="link3" OBJ-XID="/g3/link3" Parents="/g3">
@@ -298,12 +298,12 @@ Expected output for 'h5dump --xml tmany.h5'
       </Dataset>
    </Group>
    <Group Name="g4" OBJ-XID="/g4" Parents="/" >
-      <Dataset Name="dset2" OBJ-XID="/g4" Parents="/g4">
+      <Dataset Name="dset2" OBJ-XID="/g4/dset2" Parents="/g4">
          <DatasetPtr OBJ-XID="/g3/link3"/>
       </Dataset>
    </Group>
    <Group Name="g5" OBJ-XID="/g5" Parents="/" >
-      <SoftLink LinkName="slink4" Target="/g6/dset3" TargetObj="/g6/dset3" OBJ-XID="slink4" Source="/g5"/>
+      <SoftLink LinkName="slink4" Target="/g6/dset3" TargetObj="/g5/g6/dset3" OBJ-XID="/g5/slink4" Source="/g5"/>
    </Group>
    <Group Name="g6" OBJ-XID="/g6" Parents="/" >
       <Dataset Name="dset3" OBJ-XID="/g6/dset3" Parents="/g6">

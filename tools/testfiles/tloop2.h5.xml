@@ -7,7 +7,7 @@ Expected output for 'h5dump --xml tloop2.h5'
 <RootGroup OBJ-XID="root">
    <Group Name="g1" OBJ-XID="/g1" Parents="/" >
       <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
-         <SoftLink LinkName="g2.1" Target="/g1" TargetObj="/g1" OBJ-XID="g2.1" Source="/g1/g1.1"/>
+         <SoftLink LinkName="g2.1" Target="/g1" TargetObj="/g1/g1.1/g1" OBJ-XID="/g1/g1.1/g2.1" Source="/g1/g1.1"/>
       </Group>
    </Group>
    <Group Name="g2" OBJ-XID="/g2" Parents="/" >

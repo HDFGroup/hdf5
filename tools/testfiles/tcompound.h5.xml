@@ -5,7 +5,7 @@ Expected output for 'h5dump --xml tcompound.h5'
 <!DOCTYPE HDF5-File PUBLIC "HDF5-File.dtd" "http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
 <HDF5-File>
 <RootGroup OBJ-XID="root">
-   <NamedDataType Name="#6632:0" OBJ-XID="/#6632:0" Parents="#6632:0">
+   <NamedDataType Name="#6632:0" OBJ-XID="/#6632:0" Parents="root">
       <CompoundType>
          <Field FieldName="int">
             <DataType> 
@@ -109,7 +109,7 @@ Expected output for 'h5dump --xml tcompound.h5'
       </Data>
    </Dataset>
    <Group Name="group1" OBJ-XID="/group1" Parents="/" >
-      <NamedDataType Name="type3" OBJ-XID="/group1/type3" Parents="type3">
+      <NamedDataType Name="type3" OBJ-XID="/group1/type3" Parents="/group1">
          <CompoundType>
             <Field FieldName="int">
                <DataType> 

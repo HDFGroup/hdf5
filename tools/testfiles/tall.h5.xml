@@ -126,7 +126,7 @@ Expected output for 'h5dump --xml tall.h5'
       </Group>
       <Group Name="g1.2" OBJ-XID="/g1/g1.2" Parents="/g1" >
          <Group Name="g1.2.1" OBJ-XID="/g1/g1.2/g1.2.1" Parents="/g1/g1.2" >
-            <SoftLink LinkName="slink" Target="somevalue" TargetObj="somevalue" OBJ-XID="slink" Source="/g1/g1.2/g1.2.1"/>
+            <SoftLink LinkName="slink" Target="somevalue" TargetObj="/g1/g1.2/g1.2.1/somevalue" OBJ-XID="/g1/g1.2/g1.2.1/slink" Source="/g1/g1.2/g1.2.1"/>
          </Group>
       </Group>
    </Group>

@@ -23,11 +23,11 @@ Expected output for 'h5dump --xml thlink.h5'
       </Data>
    </Dataset>
    <Group Name="g1" OBJ-XID="/g1" Parents="/" >
-      <Dataset Name="dset2" OBJ-XID="/g1" Parents="/g1">
+      <Dataset Name="dset2" OBJ-XID="/g1/dset2" Parents="/g1">
          <DatasetPtr OBJ-XID="/dset1"/>
       </Dataset>
       <Group Name="g1.1" OBJ-XID="/g1/g1.1" Parents="/g1" >
-         <Dataset Name="dset3" OBJ-XID="/g1/g1.1" Parents="/g1/g1.1">
+         <Dataset Name="dset3" OBJ-XID="/g1/g1.1/dset3" Parents="/g1/g1.1">
             <DatasetPtr OBJ-XID="/dset1"/>
          </Dataset>
       </Group>
