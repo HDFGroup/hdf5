@@ -1961,6 +1961,8 @@ H5S_decode(unsigned char *buf)
     ret_value=ds;
 
 done:
+    H5MM_xfree(f.shared);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
