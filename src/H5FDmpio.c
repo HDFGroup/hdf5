@@ -1810,7 +1810,7 @@ done:
                 HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
 
             /* Round-robin rotate to the next process */
-            file->mpi_round = (++file->mpi_round)%file->mpi_size;
+            file->mpi_round = (file->mpi_round+1)%file->mpi_size;
         } /* end if */
     } /* end if */
 
