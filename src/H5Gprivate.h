@@ -161,6 +161,8 @@ H5_DLL  herr_t H5G_free_grp_name(H5G_t *grp);
  */
 H5_DLL herr_t H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 			      int indent, int fwidth, haddr_t heap);
+H5_DLL herr_t H5G_node_init(H5F_t *f);
+H5_DLL herr_t H5G_node_close(const H5F_t *f);
 
 /*
  * These functions operate on symbol table entries.  They're used primarily

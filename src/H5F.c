@@ -1490,6 +1490,10 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id)
         /* Create the file's "open object" information */
         if(H5FO_create(f)<0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object TBBT")
+
+        /* Create information needed for group nodes */
+        if(H5G_node_init(f)<0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create group node info")
     } /* end else */
     
     f->shared->nrefs++;
@@ -1576,6 +1580,10 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
                 ret_value = FAIL; /*but keep going*/
 	    } /* end if */
 	    f->shared->cwfs = H5MM_xfree (f->shared->cwfs);
+	    if (H5G_node_close(f)<0) {
+                HERROR(H5E_FILE, H5E_CANTRELEASE, "problems closing file");
+                ret_value = FAIL; /*but keep going*/
+	    } /* end if */
 
 	    /* Destroy file creation properties */
             if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id)) 
@@ -4461,6 +4469,38 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_comm() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_raw_page
+ *
+ * Purpose:	Replaced a macro to retrieve the raw B-tree page value
+ *              now that the generic properties are being used to store
+ *              the values.
+ *
+ * Return:	Success:	Non-void, and the raw B-tree page value
+ *                              is returned.
+ *
+ * 		Failure:	void (should not happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jul  5 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *H5F_raw_page(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_raw_page)
+
+    assert(f);
+    assert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->raw_page)
+} /* end H5F_raw_page() */
 
 
 /*-------------------------------------------------------------------------

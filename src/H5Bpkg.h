@@ -43,12 +43,6 @@
 /*
  * The B-tree node as stored in memory...
  */
-typedef struct H5B_key_t {
-    hbool_t	dirty;	/*native key is more recent than raw key	     */
-    uint8_t	*rkey;	/*ptr into node->page for raw key		     */
-    void	*nkey;	/*null or ptr into node->native for key		     */
-} H5B_key_t;
-
 struct H5B_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
@@ -56,14 +50,13 @@ struct H5B_t {
     size_t		sizeof_node;	/*size of raw (disk) node	     */
     size_t		sizeof_rkey;	/*size of raw (disk) key	     */
     size_t		total_native_keysize;	/*size of native keys	     */
-    unsigned		ndirty;		/*num child ptrs to emit	     */
     unsigned		level;		/*node level			     */
     haddr_t		left;		/*address of left sibling	     */
     haddr_t		right;		/*address of right sibling	     */
     unsigned		nchildren;	/*number of child pointers	     */
-    uint8_t		*page;		/*disk page			     */
+    uint8_t		*raw_page;	/*disk page (shared)		     */
     uint8_t		*native;	/*array of keys in native format     */
-    H5B_key_t		*key;		/*2k+1 key entries		     */
+    void		**nkey;		/*2k+1 key entries		     */
     haddr_t		*child;		/*2k child pointers		     */
 };
 

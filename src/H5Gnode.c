@@ -62,7 +62,7 @@ typedef struct H5G_node_key_t {
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf);
+static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size(H5F_t *f);
 
 /* Metadata cache callbacks */
@@ -76,6 +76,7 @@ static herr_t H5G_compute_size(H5F_t *f, H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
+static void *H5G_node_get_page(H5F_t *f, const void *_udata);
 static herr_t H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key,
 			      void *_udata, void *_rt_key,
 			      haddr_t *addr_p/*out*/);
@@ -116,6 +117,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5B_SNODE_ID,		/*id			*/
     sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
     H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
+    H5G_node_get_page,		/*get_page		*/
     H5G_node_create,		/*new			*/
     H5G_node_cmp2,		/*cmp2			*/
     H5G_node_cmp3,		/*cmp3			*/
@@ -137,6 +139,9 @@ H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
 
 /* Declare a free list to manage blocks of symbol node data */
 H5FL_BLK_DEFINE_STATIC(symbol_node);
+
+/* Declare a free list to manage the raw page information */
+H5FL_BLK_DEFINE_STATIC(grp_page);
 
 
 /*-------------------------------------------------------------------------
@@ -165,6 +170,34 @@ H5G_node_sizeof_rkey(H5F_t *f, const void UNUSED * udata)
 
     FUNC_LEAVE_NOAPI(H5F_SIZEOF_SIZE(f));	/*the name offset */
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_get_page
+ *
+ * Purpose:	Returns the raw data page for the specified UDATA.
+ *
+ * Return:	Success:	Pointer to the raw B-tree page for this
+                                file's groups
+ *
+ *		Failure:	Can't fail
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, October  8, 1997
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5G_node_get_page(H5F_t *f, const void UNUSED *_udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_page);
+
+    assert(f);
+
+    FUNC_LEAVE_NOAPI(H5F_RAW_PAGE(f));
+} /* end H5G_node_get_page() */
 
 
 /*-------------------------------------------------------------------------
@@ -456,16 +489,15 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
         size = H5G_node_size(f);
 
         /* Allocate temporary buffer */
-        if ((buf=H5FL_BLK_CALLOC(symbol_node,size))==NULL)
+        if ((buf=H5FL_BLK_MALLOC(symbol_node,size))==NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-        if (H5G_node_serialize(f, sym, buf) < 0)
+        if (H5G_node_serialize(f, sym, size, buf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed");
 
         if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file");
-        if (buf)
-            H5FL_BLK_FREE(symbol_node,buf);
+        H5FL_BLK_FREE(symbol_node,buf);
 
         /* Reset the node's dirty flag */
         sym->cache_info.is_dirty = FALSE;
@@ -501,7 +533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf)
+H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
 {
     uint8_t    *p;
     herr_t      ret_value = SUCCEED;
@@ -531,6 +563,7 @@ H5G_node_serialize(H5F_t *f, H5G_node_t *sym, uint8_t *buf)
     /* entries */
     if (H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
+    HDmemset(p, 0, size - (p - buf));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1669,6 +1702,76 @@ done:
     
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_init
+ *
+ * Purpose:	This function gets called during a file opening to initialize
+ *              global information about group B-tree nodes for file.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Jul  5, 2004
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_init(H5F_t *f)
+{
+    size_t		sizeof_rkey;    /* Single raw key size */
+    size_t              size;           /* Raw B-tree node size */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
+
+    /* Check arguments. */
+    assert(f);
+
+    /* Set up the "global" information for this file's groups */
+    sizeof_rkey = H5G_node_sizeof_rkey(f, NULL);
+    assert(sizeof_rkey);
+    size = H5B_nodesize(f, H5B_SNODE, NULL, sizeof_rkey);
+    assert(size);
+    if(NULL==(f->shared->raw_page=H5FL_BLK_MALLOC(grp_page,size)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5G_node_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_node_close
+ *
+ * Purpose:	This function gets called during a file close to shutdown
+ *              global information about group B-tree nodes for file.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Jul  5, 2004
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_close(const H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_node_close)
+
+    /* Check arguments. */
+    assert(f);
+
+    /* Free the raw B-tree node buffer */
+    H5FL_BLK_FREE(grp_page,f->shared->raw_page);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_node_close */
 
 
 /*-------------------------------------------------------------------------

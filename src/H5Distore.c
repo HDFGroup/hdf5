@@ -157,6 +157,7 @@ static int H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, void *_lt_key, haddr
 
 /* B-tree callbacks */
 static size_t H5D_istore_sizeof_rkey(H5F_t *f, const void *_udata);
+static void *H5D_istore_get_page(H5F_t *f, const void *_udata);
 static herr_t H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
 				  haddr_t *addr_p /*out*/);
@@ -187,6 +188,7 @@ H5B_class_t H5B_ISTORE[1] = {{
     H5B_ISTORE_ID,		/*id			*/
     sizeof(H5D_istore_key_t),	/*sizeof_nkey		*/
     H5D_istore_sizeof_rkey, 	/*get_sizeof_rkey	*/
+    H5D_istore_get_page,	/*get_page		*/
     H5D_istore_new_node,	/*new			*/
     H5D_istore_cmp2,		/*cmp2			*/
     H5D_istore_cmp3,		/*cmp3			*/
@@ -208,6 +210,9 @@ H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
+
+/* Declare a free list to manage the raw page information */
+H5FL_BLK_DEFINE_STATIC(chunk_page);
 
 
 /*-------------------------------------------------------------------------
@@ -246,6 +251,37 @@ H5D_istore_sizeof_rkey(H5F_t UNUSED *f, const void *_udata)
 
     FUNC_LEAVE_NOAPI(nbytes);
 } /* end H5D_istore_sizeof_rkey() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_get_page
+ *
+ * Purpose:	Returns the raw data page for the specified UDATA.
+ *
+ * Return:	Success:	Pointer to the raw B-tree page for this dataset
+ *
+ *		Failure:	Can't fail
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, July  5, 2004
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5D_istore_get_page(H5F_t UNUSED *f, const void *_udata)
+{
+    const H5D_istore_ud1_t *udata = (const H5D_istore_ud1_t *) _udata;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_get_page);
+
+    assert(udata);
+    assert(udata->mesg);
+    assert(udata->mesg->u.chunk.raw_page);
+
+    FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.raw_page);
+} /* end H5D_istore_get_page() */
 
 
 /*-------------------------------------------------------------------------
@@ -643,7 +679,7 @@ done:
  */
 static H5B_ins_t
 H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
-		  hbool_t UNUSED *lt_key_changed,
+		  hbool_t *lt_key_changed,
 		  void *_md_key, void *_udata, void *_rt_key,
 		  hbool_t UNUSED *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
@@ -858,6 +894,9 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, hadd
 herr_t
 H5D_istore_init (H5F_t *f, H5D_t *dset)
 {
+    H5D_istore_ud1_t	udata;
+    size_t		sizeof_rkey;    /* Single raw key size */
+    size_t              size;           /* Raw B-tree node size */
     H5D_rdcc_t	*rdcc = &(dset->cache.chunk);
     herr_t      ret_value=SUCCEED;       /* Return value */
     
@@ -871,6 +910,17 @@ H5D_istore_init (H5F_t *f, H5D_t *dset)
 	if (NULL==rdcc->slot)
 	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     } /* end if */
+
+    /* Initialize "user" data for B-tree callbacks, etc. */
+    udata.mesg = &dset->layout;
+
+    /* Set up the "global" information for this dataset's chunks */
+    sizeof_rkey = H5D_istore_sizeof_rkey(f, &udata);
+    assert(sizeof_rkey);
+    size = H5B_nodesize(f, H5B_ISTORE, NULL, sizeof_rkey);
+    assert(size);
+    if(NULL==(dset->layout.u.chunk.raw_page=H5FL_BLK_MALLOC(chunk_page,size)))
+	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1150,6 +1200,7 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
     if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
+    /* Flush all the cached chunks */
     for (ent=rdcc->head; ent; ent=next) {
 #ifdef H5D_ISTORE_DEBUG
 	HDfputc('c', stderr);
@@ -1164,6 +1215,9 @@ H5D_istore_dest (H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 
     H5FL_SEQ_FREE (H5D_rdcc_ent_ptr_t,rdcc->slot);
     HDmemset (rdcc, 0, sizeof(H5D_rdcc_t));
+
+    /* Free the raw B-tree node buffer */
+    H5FL_BLK_FREE(chunk_page,dset->layout.u.chunk.raw_page);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1919,7 +1973,9 @@ H5D_istore_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
 	assert(layout->u.chunk.dim[u] > 0);
 #endif
 
+    /* Initialize "user" data for B-tree callbacks, etc. */
     udata.mesg = layout;
+
     if (H5B_create(f, dxpl_id, H5B_ISTORE, &udata, &(layout->u.chunk.addr)/*out*/) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't create B-tree");
     
