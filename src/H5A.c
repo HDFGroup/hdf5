@@ -503,6 +503,7 @@ H5A_open(H5G_entry_t *ent, unsigned idx)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL,
 		    "unable to load attribute info from dataset header");
     }
+    attr->initialized=1;
 
     /* Copy the symbol table entry */
     attr->ent=*ent;
