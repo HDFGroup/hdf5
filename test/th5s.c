@@ -271,6 +271,7 @@ test_h5s_scalar_read(void)
     hssize_t		n;	 	/* Number of dataspace elements */
     unsigned      	rdata;      	/* Scalar data read in 		*/
     herr_t		ret;		/* Generic return value		*/
+    H5S_class_t ext_type;               /* Extent type */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Scalar Dataspace Manipulation during Reading\n"));
@@ -296,6 +297,10 @@ test_h5s_scalar_read(void)
 
     rank = H5Sget_simple_extent_dims(sid1, tdims, NULL);
     VERIFY(rank, 0, "H5Sget_simple_extent_dims");
+
+    /* Verify extent type */
+    ext_type = H5Sget_simple_extent_type(sid1);
+    VERIFY(ext_type, H5S_SCALAR, "H5Sget_simple_extent_type");
 
     ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
