@@ -918,7 +918,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types, unsigned *obj_id_count)
     H5F_t    *f=NULL;
     herr_t   ret_value;
 
-    FUNC_ENTER_API(H5Fget_obj_counts, FAIL);
+    FUNC_ENTER_API(H5Fget_obj_count, FAIL);
     H5TRACE3("e","iIu*Iu",file_id,types,obj_id_count);
 
     if( file_id != H5F_OBJ_ALL && (NULL==(f=H5I_object_verify(file_id,H5I_FILE))) )
@@ -2123,7 +2123,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id,
     
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value;	        /*return value			*/
- 
+
     FUNC_ENTER_API(H5Fcreate, FAIL);
     H5TRACE4("i","sIuii",filename,flags,fcpl_id,fapl_id);
 
@@ -2852,7 +2852,7 @@ herr_t
 H5Fclose(hid_t file_id)
 {
     herr_t	ret_value = SUCCEED;
- 
+
     FUNC_ENTER_API(H5Fclose, FAIL);
     H5TRACE1("e","i",file_id);
 
@@ -2866,7 +2866,7 @@ H5Fclose(hid_t file_id)
      */
     if (H5I_dec_ref (file_id)<0)
 	HGOTO_ERROR (H5E_ATOM, H5E_CANTINIT, FAIL, "problems closing file");
-    
+
 done:
     FUNC_LEAVE(ret_value);
 }
