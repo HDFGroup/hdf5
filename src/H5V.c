@@ -157,7 +157,7 @@ H5V_hyper_stride(intn n, const hsize_t *size,
     hsize_t	    acc;	/*accumulator				*/
     int		    i;		/*counter				*/
 
-    FUNC_ENTER(H5V_hyper_stride, (abort(), 0));
+    FUNC_ENTER(H5V_hyper_stride, (HDabort(), 0));
 
     assert(n >= 0 && n < H5V_HYPER_NDIMS);
     assert(size);

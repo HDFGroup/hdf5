@@ -373,8 +373,8 @@ H5S_hyper_get_regions (size_t *num_regions, intn dim, size_t bound_count,
 
         /* Sort region list and eliminate duplicates if necessary */
         if(num_reg>1) {
-            qsort(ret_value,num_reg,sizeof(H5S_hyper_region_t),
-		  H5S_hyper_compare_regions);
+            HDqsort(ret_value,num_reg,sizeof(H5S_hyper_region_t),
+		    H5S_hyper_compare_regions);
             for(i=1,curr_reg=0,uniq_reg=1; i<num_reg; i++) {
                 if(ret_value[curr_reg].start!=ret_value[i].start &&
                         ret_value[curr_reg].end!=ret_value[i].end) {
@@ -1977,8 +1977,10 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src)
 
     /* Sort the boundary arrays */
     for(i=0; i<src->extent.u.simple.rank; i++) {
-        qsort(new_hyper->lo_bounds[i],new_hyper->count,sizeof(H5S_hyper_bound_t),H5S_hyper_compare_bounds);
-        qsort(new_hyper->hi_bounds[i],new_hyper->count,sizeof(H5S_hyper_bound_t),H5S_hyper_compare_bounds);
+        HDqsort(new_hyper->lo_bounds[i], new_hyper->count,
+		sizeof(H5S_hyper_bound_t), H5S_hyper_compare_bounds);
+        HDqsort(new_hyper->hi_bounds[i], new_hyper->count,
+		sizeof(H5S_hyper_bound_t), H5S_hyper_compare_bounds);
     } /* end for */
 #ifdef QAK
     printf("%s: check 7.0\n", FUNC);

@@ -142,8 +142,8 @@ H5F_init_interface(void)
 #ifdef HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
-        const char *s = getenv ("HDF5_MPI_1_METAWRITE");
-        if (s && isdigit(*s)) {
+        const char *s = HDgetenv ("HDF5_MPI_1_METAWRITE");
+        if (s && HDisdigit(*s)) {
             H5_mpi_1_metawrite_g = (int)HDstrtol (s, NULL, 0);
         }
     }
@@ -250,11 +250,11 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_create_template
+ * Function:	H5Fget_create_plist
  *
- * Purpose:	Get an atom for a copy of the file-creation template for this
- *		file. This function returns an atom with a copy of the
- *		template parameters used to create a file.
+ * Purpose:	Get an atom for a copy of the file-creation property list for
+ *		this file. This function returns an atom with a copy of the
+ *		properties used to create a file.
  *
  * Return:	Success:	template ID
  *
@@ -265,36 +265,35 @@ H5F_encode_length_unusual(const H5F_t *f, uint8 **p, uint8 *l)
  * Modifications:
  *
  * 	Robb Matzke, 18 Feb 1998
- *	Calls H5P_copy() to copy the template and H5P_close() to free that
- *	template if an error occurs.
+ *	Calls H5P_copy() to copy the property list and H5P_close() to free
+ *	that property list if an error occurs.
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_create_template(hid_t file_id)
+H5Fget_create_plist(hid_t file_id)
 {
     H5F_t		*file = NULL;
     hid_t		ret_value = FAIL;
-    H5F_create_t	*tmpl = NULL;
+    H5F_create_t	*plist = NULL;
 
-    FUNC_ENTER(H5Fget_create_template, FAIL);
+    FUNC_ENTER(H5Fget_create_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* check args */
-    if (H5_FILE != H5I_group(file_id) || NULL==(file=H5I_object (file_id))) {
+    if (H5_FILE != H5I_group(file_id) || NULL==(file=H5I_object(file_id))) {
 	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
     
-    /* Create the template object to return */
-    if (NULL==(tmpl=H5P_copy (H5P_FILE_CREATE,
-			      file->shared->create_parms))) {
-	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		       "unable to copy file creation properties");
+    /* Create the property list object to return */
+    if (NULL==(plist=H5P_copy(H5P_FILE_CREATE, file->shared->create_parms))) {
+	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		      "unable to copy file creation properties");
     }
 
     /* Create an atom */
-    if ((ret_value = H5P_create(H5P_FILE_CREATE, tmpl)) < 0) {
-	H5P_close (H5P_FILE_CREATE, tmpl);
+    if ((ret_value = H5P_create(H5P_FILE_CREATE, plist)) < 0) {
+	H5P_close(H5P_FILE_CREATE, plist);
 	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
 		      "unable to register property list");
     }
@@ -304,13 +303,13 @@ H5Fget_create_template(hid_t file_id)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fget_access_template
+ * Function:	H5Fget_access_plist
  *
- * Purpose:	Returns a copy of the file access template of the specified
- *		file.
+ * Purpose:	Returns a copy of the file access property list of the
+ *		specified file.
  *
  * Return:	Success:	Object ID for a copy of the file access
- *				template.
+ *				property list.
  *
  *		Failure:	FAIL
  *
@@ -322,35 +321,34 @@ H5Fget_create_template(hid_t file_id)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Fget_access_template(hid_t file_id)
+H5Fget_access_plist(hid_t file_id)
 {
     H5F_t		*f = NULL;
-    H5F_access_t	*tmpl = NULL;
+    H5F_access_t	*plist = NULL;
     hid_t		ret_value = FAIL;
     
-    FUNC_ENTER (H5Fget_access_template, FAIL);
+    FUNC_ENTER(H5Fget_access_plist, FAIL);
     H5TRACE1("i","i",file_id);
 
     /* Check args */
-    if (H5_FILE!=H5I_group (file_id) || NULL==(f=H5I_object (file_id))) {
-	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    if (H5_FILE!=H5I_group(file_id) || NULL==(f=H5I_object(file_id))) {
+	HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     }
 
-    /* Create the template object to return */
-    if (NULL==(tmpl=H5P_copy (H5P_FILE_ACCESS,
-			      f->shared->access_parms))) {
-	HRETURN_ERROR (H5E_INTERNAL, H5E_CANTINIT, FAIL,
-		       "unable to copy file access properties");
+    /* Create the property list object to return */
+    if (NULL==(plist=H5P_copy(H5P_FILE_ACCESS, f->shared->access_parms))) {
+	HRETURN_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL,
+		      "unable to copy file access properties");
     }
 
     /* Create an atom */
-    if ((ret_value = H5P_create (H5P_FILE_ACCESS, tmpl))<0) {
-	H5P_close (H5P_FILE_ACCESS, tmpl);
-	HRETURN_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL,
-		       "unable to register property list");
+    if ((ret_value = H5P_create(H5P_FILE_ACCESS, plist))<0) {
+	H5P_close(H5P_FILE_ACCESS, plist);
+	HRETURN_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL,
+		      "unable to register property list");
     }
 
-    FUNC_LEAVE (ret_value);
+    FUNC_LEAVE(ret_value);
 }
 	    
 

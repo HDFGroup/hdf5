@@ -110,16 +110,16 @@
       Currently, the default low-level file driver is used for all
       family members (H5F_LOW_DFLT, usually set to be Section 2 I/O or
       Section 3 stdio), but we'll probably eventually want to pass
-      that as a parameter of the file access template, which hasn't
-      been implemented yet.  When creating a family, a default family
-      member size is used (defined at the top H5Ffamily.c, currently
-      64MB) but that also should be settable in the file access
-      template. When opening an existing family, the size of the first
-      member is used to determine the member size (flushing/closing a
-      family ensures that the first member is the correct size) but
-      the other family members don't have to be that large (the local
-      address space, however, is logically the same size for all
-      members).
+      that as a parameter of the file access property list, which
+      hasn't been implemented yet.  When creating a family, a default
+      family member size is used (defined at the top H5Ffamily.c,
+      currently 64MB) but that also should be settable in the file
+      access property list. When opening an existing family, the size
+      of the first member is used to determine the member size
+      (flushing/closing a family ensures that the first member is the
+      correct size) but the other family members don't have to be that
+      large (the local address space, however, is logically the same
+      size for all members).
 
     <p>I haven't implemented a split meta/raw family yet but am rather
       curious to see how it would perform. I was planning to use the
@@ -130,7 +130,7 @@
       then we'll chose the split family and use the default low level
       driver for each of the two family members.  Eventually we'll
       want to pass these kinds of things through the file access
-      template instead of relying on naming convention.
+      property list instead of relying on naming convention.
 
     <h3>External Raw Data</h3>
 
@@ -199,7 +199,7 @@ struct H5F_mount_t {
 
     <p>The <code>H5Fmount</code> function takes the ID of an open
       file, the name of a to-be-mounted file, the name of the mount
-      point, and a file access template (like <code>H5Fopen</code>).
+      point, and a file access property list (like <code>H5Fopen</code>).
       It opens the new file and adds a record to the parent's mount
       table.  The <code>H5Funmount</code> function takes the parent
       file ID and the name of the mount point and closes the file
@@ -272,7 +272,7 @@ struct H5F_mount_t {
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Sat Nov  8 18:08:52 EST 1997 -->
 <!-- hhmts start -->
-Last modified: Wed Nov 12 15:01:14 EST 1997
+Last modified: Tue Sep  8 14:43:32 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

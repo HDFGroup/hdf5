@@ -498,9 +498,9 @@ H5F_low_access(const H5F_low_class_t *type, const char *name,
 	ret_value = (type->access) (name, access_parms, mode, key /*out*/);
 
     } else {
-	ret_value = (0 == access(name, mode) ? TRUE : FALSE);
+	ret_value = (0 == HDaccess(name, mode) ? TRUE : FALSE);
 	if (key) {
-	    stat(name, &sb);
+	    HDstat(name, &sb);
 	    key->dev = sb.st_dev;
 	    key->ino = sb.st_ino;
 	}

@@ -82,9 +82,9 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
 
     FUNC_ENTER(H5F_stdio_open, NULL);
 
-    if (access(name, F_OK) < 0) {
+    if (HDaccess(name, F_OK) < 0) {
 	if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR)) {
-	    f = fopen(name, "wb+");
+	    f = HDfopen(name, "wb+");
 	} else {
 	    HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL,
 			  "file doesn't exist and CREAT wasn't specified");
@@ -96,12 +96,12 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
 
     } else if (flags & H5F_ACC_RDWR) {
 	if (flags & H5F_ACC_TRUNC)
-	    f = fopen(name, "wb+");
+	    f = HDfopen(name, "wb+");
 	else
-	    f = fopen(name, "rb+");
+	    f = HDfopen(name, "rb+");
 
     } else {
-	f = fopen(name, "rb");
+	f = HDfopen(name, "rb");
     }
     if (!f)
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "fopen failed");
@@ -115,17 +115,17 @@ H5F_stdio_open(const char *name, const H5F_access_t __unused__ *access_parms,
     lf->u.stdio.op = H5F_OP_SEEK;
     lf->u.stdio.cur = 0;
     H5F_addr_reset(&(lf->eof));
-    if (fseek(lf->u.stdio.f, 0, SEEK_END) < 0) {
+    if (HDfseek(lf->u.stdio.f, 0, SEEK_END) < 0) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
     } else {
-	hssize_t x = ftell (lf->u.stdio.f);
+	hssize_t x = HDftell (lf->u.stdio.f);
 	assert (x>=0);
 	H5F_addr_inc(&(lf->eof), (hsize_t)x);
     }
 
     /* The unique key */
     if (key) {
-	fstat(fileno(f), &sb);
+	HDfstat(fileno(f), &sb);
 	key->dev = sb.st_dev;
 	key->ino = sb.st_ino;
     }
@@ -156,7 +156,7 @@ H5F_stdio_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     FUNC_ENTER(H5F_stdio_close, FAIL);
 
-    if (fclose(lf->u.stdio.f) < 0) {
+    if (HDfclose(lf->u.stdio.f) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "fclose failed");
     }
     lf->u.stdio.f = NULL;
@@ -234,7 +234,7 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek64 failed");
 	}
 #else
-	if (fseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
+	if (HDfseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
 	}
 #endif
@@ -255,8 +255,8 @@ H5F_stdio_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
      * will advance the file position by N.  If N is negative or an error
      * occurs then the file position is undefined.
      */
-    n = fread(buf, 1, size, lf->u.stdio.f);
-    if (n <= 0 && ferror(lf->u.stdio.f)) {
+    n = HDfread(buf, 1, size, lf->u.stdio.f);
+    if (n <= 0 && HDferror(lf->u.stdio.f)) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "fread failed");
     } else if (n < size) {
@@ -341,7 +341,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "fseek64 failed");
 	}
 #else
-	if (fseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
+	if (HDfseek(lf->u.stdio.f, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "fseek failed");
 	}
 #endif
@@ -353,7 +353,7 @@ H5F_stdio_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
      * advanced by the number of bytes read.  Otherwise nobody knows where it
      * is.
      */
-    if (n != fwrite(buf, 1, size, lf->u.stdio.f)) {
+    if (n != HDfwrite(buf, 1, size, lf->u.stdio.f)) {
 	lf->u.stdio.op = H5F_OP_UNKNOWN;
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fwrite failed");
     }
@@ -400,7 +400,7 @@ H5F_stdio_flush(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
     /*
      * Flush
      */
-    if (fflush(lf->u.stdio.f) < 0) {
+    if (HDfflush(lf->u.stdio.f) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed");
     }
     FUNC_LEAVE(SUCCEED);

@@ -1,9 +1,8 @@
 #------------------------------------------------------------------------------
 # This is the list of files that are part of HDF5.  All files have a
 # `./' prefix and appear in lexicographic order.  Lines that end with
-# _DO_NOT_DISTRIBUTE_ (preceded by tabs) will not be included in a
-# release.  Blank lines and comments are ignored.  Comments must start
-# in column one.
+# _DO_NOT_DISTRIBUTE_ will not be included in a release.  Blank lines
+# and comments are ignored.  Comments must start in column one.
 #------------------------------------------------------------------------------
 
 ./COPYING
@@ -91,6 +90,7 @@
 ./doc/html/RM_H5S.html
 ./doc/html/RM_H5T.html
 ./doc/html/RM_H5Z.html
+./doc/html/Ragged.html
 ./doc/html/Version.html
 ./doc/html/chunk1.gif
 ./doc/html/chunk1.obj			_DO_NOT_DISTRIBUTE_

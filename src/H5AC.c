@@ -869,19 +869,19 @@ H5AC_debug(H5F_t __unused__ *f)
 
 	    switch (i) {
 	    case H5AC_BT_ID:
-		strcpy(s, "B-tree nodes");
+		HDstrcpy(s, "B-tree nodes");
 		break;
 	    case H5AC_SNODE_ID:
-		strcpy(s, "symbol table nodes");
+		HDstrcpy(s, "symbol table nodes");
 		break;
 	    case H5AC_LHEAP_ID:
-		strcpy (s, "local heaps");
+		HDstrcpy (s, "local heaps");
 		break;
 	    case H5AC_GHEAP_ID:
-		strcpy (s, "global heaps");
+		HDstrcpy (s, "global heaps");
 		break;
 	    case H5AC_OHDR_ID:
-		strcpy(s, "object headers");
+		HDstrcpy(s, "object headers");
 		break;
 	    default:
 		sprintf(s, "unknown id %d", i);

@@ -418,7 +418,7 @@ H5O_dtype_encode_helper(uint8 **pp, const H5T_t *dt)
         for (i = 0; i < dt->u.compnd.nmembs; i++) {
 	    /* Name, multiple of eight bytes */
 	    HDstrcpy ((char*)(*pp), dt->u.compnd.memb[i].name);
-            n = strlen(dt->u.compnd.memb[i].name);
+            n = HDstrlen(dt->u.compnd.memb[i].name);
 	    for (z=n+1; z%8; z++) (*pp)[z] = '\0';
 	    *pp += z;
 

@@ -87,7 +87,7 @@ H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
     oflags |= (flags & H5F_ACC_EXCL) ? O_EXCL : 0;
     oflags |= (flags & H5F_ACC_TRUNC) ? O_TRUNC : 0;
 
-    if ((fd = open(name, oflags, 0666)) < 0) {
+    if ((fd = HDopen(name, oflags, 0666)) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CANTOPENFILE, NULL, "open failed");
     }
     if (NULL==(lf = H5MM_calloc(sizeof(H5F_low_t)))) {
@@ -97,7 +97,7 @@ H5F_sec2_open(const char *name, const H5F_access_t __unused__ *access_parms,
     lf->u.sec2.fd = fd;
     lf->u.sec2.op = H5F_OP_SEEK;
     lf->u.sec2.cur = 0;
-    fstat(fd, &sb);
+    HDfstat(fd, &sb);
     lf->eof.offset = sb.st_size;
 
     if (key) {
@@ -131,7 +131,7 @@ H5F_sec2_close(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms)
 {
     FUNC_ENTER(H5F_sec2_close, FAIL);
 
-    if (close(lf->u.sec2.fd) < 0) {
+    if (HDclose(lf->u.sec2.fd) < 0) {
 	HRETURN_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "close failed");
     }
     lf->u.sec2.fd = -1;
@@ -210,7 +210,7 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
 	    HRETURN_ERROR (H5E_IO, H5E_SEEKERROR, FAIL, "lseek64 failed");
 	}
 #else
-	if (lseek(lf->u.sec2.fd, offset, SEEK_SET) < 0) {
+	if (HDlseek(lf->u.sec2.fd, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "lseek failed");
 	}
 #endif
@@ -230,7 +230,7 @@ H5F_sec2_read(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
      * Read the data.  If a read error occurs then set the last file operation
      * to UNKNOWN because the file position isn't guaranteed by Posix.
      */
-    if ((n = read(lf->u.sec2.fd, buf, size)) < 0) {
+    if ((n = HDread(lf->u.sec2.fd, buf, size)) < 0) {
 	lf->u.sec2.op = H5F_OP_UNKNOWN;
 	HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL, "read failed");
     } else if ((size_t)n < size) {
@@ -307,7 +307,7 @@ H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
     if (!H5F_OPT_SEEK ||
 	lf->u.sec2.op == H5F_OP_UNKNOWN ||
 	lf->u.sec2.cur != offset) {
-	if (lseek(lf->u.sec2.fd, offset, SEEK_SET) < 0) {
+	if (HDlseek(lf->u.sec2.fd, offset, SEEK_SET) < 0) {
 	    HRETURN_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "lseek failed");
 	}
 	lf->u.sec2.cur = offset;
@@ -317,7 +317,7 @@ H5F_sec2_write(H5F_low_t *lf, const H5F_access_t __unused__ *access_parms,
      * Write the data to the file.  If the write failed then set the
      * operation back to UNKNOWN since Posix doesn't gurantee its value.
      */
-    if (n != write(lf->u.sec2.fd, buf, size)) {
+    if (n != HDwrite(lf->u.sec2.fd, buf, size)) {
 	lf->u.sec2.op = H5F_OP_UNKNOWN;
 	HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write failed");
     }

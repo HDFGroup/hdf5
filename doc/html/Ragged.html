@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ragged Arrays</title>
+  </head>
+
+  <body>
+    <h1>Ragged Arrays</h1>
+
+    <h2>1. Introduction</h2>
+
+    <p><b>Ragged arrays should be considered alpha quality. They were
+	added to HDF5 to satisfy the needs of the ASCI/DMF vector
+	bundle project; the interface and storage methods are likely
+	to change in the future in ways that are not backward
+	compatible.</b>
+
+    <p>A two-dimensional ragged array has been added to the library
+      and built on top of other existing functionality.  A ragged
+      array is a one-dimensional array of <em>rows</em> where the
+      length of any row is independent of the lengths of the other
+      rows.  The number of rows and the length of each row can be
+      changed at any time (the current version does not support
+      truncating an array by removing rows). All elements of the
+      ragged array have the same data type and, as with datasets, the
+      data is type-converted between memory buffers and files.
+
+    <p>The current implementation works best when most of the rows are 
+      approximately the same length since a two dimensional dataset
+      can be created to hold a nominal number of elements from each
+      row with the additional elements stored in a separate dataset
+      which implements a heap.
+
+    <p>A ragged array is a composite object implemented as a group
+      with three datasets.  The name of the group is the name of the
+      ragged array. The <em>raw</em> dataset is a two-dimensional
+      array that contains the first <em>N</em> elements of each row
+      where <em>N</em> is determined by the application when the array
+      is created.  If most rows have fewer than <em>N</em> elements
+      then internal fragmentation may be quite bad.
+
+    <p>The <em>over</em> dataset is a one-dimensional array that
+      contains elements from each row that don't fit in the
+      <em>raw</em> dataset.
+
+    <p>The <em>meta</em> dataset maintains information about each row
+      such as the number of elements in the row, the location of the
+      overflow elements in the <em>over</em> dataset (if any), and the 
+      amount of space reserved in <em>over</em> for the row.  The
+      <em>meta</em> dataset has one entry per row and is where most of 
+      the storage overhead is concentrated when rows are relatively
+      short.
+
+    <h2>2. Opening and Closing</h2>
+
+    <dl>
+      <dt><code>hid_t H5Rcreate (hid_t <em>location</em>, const char
+	  *<em>name</em>, hid_t <em>type</em>, hid_t
+	  <em>plist</em>)</code>
+      <dd>This function creates a new ragged array by creating the
+	group with the specified name and populating it with the
+	component datasets (which should not be accessed
+	independently). The dataset creation property list
+	<em>plist</em> defines the width of the <em>raw</em> dataset;
+	a nominal row is considered to be the width of a chunk.  The
+	<em>type</em> argument defines the data type which will be
+	stored in the file. A negative value is returned if the array
+	cannot be created.
+
+	<br><br>
+      <dt><code>hid_t H5Ropen (hid_t <em>location</em>, const char
+	  *<em>name</em>)</code>
+      <dd>This function opens a ragged array by opening the specified
+	group and the component datasets (which should not be accessed 
+	indepently).  A negative value is returned if the array cannot 
+	be opened.
+
+	<br><br>
+      <dt><code>herr_t H5Rclose (hid_t <em>array</em>)</code>
+      <dd>All ragged arrays should be closed by calling this
+	function.  The group and component datasets will be closed
+	automatically by the library.
+    </dl>
+
+    <h2>3. Reading and Writing</h2>
+
+    <p>In order to be as efficient as possible the ragged array layer
+      operates on sets of contiguous rows and it is to the
+      application's advantage to perform I/O on as many rows at a time 
+      as possible.  These functions take a starting row number and the 
+      number of rows on which to operate.
+
+    <dl>
+      <dt><code>herr_t H5Rwrite (hid_t <em>array_id</em>, hssize_t
+	  <em>start_row</em>, hsize_t <em>nrows</em>, hid_t
+	  <em>type</em>, hsize_t <em>size</em>[], void
+	  *<em>buf</em>[])</code>
+      <dd>A set of ragged array rows beginning at <em>start_row</em>
+	and continuing for <em>nrows</em> is written to the file,
+	converting the memory data type <em>type</em> to the file data
+	type which was defined when the array was created.  The number 
+	of elements to write from each row is specified in the
+	<em>size</em> array and the data for each row is pointed to
+	from the <em>buf</em> array.  The <em>size</em> and
+	<em>buf</em> are indexed so their first element corresponds to 
+	the first row on which to operate.
+
+	<br><br>
+      <dt><code>herr_t H5Rread (hid_t <em>array_id</em>, hssize_t
+	  <em>start_row</em>, hsize_t <em>nrows</em>, hid_t
+	  <em>type</em>, hsize_t <em>size</em>[], void
+	  *<em>buf</em>[])</code>
+      <dd>A set of ragged array rows beginning at <em>start_row</em>
+	and continuing for <em>nrows</em> is read from the file,
+	converting from the file data type which was defined when the
+	array was created to the memory data type <em>type</em>. The
+	number of elements to read from each row is specified in the
+	<em>size</em> array and the buffers in which to place the
+	results are pointed to by the <em>buf</em> array.  On return,
+	the <em>size</em> array will contain the actual size of the
+	row which may be different than the requested size.  When the
+	request size is smaller than the actual size the row will be
+	truncated; otherwise the remainder of the output buffer will
+	be zero filled.  If a pointer in the <em>buf</em> array is
+	null then the library will ignore the corresponding
+	<em>size</em> value and allocate a buffer large enough to hold 
+	the entire row. This function returns negative for failures
+	with <em>buf</em> containing the original input values.
+    </dl>
+      
+    <hr>
+    <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
+<!-- Created: Wed Aug 26 14:10:32 EDT 1998 -->
+<!-- hhmts start -->
+Last modified: Fri Aug 28 14:27:19 EDT 1998
+<!-- hhmts end -->
+  </body>
+</html>

@@ -1001,7 +1001,7 @@ H5G_namei(H5G_entry_t *loc_ent, const char *name, const char **rest/*out*/,
     } else {
 	*obj_ent = *loc_ent;
     }
-    memset(grp_ent, 0, sizeof(H5G_entry_t));
+    HDmemset(grp_ent, 0, sizeof(H5G_entry_t));
     H5F_addr_undef(&(grp_ent->header));
 
 
@@ -1971,7 +1971,7 @@ H5G_link (H5G_entry_t *loc, H5G_link_t type, const char *cur_name,
 	}
 	if ((size_t)(-1)==(offset=H5HL_insert (grp_ent.file,
 					       &(stab_mesg.heap_addr),
-					       strlen(cur_name)+1,
+					       HDstrlen(cur_name)+1,
 					       cur_name))) {
 	    HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			   "unable to write link value to local heap");
@@ -2075,7 +2075,7 @@ H5G_get_objinfo (H5G_entry_t *loc, const char *name, hbool_t follow_link,
 		HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
 			       "unable to read symbolic link value");
 	    }
-	    statbuf->linklen = strlen(s)+1; /*count the null terminator*/
+	    statbuf->linklen = HDstrlen(s)+1; /*count the null terminator*/
 	    statbuf->objno[0] = statbuf->objno[1] = 0;
 	    statbuf->nlink = 0;
 	    statbuf->type = H5G_LINK;
@@ -2179,7 +2179,7 @@ H5G_linkval (H5G_entry_t *loc, const char *name, size_t size, char *buf/*out*/)
     
     /* Copy to output buffer */
     if (size>0 && buf) {
-	strncpy (buf, s, size);
+	HDstrncpy (buf, s, size);
     }
 
     FUNC_LEAVE (SUCCEED);
@@ -2270,8 +2270,8 @@ H5G_get_comment(H5G_entry_t *loc, const char *name, size_t bufsize, char *buf)
 	if (buf && bufsize>0) buf[0] = '\0';
 	retval = 0;
     } else {
-	strncpy(buf, comment.s, bufsize);
-	retval = (intn)strlen(comment.s);
+	HDstrncpy(buf, comment.s, bufsize);
+	retval = (intn)HDstrlen(comment.s);
 	H5O_reset(H5O_NAME, &comment);
     }
 

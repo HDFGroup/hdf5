@@ -359,7 +359,7 @@ int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmkfifo(S,M)           mkfifo(S,M)
 #define HDmktime(T)             mktime(T)
 #define HDmodf(X,Y)             modf(X,Y)
-/* open() variable arguments */
+#define HDopen(S,F,M)		open(S,F,M)
 #define HDopendir(S)            opendir(S)
 #define HDpathconf(S,N)         pathconf(S,N)
 #define HDpause()               pause()

@@ -46,14 +46,19 @@ while (<>) {
       # calls.
       next if $name =~ /^(if|for|return|sizeof|switch|while|void)$/;
 
+      # Ignore things that get misdetected because of the simplified
+      # parsing that takes place here.
+      next if $name =~ /^int$/;
+
       # These are really HDF5 functions/macros even though they don't
       # start with `h' or `H'.
       next if $name =~ /^FUNC_(ENTER|LEAVE)(_INIT)?$/;
       next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)$/;
-      next if $name =~ /^(MIN|MAX3?|NELMTS|BOUND|CONSTR)$/;
+      next if $name =~ /^(MIN3?|MAX3?|NELMTS|BOUND|CONSTR)$/;
+      next if $name =~ /^addr_defined$/;
 
       # These functions/macros are exempt.
-      next if $name =~ /^(assert|main|[fs]?printf)$/;
+      next if $name =~ /^(assert|main|[fs]?printf|va_(start|arg|end))$/;
 
       print "$ARGV:$.: $name\n";
    }

@@ -63,9 +63,56 @@ static char		RcsId[] = "@(#)$Revision$";
 #include <H5Eprivate.h>
 #include <H5MMprivate.h>
 
+/* Interface initialialization? */
 #define PABLO_MASK	H5I_mask
+static hbool_t interface_initialize_g = FALSE;
+#define INTERFACE_INIT H5I_init_interface
+static herr_t H5I_init_interface(void);
+
+/*
+ * Define the following macro for fast hash calculations (but limited
+ * hash sizes)
+ */
+#define HASH_SIZE_POWER_2
+
+/* Define the following macro for atom caching over all the atoms */
+#define IDS_ARE_CACHED
 
 /*-------------------- Locally scoped variables -----------------------------*/
+
+#ifdef IDS_ARE_CACHED
+#  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
+#endif
+
+/* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
+#define GROUP_BITS  8
+#define GROUP_MASK  0xFF
+
+/* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
+#define ID_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
+#define ID_MASK   0x0FFFFFFF
+
+/* Map an atom to a Group number */
+#define H5I_GROUP(a)    ((H5I_group_t)					      \
+			 ((((hid_t)(a))>>				      \
+			   ((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
+
+#ifdef HASH_SIZE_POWER_2
+/*
+ * Map an ID to a hash location (assumes s is a power of 2 and smaller
+ * than the ID_MASK constant).
+ */
+#  define H5I_LOC(a,s)	((hid_t)((size_t)(a)&((s)-1)))
+#else
+/*
+ * Map an ID to a hash location.
+ */
+#  define H5I_LOC(a,s)    (((hid_t)(a)&ID_MASK)%(s))
+#endif
+
+/* Combine a Group number and an atom index into an atom */
+#define H5I_MAKE(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
+                             ((hid_t)(i)&ID_MASK))
 
 #ifdef IDS_ARE_CACHED
 /* Array of pointers to ID groups */
@@ -78,11 +125,6 @@ static H5I_id_group_t *id_group_list[MAXGROUP];
 
 /* Pointer to the atom node free list */
 static H5I_id_info_t *id_free_list = NULL;
-
-/* Interface initialialization? */
-static hbool_t interface_initialize_g = FALSE;
-#define INTERFACE_INIT H5I_init_interface
-static herr_t H5I_init_interface(void);
 
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
@@ -261,7 +303,7 @@ H5I_destroy_group(H5I_group_t grp)
 	 * Remove atoms from the global atom cache.
 	 */
 	for (i=0; i<ID_CACHE_SIZE; i++) {
-	    if (ID_TO_GROUP(H5I_id_cache[i]) == grp) {
+	    if (H5I_GROUP(H5I_id_cache[i]) == grp) {
 		H5I_id_cache[i] = (-1);
 		H5I_obj_cache[i] = NULL;
 	    }
@@ -334,7 +376,7 @@ H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
 	HGOTO_DONE(FAIL);
 
     /* Create the struct & it's ID */
-    new_id = MAKE_ID(grp, grp_ptr->nextid);
+    new_id = H5I_MAKE(grp, grp_ptr->nextid);
     id_ptr->id = new_id;
     id_ptr->count = 1; /*initial reference count*/
     id_ptr->obj_ptr = object;
@@ -365,9 +407,9 @@ H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
 	
 	do {
 	    /* new ID to check for */
-	    hid_t next_id = MAKE_ID(grp, grp_ptr->nextid);
+	    hid_t next_id = H5I_MAKE(grp, grp_ptr->nextid);
 	    H5I_id_info_t *curr_id;   /* ptr to the current atom */
-	    hash_loc = ID_TO_LOC (grp_ptr->nextid, grp_ptr->hash_size);
+	    hash_loc = H5I_LOC (grp_ptr->nextid, grp_ptr->hash_size);
 
 	    curr_id = grp_ptr->id_list[hash_loc];
 	    if (curr_id == NULL) break; /* Ha! this is not likely... */
@@ -411,7 +453,7 @@ H5I_register(H5I_group_t grp,   /* IN: Group to register the object in */
 hid_t
 H5I_inc_ref(hid_t id)
 {
-    H5I_group_t		grp = ID_TO_GROUP(id); /* object's group	*/
+    H5I_group_t		grp = H5I_GROUP(id); /* object's group	*/
     H5I_id_group_t	*grp_ptr = NULL;	/* ptr to the ID group*/
     H5I_id_info_t		*id_ptr = NULL;	/* ptr to the new ID 	*/
     hid_t		ret_value = FAIL;
@@ -509,7 +551,7 @@ H5I_group(hid_t id)
 
     FUNC_ENTER(H5I_group, BADGROUP);
 
-    ret_value = ID_TO_GROUP(id);
+    ret_value = H5I_GROUP(id);
     if (ret_value <= BADGROUP || ret_value >= MAXGROUP) {
 	HGOTO_DONE(BADGROUP);
     }
@@ -545,14 +587,14 @@ H5I_remove(hid_t id)
 
     FUNC_ENTER(H5I_remove, NULL);
 
-    grp = ID_TO_GROUP(id);
+    grp = H5I_GROUP(id);
     if (grp <= BADGROUP || grp >= MAXGROUP) HGOTO_DONE(NULL);
 
     grp_ptr = id_group_list[grp];
     if (grp_ptr == NULL || grp_ptr->count <= 0) HGOTO_DONE(NULL);
 
     /* Get the location in which the ID is located */
-    hash_loc = (uintn) ID_TO_LOC(id, grp_ptr->hash_size);
+    hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
     curr_id = grp_ptr->id_list[hash_loc];
     if (curr_id == NULL) HGOTO_DONE(NULL);
 
@@ -622,7 +664,7 @@ H5I_remove(hid_t id)
 intn
 H5I_dec_ref(hid_t id)
 {
-    H5I_group_t		grp = ID_TO_GROUP(id); /* Group the object is in */
+    H5I_group_t		grp = H5I_GROUP(id); /* Group the object is in */
     H5I_id_group_t	*grp_ptr = NULL;     /* ptr to the group */
     H5I_id_info_t		*id_ptr = NULL;     /* ptr to the new ID */
     void *		obj;	    /* object to call 'free' function with */
@@ -728,7 +770,7 @@ H5I_find_id(hid_t id)
 
     FUNC_ENTER(H5I_find_id, NULL);
 
-    grp = ID_TO_GROUP(id);
+    grp = H5I_GROUP(id);
     if (grp <= BADGROUP || grp >= MAXGROUP)
 	HGOTO_DONE(NULL);
 
@@ -737,7 +779,7 @@ H5I_find_id(hid_t id)
 	HGOTO_DONE(NULL);
 
     /* Get the location in which the ID is located */
-    hash_loc = (uintn) ID_TO_LOC(id, grp_ptr->hash_size);
+    hash_loc = (uintn) H5I_LOC(id, grp_ptr->hash_size);
     id_ptr = grp_ptr->id_list[hash_loc];
     if (id_ptr == NULL)
 	HGOTO_DONE(NULL);

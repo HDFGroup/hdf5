@@ -923,7 +923,7 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 	    name = H5HL_peek (f, &(bt_udata->group->ent.cache.stab.heap_addr),
 			     name_off[i]);
 	    assert (name);
-	    n = strlen (name);
+	    n = HDstrlen (name);
 	    if (n+1>sizeof(buf)) {
 		if (NULL==(s = H5MM_malloc (n+1))) {
 		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
@@ -932,7 +932,7 @@ H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 	    } else {
 		s = buf;
 	    }
-	    strcpy (s, name);
+	    HDstrcpy (s, name);
 	    ret_value = (bt_udata->op)(bt_udata->group_id, s,
 				       bt_udata->op_data);
 	    if (s!=buf) H5MM_xfree (s);

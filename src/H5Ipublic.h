@@ -51,18 +51,6 @@ typedef enum {
 /* Type of atoms to return to users */
 typedef int hid_t;
 
-/* # of bits to use for Group ID in each atom (change if MAXGROUP>16) */
-#define GROUP_BITS  8
-#define GROUP_MASK  0xFF
-
-/* # of bits to use for the Atom index in each atom (assumes 8-bit bytes) */
-#define ID_BITS   ((sizeof(hid_t)*8)-GROUP_BITS)
-#define ID_MASK   0x0FFFFFFF
-
-/* Combine a Group number and an atom index into an atom */
-#define MAKE_ID(g,i)      ((((hid_t)(g)&GROUP_MASK)<<ID_BITS)|      \
-                             ((hid_t)(i)&ID_MASK))
-
 #ifdef __cplusplus
 extern "C" {
 #endif

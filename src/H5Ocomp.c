@@ -112,7 +112,7 @@ H5O_pline_decode(H5F_t __unused__ *f, const uint8 *p,
 	     * should be, but to be safe...)
 	     */
 	    pline->filter[i].name = H5MM_malloc(name_length+1);
-	    memcpy(pline->filter[i].name, p, name_length);
+	    HDmemcpy(pline->filter[i].name, p, name_length);
 	    pline->filter[i].name[name_length] = '\0';
 	    p += name_length;
 	}
@@ -199,7 +199,7 @@ H5O_pline_encode (H5F_t __unused__ *f, uint8 *p/*out*/, const void *mesg)
 	    (cls=H5Z_find(pline->filter[i].id))) {
 	    name = cls->name;
 	}
-	name_length = name ? strlen(name)+1 : 0;
+	name_length = name ? HDstrlen(name)+1 : 0;
 
 	/* Encode the filter */
 	UINT16ENCODE(p, pline->filter[i].id);
@@ -207,7 +207,7 @@ H5O_pline_encode (H5F_t __unused__ *f, uint8 *p/*out*/, const void *mesg)
 	UINT16ENCODE(p, pline->filter[i].flags);
 	UINT16ENCODE(p, pline->filter[i].cd_nelmts);
 	if (name_length>0) {
-	    memcpy(p, name, name_length);
+	    HDmemcpy(p, name, name_length);
 	    p += name_length;
 	    while (name_length++ % 8) *p++ = 0;
 	}
@@ -339,7 +339,7 @@ H5O_pline_size (H5F_t __unused__ *f, const void *mesg)
 	    (cls=H5Z_find(pline->filter[i].id))) {
 	    name = cls->name;
 	}
-	name_len = name ? strlen(name)+1 : 0;
+	name_len = name ? HDstrlen(name)+1 : 0;
 	
 
 	size += 2 +			/*filter identification number	*/

@@ -97,3 +97,15 @@ Information for HDF5 maintainers:
 
   which limits the number of children to two (this doesn't work at the
   top level because the `-j2' is not passed to recursive makes).
+
+* To create a release tarball go to the top-level directory and run
+  ./bin/release.  You can optionally supply one or more of the words
+  `tar', `gzip', `bzip2' or `compress' on the command line.  The
+  result will be a (compressed) tar file(s) in the `releases'
+  directory.  The README file is updated to contain the release date
+  and version number.
+
+* To create a tarball of all the files which are part of HDF5 go to
+  the top-level directory and type:
+
+      tar cvf foo.tar `grep '^\.' MANIFEST |unexpand |cut -f1`

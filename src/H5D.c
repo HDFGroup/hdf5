@@ -978,7 +978,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     if (efl->nused>0) {
 	size_t heap_size = H5HL_ALIGN (1);
 	for (i=0; i<efl->nused; i++) {
-	    heap_size += H5HL_ALIGN (strlen (efl->slot[i].name)+1);
+	    heap_size += H5HL_ALIGN (HDstrlen (efl->slot[i].name)+1);
 	}
 	if (H5HL_create (f, heap_size, &(efl->heap_addr))<0 ||
 	    (size_t)(-1)==H5HL_insert (f, &(efl->heap_addr), 1, "")) {

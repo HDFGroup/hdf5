@@ -83,8 +83,8 @@ hid_t H5Fcreate (const char *filename, unsigned flags, hid_t create_plist,
 hid_t H5Fopen (const char *filename, unsigned flags, hid_t access_plist);
 herr_t H5Fflush(hid_t object_id);
 herr_t H5Fclose (hid_t file_id);
-hid_t H5Fget_create_template (hid_t file_id);
-hid_t H5Fget_access_template (hid_t file_id);
+hid_t H5Fget_create_plist (hid_t file_id);
+hid_t H5Fget_access_plist (hid_t file_id);
 
 #ifdef __cplusplus
 }

@@ -7,8 +7,9 @@ Release information for hdf5-1.0.23a
 * The compression API has been replaced with a more general filter
   API.  See doc/html/Filters.html for details.
 
-* Alpha-quality 2d ragged arrays, a layer built on top of other hdf5
-  objects.  The API and storage format will almost certainly change.
+* Alpha-quality 2d ragged arrays are implemented as a layer built on
+  top of other hdf5 objects.  The API and storage format will almost
+  certainly change.
 
 * More debugging support including API tracing.  See Debugging.html.
 
@@ -137,8 +138,8 @@ Library
    H5open		- initialize library (happens automatically)
    H5close		- shut down the library (happens automatically)
    H5dont_atexit	- don't call H5close on exit
-   H5version		- retrieve library version info
-   H5version_check	- check for specific library version
+   H5get_libversion	- retrieve library version info
+   H5check_version	- check for specific library version
 
 Property Lists
    H5Pclose		- release template resources
@@ -180,10 +181,10 @@ Property Lists
    H5Pset_buffer	- set raw-data I/O pipe buffer properties
    H5Pget_preserve	- get type conversion preservation properties
    H5Pset_preserve	- set type conversion preservation properties
-   H5Pget_compression	- get raw data compression properties
-   H5Pset_compression	- set raw data compression properties
-   H5Pget_deflate	- get deflate compression properties
-   H5Pset_deflate	- set deflate compression properties
+   H5Pget_nfilters	- get number of raw data filters
+   H5Pget_filter	- get raw data filter properties
+   H5Pset_filter	- set raw data filter properties
+   H5Pset_deflate	- set deflate compression filter properties
    H5Pget_mpi		- get MPI-IO properties
    H5Pset_mpi		- set MPI-IO properties
    H5Pget_xfer		- get data transfer properties
@@ -201,64 +202,74 @@ Datasets
    H5Dextend		- extend a dataset
 
 Attributes
-   H5Acreate	- create a new attribute
-   H5Aopen_name	- open an attribute by name
-   H5Aopen_idx	- open an attribute by number
+   H5Acreate		- create a new attribute
+   H5Aopen_name		- open an attribute by name
+   H5Aopen_idx		- open an attribute by number
    H5Awrite		- write values into an attribute
    H5Aread		- read values from an attribute
-   H5Aget_space	- get attribute data space
-   H5Aget_type	- get attribute data type
-   H5Aget_name	- get attribute name
-   H5Anum_attrs	- return the number of attributes for an object
-   H5Aiterate	- iterate over an object's attributes
-   H5Adelete	- delete an attribute
+   H5Aget_space		- get attribute data space
+   H5Aget_type		- get attribute data type
+   H5Aget_name		- get attribute name
+   H5Anum_attrs		- return the number of attributes for an object
+   H5Aiterate		- iterate over an object's attributes
+   H5Adelete		- delete an attribute
    H5Aclose		- close an attribute
 
 Errors
    H5Eclear		- clear the error stack
    H5Eprint		- print an error stack
-   H5Eget_auto	- get automatic error reporting settings
-   H5Eset_auto	- set automatic error reporting
+   H5Eget_auto		- get automatic error reporting settings
+   H5Eset_auto		- set automatic error reporting
    H5Ewalk		- iterate over the error stack
-   H5Ewalk_cb	- the default error stack iterator function
-   H5Eget_major	- get the message for the major error number
-   H5Eget_minor	- get the message for the minor error number
+   H5Ewalk_cb		- the default error stack iterator function
+   H5Eget_major		- get the message for the major error number
+   H5Eget_minor		- get the message for the minor error number
 
 Files
-   H5Fclose		    - close a file and release resources
+   H5Fclose		- close a file and release resources
    H5Fcreate		- create a new file
-   H5Fget_create_template- get file creation property list
-   H5Fget_access_template- get file access property list
+   H5Fget_create_plist	- get file creation property list
+   H5Fget_access_plist	- get file access property list
    H5Fis_hdf5		- determine if a file is an hdf5 file
-   H5Fopen		    - open an existing file
+   H5Fopen		- open an existing file
 
 Groups
    H5Gclose		- close a group and release resources
-   H5Gcreate    - create a new group
+   H5Gcreate    	- create a new group
    H5Gopen		- open an existing group
    H5Gpop		- pop a group from the cwg stack
    H5Gpush		- push a group onto the cwg stack
    H5Gset		- set the current working group (cwg)
-   H5Giterate   - iterate over the contents of a group
+   H5Giterate   	- iterate over the contents of a group
    H5Gmove		- change the name of some object
    H5Glink		- create a hard or soft link to an object
-   H5Gunlink    - break the link between a name and an object
-   H5Gstat		- get information about a group entry
+   H5Gunlink    	- break the link between a name and an object
+   H5Gget_objinfo	- get information about a group entry
    H5Gget_linkval	- get the value of a soft link
+   H5Gget_comment	- get the comment string for an object
+   H5Gset_comment	- set the comment string for an object
 
 Dataspaces
-   H5Sclose		        - release dataspace
-   H5Screate	        - create a new dataspace
-   H5Screate_simple	    - create a new simple dataspace
-   H5Sextent_dims		- get dataspace size
+   H5Screate	        - create a new data space
+   H5Scopy		- copy a data space
+   H5Sclose		- release data space
+   H5Screate_simple	- create a new simple data space
+   H5Sset_space		- set simple data space extents
+   H5Sis_simple		- determine if data space is simple
+   H5Sset_extent_simple	- set simple data space dimensionality and size
+   H5Sget_simple_extent_npoints	- get number of points in simple extent
+   H5Sget_simple_extent_ndims - get simple data space dimensionality
+   H5Sget_simple_extent_dims - get simple data space size
+   H5Sget_simple_extent_type - get type of simple extent
+   H5Sset_extent_none	- reset extent to be empty
+   H5Sextent_copy	- copy the extent from one data space to another
+   H5Sget_select_npoints - get number of points selected for I/O
    H5Sselect_hyperslab	- set hyperslab dataspace selection
    H5Sselect_elements   - set element sequence dataspace selection
-   H5Sextent_ndims		- get dataspace dimensionality
-   H5Sextent_npoints	- get number of points in extent of dataspace
-   H5Sselect_npoints	- get number of selected points in dataspace
-   H5Sis_simple		    - determine if dataspace is simple
-   H5Sset_extent_simple	- set simple dataspace dimensionality and size
-   H5Scopy		        - copy a dataspace
+   H5Sselect_all	- select entire extent for I/O
+   H5Sselect_none	- deselect all elements of extent
+   H5Soffset_simple	- set selection offset
+   H5Sselect_valid	- determine if selection is valid for extent
 
 Datatypes
    H5Tclose		- release data type resources
@@ -268,8 +279,14 @@ Datatypes
    H5Tcopy		- copy a data type
    H5Tcreate		- create a new data type
    H5Tequal		- compare two data types
+   H5Tlock		- lock type to prevent changes
    H5Tfind		- find a data type conversion function
    H5Tconvert		- convert data from one type to another
+   H5Tregister_hard	- register specific type conversion function
+   H5Tregister_soft	- register general type conversion function
+   H5Tunregister	- remove a type conversion function
+   H5Tget_overflow	- get function that handles overflow conv. cases
+   H5Tset_overflow	- set function to handle overflow conversion cases
    H5Tget_class		- get data type class
    H5Tget_cset		- get character set
    H5Tget_ebias		- get exponent bias
@@ -288,11 +305,9 @@ Datatypes
    H5Tget_sign		- get integer sign type
    H5Tget_size		- get size in bytes
    H5Tget_strpad	- get string padding
-   H5Tinsert		- insert struct member
-   H5Tlock		- lock type to prevent changes
+   H5Tinsert		- insert scalar struct member
+   H5Tinsert_array	- insert array struct member
    H5Tpack		- pack struct members
-   H5Tregister_hard	- register specific type conversion function
-   H5Tregister_soft	- register general type conversion function
    H5Tset_cset		- set character set
    H5Tset_ebias		- set exponent bias
    H5Tset_fields	- set floating point fields
@@ -305,10 +320,16 @@ Datatypes
    H5Tset_sign		- set integer sign type
    H5Tset_size		- set size in bytes
    H5Tset_strpad	- set string padding
-   H5Tunregister	- remove a type conversion function
 
-Compression
-   H5Tregister		- register a new compression method
+Filters
+   H5Tregister		- register a new filter method
+
+Ragged Arrays (alpha)
+   H5Rcreate		- create a new ragged array
+   H5Ropen		- open an existing array
+   H5Rclose		- close a ragged array
+   H5Rwrite		- write to an array
+   H5Rread		- read from an array
 
 This release has been tested on UNIX platforms only; specifically:
 Linux, FreedBSD, IRIX, Solaris & Dec UNIX.
@@ -317,24 +338,24 @@ Linux, FreedBSD, IRIX, Solaris & Dec UNIX.
 Release information for parallel HDF5
 -------------------------------------
 
-+) Current release supports independent access to fixed dimension datasets
-   only.
+* Current release supports independent access to fixed dimension datasets
+  only.
 
-+) The comm and info arguments of H5Cset_mpi are not used.  All parallel
-   I/O are done via MPI_COMM_WORLD.  Access_mode for H5Cset_mpi can be
-   H5ACC_INDEPENDENT only.
+* The comm and info arguments of H5Cset_mpi are not used.  All parallel
+  I/O are done via MPI_COMM_WORLD.  Access_mode for H5Cset_mpi can be
+  H5ACC_INDEPENDENT only.
 
-+) This release of parallel HDF5 has been tested on IBM SP2 and SGI
-   Origin 2000 systems.  It uses the ROMIO version of MPIO interface
-   for parallel I/O supports.
+* This release of parallel HDF5 has been tested on IBM SP2 and SGI
+  Origin 2000 systems.  It uses the ROMIO version of MPIO interface
+  for parallel I/O supports.
 
-+) Useful URL's.
-   Parallel HDF webpage: "http://hdf.ncsa.uiuc.edu/Parallel_HDF/"
-   ROMIO webpage: "http://www.mcs.anl.gov/home/thakur/romio/"
+* Useful URL's.
+  Parallel HDF webpage: "http://hdf.ncsa.uiuc.edu/Parallel_HDF/"
+  ROMIO webpage: "http://www.mcs.anl.gov/home/thakur/romio/"
 
-+) Some to-do items for future releases
-      support for Intel Teraflop platform.
-      support for unlimited dimension datasets.
-      support for file access via a communicator besides MPI_COMM_WORLD.
-      support for collective access to datasets.
-      support for independent create/open of datasets.
+* Some to-do items for future releases
+     support for Intel Teraflop platform.
+     support for unlimited dimension datasets.
+     support for file access via a communicator besides MPI_COMM_WORLD.
+     support for collective access to datasets.
+     support for independent create/open of datasets.

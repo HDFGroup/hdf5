@@ -105,8 +105,8 @@ test_file_create(void)
     VERIFY(fid2, FAIL, "H5Fcreate");
 
     /* Get the file-creation template */
-    tmpl1 = H5Fget_create_template(fid1);
-    CHECK(tmpl1, FAIL, "H5Fget_create_template");
+    tmpl1 = H5Fget_create_plist(fid1);
+    CHECK(tmpl1, FAIL, "H5Fget_create_plist");
 
     /* Get the file-creation parameters */
     ret = H5Pget_userblock(tmpl1, &ublock);
@@ -159,8 +159,8 @@ test_file_create(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Get the file-creation template */
-    tmpl1 = H5Fget_create_template(fid2);
-    CHECK(tmpl1, FAIL, "H5Fget_create_template");
+    tmpl1 = H5Fget_create_plist(fid2);
+    CHECK(tmpl1, FAIL, "H5Fget_create_plist");
 
     /* Get the file-creation parameters */
     ret = H5Pget_userblock(tmpl1, &ublock);
@@ -201,8 +201,8 @@ test_file_create(void)
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Get the file-creation template */
-    tmpl1 = H5Fget_create_template(fid3);
-    CHECK(tmpl1, FAIL, "H5Fget_create_template");
+    tmpl1 = H5Fget_create_plist(fid3);
+    CHECK(tmpl1, FAIL, "H5Fget_create_plist");
 
     /* Get the file-creation parameters */
     ret = H5Pget_userblock(tmpl1, &ublock);
@@ -260,8 +260,8 @@ test_file_open(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Get the file-creation template */
-    tmpl1 = H5Fget_create_template(fid1);
-    CHECK(tmpl1, FAIL, "H5Fget_create_template");
+    tmpl1 = H5Fget_create_plist(fid1);
+    CHECK(tmpl1, FAIL, "H5Fget_create_plist");
 
     /* Get the file-creation parameters */
     ret = H5Pget_userblock(tmpl1, &ublock);

@@ -76,11 +76,11 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
     assert (!sh);
 
     /* Initialize time zone information */
-    if (0==ncalls++) tzset();
+    if (0==ncalls++) HDtzset();
 
     /* decode */
     for (i=0; i<14; i++) {
-	if (!isdigit(p[i])) {
+	if (!HDisdigit(p[i])) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
 			  "badly formatted modification time message");
 	}
@@ -92,7 +92,7 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
      * and then figure out the adjustment based on the local time zone and
      * daylight savings setting.
      */
-    memset(&tm, 0, sizeof tm);
+    HDmemset(&tm, 0, sizeof tm);
     tm.tm_year = (p[0]-'0')*1000 + (p[1]-'0')*100 +
 		 (p[2]-'0')*10 + (p[3]-'0') - 1900;
     tm.tm_mon = (p[4]-'0')*10 + (p[5]-'0') - 1;
@@ -101,7 +101,7 @@ H5O_mtime_decode(H5F_t __unused__ *f, const uint8 *p,
     tm.tm_min = (p[10]-'0')*10 + (p[11]-'0');
     tm.tm_sec = (p[12]-'0')*10 + (p[13]-'0');
     tm.tm_isdst = -1; /*figure it out*/
-    if ((time_t)-1==(the_time=mktime(&tm))) {
+    if ((time_t)-1==(the_time=HDmktime(&tm))) {
 	HRETURN_ERROR(H5E_OHDR, H5E_CANTINIT, NULL,
 		      "badly formatted modification time message");
     }
@@ -188,7 +188,7 @@ H5O_mtime_encode(H5F_t __unused__ *f, uint8 *p, const void *_mesg)
     assert(mesg);
 
     /* encode */
-    tm = gmtime(mesg);
+    tm = HDgmtime(mesg);
     sprintf((char*)p, "%04d%02d%02d%02d%02d%02d",
 	    1900+tm->tm_year, 1+tm->tm_mon, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
@@ -304,10 +304,10 @@ H5O_mtime_debug(H5F_t __unused__ *f, const void *_mesg, FILE *stream,
     assert(fwidth >= 0);
 
     /* debug */
-    tm = localtime(mesg);
+    tm = HDlocaltime(mesg);
 
     
-    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Time:", buf);
 

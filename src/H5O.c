@@ -1290,7 +1290,7 @@ static herr_t
 H5O_touch_oh(H5F_t *f, H5O_t *oh, hbool_t force)
 {
     intn	idx;
-    time_t	now = time(NULL);
+    time_t	now = HDtime(NULL);
     size_t	size;
     
     FUNC_ENTER(H5O_touch_oh, FAIL);

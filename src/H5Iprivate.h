@@ -24,40 +24,6 @@
 /* Private headers needed by this file */
 #include <H5private.h>
 
-/* ID Feature controls */
-
-/*
- * Define the following macro for fast hash calculations (but limited
- * hash sizes)
- */
-#define HASH_SIZE_POWER_2
-
-/* Define the following macro for atom caching over all the atoms */
-#define IDS_ARE_CACHED
-
-#ifdef IDS_ARE_CACHED
-#  define ID_CACHE_SIZE 4             /*# of previous atoms cached         */
-#endif
-
-/* Map an atom to a Group number */
-#define ID_TO_GROUP(a)    ((H5I_group_t)((((hid_t)(a))>>			     \
-					((sizeof(hid_t)*8)-GROUP_BITS))&GROUP_MASK))
-
-#ifdef HASH_SIZE_POWER_2
-
-/*
- * Map an ID to a hash location (assumes s is a power of 2 and smaller
- * than the ID_MASK constant).
- */
-#  define ID_TO_LOC(a,s)	((hid_t)((size_t)(a)&((s)-1)))
-#else
-
-/*
- * Map an ID to a hash location.
- */
-#  define ID_TO_LOC(a,s)    (((hid_t)(a)&ID_MASK)%(s))
-#endif
-
 /* Default sizes of the hash-tables for various atom groups */
 #define H5I_ERRSTACK_HASHSIZE   	64
 #define H5I_FILEID_HASHSIZE     	64

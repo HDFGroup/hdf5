@@ -19,33 +19,33 @@ HDF5 Draft API Specification
     <li><a href="#File-Open">H5Fopen</a>
     <li><a href="#File-Create">H5Fcreate</a>
     <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
-    <li><a href="#File-GetCreateTemplate">H5Fget_create_template</a>
+    <li><a href="#File-GetCreatePlist">H5Fget_create_plist</a>
     <li><a href="#File-Close">H5Fclose</a>
 </ol>
 
-<li><a href="#Template">Template</a> - H5P&lt;name&gt; - API for manipulating object templates
+<li><a href="#Plist">Property list</a> - H5P&lt;name&gt; - API for manipulating object property lists
 <ol type=A>
-    <li><a href="#Template-Create">H5Pcreate</a>
-    <li><a href="#Template-GetClass">H5Pget_class</a>
-    <li><a href="#Template-Copy">H5Pcopy</a>
-    <li><a href="#Template-Close">H5Pclose</a>
-    <li><a href="#Template-GetVersion">H5Pget_version</a>
-    <li><a href="#Template-SetUserblock">H5Pset_userblock</a>
-    <li><a href="#Template-GetUserblock">H5Pget_userblock</a>
-    <li><a href="#Template-SetSizes">H5Pset_sizes</a>
-    <li><a href="#Template-GetSizes">H5Pget_sizes</a>
-    <li><a href="#Template-SetMPI">H5Pset_mpi</a>
-    <li><a href="#Template-GetMPI">H5Pget_mpi</a>
-    <li><a href="#Template-SetXfer">H5Pset_xfer</a>
-    <li><a href="#Template-GetXfer">H5Pget_xfer</a>
-    <li><a href="#Template-SetSymK">H5Pset_sym_k</a>
-    <li><a href="#Template-GetSymK">H5Pget_sym_k</a>
-    <li><a href="#Template-SetIstoreK">H5Pset_istore_k</a>
-    <li><a href="#Template-GetIstoreK">H5Pget_istore_k</a>
-    <li><a href="#Template-SetLayout">H5Pset_layout</a>
-    <li><a href="#Template-GetLayout">H5Pget_layout</a>
-    <li><a href="#Template-SetChunk">H5Pset_chunk</a>
-    <li><a href="#Template-GetChunk">H5Pget_chunk</a>
+    <li><a href="#Plist-Create">H5Pcreate</a>
+    <li><a href="#Plist-GetClass">H5Pget_class</a>
+    <li><a href="#Plist-Copy">H5Pcopy</a>
+    <li><a href="#Plist-Close">H5Pclose</a>
+    <li><a href="#Plist-GetVersion">H5Pget_version</a>
+    <li><a href="#Plist-SetUserblock">H5Pset_userblock</a>
+    <li><a href="#Plist-GetUserblock">H5Pget_userblock</a>
+    <li><a href="#Plist-SetSizes">H5Pset_sizes</a>
+    <li><a href="#Plist-GetSizes">H5Pget_sizes</a>
+    <li><a href="#Plist-SetMPI">H5Pset_mpi</a>
+    <li><a href="#Plist-GetMPI">H5Pget_mpi</a>
+    <li><a href="#Plist-SetXfer">H5Pset_xfer</a>
+    <li><a href="#Plist-GetXfer">H5Pget_xfer</a>
+    <li><a href="#Plist-SetSymK">H5Pset_sym_k</a>
+    <li><a href="#Plist-GetSymK">H5Pget_sym_k</a>
+    <li><a href="#Plist-SetIstoreK">H5Pset_istore_k</a>
+    <li><a href="#Plist-GetIstoreK">H5Pget_istore_k</a>
+    <li><a href="#Plist-SetLayout">H5Pset_layout</a>
+    <li><a href="#Plist-GetLayout">H5Pget_layout</a>
+    <li><a href="#Plist-SetChunk">H5Pset_chunk</a>
+    <li><a href="#Plist-GetChunk">H5Pget_chunk</a>
 </ol>
 
 <!--
@@ -253,19 +253,20 @@ documented below.
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
             <em>uintn</em> <code>flags</code>,
-            <em>hid_t</em> <code>access_template</code>
+            <em>hid_t</em> <code>access_plist</code>
         )
 <dt><strong>Description:</strong>
         <dd>This is the primary function for opening existing HDF5 files.
-            The <code>flags</code> parameter determines the file access mode.
-            There is no read flag, all open files are implicitily opened for
-            read access.
-            All flags may be combined with the '|' (boolean OR operator) to
-            change the behavior of the file open call.
-            The <code>access_template</code> parameter is a template containing
-            additional information required for specific methods of access,
-            parallel I/O for example.  The paramters for access templates are
-            described in the H5P API documentation.
+            The <code>flags</code> parameter determines the file
+            access mode.  There is no read flag, all open files are
+            implicitily opened for read access.  All flags may be
+            combined with the '|' (boolean OR operator) to change the
+            behavior of the file open call.  The
+            <code>access_plist</code> parameter is a property list
+            containing additional information required for specific
+            methods of access, parallel I/O for example.  The
+            paramters for access property lists are described in the
+            H5P API documentation.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>const char *</em><code>name</code>
@@ -276,11 +277,11 @@ documented below.
                     <dt>H5F_ACC_RDWR
                         <dd>Allow read and write access to file.
                 </dl></ul>
-        <dt><em>hid_t</em><code>access_template</code>
-            <dd>Template indicating the file access properties.
+        <dt><em>hid_t</em><code>access_plist</code>
+            <dd>Property list indicating the file access properties.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
-                access_template.  Use 0 for default access template.
+                access_plist.  Use 0 for default access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>An ID (of type <em>hid_t</em>) for the file upon success,
@@ -293,22 +294,23 @@ documented below.
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Fcreate</code>(<em>const char *</em><code>name</code>,
             <em>uintn</em> <code>flags</code>,
-            <em>hid_t</em> <code>create_template</code>,
-            <em>hid_t</em> <code>access_template</code>
+            <em>hid_t</em> <code>create_plist</code>,
+            <em>hid_t</em> <code>access_plist</code>
         )
 <dt><strong>Description:</strong>
         <dd>This is the primary function for opening and creating HDF5 files.
-            The <code>flags</code> parameter determines whether an existing
-            file will be overwritten or not.  All newly created files are opened
-            for both reading and writing.
-            All flags may be combined with the '|' (boolean OR operator) to
-            change the behavior of the file open call.
-            The <code>create_template</code> and <code>access_template</code>
-            parameters are templates containing additional information required
-            for specific methods of access or particular aspects of the file
-            to set when creating a file.
-            The parameters for creation and access templates are
-            described in the H5P API documentation.
+            The <code>flags</code> parameter determines whether an
+            existing file will be overwritten or not.  All newly
+            created files are opened for both reading and writing.
+            All flags may be combined with the '|' (boolean OR
+            operator) to change the behavior of the file open call.
+            The <code>create_plist</code> and
+            <code>access_plist</code> parameters are property lists
+            containing additional information required for specific
+            methods of access or particular aspects of the file to set
+            when creating a file.  The parameters for creation and
+            access property lists are described in the H5P API
+            documentation.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>const char *</em><code>name</code>
@@ -321,13 +323,14 @@ documented below.
                             be truncated, erasing all data previously stored in
                             the file.
                 </dl></ul>
-        <dt><em>hid_t</em><code>create_template</code>
-            <dd>File creation template ID, used when modifying default file meta-data
-        <dt><em>hid_t</em><code>access_template</code>
-            <dd>Template indicating the file access properties.
+        <dt><em>hid_t</em><code>create_plist</code>
+            <dd>File creation property list ID, used when modifying
+                default file meta-data.
+        <dt><em>hid_t</em><code>access_plist</code>
+            <dd>Property list indicating the file access properties.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
-                access_template.  Use 0 for default access template.
+                access_plist.  Use 0 for default access properties.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>An ID (of type <em>hid_t</em>) for the file upon success,
@@ -353,18 +356,18 @@ documented below.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="File-GetCreateTemplate">H5Fget_create_template</a>
+<dt><strong>Name:</strong> <a name="File-GetCreatePlist">H5Fget_create_plist</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Fget_create_template</code>(<em>hid_t</em> <code>file_id</code>
+    <dd><em>hid_t </em><code>H5Fget_create_plist</code>(<em>hid_t</em> <code>file_id</code>
         )
 <dt><strong>Description:</strong>
-        <dd>This function returns an template ID with a copy of the parameters
-            used to create this file.  Useful for duplicating the parameters
-            when creating another file.
+        <dd>This function returns a property list ID with a copy of
+            the parameters used to create this file.  Useful for
+            duplicating the parameters when creating another file.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
-            <dd>File ID to get creation template of
+            <dd>File ID for which to get creation property list.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>zero/negative
@@ -390,24 +393,24 @@ documented below.
 </dl>
 
 <hr>
-<h2><a name="Template">Template API Functions</a></h2>
-<P>These functions manipulate template objects to allow objects which require
+<h2><a name="Plist">Property List API Functions</a></h2>
+<P>These functions manipulate property lists to allow objects which require
 many different parameters to be easily manipulated.
 <br>
 <br>
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-Create">H5Pcreate</a>
+<dt><strong>Name:</strong> <a name="Plist-Create">H5Pcreate</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t </em><code>H5Pcreate</code>(<em>H5P_class_t</em> <code>type</code>
         )
 <dt><strong>Description:</strong>
-        <dd>This function returns a template ID for a copy of the default
-            template of a given type.
+        <dd>This function returns a property list ID for a copy of the default
+            property list of a given type.
             <br>
     <dl>
-        <dt>Template Types and Uses:
+        <dt>Property List Types and Uses:
             <ul><dl>
                 <dt>H5P_FILE_CREATE
                     <dd>Used to set the metadata information about a file during
@@ -425,7 +428,7 @@ many different parameters to be easily manipulated.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>H5P_class_t</em> <code>type</code>
-            <dd>The type of template to create.
+            <dd>The type of property list to create.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Valid ID on success, negative on failure
@@ -433,16 +436,16 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-Close">H5Pclose</a>
+<dt><strong>Name:</strong> <a name="Plist-Close">H5Pclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pclose</code>(<em>hid_t</em> <code>template_id</code>
+    <dd><em>herr_t </em><code>H5Pclose</code>(<em>hid_t</em> <code>plist_id</code>
         )
 <dt><strong>Description:</strong>
-        <dd>This function terminates access to a template.
+        <dd>This function terminates access to a property list.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to terminate access to.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to terminate access to.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>zero/negative
@@ -450,43 +453,43 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetClass">H5Pget_class</a>
+<dt><strong>Name:</strong> <a name="Plist-GetClass">H5Pget_class</a>
 <dt><strong>Signature:</strong>
-    <dd><em>H5P_class_t </em><code>H5Pget_class</code>(<em>hid_t</em> <code>template_id</code>
+    <dd><em>H5P_class_t </em><code>H5Pget_class</code>(<em>hid_t</em> <code>plist_id</code>
         )
 <dt><strong>Description:</strong>
-        <dd>This function queries the class of a template ID.
+        <dd>This function queries the class of a property list ID.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Template class code on success, negative on failure
+    <dd>Property list class code on success, negative on failure
 </dl>
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-Copy">H5Pcopy</a>
+<dt><strong>Name:</strong> <a name="Plist-Copy">H5Pcopy</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Pcopy</code>(<em>hid_t</em> <code>template_id</code>
+    <dd><em>hid_t </em><code>H5Pcopy</code>(<em>hid_t</em> <code>plist_id</code>
         )
 <dt><strong>Description:</strong>
-        <dd>This function makes a copy of a template ID.
+        <dd>This function makes a copy of a property list ID.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to duplicate.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to duplicate.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Template ID on success, negative on failure
+    <dd>Property list ID on success, negative on failure
 </dl>
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetVersion">H5Pget_version</a>
+<dt><strong>Name:</strong> <a name="Plist-GetVersion">H5Pget_version</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>int *</em> <code>boot</code>,
             <em>int *</em> <code>freelist</code>,
             <em>int *</em> <code>stab</code>,
@@ -494,12 +497,12 @@ many different parameters to be easily manipulated.
         )
 <dt><strong>Description:</strong>
         <dd>This function queries the version information of various objects
-            for a file creation template.  Any pointer parameters which are
-            passed as NULL are not queried.
+            for a file creation property list.  Any pointer parameters
+            which are passed as NULL are not queried.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>int *</em> <code>boot</code>
             <dd>Pointer to location to return boot block version number.
         <dt><em>int *</em> <code>freelist</code>
@@ -515,21 +518,21 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetUserblock">H5Pset_userblock</a>
+<dt><strong>Name:</strong> <a name="Plist-SetUserblock">H5Pset_userblock</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_userblock</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_userblock</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>hsize_t</em> <code>size</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the size of the user-block located at the 
             beginning of an HDF5 file.  This function is only valid for
-            file creation templates.  The default user-block size is 0.
+            file creation property lists.  The default user-block size is 0.
             Only values which are powers of 2 larger equal to 512 or larger
             may be used as a valid user-block size.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template to modify.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list to modify.
         <dt><em>hsize_t</em> <code>size</code>
             <dd>Size of the user-block in bytes.
     </dl>
@@ -539,19 +542,19 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetUserblock">H5Pget_userblock</a>
+<dt><strong>Name:</strong> <a name="Plist-GetUserblock">H5Pget_userblock</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_userblock</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_userblock</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>hsize_t *</em> <code>size</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function retrieves the size of the user-block located at the 
             beginning of an HDF5 file.  This function is only valid for
-            file creation templates.
+            file creation property lists.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>hsize_t *</em> <code>size</code>
             <dd>Pointer to location to return user-block size.
     </dl>
@@ -561,23 +564,23 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetSizes">H5Pset_sizes</a>
+<dt><strong>Name:</strong> <a name="Plist-SetSizes">H5Pset_sizes</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_sizes</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_sizes</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t</em> <code>sizeof_addr</code>,
             <em>size_t</em> <code>sizeof_size</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the byte size of the offsets and lengths used to
-            address objects in an HDF5 file.  This function is only valid for
-            file creation templates.  Passing in a value of 0 for one of the
-            sizeof parameters retains the current value.  The default value
-            for both values is 4 bytes.  Valid values currenly are 2, 4, 8 and
-            16.
+            address objects in an HDF5 file.  This function is only
+            valid for file creation property lists.  Passing in a
+            value of 0 for one of the sizeof parameters retains the
+            current value.  The default value for both values is 4
+            bytes.  Valid values currenly are 2, 4, 8 and 16.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template to modify.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list to modify.
         <dt><em>size_t</em> <code>sizeof_addr</code>
             <dd>Size of an object offset in bytes.
         <dt><em>size_t</em> <code>sizeof_size</code>
@@ -589,20 +592,20 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetSizes">H5Pget_sizes</a>
+<dt><strong>Name:</strong> <a name="Plist-GetSizes">H5Pget_sizes</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_sizes</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_sizes</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t *</em> <code>sizeof_addr</code>,
             <em>size_t *</em> <code>sizeof_size</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function retrieves the size of the offsets and lengths used
             in an HDF5 file.  This function is only valid for file creation
-            templates.
+            property lists.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>size_t *</em> <code>size</code>
             <dd>Pointer to location to return offset size in bytes.
         <dt><em>size_t *</em> <code>size</code>
@@ -614,7 +617,7 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetMPI">H5Pset_mpi</a>
+<dt><strong>Name:</strong> <a name="Plist-SetMPI">H5Pset_mpi</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_mpi</code>(<em>hid_t</em> <code>tid</code>,
             <em>MPI_Comm</em> <code>comm</code>,
@@ -622,29 +625,29 @@ many different parameters to be easily manipulated.
         )
 <dt><strong>Description:</strong>
         <dd>Store the access mode for parallel I/O call and the user supplied
-	    communicator and info in the access template which can then
+	    communicator and info in the access property list which can then
 	    be used to open file.  This function is available only in the
             parallel HDF5 library.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>tid</code>
-            <dd>ID of template to modify
+            <dd>ID of property list to modify
         <dt><em>MPI_Comm</em> <code>comm</code>
             <dd>
       	    MPI communicator to be used for file open as defined in
                   MPI_FILE_OPEN of MPI-2.  This function  does not make a
                   duplicated communicator. Any modification to comm after
                   this function call returns may have undetermined effect
-                  to the access template.  Users should call this function
-                  again to setup the template.
+                  to the access property list.  Users should call this function
+                  again to setup the property list.
         <dt><em>MPI_Info</em> <code>info</code>
             <dd>
       	    MPI info object to be used for file open as defined in
                   MPI_FILE_OPEN of MPI-2.  This function  does not make a
                   duplicated info. Any modification to info after
                   this function call returns may have undetermined effect
-                  to the access template.  Users should call this function
-                  again to setup the template.
+                  to the access property list.  Users should call this function
+                  again to setup the property list.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>zero/negative
@@ -652,7 +655,7 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetMPI">H5Pget_mpi</a>
+<dt><strong>Name:</strong> <a name="Plist-GetMPI">H5Pget_mpi</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_mpi</code>(<em>hid_t</em> <code>tid</code>,
             <em>MPI_Comm</em> <code>*comm</code>,
@@ -678,7 +681,7 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetXfer">H5Pset_xfer</a>
+<dt><strong>Name:</strong> <a name="Plist-SetXfer">H5Pset_xfer</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pset_xfer</code>(<em>hid_t</em> <code>tid</code>,
             <em>H5D_transfer_t</em> <code>data_xfer_mode</code>
@@ -707,7 +710,7 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetXfer">H5Pget_xfer</a>
+<dt><strong>Name:</strong> <a name="Plist-GetXfer">H5Pget_xfer</a>
 <dt><strong>Signature:</strong>
     <dd><em>herr_t </em><code>H5Pget_xfer</code>(<em>hid_t</em> <code>tid</code>,
             <em>H5D_transfer_t *</em> <code>data_xfer_mode</code>
@@ -729,31 +732,32 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetSymK">H5Pset_sym_k</a>
+<dt><strong>Name:</strong> <a name="Plist-SetSymK">H5Pset_sym_k</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_sym_k</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_sym_k</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t</em> <code>ik</code>,
             <em>size_t</em> <code>lk</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the size of parameters used to control the
-            symbol table nodes.  This function is only valid for
-            file creation templates.  Passing in a value of 0 for one of the
-            parameters retains the current value. 
-            <code>ik</code> is one half the rank of a tree that stores a symbol
-            table for a group.  Internal nodes of the symbol table are on
-            average 75% full.  That is, the average rank of the tree is
-            1.5 times the value of <code>ik</code>.
-            <code>lk</code> is one half of the number of symbols that can be stored in
-            a symbol table node.  A symbol table node is the leaf of a
-            symbol table tree which is used to store a group.  When
-            symbols are inserted randomly into a group, the group's
-            symbol table nodes are 75% full on average.  That is, they
-            contain 1.5 times the number of symbols specified by <code>lk</code>.
+            symbol table nodes.  This function is only valid for file
+            creation property lists.  Passing in a value of 0 for one
+            of the parameters retains the current value.
+            <code>ik</code> is one half the rank of a tree that stores
+            a symbol table for a group.  Internal nodes of the symbol
+            table are on average 75% full.  That is, the average rank
+            of the tree is 1.5 times the value of
+            <code>ik</code>. <code>lk</code> is one half of the number
+            of symbols that can be stored in a symbol table node.  A
+            symbol table node is the leaf of a symbol table tree which
+            is used to store a group.  When symbols are inserted
+            randomly into a group, the group's symbol table nodes are
+            75% full on average.  That is, they contain 1.5 times the
+            number of symbols specified by <code>lk</code>.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>size_t</em> <code>ik</code>
             <dd>Symbol table tree rank.
         <dt><em>size_t</em> <code>lk</code>
@@ -765,23 +769,23 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetSymK">H5Pget_sym_k</a>
+<dt><strong>Name:</strong> <a name="Plist-GetSymK">H5Pget_sym_k</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_sym_k</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_sym_k</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t *</em> <code>ik</code>,
             <em>size_t *</em> <code>lk</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function retrieves the size of the symbol table's B-tree
             1/2 rank and the symbol table's leaf node 1/2 size.  See
-            information for <a href="#Template-SetSymK">H5Pset_sym_k</a> for
-            more information.  This function is only valid for file creation
-            templates.  If a parameter valued is set to NULL, that parameter is
-            not retrieved.
+            information for <a href="#Plist-SetSymK">H5Pset_sym_k</a>
+	    for more information.  This function is only valid for file
+            creation property lists.  If a parameter valued is set to
+            NULL, that parameter is not retrieved.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>size_t *</em> <code>ik</code>
             <dd>Pointer to location to return the symbol table's B-tree 1/2 rank.
         <dt><em>size_t *</em> <code>size</code>
@@ -793,23 +797,24 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetIstoreK">H5Pset_istore_k</a>
+<dt><strong>Name:</strong> <a name="Plist-SetIstoreK">H5Pset_istore_k</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_istore_k</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_istore_k</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t</em> <code>ik</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the size of the parameter used to control the
-            B-trees for indexing chunked datasets.  This function is only valid for
-            file creation templates.  Passing in a value of 0 for one of the
-            parameters retains the current value. 
-            <code>ik</code> is one half the rank of a tree that stores chunked raw
-            data.  On average, such a tree will be 75% full, or have an
-            average rank of 1.5 times the value of <code>ik</code>.
+            B-trees for indexing chunked datasets.  This function is
+            only valid for file creation property lists.  Passing in a
+            value of 0 for one of the parameters retains the current
+            value.  <code>ik</code> is one half the rank of a tree
+            that stores chunked raw data.  On average, such a tree
+            will be 75% full, or have an average rank of 1.5 times the
+            value of <code>ik</code>.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>size_t</em> <code>ik</code>
             <dd>1/2 rank of chunked storage B-tree.
     </dl>
@@ -819,20 +824,20 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetIstoreK">H5Pget_istore_k</a>
+<dt><strong>Name:</strong> <a name="Plist-GetIstoreK">H5Pget_istore_k</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_istore_k</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_istore_k</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>size_t *</em> <code>ik</code>
         )
 <dt><strong>Description:</strong>
         <dd>Queries the 1/2 rank of an indexed storage B-tree.  See
-            <a href="#Template-SetIstoreK">H5Pset_istore_k</a> for details.
+            <a href="#Plist-SetIstoreK">H5Pset_istore_k</a> for details.
             The argument <code>ik</code> may be the null pointer.  This
-            function is only valid for file creation templates.
+            function is only valid for file creation property lists.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>size_t *</em> <code>ik</code>
             <dd>Pointer to location to return the chunked storage B-tree 1/2 rank.
     </dl>
@@ -842,15 +847,16 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetLayout">H5Pset_layout</a>
+<dt><strong>Name:</strong> <a name="Plist-SetLayout">H5Pset_layout</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_layout</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_layout</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>H5D_layout_t</em> <code>layout</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the type of storage used store the raw data for
-            a dataset.  This function is only valid for dataset creation templates.
-            Valid parameter for <code>layout</code> are:
+            a dataset.  This function is only valid for dataset
+            creation property lists. Valid parameter for
+            <code>layout</code> are:
             <ul> <dl>
                 <dt>H5D_COMPACT
                     <dd>Store raw data and object header contiguously in file.
@@ -866,8 +872,8 @@ many different parameters to be easily manipulated.
             </dl> </ul>
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>H5D_layout_t</em> <code>layout</code>
             <dd>Type of storage layout for raw data.
     </dl>
@@ -877,14 +883,14 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetLayout">H5Pget_layout</a>
+<dt><strong>Name:</strong> <a name="Plist-GetLayout">H5Pget_layout</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_layout</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_layout</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>H5D_layout_t *</em> <code>layout</code>
         )
 <dt><strong>Description:</strong>
         <dd>Queries the layout of the raw data for a dataset.
-            This function is only valid for dataset creation templates.
+            This function is only valid for dataset creation property lists.
             Valid types for <code>layout</code> are:
             <ul> <dl>
                 <dt>H5D_COMPACT
@@ -898,8 +904,8 @@ many different parameters to be easily manipulated.
             </dl> </ul>
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>H5D_layout_t *</em> <code>layout</code>
             <dd>Pointer to location to return the storage layout.
     </dl>
@@ -909,24 +915,25 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-SetChunk">H5Pset_chunk</a>
+<dt><strong>Name:</strong> <a name="Plist-SetChunk">H5Pset_chunk</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pset_chunk</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pset_chunk</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>int</em> <code>ndims</code>,
             <em>const hsize_t *</em> <code>dim</code>
         )
 <dt><strong>Description:</strong>
         <dd>This function sets the size of the chunks used to store a chunked
-            layout dataset.  This function is only valid for dataset creation
-            templates.  The <code>ndims</code> parameter currently must be the
-            same size as the rank of the dataset.  The values of the
-            <code>dim</code> array define the size of the chunks to store the
-            dataset's raw data.  As a side-effect, the layout of the dataset is
-            changed to H5D_CHUNKED, if it isn't already.
+            layout dataset.  This function is only valid for dataset
+            creation property lists.  The <code>ndims</code> parameter
+            currently must be the same size as the rank of the
+            dataset.  The values of the <code>dim</code> array define
+            the size of the chunks to store the dataset's raw data.
+            As a side-effect, the layout of the dataset is changed to
+            H5D_CHUNKED, if it isn't already.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>int</em> <code>ndims</code>
             <dd>The number of dimensions of each chunk.
         <dt><em>const hsize_t *</em> <code>dim</code>
@@ -938,20 +945,20 @@ many different parameters to be easily manipulated.
 
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Template-GetChunk">H5Pget_chunk</a>
+<dt><strong>Name:</strong> <a name="Plist-GetChunk">H5Pget_chunk</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Pget_chunk</code>(<em>hid_t</em> <code>template_id</code>,
+    <dd><em>herr_t </em><code>H5Pget_chunk</code>(<em>hid_t</em> <code>plist_id</code>,
             <em>int</em> <code>max_ndims</code>
             <em>hsize_t *</em> <code>dims</code>
         )
 <dt><strong>Description:</strong>
         <dd>Queries the size of chunks for the raw data of a chunked layout
             dataset.  This function is only valid for dataset creation
-            templates.
+            property lists.
 <dt><strong>Parameters:</strong>
     <dl>
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>Template ID to query.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>Property list ID to query.
         <dt><em>int</em> <code>max_ndims</code>
             <dd>Size of the <code>dims</code> array.
         <dt><em>hsize_t *</em> <code>dims</code>
@@ -1100,19 +1107,20 @@ be constructed from a datatype and a dataspace.
         <em>const char *</em><code>name</code>,
         <em>hid_t</em><code>type_id</code>,
         <em>hid_t</em><code>space_id</code>,
-        <em>hid_t</em><code>template_id</code>
+        <em>hid_t</em><code>plist_id</code>
     )
 <dt><strong>Description:</strong>
     <dd>This function creates a new dataset in the file specified with the
-        <code>file_id</code>.  The <code>type_id</code> and <code>space_id</code>
-        are the IDs of the datatype and dataspace used to construct the
-        framework of the dataset.  The datatype and dataspace parameters
-        describe the dataset as it will exist in the file, which is not
-        necessarily the same as it exists in memory.  The <code>template_id</code>
-        contains either the default template (H5P_DEFAULT) or a template_id
-        with particular constant properties used to create the dataset.  The
-        <code>name</code> is used to identify the dataset in a group and must
-        be unique within that group.
+        <code>file_id</code>.  The <code>type_id</code> and
+        <code>space_id</code> are the IDs of the datatype and
+        dataspace used to construct the framework of the dataset.  The
+        datatype and dataspace parameters describe the dataset as it
+        will exist in the file, which is not necessarily the same as
+        it exists in memory.  The <code>plist_id</code> contains
+        either the default property lists (H5P_DEFAULT) or a plist_id
+        with particular constant properties used to create the
+        dataset.  The <code>name</code> is used to identify the
+        dataset in a group and must be unique within that group.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>file_id</code>
@@ -1123,8 +1131,8 @@ be constructed from a datatype and a dataspace.
             <dd>ID of the datatype to use when creating the dataset.
         <dt><em>hid_t</em> <code>space_id</code>
             <dd>ID of the dataspace to use when creating the dataset.
-        <dt><em>hid_t</em> <code>template_id</code>
-            <dd>ID of the dataset creation template.
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>ID of the dataset creation property list.
     </dl>
 <dt><strong>Returns:</strong>
     <dd>Dataset ID on success, negative on failure.
@@ -1195,15 +1203,16 @@ be constructed from a datatype and a dataspace.
     <dd><em>hid_t </em><code>H5Dget_create_plist</code>(<em>hid_t </em><code>dataset_id</code>
     )
 <dt><strong>Description:</strong>
-    <dd>This function returns a copy of the dataset creation template for a
-        dataset.  The template should be released with the H5Pclose() function.
+    <dd>This function returns a copy of the dataset creation property
+        list for a dataset.  The property list should be released with the
+        H5Pclose() function.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
             <dd>ID of the dataset to query.
     </dl>
 <dt><strong>Returns:</strong>
-    <dd>Dataset creation template ID on success, negative on failure.
+    <dd>Dataset creation property list ID on success, negative on failure.
 </dl>
 
 <hr>
@@ -1214,22 +1223,24 @@ be constructed from a datatype and a dataspace.
         <em>hid_t</em> <code>mem_type_id</code>,
         <em>hid_t</em> <code>mem_space_id</code>,
         <em>hid_t</em> <code>file_space_id</code>,
-        <em>hid_t</em> <code>transfer_template_id</code>,
+        <em>hid_t</em> <code>transfer_plist_id</code>,
         <em>void *</em> <code>buf</code>
     )
 <dt><strong>Description:</strong>
     <dd>This function reads raw data from the specified dataset into <code>buf</code>,
-        converting from the file datatype of the dataset into the memory
-        datatype specified in <code>mem_type_id</code>.  The portion of the
-        dataset to read from disk is specified with the <code>file_spaceid</code>
-        which can contain a dataspace with a hyperslab selected or the constant
-        H5S_ALL, which indicates the entire dataset is to be read.  The portion
-        of the dataset read into the memory buffer is specified with the
-        <code>mem_space_id</code> which can also be a hyperslab of the same
-        size or the H5S_ALL parameter to store the entire dataset.  The
-        <code>transfer_template_id</code> is a dataset transfer template ID which
-        is used to provide addition parameters for the I/O operation or can
-        be H5P_DEFAULT for the default library behavior.
+        converting from the file datatype of the dataset into the
+        memory datatype specified in <code>mem_type_id</code>.  The
+        portion of the dataset to read from disk is specified with the
+        <code>file_spaceid</code> which can contain a dataspace with a
+        hyperslab selected or the constant H5S_ALL, which indicates
+        the entire dataset is to be read.  The portion of the dataset
+        read into the memory buffer is specified with the
+        <code>mem_space_id</code> which can also be a hyperslab of the
+        same size or the H5S_ALL parameter to store the entire
+        dataset.  The <code>transfer_plist_id</code> is a dataset
+        transfer property list ID which is used to provide addition
+        parameters for the I/O operation or can be H5P_DEFAULT for the
+        default library behavior.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
@@ -1240,8 +1251,8 @@ be constructed from a datatype and a dataspace.
             <dd>ID of the memory dataspace.
         <dt><em>hid_t</em> <code>file_space_id</code>
             <dd>ID of the dataset's dataspace in the file.
-        <dt><em>hid_t</em> <code>transfer_template_id</code>
-            <dd>ID of a transfer template for this I/O operation.
+        <dt><em>hid_t</em> <code>transfer_plist_id</code>
+            <dd>ID of a transfer property list for this I/O operation.
         <dt><em>void *</em> <code>buf</code>
             <dd>Buffer to store information read from the file.
     </dl>
@@ -1257,23 +1268,24 @@ be constructed from a datatype and a dataspace.
         <em>hid_t</em> <code>mem_type_id</code>,
         <em>hid_t</em> <code>mem_space_id</code>,
         <em>hid_t</em> <code>file_space_id</code>,
-        <em>hid_t</em> <code>transfer_template_id</code>,
+        <em>hid_t</em> <code>transfer_plist_id</code>,
         <em>const void *</em> <code>buf</code>
     )
 <dt><strong>Description:</strong>
     <dd>This function writes raw data from memory into the specified dataset
-        converting from the memory datatype of the dataset specified in
-        <code>mem_type_id</code> into the file datatype.
-        The portion of the
-        dataset to written to disk is specified with the <code>file_spaceid</code>
-        which can contain a dataspace with a hyperslab selected or the constant
-        H5S_ALL, which indicates the entire dataset is to be written.  The portion
-        of the dataset written from the memory buffer is specified with the
-        <code>mem_space_id</code> which can also be a hyperslab of the same
-        size or the H5S_ALL parameter to store the entire dataset.  The
-        <code>transfer_template_id</code> is a dataset transfer template ID which
-        is used to provide addition parameters for the I/O operation or can
-        be H5P_DEFAULT for the default library behavior.
+        converting from the memory datatype of the dataset specified
+        in <code>mem_type_id</code> into the file datatype.  The
+        portion of the dataset to written to disk is specified with
+        the <code>file_spaceid</code> which can contain a dataspace
+        with a hyperslab selected or the constant H5S_ALL, which
+        indicates the entire dataset is to be written.  The portion of
+        the dataset written from the memory buffer is specified with
+        the <code>mem_space_id</code> which can also be a hyperslab of
+        the same size or the H5S_ALL parameter to store the entire
+        dataset.  The <code>transfer_plist_id</code> is a dataset
+        transfer property list ID which is used to provide addition
+        parameters for the I/O operation or can be H5P_DEFAULT for the
+        default library behavior.
 <dt><strong>Parameters:</strong>
     <dl>
         <dt><em>hid_t</em> <code>dataset_id</code>
@@ -1284,8 +1296,8 @@ be constructed from a datatype and a dataspace.
             <dd>ID of the memory dataspace.
         <dt><em>hid_t</em> <code>file_space_id</code>
             <dd>ID of the dataset's dataspace in the file.
-        <dt><em>hid_t</em> <code>transfer_template_id</code>
-            <dd>ID of a transfer template for this I/O operation.
+        <dt><em>hid_t</em> <code>transfer_plist_id</code>
+            <dd>ID of a transfer property list for this I/O operation.
         <dt><em>const void *</em> <code>buf</code>
             <dd>Buffer to store information to be written to the file.
     </dl>

@@ -118,11 +118,11 @@ H5F_split_open(const char *name, const H5F_access_t *access_parms,
     /* Open the meta data file */
     ext = access_parms->u.split.meta_ext ?
 	  access_parms->u.split.meta_ext : H5F_SPLIT_META_EXT;
-    if (strlen (name)+strlen (ext) >= sizeof fullname) {
+    if (HDstrlen(name)+HDstrlen(ext) >= sizeof fullname) {
 	HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "file name is too long");
     }
-    strcpy (fullname, name);
-    strcat (fullname, ext);
+    HDstrcpy(fullname, name);
+    HDstrcat(fullname, ext);
 
     lf->u.split.meta = H5F_low_open(meta_type, fullname,
 				    access_parms->u.split.meta_access,
@@ -134,11 +134,11 @@ H5F_split_open(const char *name, const H5F_access_t *access_parms,
     /* Open the raw data file */
     ext = access_parms->u.split.raw_ext ?
 	  access_parms->u.split.raw_ext : H5F_SPLIT_RAW_EXT;
-    if (strlen (name)+strlen (ext) >= sizeof fullname) {
+    if (HDstrlen(name)+HDstrlen(ext) >= sizeof fullname) {
 	HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "file name is too long");
     }
-    strcpy (fullname, name);
-    strcat (fullname, ext);
+    HDstrcpy(fullname, name);
+    HDstrcat(fullname, ext);
 
     lf->u.split.raw = H5F_low_open(raw_type, fullname,
 				   access_parms->u.split.raw_access,
@@ -372,11 +372,11 @@ H5F_split_access(const char *name, const H5F_access_t *access_parms,
     meta_type = H5F_low_class (access_parms->u.split.meta_access->driver);
     ext = access_parms->u.split.meta_ext ?
 	  access_parms->u.split.meta_ext : H5F_SPLIT_META_EXT;
-    if (strlen (name)+strlen (ext) >= sizeof fullname) {
+    if (HDstrlen(name)+HDstrlen(ext) >= sizeof fullname) {
 	HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "file name is too long");
     }
-    strcpy (fullname, name);
-    strcat (fullname, ext);
+    HDstrcpy(fullname, name);
+    HDstrcat(fullname, ext);
 
     status = H5F_low_access(meta_type, fullname,
 			    access_parms->u.split.meta_access,
@@ -391,11 +391,11 @@ H5F_split_access(const char *name, const H5F_access_t *access_parms,
     raw_type = H5F_low_class (access_parms->u.split.raw_access->driver);
     ext = access_parms->u.split.raw_ext ?
 	  access_parms->u.split.raw_ext : H5F_SPLIT_RAW_EXT;
-    if (strlen (name)+strlen (ext) >= sizeof fullname) {
+    if (HDstrlen(name)+HDstrlen(ext) >= sizeof fullname) {
 	HRETURN_ERROR (H5E_IO, H5E_CANTINIT, FAIL, "file name is too long");
     }
-    strcpy (fullname, name);
-    strcat (fullname, ext);
+    HDstrcpy(fullname, name);
+    HDstrcat(fullname, ext);
 
     status = H5F_low_access(raw_type, fullname,
 			    access_parms->u.split.raw_access,

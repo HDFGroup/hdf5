@@ -187,7 +187,7 @@ H5T_bit_get_d (uint8 *buf, size_t offset, size_t size)
 	break;
 
     default:
-	abort ();
+	HDabort ();
     }
 
     FUNC_LEAVE (val);
@@ -228,7 +228,7 @@ H5T_bit_set_d (uint8 *buf, size_t offset, size_t size, hsize_t val)
 	break;
 
     default:
-	abort ();
+	HDabort ();
     }
 
     H5T_bit_copy (buf, offset, (uint8*)&val, 0, size);

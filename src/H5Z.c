@@ -106,7 +106,7 @@ H5Z_term_interface (void)
 		}
 
 		/* Truncate the comment to fit in the field */
-		strncpy(comment, H5Z_table_g[i].name, sizeof comment);
+		HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
 		comment[sizeof(comment)-1] = '\0';
 
 		/*
@@ -388,7 +388,7 @@ H5Z_find(H5Z_filter_t id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_pipeline(H5F_t *f, const H5O_pline_t *pline, uintn flags,
+H5Z_pipeline(H5F_t __unused__ *f, const H5O_pline_t *pline, uintn flags,
 	     uintn *filter_mask/*in,out*/, size_t *nbytes/*in,out*/,
 	     size_t *buf_size/*in,out*/, void **buf/*in,out*/)
 {

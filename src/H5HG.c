@@ -952,12 +952,12 @@ H5HG_debug(H5F_t *f, const haddr_t *addr, FILE *stream, intn indent,
 		    if (j+k<size) {
 			fprintf (stream, "%02x ", p[j+k]);
 		    } else {
-			fputs ("   ", stream);
+			HDfputs("   ", stream);
 		    }
 		}
 		for (k=0; k<16 && j+k<size; k++) {
 		    if (8==k) fprintf (stream, " ");
-		    fputc (p[j+k]>' ' && p[j+k]<='~' ? p[j+k] : '.', stream);
+		    HDfputc(p[j+k]>' ' && p[j+k]<='~' ? p[j+k] : '.', stream);
 		}
 		fprintf (stream, "\n");
 	    }

@@ -81,8 +81,8 @@ H5S_init_interface(void)
 #ifdef HAVE_PARALLEL
     {
         /* Allow MPI buf-and-file-type optimizations? */
-        const char *s = getenv ("HDF5_MPI_OPT_TYPES");
-        if (s && isdigit(*s)) {
+        const char *s = HDgetenv ("HDF5_MPI_OPT_TYPES");
+        if (s && HDisdigit(*s)) {
             H5_mpi_opt_types_g = (int)HDstrtol (s, NULL, 0);
         }
     }
@@ -113,11 +113,12 @@ static void
 H5S_term_interface(void)
 {
     size_t	i;
+    
+#ifdef H5S_DEBUG
     int		j, nprints=0;
     H5S_conv_t	*path=NULL;
     char	buf[256];
     
-#ifdef H5S_DEBUG
     /*
      * Print statistics about each conversion path.
      */

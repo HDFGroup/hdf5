@@ -161,7 +161,7 @@ H5Pcreate(H5P_class_t type)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
+	HDmemcpy(plist, &H5F_create_dflt, sizeof(H5F_create_t));
 	break;
 
     case H5P_FILE_ACCESS:
@@ -169,7 +169,7 @@ H5Pcreate(H5P_class_t type)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
+	HDmemcpy(plist, &H5F_access_dflt, sizeof(H5F_access_t));
 	break;
 
     case H5P_DATASET_CREATE:
@@ -177,7 +177,7 @@ H5Pcreate(H5P_class_t type)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
+	HDmemcpy(plist, &H5D_create_dflt, sizeof(H5D_create_t));
 	break;
 
     case H5P_DATASET_XFER:
@@ -185,7 +185,7 @@ H5Pcreate(H5P_class_t type)
 	    HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 			   "memory allocation failed");
 	}
-	memcpy(plist, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
+	HDmemcpy(plist, &H5D_xfer_dflt, sizeof(H5D_xfer_t));
 	break;
 
     default:
@@ -1307,7 +1307,7 @@ H5Pget_external(hid_t plist_id, int idx, size_t name_size, char *name/*out*/,
 
     /* Return values */
     if (name_size>0 && name) {
-	strncpy (name, plist->efl.slot[idx].name, name_size);
+	HDstrncpy (name, plist->efl.slot[idx].name, name_size);
     }
     if (offset) *offset = plist->efl.slot[idx].offset;
     if (size) *size = plist->efl.slot[idx].size;
@@ -1731,16 +1731,16 @@ H5Pget_split(hid_t plist_id, size_t meta_ext_size, char *meta_ext/*out*/,
     /* Output arguments */
     if (meta_ext && meta_ext_size>0) {
 	if (plist->u.split.meta_ext) {
-	    strncpy (meta_ext, plist->u.split.meta_ext, meta_ext_size);
+	    HDstrncpy (meta_ext, plist->u.split.meta_ext, meta_ext_size);
 	} else {
-	    strncpy (meta_ext, ".meta", meta_ext_size);
+	    HDstrncpy (meta_ext, ".meta", meta_ext_size);
 	}
     }
     if (raw_ext && raw_ext_size>0) {
 	if (plist->u.split.raw_ext) {
-	    strncpy (raw_ext, plist->u.split.raw_ext, raw_ext_size);
+	    HDstrncpy (raw_ext, plist->u.split.raw_ext, raw_ext_size);
 	} else {
-	    strncpy (raw_ext, ".raw", raw_ext_size);
+	    HDstrncpy (raw_ext, ".raw", raw_ext_size);
 	}
     }
     if (meta_properties) {
@@ -2364,7 +2364,7 @@ H5Pget_filter(hid_t plist_id, int idx, unsigned int *flags/*out*/,
 	    H5Z_class_t *cls = H5Z_find(plist->pline.filter[idx].id);
 	    if (cls) s = cls->name;
 	}
-	if (s) strncpy(name, s, namelen);
+	if (s) HDstrncpy(name, s, namelen);
 	else name[0] = '\0';
     }
     

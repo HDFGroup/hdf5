@@ -17,9 +17,9 @@ effort is shown here at steps 9) and steps 10).
 The total required steps are something similar to:
 FROM SASN100,
 
-1) uncompress hdf5-1.0.0a.tar.Z
+1) uncompress hdf5-1.1.0.tar.Z
 
-2) tar xvf hdf5-1.0.0a.tar
+2) tar xvf hdf5-1.1.0.tar
 
 3) cd ./hdf5
 
@@ -73,9 +73,9 @@ execution of parallel tests described in steps 12) through 16).
 The total required steps are something similar to:
 FROM SASN100,
 
-1) uncompress hdf5-1.0.0a.tar.Z
+1) uncompress hdf5-1.1.0.tar.Z
 
-2) tar xvf hdf5-1.0.0a.tar
+2) tar xvf hdf5-1.1.0.tar
 
 3) cd ./hdf5
 

@@ -135,7 +135,7 @@ H5_init_library(void)
 
     /* Debugging? */
     H5_debug_mask("-all");
-    H5_debug_mask(getenv("HDF5_DEBUG"));
+    H5_debug_mask(HDgetenv("HDF5_DEBUG"));
 
     FUNC_LEAVE(SUCCEED);
 }
@@ -351,7 +351,7 @@ H5_debug_mask(const char *s)
     int		clear;
 	
     while (s && *s) {
-	if (isalpha(*s) || '-'==*s || '+'==*s) {
+	if (HDisalpha(*s) || '-'==*s || '+'==*s) {
 	    /* Enable or Disable debugging? */
 	    if ('-'==*s) {
 		clear = TRUE;
@@ -364,21 +364,21 @@ H5_debug_mask(const char *s)
 	    }
 
 	    /* Get the name */
-	    for (i=0; isalpha(*s); i++, s++) {
+	    for (i=0; HDisalpha(*s); i++, s++) {
 		if (i<sizeof pkg_name) pkg_name[i] = *s;
 	    }
 	    pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
 
 	    /* Trace, all, or one? */
-	    if (!strcmp(pkg_name, "trace")) {
+	    if (!HDstrcmp(pkg_name, "trace")) {
 		H5_debug_g.trace = clear?NULL:stream;
-	    } else if (!strcmp(pkg_name, "all")) {
+	    } else if (!HDstrcmp(pkg_name, "all")) {
 		for (i=0; i<H5_NPKGS; i++) {
 		    H5_debug_g.pkg[i].stream = clear?NULL:stream;
 		}
 	    } else {
 		for (i=0; i<H5_NPKGS; i++) {
-		    if (!strcmp(H5_debug_g.pkg[i].name, pkg_name)) {
+		    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
 			H5_debug_g.pkg[i].stream = clear?NULL:stream;
 			break;
 		    }
@@ -388,10 +388,10 @@ H5_debug_mask(const char *s)
 		}
 	    }
 
-	} else if (isdigit(*s)) {
+	} else if (HDisdigit(*s)) {
 	    int fd = (int)HDstrtol (s, &rest, 0);
 	    if ((stream=HDfdopen(fd, "w"))) {
-	        setvbuf (stream, NULL, _IOLBF, 0);
+	        HDsetvbuf (stream, NULL, _IOLBF, 0);
             }
 	    s = rest;
 	} else {
@@ -469,16 +469,16 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
     
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
 	H5_VERS_RELEASE!=relnum) {
-	fputs ("Warning! The HDF5 header files included by this application "
-	       "do not match the\nversion used by the HDF5 library to which "
-	       "this application is linked. Data\ncorruption or segmentation "
-	       "faults would be likely if the application were\nallowed to "
-	       "continue.\n", stderr);
+	HDfputs ("Warning! The HDF5 header files included by this application "
+		 "do not match the\nversion used by the HDF5 library to which "
+		 "this application is linked. Data\ncorruption or "
+		 "segmentation faults would be likely if the application "
+		 "were\nallowed to continue.\n", stderr);
 	fprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
 		 majnum, minnum, relnum, 
 		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-	fputs ("Bye...\n", stderr);
-	abort ();
+	HDfputs ("Bye...\n", stderr);
+	HDabort ();
     }
     return SUCCEED;
 }
@@ -599,14 +599,14 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	modifier[0] = '\0';
 
 	if ('%'==fmt[0] && '%'==fmt[1]) {
-	    putc ('%', stream);
+	    HDputc ('%', stream);
 	    fmt += 2;
 	    nout++;
 	} else if ('%'==fmt[0]) {
 	    s = fmt+1;
 
 	    /* Flags */
-	    while (strchr ("-+ #", *s)) {
+	    while (HDstrchr ("-+ #", *s)) {
 		switch (*s) {
 		case '-':
 		    leftjust = 1;
@@ -625,9 +625,9 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 	    
 	    /* Field width */
-	    if (isdigit (*s)) {
+	    if (HDisdigit (*s)) {
 		zerofill = ('0'==*s);
-		fwidth = (int)strtol (s, &rest, 10);
+		fwidth = (int)HDstrtol (s, &rest, 10);
 		s = rest;
 	    } else if ('*'==*s) {
 		fwidth = va_arg (ap, int);
@@ -641,8 +641,8 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    /* Precision */
 	    if ('.'==*s) {
 		s++;
-		if (isdigit (*s)) {
-		    prec = (int)strtol (s, &rest, 10);
+		if (HDisdigit (*s)) {
+		    prec = (int)HDstrtol (s, &rest, 10);
 		    s = rest;
 		} else if ('*'==*s) {
 		    prec = va_arg (ap, int);
@@ -652,20 +652,20 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    }
 
 	    /* Type modifier */
-	    if (strchr ("ZHhlq", *s)) {
+	    if (HDstrchr ("ZHhlq", *s)) {
 		switch (*s) {
 		case 'H':
 		    if (sizeof(hsize_t)==sizeof(long)) {
-			strcpy (modifier, "l");
+			HDstrcpy (modifier, "l");
 		    } else if (sizeof(hsize_t)==sizeof(long long)) {
-			strcpy (modifier, PRINTF_LL_WIDTH);
+			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    }
 		    break;
 		case 'Z':
 		    if (sizeof(size_t)==sizeof(long)) {
-			strcpy (modifier, "l");
+			HDstrcpy (modifier, "l");
 		    } else if (sizeof(size_t)==sizeof(long long)) {
-			strcpy (modifier, PRINTF_LL_WIDTH);
+			HDstrcpy (modifier, PRINTF_LL_WIDTH);
 		    } else if (sizeof(size_t)==sizeof(int)) {
 			modifier[0] = '\0';
 		    }
@@ -687,28 +687,28 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		     leftjust?"-":"", plussign?"+":"",
 		     ldspace?" ":"", prefix?"#":"", zerofill?"0":"");
 	    if (fwidth>0) {
-		sprintf (template+strlen (template), "%d", fwidth);
+		sprintf (template+HDstrlen(template), "%d", fwidth);
 	    }
 	    if (prec>0) {
-		sprintf (template+strlen (template), ".%d", prec);
+		sprintf (template+HDstrlen(template), ".%d", prec);
 	    }
 	    if (*modifier) {
-		sprintf (template+strlen (template), "%s", modifier);
+		sprintf (template+HDstrlen(template), "%s", modifier);
 	    }
-	    sprintf (template+strlen (template), "%c", conv);
+	    sprintf (template+HDstrlen(template), "%c", conv);
 	    
 
 	    /* Conversion */
 	    switch (conv) {
 	    case 'd':
 	    case 'i':
-		if (!strcmp (modifier, "h")) {
+		if (!HDstrcmp(modifier, "h")) {
 		    short x = va_arg (ap, short);
 		    n = fprintf (stream, template, x);
 		} else if (!*modifier) {
 		    int x = va_arg (ap, int);
 		    n = fprintf (stream, template, x);
-		} else if (!strcmp (modifier, "l")) {
+		} else if (!HDstrcmp (modifier, "l")) {
 		    long x = va_arg (ap, long);
 		    n = fprintf (stream, template, x);
 		} else {
@@ -721,13 +721,13 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'u':
 	    case 'x':
 	    case 'X':
-		if (!strcmp (modifier, "h")) {
+		if (!HDstrcmp (modifier, "h")) {
 		    unsigned short x = va_arg (ap, unsigned short);
 		    n = fprintf (stream, template, x);
 		} else if (!*modifier) {
 		    unsigned int x = va_arg (ap, unsigned int);
 		    n = fprintf (stream, template, x);
-		} else if (!strcmp (modifier, "l")) {
+		} else if (!HDstrcmp (modifier, "l")) {
 		    unsigned long x = va_arg (ap, unsigned long);
 		    n = fprintf (stream, template, x);
 		} else {
@@ -741,10 +741,10 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 	    case 'E':
 	    case 'g':
 	    case 'G':
-		if (!strcmp (modifier, "h")) {
+		if (!HDstrcmp (modifier, "h")) {
 		    float x = va_arg (ap, float);
 		    n = fprintf (stream, template, x);
-		} else if (!*modifier || !strcmp (modifier, "l")) {
+		} else if (!*modifier || !HDstrcmp (modifier, "l")) {
 		    double x = va_arg (ap, double);
 		    n = fprintf (stream, template, x);
 		} else {
@@ -771,24 +771,24 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 				ldspace?" ":"", prefix?"#":"",
 				zerofill?"0":"");
 			if (fwidth>0) {
-			    sprintf(template+strlen(template), "%d", fwidth);
+			    sprintf(template+HDstrlen(template), "%d", fwidth);
 			}
 			if (sizeof(x->offset)==SIZEOF_INT) {
-			    strcat(template, "d");
+			    HDstrcat(template, "d");
 			} else if (sizeof(x->offset)==SIZEOF_LONG) {
-			    strcat(template, "ld");
+			    HDstrcat(template, "ld");
 			} else if (sizeof(x->offset)==SIZEOF_LONG_LONG) {
-			    strcat(template, PRINTF_LL_WIDTH);
-			    strcat(template, "d");
+			    HDstrcat(template, PRINTF_LL_WIDTH);
+			    HDstrcat(template, "d");
 			}
 			n = fprintf(stream, template, x->offset);
 		    } else {
-			strcpy(template, "%");
-			if (leftjust) strcat(template, "-");
+			HDstrcpy(template, "%");
+			if (leftjust) HDstrcat(template, "-");
 			if (fwidth) {
-			    sprintf(template+strlen(template), "%d", fwidth);
+			    sprintf(template+HDstrlen(template), "%d", fwidth);
 			}
-			strcat(template, "s");
+			HDstrcat(template, "s");
 			fprintf(stream, template, x?"UNDEF":"NULL");
 		    }
 		}
@@ -811,20 +811,20 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 
 	    case 'n':
 		if (1) {
-		    template[strlen(template)-1] = 'u';
+		    template[HDstrlen(template)-1] = 'u';
 		    n = fprintf (stream, template, nout);
 		}
 		break;
 
 	    default:
-		fputs (template, stream);
-		n = (int)strlen (template);
+		HDfputs (template, stream);
+		n = (int)HDstrlen (template);
 		break;
 	    }
 	    nout += n;
 	    fmt = s;
 	} else {
-	    putc (*fmt, stream);
+	    HDputc (*fmt, stream);
 	    fmt++;
 	    nout++;
 	}
@@ -891,7 +891,7 @@ HDstrtoll (const char *s, const char **rest, int base)
     }
     
     /* Skip white space */
-    while (isspace (*s)) s++;
+    while (HDisspace (*s)) s++;
 
     /* Optional minus or plus sign */
     if ('+'==*s) {
@@ -1083,33 +1083,33 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
     double	bw;
 
     if (nseconds<=0.0) {
-	strcpy(buf, "       NaN");
+	HDstrcpy(buf, "       NaN");
     } else {
 	bw = nbytes/nseconds;
 	if (bw==0.0) {
-	    strcpy(buf, "0.000  B/s");
+	    HDstrcpy(buf, "0.000  B/s");
 	} else if (bw<1.0) {
 	    sprintf(buf, "%10.4e", bw);
 	} else if (bw<1024.0) {
 	    sprintf(buf, "%05.4f", bw);
-	    strcpy(buf+5, "  B/s");
+	    HDstrcpy(buf+5, "  B/s");
 	} else if (bw<1024.0*1024.0) {
 	    sprintf(buf, "%05.4f", bw/1024.0);
-	    strcpy(buf+5, " kB/s");
+	    HDstrcpy(buf+5, " kB/s");
 	} else if (bw<1024.0*1024.0*1024.0) {
 	    sprintf(buf, "%05.4f", bw/(1024.0*1024.0));
-	    strcpy(buf+5, " MB/s");
+	    HDstrcpy(buf+5, " MB/s");
 	} else if (bw<1024.0*1024.0*1024.0*1024.0) {
 	    sprintf(buf, "%05.4f",
 		    bw/(1024.0*1024.0*1024.0));
-	    strcpy(buf+5, " GB/s");
+	    HDstrcpy(buf+5, " GB/s");
 	} else if (bw<1024.0*1024.0*1024.0*1024.0*1024.0) {
 	    sprintf(buf, "%05.4f",
 		    bw/(1024.0*1024.0*1024.0*1024.0));
-	    strcpy(buf+5, " TB/s");
+	    HDstrcpy(buf+5, " TB/s");
 	} else {
 	    sprintf(buf, "%10.4e", bw);
-	    if (strlen(buf)>10) {
+	    if (HDstrlen(buf)>10) {
 		sprintf(buf, "%10.3e", bw);
 	    }
 	}
@@ -1174,16 +1174,16 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     for (i=0; i<NELMTS(asize); i++) asize[i] = -1;
 
     /* Parse the argument types */
-    for (argno=0; *type; argno++, type+=isupper(*type)?2:1) {
+    for (argno=0; *type; argno++, type+=HDisupper(*type)?2:1) {
 	/* Count levels of indirection */
 	for (ptr=0; '*'==*type; type++) ptr++;
 	if ('['==*type) {
 	    if ('a'==type[1]) {
-		asize_idx = (int)strtol(type+2, &rest, 10);
+		asize_idx = (int)HDstrtol(type+2, &rest, 10);
 		assert(']'==*rest);
 		type = rest+1;
 	    } else {
-		rest = strchr(type, ']');
+		rest = HDstrchr(type, ']');
 		assert(rest);
 		type = rest+1;
 		asize_idx = -1;
@@ -1199,9 +1199,9 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	 */
 	argname = va_arg (ap, char*);
 	if (argname) {
-	    n = MAX (0, (int)strlen(argname)-3);
-	    if (!strcmp (argname+n, "_id")) {
-		strncpy (buf, argname, MIN ((int)sizeof(buf)-1, n));
+	    n = MAX (0, (int)HDstrlen(argname)-3);
+	    if (!HDstrcmp (argname+n, "_id")) {
+		HDstrncpy (buf, argname, MIN ((int)sizeof(buf)-1, n));
 		buf[MIN((int)sizeof(buf)-1, n)] = '\0';
 		argname = buf;
 	    }
@@ -1536,7 +1536,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			break;
 		    case H5_FILE:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "file")) {
+			if (HDstrcmp (argname, "file")) {
 			    fprintf (out, " (file)");
 			}
 			break;
@@ -1549,13 +1549,13 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 		    case H5_TEMPLATE_6:
 		    case H5_TEMPLATE_7:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "plist")) {
+			if (HDstrcmp (argname, "plist")) {
 			    fprintf (out, " (plist)");
 			}
 			break;
 		    case H5_GROUP:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "group")) {
+			if (HDstrcmp (argname, "group")) {
 			    fprintf (out, " (group)");
 			}
 			break;
@@ -1648,14 +1648,14 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			    fprintf(out, "H5T_FORTRAN_S1");
 			} else {
 			    fprintf(out, "%ld", (long)obj);
-			    if (strcmp (argname, "type")) {
+			    if (HDstrcmp (argname, "type")) {
 				fprintf (out, " (type)");
 			    }
 			}
 			break;
 		    case H5_DATASPACE:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "space")) {
+			if (HDstrcmp (argname, "space")) {
 			    fprintf (out, " (space)");
 			}
 			/*Save the rank of simple data spaces for arrays*/
@@ -1668,25 +1668,25 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 			break;
 		    case H5_DATASET:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "dset")) {
+			if (HDstrcmp (argname, "dset")) {
 			    fprintf (out, " (dset)");
 			}
 			break;
 		    case H5_ATTR:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp (argname, "attr")) {
+			if (HDstrcmp (argname, "attr")) {
 			    fprintf (out, " (attr)");
 			}
 			break;
 		    case H5_TEMPBUF:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp(argname, "tbuf")) {
+			if (HDstrcmp(argname, "tbuf")) {
 			    fprintf(out, " (tbuf");
 			}
 			break;
 		    case H5_RAGGED:
 			fprintf(out, "%ld", (long)obj);
-			if (strcmp(argname, "array")) {
+			if (HDstrcmp(argname, "array")) {
 			    fprintf(out, " (array)");
 			}
 			break;
@@ -2221,7 +2221,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
 	    break;
 
 	default:
-	    if (isupper (type[0])) {
+	    if (HDisupper (type[0])) {
 		fprintf (out, "BADTYPE(%c%c)", type[0], type[1]);
 	    } else {
 		fprintf (out, "BADTYPE(%c)", type[0]);
@@ -2237,7 +2237,7 @@ H5_trace (hbool_t returning, const char *func, const char *type, ...)
     } else {
 	fprintf (out, ")");
     }
-    fflush (out);
+    HDfflush (out);
     return;
 }
 

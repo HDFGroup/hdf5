@@ -61,7 +61,7 @@
 	set.  The <em>access_properties</em> is a file access property
 	list ID or <code>H5P_DEFAULT</code> for the default I/O access
         parameters.  Creating and changing the parameters for access
-        templates is documented further below.  Files which are opened
+        property lists is documented further below.  Files which are opened
         more than once return a unique identifier for each
         <code>H5Fopen()</code> call and can be accessed through all
         file IDs.  The return value is an ID for the open file and it
@@ -200,40 +200,40 @@
 	an address which is a multiple of some number.
     </dl> </ul>
 
-    <h2>5. Examples of using file templates</h2>
+    <h2>5. Examples of using file property lists</h2>
     
-    <h3>5.1. Example of using file creation templates</h3>
+    <h3>5.1. Example of using file creation property lists</h3>
     
     <p>This following example shows how to create a file with 64-bit object
       offsets and lengths:<br>
     <pre>
-        hid_t create_template;
+        hid_t create_plist;
         hid_t file_id;
 
-        create_template = H5Pcreate(H5P_FILE_CREATE);
-        H5Pset_sizes(create_template, 8, 8);
+        create_plist = H5Pcreate(H5P_FILE_CREATE);
+        H5Pset_sizes(create_plist, 8, 8);
 
         file_id = H5Fcreate("test.h5", H5F_ACC_TRUNC,
-                             create_template, H5P_DEFAULT);
+                             create_plist, H5P_DEFAULT);
         .
         .
         .
         H5Fclose(file_id);
     </pre>
         
-    <h3>5.2. Example of using file creation templates</h3>
+    <h3>5.2. Example of using file creation plist</h3>
 
     <p>This following example shows how to open an existing file for
       independent datasets access by MPI parallel I/O:<br>
     <pre>
-        hid_t access_template;
+        hid_t access_plist;
         hid_t file_id;
 
-        access_template = H5Pcreate(H5P_FILE_ACCESS);
-        H5Pset_mpi(access_template, MPI_COMM_WORLD, MPI_INFO_NULL);
+        access_plist = H5Pcreate(H5P_FILE_ACCESS);
+        H5Pset_mpi(access_plist, MPI_COMM_WORLD, MPI_INFO_NULL);
 
 	/* H5Fopen must be called collectively */
-        file_id = H5Fopen("test.h5", H5F_ACC_RDWR, access_template);
+        file_id = H5Fopen("test.h5", H5F_ACC_RDWR, access_plist);
         .
         .
         .
@@ -532,7 +532,7 @@
     <address><a href="mailto:matzke@llnl.gov">Robb Matzke</a></address>
 <!-- Created: Tue Jan 27 09:11:27 EST 1998 -->
 <!-- hhmts start -->
-Last modified: Thu Aug  6 16:17:08 EDT 1998
+Last modified: Tue Sep  8 14:43:31 EDT 1998
 <!-- hhmts end -->
   </body>
 </html>

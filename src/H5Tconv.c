@@ -644,14 +644,14 @@ H5T_conv_i_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	} else if (src->size>=dst->size) {
 	    sp = dp = (uint8*)buf;
 	    direction = 1;
-	    olap = (size_t)(ceil((double)(src->size)/
-				 (double)(src->size-dst->size))-1);
+	    olap = (size_t)(HDceil((double)(src->size)/
+				   (double)(src->size-dst->size))-1);
 	} else {
 	    sp = (uint8*)buf + (nelmts-1) * src->size;
 	    dp = (uint8*)buf + (nelmts-1) * dst->size;
 	    direction = -1;
-	    olap = (size_t)(ceil((double)(dst->size)/
-				 (double)(dst->size-src->size))-1);
+	    olap = (size_t)(HDceil((double)(dst->size)/
+				   (double)(dst->size-src->size))-1);
 	}
 
 	/* The conversion loop */
@@ -1023,14 +1023,14 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 	} else if (src_p->size>=dst_p->size) {
 	    sp = dp = (uint8*)buf;
 	    direction = 1;
-	    olap = (size_t)(ceil((double)(src_p->size)/
-				 (double)(src_p->size-dst_p->size))-1);
+	    olap = (size_t)(HDceil((double)(src_p->size)/
+				   (double)(src_p->size-dst_p->size))-1);
 	} else {
 	    sp = (uint8*)buf + (nelmts-1) * src_p->size;
 	    dp = (uint8*)buf + (nelmts-1) * dst_p->size;
 	    direction = -1;
-	    olap = (size_t)(ceil((double)(dst_p->size)/
-				 (double)(dst_p->size-src_p->size))-1);
+	    olap = (size_t)(HDceil((double)(dst_p->size)/
+				   (double)(dst_p->size-src_p->size))-1);
 	}
 
 	/* The conversion loop */
@@ -1129,7 +1129,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		msize = src.u.f.msize;
 	    } else {
 		assert("normalization method not implemented yet" && 0);
-		abort();
+		HDabort();
 	    }
 	    
 	    /*
@@ -1151,7 +1151,7 @@ H5T_conv_f_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		expo -= src.u.f.ebias;
 	    } else {
 		assert("normalization method not implemented yet" && 0);
-		abort();
+		HDabort();
 	    }
 
 	    /*
@@ -1406,14 +1406,14 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	} else if (src->size>=dst->size) {
 	    sp = dp = (uint8*)buf;
 	    direction = 1;
-	    olap = (size_t)(ceil((double)(src->size)/
-				 (double)(src->size-dst->size))-1);
+	    olap = (size_t)(HDceil((double)(src->size)/
+				   (double)(src->size-dst->size))-1);
 	} else {
 	    sp = (uint8*)buf + (nelmts-1) * src->size;
 	    dp = (uint8*)buf + (nelmts-1) * dst->size;
 	    direction = -1;
-	    olap = (size_t)(ceil((double)(dst->size)/
-				 (double)(dst->size-src->size))-1);
+	    olap = (size_t)(HDceil((double)(dst->size)/
+				   (double)(dst->size-src->size))-1);
 	}
 
 	/* Allocate the overlap buffer */
@@ -1471,7 +1471,7 @@ H5T_conv_s_s (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		nchars = src->size;
 		while (nchars>0 && ' '==s[nchars-1]) --nchars;
 		nchars = MIN(dst->size, nchars);
-		memcpy(d, s, nchars);
+		HDmemcpy(d, s, nchars);
 		break;
 
 	    case H5T_STR_RESERVED_3:

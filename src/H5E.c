@@ -261,7 +261,7 @@ H5Eprint(FILE *stream)
     if (!stream) stream = stderr;
     fprintf (stream, "HDF5-DIAG: Error detected in thread 0.");
     if (estack && estack->nused>0) fprintf (stream, "  Back trace follows.");
-    fputc ('\n', stream);
+    HDfputc ('\n', stream);
     status = H5E_walk (H5E_WALK_DOWNWARD, H5Ewalk_cb, (void*)stream);
     
     FUNC_LEAVE (status);

@@ -83,12 +83,12 @@ H5O_name_decode(H5F_t __unused__ *f, const uint8 *p,
 
     /* decode */
     if (NULL==(mesg = H5MM_calloc(sizeof(H5O_name_t))) ||
-	NULL==(mesg->s = H5MM_malloc (strlen ((const char*)p)+1))) {
+	NULL==(mesg->s = H5MM_malloc (HDstrlen((const char*)p)+1))) {
 	H5MM_xfree (mesg);
 	HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL,
 		       "memory allocation failed");
     }
-    strcpy (mesg->s, (const char*)p);
+    HDstrcpy(mesg->s, (const char*)p);
 
     FUNC_LEAVE(mesg);
 }
@@ -123,7 +123,7 @@ H5O_name_encode(H5F_t __unused__ *f, uint8 *p, const void *_mesg)
     assert(mesg && mesg->s);
 
     /* encode */
-    strcpy ((char*)p, mesg->s);
+    HDstrcpy((char*)p, mesg->s);
     FUNC_LEAVE(SUCCEED);
 }
 

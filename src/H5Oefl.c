@@ -189,7 +189,7 @@ H5O_efl_encode(H5F_t *f, uint8 *p, const void *_mesg)
 	 */
 	if (0==mesg->slot[i].name_offset) {
 	    offset = H5HL_insert (f, &(mesg->heap_addr),
-				  strlen (mesg->slot[i].name)+1,
+				  HDstrlen (mesg->slot[i].name)+1,
 				  mesg->slot[i].name);
 	    if ((size_t)(-1)==offset) {
 		HRETURN_ERROR (H5E_EFL, H5E_CANTINIT, FAIL,
@@ -447,22 +447,22 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
 			 "external file address overflowed");
 	}
-	if ((fd=open (efl->slot[i].name, O_RDONLY))<0) {
+	if ((fd=HDopen (efl->slot[i].name, O_RDONLY, 0))<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
 			 "unable to open external raw data file");
 	}
-	if (lseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
+	if (HDlseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
 	to_read = MIN(efl->slot[i].size-skip, size);
-	if ((n=read (fd, buf, to_read))<0) {
+	if ((n=HDread (fd, buf, to_read))<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "read error in external raw data file");
 	} else if ((size_t)n<to_read) {
 	    HDmemset (buf+n, 0, to_read-n);
 	}
-	close (fd);
+	HDclose (fd);
 	fd = -1;
 	size -= to_read;
 	buf += to_read;
@@ -472,7 +472,7 @@ H5O_efl_read (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
     ret_value = SUCCEED;
     
  done:
-    if (fd>=0) close (fd);
+    if (fd>=0) HDclose (fd);
     FUNC_LEAVE (ret_value);
 }
 	
@@ -532,8 +532,8 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL,
 			 "external file address overflowed");
 	}
-	if ((fd=open (efl->slot[i].name, O_RDWR))<0) {
-	    if (access (efl->slot[i].name, F_OK)<0) {
+	if ((fd=HDopen (efl->slot[i].name, O_RDWR, 0))<0) {
+	    if (HDaccess (efl->slot[i].name, F_OK)<0) {
 		HGOTO_ERROR (H5E_EFL, H5E_CANTOPENFILE, FAIL,
 			     "external raw data file does not exist");
 	    } else {
@@ -541,16 +541,16 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
 			     "unable to open external raw data file");
 	    }
 	}
-	if (lseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
+	if (HDlseek (fd, (off_t)(efl->slot[i].offset+skip), SEEK_SET)<0) {
 	    HGOTO_ERROR (H5E_EFL, H5E_SEEKERROR, FAIL,
 			 "unable to seek in external raw data file");
 	}
 	to_write = MIN(efl->slot[i].size-skip, size);
-	if ((size_t)write (fd, buf, to_write)!=to_write) {
+	if ((size_t)HDwrite (fd, buf, to_write)!=to_write) {
 	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL,
 			 "write error in external raw data file");
 	} 
-	close (fd);
+	HDclose (fd);
 	fd = -1;
 	size -= to_write;
 	buf += to_write;
@@ -560,7 +560,7 @@ H5O_efl_write (H5F_t __unused__ *f, const H5O_efl_t *efl, haddr_t *addr,
     ret_value = SUCCEED;
     
  done:
-    if (fd>=0) close (fd);
+    if (fd>=0) HDclose (fd);
     FUNC_LEAVE (ret_value);
 }
 	

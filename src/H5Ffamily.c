@@ -117,7 +117,7 @@ H5F_fam_open(const char *name, const H5F_access_t *access_parms,
 				access_parms->u.fam.memb_access,
 				F_OK, NULL)) {
 		break;
-	    } else if (unlink(member_name) < 0) {
+	    } else if (HDunlink(member_name) < 0) {
 		HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "can't delete member");
 	    }
 	}

@@ -272,7 +272,7 @@ H5F_istore_debug_key (FILE *stream, intn indent, intn fwidth,
     for (i=0; i<udata->mesg.ndims; i++) {
 	HDfprintf (stream, "%s%Hd", i?", ":"", key->offset[i]);
     }
-    fputs ("}\n", stream);
+    HDfputs ("}\n", stream);
 
     FUNC_LEAVE (SUCCEED);
 }
