@@ -756,6 +756,7 @@
 ./perform/pio_perf.h
 ./perform/pio_timer.c
 ./perform/pio_timer.h
+./perform/zip_perf.c
 
 ./release_docs/INSTALL
 ./release_docs/INSTALL_TFLOPS
