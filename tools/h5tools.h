@@ -432,5 +432,5 @@ extern int nCols;
 
 
 /* Definitions of useful routines */
-void print_version(char *program_name);
+void print_version(const char *program_name);
 
