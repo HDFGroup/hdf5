@@ -24,11 +24,13 @@
 ./bin/chkconfigure			_DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright			_DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
+./bin/compile
 ./bin/config.guess
 ./bin/config.sub
 ./bin/config_para_ibm_sp.sh 
 ./bin/debug-ohdr			_DO_NOT_DISTRIBUTE_
 ./bin/dependencies
+./bin/depcomp
 ./bin/deploy
 ./bin/distdep
 ./bin/errors			        _DO_NOT_DISTRIBUTE_
