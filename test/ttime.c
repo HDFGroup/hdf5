@@ -20,9 +20,9 @@
 *
 *************************************************************/
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define DATAFILE   "ttime.h5"
 

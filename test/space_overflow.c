@@ -14,7 +14,7 @@
  *		Don't forget to change H5S_MAX_RANK back to its original
  *		value and recompile once the test file is created.
  */
-#include <hdf5.h>
+#include "hdf5.h"
 
 
 /*-------------------------------------------------------------------------

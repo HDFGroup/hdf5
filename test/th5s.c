@@ -20,12 +20,12 @@
 *
 *************************************************************/
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <H5private.h>
-#include <H5Bprivate.h>
-#include <H5Sprivate.h>
-#include <H5Pprivate.h>
+#include "H5private.h"
+#include "H5Bprivate.h"
+#include "H5Sprivate.h"
+#include "H5Pprivate.h"
 
 #define TESTFILE   "th5s.h5"
 #define DATAFILE   "th5s1.h5"

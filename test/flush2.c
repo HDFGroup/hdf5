@@ -10,7 +10,7 @@
  *		as the file was flushed first.  This half tries to read the
  *		file created by the first half.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "flush",

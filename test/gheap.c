@@ -9,14 +9,14 @@
  *		collections but the collections are not related to one
  *		another by anything that appears in the file format.
  */
-#include <h5test.h>
-#include <H5private.h>
-#include <H5Eprivate.h>
-#include <H5Fprivate.h>
-#include <H5Gprivate.h>
-#include <H5HGprivate.h>
-#include <H5Iprivate.h>
-#include <H5Pprivate.h>
+#include "h5test.h"
+#include "H5private.h"
+#include "H5Eprivate.h"
+#include "H5Fprivate.h"
+#include "H5Gprivate.h"
+#include "H5HGprivate.h"
+#include "H5Iprivate.h"
+#include "H5Pprivate.h"
 
 const char *FILENAME[] = {
     "gheap1",

@@ -10,7 +10,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <hdf5.h>
+#include "hdf5.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <ctype.h>
@@ -21,7 +21,7 @@
 #endif
 
 #ifdef H5_HAVE_IO_H
-#	include <io.h>
+#   include <io.h>
 #endif
 
 #ifdef H5_HAVE_UNISTD_H

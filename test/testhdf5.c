@@ -52,7 +52,7 @@ int                     num_errs = 0;
 int                     Verbosity;
 
 /* ANY new test needs to have a prototype in tproto.h */
-#include <testhdf5.h>
+#include "testhdf5.h"
 
 struct TestStruct {
     int    NumErrors;

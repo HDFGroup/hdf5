@@ -5,7 +5,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Wednesday, April  8, 1998
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "big",

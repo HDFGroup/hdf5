@@ -8,7 +8,7 @@
  * Purpose:	Tests extendible datasets.
  */
 
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "extend",

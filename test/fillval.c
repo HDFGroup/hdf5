@@ -7,7 +7,7 @@
  *
  * Purpose:	Tests dataset fill values.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 /*
  * Define NO_FILLING if you want to compare how this test works when there is

@@ -8,8 +8,8 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <hdf5.h>
-#include <H5private.h>
+#include "hdf5.h"
+#include "H5private.h"
 
 #ifdef H5_STDC_HEADERS
 #   include <assert.h>

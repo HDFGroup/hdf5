@@ -8,7 +8,7 @@
 
 /* See H5private.h for how to include headers */
 #undef NDEBUG
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "cmpd_dset",

@@ -23,8 +23,8 @@
  * Include required headers.  This file tests internal library functions,
  * so we include the private headers here.
  */
-#include <H5private.h>
-#include <H5Eprivate.h>
+#include "H5private.h"
+#include "H5Eprivate.h"
 
 #ifndef HDF5_TEST_MASTER
 extern int              num_errs;

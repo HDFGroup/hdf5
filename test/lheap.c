@@ -7,9 +7,9 @@
  *
  * Purpose:	Test local heaps used by symbol tables (groups).
  */
-#include <h5test.h>
-#include <H5HLprivate.h>
-#include <H5Iprivate.h>
+#include "h5test.h"
+#include "H5HLprivate.h"
+#include "H5Iprivate.h"
 
 const char *FILENAME[] = {
     "lheap",

@@ -7,7 +7,7 @@
  *
  * Purpose:	Test H5Gunlink().
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "unlink",

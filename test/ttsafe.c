@@ -39,7 +39,8 @@
 #endif
 
 #include <stdarg.h>
-#include <ttsafe.h>
+
+#include "ttsafe.h"
 
 #ifndef H5_HAVE_THREADSAFE
 int main(void)

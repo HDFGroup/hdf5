@@ -10,7 +10,7 @@
  *		very OS-dependent and this test tries to figure out if it's
  *		working properly.
  */
-#include <h5test.h>
+#include "h5test.h"
 
 const char *FILENAME[] = {
     "mtime",

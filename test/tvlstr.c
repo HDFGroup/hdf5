@@ -24,9 +24,9 @@
 #include <stdio.h>
 #endif
 
-#include <testhdf5.h>
+#include "testhdf5.h"
 
-#include <hdf5.h>
+#include "hdf5.h"
 
 #define DATAFILE   "tvlstr.h5"
 
