@@ -558,247 +558,208 @@ H5T_init_interface(void)
     if (NULL==(native_double=H5I_object(H5T_NATIVE_DOUBLE_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype object");
 
-    /* Use this global as a proxy for all the globals, since they all get
-     * initialized and shutdown at the same time.
+    /*------------------------------------------------------------
+     * Native types
+     *------------------------------------------------------------ 
      */
-    if(H5T_NATIVE_INT_LEAST8_g<0) {
-        /*------------------------------------------------------------
-         * Defaults for C9x types
-         *------------------------------------------------------------ 
-         */
 
-        /* int8 */
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST8_g,COPY,native_int,SET,1)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST8_g,COPY,native_uint,SET,1)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST8_g,COPY,native_int,SET,1)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST8_g,COPY,native_uint,SET,1)
-        
-        /* int16 */
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST16_g,COPY,native_int,SET,2)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST16_g,COPY,native_uint,SET,2)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST16_g,COPY,native_int,SET,2)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST16_g,COPY,native_uint,SET,2)
-        
-        /* int32 */
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST32_g,COPY,native_int,SET,4)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST32_g,COPY,native_uint,SET,4)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST32_g,COPY,native_int,SET,4)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST32_g,COPY,native_uint,SET,4)
-        
-        /* int64 */
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_LEAST64_g,COPY,native_int,SET,8)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_LEAST64_g,COPY,native_uint,SET,8)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_INT_FAST64_g,COPY,native_int,SET,8)
-        H5T_INIT_TYPE(NONE,H5T_NATIVE_UINT_FAST64_g,COPY,native_uint,SET,8)
-        
+    /* 1-byte bit field */
+    H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B8_g,COPY,native_uint,SET,1)
+    
+    /* 2-byte bit field */
+    H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B16_g,COPY,native_uint,SET,2)
+    
+    /* 4-byte bit field */
+    H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B32_g,COPY,native_uint,SET,4)
+    
+    /* 8-byte bit field */
+    H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B64_g,COPY,native_uint,SET,8)
+    
+    /* haddr_t */
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HADDR_g,COPY,native_uint,SET,sizeof(haddr_t))
 
-        /*------------------------------------------------------------
-         * Native types
-         *------------------------------------------------------------ 
-         */
+    /* hsize_t */
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSIZE_g,COPY,native_uint,SET,sizeof(hsize_t))
+    
+    /* hssize_t */
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSSIZE_g,COPY,native_int,SET,sizeof(hssize_t))
+    
+    /* herr_t */
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HERR_g,COPY,native_int,SET,sizeof(herr_t))
 
-        /* 1-byte bit field */
-        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B8_g,COPY,native_uint,SET,1)
-        
-        /* 2-byte bit field */
-        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B16_g,COPY,native_uint,SET,2)
-        
-        /* 4-byte bit field */
-        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B32_g,COPY,native_uint,SET,4)
-        
-        /* 8-byte bit field */
-        H5T_INIT_TYPE(BITFIELD,H5T_NATIVE_B64_g,COPY,native_uint,SET,8)
-        
-        /* haddr_t */
-        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HADDR_g,COPY,native_uint,SET,sizeof(haddr_t))
+    /* hbool_t */
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HBOOL_g,COPY,native_int,SET,sizeof(hbool_t))
 
-        /* hsize_t */
-        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSIZE_g,COPY,native_uint,SET,sizeof(hsize_t))
-        
-        /* hssize_t */
-        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HSSIZE_g,COPY,native_int,SET,sizeof(hssize_t))
-        
-        /* herr_t */
-        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HERR_g,COPY,native_int,SET,sizeof(herr_t))
+    /*------------------------------------------------------------
+     * IEEE Types
+     *------------------------------------------------------------ 
+     */
 
-        /* hbool_t */
-        H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HBOOL_g,COPY,native_int,SET,sizeof(hbool_t))
+    /* IEEE 4-byte little-endian float */
+    H5T_INIT_TYPE(FLOATLE,H5T_IEEE_F32LE_g,COPY,native_double,SET,4)
 
-        /*------------------------------------------------------------
-         * IEEE Types
-         *------------------------------------------------------------ 
-         */
+    /* IEEE 4-byte big-endian float */
+    H5T_INIT_TYPE(FLOATBE,H5T_IEEE_F32BE_g,COPY,native_double,SET,4)
 
-        /* IEEE 4-byte little-endian float */
-        H5T_INIT_TYPE(FLOATLE,H5T_IEEE_F32LE_g,COPY,native_double,SET,4)
+    /* IEEE 8-byte little-endian float */
+    H5T_INIT_TYPE(DOUBLELE,H5T_IEEE_F64LE_g,COPY,native_double,SET,8)
+    ieee_f64le=dt;    /* Keep type for later */
 
-        /* IEEE 4-byte big-endian float */
-        H5T_INIT_TYPE(FLOATBE,H5T_IEEE_F32BE_g,COPY,native_double,SET,4)
+    /* IEEE 8-byte big-endian float */
+    H5T_INIT_TYPE(DOUBLEBE,H5T_IEEE_F64BE_g,COPY,native_double,SET,8)
 
-        /* IEEE 8-byte little-endian float */
-        H5T_INIT_TYPE(DOUBLELE,H5T_IEEE_F64LE_g,COPY,native_double,SET,8)
+    /*------------------------------------------------------------
+     * Other "standard" types
+     *------------------------------------------------------------ 
+     */
 
-        /* IEEE 8-byte big-endian float */
-        H5T_INIT_TYPE(DOUBLEBE,H5T_IEEE_F64BE_g,COPY,native_double,SET,8)
+    /* 1-byte little-endian (endianness is irrelevant) signed integer */
+    H5T_INIT_TYPE(SINTLE,H5T_STD_I8LE_g,COPY,native_int,SET,1)
+    
+    /* 1-byte big-endian (endianness is irrelevant) signed integer */
+    H5T_INIT_TYPE(SINTBE,H5T_STD_I8BE_g,COPY,native_int,SET,1)
+    
+    /* 2-byte little-endian signed integer */
+    H5T_INIT_TYPE(SINTLE,H5T_STD_I16LE_g,COPY,native_int,SET,2)
+    
+    /* 2-byte big-endian signed integer */
+    H5T_INIT_TYPE(SINTBE,H5T_STD_I16BE_g,COPY,native_int,SET,2)
+    
+    /* 4-byte little-endian signed integer */
+    H5T_INIT_TYPE(SINTLE,H5T_STD_I32LE_g,COPY,native_int,SET,4)
+    std_i32le=dt;    /* Keep type for later */
+    
+    /* 4-byte big-endian signed integer */
+    H5T_INIT_TYPE(SINTBE,H5T_STD_I32BE_g,COPY,native_int,SET,4)
+    
+    /* 8-byte little-endian signed integer */
+    H5T_INIT_TYPE(SINTLE,H5T_STD_I64LE_g,COPY,native_int,SET,8)
+    
+    /* 8-byte big-endian signed integer */
+    H5T_INIT_TYPE(SINTBE,H5T_STD_I64BE_g,COPY,native_int,SET,8)
+    
+    /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
+    H5T_INIT_TYPE(UINTLE,H5T_STD_U8LE_g,COPY,native_uint,SET,1)
+    std_u8le=dt;    /* Keep type for later */
+    
+    /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
+    H5T_INIT_TYPE(UINTBE,H5T_STD_U8BE_g,COPY,native_uint,SET,1)
+    std_u8be=dt;    /* Keep type for later */
+    
+    /* 2-byte little-endian unsigned integer */
+    H5T_INIT_TYPE(UINTLE,H5T_STD_U16LE_g,COPY,native_uint,SET,2)
+    std_u16le=dt;    /* Keep type for later */
+    
+    /* 2-byte big-endian unsigned integer */
+    H5T_INIT_TYPE(UINTBE,H5T_STD_U16BE_g,COPY,native_uint,SET,2)
+    std_u16be=dt;    /* Keep type for later */
+    
+    /* 4-byte little-endian unsigned integer */
+    H5T_INIT_TYPE(UINTLE,H5T_STD_U32LE_g,COPY,native_uint,SET,4)
+    std_u32le=dt;    /* Keep type for later */
+    
+    /* 4-byte big-endian unsigned integer */
+    H5T_INIT_TYPE(UINTBE,H5T_STD_U32BE_g,COPY,native_uint,SET,4)
+    std_u32be=dt;    /* Keep type for later */
+    
+    /* 8-byte little-endian unsigned integer */
+    H5T_INIT_TYPE(UINTLE,H5T_STD_U64LE_g,COPY,native_uint,SET,8)
+    std_u64le=dt;    /* Keep type for later */
+    
+    /* 8-byte big-endian unsigned integer */
+    H5T_INIT_TYPE(UINTBE,H5T_STD_U64BE_g,COPY,native_uint,SET,8)
+    std_u64be=dt;    /* Keep type for later */
+    
+    /*------------------------------------------------------------
+     * Little- & Big-endian bitfields
+     *------------------------------------------------------------ 
+     */
 
-        /*------------------------------------------------------------
-         * Other "standard" types
-         *------------------------------------------------------------ 
-         */
-        
+    /* little-endian (order is irrelevant) 8-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B8LE_g,COPY,std_u8le,NOSET,-)
+    bitfield=dt;    /* Keep type for later */
 
-        /* 1-byte little-endian (endianness is irrelevant) signed integer */
-        H5T_INIT_TYPE(SINTLE,H5T_STD_I8LE_g,COPY,native_int,SET,1)
-        
-        /* 1-byte big-endian (endianness is irrelevant) signed integer */
-        H5T_INIT_TYPE(SINTBE,H5T_STD_I8BE_g,COPY,native_int,SET,1)
-        
-        /* 2-byte little-endian signed integer */
-        H5T_INIT_TYPE(SINTLE,H5T_STD_I16LE_g,COPY,native_int,SET,2)
-        
-        /* 2-byte big-endian signed integer */
-        H5T_INIT_TYPE(SINTBE,H5T_STD_I16BE_g,COPY,native_int,SET,2)
-        
-        /* 4-byte little-endian signed integer */
-        H5T_INIT_TYPE(SINTLE,H5T_STD_I32LE_g,COPY,native_int,SET,4)
-        
-        /* 4-byte big-endian signed integer */
-        H5T_INIT_TYPE(SINTBE,H5T_STD_I32BE_g,COPY,native_int,SET,4)
-        
-        /* 8-byte little-endian signed integer */
-        H5T_INIT_TYPE(SINTLE,H5T_STD_I64LE_g,COPY,native_int,SET,8)
-        
-        /* 8-byte big-endian signed integer */
-        H5T_INIT_TYPE(SINTBE,H5T_STD_I64BE_g,COPY,native_int,SET,8)
-        
-        /* 1-byte little-endian (endianness is irrelevant) unsigned integer */
-        H5T_INIT_TYPE(UINTLE,H5T_STD_U8LE_g,COPY,native_uint,SET,1)
-        std_u8le=dt;    /* Keep type for later */
-        
-        /* 1-byte big-endian (endianness is irrelevant) unsigned integer */
-        H5T_INIT_TYPE(UINTBE,H5T_STD_U8BE_g,COPY,native_uint,SET,1)
-        std_u8be=dt;    /* Keep type for later */
-        
-        /* 2-byte little-endian unsigned integer */
-        H5T_INIT_TYPE(UINTLE,H5T_STD_U16LE_g,COPY,native_uint,SET,2)
-        std_u16le=dt;    /* Keep type for later */
-        
-        /* 2-byte big-endian unsigned integer */
-        H5T_INIT_TYPE(UINTBE,H5T_STD_U16BE_g,COPY,native_uint,SET,2)
-        std_u16be=dt;    /* Keep type for later */
-        
-        /* 4-byte little-endian unsigned integer */
-        H5T_INIT_TYPE(UINTLE,H5T_STD_U32LE_g,COPY,native_uint,SET,4)
-        std_u32le=dt;    /* Keep type for later */
-        
-        /* 4-byte big-endian unsigned integer */
-        H5T_INIT_TYPE(UINTBE,H5T_STD_U32BE_g,COPY,native_uint,SET,4)
-        std_u32be=dt;    /* Keep type for later */
-        
-        /* 8-byte little-endian unsigned integer */
-        H5T_INIT_TYPE(UINTLE,H5T_STD_U64LE_g,COPY,native_uint,SET,8)
-        std_u64le=dt;    /* Keep type for later */
-        
-        /* 8-byte big-endian unsigned integer */
-        H5T_INIT_TYPE(UINTBE,H5T_STD_U64BE_g,COPY,native_uint,SET,8)
-        std_u64be=dt;    /* Keep type for later */
-        
+    /* big-endian (order is irrelevant) 8-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B8BE_g,COPY,std_u8be,NOSET,-)
 
-        /*------------------------------------------------------------
-         * Little- & Big-endian bitfields
-         *------------------------------------------------------------ 
-         */
+    /* Little-endian 16-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B16LE_g,COPY,std_u16le,NOSET,-)
 
-        /* little-endian (order is irrelevant) 8-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B8LE_g,COPY,std_u8le,NOSET,-)
+    /* Big-endian 16-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B16BE_g,COPY,std_u16be,NOSET,-)
 
-        /* big-endian (order is irrelevant) 8-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B8BE_g,COPY,std_u8be,NOSET,-)
+    /* Little-endian 32-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B32LE_g,COPY,std_u32le,NOSET,-)
 
-        /* Little-endian 16-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B16LE_g,COPY,std_u16le,NOSET,-)
+    /* Big-endian 32-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B32BE_g,COPY,std_u32be,NOSET,-)
 
-        /* Big-endian 16-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B16BE_g,COPY,std_u16be,NOSET,-)
+    /* Little-endian 64-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B64LE_g,COPY,std_u64le,NOSET,-)
 
-        /* Little-endian 32-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B32LE_g,COPY,std_u32le,NOSET,-)
+    /* Big-endian 64-bit bitfield */
+    H5T_INIT_TYPE(BITFIELD,H5T_STD_B64BE_g,COPY,std_u64be,NOSET,-)
 
-        /* Big-endian 32-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B32BE_g,COPY,std_u32be,NOSET,-)
+    /*------------------------------------------------------------
+     * The Unix architecture for dates and times.
+     *------------------------------------------------------------ 
+     */
 
-        /* Little-endian 64-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B64LE_g,COPY,std_u64le,NOSET,-)
+    /* Little-endian 32-bit UNIX time_t */
+    H5T_INIT_TYPE(TIME,H5T_UNIX_D32LE_g,COPY,std_u32le,NOSET,-)
 
-        /* Big-endian 64-bit bitfield */
-        H5T_INIT_TYPE(BITFIELD,H5T_STD_B64BE_g,COPY,std_u64be,NOSET,-)
+    /* Big-endian 32-bit UNIX time_t */
+    H5T_INIT_TYPE(TIME,H5T_UNIX_D32BE_g,COPY,std_u32be,NOSET,-)
 
-        /*------------------------------------------------------------
-         * The Unix architecture for dates and times.
-         *------------------------------------------------------------ 
-         */
+    /* Little-endian 64-bit UNIX time_t */
+    H5T_INIT_TYPE(TIME,H5T_UNIX_D64LE_g,COPY,std_u64le,NOSET,-)
 
-        /* Little-endian 32-bit UNIX time_t */
-        H5T_INIT_TYPE(TIME,H5T_UNIX_D32LE_g,COPY,std_u32le,NOSET,-)
-
-        /* Big-endian 32-bit UNIX time_t */
-        H5T_INIT_TYPE(TIME,H5T_UNIX_D32BE_g,COPY,std_u32be,NOSET,-)
-
-        /* Little-endian 64-bit UNIX time_t */
-        H5T_INIT_TYPE(TIME,H5T_UNIX_D64LE_g,COPY,std_u64le,NOSET,-)
-
-        /* Big-endian 64-bit UNIX time_t */
-        H5T_INIT_TYPE(TIME,H5T_UNIX_D64BE_g,COPY,std_u64be,NOSET,-)
+    /* Big-endian 64-bit UNIX time_t */
+    H5T_INIT_TYPE(TIME,H5T_UNIX_D64BE_g,COPY,std_u64be,NOSET,-)
 
 
-        /* Indicate that the types that are created from here down are allocated
-         * H5FL_ALLOC(), not copied with H5T_copy()
-         */
-         copied_dtype=0;
+    /* Indicate that the types that are created from here down are allocated
+     * H5FL_ALLOC(), not copied with H5T_copy()
+     */
+     copied_dtype=0;
 
-        /* Opaque data */
-        H5T_INIT_TYPE(OPAQ,H5T_NATIVE_OPAQUE_g,ALLOC,-,SET,1)
+    /* Opaque data */
+    H5T_INIT_TYPE(OPAQ,H5T_NATIVE_OPAQUE_g,ALLOC,-,SET,1)
 
-        /*------------------------------------------------------------
-         * The `C' architecture
-         *------------------------------------------------------------ 
-         */
+    /*------------------------------------------------------------
+     * The `C' architecture
+     *------------------------------------------------------------ 
+     */
 
-        /* One-byte character string */
-        H5T_INIT_TYPE(CSTRING,H5T_C_S1_g,ALLOC,-,SET,1)
+    /* One-byte character string */
+    H5T_INIT_TYPE(CSTRING,H5T_C_S1_g,ALLOC,-,SET,1)
+    string=dt;    /* Keep type for later */
 
-        /*------------------------------------------------------------
-         * The `Fortran' architecture
-         *------------------------------------------------------------ 
-         */
+    /*------------------------------------------------------------
+     * The `Fortran' architecture
+     *------------------------------------------------------------ 
+     */
 
-        /* One-byte character string */
-        H5T_INIT_TYPE(FORSTRING,H5T_FORTRAN_S1_g,ALLOC,-,SET,1)
+    /* One-byte character string */
+    H5T_INIT_TYPE(FORSTRING,H5T_FORTRAN_S1_g,ALLOC,-,SET,1)
 
-        /*------------------------------------------------------------
-         * Pointer types
-         *------------------------------------------------------------ 
-         */
+    /*------------------------------------------------------------
+     * Pointer types
+     *------------------------------------------------------------ 
+     */
 
-        /* Object pointer (i.e. object header address in file) */
-        H5T_INIT_TYPE(OBJREF,H5T_STD_REF_OBJ_g,ALLOC,-,SET,H5R_OBJ_REF_BUF_SIZE)
-        
-        /* Dataset Region pointer (i.e. selection inside a dataset) */
-        H5T_INIT_TYPE(REGREF,H5T_STD_REF_DSETREG_g,ALLOC,-,SET,H5R_DSET_REG_REF_BUF_SIZE)
-    } /* end if */
+    /* Object pointer (i.e. object header address in file) */
+    H5T_INIT_TYPE(OBJREF,H5T_STD_REF_OBJ_g,ALLOC,-,SET,H5R_OBJ_REF_BUF_SIZE)
+    
+    /* Dataset Region pointer (i.e. selection inside a dataset) */
+    H5T_INIT_TYPE(REGREF,H5T_STD_REF_DSETREG_g,ALLOC,-,SET,H5R_DSET_REG_REF_BUF_SIZE)
 
     /*
      * Register conversion functions beginning with the most general and
      * ending with the most specific.
      */
-    if (NULL == (fixedpt = H5I_object(H5T_NATIVE_INT_g)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL == (floatpt = H5I_object(H5T_NATIVE_FLOAT_g)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL == (string = H5I_object(H5T_C_S1_g)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL == (bitfield = H5I_object(H5T_STD_B8LE_g)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    fixedpt = native_int;
+    floatpt = native_float;
     if (NULL == (compound = H5T_create(H5T_COMPOUND, 1)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (enum_type = H5T_create(H5T_ENUM, 1)))
@@ -807,12 +768,6 @@ H5T_init_interface(void)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     if (NULL == (array = H5T_array_create(native_int,1,dim,NULL)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL==(std_u32le=H5I_object(H5T_STD_U32LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL==(std_i32le=H5I_object(H5T_STD_I32LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if (NULL==(ieee_f64le=H5I_object(H5T_IEEE_F64LE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
     status = 0;
 
     status |= H5T_register(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T_conv_i_i, H5AC_dxpl_id);
