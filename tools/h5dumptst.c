@@ -36,6 +36,7 @@
 #define FILE29	"tarray5.h5"
 #define FILE30	"tarray6.h5"
 #define FILE31	"tarray7.h5"
+#define FILE32	"tempty.h5"
 
 #define LENSTR		50
 #define LENSTR2		11
@@ -2466,6 +2467,61 @@ static void test_array7(void)
     ret = H5Fclose(fid1);
 }
 
+static void test_empty(void)
+{
+    typedef struct {
+        int a;
+        float b;
+        char c;
+    } empty_struct;
+    hid_t file, dset, space, type;
+    hsize_t dims[] = { SPACE1_DIM1 };
+    herr_t ret=0;
+
+    ret = ret;	/* so that compiler won't complain "is set but never used" */
+    file = H5Fcreate(FILE32, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    space = H5Screate_simple(SPACE1_RANK, dims, NULL);
+
+    /* write out an empty vlen dataset */
+    type = H5Tvlen_create(H5T_NATIVE_INT);
+    dset = H5Dcreate(file, "Dataset1.0", type, space, H5P_DEFAULT);
+    /* Don't write any data */
+    ret = H5Dclose(dset);
+    ret = H5Tclose(type);
+
+    /* write out an empty native integer dataset dataset */
+    dset = H5Dcreate(file, "Dataset2.0", H5T_NATIVE_INT, space, H5P_DEFAULT);
+    /* Don't write any data */
+    ret = H5Dclose(dset);
+
+    /* write out an empty native floating-point dataset dataset */
+    dset = H5Dcreate(file, "Dataset3.0", H5T_NATIVE_FLOAT, space, H5P_DEFAULT);
+    /* Don't write any data */
+    ret = H5Dclose(dset);
+
+    /* write out an empty array dataset */
+    type = H5Tarray_create(H5T_NATIVE_INT,SPACE1_RANK,dims,NULL);
+    dset = H5Dcreate(file, "Dataset4.0", type, space, H5P_DEFAULT);
+    /* Don't write any data */
+    ret = H5Dclose(dset);
+    ret = H5Tclose(type);
+
+    /* write out an empty compound dataset */
+    type = H5Tcreate(H5T_COMPOUND,sizeof(empty_struct));
+    H5Tinsert(type, "a", HOFFSET(empty_struct, a),H5T_NATIVE_INT);
+    H5Tinsert(type, "b", HOFFSET(empty_struct, b),H5T_NATIVE_FLOAT);
+    H5Tinsert(type, "c", HOFFSET(empty_struct, c),H5T_NATIVE_CHAR);
+    dset = H5Dcreate(file, "Dataset5.0", type, space, H5P_DEFAULT);
+    /* Don't write any data */
+    ret = H5Dclose(dset);
+    ret = H5Tclose(type);
+
+    ret = H5Sclose(space);
+
+    ret = H5Fclose(file);
+}
+
 int main(void)
 {
     test_group();
@@ -2508,6 +2564,8 @@ int main(void)
     test_array5();
     test_array6();
     test_array7();
+
+    test_empty();
 
     return 0;
 }

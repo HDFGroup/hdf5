@@ -130,6 +130,9 @@ TOOLTEST tvldtypes1.ls -w80 -r -d tvldtypes1.h5
 # test for array data types
 TOOLTEST tarray1.ls -w80 -r -d tarray1.h5
 
+# test for empty data
+TOOLTEST tempty.ls -w80 -d tempty.h5
+
 if test $nerrors -eq 0 ; then
 	echo "All $h5tool tests passed."
 fi
