@@ -1,4 +1,4 @@
-HDF5 version 1.7.26 released on Sun May 16 09:00:53 CDT 2004
+HDF5 version 1.7.27 released on Sun Jun  6 03:25:48 CDT 2004
 ================================================================================
 
 
@@ -36,6 +36,8 @@ New Features
 
     Configuration:
     --------------
+        - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
+	  is used with optimization NOT off.  AKC - 2004/05/20
 	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
         - Prefix default is changed from /usr/local to `pwd`/hdf5.
           AKC - 2003/07/09
@@ -129,6 +131,8 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Opaque datatype with no tag failed for some operations.  Fixed.
+            SLU - 2004/6/3 
 	- Fixed dtypes "sw long double -> double" failure in QSC class
 	  machines.  AKC - 2004/4/16
         - Fixed problem with fletcher32 filter when converting data of different
