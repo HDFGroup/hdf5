@@ -56,9 +56,9 @@ typedef struct err_num_struct {
 } err_num_t;
 
 err_num_t expected[] = {
-	{15, 23},
-	{15, 23},
-	{10, 32}
+	{H5E_DATASET, H5E_CANTINIT},
+	{H5E_DATASET, H5E_CANTINIT},
+	{H5E_SYM, H5E_EXISTS}
 };
 
 int error_flag = 0;
