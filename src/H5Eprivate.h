@@ -27,7 +27,7 @@
 
 #ifndef NEW_ERR
 
-#define H5E_ERRCLS_RESERVED_ATOMS  0
+#define H5E_RESERVED_ATOMS  0
 
 typedef struct H5E_cls_t {
     char *cls_name;
@@ -35,15 +35,17 @@ typedef struct H5E_cls_t {
     char *lib_vers;
 } H5E_cls_t;
 
-typedef struct H5E_maj_t {
-    char *mesg;
-    H5E_cls_t  *cls;
-} H5E_maj_t;
+typedef struct H5E_msg_t {
+    char        *msg;
+    H5E_type_t   type;
+    H5E_cls_t   *cls;
+} H5E_msg_t;
 
-typedef struct H5E_min_t {
-    char *mesg;
-    H5E_cls_t  *cls;
-} H5E_min_t;
+/* An error stack */
+typedef struct H5E_t_new {
+    int	nused;			        /*num slots currently used in stack  */
+    H5E_error_t_new slot[H5E_NSLOTS];	/*array of error records	     */
+} H5E_t_new;
 
 #ifdef TMP
 /* HDF5 error class */
@@ -276,6 +278,18 @@ H5_DLL herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 H5_DLL herr_t H5E_clear (void);
 H5_DLL herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func,
 			 void *client_data);
+
+#ifndef NEW_ERR
+/* New error API */
+H5_DLL hid_t  H5E_register_class(const char *cls_name, const char *lib_name, 
+                                const char *version);
+H5_DLL herr_t  H5E_unregister_class(H5E_cls_t *cls);
+H5_DLL herr_t H5E_close_msg(H5E_msg_t *err);
+H5_DLL hid_t  H5E_create_msg(hid_t cls_id, H5E_type_t msg_type, const char *msg);
+H5_DLL hid_t  H5E_get_current_stack(void);
+H5_DLL herr_t H5E_close_stack(H5E_t_new *err_stack);
+
+#endif /* NEW_ERR */
 
 #ifdef H5_HAVE_PARALLEL
 /*

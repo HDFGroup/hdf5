@@ -26,12 +26,26 @@
 
 #ifndef NEW_ERR
 
-typedef enum H5E_msg_t {
-    H5E_MSG_ERROR   =-1,
-    H5E_MSG_MAJOR,
-    H5E_MSG_MINOR,
-    H5E_MSG_LIMIT
-} H5E_msg_t;
+#define H5E_DEFAULT             0
+
+/* Take out _new later */
+typedef enum H5E_type_t {
+    H5E_ERROR_new   =-1,
+    H5E_MAJOR_new,
+    H5E_MINOR_new,
+    H5E_LIMIT_new
+} H5E_type_t;
+
+/* Information about an error; element of error stack */
+typedef struct H5E_error_t_new {
+    hid_t       cls_id;         /*class ID                           */
+    hid_t       maj_id;		/*major error ID		     */
+    hid_t       min_id;		/*minor error number		     */
+    const char	*func_name;   	/*function in which error occurred   */
+    const char	*file_name;	/*file in which error occurred       */
+    unsigned	line;		/*line in file where error occurs    */
+    const char	*desc;		/*optional supplied description      */
+} H5E_error_t_new;
 
 /* When this header is included from H5Eprivate.h, don't make calls to H5open() */
 #undef H5OPEN
@@ -417,8 +431,6 @@ extern "C" {
 typedef herr_t (*H5E_walk_t)(int n, H5E_error_t *err_desc, void *client_data);
 typedef herr_t (*H5E_auto_t)(void *client_data);
 
-H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
-H5_DLL herr_t H5Eunregister_class(hid_t class_id);
 H5_DLL herr_t H5Eset_auto (H5E_auto_t func, void *client_data);
 H5_DLL herr_t H5Eget_auto (H5E_auto_t *func, void **client_data);
 H5_DLL herr_t H5Eclear (void);
@@ -429,6 +441,14 @@ H5_DLL const char *H5Eget_major (H5E_major_t major_number);
 H5_DLL const char *H5Eget_minor (H5E_minor_t minor_number);
 H5_DLL herr_t H5Epush(const char *file, const char *func,
             unsigned line, H5E_major_t maj, H5E_minor_t min, const char *str);
+
+/* New error API */
+H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name, const char *version);
+H5_DLL herr_t H5Eunregister_class(hid_t class_id);
+H5_DLL herr_t H5Eclose_msg(hid_t err_id);
+H5_DLL hid_t  H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
+H5_DLL hid_t  H5Eget_current_stack(void);
+H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 
 #ifdef __cplusplus
 }

@@ -206,7 +206,32 @@ static int interface_initialize_g = 0;
  * types to reset in H5E_term_interface().
  */
 hid_t H5E_ERR_CLS_g			= FAIL;
+
 #endif /* NEW_ERR */
+
+#ifndef NEW_ERR
+#ifdef H5_HAVE_THREADSAFE
+/*
+ * The per-thread error stack. pthread_once() initializes a special
+ * key that will be used by all threads to create a stack specific to
+ * each thread individually. The association of stacks to threads will
+ * be handled by the pthread library.
+ *
+ * In order for this macro to work, H5E_get_my_stack() must be preceeded
+ * by "H5E_t *estack =".
+ */
+H5E_t_new *H5E_get_stack_new(void);
+#define H5E_get_my_stack_new()  H5E_get_stack_new()
+#else
+/*
+ * The error stack.  Eventually we'll have some sort of global table so each
+ * thread has it's own stack.  The stacks will be created on demand when the
+ * thread first calls H5E_push().  */
+H5E_t_new		H5E_stack_g_new[1];
+#define H5E_get_my_stack_new()	(H5E_stack_g_new+0)
+#endif
+
+#endif
 
 #ifdef H5_HAVE_THREADSAFE
 /*
@@ -249,9 +274,7 @@ void *H5E_auto_data_g = NULL;
 /* Static function declarations */
 static herr_t H5E_init_interface (void);
 #ifndef NEW_ERR
-static hid_t  H5E_register_class(const char *cls_name, const char *lib_name, 
-                                const char *version);
-static hid_t  H5E_unregister_class(H5E_cls_t *cls);
+static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key);
 #endif /* NEW_ERR */
 static herr_t H5E_walk_cb (int n, H5E_error_t *err_desc, void *client_data);
 
@@ -318,10 +341,15 @@ H5E_init_interface(void)
 
     FUNC_ENTER_NOINIT(H5E_init_interface);
 
-    /* Initialize the atom group for the dataset IDs */
-    if(H5I_init_group(H5I_ERROR_CLASS, H5I_ERRORCLS_HASHSIZE, H5E_ERRCLS_RESERVED_ATOMS, 
-                    (H5I_free_t)H5E_unregister_class)<0)
-	HGOTO_ERROR (H5E_ERROR, H5E_CANTINIT, FAIL, "unable to initialize interface");
+    /* Initialize the atom group for the error class IDs */
+    H5I_init_group(H5I_ERROR_CLASS, H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_unregister_class);
+    /* Initialize the atom group for the major error IDs */
+    H5I_init_group(H5I_ERROR_MSG, H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_close_msg);
+    /* Initialize the atom group for the error stacks */
+    H5I_init_group(H5I_ERROR_STACK, H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS, 
+                    (H5I_free_t)H5E_close_stack);
 
     /* From the old function; take out later */
     H5E_auto_data_g = stderr;
@@ -407,7 +435,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 H5E_register_class(const char *cls_name, const char *lib_name, const char *version)
 {
     hid_t       ret_value;   /* Return value */
@@ -488,21 +516,383 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+herr_t
 H5E_unregister_class(H5E_cls_t *cls)
 {
     herr_t       ret_value = SUCCEED;   /* Return value */
     
     FUNC_ENTER_NOAPI(H5E_unregister_class, FAIL);
+
+    H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls);
+
+    if(cls) {
+        if(cls->cls_name)    
+            H5MM_xfree(cls->cls_name);
+        if(cls->lib_name)
+            H5MM_xfree(cls->lib_name);
+        if(cls->lib_vers)
+            H5MM_xfree(cls->lib_vers);
+        H5MM_xfree(cls);
+    }
     
-    H5MM_xfree(cls->cls_name);
-    H5MM_xfree(cls->lib_name);
-    H5MM_xfree(cls->lib_vers);
-    H5MM_xfree(cls);
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E_close_msg_cb
+ *
+ * Purpose:     H5I_search callback function to close error messages in the
+ *              error class.
+ *
+ * Programmer:  Raymond Lu
+ *              July 14, 2003
+ *              
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5E_msg_t   *err_msg = (H5E_msg_t*)obj_ptr;
+    H5E_cls_t   *cls = (H5E_cls_t*)key;
+        
+    FUNC_ENTER_NOAPI(H5_close_msg_cb, FAIL);
+  
+    assert(obj_ptr);
+
+    if(err_msg->cls == cls)
+        H5E_close_msg(err_msg);
+    
+ done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eclose_msg
+ *
+ * Purpose:	Closes a major or minor error.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eclose_msg(hid_t err_id)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_msg_t    *err;
+    
+    FUNC_ENTER_API(H5Eclose_msg, FAIL);
+    H5TRACE1("e","i",err_id);
+
+    /* Need to check for errors */
+    err = H5I_object_verify(err_id, H5I_ERROR_MSG);
+    
+    /* Decrement the counter.  It will be freed if the count reaches zero. */
+    H5I_dec_ref(err_id);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_close_msg
+ *
+ * Purpose:	Private function to close an error messge.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_close_msg(H5E_msg_t *err)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5E_close_msg, FAIL);
+
+    /* Doesn't free err->cls here */
+    if(err) {
+        if(err->msg)    
+            H5MM_xfree(err->msg);
+        H5MM_xfree(err);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Ecreate_msg
+ *
+ * Purpose:	Creates a major or minor error, returns an ID.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg)
+{
+    hid_t       ret_value;   /* Return value */
+    
+    FUNC_ENTER_API(H5Ecreate_msg, FAIL);
+    
+    ret_value = H5E_create_msg(cls, msg_type, msg);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_create_msg
+ *
+ * Purpose:	Private function to create a major or minor error.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5E_create_msg(hid_t cls_id, H5E_type_t msg_type, const char *msg)
+{
+    hid_t       ret_value;   /* Return value */
+    H5E_msg_t   *msg_ptr;
+    
+    FUNC_ENTER_NOAPI(H5E_create_msg, FAIL);
+    
+    /* Check arguments */
+    assert(msg);
+
+    /* Need to check for failures from malloc & strdup */
+    msg_ptr = H5MM_malloc(sizeof(H5E_msg_t));
+
+    msg_ptr->cls = H5I_object_verify(cls_id, H5I_ERROR_CLASS);
+    msg_ptr->type = msg_type;
+    msg_ptr->msg = HDstrdup(msg);
+
+    /* Register the new error message to get an ID for it */
+    /* Need to check for error */
+    ret_value = H5I_register(H5I_ERROR_MSG, msg_ptr);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+#ifdef H5_HAVE_THREADSAFE
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_stack_new
+ *
+ * Purpose:	Support function for H5E_get_my_stack() to initialize and
+ *              acquire per-thread error stack.
+ *
+ * Return:	Success:	error stack (H5E_t *)
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Chee Wai LEE
+ *              April 24, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5E_t_new *
+H5E_get_stack_new(void)
+{
+    H5E_t_new *estack;
+    H5E_t *ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_get_stack_new,NULL);
+
+    estack = pthread_getspecific(H5TS_errstk_key_g);
+    if (!estack) {
+        /* no associated value with current thread - create one */
+        estack = (H5E_t_new *)H5MM_malloc(sizeof(H5E_t_new));
+        pthread_setspecific(H5TS_errstk_key_g, (void *)estack);
+    }
+
+    /* Set return value */
+    ret_value=estack;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+#endif  /* H5_HAVE_THREADSAFE */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eget_current_stack
+ *
+ * Purpose:	Registers current error stack, returns object handle for it,
+ *              clears it.
+ *
+ * Return:	Non-negative value as stack ID on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Eget_current_stack(void)
+{
+    hid_t       ret_value;   /* Return value */
+
+    FUNC_ENTER_API(H5Eget_current_stack, FAIL);
+    H5TRACE0("i","");
+    
+    /* Add HGOTO_ERROR later */
+    ret_value=H5E_get_current_stack();
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_get_current_stack
+ *
+ * Purpose:	Private function to register an error stack.
+ *
+ * Return:	Non-negative value as class ID on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 11, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5E_get_current_stack(void)
+{
+    hid_t       ret_value;   /* Return value */
+    H5E_t_new	*estack = H5E_get_my_stack_new ();
+    
+    FUNC_ENTER_NOAPI(H5E_get_current_stack, FAIL);
+
+    /* Register the error stack to get an ID for it */
+    /* Need to check for error */
+    ret_value = H5I_register(H5I_ERROR_STACK, estack);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Eclose_stack
+ *
+ * Purpose:	Closes an error stack.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eclose_stack(hid_t stack_id)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_t_new    *err_stack;
+
+    FUNC_ENTER_API(H5Eclose_stack, FAIL);
+    H5TRACE1("e","i",stack_id);
+
+    /* Add HGOTO_ERROR later */
+    if(H5E_DEFAULT == stack_id)
+        ;
+    
+    /* Need to check for errors */
+    err_stack = H5I_object_verify(stack_id, H5I_ERROR_STACK);
+
+    /*
+     * Decrement the counter on the dataset.  It will be freed if the count
+     * reaches zero.
+     */
+    /* Need to check for errors */
+    H5I_dec_ref(stack_id);
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_close_stack
+ *
+ * Purpose:	Private function to close an error stack.
+ *
+ * Return:	Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, July 14, 2003
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_close_stack(H5E_t_new *err_stack)
+{
+    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5E_error_t_new     *error;
+    int          i;
+    
+    FUNC_ENTER_NOAPI(H5E_close_stack, FAIL);
+    
+    if(err_stack) {
+        for(i=0; i<err_stack->nused; i++) {
+            error = &(err_stack->slot[i]);
+            if(error->func_name)
+                H5MM_xfree(error->func_name);
+            if(error->file_name)
+                H5MM_xfree(error->file_name);
+            if(error->desc)
+                H5MM_xfree(error->desc);
+        }
+        H5MM_xfree(err_stack);
+    }
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
 #endif /* NEW_ERR */
 
 

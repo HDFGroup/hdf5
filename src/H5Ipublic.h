@@ -43,8 +43,8 @@ typedef enum {
     H5I_GENPROP_CLS,            /*group ID for generic property list classes */
     H5I_GENPROP_LST,            /*group ID for generic property lists       */
     H5I_ERROR_CLASS,            /*group ID for error classes                */
-    H5I_ERROR_MAJOR,            /*group ID for major errors                 */
-    H5I_ERROR_MINOR,            /*group ID for minor errors                 */
+    H5I_ERROR_MSG,              /*group ID for error messages               */
+    H5I_ERROR_STACK,            /*group ID for error stacks                 */
     
     H5I_NGROUPS		        /*number of valid groups, MUST BE LAST!	    */
 } H5I_type_t;

@@ -34,6 +34,7 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 hid_t   ERR_CLS;
 hid_t   ERR_MAJ_TEST;
 hid_t   ERR_MIN_SUBROUTINE;
+hid_t   ERR_STACK;
 
 #define DSET_NAME               "a_dataset"
 
@@ -179,18 +180,91 @@ init_error(void)
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS))<0)
         goto error;
 
-    /* 
-    if((ERR_MAJ_TEST = H5Ecreate_mesg(ERR_CLS, H5E_MAJOR, "Error in test"))<0)
+    if((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR_new, "Error in test"))<0)
         goto error;
-    if((ERR_MIN_SUBROUTINE = H5Ecreate_mesg(ERR_CLS, H5E_MINOR, "Error in subroutine"))<0)
+    if((ERR_MIN_SUBROUTINE = H5Ecreate_msg(ERR_CLS, H5E_MINOR_new, "Error in subroutine"))<0)
         goto error;
-    */
+    
     PASSED();
     return 0;
 
   error:
     return -1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	error_stack
+ *
+ * Purpose:	Manipulates current error stack.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		July 14, 2003
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+error_stack(void)
+{
+    if((ERR_STACK = H5Eget_current_stack())<0)
+        goto error;
+
+    if(H5Eclose_stack(ERR_STACK)<0)
+        goto error;
+    
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	close_error
+ *
+ * Purpose:	Closes error information.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *		July 10, 2003
+ *
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+close_error(void)
+{
+    /*
+    if(H5Eclose_msg(ERR_MAJ_TEST)<0)
+        goto error;
+    if(H5Eclose_msg(ERR_MIN_SUBROUTINE)<0)
+        goto error;
+    */
+    
+    if(H5Eunregister_class(ERR_CLS)<0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+  error:
+    return -1;
+}
+
 #endif /* NEW_ERR */
     
 
@@ -225,6 +299,11 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
+    
+#ifndef NEW_ERR 
+    if(error_stack()<0)
+        goto error;
+#endif /* NEW_ERR */
 
     /*if(test_error(file)<0) {*/
 #ifndef NEW_ERR
@@ -234,9 +313,14 @@ main(void)
     }*/
     
     if (H5Fclose(file)<0) goto error;
-    printf("All error API test based on native datatype test passed.\n");
     h5_cleanup(FILENAME, fapl);
 
+#ifndef NEW_ERR 
+    if(close_error()<0)
+        goto error;
+#endif /* NEW_ERR */
+    printf("All error API test based on native datatype test passed.\n");
+    
     return 0;
 
  error:
