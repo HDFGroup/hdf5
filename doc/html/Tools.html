@@ -75,35 +75,39 @@ to convert files from HDF4 format to HDF5 format and vice versa.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Tools-Dump">h5dump</a> -- 
-        A tool for displaying HDF5 file contents
-    <li><a href="#Tools-Ls">h5ls</a> -- 
-        A tool for listing specified features of HDF5 file contents
-    <li><a href="#Tools-Diff">h5diff</a> -- 
-        A tool to identify and locate the differences between two HDF5 files 
-	<em>(Beta version)</em>
-    <li><a href="#Tools-Repart">h5repart</a> -- 
-        A tool for repartitioning a file, creating a family of files
-    <li><a href="#Tools-Import">h5import</a> -- 
-        A tool for importing data into an existing or new HDF5 file
-    <li><a href="#Tools-GIF2H5">gif2h5</a> -- 
-        A tool for converting a GIF file to an HDF5 file
-    <li><a href="#Tools-H52GIF">h52gif</a> -- 
-        A tool for converting images in an HDF5 file to a GIF file
-    <li><a href="#Tools-H5toh4">h5toh4</a> -- 
-        A tool for converting an HDF5 file to an HDF4 file
-    <li><a href="#Tools-H4toh5">h4toh5</a> -- 
-        A tool for converting an HDF4 file to an HDF5 file
-    <li><a href="#Tools-Perf">h5perf</a> -- 
-        A tool for measuring HDF5 performance
-    <li><a href="#Tools-Redeploy">h5redeploy</a> -- 
-        A tool for updating HDF5 compiler tools after installing HDF5 
-    <li><a href="#Tools-H5CC">h5cc</a> --
-        A tool for compiling HDF5 programs written in C
-    <li><a href="#Tools-H5FC">h5fc</a> --
-        A tool for compiling HDF5 programs written in Fortran90
-    <li><a href="#Tools-H5C++">h5c++</a> --
-        A tool for compiling HDF5 programs written in C++
+    <li>User utilities: 
+    <ul>
+        <li><a href="#Tools-Dump">h5dump</a> -- 
+            A tool for displaying HDF5 file contents
+        <li><a href="#Tools-Ls">h5ls</a> -- 
+            A tool for listing specified features of HDF5 file contents
+        <li><a href="#Tools-Diff">h5diff</a> -- 
+            A tool to identify and locate the differences between two HDF5 files 
+            <em>(Beta version)</em>
+        <li><a href="#Tools-Repart">h5repart</a> -- 
+            A tool for repartitioning a file, creating a family of files
+        <li><a href="#Tools-Import">h5import</a> -- 
+            A tool for importing data into an existing or new HDF5 file
+        <li><a href="#Tools-GIF2H5">gif2h5</a> -- 
+            A tool for converting a GIF file to an HDF5 file
+        <li><a href="#Tools-H52GIF">h52gif</a> -- 
+            A tool for converting images in an HDF5 file to a GIF file
+        <li><a href="#Tools-Perf">h5perf</a> -- 
+            A tool for measuring HDF5 performance
+	    <br><br
+    </ul>
+    <li>Configuration and  library management utilities: 
+    <ul>
+        <li><a href="#Tools-Redeploy">h5redeploy</a> -- 
+            A tool for updating HDF5 compiler tools after installing HDF5 
+         <li><a href="#Tools-H5CC">h5cc</a> --
+            A tool for compiling HDF5 programs written in C
+        <li><a href="#Tools-H5FC">h5fc</a> --
+            A tool for compiling HDF5 programs written in Fortran90
+        <li><a href="#Tools-H5C++">h5c++</a> --
+            A tool for compiling HDF5 programs written in C++
+ 	    <br><br
+   </ul>
     <li><a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html/">Java-based tools for HDF5</a> -- 
         <em>(at <code>http://hdf.ncsa.uiuc.edu/java-hdf5-html/</code>)</em>
         <br>
@@ -112,6 +116,19 @@ to convert files from HDF4 format to HDF5 format and vice versa.
         <br>
         Includes <code>H5view</code>, <code>H5gen</code>, Java HDF5
         Interface (JHI5), and HDF5 VisAD Data Adapter
+        <br><br>
+    <li><a href="http://hdf.ncsa.uiuc.edu/h4toh5/">HDF5/HDF4 conversion tools</a>: 
+    <ul>
+        <li><a href="http://hdf.ncsa.uiuc.edu/h4toh5/">H4toH5 Conversion Library</a> -- 
+            A library providing APIs for use in tools that perform customized 
+	    conversions of HDF4 files to HDF5 files
+	    &nbsp;
+	    <em>(Distributed separately; not part of HDF5)</em>
+        <li><a href="#Tools-H5toh4">h5toh4</a> -- 
+            A utility for converting an HDF5 file to an HDF4 file
+        <li><a href="#Tools-H4toh5">h4toh5</a> -- 
+            A utility for converting an HDF4 file to an HDF5 file
+    </ul>
 </ul>
 </td></tr>
 </table>
@@ -2273,7 +2290,7 @@ And in this document, the
 Describes HDF5 Release 1.6.0, July 2003
 </address><!-- #EndLibraryItem --> 
 
-Last modified: 11 June 2003
+Last modified: 2 July 2003
 
 </body>
 </html>
