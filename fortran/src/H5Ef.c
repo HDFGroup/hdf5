@@ -36,7 +36,8 @@ nh5eclear_c( )
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Wednesday, March 29, 2000
- * Modifications:
+ * Modifications: Bug fix: Added call to close the file with the error messages
+ *                EP 11/26/01
  *---------------------------------------------------------------------------*/
 int_f
 nh5eprint_c1(_fcd name, int_f* namelen)
@@ -48,12 +49,14 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   int c_namelen;
   c_namelen = *namelen;
   c_name = (char*)HD5f2cstring(name, c_namelen);
-  file = fopen(c_name, "w");
-
+  file = fopen(c_name, "a");
+       if(!file) return ret_val;
   /*
    * Call H5Eprint function.
    */
   status = H5Eprint(file);
+  fclose(file);
+  
   if(status < 0) return ret_val;
   ret_val = 0;
   return ret_val;
