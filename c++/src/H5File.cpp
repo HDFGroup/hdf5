@@ -412,7 +412,15 @@ void H5File::getVFDHandle(void **file_handle)
    }
 }
 
-// Calls the C API H5Fclose to close this file.  Used by IdComponent::reset
+//--------------------------------------------------------------------------
+// Function:    H5File::p_close (private)
+///\brief       Closes this H5 file.
+///\exception   H5::FileIException
+///\note
+///             This function will be obsolete because its functionality
+///             is recently handled by the C library layer.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void H5File::p_close() const
 {
    herr_t ret_value = H5Fclose( id );

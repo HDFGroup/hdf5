@@ -262,7 +262,7 @@ void H5Object::removeAttr( const string& name ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::getNumAttrs
+// Function:	H5Object::flush
 ///\brief	Flushes all buffers associated with a file to disk.
 ///\param	scope - IN: Specifies the scope of the flushing action,
 ///		which can be either of these values:
@@ -280,6 +280,26 @@ void H5Object::flush(H5F_scope_t scope ) const
    {
       throw FileIException("H5Object::flush", "H5Fflush failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::Reference
+///\brief	Creates a reference.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5Object::Reference(const char* name, H5R_type_t ref_type, DataSpace& dataspace) const
+{
+   void *ref;
+   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, dataspace.getId());
+   if (ret_value < 0)
+   {
+      throw AttributeIException("H5Object::getNumAttrs", 
+		"H5Aget_num_attrs failed - returned negative number of attributes");
+   }
+   return(ref);
 }
 
 //--------------------------------------------------------------------------

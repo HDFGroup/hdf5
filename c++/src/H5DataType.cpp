@@ -120,8 +120,8 @@ void DataType::copy( const DataType& like_type )
 // Function:	DataType::operator=
 ///\brief	Assignment operator
 ///\param	rhs - IN: Reference to the existing datatype
+///\return	Reference to DataType instance
 ///\exception   H5::DataTypeIException
-///
 // Description
 // 		Makes a copy of the type on the right hand side and stores 
 //		the new id in the left hand side object.  
@@ -458,7 +458,7 @@ void DataType::setTag( const string& tag ) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataType::setTag
+// Function:	DataType::getTag
 ///\brief	Gets the tag associated with an opaque datatype. 
 ///\return	Tag associated with the opaque datatype
 ///\exception   H5::DataTypeIException
@@ -529,9 +529,13 @@ bool DataType::isVariableStr() const
 }
 
 //--------------------------------------------------------------------------
-// This private function calls the C API H5Tclose to close this datatype.
-// Used by H5Object::p_reset.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    DataType::p_close (private)
+///\brief       Closes this datatype.
+///\exception   H5::DataTypeIException
+///\note
+///             This function will be obsolete because its functionality
+///             is recently handled by the C library layer.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::p_close() const
 {
