@@ -46,6 +46,18 @@
 #define H5TEST_DLLVAR extern
 #endif /* _HDF5TESTDLL_ */
 
+#if defined(HDF5FORT_CSTUB_DLL_EXPORTS)
+#pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
+#define H5_FCDLL __declspec(dllexport)
+#define H5_FCDLLVAR __declspec(dllexport)
+#elif defined(HDF5FORT_CSTUB_USEDLL)
+#define H5_FCDLL __declspec(dllimport)
+#define H5_FCDLLVAR __declspec(dllimport)
+#else
+#define H5_FCDLL
+#define H5_FCDLLVAR extern
+#endif /* _HDF5_FORTRANDLL_EXPORTS_ */
+
 /* Added to export or to import C++ APIs - BMR (02-15-2002) */
 #if defined(HDF5_CPPDLL_EXPORTS) /* this name is generated at creation */
 #define H5_DLLCPP __declspec(dllexport)
@@ -61,6 +73,8 @@
 #define H5_DLLCPP
 #define H5TEST_DLL
 #define H5TEST_DLLVAR extern
+#define H5_FCDLL
+#define H5_FCDLLVAR extern
 #endif
 
 #endif /* H5API_ADPT_H */
