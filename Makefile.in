@@ -57,7 +57,7 @@ SUBDIRS=src test
 #		make used in combination with gcc will maintain dependency
 #		information automatically.
 #
-all lib progs test _test install uninstall TAGS dep depend:
+lib progs test _test install uninstall TAGS dep depend:
 	@@SETX@; for d in $(SUBDIRS); do				      \
 	   (cd $$d && $(MAKE) $@) || exit 1;				      \
 	done
