@@ -108,6 +108,10 @@ Bug Fixes since HDF5-1.6.2 release
 
     Library
     -------
+        - Fixed error which could cause a core dump when a type conversion
+          routine was registered after a compound datatype had been
+          converted and then an equivalment compound datatype was converted
+          again.  QAK - 2004/08/07
         - Fixed memory overwrite when encoding "multi" file driver information
           for file's superblock.  QAK - 2004/08/05
         - Fixed obscure bug where a filter which failed during chunk allocation
