@@ -800,8 +800,8 @@ case "$withval" in
       AC_CHECK_HEADERS(netinet/tcp.h)
       AC_DEFINE(HAVE_STREAM)
 
-      dnl Check if we have struct socklen_t available
-      AC_MSG_CHECKING([if struct socklen_t is defined])
+      dnl Check if 'socklen_t' available
+      AC_MSG_CHECKING([if socklen_t is defined])
       AC_TRY_COMPILE(
          [
 #include <stdio.h>
@@ -817,7 +817,7 @@ case "$withval" in
 #endif
          ],
          [socklen_t foo; return 0;],
-         AC_DEFINE(HAVE_STRUCT_SOCKLEN_T) AC_MSG_RESULT(yes),
+         AC_DEFINE(HAVE_SOCKLEN_T) AC_MSG_RESULT(yes),
          AC_MSG_RESULT(no)
       )
       ;;

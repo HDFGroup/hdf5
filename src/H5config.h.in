@@ -92,8 +92,8 @@
 /* Define if <netinet/tcp.h> header file is available */
 #undef HAVE_NETINET_TCP_H
 
-/* Define if struct socklen_t is known */
-#undef HAVE_STRUCT_SOCKLEN_T
+/* Define if 'socklen_t' is available */
+#undef HAVE_SOCKLEN_T
 
 /* The number of bytes in a __int64.  */
 #undef SIZEOF___INT64
