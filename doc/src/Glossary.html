@@ -1,0 +1,53 @@
+<html><head><title>
+HDF5 Draft Glossary
+</title></head><body>
+
+<center>
+<h1>HDF5 Glossary</h1>
+</center>
+
+A glossary of data-types used in the HDF5 APIs.
+
+<ol type=A>
+    <li><a href="#Glossary-Basic">Basic Types</a>
+    <li><a href="#Glossary-Complex">Complex Types</a>
+    <li><a href="#Glossary-DiskIO">Disk I/O Types</a>
+</ol>
+
+<P>Since many of the typedefs in the HDF5 API are not well-defined yet,
+the types below may change radically en route to a final API...
+
+<hr>
+
+<a name="Glossary-Basic">Basic Types:</a>
+<ul>
+    <li>char     - 8-bit character (only for ASCII information)
+    <li>int8     - 8-bit signed integer
+    <li>uint8    - 8-bit unsigned integer
+    <li>int16    - 16-bit signed integer
+    <li>uint16   - 16-bit unsigned integer
+    <li>int32    - 32-bit signed integer
+    <li>uint32   - 32-bit unsigned integer
+    <li>intn     - "native" signed integer
+    <li>uintn    - "native" unsigned integer
+    <li>int64    - 64-bit signed integer (new)
+    <li>uint64   - 64-bit unsigned integer (new)
+    <li>float32  - 32-bit IEEE float
+    <li>float64  - 64-bit IEEE float
+</ul>
+
+<a name="Glossary-Complex">Complex Types:</a>
+<ul>
+    <li>hid_t   - 32-bit unsigned integer used as ID for memory objects
+    <li>hoid_t  - 32-bit unsigned integer (currently) used as ID for disk-based
+                objects
+    <li>hbool_t - boolean to indicate true/false/error codes from functions
+    <li>herr_t  - 32-bit integer to indicate succeed/fail codes from functions
+</ul>
+
+<a name="Glossary-DiskIO">Disk I/O Types:</a>
+<ul>
+    <li>hoff_t  - (64-bit?) offset on disk in bytes
+    <li>hlen_t  - (64-bit?) length on disk in bytes
+</ul>
+
