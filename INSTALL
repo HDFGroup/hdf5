@@ -1,13 +1,13 @@
 -*- outline -*-
 
-This file contains instructions for the installation of HDF5 on
-Unix-like systems.
+This file contains instructions for the installation of HDF5 software.
 
 * Obtaining HDF5
 	The latest supported public release of HDF5 is available from
-	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5 and is available in tar
-	format uncompressed or compressed with compress, gzip, or
-	bzip2.
+	ftp://hdf.ncsa.uiuc.edu/pub/dist/HDF5.  For Unix platforms, it
+        is available in tar format uncompressed or compressed with
+	compress, gzip, or bzip2.  For Microsoft Windows, it is in
+        ZIP format.
 
 	The HDF team also makes snapshots of the source code available
 	on a regular basis. These snapshots are unsupported (that is,
@@ -45,10 +45,6 @@ Unix-like systems.
 	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
 	from SGI.
 
-** TFLOPS
-	Users of the Intel TFLOPS machine, after reading this file,
-	should see the INSTALL.ascired for more instructions.
-
 ** Windows/NT
 	The MicroSoft Win32 5.0 compiler is unable to cast unsigned
 	long long values to doubles. HDF5 works around this bug by
@@ -65,6 +61,14 @@ Unix-like systems.
 	$ cd hdf5-1.2.0
 	$ make check
 	$ make install
+
+** TFLOPS
+	Users of the Intel TFLOPS machine, after reading this file,
+	should see the INSTALL.ascired for more instructions.
+
+** Windows
+	Users of Microsoft Windows should see the INSTALL_Windows.txt
+	for detailed instructions.
 
 * HDF5 dependencies
 ** Zlib
@@ -98,6 +102,18 @@ Unix-like systems.
 
 *** Bzip'd tar archive (*.tar.bz2)
 	$ bunzip2 <hdf5-1.2.0.tar.gz |tar xf -
+
+** Source vs. Build Directories
+	On most systems the build can occur in a directory other than
+	the source directory, allowing multiple concurrent builds
+	and/or read-only source code. In order to accomplish this, one 
+	should create a build directory, cd into that directory, and
+	run the `configure' script found in the source directory
+	(configure details are below).
+
+	Unfortunately, this does not work on recent Irix platforms
+	(6.5? and later) because that `make' doesn't understand the
+	VPATH variable.  This will be fixed in the next release.
 
 ** Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
@@ -152,6 +168,12 @@ Unix-like systems.
 	alternate compiler specify it with the CC variable:
 
 	    $ CC='cc -o32' ./configure
+
+	One may also use various environment variables to change the
+	behavior of the compiler.  E.g., to ask for -n32 ABI:
+	    $ SGI_ABI=-n32
+	    $ export SGI_ABI
+	    $ ./configure
 
 *** Additional compilation flags
 	If addtional flags must be passed to the compilation commands
@@ -292,42 +314,9 @@ Unix-like systems.
 
 *** Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
-	parallelizm on a distributed multi-processor system. The easy
-	way to do this is to have a properly installed parallel
-	compiler (e.g., MPICH's mpicc or IBM's mpcc) and supply that
-	executable as the value of the CC environment variable:
+	parallelizm on a distributed multi-processor system.  Read the
+	file INSTALL_parallel for detailed explanations.
 
-	    $ CC=mpcc ./configure
-	    $ CC=/usr/local/mpi/bin/mpicc ./configure
-
-	If no such wrapper script is available then you must specify
-	your normal C compiler along with the distribution of
-	MPI/MPI-IO which is to be used (values other than `mpich' will 
-	be added at a later date):
-
-	    $ ./configure --enable-parallel=mpich
-
-	If the MPI/MPI-IO include files and/or libraries cannot be
-	found by the compiler then their directories must be given as
-	arguments to CPPFLAGS and/or LDFLAGS:
-
-	    $ CPPFLAGS=-I/usr/local/mpi/include \
-	      LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
-	      ./configure --enable-parallel=mpich
-
-	If a parallel library is being built then configure attempts
-	to determine how to run a parallel application on one
-	processor and on many processors.  If the compiler is mpicc
-	and the user hasn't specified values for RUNSERIAL and
-	RUNPARALLEL then configure chooses `mpirun' from the same
-	directory as `mpicc':
-
-	    RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
-	    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=2}
-
-	The `$${NPROCS:=2}' will be substituted with the value of the
-	NPROCS environment variable at the time `make check' is run
-	(or the value 2).
 
 ** Building
 	The library, confidence tests, and programs can be build by

@@ -23,8 +23,6 @@
 # The following flags are only needed when compiling/linking a user program
 # for execution.
 #
-debug="-g -UH5O_DEBUG -DH5F_OPT_SEEK=0"
-default_mode="$debug -DH5F_LOW_DFLT=H5F_LOW_SEC2"
 
 # Using the MPICH libary by Daniel Sands.
 # It contains both MPI-1 and MPI-IO functions.
@@ -44,14 +42,6 @@ mpio_lib="-L$ROMIO/lib"
 MPI_INC="$mpi1_inc $mpio_inc"
 MPI_LIB="$mpi1_lib $mpio_lib"
 
-#for version 1.1 and later
-RUNSERIAL="yod -sz 1"
-export RUNSERIAL
-RUNPARALLEL="yod -sz 8"
-export RUNPARALLEL
-LIBS="-lmpich"
-export LIBS
-
 
 # Once these variables are set to the proper values for your installation,
 # you can run the configure program (i.e., ./configure tflop --enable-parallel=mpio)
@@ -62,7 +52,7 @@ export LIBS
 # cicc and link to the MPI-IO library and the parallel version of the HDF5
 # library (that was created and installed with the configure/make process).
 
-CFLAGS="$default_mode" \
 CPPFLAGS=$MPI_INC \
 LDFLAGS=$MPI_LIB \
-./configure --enable-parallel --disable-shared tflop 
+LIBS="-lmpich" \
+./configure --enable-parallel tflop 

@@ -1,6 +1,5 @@
 	    Installation instructions for Parallel HDF5
 	    -------------------------------------------
-		(last updated: May 21, 1999)
 
 1. Overview
 -----------
@@ -79,9 +78,40 @@ make install
 
 3. Detail explanation
 ---------------------
-[Work in progress.  Please send mail to hdfparallel@ncsa.uiuc.edu.]
+The HDF5 library can be configured to use MPI and MPI-IO for
+parallelizm on a distributed multi-processor system. The easy
+way to do this is to have a properly installed parallel
+compiler (e.g., MPICH's mpicc or IBM's mpcc) and supply that
+executable as the value of the CC environment variable:
 
+    $ CC=mpcc ./configure
+    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
+If no such wrapper script is available then you must specify
+your normal C compiler along with the distribution of
+MPI/MPI-IO which is to be used (values other than `mpich' will 
+be added at a later date):
 
+    $ ./configure --enable-parallel=mpich
 
+If the MPI/MPI-IO include files and/or libraries cannot be
+found by the compiler then their directories must be given as
+arguments to CPPFLAGS and/or LDFLAGS:
 
+    $ CPPFLAGS=-I/usr/local/mpi/include \
+      LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
+      ./configure --enable-parallel=mpich
+
+If a parallel library is being built then configure attempts
+to determine how to run a parallel application on one
+processor and on many processors.  If the compiler is mpicc
+and the user hasn't specified values for RUNSERIAL and
+RUNPARALLEL then configure chooses `mpirun' from the same
+directory as `mpicc':
+
+    RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
+    RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=2}
+
+The `$${NPROCS:=2}' will be substituted with the value of the
+NPROCS environment variable at the time `make check' is run
+(or the value 2).
