@@ -13,6 +13,10 @@
 # access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
 #
 # Tests for the h5diff tool
+#
+# Modification:
+#   Albert Cheng, 2005/2/3
+#   Added -p option for parallel h5diff tests.
 
 H5DIFF=h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
@@ -22,6 +26,7 @@ DIFF='diff -c'
 
 nerrors=0
 verbose=yes
+pmode=			    # default to run h5diff tests
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -29,6 +34,30 @@ if test -z "$srcdir"; then
 fi
 
 test -d ../testfiles || mkdir ../testfiles
+
+# Parse option
+#   -p   run ph5diff tests
+#   -h   print help page
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -p)	# run ph5diff tests
+	H5DIFF=ph5diff
+	pmode=yes
+	shift
+	;;
+    -h) # print help page
+	echo "$0 [-p] [-h]"
+	echo "    -p   run ph5diff tests"
+	echo "    -h   print help page"
+	shift
+	exit 0
+	;;
+    *)  # unknown option
+        echo "$0: Unknown option ($1)"
+	exit 1
+	;;
+    esac
+done
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -47,8 +76,10 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-   if test -z "$RUNPARALLEL"; then
-	echo $* SKIPPED
+   if test -n "$pmode"; then
+	shift
+	TESTING $H5DIFF $@
+	echo  " -SKIP-"
    else
    expect="$srcdir/../testfiles/$1"
    actual="../testfiles/`basename $1 .txt`.out"
@@ -91,6 +122,7 @@ TOOLTEST() {
      fi
    fi
 }
+
 
 ##############################################################################
 ##############################################################################
