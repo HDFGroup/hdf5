@@ -23,24 +23,27 @@ PABLO_FLAGS = -I. -I../src -I$(PABLO_INC) -DHAVE_PABLO $(PABLO_MPIO_FLAGS)
 ## This is our main target:
 LIB=libhdf5-inst.a
 
-#SRCDIRS := ./. ../src/.
 SRCDIRS = ./. ../src/.
 # Took out the GNU'isms for the SRCFILES and LIB_SRC variables.
 #  This may cause problems in two ways: any changes to the SRCDIRS variable
 #  should be make to the SRCFILES macro also and the LIB_SRC variable now has
 #  directory paths included in it (which may cause problems somewhere). - QAK
-#SRCFILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*.c))
-#SRCFILES := *.c ../src/*.c
-SRCFILES = *.c ../src/*.c
-#LIB_SRC     := $(notdir $(SRCFILES))
-#LIB_SRC     := $(SRCFILES)
-LIB_SRC     = $(SRCFILES)
-#LIB_COBJ := $(LIB_SRC:.c=.o)
+LIB_SRC= \
+    H5.c H5A.c H5AC.c H5B.c H5D.c H5E.c H5F.c H5Farray.c H5Fcontig.c \
+    H5Fistore.c H5Fseq.c H5FD.c H5FDsec2.c H5FDfamily.c H5FDmpio.c H5FDcore.c \
+    H5FDdpss.c H5FDmulti.c H5FDgass.c H5FDlog.c H5FDsrb.c H5FDstdio.c \
+    H5FDstream.c H5FL.c H5G.c H5Gent.c H5Gnode.c H5Gstab.c H5HG.c H5HL.c H5I.c \
+    H5MF.c H5MM.c H5O.c H5Oattr.c H5Ocomp.c H5Ocont.c H5Odtype.c H5Oefl.c \
+    H5Ofill.c H5Olayout.c H5Omtime.c H5Oname.c H5Onull.c H5Osdspace.c \
+    H5Oshared.c H5Ostab.c H5P.c H5R.c H5RA.c H5S.c H5Sall.c H5Shyper.c \
+    H5Smpio.c H5Snone.c H5Spoint.c H5Sselect.c H5T.c H5Tbit.c H5Tconv.c \
+    H5Tinit.c H5Tvlen.c H5TB.c H5TS.c H5V.c H5Z.c H5Zdeflate.c 
+
+PABLO_OBJ = PabloHDF.o PabloHDF_RT.o PabloHDF_SDDF.o PabloHDFff.o
+
 LIB_COBJ = $(LIB_SRC:.c=.o)
-#LIB_FOBJ := PabloHDFff.o     
-LIB_FOBJ = PabloHDFff.o     
-#LIB_OBJ  := $(LIB_FOBJ) $(LIB_COBJ)
-LIB_OBJ  = $(LIB_FOBJ) $(LIB_COBJ)
+LIB_OBJ  = $(PABLO_OBJ) $(LIB_COBJ)
+lib_obj: $(LIB_OBJ)
 
 copy_src: 
 	cp ../src/*.c .
@@ -63,10 +66,9 @@ PABLO_HDR = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
 ## makefile.
 ##
 lib: $(LIB)
-$(LIB) __no_library__: $(LIB_OBJ)
+$(LIB): $(LIB_OBJ) 
 	$(AR) -rc $@ $(LIB_OBJ)
 	$(RANLIB) $@
-
 ##
 ## Dummy this out so that there is no redundant make of the library
 ##
@@ -132,8 +134,12 @@ distclean: clean
 maintainer-clean: distclean
 	$(RM) *~ core core.* *.core *.bak *.contrib gmon.out
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $*.c
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
+
+.c.lo:
+	@$(LT_COMPILE) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
+
 
 PABLO_INCLUDES = HDFentryNames.h HDFidList.h ProcIDs.h HDFTrace.h ProcTrace.h \
                  ProcTrace.inc
@@ -172,6 +178,7 @@ ProcTrace.inc: HDFidList.h
 	echo "      parameter (MPISummaryTrace = 3)"  >> $@
 	echo "      parameter (NoTrace = 4)"  >> $@
 
+
 PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES) copy_src
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
@@ -182,4 +189,4 @@ PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES) copy_src
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(PABLO_FLAGS) -c $<
 
 PabloHDFff.o: PabloHDFff.f $(PABLO_INCLUDES) copy_src 
-	$(F77) -O -c $<
+	$(F77) -O -c PabloHDFff.f
