@@ -78,17 +78,18 @@ object names.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Identify-IncRef">H5Iinc_ref</a>
     <li><a href="#Identify-GetName">H5Iget_name</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Identify-DecRef">H5Idec_ref</a>
     <li><a href="#Identify-GetType">H5Iget_type</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
     <li><a href="#Identify-GetRef">H5Iget_ref</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Identify-IncRef">H5Iinc_ref</a>
+    <li><a href="#Identify-DecRef">H5Idec_ref</a>
 </ul>
 </td></tr>
 </table>
@@ -102,7 +103,7 @@ object names.
     <td valign="top">
 	<ul>
             <li><a href="#Identify-DecRef">H5Idec_ref</a>
-            <li><a href="#Identify-GetName">H5Iget_name</a>
+            <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
 	</ul>     
     </td>
     
@@ -110,8 +111,8 @@ object names.
     
     <td valign="top">
 	<ul>
+            <li><a href="#Identify-GetName">H5Iget_name</a>
             <li><a href="#Identify-GetRef">H5Iget_ref</a>
-            <li><a href="#Identify-GetType">H5Iget_type</a>
 	</ul>
     </td>
     
@@ -119,6 +120,7 @@ object names.
     
     <td valign="top">
 	<ul>
+            <li><a href="#Identify-GetType">H5Iget_type</a>
             <li><a href="#Identify-IncRef">H5Iinc_ref</a>
 	</ul>
     </td>
@@ -135,17 +137,18 @@ as the corresponding C function.
 <table border=0>
 <tr><td valign=top>
 <ul>
-    <li><a href="#Identify-IncRef">h5iinc_ref_f</a>
     <li><a href="#Identify-GetName">h5iget_name_f</a>
-</ul>
-</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
-<ul>
-    <li><a href="#Identify-DecRef">h5idec_ref_f</a>
     <li><a href="#Identify-GetType">h5iget_type_f</a>
 </ul>
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
+    <li><a href="#Identify-GetFileId">H5Iget_file_id</a>
     <li><a href="#Identify-GetRef">h5iget_ref_f</a>
+</ul>
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
+<ul>
+    <li><a href="#Identify-IncRef">h5iinc_ref_f</a>
+    <li><a href="#Identify-DecRef">h5idec_ref_f</a>
 </ul>
 </td></tr>
 </table>
@@ -223,6 +226,57 @@ END SUBROUTINE h5idec_ref_f
         <img src="Graphics/C++.gif">
         -->
 </dl>
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_file_id" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetFileId">H5Iget_file_id</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Iget_file_id</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves an identifier for the file containing the specified object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_file_id</code> returns the identifier of the file 
+        associated with the object referenced by <code>obj_id</code>.  
+        <p>
+        <code>obj_id</code> can be a file, group, dataset, named datatype, 
+        or attribute identifier.
+        <p>
+        Note that the HDF5 Library permits an application to close a file
+        while objects within the file remain open.
+        If the file containing the object <code>obj_id</code> 
+        is still open, <code>H5Iget_file_id</code> will retrieve the 
+        existing file identifier.
+        If there is no existing file identifier for the file, 
+        i.e., the file has been closed, 
+        <code>H5Iget_file_id</code> will reopen the file and 
+        return a new file identifier.
+        In either case, the file identifier must eventually be released 
+        using <code>H5Fclose</code>.  
+<dt><strong>Parameters:</strong>
+    <ul>
+    <table>
+      <tr>
+        <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Identifier of the object whose associated 
+            file identifier will be returned.</td>
+      </tr>
+    </table>
+    </ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file identifier on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>This function is currently not supported in FORTRAN 90.
+
+<!--<dt><strong>Non-C API(s):</strong>
+    <dd>
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
 
 <!-- NEW PAGE -->
 <!-- NEW PAGE -->
@@ -536,7 +590,7 @@ And in this document, the
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 March 2004");
+document.writeln("Last modified: 24 August 2004");
 -->
 </SCRIPT>
 
