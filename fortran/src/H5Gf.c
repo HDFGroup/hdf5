@@ -50,7 +50,7 @@ nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  
       */
      c_loc_id = *loc_id;
      if ( *size_hint == OBJECT_NAMELEN_DEFAULT_F ) 
-     c_grp_id = H5Gcreate(c_loc_id, c_name, NULL);
+     c_grp_id = H5Gcreate(c_loc_id, c_name, 0);
      else {
           c_size_hint = (size_t)*size_hint; 
           c_grp_id = H5Gcreate(c_loc_id, c_name, c_size_hint);

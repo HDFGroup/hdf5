@@ -1082,8 +1082,9 @@ nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id
   hid_t c_type_id;
   hid_t c_space_id;
   hvl_t *c_buf;
-  int i,j;
+  int i;
   hssize_t num_elem;
+  herr_t status;
 
   c_dset_id = (hid_t)*dset_id;
   c_type_id = (hid_t)*type_id;
@@ -1094,16 +1095,17 @@ nh5dvlen_get_max_len_c ( hid_t_f *dset_id ,  hid_t_f *type_id, hid_t_f *space_id
 
   c_buf = (hvl_t *)malloc(sizeof(hvl_t)*num_elem); 
   if (c_buf == NULL) return ret_value;
-  if(H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf)) goto DONE;
+  status = H5Dread(c_dset_id, c_type_id, H5S_ALL, c_space_id, H5P_DEFAULT, c_buf);
+  if(status < 0) goto DONE;
   
   c_len = 0;
   for (i=0; i < num_elem; i++) c_len = H5_MAX(c_len, c_buf[i].len);  
   *len = (size_t_f)c_len;
+  H5Dvlen_reclaim(c_type_id, c_space_id, H5P_DEFAULT, c_buf);
   ret_value = 0;
   
 DONE:
 
-  H5Dvlen_reclaim(c_type_id, c_space_id, H5P_DEFAULT, c_buf);
   free(c_buf);
   return ret_value;
 }
@@ -1140,7 +1142,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   size_t max_len;
 
   hvl_t *c_buf;
-  int i, j;
+  int i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -1223,15 +1225,14 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
    * Call H5Dread function.
    */
    status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
- if ( status >=0 ) {
+ if ( status < 0 ) goto DONE;
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;  
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int));
   }
- } 
-  ret_value = num_elem;
-DONE:
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  ret_value = 0;
+DONE:
   free(c_buf);
   return ret_value;
 }
@@ -1266,10 +1267,9 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
   herr_t status;
   char *tmp, *tmp_p;
   size_t max_len;
-  size_t buf_len;
 
   char **c_buf;
-  int i, j;
+  int i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -1346,10 +1346,9 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   herr_t status;
   char *tmp, *tmp_p;
   size_t max_len;
-  size_t buf_len;
 
   char **c_buf;
-  int i, j;
+  int i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -1386,7 +1385,6 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   }
   HD5packFstring(tmp, _fcdtocp(buf), max_len*num_elem);  
   ret_value = 0;
-DONE:
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
   free(c_buf);
   free(tmp);
@@ -1430,7 +1428,7 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   size_t max_len;
 
   hvl_t *c_buf;
-  int i, j;
+  int i;
   hsize_t num_elem;
   
   max_len = (size_t)dims[0];
@@ -1517,7 +1515,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
    * Call H5Dread function.
    */
    status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
- if ( status >=0 ) {
+ if ( status <0  )  goto DONE;
   for (i=0; i < num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;  
 #if defined (_UNICOS)
@@ -1526,10 +1524,10 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(float));
 #endif
   }
- } 
-  ret_value = num_elem;
-DONE:
+  
   H5Dvlen_reclaim(c_mem_type_id, c_mem_space_id, H5P_DEFAULT, c_buf);
+  ret_value = 0;
+DONE:
   free(c_buf);
   return ret_value;
 }

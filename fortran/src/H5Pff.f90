@@ -6167,7 +6167,7 @@
               INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
               INTEGER :: maxlen
               INTEGER :: c_maxlen_out 
-              INTEGER, INTENT(IN) :: flag
+              INTEGER, INTENT(OUT) :: flag
               END FUNCTION h5pget_fapl_multi_c
             END INTERFACE
             maxlen = LEN(memb_name(0))

@@ -96,30 +96,10 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
 {
      int ret_value = -1;
      hid_t c_file_id;
-     int CASE;
      H5F_scope_t  c_scope;
      htri_t status;
      c_scope = (H5F_scope_t)*scope;
 
-     /*
-      * Define scope flags
-      */
-/*
-     CASE = (int)*scope;
-     switch (CASE) {
-
-	case H5F_SCOPE_LOCAL_F:
-	  c_scope = H5F_SCOPE_LOCAL;
-          break;
-
-	case H5F_SCOPE_GLOBAL_F:
-	  c_scope = H5F_SCOPE_GLOBAL;
-          break;
-
-        default:
-          return ret_value;
-     }
-*/     
      /*
       * Call H5Fflush function.
       */
