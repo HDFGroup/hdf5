@@ -970,9 +970,6 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
     assert (hobj->idx>0 && hobj->idx<heap->nalloc);
-if(!(heap->obj[hobj->idx].begin)) {
-    HDfprintf(stderr,"%s: hobj->idx=%d, heap=%p, heap->obj[hobj->idx].begin=%p\n",FUNC,hobj->idx,heap,heap->obj[hobj->idx].begin);
-}
     assert (heap->obj[hobj->idx].begin);
     obj_start = heap->obj[hobj->idx].begin;
     /* Include object header size */
