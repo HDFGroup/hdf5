@@ -51,7 +51,7 @@ void pause_proc(MPI_Comm comm, int argc, char **argv)
     if (MAINPROCESS)
 	while ((stat(greenlight, &statbuf) == -1) && loops < maxloop){
 	    if (!loops++){
-		printf("Proc %d (%*s, %d): You may attach %d for debugging.\n",
+		printf("Proc %d (%*s, %d): to debug, attach %d\n",
 		    mpi_rank, mpi_namelen, mpi_name, pid, pid);
 	    }
 	    printf("waiting(%ds) for file %s ...\n", time_int, greenlight);

@@ -16,7 +16,7 @@ CC=cc -ansi -64
 # 1178 -- print format not compatible
 WARNING=-woff 1429,1178
 CFLAGS=-g $(WARNING)
-CPPFLAGS=-I. -I../src $(MPI_INC)
+CPPFLAGS=-I. -I../src $(MPI_INC) -DUSE_PAUSE
 RM=rm -f
 
 # temporary test files that can be cleaned away

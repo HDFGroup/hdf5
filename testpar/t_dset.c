@@ -133,8 +133,15 @@ int dataset_vrfy(hssize_t start[], hsize_t count[], hsize_t stride[], DATATYPE *
     int i, j, vrfyerrs;
 
     /* print it if verbose */
-    if (verbose)
+    if (verbose) {
+	printf("dataset_vrfy dumping:::\n");
+	printf("start(%d, %d), count(%d, %d), stride(%d, %d)\n",
+	    start[0], start[1], count[0], count[1], stride[0], stride[1]);
+	printf("original values:\n");
+	dataset_print(start, count, stride, original);
+	printf("compared values:\n");
 	dataset_print(start, count, stride, dataset);
+    }
 
     vrfyerrs = 0;
     for (i=0; i < count[0]; i++){
@@ -202,9 +209,9 @@ dataset_writeInd(char *filename)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    /* -------------------
-     * START AN HDF5 FILE 
-     * -------------------*/
+    /* ----------------------------------------
+     * CREATE AN HDF5 FILE WITH PARALLEL ACCESS
+     * ---------------------------------------*/
     /* setup file access template with parallel IO access. */
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl != FAIL), "H5Pcreate access succeeded");
@@ -221,10 +228,10 @@ dataset_writeInd(char *filename)
     VRFY((ret != FAIL), "");
 
 
-    /* --------------------------
+    /* ---------------------------------------------
      * Define the dimensions of the overall datasets
      * and the slabs local to the MPI process.
-     * ------------------------- */
+     * ------------------------------------------- */
     /* setup dimensionality object */
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid != FAIL), "H5Screate_simple succeeded");
@@ -241,6 +248,11 @@ dataset_writeInd(char *filename)
     VRFY((dataset2 != FAIL), "H5Dcreate succeeded");
 
 
+    /*
+     * To test the independent orders of writes between processes, all
+     * even number processes write to dataset1 first, then dataset2.
+     * All odd number processes write to dataset2 first, then dataset1.
+     */
 
     /* set up dimensions of the slab this process accesses */
     slab_set(mpi_rank, mpi_size, start, count, stride, BYROW);
@@ -262,12 +274,11 @@ dataset_writeInd(char *filename)
     /* write data independently */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
 	    H5P_DEFAULT, data_array1);					    
-    VRFY((ret != FAIL), "H5Dwrite succeeded");
-
+    VRFY((ret != FAIL), "H5Dwrite dataset1 succeeded");
     /* write data independently */
     ret = H5Dwrite(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,	    
 	    H5P_DEFAULT, data_array1);					    
-    VRFY((ret != FAIL), "H5Dwrite succeeded");
+    VRFY((ret != FAIL), "H5Dwrite dataset2 succeeded");
 
     /* release dataspace ID */
     H5Sclose(file_dataspace);
@@ -815,9 +826,9 @@ extend_writeInd(char *filename)
     VRFY((ret != FAIL), "");
 
 
-    /* --------------------------
+    /* --------------------------------------------------------------
      * Define the dimensions of the overall datasets and create them.
-     * ------------------------- */
+     * ------------------------------------------------------------- */
 
     /* set up dataset storage chunk sizes and creation property list */
     if (verbose)
@@ -855,6 +866,10 @@ extend_writeInd(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, count, stride, &data_array1[0][0]);
     MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
 
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple (RANK, count, NULL);
@@ -891,14 +906,18 @@ extend_writeInd(char *filename)
     /* put some trivial data in the data_array */
     dataset_fill(start, count, stride, &data_array1[0][0]);
     MESG("data_array initialized");
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
 
     /* create a memory dataspace independently */
     mem_dataspace = H5Screate_simple (RANK, count, NULL);
     VRFY((mem_dataspace != FAIL), "");
 
 #ifdef DISABLE
-    /* Try write to dataset2 without extending it first.  Should fail. */
-    /* first turn off auto error reporting */
+    /* Try write to dataset2 beyond its current dim sizes.  Should fail. */
+    /* Temporary turn off auto error reporting */
     H5Eget_auto(&old_func, &old_client_data);
     H5Eset_auto(NULL, NULL);
 
@@ -918,7 +937,7 @@ extend_writeInd(char *filename)
     H5Sclose(file_dataspace);
 #else
     /* Skip test because H5Dwrite is not failing as expected */
-    printf("Skip test of write before extend\n");
+    printf("***Skip test of write-beyond-current-dim-size\n");
 #endif
 
     /* Extend dataset2 and try again.  Should succeed. */
@@ -988,13 +1007,15 @@ extend_readInd(char *filename)
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
 
+    /* -------------------
+     * OPEN AN HDF5 FILE 
+     * -------------------*/
     /* setup file access template */
     acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
     VRFY((acc_tpl != FAIL), "");
     /* set Parallel access with communicator */
     ret = H5Pset_mpi(acc_tpl, comm, info);     
     VRFY((ret != FAIL), "");
-
 
     /* open the file collectively */
     fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
@@ -1021,12 +1042,13 @@ extend_readInd(char *filename)
     VRFY((file_dataspace != FAIL), "H5Dget_space succeeded");
     ret=H5Sget_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_dims succeeded");
-    dims[0]=dims[0]*2;
+    dims[0]++;
     ret=H5Dextend(dataset1, dims);
     VRFY((ret == FAIL), "H5Dextend failed as expected");
 
     /* restore auto error reporting */
     H5Eset_auto(old_func, old_client_data);
+    H5Sclose(file_dataspace);
 
 
     /* Read dataset1 using BYROW pattern */
@@ -1045,6 +1067,10 @@ extend_readInd(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, count, stride, &data_origin1[0][0]);
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
 
     /* read data independently */
     ret = H5Dread(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
@@ -1076,6 +1102,10 @@ extend_readInd(char *filename)
 
     /* fill dataset with test data */
     dataset_fill(start, count, stride, &data_origin1[0][0]);
+    if (verbose){
+	MESG("data_array created");
+	dataset_print(start, count, stride, &data_array1[0][0]);
+    }
 
     /* read data independently */
     ret = H5Dread(dataset2, H5T_NATIVE_INT, mem_dataspace, file_dataspace,

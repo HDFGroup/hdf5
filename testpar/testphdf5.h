@@ -26,7 +26,11 @@
 	    mesg, (int)__LINE__, __FILE__);     			      \
         nerrors++;                                                            \
         H5Eprint (stdout);                                                    \
-	if (!verbose) exit(nerrors);					      \
+	fflush(stdout);							      \
+	if (!verbose){							      \
+	    MPI_Finalize();						      \
+	    exit(nerrors);						      \
+	}								      \
     }                                                                         \
     H5Eclear();                                                               \
 } while(0)
