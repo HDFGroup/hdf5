@@ -21,14 +21,17 @@
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
-/* Define if support for Fletcher32 checksum is enabled */
-#undef HAVE_FILTER_FLETCHER32
-
 /* Define if support for deflate filter is enabled */
 #undef HAVE_FILTER_DEFLATE
 
+/* Define if support for Fletcher32 checksum is enabled */
+#undef HAVE_FILTER_FLETCHER32
+
 /* Define if support for shuffle filter is enabled */
 #undef HAVE_FILTER_SHUFFLE
+
+/* Define if support for szip filter is enabled */
+#undef HAVE_FILTER_SZIP
 
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
@@ -161,6 +164,9 @@
 /* Define to 1 if you have the `ssl' library (-lssl). */
 #undef HAVE_LIBSSL
 
+/* Define to 1 if you have the `sz' library (-lsz). */
+#undef HAVE_LIBSZ
+
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
 
@@ -280,6 +286,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <szlib.h> header file. */
+#undef HAVE_SZLIB_H
 
 /* Define if we have thread safe support */
 #undef HAVE_THREADSAFE
