@@ -61,10 +61,10 @@
 #include "mpi.h"
 #endif
 
+#include "H5config.h"
 #undef HAVE_PABLO
 #include "H5private.h" 
 #define HAVE_PABLO
-#include "H5config.h"
 #include "ProcIDs.h"
 
 #include "SystemDepend.h"
