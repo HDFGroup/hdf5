@@ -61,7 +61,7 @@ test_split_comm_access(char *filename[])
 
 	/* create the file collectively */
 	fid=H5Fcreate(filename[color],H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
-	VRFY((fid != FAIL), "H5Fcreate succeed");
+	VRFY((fid != FAIL), "H5Fcreate succeeded");
 
 	/* Release file-access template */
 	ret=H5Pclose(acc_tpl);
