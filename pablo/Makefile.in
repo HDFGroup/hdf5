@@ -7,7 +7,7 @@
 @COMMENCE@
 TRACE=perl ../bin/trace
 PABLO_INC = 
-#PABLO_FLAGS = -I$(PABLO_INC) -DHAVE_PABLO
+PABLO_FLAGS = -I$(PABLO_INC) -DHAVE_PABLO
 
 # Add `-I.' to the C preprocessor flags.
 CPPFLAGS=-I. -I../src $(PABLO_FLAGS) @CPPFLAGS@
@@ -151,17 +151,25 @@ maintainer-clean: distclean
 	$(AR) -rc $@ $*.o
 	$(RM) $*.o
 
-.c.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.o
+.c.o: 
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c ../src/$*.c
 
-PabloHDF.o: PabloHDF.c
-        $(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+PABLO_INCLUDES = HDFentryNames.h HDFidList.h HDF5record_RT.h ProcIDs.h 
 
-PabloHDF_RT.o: PabloHDF_RT.c
-        $(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+PabloHDF.o: PabloHDF.c $(PABLO_INCLUDES)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
 
-PabloHDF_SDDF.o: PabloHDF_SDDF.c
-        $(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+PabloHDF_RT.o: PabloHDF_RT.c $(PABLO_INCLUDES)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+PabloHDF_SDDF.o: PabloHDF_SDDF.c $(PABLO_INCLUDES)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+
+HDFentryNames.h: HDFentries.txt
+	sed "s/.*/\"&\",/" $? > $@
+
+HDFidList.h: HDFentries.txt
+	sed "s/.*/ID_&,/" $? > $@
 
 #------------------------------------------------------------------------------
 # The following section of this makefile contains dependencies between the
@@ -176,6 +184,8 @@ PabloHDF_SDDF.o: PabloHDF_SDDF.c
 H5A.c: ../src/H5A.c 
 H5A.o: \
 H5A.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -210,6 +220,8 @@ H5A.c \
 H5AC.c:  ../src/H5AC.c 
 H5AC.o: \
 H5AC.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -224,6 +236,8 @@ H5AC.c \
 H5B.c:  ../src/H5B.c 
 H5B.o: \
 H5B.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -243,6 +257,8 @@ H5B.c \
 H5D.c:  ../src/H5D.c 
 H5D.o: \
 H5D.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -282,6 +298,8 @@ H5D.c \
 H5E.c:  ../src/H5E.c 
 H5E.o: \
 H5E.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -291,6 +309,8 @@ H5E.c \
 H5F.c:  ../src/H5F.c 
 H5F.o: \
 H5F.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -325,6 +345,8 @@ H5F.c \
 H5Farray.c:  ../src/H5Farray.c 
 H5Farray.o: \
 H5Farray.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -354,6 +376,8 @@ H5Farray.c \
 H5Fcore.c:  ../src/H5Fcore.c 
 H5Fcore.o: \
 H5Fcore.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -363,6 +387,8 @@ H5Fcore.c \
 H5Ffamily.c:  ../src/H5Ffamily.c 
 H5Ffamily.o: \
 H5Ffamily.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -372,6 +398,8 @@ H5Ffamily.c \
 H5Fistore.c:  ../src/H5Fistore.c 
 H5Fistore.o: \
 H5Fistore.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -401,6 +429,8 @@ H5Fistore.c \
 H5Flow.c:  ../src/H5Flow.c 
 H5Flow.o: \
 H5Flow.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -415,6 +445,8 @@ H5Flow.c \
 H5Fmpio.c:  ../src/H5Fmpio.c 
 H5Fmpio.o: \
 H5Fmpio.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -444,6 +476,8 @@ H5Fmpio.c \
 H5Fsec2.c:  ../src/H5Fsec2.c 
 H5Fsec2.o: \
 H5Fsec2.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -458,6 +492,8 @@ H5Fsec2.c \
 H5Fsplit.c:  ../src/H5Fsplit.c 
 H5Fsplit.o: \
 H5Fsplit.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -472,6 +508,8 @@ H5Fsplit.c \
 H5Fstdio.c:  ../src/H5Fstdio.c 
 H5Fstdio.o: \
 H5Fstdio.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -486,6 +524,8 @@ H5Fstdio.c \
 H5G.c:  ../src/H5G.c 
 H5G.o: \
 H5G.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -520,6 +560,8 @@ H5G.c \
 H5Gent.c:  ../src/H5Gent.c 
 H5Gent.o: \
 H5Gent.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -539,6 +581,8 @@ H5Gent.c \
 H5Gnode.c:  ../src/H5Gnode.c 
 H5Gnode.o: \
 H5Gnode.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -573,6 +617,8 @@ H5Gnode.c \
 H5Gstab.c:  ../src/H5Gstab.c 
 H5Gstab.o: \
 H5Gstab.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -603,6 +649,8 @@ H5Gstab.c \
 H5HG.c:  ../src/H5HG.c 
 H5HG.o: \
 H5HG.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -622,6 +670,8 @@ H5HG.c \
 H5HL.c:  ../src/H5HL.c 
 H5HL.o: \
 H5HL.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -641,6 +691,8 @@ H5HL.c \
 H5MF.c:  ../src/H5MF.c 
 H5MF.o: \
 H5MF.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -650,6 +702,8 @@ H5MF.c \
 H5MM.c:  ../src/H5MM.c 
 H5MM.o: \
 H5MM.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -659,6 +713,8 @@ H5MM.c \
 H5O.c:  ../src/H5O.c 
 H5O.o: \
 H5O.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -688,6 +744,8 @@ H5O.c \
 H5Oattr.c:  ../src/H5Oattr.c 
 H5Oattr.o: \
 H5Oattr.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -717,6 +775,8 @@ H5Oattr.c \
 H5Ocomp.c:  ../src/H5Ocomp.c 
 H5Ocomp.o: \
 H5Ocomp.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -741,6 +801,8 @@ H5Ocomp.c \
 H5Ocont.c:  ../src/H5Ocont.c 
 H5Ocont.o: \
 H5Ocont.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -765,6 +827,8 @@ H5Ocont.c \
 H5Odtype.c:  ../src/H5Odtype.c 
 H5Odtype.o: \
 H5Odtype.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -789,6 +853,8 @@ H5Odtype.c \
 H5Oefl.c:  ../src/H5Oefl.c 
 H5Oefl.o: \
 H5Oefl.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -818,6 +884,8 @@ H5Oefl.c \
 H5Ofill.c:  ../src/H5Ofill.c 
 H5Ofill.o: \
 H5Ofill.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -842,6 +910,8 @@ H5Ofill.c \
 H5Olayout.c:  ../src/H5Olayout.c 
 H5Olayout.o: \
 H5Olayout.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -866,6 +936,8 @@ H5Olayout.c \
 H5Omtime.c:  ../src/H5Omtime.c 
 H5Omtime.o: \
 H5Omtime.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -890,6 +962,8 @@ H5Omtime.c \
 H5Oname.c:  ../src/H5Oname.c 
 H5Oname.o: \
 H5Oname.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -914,6 +988,8 @@ H5Oname.c \
 H5Onull.c:  ../src/H5Onull.c 
 H5Onull.o: \
 H5Onull.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -933,6 +1009,8 @@ H5Onull.c \
 H5Osdspace.c:  ../src/H5Osdspace.c 
 H5Osdspace.o: \
 H5Osdspace.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -957,6 +1035,8 @@ H5Osdspace.c \
 H5Oshared.c:  ../src/H5Oshared.c 
 H5Oshared.o: \
 H5Oshared.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -981,6 +1061,8 @@ H5Oshared.c \
 H5Ostab.c:  ../src/H5Ostab.c 
 H5Ostab.o: \
 H5Ostab.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1005,6 +1087,8 @@ H5Ostab.c \
 H5P.c:  ../src/H5P.c 
 H5P.o: \
 H5P.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1034,6 +1118,8 @@ H5P.c \
 H5R.c:  ../src/H5R.c 
 H5R.o: \
 H5R.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1043,6 +1129,8 @@ H5R.c \
 H5RA.c:  ../src/H5RA.c 
 H5RA.o: \
 H5RA.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5RAprivate.h \
 ../src/H5RApublic.h \
 ../src/H5Ipublic.h \
@@ -1072,6 +1160,8 @@ H5RA.c \
 H5S.c:  ../src/H5S.c 
 H5S.o: \
 H5S.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1096,6 +1186,8 @@ H5S.c \
 H5Sall.c:  ../src/H5Sall.c 
 H5Sall.o: \
 H5Sall.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1120,6 +1212,8 @@ H5Sall.c \
 H5Shyper.c:  ../src/H5Shyper.c 
 H5Shyper.o: \
 H5Shyper.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1149,6 +1243,8 @@ H5Shyper.c \
 H5Smpio.c:  ../src/H5Smpio.c 
 H5Smpio.o: \
 H5Smpio.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1173,6 +1269,8 @@ H5Smpio.c \
 H5Spoint.c:  ../src/H5Spoint.c 
 H5Spoint.o: \
 H5Spoint.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1202,6 +1300,8 @@ H5Spoint.c \
 H5Sselect.c:  ../src/H5Sselect.c 
 H5Sselect.o: \
 H5Sselect.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1231,6 +1331,8 @@ H5Sselect.c \
 H5T.c:  ../src/H5T.c 
 H5T.o: \
 H5T.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1260,6 +1362,8 @@ H5T.c \
 H5Tbit.c:  ../src/H5Tbit.c 
 H5Tbit.o: \
 H5Tbit.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1279,6 +1383,8 @@ H5Tbit.c \
 H5Tconv.c:  ../src/H5Tconv.c 
 H5Tconv.o: \
 H5Tconv.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5Iprivate.h \
 ../src/H5Ipublic.h \
 ../src/H5public.h \
@@ -1303,6 +1409,8 @@ H5Tconv.c \
 H5Tinit.c:  ../src/H5Tinit.c 
 H5Tinit.o: \
 H5Tinit.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1322,6 +1430,8 @@ H5Tinit.c \
 H5TB.c:  ../src/H5TB.c 
 H5TB.o: \
 H5TB.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1331,6 +1441,8 @@ H5TB.c \
 H5V.c:  ../src/H5V.c 
 H5V.o: \
 H5V.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1355,6 +1467,8 @@ H5V.c \
 H5Z.c:  ../src/H5Z.c 
 H5Z.o: \
 H5Z.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1383,6 +1497,8 @@ H5Z.c \
 H5.c:  ../src/H5.c 
 H5.o: \
 H5.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
@@ -1415,6 +1531,8 @@ H5.c \
 H5I.c:  ../src/H5I.c 
 H5I.o: \
 H5I.c \
+ProcIDs.h \
+HDFidList.h \
 ../src/H5private.h \
 ../src/H5public.h \
 ../src/H5config.h \
