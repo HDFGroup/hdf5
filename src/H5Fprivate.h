@@ -241,6 +241,7 @@ typedef struct H5F_access_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     size_t	meta_block_size;    /* Minimum metadata allocation block size (when aggregating metadata allocations) */
+    size_t	sdata_block_size;   /* Minimum "small data" allocation block size (when aggregating "small data" allocations) */
     hsize_t	sieve_buf_size;     /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hid_t	driver_id;	/* File driver ID			*/

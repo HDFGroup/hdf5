@@ -232,6 +232,7 @@ H5F_init_interface(void)
     H5F_access_dflt.alignment = 1; /*no alignment*/
     H5F_access_dflt.gc_ref = 0; /*don't garbage-collect references*/
     H5F_access_dflt.meta_block_size = 2048; /* set metadata block allocations to 2KB */
+    H5F_access_dflt.sdata_block_size = 2048; /* set "small data" block allocations to 2KB */
     H5F_access_dflt.sieve_buf_size = 64*1024; /* set sieve buffer allocation to 64KB */
     H5F_access_dflt.driver_id = H5FD_SEC2; /*default driver*/
     H5F_access_dflt.driver_info = NULL; /*driver file access properties*/
@@ -491,6 +492,7 @@ H5Fget_access_plist(hid_t file_id)
     _fapl.alignment = f->shared->alignment;
     _fapl.gc_ref = f->shared->gc_ref;
     _fapl.meta_block_size = f->shared->lf->def_meta_block_size;
+    _fapl.sdata_block_size = f->shared->lf->def_sdata_block_size;
     _fapl.sieve_buf_size = f->shared->sieve_buf_size;
     _fapl.driver_id = f->shared->lf->driver_id;
     _fapl.driver_info = NULL; /*just for now */

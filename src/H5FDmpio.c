@@ -952,6 +952,7 @@ H5FD_mpio_query(const H5FD_t *_file, unsigned long *flags /* out */)
     if(flags) {
         *flags=0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
     } /* end if */
 
     FUNC_LEAVE(ret_value);

@@ -3778,6 +3778,8 @@ H5Pget_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t *alloc_func/*out*/,
  *              Friday, August 25, 2000
  *
  * Modifications:
+ *      Quincey Koziol, June 5, 2002
+ *      Also sets the "small data" aggregation size
  *
  *-------------------------------------------------------------------------
  */
@@ -3797,7 +3799,7 @@ H5Pset_meta_block_size(hid_t fapl_id, hsize_t size)
     }
 
     /* Set values */
-    fapl->meta_block_size = size;
+    fapl->sdata_block_size = fapl->meta_block_size = size;
 
     FUNC_LEAVE (SUCCEED);
 }

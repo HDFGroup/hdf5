@@ -812,6 +812,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->maxaddr = maxaddr;
     HDmemset(file->fl, 0, sizeof(file->fl));
     file->def_meta_block_size = fapl->meta_block_size;
+    file->def_sdata_block_size = fapl->sdata_block_size;
     file->accum_loc = HADDR_UNDEF;
     file->threshold = fapl->threshold;
     file->alignment = fapl->alignment;
@@ -1413,72 +1414,144 @@ H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hsize_t size)
     }
 #endif
 
-    /*
-     * If the metadata aggregation feature is enabled for this VFL driver,
-     * allocate "generic" metadata space and sub-allocate out of that, if
-     * possible.  Otherwise just allocate through H5FD_real_alloc()
-     */
-    /* Allocate all types of metadata out of the metadata block */
-    if((file->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) && type!=H5FD_MEM_DRAW) {
-        /* Check if the space requested is larger than the space left in the block */
-        if(size>file->cur_meta_block_size) {
-            haddr_t new_meta;       /* Address for new metadata */
+    /* Handle metadata differently from "raw" data */
+    if(type!=H5FD_MEM_DRAW) {
+        /*
+         * If the metadata aggregation feature is enabled for this VFL driver,
+         * allocate "generic" metadata space and sub-allocate out of that, if
+         * possible.  Otherwise just allocate through H5FD_real_alloc()
+         */
+        /* Allocate all types of metadata out of the metadata block */
+        if(file->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) {
+            /* Check if the space requested is larger than the space left in the block */
+            if(size>file->cur_meta_block_size) {
+                haddr_t new_meta;       /* Address for new metadata */
 
-            /* Check if the block asked for is too large for a metadata block */
-            if(size>=file->def_meta_block_size) {
-                /* Allocate more room for this new block the regular way */
-                new_meta=H5FD_real_alloc(file,type,size);
+                /* Check if the block asked for is too large for a metadata block */
+                if(size>=file->def_meta_block_size) {
+                    /* Allocate more room for this new block the regular way */
+                    new_meta=H5FD_real_alloc(file,type,size);
 
-                /* Check if the new metadata is at the end of the current metadata block */
-                if(file->eoma+file->cur_meta_block_size==new_meta) {
-                    /* Treat the allocation request as if the current metadata block
-                     * grew by the amount allocated and just update the eoma
-                     * address.  Don't bother updating the cur_meta_block_size
-                     * since it will just grow and shrink by the same amount.
-                     */
-                    ret_value=file->eoma;
-                    file->eoma+=size;
+                    /* Check if the new metadata is at the end of the current metadata block */
+                    if(file->eoma+file->cur_meta_block_size==new_meta) {
+                        /* Treat the allocation request as if the current metadata block
+                         * grew by the amount allocated and just update the eoma
+                         * address.  Don't bother updating the cur_meta_block_size
+                         * since it will just grow and shrink by the same amount.
+                         */
+                        ret_value=file->eoma;
+                        file->eoma+=size;
+                    } /* end if */
+                    else {
+                        /* Use the new metadata block for the space allocated */
+                        ret_value=new_meta;
+                    } /* end else */
                 } /* end if */
                 else {
-                    /* Use the new metadata block for the space allocated */
-                    ret_value=new_meta;
+                    /* Allocate another metadata block */
+                    new_meta=H5FD_real_alloc(file,H5FD_MEM_DEFAULT,file->def_meta_block_size);
+
+                    /* Check if the new metadata is at the end of the current metadata block */
+                    if(file->eoma+file->cur_meta_block_size==new_meta) {
+                        file->cur_meta_block_size+=file->def_meta_block_size;
+                    } /* end if */
+                    else {
+                        /*
+                         * Instead of just dropping the remainder of the block on the
+                         * floor and leaving the space in the file unused, we should
+                         * return this small piece of unused space to the free list
+                         * management. - QAK
+                         */
+                        file->eoma=new_meta;
+                        file->cur_meta_block_size=file->def_meta_block_size;
+                    } /* end else */
+
+
+                    /* Allocate space out of the metadata block */
+                    ret_value=file->eoma;
+                    file->cur_meta_block_size-=size;
+                    file->eoma+=size;
                 } /* end else */
             } /* end if */
             else {
-                /* Allocate another metadata block */
-                new_meta=H5FD_real_alloc(file,H5FD_MEM_DEFAULT,file->def_meta_block_size);
-
-                /* Check if the new metadata is at the end of the current metadata block */
-                if(file->eoma+file->cur_meta_block_size==new_meta) {
-                    file->cur_meta_block_size+=file->def_meta_block_size;
-                } /* end if */
-                else {
-                    /*
-                     * Instead of just dropping the remainder of the block on the
-                     * floor and leaving the space in the file unused, we should
-                     * return this small piece of unused space to the free list
-                     * management. - QAK
-                     */
-                    file->eoma=new_meta;
-                    file->cur_meta_block_size=file->def_meta_block_size;
-                } /* end else */
-
-
                 /* Allocate space out of the metadata block */
                 ret_value=file->eoma;
                 file->cur_meta_block_size-=size;
                 file->eoma+=size;
             } /* end else */
         } /* end if */
-        else {
-            /* Allocate space out of the metadata block */
-            ret_value=file->eoma;
-            file->cur_meta_block_size-=size;
-            file->eoma+=size;
+        else { /* Allocate data the regular way */
+            ret_value=H5FD_real_alloc(file,type,size);
         } /* end else */
     } /* end if */
-    else { /* Allocate data the regular way */
-        ret_value=H5FD_real_alloc(file,type,size);
+    else { /* Allocate "raw" data */
+        /*
+         * If the "small data" aggregation feature is enabled for this VFL driver,
+         * allocate "small data" space and sub-allocate out of that, if
+         * possible.  Otherwise just allocate through H5FD_real_alloc()
+         */
+        if(file->feature_flags&H5FD_FEAT_AGGREGATE_SMALLDATA) {
+            /* Check if the space requested is larger than the space left in the block */
+            if(size>file->cur_sdata_block_size) {
+                haddr_t new_data;       /* Address for new raw data block */
+
+                /* Check if the block asked for is too large for the "small data" block */
+                if(size>=file->def_sdata_block_size) {
+                    /* Allocate more room for this new block the regular way */
+                    new_data=H5FD_real_alloc(file,type,size);
+
+                    /* Check if the new raw data is at the end of the current "small data" block */
+                    if(file->eosda+file->cur_sdata_block_size==new_data) {
+                        /* Treat the allocation request as if the current "small data"
+                         * block grew by the amount allocated and just update the
+                         * eosda address.  Don't bother updating the
+                         * cur_sdata_block_size since it will just grow and shrink by
+                         * the same amount.
+                         */
+                        ret_value=file->eosda;
+                        file->eosda+=size;
+                    } /* end if */
+                    else {
+                        /* Use the new "small data" block for the space allocated */
+                        ret_value=new_data;
+                    } /* end else */
+                } /* end if */
+                else {
+                    /* Allocate another "small data" block */
+                    new_data=H5FD_real_alloc(file,type,file->def_sdata_block_size);
+
+                    /* Check if the new raw data is at the end of the current "small data" block */
+                    if(file->eosda+file->cur_sdata_block_size==new_data) {
+                        file->cur_sdata_block_size+=file->def_sdata_block_size;
+                    } /* end if */
+                    else {
+                        /*
+                         * Instead of just dropping the remainder of the block on the
+                         * floor and leaving the space in the file unused, we should
+                         * return this small piece of unused space to the free list
+                         * management. - QAK
+                         */
+                        file->eosda=new_data;
+                        file->cur_sdata_block_size=file->def_sdata_block_size;
+                    } /* end else */
+
+
+                    /* Allocate space out of the "small data" block */
+                    ret_value=file->eosda;
+                    file->cur_sdata_block_size-=size;
+                    file->eosda+=size;
+                } /* end else */
+            } /* end if */
+            else {
+                /* Allocate space out of the "small data" block */
+                ret_value=file->eosda;
+                file->cur_sdata_block_size-=size;
+                file->eosda+=size;
+            } /* end else */
+        } /* end if */
+        else { /* Allocate data the regular way */
+            ret_value=H5FD_real_alloc(file,type,size);
+        } /* end else */
     } /* end else */
 
 done:
