@@ -78,6 +78,11 @@ Library
      certain compound datatype conversions was fixed for nested compound
      types. This required a small change in the datatype conversion
      function API.
+   * Re-wrote part of the hyperslab initialization code to speed it up quite
+     a bit.
+   * Added bounded garbage collection for the free lists when they run out of
+     memory and also added H5set_free_list_limits API call to allow users to
+     put an upper limit on the amount of memory used for free lists.
 
 
 Configuration
