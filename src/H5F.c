@@ -1682,6 +1682,33 @@ H5F_flush(H5F_t *f, H5F_scope_t scope, hbool_t invalidate,
 
     /* Avoid flushing buffers & caches when alloc_only set */
     if(!alloc_only) {
+        /* If we are invalidating everything (which only happens just before
+         * the file closes), release the unused portion of the metadata and
+         * "small data" blocks back to the free lists in the file.
+         */
+        if(invalidate) {
+            if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_METADATA) {
+                /* Return the unused portion of the metadata block to a free list */
+                if(f->shared->lf->eoma!=0)
+                    if(H5FD_free(f->shared->lf,H5FD_MEM_DEFAULT,f->shared->lf->eoma,f->shared->lf->cur_meta_block_size)<0)
+                        HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free metadata block");
+
+                /* Reset metadata block information, just in case */
+                f->shared->lf->eoma=0;
+                f->shared->lf->cur_meta_block_size=0;
+            } /* end if */
+            if(f->shared->lf->feature_flags&H5FD_FEAT_AGGREGATE_SMALLDATA) {
+                /* Return the unused portion of the "small data" block to a free list */
+                if(f->shared->lf->eosda!=0)
+                    if(H5FD_free(f->shared->lf,H5FD_MEM_DRAW,f->shared->lf->eosda,f->shared->lf->cur_sdata_block_size)<0)
+                        HRETURN_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free 'small data' block");
+
+                /* Reset "small data" block information, just in case */
+                f->shared->lf->eosda=0;
+                f->shared->lf->cur_sdata_block_size=0;
+            } /* end if */
+        } /* end if */
+
         /* flush the data sieve buffer, if we have a dirty one */
         if(f->shared->sieve_buf && f->shared->sieve_dirty) {
             /* Write dirty data sieve buffer to file */
@@ -1960,7 +1987,7 @@ H5F_close(H5F_t *f)
 	 * this file are closed the flush isn't really necessary, but lets
 	 * just be safe.
 	 */
-	if (H5F_flush(f, H5F_SCOPE_LOCAL, TRUE, FALSE)<0) {
+	if (H5F_flush(f, H5F_SCOPE_LOCAL, FALSE, FALSE)<0) {
 	    HRETURN_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,
 			  "unable to flush cache");
 	}
