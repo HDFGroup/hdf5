@@ -21,7 +21,7 @@
 ## tilde to the file name.
 ##
 .PRECIOUS: Dependencies
-Dependencies: .depend
+$(srcdir)/Dependencies: .depend
 	@if test "$(srcdir)" != "."; then				      \
 	    echo '## This file is machine generated on GNU systems.'          \
 		>$@;							      \
