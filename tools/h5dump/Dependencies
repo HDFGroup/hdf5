@@ -2,8 +2,8 @@
 ## Only temporary changes may be made here.
 
 h5dump.lo: \
-   $(srcdir)/h5dump.c \
-   $(srcdir)/h5dump.h \
+   $(top_srcdir)/tools/h5dump/h5dump.c \
+   $(top_srcdir)/tools/h5dump/h5dump.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -14,6 +14,7 @@ h5dump.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -44,7 +45,7 @@ h5dump.lo: \
    $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/tools/lib/h5tools_utils.h
 h5dumpgentest.lo: \
-   $(srcdir)/h5dumpgentest.c \
+   $(top_srcdir)/tools/h5dump/h5dumpgentest.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -55,6 +56,7 @@ h5dumpgentest.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \

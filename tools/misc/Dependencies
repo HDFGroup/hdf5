@@ -2,7 +2,7 @@
 ## Only temporary changes may be made here.
 
 h5debug.lo: \
-   $(srcdir)/h5debug.c \
+   $(top_srcdir)/tools/misc/h5debug.c \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -44,7 +44,7 @@ h5debug.lo: \
    $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5FDfamily.h
 h5createU8.lo: \
-   $(srcdir)/h5createU8.c \
+   $(top_srcdir)/tools/misc/h5createU8.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -55,6 +55,7 @@ h5createU8.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -80,7 +81,7 @@ h5createU8.lo: \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h
 h5repart.lo: \
-   $(srcdir)/h5repart.c \
+   $(top_srcdir)/tools/misc/h5repart.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -91,6 +92,7 @@ h5repart.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -119,7 +121,7 @@ h5repart.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h
 pdb2hdf.lo: \
-   $(srcdir)/pdb2hdf.c \
+   $(top_srcdir)/tools/misc/pdb2hdf.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -130,6 +132,7 @@ pdb2hdf.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \

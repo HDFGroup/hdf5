@@ -13,6 +13,7 @@ iopipe.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -52,6 +53,7 @@ chunk.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -88,6 +90,7 @@ overhead.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -127,6 +130,7 @@ zip_perf.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -164,6 +168,7 @@ pio_perf.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -200,6 +205,7 @@ pio_engine.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -237,6 +243,7 @@ pio_timer.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \

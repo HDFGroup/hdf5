@@ -2,8 +2,8 @@
 ## Only temporary changes may be made here.
 
 h5tools.lo: \
-   $(srcdir)/h5tools.c \
-   $(srcdir)/h5tools.h \
+   $(top_srcdir)/tools/lib/h5tools.c \
+   $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -14,6 +14,7 @@ h5tools.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -38,20 +39,20 @@ h5tools.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/h5tools_str.h \
-   $(srcdir)/h5tools_utils.h \
+   $(top_srcdir)/tools/lib/h5tools_str.h \
+   $(top_srcdir)/tools/lib/h5tools_utils.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h
 h5tools_str.lo: \
-   $(srcdir)/h5tools_str.c \
+   $(top_srcdir)/tools/lib/h5tools_str.c \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
    $(top_srcdir)/src/H5api_adpt.h \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h \
-   $(srcdir)/h5tools.h \
+   $(top_srcdir)/tools/lib/h5tools.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5Ipublic.h \
    $(top_srcdir)/src/H5Apublic.h \
@@ -59,6 +60,7 @@ h5tools_str.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -83,10 +85,10 @@ h5tools_str.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/h5tools_str.h
+   $(top_srcdir)/tools/lib/h5tools_str.h
 h5tools_utils.lo: \
-   $(srcdir)/h5tools_utils.c \
-   $(srcdir)/h5tools_utils.h \
+   $(top_srcdir)/tools/lib/h5tools_utils.c \
+   $(top_srcdir)/tools/lib/h5tools_utils.h \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -97,6 +99,7 @@ h5tools_utils.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -125,7 +128,7 @@ h5tools_utils.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5FSprivate.h
 talign.lo: \
-   $(srcdir)/talign.c \
+   $(top_srcdir)/tools/lib/talign.c \
    $(top_srcdir)/src/hdf5.h \
    $(top_srcdir)/src/H5public.h \
    $(top_builddir)/src/H5pubconf.h \
@@ -136,6 +139,7 @@ talign.lo: \
    $(top_srcdir)/src/H5Bpublic.h \
    $(top_srcdir)/src/H5Dpublic.h \
    $(top_srcdir)/src/H5Epublic.h \
+   $(top_srcdir)/src/H5Epubgen.h \
    $(top_srcdir)/src/H5Fpublic.h \
    $(top_srcdir)/src/H5FDpublic.h \
    $(top_srcdir)/src/H5Gpublic.h \
@@ -160,4 +164,4 @@ talign.lo: \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
    $(top_srcdir)/src/H5FDstream.h \
-   $(srcdir)/h5tools.h
+   $(top_srcdir)/tools/lib/h5tools.h
