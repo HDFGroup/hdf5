@@ -789,6 +789,22 @@ test_compound_dtype3(hid_t file)
         TEST_ERROR;
     H5Tclose(mem_id);
     
+    /* check the array member */
+    if((mem_id = H5Tget_member_type(native_type, 1))<0)
+        TEST_ERROR;
+    if(H5T_ARRAY!=H5Tget_class(mem_id))
+        TEST_ERROR;
+    if((nest_mem_id = H5Tget_super(mem_id))<0)
+        TEST_ERROR;
+    if(H5Tget_order(nest_mem_id) != H5Tget_order(H5T_NATIVE_INT)) 
+        TEST_ERROR;
+    if(H5Tget_size(nest_mem_id) < H5Tget_size(H5T_STD_I32LE))
+        TEST_ERROR;
+    if(H5T_INTEGER!=H5Tget_class(nest_mem_id))
+        TEST_ERROR;
+    H5Tclose(nest_mem_id);
+    H5Tclose(mem_id);
+  
     /* check the long long member */
     if((mem_id = H5Tget_member_type(native_type, 2))<0)
         TEST_ERROR;
@@ -832,7 +848,7 @@ test_compound_dtype3(hid_t file)
                 if(temp_point->a[k] != temp_check->a[k]) {
 		      H5_FAILED();
 		      printf("    Read different values than written.\n");
-		      printf("    At index %d,%d\n", i, j);
+		      printf("    At index %d,%d,%d\n", i, j, k);
 		      goto error;
                 }
             }
