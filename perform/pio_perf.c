@@ -13,7 +13,7 @@
  * This is what the report should look like:
  *
  *  nprocs = Max#Procs
- *      IO Type = RAWIO
+ *      IO API = POSIXIO
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -23,7 +23,7 @@
  *
  *          . . .
  *
- *      IO Type = MPIO
+ *      IO API = MPIO
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -33,7 +33,7 @@
  *
  *          . . .
  *
- *      IO Type = PHDF5
+ *      IO API = PHDF5
  *          # Files = 1, # of dsets = 1000, Elements per dset = 37000
  *              Write Results = x MB/s
  *              Read Results = x MB/s
@@ -72,11 +72,12 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define PIO_RAW             0x10
+#define PIO_POSIX           0x10
 #define PIO_MPI             0x20
 #define PIO_HDF5            0x40
 
-#define MB_PER_SEC(bytes,t) (((bytes) / ONE_MB) / t)
+/* report 0.0 in case t is zero too */
+#define MB_PER_SEC(bytes,t) (((t)==0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
 /* global variables */
 FILE       *output;             /* output file                          */
@@ -91,6 +92,7 @@ int         pio_debug_level = 0;/* The debug level:
                                  *   1 - Minimal
                                  *   2 - Some more
                                  *   3 - Maximal
+                                 *   4 - Maximal & then some
                                  */
 
 /* local variables */
@@ -102,22 +104,32 @@ static const char  *progname = "pio_perf";
  * adding more, make sure that they don't clash with each other.
  */
 #if 1
-static const char *s_opts = "hD:f:HP:p:X:x:md:F:i:o:r";
+static const char *s_opts = "ha:A:cD:f:P:p:X:x:nd:F:i:o:stT:";
 #else
-static const char *s_opts = "hbD:f:HP:p:X:x:md:F:i:o:r";
+static const char *s_opts = "ha:A:bcD:f:P:p:X:x:nd:F:i:o:stT:";
 #endif  /* 1 */
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
     { "he", no_arg, 'h' },
+    { "align", require_arg, 'a' },
+    { "alig", require_arg, 'a' },
+    { "ali", require_arg, 'a' },
+    { "al", require_arg, 'a' },
+    { "api", require_arg, 'A' },
+    { "ap", require_arg, 'A' },
 #if 0
-    /* a siting of the elusive binary option */
+    /* a sighting of the elusive binary option */
     { "binary", no_arg, 'b' },
     { "binar", no_arg, 'b' },
     { "bina", no_arg, 'b' },
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif  /* 0 */
+    { "chunk", no_arg, 'c' },
+    { "chun", no_arg, 'c' },
+    { "chu", no_arg, 'c' },
+    { "ch", no_arg, 'c' },
     { "debug", require_arg, 'D' },
     { "debu", require_arg, 'D' },
     { "deb", require_arg, 'D' },
@@ -130,9 +142,6 @@ static struct long_options l_opts[] = {
     { "file", require_arg, 'f' },
     { "fil", require_arg, 'f' },
     { "fi", require_arg, 'f' },
-    { "hdf5", no_arg, 'H' },
-    { "hdf", no_arg, 'H' },
-    { "hd", no_arg, 'H' },
     { "max-num-processes", require_arg, 'P' },
     { "max-num-processe", require_arg, 'P' },
     { "max-num-process", require_arg, 'P' },
@@ -167,10 +176,12 @@ static struct long_options l_opts[] = {
     { "min-xfe", require_arg, 'x' },
     { "min-xf", require_arg, 'x' },
     { "min-x", require_arg, 'x' },
-    { "mpiio", no_arg, 'm' },
-    { "mpii", no_arg, 'm' },
-    { "mpi", no_arg, 'm' },
-    { "mp", no_arg, 'm' },
+    { "no-fill", no_arg, 'n' },
+    { "no-fil", no_arg, 'n' },
+    { "no-fi", no_arg, 'n' },
+    { "no-f", no_arg, 'n' },
+    { "no-", no_arg, 'n' },
+    { "no", no_arg, 'n' },
     { "num-dsets", require_arg, 'd' },
     { "num-dset", require_arg, 'd' },
     { "num-dse", require_arg, 'd' },
@@ -196,8 +207,14 @@ static struct long_options l_opts[] = {
     { "outp", require_arg, 'o' },
     { "out", require_arg, 'o' },
     { "ou", require_arg, 'o' },
-    { "raw", no_arg, 'r' },
-    { "ra", no_arg, 'r' },
+    { "threshold", require_arg, 'T' },
+    { "threshol", require_arg, 'T' },
+    { "thresho", require_arg, 'T' },
+    { "thresh", require_arg, 'T' },
+    { "thres", require_arg, 'T' },
+    { "thre", require_arg, 'T' },
+    { "thr", require_arg, 'T' },
+    { "th", require_arg, 'T' },
     { NULL, 0, '\0' }
 };
 
@@ -208,10 +225,16 @@ struct options {
     long num_dsets;             /* number of datasets                   */
     long num_files;             /* number of files                      */
     long num_iters;             /* number of iterations                 */
-    long max_num_procs;         /* maximum number of processes to use   */
-    long min_num_procs;         /* minimum number of processes to use   */
+    int max_num_procs;          /* maximum number of processes to use   */
+    int min_num_procs;          /* minimum number of processes to use   */
     size_t max_xfer_size;       /* maximum transfer buffer size         */
     size_t min_xfer_size;       /* minimum transfer buffer size         */
+    int print_times;       	/* print times as well as throughputs   */
+    int print_raw;         	/* print raw data throughput info       */
+    off_t h5_alignment;         /* alignment in HDF5 file               */
+    off_t h5_threshold;         /* threshold for alignment in HDF5 file */
+    int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
+    int h5_no_fill;        	/* Disable HDF5 writing fill values     */
 };
 
 typedef struct _minmax {
@@ -225,12 +248,13 @@ typedef struct _minmax {
 static off_t parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(struct options *options);
-static int run_test(iotype iot, parameters parms);
+static int run_test(iotype iot, parameters parms, struct options *opts);
 static void output_all_info(minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
-static minmax accumulate_minmax_stuff(minmax *mm, off_t raw_size, int count);
+static minmax accumulate_minmax_stuff(minmax *mm, int count);
 static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
+static void output_results(const struct options *options, const char *name, minmax *table, int table_size,off_t data_size);
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
@@ -315,8 +339,8 @@ finish:
  *              processors to use. For each loop iteration, we divide that
  *              number by 2 and rerun the test.
  *
- *            - The second slowest is what type of IO to perform. We have
- *              three choices: RAWIO, MPI-IO, and PHDF5.
+ *            - The second slowest is what type of IO API to perform. We have
+ *              three choices: POSIXIO, MPI-IO, and PHDF5.
  *
  *            - Then we change the size of the buffer. This information is
  *              inferred from the number of datasets to create and the number
@@ -331,9 +355,9 @@ static void
 run_test_loop(struct options *opts)
 {
     parameters parms;
-    long num_procs;
+    int num_procs;
     int		doing_pio;		/* if this process is doing PIO */
-    int io_runs = PIO_HDF5 | PIO_MPI | PIO_RAW; /* default to run all tests */
+    int io_runs = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* default to run all tests */
 
     if (opts->io_types & ~0x7) {
         /* we want to run only a select subset of these tests */
@@ -345,13 +369,17 @@ run_test_loop(struct options *opts)
         if (opts->io_types & PIO_MPI)
             io_runs |= PIO_MPI;
 
-        if (opts->io_types & PIO_RAW)
-            io_runs |= PIO_RAW;
+        if (opts->io_types & PIO_POSIX)
+            io_runs |= PIO_POSIX;
     }
 
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
     parms.num_iters = opts->num_iters;
+    parms.h5_align = opts->h5_alignment;
+    parms.h5_thresh = opts->h5_threshold;
+    parms.h5_use_chunks = opts->h5_use_chunks;
+    parms.h5_no_fill = opts->h5_no_fill;
 
     /* start with max_num_procs and decrement it by half for each loop. */
     /* if performance needs restart, fewer processes may be needed. */
@@ -373,24 +401,28 @@ run_test_loop(struct options *opts)
             for (buf_size = opts->min_xfer_size;
                     buf_size <= opts->max_xfer_size; buf_size <<= 1) {
                 parms.buf_size = buf_size;
-                parms.num_elmts = opts->file_size / (parms.num_dsets * sizeof(int));
+                parms.num_elmts = opts->file_size / (off_t)(parms.num_dsets * sizeof(int));
 
                 print_indent(1);
                 output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
                               buf_size,
-                              ((double)parms.num_dsets * parms.num_elmts * sizeof(int)) / ONE_MB);
+                              ((double)parms.num_dsets * (double)parms.num_elmts * (double)sizeof(int)) / ONE_MB);
                 print_indent(1);
                 output_report("  # of files: %ld, # of dsets: %ld, # of elmts per dset: %ld\n",
                               parms.num_files, parms.num_dsets, parms.num_elmts);
 
-                if (io_runs & PIO_RAW)
-                    run_test(RAWIO, parms);
+                if (io_runs & PIO_POSIX)
+                    run_test(POSIXIO, parms, opts);
 
                 if (io_runs & PIO_MPI)
-                    run_test(MPIO, parms);
+                    run_test(MPIO, parms, opts);
 
                 if (io_runs & PIO_HDF5)
-                    run_test(PHDF5, parms);
+                    run_test(PHDF5, parms, opts);
+
+                /* Run the tests once if buf_size==0, but then break out */
+                if(buf_size==0)
+                    break;
             }
 
             if (destroy_comm_world() != SUCCESS) {
@@ -408,34 +440,37 @@ run_test_loop(struct options *opts)
  * Modifications:
  */
 static int
-run_test(iotype iot, parameters parms)
+run_test(iotype iot, parameters parms, struct options *opts)
 {
     results         res;
     register int    i, ret_value = SUCCESS;
     int             comm_size;
     off_t           raw_size;
-    minmax          total_mm;
-    minmax         *write_mpi_mm_table;
-    minmax         *write_mm_table;
-    minmax         *write_gross_mm_table;
-    minmax         *read_mpi_mm_table;
-    minmax         *read_mm_table;
-    minmax         *read_gross_mm_table;
+    minmax         *write_mpi_mm_table=NULL;
+    minmax         *write_mm_table=NULL;
+    minmax         *write_gross_mm_table=NULL;
+    minmax         *write_raw_mm_table=NULL;
+    minmax         *read_mpi_mm_table=NULL;
+    minmax         *read_mm_table=NULL;
+    minmax         *read_gross_mm_table=NULL;
+    minmax         *read_raw_mm_table=NULL;
     minmax          write_mpi_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_gross_mm = {0.0, 0.0, 0.0, 0};
+    minmax          write_raw_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_mpi_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_gross_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_raw_mm = {0.0, 0.0, 0.0, 0};
 
-    raw_size = parms.num_dsets * parms.num_elmts * sizeof(int);
+    raw_size = (off_t)parms.num_dsets * (off_t)parms.num_elmts * (off_t)sizeof(int);
     parms.io_type = iot;
     print_indent(2);
-    output_report("Type of IO = ");
+    output_report("IO API = ");
 
     switch (iot) {
-    case RAWIO:
-        output_report("Raw\n");
+    case POSIXIO:
+        output_report("POSIX\n");
         break;
     case MPIO:
         output_report("MPIO\n");
@@ -447,46 +482,18 @@ run_test(iotype iot, parameters parms)
 
     MPI_Comm_size(pio_comm_g, &comm_size);
 
-    write_mpi_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    write_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    write_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    read_mpi_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    read_mm_table = malloc(parms.num_iters * sizeof(minmax));
-    read_gross_mm_table = malloc(parms.num_iters * sizeof(minmax));
+    /* allocate space for tables minmax and that it is sufficient */
+    /* to initialize all elements to zeros by calloc.             */
+    write_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    write_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    write_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    write_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    read_mpi_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    read_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    read_gross_mm_table = calloc(parms.num_iters , sizeof(minmax));
+    read_raw_mm_table = calloc(parms.num_iters , sizeof(minmax));
 
-    for (i = 0; i < parms.num_iters; ++i) {
-        write_mpi_mm_table[i].min = 0.0;
-        write_mpi_mm_table[i].max = 0.0;
-        write_mpi_mm_table[i].sum = 0.0;
-        write_mpi_mm_table[i].num = 0;
-
-        write_mm_table[i].min = 0.0;
-        write_mm_table[i].max = 0.0;
-        write_mm_table[i].sum = 0.0;
-        write_mm_table[i].num = 0;
-
-        write_gross_mm_table[i].min = 0.0;
-        write_gross_mm_table[i].max = 0.0;
-        write_gross_mm_table[i].sum = 0.0;
-        write_gross_mm_table[i].num = 0;
-
-        read_mpi_mm_table[i].min = 0.0;
-        read_mpi_mm_table[i].max = 0.0;
-        read_mpi_mm_table[i].sum = 0.0;
-        read_mpi_mm_table[i].num = 0;
-
-        read_mm_table[i].min = 0.0;
-        read_mm_table[i].max = 0.0;
-        read_mm_table[i].sum = 0.0;
-        read_mm_table[i].num = 0;
-
-        read_gross_mm_table[i].min = 0.0;
-        read_gross_mm_table[i].max = 0.0;
-        read_gross_mm_table[i].sum = 0.0;
-        read_gross_mm_table[i].num = 0;
-    }
-
-    /* Do IO iteration times, collecting statics each time */
+    /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
         double t;
 
@@ -511,6 +518,12 @@ run_test(iotype iot, parameters parms)
 
         write_gross_mm_table[i] = write_gross_mm;
 
+        /* gather all of the raw "write" times */
+        t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
+	get_minmax(&write_raw_mm, t);
+
+        write_raw_mm_table[i] = write_raw_mm;
+
         /* gather all of the "mpi read" times */
         t = get_time(res.timers, HDF5_MPI_READ);
 	get_minmax(&read_mpi_mm, t);
@@ -528,12 +541,32 @@ run_test(iotype iot, parameters parms)
 	get_minmax(&read_gross_mm, t);
 
         read_gross_mm_table[i] = read_gross_mm;
+
+        /* gather all of the raw "read" times */
+        t = get_time(res.timers, HDF5_RAW_READ_FIXED_DIMS);
+	get_minmax(&read_raw_mm, t);
+
+        read_raw_mm_table[i] = read_raw_mm;
         pio_time_destroy(res.timers);
     }
 
     /* 
-     * Show various statics
+     * Show various statistics
      */
+    /* Write statistics	*/
+    /* Print the raw data throughput if desired */
+    if(opts->print_raw) {
+        /* accumulate and output the max, min, and average "raw write" times */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Raw Data Write details:\n");
+            output_all_info(write_raw_mm_table, parms.num_iters, 4);
+        }
+
+        output_results(opts,"Raw Data Write",write_raw_mm_table,parms.num_iters,raw_size);
+    } /* end if */
+
     /* show mpi write statics */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -541,6 +574,8 @@ run_test(iotype iot, parameters parms)
         output_report("MPI Write details:\n");
         output_all_info(write_mpi_mm_table, parms.num_iters, 4);
     }
+
+    /* We don't currently output the MPI write results */
 
     /* accumulate and output the max, min, and average "write" times */
     if (pio_debug_level >= 3) {
@@ -550,18 +585,7 @@ run_test(iotype iot, parameters parms)
         output_all_info(write_mm_table, parms.num_iters, 4);
     }
 
-    total_mm = accumulate_minmax_stuff(write_mm_table, raw_size, parms.num_iters);
-
-    print_indent(3);
-    output_report("Write (%d iteration(s)):\n", parms.num_iters);
-
-    print_indent(4);
-    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(4);
-    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(4);
-    output_report("Average Throughput: %.2f MB/s\n",
-                  total_mm.sum / total_mm.num);
+    output_results(opts,"Write",write_mm_table,parms.num_iters,raw_size);
 
     /* accumulate and output the max, min, and average "gross write" times */
     if (pio_debug_level >= 3) {
@@ -571,18 +595,21 @@ run_test(iotype iot, parameters parms)
         output_all_info(write_gross_mm_table, parms.num_iters, 4);
     }
 
-    total_mm = accumulate_minmax_stuff(write_gross_mm_table, raw_size, parms.num_iters);
+    output_results(opts,"Write Open-Close",write_gross_mm_table,parms.num_iters,raw_size);
 
-    print_indent(3);
-    output_report("Write Open-Close (%d iteration(s)):\n", parms.num_iters);
+    /* Read statistics	*/
+    /* Print the raw data throughput if desired */
+    if(opts->print_raw) {
+        /* accumulate and output the max, min, and average "raw read" times */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Raw Data Read details:\n");
+            output_all_info(read_raw_mm_table, parms.num_iters, 4);
+        }
 
-    print_indent(4);
-    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(4);
-    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(4);
-    output_report("Average Throughput: %.2f MB/s\n",
-                  total_mm.sum / total_mm.num);
+        output_results(opts,"Raw Data Read",read_raw_mm_table,parms.num_iters,raw_size);
+    } /* end if */
 
     /* show mpi read statics */
     if (pio_debug_level >= 3) {
@@ -592,6 +619,8 @@ run_test(iotype iot, parameters parms)
         output_all_info(read_mpi_mm_table, parms.num_iters, 4);
     }
 
+    /* We don't currently output the MPI read results */
+
     /* accumulate and output the max, min, and average "read" times */
     if (pio_debug_level >= 3) {
         /* output all of the times for all iterations */
@@ -600,18 +629,7 @@ run_test(iotype iot, parameters parms)
         output_all_info(read_mm_table, parms.num_iters, 4);
     }
 
-    total_mm = accumulate_minmax_stuff(read_mm_table, raw_size, parms.num_iters);
-
-    print_indent(3);
-    output_report("Read (%d iteration(s)):\n", parms.num_iters);
-
-    print_indent(4);
-    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(4);
-    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(4);
-    output_report("Average Throughput: %.2f MB/s\n",
-                  total_mm.sum / total_mm.num);
+    output_results(opts,"Read",read_mm_table,parms.num_iters,raw_size);
 
     /* accumulate and output the max, min, and average "gross read" times */
     if (pio_debug_level >= 3) {
@@ -621,18 +639,7 @@ run_test(iotype iot, parameters parms)
         output_all_info(read_gross_mm_table, parms.num_iters, 4);
     }
 
-    total_mm = accumulate_minmax_stuff(read_gross_mm_table, raw_size, parms.num_iters);
-
-    print_indent(3);
-    output_report("Read Open-Close (%d iteration(s)):\n", parms.num_iters);
-
-    print_indent(4);
-    output_report("Minimum Throughput: %.2f MB/s\n", total_mm.min);
-    print_indent(4);
-    output_report("Maximum Throughput: %.2f MB/s\n", total_mm.max);
-    print_indent(4);
-    output_report("Average Throughput: %.2f MB/s\n",
-                  total_mm.sum / total_mm.num);
+    output_results(opts,"Read Open-Close",read_gross_mm_table,parms.num_iters,raw_size);
 
     /* clean up our mess */
     free(write_mpi_mm_table);
@@ -641,6 +648,8 @@ run_test(iotype iot, parameters parms)
     free(read_mm_table);
     free(write_gross_mm_table);
     free(read_gross_mm_table);
+    free(write_raw_mm_table);
+    free(read_raw_mm_table);
     return ret_value;
 }
 
@@ -667,7 +676,7 @@ output_all_info(minmax *mm, int count, int indent_level)
 }
 
 /*
- * Function:    get_minmax_stuff
+ * Function:    get_minmax
  * Purpose:     Gather all the min, max and total of val.
  * Return:      Nothing
  * Programmer:  Bill Wendling, 21. December 2001
@@ -694,18 +703,21 @@ get_minmax(minmax *mm, double val)
  * Return:      TOTAL_MM - the total of all of these.
  * Programmer:  Bill Wendling, 21. December 2001
  * Modifications:
+ *              Changed to use seconds instead of MB/s - QAK, 5/9/02
  */
 static minmax
-accumulate_minmax_stuff(minmax *mm, off_t raw_size, int count)
+accumulate_minmax_stuff(minmax *mm, int count)
 {
     register int i;
     minmax total_mm;
     
-    total_mm.sum = total_mm.max = total_mm.min = MB_PER_SEC(raw_size, mm[0].max);
+    total_mm.sum = 0.0;
+    total_mm.max = -DBL_MAX;
+    total_mm.min = DBL_MAX;
     total_mm.num = count;
 
-    for (i = 1; i < count; ++i) {
-        double m = MB_PER_SEC(raw_size, mm[i].max);
+    for (i = 0; i < count; ++i) {
+        double m = mm[i].max;
 
         total_mm.sum += m;
 
@@ -801,6 +813,50 @@ destroy_comm_world(void)
 }
 
 /*
+ * Function:    output_results
+ * Purpose:     Print information about the time & bandwidth for a given
+ *                  minmax & # of iterations.
+ * Return:      Nothing
+ * Programmer:  Quincey Koziol, 9. May 2002
+ * Modifications:
+ */
+static void
+output_results(const struct options *opts, const char *name, minmax *table,
+    int table_size,off_t data_size)
+{
+    minmax          total_mm;
+
+    total_mm = accumulate_minmax_stuff(table, table_size);
+
+    print_indent(3);
+    output_report("%s (%d iteration(s)):\n", name,(int)table_size);
+
+    /* Note: The maximum throughput uses the minimum amount of time & vice versa */
+
+    print_indent(4);
+    output_report("Maximum Throughput: %6.2f MB/s", MB_PER_SEC(data_size,total_mm.min));
+    if(opts->print_times)
+        output_report(" (%7.3f s)\n", total_mm.min);
+    else
+        output_report("\n");
+
+    print_indent(4);
+    output_report("Average Throughput: %6.2f MB/s",
+                  MB_PER_SEC(data_size,total_mm.sum / total_mm.num));
+    if(opts->print_times)
+        output_report(" (%7.3f s)\n", (total_mm.sum / total_mm.num));
+    else
+        output_report("\n");
+
+    print_indent(4);
+    output_report("Minimum Throughput: %6.2f MB/s", MB_PER_SEC(data_size,total_mm.max));
+    if(opts->print_times)
+        output_report(" (%7.3f s)\n", total_mm.max);
+    else
+        output_report("\n");
+}
+
+/*
  * Function:    output_report
  * Purpose:     Print a line of the report. Only do so if I'm the 0 process.
  * Return:      Nothing
@@ -872,55 +928,142 @@ parse_command_line(int argc, char *argv[])
     cl_opts->min_num_procs = 1;
     cl_opts->max_xfer_size = 1 * ONE_MB;
     cl_opts->min_xfer_size = 128 * ONE_KB;
+    cl_opts->print_times = 0;   /* Printing times is off by default */
+    cl_opts->print_raw = 0;     /* Printing raw data throughput is off by default */
+    cl_opts->h5_alignment = 1;  /* No alignment for HDF5 objects by default */
+    cl_opts->h5_threshold = 1;  /* No threshold for aligning HDF5 objects by default */
+    cl_opts->h5_use_chunks = 0; /* Don't chunk the HDF5 dataset by default */
+    cl_opts->h5_no_fill = 0;    /* Write fill values by default */
 
     while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
+        case 'a':
+            cl_opts->h5_alignment = parse_size_directive(opt_arg);
+            break;
+        case 'A':
+            cl_opts->io_types &= ~0x7;
+
+            {
+                const char *end = opt_arg;
+
+                while (end && *end != '\0') {
+                    char buf[10];
+                    int i;
+
+                    memset(buf, '\0', sizeof(buf));
+
+                    for (i = 0; *end != '\0' && *end != ','; ++end)
+                        if (isalnum(*end) && i < 10)
+                            buf[i++] = *end;
+
+                    if (!strcasecmp(buf, "phdf5")) {
+                        cl_opts->io_types |= PIO_HDF5;
+                    } else if (!strcasecmp(buf, "mpiio")) {
+                        cl_opts->io_types |= PIO_MPI;
+                    } else if (!strcasecmp(buf, "posix")) {
+                        cl_opts->io_types |= PIO_POSIX;
+                    } else {
+                        fprintf(stderr, "pio_perf: invalid --api option %s\n",
+                                buf);
+                        exit(1);
+                    }
+
+                    if (*end == '\0')
+                        break;
+
+                    end++;
+                }
+            }
+
+            break;
 #if 0
         case 'b':
             /* the future "binary" option */
             break;
 #endif  /* 0 */
+        case 'c':       /* Turn on chunked HDF5 dataset creation */
+            cl_opts->h5_use_chunks = 1;
+            break;
         case 'd':
-            cl_opts->num_dsets = strtol(opt_arg, NULL, 10);
+            cl_opts->num_dsets = atoi(opt_arg);
             break;
         case 'D':
-            pio_debug_level = strtol(opt_arg, NULL, 10);
+            {
+                const char *end = opt_arg;
 
-            if (pio_debug_level > 4)
-                pio_debug_level = 4;
-            else if (pio_debug_level < 0)
-                pio_debug_level = 0;
+                while (end && *end != '\0') {
+                    char buf[10];
+                    int i;
+
+                    memset(buf, '\0', sizeof(buf));
+
+                    for (i = 0; *end != '\0' && *end != ','; ++end)
+                        if (isalnum(*end) && i < 10)
+                            buf[i++] = *end;
+
+                    if (strlen(buf) > 1 || isdigit(buf[0])) {
+                        register int i;
+
+                        for (i = 0; i < 10 && buf[i] != '\0'; ++i)
+                            if (!isdigit(buf[i])) {
+                                fprintf(stderr, "pio_perf: invalid --debug option %s\n",
+                                        buf);
+                                exit(1);
+                            }
+
+                        pio_debug_level = atoi(buf);
+
+                        if (pio_debug_level > 4)
+                            pio_debug_level = 4;
+                        else if (pio_debug_level < 0)
+                            pio_debug_level = 0;
+                    } else {
+                        switch (*buf) {
+                        case 'r':
+                            /* Turn on raw data throughput info */
+                            cl_opts->print_raw = 1;
+                            break;
+                        case 't':
+                            /* Turn on time printing */
+                            cl_opts->print_times = 1;
+                            break;
+                        default:
+                            fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
+                            exit(1);
+                        }
+                    }
+
+                    if (*end == '\0')
+                        break;
+
+                    end++;
+                }
+            }
 
             break;
         case 'f':
             cl_opts->file_size = parse_size_directive(opt_arg);
             break;
         case 'F':
-            cl_opts->num_files = strtol(opt_arg, NULL, 10);
-            break;
-        case 'H':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_HDF5;
+            cl_opts->num_files = atoi(opt_arg);
             break;
         case 'i':
-            cl_opts->num_iters = strtol(opt_arg, NULL, 10);
+            cl_opts->num_iters = atoi(opt_arg);
             break;
-        case 'm':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_MPI;
+        case 'n':       /* Turn off writing fill values */
+            cl_opts->h5_no_fill = 1;
             break;
         case 'o':
             cl_opts->output_file = opt_arg;
             break;
         case 'p':
-            cl_opts->min_num_procs = strtol(opt_arg, NULL, 10);
+            cl_opts->min_num_procs = atoi(opt_arg);
             break;
         case 'P':
-            cl_opts->max_num_procs = strtol(opt_arg, NULL, 10);
+            cl_opts->max_num_procs = atoi(opt_arg);
             break;
-        case 'r':
-            cl_opts->io_types &= ~0x7;
-            cl_opts->io_types |= PIO_RAW;
+        case 'T':
+            cl_opts->h5_threshold = parse_size_directive(opt_arg);
             break;
         case 'x':
             cl_opts->min_xfer_size = parse_size_directive(opt_arg);
@@ -1005,41 +1148,58 @@ usage(const char *prog)
 
     if (myrank == 0) {
         fflush(stdout);
-        fprintf(stdout, "usage: %s [OPTIONS]\n", prog);
-        fprintf(stdout, "  OPTIONS\n");
-        fprintf(stdout, "     -h, --help                  Print a usage message and exit\n");
-        fprintf(stdout, "     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
-        fprintf(stdout, "     -D N, --debug=N             Indicate the debugging level [default:0]\n");
-        fprintf(stdout, "     -f S, --file-size=S         Size of a single file [default: 64M]\n");
-        fprintf(stdout, "     -F N, --num-files=N         Number of files [default: 1]\n");
-        fprintf(stdout, "     -H, --hdf5                  Run HDF5 performance test\n");
-        fprintf(stdout, "     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
-        fprintf(stdout, "     -m, --mpiio                 Run MPI/IO performance test\n");
-        fprintf(stdout, "     -o F, --output=F            Output raw data into file F [default: none]\n");
-        fprintf(stdout, "     -P N, --max-num-processes=N Maximum number of processes to use [default: all MPI_COMM_WORLD processes ]\n");
-        fprintf(stdout, "     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        fprintf(stdout, "     -r, --raw                   Run raw (UNIX) performance test\n");
-        fprintf(stdout, "     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
-        fprintf(stdout, "     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "  F - is a filename.\n");
-        fprintf(stdout, "  N - is an integer >=0.\n");
-        fprintf(stdout, "  S - is a size specifier, an integer >=0 followed by a size indicator:\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "          K - Kilobyte\n");
-        fprintf(stdout, "          M - Megabyte\n");
-        fprintf(stdout, "          G - Gigabyte\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "      Example: 37M = 37 Megabytes\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "  Debugging levels are:\n");
-        fprintf(stdout, "\n");
-        fprintf(stdout, "    0 - None\n");
-        fprintf(stdout, "    1 - Minimal\n");
-        fprintf(stdout, "    2 - Not quite everything\n");
-        fprintf(stdout, "    3 - Everything\n");
-        fprintf(stdout, "    4 - Everything and the kitchen sink\n");
-        fprintf(stdout, "\n");
+        printf("usage: %s [OPTIONS]\n", prog);
+        printf("  OPTIONS\n");
+        printf("     -h, --help                  Print a usage message and exit\n");
+        printf("     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
+        printf("     -A AL, --api=AL             Which APIs to test [default: all of them]\n");
+#if 0
+        printf("     -b, --binary                The elusive binary option\n");
+#endif  /* 0 */
+        printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
+        printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
+        printf("     -D DL, --debug=DL           Indicate the debugging level\n");
+        printf("                                 [default: no debugging]\n");
+        printf("     -f S, --file-size=S         Size of a single file [default: 64M]\n");
+        printf("     -F N, --num-files=N         Number of files [default: 1]\n");
+        printf("     -i, --num-iterations        Number of iterations to perform [default: 1]\n");
+        printf("     -n, --no-fill               Don't write fill values to HDF5 dataset\n");
+        printf("                                 [default: off (i.e. write fill values)]\n");
+        printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
+        printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
+        printf("                                 [default: all MPI_COMM_WORLD processes ]\n");
+        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
+        printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
+        printf("                                 [default: 1]\n");
+        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
+        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
+        printf("\n");
+        printf("  F  - is a filename.\n");
+        printf("  N  - is an integer >=0.\n");
+        printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
+        printf("          K - Kilobyte\n");
+        printf("          M - Megabyte\n");
+        printf("          G - Gigabyte\n");
+        printf("\n");
+        printf("      Example: 37M = 37 Megabytes\n");
+        printf("\n");
+        printf("  AL - is an API list. Valid values are:\n");
+        printf("          phdf5 - Parallel HDF5\n");
+        printf("          mpiio - MPI-I/O\n");
+        printf("          posix - POSIX\n");
+        printf("\n");
+        printf("      Example: --api=mpiio,phdf5\n");
+        printf("\n");
+        printf("  DL - is a list of debugging flags. Valid values are:\n");
+        printf("          1 - Minimal\n");
+        printf("          2 - Not quite everything\n");
+        printf("          3 - Everything\n");
+        printf("          4 - Everything and the kitchen sink\n");
+        printf("          r - Raw data I/O throughput information\n");
+        printf("          t - Times as well as throughputs\n");
+        printf("\n");
+        printf("      Example: --debug=2,r,t\n");
+        printf("\n");
         fflush(stdout);
     }
 }
