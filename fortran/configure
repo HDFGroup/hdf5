@@ -8115,7 +8115,7 @@ echo $ECHO_N "checking for mpirun... $ECHO_C" >&6
 echo "${ECHO_T}$path/mpirun" >&6
       RUNSERIAL="${RUNSERIAL:-none}"
       if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
       fi
     else
       echo "$as_me:$LINENO: result: none" >&5
@@ -8315,7 +8315,7 @@ rm -rf conftest*
     fi
 
         if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-      RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
+      RUNPARALLEL="mpirun -np \$\${NPROCS:=2}"
     fi
     ;;
 
