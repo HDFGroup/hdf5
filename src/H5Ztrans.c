@@ -144,7 +144,8 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 										\
 }
 
-#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE,ULLONG_WORKS)		\
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
+#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
     if((TYPE) == H5T_NATIVE_CHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
@@ -167,12 +168,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LLONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-    {									\
-	if(ULLONG_WORKS)						\
-	    H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE))		\
-	else								\
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double: required for data transform") \
-    }									\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE))\
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
@@ -180,6 +176,40 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
 }
+#else
+#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
+{									\
+    if((TYPE) == H5T_NATIVE_CHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UCHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SCHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), signed char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SHORT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), short, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_USHORT)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned short, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_INT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), int, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UINT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned int, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_ULONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LLONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_ULLONG)				\
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,                       \
+	    "Cannot convert from unsigned long long to double: required for data transform") \
+    else if((TYPE) == H5T_NATIVE_FLOAT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_DOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
+}
+#endif
 
 #define H5Z_XFORM_DO_OP3(OP)                                                                                                                    \
 {                                                                                                                                               \
@@ -1020,19 +1050,19 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 
 	switch (tree->type) {
 	    case H5Z_XFORM_PLUS:  
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, +=, array_size, H5_ULLONG_TO_FP_CAST_WORKS)
+		H5Z_XFORM_TYPE_OP(resl, resr, array_type, +=, array_size)
 		break;
 
 	    case H5Z_XFORM_MINUS:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, -=, array_size, H5_ULLONG_TO_FP_CAST_WORKS)
+		H5Z_XFORM_TYPE_OP(resl, resr, array_type, -=, array_size)
 		break;
 
 	    case H5Z_XFORM_MULT:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, *=, array_size, H5_ULLONG_TO_FP_CAST_WORKS)
+		H5Z_XFORM_TYPE_OP(resl, resr, array_type, *=, array_size)
 		break;
 	    
 	    case H5Z_XFORM_DIVIDE: 
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, /=, array_size, H5_ULLONG_TO_FP_CAST_WORKS)
+		H5Z_XFORM_TYPE_OP(resl, resr, array_type, /=, array_size)
 		break;
 
 	    default: 
@@ -1567,10 +1597,10 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
      * pasing them */
     assert(exp);
     assert(data_xform_prop);
-    
+
     if( (ret_value = H5MM_strdup(data_xform_prop->xform_exp)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for data transform string")
-  
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)  
 } /* H5Z_xform_extract_xform_str() */
