@@ -108,9 +108,9 @@ typedef union _file_descr {
 static char  *pio_create_filename(iotype iot, const char *base_name,
                                   char *fullname, size_t size);
 static herr_t do_write(results *res, file_descr *fd, parameters *parms,
-                    long ndsets, off_t nelmts, size_t buf_size, void *buffer);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer);
 static herr_t do_read(results *res, file_descr *fd, parameters *parms,
-                    long ndsets, off_t nelmts, size_t buf_size, void *buffer /*out*/);
+    long ndsets, off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/);
 static herr_t do_fopen(parameters *param, char *fname, file_descr *fd /*out*/,
                        int flags);
 static herr_t do_fclose(iotype iot, file_descr *fd);
@@ -144,16 +144,12 @@ do_pio(parameters param)
     off_t       nelmts;
     char        *buffer = NULL;         /*data buffer pointer           */
     size_t      buf_size;               /*data buffer size in bytes     */
+    size_t      blk_size;       	/*interleaved I/O block size            */
 
     /* HDF5 variables */
     herr_t          hrc;                /*HDF5 return code              */
 
     /* Sanity check parameters */
-
-    /* debug */
-    if (pio_debug_level>=4) {
-	h5_dump_info_object(h5_io_info_g);
-    }
 
     /* IO type */
     iot = param.io_type;
@@ -182,6 +178,7 @@ do_pio(parameters param)
     nelmts = param.num_elmts;       /* number of elements per dataset       */
     maxprocs = param.num_procs;     /* max number of mpi-processes to use   */
     buf_size = param.buf_size;
+    blk_size = param.block_size;    /* interleaved IO block size            */
 
     if (nfiles < 0 ) {
         fprintf(stderr,
@@ -204,31 +201,36 @@ do_pio(parameters param)
         GOTOERROR(FAIL);
     }
 
-
-#if akcdebug
-/* debug*/
-fprintf(stderr, "nfiles=%d\n", nfiles);
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "maxprocs=%d\n", maxprocs);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
-fprintf(stderr, "total data size=%ld\n", ndsets*nelmts*sizeof(int));
-nfiles=MIN(3, nfiles);
-/*ndsets=MIN(5, ndsets);*/
-/*nelmts=MIN(1000, nelmts);*/
-buf_size=MIN(1024*1024, buf_size);
-/* DEBUG END */
-#endif
-
-    /* allocate data buffer */
-    if(buf_size>0) {
+    /* allocate transfer buffer */
+    if(buf_size<=0) {
+        HDfprintf(stderr,
+	    "Transfer buffer size (%Hd) must be > 0\n", (long_long)buf_size);
+	GOTOERROR(FAIL);
+    }else{
         buffer = malloc(buf_size);
 
         if (buffer == NULL){
-            fprintf(stderr, "malloc for data buffer size (%ld) failed\n",
-                buf_size);
+            HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n",
+                (long_long)buf_size);
             GOTOERROR(FAIL);
         }
+    }
+
+    if (blk_size < 0 ) {
+        HDfprintf(stderr,
+	    "interleaved I/O block size must be >= 0 (%Hd)\n",
+	    (long_long)blk_size);
+        GOTOERROR(FAIL);
+    }
+
+    /* Should only need blk_size <= buf_size. */
+    /* More restrictive condition for easier implementation for now. */
+    if (blk_size > 0 && (buf_size % blk_size)){
+        HDfprintf(stderr,
+	    "Transfer buffer size (%Hd) must be a multiple of the "
+	    "interleaved I/O block size (%Hd)\n",
+	    (long_long)buf_size, (long_long)blk_size);
+        GOTOERROR(FAIL);
     }
 
     if (pio_debug_level >= 4) {
@@ -252,9 +254,6 @@ buf_size=MIN(1024*1024, buf_size);
 
         sprintf(base_name, "#pio_tmp_%u", nf);
         pio_create_filename(iot, base_name, fname, sizeof(fname));
-#if AKCDEBUG
-fprintf(stderr, "filename=%s\n", fname);
-#endif
 
         set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, START);
         hrc = do_fopen(&param, fname, &fd, PIO_CREATE | PIO_WRITE);
@@ -262,7 +261,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, START);
-        hrc = do_write(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+        hrc = do_write(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, STOP);
 
         VRFY((hrc == SUCCESS), "do_write failed");
@@ -285,7 +284,7 @@ fprintf(stderr, "filename=%s\n", fname);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, START);
-        hrc = do_read(&res, &fd, &param, ndsets, nelmts, buf_size, buffer);
+        hrc = do_read(&res, &fd, &param, ndsets, nelmts, blk_size, buf_size, buffer);
         set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, STOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
@@ -448,7 +447,7 @@ pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
  */
 static herr_t
 do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
-         off_t nelmts, size_t buf_size, void *buffer)
+         off_t nelmts, size_t blk_size, size_t buf_size, void *buffer)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -473,13 +472,6 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t           h5dset_space_id = -1;   /*dataset space ID              */
     hid_t           h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t           h5ds_id = -1;           /*dataset handle                */
-
-#if AKCDEBUG
-fprintf(stderr, "In do_write\n");
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
-#endif
 
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * ELMT_SIZE;
@@ -584,11 +576,6 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             /* last process.  Take whatever are left */
             elmts_count = nelmts - elmts_begin;
 
-#if AKCDEBUG
-fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
-	pio_mpi_rank_g, elmts_begin, elmts_count);
-#endif
-    
         nelmts_written = 0 ;
 
         /* Start "raw data" write timer */
@@ -604,7 +591,7 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
                 nelmts_towrite = elmts_count - nelmts_written;
             }
 
-#if AKCDEBUG
+#ifdef AKCDEBUG
             /*Prepare write data*/
             {
                 int *intptr = (int *)buffer;
@@ -623,11 +610,6 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 		/* may be of smaller sized integer types */
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_written)*ELMT_SIZE;
 
-#if AKCDEBUG
-HDfprintf(stderr, "proc %d: write %Hd bytes at file-offset %Hd\n",
-        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
-#endif
-
 		/* only care if seek returns error */
                 rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
                 VRFY((rc==0), "POSIXSEEK");
@@ -639,12 +621,6 @@ HDfprintf(stderr, "proc %d: write %Hd bytes at file-offset %Hd\n",
 
             case MPIO:
                 mpi_offset = dset_offset + (elmts_begin + nelmts_written)*ELMT_SIZE;
-
-#if AKCDEBUG
-fprintf(stderr, "proc %d: writes %ld bytes at mpi-offset %ld\n",
-        pio_mpi_rank_g, nelmts_towrite*ELMT_SIZE, mpi_offset);
-#endif
-
                 mrc = MPI_File_write_at(fd->mpifd, mpi_offset, buffer,
                                         (int)(nelmts_towrite*ELMT_SIZE), MPI_CHAR,
                                         &mpi_status);
@@ -732,7 +708,7 @@ done:
  */
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
-        off_t nelmts, size_t buf_size, void *buffer /*out*/)
+        off_t nelmts, size_t blk_size, size_t buf_size, void *buffer /*out*/)
 {
     int         ret_code = SUCCESS;
     int         rc;             /*routine return code                   */
@@ -756,13 +732,6 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
     hid_t       h5dset_space_id = -1;   /*dataset space ID              */
     hid_t       h5mem_space_id = -1;    /*memory dataspace ID           */
     hid_t       h5ds_id = -1;   /*dataset handle                        */
-
-#if AKCDEBUG
-fprintf(stderr, "In do_read\n");
-fprintf(stderr, "ndsets=%ld\n", ndsets);
-fprintf(stderr, "nelmts=%ld\n", nelmts);
-fprintf(stderr, "buffer size=%ld\n", buf_size);
-#endif
 
     /* calculate dataset parameters. data type is always native C int */
     dset_size = nelmts * ELMT_SIZE;
@@ -830,11 +799,6 @@ fprintf(stderr, "buffer size=%ld\n", buf_size);
             /* last process.  Take whatever are left */
             elmts_count = nelmts - elmts_begin;
 
-#if AKCDEBUG
-fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
-        pio_mpi_rank_g, elmts_begin, elmts_count);
-#endif
-    
         nelmts_read = 0 ;
 
         /* Start "raw data" read timer */
@@ -857,11 +821,6 @@ fprintf(stderr, "proc %d: elmts_begin=%ld, elmts_count=%ld\n",
 		/* may be of smaller sized integer types */
                 file_offset = dset_offset + (off_t)(elmts_begin + nelmts_read)*ELMT_SIZE;
 
-#if AKCDEBUG
-HDfprintf(stderr, "proc %d: read %Hd bytes at file-offset %Hd\n",
-        pio_mpi_rank_g, (long_long)nelmts_towrite*ELMT_SIZE, (long_long)file_offset);
-#endif
-
 		/* only care if seek returns error */
                 rc = POSIXSEEK(fd->posixfd, file_offset) < 0 ? -1 : 0;
                 VRFY((rc==0), "POSIXSEEK");
@@ -873,11 +832,6 @@ HDfprintf(stderr, "proc %d: read %Hd bytes at file-offset %Hd\n",
 
             case MPIO:
                 mpi_offset = dset_offset + (elmts_begin + nelmts_read)*ELMT_SIZE;
-
-#if AKCDEBUG
-fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
-        pio_mpi_rank_g, nelmts_toread*ELMT_SIZE, mpi_offset);
-#endif
 
                 mrc = MPI_File_read_at(fd->mpifd, mpi_offset, buffer,
                                        (int)(nelmts_toread*ELMT_SIZE), MPI_CHAR,
@@ -912,7 +866,7 @@ fprintf(stderr, "proc %d: read %ld bytes at mpi-offset %ld\n",
                 break;
             }
 
-#if AKCDEBUG & 0
+#ifdef AKCDEBUG
             /*verify read data*/
             {
                 int *intptr = (int *)buffer;

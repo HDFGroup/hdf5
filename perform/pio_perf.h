@@ -31,6 +31,7 @@ typedef struct parameters_ {
     off_t	num_elmts;      /* Number of native ints in each dset   */
     int		num_iters;      /* Number of times to loop doing the IO */
     size_t 	buf_size;       /* Buffer size                          */
+    size_t      block_size;     /* interleaved block size               */
     hsize_t 	h5_align;       /* HDF5 object alignment                */
     hsize_t 	h5_thresh;      /* HDF5 object alignment threshold      */
     unsigned 	h5_use_chunks;  /* Make HDF5 dataset chunked            */
