@@ -341,6 +341,11 @@ RUNSNAPTEST()
 		shift
 		SNAPCMD_OPT="$SNAPCMD_OPT deploy $1"
 		;;
+	    deploydir)
+		# default directory for deployment.
+		shift
+		SNAPCMD_OPT="$SNAPCMD_OPT deploydir $1"
+		;;
 	    *) # unknown test
 		PRINT "$0: unknown type of test ($1)"
 		retcode=1
@@ -420,6 +425,7 @@ RUNSNAPTEST()
 #    skip		skip this test
 #    srcdirname <name>	use <name> as the build-directory.
 #    deploy <name>	deploy the built binary at directory <name>.
+#    deploydir <name>   use <name> as the default directory for deployment.
 SNAPTEST_CONFIG_PARSE()
 {
     while read x y ; do

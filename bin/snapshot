@@ -83,6 +83,7 @@ while [ $# -gt 0 ] ; do
 	    cmd=""
 	    ;;
 	deploy)
+	    # deploy the built binary.
 	    shift
 	    if [ $# -lt 1 ]; then
 		echo "deploy <dir> missing"
@@ -92,6 +93,17 @@ while [ $# -gt 0 ] ; do
 	    fi
 	    cmddeploy="deploy"
 	    DEPLOYDIRNAME="$1"
+	    ;;
+	deploydir)
+	    # default directory for deployment.
+	    shift
+	    if [ $# -lt 1 ]; then
+		echo "deploydir <dir> missing"
+		errcode=1
+		cmd="help"
+		break
+	    fi
+	    deploydir="$1"
 	    ;;
 	test)
 	    cmdtest="test"
@@ -199,7 +211,7 @@ if [ "$cmd" = help ]; then
     set -
     cat <<EOF
 Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
-	[clean] [distclean] [echo] [deploy <dir>]
+	[clean] [distclean] [echo] [deploy <dir>] [deploydir <dir>]
 	[zlib <zlib_path>] [archive <arch_path>] [srcdirname <dir>]
 	[op-configure <option>] [--<option>]
     all:      Run all commands (checkout, test & release)
@@ -208,6 +220,7 @@ Usage: $PROGNAME [all] [checkout] [diff] [test] [srcdir] [release] [help]
     diff:     Run diff on current and previous versions.  Exit 0 if
               no significant differences are found.  Otherwise, non-zero.
     deploy:   deploy binary to directory <dir>
+    deploydir: use <dir> as the default directory for deployment
     test:     Run test
     release:  Run release
     clean:    Run make clean
@@ -399,7 +412,7 @@ fi # Test the HDF5 library
 if [ -n "$DEPLOYDIRNAME" ]; then
     if [ "$snapshot" = "yes" ]; then
 	TIMESTAMP "deploy"
-	if (cd ${TESTDIR} && ${CURRENT}/bin/deploy ${DEPLOYDIRNAME}); then
+	if (cd ${TESTDIR} && ${CURRENT}/bin/deploy ${deploydir}/${DEPLOYDIRNAME}); then
 	    errcode=$?
 	    exit $errcode
 	fi
