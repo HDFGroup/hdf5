@@ -987,7 +987,7 @@ H5D_create(H5G_entry_t *loc, const char *name, const H5T_t *type,
     }
 
     /* Create (open for write access) an object header */
-    if (H5O_create(f, 96, &(new_dset->ent)) < 0) {
+    if (H5O_create(f, 256, &(new_dset->ent)) < 0) {
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL,
 		    "unable to create dataset object header");
     }

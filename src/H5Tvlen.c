@@ -71,7 +71,6 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
             /* Set up the function pointers to access the VL information (in memory) */
             dt->u.vlen.getlen=H5T_vlen_mem_getlen;
             dt->u.vlen.read=H5T_vlen_mem_read;
-            dt->u.vlen.alloc=H5T_vlen_mem_alloc;
             dt->u.vlen.write=H5T_vlen_mem_write;
 
             /* Reset file ID (since this VL is in memory) */
@@ -86,14 +85,14 @@ H5T_vlen_set_loc(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
 
             /* 
              * Size of element on disk is 4 bytes for the length, plus the size
-             * of an address in this file.  Memory size is different
+             * of an address in this file, plus 4 bytes for the size of a heap
+             * ID.  Memory size is different
              */
-            dt->size = H5F_SIZEOF_ADDR(f)+4;
+            dt->size = 4 + H5F_SIZEOF_ADDR(f) + 4;
 
             /* Set up the function pointers to access the VL information (in memory) */
             dt->u.vlen.getlen=H5T_vlen_disk_getlen;
             dt->u.vlen.read=H5T_vlen_disk_read;
-            dt->u.vlen.alloc=H5T_vlen_disk_alloc;
             dt->u.vlen.write=H5T_vlen_disk_write;
 
             /* Set file ID (since this VL is on disk) */
@@ -169,44 +168,6 @@ herr_t H5T_vlen_mem_read(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_vlen_mem_alloc
- *
- * Purpose:	Allocates a memory based VL sequence
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t H5T_vlen_mem_alloc(const H5F_xfer_t *xfer_parms, void *vl_addr, hsize_t seq_len, hsize_t base_size)
-{
-    hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
-
-    FUNC_ENTER (H5T_vlen_mem_alloc, FAIL);
-
-    /* check parameters */
-    assert(vl);
-
-    /* Use the user's memory allocation routine is one is defined */
-    if(xfer_parms->vlen_alloc!=NULL) {
-        if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
-      } /* end if */
-    else {  /* Default to system malloc */
-        if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
-            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
-      } /* end else */
-    vl->len=seq_len;
-
-    FUNC_LEAVE (SUCCEED);
-}   /* end H5T_vlen_mem_alloc() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_vlen_mem_write
  *
  * Purpose:	"Writes" the memory based VL sequence from a buffer
@@ -220,15 +181,27 @@ herr_t H5T_vlen_mem_alloc(const H5F_xfer_t *xfer_parms, void *vl_addr, hsize_t s
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_mem_write(H5F_t UNUSED *f, void *vl_addr, void *buf, size_t len)
+herr_t H5T_vlen_mem_write(const H5F_xfer_t *xfer_parms, H5F_t UNUSED *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     hvl_t *vl=(hvl_t *)vl_addr;   /* Pointer to the user's hvl_t information */
+    size_t len=seq_len*base_size;
 
     FUNC_ENTER (H5T_vlen_mem_write, FAIL);
 
     /* check parameters */
-    assert(vl && vl->p);
+    assert(vl);
     assert(buf);
+
+    /* Use the user's memory allocation routine is one is defined */
+    if(xfer_parms->vlen_alloc!=NULL) {
+        if(NULL==(vl->p=(xfer_parms->vlen_alloc)(seq_len*base_size,xfer_parms->alloc_info)))
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+      } /* end if */
+    else {  /* Default to system malloc */
+        if(NULL==(vl->p=H5MM_malloc(seq_len*base_size)))
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data");
+      } /* end else */
+    vl->len=seq_len;
 
     HDmemcpy(vl->p,buf,len);
 
@@ -309,32 +282,6 @@ herr_t H5T_vlen_disk_read(H5F_t *f, void *vl_addr, void *buf, size_t UNUSED len)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_vlen_disk_alloc
- *
- * Purpose:	Allocates a disk based VL sequence
- *      NOTE: This function is currently a NOOP, allocation of the heap block
- *          is done when the block is written out.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, June 2, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t H5T_vlen_disk_alloc(const H5F_xfer_t UNUSED *f, void UNUSED *vl_addr, hsize_t UNUSED seq_len, hsize_t UNUSED base_size)
-{
-    FUNC_ENTER (H5T_vlen_disk_alloc, FAIL);
-
-    /* check parameters */
-
-    FUNC_LEAVE (SUCCEED);
-}   /* end H5T_vlen_disk_alloc() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_vlen_disk_write
  *
  * Purpose:	Writes the disk based VL sequence from a buffer
@@ -348,11 +295,11 @@ herr_t H5T_vlen_disk_alloc(const H5F_xfer_t UNUSED *f, void UNUSED *vl_addr, hsi
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5T_vlen_disk_write(H5F_t *f, void *vl_addr, void *buf, size_t len)
+herr_t H5T_vlen_disk_write(const H5F_xfer_t UNUSED *xfer_parms, H5F_t *f, void *vl_addr, void *buf, hsize_t seq_len, hsize_t base_size)
 {
     uint8_t *vl=(uint8_t *)vl_addr;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
-    uint32_t seq_len;
+    size_t len=seq_len*base_size;
 
     FUNC_ENTER (H5T_vlen_disk_write, FAIL);
 
@@ -554,13 +501,36 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
     switch(dt->type) {
         /* Check each field and recurse on VL and compound ones */
         case H5T_COMPOUND:
+        {
+            intn accum_change=0;    /* Amount of change in the offset of the fields */
+            size_t old_size;        /* Preview size of a field */
+
+            /* Sort the fields based on offsets */
+            qsort(dt->u.compnd.memb, dt->u.compnd.nmembs, sizeof(H5T_cmemb_t), H5T_cmp_field_off);
+	
             for (i=0; i<dt->u.compnd.nmembs; i++) {
+                /* Apply the accumulated size change to the offset of the field */
+                dt->u.compnd.memb[i].offset += accum_change;
+
                 /* Recurse if it's VL or compound */
                 if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN) {
+                    /* Keep the old field size for later */
+                    old_size=dt->u.compnd.memb[i].type->size;
+
+                    /* Mark the VL or compound type */
                     if(H5T_vlen_mark(dt->u.compnd.memb[i].type,f,loc)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
+                    
+                    /* If the field changed size, add that change to the accumulated size change */
+                    if(old_size != dt->u.compnd.memb[i].type->size)
+                        accum_change += (dt->u.compnd.memb[i].type->size - (int)old_size);
                 } /* end if */
             } /* end for */
+
+            /* Apply the accumulated size change to the datatype */
+            dt->size += accum_change;
+	
+        } /* end case */
             break;
 
         /* Recurse on the VL information if it's VL or compound, then free VL sequence */

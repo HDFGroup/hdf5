@@ -991,15 +991,15 @@ H5S_all_select_iterate(void *buf, hid_t type_id, H5S_t *space, H5D_operator_t op
 
         ret_value=(*operator)(tmp_buf,type_id,rank,mem_offset,operator_data);
 
+        /* Decrement the number of elements to iterate through */
+        nelemts--;
+
         /* Advance the coordinate (currently in C memory order) */
         index=rank-1; /* Leave the byte offset in the element alone */
-        while(++mem_offset[index]==mem_size[index] && index>=0) {
+        while(index>=0 && ++mem_offset[index]==mem_size[index]) {
             mem_offset[index]=0;
             index--;
           } /* end while */
-
-        /* Decrement the number of elements to iterate through */
-        nelemts--;
       } /* end while */
 
     FUNC_LEAVE (ret_value);
