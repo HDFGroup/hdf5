@@ -327,10 +327,12 @@ fi
 dnl ----------------------------------------------------------------------
 dnl If we should build only static executables
 dnl
-AC_MSG_CHECKING(if should build only statically linked executables)
-AC_ARG_ENABLE(static_exec,
-  [  --enable-static-exec    Build only statically linked executables [default=no]],
-  STATIC_EXEC=$enableval)
+AC_MSG_CHECKING([if should build only statically linked executables])
+AC_ARG_ENABLE([static_exec],
+              [AC_HELP_STRING([--enable-static-exec],
+                              [Build only statically linked executables
+                               [default=no]])],
+              STATIC_EXEC=$enableval)
 
 if test "X$STATIC_EXEC" = "Xyes"; then
   echo "yes"
