@@ -124,7 +124,7 @@ H5FO_opened(const H5F_t *f, haddr_t addr)
         open_obj=H5TB_NODE_DATA(obj_node);
         assert(open_obj);
         ret_value=open_obj->obj;
-        assert(ret_value>0);
+        assert(ret_value!=NULL);
     } /* end if */
     else
         ret_value=NULL;
