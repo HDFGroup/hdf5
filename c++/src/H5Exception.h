@@ -32,7 +32,7 @@ class Exception {
 
 	// Returns the detailed message set at the time the exception is thrown
 	string getDetailMesg() const;
-	char* getCDetailMesg();	// C string of detailed message
+	const char* getCDetailMesg() const;	// C string of detailed message
 
 	// Turns on the automatic error printing.
 	static void setAutoPrint( H5E_auto_t func, void* client_data );

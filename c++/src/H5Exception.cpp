@@ -120,6 +120,11 @@ string Exception::getDetailMesg() const
    return( detailMessage );
 }
 
+const char* Exception::getCDetailMesg() const
+{
+   return( detailMessage.c_str() );
+}
+
 // Prints the error stack in a default manner.
 void Exception::printError( FILE* stream ) const
 {
@@ -128,12 +133,7 @@ void Exception::printError( FILE* stream ) const
       throw Exception( "Exception::printError" );
 }
 
-Exception::~Exception()
-{
-   herr_t ret_value = H5Eprint( NULL ); // print to stderr
-   if( ret_value < 0 )
-      throw Exception( "Exception::printError" );
-}
+Exception::~Exception() {}
 
 FileIException::FileIException():Exception(){}
 FileIException::FileIException( string message ): Exception( message ){}
