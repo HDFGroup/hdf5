@@ -369,7 +369,7 @@ ragged_read_all(hid_t ra, hsize_t rows_at_once)
 	    }
 #ifndef _HDF5USEDLL_
 /*	
-	For NT dll version we free memory down at the bottom.  crashed otherwise.	
+	For NT dll version we free memory down at the bottom.  crashed otherwise.
 */
 	    free(buf[i]);
 	    buf[i] = NULL;
