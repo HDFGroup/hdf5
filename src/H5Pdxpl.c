@@ -31,6 +31,51 @@ static int             interface_initialize_g = 0;
 
 /* Static function prototypes */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_data_transform
+ *
+ * Purpose:
+ *              Sets data transform expression. 
+ *
+ * 
+ * Return:      Returns a non-negative value if successful; otherwise returns a negative value. 
+ * 
+ * 
+ * Programmer:	Leon Arber
+ *              Monday, March 07, 2004
+ * 
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Pset_data_transform(hid_t plist_id, char* expression)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_data_transform, FAIL);
+    
+    /*    H5TRACE4("e","izxx",plist_id,expression); */
+
+    /* Check arguments */
+    if (expression == NULL)
+        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "expression cannot be NULL");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Update property list */
+    if(H5P_set(plist, H5D_XFER_XFORM, &expression)<0)
+        HGOTO_ERROR (H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression");
+
+done:
+    FUNC_LEAVE_API(ret_value);
+}
+
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_buffer

@@ -197,6 +197,7 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[]);
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
+H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, char* expression);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL int H5Pget_external_count(hid_t plist_id);
@@ -217,6 +218,7 @@ H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
 H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
+
 H5_DLL herr_t H5Pset_buffer(hid_t plist_id, size_t size, void *tconv,
         void *bkg);
 H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv/*out*/,

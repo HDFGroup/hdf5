@@ -28,6 +28,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
+#include "H5Zprivate.h"
 
 /*#define H5D_DEBUG*/
 
@@ -51,6 +52,14 @@ static haddr_t H5D_get_offset(const H5D_t *dset);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_close(H5D_t *dataset);
+
+static herr_t H5D_xfer_xform_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5D_xfer_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5D_xfer_xform_copy(const char* name, size_t size, void* value);
+static herr_t H5D_xfer_xform_close(const char* name, size_t size, void* value);
+    
+
+
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
@@ -128,6 +137,7 @@ H5D_init_interface(void)
 {
     /* Dataset Transfer property class variables.  In sequence, they are,
      * - Transfer Property list class to modify
+     * - Default value for maximum data transform buffer size
      * - Default value for maximum temp buffer size
      * - Default value for type conversion buffer
      * - Default value for background buffer
@@ -148,6 +158,7 @@ H5D_init_interface(void)
      * - Default value for datatype conversion callback
      */
     H5P_genclass_t  *xfer_pclass;   
+    void*           def_xfer_xform           = H5D_XFER_XFORM_DEF; 
     size_t          def_max_temp_buf         = H5D_XFER_MAX_TEMP_BUF_DEF;
     void            *def_tconv_buf           = H5D_XFER_TCONV_BUF_DEF;
     void            *def_bkgr_buf            = H5D_XFER_BKGR_BUF_DEF;   
@@ -189,7 +200,7 @@ H5D_init_interface(void)
     H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
     size_t          nprops;                 /* Number of properties */
     herr_t          ret_value                = SUCCEED;   /* Return value */
-
+           
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_interface)
 
     /* Initialize the atom group for the dataset IDs */
@@ -210,6 +221,10 @@ H5D_init_interface(void)
 
     /* Assume that if there are properties in the class, they are the default ones */
     if(nprops==0) {
+        /* Register the data transform property */
+        if(H5P_register(xfer_pclass,H5D_XFER_XFORM,H5D_XFER_XFORM_SIZE,&def_xfer_xform,NULL,H5D_XFER_XFORM_SET,NULL,H5D_XFER_XFORM_DEL,H5D_XFER_XFORM_COPY,NULL,H5D_XFER_XFORM_CLOSE)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        
         /* Register the max. temp buffer size property */
         if(H5P_register(xfer_pclass,H5D_XFER_MAX_TEMP_BUF_NAME,H5D_XFER_MAX_TEMP_BUF_SIZE,&def_max_temp_buf,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -438,6 +453,219 @@ H5D_term_interface(void)
     }
     FUNC_LEAVE_NOAPI(n)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_xfer_xform_set
+ *
+ * Purpose: Callback for setting a data transform property.  This generates
+ * the parse tree for the data transform, as well as saving the transform
+ * locally.
+ *
+ * Return: Success: SUCCEED, Failure: FAIL
+ *
+ * Programmer: Leon Arber, larber@uiuc.edu
+ *
+ * Date: April 9, 2004
+ *
+ * Comments: private, calls H5Z_xform_parse and H5Z_xform_reduce_tree
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_xfer_xform_set(hid_t prop_id, const char UNUSED *name, size_t UNUSED size, void* value)
+{
+    H5P_genplist_t *new_plist;
+    void*          parse_root;
+    H5Z_data_xform*    data_xform_prop;
+    int            exp_size;
+    herr_t         ret_value=SUCCEED;
+
+    exp_size  = strlen(*(char**)value) + 1;
+    data_xform_prop = (H5Z_data_xform*) HDmalloc(sizeof(H5Z_data_xform));
+    
+    FUNC_ENTER_NOAPI(H5D_xfer_xform_set, FAIL)
+
+        /* Verify property list ID */
+   if (NULL == (new_plist = H5I_object(prop_id)))
+      HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transform property list")
+           
+   if (value == NULL)
+       HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cannot parse a null expression")
+   else
+   {
+#ifdef H5Z_XFORM_DEBUG
+       printf("Adding a new dataset transfer prop.  Parsing a new tree from %s\n",*(char**) value);
+#endif    
+      
+        /* copy the user's string into the property */
+       data_xform_prop->xform_exp = HDmalloc(exp_size);
+       strncpy(data_xform_prop->xform_exp, *(char**)value, exp_size);        
+       
+       
+       /* we generate the parse tree right here and store a poitner to its root in the property. */
+       parse_root = H5Z_xform_parse(*(H5Z_node**)value);
+       H5Z_xform_reduce_tree((H5Z_node*)parse_root);
+       if(parse_root)
+       {
+           data_xform_prop->parse_root = parse_root;
+           HDmemcpy(value, &data_xform_prop, sizeof(void*));
+       }
+       else
+       {       
+           /* if we couldn't parse the user's string, we're not going to store it */
+           data_xform_prop->parse_root = NULL;
+           free(data_xform_prop->xform_exp);
+           data_xform_prop->xform_exp = NULL;
+           free(data_xform_prop);
+           *(H5Z_data_xform**)value = NULL;
+           HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error parsing data transform expression")
+       }
+   }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)  
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_xfer_xform_del
+ *
+ * Purpose: Frees memory allocated by H5D_xfer_xform_set 
+ *
+ * Return: Success: SUCCEED, Failure: FAIL
+ *
+ * Programmer: Leon Arber larber@uiuc.edu
+ *           
+ *
+ * Date: April 9, 2004
+ *
+ * Comments: Private function, calls private H5Z_xform_destroy_parse_tree
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_xfer_xform_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+{
+#ifdef H5Z_XFORM_DEBUG
+    fprintf(stderr, "Freeing memory b/c of delete\n");
+#endif
+    herr_t ret_value = SUCCEED;
+    
+    FUNC_ENTER_NOAPI(H5D_xfer_xform_del, FAIL)
+
+    assert(value);
+ 
+   
+    if( *(H5Z_data_xform**)value != NULL) 
+    {
+        H5Z_xform_destroy_parse_tree(((*((H5Z_data_xform**)value)))->parse_root);
+        HDfree(((*((H5Z_data_xform**)value)))->xform_exp);
+        HDfree(*(H5Z_data_xform**)value);    
+        *(H5Z_data_xform**)value = NULL; 
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_xfer_xform_copy
+ *
+ * Purpose: Creates a copy of the user's data transform string and its
+ * associated parse tree.
+ *
+ * Return: Success: SUCCEED, Failure: FAIL
+ *
+ * Programmer: Leon Arber larber@uiuc.edu
+ *          
+ *
+ * Date: April 9, 2004
+ *
+ * Comments: Public function, calls private H5Z_xform_copy_tree
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_xfer_xform_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    H5Z_node*   new_tree;
+    herr_t ret_value = SUCCEED;
+    
+    FUNC_ENTER_NOAPI(H5D_xfer_xform_copy, FAIL)
+
+   /* this will involved generating a new parse tree by copying every single node in the old one */
+        H5Z_data_xform*    data_xform_prop;
+    data_xform_prop = (H5Z_data_xform*) HDmalloc(sizeof(H5Z_data_xform));
+
+    data_xform_prop->xform_exp = (char*) HDmalloc(strlen( ((*(H5Z_data_xform**)value))->xform_exp) + 1); 
+    strcpy(data_xform_prop->xform_exp, ((*(H5Z_data_xform**)value))->xform_exp);
+    if( (new_tree = (H5Z_node*)H5Z_xform_copy_tree( ((*(H5Z_data_xform**)value))->parse_root)) == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "error copying the parse tree")
+    else
+        data_xform_prop->parse_root = new_tree;
+
+    *(H5Z_data_xform**)value = data_xform_prop;
+    
+done:
+FUNC_LEAVE_NOAPI(ret_value)
+
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5D_xfer_xform_close
+ *
+ * Purpose: Frees memory allocated by H5D_xfer_xform_set
+ *
+ * Return: Success: SUCCEED, Failure: FAIL
+ *
+ * Programmer: Leon Arber larber@uiuc.edu
+ *
+ * Date: April 9, 2004
+ *
+ * Comments: private function, calls H5Z_xform_destroy_parse_tree
+ *              Identical to H5D_xfer_xform_del
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_xfer_xform_close(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+#ifdef H5Z_XFORM_DEBUG
+    fprintf(stderr, "Freeing memory b/c of close\n");
+#endif
+    herr_t ret_value = SUCCEED;
+    
+    FUNC_ENTER_NOAPI(H5D_xfer_xform_close, FAIL)
+   
+    assert(value);
+    
+    if( *(H5Z_data_xform**)value != NULL) 
+    {
+        H5Z_xform_destroy_parse_tree(((*((H5Z_data_xform**)value)))->parse_root);
+        HDfree(((*((H5Z_data_xform**)value)))->xform_exp);
+        HDfree(*(H5Z_data_xform**)value);    
+        *(H5Z_data_xform**)value = NULL;
+    }
+
+  
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -3560,7 +3788,7 @@ done:
  * Purpose: Modifies the dimensions of a dataset, based on H5Dextend. 
  *  Can change to a lower dimension.
  *
- * Return: Success: 0, Failure: -1
+ * Return: Success: SUCCEED, Failure: FAIL
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *             Robb Matzke
@@ -3603,7 +3831,7 @@ done:
  * Purpose: Based in H5D_extend, allows change to a lower dimension, 
  *  calls H5S_set_extent and H5F_istore_prune_by_extent instead
  *
- * Return: Success: 0, Failure: -1
+ * Return: Success: SUCCEED, Failure: FAIL
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *             Robb Matzke

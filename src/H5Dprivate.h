@@ -74,6 +74,15 @@
 #define H5D_CRT_DATA_PIPELINE_CMP  H5D_crt_data_pipeline_cmp
 
 /* ======== Data transfer properties ======== */
+/* Definitions for data transform property */
+#define H5D_XFER_XFORM              "data_transform"
+#define H5D_XFER_XFORM_SIZE         sizeof(void *)
+#define H5D_XFER_XFORM_DEF          NULL
+#define H5D_XFER_XFORM_SET              H5D_xfer_xform_set             
+#define H5D_XFER_XFORM_DEL              H5D_xfer_xform_del
+#define H5D_XFER_XFORM_COPY             H5D_xfer_xform_copy
+#define H5D_XFER_XFORM_CLOSE            H5D_xfer_xform_close
+                                   
 /* Definitions for maximum temp buffer size property */
 #define H5D_XFER_MAX_TEMP_BUF_NAME       "max_temp_buf"
 #define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
@@ -171,6 +180,7 @@ typedef struct H5D_dxpl_cache_t {
 #endif /*H5_HAVE_PARALLEL*/
     H5Z_EDC_t err_detect;       /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t filter_cb;         /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
+    H5Z_data_xform* data_xform_prop; /* Data transform prop (H5D_XFER_XFORM) */
 } H5D_dxpl_cache_t;
 
 /* Typedef for cached dataset creation property list information */

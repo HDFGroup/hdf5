@@ -19,6 +19,10 @@
 #ifndef _H5Zprivate_H
 #define _H5Zprivate_H
 
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5Tprivate.h"
+#include "H5Eprivate.h"
+#include "H5Iprivate.h"
 #include "H5Zpublic.h"
 
 /* Structure to store information about each filter's parameters */
@@ -29,6 +33,41 @@ typedef struct {
     size_t		cd_nelmts;	/*number of elements in cd_values[]  */
     unsigned		*cd_values;	/*client data values		     */
 } H5Z_filter_info_t;
+
+
+/* Token types */
+typedef enum {
+    ERROR,
+    H5Z_INTEGER, /* this represents an integer type in the data transform expression */
+    H5Z_FLOAT,  /* this represents a floating point type in the data transform expression */
+    SYMBOL,
+    PLUS,
+    MINUS,
+    MULT,
+    DIVIDE,
+    LPAREN,
+    RPAREN,
+    END
+} H5Z_token_type;
+
+typedef union {
+    char   *sym_val;
+    long    int_val;
+    double  float_val;
+} H5Z_num_val;
+
+
+typedef struct H5Z_node {
+    struct H5Z_node    *lchild;
+    struct H5Z_node    *rchild;
+    H5Z_token_type      type;
+    H5Z_num_val         value;
+} H5Z_node;
+
+typedef struct {
+    char*       xform_exp;
+    H5Z_node*       parse_root;
+} H5Z_data_xform;
 
 /* Special parameters for szip compression */
 /* [These are aliases for the similar definitions in szlib.h, which we can't
@@ -59,6 +98,14 @@ H5_DLL H5Z_filter_info_t *H5Z_filter_info(const struct H5O_pline_t *pline,
         H5Z_filter_t filter);
 H5_DLL htri_t H5Z_all_filters_avail(const struct H5O_pline_t *pline);
 H5_DLL herr_t H5Z_delete(struct H5O_pline_t *pline, H5Z_filter_t filter);
+
+/* Data Transform Functions */
+H5_DLL void H5Z_xform_destroy_parse_tree(H5Z_node *tree);
+H5_DLL void H5Z_xform_eval(H5Z_node *tree, void* array, hsize_t array_size, hid_t array_type);
+H5_DLL void* H5Z_xform_parse(const char *expression);
+H5_DLL hid_t H5Z_xform_find_type(H5T_t* type);
+H5_DLL void H5Z_xform_reduce_tree(H5Z_node* tree);
+H5_DLL void* H5Z_xform_copy_tree(H5Z_node* tree);
 
 
 #endif
