@@ -126,7 +126,7 @@ TABLE.list TD { border:none; }
 	      <li><a href="#ReservedMessage_000A">Name: Reserved - not assigned yet</a>                     <!-- 0x000a -->
 	      <li><a href="#FilterMessage">Name: Data Storage - Filter Pipeline</a>                	    <!-- 0x000b -->
 	      <li><a href="#AttributeMessage">Name: Attribute</a>                                           <!-- 0x000c -->
-	      <li><a href="#NameMessage">Name: Object Name</a>                                              <!-- 0x000d -->
+	      <li><a href="#CommentMessage">Name: Object Comment</a>                                              <!-- 0x000d -->
 	      <li><a href="#OldModifiedMessage">Name: Object Modification Date and Time (Old)</a>           <!-- 0x000e -->
 <!--	      <li><a href="#SharedMessage">Name: Shared Object Message</a> -->                              <!-- 0x000f -->
 	      <li><a href="#ContinuationMessage">Name: Object Header Continuation</a>                       <!-- 0x0010 -->
@@ -5169,14 +5169,14 @@ TABLE.list TD { border:none; }
     </center>
     
     <hr>
-    <h4><a name="NameMessage">Name: Object Name</a></h4>
+    <h4><a name="CommentMessage">Name: Object Comment</a></h4>
 
     <p><b>Header Message Type:</b> 0x000D<br>
       <b>Length:</b> varies<br>
       <b>Status:</b> Optional, may not be repeated.
 
-    <p><b>Purpose and Description:</b> The object name or comment is
-      designed to be a short description of an object.  An object name
+    <p><b>Purpose and Description:</b> The object comment is
+      designed to be a short description of an object.  An object comment
       is a sequence of non-zero (<code>\0</code>) ASCII characters with no other
       formatting included by the library.
 
@@ -5195,7 +5195,7 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr align=center>
-	  <td colspan=4><br>Name<br><br></td>
+	  <td colspan=4><br>Comment<br><br></td>
 	</tr>
       </table>
     </center>
