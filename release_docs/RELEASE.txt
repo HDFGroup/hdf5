@@ -100,7 +100,9 @@ Bug Fixes since HDF5-1.6.3 release
 
     F90 API
     -------
-    
+       - on windows, previously Fortran DLL built and tested failed,
+                     now Fortran DLL has been built and tested successfully
+                         with Dec Fortran 6.6c or Dec Fortran 6.0.
     C++ API
     -------
 Documentation
