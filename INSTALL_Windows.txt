@@ -37,7 +37,7 @@ STEP II: Building the Libraries and tests.
         1. Rename the directory under C:\myHDFstuff\ from hdf5xxx to hdf5.  
 
         2. Unpack all.zip in 'hdf5' and move the zlib.dll from 
-	     c:\myHDFstuff\hdf5\src\dll to the Windows system directory.
+	     c:\myHDFstuff\hdf5\src\zlib\dll to the Windows system directory.
 
            NOTE TO ALPHA USERS- the version of zlib that is packaged in all.zip 
            is for Intel platforms.  The Alpha versions of the libraries can be
@@ -163,6 +163,10 @@ was built correctly.
 To test, cd into the hdf5\test directory.  Then type:
 "hdf5test [debug or release] [dll]" depending on which version you would 
 like to test.
+
+To use the timing tests use the hdf5timingtest.bat file found in the hdf5\test 
+directory.  Type: "hdf5timingtest [debug or release] [dll]" depending on which
+version you would like to test.
 
 To test the h5dump utility, cd into hdf5\tools.  Then type:
 "dumptest [debug or release] [dll]" depending on which version you would like
