@@ -823,8 +823,17 @@ HDfprintf (FILE *stream, const char *fmt, ...)
 		    break;
 		    
 		default:
-		    modifier[0] = *s;
-		    modifier[1] = '\0';
+                    /* Handle 'll' for long long types */
+                    if(*s=='l' && *(s+1)=='l') {
+                        modifier[0] = *s;
+                        modifier[1] = *s;
+                        modifier[2] = '\0';
+                        s++; /* Increment over first 'l', second is taken care of below */
+                    } /* end if */
+                    else {
+                        modifier[0] = *s;
+                        modifier[1] = '\0';
+                    } /* end else */
 		    break;
 		}
 		s++;
