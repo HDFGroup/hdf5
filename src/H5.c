@@ -48,6 +48,7 @@ H5_api_t H5_g;
 hbool_t H5_libinit_g = FALSE;
 #endif
 
+char			H5_lib_vers_info_g[] = H5_VERS_INFO;
 hbool_t                 dont_atexit_g = FALSE;
 H5_debug_t		H5_debug_g;		/*debugging info	*/
 static void		H5_debug_mask(const char*);
@@ -495,12 +496,18 @@ H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
  *              Tuesday, April 21, 1998
  *
  * Modifications:
+ *	Albert Cheng, May 12, 2001
+ *	Added verification of H5_VERS_INFO.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 {
+    char	lib_str[256];
+    char	substr[] = H5_VERS_SUBRELEASE;
+    static int	checked = 0;
+
     /* Don't initialize the library quite yet */
     
     if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
@@ -516,6 +523,34 @@ H5check_version (unsigned majnum, unsigned minnum, unsigned relnum)
 	HDfputs ("Bye...\n", stderr);
 	HDabort ();
     }
+
+    if (checked)
+	return SUCCEED;
+    
+    checked = 1;
+    /*
+     *verify if H5_VERS_INFO is consistent with the other version information.
+     *Check only the first sizeof(lib_str) char.  Assume the information
+     *will fit within this size or enough significance.
+     */
+    sprintf(lib_str, "HDF5 library version: %d.%d.%d",
+	H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+    if (*substr){
+	HDstrcat(lib_str, "-");
+	HDstrncat(lib_str, substr, sizeof(lib_str) - HDstrlen(lib_str) - 1);
+    }
+    if (HDstrcmp(lib_str, H5_lib_vers_info_g)){
+	HDfputs ("Warning!  Library version information error.\n"
+	         "The HDF5 library version information are not "
+		 "consistent in its source code.\nThis is NOT a fatal error "
+		 "but should be corrected.\n", stderr);
+	fprintf (stderr, "Library version information are:\n"
+		 "H5_VERS_MAJOR=%d, H5_VERS_MINOR=%d, H5_VERS_RELEASE=%d, "
+		 "H5_VERS_SUBRELEASE=%s,\nH5_VERS_INFO=%s\n",
+		 H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
+		 H5_VERS_SUBRELEASE, H5_VERS_INFO);
+    }
+
     return SUCCEED;
 }
 
