@@ -196,6 +196,8 @@
 ./examples/h5_write.c
 ./examples/h5_select.c
 ./examples/h5_attribute.c
+./examples/h5_mount.c
+./examples/h5_reference.c
 
 ./pablo/HDFIOTrace.h
 ./pablo/HDFTrace.h
