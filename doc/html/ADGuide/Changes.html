@@ -91,7 +91,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
               <tr>
                 <td align="left" valign="top"><code>H5Iget_file_id</code>
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td align="left" valign="top"><em>herr_t</em> <code>H5Iget_file_id</code> 
+                <td align="left" valign="top"><em>hid_t</em> <code>H5Iget_file_id</code> 
                     (<em>hid_t</em> <code>obj_id</code>)<br>
                     See <a href="../RM_H5I.html#Identify-GetFileID">entry</a>.</td>
               </tr>
@@ -110,7 +110,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
                     &nbsp;&nbsp;&nbsp;&nbsp;</td>
                 <td align="left" valign="top"><em>herr_t</em> <code>H5Zget_filter_info</code> 
                     (<em>H5Z_filter_t</em> <code>filter</code>,
-		     <em>unsigned *</em> <code>flags</code>)<br>
+		     <em>unsigned int *</em> <code>flags</code>)<br>
                     See <a href="../RM_H5Z.html#Compression-GetFilterInfo">entry</a>.</td>
               </tr>
               </table>    
@@ -147,7 +147,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
           <dd>&nbsp;
 	  <dt>C++ wrappers:
 	  <dd>C++ wrappers have been brought in sync with the C library,
-              completing the C++ API.
+              rendering the C++ API significantly more complete.
 	      Most of the new wrappers are for H5P and H5T APIs.  
 	      <p>
 	      All available C++ elements are now documented in the 
@@ -175,7 +175,9 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 
     <h3>Deleted Functions</h3>
 
+	<!--
         None.
+	-->
 
 	<!--
 	The following functions are deprecated in HDF5 Release X.X.x.
@@ -213,6 +215,15 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 	The above functions will eventually be removed from the HDF5 
         distribution and from the <cite>HDF5 Reference Manual</cite>.
 	-->
+
+
+	The following function has been removed in this release.
+
+        <dl>
+          <dd>&nbsp;
+	  <dt>C++ wrapper:
+	  <dd><code>CompType::getMemberDims</code>
+        </dl>
 
 
     <h3>Functions with Changed Syntax</h3>
@@ -1646,7 +1657,7 @@ V1.4.0
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 20 August 2004 
+Last modified: 23 August 2004 
 <!-- hhmts end -->
 
 </body>
