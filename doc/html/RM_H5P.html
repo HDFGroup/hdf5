@@ -912,7 +912,7 @@ END SUBROUTINE h5pcopy_prop_f
 <dl>
   <dt><strong>Name:</strong> <a name="Property-Create">H5Pcreate</a>
   <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Pcreate</code>(<em>H5P_class_t</em> <code>type</code>
+    <dd><em>hid_t </em><code>H5Pcreate</code>(<em>hid_t</em> <code>cls_id</code>
         )
   <dt><strong>Purpose:</strong>
     <dd>Creates a new property as an instance of a property list class.
@@ -953,8 +953,8 @@ END SUBROUTINE h5pcopy_prop_f
       otherwise, errors are likely to occur.
   <dt><strong>Parameters:</strong>
     <dl>
-      <dt><em>H5P_class_t</em> <code>type</code>
-        <dd>IN: The type of property list to create.
+      <dt><em>hid_t</em> <code>cls_id</code>
+        <dd>IN: The class of the property list to create.
     </dl>
   <dt><strong>Returns:</strong>
     <dd>Returns a property list identifier (<code>plist</code>) if successful; 
