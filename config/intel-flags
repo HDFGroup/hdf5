@@ -32,8 +32,8 @@ fi
 
 # Common Intel flags for various situations
 if test "X-icc" = "X-$cc_vendor"; then
-    # Insert section about version specific problems from gnu-flags here, if
-    # necessary.
+    # Insert section about version specific problems from compiler flags here,
+    # if necessary.
 
     arch=
     # Architecture-specific flags
@@ -54,7 +54,7 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    CFLAGS="${CFLAGS:--std=c99} $arch"
+    CFLAGS="${CFLAGS:--std=c99 $arch}"
 
     # Production
     PROD_CFLAGS="-O3"
