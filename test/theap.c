@@ -50,7 +50,7 @@ test_heap (void)
    const char	*s;
    off_t	obj[NOBJS];
    
-   MESSAGE (5, print_func("Testing Heaps\n"););
+   MESSAGE (5, ("Testing Heaps\n"));
 
    /* Create the file */
    fid = H5Fcreate ("theap.h5", H5ACC_OVERWRITE, 0, 0);
@@ -78,7 +78,7 @@ test_heap (void)
    /* Read the objects back out */
    for (i=0; i<NOBJS; i++) {
       s = H5H_peek (f, heap, obj[i]);
-      MESSAGE (8, print_func ("object is `%s'\n", s););
+      MESSAGE (8, ("object is `%s'\n", s));
    }
 
    /* Close the file */

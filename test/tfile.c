@@ -68,7 +68,7 @@ static void test_file_create(void)
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
-    MESSAGE(5, print_func("Testing Low-Level File Creation I/O\n"););
+    MESSAGE(5, ("Testing Low-Level File Creation I/O\n"));
 
     /* Create first file */
     fid1=H5Fcreate(FILE1,H5ACC_OVERWRITE,0,0);
@@ -247,7 +247,7 @@ static void test_file_open(void)
     herr_t ret;         /* Generic return value */
 
     /* Output message about test being performed */
-    MESSAGE(5, print_func("Testing Low-Level File Opening I/O\n"););
+    MESSAGE(5, ("Testing Low-Level File Opening I/O\n"));
 
     /* Open second file */
     fid1=H5Fopen(FILE2,H5ACC_WRITE,0);
@@ -296,7 +296,7 @@ static void test_file_open(void)
 void test_file(void)
 {
     /* Output message about test being performed */
-    MESSAGE(5, print_func("Testing Low-Level File I/O\n"););
+    MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
     test_file_create();     /* Test file creation (also creation templates) */
     test_file_open();       /* Test file opening */

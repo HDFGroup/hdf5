@@ -250,28 +250,22 @@ int main(int argc, char *argv[])
       {
           if (Test[Loop].SkipFlag)
             {
-                MESSAGE(2, print_func("Skipping -- %s \n", Test[Loop].Description);
-                    );
+                MESSAGE(2, ("Skipping -- %s \n", Test[Loop].Description));
             }
           else
             {
-                MESSAGE(2, print_func("Testing  -- %s (%s) \n", Test[Loop].Description,
-                                  Test[Loop].Name);
-                    );
-                MESSAGE(5, print_func("===============================================\n");
-                    );
+                MESSAGE(2, ("Testing  -- %s (%s) \n", Test[Loop].Description,
+			    Test[Loop].Name));
+                MESSAGE(5, ("===============================================\n"));
                 Test[Loop].NumErrors = num_errs;
                 (*Test[Loop].Call) ();
                 Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
-                MESSAGE(5, print_func("===============================================\n");
-                    );
-                MESSAGE(5, print_func("There were %d errors detected.\n\n", (int) Test[Loop].NumErrors);
-                    );
+                MESSAGE(5, ("===============================================\n"));
+                MESSAGE(5, ("There were %d errors detected.\n\n", (int) Test[Loop].NumErrors));
             }   /* end else */
       }     /* end for */
 
-    MESSAGE(2, print_func("\n\n");
-        )
+    MESSAGE(2, ("\n\n"))
         if (num_errs)
         print_func("!!! %d Error(s) were detected !!!\n\n", (int) num_errs);
     else
@@ -296,8 +290,7 @@ int main(int argc, char *argv[])
 
     if (CleanUp)
       {
-          MESSAGE(2, print_func("\nCleaning Up...\n\n");
-              );
+          MESSAGE(2, ("\nCleaning Up...\n\n"));
 #if !(defined DOS386 | defined WIN386)
           system("rm -f *.hdf *.tmp");
 #else   /* OLD_WAY */

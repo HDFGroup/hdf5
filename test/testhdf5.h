@@ -74,7 +74,7 @@ if(ret == FAIL) {print_func("*** UNEXPECTED RETURN from %s is %ld at line %4d in
 } while(0)
 
 /* Used to document process through a test */
-#define MESSAGE(v,a) {if (Verbosity>v) {a}}
+#define MESSAGE(V,A) {if (Verbosity>(V)) print_func A;}
 
 /* definitions for command strings */
 #define VERBOSITY_STR	"Verbosity"

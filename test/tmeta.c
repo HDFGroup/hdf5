@@ -67,7 +67,7 @@ void test_metadata(void)
     uint8 *p;       /* pointer into the buffer being en/de-coded */
 
     /* Output message about test being performed */
-    MESSAGE(5, print_func("Testing Metadata encode/decode code\n"););
+    MESSAGE(5, ("Testing Metadata encode/decode code\n"));
 
     /* Start by encoding the values above */
     p=encode_buffer;
