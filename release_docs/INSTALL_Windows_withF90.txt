@@ -1,0 +1,81 @@
+
+===============================================================================
+     HDF5 Fortran90 Library Build and Testing Instructions for Windows NT/98
+     with DEC Visual Fortran V6.0
+===============================================================================
+
+
+Preconditions
+
+    1. These instructions are for users who wish to build the C and 
+       Fortran90 libraries.  If you are interested only in the C library, 
+       see INSTAll_Windows.txt or INSTAll_codewarrior.txt.
+
+    2. MS VC++ V 6.0, DEC Visual Fortran V6.0, and WinZip must be installed
+       prior to building the HDF5 library.
+
+
+    3. Download the hdf5-1.4.2 distribution archive and run WinZip to unpack 
+       the source code.  The code will be unpacked into the hdf5\ directory.
+
+    4. HDF5 uses the zlib library, which is distributed with the HDF5 Windows 
+       source code.  
+
+    Note: Only a static Fortran Library is supported in this release.
+
+
+Building the HDF5 Fortran and C libraries (static only)
+
+    1. Unpack all_withf90.zip, found in the hdf5\ directory, into the 
+       hdf5\ directory.
+
+    2. Go to the hdf5\proj\ directory and click on the file all.dsw. 
+       This will invoke MS VC++.
+     
+    3. Select "Build", then select "Set Active Configuration".
+
+            "all -- Win32 Debug" to build debug versions of
+                single-threaded static libraries, debug multithreaded DLLs,
+
+                and tests. 
+
+            "all -- Win32 Release" to build release versions of
+                single-threaded static libraries, multithreaded DLLs,
+                and tests.
+
+    NOTE: "all" is a dummy target. You will get a link error when 
+          "all.exe." is built:
+
+               LINK: error LNK2001: unresolved external symbol
+                           _mainCRTStartup.....
+               all.exe - 2 error(s), ....
+
+           This warning messages can be ignored as the "all.exe" is never 
+           created.
+
+    When the debug or release build is completed, the directories 
+    listed below will contain the following files:
+
+           hdf5\proj\hdf5\debug - 
+           hdf5\proj\hdf5\release - 
+               hdf5.lib- the F90 and C hdf5 libraries
+
+           hdf5\proj\hdf5dll\debug - 
+               hdf5ddll.dll- the F90 and C hdf5 libraries
+               hdf5ddll.lib- the dll export library                  
+
+           hdf5\proj\hdf5dll\release - 
+               hdf5dll.dll- the F90 and C hdf5 libraries
+               hdf5dll.lib- the dll export library
+
+    Note: Only the C DLL works; an F90 DLL is not supported!
+
+
+Testing libraries and tools
+
+    1. See the file INSTALL_Windows.txt (STEP 2) for how for instruction on 
+       testing the C HDF5 library and non-hdf4-related tools.
+
+    2. To test Fortran HDF5 Library, run testhdf5_fortran.bat in the
+       hdf5\fortran\test directory 
+
