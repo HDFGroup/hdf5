@@ -177,7 +177,7 @@ case $HSIZET in
     AC_MSG_RESULT([large])
     HSIZET=large
     AC_DEFINE([HAVE_LARGE_HSIZET], [1],
-              [Define if it's safe to use \`long long' for hsize_t and hssize_t])
+              [Define if it's safe to use `long long' for hsize_t and hssize_t])
     ;;
 esac
 
@@ -711,7 +711,7 @@ AC_TRY_COMPILE([
   ],
   [dev_t d1, d2; if(d1==d2) return 0;],
   AC_DEFINE([DEV_T_IS_SCALAR], [1],
-            [Define if \`dev_t' is a scalar])
+            [Define if `dev_t' is a scalar])
   AC_MSG_RESULT(yes),
   AC_MSG_RESULT(no)
 )
@@ -1363,7 +1363,7 @@ if test "$STREAM_VFD" = "yes"; then
 #endif
   ],
     [socklen_t foo; return 0;],
-    AC_DEFINE([HAVE_SOCKLEN_T], 1, [Define if \`socklen_t' is defined])
+    AC_DEFINE([HAVE_SOCKLEN_T], 1, [Define if `socklen_t' is defined])
     AC_MSG_RESULT([yes]),
     AC_MSG_RESULT([no])
   )
@@ -1382,7 +1382,7 @@ AC_TRY_COMPILE([
 #include <sys/time.h>
 #include <time.h>], [struct tm tm; tm.tm_gmtoff=0;],
 AC_DEFINE([HAVE_TM_GMTOFF], [1],
-          [Define if \`tm_gmtoff' is a member of \`struct tm'])
+          [Define if `tm_gmtoff' is a member of `struct tm'])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
@@ -1392,7 +1392,7 @@ AC_TRY_COMPILE([
 #include <sys/time.h>
 #include <time.h>], [struct tm tm; tm.__tm_gmtoff=0;],
 AC_DEFINE([HAVE___TM_GMTOFF], [1],
-          [Define if \`__tm_gmtoff' is a member of \`struct tm'])
+          [Define if `__tm_gmtoff' is a member of `struct tm'])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
@@ -1402,7 +1402,7 @@ AC_TRY_LINK([
 #include <sys/time.h>
 #include <time.h>], [timezone=0;],
 AC_DEFINE([HAVE_TIMEZONE], [1],
-          [Define if \`timezone' is a global variable])
+          [Define if `timezone' is a global variable])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
@@ -1414,7 +1414,7 @@ AC_TRY_COMPILE([
 #include <sys/time.h>
 #include <time.h>], [struct timezone tz; tz.tz_minuteswest=0;],
 AC_DEFINE([HAVE_STRUCT_TIMEZONE], [1],
-          [Define if \`struct timezone' is defined])
+          [Define if `struct timezone' is defined])
 have_struct_tz="yes"
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
@@ -1456,7 +1456,7 @@ AC_MSG_CHECKING([for st_blocks in struct stat])
 AC_TRY_COMPILE([
 #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;],
 AC_DEFINE([HAVE_STAT_ST_BLOCKS], [1],
-          [Define if \`struct stat' has the \`st_blocks' field])
+          [Define if `struct stat' has the `st_blocks' field])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
@@ -1469,14 +1469,14 @@ AC_CHECK_FUNCS(_scrsize ioctl)
 AC_MSG_CHECKING([for struct videoconfig])
 AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],
 AC_DEFINE([HAVE_STRUCT_VIDEOCONFIG], [1],
-          [Define if \`struct videoconfig' is defined])
+          [Define if `struct videoconfig' is defined])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
 AC_MSG_CHECKING([for struct text_info])
 AC_TRY_COMPILE(, [struct text_info w; w.screenwidth=0;],
 AC_DEFINE([HAVE_STRUCT_TEXT_INFO], [1],
-          [Define if \`struct text_info' is defined])
+          [Define if `struct text_info' is defined])
 AC_MSG_RESULT([yes]),
 AC_MSG_RESULT([no]))
 
@@ -1553,7 +1553,7 @@ done)dnl
 
 AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
 AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
-                   [Width for printf() for type \`long long' or \`__int64', use \`ll'])
+                   [Width for printf() for type `long long' or `__int64', use `ll'])
 
 dnl ----------------------------------------------------------------------
 dnl Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
@@ -2055,7 +2055,7 @@ if test -n "$PARALLEL"; then
   
   if test ${hdf5_cv_mpi_file_set_size_big} = "yes"; then
     AC_DEFINE([MPI_FILE_SET_SIZE_BIG], [1],
-              [Define if your system's \`MPI_File_set_size' function works for files over 2GB.])
+              [Define if your system's `MPI_File_set_size' function works for files over 2GB.])
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
