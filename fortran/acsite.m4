@@ -1,11 +1,20 @@
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 dnl
+dnl Copyright by the Board of Trustees of the University of Illinois.
+dnl All rights reserved.
+dnl
+dnl This file is part of HDF5.  The full HDF5 copyright notice, including
+dnl terms governing use, modification, and redistribution, is contained in
+dnl the files COPYING and Copyright.html.  COPYING can be found at the root
+dnl of the source code distribution tree; Copyright.html can be found at the
+dnl root level of an installed copy of the electronic HDF5 document set and
+dnl is linked from the top-level documents page.  It can also be found at
+dnl http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
+dnl access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+dnl
 dnl Macros for HDF5 Fortran
 dnl
-dnl Copyright (C) 2000, 2002
-dnl     National Center for Supercomputing Applications.
-dnl     All rights reserved.
 dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 
@@ -258,6 +267,37 @@ else
 fi
 AC_SUBST(F9XMODFLAG)
 AC_SUBST(F9XMODEXT)
+rm -rf conftest*
+])
+
+dnl -------------------------------------------------------------------------
+dnl AC_TRY_FCOMPILE()
+dnl
+dnl	Check if we can compile a simple Fortran 90 program.
+dnl
+dnl AC_TRY_FCOMPILE(FUNCTION-BODY,
+dnl                 [ACTION-IF-SUCCESS], [ACTION-IF-NOT-SUCCESS])
+dnl
+AC_DEFUN([AC_TRY_FCOMPILE],
+[AC_LANG_SAVE
+AC_LANG_FORTRAN9X
+
+test -d conftestdir || mkdir conftestdir
+cd conftestdir
+rm -rf *
+
+cat >conftest.$ac_ext <<EOF
+          $1
+EOF
+
+if AC_TRY_EVAL(ac_compile); then
+  :
+  [$2]
+else
+  :
+  [$3]
+fi
+cd ..
 rm -rf conftest*
 ])
 

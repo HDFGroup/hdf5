@@ -8075,6 +8075,48 @@ ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $L
 cross_compiling=$ac_cv_prog_f9x_cross
 
 
+FFLAGS_saved=$FFLAGS
+FFLAGS="$FFLAGS -I."
+
+echo "$as_me:$LINENO: checking if compiler supports -I. option" >&5
+echo $ECHO_N "checking if compiler supports -I. option... $ECHO_C" >&6
+
+
+ac_ext=f90
+ac_compile='${F9X-f90} -c $FFLAGS conftest.$ac_ext 1>&5'
+ac_link='${F9X-f90} -o conftest${ac_exeext} $FFLAGS conftest.$ac_ext $LDFLAGS $LIBS 1>&5'
+cross_compiling=$ac_cv_prog_f9x_cross
+
+
+test -d conftestdir || mkdir conftestdir
+cd conftestdir
+rm -rf *
+
+cat >conftest.$ac_ext <<EOF
+
+      program conftest
+      end
+
+EOF
+
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; then
+  :
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+else
+  :
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+   FFLAGS="$FFLAGS_saved"
+fi
+cd ..
+rm -rf conftest*
+
+
 
 
 

@@ -407,6 +407,18 @@ AC_CACHE_SAVE
 dnl Change back to the Fortran 90 language
 AC_LANG_FORTRAN9X
 
+dnl See if the compiler will support the "-I." option
+FFLAGS_saved=$FFLAGS
+FFLAGS="$FFLAGS -I."
+
+AC_MSG_CHECKING(if compiler supports -I. option)
+AC_TRY_FCOMPILE([
+      program conftest
+      end
+], AC_MSG_RESULT(yes),
+   AC_MSG_RESULT(no)
+   FFLAGS="$FFLAGS_saved")
+
 dnl ----------------------------------------------------------------------
 dnl The following variables are used to distinguish between building a
 dnl serial and parallel library.
