@@ -2,7 +2,7 @@
 <HEAD>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1252">
 <META NAME="Generator" CONTENT="Microsoft Word 97">
-<TITLE>H5introH</TITLE>
+<TITLE>Introduction to HDF5</TITLE>
 </HEAD>
 <BODY LINK="#0000ff" VLINK="#800080">
 
@@ -21,7 +21,7 @@
 </FONT><FONT FACE="Times"><P>This is an introduction to the HDF5 data model and programming model.  Being a <I>Getting Started</I> or <I>QuickStart</I> document, this </FONT><I>Introduction to HDF5</I> <FONT FACE="Times">is intended to provide enough information for you to develop a basic understanding of how HDF5 works and is meant to be used. Knowledge of the current version of HDF will make it easier to follow the text, but it is not required.  More complete information of the sort you will need to actually use HDF5 is available in the HDF5 documentation at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/"><FONT FACE="Times">http://hdf.ncsa.uiuc.edu/HDF5/</FONT></A><FONT FACE="Times">.  Available documents include the following:
 
 <UL>
-</FONT><LI><I>HDF5 User’s Guide</I> at <A HREF="http://hdf.ncsa.uiuc.edu/HDF5/H5.user.html">http://hdf.ncsa.uiuc.edu/HDF5/H5.user.html</A>.  Where appropriate, this <I>Introduction</I> will refer to specific sections of the <I>User’s Guide</I>.
+</FONT><LI><I>HDF5 User&#146s Guide</I> at <A HREF="http://hdf.ncsa.uiuc.edu/HDF5/H5.user.html">http://hdf.ncsa.uiuc.edu/HDF5/H5.user.html</A>.  Where appropriate, this <I>Introduction</I> will refer to specific sections of the <I>User&#146s Guide</I>.
 <LI><I>HDF5 Reference Manual</I> at <A HREF="http://hdf.ncsa.uiuc.edu/HDF5/RM_H5Front.html">http://hdf.ncsa.uiuc.edu/HDF5/RM_H5Front.html</A>.</UL>
 
 <FONT FACE="Times"><P>Code examples are available in the source code tree when you install HDF5.  
@@ -73,7 +73,7 @@
 
 <UL>
 </FONT><I><LI>HDF5 group: </I>a grouping structure containing instances of zero or more groups or datasets, together with supporting metadata.
-<I><LI>HD5F dataset:</I> a multidimensional array of data elements, together with supporting metadata. </UL>
+<I><LI>HDF5 dataset:</I> a multidimensional array of data elements, together with supporting metadata. </UL>
 
 <FONT FACE="Times"><P>Working with groups and group members is similar in many ways to working with directories and files in UNIX. As with UNIX directories and files, objects in an HDF5 file are often described by giving their full path names. 
 </FONT><CODE><DL>
@@ -94,7 +94,7 @@
 <P>The header contains information that is needed to interpret the array portion of the dataset, as well as metadata (or pointers to metadata) that describes or annotates the dataset. Header information includes the name of the object, its dimensionality, its number-type, information about how the data itself is stored on disk, and other information used by the library to speed up access to the dataset or maintain the file's integrity.
 <P>There are four essential classes of information in any header: <I>name</I>, <I>datatype</I>, <I>dataspace</I>, and <I>storage layout</I>:
 </FONT><B><DFN><P>Name.</B></DFN><FONT FACE="Times"> A dataset <I>name</I> is a sequence of alphanumeric ASCII characters.
-</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to define many different kinds of datatypes. There are two categories of datatypes: <I>atomic</I> datatypes and <I>compound</I> datatypes. Atomic datatypes are those that are not decomposed at the datatype interface level, such as integers and floats. <I><CODE>NATIVE</CODE></I> datatypes are system-specific instances of atomic datatypes. Compound datatypes are made up of atomic datatypes. And <I>named</I> dataypes are either atomic or compound datatypes that are have been specifically designated to be shared across datasets.
+</FONT><B><DFN><P>Datatype.</B></DFN><FONT FACE="Times"> HDF5 allows one to define many different kinds of datatypes. There are two categories of datatypes: <I>atomic</I> datatypes and <I>compound</I> datatypes. Atomic datatypes are those that are not decomposed at the datatype interface level, such as integers and floats. <I><CODE>NATIVE</CODE></I> datatypes are system-specific instances of atomic datatypes. Compound datatypes are made up of atomic datatypes. And <I>named</I> datatypes are either atomic or compound datatypes that are have been specifically designated to be shared across datasets.
 <I><P>Atomic datatypes</I> include integers and floating-point numbers. Each atomic type belongs to a particular class and has several properties: size, order, precision, and offset. In this introduction, we consider only a few of these properties.
 <P>Atomic datatypes include integer, float, date and time, string, bit field, and opaque. <I>(Note: Only integer, float and string  classes are available in the current implementation.)
 </I><P>Properties of integer types include size, order (endian-ness), and signed-ness (signed/unsigned).
@@ -203,13 +203,13 @@
 </TABLE>
 </CENTER>
 
-<FONT FACE="Times"><P>See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html">http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+<FONT FACE="Times"><P>See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html">http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html</A><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 
 
 <FONT FACE="Times"><P>A <I>compound datatype</I> is one in which a collection of simple datatypes are represented as a single unit, similar to a <I>struct</I> in C. The parts of a compound datatype are called <I>members.</I> The members of a compound datatype may be of any datatype, including another compound datatype. It is possible to read members from a compound type without reading the whole type.
 <p>
-<ta/FONT><I><P>Named datatypes.</I>  Normally each dataset has its own datatype, but sometimes we may want to share a datatype among several datasets.  This can be done using a <I>named </I>datatype. A named data type is stored in a file independent of any dataset, and referenced by all datasets that have that datatype.  Named datatypes may have an associated attributes list.  
-See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html">http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+<ta/FONT><I><P>Named datatypes.</I>  Normally each dataset has its own datatype, but sometimes we may want to share a datatype among several datasets.  This can be done using a <I>named </I>datatype. A named data type is stored in the file independently of any dataset, and referenced by all datasets that have that datatype.  Named datatypes may have an associated attributes list.  
+See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html">http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.html</A><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 <B><DFN><P>Dataspace.</B> </DFN>A dataset <I>dataspace </I>describes the dimensionality of the dataset. The dimensions of a dataset can be fixed (unchanging), or they may be <I>unlimited</I>, which means that they are extendible (i.e. they can grow larger). 
 <P>Properties of a dataspace consist of the <I>rank </I>(number of dimensions) of the data array, the <I>actual sizes of the dimensions</I> of the array, and the <I>maximum sizes of the dimensions </I>of the array. For a fixed-dimension dataset, the actual size is the same as the maximum size of a dimension. When a dimension is unlimited, the maximum size is set to the </FONT>value <CODE>H5P_UNLIMITED</CODE>.<FONT FACE="Times"> (An example below shows how to create extendible datasets.)
 <P>A dataspace can also describe portions of a dataset, making it possible to do partial I/O operations on  <I>selections</I>.  <I>Selection</I> is supported by the dataspace interface (H5S). Given an n-dimensional dataset, there are currently three ways to do partial selection: 
@@ -220,7 +220,7 @@ See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.
 <LI>Select a list of independent points. </OL>
 
 <FONT FACE="Times"><P>Since I/O operations have two end-points, the raw data transfer functions require two dataspace arguments: one describes the application memory dataspace or subset thereof, and the other describes the file dataspace or subset thereof.
-<P>See <I>Dataspaces</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Dataspaces.html">http://hdf.ncsa.uiuc.edu/HDF5/Dataspaces.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+<P>See <I>Dataspaces</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Dataspaces.html">http://hdf.ncsa.uiuc.edu/HDF5/Dataspaces.html</A><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 </FONT><B><DFN><P>Storage layout.</B></DFN><FONT FACE="Times"> The HDF5 format makes it possible to store data in a variety of ways. The default storage layout format is <I>contiguous</I>, meaning that data is stored in the same linear way that it is organized in memory. Two other storage layout formats are currently defined for HDF5: <I>compact, </I>and<I> chunked. </I>In the future, other storage layouts may be added.<I> 
 <P>Compact</I> storage is used when the amount of data is small and can be stored directly in the object header. <I>(Note: Compact storage is not supported in this release.)</I> 
 <I><P>Chunked</I> storage involves dividing the dataset into equal-sized "chunks" that are stored separately. Chunking has three important benefits. 
@@ -230,12 +230,12 @@ See <I>Datatypes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datatypes.
 <LI>It makes it possible to compress large datasets and still achieve good performance when accessing subsets of the dataset. 
 <LI>It makes it possible efficiently to extend the dimensions of a dataset in any direction.</OL>
 
-<P>See <I>Datasets</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datasets.html">http://hdf.ncsa.uiuc.edu/HDF5/Datasets.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+<P>See <I>Datasets</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Datasets.html">http://hdf.ncsa.uiuc.edu/HDF5/Datasets.html</A><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 </FONT><H3><A NAME="_Toc429885305">HDF5 Attributes</A></H3>
 <I>Attributes </I>are small named datasets that are attached to primary datasets, groups, or named datatypes.  Attributes can be used to describe the nature and/or the intended usage of a dataset or group. An attribute has two parts: (1) a <I>name</I> and (2) a <I>value</I>.  The value part contains one or more data entries of the same data type. 
 <FONT FACE="Times"><P>The Attribute API (H5A) is used to read or write attribute information. When accessing attributes, they can be identified by name or by an <I>index value</I>.  The use of an index value makes it possible to iterate through all of the attributes associated with a given object.
 <P>The HDF5 format and I/O library are designed with the assumption that attributes are small datasets. They are always stored in the object header of the object they are attached to.  Because of this, large datasets should not be stored as attributes. How large is "large" is not defined by the library and is up to the user's interpretation. (Large datasets with metadata can be stored as supplemental datasets in a group with the primary dataset.) 
-<P>See <I>Attributes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Attributes.html">http://hdf.ncsa.uiuc.edu/HDF5/Attributes.html</A><FONT FACE="Times"> in the<I> HDF User’s Guide</I> for further information.
+<P>See <I>Attributes</I> at </FONT><A HREF="http://hdf.ncsa.uiuc.edu/HDF5/Attributes.html">http://hdf.ncsa.uiuc.edu/HDF5/Attributes.html</A><FONT FACE="Times"> in the<I> HDF User&#146s Guide</I> for further information.
 </FONT><H2><A NAME="_Toc429885306">The HDF5 Applications Programming Interface (API)</A></H2>
 <FONT FACE="Times"><P>The current HDF5 API is implemented only in C. The API provides routines for creating HDF5 files, creating and writing groups, datasets, and their attributes to HDF5 files, and reading groups, datasets and their attributes from HDF5 files.
 </FONT><H3><A NAME="_Toc429885307">Naming conventions</A></H3>
@@ -1219,7 +1219,7 @@ H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im),
      2 2 2 3 3
      2 2 2 3 3</PRE>
 <FONT FACE="Times"><P>The current version of HDF 5 requires you to use <I>chunking</I> in order to define extendible datasets. Chunking makes it possible to extend datasets efficiently, without having to reorganize storage excessively. 
-<P>Three operations are required in order to write an extendible dataset:
+<P>The following operations are required in order to write an extendible dataset:
 <OL>
 
 <LI>Declare the dataspace of the dataset to have <I>unlimited dimensions</I> for all dimensions that might eventually be extended.
@@ -1245,7 +1245,7 @@ cparms = H5Pcreate (H5P_DATASET_CREATE);
 status = H5Pset_chunk( cparms, RANK, chunk_dims);
 </PRE>
 
-Then create a datset.
+Then create a dataset.
 <pre>
 /*
  * Create a new dataset within the file using cparms
@@ -1344,7 +1344,7 @@ ret  = H5Aread(attr, H5T_NATIVE_INT, &amp;point_out);
 printf("The value of the attribute \"Integer attribute\" is %d \n", point_out); 
 ret =  H5Aclose(attr);
 </pre>
-</FONT><B><P>Reading an attribute whose characterstics are not known. </B>It may be necessary to query a<FONT FACE="Times"> file to obtain information about an attribute, namely its name, data type, rank and dimensions. The following code opens an attribute by its index value using </FONT><CODE>H5Aopen_index</CODE><FONT FACE="Times">, then reads in information about its datatype.
+</FONT><B><P>Reading an attribute whose characteristics are not known. </B>It may be necessary to query a<FONT FACE="Times"> file to obtain information about an attribute, namely its name, data type, rank and dimensions. The following code opens an attribute by its index value using </FONT><CODE>H5Aopen_index</CODE><FONT FACE="Times">, then reads in information about its datatype.
 </FONT>
 <pre>
 /*
@@ -1359,7 +1359,7 @@ printf("The value of the attribute with the index 2 is %s \n", string_out);
 <code>
 </CODE><P>In practice, if the characteristics of attributes are not know, the code involved in accessing and processing the attribute can be quite complex.  For this reason, HDF5 includes a function called <CODE>H5Aiterate</CODE>, which applies a user-supplied function to each of a set of attributes.  The user-supplied function can contain the code that interprets, accesses and processes each attribute. 
 <p>
-<a href="#ReadWriteAttributes">Example 8</a> <A NAME="_Toc429885323">illustrates the use of the <FONT FACE="Courier">H5Aiterate</FONT> function, as well as the other attribute examples described above.</A> 
+<a href="#ReadWriteAttributes">Example 8</a> <A NAME="_Toc429885323">illustrates the use of the <code>H5Aiterate</code> function, as well as the other attribute examples described above.</A> 
 
 
 <hr>
@@ -1540,7 +1540,7 @@ main (void)
 	   (unsigned long)(dims_out[0]), (unsigned long)(dims_out[1]));
 
     /* 
-     * Define hyperslab in the datatset. 
+     * Define hyperslab in the dataset. 
      */
     offset[0] = 1;
     offset[1] = 2;
@@ -1850,7 +1850,7 @@ main(void)
 	double c; 
     } s1_t;
     s1_t       s1[LENGTH];
-    hid_t      s1_tid;     /* File datatype hadle */
+    hid_t      s1_tid;     /* File datatype identifier */
 
     /* Second structure (subset of s1_t)  and dataset*/
     typedef struct s2_t {
@@ -2034,7 +2034,7 @@ main (void)
 				{3, 3} };
 
     /*
-     * Create the data space with ulimited dimensions. 
+     * Create the data space with unlimited dimensions. 
      */
     dataspace = H5Screate_simple(RANK, dims, maxdims); 
 
@@ -2617,7 +2617,7 @@ main (void)
    ret = H5Awrite(attr3, atype, string); 
 
    /*
-    * Close attribute and file datapsaces.
+    * Close attribute and file dataspaces.
     */
    ret = H5Sclose(aid1); 
    ret = H5Sclose(aid2); 
