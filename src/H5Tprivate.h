@@ -64,6 +64,18 @@ typedef enum {
 } H5T_vlen_type_t;
 
 /*
+ * Internal data structure for passing information to H5T_vlen_get_buf_size
+ */
+typedef struct {
+    hid_t dataset_id;       /* ID of the dataset we are working on */
+    hid_t space_id;         /* ID of the dataset's dataspace we are working on */
+    hid_t fl_tbuf_id;       /* ID of the temporary buffer we are using for fixed-length data */
+    hid_t vl_tbuf_id;       /* ID of the temporary buffer we are using for VL data */
+    hid_t xfer_pid;         /* ID of the dataset xfer property list */
+    hsize_t size;           /* Accumulated number of bytes for the selection */
+} H5T_vlen_bufsize_t;
+
+/*
  * Is the path the special no-op path? The no-op function can be set by the
  * application and there might be more than one no-op path in a
  * multi-threaded application if one thread is using the no-op path when some

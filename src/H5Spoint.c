@@ -816,11 +816,20 @@ H5S_point_select_valid (const H5S_t *space)
 
     assert(space);
 
+#ifdef QAK
+printf("%s: check 1.0\n",FUNC);
+#endif /* QAK */
     /* Check each point to determine whether selection+offset is within extent */
     curr=space->select.sel_info.pnt_lst->head;
     while(curr!=NULL) {
         /* Check each dimension */
         for(i=0; i<space->extent.u.simple.rank; i++) {
+#ifdef QAK
+printf("%s: check 2.0\n",FUNC);
+printf("%s: curr->pnt[%d]=%d\n",FUNC,(int)i,(int)curr->pnt[i]);
+printf("%s: space->select.offset[%d]=%d\n",FUNC,(int)i,(int)space->select.offset[i]);
+printf("%s: space->extent.u.simple.size[%d]=%d\n",FUNC,(int)i,(int)space->extent.u.simple.size[i]);
+#endif /* QAK */
             /* Check if an offset has been defined */
             /* Bounds check the selected point + offset against the extent */
             if(((curr->pnt[i]+space->select.offset[i])>(hssize_t)space->extent.u.simple.size[i])
@@ -832,6 +841,9 @@ H5S_point_select_valid (const H5S_t *space)
 
         curr=curr->next;
     } /* end while */
+#ifdef QAK
+printf("%s: check 3.0\n",FUNC);
+#endif /* QAK */
 
     FUNC_LEAVE (ret_value);
 } /* end H5S_point_select_valid() */

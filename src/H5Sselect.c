@@ -519,7 +519,7 @@ herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
 
 done:
     FUNC_LEAVE (ret_value);
-}   /* H5Sselect_elements() */
+}   /* H5S_select_elements() */
 
 /*--------------------------------------------------------------------------
  NAME

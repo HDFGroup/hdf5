@@ -377,59 +377,62 @@ H5TB_resize_buf(hid_t tbuf_id, hsize_t size, void **ptr)
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a temp. buffer");
     }
 
-    /* Save old pointer for later */
-    old_ptr=tbuf->buf;
+    /* Check if we actually need to re-size the buffer */
+    if(size > tbuf->size) {
+        /* Save old pointer for later */
+        old_ptr=tbuf->buf;
 
-    /* Try to resize buffer to new size */
-    if((tbuf->buf = H5MM_realloc(tbuf->buf, size))==NULL) {
-        tbuf->buf=old_ptr;  /* restore pointer if no memory available */
-        HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-              "unable to allocate space for temporary buffer");
-    }
+        /* Try to resize buffer to new size */
+        if((tbuf->buf = H5MM_realloc(tbuf->buf, size))==NULL) {
+            tbuf->buf=old_ptr;  /* restore pointer if no memory available */
+            HRETURN_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                  "unable to allocate space for temporary buffer");
+        }
 
-    /* Change the size of the buffer */
-    tbuf->size=size;
+        /* Change the size of the buffer */
+        tbuf->size=size;
 
-    /*
-     * Check if we need to move the buffer in the sorted list
-     */
+        /*
+         * Check if we need to move the buffer in the sorted list
+         */
 
-    /* Check if this is not the last node and it need's to move */
-    if(tbuf->next!=NULL && tbuf->next->size < tbuf->size) {
-        /* Remove this node from the list */
-        if(tbuf->prev==NULL) {  /* remove from head of list */
-            H5TB_list_head=tbuf->next;
-            tbuf->next->prev=NULL;
-        } else {    /* remove from middle of list */
-            tbuf->prev->next=tbuf->next;
-            tbuf->next->prev=tbuf->prev;
+        /* Check if this is not the last node and it needs to move */
+        if(tbuf->next!=NULL && tbuf->next->size < tbuf->size) {
+            /* Remove this node from the list */
+            if(tbuf->prev==NULL) {  /* remove from head of list */
+                H5TB_list_head=tbuf->next;
+                tbuf->next->prev=NULL;
+            } else {    /* remove from middle of list */
+                tbuf->prev->next=tbuf->next;
+                tbuf->next->prev=tbuf->prev;
+            } /* end if */
+
+            /* Find correct position in list */
+            curr=H5TB_list_head;
+            while(curr!=NULL) {
+                if(!curr->inuse && size<curr->size)
+                    break;
+                curr=curr->next;
+            } /* end while */
+
+            /* Insert into correct position in list */
+            if(curr!=NULL) {
+            /*
+             * Can't be adding to the beginning of list, so this is in the
+             * middle somewhere.
+             */
+                curr->prev->next=tbuf;
+                tbuf->prev=curr->prev;
+                curr->prev=tbuf;
+                tbuf->next=curr;
+            } else {        /* append to end of list */
+                H5TB_list_tail->next=tbuf;
+                tbuf->prev=H5TB_list_tail;
+                tbuf->next=NULL;
+                H5TB_list_tail=tbuf;
+            } /* end else */
         } /* end if */
-
-        /* Find correct position in list */
-        curr=H5TB_list_head;
-        while(curr!=NULL) {
-            if(!curr->inuse && size<curr->size)
-                break;
-            curr=curr->next;
-        } /* end while */
-
-        /* Insert into correct position in list */
-        if(curr!=NULL) {
-	    /*
-	     * Can't be adding to the beginning of list, so this is in the
-	     * middle somewhere.
-	     */
-            curr->prev->next=tbuf;
-            tbuf->prev=curr->prev;
-            curr->prev=tbuf;
-            tbuf->next=curr;
-        } else {        /* append to end of list */
-            H5TB_list_tail->next=tbuf;
-            tbuf->prev=H5TB_list_tail;
-            tbuf->next=NULL;
-            H5TB_list_tail=tbuf;
-        } /* end else */
-    } /* end if */
+      } /* end if */
 
     /* Assign the pointer to the buffer, if requested */
     if(ptr!=NULL)

@@ -558,3 +558,4 @@ H5T_vlen_mark(H5T_t *dt, H5F_t *f, H5T_vlen_type_t loc)
 done:
     FUNC_LEAVE(ret_value);
 }   /* end H5T_vlen_mark() */
+

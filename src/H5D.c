@@ -2662,8 +2662,10 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     /* Check args */
     if (NULL==op)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator");
+#ifdef OLD_WAY
     if (buf==NULL)
         HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer");
+#endif /* OLD_WAY */
     if (H5I_DATATYPE != H5I_get_type(type_id))
         HRETURN_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype");
     if (H5I_DATASPACE != H5I_get_type(space_id) ||
@@ -2723,6 +2725,191 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
 
     FUNC_LEAVE(ret_value);
 }   /* end H5Dvlen_reclaim() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_vlen_get_buf_size_alloc
+ *
+ * Purpose:	This routine makes certain there is enough space in the temporary
+ *      buffer for the new data to read in.  All the VL data read in is actually
+ *      placed in this buffer, overwriting the previous data.  Needless to say,
+ *      this data is not actually usable.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+void *H5D_vlen_get_buf_size_alloc(size_t size, void *info)
+{
+    H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)info;
+    void *ret_value=NULL;       /* Pointer to return */
+
+    FUNC_ENTER(H5D_vlen_get_buf_size_alloc, NULL);
+
+    /* Get a temporary pointer to space for the VL data */
+    if (H5TB_resize_buf(vlen_bufsize->vl_tbuf_id,size,&ret_value)>=0)
+        vlen_bufsize->size+=size;
+
+    FUNC_LEAVE(ret_value);
+} /* end H5D_vlen_get_buf_size_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_vlen_get_buf_size
+ *
+ * Purpose:	This routine checks the number of bytes required to store a single
+ *      element from a dataset in memory, creating a selection with just the
+ *      single element selected to read in the element and using a custom memory
+ *      allocator for any VL data encountered.
+ *          The *size value is modified according to how many bytes are
+ *      required to store the element in memory.
+ *
+ * Implementation: This routine actually performs the read with a custom
+ *      memory manager which basically just counts the bytes requested and
+ *      uses a temporary memory buffer (through the H5TB API) to make certain
+ *      enough space is available to perform the read.  Then the temporary
+ *      buffer is released and the number of bytes allocated is returned.
+ *      Kinda kludgy, but easier than the other method of trying to figure out
+ *      the sizes without actually reading the data in... - QAK
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 17, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, hsize_t UNUSED ndim, hssize_t *point, void *op_data)
+{
+    H5T_vlen_bufsize_t *vlen_bufsize=(H5T_vlen_bufsize_t *)op_data;
+    void *tbuf;         /* pointer to temporary buffer */
+    H5T_t	*dt = NULL;
+    herr_t ret_value=FAIL;
+
+    FUNC_ENTER(H5D_vlen_get_buf_size, FAIL);
+
+    assert(op_data);
+    assert(H5I_DATATYPE == H5I_get_type(type_id));
+
+    /* Check args */
+    if (NULL==(dt=H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    /* Make certain there is enough fixed-length buffer available */
+    if (H5TB_resize_buf(vlen_bufsize->fl_tbuf_id,H5T_get_size(dt),&tbuf)<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf");
+
+    /* Select point to read in */
+    if (H5Sselect_elements(vlen_bufsize->space_id,H5S_SELECT_SET,1,(const hssize_t **)point)<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point");
+
+    /* Read in the point (with the custom VL memory allocator) */
+    if(H5Dread(vlen_bufsize->dataset_id,type_id,H5S_ALL,vlen_bufsize->space_id,vlen_bufsize->xfer_pid,tbuf)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point");
+
+    /* Set the correct return value, if we get this far */
+    ret_value=0;
+
+done:
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5D_vlen_get_buf_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dvlen_get_buf_size
+ *
+ * Purpose:	This routine checks the number of bytes required to store the VL
+ *      data from the dataset, using the space_id for the selection in the
+ *      dataset on disk and the type_id for the memory representation of the
+ *      VL data, in memory.  The *size value is modified according to how many
+ *      bytes are required to store the VL data in memory.
+ *
+ * Implementation: This routine actually performs the read with a custom
+ *      memory manager which basically just counts the bytes requested and
+ *      uses a temporary memory buffer (through the H5TB API) to make certain
+ *      enough space is available to perform the read.  Then the temporary
+ *      buffer is released and the number of bytes allocated is returned.
+ *      Kinda kludgy, but easier than the other method of trying to figure out
+ *      the sizes without actually reading the data in... - QAK
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 11, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
+        hsize_t *size)
+{
+    H5T_vlen_bufsize_t vlen_bufsize={0};
+    char bogus;         /* bogus value to pass to H5Diterate() */
+    herr_t ret_value=FAIL;
+
+    FUNC_ENTER(H5Dvlen_get_buf_size, FAIL);
+
+    /* Check args */
+    if (H5I_DATASET!=H5I_get_type(dataset_id) ||
+            H5I_DATATYPE!=H5I_get_type(type_id) ||
+            H5I_DATASPACE!=H5I_get_type(space_id) || size==NULL) {
+        HRETURN_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument");
+    }
+
+    /* Initialize the callback data block */
+    /* Save the dataset ID */
+    vlen_bufsize.dataset_id=dataset_id;
+
+    /* Get a copy of the dataspace ID */
+    if((vlen_bufsize.space_id=H5Dget_space(dataset_id))<0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace");
+
+    /* Grab the temporary buffers required */
+    if((vlen_bufsize.fl_tbuf_id=H5TB_get_buf(1,0,NULL))<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
+    if((vlen_bufsize.vl_tbuf_id=H5TB_get_buf(1,0,NULL))<0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "no temporary buffers available");
+
+    /* Change to the custom memory allocation routines for reading VL data */
+    if((vlen_bufsize.xfer_pid=H5Pcreate(H5P_DATA_XFER))<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "no dataset xfer plists available");
+
+    if(H5Pset_vlen_mem_manager(vlen_bufsize.xfer_pid,H5D_vlen_get_buf_size_alloc,&vlen_bufsize,NULL,NULL)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set VL data allocation routine");
+
+    /* Set the initial number of bytes required */
+    vlen_bufsize.size=0;
+
+    /* Call H5Diterate with args, etc. */
+    ret_value=H5Diterate(&bogus,type_id,space_id,H5D_vlen_get_buf_size,
+			 &vlen_bufsize);
+
+    /* Get the size if we succeeded */
+    if(ret_value>=0)
+        *size=vlen_bufsize.size;
+
+done:
+    if(vlen_bufsize.space_id>0)
+        H5Sclose(vlen_bufsize.space_id);
+    if(vlen_bufsize.fl_tbuf_id>0)
+        H5TB_release_buf(vlen_bufsize.fl_tbuf_id);
+    if(vlen_bufsize.vl_tbuf_id>0)
+        H5TB_release_buf(vlen_bufsize.vl_tbuf_id);
+    if(vlen_bufsize.xfer_pid>0)
+        H5Pclose(vlen_bufsize.xfer_pid);
+
+    FUNC_LEAVE(ret_value);
+}   /* end H5Dvlen_get_buf_size() */
 
 
 /*-------------------------------------------------------------------------
