@@ -366,7 +366,7 @@ hsize_t dset3_dim[2];
        dset2[i].b = i+ i*0.1;
 
        dset4[i].a = i;
-       dset4[i].b = i*1.0;
+       dset4[i].b = i+3;
 
        dset5[i].a = i;
        dset5[i].b = i*0.1;
@@ -427,10 +427,10 @@ hsize_t dset3_dim[2];
   for (i = 0; i < (int)dset3_dim[0]; i++) {
        for (j = 0; j < (int)dset3_dim[1]; j++) {
             for (k = 0; k < 4; k++)
-                 dset3[i][j].a[k] = k;
+                 dset3[i][j].a[k] = k+j+i;
             for (k = 0; k < 5; k++)
                  for (l = 0; l < 6; l++)
-                      dset3[i][j].b[k][l] = 0.1* (k+1);
+                      dset3[i][j].b[k][l] = (k+1)+l+j+i;
        }
   }
   H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
@@ -721,7 +721,7 @@ float dset2_1[10], dset2_2[3][5];
   dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
-            dset1[i][j] = j;
+            dset1[i][j] = j*i;
   H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
   H5Sclose(space);
 
@@ -779,7 +779,7 @@ float dset2_1[10], dset2_2[3][5];
   dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
-            dset2_2[i][j] = i*0.1;
+            dset2_2[i][j] = (i+1)*j*0.1;
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -1576,6 +1576,7 @@ void test_nestcomp(){
 	hid_t file,space,type,type2,dataset;
 	int i, maxdim = 5, status = 0;
 	hsize_t dim = 5;
+	int y = 1;
 
 	typedef struct {
 		double re;   /*real part*/
@@ -1590,12 +1591,13 @@ void test_nestcomp(){
     /*
      * Initialize the data
      */
+	
     for (i = 0; i< dim; i++) {
 		surft[i].x.re = i;
-		surft[i].x.im = i;
-
-		surft[i].y.re = i;
-		surft[i].y.im = i;
+		surft[i].x.im = i+y;
+		y++;
+		surft[i].y.re = i+y;
+		surft[i].y.im = i+2*y;
     }
 
     /*
