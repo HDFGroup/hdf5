@@ -64,12 +64,6 @@ METHODS="gzip bzip2"
 # Use User's MAKE if set.  Else use generic make.
 MAKE=${MAKE:-make}
 
-# Make sure cvs would work
-if [ -z "$CVSROOT" ]; then
-    echo "Where is the CVS repository?" 1>&2
-    exit 1
-fi
-
 #
 # Command options
 cmd="all"
@@ -259,6 +253,11 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # regardless of the return code of distclean.
     ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
 
+    # verify proper cvs setting
+    if [ -z "$CVSROOT" ]; then
+	echo "CVSROOT not defined!" 1>&2
+	exit 1
+    fi
     # Check out the current version from CVS
     cvs -Q co -d ${CURRENT} ${CVSVERSION} hdf5 || exit 1
 fi # Do CVS checkout
