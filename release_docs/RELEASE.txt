@@ -1,4 +1,4 @@
-HDF5 version 1.6.2-pre2 currently under development
+HDF5 version 1.6.2 released on Thu Feb 12 13:53:52 CST 2004
 ================================================================================
 
 
@@ -224,13 +224,13 @@ Platforms Tested
                                   Sun WorkShop 6 update 2 C++ 5.3
     TFLOPS r1.0.4 v4.4.2 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
                                           local modifications
-    IA-32 Linux 2.4.9             gcc 2.96
+    IA-32 Linux 2.4.18            gcc 2.96
                                   Intel(R) C++ Version 7.0
                                   Intel(R) Fortran Compiler Version 7.0
                                   
-    IA-64 Linux 2.4.18 ia64       gcc version 3.0.4
-                                  Intel(R) C++ Version 7.0
-                                  Intel(R) Fortran Compiler Version 7.0
+    IA-64 Linux 2.4.16 ia64       gcc version 3.0.4
+                                  Intel(R) C++ Version 7.1
+                                  Intel(R) Fortran Compiler Version 7.1
 
     IA-64 Linux 2.4.21.SuSE_128.bef1 ia64
                                   Intel(R) C++ Version 7.1
