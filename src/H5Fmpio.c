@@ -992,5 +992,99 @@ H5F_haddr_to_MPIOff( haddr_t addr, MPI_Offset *mpi_off )
 
     return (ret_val);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5PC_Wait_for_left_neighbor
+ *
+ * Purpose:	Blocks until (empty) msg is received
+ *		from immediately lower-rank neighbor.
+ *		In conjunction with Signal_right_neighbor,
+ *		useful for enforcing 1-process-at-at-time access
+ *		to critical regions to avoid race conditions
+ *		(though it is overkill to require that the processes
+ *		be allowed to proceed strictly in order of their rank).
+ *
+ *		NOTE: This routine doesn't read or write any file,
+ *		just performs interprocess coordination.
+ *		It really should reside in a separate package of such routines.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	rky
+ *              19981207
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PC_Wait_for_left_neighbor( MPI_Comm comm )
+{
+    char msgbuf[1];
+    int myid, mpi_err;
+    MPI_Status rcvstat;
+
+    FUNC_ENTER (H5PC_Wait_for_left_neighbor, FAIL);
+
+    mpi_err = MPI_Comm_rank( comm, &myid );
+    if (MPI_SUCCESS!=mpi_err)
+	HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Comm_rank failed");
+    /* p0 has no left neighbor; all other procs wait for msg */
+    if (myid != 0) {
+	mpi_err = MPI_Recv( &msgbuf, 1, MPI_CHAR, myid-1, MPI_ANY_TAG, comm,
+			    &rcvstat );
+	if (MPI_SUCCESS!=mpi_err)
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Recv failed");
+    }
+    FUNC_LEAVE (SUCCEED);
+} /* H5PC_Wait_for_left_neighbor */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5PC_Signal_right_neighbor
+ *
+ * Purpose:	Blocks until (empty) msg is received
+ *		from immediately lower-rank neighbor.
+ *		In conjunction with Wait_for_left_neighbor,
+ *		useful for enforcing 1-process-at-at-time access
+ *		to critical regions to avoid race conditions
+ *		(though it is overkill to require that the processes
+ *		be allowed to proceed strictly in order of their rank).
+ *
+ *		NOTE: This routine doesn't read or write any file,
+ *		just performs interprocess coordination.
+ *		It really should reside in a separate package of such routines.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	rky
+ *              19981207
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PC_Signal_right_neighbor( MPI_Comm comm )
+{
+    char msgbuf[1];
+    int myid, numprocs, mpi_err;
+
+    FUNC_ENTER (H5PC_Signal_right_neighbor, FAIL);
+
+    mpi_err = MPI_Comm_size( comm, &numprocs );
+    if (MPI_SUCCESS!=mpi_err)
+	HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Comm_rank failed");
+    mpi_err = MPI_Comm_rank( comm, &myid );
+    if (MPI_SUCCESS!=mpi_err)
+	HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Comm_rank failed");
+    if (myid != (numprocs-1)) {
+	mpi_err = MPI_Send( &msgbuf, 0/*empty msg*/, MPI_CHAR, myid+1, 0, comm);
+	if (MPI_SUCCESS!=mpi_err)
+	    HRETURN_ERROR(H5E_IO, H5E_MPI, FAIL, "MPI_Send failed");
+    }
+    FUNC_LEAVE (SUCCEED);
+} /* H5PC_Signal_right_neighbor */
 
 #endif	/* HAVE_PARALLEL */

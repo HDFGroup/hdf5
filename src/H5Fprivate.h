@@ -654,6 +654,8 @@ herr_t H5F_addr_pack(H5F_t *f, haddr_t *addr, const long objno[2]);
 /* Functions for MPI-IO */
 #ifdef HAVE_PARALLEL
 htri_t H5F_mpio_tas_allsame(H5F_low_t *lf, hbool_t newval );
+herr_t H5PC_Wait_for_left_neighbor( MPI_Comm comm );
+herr_t H5PC_Signal_right_neighbor( MPI_Comm comm );
 #endif /* HAVE_PARALLEL */
 
 #endif

@@ -2054,6 +2054,10 @@ H5F_istore_get_addr (H5F_t *f, const H5O_layout_t *layout,
  * rky 980923
  * Added barrier to preclude racing with data writes.
  *
+ * rky 19981207
+ * Added Wait-Signal wrapper around unlock-lock critical region
+ * to prevent race condition (unlock reads, lock writes the chunk).
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2118,6 +2122,14 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 	     * Lock the chunk, copy from application to chunk, then unlock the
 	     * chunk.
 	     */
+
+	    /* rky 981207 Serialize access to this critical region. */
+	    if (SUCCEED!=
+		H5PC_Wait_for_left_neighbor(f->shared->access_parms->u.mpio.comm))
+	    {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "unable to lock the data chunk");
+	    }
 	    if (NULL==(chunk=H5F_istore_lock (f, layout, split_ratios, pline,
 					      fill, chunk_offset, FALSE,
 					      &idx_hint))) {
@@ -2129,6 +2141,12 @@ H5F_istore_allocate (H5F_t *f, const H5O_layout_t *layout,
 				   chunk_size)<0) {
 		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
 			       "uanble to unlock raw data chunk");
+	    }
+	    if (SUCCEED!=
+		H5PC_Signal_right_neighbor(f->shared->access_parms->u.mpio.comm))
+	    {
+		HRETURN_ERROR (H5E_IO, H5E_WRITEERROR, FAIL,
+			       "unable to unlock the data chunk");
 	    }
 #ifdef NO
 	} else {
