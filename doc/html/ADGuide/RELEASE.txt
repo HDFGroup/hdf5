@@ -1,4 +1,4 @@
-HDF5 version 1.5.48 released on Sat Mar  1 07:16:42 CST 2003
+HDF5 version 1.5.49 released on Sat Mar 15 07:08:29 CST 2003
 ================================================================================
 
 
@@ -215,6 +215,7 @@ Configuration
 Tools
 -----
 
+    * Added a -force option to h5redeploy.  AKC - 2003/03/04 
     * The VL string bug(data and datatype cannot be shown) in h5dump is fixed.
       -SLU - 2002/11/18
     * Fixed segfault if h5dump was invoked with some options but no file (e.g.,
@@ -245,6 +246,13 @@ Documentation
  
     o APIs
     ------
+      o Fortran APIs
+      --------------
+          * Added support for generic properties.
+          * Added support for time allocation properties.
+          * Added support for variable length datatypes (only datatypes based
+            on INTEGER, REAL and CHARACTER Fortran types are supported).
+          EIP, March 5, 2003
  
     o Performance
     -------------
@@ -509,7 +517,8 @@ Platforms Tested
   (Solaris 2.7)                 WorkShop Compilers 5.0 99/10/25 Fortran 90
                                        2.0 Patch 107356-04
                                 Workshop Compilers 5.0 98/12/15 C++ 5.0
-  TFLOPS r1.0.4 v4.0            mpich-1.2.1 with local changes
+  TFLOPS r1.0.4 v4.3.3 i386     pgcc Rel 3.1-4i with mpich-1.2.4 with
+                                          local modifications
   Windows NT4.0, 2000 (NT5.0)   MSVC++ 6.0
   Windows 98                    MSVC++ 6.0
 
@@ -590,6 +599,11 @@ Supported Configuration Features Summary
 
 Known Problems
 ==============
+* The h5dump tests may fail to match the expected output on some platforms
+  (e.g. parallel jobs, Windows) where the error messages directed to
+  "stderr" do not appear in the "right order" with output from stdout.
+  This is not an error.
+
 * Datasets or attributes which have a variable-length string datatype are not
   printing correctly with h5dump and h5ls.
 
