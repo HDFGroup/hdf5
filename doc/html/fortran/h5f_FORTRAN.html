@@ -338,6 +338,28 @@ FORTRAN File API -- h5f
 </pre>
 
 
+<p>&nbsp;
+<p>&nbsp;
+<hr>
+<p>&nbsp;
+<a name="h5fget_freespace_f">
+<p>&nbsp;
+</a>
+
+
+<dt><strong>FORTRAN interface:</strong>  &nbsp <strong>h5fget_freespace_f</strong>
+<pre>
+         SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
+
+           IMPLICIT NONE 
+           INTEGER(HID_T), INTENT(IN)  :: file_id  ! File identifier
+           INTEGER(HSSIZE_T), INTENT(OUT) :: free_space ! amount of free space in file
+           INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                                    ! 0 on success and -1 on failure
+         END SUBROUTINE h5fget_freespace_f 
+</pre>
+
+
 </dl>
 
 <p>&nbsp;

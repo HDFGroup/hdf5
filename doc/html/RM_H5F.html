@@ -96,6 +96,7 @@ documented below.
     <li><a href="#File-GetAccessPlist">H5Fget_access_plist</a>
     <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
     <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
+    <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
 </ul>
 </td></tr>
 </table>
@@ -119,11 +120,11 @@ documented below.
     
     <td valign="top">
 	<ul>
+      <li><a href="#File-GetFreeSpace">H5Fget_freespace</a>
       <li><a href="#File-GetObjCount">H5Fget_obj_count</a>
       <li><a href="#File-GetObjIDs">H5Fget_obj_ids</a>
       <li><a href="#File-GetVfdHandle">H5Fget_vfd_handle</a>
       <li><a href="#File-IsHDF5">H5Fis_hdf5</a>
-      <li><a href="#File-Mount">H5Fmount</a>
 	</ul>
     </td>
     
@@ -131,6 +132,7 @@ documented below.
     
     <td valign="top">
 	<ul>
+      <li><a href="#File-Mount">H5Fmount</a>
       <li><a href="#File-Open">H5Fopen</a>
       <li><a href="#File-Reopen">H5Freopen</a>
       <li><a href="#File-Unmount">H5Funmount</a>
@@ -176,6 +178,7 @@ facilitate moving easily between them.</i>
     <li><a href="#File-GetAccessPlist">h5fget_access_plist_f</a>
     <li><a href="#File-GetObjCount">h5fget_obj_count_f</a>
     <li><a href="#File-GetObjIDs">h5fget_obj_ids_f</a>
+    <li><a href="#File-GetObjIDs">h5fget_freespace_f</a>
 </ul>
 </td></tr>
 </table>
@@ -483,6 +486,41 @@ facilitate moving easily between them.</i>
     <dd><a href="fortran/h5f_FORTRAN.html#h5fget_create_plist_f" 
         target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
         <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_freespace" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetFreeSpace">H5Fget_freespace</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Fget_freespace</code>(<em>hid_t</em> <code>file_id</code>)
+<dt><strong>Purpose:</strong>
+        <dd>Returns the amount of free space in a file.
+<dt><strong>Description:</strong>
+    <dd>Given the identifier of an open file, <code>file_id</code>, 
+	<code>H5Fget_freespace</code> returns the amount of space that is
+        unused by any objects in the file.
+        <p>
+        Currently, the HDF5 library only tracks free space in a file from a
+        file open or create until that file is closed, so this routine will
+        only report the free space that has been created during that
+        interval.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of a currently-open HDF5 file
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a the amount of free space in the file if successful;
+        otherwise returns a negative value.
+<dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5f_FORTRAN.html#h5fget_freespace_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+     <!--
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->

@@ -39,6 +39,8 @@ New Features
 
     Library:
     --------
+        - Added new H5Fget_freespace() routine to query the free space in a
+            given file.  QAK 2003/10/06
 
     Parallel Library:
     -----------------

@@ -669,5 +669,79 @@
 
         END SUBROUTINE file_close 
 
+!
+!    The following subroutine tests h5fget_freespace_f
+!
+
+        SUBROUTINE file_space(cleanup, total_error)
+        USE HDF5  ! This module contains all necessary modules
+          IMPLICIT NONE
+          LOGICAL, INTENT(IN) :: cleanup
+          INTEGER, INTENT(OUT) :: total_error 
+          INTEGER              :: error
+     
+          !
+          CHARACTER(LEN=10), PARAMETER :: filename = "file_space"
+          CHARACTER(LEN=3), PARAMETER :: grpname = "grp"
+          CHARACTER(LEN=80)  :: fix_filename 
+
+          INTEGER(HID_T) :: fid ! File identifiers 
+          INTEGER(HSSIZE_T) :: free_space
+          INTEGER(HID_T) :: group_id      ! Group identifier 
+          
+          CALL h5eset_auto_f(0, error)
+
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error)
+               CALL check("h5fcreate_f",error,total_error)
+
+          CALL h5fget_freespace_f(fid, free_space, error)
+               CALL check("h5fget_freespace_f",error,total_error)
+               if(error .eq.0 .and. free_space .ne. 0) then
+                 total_error = total_error + 1
+                 write(*,*) "Wrong amount of free space reported, ", free_space
+               endif
+
+          ! Create group in the file.
+          CALL h5gcreate_f(fid, grpname, group_id, error)
+          CALL check("h5gcreate_f",error,total_error)
+
+          ! Close group
+          CALL h5gclose_f(group_id, error)
+          CALL check("h5gclose_f", error, total_error)
+          
+          ! Check the free space now
+          CALL h5fget_freespace_f(fid, free_space, error)
+               CALL check("h5fget_freespace_f",error,total_error)
+               if(error .eq.0 .and. free_space .ne. 0) then
+                 total_error = total_error + 1
+                 write(*,*) "Wrong amount of free space reported, ", free_space
+               endif
+
+          !Unlink the group
+          CALL h5gunlink_f(fid, grpname, error)
+          CALL check("h5gunlink_f", error, total_error)
+
+          ! Check the free space now
+          CALL h5fget_freespace_f(fid, free_space, error)
+               CALL check("h5fget_freespace_f",error,total_error)
+               if(error .eq.0 .and. free_space .ne. 976) then
+                 total_error = total_error + 1
+                 write(*,*) "Wrong amount of free space reported, ", free_space
+               endif
+
+          CALL h5fclose_f(fid, error)
+              CALL check("h5fclose_f",error,total_error)
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          RETURN
+
+        END SUBROUTINE file_space 
+
 
 

@@ -452,3 +452,26 @@ nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f
   if ( H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, (hid_t *)obj_ids) < 0  ) ret_value = -1;
   return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5fget_freespace_c
+ * Purpose:     Call H5Fget_freespace to get amount of free space within a file
+ * Inputs:      file_id - identifier of the file to query
+ * Returns:     free_space  - amount of free space in file
+ *              0 on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              Tuesday, October 7, 2003
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f 
+nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
+{
+  int ret_value = 0;
+  hid_t c_file_id;
+  hssize_t c_free_space;
+
+  c_file_id = (hid_t)*file_id;
+  if ( (c_free_space=H5Fget_freespace(c_file_id)) < 0  ) ret_value = -1;
+  *free_space=(hssize_t_f)c_free_space;
+  return ret_value;
+}
