@@ -2740,10 +2740,12 @@ main(int argc, const char *argv[])
         }
     }
 
-    if (argv[opt_ind][0] == '\\')
-	fname = &argv[opt_ind][1];
-    else
-	fname = argv[opt_ind];
+    if (argc <= opt_ind) {
+        error_msg(progname, "missing file name\n");
+        usage(progname);
+        exit(EXIT_FAILURE);
+    }
+    fname = argv[opt_ind];
 
     fid = h5tools_fopen(fname, driver, NULL, 0);
 
