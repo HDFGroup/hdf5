@@ -473,10 +473,10 @@ static struct long_options l_opts[] = {
     { "start", require_arg, 's' },
     { "star", require_arg, 's' },
     { "sta", require_arg, 's' },
-    { "stride", require_arg, 'T' },
-    { "strid", require_arg, 'T' },
-    { "stri", require_arg, 'T' },
-    { "str", require_arg, 'T' },
+    { "stride", require_arg, 'S' },
+    { "strid", require_arg, 'S' },
+    { "stri", require_arg, 'S' },
+    { "str", require_arg, 'S' },
     { "width", require_arg, 'w' },
     { "widt", require_arg, 'w' },
     { "wid", require_arg, 'w' },
@@ -596,23 +596,40 @@ usage: %s [OPTIONS] file\n\
       -g P, --group=P     Print the specified group and all members\n\
       -l P, --soft-link=P Print the value(s) of the specified soft link\n\
       -o F, --output=F    Output raw data into file F\n\
-      -t T, --datatype=T  Print the specified named data type\n\
+      -t P, --datatype=P  Print the specified named data type\n\
       -w N, --width=N     Set the number of columns of output\n\
       -x, --xml           Output in XML\n\
       -D U, --xml-dtd=U   Use the DTD at U\n\
 \n\
+ Subsetting is available by using the following options with a dataset\n\
+ attribute. Subsetting is done by selecting a hyperslab from the data.\n\
+ Thus, the options mirror those for performing a hyperslab selection.\n\
+ The START and COUNT parameters are mandatory if you do subsetting.\n\
+ The STRIDE and BLOCK parameters are optional and will default to 1 in\n\
+ each dimension.\n\
+\n\
+      -s L, --start=L     Offset of start of subsetting selection\n\
+      -c L, --count=L     Number of blocks to include in selection\n\
+      -S L, --stride=L    Hyperslab stride\n\
+      -k L, --block=L     Size of block in hyperslab\n\
+\n\
   P - is the full path from the root group to the object.\n\
-  T - is the name of the data type.\n\
   F - is a filename.\n\
   N - is an integer greater than 1.\n\
+  L - is a list of integers the number of which are equal to the\n\
+        number of dimensions in the dataspace being queried\n\
   U - is a URI reference (as defined in [IETF RFC 2396],\n\
         updated by [IETF RFC 2732])\n\
 \n\
-  Example:\n\
+  Examples:\n\
 \n\
-     Attribute foo of the group /bar_none in file quux.h5\n\
+  1) Attribute foo of the group /bar_none in file quux.h5\n\
 \n\
      	h5dump -a /bar_none/foo quux.h5\n\
+\n\
+  2) Selecting a subset from dataset /foo in file quux.h5\n\
+\n\
+        h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n\
 \n", prog);
 }
 
@@ -1697,7 +1714,7 @@ dump_dims(hsize_t *s, int dims)
 
     for (i = 0; i < dims; i++) {
         printf("%u", s[i]);
-        
+
         if (i + 1 != dims)
             printf(", ");
     }
@@ -2300,7 +2317,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED *data)
 static struct handler_t *
 parse_command_line(int argc, const char *argv[])
 {
-    struct handler_t   *hand, *last_dset;
+    struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
 
     if (argc < 2) {
@@ -2315,6 +2332,11 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
+#if 0
+        case 'b':
+            /* binary output */
+            break;
+#endif  /* 0 */
         case 'B':
             display_bb = TRUE;
             last_was_dset = FALSE;
@@ -2408,7 +2430,7 @@ parse_start:
             last_was_dset = FALSE;
             break;
 
-        /** XML parameters **/
+        /** begin XML parameters **/
         case 'x':
             /* select XML output */
             doxml = TRUE;
@@ -2421,7 +2443,7 @@ parse_start:
             break;
         /** end XML parameters **/
 
-        /** subsetting parameters **/
+        /** begin subsetting parameters **/
         case 's':
         case 'T':
         case 'c':
@@ -3113,7 +3135,8 @@ fill_ref_path_table(hid_t group, const char *name, void UNUSED * op_data)
 	    d_status = EXIT_FAILURE;
 	}
 	break;
-    default:;
+    default:
+        break;
     }
 
     free(tmp);
@@ -4169,8 +4192,8 @@ xml_dump_group(hid_t gid, const char *name)
     H5G_stat_t              statbuf;
     char                   *cp;
     hid_t                   dset, type;
-    char                    typename[1024], *tmp;
-    char                   *par;
+    char                    typename[1024], *tmp = NULL;
+    char                   *par = NULL;
     int                     i;
     int                     isRoot = 0;
     int                     xtype;
@@ -4235,11 +4258,6 @@ xml_dump_group(hid_t gid, const char *name)
 	    H5Aiterate(gid, NULL,
 		       dump_function_table->dump_attribute_function, NULL);
 
-	    /* iterate through all the members */
-	    xtype = H5G_GROUP;
-	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-	    xtype = H5G_DATASET;
-	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	    if (!strcmp(name, "/") && unamedtype) {
 		/* Very special case: dump unamed type in root group */
 		for (i = 0; i < type_table->nobjs; i++) {
@@ -4255,7 +4273,13 @@ xml_dump_group(hid_t gid, const char *name)
 		    }
 		}
 	    }
+
+	    /* iterate through all the members */
 	    xtype = H5G_TYPE;
+	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	    xtype = H5G_DATASET;
+	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+	    xtype = H5G_GROUP;
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	    xtype = H5G_LINK;
 	    H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
@@ -4264,11 +4288,6 @@ xml_dump_group(hid_t gid, const char *name)
 	/* 1.  do all the attributes of the group */
 	H5Aiterate(gid, NULL, dump_function_table->dump_attribute_function, NULL);
 
-  	/* iterate through all the members */
-  	xtype = H5G_GROUP;
-  	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
-  	xtype = H5G_DATASET;
-  	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	if (!strcmp(name, "/") && unamedtype) {
 	    /* Very special case: dump unamed type in root group */
 	    for (i = 0; i < type_table->nobjs; i++) {
@@ -4284,8 +4303,14 @@ xml_dump_group(hid_t gid, const char *name)
 		}
 	    }
 	}
+
+  	/* iterate through all the members */
 	xtype = H5G_TYPE;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+  	xtype = H5G_DATASET;
+  	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
+  	xtype = H5G_GROUP;
+  	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
 	xtype = H5G_LINK;
 	H5Giterate(gid, ".", NULL, dump_all, (void *) &xtype);
     }
