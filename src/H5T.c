@@ -1119,9 +1119,11 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_HARD, "llong_flt", native_llong, native_float, H5T_conv_llong_float, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_HARD, "llong_dbl", native_llong, native_double, H5T_conv_llong_double, H5AC_dxpl_id);
     
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     /* From unsigned long long to floats */
     status |= H5T_register(H5T_PERS_HARD, "ullong_flt", native_ullong, native_float, H5T_conv_ullong_float, H5AC_dxpl_id);
     status |= H5T_register(H5T_PERS_HARD, "ullong_dbl", native_ullong, native_double, H5T_conv_ullong_double, H5AC_dxpl_id);
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 
     /* From floats to char */
     status |= H5T_register(H5T_PERS_HARD, "flt_char", native_float, native_schar, H5T_conv_float_char, H5AC_dxpl_id);

@@ -4114,10 +4114,12 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    HDmemcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
 		    hw_float = (float)(*((long_long*)aligned));
 		    break;
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 		case INT_ULLONG:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned long_long), sizeof(unsigned long_long));
 		    hw_float = (float)(*((unsigned long_long*)aligned));
 		    break;
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 		default:
 		    break;
 		}
@@ -4160,10 +4162,12 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    HDmemcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
 		    hw_double = (double)(*((long_long*)aligned));
 		    break;
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 		case INT_ULLONG:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned long_long), sizeof(unsigned long_long));
 		    hw_double = (double)(*((unsigned long_long*)aligned));
 		    break;
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 		default:
 		    break;
 		}
@@ -4206,10 +4210,12 @@ test_conv_int_float(const char *name, hid_t src, hid_t dst)
 		    HDmemcpy(aligned, saved+j*sizeof(long_long), sizeof(long_long));
 		    hw_ldouble = (long double)(*((long_long*)aligned));
 		    break;
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 		case INT_ULLONG:
 		    HDmemcpy(aligned, saved+j*sizeof(unsigned long_long), sizeof(unsigned long_long));
 		    hw_ldouble = (long double)(*((unsigned long_long*)aligned));
 		    break;
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 		default:
 		    break;
 		}
@@ -5583,8 +5589,26 @@ run_int_float_conv(const char *name)
     nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_LLONG, H5T_NATIVE_DOUBLE);
 
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_float(name, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE);
+#else /* H5_ULLONG_TO_FP_CAST_WORKS */
+    {
+        char		str[256];		/*hello string		*/
+
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "unsigned long long", "float");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+
+        sprintf(str, "Testing random %s %s -> %s conversions",
+                name, "unsigned long long", "double");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+    }
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 #endif
 
     return nerrors;

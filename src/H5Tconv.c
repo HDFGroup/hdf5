@@ -7532,6 +7532,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+#ifdef H5_ULLONG_TO_FP_CAST_WORKS
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_float
@@ -7595,6 +7596,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
+#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 
 
 /*-------------------------------------------------------------------------

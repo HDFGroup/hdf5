@@ -515,6 +515,10 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #undef TM_IN_SYS_TIME
 
+/* Define if your system can compile unsigned long long to floating-point
+   casts. */
+#undef ULLONG_TO_FP_CAST_WORKS
+
 /* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
 #undef WANT_H5_V1_6_COMPAT
 
