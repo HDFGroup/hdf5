@@ -814,11 +814,11 @@ class FileAccPropList : public PropList
 	void getAlignment( hsize_t& threshold, hsize_t& alignment ) const;
 
 	// Sets the meta data cache and raw data chunk cache parameters.
-	void setCache( int mdc_nelmts, int rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
+	void setCache( int mdc_nelmts, size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0 ) const;
 
 	// Retrieves maximum sizes of data caches and the preemption 
 	// policy value.
-	void getCache( int& mdc_nelmts, int& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
+	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
 
 	// Sets garbage collecting references flag.
 	void setGcReferences( unsigned gc_ref = 0 ) const;

@@ -72,6 +72,27 @@ void FileCreatPropList::getSizes( size_t& sizeof_addr, size_t& sizeof_size ) con
    }
 }
 
+#ifdef H5_WANT_H5_V1_4_COMPAT
+void FileCreatPropList::setSymk( int ik, int lk ) const
+{
+   herr_t ret_value = H5Pset_sym_k( id, ik, lk );
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileCreatPropList::setSymk", 
+		"H5Pset_sym_k failed");
+   }
+}
+
+void FileCreatPropList::getSymk( int& ik, int& lk ) const
+{
+   herr_t ret_value = H5Pget_sym_k( id, &ik, &lk );
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileCreatPropList::getSymk", 
+		"H5Pget_sym_k failed");
+   }
+}
+#else /* H5_WANT_H5_V1_4_COMPAT */
 void FileCreatPropList::setSymk( int ik, unsigned lk ) const
 {
    herr_t ret_value = H5Pset_sym_k( id, ik, lk );
@@ -91,6 +112,7 @@ void FileCreatPropList::getSymk( int& ik, unsigned& lk ) const
 		"H5Pget_sym_k failed");
    }
 }
+#endif /* H5_WANT_H5_V1_4_COMPAT */
 
 void FileCreatPropList::setIstorek( int ik ) const
 {
