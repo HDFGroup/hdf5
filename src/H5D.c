@@ -1994,7 +1994,7 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
 {
     H5D_t 	*dataset = NULL;	/*new dataset struct 		*/
     H5D_t 	*ret_value = NULL;	/*return value			*/
-    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_ALLOC, TRUE}; 
+    H5O_fill_new_t  fill = {NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_CRT_FILL_TIME_DEF, TRUE}; 
     H5O_fill_t     *fill_prop;          /* Pointer to dataset's fill value area */
     H5O_pline_t pline;                  /* I/O pipeline information */
     H5D_layout_t layout;                /* Dataset layout */
@@ -2111,6 +2111,9 @@ H5D_open_oid(H5G_entry_t *ent, hid_t dxpl_id)
             default:
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet");
         } /* end switch */
+
+        /* Set the default fill time */
+        fill.fill_time=H5D_CRT_FILL_TIME_DEF;
     } /* end if */
     if(fill.fill_defined) {
         if(NULL==H5O_copy(H5O_FILL_ID, &fill, fill_prop))
