@@ -61,6 +61,15 @@ Documentation
 New Features
 ============
 
+    * C++ API:
+	- Added two new member functions: Exception::getFuncName() and
+	  Exception::getCFuncName() to provide the name of the member
+	  function, where an exception is thrown.
+	- IdComponent::operator= becomes a virtual function because DataType,
+	  DataSpace, and PropList provide their own implementation.  The new
+	  operator= functions invoke H5Tcopy, H5Scopy, and H5Pcopy to make a
+	  copy of a datatype, dataspace, and property list, respectively.
+
 
 Platforms Tested
 ================
@@ -177,3 +186,9 @@ Known Problems
   incorrectly described.)  For more information, please see:
 
      http://hdf.ncsa.uiuc.edu/HDF5/H5Image/ImageDetails.htm
+
+* The test_compression in ./c++/test/dsets.cpp failed on Linux.  A size
+  value that is passed to a memcpy mysteriously becomes very large resulting 
+  in a Segnmentation Fault.  This specific test is disabled until we can 
+  figure out the problem and come up with a solution.
+  
