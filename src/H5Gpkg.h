@@ -93,19 +93,18 @@ typedef struct H5G_bt_ud1_t {
 
 /*
  * Data exchange structure to pass through the B-tree layer for the
- * H5B_list function.
+ * H5B_iterate function.
  */
 typedef struct H5G_bt_ud2_t {
-
     /* downward */
-    H5G_entry_t *entry;         /*array of entries, alloc'd by caller        */
-    char        **name;         /*array of string ptrs, allocd by caller     */
-    intn        maxentries;     /*size of the ADDR and NAME arrays           */
-    haddr_t     heap_addr;      /*heap address                               */
+    hid_t	group_id;	/*group id to pass to iteration operator     */
+    struct H5G_t *group;	/*the group to which group_id points	     */
+    int		skip;		/*initial entries to skip		     */
+    H5G_iterate_t op;		/*iteration operator			     */
+    void	*op_data;	/*user-defined operator data		     */
 
     /* upward */
-    intn        nsyms;          /*num. symbols processed                     */
-
+    
 } H5G_bt_ud2_t;
 
 /*
@@ -126,9 +125,6 @@ herr_t H5G_stab_find (H5G_entry_t *grp_ent, const char *name,
                       H5G_entry_t *obj_ent/*out*/);
 herr_t H5G_stab_insert (H5G_entry_t *grp_ent, const char *name,
                         H5G_entry_t *obj_ent);
-intn H5G_stab_list (H5G_entry_t *self, intn maxentries, char *names[]/*out*/,
-                    H5G_entry_t entries[]/*out*/);
-
 /*
  * Functions that understand symbol table entries.
  */

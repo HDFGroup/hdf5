@@ -1982,7 +1982,7 @@ fi
 echo $ac_n "checking for parallel support""... $ac_c" 1>&6
 echo "configure:1984: checking for parallel support" >&5;
 
- RUNTEST=""
+
 
 case "X-$PARALLEL" in
 

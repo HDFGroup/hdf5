@@ -38,6 +38,7 @@
    (H5B_SIZEOF_MAGIC +          /*magic number                          */    \
     4 +                         /*type, level, num entries              */    \
     2*H5F_SIZEOF_ADDR(F))       /*left and right sibling addresses        */
+     
 #define H5B_K(F,TYPE)           /*K value given file and Btree subclass */    \
    ((F)->shared->create_parms.btree_k[(TYPE)->id])
 
@@ -121,6 +122,6 @@ herr_t H5B_find (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
                  void *udata);
 herr_t H5B_insert (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
                    void *udata);
-herr_t H5B_list (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
-                 void *udata);
+herr_t H5B_iterate (H5F_t *f, const H5B_class_t *type, const haddr_t *addr,
+		    void *udata);
 #endif

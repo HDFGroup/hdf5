@@ -47,7 +47,7 @@ static hbool_t          interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self /*out */ )
+H5G_stab_create(H5F_t *f, size_t init, H5G_entry_t *self/*out*/)
 {
     size_t                  name;       /*offset of "" name     */
     H5O_stab_t              stab;       /*symbol table message  */
@@ -206,72 +206,4 @@ H5G_stab_insert(H5G_entry_t *grp_ent, const char *name, H5G_entry_t *obj_ent)
     /* update the name offset in the entry */
     obj_ent->name_off = udata.ent.name_off;
     FUNC_LEAVE(SUCCEED);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_stab_list
- *
- * Purpose:     Returns a list of all the symbols in a symbol table.
- *              The caller allocates an array of pointers which this
- *              function will fill in with malloc'd names.  The caller
- *              also allocates an array of symbol table entries which will
- *              be filled in with data from the symbol table.  Each of these
- *              arrays should have at least MAXENTRIES elements.
- *
- * Errors:
- *              SYM       BADMESG       Not a symbol table. 
- *              SYM       CANTLIST      B-tree list failure. 
- *
- * Return:      Success:        The total number of symbols in the
- *                              symbol table.  This may exceed MAXENTRIES,
- *                              but at most MAXENTRIES values are copied
- *                              into the NAMES and ENTRIES arrays.
- *
- *              Failure:        FAIL, the pointers in NAMES are undefined but
- *                              no memory is allocated.  The values in
- *                              ENTRIES are undefined.
- *
- * Programmer:  Robb Matzke
- *              matzke@llnl.gov
- *              Aug  1 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-intn
-H5G_stab_list(H5G_entry_t *grp_ent, intn maxentries, char *names[] /*out */ ,
-              H5G_entry_t entries[] /*out */ )
-{
-    H5G_bt_ud2_t            udata;
-    H5O_stab_t              stab;
-    intn                    i;
-
-    FUNC_ENTER(H5G_stab_list, FAIL);
-
-    /* check args */
-    assert(grp_ent && grp_ent->file);
-    assert(maxentries >= 0);
-
-    /* initialize data to pass through B-tree */
-    if (NULL == H5O_read(grp_ent, H5O_STAB, 0, &stab)) {
-        HRETURN_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "not a symbol table");
-    }
-    udata.entry = entries;
-    udata.name = names;
-    udata.heap_addr = stab.heap_addr;
-    udata.maxentries = maxentries;
-    udata.nsyms = 0;
-    if (names)
-        HDmemset(names, 0, maxentries);
-
-    /* list */
-    if (H5B_list(grp_ent->file, H5B_SNODE, &(stab.btree_addr), &udata) < 0) {
-        if (names) {
-            for (i = 0; i < maxentries; i++)
-                H5MM_xfree(names[i]);
-        }
-        HRETURN_ERROR(H5E_SYM, H5E_CANTLIST, FAIL, "b-tree list failure");
-    }
-    FUNC_LEAVE(udata.nsyms);
 }

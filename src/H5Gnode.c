@@ -17,7 +17,7 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5G_PACKAGE		/*suppress error message about including H5Gpkg.h */
+#define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
 
 /* Packages needed by this file... */
 #include <H5private.h>		/*library		  */
@@ -33,64 +33,61 @@
 #define PABLO_MASK	H5G_node_mask
 
 /* PRIVATE PROTOTYPES */
-static herr_t		H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
-					    void *_key);
-static herr_t		H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
-					    void *_key);
-static size_t		H5G_node_size(H5F_t *f);
-static herr_t		H5G_node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
-					void *_udata, void *_rt_key,
-					haddr_t *addr /*out */ );
-static herr_t		H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
-				       H5G_node_t *sym);
-static H5G_node_t      *H5G_node_load(H5F_t *f, const haddr_t *addr,
-				      const void *_udata1, void *_udata2);
-static intn		H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
-				      void *_rt_key);
-static intn		H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata,
-				      void *_rt_key);
-static herr_t		H5G_node_found(H5F_t *f, const haddr_t *addr,
-				       const void *_lt_key, void *_udata,
-				       const void *_rt_key);
-static H5B_ins_t	H5G_node_insert(H5F_t *f, const haddr_t *addr,
-				     void *_lt_key, hbool_t *lt_key_changed,
-					void *_md_key, void *_udata,
-				     void *_rt_key, hbool_t *rt_key_changed,
-					haddr_t *new_node /*out */ );
-static herr_t		H5G_node_list(H5F_t *f, const haddr_t *addr, void *_udata);
-static size_t		H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
+static herr_t H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
+				  void *_key);
+static herr_t H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw,
+				  void *_key);
+static size_t H5G_node_size(H5F_t *f);
+static herr_t H5G_node_create(H5F_t *f, H5B_ins_t op, void *_lt_key,
+			      void *_udata, void *_rt_key,
+			      haddr_t *addr/*out*/);
+static herr_t H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
+			     H5G_node_t *sym);
+static H5G_node_t *H5G_node_load(H5F_t *f, const haddr_t *addr,
+				 const void *_udata1, void *_udata2);
+static intn H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata,
+			  void *_rt_key);
+static intn H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata,
+			  void *_rt_key);
+static herr_t H5G_node_found(H5F_t *f, const haddr_t *addr,
+			     const void *_lt_key, void *_udata,
+			     const void *_rt_key);
+static H5B_ins_t H5G_node_insert(H5F_t *f, const haddr_t *addr,
+				 void *_lt_key, hbool_t *lt_key_changed,
+				 void *_md_key, void *_udata,
+				 void *_rt_key, hbool_t *rt_key_changed,
+				 haddr_t *new_node/*out*/);
+static herr_t H5G_node_iterate(H5F_t *f, const haddr_t *addr, void *_udata);
+static size_t H5G_node_sizeof_rkey(H5F_t *f, const void *_udata);
 
 /* H5G inherits cache-like properties from H5AC */
-const H5AC_class_t	H5AC_SNODE[1] =
-{
-    {
-	H5AC_SNODE_ID,
-  (void *(*)(H5F_t *, const haddr_t *, const void *, void *)) H5G_node_load,
-     (herr_t (*)(H5F_t *, hbool_t, const haddr_t *, void *)) H5G_node_flush,
-    }};
+const H5AC_class_t H5AC_SNODE[1] = {{
+    H5AC_SNODE_ID,
+    (void *(*)(H5F_t*, const haddr_t*, const void*, void*))H5G_node_load,
+    (herr_t (*)(H5F_t*, hbool_t, const haddr_t*, void*))H5G_node_flush,
+}};
 
 /* H5G inherits B-tree like properties from H5B */
-H5B_class_t		H5B_SNODE[1] =
-{
-    {
-	H5B_SNODE_ID,		/*id			*/
-	sizeof(H5G_node_key_t), /*sizeof_nkey		*/
-	H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
-	H5G_node_create,	/*new			*/
-	H5G_node_cmp2,		/*cmp2			*/
-	H5G_node_cmp3,		/*cmp3			*/
-	H5G_node_found,		/*found			*/
-	H5G_node_insert,	/*insert		*/
-	TRUE,			/*follow min branch?	*/
-	TRUE,			/*follow max branch?	*/
-	H5G_node_list,		/*list			*/
-	H5G_node_decode_key,	/*decode		*/
-	H5G_node_encode_key,	/*encode		*/
-    }};
+H5B_class_t H5B_SNODE[1] = {{
+    H5B_SNODE_ID,		/*id			*/
+    sizeof(H5G_node_key_t), 	/*sizeof_nkey		*/
+    H5G_node_sizeof_rkey,	/*get_sizeof_rkey	*/
+    H5G_node_create,		/*new			*/
+    H5G_node_cmp2,		/*cmp2			*/
+    H5G_node_cmp3,		/*cmp3			*/
+    H5G_node_found,		/*found			*/
+    H5G_node_insert,		/*insert		*/
+    TRUE,			/*follow min branch?	*/
+    TRUE,			/*follow max branch?	*/
+    H5G_node_iterate,		/*list			*/
+    H5G_node_decode_key,	/*decode		*/
+    H5G_node_encode_key,	/*encode		*/
+}};
 
 /* Interface initialization */
-static intn		interface_initialize_g = FALSE;
+static intn interface_initialize_g = FALSE;
 #define INTERFACE_INIT	NULL
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_sizeof_rkey
@@ -115,6 +112,7 @@ H5G_node_sizeof_rkey(H5F_t *f, const void *udata __attribute__((unused)))
 {
     return H5F_SIZEOF_SIZE(f);	/*the name offset */
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_decode_key
@@ -148,6 +146,7 @@ H5G_node_decode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_encode_key
@@ -181,6 +180,7 @@ H5G_node_encode_key(H5F_t *f, H5B_t *bt, uint8 *raw, void *_key)
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_size
@@ -205,6 +205,7 @@ H5G_node_size(H5F_t *f)
     return H5G_NODE_SIZEOF_HDR(f) +
 	(2 * H5G_NODE_K(f)) * H5G_SIZEOF_ENTRY(f);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_create
@@ -230,7 +231,7 @@ H5G_node_size(H5F_t *f)
 static herr_t
 H5G_node_create(H5F_t *f, H5B_ins_t op,
 		void *_lt_key, void *_udata, void *_rt_key,
-		haddr_t *addr /*out */ )
+		haddr_t *addr/*out*/)
 {
     H5G_node_key_t	   *lt_key = (H5G_node_key_t *) _lt_key;
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
@@ -247,7 +248,7 @@ H5G_node_create(H5F_t *f, H5B_ins_t op,
 
     sym = H5MM_xcalloc(1, sizeof(H5G_node_t));
     size = H5G_node_size(f);
-    if (H5MF_alloc(f, H5MF_META, size, addr /*out */ ) < 0) {
+    if (H5MF_alloc(f, H5MF_META, size, addr/*out*/) < 0) {
 	H5MM_xfree(sym);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
 		      "unable to allocate file space");
@@ -266,13 +267,12 @@ H5G_node_create(H5F_t *f, H5B_ins_t op,
      * allows the comparison functions to work correctly without knowing
      * that there are no symbols.
      */
-    if (lt_key)
-	lt_key->offset = 0;
-    if (rt_key)
-	rt_key->offset = 0;
+    if (lt_key) lt_key->offset = 0;
+    if (rt_key) rt_key->offset = 0;
 
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_flush
@@ -295,10 +295,10 @@ static herr_t
 H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
 	       H5G_node_t *sym)
 {
-    uint8		   *buf = NULL, *p = NULL;
-    size_t		    size;
-    herr_t		    status;
-    int			    i;
+    uint8	*buf = NULL, *p = NULL;
+    size_t	size;
+    herr_t	status;
+    int		i;
 
     FUNC_ENTER(H5G_node_flush, FAIL);
 
@@ -313,8 +313,8 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
      * Look for dirty entries and set the node dirty flag.
      */
     for (i = 0; i < sym->nsyms; i++) {
-        if (sym->entry[i].dirty)
-            sym->dirty = TRUE;
+	if (sym->entry[i].dirty)
+	    sym->dirty = TRUE;
     }
 
     /*
@@ -358,6 +358,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
     }
     FUNC_LEAVE(SUCCEED);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_load
@@ -376,7 +377,7 @@ H5G_node_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr,
  *
  *-------------------------------------------------------------------------
  */
-static H5G_node_t      *
+static H5G_node_t *
 H5G_node_load(H5F_t *f, const haddr_t *addr, const void *_udata1,
 	      void *_udata2)
 {
@@ -445,6 +446,7 @@ H5G_node_load(H5F_t *f, const haddr_t *addr, const void *_udata1,
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_cmp2
@@ -496,6 +498,7 @@ H5G_node_cmp2(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 
     FUNC_LEAVE(cmp);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_cmp3
@@ -552,6 +555,7 @@ H5G_node_cmp3(H5F_t *f, void *_lt_key, void *_udata, void *_rt_key)
 
     FUNC_LEAVE(0);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_found
@@ -585,11 +589,11 @@ static herr_t
 H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
 	       void *_udata, const void *_rt_key)
 {
-    H5G_bt_ud1_t	   *bt_udata = (H5G_bt_ud1_t *) _udata;
-    H5G_node_t		   *sn = NULL;
-    intn		    lt = 0, idx = 0, rt, cmp = 1;
-    const char		   *s;
-    herr_t		    ret_value = FAIL;
+    H5G_bt_ud1_t	*bt_udata = (H5G_bt_ud1_t *) _udata;
+    H5G_node_t		*sn = NULL;
+    intn		lt = 0, idx = 0, rt, cmp = 1;
+    const char		*s;
+    herr_t		ret_value = FAIL;
 
     FUNC_ENTER(H5G_node_found, FAIL);
 
@@ -607,6 +611,7 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL,
 		    "unable to protect symbol table node");
     }
+
     /*
      * Binary search.
      */
@@ -639,8 +644,8 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
 	break;
 
     default:
-        HRETURN_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL,
-                      "internal erorr (unknown symbol find operation)");
+	HRETURN_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL,
+		      "internal erorr (unknown symbol find operation)");
     }
     ret_value = SUCCEED;
 
@@ -651,6 +656,7 @@ H5G_node_found(H5F_t *f, const haddr_t *addr, const void *_lt_key,
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_insert
@@ -726,6 +732,7 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR,
 		    "unable to protect symbol table node");
     }
+
     /*
      * Where does the new symbol get inserted?	We use a binary search.
      */
@@ -832,12 +839,12 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
     }
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_list
+ * Function:	H5G_node_iterate
  *
- * Purpose:	This function gets called during a group list operation.
- *		It should fill in data in the UDATA struct.
+ * Purpose:	This function gets called during a group iterate operation.
  *
  * Return:	Success:	SUCCEED
  *
@@ -852,15 +859,17 @@ H5G_node_insert(H5F_t *f, const haddr_t *addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_list(H5F_t *f, const haddr_t *addr, void *_udata)
+H5G_node_iterate (H5F_t *f, const haddr_t *addr, void *_udata)
 {
-    H5G_bt_ud2_t	   *bt_udata = (H5G_bt_ud2_t *) _udata;
-    H5G_node_t		   *sn = NULL;
-    intn		    i;
-    const char		   *s;
-    herr_t		    ret_value = FAIL;
+    H5G_bt_ud2_t	*bt_udata = (H5G_bt_ud2_t *)_udata;
+    H5G_node_t		*sn = NULL;
+    intn		i, nsyms;
+    size_t		n, *name_off=NULL;
+    const char		*name;
+    char		buf[1024], *s;
+    herr_t		ret_value = FAIL;
 
-    FUNC_ENTER(H5G_node_list, FAIL);
+    FUNC_ENTER(H5G_node_iterate, FAIL);
 
     /*
      * Check arguments.
@@ -869,50 +878,46 @@ H5G_node_list(H5F_t *f, const haddr_t *addr, void *_udata)
     assert(addr && H5F_addr_defined(addr));
     assert(bt_udata);
 
-    if (NULL == (sn = H5AC_protect(f, H5AC_SNODE, addr, NULL, NULL))) {
+    /*
+     * Save information about the symbol table node since we can't lock it
+     * because we're about to call an application function.
+     */
+    if (NULL == (sn = H5AC_find(f, H5AC_SNODE, addr, NULL, NULL))) {
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL,
-		    "unable to protect symbol table node");
+		    "unable to load symbol table node");
     }
+    nsyms = sn->nsyms;
+    name_off = H5MM_xmalloc (nsyms*sizeof(name_off[0]));
+    for (i=0; i<nsyms; i++) name_off[i] = sn->entry[i].name_off;
+    sn = NULL;
+
     /*
-     * If we've already overflowed the user-supplied buffer, then just
-     * keep track of how many names we've seen and don't bother doing
-     * anything else.
+     * Iterate over the symbol table node entries.
      */
-    if (bt_udata->nsyms >= bt_udata->maxentries) {
-	bt_udata->nsyms += sn->nsyms;
-	HGOTO_DONE(SUCCEED);
-    }
-    /*
-     * Save the symbol table entries.
-     */
-    if (bt_udata->entry) {
-	for (i = 0; i < sn->nsyms && bt_udata->nsyms + i < bt_udata->maxentries; i++) {
-	    bt_udata->entry[bt_udata->nsyms + i] = sn->entry[i];
+    for (i=0, ret_value=0; i<nsyms && 0==ret_value; i++) {
+	if (bt_udata->skip>0) {
+	    --bt_udata->skip;
+	} else {
+	    name = H5H_peek (f, &(bt_udata->group->ent.cache.stab.heap_addr),
+			     name_off[i]);
+	    assert (name);
+	    n = strlen (name);
+	    s = n+1>sizeof(buf) ? H5MM_xmalloc (n+1) : buf;
+	    strcpy (s, name);
+	    ret_value = (bt_udata->op)(bt_udata->group_id, s,
+				       bt_udata->op_data);
+	    if (s!=buf) H5MM_xfree (s);
 	}
     }
-    if (bt_udata->name) {
-	for (i = 0; i < sn->nsyms && bt_udata->nsyms + i < bt_udata->maxentries; i++) {
-	    if (NULL == (s = H5H_peek(f, &(bt_udata->heap_addr),
-				      sn->entry[i].name_off))) {
-		HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL,
-			    "unable to read symbol name");
-	    }
-	    bt_udata->name[bt_udata->nsyms + i] = H5MM_xstrdup(s);
-	}
+    if (ret_value<0) {
+	HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
     }
-    /*
-     * Update the number of symbols.
-     */
-    bt_udata->nsyms += sn->nsyms;
-    ret_value = SUCCEED;
 
   done:
-    if (sn && H5AC_unprotect(f, H5AC_SNODE, addr, sn) < 0) {
-	HRETURN_ERROR(H5E_CACHE, H5E_PROTECT, FAIL,
-		      "unable to release symbol table node");
-    }
+    name_off = H5MM_xfree (name_off);
     FUNC_LEAVE(ret_value);
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_node_debug

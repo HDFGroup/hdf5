@@ -48,7 +48,7 @@
 
 /* Interface initialization */
 static hbool_t		interface_initialize_g = FALSE;
-#define INTERFACE_INIT		H5G_init_interface
+#define INTERFACE_INIT	H5G_init_interface
 static herr_t		H5G_init_interface(void);
 static void		H5G_term_interface(void);
 
@@ -364,6 +364,86 @@ H5Gpop(hid_t file_id)
     FUNC_LEAVE(SUCCEED);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Giterate
+ *
+ * Purpose:	Iterates over the entries of a group.  The FILE_ID and NAME
+ *		identify the group over which to iterate and INDEX indicates
+ *		where to start iterating (zero means at the beginning).	 The
+ *		OPERATOR is called for each member and the iteration
+ *		continues until the operator returns non-zero or all members
+ *		are processed. The operator is passed a group ID for the
+ *		group being iterated, a member name, and OP_DATA for each
+ *		member.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	FAIL if something goes wrong within the
+ *				library, or a negative value returned by one
+ *				of the operators.
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, March 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Giterate (hid_t file_id, const char *name, int *index,
+	    H5G_iterate_t op, void *op_data)
+{
+    H5F_t		*f = NULL;
+    int			_index = 0;
+    H5G_bt_ud2_t	udata;
+    herr_t		ret_value = FAIL;
+    
+    FUNC_ENTER (H5Giterate, FAIL);
+
+    /* Check args */
+    if (H5_FILE!=H5I_group (file_id) ||
+	NULL==(f=H5I_object (file_id))) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    }
+    if (!name || !*name) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified");
+    }
+    if (!index) index = &_index;
+    if (!op) {
+	HRETURN_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified");
+    }
+
+    /*
+     * Open the group on which to operate.  We also create a group ID which
+     * we can pass to the application-defined operator.
+     */
+    if (NULL==(udata.group = H5G_open (f, name))) {
+	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group");
+    }
+    if ((udata.group_id=H5I_register (H5_GROUP, udata.group))<0) {
+	H5G_close (udata.group);
+	HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL,
+		       "unable to register group");
+    }
+    
+    /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
+    udata.skip = *index;
+    udata.op = op;
+    udata.op_data = op_data;
+
+    /* Iterate over the group members */
+    if ((ret_value = H5B_iterate (f, H5B_SNODE,
+				  &(udata.group->ent.cache.stab.btree_addr),
+				  &udata))<0) {
+	HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+    }
+    H5I_dec_ref (udata.group_id); /*also closes udata.group*/
+    FUNC_LEAVE (ret_value);
+}
+
 /*
  *-------------------------------------------------------------------------
  *-------------------------------------------------------------------------
@@ -523,22 +603,19 @@ H5G_component(const char *name, size_t *size_p)
  */
 static herr_t
 H5G_namei(H5F_t *f, H5G_entry_t *cwg, const char *name,
-	  const char **rest /*out */ , H5G_entry_t *grp_ent /*out */ ,
-	  H5G_entry_t *obj_ent /*out */ )
+	  const char **rest/*out*/, H5G_entry_t *grp_ent/*out*/,
+	  H5G_entry_t *obj_ent/*out*/)
 {
-    H5G_entry_t		    _grp_ent;	/*entry for current group	*/
-    H5G_entry_t		    _obj_ent;	/*entry found			*/
-    size_t		    nchars;	/*component name length		*/
-    char		    comp[1024];		/*component name buffer		*/
-    hbool_t		    aside = FALSE;	/*did we look at a name message? */
+    H5G_entry_t		_grp_ent;	/*entry for current group	*/
+    H5G_entry_t		_obj_ent;	/*entry found			*/
+    size_t		nchars;		/*component name length		*/
+    char		comp[1024];	/*component name buffer		*/
+    hbool_t		aside = FALSE;	/*did we look at a name message?*/
 
     /* clear output args before FUNC_ENTER() in case it fails */
-    if (rest)
-	*rest = name;
-    if (!grp_ent)
-	grp_ent = &_grp_ent;
-    if (!obj_ent)
-	obj_ent = &_obj_ent;
+    if (rest) *rest = name;
+    if (!grp_ent) grp_ent = &_grp_ent;
+    if (!obj_ent) obj_ent = &_obj_ent;
     memset(grp_ent, 0, sizeof(H5G_entry_t));
     H5F_addr_undef(&(grp_ent->header));
     memset(obj_ent, 0, sizeof(H5G_entry_t));
@@ -754,15 +831,15 @@ H5G_mkroot(H5F_t *f, size_t size_hint)
  *
  *-------------------------------------------------------------------------
  */
-H5G_t		       *
+H5G_t *
 H5G_create(H5F_t *f, const char *name, size_t size_hint)
 {
-    const char		   *rest = NULL;	/*the base name			*/
-    H5G_entry_t		    grp_ent;	/*group containing new group	*/
-    char		    _comp[1024];	/*name component		*/
-    size_t		    nchars;	/*number of characters in compon */
-    herr_t		    status;	/*function return status	*/
-    H5G_t		   *grp = NULL;		/*new group			*/
+    const char	*rest = NULL;		/*the base name			*/
+    H5G_entry_t	grp_ent;		/*group containing new group	*/
+    char	_comp[1024];		/*name component		*/
+    size_t	nchars;			/*number of characters in compon*/
+    herr_t	status;			/*function return status	*/
+    H5G_t	*grp = NULL;		/*new group			*/
 
     FUNC_ENTER(H5G_create, NULL);
 
@@ -774,7 +851,7 @@ H5G_create(H5F_t *f, const char *name, size_t size_hint)
      * Try to create the root group.  Ignore the error if this function
      * fails because the root group already exists.
      */
-    if ((status = H5G_mkroot(f, H5G_SIZE_HINT)) < 0 && -2 != status) {
+    if ((status=H5G_mkroot(f, H5G_SIZE_HINT))<0 && -2!=status) {
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create root group");
     }
     H5E_clear();
@@ -801,12 +878,14 @@ H5G_create(H5F_t *f, const char *name, size_t size_hint)
 	    rest = _comp;
 	}
     }
+    
     /* create an open group */
     grp = H5MM_xcalloc(1, sizeof(H5G_t));
-    if (H5G_stab_create(f, size_hint, &(grp->ent) /*out */ ) < 0) {
+    if (H5G_stab_create(f, size_hint, &(grp->ent)/*out*/) < 0) {
 	grp = H5MM_xfree(grp);
 	HRETURN_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create grp");
     }
+    
     /* insert child name into parent */
     if (H5G_stab_insert(&grp_ent, rest, &(grp->ent)) < 0) {
 	H5O_close(&(grp->ent));

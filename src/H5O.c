@@ -516,6 +516,9 @@ H5O_flush(H5F_t *f, hbool_t destroy, const haddr_t *addr, H5O_t *oh)
 	/* encode body size */
 	UINT32ENCODE(p, oh->chunk[0].size);
 
+	/* zero to alignment */
+	HDmemset (p, 0, H5O_SIZEOF_HDR(f)-12);
+
 	/* write the object header header */
 	if (H5F_block_write(f, addr, H5O_SIZEOF_HDR(f), buf) < 0) {
 	    HRETURN_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL,

@@ -559,7 +559,9 @@ main(int argc, char *argv[])
                 size_of_test |= TEST_LARGE;
             } else {
                 printf("unrecognized argument: %s\n", argv[i]);
+#if 0
                 exit(1);
+#endif
             }
         }
     }
