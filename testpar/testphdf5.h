@@ -22,7 +22,7 @@
 	}								      \
     }								      	      \
     else{								      \
-        printf("*** Assertion failed (%s) at line %4d in %s\n",               \
+        printf("*** PHDF5 Assertion failed (%s) at line %4d in %s\n",         \
 	    mesg, (int)__LINE__, __FILE__);     			      \
         nerrors++;                                                            \
         H5Eprint (stdout);                                                    \
