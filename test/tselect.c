@@ -79,6 +79,23 @@ static char		RcsId[] = "$Revision$";
 /* Element selection information */
 #define POINT1_NPOINTS 10
 
+/* Chunked dataset information */
+#define DATASETNAME "ChunkArray" 
+#define NX_SUB   87                     /* hyperslab dimensions */ 
+#define NY_SUB   61 
+#define NZ_SUB  181 
+#define NX       87                     /* output buffer dimensions */ 
+#define NY       61 
+#define NZ      181 
+#define RANK_F     3                    /* File dataspace rank */
+#define RANK_M     3                    /* Memory dataspace rank */
+#define X    87                         /* dataset dimensions */
+#define Y    61   
+#define Z   181  
+#define CHUNK_X   87                    /* chunk dimensions */
+#define CHUNK_Y   61    
+#define CHUNK_Z  181    
+
 /* Location comparison function */
 int compare_size_t(const void *s1, const void *s2);
 
@@ -2810,6 +2827,238 @@ printf("random I/O, after H5Dread()\n");
 
 /****************************************************************
 **
+**  test_select_hyper_chunk(): Test basic H5S (dataspace) selection code.
+**      Tests large hyperslab selection in chunked dataset
+** 
+****************************************************************/
+static void 
+test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
+{
+    hsize_t     dimsf[3];              /* dataset dimensions */
+    hsize_t     chunk_dimsf[3] = {CHUNK_X, CHUNK_Y, CHUNK_Z};    /* chunk sizes */
+    short      *data;                   /* data to write */
+    short      *tmpdata;                /* data to write */
+
+    /* 
+     * Data  and output buffer initialization. 
+     */
+    hid_t       file, dataset;         /* handles */
+    hid_t       dataspace;   
+    hid_t       memspace; 
+    hid_t       plist;                 
+    hsize_t     dimsm[3];              /* memory space dimensions */
+    hsize_t     dims_out[3];           /* dataset dimensions */      
+    herr_t      status;                             
+
+    short         *data_out; /* output buffer */
+    short         *tmpdata_out; /* output buffer */
+   
+    hsize_t     count[3];              /* size of the hyperslab in the file */
+    hssize_t    offset[3];             /* hyperslab offset in the file */
+    hsize_t     count_out[3];          /* size of the hyperslab in memory */
+    hssize_t    offset_out[3];         /* hyperslab offset in memory */
+    int         i, j, k, status_n, rank;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Hyperslab I/O on Large Chunks\n"));
+
+    /* Allocate the transfer buffers */
+    data = (short*)malloc(sizeof(short)*X*Y*Z);
+    data_out = (short*)calloc(NX*NY*NZ,sizeof(short));
+ 
+    /* 
+     * Data buffer initialization. 
+     */
+    tmpdata = data;
+    for (j = 0; j < X; j++)
+	for (i = 0; i < Y; i++)
+	    for (k = 0; k < Z; k++)
+                *tmpdata++ =  (short)((k+1)%256);
+
+    /*
+     * Create a new file using H5F_ACC_TRUNC access,
+     * the default file creation properties, and the default file
+     * access properties.
+     */
+    file = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_plist);
+    CHECK(file, FAIL, "H5Fcreate");
+
+    /*
+     * Describe the size of the array and create the data space for fixed
+     * size dataset. 
+     */
+    dimsf[0] = X;
+    dimsf[1] = Y;
+    dimsf[2] = Z;
+    dataspace = H5Screate_simple (RANK_F, dimsf, NULL); 
+    CHECK(dataspace, FAIL, "H5Screate_simple");
+
+    /*
+     * Create a new dataset within the file using defined dataspace and
+     * chunking properties.
+     */
+    plist = H5Pcreate (H5P_DATASET_CREATE);
+    CHECK(plist, FAIL, "H5Pcreate");
+    status = H5Pset_chunk (plist, RANK_F, chunk_dimsf);
+    CHECK(status, FAIL, "H5Pset_chunk");
+    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, plist); 
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* 
+     * Define hyperslab in the dataset. 
+     */
+    offset[0] = 0;
+    offset[1] = 0;
+    offset[2] = 0;
+    count[0]  = NX_SUB;
+    count[1]  = NY_SUB;
+    count[2]  = NZ_SUB;
+    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL, 
+                                  count, NULL);
+    CHECK(status, FAIL, "H5Sselect_hyperslab");
+
+    /*
+     * Define the memory dataspace.
+     */
+    dimsm[0] = NX;
+    dimsm[1] = NY;
+    dimsm[2] = NZ;
+    memspace = H5Screate_simple (RANK_M, dimsm, NULL);   
+    CHECK(memspace, FAIL, "H5Screate_simple");
+
+    /* 
+     * Define memory hyperslab. 
+     */
+    offset_out[0] = 0;
+    offset_out[1] = 0;
+    offset_out[2] = 0;
+    count_out[0]  = NX_SUB;
+    count_out[1]  = NY_SUB;
+    count_out[2]  = NZ_SUB;
+    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL, 
+                                  count_out, NULL);
+    CHECK(status, FAIL, "H5Sselect_hyperslab");
+
+    /*
+     * Write the data to the dataset using hyperslabs
+     */
+    status = H5Dwrite (dataset, H5T_NATIVE_SHORT, memspace, dataspace,
+                      xfer_plist, data);
+    CHECK(status, FAIL, "H5Dwrite");
+
+    /*
+     * Close/release resources.
+     */
+    status=H5Pclose (plist);
+    CHECK(status, FAIL, "H5Pclose");
+    status=H5Sclose (dataspace);
+    CHECK(status, FAIL, "H5Sclose");
+    status=H5Sclose (memspace);
+    CHECK(status, FAIL, "H5Sclose");
+    status=H5Dclose (dataset);
+    CHECK(status, FAIL, "H5Dclose");
+    status=H5Fclose (file);
+    CHECK(status, FAIL, "H5Fclose");
+ 
+
+/*************************************************************  
+
+  This reads the hyperslab from the test.h5 file just 
+  created, into a 3-dimensional plane of the 3-dimensional 
+  array.
+
+ ************************************************************/  
+ 
+    /*
+     * Open the file and the dataset.
+     */
+    file = H5Fopen (FILENAME, H5F_ACC_RDONLY, fapl_plist);
+    CHECK(file, FAIL, "H5Fopen");
+    dataset = H5Dopen (file, DATASETNAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    dataspace = H5Dget_space (dataset);    /* dataspace handle */
+    CHECK(dataspace, FAIL, "H5Dget_space");
+    rank      = H5Sget_simple_extent_ndims (dataspace);
+    VERIFY(rank, 3, "H5Sget_simple_extent_ndims");
+    status_n  = H5Sget_simple_extent_dims (dataspace, dims_out, NULL);
+    CHECK(status_n, FAIL, "H5Sget_simple_extent_dims");
+    VERIFY(dims_out[0], dimsf[0], "Dataset dimensions");
+    VERIFY(dims_out[1], dimsf[1], "Dataset dimensions");
+    VERIFY(dims_out[2], dimsf[2], "Dataset dimensions");
+
+    /* 
+     * Define hyperslab in the dataset. 
+     */
+    offset[0] = 0;
+    offset[1] = 0;
+    offset[2] = 0;
+    count[0]  = NX_SUB;
+    count[1]  = NY_SUB;
+    count[2]  = NZ_SUB;
+    status = H5Sselect_hyperslab (dataspace, H5S_SELECT_SET, offset, NULL, 
+                                  count, NULL);
+    CHECK(status, FAIL, "H5Sselect_hyperslab");
+
+    /*
+     * Define the memory dataspace.
+     */
+    dimsm[0] = NX;
+    dimsm[1] = NY;
+    dimsm[2] = NZ;
+    memspace = H5Screate_simple (RANK_M, dimsm, NULL);   
+    CHECK(memspace, FAIL, "H5Screate_simple");
+
+    /* 
+     * Define memory hyperslab. 
+     */
+    offset_out[0] = 0;
+    offset_out[1] = 0;
+    offset_out[2] = 0;
+    count_out[0]  = NX_SUB;
+    count_out[1]  = NY_SUB;
+    count_out[2]  = NZ_SUB;
+    status = H5Sselect_hyperslab (memspace, H5S_SELECT_SET, offset_out, NULL, 
+                                  count_out, NULL);
+    CHECK(status, FAIL, "H5Sselect_hyperslab");
+
+    /*
+     * Read data from hyperslab in the file into the hyperslab in 
+     * memory and display.
+     */
+    status = H5Dread (dataset, H5T_NATIVE_SHORT, memspace, dataspace,
+                      xfer_plist, data_out);
+    CHECK(status, FAIL, "H5Dread");
+
+    /* Compare data written with data read in */
+    tmpdata = data;
+    tmpdata_out = data_out;
+    for (j = 0; j < X; j++)
+	for (i = 0; i < Y; i++)
+	    for (k = 0; k < Z; k++,tmpdata++,tmpdata_out++) {
+                if(*tmpdata!=*tmpdata_out) {
+                    num_errs++;
+                    printf("Error! j=%d, i=%d, k=%d, *tmpdata=%x, *tmpdata_out=%x\n",j,i,k,(unsigned)*tmpdata,(unsigned)*tmpdata_out);
+                } /* end if */
+            } /* end for */
+
+    /*
+     * Close and release resources.
+     */
+    status=H5Dclose (dataset);
+    CHECK(status, FAIL, "H5Dclose");
+    status=H5Sclose (dataspace);
+    CHECK(status, FAIL, "H5Sclose");
+    status=H5Sclose (memspace);
+    CHECK(status, FAIL, "H5Sclose");
+    status=H5Fclose (file);
+    CHECK(status, FAIL, "H5Fclose");
+    free (data);
+    free (data_out);
+}   /* test_select_hyper_chunk() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 ** 
 ****************************************************************/
@@ -2817,6 +3066,11 @@ void
 test_select(void)
 {
     hid_t plist_id;     /* Property list for reading random hyperslabs */
+    hid_t fapl;         /* Property list accessing the file */
+    int mdc_nelmts;     /* Metadata number of elements */
+    int rdcc_nelmts;    /* Raw data number of elements */
+    size_t rdcc_nbytes; /* Raw data number of bytes */
+    double rdcc_w0;     /* Raw data write percentage */
     herr_t	ret;	/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -2849,6 +3103,30 @@ test_select(void)
     CHECK(ret, FAIL, "H5Pset_buffer");
 
     test_select_hyper_union_random_5d(plist_id);  /* Test hyperslab union code for random 5-D hyperslabs */
+
+    /* Create a dataset transfer property list */
+    fapl=H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    /* Get the default file access properties for caching */
+    ret=H5Pget_cache(fapl,&mdc_nelmts,&rdcc_nelmts,&rdcc_nbytes,&rdcc_w0);
+    CHECK(ret, FAIL, "H5Pget_cache");
+
+    /* Increase the size of the raw data cache */
+    rdcc_nbytes=10*1024*1024;
+
+    /* Set the file access properties for caching */
+    ret=H5Pset_cache(fapl,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0);
+    CHECK(ret, FAIL, "H5Pset_cache");
+
+    /* Test reading in a large hyperslab with a chunked dataset */
+    test_select_hyper_chunk(fapl,H5P_DEFAULT);
+
+    /* Test reading in a large hyperslab with a chunked dataset a small amount at a time */
+    test_select_hyper_chunk(fapl,plist_id);
+
+    ret=H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     ret=H5Pclose(plist_id);
     CHECK(ret, FAIL, "H5Pclose");
