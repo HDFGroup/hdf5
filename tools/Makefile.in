@@ -10,7 +10,7 @@
 CPPFLAGS=-I../src -I. @CPPFLAGS@
 
 # Tools test targets.
-#TESTS=testh5dump.sh
+TESTS=testh5dump
 
 # These are our main targets:
 PROGS=h5debug h5import h5ls h5repart h5dump
@@ -41,5 +41,8 @@ h5repart: h5repart.o $(LIB) ../src/libhdf5.a
 
 h5dump: h5dump.o h5dumputil.o $(LIB) ../src/libhdf5.a
 	$(CC) $(CFLAGS) -o $@ h5dump.o h5dumputil.o $(LIBS)
+
+testh5dump: testh5dump.sh
+	cp testh5dump.sh $@
 
 @CONCLUDE@
