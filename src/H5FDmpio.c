@@ -731,6 +731,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     }
     
     /* Check for debug commands in the info parameter */
+#if 0
+    /* Temporary KLUGE rky 2000-06-29, because fa->info is invalid (-1)*/
     {
 	char debug_str[128];
         int infoerr, flag, i;
@@ -747,6 +749,8 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
             }
         }
     }
+    /* END Temporary KLUGE rky 2000-06-29, because fa->info is invalid (-1) */
+#endif
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
@@ -1264,6 +1268,10 @@ H5FD_mpio_read(H5FD_t *_file, hid_t dxpl_id, haddr_t addr, hsize_t size,
  *		a racing condition (that other processes try to
  *		read the file before p0 finishes writing) and also
  *		allows all processes to report the same ret_value.
+ *
+ *		Kim Yates, Pat Weidhaas,  2000-09-26
+ *		Move block of coding where only p0 writes after the
+ *              MPI_File_set_view call. 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1303,23 +1311,6 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
         fprintf(stdout, "in H5FD_mpio_write  mpi_off=%ld  size_i=%d\n",
                 (long)mpi_off, size_i);
 #endif
-
-    /* Only p0 will do the actual write if all procs in comm write same data */
-    allsame = H5FD_mpio_tas_allsame(_file, FALSE);
-    if (allsame && H5_mpi_1_metawrite_g) {
-        if (MPI_SUCCESS != MPI_Comm_rank(file->comm, &mpi_rank))
-            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
-        if (mpi_rank != 0) {
-#ifdef H5FDmpio_DEBUG
-            if (H5FD_mpio_Debug[(int)'w']) {
-                fprintf(stdout,
-		    "  proc %d: in H5FD_mpio_write (write omitted)\n",
-		    mpi_rank );
-            }
-#endif
-            HGOTO_DONE(SUCCEED) /* skip the actual write */
-        }
-    }
 
     /* Obtain the data transfer properties */
     if (H5P_DEFAULT==dxpl_id || H5FD_MPIO!=H5Pget_driver(dxpl_id)) {
@@ -1372,6 +1363,23 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id/*unused*/, 
      */
     file->old_use_types = use_types_this_time;
     file->use_types = 0;
+
+    /* Only p0 will do the actual write if all procs in comm write same data */
+    allsame = H5FD_mpio_tas_allsame(_file, FALSE);
+    if (allsame && H5_mpi_1_metawrite_g) {
+        if (MPI_SUCCESS != MPI_Comm_rank(file->comm, &mpi_rank))
+            HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, FAIL, "MPI_Comm_rank failed");
+        if (mpi_rank != 0) {
+#ifdef H5FDmpio_DEBUG
+            if (H5FD_mpio_Debug[(int)'w']) {
+                fprintf(stdout,
+		    "  proc %d: in H5FD_mpio_write (write omitted)\n",
+		    mpi_rank );
+            }
+#endif
+            HGOTO_DONE(SUCCEED) /* skip the actual write */
+        }
+    }
 
     /* Write the data. */
     assert(H5FD_MPIO_INDEPENDENT==dx->xfer_mode || H5FD_MPIO_COLLECTIVE==dx->xfer_mode);
