@@ -79,6 +79,9 @@ struct space4_struct {
     char c2;
  } space4_data={'v',987123,-3.14,'g'}; /* Test data for 4th dataspace */
 
+/* Null dataspace */
+int space5_data = 7;
+
 /*-------------------------------------------------------------------------
  *  
  * Function:	test_h5s_basic
@@ -348,6 +351,56 @@ test_h5s_scalar_read(void)
 
 /*-------------------------------------------------------------------------
  *  
+ * Function:	test_h5s_null
+ *
+ * Purpose:	Test null H5S (dataspace) code
+ *
+ * Return:	none
+ *
+ * Programmer:	Raymond Lu (using C version)
+ *              May 18, 2004
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void 
+test_h5s_null(void)
+{
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Null Dataspace Writing\n"));
+
+    try
+    {
+	// Create file
+	H5File fid1(DATAFILE, H5F_ACC_TRUNC);
+
+	/* Create scalar dataspace */
+	DataSpace sid1(H5S_NULL);
+
+	//n = H5Sget_simple_extent_npoints(sid1);
+	hssize_t	n;	 	/* Number of dataspace elements */
+	n = sid1.getSimpleExtentNpoints();
+	VERIFY(n, 0, "DataSpace::getSimpleExtentNpoints");
+
+	// Create a dataset 
+	DataSet dataset = fid1.createDataSet("Dataset1", PredType::NATIVE_UINT,sid1);
+
+        // Try to write nothing to the dataset
+	dataset.write(&space5_data, PredType::NATIVE_INT);
+
+        // Read the data.  Make sure no change to the buffer
+	dataset.read(&space5_data, PredType::NATIVE_INT);
+	VERIFY(space5_data, 7, "H5Dread");
+    } // end of try block
+    catch (Exception error)
+    {
+	CHECK(FAIL, FAIL, error.getCFuncName());
+    }
+}				/* test_h5s_null() */
+
+/*-------------------------------------------------------------------------
+ *  
  * Function:	test_h5s_compound_scalar_write
  *
  * Purpose:	Test scalar H5S (dataspace) writing for compound 
@@ -507,7 +560,8 @@ test_h5s(void)
 
     test_h5s_basic();		/* Test basic H5S code */
     test_h5s_scalar_write();	/* Test scalar H5S writing code */
-    test_h5s_scalar_read();		/* Test scalar H5S reading code */
+    test_h5s_scalar_read();	/* Test scalar H5S reading code */
+    test_h5s_null();		/* Test null H5S code  */
     test_h5s_compound_scalar_write();	/* Test compound datatype scalar H5S writing code */
     test_h5s_compound_scalar_read();	/* Test compound datatype scalar H5S reading code */
 } /* test_h5s() */
