@@ -1358,6 +1358,16 @@
 ./tools/testfiles/tstring.ddl
 ./tools/testfiles/tuserfilter.ddl
 ./tools/testfiles/tszip.ddl
+./tools/testfiles/tallfilters.ddl
+./tools/testfiles/tfillalloc.ddl
+./tools/testfiles/tfillincr.ddl
+./tools/testfiles/tfilllate.ddl
+./tools/testfiles/tstringe.ddl
+./tools/testfiles/tindicesyes.ddl
+./tools/testfiles/tindicesno.ddl
+
+
+
 
 
 # Expected output from h5ls tests

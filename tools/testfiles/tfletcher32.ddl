@@ -5,9 +5,10 @@ HDF5 "tfilters.h5" {
 DATASET "fletcher32" {
    DATATYPE  H5T_STD_I32LE
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
-   STORAGE_LAYOUT CHUNKED {
-      SIZE 816 ( 10, 5 )
-   }
+   STORAGE_LAYOUT {
+      CHUNKED ( 10, 5 )
+      SIZE 816
+    }
    FILTERS {
       CHECKSUM FLETCHER32
    }

@@ -6,7 +6,8 @@ DATASET "compact" {
 COMMENT "This is a dataset with compact storage"
    DATATYPE  H5T_STD_I32LE
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
-   STORAGE_LAYOUT COMPACT {
+   STORAGE_LAYOUT {
+      COMPACT
       SIZE 800
    }
    FILLVALUE {

@@ -4452,6 +4452,7 @@ static void gent_filters()
  hid_t    sid1; /* dataspace ID */
  hid_t    tid;  /* datatype ID */
  hid_t    did;  /* dataset ID */
+ hid_t    gid;  /* group ID */
 #if defined (H5_HAVE_FILTER_SZIP)
  unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
  unsigned szip_pixels_per_block=4;
@@ -4462,21 +4463,19 @@ static void gent_filters()
  hsize_t  dims2[1]={2};
  hvl_t    buf2[2];
  hsize_t  dims3[1]={1};
- char     buf3[]={"this is\n a string \twith three\n newline\n escape \tcharacters"};
+ char     buf3[]={"quote \"  backspace\b form feed\f new line\n tab\t new line\n carriage return\r"};
  hsize_t  dims4[1]={6};
  char     buf4[6]={"abcdef"};
- hobj_ref_t buf5[5]; 
- hsize_t  dims5[1]={5};
+ hobj_ref_t buf5[1]; 
+ hsize_t  dims5[1]={1};
  int      i, j, n, ret, val;
  int      fillval = -99;
-
 
  typedef enum 
  {
   E_RED,
   E_GREEN
  } e_t;
-
 
  for (i=n=0; i<DIM1; i++){
   for (j=0; j<DIM2; j++){
@@ -4664,7 +4663,7 @@ static void gent_filters()
 #endif 
  assert(ret>=0);
 
- H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
+ ret=H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
  assert(ret>=0);
 
  ret=make_dset(fid,"myfilter",sid,dcpl,buf1);
@@ -4674,43 +4673,96 @@ static void gent_filters()
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
 
+
+
 /*-------------------------------------------------------------------------
  * make an external dataset
  *-------------------------------------------------------------------------
  */
  make_external(fid);
 
- /*-------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
  * make datasets with fill value combinations
+ * H5D_FILL_TIME_IFSET
  *-------------------------------------------------------------------------
  */
-
- 
- ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
- assert(ret>=0);
-
- ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
  assert(ret>=0);
 
  ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill_early",sid,dcpl,buf1);
+ ret=make_dset(fid,"fill_time_ifset",sid,dcpl,buf1);
  assert(ret>=0);
 
+/*-------------------------------------------------------------------------
+ * H5D_FILL_TIME_ALLOC
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+ 
+ ret=make_dset(fid,"fill_time_alloc",sid,dcpl,buf1);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_FILL_TIME_NEVER
+ *-------------------------------------------------------------------------
+ */
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill_never",sid,dcpl,buf1);
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
  assert(ret>=0);
+
+ ret=make_dset(fid,"fill_time_never",sid,dcpl,buf1);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_ALLOC_TIME_EARLY 
+ *-------------------------------------------------------------------------
+ */
 
  ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET);
  assert(ret>=0);
 
- ret=make_dset(fid,"fill_ifset",sid,dcpl,buf1);
+ ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
  assert(ret>=0);
 
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
 
+ ret=make_dset(fid,"alloc_time_early",sid,dcpl,buf1);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_ALLOC_TIME_INCR    
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"alloc_time_incr",sid,dcpl,buf1);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
+ * H5D_ALLOC_TIME_LATE     
+ *-------------------------------------------------------------------------
+ */
+ ret=H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
+ assert(ret>=0);
+
+ ret=H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+ assert(ret>=0);
+
+ ret=make_dset(fid,"alloc_time_late",sid,dcpl,buf1);
+ assert(ret>=0);
 
 /*-------------------------------------------------------------------------
  * commit a H5G_TYPE type with a comment
@@ -4773,7 +4825,7 @@ static void gent_filters()
  assert(ret>=0);
 
 /*-------------------------------------------------------------------------
- * string
+ * string with escaped characters
  *-------------------------------------------------------------------------
  */
 
@@ -4781,6 +4833,7 @@ static void gent_filters()
  ret=H5Tset_size(tid, sizeof(buf3));
  assert(ret>=0);
  write_dset(fid,1,dims3,"string",tid,buf3);
+ assert(ret>=0);
  ret=H5Tclose(tid);
  assert(ret>=0);
 
@@ -4791,21 +4844,22 @@ static void gent_filters()
  write_dset(fid,1,dims4,"char",H5T_NATIVE_CHAR,buf4);
 
 /*-------------------------------------------------------------------------
+ * a group and a link
+ *-------------------------------------------------------------------------
+ */
+ gid  = H5Gcreate(fid,"g1",0);
+ H5Glink (gid, H5G_LINK_SOFT, "somevalue", "slink");
+ write_dset(gid,1,dims4,"mydset",H5T_NATIVE_CHAR,buf4);
+ ret  = H5Gclose(gid);
+ assert(ret>=0);
+
+/*-------------------------------------------------------------------------
  * reference
  *-------------------------------------------------------------------------
  */
- ret=H5Rcreate(&buf5[0],fid,"compact",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[1],fid,"myvlen",H5R_OBJECT,-1);
- assert(ret>=0);
-  ret=H5Rcreate(&buf5[2],fid,"compact",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[3],fid,"myvlen",H5R_OBJECT,-1);
- assert(ret>=0);
- ret=H5Rcreate(&buf5[4],fid,"contiguous",H5R_OBJECT,-1);
+ ret=H5Rcreate(&buf5[0],fid,"g1/mydset",H5R_OBJECT,-1);
  assert(ret>=0);
  write_dset(fid,1,dims5,"reference",H5T_STD_REF_OBJ,buf5);
-
  
 /*-------------------------------------------------------------------------
  * close

@@ -10,10 +10,11 @@ usage: h5dump [OPTIONS] file
      -A                   Print the header and value of attributes; data of datasets is not displayed
      -i, --object-ids     Print the object ids
      -r, --string         Print 1-byte integer datasets as ASCII
-     -e,                  Interpret carriage return (\n) as new line
+     -e,                  Escape non printing characters
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
+     -y                   Do not print array indices with the data
      -p,   --properties   Print dataset filters, storage layout and fill value
      -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
@@ -21,7 +22,7 @@ usage: h5dump [OPTIONS] file
      -o F, --output=F     Output raw data into file F
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
-     -x, --xml            Output in XML using Schema (default)
+     -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML

@@ -211,6 +211,9 @@ TOOLTEST tchar1.ddl -r tchar.h5
 # Missing file name
 TOOLTEST tnofilename.ddl
 
+
+
+
 # test for super block
 TOOLTEST tboot.ddl -H -B -d compact tfilters.h5
 
@@ -221,22 +224,31 @@ TOOLTEST tcontents.ddl -n tfilters.h5
 # compact
 TOOLTEST tcompact.ddl -H -p -d compact tfilters.h5
 # contiguous
-TOOLTEST tcontiguos.ddl -H -p -d contiguos tfilters.h5
+TOOLTEST tcontiguos.ddl -H -p -d contiguous tfilters.h5
 # chunked
 TOOLTEST tchunked.ddl -H -p -d chunked tfilters.h5
 # external 
 TOOLTEST texternal.ddl -H -p -d external tfilters.h5
 
 # Fill values
-TOOLTEST tfillearly.ddl -H -p -d fill_early tfilters.h5
-TOOLTEST tfillnever.ddl -H -p -d fill_never tfilters.h5
-TOOLTEST tfillifset.ddl -H -p -d fill_ifset tfilters.h5
+TOOLTEST tfillifset.ddl -H -p -d fill_time_ifset tfilters.h5
+TOOLTEST tfillalloc.ddl -H -p -d fill_time_alloc tfilters.h5
+TOOLTEST tfillnever.ddl -H -p -d fill_time_never tfilters.h5
+TOOLTEST tfillearly.ddl -H -p -d alloc_time_early tfilters.h5
+TOOLTEST tfillincr.ddl  -H -p -d alloc_time_incr tfilters.h5
+TOOLTEST tfilllate.ddl  -H -p -d alloc_time_late tfilters.h5
+
 
 # references , print path
 TOOLTEST treference.ddl -d reference  tfilters.h5
 
-# string , print new lines
-TOOLTEST tstring.ddl -e -d string  tfilters.h5
+# escape/not escape non printable characters
+TOOLTEST tstringe.ddl -e -d string  tfilters.h5
+TOOLTEST tstring.ddl -d string  tfilters.h5
+
+# array indices print/not print
+TOOLTEST tindicesyes.ddl -d compact  tfilters.h5
+TOOLTEST tindicesno.ddl -y -d compact  tfilters.h5
 
 
 # tests for filters
@@ -268,8 +280,15 @@ if test $USE_FILTER_FLETCHER32 != "yes"; then
 else
 	TOOLTEST tfletcher32.ddl $option
 fi
+# all
+option="-H -p -d all  tfilters.h5"
+if test $USE_FILTER_FLETCHER32 != "yes" -o  $USE_FILTER_SZIP != "yes" -o  $USE_FILTER_DEFLATE != "yes" -o  $USE_FILTER_SHUFFLE != "yes"; then SKIP $option
+else
+ TOOLTEST tallfilters.ddl $option
+fi
 # user defined
-TOOLTEST tuserfilter.ddl -H  -d myfilter  tfilters.h5
+TOOLTEST tuserfilter.ddl -H  -p -d myfilter  tfilters.h5
+
 		  
 		  
 
