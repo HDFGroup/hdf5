@@ -431,7 +431,7 @@ int main(int argc, char **argv)
 	MPI_BANNER("collective group and dataset write ...");
         collective_group_write(filenames[6], ngroups);
         if (doread) {
-       	    MPI_BANNER("indepenent group and dataset read ...");
+       	    MPI_BANNER("independent group and dataset read ...");
             independent_group_read(filenames[6], ngroups);
         }
     }
