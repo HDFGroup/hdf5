@@ -29,13 +29,6 @@
 static void aux_objinsert_filter(pack_info_t *obj,
                                  filter_info_t filt)
 {
- int j;
-
- for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
- {
-  obj->filter[j].filtn = -1;
- }
-
  obj->nfilters=1;
  obj->filter[0]=filt;
 
@@ -101,6 +94,62 @@ int filter_this(const char* name,    /* object name from traverse list */
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: print_filters
+ *
+ * Purpose: print the filters in DCPL
+ *
+ * Return: 0, ok, -1 no
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 19, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int print_filters(hid_t dcpl_id)   
+{
+ int          nfilters;       /* number of filters */
+ unsigned     filt_flags;     /* filter flags */
+ H5Z_filter_t filtn;          /* filter identification number */
+ unsigned     cd_values[20];  /* filter client data values */
+ size_t       cd_nelmts;      /* filter client number of values */
+ size_t       cd_num;         /* filter client data counter */
+ char         f_name[256];    /* filter/file name */
+ char         s[64];          /* temporary string buffer */
+ int          i;
+
+ /* get information about filters */
+ if ((nfilters = H5Pget_nfilters(dcpl_id))<0) 
+  return -1;
+ 
+ for (i=0; i<nfilters; i++) 
+ {
+  cd_nelmts = NELMTS(cd_values);
+  filtn = H5Pget_filter(dcpl_id, 
+   i, 
+   &filt_flags, 
+   &cd_nelmts,
+   cd_values, 
+   sizeof(f_name), 
+   f_name);
+  
+  f_name[sizeof(f_name)-1] = '\0';
+  sprintf(s, "Filter-%d:", i);
+  printf("    %-10s %s-%u %s {", s,
+   f_name[0]?f_name:"method",
+   (unsigned)filtn,
+   filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
+  for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
+   printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
+  }
+  printf("}\n");
+ } 
+ 
+ return 0;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: apply_filters
@@ -127,9 +176,7 @@ int apply_filters(hid_t dcpl_id,
  H5Z_filter_t filtn;          /* filter identification number */
  unsigned     cd_values[20];  /* filter client data values */
  size_t       cd_nelmts;      /* filter client number of values */
- size_t       cd_num;         /* filter client data counter */
  char         f_name[256];    /* filter/file name */
- char         s[64];          /* temporary string buffer */
  int          i, j;
  unsigned     aggression;     /* the deflate level */
  unsigned     szip_options_mask=H5_SZIP_NN_OPTION_MASK;
@@ -149,22 +196,7 @@ int apply_filters(hid_t dcpl_id,
    cd_values, 
    sizeof(f_name), 
    f_name);
-
-  if  (options->verbose)
-  {
-   f_name[sizeof(f_name)-1] = '\0';
-   sprintf(s, "Filter-%d:", i);
-   printf("    %-10s %s-%u %s {", s,
-    f_name[0]?f_name:"method",
-    (unsigned)filtn,
-    filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-   for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
-    printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
-   }
-   printf("}\n");
-  }
  } 
-
 
 /* 
  the type of filter and additional parameter 

@@ -22,8 +22,8 @@ static void usage(void);
 
 /*
 Examples of use:
--v -i file1.h5 -o file2.h5 -t "dataset:GZIP 6" -c "dataset:2x2"
--v -i file1.h5 -o file2.h5 -t "GZIP 6" 
+-v -i file1.h5 -o file2.h5 -f "dataset:GZIP 6" -l "dataset:2x2"
+-v -i file1.h5 -o file2.h5 -f "GZIP 6" 
 */
 
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-v") == 0) {       
    options.verbose = 1;
   }
-  else if (strcmp(argv[i], "-t") == 0) {  
+  else if (strcmp(argv[i], "-f") == 0) {  
    
    /* add the -t option */
    h5repack_addfilter(argv[i+1],&options);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
    /* jump to next */
    ++i;
   }
-  else if (strcmp(argv[i], "-c") == 0) {       
+  else if (strcmp(argv[i], "-l") == 0) {       
    
    /* parse the -c option */
    h5repack_addlayout(argv[i+1],&options);

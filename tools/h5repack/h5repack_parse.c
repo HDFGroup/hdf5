@@ -399,6 +399,14 @@ obj_list_t* parse_layout(const char *str,
  *-------------------------------------------------------------------------
  */
    k=0; 
+
+   if (j>(int)len)
+   {
+    if (obj_list) free(obj_list);
+    printf("Parse layout error: <%s> Chunk dimensions missing\n",str);
+    exit(1);
+   }
+
    for ( i=j, c_index=0; i<len; i++)
    {
     c = str[i];

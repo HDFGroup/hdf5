@@ -178,8 +178,10 @@ int h5repack_addlayout(const char* str,
   
  obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
  int         n_objs;             /*number of objects in the current -t or -c option entry */
- int         j;
  pack_info_t pack;               /*info about layout to extract from parse */
+ int         j;
+
+ init_packobject(&pack);
 
  if (options->all_layout==1){
   printf("Error: Invalid layout input: all option \

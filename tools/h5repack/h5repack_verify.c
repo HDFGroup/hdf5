@@ -259,6 +259,7 @@ int h5repack_verify(const char *fname,
   */
     if (options->all_layout==1){
      pack_info_t pack;
+     init_packobject(&pack);
      pack.layout=options->layout_g;
      pack.chunk=options->chunk_g;
      if (has_layout(dcpl_id,&pack)==0)

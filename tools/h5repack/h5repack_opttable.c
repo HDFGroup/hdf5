@@ -17,6 +17,36 @@
 #include "h5repack.h"
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: init_packobject
+ *
+ * Purpose: initialize a pack_info_t structure
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void init_packobject(pack_info_t *obj)
+{
+ int j, k;
+ 
+ strcpy(obj->path,"\0");
+ for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
+ {
+  obj->filter[j].filtn  = -1;
+  for ( k=0; k<CDVALUES; k++) 
+   obj->filter[j].cd_values[k] = -1;
+ }
+ obj->chunk.rank = -1;
+ obj->refobj_id = -1;
+ obj->layout = -1;
+ obj->nfilters = 0;
+ 
+ 
+}
+
 /*-------------------------------------------------------------------------
  * Function: aux_tblinsert_filter
  *
@@ -28,8 +58,8 @@
  */
 
 static void aux_tblinsert_filter(pack_opttbl_t *table, 
-                              int I,
-                              filter_info_t filt)
+                                 int I,
+                                 filter_info_t filt)
 {
  if (table->objs[ I ].nfilters<H5_REPACK_MAX_NFILTERS)
  {

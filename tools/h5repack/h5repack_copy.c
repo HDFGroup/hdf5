@@ -231,6 +231,9 @@ int do_copy_file(hid_t fidin,
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
 
+   if (options->verbose)
+    print_filters(dcpl_id);
+
 
 /*-------------------------------------------------------------------------
  * object references are a special case
@@ -243,6 +246,7 @@ int do_copy_file(hid_t fidin,
 
     /* the information about the object to be filtered/"layouted" */
     pack_info_t obj;
+    init_packobject(&obj);
 
     /* get the storage size of the input dataset */
     dsize_in=H5Dget_storage_size(dset_in);
@@ -278,6 +282,13 @@ int do_copy_file(hid_t fidin,
      */
     if (filter_this(travt->objs[i].name,options,&obj))
     {
+     /* filters require CHUNK layout; if we do not have one define a default */
+     if (obj.chunk.rank==0)
+     {
+      obj.chunk.rank=rank;
+      for (j=0; j<rank; j++) 
+       obj.chunk.chunk_lengths[j] = dims[j] / 2;
+     }
      if (apply_filters(dcpl_id,H5Tget_size(mtype_id),options,&obj)<0)
       continue;
     }
