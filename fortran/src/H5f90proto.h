@@ -608,10 +608,10 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen);
 #   define nh5pget_hyper_cache_c         FNAME(H5PGET_HYPER_CACHE_C)
 #   define nh5pget_btree_ratios_c         FNAME(H5PGET_BTREE_RATIOS_C)
 #   define nh5pset_btree_ratios_c         FNAME(H5PSET_BTREE_RATIOS_C)
-#   define nh5pset_mpi_c         FNAME(H5PSET_MPI_C)
-#   define nh5pget_mpi_c         FNAME(H5PGET_MPI_C)
-#   define nh5pset_xfer_c        FNAME(H5PSET_XFER_C)
-#   define nh5pget_xfer_c        FNAME(H5PGET_XFER_C)
+#   define nh5pset_fapl_mpio_c         FNAME(H5PSET_FAPL_MPIO_C)
+#   define nh5pget_fapl_mpio_c         FNAME(H5PGET_FAPL_MPIO_C)
+#   define nh5pset_dxpl_mpio_c        FNAME(H5PSET_DXPL_MPIO_C)
+#   define nh5pget_dxpl_mpio_c        FNAME(H5PGET_DXPL_MPIO_C)
 
 #else
 #   define nh5pcreate_c       FNAME(h5pcreate_c)
@@ -665,10 +665,10 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen);
 #   define nh5pget_hyper_cache_c         FNAME(h5pget_hyper_cache_c)
 #   define nh5pget_btree_ratios_c         FNAME(h5pget_btree_ratios_c)
 #   define nh5pset_btree_ratios_c         FNAME(h5pset_btree_ratios_c)
-#   define nh5pset_mpi_c         FNAME(h5pset_mpi_c)
-#   define nh5pget_mpi_c         FNAME(h5pget_mpi_c)
-#   define nh5pset_xfer_c        FNAME(h5pset_xfer_c)
-#   define nh5pget_xfer_c        FNAME(h5pget_xfer_c)
+#   define nh5pset_fapl_mpio_c         FNAME(h5pset_fapl_mpio_c)
+#   define nh5pget_fapl_mpio_c         FNAME(h5pget_fapl_mpio_c)
+#   define nh5pset_dxpl_mpio_c        FNAME(h5pset_dxpl_mpio_c)
+#   define nh5pget_dxpl_mpio_c        FNAME(h5pget_dxpl_mpio_c)
 
 #endif
 #endif
@@ -781,13 +781,13 @@ nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
 extern int_f 
 nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 extern int_f
-nh5pget_mpi_c(hid_t_f *prp_id, int_f* comm, int_f* info);
+nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
 extern int_f
-nh5pset_mpi_c(hid_t_f *prp_id, int_f* comm, int_f* info);
+nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
 extern int_f
-nh5pget_xfer_c(hid_t_f *prp_id, int_f* data_xfer_mode);
+nh5pget_dxpl_mpio_rc(hid_t_f *prp_id, int_f* data_xfer_mode);
 extern int_f
-nh5pset_xfer_c(hid_t_f *prp_id, int_f* data_xfer_mode);
+nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 
 /*
  * Functions frome H5Rf.c 

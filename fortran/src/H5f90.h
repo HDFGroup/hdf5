@@ -75,8 +75,7 @@
 #define   H5P_MOUNT_F           4
 
 /* Constants used in H5Pf_parallel.c and H5Pff_parallel.f90 files */
-#define H5D_XFER_INDEPENDENT_F   0
-#define H5D_XFER_COLLECTIVE_F    1 
-#define H5D_XFER_DFLT_F          2 
+#define H5FD_MPIO_INDEPENDENT_F   0
+#define H5FD_MPIO_COLLECTIVE_F    1 
 
 #endif /* _H5f90_H */
