@@ -14,7 +14,7 @@ if test "X$srcdir" = X; then
 fi
 mkdir testfiles >/dev/null 2>&1
 
-INDIR="$srcdir/testfiles"
+SRCDIR="$srcdir/testfiles"
 OUTDIR="./testfiles"
 
 nerrors=0
@@ -30,79 +30,68 @@ TESTING()
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
-# difference between the actual output and the expected output. The
-# expected output is given by adding a `.dmp' extension to the root of
-# the first argument to this function and the actual output file is
-# calculated by replacing the `.dmp' with `.tmp'.  The actual output
-# is not removed if $HDF5_NOCLEANUP has a value.
+# difference between the actual and the expected hdf4 files. The
+# expected hdf4 files are in testfiles/Expected directory.
+# The actual hdf4 file is not removed if $HDF5_NOCLEANUP is to a non-null
+# value.
 CONVERT()
 {
     # Run h5toh4 convert.
     TESTING $h5toh4 $@
 
-#
-# Set up arguments to run the conversion test.
-# The converter assumes all hdf5 files has the .h5 suffix as in the form
-# of foo.h5.  It creates the corresponding hdf4 files with the .hdf suffix
-# as in the form of foo.hdf.  One exception is that if exactly two file names
-# are given, it treats the first argument as an hdf5 file and creates the
-# corresponding hdf4 file with the name as the second argument, WITOUT
-# any consideration of the suffix.
-#
-# If INDIR != OUTDIR, need to copy the input hdf5 files from the INDIR
-# to the OUTDIR and transform the input file pathname because of the suffix
-# convention mentioned above.  This way, the hdf4 files are always created
-# in the OUTDIR directory.
+    #
+    # Set up arguments to run the conversion test.
+    # The converter assumes all hdf5 files has the .h5 suffix as in the form
+    # of foo.h5.  It creates the corresponding hdf4 files with the .hdf suffix
+    # as in the form of foo.hdf.  One exception is that if exactly two file
+    # names are given, it treats the first argument as an hdf5 file and creates
+    # the corresponding hdf4 file with the name as the second argument, WITOUT
+    # any consideration of the suffix.  (For this test script, in order to
+    # match the output hdf4 file with the expected hdf4 file, it expects the
+    # second file of the two-files tests has the .hdf suffix too.)
+    #
+    # If SRCDIR != OUTDIR, need to copy the input hdf5 files from the SRCDIR
+    # to the OUTDIR and transform the input file pathname because of the suffix
+    # convention mentioned above.  This way, the hdf4 files are always created
+    # in the OUTDIR directory.
 
-# Need to run the following in a separate shell to preserve the
-# positional parameters of THIS shell.  The current shell parameters
-# are needed for the verification.  (In the next revision, will use
-# the $OUTFILES values to do the verification.)
-#
-
-(
     INFILES=""
     OUTFILES=""
+    MULTIRUN=""
 
     case "$1" in
-    "-m")	# multiple files conversion
+    "-m")		# multiple files conversion
+	MULTIRUN="-m"
 	shift
-	while [ $# -gt 0 ]
+	for f in $*
 	do
-	    if [ "$INDIR" != "$OUTDIR" ]
+	    if [ "$SRCDIR" != "$OUTDIR" ]
 	    then
-		cp $INDIR/$1 $OUTDIR/$1
+		cp $SRCDIR/$f $OUTDIR/$f
 	    fi
-	    INFILES="$INFILES $OUTDIR/$1"
-	    OUTFILES="$OUTFILES $OUTDIR/`basename $1 .h5`.hdf"
+	    INFILES="$INFILES $f"
+	    OUTFILES="$OUTFILES `basename $f .h5`.hdf"
 	    shift
 	done
-	set - "-m" $INFILES
 	;;
-
-    * ) # one file conversion
+    * )			# Single file conversion
 	case $# in
-	1)  
-	    if [ "$INDIR" != "$OUTDIR" ]
+	1)  if [ "$SRCDIR" != "$OUTDIR" ]
 	    then
-		cp $INDIR/$1 $OUTDIR/$1
+		cp $SRCDIR/$1 $OUTDIR/$1
 	    fi
-	    INFILES="$OUTDIR/$1"
-	    OUTFILES="$OUTDIR/`basename $1 .h5`.hdf"
-	    set - $INFILES
+	    INFILES="$1"
+	    OUTFILES="`basename $1 .h5`.hdf"
 	    ;;
-	    
-	2)  # hdf4 file specified
-	    if [ "$INDIR" != "$OUTDIR" ]
+	2) 		# hdf4 file specified
+	    if [ "$SRCDIR" != "$OUTDIR" ]
 	    then
-		cp $INDIR/$1 $OUTDIR/$1
+		cp $SRCDIR/$1 $OUTDIR/$1
 	    fi
-	    INFILES="$OUTDIR/$1"
+	    INFILES="$1"
 	    OUTFILES="$2"
-	    set - $OUTDIR/$1 $OUTDIR/$2
 	    ;;
-
-	*)  # Illegal
+	*)		# Illegal
 	    echo "Illegal arguments"
 	    exit 1
 	    ;;
@@ -111,116 +100,59 @@ CONVERT()
     esac
 
     # run the conversion and remove input files that have been copied over
-    $h5toh4 "$@" 2>/dev/null
-    if [ "$INDIR" != "$OUTDIR" ]
-    then
-	$RM $INFILES
-    fi
+    (
+	cd $OUTDIR
+	../$h5toh4 $MULTIRUN $INFILES 2>/dev/null
+	if [ "$SRCDIR" != "$OUTDIR" ]
+	then
+	    $RM $INFILES
+	fi
+    )
 
-)
+    # Verify results
+    result="passed"
+    for f in $OUTFILES
+    do
+	if $cmp $SRCDIR/Expected/$f $OUTDIR/$f
+	then
+	    :
+	else
+	    # Use hdp to dump the files and verify the output.
+	    outfile=`basename $f .hdf`
+	    expect_out=$outfile.expect
+	    actual_out=$outfile.actual
 
-    # verify results
-    case "$1" in
-
-    "-m")
-
-	multirun=passed
-	shift
-	for i in $@
-	do
-		h4file=`echo $i | $SED -e s/\.h5/.hdf/g`
-
-	    	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
-	    	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
-
-		if test "tloop.hdf" = "$h4file"; then
-			($H4DUMP dumpvg "$OUTDIR/$h4file" |head -50 >"$OUTDIR/$actual") 2>/dev/null
-		else
-			$H4DUMP dumpvg "$OUTDIR/$h4file" > "$OUTDIR/$actual"
+	    (cd $SRCDIR/Expected
+	    $H4DUMP dumpvg $outfile.hdf
+	    $H4DUMP dumpvd $outfile.hdf
+	    $H4DUMP dumpsds $outfile.hdf ) > $expect_out
+	    (cd $OUTDIR
+	    $H4DUMP dumpvg $outfile.hdf
+	    $H4DUMP dumpvd $outfile.hdf
+	    $H4DUMP dumpsds $outfile.hdf ) > $actual_out
+	    if $cmp $expect_out $actual_out; then
+		:
+	    else
+		if test "passed" = $result; then
+		    echo "*FAILED*"
+		    nerrors="`expr $nerrors + 1`"
+		    result=failed
 		fi
-		$H4DUMP dumpvd "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
-		$H4DUMP dumpsds "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
-
-    		# Results. We normalize the result to account for different output 
-    		# widths.  That is, the test should succeed if the only
-    		# differences are in white space. We have to do this the hard way
-    		# because diff isn't always smart enough.
-		tr '\n' ' ' <"$OUTDIR/$actual" |tr -s ' \t' |fold >"$OUTDIR/$actual-norm"
-		tr '\n' ' ' <"$INDIR/$expect" |tr -s ' \t' |fold >"$OUTDIR/$expect-norm"
-
-    		if $cmp "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"; then
-			set unrelated
-		else
-			if test "passed" = "$multirun"; then
-				echo "*FAILED*"
-				echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
-				nerrors="`expr $nerrors + 1`"
-				multirun=failed
-			fi
-			test yes = "$verbose" && $diff "$INDIR/$expect" "$OUTDIR/$actual" |sed 's/^/    /'
-    		fi
-
-    		# Clean up output file
-    		$RM "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"
-    		if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-			$RM "$OUTDIR/$actual"
-			$RM "$OUTDIR/$h4file"
-    		fi
-	done
-	if test "passed" = "$multirun"; then
-		echo " PASSED"
-	fi
-
-	;;
-
-
-    * )
-
-   	if [ $# -eq 1 ]
-	then 
-		h4file=`echo $1 | $SED -e s/\.h5/.hdf/`
-	else
-		h4file=$2
-	fi
-
-	actual=`echo $h4file | $SED -e s/\.hdf/.tmp/`
-	expect=`echo $h4file | $SED -e s/\.hdf/.dmp/`
-
-	if test "tloop.hdf" = "$h4file"; then
-		($H4DUMP dumpvg "$OUTDIR/$h4file" |head -50 >"$OUTDIR/$actual") 2>/dev/null
-	else
-		$H4DUMP dumpvg "$OUTDIR/$h4file" > "$OUTDIR/$actual"
-	fi
-	$H4DUMP dumpvd "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
-	$H4DUMP dumpsds "$OUTDIR/$h4file" >> "$OUTDIR/$actual"
-
-
-	# Results. We normalize the result to account for different output 
-	# widths.  That is, the test should succeed if the only
-	# differences are in white space. We have to do this the hard way
-	# because diff isn't always smart enough.
-	tr '\n' ' ' <"$OUTDIR/$actual" |tr -s ' \t' |fold >"$OUTDIR/$actual-norm"
-	tr '\n' ' ' <"$INDIR/$expect" |tr -s ' \t' |fold >"$OUTDIR/$expect-norm"
-
-	if $cmp "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"; then
-		echo " PASSED"
-	else
-		echo "*FAILED*"
-		echo "    Actual result (*.tmp) differs from expected result (*.dmp)"
-		nerrors="`expr $nerrors + 1`"
-		test yes = "$verbose" && $diff "$INDIR/$expect" "$OUTDIR/$actual" |sed 's/^/    /'
+		test yes = "$verbose" &&
+		echo "    Actual result (*.actual) differs from expected result (*.expect)" &&
+		$diff $expect_out $actual_out |sed 's/^/    /'
+	    fi
 	fi
 
 	# Clean up output file
-	$RM "$OUTDIR/$expect-norm" "$OUTDIR/$actual-norm"
 	if [ X = ${HDF5_NOCLEANUP:-X} ]; then
-		$RM "$OUTDIR/$actual"
-		$RM "$OUTDIR/$h4file"
+	    $RM $expect_out $actual_out
+	    $RM $OUTDIR/$f
 	fi
-	;;
-
-    esac
-
+    done
+    if test "passed" = "$result"; then
+	    echo " PASSED"
+    fi
 }
 
 
