@@ -38,7 +38,8 @@ LIB_SRC=H5Exception.cpp H5RefCounter.cpp H5IdComponent.cpp H5Library.cpp        
         H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp H5DataType.cpp        \
         H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp H5PredType.cpp	        \
         H5EnumType.cpp H5IntType.cpp H5FloatType.cpp H5StrType.cpp	        \
-        H5CompType.cpp H5DataSet.cpp H5CommonFG.cpp H5Group.cpp H5File.cpp
+        H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp		\
+	H5CommonFG.cpp H5Group.cpp H5File.cpp
 LIB_OBJ=$(LIB_SRC:.cpp=.lo)
 
 PUB_HDR=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h           \
@@ -46,7 +47,9 @@ PUB_HDR=H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h           
         H5DcreatProp.h H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h    \
         H5FcreatProp.h H5File.h H5FloatType.h H5Group.h H5IdComponent.h         \
         H5Include.h H5IntType.h H5Library.h H5Object.h H5PredType.h             \
-        H5PropList.h H5RefCounter.h H5StrType.h H5CppDoc.h
+        H5PropList.h H5RefCounter.h H5StrType.h H5CppDoc.h H5ArrayType.h	\
+	H5VarLenType.h
+
 PUB_PROGS=h5c++
 
 ARFLAGS=rs
