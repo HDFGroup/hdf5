@@ -62,7 +62,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 
 
     <h3>New Functions and Tools</h3>
-        <dl>
+	<dl>
 	  <dt>C functions:
           <dd>The following C functions are new for Release 1.6.3 and 
               are documented in the
@@ -144,6 +144,17 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
               </tr>
               </table>    
 	  
+          <dd>&nbsp;
+	  <dt>C++ wrappers:
+	  <dd>C++ wrappers have been brought in sync with the C library,
+              completing the C++ API.
+	      Most of the new wrappers are for H5P and H5T APIs.  
+	      <p>
+	      All available C++ elements are now documented in the 
+	      <a href="../cpplus_RM/index.html" target="CppExternal">
+	              <cite>HDF5 C++ API Reference Manual</cite></a>. 
+	      (The <cite>HDF5 C++ API Reference Manual</cite> is also a 
+	      new addition in this release.)
 	  
           <dd>&nbsp;
 	  <dt>Tools:
@@ -151,6 +162,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
               documented on the <a href="../Tools.html">Tools page</a> of the
               <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
               <dd><code>h5new_tool</code> is designed to do whatever this sentence says.
+	      (Clearly, this is a placeholder entry that should be removed before release.)
           <dd>&nbsp; 
           <dd>The following tool was in Release 1.6.2 but was not included in formal documentation. 
               A full description is now included on the 
@@ -206,7 +218,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
     <h3>Functions with Changed Syntax</h3>
 
         The following functions have changed as noted.
-	
+	<p>
         <dl>
         <dt>C functions:
         <dt><code>H5FDset_fapl_multi</code>
@@ -232,7 +244,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 		     <em>const haddr_t *</em> <code>memb_addr</code>,
 		     <em>hbool_t</em> <code>relax</code>)<br>
                 </ul>
-
+            <p>
             This change should not appreciably affect application programs.
 
         <dt><code>H5Tconvert</code>
@@ -258,7 +270,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 		     <em>void *</em> <code>background</code>,
 		     <em>hid_t</em> <code>plist_id</code>)<br>
                 </ul>
-
+            <p>
             This was changed to prevent overflows when <code>hsize_t</code> and
             <code>size_t</code> types are different sizes.  Application code
             may need to be modified to take this into account.  Application
@@ -267,25 +279,45 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
             below.
 
         <dt><code>H5Tregister</code> and <code>H5Tunregister</code>
-          <dd>These two routines are affected by the change to the H5T_conv_t
-                typedef (described below) and may require application
-                registered datatype conversion routines to be modified to
-                conform to the changed typedef.
-        </dl>
+          <dd>These two routines are affected by the change to the 
+                <code>H5T_conv_t</code> typedef (described below) and may 
+                require application registered datatype conversion routines 
+                to be modified to conform to the changed typedef.
+
+
+
+        <dd>&nbsp;
+        <dt>C++ wrappers:
+        <dt><code>H5::Exception</code> and its subclasses
+          <dd>Constructors used by <code>H5::Exception</code> and its 
+	  subclasses that were previously overloaded to take char pointers 
+          have been removed.
+	  Constructors that passed in a reference of <code>string</code>
+          have been changed to pass by value.  
+          In addition, the default value of the detailed
+          message has been changed from <code>0/NULL</code> to 
+	  <code>DEFAULT_MSG</code> 
+	  (meaning "No detailed information provided").
+	  
+         <dd>&nbsp;
+       <dt><code>DSetCreatPropList::setLayout</code>
+	<dd>The prototype for <code>DSetCreatPropList::setLayout</code> 
+	    has been changed: the first parameter has been removed.
 
         <!--
         <dd>&nbsp;
         <dt>Fortran90 subroutines:
         <dt><code>h5subroutine_f?</code>
           <dd>Change...
-        </dl>
         -->
+	  
+        </dl>
 
 
     <h3>Constants with Changed Values</h3>
     
         The following library structures have changed as noted.
-	
+	<p>
         <dl>
         <dt>C API:
         <dt><code>H5T_conv_t</code>
@@ -318,7 +350,7 @@ transition from the HDF5 Release 1.6.2 to Release 1.6.3.
 		     <em>void *</em> <code>bkg</code>,
 		     <em>hid_t</em> <code>plist_id</code>)<br>
                 </ul>
-
+            <p>
             This was changed to prevent overflows when <code>hsize_t</code> and
             <code>size_t</code> types are different sizes.  Application code
             may need to be modified to take this into account.
@@ -1614,7 +1646,7 @@ V1.4.0
 Describes HDF5 Release 1.6.2, February 2004
 </address><!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 1 July 2004 
+Last modified: 20 August 2004 
 <!-- hhmts end -->
 
 </body>
