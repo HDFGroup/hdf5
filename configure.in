@@ -505,13 +505,11 @@ case "$withval" in
    *)
       zlib_inc="`echo $withval |cut -f1 -d,`"
       if test -n "$zlib_inc"; then
-         saved_CPPFLAGS="$CPPFLAGS"
          CPPFLAGS="$CPPFLAGS -I$zlib_inc"
       fi
 
       zlib_lib="`echo $withval |cut -f2 -d, -s`"
       if test -n "$zlib_lib"; then
-         saved_LDFLAGS="$LDFLAGS"
          LDFLAGS="$LDFLAGS -L$zlib_lib"
       fi
       ;;
@@ -1405,9 +1403,9 @@ dnl libraries.
 dnl 
 DYNAMIC_DIRS=""
 if test -n "$LDFLAGS"; then
-   for d in $LDFLAGS ; do
+   for d in X $LDFLAGS ; do
       case "$d" in
-         -L.*)
+         -L*)
             d=`echo $d | sed -e 's/-L//g'`
             case "$d" in
                .*)
@@ -1425,7 +1423,7 @@ AC_SUBST(DYNAMIC_DIRS)
 
 if test -n "$CPPFLAGS"; then
    TEMP_CPPFLAGS=""
-   for d in $CPPFLAGS ; do
+   for d in X $CPPFLAGS ; do
       case "$d" in
         -I.*)
            dnl If the path isn't absolute, make it so by prepending
