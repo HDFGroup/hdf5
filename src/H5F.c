@@ -433,7 +433,7 @@ hatom_t H5Fcreate(const char *filename, uintn flags, hatom_t create_temp, hatom_
     H5ECLEAR;
     if(filename==NULL)  /* check for valid filename */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
-    if(flags&(~H5ACC_OVERWRITE)!=0)     /* check for valid flags */
+    if((flags&~H5ACC_OVERWRITE)!=0)     /* check for valid flags */
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL);
 
     /* See if this file is already open */

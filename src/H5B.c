@@ -158,11 +158,11 @@ static interface_initialize_g = FALSE;
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
+H5B_new (hdf5_file_t *f, const H5B_class_t *type)
 {
    H5B_t	*bt=NULL;
    haddr_t	addr;
-   size_t	size;
+   size_t	size, sizeof_rkey;
    size_t	total_native_keysize;
    intn		offset, i;
 
@@ -178,6 +178,7 @@ H5B_new (hdf5_file_t *f, const H5B_class_t *type, size_t sizeof_rkey)
    /*
     * Allocate file and memory data structures.
     */
+   sizeof_rkey = (type->get_sizeof_rkey)(f);
    size = H5B_nodesize (f, type, &total_native_keysize, sizeof_rkey);
    if ((addr = H5MF_alloc (f, size))<0) {
       HRETURN_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL);

@@ -1038,7 +1038,6 @@ H5O_alloc (hdf5_file_t *f, H5O_t *oh, const H5O_class_t *type, size_t size)
    /* check args */
    assert (oh);
    assert (type);
-   assert (size>=0);
    H5O_ALIGN (size, oh->alignment);
 
    /* look for a null message which is large enough */

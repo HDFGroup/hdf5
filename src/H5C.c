@@ -48,9 +48,9 @@ static intn interface_initialize_g = FALSE;
 /* Define the library's default file creation template (constants in hdf5lims.h) */
 const file_create_temp_t default_file_create={
     HDF5_USERBLOCK_DEFAULT,         /* Default user-block size */
+    HDF5_BTREEPAGE_DEFAULT,         /* Default B-tree page size */
     HDF5_OFFSETSIZE_DEFAULT,        /* Default offset size */
     HDF5_LENGTHSIZE_DEFAULT,        /* Default length size */
-    HDF5_BTREEPAGE_DEFAULT,         /* Default B-tree page size */
     HDF5_BOOTBLOCK_VERSION,         /* Current Boot-Block version # */
     HDF5_SMALLOBJECT_VERSION,       /* Current Small-Object heap version # */
     HDF5_FREESPACE_VERSION,         /* Current Free-Space info version # */

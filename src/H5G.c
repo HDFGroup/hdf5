@@ -286,7 +286,7 @@ H5G_stab_insert (hdf5_file_t *f, H5G_entry_t *self, const char *name,
    }
    if (stab.btree<=0 || stab.heap<=0) {
       if (stab.btree<=0 &&
-	  (stab.btree = H5B_new (f, H5B_SNODE, sizeof(H5G_node_key_t)))<0) {
+	  (stab.btree = H5B_new (f, H5B_SNODE))<0) {
 	 HRETURN_ERROR (H5E_SYM, H5E_CANTINIT, FAIL);
       }
       if (stab.heap<=0) {

@@ -573,8 +573,7 @@ H5H_insert (hdf5_file_t *f, haddr_t addr, size_t buf_size, const void *buf)
     */
    if (offset<0) {
 
-      need_more = MAX (2*heap->mem_alloc, H5H_SIZEOF_FREE(f));
-      need_more = MAX (need_more, need);
+      need_more = MAX3 (need, heap->mem_alloc, H5H_SIZEOF_FREE(f));
 
       if (max_fl && max_fl->offset+max_fl->size==heap->mem_alloc) {
 	 /*

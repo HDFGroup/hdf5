@@ -193,7 +193,9 @@ done:
 herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
 {
     H5D_dataset_t *dataset;         /* dataset object to release */
+#if 0
     uintn   towrite;        /* number of bytes to write out */
+#endif
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER(H5Dwrite, H5D_init_interface, FAIL);
@@ -214,7 +216,9 @@ herr_t H5Dwrite(hatom_t oid, hatom_t did, VOIDP buf)
     if(dataset->type==0 || dataset->dim==0)
         HGOTO_ERROR(H5E_FUNC, H5E_UNINITIALIZED, FAIL);
 
-/*  towrite=H5Tsize(dataset->type)*H5Pnelem(did); */
+#if 0
+    towrite=H5Tsize(dataset->type)*H5Pnelem(did);
+#endif
 /* Check memory to disk datatype conversions, etc. */
 /* data out */
 
