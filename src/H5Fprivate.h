@@ -100,10 +100,10 @@
 
 #  define INT64ENCODE(p, n) {						      \
    int64 _n = (n);							      \
-   intn _i;								      \
+   size_t _i;								      \
    uint8 *_p = (uint8*)(p);						      \
    for (_i=0; _i<sizeof(int64); _i++, _n>>=8) {				      \
-      *_p++ = _n & 0xff;						      \
+      *_p++ = (uint8)(_n & 0xff);					      \
    }									      \
    for (/*void*/; _i<8; _i++) {						      \
       *_p++ = (n)<0 ? 0xff : 0;						      \
@@ -113,10 +113,10 @@
 
 #  define UINT64ENCODE(p, n) {						      \
    uint64 _n = (n);							      \
-   intn _i;								      \
+   size_t _i;								      \
    uint8 *_p = (uint8*)(p);						      \
    for (_i=0; _i<sizeof(uint64); _i++, _n>>=8) {			      \
-      *_p++ = _n & 0xff;						      \
+      *_p++ = (uint8)(_n & 0xff);					      \
    }									      \
    for (/*void*/; _i<8; _i++) {						      \
       *_p++ = 0;							      \
@@ -150,7 +150,7 @@
 
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
-   intn _i;								      \
+   size_t _i;								      \
    n = 0;							      \
    (p) += 8;								      \
    for (_i=0; _i<sizeof(int64); _i++, n<<=8) {				      \
@@ -161,7 +161,7 @@
 
 #  define UINT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
-   intn _i;								      \
+   size_t _i;								      \
    n = 0;							      \
    (p) += 8;								      \
    for (_i=0; _i<sizeof(uint64); _i++, n<<=8) {			      \
@@ -403,18 +403,12 @@ typedef struct H5F_t {
       break;								      \
    }
 
-#ifdef NOT_YET
-#define H5F_encode_length(f,p,l) (H5F_SIZEOF_SIZE(f)==4 ? UINT32ENCODE(p,l) \
-    : H5F_SIZEOF_SIZE(f)==8 ? UINT64ENCODE(p,l) \
-    : H5F_SIZEOF_SIZE(f)==2 ? UINT16ENCODE(p,l) : H5FPencode_unusual_length(f,&(p),(uint8 *)&(l)))
-#else
 #define H5F_encode_length(f,p,l)					      \
    switch(H5F_SIZEOF_SIZE(f)) {						      \
    case 4: UINT32ENCODE(p,l); break;					      \
    case 8: UINT64ENCODE(p,l); break;					      \
    case 2: UINT16ENCODE(p,l); break;					      \
 }
-#endif
 
 #define H5F_decode_length(f,p,l)					      \
    switch(H5F_SIZEOF_SIZE(f)) {						      \
