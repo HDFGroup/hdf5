@@ -161,6 +161,8 @@ H5_DLL htri_t H5S_is_simple(const H5S_t *sdim);
 H5_DLL herr_t H5S_extent_release(H5S_t *space);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
+H5_DLL H5S_t *H5S_create_simple(int rank, const hsize_t dims[/*rank*/],
+		  const hsize_t maxdims[/*rank*/]);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			 int indent, int fwidth);
 

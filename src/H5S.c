@@ -1780,14 +1780,12 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
     }
 
     /* Create the space and set the extent */
-    if(NULL==(space=H5S_create(H5S_SIMPLE)))
+    if(NULL==(space=H5S_create_simple(rank,dims,maxdims)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace");
-    if(H5S_set_extent_simple(space,(unsigned)rank,dims,maxdims)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions");
     
     /* Atomize */
     if ((ret_value=H5I_register (H5I_DATASPACE, space))<0)
-        HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom");
+        HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID");
     
 done:
     if (ret_value<0) {
@@ -1797,6 +1795,47 @@ done:
 
     FUNC_LEAVE_API(ret_value);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_create_simple
+ *
+ * Purpose:	Internal function to create simple dataspace
+ *
+ * Return:	Success:	The ID for the new simple data space object.
+ *		Failure:	Negative
+ *
+ * Errors:
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, April  3, 2003
+ *
+ * Modifications:
+ *              Extracted from H5Screate_simple
+ *              Quincey Koziol, Thursday, April  3, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_t *
+H5S_create_simple(int rank, const hsize_t dims[/*rank*/],
+		  const hsize_t maxdims[/*rank*/])
+{
+    H5S_t	*ret_value;     /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_create_simple, NULL);
+
+    /* Check arguments */
+    assert(rank>=0 && rank <=H5S_MAX_RANK);
+
+    /* Create the space and set the extent */
+    if(NULL==(ret_value=H5S_create(H5S_SIMPLE)))
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace");
+    if(H5S_set_extent_simple(ret_value,(unsigned)rank,dims,maxdims)<0)
+        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "can't set dimensions");
+    
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5S_create_simple() */
 
 
 /*-------------------------------------------------------------------------
