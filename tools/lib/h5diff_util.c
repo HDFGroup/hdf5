@@ -16,47 +16,6 @@
 #include <assert.h>
 
 
-
-/*-------------------------------------------------------------------------
- * Function: diff_can
- *
- * Purpose: Check if TYPE_ID is supported; only the listed types are 
- *  supported in the current version
- * Date: May 30, 2003
- *
- * Modifications: October 29, 2003
- *  Added support for H5T_COMPOUND, H5T_STRING, H5T_ARRAY types; 
- *
- *-------------------------------------------------------------------------
- */
-int diff_can(hid_t type_id)
-{
- int ret=0;
-
- if ( ((H5Tget_class(type_id) == H5T_COMPOUND)==1)|| /* get class */
-      ((H5Tget_class(type_id) == H5T_STRING)==1)||   /* get class */
-      ((H5Tget_class(type_id) == H5T_ARRAY)==1)||   /* get class */
-    
-      (H5Tequal(type_id, H5T_NATIVE_FLOAT)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_DOUBLE)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_INT)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_UINT)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_SCHAR)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_UCHAR)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_SHORT)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_USHORT)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_LONG)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_ULONG)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_LLONG)==1)||
-      (H5Tequal(type_id, H5T_NATIVE_ULLONG)==1)
-      )
-      ret=1;
- return ret;
-}
-
-
-
-
 /*-------------------------------------------------------------------------
  * Function: print_pos
  *
@@ -70,8 +29,14 @@ int diff_can(hid_t type_id)
  *
  *-------------------------------------------------------------------------
  */
-void print_pos( int *ph, int p, unsigned int curr_pos, int *acc, 
-                int *pos, int rank, const char *obj1, const char *obj2 )
+void print_pos( int        *ph, 
+                int        per, 
+                hsize_t    curr_pos, 
+                hsize_t    *acc, 
+                hsize_t    *pos, 
+                int        rank, 
+                const char *obj1, 
+                const char *obj2 )
 {
  int i;
 
@@ -79,21 +44,26 @@ void print_pos( int *ph, int p, unsigned int curr_pos, int *acc,
  if ( *ph==1 )
  {
   *ph=0;
-  if (p)
+  if (per)
   {
-   printf("%-15s %-15s %-15s %-15s %-15s\n", "position", obj1, obj2, "difference", 
+   printf("%-15s %-15s %-15s %-15s %-15s\n", 
+    "position", 
+    (obj1!=NULL) ? obj1 : " ", 
+    (obj2!=NULL) ? obj2 : " ",
+    "difference", 
     "relative");
    printf("------------------------------------------------------------------------\n");
   }
   else
   {
-   printf("%-15s %-15s %-15s %-20s\n", "position", obj1, obj2, "difference");
+   printf("%-15s %-15s %-15s %-20s\n", 
+    "position", 
+    (obj1!=NULL) ? obj1 : " ", 
+    (obj2!=NULL) ? obj2 : " ",
+    "difference");
    printf("------------------------------------------------------------\n");
   }
  }
-
- for ( i = 0; i < rank; i++)
-  pos[i]=0;
 
  for ( i = 0; i < rank; i++)
  {
@@ -105,7 +75,7 @@ void print_pos( int *ph, int p, unsigned int curr_pos, int *acc,
  printf("[ " );  
  for ( i = 0; i < rank; i++)
  {
-  printf("%d ", pos[i]  );
+  HDfprintf(stdout,"%Hu ", pos[i]  );
  }
  printf("]" );
 }

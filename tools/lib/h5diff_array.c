@@ -18,57 +18,65 @@
 #include <assert.h>
 #include <math.h>
 
+
 static 
-int diff_array_mem( void       *_mem1, 
-                    void       *_mem2, 
-                    hid_t      m_type,
-                    unsigned   i, 
-                    int        rank, 
-                    int        *acc,  
-                    int        *pos, 
-                    diff_opt_t *options, 
-                    const char *obj1, 
-                    const char *obj2);
+int diff_datum( void       *_mem1, 
+                void       *_mem2, 
+                hid_t      m_type,
+                hsize_t    i, 
+                int        rank, 
+                hsize_t    *acc,  
+                hsize_t    *pos, 
+                diff_opt_t *options, 
+                const char *obj1, 
+                const char *obj2,
+                hid_t      container1_id,
+                hid_t      container2_id,
+                int        *ph); 
 
 static
 int diff_native_uchar(unsigned char *mem1,
                       unsigned char *mem2,
                       size_t        type_size,
-                      unsigned      i, 
+                      hsize_t       i, 
                       int           rank, 
-                      int           *acc,  
-                      int           *pos, 
+                      hsize_t       *acc,  
+                      hsize_t       *pos,
                       diff_opt_t    *options, 
                       const char    *obj1, 
                       const char    *obj2,
-                      int           ph);
+                      int           *ph);
+
+static
+int diff_char(unsigned char *mem1,
+             unsigned char *mem2,
+             size_t        type_size,
+             hsize_t       i, 
+             int           rank, 
+             hsize_t       *acc,  
+             hsize_t       *pos,
+             diff_opt_t    *options, 
+             const char    *obj1, 
+             const char    *obj2,
+             int           *ph);
+
+static 
+hbool_t is_zero(const void *_mem, size_t size);
+static 
+void close_obj(H5G_obj_t obj_type, hid_t obj_id);
 
 
 /*-------------------------------------------------------------------------
  * Function: diff_array
  *
- * Purpose: compare array; 
- *   currenttly only the NATIVE types below are supported
+ * Purpose: compare two memory buffers;
  *
- * Return: number of differences found
+ * Return: number of differences found, -1 on error
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
- * Date: May 30, 2003
- *
- * Modifications: October 30, 2003
- *  Added support for H5T_COMPOUND types; to handle compounds a recursive
- *  function is called. because of this , the data is compared datum by datum
- *  instead of the previous cycle that compared all the array  the native 
- *  types 
- * Added support for  
- *  H5T_STRING                          
- *  H5T_BITFIELD                          
- *  H5T_OPAQUE           
- *  H5T_ENUM		 
- *  H5T_VLEN		
- *  H5T_ARRAY	                 
- *
+ * Date: November 12, 2003
+ *    
  *-------------------------------------------------------------------------
  */
 
@@ -80,7 +88,9 @@ int diff_array( void *_mem1,
                 diff_opt_t *options, 
                 const char *name1, 
                 const char *name2,
-                hid_t m_type )
+                hid_t m_type,
+                hid_t container1_id,
+                hid_t container2_id) /* dataset where the reference came from*/
 { 
  int           nfound=0;          /* number of differences found */
  size_t        size;              /* size of datum */
@@ -88,23 +98,27 @@ int diff_array( void *_mem1,
  unsigned char *mem2 = (unsigned char*)_mem2;
  unsigned char *tmp1;
  unsigned char *tmp2;
- int           acc[32];           /* accumulator and matrix position */
- int           pos[32];
- unsigned      i;
+ hsize_t       acc[32];    /* accumulator position */
+ hsize_t       pos[32];    /* matrix position */
+ int           ph=1;       /* print header  */
+ hsize_t       i;
  int           j;
+
 
  acc[rank-1]=1;
  for(j=(rank-2); j>=0; j--)
  {
   acc[j]=acc[j+1]*(int)dims[j+1];
  }
+ for ( j = 0; j < rank; j++)
+  pos[j]=0;
 
 
  if(H5Tis_variable_str(m_type)) 
  {
   tmp1 = ((unsigned char**)mem1)[0]; 
   tmp2 = ((unsigned char**)mem2)[0]; 
-		nfound+=diff_array_mem(
+		nfound+=diff_datum(
    tmp1,
    tmp2, 
    m_type,
@@ -114,7 +128,10 @@ int diff_array( void *_mem1,
    pos,
    options,
    name1,
-   name2);
+   name2,
+   container1_id,
+   container2_id,
+   &ph);
  }
 
  else
@@ -126,7 +143,7 @@ int diff_array( void *_mem1,
   
   for ( i = 0; i < nelmts; i++)
   {
-   nfound+=diff_array_mem(
+   nfound+=diff_datum(
     mem1 + i * size,
     mem2 + i * size, /* offset */
     m_type,
@@ -136,7 +153,10 @@ int diff_array( void *_mem1,
     pos,
     options,
     name1,
-    name2);
+    name2,
+    container1_id,
+    container2_id,
+    &ph);
    if (options->n && nfound>=options->count)
     return nfound;
   }
@@ -148,30 +168,57 @@ int diff_array( void *_mem1,
 
 
 /*-------------------------------------------------------------------------
- * Function: diff_array_mem
+ * Function: diff_datum
  *
  * Purpose: Compare the values pointed to in _MEM1 and _MEM2 of type M_TYPE
  *
- * Return: number of differences found
+ * Return: number of differences found, -1 on error
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: October 29, 2003
  *
+ * The compare of the 2 buffers read from the files is made datum by datum.
+ *
+ * H5T_INTEGER and H5T_FLOAT
+ *  Copy the buffer into a compatible local datum and do a numerical 
+ *  compare of this datum
+ * H5T_COMPOUND
+ *  Recursively call this function for each member
+ * H5T_ARRAY
+ *  Recursively call this function for each element 
+ * H5T_VLEN
+ *  Recursively call this function for each element 
+ * H5T_STRING
+ *  compare byte by byte in a cycle from 0 to type_size. this type_size is the 
+ *  value obtained by the get_size function but it is the string lenght for 
+ *  variable sized strings
+ * H5T_OPAQUE
+ *  compare byte by byte in a cycle from 0 to type_size
+ * H5T_BITFIELD
+ *  compare byte by byte in a cycle from 0 to type_size
+ * H5T_ENUM
+ *  for each pair of elements being compared, both bit patterns are converted to 
+ *  their corresponding enumeration constant and a string comparison is made
+ * H5T_REFERENCE
+ *  Dereference the object and compare the type (basic object type). 
  *-------------------------------------------------------------------------
  */
 
 static 
-int diff_array_mem( void       *_mem1, 
-                    void       *_mem2, 
-                    hid_t      m_type,
-                    unsigned   i, 
-                    int        rank, 
-                    int        *acc,  
-                    int        *pos, 
-                    diff_opt_t *options, 
-                    const char *obj1, 
-                    const char *obj2)
+int diff_datum( void       *_mem1, 
+                void       *_mem2, 
+                hid_t      m_type,
+                hsize_t    i, 
+                int        rank, 
+                hsize_t    *acc,  
+                hsize_t    *pos, 
+                diff_opt_t *options, 
+                const char *obj1, 
+                const char *obj2,
+                hid_t      container1_id,
+                hid_t      container2_id, /*where the reference came from*/
+                int        *ph)           /*print header */ 
 {
  char          fmt_llong[255],  fmt_ullong[255];
  char          fmt_llongp[255], fmt_ullongp[255];
@@ -187,8 +234,15 @@ int diff_array_mem( void       *_mem1,
  hsize_t       nelmts;
  hsize_t       ndims;
  size_t        size;
- static int    ph=1;      /* print header  */
- int           nfound=0;  /* differences found */
+ int           iszero1;
+ int           iszero2;
+ H5G_obj_t     obj1_type;
+ H5G_obj_t     obj2_type;
+ hid_t         obj1_id;
+ hid_t         obj2_id;
+ H5G_stat_t    sb1;
+ H5G_stat_t    sb2;
+ int           nfound=0;   /* differences found */
 
  /* Build default formats for long long types */
  sprintf(fmt_llong,  "%%%sd              %%%sd               %%%sd\n", 
@@ -200,10 +254,7 @@ int diff_array_mem( void       *_mem1,
  sprintf(fmt_ullongp, "%%%su             %%%su               %%%su               %%%su\n", 
   H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH, H5_PRINTF_LL_WIDTH);
 
-
- /* Get the size. */
  type_size = H5Tget_size( m_type );
-
 
  switch (H5Tget_class(m_type)) 
  {
@@ -213,9 +264,7 @@ int diff_array_mem( void       *_mem1,
  case H5T_TIME:
   assert(0);
   break;
- case H5T_REFERENCE:
-  assert(0);
-  break;
+
 /*-------------------------------------------------------------------------
  * H5T_COMPOUND
  *-------------------------------------------------------------------------
@@ -226,7 +275,7 @@ int diff_array_mem( void       *_mem1,
   {
    offset    = H5Tget_member_offset(m_type, j);
    memb_type = H5Tget_member_type(m_type, j);
-   nfound+=diff_array_mem(
+   nfound+=diff_datum(
     mem1+offset,
     mem2+offset,
     memb_type,
@@ -236,7 +285,10 @@ int diff_array_mem( void       *_mem1,
     pos,
     options,
     obj1,
-    obj2);
+    obj2,
+    container1_id,
+    container2_id,
+    ph);
    H5Tclose(memb_type);
   }
   break;
@@ -248,16 +300,16 @@ int diff_array_mem( void       *_mem1,
  case H5T_STRING:
   
   if(H5Tis_variable_str(m_type)) 
-   type_size = HDstrlen(mem1);
+   type_size = HDstrlen((char*)mem1);
   else 
    type_size = H5Tget_size(m_type);
   
   for (u=0; u<type_size; u++)
-   nfound+=diff_native_uchar(
+   nfound+=diff_char(
    mem1 + u,
    mem2 + u, /* offset */
    type_size,
-   u, 
+   i,        /* index position */
    rank, 
    acc,
    pos,
@@ -281,7 +333,7 @@ int diff_array_mem( void       *_mem1,
     mem1 + u,
     mem2 + u, /* offset */
     type_size,
-    u, 
+    i,        /* index position */
     rank, 
     acc,
     pos,
@@ -304,7 +356,7 @@ int diff_array_mem( void       *_mem1,
    mem1 + u,
    mem2 + u, /* offset */
    type_size,
-   u, 
+   i,        /* index position */
    rank, 
    acc,
    pos,
@@ -331,30 +383,44 @@ int diff_array_mem( void       *_mem1,
    char enum_name1[1024];
    char enum_name2[1024];
    
-   if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
-    (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
-   {
-    if (HDstrcmp(enum_name1,enum_name2)!=0)
-     nfound=1;
-   }
-   else
-   {
-    for (u=0; u<type_size; u++)
-     nfound+=diff_native_uchar(
-     mem1 + u,
-     mem2 + u, /* offset */
-     type_size,
-     u, 
-     rank, 
-     acc,
-     pos,
-     options, 
-     obj1, 
-     obj2,
-     ph);
+   /* disable error reporting */
+   H5E_BEGIN_TRY {
     
-   }
+    if ((H5Tenum_nameof(m_type, mem1, enum_name1, sizeof enum_name1) >= 0) &&
+     (H5Tenum_nameof(m_type, mem2, enum_name2, sizeof enum_name2) >= 0))
+    {
+     if (HDstrcmp(enum_name1,enum_name2)!=0)
+     {
+      nfound=1;
+      if ( options->r==0 ) 
+      {
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+       printf(SPACES);
+       printf(SFORMAT,enum_name1,enum_name2);
+      }
+     }
+    }
+    else
+    {
+     for (u=0; u<type_size; u++)
+      nfound+=diff_native_uchar(
+      mem1 + u,
+      mem2 + u, /* offset */
+      type_size,
+      i,        /* index position */
+      rank, 
+      acc,
+      pos,
+      options, 
+      obj1, 
+      obj2,
+      ph);
+    }
+    
+    /* enable error reporting */
+   } H5E_END_TRY;
   }
+
   
   break;
 /*-------------------------------------------------------------------------
@@ -373,17 +439,20 @@ int diff_array_mem( void       *_mem1,
   for (u = 0, nelmts = 1; u <ndims; u++)
    nelmts *= dims[u];
   for (u = 0; u < nelmts; u++) 
-   nfound+=diff_array_mem(
+   nfound+=diff_datum(
     mem1 + u * size,
     mem2 + u * size, /* offset */
     memb_type,
-    u,
+    i,               /* index position */
     rank,
     acc,
     pos,
     options,
     obj1,
-    obj2);
+    obj2,
+    container1_id,
+    container2_id,
+    ph);
   H5Tclose(memb_type);
   break;
 
@@ -401,21 +470,119 @@ int diff_array_mem( void       *_mem1,
   nelmts = ((hvl_t *)mem1)->len;
   
   for (j = 0; j < nelmts; j++) 
-    nfound+=diff_array_mem(
+    nfound+=diff_datum(
     ((char *)(((hvl_t *)mem1)->p)) + j * size,
     ((char *)(((hvl_t *)mem2)->p)) + j * size, /* offset */
     memb_type,
-    j,
+    i,         /* index position */
     rank,
     acc,
     pos,
     options,
     obj1,
-    obj2);
+    obj2,
+    container1_id,
+    container2_id,
+    ph);
   
   H5Tclose(memb_type);
   
   break;
+
+
+ case H5T_REFERENCE:
+  
+  iszero1=is_zero(_mem1, H5Tget_size(m_type));
+  iszero2=is_zero(_mem2, H5Tget_size(m_type));
+  if (iszero1==1 && iszero2==1)
+   return 0;
+  else if (iszero1!=iszero2)
+   return 1;
+  else
+  {
+
+/*-------------------------------------------------------------------------
+ * H5T_STD_REF_DSETREG
+ * Dataset region reference
+ *-------------------------------------------------------------------------
+ */
+   
+   if (H5Tequal(m_type, H5T_STD_REF_DSETREG)) 
+   {
+    if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
+     return -1;
+    if ((obj2_id = H5Rdereference(container2_id, H5R_DATASET_REGION, _mem2))<0)
+     return -1;
+    if (H5Gget_objinfo(obj1_id, ".", FALSE, &sb1)<0)
+     return -1;
+    if (H5Gget_objinfo(obj2_id, ".", FALSE, &sb2)<0)
+     return -1;
+
+    /* compare OID */
+    if (sb1.objno!=sb2.objno)
+    {
+     printf("Different OIDs in reference: <%s, %d> and <%s, %d>", 
+      obj1, sb1.objno, obj2, sb2.objno);
+     nfound = 1;
+    }
+    close_obj(H5G_DATASET,obj1_id);
+    close_obj(H5G_DATASET,obj2_id);
+    
+   }/*dataset reference*/
+
+
+/*-------------------------------------------------------------------------
+ * H5T_STD_REF_OBJ
+ * Object references. get the type and OID of the referenced object
+ *-------------------------------------------------------------------------
+ */
+   else if (H5Tequal(m_type, H5T_STD_REF_OBJ)) 
+   {
+
+    if ((obj1_type = H5Rget_obj_type(container1_id, H5R_OBJECT, _mem1))<0)
+     return -1;
+    if ((obj2_type = H5Rget_obj_type(container2_id, H5R_OBJECT, _mem2))<0)
+     return -1;
+
+    /* check object type */
+    if (obj1_type!=obj2_type)
+    {
+     printf("Different object types referenced: <%s> and <%s>", obj1, obj2);
+     return 1;
+    }
+
+    if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1))<0)
+     return -1;
+    if ((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2))<0)
+     return -1;
+
+
+    /*deep compare */
+    switch (obj1_type) {
+    case H5G_DATASET:
+     nfound=diff_datasetid(obj1_id,
+      obj2_id,
+      NULL,
+      NULL,
+      options);
+     break;
+    default:
+     printf("Warning: Comparison not possible of object types referenced: <%s> and <%s>", 
+      obj1, obj2);
+     break;
+    }
+
+    close_obj(obj1_type,obj1_id);
+    close_obj(obj2_type,obj2_id);
+    
+   }/*object reference*/
+   
+  }/*is zero*/
+  
+  
+  break;
+
+
  case H5T_INTEGER:
 
 
@@ -437,7 +604,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
       }
@@ -451,7 +618,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
         abs(1-temp2_char/temp1_char));
@@ -467,7 +634,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char),
         abs(1-temp2_char/temp1_char));
@@ -479,7 +646,7 @@ int diff_array_mem( void       *_mem1,
     {
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(IFORMAT,temp1_char,temp2_char,abs(temp1_char-temp2_char));
      }
@@ -507,7 +674,7 @@ int diff_array_mem( void       *_mem1,
      {
      if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
       }
@@ -521,7 +688,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
         abs(1-temp2_uchar/temp1_uchar));
@@ -537,7 +704,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
         abs(1-temp2_uchar/temp1_uchar));
@@ -549,7 +716,7 @@ int diff_array_mem( void       *_mem1,
     {
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
      }
@@ -579,7 +746,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
       }
@@ -593,7 +760,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
         abs(1-temp2_short/temp1_short));
@@ -609,7 +776,7 @@ int diff_array_mem( void       *_mem1,
      {
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short),
         abs(1-temp2_short/temp1_short));
@@ -621,7 +788,7 @@ int diff_array_mem( void       *_mem1,
     {
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(IFORMAT,temp1_short,temp2_short,abs(temp1_short-temp2_short));
      }
@@ -652,7 +819,7 @@ int diff_array_mem( void       *_mem1,
    
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
       }
@@ -667,7 +834,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
         abs(1-temp2_ushort/temp1_ushort));
@@ -684,7 +851,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort),
         abs(1-temp2_ushort/temp1_ushort));
@@ -697,7 +864,7 @@ int diff_array_mem( void       *_mem1,
    
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(IFORMAT,temp1_ushort,temp2_ushort,abs(temp1_ushort-temp2_ushort));
      }
@@ -729,7 +896,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
       }
@@ -744,7 +911,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
         abs(1-temp2_int/temp1_int));
@@ -761,7 +928,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(IPFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int),
         abs(1-temp2_int/temp1_int));
@@ -774,7 +941,7 @@ int diff_array_mem( void       *_mem1,
    
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(IFORMAT,temp1_int,temp2_int,abs(temp1_int-temp2_int));
      }
@@ -806,7 +973,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(UIFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
       }
@@ -821,7 +988,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(UIPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
         abs((int)(1-temp2_uint/temp1_uint)));
@@ -838,7 +1005,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(UIPFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)),
         abs((int)(1-temp2_uint/temp1_uint)));
@@ -851,7 +1018,7 @@ int diff_array_mem( void       *_mem1,
     
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(UIFORMAT,temp1_uint,temp2_uint,abs((int)(temp1_uint-temp2_uint)));
      }
@@ -884,7 +1051,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
       }
@@ -899,7 +1066,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
         labs(1-temp2_long/temp1_long));
@@ -916,7 +1083,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(LPIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long),
         labs(1-temp2_long/temp1_long));
@@ -929,7 +1096,7 @@ int diff_array_mem( void       *_mem1,
     
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(LIFORMAT,temp1_long,temp2_long,labs(temp1_long-temp2_long));
      }
@@ -961,7 +1128,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(ULIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
       }
@@ -976,7 +1143,7 @@ int diff_array_mem( void       *_mem1,
       
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(ULPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
         labs((long)(1-temp2_ulong/temp1_ulong)));
@@ -993,7 +1160,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(ULPIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)),
         labs((long)(1-temp2_ulong/temp1_ulong)));
@@ -1006,7 +1173,7 @@ int diff_array_mem( void       *_mem1,
     
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(ULIFORMAT,temp1_ulong,temp2_ulong,labs((long)(temp1_ulong-temp2_ulong)));
      }
@@ -1037,7 +1204,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_llong,temp1_llong,temp2_llong,(long_long)labs((long)(temp1_llong-temp2_llong)));
       }
@@ -1052,7 +1219,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_llongp,temp1_llong,temp2_llong,(long_long)labs((long)(temp1_llong-temp2_llong)),
         (long_long)labs((long)(1-temp2_llong/temp1_llong)));
@@ -1069,7 +1236,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_llongp,temp1_llong,temp2_llong,(long_long)labs((long)(temp1_llong-temp2_llong)),
         (long_long)labs((long)(1-temp2_llong/temp1_llong)));
@@ -1082,7 +1249,7 @@ int diff_array_mem( void       *_mem1,
    
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(fmt_llong,temp1_llong,temp2_llong,(long_long)labs((long)(temp1_llong-temp2_llong)));
      }
@@ -1113,7 +1280,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullong,temp1_ullong,temp2_ullong,
         (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
@@ -1129,7 +1296,7 @@ int diff_array_mem( void       *_mem1,
    
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullongp,temp1_ullong,temp2_ullong,
         (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
@@ -1147,7 +1314,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(fmt_ullongp,temp1_ullong,temp2_ullong,
         (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)),
@@ -1161,7 +1328,7 @@ int diff_array_mem( void       *_mem1,
    
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(fmt_ullong,temp1_ullong,temp2_ullong,
        (unsigned long_long)labs((long)(temp1_ullong-temp2_ullong)));
@@ -1198,7 +1365,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
       }
@@ -1213,7 +1380,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
         fabs(1-temp2_float/temp1_float));
@@ -1230,7 +1397,7 @@ int diff_array_mem( void       *_mem1,
     
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FPFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float),
         fabs(1-temp2_float/temp1_float));
@@ -1243,7 +1410,7 @@ int diff_array_mem( void       *_mem1,
     
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(FFORMAT,temp1_float,temp2_float,fabs(temp1_float-temp2_float));
      }
@@ -1273,7 +1440,7 @@ int diff_array_mem( void       *_mem1,
    
       if ( options->r==0 ) 
       {
-       print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
       }
@@ -1288,7 +1455,7 @@ int diff_array_mem( void       *_mem1,
      
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
         fabs(1-temp2_double/temp1_double));
@@ -1305,7 +1472,7 @@ int diff_array_mem( void       *_mem1,
    
       if ( options->r==0 ) 
       {
-       print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+       print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
        printf(SPACES);
        printf(FPFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double),
         fabs(1-temp2_double/temp1_double));
@@ -1318,7 +1485,7 @@ int diff_array_mem( void       *_mem1,
     
      if ( options->r==0 ) 
      {
-      print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+      print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
       printf(SPACES);
       printf(FFORMAT,temp1_double,temp2_double,fabs(temp1_double-temp2_double));
      }
@@ -1341,7 +1508,7 @@ int diff_array_mem( void       *_mem1,
 /*-------------------------------------------------------------------------
  * Function: diff_native_uchar
  *
- * Purpose: do a byte-by-byte comparison
+ * Purpose: do a byte-by-byte comparison and print in numerical format
  *
  * Return: number of differences found
  *
@@ -1352,24 +1519,22 @@ int diff_array_mem( void       *_mem1,
  *-------------------------------------------------------------------------
  */
 
-
 static
 int diff_native_uchar(unsigned char *mem1,
                       unsigned char *mem2,
                       size_t        type_size,
-                      unsigned      i, 
+                      hsize_t       i, 
                       int           rank, 
-                      int           *acc,  
-                      int           *pos, 
+                      hsize_t       *acc,  
+                      hsize_t       *pos,
                       diff_opt_t    *options, 
                       const char    *obj1, 
                       const char    *obj2,
-                      int           ph)
+                      int           *ph)
 {
  int                nfound=0;  /* differences found */
  unsigned char      temp1_uchar;
  unsigned char      temp2_uchar;
- 
  
  memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
  memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -1381,7 +1546,7 @@ int diff_native_uchar(unsigned char *mem1,
   {
    if ( options->r==0 ) 
    {
-    print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+    print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
     printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
    }
@@ -1395,7 +1560,7 @@ int diff_native_uchar(unsigned char *mem1,
   {
    if ( options->r==0 ) 
    {
-    print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+    print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
     printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
      abs(1-temp2_uchar/temp1_uchar));
@@ -1411,7 +1576,7 @@ int diff_native_uchar(unsigned char *mem1,
   {
    if ( options->r==0 ) 
    {
-    print_pos(&ph,1,i,acc,pos,rank,obj1,obj2);
+    print_pos(ph,1,i,acc,pos,rank,obj1,obj2);
     printf(SPACES);
     printf(IPFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar),
      abs(1-temp2_uchar/temp1_uchar));
@@ -1423,7 +1588,7 @@ int diff_native_uchar(unsigned char *mem1,
  {
   if ( options->r==0 ) 
   {
-   print_pos(&ph,0,i,acc,pos,rank,obj1,obj2);
+   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
    printf(SPACES);
    printf(IFORMAT,temp1_uchar,temp2_uchar,abs(temp1_uchar-temp2_uchar));
   }
@@ -1432,3 +1597,105 @@ int diff_native_uchar(unsigned char *mem1,
  
  return nfound;
 } 
+
+
+/*-------------------------------------------------------------------------
+ * Function: diff_char
+ *
+ * Purpose: do a byte-by-byte comparison and print in char format
+ *
+ * Return: number of differences found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: October 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+int diff_char(unsigned char *mem1,
+              unsigned char *mem2,
+              size_t        type_size,
+              hsize_t       i, 
+              int           rank, 
+              hsize_t       *acc,  
+              hsize_t       *pos,
+              diff_opt_t    *options, 
+              const char    *obj1, 
+              const char    *obj2,
+              int           *ph)
+{
+ int                nfound=0;  /* differences found */
+ unsigned char      temp1_uchar;
+ unsigned char      temp2_uchar;
+ 
+ memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
+ memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
+
+ if (temp1_uchar != temp2_uchar)
+ {
+  if ( options->r==0 ) 
+  {
+   print_pos(ph,0,i,acc,pos,rank,obj1,obj2);
+   printf(SPACES);
+   printf(CFORMAT,temp1_uchar,temp2_uchar);
+  }
+  nfound++;
+ }
+ 
+ return nfound;
+} 
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	is_zero
+ *
+ * Purpose:	Determines if memory is initialized to all zero bytes.
+ *
+ * Return:	TRUE if all bytes are zero; FALSE otherwise
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+is_zero(const void *_mem, size_t size)
+{
+ const unsigned char *mem = (const unsigned char *)_mem;
+ 
+ while (size-- > 0)
+  if (mem[size])
+   return FALSE;
+  
+  return TRUE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	close_obj
+ *
+ * Purpose:	Auxialiary function to close an object
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static 
+void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+{
+ 
+ switch (obj_type) {
+ case H5G_GROUP:
+  H5Gclose(obj_id);
+  break;
+ case H5G_DATASET:
+  H5Dclose(obj_id);
+  break;
+ case H5G_TYPE:
+  H5Tclose(obj_id);
+  break;
+ default:
+  assert(0);
+  break;
+ }
+}
+

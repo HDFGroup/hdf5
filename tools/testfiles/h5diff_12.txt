@@ -2,10 +2,5 @@
 Expected output for 'h5diff file1.h5 file2.h5 -v -n 2 g1/dset1 g1/dset2'
 #############################
 $h5diff file1.h5 file2.h5 -v -n 2 g1/dset1 g1/dset2
-Comparing </g1/dset1> with </g1/dset2>
-position        dset1           dset2           difference          
-------------------------------------------------------------
-[ 0 1 ]          1               1.1             0.1            
-[ 1 0 ]          1               1.01            0.01           
-2 differences found
+Object <2> could not be found in <file1.h5>
 

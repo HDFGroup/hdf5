@@ -28,9 +28,6 @@
  *
  * Date: May 9, 2003
  *
- * Modifications: November 3, 2003
- *  
- *
  *-------------------------------------------------------------------------
  */
 int diff_dataset( hid_t file1_id, 
@@ -41,29 +38,7 @@ int diff_dataset( hid_t file1_id,
 {
  hid_t        dset1_id  =-1;
  hid_t        dset2_id  =-1;
- hid_t        space1_id =-1;
- hid_t        space2_id =-1;
- hid_t        f_type1=-1, f_type2=-1; /* file data type */ 
- hid_t        m_type1=-1, m_type2=-1; /* memory data type */
- size_t       m_size1, m_size2;       /* size of type in memory */
- H5T_sign_t   sign1, sign2;           /* sign of type */
- int          rank1, rank2; 
- void         *buf1=NULL, *buf2=NULL;
- hsize_t      tot_cnt1, tot_cnt2;
- hsize_t      dims1[H5S_MAX_RANK];
- hsize_t      dims2[H5S_MAX_RANK];
- hsize_t      maxdim1[H5S_MAX_RANK];
- hsize_t      maxdim2[H5S_MAX_RANK];
- int          nfound=0;               /* number of differences found */
- const char   *name1=NULL;            /* relative names */
- const char   *name2=NULL;
- int          maxdim_diff=0;          /* maximum dimensions are different */
- int          dim_diff=0;             /* current dimensions are different */
- int          can1, can2;             /* supported diff */
- hsize_t      storage_size1;
- hsize_t      storage_size2;
- int          i, gout=0;
-
+ int          gout=0, nfound;
 
  /* disable error reporting */
  H5E_BEGIN_TRY {
@@ -88,6 +63,77 @@ int diff_dataset( hid_t file1_id,
  } H5E_END_TRY;
  if (gout)
   goto out;
+
+ nfound=diff_datasetid(dset1_id,
+                       dset2_id,
+                       obj1_name,
+                       obj2_name,
+                       options);
+
+ 
+
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
+
+out:
+
+ /* disable error reporting */
+ H5E_BEGIN_TRY {
+  H5Dclose(dset1_id);
+  H5Dclose(dset2_id);
+   /* enable error reporting */
+ } H5E_END_TRY;
+ 
+ return nfound;
+
+}
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: diff_datasetid
+ *
+ * Purpose: check for comparable datasets and read into a compatible 
+ *  memory type
+ *
+ * Return: Number of differences found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+int diff_datasetid( hid_t dset1_id, 
+                    hid_t dset2_id, 
+                    const char *obj1_name, 
+                    const char *obj2_name, 
+                    diff_opt_t *options )
+{
+ hid_t        space1_id =-1;
+ hid_t        space2_id =-1;
+ hid_t        f_type1=-1, f_type2=-1; /* file data type */ 
+ hid_t        m_type1=-1, m_type2=-1; /* memory data type */
+ size_t       m_size1, m_size2;       /* size of type in memory */
+ H5T_sign_t   sign1, sign2;           /* sign of type */
+ int          rank1, rank2; 
+ void         *buf1=NULL, *buf2=NULL;
+ hsize_t      nelmts1, nelmts2;
+ hsize_t      dims1[H5S_MAX_RANK];
+ hsize_t      dims2[H5S_MAX_RANK];
+ hsize_t      maxdim1[H5S_MAX_RANK];
+ hsize_t      maxdim2[H5S_MAX_RANK];
+ int          nfound=0;               /* number of differences found */
+ const char   *name1=NULL;            /* relative names */
+ const char   *name2=NULL;
+ int          maxdim_diff=0;          /* maximum dimensions are different */
+ int          dim_diff=0;             /* current dimensions are different */
+ hsize_t      storage_size1;
+ hsize_t      storage_size2;
+ int          i, gout=0;
 
   /* Get the dataspace handle */
  if ( (space1_id = H5Dget_space(dset1_id)) < 0 )
@@ -136,7 +182,7 @@ int diff_dataset( hid_t file1_id,
  storage_size2=H5Dget_storage_size(dset2_id);
  if (storage_size1<=0 && storage_size2<=0)
  {
-  if (options->verbose) 
+  if (options->verbose && obj1_name && obj2_name) 
    printf("<%s> and <%s> are empty datasets\n", obj1_name, obj2_name);
   goto out;
  }
@@ -167,26 +213,26 @@ int diff_dataset( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
- tot_cnt1 = 1;
+ nelmts1 = 1;
  for (i = 0; i < rank1; i++) 
  {
-  tot_cnt1 *= dims1[i];
+  nelmts1 *= dims1[i];
  }
  
- tot_cnt2 = 1;
+ nelmts2 = 1;
  for (i = 0; i < rank2; i++) 
  {
-  tot_cnt2 *= dims2[i];
+  nelmts2 *= dims2[i];
  }
 
- assert(tot_cnt1==tot_cnt2);
+ assert(nelmts1==nelmts2);
 
 /*-------------------------------------------------------------------------
  * check for equal file datatype; warning only
  *-------------------------------------------------------------------------
  */
 
- if ( (H5Tequal(f_type1, f_type2)==0) && options->verbose) 
+ if ( (H5Tequal(f_type1, f_type2)==0) && options->verbose && obj1_name) 
  {
   printf("Warning: Different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
@@ -209,27 +255,9 @@ int diff_dataset( hid_t file1_id,
  m_size2 = H5Tget_size( m_type2 );
 
 #if defined (H5DIFF_DEBUG)
- print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
+ if (obj1_name)
+  print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
 #endif 
-
-/*-------------------------------------------------------------------------
- * check for the comparable types in diff_array
- *-------------------------------------------------------------------------
- */
-
- can1=diff_can(m_type1);
- can2=diff_can(m_type2);
- if ( (can1==0 || can2==0))
- {
-  if (options->verbose) {
-   printf("Comparison not supported\n");
-   if ( can1==0 )
-    printf("<%s> type is not supported\n", obj1_name);
-   if ( can2==0 )
-    printf("<%s> type is not supported\n", obj2_name);
-  }
-  goto out;
- }
 
 /*-------------------------------------------------------------------------
  * check for different signed/unsigned types
@@ -240,14 +268,12 @@ int diff_dataset( hid_t file1_id,
  sign2=H5Tget_sign(m_type2);
  if ( sign1 != sign2 )
  {
-  if (options->verbose) {
-   printf("Comparison not supported\n");
-   printf("<%s> has sign %s\n", obj1_name, get_sign(sign1));
-   printf("<%s> has sign %s", obj2_name, get_sign(sign2));
+  if (options->verbose && obj1_name) {
+   printf("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
+   printf("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
   }
   goto out;
  }
-
 
 /*-------------------------------------------------------------------------
  * "upgrade" the smaller memory size 
@@ -270,13 +296,14 @@ int diff_dataset( hid_t file1_id,
   }
 #if defined (H5DIFF_DEBUG)
   printf("WARNING: Size was upgraded\n");
+  if (obj1_name)
   print_sizes(obj1_name,obj2_name,f_type1,f_type2,m_type1,m_type2);
 #endif 
  }
  assert(m_size1==m_size2);
 
- buf1 = (void *) HDmalloc((unsigned) (tot_cnt1*m_size1));
- buf2 = (void *) HDmalloc((unsigned) (tot_cnt2*m_size2));
+ buf1 = (void *) HDmalloc((unsigned) (nelmts1*m_size1));
+ buf2 = (void *) HDmalloc((unsigned) (nelmts2*m_size2));
 
  if ( buf1 == NULL || buf2 == NULL )
  {
@@ -299,12 +326,23 @@ int diff_dataset( hid_t file1_id,
  * array compare
  *-------------------------------------------------------------------------
  */
- if (options->verbose)
-  printf( "Comparing <%s> with <%s>\n", obj1_name, obj2_name );
- name1=diff_basename(obj1_name);
- name2=diff_basename(obj2_name);
- nfound = diff_array(buf1,buf2,tot_cnt1,rank1,dims1,options,name1,name2,m_type1);
- if (options->verbose)
+ if (obj1_name)
+  name1=diff_basename(obj1_name);
+ if (obj2_name)
+  name2=diff_basename(obj2_name);
+ nfound = diff_array(buf1, 
+                     buf2,
+                     nelmts1,
+                     rank1,
+                     dims1,
+                     options,
+                     name1,
+                     name2,
+                     m_type1,
+                     dset1_id,
+                     dset2_id);
+
+ if (options->verbose && nfound)
   printf("%d differences found\n", nfound );
 
 /*-------------------------------------------------------------------------
@@ -312,10 +350,7 @@ int diff_dataset( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
- if (options->attr)
-  diff_attr(dset1_id,dset1_id,options);
-
-
+ diff_attr(dset1_id,dset2_id,obj1_name,obj2_name,options);
 
 /*-------------------------------------------------------------------------
  * close
@@ -330,8 +365,6 @@ out:
  /* close */
  /* disable error reporting */
  H5E_BEGIN_TRY {
-  H5Dclose(dset1_id);
-  H5Dclose(dset2_id);
   H5Sclose(space1_id);
   H5Sclose(space2_id);
   H5Tclose(f_type1);
@@ -344,6 +377,9 @@ out:
  return nfound;
 
 }
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function: diff_can_type
@@ -398,9 +434,8 @@ int diff_can_type( hid_t       f_type1, /* file data type */
 
  if ( tclass1 != tclass2 )
  {
-  if (options->verbose) {
-   printf("Comparison not supported\n");
-   printf("<%s> is of class %s and <%s> is of class %s\n", 
+  if (options->verbose && obj1_name) {
+   printf("Comparison not possible: <%s> is of class %s and <%s> is of class %s\n", 
     obj1_name, get_class(tclass1), 
     obj2_name, get_class(tclass2) );
   }
@@ -424,16 +459,14 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  case H5T_OPAQUE:
  case H5T_ENUM:
  case H5T_VLEN:
-  return 1;
+ case H5T_REFERENCE:
   
- default: /*H5T_TIME, H5T_REFERENCE */
-  if (options->verbose ) {
-   printf("Comparison not supported\n");
-   printf("<%s> is of class %s and <%s> is of class %s\n", 
-    obj1_name, get_class(tclass1), 
-    obj2_name, get_class(tclass2) );
-  }
+  break;
   
+ default: /*H5T_TIME */
+  if (options->verbose && obj1_name ) 
+   printf("Comparison not supported: <%s> and <%s> are of class %s\n", 
+    obj1_name,obj2_name,get_class(tclass2) );
   return 0;
  }
 
@@ -442,7 +475,7 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  *-------------------------------------------------------------------------
  */
 
- if ( (H5Tequal(f_type1, f_type2)==0) && options->verbose) 
+ if ( (H5Tequal(f_type1, f_type2)==0) && options->verbose && obj1_name) 
  {
   printf("Warning: Different storage datatype\n");
   printf("<%s> has file datatype ", obj1_name);
@@ -460,9 +493,8 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  
  if ( rank1 != rank2 )
  {
-  if (options->verbose) {
-   printf("Comparison not supported\n");
-   printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+  if (options->verbose && obj1_name) {
+   printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
    print_dims(rank1,dims1);
    printf(", max dimensions ");
    print_dims(rank1,maxdim1);
@@ -499,9 +531,8 @@ int diff_can_type( hid_t       f_type1, /* file data type */
 
  if (dim_diff==1)
  {
-  if (options->verbose) {
-   printf("Comparison not supported\n");
-   printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+  if (options->verbose && obj1_name) {
+   printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
    print_dims(rank1,dims1);
    if (maxdim1 && maxdim2) {
     printf(", max dimensions ");
@@ -520,7 +551,7 @@ int diff_can_type( hid_t       f_type1, /* file data type */
  * maximum dimensions; just give a warning
  *-------------------------------------------------------------------------
  */
- if (maxdim1 && maxdim2 && maxdim_diff==1)
+ if (maxdim1 && maxdim2 && maxdim_diff==1 && obj1_name )
  {
   if (options->verbose) {
    printf( "Warning: Different maximum dimensions\n");

@@ -2,6 +2,5 @@
 Expected output for 'h5diff file3.h5 file3.h5 -v link link'
 #############################
 $h5diff file3.h5 file3.h5 -v link link
-Comparison not supported
-</link> is of type H5G_LINK and </link> is of type H5G_LINK
+Link:        </link> and </link>
 

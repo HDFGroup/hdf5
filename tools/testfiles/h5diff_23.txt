@@ -2,6 +2,5 @@
 Expected output for 'h5diff file3.h5 file3.h5 -v group group'
 #############################
 $h5diff file3.h5 file3.h5 -v group group
-Comparison not supported
-</group> is of type H5G_GROUP and </group> is of type H5G_GROUP
+Group:       </group> and </group>
 

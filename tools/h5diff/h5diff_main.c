@@ -19,7 +19,7 @@
 /* Due to alignment issue in Alpha clusters, options must be declared here
  * not as a local variable in main().
  */
-diff_opt_t  options = {0,0,0,0,0,0,0,0,0};
+diff_opt_t  options = {0,0,0,0,0,0,0,0};
 
 static void usage(void);
 static int check_n_input( const char* );
@@ -55,19 +55,6 @@ int main(int argc, const char *argv[])
  const char *objname2  = NULL;
  int        nfound=0, ret;
 
-/*-------------------------------------------------------------------------
- * print the command line options
- *-------------------------------------------------------------------------
- */
-
- printf("$h5diff");
- for (i=1; i<argc ; i++) 
- {
-  printf(" %s", argv[i] );
- }
- printf("\n");
-
- 
 /*-------------------------------------------------------------------------
  * initial check of command line options
  *-------------------------------------------------------------------------
@@ -116,9 +103,7 @@ int main(int argc, const char *argv[])
     case 'v': 
      options.verbose = 1;
      break;
-    case 'a': 
-     options.attr = 1;
-     break;
+    break;
     case 'r': 
      options.r = 1;
      break;
@@ -172,7 +157,9 @@ int main(int argc, const char *argv[])
    
   {
    /* check if it is not a -d, -p parameter */
-   if ( '-' !=argv[i-1][0] )
+   if ( '-'==argv[i-1][0] && ('d'==argv[i-1][1] ||'p'==argv[i-1][1] ))
+    continue;
+   else
    {
     if ( objname1==NULL )
      objname1 = argv[i];
@@ -185,11 +172,28 @@ int main(int argc, const char *argv[])
      else
       /* no */
       objname2 = objname1;
-    }
-   }
-  }
+    } /*objname2*/
+   } /*else*/
+  } /*else*/
   
  }/*for*/
+
+
+/*-------------------------------------------------------------------------
+ * print the command line options
+ *-------------------------------------------------------------------------
+ */
+ 
+ if (options.verbose)
+ {
+  printf("$h5diff");
+  for (i=1; i<argc ; i++) 
+  {
+   printf(" %s", argv[i] );
+  }
+  printf("\n");
+ }
+
  
 
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
@@ -307,7 +311,6 @@ void usage(void)
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
  printf("[-p relative]     Print difference when it is greater than a relative limit\n");
- printf("[-a]              Compare attributes\n");
  printf("\n");
  printf("Items in [] are optional\n");
  printf("[obj1] and [obj2] are HDF5 objects (datasets, groups or datatypes)\n");

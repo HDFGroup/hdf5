@@ -12,78 +12,13 @@
  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "hdf5.h"
-#include "H5private.h" 
+#include "testh5diff.h"
+
 
 /*UINT_MAX Maximum value for a variable of type unsigned int. 4294967295 */
 #define UIMAX 4294967295u
 
-/* diff test*/
-static int do_test_1(const char *file1, const char *file2);
-static int do_test_2(const char *file1, const char *file2);
-static int do_test_3(const char *file1, const char *file2);
-static int do_test_4(const char *file1, const char *file2);
-static int do_test_5(const char *file1, const char *file2);
-static int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
-                          hid_t type_id, void *buf );
 
-
-int main(int UNUSED argc, const UNUSED char *argv[])
-{
- 
- do_test_1("file1.h5","file2.h5");
- do_test_2("file3.h5",NULL);
- do_test_3("file4.h5",NULL);
- do_test_4("file5.h5",NULL);
- do_test_5("file6.h5",NULL);
- return 0;
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: write_dataset
- *
- * Purpose: utility function to write a dataset
- *
- * Return: 
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: April 7, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-static 
-int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
-                   hid_t type_id, void *buf )
-{
- hid_t   dataset_id;
- hid_t   space_id;  
- herr_t  status;
-
- /* Create a buf space  */
- space_id = H5Screate_simple(rank,dims,NULL);
-
- /* Create a dataset */
- dataset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT);
-  
- /* Write the buf */
- if ( buf )
-  H5Dwrite(dataset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-
- /* Close */
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
- assert(status>=0);
-
- return status;
-
-}
 
 /*
 
@@ -114,7 +49,7 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
  file1.h5 file2.h5 
 
 # ##############################################################################
-# # not comparable types
+# # basic types
 # ##############################################################################
 
 # 2.0
@@ -135,37 +70,6 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 # 2.5
  file3.h5 file3.h5 link link
 
-# ##############################################################################
-# # Class issues
-# ##############################################################################
-
-
-# 3.0
- file4.h5 file4.h5 string 
-
-# 3.1
- file4.h5 file4.h5 bitfield 
-
-# 3.2
- file4.h5 file4.h5 opaque
-
-# 3.3
- file4.h5 file4.h5 compound
-
-# 3.4
- file4.h5 file4.h5 ref
-
-# 3.5
- file4.h5 file4.h5 enum
-
-# 3.6
- file4.h5 file4.h5 vlen
-
-# 3.7
- file4.h5 file4.h5 array
-
-# 3.8
- file4.h5 file4.h5 integer float
 
 # ##############################################################################
 # # Dimensions
@@ -334,8 +238,8 @@ int write_dataset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
  * Basic review tests
  *-------------------------------------------------------------------------
  */
-static 
-int do_test_1(const char *file1, const char *file2)
+ 
+int test_basic(const char *file1, const char *file2)
 {
 
  hid_t   file1_id, file2_id; 
@@ -345,7 +249,7 @@ int do_test_1(const char *file1, const char *file2)
 
  /* Test */
  double  data1[3][2] = {{1,1},{1,1},{1,1}};
- double  data2[3][2] = {{1,1.1},{1.01,1.001},{1.0001,1.000000001}};
+ double  data2[3][2] = {{1,1.1},{1.01,1.001},{1.0001,1}};
  double  data3[3][2] = {{100,110},{100,100},{100,100}};
  double  data4[3][2] = {{110,100},{90,80},{140,200}};
 
@@ -362,11 +266,11 @@ int do_test_1(const char *file1, const char *file2)
  group2_id = H5Gcreate(file2_id, "g1", 0);
  group3_id = H5Gcreate(file2_id, "g2", 0);
 
- write_dataset(group1_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data1);
- write_dataset(group2_id,2,dims,"dset2",H5T_NATIVE_DOUBLE,data2);
- write_dataset(group1_id,2,dims,"dset3",H5T_NATIVE_DOUBLE,data3);
- write_dataset(group2_id,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
- write_dataset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
+ write_dset(group1_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data1);
+ write_dset(group2_id,2,dims,"dset2",H5T_NATIVE_DOUBLE,data2);
+ write_dset(group1_id,2,dims,"dset3",H5T_NATIVE_DOUBLE,data3);
+ write_dset(group2_id,2,dims,"dset4",H5T_NATIVE_DOUBLE,data4);
+ write_dset(group2_id,2,dims,"dset1",H5T_NATIVE_DOUBLE,data2);
 
 /*-------------------------------------------------------------------------
  * Close 
@@ -384,8 +288,8 @@ int do_test_1(const char *file1, const char *file2)
  * Compare different types: H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK
  *-------------------------------------------------------------------------
  */
-static 
-int do_test_2(const char *file1, const char UNUSED *file2)
+ 
+int test_types(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -399,6 +303,7 @@ int do_test_2(const char *file1, const char UNUSED *file2)
   int    a;
   float  b;
  } s_t;
+ 
 
 /*-------------------------------------------------------------------------
  * Create one file
@@ -410,7 +315,7 @@ int do_test_2(const char *file1, const char UNUSED *file2)
  * H5G_DATASET
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,1,dims,"dset",H5T_NATIVE_INT,0);
+ write_dset(file1_id,1,dims,"dset",H5T_NATIVE_INT,0);
 
 /*-------------------------------------------------------------------------
  * H5G_GROUP
@@ -450,205 +355,13 @@ int do_test_2(const char *file1, const char UNUSED *file2)
 
 
 
-/*-------------------------------------------------------------------------
- * Check for non supported classes. Supported classes are H5T_INTEGER and H5T_FLOAT
- * Non supported classes are
- * H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_COMPOUND, H5T_REFERENCE,
- * H5T_ENUM, H5T_VLEN, H5T_ARRAY
- *-------------------------------------------------------------------------
- */
-static 
-int do_test_3(const char *file1, const char UNUSED *file2)
-{
-
- hid_t   file1_id; 
- hid_t   dataset_id;
- hid_t   space_id;  
- hid_t   type_id;  
- hsize_t dims[1]={1};
- herr_t  status;
- int     val;
-
-  /* Compound datatype */
- typedef struct s_t 
- {
-  int    a;
-  float  b;
- } s_t;
-
- typedef enum 
- {
-  E_RED,
-  E_GREEN
-} e_t;
-
-/*-------------------------------------------------------------------------
- * Create a file
- *-------------------------------------------------------------------------
- */
- file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
-
-/*-------------------------------------------------------------------------
- * H5T_STRING
- *-------------------------------------------------------------------------
- */
- space_id = H5Screate(H5S_SCALAR);
- type_id = H5Tcopy(H5T_C_S1);
- dataset_id = H5Dcreate(file1_id,"string",type_id,space_id,H5P_DEFAULT);
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * H5T_BITFIELD
- *-------------------------------------------------------------------------
- */
-
- type_id = H5Tcopy(H5T_STD_B8LE);
- write_dataset(file1_id,1,dims,"bitfield",type_id,0);
- status = H5Tclose(type_id);
-
-
-/*-------------------------------------------------------------------------
- * H5T_OPAQUE
- *-------------------------------------------------------------------------
- */
-
- type_id = H5Tcreate(H5T_OPAQUE, 1);
- status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
- write_dataset(file1_id,1,dims,"opaque",type_id,0);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * H5T_COMPOUND
- *-------------------------------------------------------------------------
- */
-
- type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
- H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
- H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
- write_dataset(file1_id,1,dims,"compound",type_id,0);
- status = H5Tclose(type_id);
- 
-/*-------------------------------------------------------------------------
- * H5T_REFERENCE
- *-------------------------------------------------------------------------
- */
- write_dataset(file1_id,1,dims,"ref",H5T_STD_REF_OBJ,0);
-
-/*-------------------------------------------------------------------------
- * H5T_ENUM
- *-------------------------------------------------------------------------
- */
- type_id = H5Tcreate(H5T_ENUM, sizeof(e_t));
- H5Tenum_insert(type_id, "RED",   (val = 0, &val));
- H5Tenum_insert(type_id, "GREEN", (val = 1, &val));
- write_dataset(file1_id,1,dims,"enum",type_id,0);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * H5T_VLEN
- *-------------------------------------------------------------------------
- */
- type_id = H5Tvlen_create(H5T_NATIVE_INT);
- write_dataset(file1_id,1,dims,"vlen",type_id,0);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * H5T_ARRAY
- *-------------------------------------------------------------------------
- */
- type_id = H5Tarray_create(H5T_NATIVE_INT,1,dims,NULL);
- write_dataset(file1_id,1,dims,"array",type_id,0);
- status = H5Tclose(type_id);
-
-/*-------------------------------------------------------------------------
- * H5T_INTEGER vs H5T_FLOAT
- *-------------------------------------------------------------------------
- */
-
- write_dataset(file1_id,1,dims,"integer",H5T_NATIVE_INT,0);
- write_dataset(file1_id,1,dims,"float",H5T_NATIVE_FLOAT,0);
-
-/*-------------------------------------------------------------------------
- * Close 
- *-------------------------------------------------------------------------
- */
- status = H5Fclose(file1_id);
- return status;
-}
-
-
-/*-------------------------------------------------------------------------
- * Dimension issues
- *-------------------------------------------------------------------------
- */
-static 
-int do_test_4(const char *file1, const char UNUSED *file2)
-{
-
- hid_t   file1_id; 
- hid_t   dataset_id;
- hid_t   space_id;
- hid_t   plist_id;
- herr_t  status;
- hsize_t dims1 [1]={7};
- hsize_t dims2 [4]={2,2,2,2};
- hsize_t dims21[4]={2,2,2,3};
-
-/*-------------------------------------------------------------------------
- * Create a file
- *-------------------------------------------------------------------------
- */
- file1_id = H5Fcreate (file1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT); 
-
-/*-------------------------------------------------------------------------
- * rank
- *-------------------------------------------------------------------------
- */
- write_dataset(file1_id,1,dims1,"dset1",H5T_NATIVE_INT,NULL);
- write_dataset(file1_id,4,dims2,"dset2",H5T_NATIVE_INT,NULL);
-
-/*-------------------------------------------------------------------------
- * current dimensions
- *-------------------------------------------------------------------------
- */
- write_dataset(file1_id,4,dims2,"dset3",H5T_NATIVE_INT,NULL);
- write_dataset(file1_id,4,dims21,"dset4",H5T_NATIVE_INT,NULL);
-
-/*-------------------------------------------------------------------------
- * Check for the same maximum dimensions. Give a warning if they are different
- *-------------------------------------------------------------------------
- */
-
- space_id = H5Screate_simple(4,dims2,dims2);
- dataset_id = H5Dcreate(file1_id,"dset5",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
- space_id = H5Screate_simple(4,dims2,dims21);
- plist_id = H5Pcreate(H5P_DATASET_CREATE);
- status = H5Pset_chunk(plist_id,4,dims2);
- dataset_id = H5Dcreate(file1_id,"dset6",H5T_NATIVE_INT,space_id,plist_id);
- status = H5Dclose(dataset_id);
- status = H5Sclose(space_id);
-
-/*-------------------------------------------------------------------------
- * Close 
- *-------------------------------------------------------------------------
- */
- status = H5Fclose(file1_id);
- return status;
-}
-
-
-
 
 /*-------------------------------------------------------------------------
  * Datasets datatypes 
  *-------------------------------------------------------------------------
  */
-static 
-int do_test_5(const char *file1, const char UNUSED *file2)
+ 
+int test_native(const char *file1, const char UNUSED *file2)
 {
 
  hid_t   file1_id; 
@@ -695,83 +408,83 @@ int do_test_5(const char *file1, const char UNUSED *file2)
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset0a",H5T_STD_I16LE,buf2a);
- write_dataset(file1_id,2,dims,"dset0b",H5T_STD_I32LE,buf3b);
+ write_dset(file1_id,2,dims,"dset0a",H5T_STD_I16LE,buf2a);
+ write_dset(file1_id,2,dims,"dset0b",H5T_STD_I32LE,buf3b);
  
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_CHAR 
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,2,dims,"dset1a",H5T_NATIVE_CHAR,buf1a);
- write_dataset(file1_id,2,dims,"dset1b",H5T_NATIVE_CHAR,buf1b);
+ write_dset(file1_id,2,dims,"dset1a",H5T_NATIVE_CHAR,buf1a);
+ write_dset(file1_id,2,dims,"dset1b",H5T_NATIVE_CHAR,buf1b);
 
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_SHORT 
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,2,dims,"dset2a",H5T_NATIVE_SHORT,buf2a);
- write_dataset(file1_id,2,dims,"dset2b",H5T_NATIVE_SHORT,buf2b);
+ write_dset(file1_id,2,dims,"dset2a",H5T_NATIVE_SHORT,buf2a);
+ write_dset(file1_id,2,dims,"dset2b",H5T_NATIVE_SHORT,buf2b);
 
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_INT
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,2,dims,"dset3a",H5T_NATIVE_INT,buf3a);
- write_dataset(file1_id,2,dims,"dset3b",H5T_NATIVE_INT,buf3b);
+ write_dset(file1_id,2,dims,"dset3a",H5T_NATIVE_INT,buf3a);
+ write_dset(file1_id,2,dims,"dset3b",H5T_NATIVE_INT,buf3b);
 
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_LONG
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,2,dims,"dset4a",H5T_NATIVE_LONG,buf4a);
- write_dataset(file1_id,2,dims,"dset4b",H5T_NATIVE_LONG,buf4b);
+ write_dset(file1_id,2,dims,"dset4a",H5T_NATIVE_LONG,buf4a);
+ write_dset(file1_id,2,dims,"dset4b",H5T_NATIVE_LONG,buf4b);
 
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_FLOAT
  *-------------------------------------------------------------------------
  */
- write_dataset(file1_id,2,dims,"dset5a",H5T_NATIVE_FLOAT,buf5a);
- write_dataset(file1_id,2,dims,"dset5b",H5T_NATIVE_FLOAT,buf5b);
+ write_dset(file1_id,2,dims,"dset5a",H5T_NATIVE_FLOAT,buf5a);
+ write_dset(file1_id,2,dims,"dset5b",H5T_NATIVE_FLOAT,buf5b);
 
 /*-------------------------------------------------------------------------
  * Check H5T_NATIVE_DOUBLE 
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset6a",H5T_NATIVE_DOUBLE,buf6a);
- write_dataset(file1_id,2,dims,"dset6b",H5T_NATIVE_DOUBLE,buf6b);
+ write_dset(file1_id,2,dims,"dset6a",H5T_NATIVE_DOUBLE,buf6a);
+ write_dset(file1_id,2,dims,"dset6b",H5T_NATIVE_DOUBLE,buf6b);
 
 /*-------------------------------------------------------------------------
  * H5T_NATIVE_CHAR and H5T_NATIVE_UCHAR
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset7a",H5T_NATIVE_CHAR,buf7a);
- write_dataset(file1_id,2,dims,"dset7b",H5T_NATIVE_UCHAR,buf7b);
+ write_dset(file1_id,2,dims,"dset7a",H5T_NATIVE_CHAR,buf7a);
+ write_dset(file1_id,2,dims,"dset7b",H5T_NATIVE_UCHAR,buf7b);
 
 /*-------------------------------------------------------------------------
  * H5T_NATIVE_LLONG
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset8a",H5T_NATIVE_LLONG,buf8a);
- write_dataset(file1_id,2,dims,"dset8b",H5T_NATIVE_LLONG,buf8b);
+ write_dset(file1_id,2,dims,"dset8a",H5T_NATIVE_LLONG,buf8a);
+ write_dset(file1_id,2,dims,"dset8b",H5T_NATIVE_LLONG,buf8b);
 
 /*-------------------------------------------------------------------------
  * H5T_NATIVE_ULLONG
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset9a",H5T_NATIVE_ULLONG,buf9a);
- write_dataset(file1_id,2,dims,"dset9b",H5T_NATIVE_ULLONG,buf9b);
+ write_dset(file1_id,2,dims,"dset9a",H5T_NATIVE_ULLONG,buf9a);
+ write_dset(file1_id,2,dims,"dset9b",H5T_NATIVE_ULLONG,buf9b);
 
 /*-------------------------------------------------------------------------
  * H5T_NATIVE_INT
  *-------------------------------------------------------------------------
  */
 
- write_dataset(file1_id,2,dims,"dset10a",H5T_NATIVE_UINT,buf10a);
- write_dataset(file1_id,2,dims,"dset10b",H5T_NATIVE_UINT,buf10b);
+ write_dset(file1_id,2,dims,"dset10a",H5T_NATIVE_UINT,buf10a);
+ write_dset(file1_id,2,dims,"dset10b",H5T_NATIVE_UINT,buf10b);
 
 
 /*-------------------------------------------------------------------------
@@ -781,4 +494,5 @@ int do_test_5(const char *file1, const char UNUSED *file2)
  status = H5Fclose(file1_id);
  return status;
 }
+
 

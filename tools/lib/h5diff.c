@@ -14,6 +14,7 @@
 
 
 #include "h5diff.h"
+#include "H5private.h" 
 #include <stdlib.h>
 #include <assert.h>
 
@@ -316,11 +317,10 @@ int diff_compare( hid_t file1_id,
  /* objects are not the same type */
  if ( info1[i].type != info2[j].type && options->verbose)
  {
-  printf("Comparison not supported\n");
-  printf("<%s> is of type %s and <%s> is of type %s\n", 
+  printf("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n", 
    obj1_name, get_type(info1[i].type), 
    obj2_name, get_type(info2[j].type) );
-  return 0;
+  return 1;
  }
   
  nfound=diff( file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type );
@@ -333,6 +333,11 @@ int diff_compare( hid_t file1_id,
  * Function: diff
  *
  * Purpose: switch between types and choose the diff function
+ * TYPE is either
+ *  H5G_LINK     Object is a symbolic link	
+ *  H5G_GROUP		  Object is a group		
+ *  H5G_DATASET 	Object is a dataset		
+ *  H5G_TYPE     Object is a named data type	
  *
  * Return: Number of differences found
  *
@@ -340,42 +345,163 @@ int diff_compare( hid_t file1_id,
  *
  * Date: May 9, 2003
  *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
-int diff( hid_t file1_id, 
-          const char *obj1_name, 
-          hid_t file2_id, 
-          const char *obj2_name, 
+int diff( hid_t      file1_id, 
+          const char *path1, 
+          hid_t      file2_id, 
+          const char *path2, 
           diff_opt_t *options, 
-          int type )
+          H5G_obj_t  type )
 {
- int nfound=0;
+ hid_t       type1_id;
+ hid_t       type2_id;
+ hid_t       grp1_id;
+ hid_t       grp2_id;
+ int         ret;
+ H5G_stat_t  sb1;
+ H5G_stat_t  sb2;
+ char        *buf1=NULL;
+ char        *buf2=NULL;
+ int         nfound=-1;
 
  switch ( type )
  {
+/*-------------------------------------------------------------------------
+ * H5G_DATASET
+ *-------------------------------------------------------------------------
+ */
  case H5G_DATASET:
-  nfound=diff_dataset(file1_id,file2_id,obj1_name,obj2_name,options);
+  if (options->verbose)
+   printf( "Dataset:     <%s> and <%s>\n",path1,path2);
+  nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+  break;
+
+/*-------------------------------------------------------------------------
+ * H5G_TYPE
+ *-------------------------------------------------------------------------
+ */
+ case H5G_TYPE:
+  if (options->verbose)
+   printf( "Datatype:    <%s> and <%s>\n",path1,path2);
+  
+  if ((type1_id = H5Topen(file1_id, path1))<0) 
+   goto out;
+  if ((type2_id = H5Topen(file2_id, path2))<0) 
+   goto out;
+  
+  if ((ret = H5Tequal(type1_id,type2_id))<0)
+   goto out;
+  
+  /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
+  nfound = (ret>0) ? 0 : 1;
+  
+  /* compare attributes */
+  diff_attr(type1_id,type2_id,path1,path2,options);
+  
+  if ( H5Tclose(type1_id)<0)
+   goto out;
+  if ( H5Tclose(type2_id)<0)
+   goto out;
+  
+  break;
+
+/*-------------------------------------------------------------------------
+ * H5G_GROUP
+ *-------------------------------------------------------------------------
+ */
+ case H5G_GROUP:
+  if (options->verbose)
+   printf( "Group:       <%s> and <%s>\n",path1,path2);
+  
+  if ((grp1_id = H5Gopen(file1_id, path1))<0) 
+   goto out;
+  if ((grp2_id = H5Gopen(file2_id, path2))<0) 
+   goto out;
+  
+  ret = HDstrcmp(path1,path2);
+  
+  /* if "path1" != "path2" then the groups are "different" */
+  nfound = (ret!=0) ? 1 : 0;
+  
+  /* compare attributes */
+  diff_attr(grp1_id,grp2_id,path1,path2,options);
+  
+  if ( H5Gclose(grp1_id)<0)
+   goto out;
+  if ( H5Gclose(grp2_id)<0)
+   goto out;
+  
+  break;
+
+
+/*-------------------------------------------------------------------------
+ * H5G_LINK
+ *-------------------------------------------------------------------------
+ */
+ case H5G_LINK:
+  if (options->verbose)
+   printf( "Link:        <%s> and <%s>\n",path1,path2);
+ 
+  if (H5Gget_objinfo(file1_id,path1,FALSE,&sb1)<0)
+   goto out;
+  if (H5Gget_objinfo(file1_id,path1,FALSE,&sb2)<0)
+   goto out;
+  
+  buf1 = malloc(sb1.linklen);
+  buf2 = malloc(sb2.linklen);
+  
+  if (H5Gget_linkval(file1_id,path1,sb1.linklen,buf1)<0)
+   goto out;
+  if (H5Gget_linkval(file2_id,path2,sb1.linklen,buf2)<0)
+   goto out;
+
+  ret = HDstrcmp(buf1,buf2);
+  
+  /* if "buf1" != "buf2" then the links are "different" */
+  nfound = (ret!=0) ? 1 : 0;
+
+  if (buf1) {
+   free(buf1);
+   buf1=NULL;
+  }
+
+  if (buf2) {
+   free(buf2);
+   buf2=NULL;
+  }
+  
   break;
   
+  
  default:
+  nfound=0;
   if (options->verbose) {
-   printf("Comparison not supported\n");
-   printf("<%s> is of type %s and <%s> is of type %s\n", 
-    obj1_name, get_type(type), 
-    obj2_name, get_type(type) );
+   printf("Comparison not supported: <%s> and <%s> are of type %s\n", 
+    path1, path2, get_type(type) );
   }
   break;
  } 
  
-#if 0
- if (options->verbose) 
-  printf("\n");
-#endif
+
+ out:
+
+ /* close */
+ /* disable error reporting */
+ H5E_BEGIN_TRY {
+  H5Tclose(type1_id);
+  H5Tclose(type2_id);
+  H5Gclose(grp1_id);
+  H5Tclose(grp2_id);
+   /* enable error reporting */
+ } H5E_END_TRY;
+ 
+ if (buf1)
+  free(buf1);
+ if (buf2)
+  free(buf2);
+ 
  return nfound;
 }
 

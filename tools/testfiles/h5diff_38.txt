@@ -1,6 +1,0 @@
-#############################
-Expected output for 'h5diff file4.h5 file4.h5 -v integer float'
-#############################
-$h5diff file4.h5 file4.h5 -v integer float
-</float> and </float> are empty datasets
-

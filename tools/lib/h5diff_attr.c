@@ -20,7 +20,7 @@
 /*-------------------------------------------------------------------------
  * Function: diff_attr
  *
- * Purpose: diff attributes located in LOC1_ID and LOC2_ID, which are 
+ * Purpose: compare attributes located in LOC1_ID and LOC2_ID, which are 
  *  obtained either from 
  * loc_id = H5Gopen( fid, name);
  * loc_id = H5Dopen( fid, name);
@@ -38,8 +38,10 @@
  *-------------------------------------------------------------------------
  */
 
-int diff_attr(hid_t loc1_id, 
-              hid_t loc2_id, 
+int diff_attr(hid_t      loc1_id, 
+              hid_t      loc2_id, 
+              const char *path1, 
+              const char *path2, 
               diff_opt_t *options
               )
 {
@@ -92,7 +94,7 @@ int diff_attr(hid_t loc1_id,
   /* get name */
   if (H5Aget_name( attr1_id, 255, name1 )<0) 
    goto error;
-  if (H5Aget_name( attr1_id, 255, name2 )<0) 
+  if (H5Aget_name( attr2_id, 255, name2 )<0) 
    goto error;
 
   if (HDstrcmp(name1,name2)!=0)
@@ -179,10 +181,23 @@ int diff_attr(hid_t loc1_id,
  */
 
  if (options->verbose)
-  printf( "Comparing <%s> with <%s>\n", name1, name2 );
- nfound = diff_array(buf1,buf2,nelmts1,rank1,dims1,options,name1,name2,mtype1_id);
- if (options->verbose)
-  printf("%d attribute differences found\n", nfound );
+  printf( "Attribute:   <%s> and <%s>\n",name1,name2);
+ sprintf(name1,"%s of <%s>",name1,path1);
+ sprintf(name2,"%s of <%s>",name2,path2);
+ nfound = diff_array(buf1, 
+                     buf2,
+                     nelmts1,
+                     rank1,
+                     dims1,
+                     options,
+                     name1,
+                     name2,
+                     mtype1_id,
+                     attr1_id,
+                     attr2_id);
+ if (options->verbose && nfound)
+  printf("%d differences found\n", nfound );
+
 
 /*-------------------------------------------------------------------------
  * close

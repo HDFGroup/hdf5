@@ -2,6 +2,5 @@
 Expected output for 'h5diff file3.h5 file3.h5 -v dset type'
 #############################
 $h5diff file3.h5 file3.h5 -v dset type
-Comparison not supported
-</type> is of type H5G_TYPE and </type> is of type H5G_TYPE
+Comparison not possible: </dset> is of type H5G_DATASET and </type> is of type H5G_TYPE
 
