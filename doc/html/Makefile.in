@@ -34,7 +34,7 @@ PUB_DOCS= Attributes.html Big.html Caching.html Chunking.html Chunk_f1.gif \
 	H5.user.PrintTpg.html IH_map1.gif IH_map2.gif IH_map3.gif IH_map4.gif \
 	IH_mapFoot.gif IH_mapHead.gif IOPipe.html MountingFiles.html \
 	NCSAfooterlogo.gif PaletteExample1.gif Palettes.fm.anc.gif \
-	Palettes.html Performance.html Properties.html Ragged.html 
+	Palettes.html Performance.html Properties.html Ragged.html \
 	References.html RM_H5.html \
 	RM_H5A.html RM_H5D.html RM_H5E.html RM_H5F.html RM_H5Front.html \
 	RM_H5G.html RM_H5I.html RM_H5P.html RM_H5R.html RM_H5RA.html \
