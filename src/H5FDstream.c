@@ -136,7 +136,7 @@ static const H5FD_class_t H5FD_stream_g =
   H5FD_stream_open,                 /* open                                */
   H5FD_stream_close,                /* close                               */
   NULL,                             /* cmp                                 */
-  H5FD_stream_query,				/*query			*/
+  H5FD_stream_query,                                /*query                        */
   NULL,                             /* alloc                               */
   NULL,                             /* free                                */
   H5FD_stream_get_eoa,              /* get_eoa                             */
@@ -748,23 +748,24 @@ static herr_t H5FD_stream_close (H5FD_t *_stream)
     H5MM_xfree (stream->mem);
   }
   memset (stream, 0, sizeof (H5FD_stream_t));
+  H5MM_xfree (stream);
 
   FUNC_LEAVE (0);
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_stream_query
+ * Function:      H5FD_stream_query
  *
- * Purpose:	Set the flags that this VFL driver is capable of supporting.
- *      (listed in H5FDpublic.h)
+ * Purpose:       Set the flags that this VFL driver is capable of supporting.
+ *                 (listed in H5FDpublic.h)
  *
- * Return:	Success:	non-negative
+ * Return:        Success:        non-negative
  *
- *		Failure:	negative
+ *                Failure:        negative
  *
- * Programmer:	Quincey Koziol
- *              Tuesday, September 26, 2000
+ * Programmer:    Quincey Koziol
+ *                Tuesday, September 26, 2000
  *
  * Modifications:
  *
