@@ -2444,9 +2444,9 @@ SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr)
   INTEGER, INTENT(OUT) :: strpad  ! String padding method for a string datatype 
                                   ! Possible values of padding type are:
                                   !    Pad with zeros (as C does): 
-                                  !        H5T_STR_NULL_F(0) 
+                                  !        H5T_STR_NULLPAD_F(0) 
                                   !    Pad with spaces (as FORTRAN does): 
-                                  !        H5T_STR_SPACE_F(1)
+                                  !        H5T_STR_SPACEPAD_F(1)
   INTEGER, INTENT(OUT) :: hdferr  ! Error code
 END SUBROUTINE h5tget_strpad_f
 	</pre>		
@@ -3654,9 +3654,9 @@ SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr)
   INTEGER, INTENT(IN) :: strpad  ! String padding method for a string datatype 
                                  ! Possible values of padding type are:
                                  !    Pad with zeros (as C does): 
-                                 !       H5T_STR_NULL_F(0)
+                                 !r      H5T_STR_NULLPAD_(0)
                                  !    Pad with spaces (as FORTRAN does): 
-                                 !       H5T_STR_SPACE_F(1)
+                                 !       H5T_STR_SPACEPAD_F(1)
   INTEGER, INTENT(OUT) :: hdferr ! Error code
 END SUBROUTINE h5tset_strpad_f
 	</pre>		
@@ -3847,7 +3847,7 @@ And in this document, the
 Describes HDF5 Release 1.6.1, October 2003
 </address><!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 23 October 2003");
+document.writeln("Last modified: 8 January 2004");
 -->
 </SCRIPT>
  
