@@ -296,7 +296,8 @@ H5HL_load(H5F_t *f, haddr_t addr, const void UNUSED *udata1,
 
   done:
     if (!ret_value && heap) {
-        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
+        if(heap->chunk)
+            heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
         for (fl = heap->freelist; fl; fl = tail) {
             tail = fl->next;
             H5FL_FREE(H5HL_free_t,fl);
@@ -960,10 +961,16 @@ H5HL_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent, intn fwidth)
 	HRETURN_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL,
 		      "unable to load heap");
     }
-    fprintf(stream, "%*sHeap...\n", indent, "");
+    fprintf(stream, "%*sLocal Heap...\n", indent, "");
     fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	    "Dirty:",
 	    (int) (h->dirty));
+    fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	    "Header size (in bytes):",
+	    (unsigned long) H5HL_SIZEOF_HDR(f));
+    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+	      "Address of heap data:",
+	      h->addr);
     fprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	    "Data bytes allocated on disk:",
 	    (unsigned long) (h->disk_alloc));

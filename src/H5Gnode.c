@@ -1190,6 +1190,8 @@ H5G_node_debug(H5F_t *f, haddr_t addr, FILE * stream, intn indent,
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Dirty:",
 	    sn->dirty ? "Yes" : "No");
+    fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	    "Size of Node (in bytes):", (unsigned)H5G_node_size(f));
     fprintf(stream, "%*s%-*s %d of %d\n", indent, "", fwidth,
 	    "Number of Symbols:",
 	    sn->nsyms, 2 * H5G_NODE_K(f));

@@ -1195,8 +1195,17 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     case H5T_COMPOUND:
 	s = "compound";
 	break;
+    case H5T_REFERENCE:
+	s = "reference";
+	break;
     case H5T_ENUM:
 	s = "enum";
+	break;
+    case H5T_ARRAY:
+	s = "array";
+	break;
+    case H5T_VLEN:
+	s = "variable-length sequence";
 	break;
     default:
 	sprintf(buf, "H5T_CLASS_%d", (int) (dt->type));
@@ -1271,7 +1280,28 @@ H5O_dtype_debug(H5F_t *f, const void *mesg, FILE *stream,
     } else if (H5T_OPAQUE==dt->type) {
 	fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 		"Tag:", dt->u.opaque.tag);
-
+    } else if (H5T_REFERENCE==dt->type) {
+	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+		"Fix dumping reference types!");
+    } else if (H5T_VLEN==dt->type) {
+	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
+		"Fix dumping variable-length types!");
+    } else if (H5T_ARRAY==dt->type) {
+	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+		"Rank:",
+		dt->u.array.ndims);
+    fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
+	for (i=0; i<dt->u.array.ndims; i++) {
+        fprintf (stream, "%s%u", i?", ":"", dt->u.array.dim[i]);
+    }
+    fprintf (stream, "}\n");
+    fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Permutation:");
+	for (i=0; i<dt->u.array.ndims; i++) {
+        fprintf (stream, "%s%d", i?", ":"", dt->u.array.perm[i]);
+    }
+    fprintf (stream, "}\n");
+	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
+	H5O_dtype_debug(f, dt->parent, stream, indent+3, MAX(0, fwidth-3));
     } else {
 	switch (dt->u.atomic.order) {
 	case H5T_ORDER_LE:

@@ -2169,6 +2169,9 @@ H5O_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth)
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	      "Version:",
 	      (int) (oh->version));
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Header size (in bytes):",
+	      (unsigned) H5O_SIZEOF_HDR(f));
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 	      "Number of links:",
 	      (int) (oh->nlink));

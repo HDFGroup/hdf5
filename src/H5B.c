@@ -2153,6 +2153,9 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, intn indent, intn fwidth,
 	      "Tree type ID:",
 	      (int) (bt->type->id));
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
+	      "Size of node:",
+	      (unsigned long) H5B_nodesize(f, bt->type, NULL, bt->sizeof_rkey));
+    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Size of raw (disk) key:",
 	      (unsigned long) (bt->sizeof_rkey));
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
