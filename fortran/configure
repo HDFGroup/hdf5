@@ -9249,6 +9249,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
 
+        integer:: ierr
         call mpi_file_open( ierr )
         end
 EOF
@@ -9282,6 +9283,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
 
           include 'mpif.h'
+          integer:: ierr
           call mpi_file_open( ierr )
         end
 EOF
@@ -9331,6 +9333,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
 
+          integer:: ierr
           call mpi_file_open( ierr )
         end
 EOF
@@ -9364,6 +9367,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
 
             include 'mpif.h'
+            integer:: ierr
             call mpi_file_open( ierr )
         end
 EOF
@@ -9444,6 +9448,7 @@ cat >conftest.$ac_ext <<EOF
         program conftest
           include 'mpif.h'
 
+      integer:: ierr
       call mpi_file_open( ierr )
         end
 EOF
