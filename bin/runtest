@@ -309,6 +309,15 @@ RUNSNAPTEST()
 		export $1
 		shift; shift
 		;;
+	    setenv3)
+		# set environment variable with 3 values
+		# a kludge now--the extra single quotes are needed
+		# else eval complains.
+		shift
+		eval $1="'$2 $3 $4'"
+		export $1
+		shift; shift; shift
+		;;
 	    skip)
 		# skip this test
 		skiptest=yes
