@@ -301,6 +301,8 @@ TOOLTEST h5diff_70.txt file5.h5 file6.h5
 
 TOOLTEST h5diff_80.txt file7.h5 file8.h5
 
+TOOLTEST h5diff_81.txt file7.h5 file8.h5 -v
+
 
 
 

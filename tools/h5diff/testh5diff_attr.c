@@ -27,8 +27,6 @@
  *
  *-------------------------------------------------------------------------
  */
-
- 
 static void write_attr_in(hid_t loc_id, 
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
@@ -1027,7 +1025,42 @@ etc
  write_attr(loc_id,3,dims3,"float3D",H5T_NATIVE_FLOAT,buf83);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: write_null_attr
+ *
+ * Purpose: write null attribute in LOC_ID (dataset, group, named datatype) 
+ *
+ * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
+ *
+ * Date: May 24, 2004
+ *
+ *-------------------------------------------------------------------------
+ */
+static void write_null_attr(hid_t loc_id, 
+                            int make_diffs /* flag to modify data buffers */)
+{
+     hid_t sid, attr_id;
+     int        val = 2;
+     unsigned   uval = 7;
+    
+     /* Create the null attribute */
+     sid = H5Screate(H5S_NULL);
+     if(make_diffs) {
+        attr_id = H5Acreate(loc_id, "null_attr", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+      
+        /* Not supposed to write anything */
+        H5Awrite(attr_id, H5T_NATIVE_INT, &val);
+     } else {
+        attr_id = H5Acreate(loc_id, "null_attr", H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+      
+        /* Not supposed to write anything */
+        H5Awrite(attr_id, H5T_NATIVE_INT, &uval);
+     }
 
+     /* Close */
+     H5Aclose(attr_id);
+     H5Sclose(sid);
+}
 
 /*-------------------------------------------------------------------------
  * Check all HDF5 classes
@@ -1036,8 +1069,6 @@ etc
  * H5T_ENUM, H5T_VLEN, H5T_ARRAY
  *-------------------------------------------------------------------------
  */
-
- 
 int test_attr(const char *file,
               int make_diffs /* flag to modify data buffers */)
 {
@@ -1067,11 +1098,10 @@ int test_attr(const char *file,
  * write a series of attributes on the dataset, group, and root group
  *-------------------------------------------------------------------------
  */
-
  write_attr_in(dset_id,"dset",file_id,make_diffs);
  write_attr_in(group_id,NULL,0,make_diffs);
  write_attr_in(root_id,NULL,0,make_diffs);
-
+ write_null_attr(root_id,make_diffs);
 
  /* Close */
  status = H5Dclose(dset_id);
