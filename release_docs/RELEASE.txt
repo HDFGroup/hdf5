@@ -77,6 +77,8 @@ Bug Fixes since HDF5-1.4.2 Release
     * Fixed an off-by-one error in H5Sselect_valid when hyperslab selections
       which would allow hyperslab selections which overlapped the edge of the
       selection by one element as valid.
+    * Fixed the internal macros used to encode & decode file metadata, to avoid
+      an unaligned access warning on IA64 machines.
 
 
 Documentation

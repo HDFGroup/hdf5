@@ -30,9 +30,6 @@ typedef struct H5F_t H5F_t;
  * Encode and decode macros for file meta-data.
  * Currently, all file meta-data is little-endian.
  */
-
-/* For non-little-endian platforms, encode each byte by itself */
-#ifdef WORDS_BIGENDIAN
 #  define INT16ENCODE(p, i) {						      \
    *(p) = (uint8_t)( (unsigned)(i)	    & 0xff); (p)++;			      \
    *(p) = (uint8_t)(((unsigned)(i) >> 8) & 0xff); (p)++;			      \
@@ -138,44 +135,6 @@ typedef struct H5F_t H5F_t;
    }									      \
    (p) += 8;								      \
 }
-
-#else
-   /* For little-endian platforms, make the compiler do the work */
-#  define INT16ENCODE(p, i) {*((int16_t*)(p))=(int16_t)(i);(p)+=2;}
-#  define UINT16ENCODE(p, i) {*((uint16_t*)(p))=(uint16_t)(i);(p)+=2;}
-#  define INT32ENCODE(p, i)  {*((int32_t*)(p))=(int32_t)(i);(p)+=4;}
-#  define UINT32ENCODE(p, i) {*((uint32_t*)(p))=(uint32_t)(i);(p)+=4;}
-
-#  define INT64ENCODE(p, i)  {						      \
-   *((int64_t *)(p)) = (int64_t)(i);					      \
-   (p) += sizeof(int64_t);						      \
-   if (4==sizeof(int64_t)) {						      \
-      *(p)++ = (i)<0?0xff:0x00;						      \
-      *(p)++ = (i)<0?0xff:0x00;						      \
-      *(p)++ = (i)<0?0xff:0x00;						      \
-      *(p)++ = (i)<0?0xff:0x00;						      \
-   }									      \
-}
-
-#  define UINT64ENCODE(p, i) {						      \
-   *((uint64_t *)(p)) = (uint64_t)(i);					      \
-   (p) += sizeof(uint64_t);						      \
-   if (4==sizeof(uint64_t)) {						      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-      *(p)++ = 0x00;							      \
-   }									      \
-}
-
-#  define INT16DECODE(p, i)  {(i)=(int16_t)(*(const int16_t*)(p));(p)+=2;}
-#  define UINT16DECODE(p, i) {(i)=(uint16_t)(*(const uint16_t*)(p));(p)+=2;}
-#  define INT32DECODE(p, i)  {(i)=(int32_t)(*(const int32_t*)(p));(p)+=4;}
-#  define UINT32DECODE(p, i) {(i)=(uint32_t)(*(const uint32_t*)(p));(p)+=4;}
-#  define INT64DECODE(p, i)  {(i)=(int64_t)(*(const int64_t*)(p));(p)+=8;}
-#  define UINT64DECODE(p, i) {(i)=(uint64_t)(*(const uint64_t*)(p));(p)+=8;}
-
-#endif
 
 #define NBYTEENCODE(d, s, n) {	 HDmemcpy(d,s,n); p+=n }
 
