@@ -1,0 +1,13 @@
+To build the Pablo Instrumented version of the HDF 5 library
+
+1) Configure the system as normal from the parent directory
+
+2) Make the normal HDF 5 library 
+
+3) Edit the make file in this directory:
+   - Find the variable PABLO_INC and set it to the path to the include 
+     directory for the Pablo TraceLibrary
+   - If building to instrument MPI programs, uncomment the line beginning
+     PABLO_MPI_FLAGS.  In this case, the Pablo TraceLibrary should be built
+     to trace the MPI-I/O calls.
+   - Issue the make or make install command
