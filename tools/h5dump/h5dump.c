@@ -619,8 +619,11 @@ static void
 print_datatype(hid_t type,unsigned in_group)
 {
     char       *fname;
-    hid_t       nmembers, mtype, str_type;
-    int         i, j, ndims, perm[H5DUMP_MAX_RANK];
+    hid_t       mtype, str_type;
+    unsigned    nmembers;
+    int         perm[H5DUMP_MAX_RANK];
+    unsigned    ndims;
+    unsigned    i;
     size_t      size=0;
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
@@ -629,16 +632,17 @@ print_datatype(hid_t type,unsigned in_group)
     hid_t       super;
     hid_t       tmp_type;
     htri_t      is_vlstr=FALSE;
+    herr_t      ret;            /* Generic return value */
 
     if (!in_group && H5Tcommitted(type) > 0) {
         H5Gget_objinfo(type, ".", TRUE, &statbuf);
-        i = search_obj(type_table, statbuf.objno);
+        ret = search_obj(type_table, statbuf.objno);
 
-        if (i >= 0) {
-            if (!type_table->objs[i].recorded)
-                HDfprintf(stdout,"\"/#%a\"", type_table->objs[i].objno);
+        if (ret >= 0) {
+            if (!type_table->objs[ret].recorded)
+                HDfprintf(stdout,"\"/#%a\"", type_table->objs[ret].objno);
             else
-                printf("\"%s\"", type_table->objs[i].objname);
+                printf("\"%s\"", type_table->objs[ret].objname);
         } else {
             error_msg(progname, "unknown committed type.\n");
             d_status = EXIT_FAILURE;
@@ -901,8 +905,8 @@ print_datatype(hid_t type,unsigned in_group)
             H5Tget_array_dims(type, dims, perm);
 
             /* Print array dimensions */
-            for (j = 0; j < ndims; j++)
-                printf("[%d]", (int) dims[j]);
+            for (i = 0; i < ndims; i++)
+                printf("[%d]", (int) dims[i]);
 
             printf(" ");
 
@@ -3004,14 +3008,15 @@ print_enum(hid_t type)
 {
     char           **name = NULL;   /*member names                   */
     unsigned char   *value = NULL;  /*value array                    */
-    int              nmembs;        /*number of members              */
+    unsigned         nmembs;        /*number of members              */
     int              nchars;        /*number of output characters    */
     hid_t            super;         /*enum base integer type         */
     hid_t            native = -1;   /*native integer data type       */
     size_t           dst_size;      /*destination value type size    */
-    int              i;
+    unsigned         i;
 
     nmembs = H5Tget_nmembers(type);
+    assert(nmembs>0);
     super = H5Tget_super(type);
 
     /*
@@ -3034,9 +3039,8 @@ print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    assert(nmembs>0);
-    name = calloc((size_t)nmembs, sizeof(char *));
-    value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+    name = calloc(nmembs, sizeof(char *));
+    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
 	name[i] = H5Tget_member_name(type, i);
@@ -3624,8 +3628,11 @@ static void
 xml_print_datatype(hid_t type, unsigned in_group)
 {
     char                   *fname;
-    hid_t                   nmembers, mtype;
-    int                     i, j, ndims, perm[H5DUMP_MAX_RANK];
+    hid_t                   mtype;
+    unsigned                nmembers;
+    int                     perm[H5DUMP_MAX_RANK];
+    unsigned                ndims;
+    unsigned                i;
     size_t                  size;
     hsize_t                 dims[H5DUMP_MAX_RANK];
     H5T_str_t               str_pad;
@@ -3642,20 +3649,21 @@ xml_print_datatype(hid_t type, unsigned in_group)
     size_t                  msize;
     int                     nmembs;
     htri_t                  is_vlstr=FALSE;
+    herr_t                  ret;
 
     if (!in_group && H5Tcommitted(type) > 0) {
         /* detect a shared datatype, output only once */
         H5Gget_objinfo(type, ".", TRUE, &statbuf);
-        i = search_obj(type_table, statbuf.objno);
+        ret = search_obj(type_table, statbuf.objno);
 
-        if (i >= 0) {
+        if (ret >= 0) {
             /* This should be defined somewhere else */
             /* These 2 cases are handled the same right now, but
                probably will have something different eventually */
             int res;
             char * dtxid = malloc(100);
-            res = xml_name_to_XID(type_table->objs[i].objname,dtxid,100,1);
-            if (!type_table->objs[i].recorded) {
+            res = xml_name_to_XID(type_table->objs[ret].objname,dtxid,100,1);
+            if (!type_table->objs[ret].recorded) {
                 /* 'anonymous' NDT.  Use it's object num.
                    as it's name.  */
                 printf("<%sNamedDataTypePtr OBJ-XID=\"/%s\"/>\n",
@@ -3663,7 +3671,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
                     dtxid);
             } else {
                 /* point to the NDT by name */
-                char *t_objname = xml_escape_the_name(type_table->objs[i].objname);
+                char *t_objname = xml_escape_the_name(type_table->objs[ret].objname);
                 printf("<%sNamedDataTypePtr OBJ-XID=\"%s\" H5Path=\"%s\"/>\n",
                     xmlnsprefix,
                     dtxid,t_objname);
@@ -3943,7 +3951,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
             indentation(indent);
             printf("<%sArrayType Ndims=\"",xmlnsprefix);
             ndims = H5Tget_array_ndims(type);
-            printf("%d\">\n", ndims);
+            printf("%u\">\n", ndims);
 
             /* Get array information */
             H5Tget_array_dims(type, dims, perm);
@@ -3952,17 +3960,17 @@ xml_print_datatype(hid_t type, unsigned in_group)
             indent += COL;
             if (perm != NULL) {
                 /* for each dimension, list */
-                for (j = 0; j < ndims; j++) {
+                for (i = 0; i < ndims; i++) {
                     indentation(indent);
                     printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"%u\"/>\n",
-                           xmlnsprefix,(int) dims[j], (int) perm[j]);
+                           xmlnsprefix,(int) dims[i], (int) perm[i]);
                 }
             } else {
-                for (j = 0; j < ndims; j++) {
+                for (i = 0; i < ndims; i++) {
                     indentation(indent);
                     printf("<%sArrayDimension DimSize=\"%u\" DimPerm=\"0\"/>\n",
                            xmlnsprefix,
-                           (int) dims[j]);
+                           (int) dims[i]);
                 }
             }
             indent -= COL;
@@ -5073,7 +5081,7 @@ char * name;
 		case H5T_ENUM:
 			indentation(indent);
 			printf("<%sDataFromFile>\n",xmlnsprefix);
-			name = H5Tget_member_name(type, *(int *)buf);
+			name = H5Tget_member_name(type, *(unsigned *)buf);
 			indentation(indent);
 			printf("\"%s\"\n",name);
 			indentation(indent);
@@ -5412,11 +5420,11 @@ xml_print_enum(hid_t type)
 {
     char                  **name = NULL;	/*member names                    */
     unsigned char          *value = NULL;	/*value array                    */
-    int                     nmembs;	/*number of members                */
+    unsigned                nmembs;	/*number of members                */
     hid_t                   super;	/*enum base integer type        */
     hid_t                   native = -1;	/*native integer data type        */
     size_t                  dst_size;	/*destination value type size    */
-    int                     i;	/*miscellaneous counters        */
+    unsigned                i;	/*miscellaneous counters        */
     size_t                  j;
 
     nmembs = H5Tget_nmembers(type);
@@ -5448,8 +5456,8 @@ xml_print_enum(hid_t type)
     }
 
     /* Get the names and raw values of all members */
-    name = calloc((size_t)nmembs, sizeof(char *));
-    value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+    name = calloc(nmembs, sizeof(char *));
+    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
 
     for (i = 0; i < nmembs; i++) {
 	name[i] = H5Tget_member_name(type, i);

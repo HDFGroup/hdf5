@@ -703,11 +703,14 @@ display_cmpd_type(hid_t type, int ind)
     char        *name=NULL;     /* member name */
     size_t      size;           /* total size of type in bytes */
     hid_t       subtype;        /* member data type */
-    int         i, n;           /* miscellaneous counters */
+    unsigned    nmembs;         /* number of members */
+    int         n;              /* miscellaneous counters */
+    unsigned    i;              /* miscellaneous counters */
     
     if (H5T_COMPOUND!=H5Tget_class(type)) return FALSE;
     printf("struct {");
-    for (i=0; i<H5Tget_nmembers(type); i++) {
+    nmembs=H5Tget_nmembers(type);
+    for (i=0; i<nmembs; i++) {
 
         /* Name and offset */
         name = H5Tget_member_name(type, i);
@@ -750,16 +753,17 @@ display_enum_type(hid_t type, int ind)
 {
     char        **name=NULL;    /* member names */
     unsigned char *value=NULL;  /* value array */
-    int         nmembs;         /* number of members */
+    unsigned    nmembs;         /* number of members */
     int         nchars;         /* number of output characters */
     hid_t       super;          /* enum base integer type */
     hid_t       native=-1;      /* native integer data type */
     size_t      dst_size;       /* destination value type size */
-    int         i;              /* miscellaneous counters */
+    unsigned    i;              /* miscellaneous counters */
     size_t j;
         
     if (H5T_ENUM!=H5Tget_class(type)) return FALSE;
     nmembs = H5Tget_nmembers(type);
+    assert(nmembs>0);
     super = H5Tget_super(type);
     printf("enum ");
     display_type(super, ind+4);
@@ -771,23 +775,22 @@ display_enum_type(hid_t type, int ind)
      * 2. unsigned long_long -- the largest native unsigned integer
      *     3. raw format */
     if (H5Tget_size(type)<=sizeof(long_long)) {
- dst_size = sizeof(long_long);
- if (H5T_SGN_NONE==H5Tget_sign(type)) {
-     native = H5T_NATIVE_ULLONG;
- } else {
-     native = H5T_NATIVE_LLONG;
- }
+        dst_size = sizeof(long_long);
+        if (H5T_SGN_NONE==H5Tget_sign(type)) {
+            native = H5T_NATIVE_ULLONG;
+        } else {
+            native = H5T_NATIVE_LLONG;
+        }
     } else {
- dst_size = H5Tget_size(type);
+        dst_size = H5Tget_size(type);
     }
 
     /* Get the names and raw values of all members */
-    assert(nmembs>0);
-    name = calloc((size_t)nmembs, sizeof(char*));
-    value = calloc((size_t)nmembs, MAX(H5Tget_size(type), dst_size));
+    name = calloc(nmembs, sizeof(char*));
+    value = calloc(nmembs, MAX(H5Tget_size(type), dst_size));
     for (i=0; i<nmembs; i++) {
- name[i] = H5Tget_member_name(type, i);
- H5Tget_member_value(type, i, value+i*H5Tget_size(type));
+        name[i] = H5Tget_member_name(type, i);
+        H5Tget_member_value(type, i, value+i*H5Tget_size(type));
     }
 
     /* Convert values to native data type */
@@ -798,22 +801,21 @@ display_enum_type(hid_t type, int ind)
 
     /* Print members */
     for (i=0; i<nmembs; i++) {
- printf("\n%*s", ind+4, "");
- nchars = display_string(stdout, name[i], TRUE);
- printf("%*s = ", MAX(0, 16-nchars), "");
+        printf("\n%*s", ind+4, "");
+        nchars = display_string(stdout, name[i], TRUE);
+        printf("%*s = ", MAX(0, 16-nchars), "");
 
- if (native<0) {
-     printf("0x");
-     for (j=0; j<dst_size; j++) {
-  printf("%02x", value[i*dst_size+j]);
-     }
- } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
-     HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
-     *((unsigned long_long*)((void*)(value+i*dst_size))));
- } else {
-     HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
-     *((long_long*)((void*)(value+i*dst_size))));
- }
+        if (native<0) {
+            printf("0x");
+            for (j=0; j<dst_size; j++)
+                printf("%02x", value[i*dst_size+j]);
+        } else if (H5T_SGN_NONE==H5Tget_sign(native)) {
+            HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
+            *((unsigned long_long*)((void*)(value+i*dst_size))));
+        } else {
+            HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
+            *((long_long*)((void*)(value+i*dst_size))));
+        }
     }
 
     /* Release resources */

@@ -523,13 +523,23 @@ H5_DLL H5T_norm_t H5Tget_norm(hid_t type_id);
 H5_DLL H5T_pad_t H5Tget_inpad(hid_t type_id);
 H5_DLL H5T_str_t H5Tget_strpad(hid_t type_id);
 H5_DLL int H5Tget_nmembers(hid_t type_id);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL char *H5Tget_member_name(hid_t type_id, int membno);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL char *H5Tget_member_name(hid_t type_id, unsigned membno);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL int H5Tget_member_index(hid_t type_id, const char *name);
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5_DLL size_t H5Tget_member_offset(hid_t type_id, int membno);
 H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, int membno);
 H5_DLL hid_t H5Tget_member_type(hid_t type_id, int membno);
-H5_DLL herr_t H5Tget_member_value(hid_t type_id, int membno,
-				   void *value/*out*/);
+H5_DLL herr_t H5Tget_member_value(hid_t type_id, int membno, void *value/*out*/);
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5_DLL size_t H5Tget_member_offset(hid_t type_id, unsigned membno);
+H5_DLL H5T_class_t H5Tget_member_class(hid_t type_id, unsigned membno);
+H5_DLL hid_t H5Tget_member_type(hid_t type_id, unsigned membno);
+H5_DLL herr_t H5Tget_member_value(hid_t type_id, unsigned membno, void *value/*out*/);
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL H5T_cset_t H5Tget_cset(hid_t type_id);
 H5_DLL htri_t H5Tis_variable_str(hid_t type_id);
 H5_DLL hid_t H5Tget_native_type(hid_t type_id, H5T_direction_t direction); 

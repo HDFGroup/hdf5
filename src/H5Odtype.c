@@ -93,7 +93,7 @@ static herr_t
 H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 {
     unsigned		flags, version;
-    int		i, j;
+    unsigned		i, j;
     size_t		z;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -195,7 +195,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             if (NULL==dt->u.compnd.memb)
                 HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
             for (i = 0; i < dt->u.compnd.nmembs; i++) {
-                int ndims=0;     /* Number of dimensions of the array field */
+                unsigned ndims=0;     /* Number of dimensions of the array field */
                 hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
                 int perm[H5O_LAYOUT_NDIMS];     /* Dimension permutations */
                 unsigned perm_word=0;    /* Dimension permutation information */
@@ -253,7 +253,7 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
                             perm[j]=(perm_word>>(j*8))&0xff;
 
                         /* Create the array datatype for the field */
-                        if ((array_dt=H5T_array_create(temp_type,ndims,dim,perm))==NULL) {
+                        if ((array_dt=H5T_array_create(temp_type,(int)ndims,dim,perm))==NULL) {
                             for (j=0; j<=i; j++)
                                 H5MM_xfree(dt->u.compnd.memb[j].name);
                             H5MM_xfree(dt->u.compnd.memb);
@@ -311,7 +311,6 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
              * Enumeration data types...
              */
             dt->u.enumer.nmembs = dt->u.enumer.nalloc = flags & 0xffff;
-            assert(dt->u.enumer.nmembs>=0);
             if (NULL==(dt->parent=H5FL_CALLOC(H5T_t)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
             dt->parent->ent.header = HADDR_UNDEF;
@@ -405,13 +404,13 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
             *pp += 3;
 
             /* Decode array dimension sizes & compute number of elements */
-            for (j=0, dt->u.array.nelem=1; j<dt->u.array.ndims; j++) {
+            for (j=0, dt->u.array.nelem=1; j<(unsigned)dt->u.array.ndims; j++) {
                 UINT32DECODE(*pp, dt->u.array.dim[j]);
                 dt->u.array.nelem *= dt->u.array.dim[j];
             } /* end for */
 
             /* Decode array dimension permutations (even though they are unused currently) */
-            for (j=0; j<dt->u.array.ndims; j++)
+            for (j=0; j<(unsigned)dt->u.array.ndims; j++)
                 UINT32DECODE(*pp, dt->u.array.perm[j]);
 
             /* Decode base type of array */
@@ -459,7 +458,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     htri_t has_array=FALSE;       /* Whether a compound datatype has an array inside it */
     unsigned		flags = 0;
     char		*hdr = (char *)*pp;
-    int		i, j;
+    unsigned		i, j;
     size_t		n, z, aligned;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -776,11 +775,11 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             *(*pp)++ = '\0';
 
             /* Encode array dimensions */
-            for (j=0; j<dt->u.array.ndims; j++)
+            for (j=0; j<(unsigned)dt->u.array.ndims; j++)
                 UINT32ENCODE(*pp, dt->u.array.dim[j]);
 
             /* Encode array dimension permutations */
-            for (j=0; j<dt->u.array.ndims; j++)
+            for (j=0; j<(unsigned)dt->u.array.ndims; j++)
                 UINT32ENCODE(*pp, dt->u.array.perm[j]);
 
             /* Encode base type of array's information */
@@ -963,7 +962,7 @@ done:
 static size_t
 H5O_dtype_size(H5F_t *f, const void *mesg)
 {
-    int		    i;
+    unsigned		    i;
     size_t		    ret_value = 8;
     const H5T_t		   *dt = (const H5T_t *) mesg;
 
@@ -1205,7 +1204,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     const H5T_t		*dt = (const H5T_t*)mesg;
     const char		*s;
     char		buf[256];
-    int		i;
+    unsigned		i;
     size_t		k;
     herr_t ret_value=SUCCEED;   /* Return value */
     
@@ -1341,12 +1340,12 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 		"Rank:",
 		dt->u.array.ndims);
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
-	for (i=0; i<dt->u.array.ndims; i++) {
+	for (i=0; i<(unsigned)dt->u.array.ndims; i++) {
         fprintf (stream, "%s%u", i?", ":"", (unsigned)dt->u.array.dim[i]);
     }
     fprintf (stream, "}\n");
     fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Permutation:");
-	for (i=0; i<dt->u.array.ndims; i++) {
+	for (i=0; i<(unsigned)dt->u.array.ndims; i++) {
         fprintf (stream, "%s%d", i?", ":"", dt->u.array.perm[i]);
     }
     fprintf (stream, "}\n");

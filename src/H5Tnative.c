@@ -159,11 +159,12 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
     H5T_t       *dt;                /* Datatype to make native */
     H5T_class_t h5_class;           /* Class of datatype to make native */
     size_t      size;               /* Size of datatype to make native */
-    int         nmemb;              /* Number of members in compound & enum types */
+    int         snmemb;             /* Number of members in compound & enum types */
+    unsigned    nmemb;              /* Number of members in compound & enum types */
     H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
     H5T_t       *nat_super_type;    /* Native form of VL, array & enum super datatype */
     H5T_t       *new_type=NULL;     /* New native datatype */
-    int         i;                  /* Local index variable */
+    unsigned    i;                  /* Local index variable */
     H5T_t       *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_get_native_type, NULL)
@@ -257,15 +258,15 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 size_t      children_st_align=0;    /* The max alignment among compound members.  This'll be the compound alignment */
                 char        **comp_mname;   /* List of member names in compound type */
 
-                if((nmemb = H5T_get_nmembers(dtype))<=0)
+                if((snmemb = H5T_get_nmembers(dtype))<=0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "compound data type doesn't have any member")
+                H5_ASSIGN_OVERFLOW(nmemb,snmemb,int,unsigned);
                 
-                H5_CHECK_OVERFLOW(nmemb,int,size_t);
-                if((memb_list   = (H5T_t**)H5MM_malloc((size_t)nmemb*sizeof(H5T_t*)))==NULL)
+                if((memb_list   = (H5T_t**)H5MM_malloc(nmemb*sizeof(H5T_t*)))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
-                if((memb_offset = (size_t*)H5MM_calloc((size_t)nmemb*sizeof(size_t)))==NULL)
+                if((memb_offset = (size_t*)H5MM_calloc(nmemb*sizeof(size_t)))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
-                if((comp_mname = (char**)H5MM_malloc((size_t)nmemb*sizeof(char*)))==NULL)
+                if((comp_mname = (char**)H5MM_malloc(nmemb*sizeof(char*)))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
 
                 /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */  
@@ -352,8 +353,9 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type")
                     
                 /* Retrieve member info and insert members into new enum type */
-                if((nmemb = H5T_get_nmembers(dtype))<=0)
+                if((snmemb = H5T_get_nmembers(dtype))<=0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumarate data type doesn't have any member")
+                H5_ASSIGN_OVERFLOW(nmemb,snmemb,int,unsigned);
                 for(i=0; i<nmemb; i++) {
                     if((memb_name=H5T_get_member_name(dtype, i))==NULL)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name")
@@ -384,7 +386,8 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
         case H5T_ARRAY:
             {
-                int         array_rank;         /* Array's rank */
+                int         sarray_rank;        /* Array's rank */
+                unsigned    array_rank;         /* Array's rank */
                 hsize_t     *dims = NULL;       /* Dimension sizes for array */
                 hsize_t     nelems = 1;
                 size_t      super_offset=0;       
@@ -392,10 +395,10 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 size_t      super_align=0;   
 
                 /* Retrieve dimension information for array data type */
-                if((array_rank=H5T_get_array_ndims(dtype))<=0)
+                if((sarray_rank=H5T_get_array_ndims(dtype))<=0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank")
-                H5_CHECK_OVERFLOW(array_rank,int,size_t);
-                if((dims = (hsize_t*)H5MM_malloc((size_t)array_rank*sizeof(hsize_t)))==NULL)
+                H5_ASSIGN_OVERFLOW(array_rank,sarray_rank,int,unsigned);
+                if((dims = (hsize_t*)H5MM_malloc(array_rank*sizeof(hsize_t)))==NULL)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
                 if(H5T_get_array_dims(dtype, dims, NULL)<0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension size")
@@ -412,7 +415,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                     HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype")
 
                 /* Create a new array type based on native type */
-                if((new_type=H5T_array_create(nat_super_type, array_rank, dims, NULL))==NULL) 
+                if((new_type=H5T_array_create(nat_super_type, sarray_rank, dims, NULL))==NULL) 
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create array type")
 
                 /* Close base type */

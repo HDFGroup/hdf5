@@ -125,8 +125,8 @@ typedef enum H5T_sort_t {
 
 /* A compound datatype */
 typedef struct H5T_compnd_t {
-    int		nalloc;		/*num entries allocated in MEMB array*/
-    int		nmembs;		/*number of members defined in struct*/
+    unsigned	nalloc;		/*num entries allocated in MEMB array*/
+    unsigned	nmembs;		/*number of members defined in struct*/
     H5T_sort_t	sorted;		/*how are members sorted?	     */
     hbool_t     packed;		/*are members packed together?       */
     struct H5T_cmemb_t	*memb;	/*array of struct members	     */
@@ -134,8 +134,8 @@ typedef struct H5T_compnd_t {
 
 /* An enumeration datatype */
 typedef struct H5T_enum_t {
-    int		nalloc;		/*num entries allocated		     */
-    int		nmembs;		/*number of members defined in enum  */
+    unsigned	nalloc;		/*num entries allocated		     */
+    unsigned	nmembs;		/*number of members defined in enum  */
     H5T_sort_t	sorted;		/*how are members sorted?	     */
     uint8_t	*value;		/*array of values		     */
     char	**name;		/*array of symbol names		     */
@@ -305,11 +305,11 @@ H5_DLLVAR size_t	H5T_NATIVE_UINT_FAST64_ALIGN_g;
 H5_DLL herr_t H5T_init_interface(void);
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
 H5_DLL herr_t H5T_free(H5T_t *dt);
-H5_DLL H5T_sign_t H5T_get_sign(H5T_t *dt);
+H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
-H5_DLL char  *H5T_get_member_name(H5T_t *dt, int membno);
-H5_DLL herr_t H5T_get_member_value(H5T_t *dt, int membno, void *value);
-H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, int membno);
+H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
+H5_DLL herr_t H5T_get_member_value(H5T_t *dt, unsigned membno, void *value);
+H5_DLL H5T_t *H5T_get_member_type(H5T_t *dt, unsigned membno);
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);

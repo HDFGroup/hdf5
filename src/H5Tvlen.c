@@ -717,8 +717,7 @@ done:
 static herr_t 
 H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info)
 {
-    int i;     /* local index variable */
-    size_t j;   /* local index variable */
+    unsigned i;     /* local index variable */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOINIT(H5T_vlen_reclaim_recurse)
@@ -734,8 +733,8 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
                 void *off;     /* offset of field */
 
                 /* Calculate the offset member and recurse on it */
-                for(j=0; j<dt->u.array.nelem; j++) {
-                    off=((uint8_t *)elem)+j*(dt->parent->size);
+                for(i=0; i<dt->u.array.nelem; i++) {
+                    off=((uint8_t *)elem)+i*(dt->parent->size);
                     if(H5T_vlen_reclaim_recurse(off,dt->parent,free_func,free_info)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free array element")
                 } /* end for */

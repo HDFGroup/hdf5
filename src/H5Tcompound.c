@@ -38,7 +38,7 @@ static herr_t H5T_init_compound_interface(void);
 #define H5T_COMPND_INC	64	/*typical max numb of members per struct */
 
 /* Static local functions */
-static size_t H5T_get_member_offset(H5T_t *dt, int membno);
+static size_t H5T_get_member_offset(H5T_t *dt, unsigned membno);
 static herr_t H5T_pack(H5T_t *dt);
 
 
@@ -84,9 +84,17 @@ H5T_init_compound_interface(void)
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 size_t
-H5Tget_member_offset(hid_t type_id, int membno)
+H5Tget_member_offset(hid_t type_id, int _membno)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+size_t
+H5Tget_member_offset(hid_t type_id, unsigned membno)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    unsigned membno = (unsigned)_membno;
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL;
     size_t	ret_value;
 
@@ -96,7 +104,7 @@ H5Tget_member_offset(hid_t type_id, int membno)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a compound datatype");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+    if (membno >= dt->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid member number");
 
     /* Value */
@@ -111,7 +119,7 @@ done:
  * Function:	H5T_get_member_offset
  *
  * Purpose:	Private function for H5Tget_member_offset.  Returns the byte 
- *              offset of the beginning of a member with respect to the i
+ *              offset of the beginning of a member with respect to the
  *              beginning of the compound datatype datum.
  *
  * Return:	Success:	Byte offset.
@@ -129,14 +137,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5T_get_member_offset(H5T_t *dt, int membno)
+H5T_get_member_offset(H5T_t *dt, unsigned membno)
 {
     size_t	ret_value;
 
     FUNC_ENTER_NOAPI(H5T_get_member_offset, 0);
 
     assert(dt);
-    assert(membno >= 0 && membno < dt->u.compnd.nmembs);
+    assert(membno < dt->u.compnd.nmembs);
 
     /* Value */
     ret_value = dt->u.compnd.memb[membno].offset;
@@ -162,9 +170,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 H5T_class_t
-H5Tget_member_class(hid_t type_id, int membno)
+H5Tget_member_class(hid_t type_id, int _membno)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+H5T_class_t
+H5Tget_member_class(hid_t type_id, unsigned membno)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    unsigned membno = (unsigned)_membno;
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL;
     H5T_class_t	ret_value;
 
@@ -174,7 +190,7 @@ H5Tget_member_class(hid_t type_id, int membno)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a compound datatype");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+    if (membno >= dt->u.compnd.nmembs)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5T_NO_CLASS, "invalid member number");
 
     /* Value */
@@ -209,9 +225,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_WANT_H5_V1_6_COMPAT
 hid_t
-H5Tget_member_type(hid_t type_id, int membno)
+H5Tget_member_type(hid_t type_id, int _membno)
+#else /* H5_WANT_H5_V1_6_COMPAT */
+hid_t
+H5Tget_member_type(hid_t type_id, unsigned membno)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
+#ifdef H5_WANT_H5_V1_6_COMPAT
+    unsigned membno = (unsigned)_membno;
+#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5T_t	*dt = NULL, *memb_dt = NULL;
     hid_t	ret_value;
 
@@ -221,7 +245,7 @@ H5Tget_member_type(hid_t type_id, int membno)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)) || H5T_COMPOUND != dt->type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype");
-    if (membno < 0 || membno >= dt->u.compnd.nmembs)
+    if (membno >= dt->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number");
     if ((memb_dt=H5T_get_member_type(dt, membno))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type");
@@ -229,7 +253,8 @@ H5Tget_member_type(hid_t type_id, int membno)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom");
     
 done:
-    if(ret_value<0) {
+    if(ret_value<0)
+{
         if(memb_dt!=NULL)
             H5T_close(memb_dt);
     } /* end if */
@@ -258,14 +283,14 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_get_member_type(H5T_t *dt, int membno)
+H5T_get_member_type(H5T_t *dt, unsigned membno)
 {
     H5T_t	*ret_value = NULL;
 
     FUNC_ENTER_NOAPI(H5T_get_member_type, NULL);
 
     assert(dt);
-    assert(membno >=0 && membno < dt->u.compnd.nmembs);
+    assert(membno < dt->u.compnd.nmembs);
     
     /* Copy datatype into an atom */
     if (NULL == (ret_value = H5T_copy(dt->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
@@ -389,8 +414,8 @@ done:
 herr_t
 H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
-    int		idx, i;
-    size_t		total_size;
+    unsigned	idx, i;
+    size_t	total_size;
     herr_t      ret_value=SUCCEED;       /* Return value */
     
     FUNC_ENTER_NOAPI(H5T_insert, FAIL);
@@ -496,7 +521,7 @@ done:
 static herr_t
 H5T_pack(H5T_t *dt)
 {
-    int		i;
+    unsigned	i;
     size_t	offset;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
