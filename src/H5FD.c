@@ -2172,7 +2172,7 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t s
             /* New piece of metadata doesn't adjoin or overlap the existing accumulator */
             else {
                 /* Write out the existing metadata accumulator, with dispatch to driver */
-                if ((file->cls->write)(file, type, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
+                if ((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum)<0)
                     HRETURN_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed");
 
                 /* Cache the new piece of metadata */

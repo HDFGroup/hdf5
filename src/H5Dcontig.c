@@ -43,7 +43,7 @@ static intn		interface_initialize_g = 0;
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
+H5F_contig_read(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxpl_id,
 	       void *buf/*out*/)
 {
     haddr_t abs_eoa;		        /* Absolute end of file address		*/
@@ -129,7 +129,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                     rel_eoa=abs_eoa-f->shared->base_addr;
 
                     /* Compute the size of the sieve buffer */
-                    f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
+                    f->shared->sieve_size=MIN(rel_eoa-addr,MIN(max_data,f->shared->sieve_buf_size));
 
                     /* Read the new sieve buffer */
                     if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -176,7 +176,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
                 rel_eoa=abs_eoa-f->shared->base_addr;
 
                 /* Compute the size of the sieve buffer */
-                f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
+                f->shared->sieve_size=MIN(rel_eoa-addr,MIN(max_data,f->shared->sieve_buf_size));
 
                 /* Read the new sieve buffer */
                 if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
@@ -221,7 +221,7 @@ H5F_contig_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size, hid_t dxp
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
+H5F_contig_write(H5F_t *f, hsize_t max_data, H5FD_mem_t type, haddr_t addr, hsize_t size,
         hid_t dxpl_id, const void *buf)
 {
     haddr_t abs_eoa;		        /* Absolute end of file address		*/
@@ -289,46 +289,81 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                 } /* end if */
                 /* Element size fits within the buffer size */
                 else {
-                    /* Flush the sieve buffer if it's dirty */
-                    if(f->shared->sieve_dirty) {
-                        /* Write to file */
-                        if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
-                            HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                              "block write failed");
+                    /* Check if it is possible to (exactly) prepend or append to existing (dirty) sieve buffer */
+                    if(((addr+size)==sieve_start || addr==sieve_end) &&
+                            (size+sieve_size)<=f->shared->sieve_buf_size &&
+                            f->shared->sieve_dirty) {
+                        /* Prepend to existing sieve buffer */
+                        if((addr+size)==sieve_start) {
+                            /* Move existing sieve information to correct location */
+                            assert(sieve_size==(hsize_t)((size_t)sieve_size)); /*check for overflow*/
+                            HDmemmove(f->shared->sieve_buf+size,f->shared->sieve_buf,(size_t)sieve_size);
+
+                            /* Copy in new information (must be first in sieve buffer) */
+                            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                            HDmemcpy(f->shared->sieve_buf,buf,(size_t)size);
+
+                            /* Adjust sieve location */
+                            f->shared->sieve_loc=addr;
+                            
+                        } /* end if */
+                        /* Append to existing sieve buffer */
+                        else {
+                            /* Copy in new information */
+                            assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                            HDmemcpy(f->shared->sieve_buf+sieve_size,buf,(size_t)size);
+                        } /* end else */
+
+                        /* Adjust sieve size */
+                        f->shared->sieve_size += size;
+                        
+                    } /* end if */
+                    /* Can't add the new data onto the existing sieve buffer */
+                    else {
+                        /* Flush the sieve buffer if it's dirty */
+                        if(f->shared->sieve_dirty) {
+                            /* Write to file */
+                            if (H5F_block_write(f, H5FD_MEM_DRAW, sieve_start, sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                                HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                                  "block write failed");
+                            }
+
+                            /* Reset sieve buffer dirty flag */
+                            f->shared->sieve_dirty=0;
+                        } /* end if */
+
+                        /* Determine the new sieve buffer size & location */
+                        f->shared->sieve_loc=addr;
+
+                        /* Make certain we don't read off the end of the file */
+                        if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
+                            HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                "unable to determine file size");
                         }
 
-                        /* Reset sieve buffer dirty flag */
-                        f->shared->sieve_dirty=0;
-                    } /* end if */
+                        /* Adjust absolute EOA address to relative EOA address */
+                        rel_eoa=abs_eoa-f->shared->base_addr;
 
-                    /* Determine the new sieve buffer size & location */
-                    f->shared->sieve_loc=addr;
+                        /* Compute the size of the sieve buffer */
+                        f->shared->sieve_size=MIN(rel_eoa-addr,MIN(max_data,f->shared->sieve_buf_size));
 
-                    /* Make certain we don't read off the end of the file */
-                    if (HADDR_UNDEF==(abs_eoa=H5FD_get_eoa(f->shared->lf))) {
-                        HRETURN_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
-                            "unable to determine file size");
-                    }
+                        /* Check if there is any point in reading the data from the file */
+                        if(f->shared->sieve_size>size) {
+                            /* Read the new sieve buffer */
+                            if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                                HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+                                          "block read failed");
+                            }
+                        } /* end if */
 
-                    /* Adjust absolute EOA address to relative EOA address */
-                    rel_eoa=abs_eoa-f->shared->base_addr;
+                        /* Grab the data out of the buffer (must be first piece of data in buffer) */
+                        assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
+                        HDmemcpy(f->shared->sieve_buf,buf,(size_t)size);
 
-                    /* Compute the size of the sieve buffer */
-                    f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
+                        /* Set sieve buffer dirty flag */
+                        f->shared->sieve_dirty=1;
 
-                    /* Read the new sieve buffer */
-                    if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
-                        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                                  "block read failed");
-                    }
-
-                    /* Grab the data out of the buffer (must be first piece of data in buffer) */
-                    assert(size==(hsize_t)((size_t)size)); /*check for overflow*/
-                    HDmemcpy(f->shared->sieve_buf,buf,(size_t)size);
-
-                    /* Set sieve buffer dirty flag */
-                    f->shared->sieve_dirty=1;
-
+                    } /* end else */
                 } /* end else */
             } /* end else */
         } /* end if */
@@ -362,13 +397,16 @@ H5F_contig_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
                 rel_eoa=abs_eoa-f->shared->base_addr;
 
                 /* Compute the size of the sieve buffer */
-                f->shared->sieve_size=MIN(rel_eoa-addr,f->shared->sieve_buf_size);
+                f->shared->sieve_size=MIN(rel_eoa-addr,MIN(max_data,f->shared->sieve_buf_size));
 
-                /* Read the new sieve buffer */
-                if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
-                    HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
-                              "block read failed");
-                }
+                /* Check if there is any point in reading the data from the file */
+                if(f->shared->sieve_size>size) {
+                    /* Read the new sieve buffer */
+                    if (H5F_block_read(f, type, f->shared->sieve_loc, f->shared->sieve_size, dxpl_id, f->shared->sieve_buf)<0) {
+                        HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
+                                  "block read failed");
+                    }
+                } /* end if */
 
                 /* Grab the data out of the buffer (must be first piece of data in buffer) */
                 assert(size==(hsize_t)((size_t)size)); /*check for overflow*/

@@ -67,7 +67,9 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative yperslab sizes (in elements) */
     hsize_t     acc;    /* Accumulator for hyperslab sizes (in elements) */
     intn ndims;
+    hsize_t	max_data = 0;			/*bytes in dataset	*/
     haddr_t	addr=0;				/*address in file	*/
+    uintn	u;				/*counters		*/
     intn	i,j;				/*counters		*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
@@ -118,6 +120,13 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = 0;
             } else {
                 addr = layout->addr;
+
+                /* Compute the size of the dataset in bytes */
+                for(u=0, max_data=1; u<layout->ndims; u++)
+                    max_data *= layout->dim[u];
+
+                /* Adjust the maximum size of the data by the offset into it */
+                max_data -= file_offset;
             }
             addr += file_offset;
 
@@ -161,7 +170,7 @@ H5F_seq_read(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                           "external data read failed");
                 }
             } else {
-                if (H5F_contig_read(f, H5FD_MEM_DRAW, addr, seq_len, dxpl_id, buf)<0) {
+                if (H5F_contig_read(f, max_data, H5FD_MEM_DRAW, addr, seq_len, dxpl_id, buf)<0) {
                     HRETURN_ERROR(H5E_IO, H5E_READERROR, FAIL,
                               "block read failed");
                 }
@@ -501,7 +510,9 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
     hsize_t     down_size[H5O_LAYOUT_NDIMS];    /* Cumulative hyperslab sizes (in elements) */
     hsize_t     acc;            /* Accumulator for hyperslab sizes (in elements) */
     intn ndims;
+    hsize_t	max_data = 0;			/*bytes in dataset	*/
     haddr_t	addr;				/*address in file	*/
+    uintn	u;				/*counters		*/
     intn	i,j;				/*counters		*/
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode=H5FD_MPIO_INDEPENDENT;
@@ -552,6 +563,13 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                 addr = 0;
             } else {
                 addr = layout->addr;
+
+                /* Compute the size of the dataset in bytes */
+                for(u=0, max_data=1; u<layout->ndims; u++)
+                    max_data *= layout->dim[u];
+
+                /* Adjust the maximum size of the data by the offset into it */
+                max_data -= file_offset;
             }
             addr += file_offset;
 
@@ -595,7 +613,7 @@ H5F_seq_write(H5F_t *f, hid_t dxpl_id, const struct H5O_layout_t *layout,
                           "external data write failed");
                 }
             } else {
-                if (H5F_contig_write(f, H5FD_MEM_DRAW, addr, seq_len, dxpl_id, buf)<0) {
+                if (H5F_contig_write(f, max_data, H5FD_MEM_DRAW, addr, seq_len, dxpl_id, buf)<0) {
                     HRETURN_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                               "block write failed");
                 }
