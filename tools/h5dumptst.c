@@ -1,5 +1,11 @@
 /*
  * Generate the binary hdf5 files for the h5dump tests.
+ * Usage: just execute the program without any arguments will
+ * generate all the binary hdf5 files in the local directory.
+ *
+ * If you regenerate the test files (e.g., changing some code,
+ * trying it on a new platform, ...), you need to verify the correctness
+ * of the expected output and update the corresponding *.ddl files.
  */
 #include <limits.h>
 #include "hdf5.h"
