@@ -132,7 +132,6 @@ H5_DLL herr_t H5E_push (H5E_major_t maj_num, H5E_minor_t min_num,
 H5_DLL herr_t H5E_clear (void);
 H5_DLL herr_t H5E_walk (H5E_direction_t dir, H5E_walk_t func,
 			 void *client_data);
-#endif
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -158,4 +157,6 @@ extern	int	H5E_mpi_error_str_len;
     HMPI_ERROR(mpierr);							      \
     HRETURN_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                       \
 }
+#endif
+
 #endif
