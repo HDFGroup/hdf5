@@ -1600,7 +1600,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  printf("\n");
 
  /* Print address information */
- if (address_g) H5Ddebug(dset, 0);
+ if (address_g) H5Ddebug(dset);
 
  /* Close stuff */
  H5Tclose(type);

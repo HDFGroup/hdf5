@@ -46,7 +46,7 @@
 #define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"
 #define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(hsize_t[H5O_LAYOUT_NDIMS])
 #define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
-                                   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+                                   1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 /* Definitions for fill value.  size=0 means fill value will be 0 as 
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_NAME    "fill_value"
@@ -149,7 +149,7 @@ H5_DLL herr_t H5D_init(void);
 H5_DLL hid_t H5D_open(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL htri_t H5D_isa(H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL H5G_entry_t *H5D_entof(H5D_t *dataset);
-H5_DLL H5T_t *H5D_typeof(H5D_t *dset);
+H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
 H5_DLL herr_t H5D_crt_copy(hid_t new_plist_t, hid_t old_plist_t, 
                             void *copy_data);
 H5_DLL herr_t H5D_crt_close(hid_t dxpl_id, void *close_data);

@@ -3,6 +3,19 @@
 -esym(534, H5FL_arr_free, H5FL_blk_free, H5FL_reg_free)
 -esym(534, H5I_clear_group, H5I_destroy_group)
 -esym(534, H5MM_xfree)
+-esym(534, H5V_array_fill)
+
+// Turn off warnings about not using the inlined H5V* functions:
+-esym(528, H5V_vector_reduce_product, H5V_vector_inc)
+-esym(528, H5V_vector_cmp, H5V_vector_cmp_s, H5V_vector_cmp_u)
+-esym(528, H5V_vector_zerop_s, H5V_vector_zerop_u)
+
+// Turn off warnings about not "Expression-like macro not parenthesized" for
+// enumerated type increment & decrement macros:
+-esym(773, H5_INC_ENUM, H5_DEC_ENUM)
+
+// Turn off warnings about not using PABLO_MASK macro
+-esym(750, PABLO_MASK)
 
 // Suppress message about our use of 'goto' in our error macros
 -emacro(801,HGOTO_DONE)
@@ -21,6 +34,15 @@
 
 // Suppress message about "Boolean within 'if' always evaluates false" in FUNC_ENTER* macros
 -emacro(774,FUNC_ENTER_API,FUNC_ENTER_NOAPI)
+
+// Suppress message about "Constant value boolean" in IS_H5FD_MPI* macros
+-emacro(506,IS_H5FD_MPI)
+
+// Suppress message about "Boolean within 'if' always evaluates false" in IS_H5FD_MPI* macros
+-emacro((774),IS_H5FD_MPI)
+
+// Suppress message about "Static variable found within inline function" in FUNC_ENTER* macros
+-emacro(1534,FUNC_ENTER_NOINIT)
 
 // Suppress message about "Shift right of signed quantity" in H5I_GRP macro
 -emacro(702,H5I_GRP)
@@ -49,4 +71,5 @@
         H5A.c
         H5AC.c
         H5B.c
+        H5D.c
 */
