@@ -371,6 +371,156 @@ finish:
 
 
 /*
+ * MPI-IO Test: One writes, Many reads.
+ * Verify if only one process writes some data and then all other
+ * processes can read them back correctly. This tests if the
+ * underlaying parallel I/O and file system supports parallel I/O
+ * correctly.
+ *
+ * Algorithm: Only one process (e.g., process 0) writes some data.
+ * Then all processes, including the writing process, read the data
+ * back and verify them against the original values.
+ */
+
+/*
+ * Default filename can be specified via first program argument.
+ * Each process writes something, then reads all data back.
+ */
+
+#define DIMSIZE	32		/* Dimension size. */
+#define PRINTID printf("Proc %d: ", mpi_rank)
+#define USENONE 0
+#define USEATOM 1		/* request atomic I/O */
+#define USEFSYNC 2		/* request file_sync */
+
+
+test_mpio_1wMr(char *filename, int special_request)
+{
+    char hostname[128];
+    int  mpi_size, mpi_rank;
+    MPI_File fh;
+    char mpi_err_str[MPI_MAX_ERROR_STRING];
+    int  mpi_err_strlen;
+    int  mpi_err;
+    unsigned char writedata[DIMSIZE], readdata[DIMSIZE];
+    unsigned char expect_val;
+    int  i, irank; 
+    int  nerrors = 0;		/* number of errors */
+    MPI_Offset  mpi_off;
+    MPI_Status  mpi_stat;
+
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    if (mpi_rank==0){
+        printf("Testing one process writes, all processes read.\n");
+	printf("Using %d processes accessing file %s\n", mpi_size, filename);
+        printf("    (Filename can be specified via program argument)\n");
+    }
+
+    /* show the hostname so that we can tell where the processes are running */
+    if (gethostname(hostname, 128) < 0){
+	PRINTID;
+	printf("gethostname failed\n");
+	return 1;
+    }
+    PRINTID;
+    printf("hostname=%s\n", hostname);
+
+    /* Delete any old file in order to start anew. */
+    /* Must delete because MPI_File_open does not have a Truncate mode. */
+    /* Don't care if it has error. */
+    MPI_File_delete(filename, MPI_INFO_NULL);
+
+    if ((mpi_err = MPI_File_open(MPI_COMM_WORLD, filename,
+	    MPI_MODE_RDWR | MPI_MODE_CREATE ,
+	    MPI_INFO_NULL, &fh))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_open failed (%s)\n", mpi_err_str);
+	return 1;
+    }
+
+    /* This barrier is not necessary but do it anyway. */
+    MPI_Barrier(MPI_COMM_WORLD);
+    PRINTID;
+    printf("between MPI_Barrier and MPI_File_write_at\n");
+
+    /* ==================================================
+     * Each process calculates what to write but
+     * only process irank(0) writes.
+     * ==================================================*/
+    irank=0;
+    for (i=0; i < DIMSIZE; i++)
+	writedata[i] = irank*DIMSIZE + i;
+    mpi_off = irank*DIMSIZE;
+
+    /* Only one process writes */
+    if (mpi_rank==irank){
+	PRINTID; printf("wrote %d bytes at %d\n", DIMSIZE, mpi_off);
+	if ((mpi_err = MPI_File_write_at(fh, mpi_off, writedata, DIMSIZE,
+			MPI_BYTE, &mpi_stat))
+		!= MPI_SUCCESS){
+	    MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	    PRINTID;
+	    printf("MPI_File_write_at offset(%ld), bytes (%d), failed (%s)\n",
+		    (long) mpi_off, (int) DIMSIZE, mpi_err_str);
+	    return 1;
+	};
+    };
+
+    /* Bcast the return code and */
+    /* make sure all writing are done before reading. */
+    MPI_Bcast(&mpi_err, 1, MPI_INT, irank, MPI_COMM_WORLD);
+    PRINTID;
+    printf("MPI_Bcast: mpi_err = %d\n", mpi_err);
+
+    /* This barrier is not necessary because the Bcase above */
+    /* should take care of it.  Do it anyway. */
+    MPI_Barrier(MPI_COMM_WORLD);
+    PRINTID;
+    printf("after MPI_Barrier\n");
+
+    /* ==================================================
+     * Each process reads what process 0 wrote and verify.
+     * ==================================================*/
+    irank=0;
+    mpi_off = irank*DIMSIZE;
+    if ((mpi_err = MPI_File_read_at(fh, mpi_off, readdata, DIMSIZE, MPI_BYTE,
+	    &mpi_stat))
+	    != MPI_SUCCESS){
+	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
+	PRINTID;
+	printf("MPI_File_read_at offset(%ld), bytes (%d), failed (%s)\n",
+		(long) mpi_off, (int) DIMSIZE, mpi_err_str);
+	return 1;
+    };
+    for (i=0; i < DIMSIZE; i++){
+	expect_val = irank*DIMSIZE + i;
+	if (readdata[i] != expect_val){
+	    PRINTID;
+	    printf("read data[%d:%d] got %02x, expect %02x\n", irank, i,
+		    readdata[i], expect_val);
+	    nerrors++;
+	}
+    }
+
+    MPI_File_close(&fh);
+
+    PRINTID;
+    if (nerrors > 0){
+	printf("%d data errors detected\n", nerrors);
+    }else{
+	printf("all tests passed\n");
+    }
+
+    mpi_err = MPI_Barrier(MPI_COMM_WORLD);
+    return 0;
+}
+
+
+/*
  * parse the command line options
  */
 int
@@ -466,6 +616,8 @@ main(int argc, char **argv)
 	goto finish;
     }
 
+    MPI_BANNER("MPIO 1 write Many read test...");
+    test_mpio_1wMr(filenames[0], USENONE);
     MPI_BANNER("MPIO File size range test...");
     test_mpio_gb_file(filenames[0]);
     MPI_BANNER("MPIO independent overlapping writes...");
