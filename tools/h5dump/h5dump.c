@@ -1,9 +1,16 @@
-/*
- * Copyright (C) 1998, 1999, 2000, 2001, 2002
- *     National Center for Supercomputing Applications
- *     All rights reserved.
- *
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
+ * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -611,6 +618,8 @@ usage(const char *prog)
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD at U\n");
+    fprintf(stdout, "     --                   Indicate that all following arguments are non-options.\n");
+    fprintf(stdout, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
     fprintf(stdout, "\n");
     fprintf(stdout, " Subsetting is available by using the following options with a dataset\n");
     fprintf(stdout, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -1093,7 +1102,7 @@ dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dump_attr(hid_t attr, const char *attr_name, void UNUSED *op_data)
+dump_attr(hid_t attr, const char *attr_name, void * UNUSED op_data)
 {
     hid_t       attr_id, type, space;
     herr_t      ret = SUCCEED;
@@ -1973,7 +1982,7 @@ set_output_file(const char *fname)
  *-------------------------------------------------------------------------
  */
 static void
-handle_attributes(hid_t fid, char *attr, void UNUSED *data)
+handle_attributes(hid_t fid, char *attr, void * UNUSED data)
 {
     dump_selected_attr(fid, attr);
 }
@@ -2233,7 +2242,7 @@ handle_datasets(hid_t fid, char *dset, void *data)
  *-------------------------------------------------------------------------
  */
 static void
-handle_groups(hid_t fid, char *group, void UNUSED *data)
+handle_groups(hid_t fid, char *group, void * UNUSED data)
 {
     H5G_stat_t  statbuf;
     hid_t       gid;
@@ -2278,7 +2287,7 @@ handle_groups(hid_t fid, char *group, void UNUSED *data)
  *-------------------------------------------------------------------------
  */
 static void
-handle_links(hid_t fid, char *links, void UNUSED *data)
+handle_links(hid_t fid, char *links, void * UNUSED data)
 {
     H5G_stat_t  statbuf;
 
@@ -2334,7 +2343,7 @@ handle_links(hid_t fid, char *links, void UNUSED *data)
  *-------------------------------------------------------------------------
  */
 static void
-handle_datatypes(hid_t fid, char *type, void UNUSED *data)
+handle_datatypes(hid_t fid, char *type, void * UNUSED data)
 {
     hid_t       type_id;
 
@@ -3162,7 +3171,7 @@ lookup_ref_path(hobj_ref_t * ref)
  *-------------------------------------------------------------------------
  */
 static herr_t
-fill_ref_path_table(hid_t group, const char *name, void UNUSED *op_data)
+fill_ref_path_table(hid_t group, const char *name, void * UNUSED op_data)
 {
     hid_t                   obj;
     char                   *tmp;
@@ -3937,7 +3946,7 @@ xml_dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t * UNUSED sset)
 {
     h5dump_t               *outputformat = &xml_dataformat;
     int                     status = -1;
@@ -4041,7 +4050,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED *sset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED *op_data)
+xml_dump_attr(hid_t attr, const char *attr_name, void * UNUSED op_data)
 {
     hid_t   attr_id, type, space;
     char   *t_aname = xml_escape_the_name(attr_name);
@@ -4688,7 +4697,7 @@ check_compression(hid_t dcpl)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED *sset)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t * UNUSED sset)
 {
     hid_t                   type, space;
     hid_t                   dcpl;
