@@ -76,7 +76,8 @@ test_atomic_dtype(hid_t file)
     hid_t               dtype, native_type;
     int			i, j, n;
     hsize_t		dims[2];
-    
+    void                *tmp;
+
     TESTING("atomic datatype");
 
     /* Initialize the dataset */
@@ -114,18 +115,29 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_INT)) 
         TEST_ERROR;
-    if(H5Tget_size(native_type) != H5Tget_size(H5T_STD_I32BE))
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I32BE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
 
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck2)<0)
+    /* Read the dataset back.  The temporary buffer is for special platforms 
+     * like Cray. */
+    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
-
+    
+    /* Copy data from temporary buffer to destination buffer */
+    memcpy(icheck2, tmp, dims[0]*dims[1]*H5Tget_size(native_type)); 
+    free(tmp);
+    
+    /* Convert to the integer type */
+    if(H5Tconvert(native_type, H5T_NATIVE_INT, dims[0]*dims[1], icheck2, NULL, H5P_DEFAULT)<0)
+        TEST_ERROR;
+    
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < 100; i++) {
-	for (j = 0; j < 200; j++) {
+    for (i = 0; i < dims[0]; i++) {
+	for (j = 0; j < dims[1]; j++) {
 	    if (ipoints2[i][j] != icheck2[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -152,7 +164,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_LLONG)) 
         TEST_ERROR;
-    if(H5Tget_size(native_type) != H5Tget_size(H5T_STD_I64LE))
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I64LE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -173,7 +185,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_CHAR)) 
         TEST_ERROR;
-    if(H5Tget_size(native_type) != H5Tget_size(H5T_NATIVE_CHAR))
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I8LE))
         TEST_ERROR;
     if(H5T_INTEGER!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -194,7 +206,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT)) 
         TEST_ERROR;
-    if(H5Tget_size(native_type) != H5Tget_size(H5T_NATIVE_FLOAT))
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F32BE))
         TEST_ERROR;
     if(H5T_FLOAT!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -215,7 +227,7 @@ test_atomic_dtype(hid_t file)
     /* Verify the datatype retrieved and converted */
     if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_DOUBLE)) 
         TEST_ERROR;
-    if(H5Tget_size(native_type) != H5Tget_size(H5T_IEEE_F64BE))
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F64BE))
         TEST_ERROR;
     if(H5T_FLOAT!=H5Tget_class(native_type))
         TEST_ERROR;
@@ -270,6 +282,7 @@ test_compound_dtype2(hid_t file)
     hsize_t		dims[2];
     s1                 *temp_point, *temp_check;
     s1 	               *points=NULL, *check=NULL;
+    void                *tmp;
 
     TESTING("nested compound datatype");
 
@@ -316,7 +329,7 @@ test_compound_dtype2(hid_t file)
 #error "Unknown 'long' size"
 #endif
 
-    if(H5Tinsert(tid, "c", 0, H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE)<0) TEST_ERROR;
     if(H5Tinsert(tid, "i", 1, H5T_STD_I32LE)<0) TEST_ERROR;
     if(H5Tinsert(tid, "st", 5, tid2)<0) TEST_ERROR;
 #if H5_SIZEOF_LONG==4
@@ -338,7 +351,7 @@ test_compound_dtype2(hid_t file)
     /* Insert members */
     if(H5Tinsert(tid_m2, "c2", HOFFSET(s2, c2), H5T_NATIVE_SHORT)<0) TEST_ERROR;
     if(H5Tinsert(tid_m2, "l2", HOFFSET(s2, l2), H5T_NATIVE_LONG)<0) TEST_ERROR;
-    if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "i", HOFFSET(s1, i), H5T_NATIVE_INT)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "st", HOFFSET(s1, st), tid_m2)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "l", HOFFSET(s1, l), H5T_NATIVE_ULLONG)<0) TEST_ERROR;
@@ -367,9 +380,18 @@ test_compound_dtype2(hid_t file)
     if(!H5Tequal(native_type, tid_m)) 
         TEST_ERROR;
         
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+            
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
+
+    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    free(tmp);
+
+    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], check, NULL, H5P_DEFAULT))
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
@@ -444,6 +466,7 @@ test_compound_dtype(hid_t file)
     hsize_t		dims[2];
     s1                  *temp_point, *temp_check;
     s1	                *points, *check;
+    void                *tmp;
 
     TESTING("compound datatype");
 
@@ -472,7 +495,7 @@ test_compound_dtype(hid_t file)
     if((tid=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
 
     /* Insert members */
-    if(H5Tinsert(tid, "c", 0, H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE)<0) TEST_ERROR;
     if(H5Tinsert(tid, "i", 1, H5T_STD_U32LE)<0) TEST_ERROR;
     if(H5Tinsert(tid, "l", 5, H5T_STD_I64BE)<0) TEST_ERROR;
     
@@ -482,7 +505,7 @@ test_compound_dtype(hid_t file)
 
     /* Create compound datatype for datatype in memory */
     if((tid2=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
-    if(H5Tinsert(tid2, "c", HOFFSET(s1, c), H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid2, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
     if(H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_UINT)<0) TEST_ERROR;
     if(H5Tinsert(tid2, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG)<0) TEST_ERROR;
     
@@ -505,15 +528,24 @@ test_compound_dtype(hid_t file)
     if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
         TEST_ERROR;
     
-    if(H5Tget_size(native_type) != H5Tget_size(tid2))
+    if(H5Tget_size(native_type) < H5Tget_size(tid2))
         TEST_ERROR;
     if(!H5Tequal(native_type, tid2)) 
         TEST_ERROR;
         
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
 
+    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    free(tmp);
+    
+    if (H5Tconvert(native_type, tid2, dims[0]*dims[1], check, NULL, H5P_DEFAULT)<0)
+        TEST_ERROR;
+                
     /* Check that the values read are the same as the values written */
     for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
 	for (j = 0; j < 200; j++, temp_point++,temp_check++) {
@@ -579,6 +611,7 @@ test_compound_dtype3(hid_t file)
     hsize_t		dims[2];
     s1                  *temp_point, *temp_check;
     s1 	                *points=NULL, *check=NULL;
+    void                *tmp;
     
     TESTING("compound datatype");
 
@@ -610,7 +643,7 @@ test_compound_dtype3(hid_t file)
     if((tid=H5Tcreate(H5T_COMPOUND, 29))<0) TEST_ERROR;
 
     /* Insert members */
-    if(H5Tinsert(tid, "c", 0, H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE)<0) TEST_ERROR;
     if(H5Tinsert(tid, "a", 1, tid2)<0) TEST_ERROR;
     if(H5Tinsert(tid, "l", 21, H5T_STD_I64BE)<0) TEST_ERROR;
     
@@ -623,7 +656,7 @@ test_compound_dtype3(hid_t file)
         
     /* Create compound datatype for datatype in memory */
     if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
-    if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "a", HOFFSET(s1, a), tid_m2)<0) TEST_ERROR;
     if(H5Tinsert(tid_m, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG)<0) TEST_ERROR;
 
@@ -655,9 +688,18 @@ test_compound_dtype3(hid_t file)
     if(!H5Tequal(native_type, tid_m)) 
         TEST_ERROR;
         
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
+
+    memcpy(check, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    free(tmp);
+
+    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], check, NULL, H5P_DEFAULT))
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
@@ -722,6 +764,7 @@ test_enum_dtype(hid_t file)
     hid_t               tid, tid_m, dtype, native_type;
     int			i, j, n;
     hsize_t		dims[2];
+    void                *tmp;
     short               colors[8];
     const char          *mname[] = { "RED",
                                      "GREEN",
@@ -790,9 +833,18 @@ test_enum_dtype(hid_t file)
     if(!H5Tequal(native_type, tid_m)) 
         TEST_ERROR;
         
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, scheck2)<0)
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = malloc(dims[0]*dims[1]*H5Tget_size(native_type));
+    
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
+
+    memcpy(scheck2, tmp, dims[0]*dims[1]*H5Tget_size(native_type));
+    free(tmp);
+   
+    if (H5Tconvert(native_type, tid_m, dims[0]*dims[1], scheck2, NULL, H5P_DEFAULT)<0)
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
@@ -848,7 +900,8 @@ test_array_dtype(hid_t file)
     hsize_t		space_dims[2], array_dims[1]={5};
     s1                 *temp_point, *temp_check;
     s1 	               *points=NULL, *check=NULL;
-
+    void               *tmp;
+    
     TESTING("array of compound datatype");
 
     /* Allocate space for the points & check arrays */
@@ -875,7 +928,7 @@ test_array_dtype(hid_t file)
     if((tid2=H5Tcreate(H5T_COMPOUND, 13))<0) TEST_ERROR;
 
     /* Insert members */
-    if(H5Tinsert(tid2, "c", 0, H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid2, "c", 0, H5T_STD_U8BE)<0) TEST_ERROR;
     if(H5Tinsert(tid2, "i", 1, H5T_STD_U32LE)<0) TEST_ERROR;
     if(H5Tinsert(tid2, "l", 5, H5T_STD_I64BE)<0) TEST_ERROR;
     
@@ -888,7 +941,7 @@ test_array_dtype(hid_t file)
 
     /* Create compound datatype for datatype in memory */
     if((tid3=H5Tcreate(H5T_COMPOUND, sizeof(s1)))<0) TEST_ERROR;
-    if(H5Tinsert(tid3, "c", HOFFSET(s1, c), H5T_NATIVE_CHAR)<0) TEST_ERROR;
+    if(H5Tinsert(tid3, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR)<0) TEST_ERROR;
     if(H5Tinsert(tid3, "i", HOFFSET(s1, i), H5T_NATIVE_UINT)<0) TEST_ERROR;
     if(H5Tinsert(tid3, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG)<0) TEST_ERROR;
     
@@ -919,9 +972,19 @@ test_array_dtype(hid_t file)
 
     if(!H5Tequal(tid_m, native_type)) TEST_ERROR;
 
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, check)<0)
+    /* Read the dataset back. Temporary buffer is for special platforms like 
+     * Cray */
+    tmp = malloc(space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
+
+    memcpy(check, tmp, space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    free(tmp);
+    
+    if (H5Tconvert(native_type, tid_m, space_dims[0]*space_dims[1], check, 
+        NULL, H5P_DEFAULT)<0)
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0, temp_point=points, temp_check=check; i < 100; i++) {
@@ -985,6 +1048,7 @@ test_array_dtype2(hid_t file)
     hid_t               dtype, native_type, tid, tid_m;
     int			i, j, k, n;
     hsize_t		space_dims[2], array_dims[1]={5};
+    void                *tmp;
 
     TESTING("array of atomic datatype");
 
@@ -1033,9 +1097,19 @@ test_array_dtype2(hid_t file)
 
     if(!H5Tequal(tid_m, native_type)) TEST_ERROR;
 
-    /* Read the dataset back */
-    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, icheck3)<0)
+    /* Read the dataset back.  Temporary buffer is for special platforms like
+     * Cray */
+    tmp = malloc(space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    
+    if (H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp)<0)
 	TEST_ERROR;
+
+    memcpy(icheck3, tmp, space_dims[0]*space_dims[1]*H5Tget_size(native_type));
+    free(tmp);
+
+    if (H5Tconvert(native_type, tid_m, space_dims[0]*space_dims[1], icheck3, NULL, 
+        H5P_DEFAULT)<0)
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     for (i = 0; i < 100; i++) {
