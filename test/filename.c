@@ -41,6 +41,20 @@ typedef struct s1_t {
 } s1_t;
 
 /* Used to make certain a return name _is_ the file name */
+#ifdef H5_WANT_H5_V1_6_COMPAT
+#define VERIFY_NAME(x, val, where) do {					      \
+    if (GetTestVerbosity()>=VERBO_HI) {				              \
+	print_func("   Call to routine: %15s at line %4d in %s had value "    \
+		   "%ld \n", (where), (int)__LINE__, __FILE__, (long)(x));    \
+    }									      \
+    if (strcmp(x, val)) {					              \
+	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d " \
+		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
+	H5Eprint (stdout);					              \
+    }									      \
+    HDstrcmp(x, "");                                                          \
+} while(0)
+#else /* H5_WANT_H5_V1_6_COMPAT */
 #define VERIFY_NAME(x, val, where) do {					      \
     if (GetTestVerbosity()>=VERBO_HI) {				              \
 	print_func("   Call to routine: %15s at line %4d in %s had value "    \
@@ -51,8 +65,9 @@ typedef struct s1_t {
 		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
 	H5Eprint (H5E_DEFAULT, stdout);					      \
     }									      \
-    strcmp(x, "");                                                            \
+    HDstrcmp(x, "");                                                          \
 } while(0)
+#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 int main( void )
 {
