@@ -110,6 +110,8 @@ test "$verbose" && echo "   Running tar..." 1>&2
 )
 
 # Compress
+# Make sure new files are of the right access mode
+umask 0133
 for comp in $methods; do
     case $comp in
 	tar)
