@@ -26,6 +26,8 @@ TEST_SRC=hdf5test.f90 tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90	\
 	 tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90
 TEST_OBJ=$(TEST_SRC:.f90=.lo)
 
+DISTCLEAN=$(TEST_PROGS_SRC:.f90=.lo) $(TEST_PROGS_SRC:.f90=.o) *.h5
+
 $(TEST_PROGS): $(FLIB)
 
 fortranlib_test: fortranlib_test.lo $(TEST_OBJ)
