@@ -71,8 +71,9 @@ int
 main(int argc, char **argv)
 {
 	char **fargv;
-	char *h5_filename, *h4_filename;
-    char *h4_extension = "hdf";
+	char *h5_filename=NULL;
+	char *h4_filename=NULL;
+	char *h4_extension = "hdf";
 	int status = 0;
 	int status2 = 0;
 
@@ -145,7 +146,9 @@ main(int argc, char **argv)
 		if ( status != 0 ) {
 			DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 		}
-		HDfree(h4_filename);
+		if (h4_filename != NULL) {
+			HDfree(h4_filename);
+		}
 
 		break;
 
@@ -235,7 +238,9 @@ main(int argc, char **argv)
 				DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "main", __FILE__, __LINE__);
 				status2 = status;
 			}
-			HDfree(h4_filename);
+			if (h4_filename != NULL) {
+				HDfree(h4_filename);
+			}
 
 		}
 		status = status2;
@@ -406,7 +411,6 @@ int h5toh4(h5_filename, h4_filename)
 	}
 
 done:
-
 	free_table();
 
 	return status;
@@ -585,9 +589,9 @@ int32 h4_type;
 int32 recsize;
 int32 n_records, num_of_recs, record_pos;
 intn nmembers;
-char *buffer; /* read/write buffer*/
+char *buffer=NULL; /* read/write buffer*/
 char fieldname_list[4096] = "\0";
-char *fieldname;
+char *fieldname=NULL;
 hid_t fieldtype;
 int32 order;
 off_t offset;
@@ -849,7 +853,9 @@ int32 order_array[512];
 				strcat(fieldname_list,", ");
 			}
 
-			HDfree(fieldname);
+			if (fieldname != NULL) {
+				HDfree(fieldname);
+			}
 		}
 		if ((status = VSsetfields(vdata_id, fieldname_list)) != SUCCEED ) {
 			fprintf(stderr, "Error: Unable to set fieldname list  %s\n", name);
@@ -926,7 +932,9 @@ int32 order_array[512];
 	DEBUG_PRINT("Error detected in %s() [%s line %d]\n", "convert_dataset", __FILE__, __LINE__);
     }
 
-    HDfree(buffer);
+    if (buffer != NULL) {
+	HDfree(buffer);
+    }
 
     return status;
     
@@ -953,7 +961,7 @@ convert_attr (hid_t attr, char *attr_name, op_data_t *op_data)
 {
 hid_t  attr_id, type, space, mem_type, class;
 size_t typesize;
-char   *attr_values;
+char   *attr_values=NULL;
 int32  status;
 int32  h4_type;
 int32  sds_id;
@@ -1071,7 +1079,9 @@ int32  n_values;
 				return status;
 			}
 
-			HDfree(attr_values);
+			if (attr_values != NULL) {
+				HDfree(attr_values);
+			}
 
 			status = SUCCEED;
         		break;
@@ -1456,7 +1466,8 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
 {
     int status=SUCCEED;
     int32 vgroup_id;
-    char *dataset_name, *dataset_name2;
+    char *dataset_name=NULL;
+    char *dataset_name2=NULL;
     int32 hfile_id;
     int32 sd_id;
     int32 sds_id;
@@ -1579,7 +1590,9 @@ convert_shared_dataset(hid_t did, int idx, op_data_t *op_data)
 	status = FAIL;
     }
 
-    HDfree (dataset_name);
+    if (dataset_name != NULL) {
+	HDfree (dataset_name);
+    }
 
     return status;
 
@@ -1605,7 +1618,8 @@ convert_shared_group (hid_t group, int idx, op_data_t *op_data) {
     int32 vgroup_ref;
     int32 numtagref;
     int32 status;
-    char *group_name, *group_name2;
+    char *group_name=NULL;
+    char *group_name2=NULL;
     char vgroup_name[VGNAMELENMAX];
 
     hfile_id = op_data->hfile_id;
@@ -1658,7 +1672,9 @@ convert_shared_group (hid_t group, int idx, op_data_t *op_data) {
 	status = FAIL;
     }
 
-    HDfree(group_name);
+    if (group_name != NULL) {
+	HDfree(group_name);
+    }
 
     return status;
 

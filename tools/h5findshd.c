@@ -92,9 +92,15 @@ int i;
 void
 free_table (void){
 
-	HDfree(&group_table);
-	HDfree(&dset_table);
-	HDfree(&type_table);
+        if (group_table.objs != NULL) {
+		HDfree(group_table.objs);
+        }
+        if (dset_table.objs != NULL) {
+		HDfree(dset_table.objs);
+        }
+        if (type_table.objs != NULL) {
+		HDfree(type_table.objs);
+        }
 
 }
 
