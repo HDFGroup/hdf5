@@ -1091,39 +1091,45 @@ H5G_node_iterate (H5F_t *f, void UNUSED *_lt_key, haddr_t addr,
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
 		     "memory allocation failed");
     }
-    for (i=0; i<nsyms; i++) name_off[i] = sn->entry[i].name_off;
+    for (i=0; i<nsyms; i++)
+        name_off[i] = sn->entry[i].name_off;
     sn = NULL;
 
     /*
      * Iterate over the symbol table node entries.
      */
     for (i=0, ret_value=0; i<nsyms && 0==ret_value; i++) {
-	if (bt_udata->skip>0) {
-	    --bt_udata->skip;
-	} else {
-	    name = H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr,
-			     name_off[i]);
-	    assert (name);
-	    n = HDstrlen (name);
-	    if (n+1>sizeof(buf)) {
-		if (NULL==(s = H5MM_malloc (n+1))) {
-		    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
-				 "memory allocation failed");
-		}
-	    } else {
-		s = buf;
-	    }
-	    HDstrcpy (s, name);
-	    ret_value = (bt_udata->op)(bt_udata->group_id, s,
-				       bt_udata->op_data);
-	    if (s!=buf) H5MM_xfree (s);
-	}
+        if (bt_udata->skip>0) {
+            --bt_udata->skip;
+        } else {
+            name = H5HL_peek (f, bt_udata->group->ent.cache.stab.heap_addr,
+                     name_off[i]);
+            assert (name);
+            n = HDstrlen (name);
+            if (n+1>sizeof(buf)) {
+                if (NULL==(s = H5MM_malloc (n+1))) {
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                         "memory allocation failed");
+                }
+            } else {
+                s = buf;
+            }
+            HDstrcpy (s, name);
+            ret_value = (bt_udata->op)(bt_udata->group_id, s,
+                           bt_udata->op_data);
+            if (s!=buf)
+                H5MM_xfree (s);
+        }
+
+        /* Increment the number of entries passed through */
+        /* (whether we skipped them or not) */
+        bt_udata->final_ent++;
     }
     if (ret_value<0) {
-	HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
+        HERROR (H5E_SYM, H5E_CANTINIT, "iteration operator failed");
     }
 
-  done:
+done:
     name_off = H5MM_xfree (name_off);
     FUNC_LEAVE(ret_value);
 }
