@@ -84,7 +84,7 @@ usage() {
   echo " or shared libraries to compile your program by setting the following"
   echo " environment variables accordingly:"
   echo " "
-  echo "   HDF5_CXX                 -  use a different C compiler"
+  echo "   HDF5_CXX                 -  use a different C++ compiler"
   echo "   HDF5_CXXLINKER           -  use a different linker"
   echo " "
   exit 1
