@@ -225,6 +225,7 @@
 ./doc/html/TechNotes/ThreadSafeLibrary.html
 ./doc/html/TechNotes/VFL.html
 ./doc/html/TechNotes/VFLfunc.html
+./doc/html/TechNotes/VLTypes.html
 ./doc/html/TechNotes/Version.html
 ./doc/html/TechNotes/openmp-hdf5.c
 ./doc/html/TechNotes/openmp-hdf5.html
