@@ -247,10 +247,10 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC22_FILE             "tmisc22.h5"
 #define MISC22_DSET_NAME        "Dataset"
 #define MISC22_SPACE_RANK       2
-#define MISC22_CHUNK_DIM0       1024
-#define MISC22_CHUNK_DIM1       1024
-#define MISC22_SPACE_DIM0       1639
-#define MISC22_SPACE_DIM1       2308
+#define MISC22_CHUNK_DIM0       512
+#define MISC22_CHUNK_DIM1       512
+#define MISC22_SPACE_DIM0       639
+#define MISC22_SPACE_DIM1       1308
 
 /****************************************************************
 **
@@ -3485,9 +3485,9 @@ test_misc22(void)
     int correct;
 
     idts[0]=H5Tcopy(H5T_NATIVE_UINT8);
-    idts[0]=H5Tcopy(H5T_NATIVE_UINT16);
-    idts[0]=H5Tcopy(H5T_NATIVE_UINT32);
-    idts[0]=H5Tcopy(H5T_NATIVE_UINT64);
+    idts[1]=H5Tcopy(H5T_NATIVE_UINT16);
+    idts[2]=H5Tcopy(H5T_NATIVE_UINT32);
+    idts[3]=H5Tcopy(H5T_NATIVE_UINT64);
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing datatypes with SZIP filter\n"));
@@ -3539,8 +3539,8 @@ test_misc22(void)
                     correct=H5Tget_size(idts[i])*8;
                 }
                 if (correct > 24) {
-            	    if (correct < 32) correct=32;
-            	    else if (correct < 64) correct=32;
+            	    if (correct <= 32) correct=32;
+            	    else if (correct <= 64) correct=64;
                 }
             
                 /* Create the dataset */
@@ -3579,6 +3579,14 @@ test_misc22(void)
             }
         }
     }
+    ret = H5Tclose(idts[0]);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(idts[1]);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(idts[2]);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(idts[3]);
+    CHECK(ret, FAIL, "H5Tclose");
     ret = H5Sclose (sid);
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Fclose (fid);
