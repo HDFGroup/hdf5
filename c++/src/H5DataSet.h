@@ -79,18 +79,16 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	// Creates a copy of an existing DataSet using its id
-	// Note: used by CommonFG to return a DataSet; should be modified
-	// to use friend template function instead)
-	DataSet( const hid_t dataset_id );
+	// Creates a copy of an existing DataSet using its id.
+	DataSet(const hid_t existing_id);
 
-	// Used by the API to appropriately close a dataset
+	// Used by the API to appropriately close a dataset.
 	virtual void p_close() const;
 
-	// Default constructor
+	// Default constructor.
 	DataSet();
 
-	// Copy constructor
+	// Copy constructor.
 	DataSet( const DataSet& original );
 
 	virtual ~DataSet();

@@ -51,7 +51,7 @@ DataSet::DataSet() : AbstractDs() {}
 ///\param	existing_id - IN: Id of an existing dataset
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet( const hid_t dataset_id ) : AbstractDs( dataset_id ) {}
+DataSet::DataSet(const hid_t existing_id) : AbstractDs(existing_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet copy constructor
@@ -196,7 +196,8 @@ hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 //--------------------------------------------------------------------------
 // Function:	DataSet::getVlenBufSize
 ///\brief	Reclaims VL datatype memory buffers. 
-///\param	dataspace - IN: Selection for the memory buffer to free the 
+///\param	type - IN: Datatype, which is the datatype stored in the buffer
+///\param	space - IN: Selection for the memory buffer to free the 
 ///		VL datatypes within
 ///\param	xfer_plist - IN: Property list used to create the buffer
 ///\param	buf - IN: Pointer to the buffer to be reclaimed

@@ -25,22 +25,37 @@
 namespace H5 {
 #endif
 
-// Default constructor - private
+//--------------------------------------------------------------------------
+// Function:	IdComponent default constructor - private
+///\brief	Default constructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IdComponent::IdComponent() : id( -1 )
 {
    // starts counting object references
    ref_count = new RefCounter;
 }
 
-// Constructor that takes an HDF5 object id.  It creates an instance
-// of IdComponent to hold the HDF5 id
+//--------------------------------------------------------------------------
+// Function:	IdComponent overloaded constructor
+///\brief	Creates an IdComponent object using the id of an existing object.
+///\param	h5_id - IN: Id of an existing object
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+
 IdComponent::IdComponent( const hid_t h5_id ) : id( h5_id )
 {
    // starts counting object references
    ref_count = new RefCounter;
 }
 
-// Copy constructor: makes a copy of the original object
+//--------------------------------------------------------------------------
+// Function:	IdComponent copy constructor
+///\brief	Copy constructor: makes a copy of the original IdComponent object.
+///\param	original - IN: IdComponent instance to copy
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IdComponent::IdComponent( const IdComponent& original )
 {
    id = original.id;
@@ -48,17 +63,36 @@ IdComponent::IdComponent( const IdComponent& original )
    ref_count->increment(); // increment number of references to this id
 }
 
-// Increment reference counter
+//--------------------------------------------------------------------------
+// Function:	IdComponent::incRefCount
+///\brief	Increment id reference counter.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IdComponent::incRefCount() { ref_count->increment(); }
 
-// Decrement reference counter
+//--------------------------------------------------------------------------
+// Function:	IdComponent::decRefCount
+///\brief	Decrement id reference counter.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IdComponent::decRefCount() { ref_count->decrement(); }
 
-// Get the reference counter to this identifier
+//--------------------------------------------------------------------------
+// Function:	IdComponent::getCounter
+///\brief	Returns the reference counter to this identifier.
+///\return	Reference count
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 int IdComponent::getCounter() { return( ref_count->getCounter()); }
 
-// Decrements the reference counter then determines if there are no more
-// reference to this object
+//--------------------------------------------------------------------------
+// Function:	IdComponent::noReference
+///\brief	Decrements the reference counter then determines if there 
+///		are no more reference to this object.
+///\return	true if there are no more reference to this object, and false,
+///		otherwise
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 bool IdComponent::noReference()
 {
    if( ref_count->getCounter() > 0 )
@@ -66,13 +100,20 @@ bool IdComponent::noReference()
    return( ref_count->getCounter() == 0 ? true:false );
 }
 
-/* Assignment operator.
-   Description:
-   Reset the identifier of this object so that the HDF5 id can be properly
-   closed.  Copy the new identifier to this object, then increment the 
-   reference counter of the identifier to indicate that another object 
-   is referencing the identifier.
-*/
+//--------------------------------------------------------------------------
+// Function:	IdComponent::operator=
+///\brief	Assignment operator.
+///\param	rhs - IN: Reference to the existing object
+///\return	Reference to IdComponent instance
+///\exception	H5::IdComponentException when attempt to close the HDF5
+///		object fails
+// Description
+//		Reset the identifier of this object so that the HDF5 id can 
+//		be properly closed.  Copy the id from rhs to this object, 
+//		then increment the reference counter of the id to indicate 
+//		that another object is referencing it.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IdComponent& IdComponent::operator=( const IdComponent& rhs )
 {
    // reset the identifier of this object - resetIdComponent will call the 
@@ -93,13 +134,18 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
    return( *this );
 }
 
-/* Sets the identifier of this object to a new value
-   Description:
-        Reset the current identifier of this object so that the HDF5
-        id can be appropriately closed.  If only this object references
-        its identifier, its reference counter will be deleted.  A new 
-        reference counter is created for the new HDF5 object id.
-*/
+//--------------------------------------------------------------------------
+// Function:	IdComponent::incRefCount
+///\brief	Sets the identifier of this object to a new value.
+///\exception	H5::IdComponentException when the attempt to close the HDF5
+///		object fails
+// Description:
+//		Reset the current id of this object so that the HDF5
+//		id can be appropriately closed.  If only this object references
+//		its id, its reference counter will be deleted.  A new 
+//		reference counter is created for the new HDF5 object id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IdComponent::setId( hid_t new_id )
 {
    // reset the identifier of this object, call appropriate H5Xclose
@@ -115,20 +161,33 @@ void IdComponent::setId( hid_t new_id )
    ref_count = new RefCounter;
 }
 
-// Gets the id of this object 
+//--------------------------------------------------------------------------
+// Function:	IdComponent::incRefCount
+///\brief	Returns the id of this object 
+///\return	HDF5 id
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 hid_t IdComponent::getId () const
 {
    return( id );
 }
 
-// Reset this object by deleting its RefCounter
+//--------------------------------------------------------------------------
+// Function:	IdComponent::reset
+///\brief	Reset the reference counter of this object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void IdComponent::reset ()
 {
    delete ref_count;
    ref_count = NULL;
 }
 
-// Default destructor
+//--------------------------------------------------------------------------
+// Function:	IdComponent destructor
+///\brief	Noop destructor.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 IdComponent::~IdComponent() {
 
 /* uncomment this block and complete it when deciding to use dontAtExit 
@@ -156,7 +215,7 @@ IdComponent::~IdComponent() {
 }
 
 //
-// Implementation for HDF5 Reference Interface 
+// Implementation of protected functions for HDF5 Reference Interface.
 // 
 
 //--------------------------------------------------------------------------

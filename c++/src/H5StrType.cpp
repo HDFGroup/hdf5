@@ -33,19 +33,45 @@
 namespace H5 {
 #endif
 
-// Default constructor
+//--------------------------------------------------------------------------
+// Function:	StrType default constructor
+///\brief	Default constructor: Creates a stub string datatype
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::StrType() : AtomType() {}
 
-// Creates a string type using a predefined type
+//--------------------------------------------------------------------------
+// Function:	StrType overloaded constructor
+///\brief	Creates a string datatype using a predefined type.
+///\param	pred_type - IN: Predefined datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::StrType( const PredType& pred_type ) : AtomType()
 {
    // use DataType::copy to make a copy of this predefined type
    copy( pred_type );
 }
 
-// Creates a string type with a specified length - 1st argument could
-// have been skipped, but this constructor will collide with the one
-// that takes an existing id below
+//--------------------------------------------------------------------------
+// Function:	StrType overloaded constructor
+///\brief	Creates a string datatype with a specified length
+///\param	existing_id - IN: Id of an existing datatype
+///\exception	H5::DataTypeIException
+// Description
+// 		The 1st argument could have been skipped, but this 
+// 		constructor will collide with the one that takes an 
+// 		existing id.
+//
+// 		Update: by passing 'size' by reference will avoid the
+// 		clashing problem, so the 1st argument can actually be
+// 		omitted.  This constructor should be replaced by the 
+// 		other after announcing. - May, 2004
+///\note		
+///		This constructor will be obsolete in later releases,
+///		please use StrType( const size_t& size ) instead.
+// Programmer	Binh-Minh Ribler - 2000 
+//--------------------------------------------------------------------------
 StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
 {
    // use DataType::copy to make a copy of the string predefined type
@@ -53,14 +79,37 @@ StrType::StrType( const PredType& pred_type, const size_t size ) : AtomType()
    copy(pred_type);
    setSize(size);
 }
+StrType::StrType( const size_t& size ) : AtomType()
+{
+   // use DataType::copy to make a copy of the string predefined type
+   // then set its length
+   copy(H5T_C_S1);
+   setSize(size);
+}
 
-// Creates a string datatype using an existing id
+//--------------------------------------------------------------------------
+// Function:	StrType overloaded constructor
+///\brief	Creates an StrType object using the id of an existing datatype.
+///\param	existing_id - IN: Id of an existing datatype
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::StrType( const hid_t existing_id ) : AtomType( existing_id ) {}
 
-// Copy constructor: makes copy of the original StrType object
+//--------------------------------------------------------------------------
+// Function:	StrType copy constructor
+///\brief	Copy constructor: makes a copy of the original StrType object.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::StrType( const StrType& original ) : AtomType ( original ) {}
 
-// Gets the string datatype of the specified dataset - will reimplement - BMR
+//--------------------------------------------------------------------------
+// Function:    EnumType overloaded constructor
+///\brief       Gets the string datatype of the specified dataset
+///\param       dataset - IN: Dataset that this string datatype associates with
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::StrType( const DataSet& dataset ) : AtomType ()
 {
    // Calls C function H5Dget_type to get the id of the datatype
@@ -72,7 +121,14 @@ StrType::StrType( const DataSet& dataset ) : AtomType ()
    }
 }
 
-// Retrieves the character set type of a string datatype. 
+//--------------------------------------------------------------------------
+// Function:	StrType::getCset
+///\brief	Retrieves the character set type of this string datatype. 
+///\return	Character set type, which can be:
+///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_cset_t StrType::getCset() const
 {
    H5T_cset_t cset = H5Tget_cset( id );
@@ -85,7 +141,14 @@ H5T_cset_t StrType::getCset() const
    return( cset );
 }
 
-// Sets character set to be used. 
+//--------------------------------------------------------------------------
+// Function:	StrType::setCset
+///\brief	Sets character set to be used. 
+///\param	cset - IN: character set type
+///\exception	H5::DataTypeIException
+///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void StrType::setCset( H5T_cset_t cset ) const
 {
    herr_t ret_value = H5Tset_cset( id, cset );
@@ -96,7 +159,16 @@ void StrType::setCset( H5T_cset_t cset ) const
    }
 }
 
-// Retrieves the string padding method for a string datatype. 
+//--------------------------------------------------------------------------
+// Function:	StrType::getCset
+///\brief	Retrieves the storage mechanism for of this string datatype. 
+///\return	String storage mechanism, which can be:
+///		\li \c H5T_STR_NULLTERM (0) - Null terminate (as C does)
+///		\li \c H5T_STR_NULLPAD (0) - Pad with zeros
+///		\li \c H5T_STR_SPACEPAD (0) - pad with spaces (as FORTRAN does)
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5T_str_t StrType::getStrpad() const
 {
    H5T_str_t strpad = H5Tget_strpad( id );
@@ -110,7 +182,16 @@ H5T_str_t StrType::getStrpad() const
    return( strpad );
 }
 
-// Defines the storage mechanism for character strings. 
+//--------------------------------------------------------------------------
+// Function:	StrType::setStrpad
+///\brief	Defines the storage mechanism for this string datatype.
+///\param	strpad - IN: String padding type
+///\exception	H5::DataTypeIException
+///\par Description
+///		For detail, please refer to the C layer Reference Manual at:
+/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetStrpad
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 void StrType::setStrpad( H5T_str_t strpad ) const
 {
    herr_t ret_value = H5Tset_strpad( id, strpad );
@@ -121,7 +202,11 @@ void StrType::setStrpad( H5T_str_t strpad ) const
    }
 }
 
-// This destructor terminates access to the datatype
+//--------------------------------------------------------------------------
+// Function:	StrType destructor
+///\brief	Properly terminates access to this string datatype.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 StrType::~StrType() {}
 
 #ifndef H5_NO_NAMESPACE
