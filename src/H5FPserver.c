@@ -62,6 +62,7 @@ typedef struct {
 } H5FP_mdata_mod;
 
 typedef struct {
+    H5FD_t          file;       /* file driver structure                    */
     unsigned        file_id;    /* the file id the SAP keeps per file       */
     char           *filename;   /* the filename - of dubious use            */
     int             closing;    /* we're closing the file - no more changes */
@@ -99,7 +100,7 @@ static herr_t H5FP_remove_object_lock_from_list(H5FP_file_info *info,
                                                 H5FP_object_lock *ol);
 
     /* local file information handling functions */
-static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename);
+static herr_t H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, haddr_t maxaddr);
 static int H5FP_file_info_cmp(H5FP_file_info *k1, H5FP_file_info *k2, int cmparg);
 static H5FP_file_info *H5FP_new_file_info_node(unsigned file_id, char *filename);
 static H5FP_file_info *H5FP_find_file_info(unsigned file_id);
@@ -600,13 +601,13 @@ H5FP_find_file_info(unsigned file_id)
 /*
  * Function:    H5FP_add_new_file_info_to_list
  * Purpose:     Add a FILE_ID to the list of file IDS.
- * Return:      SUCCEED if the node was added
- *              FAIL otherwise
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  * Programmer:  Bill Wendling, 02. August, 2002
  * Modifications:
  */
 static herr_t
-H5FP_add_new_file_info_to_list(unsigned file_id, char *filename)
+H5FP_add_new_file_info_to_list(unsigned file_id, char *filename, haddr_t maxaddr)
 {
     H5FP_file_info *info;
     herr_t ret_value = FAIL;
@@ -620,6 +621,13 @@ H5FP_add_new_file_info_to_list(unsigned file_id, char *filename)
                         "can't insert file structure into tree");
         }
 
+        /*
+         * Initialize some of the information needed for metadata
+         * allocation requests
+         */
+        info->file.maxaddr = maxaddr;
+        info->file.accum_loc = HADDR_UNDEF;
+        HDmemset(info->file.fl, 0, sizeof(info->file.fl));
         ret_value = SUCCEED;
     }
 
@@ -804,36 +812,16 @@ H5FP_sap_handle_open_request(H5FP_request req, char *mdata, unsigned UNUSED md_s
 
     if (req.obj_type == H5FP_OBJ_FILE) {
         unsigned new_file_id = H5FP_gen_sap_file_id();
-        int i;
 
-        if (H5FP_add_new_file_info_to_list(new_file_id, mdata) != SUCCEED)
+        /* N.B. At this point, req.addr is equiv. to maxaddr in H5FD_open() */
+        if (H5FP_add_new_file_info_to_list(new_file_id, mdata, req.addr) != SUCCEED)
             HGOTO_ERROR(H5E_FPHDF5, H5E_CANTINSERT, FAIL,
                         "can't insert new file structure to list");
 
-        /* broadcast the file id to all processes */
-        /*
-         * FIXME: Isn't there some way to broadcast this result to the
-         * barrier group? -QAK
-         */
-        /*
-         * XXX:
-         *      MPI_Bcast doesn't work in this way and I don't know how
-         *      to get it to work for us. From what I gather, all of the
-         *      processes need to execute the same bit of code (the
-         *      MPI_Bcast function) to get the value to be passed to
-         *      everyone. -BW
-         */
-        for (i = 0; i < H5FP_comm_size; ++i)
-            if ((unsigned)i != H5FP_sap_rank)
-                if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, i,
-                                    H5FP_TAG_FILE_ID, H5FP_SAP_COMM)) != MPI_SUCCESS)
-                    /*
-                     * FIXME: This is terrible...if we can't send to all
-                     * processes, we should clean the file structure from
-                     * the list and tell all of the other processes that
-                     * we couldn't continue...but how to do that?!?
-                     */
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+        /* file ID gets broadcast via the captain process */
+        if ((mrc = MPI_Send(&new_file_id, 1, MPI_UNSIGNED, (int)H5FP_capt_rank,
+                            H5FP_TAG_FILE_ID, H5FP_SAP_COMM)) != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
     }
 
 done:
@@ -1248,6 +1236,8 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
     FUNC_ENTER_NOINIT(H5FP_sap_handle_write_request);
 
     if ((info = H5FP_find_file_info(req.file_id)) != NULL) {
+        H5FP_object_lock *lock;
+
         if (info->num_mods >= H5FP_MDATA_CACHE_HIGHWATER_MARK) {
             /*
              * If there are any modifications not written out yet, dump
@@ -1270,30 +1260,32 @@ H5FP_sap_handle_write_request(H5FP_request req, char *mdata, unsigned md_size)
         if (info->closing) {
             /* we're closing the file - don't accept anymore changes */
             exit_state = H5FP_STATUS_FILE_CLOSING;
-            ret_value = FAIL;
-        } else {
-            /* handle the change request */
-            H5FP_object_lock *lock = H5FP_find_object_lock(info, req.oid);
+            HGOTO_DONE(FAIL);
+        }
 
-            if (!lock || lock->owned_rank != req.proc_rank
-                    || lock->rw_lock != H5FP_LOCK_WRITE) {
-                /*
-                 * There isn't a write lock or we don't own the write
-                 * lock on this OID
-                 */
-                exit_state = H5FP_STATUS_NO_LOCK;
-                ret_value = FAIL;
-            } else if (H5FP_add_file_mod_to_list(info, req.mem_type, req.type_id,
-                                                 req.addr, req.proc_rank, md_size,
-                                                 mdata) != SUCCEED) {
-                exit_state = H5FP_STATUS_OOM;
-                ret_value = FAIL;
-            }
+        /* handle the change request */
+        lock = H5FP_find_object_lock(info, req.oid);
+
+        if (!lock || lock->owned_rank != req.proc_rank
+                || lock->rw_lock != H5FP_LOCK_WRITE) {
+            /*
+             * There isn't a write lock or we don't own the write
+             * lock on this OID
+             */
+            exit_state = H5FP_STATUS_NO_LOCK;
+            HGOTO_DONE(FAIL);
+        }
+
+        if (H5FP_add_file_mod_to_list(info, req.mem_type, req.type_id,
+                                      req.addr, req.proc_rank, md_size,
+                                      mdata) != SUCCEED) {
+            exit_state = H5FP_STATUS_OOM;
+            HGOTO_DONE(FAIL);
         }
     } else {
         /* error: there isn't a file opened to change */
         exit_state = H5FP_STATUS_BAD_FILE_ID;
-        ret_value = FAIL;
+        HGOTO_DONE(FAIL);
     }
 
 done:

@@ -266,7 +266,7 @@ H5FP_read_metadata(char **mdata, int len, int from)
 
     HDmemset(*mdata, 0, (size_t)len + 1);
 
-    if ((mrc = MPI_Recv(*mdata, len, MPI_BYTE, from, H5FP_TAG_METADATA,
+    if ((mrc = MPI_Recv(*mdata, len + 1, MPI_BYTE, from, H5FP_TAG_METADATA,
                         H5FP_SAP_COMM, &status)) != MPI_SUCCESS) {
         HDfree(*mdata);
         *mdata = NULL;

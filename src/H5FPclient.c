@@ -20,11 +20,12 @@
 #include "H5Dprivate.h"         /* Dataset Functions                    */
 #include "H5Eprivate.h"         /* Error Handling                       */
 #include "H5Fprivate.h"         /* Files                                */
-#include "H5Gpkg.h"             /* Group functions                      */
+#include "H5FDprivate.h"        /* File Drivers                         */
+#include "H5Gpkg.h"             /* Group Functions                      */
 #include "H5Iprivate.h"         /* ID Functions                         */
-#include "H5MMprivate.h"        /* Memory allocation                    */
+#include "H5MMprivate.h"        /* Memory Allocation                    */
 #include "H5Oprivate.h"         /* Object Headers                       */
-#include "H5Spkg.h"             /* Dataspace functions                  */
+#include "H5Spkg.h"             /* Dataspace Functions                  */
 #include "H5TBprivate.h"        /* Threaded, Balanced, Binary Trees     */
 
 #ifdef H5_HAVE_FPHDF5
@@ -40,7 +41,7 @@ static int interface_initialize_g = 0;
 
 /* local functions */
 static unsigned H5FP_gen_request_id(void);
-static herr_t H5FP_dump_to_file(H5F_t *file, H5FP_read *sap_read);
+static herr_t H5FP_dump_to_file(H5FD_t *file, H5FP_read *sap_read);
 
 /*
  *===----------------------------------------------------------------------===
@@ -68,7 +69,7 @@ static herr_t H5FP_dump_to_file(H5F_t *file, H5FP_read *sap_read);
  */
 herr_t
 H5FP_request_open(const char *mdata, int md_size, H5FP_obj_t obj_type,
-                  unsigned *file_id, unsigned *req_id)
+                  haddr_t maxaddr, unsigned *file_id, unsigned *req_id)
 {
     H5FP_request req;
     MPI_Status mpi_status;
@@ -94,6 +95,7 @@ H5FP_request_open(const char *mdata, int md_size, H5FP_obj_t obj_type,
         req.proc_rank = H5FP_my_rank;
         req.md_size = md_size;
         req.obj_type = obj_type;
+        req.addr = maxaddr;
 
         if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
                             H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
@@ -151,8 +153,10 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
     H5FP_COPY_OID(req.oid, obj_oid);
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
-                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
+                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
+        *status = H5FP_STATUS_LOCK_FAILED;
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+    }
 
     if (last) {
         /*
@@ -175,9 +179,6 @@ H5FP_request_lock(unsigned file_id, unsigned char *obj_oid,
     }
 
 done:
-    if (ret_value == FAIL)
-        *status = H5FP_STATUS_LOCK_FAILED;
-
     *req_id = req.req_id;
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -220,8 +221,10 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
     req.proc_rank = H5FP_my_rank;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
-                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS)
+                        H5FP_TAG_REQUEST, H5FP_SAP_COMM)) != MPI_SUCCESS) {
+        *status = H5FP_STATUS_LOCK_RELEASE_FAILED;
         HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mrc);
+    }
 
     if (last) {
         /*
@@ -240,7 +243,8 @@ H5FP_request_release_lock(unsigned file_id, unsigned char *obj_oid,
         *status = sap_reply.status;
 
         if (sap_reply.status != H5FP_STATUS_LOCK_RELEASED)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTUNLOCK, FAIL, "can't unlock object on server");
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTUNLOCK, FAIL,
+                        "can't unlock object on server");
     }
 
 done:
@@ -264,10 +268,9 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_read_metadata(H5F_t *file, unsigned file_id, H5FP_obj_t obj_type,
-                           H5AC_subid_t type_id, haddr_t addr, size_t size,
-                           uint8_t **buf, unsigned *req_id,
-                           H5FP_status_t *status)
+H5FP_request_read_metadata(H5FD_t *file, unsigned file_id, H5FD_mem_t mem_type,
+                           haddr_t addr, size_t size, uint8_t **buf,
+                           unsigned *req_id, H5FP_status_t *status)
 {
     H5FP_request req;
     H5FP_read sap_read;     /* metadata info read from the SAP's cache */
@@ -290,8 +293,6 @@ H5FP_request_read_metadata(H5F_t *file, unsigned file_id, H5FP_obj_t obj_type,
     req.req_id = H5FP_gen_request_id();
     req.file_id = file_id;
     req.proc_rank = H5FP_my_rank;
-    req.obj_type = obj_type;
-    req.type_id = type_id;
     req.addr = addr;
 
     if ((mrc = MPI_Send(&req, 1, H5FP_request_t, (int)H5FP_sap_rank,
@@ -304,15 +305,14 @@ H5FP_request_read_metadata(H5F_t *file, unsigned file_id, H5FP_obj_t obj_type,
                         H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    *status = sap_read.status;
+    HDmemset(*buf, '\0', size);
 
-    switch (*status) {
+    switch (sap_read.status) {
     case H5FP_STATUS_OK:
         /* use the info in the H5FP_read_t structure to update the metadata */
-        HDmemset(*buf, '\0', size);
         HDmemset(&mpi_status, 0, sizeof(mpi_status));
 
-        if ((mrc = MPI_Recv(*buf, (int)sap_read.md_size, MPI_BYTE, (int)H5FP_sap_rank,
+        if ((mrc = MPI_Recv(*buf, (int)size, MPI_BYTE, (int)H5FP_sap_rank,
                             H5FP_TAG_METADATA, H5FP_SAP_COMM,
                             &mpi_status)) != MPI_SUCCESS)
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
@@ -334,10 +334,14 @@ H5FP_request_read_metadata(H5F_t *file, unsigned file_id, H5FP_obj_t obj_type,
          * The metadata wasn't in the SAP's cache. Should read from disk
          * now.
          */
+        H5FD_read(file, mem_type, H5P_DATASET_XFER_DEFAULT, addr, size, buf);
         break;
     default:
-        break;
+        *status = sap_read.status;
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
     }
+
+    *status = H5FP_STATUS_OK;
 
 done:
     *req_id = req.req_id;
@@ -360,10 +364,10 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_write_metadata(H5F_t *file, unsigned file_id, uint8_t *obj_oid,
-                            H5FP_obj_t obj_type, H5AC_subid_t type_id,
-                            haddr_t addr, int mdata_size, const char *mdata,
-                            unsigned *req_id, H5FP_status_t *status)
+H5FP_request_write_metadata(H5FD_t *file, unsigned file_id, uint8_t *obj_oid,
+                            H5AC_subid_t type_id, haddr_t addr, int mdata_size,
+                            const char *mdata, unsigned *req_id,
+                            H5FP_status_t *status)
 {
     H5FP_reply sap_reply;
     H5FP_read sap_read;     /* metadata info read from the SAP's cache */
@@ -388,7 +392,6 @@ H5FP_request_write_metadata(H5F_t *file, unsigned file_id, uint8_t *obj_oid,
     req.req_id = H5FP_gen_request_id();
     req.proc_rank = H5FP_my_rank;
     req.file_id = file_id;
-    req.obj_type = obj_type;
     req.type_id = type_id;
     req.addr = addr;
     req.md_size = mdata_size;
@@ -407,9 +410,10 @@ H5FP_request_write_metadata(H5F_t *file, unsigned file_id, uint8_t *obj_oid,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    *status = sap_reply.status;
-
-    switch (*status) {
+    switch (sap_reply.status) {
+    case H5FP_STATUS_OK:
+        /* Nothing to do... */
+        break;
     case H5FP_STATUS_DUMPING:
         /*
          * Collect the metadata updates from the SAP and write them to
@@ -433,12 +437,12 @@ H5FP_request_write_metadata(H5F_t *file, unsigned file_id, uint8_t *obj_oid,
         }
 
         break;
-    case H5FP_STATUS_OK:
-        /* Nothing to do... */
-        break;
     default:
+        *status = sap_reply.status;
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
     }
+
+    *status = H5FP_STATUS_OK;
 
 done:
     *req_id = req.req_id;
@@ -462,7 +466,7 @@ done:
  * Modifications:
  */
 herr_t
-H5FP_request_close(H5F_t *file, unsigned file_id, unsigned *req_id,
+H5FP_request_close(H5FD_t *file, unsigned file_id, unsigned *req_id,
                    H5FP_status_t *status)
 {
     H5FP_reply sap_reply;
@@ -495,9 +499,10 @@ H5FP_request_close(H5F_t *file, unsigned file_id, unsigned *req_id,
                         H5FP_TAG_REPLY, H5FP_SAP_COMM, &mpi_status)) != MPI_SUCCESS)
         HMPI_GOTO_ERROR(FAIL, "MPI_Recv failed", mrc);
 
-    *status = sap_reply.status;
-
-    switch (*status) {
+    switch (sap_reply.status) {
+    case H5FP_STATUS_OK:
+        /* Nothing to do... */
+        break;
     case H5FP_STATUS_DUMPING:
         /*
          * Collect the metadata updates from the SAP and write them to
@@ -521,12 +526,12 @@ H5FP_request_close(H5F_t *file, unsigned file_id, unsigned *req_id,
         }
 
         break;
-    case H5FP_STATUS_OK:
-        /* Nothing to do... */
-        break;
     default:
+        *status = sap_reply.status;
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCHANGE, FAIL, "can't write metadata to server");
     }
+
+    *status = H5FP_STATUS_OK;
 
 done:
     *req_id = req.req_id;
@@ -564,7 +569,7 @@ H5FP_gen_request_id()
  * Modifications:
  */
 static herr_t
-H5FP_dump_to_file(H5F_t *file, H5FP_read *sap_read)
+H5FP_dump_to_file(H5FD_t *file, H5FP_read *sap_read)
 {
     herr_t ret_value = SUCCEED;
 

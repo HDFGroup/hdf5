@@ -222,24 +222,23 @@ extern herr_t H5FP_sap_receive_loop(void);
 
 /* Use these functions to communicate with the SAP */
 extern herr_t H5FP_request_open(const char *mdata, int md_len, H5FP_obj_t obj_type,
-                                unsigned *file_id, unsigned *req_id);
+                                haddr_t maxaddr, unsigned *file_id, unsigned *req_id);
 extern herr_t H5FP_request_lock(unsigned sap_file_id, unsigned char *mdata,
                                 H5FP_lock_t rw_lock, int last, unsigned *req_id,
                                 H5FP_status_t *status);
 extern herr_t H5FP_request_release_lock(unsigned sap_file_id, unsigned char *mdata,
                                         int last, unsigned *req_id,
                                         H5FP_status_t *status);
-extern herr_t H5FP_request_read_metadata(H5F_t *file, unsigned sap_file_id,
-                                         H5FP_obj_t obj_type, H5AC_subid_t type_id,
-                                         haddr_t addr, size_t size,
-                                         uint8_t **buf, unsigned *req_id,
-                                         H5FP_status_t *status);
-extern herr_t H5FP_request_write_metadata(H5F_t *file, unsigned sap_file_id,
-                                          unsigned char *obj_oid, H5FP_obj_t obj_type,
+extern herr_t H5FP_request_read_metadata(H5FD_t *file, unsigned sap_file_id,
+                                         H5FD_mem_t mem_type, haddr_t addr,
+                                         size_t size, uint8_t **buf,
+                                         unsigned *req_id, H5FP_status_t *status);
+extern herr_t H5FP_request_write_metadata(H5FD_t *file, unsigned sap_file_id,
+                                          unsigned char *obj_oid,
                                           H5AC_subid_t type_id, haddr_t addr,
                                           int mdata_len, const char *mdata,
                                           unsigned *req_id, H5FP_status_t *status);
-extern herr_t H5FP_request_close(H5F_t *file, unsigned sap_file_id, unsigned *req_id,
+extern herr_t H5FP_request_close(H5FD_t *file, unsigned sap_file_id, unsigned *req_id,
                                  H5FP_status_t *status);
 
 #ifdef __cplusplus
