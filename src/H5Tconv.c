@@ -361,16 +361,16 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 
 /* Print alignment statistics */
 #   define CI_PRINT_STATS(STYPE,DTYPE) {				      \
-    if (H5DEBUG(T) && priv->s_aligned) {				      \
+    if (H5DEBUG(T) && cdata->priv->s_aligned) {				      \
 	HDfprintf(H5DEBUG(T),						      \
 		  "      %Hu src elements aligned on %lu-byte boundaries\n",  \
-		  priv->s_aligned,					      \
+		  cdata->priv->s_aligned,					      \
 		  (unsigned long)H5T_NATIVE_##STYPE##_ALIGN_g);		      \
     }									      \
-    if (H5DEBUG(T) && priv->d_aligned) {				      \
+    if (H5DEBUG(T) && cdata->priv->d_aligned) {				      \
 	HDfprintf(H5DEBUG(T),						      \
 		  "      %Hu dst elements aligned on %lu-byte boundaries\n",  \
-		  priv->d_aligned,					      \
+		  cdata->priv->d_aligned,					      \
 		  (unsigned long)H5T_NATIVE_##DTYPE##_ALIGN_g);		      \
     }									      \
 }
@@ -774,6 +774,100 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     FUNC_LEAVE (SUCCEED);
 }
 	    
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_detect_type
+ *
+ * Purpose:	Check whether a datatype contains (or is) a certain type of
+ *		datatype.
+ *
+ * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_detect_type (H5T_t *dt, H5T_class_t cls)
+{
+    intn		i;
+
+    FUNC_ENTER (H5T_detect_type, FAIL);
+    
+    assert(dt);
+    assert(cls>H5T_NO_CLASS && cls<H5T_NCLASSES);
+
+    /* Check if this type is the correct type */
+    if(dt->type==cls)
+        HRETURN(TRUE);
+
+    /* check for types that might have the correct type as a component */
+    switch(dt->type) {
+        case H5T_COMPOUND:
+            for (i=0; i<dt->u.compnd.nmembs; i++) {
+                /* Check if this field's type is the correct type */
+                if(dt->u.compnd.memb[i].type->type==cls)
+                    HRETURN(TRUE);
+
+                /* Recurse if it's VL, compound or array */
+                if(dt->u.compnd.memb[i].type->type==H5T_COMPOUND || dt->u.compnd.memb[i].type->type==H5T_VLEN || dt->u.compnd.memb[i].type->type==H5T_ARRAY)
+                    HRETURN(H5T_detect_type(dt->u.compnd.memb[i].type,cls));
+            } /* end for */
+            break;
+
+        case H5T_ARRAY:
+        case H5T_VLEN:
+        case H5T_ENUM:
+            HRETURN(H5T_detect_type(dt->parent,cls));
+            break;
+
+        default:
+            break;
+    } /* end if */
+
+    FUNC_LEAVE (FALSE);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_need_bkg
+ *
+ * Purpose:	Check whether the source or destination datatypes require a
+ *		background buffer for the conversion.
+ *
+ *		Currently, only compound datatypes require a background buffer,
+ *		but since they can be embedded in variable-length or array datatypes,
+ *      those types must ask for a background buffer if they have compound
+ *      components.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 29, 2000
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5T_conv_need_bkg (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
+{
+    FUNC_ENTER (H5T_conv_need_bkg, FAIL);
+    
+    assert(src);
+    assert(dst);
+    assert(cdata);
+
+    if (H5T_detect_type(src,H5T_COMPOUND)==TRUE || H5T_detect_type(dst,H5T_COMPOUND)==TRUE)
+        cdata->need_bkg = H5T_BKG_TEMP;
+
+    FUNC_LEAVE (SUCCEED);
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_struct_init
  *
@@ -893,7 +987,9 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         }
     }
 
-    cdata->need_bkg = H5T_BKG_TEMP;
+    /* Check if we need a background buffer */
+    H5T_conv_need_bkg (src, dst, cdata);
+
     cdata->recalc = FALSE;
     FUNC_LEAVE (SUCCEED);
 }
@@ -1760,8 +1856,8 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  */
 herr_t
 H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
-              void UNUSED *_bkg, hid_t dset_xfer_plist)
+	      size_t buf_stride, size_t bkg_stride, void *_buf,
+              void *_bkg, hid_t dset_xfer_plist)
 {
     const H5D_xfer_t	   *xfer_parms = NULL;
     H5T_path_t	*tpath;			/* Type conversion path		     */
@@ -1801,13 +1897,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             assert (H5T_VLEN==src->type);
             assert (H5T_VLEN==dst->type);
 
-#ifdef LATER
-            /* QAK - Set up conversion function? */
-            if (H5T_conv_vlen_init (src, dst, cdata)<0) {
-                HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                       "unable to initialize conversion data");
-            }
-#endif /* LATER */
+            /* Check if we need a background buffer */
+            H5T_conv_need_bkg (src, dst, cdata);
+
             break;
 
         case H5T_CONV_FREE:
@@ -1931,8 +2023,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                   "can't read VL data");
 
                 /* Convert VL sequence */
-                if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, 0, 0,
-                                conv_buf, NULL, dset_xfer_plist)<0)
+                if (H5T_convert(tpath, tsrc_id, tdst_id, seq_len, 0, bkg_stride,
+                                conv_buf, _bkg, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                   "datatype conversion failed");
 
@@ -1995,8 +2087,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
  */
 herr_t
 H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
-              void UNUSED *_bkg, hid_t dset_xfer_plist)
+	      size_t buf_stride, size_t bkg_stride, void *_buf,
+              void *_bkg, hid_t dset_xfer_plist)
 {
     H5T_path_t	*tpath;		/* Type conversion path		     */
     hid_t   tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
@@ -2040,13 +2132,9 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     HRETURN_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "array datatypes do not have the same dimension permutations");
 #endif /* LATER */
 
-#ifdef LATER
-            /* QAK - Set up conversion function? */
-            if (H5T_conv_array_init (src, dst, cdata)<0) {
-                HRETURN_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,
-                       "unable to initialize conversion data");
-            }
-#endif /* LATER */
+            /* Check if we need a background buffer */
+            H5T_conv_need_bkg (src, dst, cdata);
+
             break;
 
         case H5T_CONV_FREE:
@@ -2111,8 +2199,8 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 HDmemmove(dp, sp, src->size);
 
                 /* Convert array */
-                if (H5T_convert(tpath, tsrc_id, tdst_id, src->u.array.nelem, 0, 0,
-                                dp, NULL, dset_xfer_plist)<0)
+                if (H5T_convert(tpath, tsrc_id, tdst_id, src->u.array.nelem, 0, bkg_stride,
+                                dp, _bkg, dset_xfer_plist)<0)
                     HRETURN_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,
                                   "datatype conversion failed");
 
