@@ -178,19 +178,6 @@ bool H5File::isHdf5(const string& name )
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
-//--------------------------------------------------------------------------
 // Function:	H5File::reopen
 ///\brief	Reopens this file
 ///\exception	H5::FileIException
@@ -273,7 +260,7 @@ FileAccPropList H5File::getAccessPlist() const
 ///\exception	H5::FileIException
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-hssize_t H5File::getFreeSpace()
+hssize_t H5File::getFreeSpace() const
 {
    hssize_t free_space = H5Fget_freespace(id);
    if( free_space < 0 )
@@ -303,7 +290,7 @@ hssize_t H5File::getFreeSpace()
 /// Multiple object types can be combined with the logical OR operator (|).
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-int H5File::getObjCount(unsigned types)
+int H5File::getObjCount(unsigned types) const
 {
    int num_objs = H5Fget_obj_count(id, types);
    if( num_objs < 0 )
@@ -322,7 +309,7 @@ int H5File::getObjCount(unsigned types)
 ///\exception	H5::FileIException
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-int H5File::getObjCount()
+int H5File::getObjCount() const
 {
    int num_objs = H5Fget_obj_count(id, H5F_OBJ_ALL);
    if( num_objs < 0 )
@@ -355,7 +342,7 @@ int H5File::getObjCount()
 // Notes: will do the overload for this one after hearing from Quincey???
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-void H5File::getObjIDs(unsigned types, int max_objs, hid_t *oid_list)
+void H5File::getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const
 {
    herr_t ret_value = H5Fget_obj_ids(id, types, max_objs, oid_list);
    if( ret_value < 0 )
@@ -383,7 +370,7 @@ void H5File::getObjIDs(unsigned types, int max_objs, hid_t *oid_list)
 ///		closed and reopened or opened during a subsequent session.
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle)
+void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
 {
    hid_t fapl_id = fapl.getId();
    herr_t ret_value = H5Fget_vfd_handle(id, fapl_id, file_handle);
@@ -403,13 +390,98 @@ void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle)
 ///\exception	H5::FileIException
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(void **file_handle)
+void H5File::getVFDHandle(void **file_handle) const
 {
    herr_t ret_value = H5Fget_vfd_handle(id, H5P_DEFAULT, file_handle);
    if( ret_value < 0 )
    {
       throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::Reference
+///\brief	Creates a reference to an Hdf5 object or a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+///		Note that, for H5File, name must be an absolute path to the 
+///		object in the file.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5File::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   return(p_reference(name, dataspace.getId(), ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it only creates
+///		a reference to an HDF5 object, not to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the protected 
+//		function for it to pass to the C API H5Rcreate
+//		to create a reference to the named object.
+///\par
+///		Note that, for H5File, name must be an absolute path to the 
+///		object in the file.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* H5File::Reference(const char* name) const
+{
+   return(p_reference(name, -1, H5R_OBJECT));
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
+///\return	Object type, which can be one of the following:
+///			\li \c H5G_LINK Object is a symbolic link.  
+///			\li \c H5G_GROUP Object is a group.  
+///			\li \c H5G_DATASET   Object is a dataset.  
+///			\li \c H5G_TYPE Object is a named datatype 
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t H5File::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   return(p_get_obj_type(ref, ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::getRegion
+///\brief	Retrieves a dataspace with the region pointed to selected.
+///\param	ref      - IN: Reference to get region of
+///\param	ref_type - IN: Type of reference to get region of - default
+///\return	DataSpace instance
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
+{
+   DataSpace dataspace(p_get_region(ref, ref_type));
+   return(dataspace);
+}
+//--------------------------------------------------------------------------
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
 }
 
 //--------------------------------------------------------------------------

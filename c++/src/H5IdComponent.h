@@ -58,9 +58,6 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator
 	IdComponent& operator=( const IdComponent& rhs );
 
-	// Resets this IdComponent instance
-	//template <class Type>
-	//void reset( Type* parent );
 	void reset();
 	void resetId();
 
@@ -75,35 +72,17 @@ class H5_DLLCPP IdComponent {
 	// Default constructor
 	IdComponent();
 
+	// Creates a reference to an HDF5 object or a dataset region.
+	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const;
+	
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+
+	// Retrieves a dataspace with the region pointed to selected.
+	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+
 }; // end class IdComponent
 
-// BMR - including template member function implementation here to 
-// prevent compilation errors.  When the compilers support template
-// member functions in *.C files, move them to IdComponent.C.
-
-// This function makes sure that this IdComponent instance actually
-// represents an HDF5 component and that this HDF5 component is no longer
-// referenced, then calls the parent function p_close to close the
-// appropriate HDF5 component.  In addition, this identifier instance 
-// will delete itself.
-// Type is the class of the instance to whom this IdComponent object
-// belongs.
-/* 11/10/00 - BMR: commented this member function because many compilers
-   still have no support for member template function.  The function is
-   replaced by resetIdComponent in H5Idtemplates.h
-template <class Type>
-void IdComponent::reset( Type* parent ) 
-{
-   if( ref_count->noReference())  // ref_count is decremented here
-   {
-      if( id > 0 )
-         parent->p_close();  // which p_close depends on whom this 
-			     // IdComponent object belongs to
-      delete ref_count; // delete the reference counter
-      delete this;	// this IdComponent object deletes itself
-   }
-}
-*/
 #ifndef H5_NO_NAMESPACE
 }
 #endif

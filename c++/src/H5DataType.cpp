@@ -26,6 +26,7 @@
 #include "H5Idtemplates.h"
 #include "H5PropList.h"
 #include "H5Object.h"
+#include "H5DataSpace.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
@@ -526,6 +527,73 @@ bool DataType::isVariableStr() const
       throw DataTypeIException("DataType::isVariableStr",
                 "H5Tis_variable_str returns negative value");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::Reference
+///\brief	Creates a reference to an HDF5 object or a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataType::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   return(p_reference(name, dataspace.getId(), ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it only creates
+///		a reference to an HDF5 object, not to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the protected 
+//		function for it to pass to the C API H5Rcreate
+//		to create a reference to the named object.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* DataType::Reference(const char* name) const
+{
+   return(p_reference(name, -1, H5R_OBJECT));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
+///\return	Object type, which can be one of the following:
+///			\li \c H5G_LINK Object is a symbolic link.  
+///			\li \c H5G_GROUP Object is a group.  
+///			\li \c H5G_DATASET   Object is a dataset.  
+///			\li \c H5G_TYPE Object is a named datatype 
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   return(p_get_obj_type(ref, ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType::getRegion
+///\brief	Retrieves a dataspace with the region pointed to selected.
+///\param	ref      - IN: Reference to get region of
+///\param	ref_type - IN: Type of reference to get region of - default
+///\return	DataSpace instance
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
+{
+   DataSpace dataspace(p_get_region(ref, ref_type));
+   return(dataspace);
 }
 
 //--------------------------------------------------------------------------

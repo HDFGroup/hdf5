@@ -66,6 +66,19 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Fills a selection in memory with zero 
 	void fillMemBuf(void *buf, DataType& buf_type, DataSpace& space);
 
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
+
+	// Creates a reference to a named Hdf5 object or to a dataset region
+	// in this object.
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
+
+	// Retrieves a dataspace with the region pointed to selected.
+	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
 	// Creates a copy of an existing DataSet using its id
 	// Note: used by CommonFG to return a DataSet; should be modified
 	// to use friend template function instead)

@@ -161,22 +161,39 @@ int Group::getObjTypeByIdx(hsize_t idx, string& type_name) const
    return (obj_type);
 }
 
-// Iterates a user's function over the entries of a group.
-//int Group::iterateElems( const string& name, int *idx, H5G_iterate_t op , void *op_data )
-//{
-   //return( iterateElems( name.c_str(), idx, op, op_data ));
-//}
-//int Group::iterateElems( const char* name, int *idx, H5G_iterate_t op , void *op_data )
-//{
-   //int ret_value = H5Giterate( id, name, idx, op, op_data );
-   //if( ret_value >= 0 )
-      //return( ret_value );
-   //else  // raise exception when H5Aiterate returns a negative value
-   //{
-      //throw GroupIException("Group::iterateElems", "H5Giterate failed");
-   //}
-//}
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	Creates a reference to an HDF5 object or a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\param	dataspace - IN: Dataspace with selection
+///\param	ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+///\return	A reference
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   return(p_reference(name, dataspace.getId(), ref_type));
+}
 
+//--------------------------------------------------------------------------
+// Function:	Group::Reference
+///\brief	This is an overloaded function, provided for your convenience.
+///		It differs from the above function in that it only creates
+///		a reference to an HDF5 object, not to a dataset region.
+///\param	name - IN: Name of the object to be referenced
+///\return	A reference
+///\exception	H5::ReferenceIException
+///\par Description
+//		This function passes H5R_OBJECT and -1 to the protected 
+//		function for it to pass to the C API H5Rcreate
+//		to create a reference to the named object.
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void* Group::Reference(const char* name) const
+{
+   return(p_reference(name, -1, H5R_OBJECT));
+}
 //--------------------------------------------------------------------------
 // Function:	Group::p_close (private)
 ///\brief	Closes this group.
@@ -193,6 +210,39 @@ void Group::p_close() const
    {
       throw GroupIException(0, "H5Gclose failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param		ref      - IN: Reference to query
+///\param		ref_type - IN: Type of reference to query
+// Return	An object type, which can be one of the following:
+//			H5G_LINK Object is a symbolic link.  
+//			H5G_GROUP Object is a group.  
+//			H5G_DATASET   Object is a dataset.  
+//			H5G_TYPE Object is a named datatype 
+// Exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   return(p_get_obj_type(ref, ref_type));
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group::getRegion
+///\brief	Retrieves a dataspace with the region pointed to selected.
+///\param	ref      - IN: Reference to get region of
+///\param	ref_type - IN: Type of reference to get region of - default
+///\return	DataSpace instance
+///\exception	H5::ReferenceIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
+{
+   DataSpace dataspace(p_get_region(ref, ref_type));
+   return(dataspace);
 }
 
 //--------------------------------------------------------------------------

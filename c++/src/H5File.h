@@ -40,24 +40,37 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	virtual hid_t getLocId() const;
 
 	// Returns the amount of free space in the file.
-	hssize_t getFreeSpace();
+	hssize_t getFreeSpace() const;
 
 	// Returns the number of opened object IDs (files, datasets, groups 
 	// and datatypes) in the same file.
-	int getObjCount(unsigned types);
-	int getObjCount();
+	int getObjCount(unsigned types) const;
+	int getObjCount() const;
 
 	// Retrieves a list of opened object IDs (files, datasets, groups 
 	// and datatypes) in the same file.
-	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list);
+	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const;
 
 	// Returns the pointer to the file handle of the low-level file driver.
-	void getVFDHandle(FileAccPropList& fapl, void **file_handle);
-	void getVFDHandle(void **file_handle);
+	void getVFDHandle(FileAccPropList& fapl, void **file_handle) const;
+	void getVFDHandle(void **file_handle) const;
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const string& name );
 	static bool isHdf5(const char* name );
+
+	// Creates a reference to a named Hdf5 object in this object.
+	void* Reference(const char* name) const;
+
+	// Creates a reference to a named Hdf5 object or to a dataset region 
+	// in this object.
+	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type) const;
+
+	// Retrieves a dataspace with the region pointed to selected.
+	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
 	// Reopens this file
 	void reopen();
