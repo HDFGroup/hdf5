@@ -116,6 +116,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   hid_t dcpl_id,       /* dataset creation property list */
                   hid_t type_id,       /* dataset datatype */
                   pack_opt_t *options, /* repack options */
+																		int has_layout,      /* input chunk */
                   pack_info_t *obj)    /* info about object to filter */
 {
  int          nfilters;       /* number of filters in DCPL */
@@ -130,6 +131,22 @@ int apply_filters(const char* name,    /* object name from traverse list */
 
  if (rank==0)
   goto out;
+
+/*-------------------------------------------------------------------------
+ * filters require CHUNK layout; if we do not have one define a default
+ *-------------------------------------------------------------------------
+ */
+	if (has_layout)
+	{
+		layout_this(dcpl_id,name,options,obj);
+	}
+	else
+	{
+		obj->chunk.rank=rank;
+  for (i=0; i<rank; i++) 
+   obj->chunk.chunk_lengths[i] = dims[i];
+	}
+
 
  /* check for datasets too small */
   if ((size=H5Tget_size(type_id))==0)
@@ -157,17 +174,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
   if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0) 
    return -1;
  }
-/*-------------------------------------------------------------------------
- * filters require CHUNK layout; if we do not have one define a default
- *-------------------------------------------------------------------------
- */
- if (obj->chunk.rank<=0)
- {
-  obj->chunk.rank=rank;
-  for (i=0; i<rank; i++) 
-   obj->chunk.chunk_lengths[i] = dims[i];
- }
- 
+
+	
+
 /*-------------------------------------------------------------------------
  * the type of filter and additional parameter 
  * type can be one of the filters
@@ -206,16 +215,19 @@ int apply_filters(const char* name,    /* object name from traverse list */
    {
     unsigned  options_mask;
     unsigned  pixels_per_block;
+
     pixels_per_block=obj->filter[i].cd_values[0];
     if (obj->filter[i].szip_coding==0)
      options_mask=H5_SZIP_NN_OPTION_MASK;
     else 
      options_mask=H5_SZIP_EC_OPTION_MASK;
+
     /* set up for szip data */
     if(H5Pset_chunk(dcpl_id,obj->chunk.rank,obj->chunk.chunk_lengths)<0)
      return -1;
     if (H5Pset_szip(dcpl_id,options_mask,pixels_per_block)<0) 
      return -1;
+
    }
    break;
 
@@ -250,6 +262,8 @@ out:
   printf("Warning: Filter could not be applied to <%s>\n",name);
  return 0;
 }
+
+
 
 
 /*-------------------------------------------------------------------------
