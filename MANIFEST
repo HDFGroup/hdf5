@@ -420,6 +420,7 @@
 ./examples/h5_attribute.c
 ./examples/h5_mount.c
 ./examples/h5_reference.c
+./examples/run_examples.sh
 
 #------------------------------------------------------------------------------
 #
